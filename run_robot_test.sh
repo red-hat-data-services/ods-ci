@@ -34,10 +34,11 @@ Linux)
     ;;
     esac
 
+VENV_ROOT=${currentpath}/venv
 #setup virtualenv
-python3 -m venv venv
-./venv/bin/activate
-./venv/bin/pip install -r requirements.txt
+python3 -m venv ${VENV_ROOT}
+source ${VENV_ROOT}/bin/activate
+${VENV_ROOT}/bin/pip install -r requirements.txt
 
 #run tests
 tmp_dir=$(mktemp -d -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)

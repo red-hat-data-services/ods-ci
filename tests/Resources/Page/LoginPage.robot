@@ -3,9 +3,9 @@ Library  Selenium2Library
 
 
 *** Variables ***
-${UI} =  https://console-openshift-console.apps.modh-qe.dev.datahub.redhat.com/
-${KUBEADMIN} =  kubeadmin
-${KUBEPASSWD} =  DYYw5-KSmW7-F9gQt-gzJpV
+${UI} =  %{CONSOLE_URL}
+${KUBEADMIN} =  %{KUBEADMIN}
+${KUBEPASSWD} =  %{KUBEPWD}
 ${BROWSER} =  chrome
 
 *** Keywords ***

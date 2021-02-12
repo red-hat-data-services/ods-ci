@@ -1,10 +1,13 @@
 # ODS-CI
 
-ODH CI is a framework to test Red Hat Open Data Science features and functionality 
+ODH CI is a framework to test Red Hat Open Data Science features and functionality
 using QE tiered testing.
 
 # Requirements
   Fedora or CentOS that supports chrome drivers
+  `lsb_release` binary
+    - Provided by redhat-lsb-core in RPM based
+
 
 # Quick Start
   export the URL, KUBEADMIN and KUBEPWD like below and run the basic robot tests

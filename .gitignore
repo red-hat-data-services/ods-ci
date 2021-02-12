@@ -1,0 +1,3 @@
+# Ignore runtime files created by the run_robot_test.sh script
+venv/
+ods_ci.egg-info/

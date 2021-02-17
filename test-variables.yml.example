@@ -1,0 +1,5 @@
+BROWSER: chrome
+OCP_CONSOLE_URL: "http://console-openshift-console.apps.my-cluster.test.redhat.com/"
+USER_AUTH_TYPE: foo-auth
+TEST_USER_NAME: foo-user
+TEST_USER_PW: foo-passwd

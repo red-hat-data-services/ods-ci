@@ -1,19 +1,13 @@
 *** Settings ***
-Library  Selenium2Library
-
-
-*** Variables ***
-${UI} =  %{CONSOLE_URL}
-${KUBEADMIN} =  %{KUBEADMIN}
-${KUBEPASSWD} =  %{KUBEPWD}
-${BROWSER} =  chrome
+Library  SeleniumLibrary
 
 *** Keywords ***
 Login To Openshift
-    Open Browser  ${UI}  browser=${BROWSER}  options=add_argument("--ignore-certificate-errors")
+    Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER}  options=add_argument("--ignore-certificate-errors")
     Wait Until Page Contains  Log in with  timeout=15
-    Click Element  xpath=/html/body/div/div/main/div/ul/li[1]/a
+    Log  ${USER_AUTH_TYPE}
+    Click Element  link:${USER_AUTH_TYPE}
     Wait Until Page Contains  Log in to your account
-    Input Text  id=inputUsername  ${KUBEADMIN}
-    Input Text  id=inputPassword  ${KUBEPASSWD}
+    Input Text  id=inputUsername  ${TEST_USER_NAME}
+    Input Text  id=inputPassword  ${TEST_USER_PW}
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button

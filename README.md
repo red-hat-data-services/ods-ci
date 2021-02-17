@@ -10,15 +10,24 @@ using QE tiered testing.
 
 
 # Quick Start
-  export the URL, KUBEADMIN and KUBEPWD like below and run the basic robot tests
+  1. Create a variables for all of the global test values
+     ```bash
+     # Create the initial test variables from the example template variables file
+     cp test-variables.yml.example test-variables.yml
+     ```
 
-  Example:
-  export CONSOLE_URL=https://console-openshift-console.apps.modh-qe.dev.datahub.redhat.com/
-  export KUBEADMIN=kubeadmin
-  export KUBEPWD=KUBEPWD
+  1. Edit the test variables file to include information required for this test run.
+     You will need to add info required for test execution:
 
-  run the script
-  sh run_robot_test.sh
+     * openshift console url
+     * user credentials 
+     * Browser to test again
+
+
+  1. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite
+    ```bash
+    sh run_robot_test.sh
+    ```
 
 
 

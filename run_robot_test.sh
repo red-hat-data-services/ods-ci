@@ -43,6 +43,6 @@ ${VENV_ROOT}/bin/pip install -r requirements.txt
 #run tests
 tmp_dir=$(mktemp -d -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
 mkdir $tmp_dir
-./venv/bin/robot -d $tmp_dir --variable CONSOLE_URL=$CONSOLE_URL --variable KUBEADMIN=$KUBEADMIN --variable KUBEPASSWD=$KUBEPWD tests/Tests/test.robot
+./venv/bin/robot -d $tmp_dir -x xunit_test_result.xml -r test_report.html --variable CONSOLE_URL=$CONSOLE_URL --variable KUBEADMIN=$KUBEADMIN --variable KUBEPASSWD=$KUBEPWD tests/Tests/test.robot
 
 esac

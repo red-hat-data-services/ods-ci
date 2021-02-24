@@ -2,6 +2,10 @@
 Library  SeleniumLibrary
 
 *** Keywords ***
+Dashboard Is Visible
+   ${is_dashboard_visible} =  Run Keyword and Return Status  Get WebElement  xpath://a[@title="dashboard"]
+   [Return]  ${is_dashboard_visible}
+
 Open Control Panel
    Wait Until Page Contains Element  link:Control Panel
    Click Link  Control Panel

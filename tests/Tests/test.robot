@@ -7,7 +7,7 @@ ${MYBROWSER} =  chrome
 
 
 *** Test Cases ***
-Logged into OpenShift 
+Logged into OpenShift
    [Tags]  Sanity
    Login To Openshift
 
@@ -21,6 +21,12 @@ Can Login to Jupyterhub
 
 Can Spawn Notebook
    [Tags]  Sanity
+   # We need to skip this testcase if the user has an existing pod
+   ${on_dashboard} =  Dashboard Is Visible
+   # Official SKIP status will be available in Robot Framework 4.0
+   # See: https://github.com/robotframework/robotframework/issues/3622
+   Run Keyword If  ${on_dashboard}  Set Tags  SKIP
+   Pass Execution If  ${on_dashboard}  SKIP:The user has an existing notebook pod running
    Select Notebook Image  s2i-minimal-notebook:v0.0.4
    Select Notebook Image  s2i-scipy-notebook:v0.0.1
    Select Notebook Image  s2i-tensorflow-notebook:v0.0.1

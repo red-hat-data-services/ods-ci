@@ -1,14 +1,8 @@
 #/bin/bash
 
-PYTHON=${PYTHON:-"python3"}
-VENV=${VENV:-"virtualenv"}
-
-echo $CONSOLE_URL
-echo $KUBEADMIN
-
-if [[ -z "${CONSOLE_URL}" || -z "${KUBEADMIN}" || -z "${KUBEPWD}" ]]; then
-  echo "CONSOLE_URL/KUBEADMIN/KUBEPWD environment variable should be set before running the scripts"
-  exit 2
+if [[ ! -f "test-variables.yml" ]]; then
+  echo "Robot Framework test variable file (test-variables.yml) is missing"
+  exit 1
 fi
 
 currentpath=`pwd`
@@ -34,6 +28,7 @@ Linux)
     ;;
     esac
 
+#TODO: Make this optional so we are not creating/updating the virtualenv everytime we run a test
 VENV_ROOT=${currentpath}/venv
 #setup virtualenv
 python3 -m venv ${VENV_ROOT}
@@ -41,8 +36,11 @@ source ${VENV_ROOT}/bin/activate
 ${VENV_ROOT}/bin/pip install -r requirements.txt
 
 #run tests
+
+#TODO: Make the tmpdir name unique when run <1min after previous run
 tmp_dir=$(mktemp -d -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
+#TODO: Configure the "tmp_dir" creation so that we can have a "latest" link
 mkdir $tmp_dir
-./venv/bin/robot -d $tmp_dir -x xunit_test_result.xml -r test_report.html --variable CONSOLE_URL=$CONSOLE_URL --variable KUBEADMIN=$KUBEADMIN --variable KUBEPASSWD=$KUBEPWD tests/Tests/test.robot
+./venv/bin/robot -d $tmp_dir -x xunit_test_result.xml -r test_report.html --variablefile test-variables.yml tests/Tests/test.robot
 
 esac

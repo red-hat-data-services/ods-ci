@@ -16,9 +16,11 @@ setup(
     install_requires=[
         "reportportal-client",
         "robotframework",
+        "robotframework-debuglibrary",
         "robotframework-selenium2library",
         "pytest",
         "pytest-logger",
+        "pyyaml",
         "requests",
     ],
     zip_safe=True,

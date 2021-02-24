@@ -1,5 +1,5 @@
 *** Settings *** 
-Library  Selenium2Library
+Library  SeleniumLibrary
 
 *** Keywords ***
 Launch Jupyterhub

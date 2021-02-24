@@ -17,7 +17,7 @@ setup(
         "reportportal-client",
         "robotframework",
         "robotframework-debuglibrary",
-        "robotframework-selenium2library",
+        "robotframework-seleniumlibrary",
         "pytest",
         "pytest-logger",
         "pyyaml",

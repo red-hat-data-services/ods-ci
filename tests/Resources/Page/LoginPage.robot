@@ -2,11 +2,20 @@
 Library  SeleniumLibrary
 
 *** Keywords ***
+Does Login Require Authentication Type
+   ${authentication_required} =  Run Keyword and Return Status  Page Should Contain  Log in with...
+   [Return]  ${authentication_required}
+
+Select Login Authentication Type
+   [Arguments]  ${auth_type}
+   Wait Until Page Contains  Log in with  timeout=15
+   Log  ${auth_type}
+   Click Element  link:${auth_type}
+
 Login To Openshift
     Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER}  options=add_argument("--ignore-certificate-errors")
-    Wait Until Page Contains  Log in with  timeout=15
-    Log  ${USER_AUTH_TYPE}
-    Click Element  link:${USER_AUTH_TYPE}
+    ${select_auth_type} =  Does Login Require Authentication Type
+    Run Keyword If  ${select_auth_type}  Select Login Authentication Type  ${USER_AUTH_TYPE}
     Wait Until Page Contains  Log in to your account
     Input Text  id=inputUsername  ${TEST_USER_NAME}
     Input Text  id=inputPassword  ${TEST_USER_PW}

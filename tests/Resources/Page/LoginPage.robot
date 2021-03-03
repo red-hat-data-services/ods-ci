@@ -13,6 +13,7 @@ Select Login Authentication Type
    Click Element  link:${auth_type}
 
 Login To Openshift
+    #TODO: Move browser creation into its own keyword
     Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     ${select_auth_type} =  Does Login Require Authentication Type
     Run Keyword If  ${select_auth_type}  Select Login Authentication Type  ${USER_AUTH_TYPE}

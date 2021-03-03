@@ -1,4 +1,7 @@
-BROWSER: chrome
+BROWSER:
+  NAME: headlesschrome
+  # List of Chrome options - https://peter.sh/experiments/chromium-command-line-switches/
+  OPTIONS: add_argument("--ignore-certificate-errors");add_argument("window-size=1920,1024")
 OCP_CONSOLE_URL: "http://console-openshift-console.apps.my-cluster.test.redhat.com/"
 USER_AUTH_TYPE: foo-auth
 TEST_USER_NAME: foo-user

@@ -4,7 +4,7 @@ Library  SeleniumLibrary
 *** Keywords ***
 Launch Jupyterhub
    Wait Until Page Contains  Networking
-   Click Link  Networking
+   Click Button  Networking
    Wait Until Page Contains  Routes  timeout=15
    Click Link  Routes
    Maximize Browser Window

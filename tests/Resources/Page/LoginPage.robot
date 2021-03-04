@@ -3,7 +3,7 @@ Library  SeleniumLibrary
 
 *** Keywords ***
 Does Login Require Authentication Type
-   ${authentication_required} =  Run Keyword and Return Status  Page Should Contain  Log in with...
+   ${authentication_required} =  Run Keyword and Return Status  Page Should Contain  Log in with
    [Return]  ${authentication_required}
 
 Select Login Authentication Type
@@ -15,6 +15,8 @@ Select Login Authentication Type
 Login To Openshift
     #TODO: Move browser creation into its own keyword
     Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+    # Give the login prompt time to render after browser opens
+    Wait Until Element is Visible  xpath://div[@class="pf-c-login"]
     ${select_auth_type} =  Does Login Require Authentication Type
     Run Keyword If  ${select_auth_type}  Select Login Authentication Type  ${USER_AUTH_TYPE}
     Wait Until Page Contains  Log in to your account

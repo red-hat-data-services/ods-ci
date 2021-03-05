@@ -1,6 +1,34 @@
 #/bin/bash
 
-if [[ ! -f "test-variables.yml" ]]; then
+TEST_CASE_FILE=tests/Tests/test.robot
+TEST_VARIABLES_FILE=test-variables.yml
+TEST_VARIABLES=""
+
+while [ "$#" -gt 0 ]; do
+  case $1 in
+    --test-variable)
+      shift
+      TEST_VARIABLES="${TEST_VARIABLES} --variable $1"
+      shift
+      ;;
+    --test-variables-file)
+      shift
+      TEST_VARIABLES_FILE=$1
+      shift
+      ;;
+    --test-case)
+      shift
+      TEST_CASE_FILE=$1
+      shift
+      ;;
+    *)
+      echo "Unknown command line switch: $1"
+      exit 1
+      ;;
+  esac
+done
+
+if [[ ! -f "${TEST_VARIABLES_FILE}" ]]; then
   echo "Robot Framework test variable file (test-variables.yml) is missing"
   exit 1
 fi
@@ -41,6 +69,6 @@ ${VENV_ROOT}/bin/pip install -r requirements.txt
 tmp_dir=$(mktemp -d -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
 #TODO: Configure the "tmp_dir" creation so that we can have a "latest" link
 mkdir $tmp_dir
-./venv/bin/robot -d $tmp_dir -x xunit_test_result.xml -r test_report.html --variablefile test-variables.yml tests/Tests/test.robot
+./venv/bin/robot -d $tmp_dir -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
 
 esac

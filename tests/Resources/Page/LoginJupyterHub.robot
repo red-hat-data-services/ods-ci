@@ -3,14 +3,10 @@ Library  SeleniumLibrary
 
 *** Keywords ***
 Login To Jupyterhub
-   #TODO: We should assume that the CURRENT browser window is where we are logging in
-   Switch Window  JupyterHub
    Wait Until Page Contains  Sign in with OpenShift
    Click Element  xpath=//*[@id="login-main"]/div/a
-   Wait Until Page Contains  Log in to your account
-   Input Text  id=inputUsername  ${TEST_USER_NAME}
-   Input Text  id=inputPassword  ${TEST_USER_PW}
-   Click Button  Log in
+   ${login_required} =  Is OpenShift Login Visible
+   Run Keyword If  ${login_required}  Login To Openshift
 
 Is Service Account Authorization Required
    ${title} =  Get Title

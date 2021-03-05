@@ -9,6 +9,7 @@ ${MYBROWSER} =  chrome
 *** Test Cases ***
 Logged into OpenShift
    [Tags]  Sanity
+    Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
    Login To Openshift
 
 Can Launch Jupyterhub

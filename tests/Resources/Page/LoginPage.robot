@@ -8,7 +8,7 @@ Does Login Require Authentication Type
 
 Is OpenShift Login Visible
    ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in with
-   Return From Keyword If  ${login_prompt_visible}
+   Return From Keyword If  ${login_prompt_visible}  True
    ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in to your account
    [Return]  ${login_prompt_visible}
 

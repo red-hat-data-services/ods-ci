@@ -1,5 +1,5 @@
 *** Settings ***
-Library  SeleniumLibrary
+Library  JupyterLibrary
 
 *** Keywords ***
 Dashboard Is Visible

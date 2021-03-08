@@ -1,5 +1,5 @@
 *** Settings ***
-Library  SeleniumLibrary
+Library  JupyterLibrary
 
 *** Keywords ***
 Does Login Require Authentication Type

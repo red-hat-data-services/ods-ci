@@ -1,5 +1,5 @@
 *** Settings ***
-Library  SeleniumLibrary
+Library  JupyterLibrary
 
 *** Keywords ***
 Login To Jupyterhub

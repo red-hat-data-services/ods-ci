@@ -33,6 +33,7 @@ Can Spawn Notebook
    Select Notebook Image  s2i-minimal-notebook
    Select Notebook Image  s2i-scipy-notebook
    Select Notebook Image  s2i-tensorflow-notebook
+   Select Notebook Image  s2i-lab-elyra
    Select Container Size  Small
    Set Number of required GPUs  9
    Set Number of required GPUs  0
@@ -53,6 +54,6 @@ Can Spawn Notebook
 
 Can Launch Python3
    [Tags]  Sanity
-   Launch Python3 JupyterHub
+   Launch Python3 JupyterLab
 
 

@@ -1,5 +1,5 @@
 *** Settings ***
-Library         SeleniumLibrary
+Library         JupyterLibrary
 
 *** Keywords ***
 Launch ${dashboard_app} From ODH Dashboard Link

@@ -3,6 +3,7 @@
 TEST_CASE_FILE=tests/Tests/test.robot
 TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
+TEST_ARTIFACT_DIR="test-output"
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -21,6 +22,12 @@ while [ "$#" -gt 0 ]; do
       TEST_CASE_FILE=$1
       shift
       ;;
+    --test-artifact-dir)
+      shift
+      TEST_ARTIFACT_DIR=$1
+      shift
+      ;;
+
     *)
       echo "Unknown command line switch: $1"
       exit 1
@@ -63,12 +70,15 @@ python3 -m venv ${VENV_ROOT}
 source ${VENV_ROOT}/bin/activate
 ${VENV_ROOT}/bin/pip install -r requirements.txt
 
-#run tests
+#Create a unique directory to store the output for current test run
+if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then
+  mkdir ${TEST_ARTIFACT_DIR}
+fi
 
-#TODO: Make the tmpdir name unique when run <1min after previous run
-tmp_dir=$(mktemp -d -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
 #TODO: Configure the "tmp_dir" creation so that we can have a "latest" link
-mkdir $tmp_dir
-./venv/bin/robot -d $tmp_dir -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+TEST_ARTIFACT_DIR=$(mktemp -d -p ${TEST_ARTIFACT_DIR} -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
+
+#run tests
+./venv/bin/robot -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
 
 esac

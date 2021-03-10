@@ -7,14 +7,14 @@ ${MYBROWSER} =  chrome
 
 
 *** Test Cases ***
-Logged into OpenShift
+Open ODH Dashboard
    [Tags]  Sanity
-    Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-   Login To Openshift
+   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+   Wait For Condition  return document.title == "Open Data Hub Dashboard"
 
 Can Launch Jupyterhub
    [Tags]  Sanity
-   Launch Jupyterhub
+   Launch JupyterHub From ODH Dashboard Dropdown
 
 Can Login to Jupyterhub
    [Tags]  Sanity

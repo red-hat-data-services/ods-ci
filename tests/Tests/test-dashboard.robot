@@ -54,6 +54,5 @@ Can Spawn Notebook
 
 Can Launch Python3
    [Tags]  Sanity
-   Launch Python3 JupyterLab
-
-
+   #Launch Python3 JupyterLab
+   Launch Python3 JupyterLab Smoke Test Notebook

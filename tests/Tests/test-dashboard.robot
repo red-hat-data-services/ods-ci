@@ -18,14 +18,14 @@ Can Launch Jupyterhub
 
 Can Login to Jupyterhub
    [Tags]  Sanity
-   Login To Jupyterhub
+   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
 
 Can Spawn Notebook
    [Tags]  Sanity
    # We need to skip this testcase if the user has an existing pod
-   ${on_dashboard} =  Dashboard Is Visible
+   ${on_dashboard} =  JupyterHub Dashboard Is Visible
    # Official SKIP status will be available in Robot Framework 4.0
    # See: https://github.com/robotframework/robotframework/issues/3622
    Run Keyword If  ${on_dashboard}  Set Tags  SKIP

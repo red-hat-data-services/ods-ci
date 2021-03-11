@@ -19,11 +19,12 @@ Select Login Authentication Type
    Click Element  link:${auth_type}
 
 Login To Openshift
+   [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
     # Give the login prompt time to render after browser opens
     Wait Until Element is Visible  xpath://div[@class="pf-c-login"]  timeout=15seconds
     ${select_auth_type} =  Does Login Require Authentication Type
-    Run Keyword If  ${select_auth_type}  Select Login Authentication Type  ${TEST_USER.AUTH_TYPE}
+    Run Keyword If  ${select_auth_type}  Select Login Authentication Type  ${ocp_user_auth_type}
     Wait Until Page Contains  Log in to your account
-    Input Text  id=inputUsername  ${TEST_USER.USERNAME}
-    Input Text  id=inputPassword  ${TEST_USER.PASSWORD}
+    Input Text  id=inputUsername  ${ocp_user_name}
+    Input Text  id=inputPassword  ${ocp_user_pw}
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button

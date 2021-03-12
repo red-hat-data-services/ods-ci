@@ -25,11 +25,11 @@ Can Login to Jupyterhub
 Can Spawn Notebook
    [Tags]  Sanity
    # We need to skip this testcase if the user has an existing pod
-   ${on_dashboard} =  JupyterHub Dashboard Is Visible
+   ${spawner_visible} =  JupyterHub Spawner Is Visible
    # Official SKIP status will be available in Robot Framework 4.0
    # See: https://github.com/robotframework/robotframework/issues/3622
-   Run Keyword If  ${on_dashboard}  Set Tags  SKIP
-   Pass Execution If  ${on_dashboard}  SKIP:The user has an existing notebook pod running
+   Run Keyword If  ${spawner_visible}!=True  Set Tags  SKIP
+   Pass Execution If  ${spawner_visible}!=True  SKIP:The user has an existing notebook pod running
    Select Notebook Image  s2i-minimal-notebook
    Select Notebook Image  s2i-scipy-notebook
    Select Notebook Image  s2i-tensorflow-notebook

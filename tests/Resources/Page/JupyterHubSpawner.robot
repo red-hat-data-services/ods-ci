@@ -3,6 +3,10 @@ Library  JupyterLibrary
 Library  String
 
 *** Keywords ***
+JupyterHub Spawner Is Visible
+   ${spawner_visible} =  Run Keyword and Return Status  Element Should Be Visible  xpath://h1[@id="header-text" and .="Spawner Options"]
+   [return]  ${spawner_visible}
+
 Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
    [Arguments]  ${notebook_image}

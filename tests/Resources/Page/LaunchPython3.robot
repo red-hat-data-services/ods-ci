@@ -34,12 +34,17 @@ Launch Python3 JupyterLab Smoke Test Notebook
    Add and Run JupyterLab Code Cell  !pip install watermark
 
    Add and Run JupyterLab Code Cell  import boto3
+   Element Should Not Contain  (//div[contains(@class,"jp-OutputArea-output")])[last()]  ModuleNotFoundError
    Add and Run JupyterLab Code Cell  import kafka
+   Element Should Not Contain  (//div[contains(@class,"jp-OutputArea-output")])[last()]  ModuleNotFoundError
    Add and Run JupyterLab Code Cell  import pandas
+   Element Should Not Contain  (//div[contains(@class,"jp-OutputArea-output")])[last()]  ModuleNotFoundError
    Add and Run JupyterLab Code Cell  import matplotlib
+   Element Should Not Contain  (//div[contains(@class,"jp-OutputArea-output")])[last()]  ModuleNotFoundError
    Add and Run JupyterLab Code Cell  import numpy
+   Element Should Not Contain  (//div[contains(@class,"jp-OutputArea-output")])[last()]  ModuleNotFoundError
    Add and Run JupyterLab Code Cell  import scipy
-   #Element Should Not Contain  (//div[contains(@class,"jp-OutputArea-output")])[last()]  ModuleNotFoundError
+   Element Should Not Contain  (//div[contains(@class,"jp-OutputArea-output")])[last()]  ModuleNotFoundError
    Capture Page Screenshot
 
    Add and Run JupyterLab Code Cell  import watermark

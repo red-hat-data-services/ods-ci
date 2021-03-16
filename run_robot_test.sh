@@ -4,27 +4,42 @@ TEST_CASE_FILE=tests/Tests/test.robot
 TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
 TEST_ARTIFACT_DIR="test-output"
+EXTRA_ROBOT_ARGS=""
 
 while [ "$#" -gt 0 ]; do
   case $1 in
+    # Override/Add global variables specified in the test variables file
     --test-variable)
       shift
       TEST_VARIABLES="${TEST_VARIABLES} --variable $1"
       shift
       ;;
+
+    # Specify the test variable file
     --test-variables-file)
       shift
       TEST_VARIABLES_FILE=$1
       shift
       ;;
+
+    # Specify test case to run
     --test-case)
       shift
       TEST_CASE_FILE=$1
       shift
       ;;
+
+    # Specify directory to store artifacts and reports from each test run
     --test-artifact-dir)
       shift
       TEST_ARTIFACT_DIR=$1
+      shift
+      ;;
+
+    # Additional arguments to pass to the robot cli
+    --extra-robot-args)
+      shift
+      EXTRA_ROBOT_ARGS=$1
       shift
       ;;
 
@@ -79,6 +94,6 @@ fi
 TEST_ARTIFACT_DIR=$(mktemp -d -p ${TEST_ARTIFACT_DIR} -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
 
 #run tests
-./venv/bin/robot -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+./venv/bin/robot -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} ${EXTRA_ROBOT_ARGS}
 
 esac

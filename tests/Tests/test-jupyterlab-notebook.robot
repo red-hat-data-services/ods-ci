@@ -33,7 +33,23 @@ Can Spawn Notebook
   Select Notebook Image  s2i-lab-elyra
   Spawn Notebook
 
-Can Launch Python3 Smoke Test Generic Notebook
+Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
-  Launch Python3 JupyterLab Smoke Test Notebook
+  Launch a new JupyterLab Document
+
+  Add and Run JupyterLab Code Cell  import os
+  Add and Run JupyterLab Code Cell  print("Hello World!")
+  Capture Page Screenshot
+
+  JupyterLab Code Cell Error Output Should Not Be Visible
+
+  Add and Run JupyterLab Code Cell  !pip freeze
+  Wait Until JupyterLab Code Cells Is Not Active
+  Capture Page Screenshot
+
+  #Get the text of the last output cell
+  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+  Should Not Match  ${output}  ERROR*
+
+  Close JupyterLab Selected Tab
   Logout JupyterLab

@@ -10,6 +10,7 @@ ${MYBROWSER} =  chrome
 Open ODH Dashboard
   [Tags]  Sanity
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+  Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For Condition  return document.title == "Open Data Hub Dashboard"
 
 Can Launch Jupyterhub

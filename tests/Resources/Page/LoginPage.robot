@@ -2,9 +2,20 @@
 Library  JupyterLibrary
 
 *** Keywords ***
+Is ${service_account_name} Service Account Authorization Required
+   ${title} =  Get Title
+   ${result} =  Run Keyword And Return Status  Should Start With  ${title}  Authorize service account ${service_account_name}
+   [Return]  ${result}
+
 Does Login Require Authentication Type
    ${authentication_required} =  Run Keyword and Return Status  Page Should Contain  Log in with
    [Return]  ${authentication_required}
+
+Is OpenShift OAuth Login Prompt Visible
+   ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in with
+   ${oauth_login} =  Run Keyword and Return Status  Page Should Contain  oauth
+   ${result} =  Evaluate  ${login_prompt_visible} and ${oauth_login}
+   [Return]  ${result}
 
 Is OpenShift Login Visible
    ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in with

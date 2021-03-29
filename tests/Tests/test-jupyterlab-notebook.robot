@@ -3,7 +3,6 @@ Resource  ../Resources/ODS.robot
 Library         DebugLibrary
 
 *** Variables ***
-${MYBROWSER} =  chrome
 
 
 *** Test Cases ***
@@ -36,6 +35,10 @@ Can Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
+
+  Wait for JupyterLab Splash Screen
+  ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
+  Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document
 
   Add and Run JupyterLab Code Cell  import os
@@ -52,5 +55,5 @@ Can Launch Python3 Smoke Test Notebook
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Not Match  ${output}  ERROR*
 
-  Close JupyterLab Selected Tab
+  Close All JupyterLab Tabs
   Logout JupyterLab

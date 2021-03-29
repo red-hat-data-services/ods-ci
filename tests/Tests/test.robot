@@ -3,7 +3,6 @@ Resource  ../Resources/ODS.robot
 Library         DebugLibrary
 
 *** Variables ***
-${MYBROWSER} =  chrome
 
 
 *** Test Cases ***

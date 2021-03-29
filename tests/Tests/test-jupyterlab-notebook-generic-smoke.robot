@@ -3,7 +3,6 @@ Resource  ../Resources/ODS.robot
 Library         DebugLibrary
 
 *** Variables ***
-${MYBROWSER} =  chrome
 
 
 *** Test Cases ***
@@ -36,5 +35,7 @@ Can Spawn Notebook
 
 Can Launch Python3 Smoke Test Generic Notebook
   [Tags]  Sanity
+  Wait for JupyterLab Splash Screen
   Launch Python3 JupyterLab Smoke Test Notebook
+  Close All JupyterLab Tabs
   Logout JupyterLab

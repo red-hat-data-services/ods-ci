@@ -27,10 +27,7 @@ Can Spawn Notebook
   [Tags]  Sanity
   # We need to skip this testcase if the user has an existing pod
   ${spawner_visible} =  JupyterHub Spawner Is Visible
-  # Official SKIP status will be available in Robot Framework 4.0
-  # See: https://github.com/robotframework/robotframework/issues/3622
-  Run Keyword If  ${spawner_visible}!=True  Set Tags  SKIP
-  Pass Execution If  ${spawner_visible}!=True  SKIP:The user has an existing notebook pod running
+  Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
   Select Notebook Image  s2i-lab-elyra
   Spawn Notebook
 

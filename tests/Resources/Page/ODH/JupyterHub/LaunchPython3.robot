@@ -15,13 +15,13 @@ Launch Python3 JupyterLab Smoke Test Notebook
   Launch a new JupyterLab Document
 
   Add and Run JupyterLab Code Cell  !pip freeze
-  Wait Until JupyterLab Code Cells Is Not Active
+  Wait Until JupyterLab Code Cell Is Not Active
   Capture Page Screenshot
   Add and Run JupyterLab Code Cell  !pip install watermark
-  Wait Until JupyterLab Code Cells Is Not Active
+  Wait Until JupyterLab Code Cell Is Not Active
 
   Add and Run JupyterLab Code Cell  import boto3     import kafka     import pandas     import matplotlib     import numpy     import scipy
-  Wait Until JupyterLab Code Cells Is Not Active
+  Wait Until JupyterLab Code Cell Is Not Active
   Capture Page Screenshot
 
   Add and Run JupyterLab Code Cell  import watermark

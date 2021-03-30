@@ -1,24 +1,48 @@
 *** Settings ***
 Library  JupyterLibrary
 
+*** Variables ***
+${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
+${JL_TABBAR_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[contains(@class,"lm-mod-current p-mod-current")]
+${JL_TABBAR_NOT_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[not(contains(@class,"lm-mod-current p-mod-current"))]
+
 *** Keywords ***
 Get JupyterLab Selected Tab Label
-  ${tab_label} =  Get Text  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]/li[contains(@class,"lm-mod-current p-mod-current")]/div[contains(@class,"p-TabBar-tabLabel")]
+  ${tab_label} =  Get Text  ${JL_TABBAR_SELECTED_XPATH}/div[contains(@class,"p-TabBar-tabLabel")]
   [return]  ${tab_label}
 
 JupyterLab Launcher Tab Is Visible
-  Get WebElement  xpath://div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]/li/div[.="Launcher"]
+  Get WebElement  xpath:${JL_TABBAR_CONTENT_XPATH}/li/div[.="Launcher"]
 
 JupyterLab Launcher Tab Is Selected
-  Get WebElement  xpath://div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]/li[contains(@class,"lm-mod-current p-mod-current")]/div[.="Launcher"]
+  Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[.="Launcher"]
 
 Open JupyterLab Launcher
   Open With JupyterLab Menu  File  New Launcher
   JupyterLab Launcher Tab Is Visible
   JupyterLab Launcher Tab Is Selected
 
+Wait Until ${filename} JupyterLab Tab Is Selected
+  Wait Until Page Contains Element  xpath:${JL_TABBAR_SELECTED_XPATH}/div[.="${filename}"]
+
+Close Other JupyterLab Tabs
+  ${original_tab} =  Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(@class, "p-TabBar-tabLabel")]
+
+  ${xpath_background_tab} =  Set Variable  xpath:${JL_TABBAR_NOT_SELECTED_XPATH}
+  ${jl_tabs} =  Get WebElements  ${xpath_background_tab}
+
+  FOR  ${tab}  IN  @{jl_tabs}
+    #Select the tab we want to close
+    Click Element  ${tab}
+    #Click the close tab icon
+    Open With JupyterLab Menu  File  Close Tab
+    Maybe Accept a JupyterLab Prompt
+  END
+  Element Should Be Visible  ${original_tab}
+  Element Should Not Be Visible  ${xpath_background_tab}
+
 Close JupyterLab Selected Tab
-  Click Element  xpath://div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]/li[contains(@class,"lm-mod-current p-mod-current")]/div[contains(@class,"lm-TabBar-tabCloseIcon")]
+  Click Element  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(@class,"lm-TabBar-tabCloseIcon")]
   Maybe Accept a JupyterLab Prompt
 
 JupyterLab Code Cell Error Output Should Not Be Visible
@@ -28,7 +52,7 @@ Get JupyterLab Code Cell Error Text
   ${error_txt} =  Get Text  //div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]
   [Return]
 
-Wait Until JupyterLab Code Cells Is Not Active
+Wait Until JupyterLab Code Cell Is Not Active
   [Documentation]  Waits until the current cell no longer has an active prompt "[*]:". This assumes that there is only one cell currently active and it is the currently selected cell
   [Arguments]  ${timeout}=120seconds
   Wait Until Element Is Not Visible  //div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]  ${timeout}
@@ -40,11 +64,11 @@ Open JupyterHub Control Panel
   Wait Until Page Contains Element  link:Control Panel
   Click Link  Control Panel
 
-Start Notebook Server
+Start JupyterLab Notebook Server
   Open JupyterHub Control Panel
   Click Link  start
 
-Stop Notebook Server
+Stop JupyterLab Notebook Server
   Open JupyterHub Control Panel
   Wait Until Page Contains  Stop My Server  30 seconds
   # This is a dumb sleep to give the Stop button in the WebUI time to actually work when clicked

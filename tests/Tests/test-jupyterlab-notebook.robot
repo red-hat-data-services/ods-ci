@@ -45,7 +45,7 @@ Can Launch Python3 Smoke Test Notebook
   JupyterLab Code Cell Error Output Should Not Be Visible
 
   Add and Run JupyterLab Code Cell  !pip freeze
-  Wait Until JupyterLab Code Cells Is Not Active
+  Wait Until JupyterLab Code Cell Is Not Active
   Capture Page Screenshot
 
   #Get the text of the last output cell

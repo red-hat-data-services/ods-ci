@@ -36,10 +36,10 @@ Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
    [Arguments]  ${env_var}  ${env_var_value}
    Click Button  Add
-   Input Text  name:variable_name  ${env_var}
+   Input Text  id:KeyForm-  ${env_var}
    Element Attribute Value Should Be  name:${env_var}  value  ${env_var}
-   Input Text  xpath://*/input[@name="${env_var}"]/../../input  ${env_var_value}
-   Element Attribute Value Should Be  name:${env_var_value}  value  ${env_var_value}
+   Input Text  id:ValueForm-${env_var}  ${env_var_value}
+   Element Attribute Value Should Be  id:ValueForm-${env_var}  value  ${env_var_value}
 
 Remove Spawner Environment Variable
    [Documentation]  Removes an existing environment variable based on the ${env_var} argument

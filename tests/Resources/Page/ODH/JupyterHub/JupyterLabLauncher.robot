@@ -60,16 +60,16 @@ Wait Until JupyterLab Code Cell Is Not Active
 Select Empty JupyterLab Code Cell
   Click Element  //div[contains(@class,"jp-mod-noOutputs jp-Notebook-cell")]
 
-Open JupyterHub Control Panel
-  Wait Until Page Contains Element  link:Control Panel
-  Click Link  Control Panel
-
 Start JupyterLab Notebook Server
   Open JupyterHub Control Panel
   Click Link  start
 
+Open JupyterLab Control Panel
+  Open With JupyterLab Menu  File  Hub Control Panel
+  Switch Window  JupyterHub
+  
 Stop JupyterLab Notebook Server
-  Open JupyterHub Control Panel
+  Open JupyterLab Control Panel
   Wait Until Page Contains  Stop My Server  30 seconds
   # This is a dumb sleep to give the Stop button in the WebUI time to actually work when clicked
   #TODO: Determine if there is any web element attribute that will allow signify when the Stop button will actually work

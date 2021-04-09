@@ -2,6 +2,9 @@
 Resource  ../Resources/ODS.robot
 Library         DebugLibrary
 
+Suite Teardown  Stop JupyterLab Notebook Server
+
+
 *** Variables ***
 
 
@@ -27,7 +30,9 @@ Can Spawn Notebook
   # We need to skip this testcase if the user has an existing pod
   ${spawner_visible} =  JupyterHub Spawner Is Visible
   Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
-  Select Notebook Image  s2i-lab-elyra
+  Select Notebook Image  s2i-generic-data-science-notebook
+  #This env is required until JupyterLab is the default interface in RHODS
+  Add Spawner Environment Variable  JUPYTER_ENABLE_LAB  true
   Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
@@ -37,6 +42,7 @@ Can Launch Python3 Smoke Test Notebook
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document
+  Close Other JupyterLab Tabs
 
   Add and Run JupyterLab Code Cell  import os
   Add and Run JupyterLab Code Cell  print("Hello World!")
@@ -51,6 +57,3 @@ Can Launch Python3 Smoke Test Notebook
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Not Match  ${output}  ERROR*
-
-  Close All JupyterLab Tabs
-  Logout JupyterLab

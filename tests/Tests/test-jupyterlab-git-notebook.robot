@@ -27,7 +27,9 @@ Can Spawn Notebook
   # We need to skip this testcase if the user has an existing pod
   ${spawner_visible} =  JupyterHub Spawner Is Visible
   Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
-  Select Notebook Image  s2i-lab-elyra
+  Select Notebook Image  s2i-generic-data-science-notebook
+  #This env is required until JupyterLab is the default interface in RHODS
+  Add Spawner Environment Variable  JUPYTER_ENABLE_LAB  true
   Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook

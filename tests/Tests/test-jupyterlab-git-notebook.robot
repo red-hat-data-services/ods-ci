@@ -2,9 +2,6 @@
 Resource  ../Resources/ODS.robot
 Library         DebugLibrary
 
-Suite Teardown  Stop JupyterLab Notebook Server
-
-
 *** Variables ***
 
 
@@ -39,10 +36,21 @@ Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
 
   Wait for JupyterLab Splash Screen
+
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document
+
   Close Other JupyterLab Tabs
+
+  ##################################################
+  # Manual Notebook Input
+  ##################################################
+  Add and Run JupyterLab Code Cell  !pip install boto3
+  Wait Until JupyterLab Code Cell Is Not Active
+  #Get the text of the last output cell
+  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+  Should Not Match  ${output}  ERROR*
 
   Add and Run JupyterLab Code Cell  import os
   Add and Run JupyterLab Code Cell  print("Hello World!")
@@ -50,10 +58,28 @@ Can Launch Python3 Smoke Test Notebook
 
   JupyterLab Code Cell Error Output Should Not Be Visible
 
-  Add and Run JupyterLab Code Cell  !pip freeze
+  ##################################################
+  # Git clone repo and run existing notebook
+  ##################################################
+  Maybe Open JupyterLab Sidebar  File Browser
+  Navigate Home In JupyterLab Sidebar
+  Open With JupyterLab Menu  Git  Clone a Repository
+  Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/sophwats/notebook-smoke-test
+  Click Element  xpath://div[.="CLONE"]
+
+  Open With JupyterLab Menu  File  Open from Path…
+  Input Text  //div[.="Open Path"]/../div[contains(@class, "jp-Dialog-body")]//input  notebook-smoke-test/watermark-smoke-test.ipynb
+  Click Element  xpath://div[.="Open"]
+
+  Wait Until watermark-smoke-test.ipynb JupyterLab Tab Is Selected
+  Close Other JupyterLab Tabs
+
+  Open With JupyterLab Menu  Run  Run All Cells
   Wait Until JupyterLab Code Cell Is Not Active
-  Capture Page Screenshot
+  JupyterLab Code Cell Error Output Should Not Be Visible
 
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Not Match  ${output}  ERROR*
+
+  Logout JupyterLab

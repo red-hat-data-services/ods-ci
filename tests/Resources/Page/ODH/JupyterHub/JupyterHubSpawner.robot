@@ -11,7 +11,7 @@ Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
    [Arguments]  ${notebook_image}
    Click Element  id:ImageDropdownBtn
-   ${notebook_webelement} =  Get WebElement  xpath://a[contains(@id,"${notebook_image}")]
+   ${notebook_webelement} =  Set Variable  xpath://a[contains(@id,"${notebook_image}")]
    Wait Until Element Is Visible  ${notebook_webelement}
    Click Element  ${notebook_webelement}
    ${selected_notebook} =  Get Text  id:ImageDropdownBtn

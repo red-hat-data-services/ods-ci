@@ -13,7 +13,7 @@ Open ODH Dashboard
   [Tags]  Sanity
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait For Condition  return document.title == "Open Data Hub Dashboard"
+  Wait Until Element Is Visible  //body//div[contains(@class, 'odh-dashboard')]
 
 Can Launch Jupyterhub
   [Tags]  Sanity
@@ -31,8 +31,6 @@ Can Spawn Notebook
   ${spawner_visible} =  JupyterHub Spawner Is Visible
   Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
   Select Notebook Image  s2i-generic-data-science-notebook
-  #This env is required until JupyterLab is the default interface in RHODS
-  Add Spawner Environment Variable  JUPYTER_ENABLE_LAB  true
   Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook

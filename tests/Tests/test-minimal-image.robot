@@ -1,7 +1,10 @@
 *** Settings ***
-Resource  ../Resources/ODS.robot
+Resource        ../Resources/ODS.robot
+Resource        ../Resources/Common.robot
 Library         DebugLibrary
 Library         JupyterLibrary
+Suite Setup      Begin Web Test
+Suite Teardown   End Web Test
 
 *** Variables ***
 
@@ -9,7 +12,7 @@ Library         JupyterLibrary
 *** Test Cases ***
 Open ODH Dashboard
   [Tags]  Sanity
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+  #Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For Condition  return document.title == "Open Data Hub Dashboard"
 
@@ -95,4 +98,9 @@ Can Launch Python3 Smoke Test Notebook
   Should Not Match  ${output}  ERROR*
   Should Be Equal As Strings  ${output}  [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]
 
-  Logout JupyterLab
+  # Clean up workspace for next run
+  Open With JupyterLab Menu  File  Open from Path…
+  Sleep  1
+  Input Text  xpath=/html/body/div[3]/div/div[1]/input  Untitled.ipynb
+  Click Element  xpath://div[.="Open"]
+  Run Cell And Check For Errors  !rm -rf *

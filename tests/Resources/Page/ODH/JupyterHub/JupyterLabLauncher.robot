@@ -84,7 +84,6 @@ Logout JupyterLab
 Run Cell And Check For Errors
   [Arguments]  ${input}
   Add and Run JupyterLab Code Cell  ${input}
-  Sleep  1
   Wait Until JupyterLab Code Cell Is Not Active
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
@@ -97,3 +96,4 @@ Run Cell And Check Output
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Match  ${output}  ${expected_output}
+  

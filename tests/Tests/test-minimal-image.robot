@@ -41,12 +41,12 @@ Can Launch Python3 Smoke Test Notebook
 
   Wait for JupyterLab Splash Screen
 
+  ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
+  Run Keyword If  not ${is_kernel_selected}  Click Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
+
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document
-  
-  ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=/html/body/div[3]
-  Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=/html/body/div[3]/div/div[2]/button[2]
 
   Close Other JupyterLab Tabs
 
@@ -79,18 +79,20 @@ Can Launch Python3 Smoke Test Notebook
   #The above doesn't work currently since the git plugin is not available
   #In the minimal image
   Add and Run JupyterLab Code Cell  !git clone https://github.com/lugi0/minimal-nb-image-test
+  # TODO
+  # Ensure output cell doesn't contain fatal: ... ?
 
   #When cloning from inside a notebook cell it takes a while for the folder to appear
   Sleep  10
   Open With JupyterLab Menu  File  Open from Path…
-  Input Text  xpath=/html/body/div[3]/div/div[1]/input  minimal-nb-image-test/minimal-nb.ipynb
+  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  minimal-nb-image-test/minimal-nb.ipynb
   Click Element  xpath://div[.="Open"]
 
   Wait Until minimal-nb.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs
 
   Open With JupyterLab Menu  Run  Run All Cells
-  Wait Until JupyterLab Code Cell Is Not Active
+  Wait Until JupyterLab Code Cell Is Not Active  timeout=300
   JupyterLab Code Cell Error Output Should Not Be Visible
 
   #Get the text of the last output cell
@@ -101,6 +103,8 @@ Can Launch Python3 Smoke Test Notebook
   # Clean up workspace for next run
   Open With JupyterLab Menu  File  Open from Path…
   Sleep  1
-  Input Text  xpath=/html/body/div[3]/div/div[1]/input  Untitled.ipynb
+  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb
   Click Element  xpath://div[.="Open"]
-  Run Cell And Check For Errors  !rm -rf *
+  Wait Until Untitled.ipynb JupyterLab Tab Is Selected
+  Close Other JupyterLab Tabs
+  Add and Run JupyterLab Code Cell  !rm -rf *

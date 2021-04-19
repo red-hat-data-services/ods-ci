@@ -14,7 +14,7 @@ Open ODH Dashboard
   [Tags]  Sanity
   #Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait For Condition  return document.title == "Open Data Hub Dashboard"
+  Wait For Condition  return document.title == "Red Hat OpenShift Data Science Dashboard"
 
 Can Launch Jupyterhub
   [Tags]  Sanity
@@ -41,6 +41,8 @@ Can Launch Python3 Smoke Test Notebook
 
   Wait for JupyterLab Splash Screen
 
+
+  # Sometimes we get a modal pop-up upon server spawn asking to select a kernel for the notebooks
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
   Run Keyword If  not ${is_kernel_selected}  Click Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
 
@@ -81,6 +83,7 @@ Can Launch Python3 Smoke Test Notebook
   Add and Run JupyterLab Code Cell  !git clone https://github.com/lugi0/minimal-nb-image-test
   # TODO
   # Ensure output cell doesn't contain fatal: ... ?
+  # Should be using the git plugin anyway
 
   #When cloning from inside a notebook cell it takes a while for the folder to appear
   Sleep  10
@@ -101,6 +104,7 @@ Can Launch Python3 Smoke Test Notebook
   Should Be Equal As Strings  ${output}  [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]
 
   # Clean up workspace for next run
+  # Might make sense to abstract it into a single Keyword
   Open With JupyterLab Menu  File  Open from Path…
   Sleep  1
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb

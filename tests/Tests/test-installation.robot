@@ -11,6 +11,7 @@ Suite Teardown  Close Browser
 
 *** Test Cases ***
 Can Install ODH Operator
+  [Tags]  TBC
   Open OperatorHub
   Install ODH Operator
   ODH Operator Should Be Installed

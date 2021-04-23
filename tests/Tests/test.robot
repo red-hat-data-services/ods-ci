@@ -1,6 +1,8 @@
 *** Settings ***
-Resource  ../Resources/ODS.robot
-Library         DebugLibrary
+Library          DebugLibrary
+Resource         ../Resources/ODS.robot
+Resource         ../Resources/Common.robot
+Suite Teardown   End Web Test
 
 *** Variables ***
 
@@ -28,8 +30,6 @@ Can Spawn Notebook
    Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
    Select Notebook Image  s2i-generic-data-science-notebook
    Select Notebook Image  s2i-minimal-notebook
-   #Select Notebook Image  s2i-scipy-notebook
-   #Select Notebook Image  s2i-tensorflow-notebook
    Select Container Size  Small
    Set Number of required GPUs  9
    Set Number of required GPUs  0
@@ -47,9 +47,12 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
    Spawn Notebook
+   Wait for JupyterLab Splash Screen
+   Launch a new JupyterLab Document
+   Close Other JupyterLab Tabs
 
 Can Launch Python3
-   [Tags]  Sanity
+   [Tags]  Sanity  TBC
    Launch Python3 JupyterHub
 
 

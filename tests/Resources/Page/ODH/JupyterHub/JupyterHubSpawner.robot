@@ -23,17 +23,23 @@ Select Notebook Image
 Select Container Size
    [Documentation]  Selects the container size based on the ${container_size} argument
    [Arguments]  ${container_size}
-   Click Element  id:SizeDropdownBtn
-   Wait Until Element Is Visible  id:${container_size}
-   Click Element  id:${container_size}
-   ${selected_size} =  Get Text  id:SizeDropdownBtn
-   Should Start With  ${selected_size}  ${container_size}
+   # Expand List
+   Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[3]/button
+   Click Element  xpath://span[.="${container_size}"]/../..
+   #Click Element  id:SizeDropdownBtn
+   #Wait Until Element Is Visible  id:${container_size}
+   #Click Element  id:${container_size}
+   #${selected_size} =  Get Text  id:SizeDropdownBtn
+   #Should Start With  ${selected_size}  ${container_size}
 
 Set Number of required GPUs
    [Documentation]  Sets the gpu count based on the ${gpus} argument
    [Arguments]  ${gpus}
-   Input Text  id:gpu-form  ${gpus}
-   Textfield Value Should Be  id:gpu-form  ${gpus}
+   # Expand list
+   Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[5]/button
+   Click Element  xpath://li[.="${gpus}"]
+   #Input Text  id:gpu-form  ${gpus}
+   #Textfield Value Should Be  id:gpu-form  ${gpus}
 
 Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
@@ -52,7 +58,7 @@ Add Spawner Environment Variable
 Remove Spawner Environment Variable
    [Documentation]  Removes an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
-   Click Element  xpath://*[@name="${env_var}"]/../../../button[.="Remove"]
+   Click Element  xpath://input[@id="${env_var}"]/../../../../button
 
 Spawner Environment Variable Exists
    [Documentation]  Removes an existing environment variable based on the ${env_var} argument

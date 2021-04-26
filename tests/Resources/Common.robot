@@ -9,9 +9,11 @@ Begin Web Test
 End Web Test
     Clean Up Server
     Click JupyterLab Menu  File
+    Capture Page Screenshot
     Click JupyterLab Menu Item  Hub Control Panel
     Switch Window  JupyterHub
     Sleep  5
     Click Element  //*[@id="stop"]
     Wait Until Page Contains  Start My Server  timeout=15
+    Capture Page Screenshot
     Close Browser

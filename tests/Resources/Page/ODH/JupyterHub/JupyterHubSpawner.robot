@@ -14,11 +14,6 @@ Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
    [Arguments]  ${notebook_image}
    Click Element  xpath://input[contains(@id, "${notebook_image}")]
-   #${notebook_webelement} =  Get WebElement  xpath://a[contains(@id,"${notebook_image}")]
-   #Wait Until Element Is Visible  ${notebook_webelement}
-   #Click Element  ${notebook_webelement}
-   #${selected_notebook} =  Get Text  id:ImageDropdownBtn
-   #Should Start With  ${selected_notebook}  ${notebook_image}
 
 Select Container Size
    [Documentation]  Selects the container size based on the ${container_size} argument
@@ -26,11 +21,6 @@ Select Container Size
    # Expand List
    Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[3]/button
    Click Element  xpath://span[.="${container_size}"]/../..
-   #Click Element  id:SizeDropdownBtn
-   #Wait Until Element Is Visible  id:${container_size}
-   #Click Element  id:${container_size}
-   #${selected_size} =  Get Text  id:SizeDropdownBtn
-   #Should Start With  ${selected_size}  ${container_size}
 
 Set Number of required GPUs
    [Documentation]  Sets the gpu count based on the ${gpus} argument
@@ -38,8 +28,6 @@ Set Number of required GPUs
    # Expand list
    Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[5]/button
    Click Element  xpath://li[.="${gpus}"]
-   #Input Text  id:gpu-form  ${gpus}
-   #Textfield Value Should Be  id:gpu-form  ${gpus}
 
 Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
@@ -49,11 +37,6 @@ Add Spawner Environment Variable
    Element Attribute Value Should Be  xpath://input[@id="${env_var}"]  value  ${env_var}
    Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
    Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}
-   #Click Button  Add
-   #Input Text  id:KeyForm-  ${env_var}
-   #Element Attribute Value Should Be  name:${env_var}  value  ${env_var}
-   #Input Text  id:ValueForm-${env_var}  ${env_var_value}
-   #Element Attribute Value Should Be  id:ValueForm-${env_var}  value  ${env_var_value}
 
 Remove Spawner Environment Variable
    [Documentation]  Removes an existing environment variable based on the ${env_var} argument

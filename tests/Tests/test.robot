@@ -28,8 +28,6 @@ Can Spawn Notebook
    Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
    Select Notebook Image  s2i-generic-data-science-notebook
    Select Notebook Image  s2i-minimal-notebook
-   #Select Notebook Image  s2i-scipy-notebook
-   #Select Notebook Image  s2i-tensorflow-notebook
    Select Container Size  Small
    Set Number of required GPUs  9
    Set Number of required GPUs  0

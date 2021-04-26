@@ -1,6 +1,6 @@
 #/bin/bash
 
-TEST_CASE_FILE=tests/Tests
+TEST_CASE_FILE=tests/Tests/test.robot
 TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
 TEST_ARTIFACT_DIR="test-output"

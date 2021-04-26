@@ -16,9 +16,6 @@ Login To ODH Dashboard
    ${authorize_service_account} =  Is odh-dashboard Service Account Authorization Required
    Run Keyword If  ${authorize_service_account}  Authorize odh-dashboard service account
 
-Wait for ODH Dashboard to Load
-  Wait For Condition  return document.title == "Red Hat OpenShift Data Science Dashboard"
-
 Wait Until ODH Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 10seconds since anything beyond that should be flagged as a UI bug 

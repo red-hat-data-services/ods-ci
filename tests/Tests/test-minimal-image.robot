@@ -1,8 +1,8 @@
 *** Settings ***
-Resource         ../Resources/ODS.robot
-Resource         ../Resources/Common.robot
-Library          DebugLibrary
-Library          JupyterLibrary
+Resource        ../Resources/ODS.robot
+Resource        ../Resources/Common.robot
+Library         DebugLibrary
+Library         JupyterLibrary
 Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
 
@@ -12,8 +12,9 @@ Suite Teardown   End Web Test
 *** Test Cases ***
 Open ODH Dashboard
   [Tags]  Sanity
+  #Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for ODH Dashboard to Load
+  Wait For Condition  return document.title == "Red Hat OpenShift Data Science Dashboard"
 
 Can Launch Jupyterhub
   [Tags]  Sanity
@@ -31,16 +32,19 @@ Can Spawn Notebook
   ${spawner_visible} =  JupyterHub Spawner Is Visible
   Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
   Select Notebook Image  s2i-minimal-notebook
+  #This env is required until JupyterLab is the default interface in RHODS
+  Add Spawner Environment Variable  JUPYTER_ENABLE_LAB  true
   Spawn Notebook
 
-Can Execute Minimal Image Test
+Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
 
   Wait for JupyterLab Splash Screen
 
 
   # Sometimes we get a modal pop-up upon server spawn asking to select a kernel for the notebooks
-  Maybe Select Kernel
+  ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
+  Run Keyword If  not ${is_kernel_selected}  Click Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
 
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
@@ -68,12 +72,21 @@ Can Execute Minimal Image Test
   ##################################################
   # Git clone repo and run existing notebook
   ##################################################
-  Maybe Open JupyterLab Sidebar  File Browser
-  Navigate Home In JupyterLab Sidebar
-  Open With JupyterLab Menu  Git  Clone a Repository
-  Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/lugi0/minimal-nb-image-test
-  Click Element  xpath://div[.="CLONE"]
+  #Maybe Open JupyterLab Sidebar  File Browser
+  #Navigate Home In JupyterLab Sidebar
+  #Open With JupyterLab Menu  Git  Clone a Repository
+  #Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/lugi0/minimal-nb-image-test
+  #Click Element  xpath://div[.="CLONE"]
 
+  #The above doesn't work currently since the git plugin is not available
+  #In the minimal image
+  Add and Run JupyterLab Code Cell  !git clone https://github.com/lugi0/minimal-nb-image-test
+  # TODO
+  # Ensure output cell doesn't contain fatal: ... ?
+  # Should be using the git plugin anyway
+
+  #When cloning from inside a notebook cell it takes a while for the folder to appear
+  Sleep  10
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  minimal-nb-image-test/minimal-nb.ipynb
   Click Element  xpath://div[.="Open"]
@@ -90,3 +103,12 @@ Can Execute Minimal Image Test
   Should Not Match  ${output}  ERROR*
   Should Be Equal As Strings  ${output}  [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]
 
+  # Clean up workspace for next run
+  # Might make sense to abstract it into a single Keyword
+  Open With JupyterLab Menu  File  Open from Path…
+  Sleep  1
+  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb
+  Click Element  xpath://div[.="Open"]
+  Wait Until Untitled.ipynb JupyterLab Tab Is Selected
+  Close Other JupyterLab Tabs
+  Add and Run JupyterLab Code Cell  !rm -rf *

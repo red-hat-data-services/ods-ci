@@ -4,14 +4,11 @@ ODH CI is a framework to test Red Hat Open Data Science features and functionali
 using QE tiered testing.
 
 # Requirements
-  Fedora or CentOS that supports chrome drivers
-  `lsb_release` binary
-    - Provided by redhat-lsb-core in RPM based
-    - This is used to query your distribution so that the appropriate webdriver binary can be added to you `PATH` correctly
-
+  Linux distribution that supports Selenium automation of a chromium web browser using [ChromeDriver](https://chromedriver.chromium.org)
+  * chromedriver binaries can be downloaded from https://chromedriver.chromium.org/downloads. The chromedriver version must match the installed version of chromium/google-chrome
 
 # Quick Start
-  1. Create a variables for all of the global test values
+  1. Create a variables file for all of the global test values
      ```bash
      # Create the initial test variables from the example template variables file
      cp test-variables.yml.example test-variables.yml

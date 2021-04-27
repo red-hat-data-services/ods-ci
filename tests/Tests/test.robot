@@ -31,8 +31,9 @@ Can Spawn Notebook
    Select Notebook Image  s2i-generic-data-science-notebook
    Select Notebook Image  s2i-minimal-notebook
    Select Container Size  Small
-   Set Number of required GPUs  9
-   Set Number of required GPUs  0
+   # Cannot set number of required GPUs on clusters without GPUs anymore
+   #Set Number of required GPUs  9
+   #Set Number of required GPUs  0
    Add Spawner Environment Variable  env_one  one
    Remove Spawner Environment Variable  env_one
    Add Spawner Environment Variable  env_two  two

@@ -36,6 +36,8 @@ Can Spawn Notebook
 Can Execute Minimal Image Test
   [Tags]  Sanity
 
+  # We need to send a PR to https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/master/src/JupyterLibrary/clients/jupyterlab/Shell.robot
+  # To increase the timeout here.
   Wait for JupyterLab Splash Screen
 
 

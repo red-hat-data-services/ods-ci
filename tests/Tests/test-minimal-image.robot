@@ -36,8 +36,7 @@ Can Spawn Notebook
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
 
-  # We need to send a PR to https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/master/src/JupyterLibrary/clients/jupyterlab/Shell.robot
-  # To increase the timeout here.
+
   Wait for JupyterLab Splash Screen
 
 

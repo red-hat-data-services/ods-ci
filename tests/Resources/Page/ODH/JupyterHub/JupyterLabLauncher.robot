@@ -80,3 +80,20 @@ Stop JupyterLab Notebook Server
 
 Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out
+
+Run Cell And Check For Errors
+  [Arguments]  ${input}
+  Add and Run JupyterLab Code Cell  ${input}
+  Wait Until JupyterLab Code Cell Is Not Active
+  #Get the text of the last output cell
+  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+  Should Not Match  ${output}  ERROR*
+
+Run Cell And Check Output
+  [Arguments]  ${input}  ${expected_output}
+  Add and Run JupyterLab Code Cell  ${input}
+  Wait Until JupyterLab Code Cell Is Not Active
+  #Get the text of the last output cell
+  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+  Should Match  ${output}  ${expected_output}
+  

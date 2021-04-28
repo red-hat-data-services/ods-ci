@@ -12,7 +12,6 @@ Suite Teardown   End Web Test
 *** Test Cases ***
 Open ODH Dashboard
   [Tags]  Sanity
-  #Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For Condition  return document.title == "Red Hat OpenShift Data Science Dashboard"
 
@@ -32,12 +31,11 @@ Can Spawn Notebook
   ${spawner_visible} =  JupyterHub Spawner Is Visible
   Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
   Select Notebook Image  s2i-minimal-notebook
-  #This env is required until JupyterLab is the default interface in RHODS
-  Add Spawner Environment Variable  JUPYTER_ENABLE_LAB  true
   Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
+
 
   Wait for JupyterLab Splash Screen
 
@@ -72,21 +70,12 @@ Can Launch Python3 Smoke Test Notebook
   ##################################################
   # Git clone repo and run existing notebook
   ##################################################
-  #Maybe Open JupyterLab Sidebar  File Browser
-  #Navigate Home In JupyterLab Sidebar
-  #Open With JupyterLab Menu  Git  Clone a Repository
-  #Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/lugi0/minimal-nb-image-test
-  #Click Element  xpath://div[.="CLONE"]
+  Maybe Open JupyterLab Sidebar  File Browser
+  Navigate Home In JupyterLab Sidebar
+  Open With JupyterLab Menu  Git  Clone a Repository
+  Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/lugi0/minimal-nb-image-test
+  Click Element  xpath://div[.="CLONE"]
 
-  #The above doesn't work currently since the git plugin is not available
-  #In the minimal image
-  Add and Run JupyterLab Code Cell  !git clone https://github.com/lugi0/minimal-nb-image-test
-  # TODO
-  # Ensure output cell doesn't contain fatal: ... ?
-  # Should be using the git plugin anyway
-
-  #When cloning from inside a notebook cell it takes a while for the folder to appear
-  Sleep  10
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  minimal-nb-image-test/minimal-nb.ipynb
   Click Element  xpath://div[.="Open"]

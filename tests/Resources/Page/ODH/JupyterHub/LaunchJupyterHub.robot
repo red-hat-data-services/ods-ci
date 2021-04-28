@@ -3,7 +3,7 @@ Library  JupyterLibrary
 
 *** Keywords ***
 Launch Jupyterhub
-   Wait Until Page Contains  Networking  timeout=15
+   Wait Until Page Contains  Networking  timeout=30
    Click Button  Networking
    Wait Until Page Contains  Routes  timeout=15
    Click Link  Routes

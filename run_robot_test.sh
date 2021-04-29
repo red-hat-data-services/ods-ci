@@ -1,6 +1,6 @@
 #/bin/bash
 
-TEST_CASE_FILE=tests/Tests/test.robot
+TEST_CASE_FILE=tests/Tests
 TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
 TEST_ARTIFACT_DIR="test-output"
@@ -94,6 +94,6 @@ fi
 TEST_ARTIFACT_DIR=$(mktemp -d -p ${TEST_ARTIFACT_DIR} -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
 
 #run tests
-./venv/bin/robot -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+./venv/bin/robot -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
 
 esac

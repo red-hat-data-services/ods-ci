@@ -37,7 +37,7 @@ Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
 
 
-  Wait for JupyterLab Splash Screen
+  Wait for JupyterLab Splash Screen  timeout=30
 
 
   Maybe Select Kernel

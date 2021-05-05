@@ -35,7 +35,7 @@ Can Spawn Notebook
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
 
-  Wait for JupyterLab Splash Screen
+  Wait for JupyterLab Splash Screen  timeout=30
 
   Maybe Select Kernel
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected

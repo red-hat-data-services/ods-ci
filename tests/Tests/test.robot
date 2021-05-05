@@ -48,7 +48,7 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
    Spawn Notebook
-   Wait for JupyterLab Splash Screen
+   Wait for JupyterLab Splash Screen  timeout=30
    Launch a new JupyterLab Document
    Close Other JupyterLab Tabs
 

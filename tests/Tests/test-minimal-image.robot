@@ -1,8 +1,8 @@
 *** Settings ***
-Resource        ../Resources/ODS.robot
-Resource        ../Resources/Common.robot
-Library         DebugLibrary
-Library         JupyterLibrary
+Resource         ../Resources/ODS.robot
+Resource         ../Resources/Common.robot
+Library          DebugLibrary
+Library          JupyterLibrary
 Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
 
@@ -13,7 +13,7 @@ Suite Teardown   End Web Test
 Open ODH Dashboard
   [Tags]  Sanity
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait For Condition  return document.title == "Red Hat OpenShift Data Science Dashboard"
+  Wait for ODH Dashboard to Load
 
 Can Launch Jupyterhub
   [Tags]  Sanity
@@ -37,12 +37,10 @@ Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
 
 
-  Wait for JupyterLab Splash Screen
+  Wait for JupyterLab Splash Screen  timeout=30
 
 
-  # Sometimes we get a modal pop-up upon server spawn asking to select a kernel for the notebooks
-  ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
-  Run Keyword If  not ${is_kernel_selected}  Click Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
+  Maybe Select Kernel
 
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
@@ -75,7 +73,7 @@ Can Launch Python3 Smoke Test Notebook
   Open With JupyterLab Menu  Git  Clone a Repository
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/lugi0/minimal-nb-image-test
   Click Element  xpath://div[.="CLONE"]
-
+  Sleep  1
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  minimal-nb-image-test/minimal-nb.ipynb
   Click Element  xpath://div[.="Open"]
@@ -91,13 +89,3 @@ Can Launch Python3 Smoke Test Notebook
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Not Match  ${output}  ERROR*
   Should Be Equal As Strings  ${output}  [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]
-
-  # Clean up workspace for next run
-  # Might make sense to abstract it into a single Keyword
-  Open With JupyterLab Menu  File  Open from Path…
-  Sleep  1
-  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb
-  Click Element  xpath://div[.="Open"]
-  Wait Until Untitled.ipynb JupyterLab Tab Is Selected
-  Close Other JupyterLab Tabs
-  Add and Run JupyterLab Code Cell  !rm -rf *

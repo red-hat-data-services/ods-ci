@@ -16,6 +16,7 @@ Suite Teardown  Close Browser
 
 *** Test Cases ***
 Can Uninstall ODH Operator
+  [Tags]  TBC
   Open Installed Operators
   Uninstall ODH Operator
   ODH Operator Should Be Uninstalled

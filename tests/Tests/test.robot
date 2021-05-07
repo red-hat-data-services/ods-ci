@@ -1,6 +1,8 @@
 *** Settings ***
-Resource  ../Resources/ODS.robot
-Library         DebugLibrary
+Library          DebugLibrary
+Resource         ../Resources/ODS.robot
+Resource         ../Resources/Common.robot
+Suite Teardown   End Web Test
 
 *** Variables ***
 
@@ -46,9 +48,12 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
    Spawn Notebook
+   Wait for JupyterLab Splash Screen  timeout=30
+   Launch a new JupyterLab Document
+   Close Other JupyterLab Tabs
 
 Can Launch Python3
-   [Tags]  Sanity
+   [Tags]  Sanity  TBC
    Launch Python3 JupyterHub
 
 

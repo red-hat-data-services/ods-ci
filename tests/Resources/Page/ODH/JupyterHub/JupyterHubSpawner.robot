@@ -13,6 +13,7 @@ JupyterHub Spawner Is Visible
 Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
    [Arguments]  ${notebook_image}
+   Wait Until Element Is Visible  xpath:/html/body/div[1]/form/div/div/div[2]/div[2]/div[1]
    Click Element  xpath://input[contains(@id, "${notebook_image}")]
 
 Select Container Size

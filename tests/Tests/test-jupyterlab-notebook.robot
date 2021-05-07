@@ -1,8 +1,10 @@
 *** Settings ***
-Resource  ../Resources/ODS.robot
-Library         DebugLibrary
+Resource         ../Resources/ODS.robot
+Resource         ../Resources/Common.robot
+Library          DebugLibrary
 
-Suite Teardown  Stop JupyterLab Notebook Server
+Suite Setup      Begin Web Test
+Suite Teardown   End Web Test
 
 
 *** Variables ***
@@ -11,9 +13,8 @@ Suite Teardown  Stop JupyterLab Notebook Server
 *** Test Cases ***
 Open ODH Dashboard
   [Tags]  Sanity
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait For Condition  return document.title == "Red Hat OpenShift Data Science Dashboard"
+  Wait for ODH Dashboard to Load
 
 Can Launch Jupyterhub
   [Tags]  Sanity
@@ -31,14 +32,13 @@ Can Spawn Notebook
   ${spawner_visible} =  JupyterHub Spawner Is Visible
   Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
   Select Notebook Image  s2i-generic-data-science-notebook
-  #This env is required until JupyterLab is the default interface in RHODS
-  Add Spawner Environment Variable  JUPYTER_ENABLE_LAB  true
   Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
 
-  Wait for JupyterLab Splash Screen
+  Wait for JupyterLab Splash Screen  timeout=30
+  Maybe Select Kernel
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document

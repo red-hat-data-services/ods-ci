@@ -14,7 +14,7 @@ Logged into OpenShift
    Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
 
 Can Launch Jupyterhub
-   [Tags]  Sanity
+   [Tags]  Sanity  Smoke
    Launch Jupyterhub
 
 Can Login to Jupyterhub
@@ -24,7 +24,7 @@ Can Login to Jupyterhub
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
 
 Can Spawn Notebook
-   [Tags]  Sanity
+   [Tags]  Sanity  Smoke
    # We need to skip this testcase if the user has an existing pod
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running

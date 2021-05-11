@@ -24,7 +24,7 @@ Can Login to Jupyterhub
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
 
 Can Spawn Notebook
-   [Tags]  Sanity  Smoke
+   [Tags]  Sanity
    # We need to skip this testcase if the user has an existing pod
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running

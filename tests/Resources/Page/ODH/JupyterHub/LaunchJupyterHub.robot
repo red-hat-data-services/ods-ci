@@ -15,4 +15,5 @@ Launch Jupyterhub
    Input Text  xpath://input[@data-test-id="item-filter"]  jupyterhub
    Wait Until Page Contains  jupyterhub  timeout=15
    Click Element  partial link:https://jupyterhub
+   Sleep  10s
    Switch Window  JupyterHub

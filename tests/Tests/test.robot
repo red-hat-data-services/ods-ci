@@ -14,7 +14,7 @@ Logged into OpenShift
    Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
 
 Can Launch Jupyterhub
-   [Tags]  Sanity
+   [Tags]  Sanity  Smoke
    Launch Jupyterhub
 
 Can Login to Jupyterhub

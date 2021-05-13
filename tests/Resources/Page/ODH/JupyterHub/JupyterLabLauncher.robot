@@ -125,6 +125,7 @@ Clone Git Repository And Open
   Click Element  xpath://div[.="Open"]
 
 Clone Git Repository And Run
+  [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
   [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}  ${timeout}=300
   Clone Git Repository And Open  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
   #${FILE} =  ${{${NOTEBOOK_TO_RUN}.split("/")[-1] if ${NOTEBOOK_TO_RUN}[-1]!="/" else ${NOTEBOOK_TO_RUN}.split("/")[-2]}}

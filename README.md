@@ -1,6 +1,6 @@
 # ODS-CI
 
-ODH CI is a framework to test Red Hat Open Data Science features and functionality
+ODS-CI is a framework to test Red Hat Open Data Science features and functionality
 using QE tiered testing.
 
 # Requirements
@@ -31,7 +31,11 @@ using QE tiered testing.
     ```
     This script is a wrapper for creating the python virtual environment and running the Robot Framework CLI.  You can run any of the test cases by creating the python virual environment, install the packages in requirements.txt and running the `robot` command directly
 
+# Contributing
 
-## License
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+
+# License
 
 This project is open sourced under MIT License.

@@ -108,3 +108,7 @@ Clean Up Server
   Wait Until Untitled.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs
   Add and Run JupyterLab Code Cell  !rm -rf *
+
+JupyterLab Is Visible
+  ${spawner_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=20
+  [return]  ${spawner_visible}

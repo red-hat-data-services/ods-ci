@@ -119,7 +119,7 @@ Clone Git Repository And Open
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
   [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
   Clone Git Repository  ${REPO_URL}
-  Sleep  1
+  Sleep  10
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${NOTEBOOK_TO_RUN}
   Click Element  xpath://div[.="Open"]
@@ -133,4 +133,5 @@ Clone Git Repository And Run
   Close Other JupyterLab Tabs
   Open With JupyterLab Menu  Run  Run All Cells
   Wait Until JupyterLab Code Cell Is Not Active  timeout=${timeout}
+  Sleep  1
   JupyterLab Code Cell Error Output Should Not Be Visible

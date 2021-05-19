@@ -7,7 +7,16 @@ Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
 
 *** Variables ***
-@{IMAGES}  s2i-generic-data-science-notebook  s2i-minimal-notebook
+#{xyz-n}  image  repo_URL  notebook_path
+@{generic-1}  s2i-generic-data-science-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
+@{generic-2}  s2i-generic-data-science-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
+@{generic-3}  s2i-generic-data-science-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
+@{minimal-1}  s2i-minimal-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
+@{minimal-2}  s2i-minimal-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
+@{minimal-3}  s2i-minimal-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
+
+@{WORKLOADS}  ${generic-1}  ${generic-2}  ${generic-3}
+...           ${minimal-1}  ${minimal-2}  ${minimal-3}
 
 
 *** Test Cases ***
@@ -19,8 +28,8 @@ Open ODH Dashboard
 Iterative Testing
   [Template]  Iterative Image Test
   [Tags]  Sanity
-  FOR  ${image}  IN  @{IMAGES}
-    ${image}  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
+  FOR  ${sublist}  IN  @{WORKLOADS}
+    ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
   END
 
 *** Keywords ***
@@ -45,7 +54,8 @@ Iterative Image Test
     #Run Cell And Check Output  !python --version  Python 3.8.7
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
-    Clone Git Repository And Run  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
+    #This ensures all workloads are run even if one (or more) fails
+    Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
     Clean Up Server
     Click JupyterLab Menu  File
     Capture Page Screenshot

@@ -17,6 +17,7 @@ setup(
         "reportportal-client",
         "robotframework>=4",
         "robotframework-debuglibrary",
+        "robotframework-lsp",
         "robotframework-seleniumlibrary",
         "robotframework-jupyterlibrary>=0.3.1",
         "ipython",

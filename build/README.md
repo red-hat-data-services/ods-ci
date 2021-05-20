@@ -6,7 +6,7 @@ The latest build can be downloaded from: https://quay.io/odsci/ods-ci:latest
 eg: podman pull quay.io/odsci/ods-ci:latest
 
 ```bash
-# Build the container (optional if you dont want to use the latest from quay.io/ods)
+# Build the container (optional if you dont want to use the latest from quay.io/odsci)
 $ podman build -t ods-ci:master -f build/Dockerfile .
 
 # Mount a file volume to provide a test-variables.yml file at runtime

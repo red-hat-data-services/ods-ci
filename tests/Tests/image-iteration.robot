@@ -15,9 +15,7 @@ Suite Teardown   End Web Test
 @{minimal-2}  s2i-minimal-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
 @{minimal-3}  s2i-minimal-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
 
-@{WORKLOADS}  ${generic-1}  ${generic-2}  ${generic-3}
-...           ${minimal-1}  ${minimal-2}  ${minimal-3}
-
+${python_dict}  {'classifiers':[${generic-1}, ${minimal-1}], 'clustering':[${generic-2}, ${generic-3}, ${minimal-2}, ${minimal-3}]}
 
 *** Test Cases ***
 Open ODH Dashboard
@@ -25,11 +23,18 @@ Open ODH Dashboard
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for ODH Dashboard to Load
 
-Iterative Testing
-  [Template]  Iterative Image Test
-  [Tags]  Sanity
-  FOR  ${sublist}  IN  @{WORKLOADS}
-    ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
+Iterative Testing Classifiers
+  [Tags]  Sanity  POLARION-ID-Classifiers
+  &{DICTIONARY} =  Evaluate  ${python_dict}
+  FOR  ${sublist}  IN  @{DICTIONARY}[classifiers]
+    Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
+  END
+
+Iterative Testing Clustering
+  [Tags]  Sanity  POLARION-ID-Clustering
+  &{DICTIONARY} =  Evaluate  ${python_dict}
+  FOR  ${sublist}  IN  @{DICTIONARY}[clustering]
+    Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
   END
 
 *** Keywords ***

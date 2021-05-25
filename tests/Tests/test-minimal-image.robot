@@ -1,6 +1,7 @@
 *** Settings ***
 Resource         ../Resources/ODS.robot
 Resource         ../Resources/Common.robot
+Resource         ../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Begin Web Test
@@ -12,7 +13,6 @@ Suite Teardown   End Web Test
 *** Test Cases ***
 Open ODH Dashboard
   [Tags]  Sanity
-  Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for ODH Dashboard to Load
 
 Can Launch Jupyterhub
@@ -27,9 +27,7 @@ Can Login to Jupyterhub
 
 Can Spawn Notebook
   [Tags]  Sanity
-  # We need to skip this testcase if the user has an existing pod
-  ${spawner_visible} =  JupyterHub Spawner Is Visible
-  Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
+  Fix Spawner Status
   Select Notebook Image  s2i-minimal-notebook
   Spawn Notebook
 

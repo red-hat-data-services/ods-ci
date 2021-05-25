@@ -2,6 +2,7 @@
 Library          DebugLibrary
 Resource         ../Resources/ODS.robot
 Resource         ../Resources/Common.robot
+Resource         ../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Suite Teardown   End Web Test
 
 *** Variables ***
@@ -25,9 +26,7 @@ Can Login to Jupyterhub
 
 Can Spawn Notebook
    [Tags]  Sanity
-   # We need to skip this testcase if the user has an existing pod
-   ${spawner_visible} =  JupyterHub Spawner Is Visible
-   Skip If  ${spawner_visible}!=True  The user has an existing notebook pod running
+   Fix Spawner Status
    Select Notebook Image  s2i-generic-data-science-notebook
    Select Notebook Image  s2i-minimal-notebook
    Select Container Size  Small

@@ -1,4 +1,5 @@
 *** Settings ***
+Resource  JupyterLabLauncher.robot
 Library  JupyterLibrary
 Library  String
 
@@ -72,3 +73,56 @@ Get Spawner Event Log
    [Documentation]  Get the spawner event log messages as a list
    ${event_elements} =  Get WebElements  class:progress-log-event
    [Return] @{event_elements}
+
+Server Not Running Is Visible
+   ${SNR_visible} =  Run Keyword and Return Status  Page Should Contain  Server not running
+   [return]  ${SNR_visible}
+
+Handle Server Not Running
+   Click Element  xpath://a[@id='start']
+
+Start My Server Is Visible
+   ${SMS_visible} =  Run Keyword and Return Status  Page Should Contain  Start My Server
+   [return]  ${SMS_visible}
+
+Handle Start My Server
+   Click Element  xpath://a[@id='start']
+
+Server Is Stopping Is Visible
+   ${SIS_visible} =  Run Keyword and Return Status  Page Should Contain  Your server is stopping.
+   [return]  ${SIS_visible}
+
+Handle Server Is Stopping
+   Sleep  10
+   Handle Server Not Running
+
+Fix Spawner Status
+   [Documentation]  This keyword handles spawner states that would prevent
+   ...              test cases from passing. If a server is already running
+   ...              or if we are redirected to an alternative spawner page,
+   ...              this keyword will bring us back to the actual spawner.
+   ${spawner_visible} =  JupyterHub Spawner Is Visible
+   IF  ${spawner_visible}!=True
+      ${JL_visible} =  JupyterLab Is Visible
+      ${SNR_visible} =  Server Not Running Is Visible
+      ${SMS_visible} =  Start My Server Is Visible
+      ${SIS_visible} =  Server Is Stopping Is Visible
+      IF  ${SIS_visible}==True
+         Handle Server Is Stopping
+      ELSE IF  ${SNR_visible}==True
+         Handle Server Not Running
+      ELSE IF  ${SMS_visible}==True
+         Handle Start My Server
+      ELSE
+         ${JL_visible} =  JupyterLab Is Visible 
+         IF  ${JL_visible}==True
+            Click JupyterLab Menu  File
+            Capture Page Screenshot
+            Click JupyterLab Menu Item  Hub Control Panel
+            Switch Window  JupyterHub
+            Sleep  5
+            Click Element  //*[@id="stop"]
+            Wait Until Page Contains  Start My Server  timeout=15
+         END
+      END
+   END

@@ -4,6 +4,5 @@ test-variables.yml
 venv/
 ods_ci.egg-info/
 test-output/
-build/
 dist/
 drivers/**/chromedriver

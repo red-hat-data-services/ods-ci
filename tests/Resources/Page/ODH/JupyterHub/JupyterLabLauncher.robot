@@ -108,7 +108,34 @@ Clean Up Server
   Wait Until Untitled.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs
   Add and Run JupyterLab Code Cell  !rm -rf *
-
+  
 JupyterLab Is Visible
   ${spawner_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=20
   [return]  ${spawner_visible}
+
+Clone Git Repository
+  [Arguments]  ${REPO_URL}
+  Open With JupyterLab Menu  Git  Clone a Repository
+  Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  ${REPO_URL}
+  Click Element  xpath://div[.="CLONE"]
+
+Clone Git Repository And Open
+  [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
+  [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
+  Clone Git Repository  ${REPO_URL}
+  Sleep  10
+  Open With JupyterLab Menu  File  Open from Path…
+  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${NOTEBOOK_TO_RUN}
+  Click Element  xpath://div[.="Open"]
+
+Clone Git Repository And Run
+  [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
+  [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}  ${timeout}=300
+  Clone Git Repository And Open  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
+  #${FILE} =  ${{${NOTEBOOK_TO_RUN}.split("/")[-1] if ${NOTEBOOK_TO_RUN}[-1]!="/" else ${NOTEBOOK_TO_RUN}.split("/")[-2]}}
+  Wait Until ${{"${NOTEBOOK_TO_RUN}".split("/")[-1] if "${NOTEBOOK_TO_RUN}"[-1]!="/" else "${NOTEBOOK_TO_RUN}".split("/")[-2]}} JupyterLab Tab Is Selected
+  Close Other JupyterLab Tabs
+  Open With JupyterLab Menu  Run  Run All Cells
+  Wait Until JupyterLab Code Cell Is Not Active  timeout=${timeout}
+  Sleep  1
+  JupyterLab Code Cell Error Output Should Not Be Visible

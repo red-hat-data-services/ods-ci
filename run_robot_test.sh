@@ -5,6 +5,7 @@ TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
 TEST_ARTIFACT_DIR="test-output"
 EXTRA_ROBOT_ARGS=""
+SKIP_PIP_INSTALL=0
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -41,6 +42,12 @@ while [ "$#" -gt 0 ]; do
       shift
       EXTRA_ROBOT_ARGS=$1
       shift
+      ;;
+
+    # Skip the pip install during the execution of this script
+    --skip-pip-install)
+      shift
+      SKIP_PIP_INSTALL=1
       ;;
 
     *)
@@ -83,7 +90,10 @@ VENV_ROOT=${currentpath}/venv
 #setup virtualenv
 python3 -m venv ${VENV_ROOT}
 source ${VENV_ROOT}/bin/activate
-${VENV_ROOT}/bin/pip install -r requirements.txt
+
+if [[ ${SKIP_PIP_INSTALL} -eq 0 ]]; then
+  ${VENV_ROOT}/bin/pip install -r requirements.txt
+fi
 
 #Create a unique directory to store the output for current test run
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then

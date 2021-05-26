@@ -9,10 +9,11 @@ Authorize odh-dashboard service account
 
 Login To ODH Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-   Wait Until Page Contains  Log in with
+   #Wait Until Page Contains  Log in with
    ${oauth_prompt_visible} =  Is OpenShift OAuth Login Prompt Visible
    Run Keyword If  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
-   Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
+   ${login-required} =  Is OpenShift Login Visible
+   Run Keyword If  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ${authorize_service_account} =  Is odh-dashboard Service Account Authorization Required
    Run Keyword If  ${authorize_service_account}  Authorize odh-dashboard service account
 

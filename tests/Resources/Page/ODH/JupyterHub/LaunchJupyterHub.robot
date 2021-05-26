@@ -2,7 +2,9 @@
 Library  JupyterLibrary
 
 *** Keywords ***
-Launch Jupyterhub
+Launch Jupyterhub via Routes
+   [Documentation]  This keyword only works with kubeadmin or accounts that are
+   ...              cluster admins. Use Launch via App for other accounts.
    Wait Until Page Contains  Networking  timeout=60
    Click Button  Networking
    Wait Until Page Contains  Routes  timeout=15
@@ -17,3 +19,9 @@ Launch Jupyterhub
    Click Element  partial link:https://jupyterhub
    Sleep  10s
    Switch Window  JupyterHub
+
+Launch Jupyterhub via App
+   Click Element  xpath://header[@id='page-main-header']/div[2]/div[1]/div[1]/nav/button
+   Sleep  1
+   Click Element  xpath://a[contains(@href, 'https://odh-dashboard')]
+   Switch Window  NEW

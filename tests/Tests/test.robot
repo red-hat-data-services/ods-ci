@@ -27,6 +27,7 @@ Can Login to Jupyterhub
    Login To Jupyterhub  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
 
 Can Spawn Notebook
    [Tags]  Sanity

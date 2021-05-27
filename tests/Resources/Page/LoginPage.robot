@@ -1,5 +1,6 @@
 *** Settings ***
-Library  JupyterLibrary
+Resource  OCPDashboard/Menu.robot
+Library   JupyterLibrary
 
 *** Keywords ***
 Is ${service_account_name} Service Account Authorization Required
@@ -39,3 +40,5 @@ Login To Openshift
     Input Text  id=inputUsername  ${ocp_user_name}
     Input Text  id=inputPassword  ${ocp_user_pw}
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
+    Sleep  10
+    Maybe Skip Tour

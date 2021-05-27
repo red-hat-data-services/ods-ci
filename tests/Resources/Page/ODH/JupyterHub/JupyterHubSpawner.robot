@@ -103,7 +103,6 @@ Fix Spawner Status
    ...              this keyword will bring us back to the actual spawner.
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    IF  ${spawner_visible}!=True
-      ${JL_visible} =  JupyterLab Is Visible
       ${SNR_visible} =  Server Not Running Is Visible
       ${SMS_visible} =  Start My Server Is Visible
       ${SIS_visible} =  Server Is Stopping Is Visible

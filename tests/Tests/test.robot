@@ -3,6 +3,7 @@ Library          DebugLibrary
 Resource         ../Resources/ODS.robot
 Resource         ../Resources/Common.robot
 Resource         ../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Suite Teardown   End Web Test
 
 *** Variables ***
@@ -16,7 +17,10 @@ Logged into OpenShift
 
 Can Launch Jupyterhub
    [Tags]  Sanity  Smoke
-   Launch Jupyterhub
+   #This keyword will work with accounts that are not cluster admins.
+   Launch Jupyterhub via App
+   Login To ODH Dashboard  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
+   Launch JupyterHub From ODH Dashboard Dropdown
 
 Can Login to Jupyterhub
    [Tags]  Sanity  Smoke

@@ -1,5 +1,5 @@
 *** Settings *** 
-Library  SeleniumLibrary
+Library  JupyterLibrary
 Library  String
 
 *** Keywords ***
@@ -28,3 +28,7 @@ Is Menu Expanded
    ...   ${menu}
    ${is_menu_expanded} =    Get Element Attribute   //button[text()="${menu}"]   attribute=aria-expanded
    [Return]    ${is_menu_expanded}
+
+Maybe Skip Tour 
+   ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id='guided-tour-modal']
+   Run Keyword If  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button

@@ -11,7 +11,7 @@ $ podman build -t ods-ci:master -f build/Dockerfile .
 
 # Mount a file volume to provide a test-variables.yml file at runtime
 # Mount a volume to preserve the test run artifacts
-$ podman run --rm -v $PWD/test-variables.yml:/root/ods-ci/test-variables.yml:Z -v $PWD/test-output:/root/ods-ci/test-output:Z ods-ci:master
+$ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z -v $PWD/test-output:/tmp/ods-ci/test-output:Z ods-ci:master
 ```
 
 ### Running the ods-ci container image in OpenShift

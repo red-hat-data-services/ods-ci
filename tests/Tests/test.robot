@@ -10,16 +10,16 @@ Suite Teardown   End Web Test
 
 *** Test Cases ***
 Logged into OpenShift
-   [Tags]  Sanity  Smoke
+   [Tags]  Sanity  Smoke  ODS-127
    Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
    Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
 
 Can Launch Jupyterhub
-   [Tags]  Sanity  Smoke
+   [Tags]  Sanity  Smoke  ODS-129
    Launch Jupyterhub
 
 Can Login to Jupyterhub
-   [Tags]  Sanity  Smoke
+   [Tags]  Sanity  Smoke  ODS-128
    Login To Jupyterhub  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

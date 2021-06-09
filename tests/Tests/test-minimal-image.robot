@@ -58,7 +58,7 @@ Can Launch Python3 Smoke Test Notebook
   Run Cell And Check Output  print("Hello World!")  Hello World!
 
   #Needs to change for RHODS release
-  Run Cell And Check Output  !python --version  Python 3.8.3
+  Run Cell And Check Output  !python --version  Python 3.8.6
   #Run Cell And Check Output  !python --version  Python 3.8.7
 
   Capture Page Screenshot

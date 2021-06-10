@@ -27,14 +27,14 @@ Iterative Testing Classifiers
   [Tags]  Sanity  POLARION-ID-Classifiers
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[classifiers]
-    Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
+    Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
   END
 
 Iterative Testing Clustering
   [Tags]  Sanity  POLARION-ID-Clustering
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[clustering]
-    Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
+    Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
   END
 
 *** Keywords ***
@@ -56,7 +56,7 @@ Iterative Image Test
     Sleep  5
     Run Cell And Check Output  print("Hello World!")  Hello World!
     #Needs to change for RHODS release
-    Run Cell And Check Output  !python --version  Python 3.8.3
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.6
     #Run Cell And Check Output  !python --version  Python 3.8.7
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible

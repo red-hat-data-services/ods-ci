@@ -27,13 +27,13 @@ Can Login to Jupyterhub
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
 
 Can Spawn Notebook
-  [Tags]  Sanity
+  [Tags]  Sanity  ODS-131  ODS-133
   Fix Spawner Status
   Select Notebook Image  s2i-minimal-notebook
   Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Sanity
+  [Tags]  Sanity  ODS-135  ODS-137
 
 
   Wait for JupyterLab Splash Screen  timeout=30

@@ -28,8 +28,7 @@ Can Login to Jupyterhub
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
 
 Can Spawn Notebook
-  [Tags]  Sanity
-  # We need to skip this testcase if the user has an existing pod
+  [Tags]  Sanity  ODS-130  ODS-132
   Fix Spawner Status
   Select Notebook Image  s2i-generic-data-science-notebook
   Spawn Notebook

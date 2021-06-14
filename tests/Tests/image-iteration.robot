@@ -24,14 +24,14 @@ Open ODH Dashboard
   Wait for ODH Dashboard to Load
 
 Iterative Testing Classifiers
-  [Tags]  Sanity  POLARION-ID-Classifiers
+  [Tags]  Sanity  ODS-131  ODS-130  ODS-133  ODS-132  ODS-135  ODS-134  ODS-137  ODS-139
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[classifiers]
     Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
   END
 
 Iterative Testing Clustering
-  [Tags]  Sanity  POLARION-ID-Clustering
+  [Tags]  Sanity  ODS-131  ODS-130  ODS-133  ODS-132  ODS-135  ODS-134  ODS-137  ODS-139
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[clustering]
     Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]

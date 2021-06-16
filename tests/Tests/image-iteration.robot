@@ -1,6 +1,7 @@
 *** Settings ***
 Resource         ../Resources/ODS.robot
 Resource         ../Resources/Common.robot
+Resource         ../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Begin Web Test
@@ -40,6 +41,7 @@ Iterative Testing Clustering
 *** Keywords ***
 Iterative Image Test
     [Arguments]  ${image}  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
+    Fix Spawner Status
     Launch JupyterHub From ODH Dashboard Dropdown
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required

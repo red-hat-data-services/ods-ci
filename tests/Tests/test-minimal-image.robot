@@ -33,7 +33,7 @@ Can Spawn Notebook
   Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Sanity  ODS-135  ODS-137
+  [Tags]  Sanity  ODS-135  ODS-137  ODS-142  ODS-143  ODS-144  ODS-145  ODS-146  ODS-147  ODS-148
 
 
   Wait for JupyterLab Splash Screen  timeout=30

@@ -1,4 +1,5 @@
 *** Settings ***
+Force Tags       Smoke
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot

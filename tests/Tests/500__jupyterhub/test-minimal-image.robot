@@ -1,5 +1,5 @@
 *** Settings ***
-Force Tags       Smoke
+Force Tags       Smoke  Sanity
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -13,28 +13,23 @@ Suite Teardown   End Web Test
 
 *** Test Cases ***
 Open ODH Dashboard
-  [Tags]  Sanity
   Wait for ODH Dashboard to Load
 
 Can Launch Jupyterhub
-  [Tags]  Sanity
   Launch JupyterHub From ODH Dashboard Dropdown
 
 Can Login to Jupyterhub
-  [Tags]  Sanity
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
 
 Can Spawn Notebook
-  [Tags]  Sanity
   Fix Spawner Status
   Select Notebook Image  s2i-minimal-notebook
   Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Sanity
 
 
   Wait for JupyterLab Splash Screen  timeout=30

@@ -13,3 +13,6 @@ OCP_ADMIN_USER:
   AUTH_TYPE: "kube:admin"
   USERNAME: kubeadmin
   PASSWORD: abc123XYZ!
+S3:
+  AWS_ACCESS_KEY_ID: ID-value
+  AWS_SECRET_ACCESS_KEY: Secret-Key

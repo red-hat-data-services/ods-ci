@@ -48,7 +48,9 @@ Remove Spawner Environment Variable
 Spawner Environment Variable Exists
    [Documentation]  Removes an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
-   Element Should Be Visible  name:${env_var}
+   #Element Should Be Visible  name:${env_var}
+   ${var_visible} =  Run Keyword and Return Status  Element Should Be Visible  name:${env_var}
+   [return]  ${var_visible}
 
 Get Spawner Environment Variable Value
    [Documentation]  Get the value of an existing environment variable based on the ${env_var} argument

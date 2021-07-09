@@ -48,7 +48,8 @@ Remove Spawner Environment Variable
 Spawner Environment Variable Exists
    [Documentation]  Removes an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
-   Element Should Be Visible  name:${env_var}
+   ${var_visible} =  Run Keyword and Return Status  Element Should Be Visible  id:${env_var}
+   [return]  ${var_visible}
 
 Get Spawner Environment Variable Value
    [Documentation]  Get the value of an existing environment variable based on the ${env_var} argument
@@ -115,6 +116,10 @@ Fix Spawner Status
       ELSE
          ${JL_visible} =  JupyterLab Is Visible 
          IF  ${JL_visible}==True
+            Click Element  xpath://span[@title="/opt/app-root/src"]
+            Launch a new JupyterLab Document
+            Close Other JupyterLab Tabs
+            Add and Run JupyterLab Code Cell  !rm -rf *
             Click JupyterLab Menu  File
             Capture Page Screenshot
             Click JupyterLab Menu Item  Hub Control Panel

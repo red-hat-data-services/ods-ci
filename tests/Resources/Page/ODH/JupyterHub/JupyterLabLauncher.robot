@@ -99,12 +99,12 @@ Run Cell And Check Output
   
 Maybe Select Kernel  
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
-  Run Keyword If  not ${is_kernel_selected}  Click Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
+  Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
-  Open With JupyterLab Menu  File  Open from Path…
-  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb
-  Click Element  xpath://div[.="Open"]
+  Open With JupyterLab Menu  File  New  Notebook
+  Sleep  2
+  Maybe Select Kernel
   Wait Until Untitled.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs
   Add and Run JupyterLab Code Cell  !rm -rf *

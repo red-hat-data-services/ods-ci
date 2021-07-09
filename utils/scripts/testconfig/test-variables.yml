@@ -1,0 +1,17 @@
+BROWSER:
+  NAME: BROWSER_NAME
+  # List of Chrome options - https://peter.sh/experiments/chromium-command-line-switches/
+  OPTIONS: add_argument("--ignore-certificate-errors");add_argument("window-size=1920,1024");add_argument('--headless');add_argument('--no-sandbox');add_argument('--disable-gpu')
+S3:
+  AWS_ACCESS_KEY_ID: S3_AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY: S3_AWS_SECRET_ACCESS_KEY
+OCP_CONSOLE_URL: OPENSHIFT_CONSOLE_URL
+ODH_DASHBOARD_URL: RHODS_DASHBOARD_URL
+TEST_USER:
+  AUTH_TYPE: TEST_USER_AUTH_TYPE
+  USERNAME: TEST_USER_USERNAME
+  PASSWORD: TEST_USER_PASSWORD
+OCP_ADMIN_USER:
+  AUTH_TYPE: OCP_ADMIN_USER_AUTH_TYPE
+  USERNAME: OCP_ADMIN_USER_USERNAME
+  PASSWORD: OCP_ADMIN_USER_PASSWORD

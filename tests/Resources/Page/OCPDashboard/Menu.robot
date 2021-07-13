@@ -4,7 +4,7 @@ Library  String
 
 *** Variables ***
 ${PERSPECTIVE_SWITCHER_BUTTON_ELEMENT}  xpath=//*[@data-test-id="perspective-switcher-toggle"]
-${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  xpath=/html/body/div[2]/div[1]/div/div/div/div/div/div/nav/div/div/button/span[1]/h2
+${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  xpath=//*[@data-test-id="perspective-switcher-toggle"]/span/h2/span
 ${PERSPECTIVE_ADMINISTRATOR_BUTTON}  xpath=//*[@id="page-sidebar"]/div/nav/div/div/ul/li[1]/button
 ${PERSPECTIVE_DEVELOPER_BUTTON}      xpath=//*[@id="page-sidebar"]/div/nav/div/div/ul/li[2]/button
 

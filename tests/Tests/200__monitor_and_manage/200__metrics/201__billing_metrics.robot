@@ -15,12 +15,12 @@ ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:se
 
 *** Test Cases ***
 Verify OpenShift Monitoring results are correct when running undefined queries
-  [Tags]  Sanity  ODS-173  RunThisTest
+  [Tags]  Sanity  ODS-173
   Run OpenShift Metrics Query  ${METRIC_RHODS_UNDEFINED}
   Metrics.Verify Query Results Dont Contain Data
 
 Test Billing Metric (notebook cpu usage) on OpenShift Monitoring
-  [Tags]  Sanity  ODS-175  RunThisTest
+  [Tags]  Sanity  ODS-175
   #Skip Test If Previous CPU Usage Is Not Zero
   Run Jupyter Notebook For 5 Minutes
   Verify Previus CPU Usage Is Greater Than Zero
@@ -54,10 +54,9 @@ Run OpenShift Metrics Query
   [Return]  ${result}
 
 Verify Previus CPU Usage Is Greater Than Zero
-  Log    Verify Previus CPU Usage Is Greater Than Zero
   ${metrics_value} =   Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}
   Metrics.Verify Query Results Contain Data
-  Log To Console    Current CPU usage: ${metrics_value}
+  Capture Page Screenshot
   Should Be True  ${metrics_value} > 0
 
 ## TODO: Add this keyword with the other JupyterHub stuff

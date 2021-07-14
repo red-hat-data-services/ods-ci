@@ -18,6 +18,7 @@ Launch JupyterLab
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
   Select Notebook Image  s2i-generic-data-science-notebook
+  Select Container Size  Small
   Sleep  1
   ${ID} =  Spawner Environment Variable Exists  AWS_ACCESS_KEY_ID
   ${PW} =  Spawner Environment Variable Exists  AWS_SECRET_ACCESS_KEY
@@ -43,6 +44,8 @@ Long Running Test Case
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering-S3.ipynb
+  Run Repo and Clean  https://github.com/red-hat-data-services/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
+  Run Repo and Clean  https://github.com/red-hat-data-services/notebook-benchmarks  notebook-benchmarks/tensorflow/TensorFlow-MNIST-Minimal.ipynb 
 
 *** Keywords ***
 
@@ -51,20 +54,6 @@ Run Repo and Clean
   Click Element  xpath://span[@title="/opt/app-root/src"]
   Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NB_NAME}
   Sleep  10
-  Capture Page Screenshot
-
-  #This section has to be slightly reworked still. Sometimes the pop-up is not in div[8] but in div[7]
-
-  ${kernel_or_server_restarting} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath:/html/body/div[8]/div/div[2]
-  IF  ${kernel_or_server_restarting} == False
-    ${is_server_down} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath:/html/body/div[8]/div/div[2]/button[2]
-    IF  ${is_server_down} == False
-        Click Button  xpath:/html/body/div[8]/div/div[2]/button[2]
-    ELSE
-        Click Button  xpath:/html/body/div[8]/div/div[2]/button
-    END
-  END
-
   Click Element  xpath://span[@title="/opt/app-root/src"]
   Open With JupyterLab Menu  File  Close All Tabs
   Maybe Accept a JupyterLab Prompt

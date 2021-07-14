@@ -130,7 +130,7 @@ Clone Git Repository And Open
 
 Clone Git Repository And Run
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
-  [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}  ${timeout}=300
+  [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}  ${timeout}=1200
   Clone Git Repository And Open  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
   #${FILE} =  ${{${NOTEBOOK_TO_RUN}.split("/")[-1] if ${NOTEBOOK_TO_RUN}[-1]!="/" else ${NOTEBOOK_TO_RUN}.split("/")[-2]}}
   Wait Until ${{"${NOTEBOOK_TO_RUN}".split("/")[-1] if "${NOTEBOOK_TO_RUN}"[-1]!="/" else "${NOTEBOOK_TO_RUN}".split("/")[-2]}} JupyterLab Tab Is Selected
@@ -139,3 +139,16 @@ Clone Git Repository And Run
   Wait Until JupyterLab Code Cell Is Not Active  timeout=${timeout}
   Sleep  1
   JupyterLab Code Cell Error Output Should Not Be Visible
+
+Handle Kernel Restarts
+  #This section has to be slightly reworked still. Sometimes the pop-up is not in div[8] but in div[7]
+
+  ${kernel_or_server_restarting} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath:/html/body/div[8]/div/div[2]
+  IF  ${kernel_or_server_restarting} == False
+    ${is_server_down} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath:/html/body/div[8]/div/div[2]/button[2]
+    IF  ${is_server_down} == False
+        Click Button  xpath:/html/body/div[8]/div/div[2]/button[2]
+    ELSE
+        Click Button  xpath:/html/body/div[8]/div/div[2]/button
+    END
+  END

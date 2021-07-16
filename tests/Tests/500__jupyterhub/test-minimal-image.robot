@@ -26,8 +26,7 @@ Can Login to Jupyterhub
 
 Can Spawn Notebook
   Fix Spawner Status
-  Select Notebook Image  s2i-minimal-notebook
-  Spawn Notebook
+  Spawn Notebook With Arguments  image=s2i-minimal-notebook
 
 Can Launch Python3 Smoke Test Notebook
 

@@ -29,10 +29,8 @@ Can Login to Jupyterhub
 
 Can Spawn Notebook
   [Tags]  Sanity
-  # We need to skip this testcase if the user has an existing pod
   Fix Spawner Status
-  Select Notebook Image  s2i-generic-data-science-notebook
-  Spawn Notebook
+  Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity

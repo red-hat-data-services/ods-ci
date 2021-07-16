@@ -48,14 +48,13 @@ Remove Spawner Environment Variable
 Spawner Environment Variable Exists
    [Documentation]  Removes an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
-   #Element Should Be Visible  name:${env_var}
-   ${var_visible} =  Run Keyword and Return Status  Element Should Be Visible  name:${env_var}
+   ${var_visible} =  Run Keyword and Return Status  Element Should Be Visible  id:${env_var}
    [return]  ${var_visible}
 
 Get Spawner Environment Variable Value
    [Documentation]  Get the value of an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
-   ${env_var_value} =  Get Value  name:${env_var}
+   ${env_var_value} =  Get Value  id:${env_var}
    [Return]  ${env_var_value}
 
 Spawn Notebook
@@ -65,6 +64,35 @@ Spawn Notebook
    Wait Until Page Contains  Your server is starting up
    Wait Until Element is Visible  id:progress-bar
    Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
+
+Has Spawn Failed
+   ${spawn_status} =  Run Keyword and Return Status  Page Should Contain Element  xpath://p[starts-with(., "Spawn failed")]
+   [Return]  ${spawn_status}
+
+Spawn Notebook With Arguments
+   [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
+   ...              It will try again ${retries} times (Default: 1). Environment variables can be passed in as kwargs
+   ...              By creating a dictionary beforehand, e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
+   [Arguments]  ${retries}=1  ${image}=s2i-generic-data-science-notebook  ${size}=Small  ${spawner_timeout}=600 seconds  &{envs}
+   FOR  ${index}  IN RANGE  0  1+${retries}
+      Select Notebook Image  ${image}
+      Select Container Size  ${size}
+      FOR  ${key}  ${value}  IN  &{envs}
+         Sleep  1
+         ${env-check} =  Spawner Environment Variable Exists  ${key}
+         IF  ${env-check}==True
+            Remove Spawner Environment Variable  ${key}
+         END
+         Add Spawner Environment Variable  ${key}  ${value}
+      END
+      Click Button  Start server
+      Wait Until Page Contains  Your server is starting up
+      Wait Until Element is Visible  id:progress-bar
+      Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
+      ${spawn_fail} =  Has Spawn Failed
+      Exit For Loop If  ${spawn_fail} == False
+      Click Element  xpath://span[@id='jupyterhub-logo']
+   END
 
 Get Spawner Progress Message
    [Documentation]  Get the progress message currently displayed

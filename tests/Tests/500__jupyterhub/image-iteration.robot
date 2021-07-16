@@ -45,8 +45,7 @@ Iterative Image Test
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
     Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-    Select Notebook Image  ${image}
-    Spawn Notebook
+    Spawn Notebook With Arguments  image=${image}
     Wait for JupyterLab Splash Screen  timeout=30
     Maybe Select Kernel
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected

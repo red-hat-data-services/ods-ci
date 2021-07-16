@@ -44,8 +44,8 @@ Long Running Test Case
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering-S3.ipynb
-  Run Repo and Clean  https://github.com/red-hat-data-services/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
-  Run Repo and Clean  https://github.com/red-hat-data-services/notebook-benchmarks  notebook-benchmarks/tensorflow/TensorFlow-MNIST-Minimal.ipynb 
+  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
+  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/TensorFlow-MNIST-Minimal.ipynb 
 
 *** Keywords ***
 

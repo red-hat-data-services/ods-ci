@@ -30,6 +30,7 @@ Can Spawn Notebook
   [Tags]  Sanity
   Fix Spawner Status
   Select Notebook Image  s2i-generic-data-science-notebook
+  Sleep  5
   ${ID} =  Spawner Environment Variable Exists  AWS_ACCESS_KEY_ID
   ${PW} =  Spawner Environment Variable Exists  AWS_SECRET_ACCESS_KEY
   

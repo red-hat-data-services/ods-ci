@@ -102,8 +102,15 @@ Maybe Select Kernel
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
+  Click Element  xpath://span[@title="/opt/app-root/src"]
   Open With JupyterLab Menu  File  New  Notebook
-  Sleep  2
+  Sleep  5
+  Maybe Select Kernel
+  Close Other JupyterLab Tabs
+  Open With JupyterLab Menu  File  Open from Path…
+  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb
+  Click Element  xpath://div[.="Open"]
+  Sleep  5
   Maybe Select Kernel
   Wait Until Untitled.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs

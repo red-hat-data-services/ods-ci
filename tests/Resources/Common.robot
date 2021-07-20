@@ -20,7 +20,7 @@ Begin Web Test
 
 End Web Test
     ${server} =  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
-    IF  ${server}
+    IF  ${server}==True
         Clean Up Server
         Click JupyterLab Menu  File
         Capture Page Screenshot

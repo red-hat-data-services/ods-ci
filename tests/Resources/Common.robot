@@ -16,11 +16,12 @@ Begin Web Test
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
+    Sleep  10
     Go To  ${ODH_DASHBOARD_URL}
 
 End Web Test
     ${server} =  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
-    IF  ${server}
+    IF  ${server}==True
         Clean Up Server
         Click JupyterLab Menu  File
         Capture Page Screenshot

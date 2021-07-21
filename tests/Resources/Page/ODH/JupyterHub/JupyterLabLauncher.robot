@@ -122,6 +122,8 @@ JupyterLab Is Visible
 
 Clone Git Repository
   [Arguments]  ${REPO_URL}
+  # Make sure we are in the root of the server
+  Click Element  xpath://span[@title="/opt/app-root/src"] 
   Open With JupyterLab Menu  Git  Clone a Repository
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  ${REPO_URL}
   Click Element  xpath://div[.="CLONE"]

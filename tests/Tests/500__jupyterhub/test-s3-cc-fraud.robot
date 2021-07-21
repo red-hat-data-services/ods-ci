@@ -29,22 +29,8 @@ Can Login to Jupyterhub
 Can Spawn Notebook
   [Tags]  Sanity
   Fix Spawner Status
-  Select Notebook Image  s2i-generic-data-science-notebook
-  Sleep  5
-  ${ID} =  Spawner Environment Variable Exists  AWS_ACCESS_KEY_ID
-  ${PW} =  Spawner Environment Variable Exists  AWS_SECRET_ACCESS_KEY
-  
-  IF  ${ID}
-    Remove Spawner Environment Variable  AWS_ACCESS_KEY_ID
-  END
-  Add Spawner Environment Variable  AWS_ACCESS_KEY_ID  ${S3.AWS_ACCESS_KEY_ID}
-
-  IF  ${PW}
-    Remove Spawner Environment Variable  AWS_SECRET_ACCESS_KEY
-  END
-  Add Spawner Environment Variable  AWS_SECRET_ACCESS_KEY  ${S3.AWS_SECRET_ACCESS_KEY}
-
-  Spawn Notebook
+  &{S3-credentials}  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
+  Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{S3-credentials}
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity

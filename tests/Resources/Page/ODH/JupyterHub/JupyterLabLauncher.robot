@@ -188,13 +188,6 @@ Run Repo and Clean
   Add and Run JupyterLab Code Cell  !rm -rf *
   Wait Until JupyterLab Code Cell Is Not Active
 
-Maybe Accept a JupyterLab Prompt
-    [Documentation]    Click the accept button in a JupyterLab dialog (if one is open).
-    #${accept} =    Get WebElements    css:.jp-mod-accept
-    #Run Keyword If    ${accept}    Click Element    ${accept[-1]}
-    ${dialog} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-content ')]
-    Run Keyword If  not ${dialog}  Click Button  xpath=//div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-content ')]/div[2]/button[3]
-
 Maybe Save Changes
     [Documentation]    Click the save button in a JupyterLab dialog (if one is open).
     ${dialog} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-content ')]

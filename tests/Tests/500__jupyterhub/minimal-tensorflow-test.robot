@@ -24,7 +24,7 @@ Minimal Tensorflow test
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
   Fix Spawner Status
   # Size needs to change
-  Spawn Notebook With Arguments  image=tensorflow-gpu  size=Small
+  Spawn Notebook With Arguments  image=tensorflow  size=Default
   Wait for JupyterLab Splash Screen  timeout=30
   Maybe Select Kernel
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected

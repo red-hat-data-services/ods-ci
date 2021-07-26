@@ -216,7 +216,7 @@ Run Repo and Clean
   Sleep  15
   Click Element  xpath://span[@title="/opt/app-root/src"]
   Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Save Changes
+  Maybe Accept a JupyterLab Prompt
   Open With JupyterLab Menu  File  New  Notebook
   Sleep  5
   Maybe Select Kernel

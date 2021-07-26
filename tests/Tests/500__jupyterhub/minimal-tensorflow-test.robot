@@ -2,7 +2,11 @@
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+<<<<<<< HEAD
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+=======
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubLauncher.robot
+>>>>>>> eb44dd2... Minimal tensorflow test
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Begin Web Test
@@ -37,19 +41,7 @@ Minimal Tensorflow test
   #Run Cell And Check Output  !python --version  Python 3.8.7
   Run Cell And Check Output  !nvcc --version | grep nvcc:  nvcc: NVIDIA (R) Cuda compiler driver
   Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.221
-  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version:  Version: 2.4.1
-
-Failing Test Case (CUDA warnings)
-  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-with-warnings.ipynb 
-  Capture Page Screenshot
-  JupyterLab Code Cell Error Output Should Not Be Visible
-
-Passing Test Case (GPU)
-  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb 
-  Capture Page Screenshot
-  JupyterLab Code Cell Error Output Should Not Be Visible
-
-Failing Test Case (CPU + Tensorflow warnings)
-  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/tensorflow-cpu_no-warnings.ipynb  
+  Run Cell And Check Output  !pip show tensorflow | grep Version:  Version: 2.4.1
+  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/TensorFlow-MNIST-Minimal.ipynb
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible

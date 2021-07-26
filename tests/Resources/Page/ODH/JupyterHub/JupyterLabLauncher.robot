@@ -171,3 +171,18 @@ Handle Kernel Restarts
         Click Button  xpath:/html/body/div[8]/div/div[2]/button
     END
   END
+
+Run Repo and Clean
+  [Arguments]  ${REPO_URL}  ${NB_NAME}
+  Click Element  xpath://span[@title="/opt/app-root/src"]
+  Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NB_NAME}
+  Sleep  15
+  Click Element  xpath://span[@title="/opt/app-root/src"]
+  Open With JupyterLab Menu  File  Close All Tabs
+  Maybe Accept a JupyterLab Prompt
+  Open With JupyterLab Menu  File  New  Notebook
+  Sleep  5
+  Maybe Select Kernel
+  Sleep  5
+  Add and Run JupyterLab Code Cell  !rm -rf *
+  Wait Until JupyterLab Code Cell Is Not Active

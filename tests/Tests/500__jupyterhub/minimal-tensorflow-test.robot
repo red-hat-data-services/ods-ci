@@ -12,7 +12,10 @@ Suite Teardown   End Web Test
 
 
 *** Test Cases ***
-Minimal CUDA test
+Minimal Tensorflow test
+  [Tags]  Regression
+  ...     PLACEHOLDER  #Category tags
+  ...     PLACEHOLDER  #Polarion tags
   Wait for ODH Dashboard to Load
   Launch JupyterHub From ODH Dashboard Dropdown
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

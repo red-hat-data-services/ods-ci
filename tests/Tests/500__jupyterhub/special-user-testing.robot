@@ -12,6 +12,9 @@ Suite Teardown   End Web Test
 
 *** Test Cases ***
 Test Special Usernames
+    [Tags]  Smoke
+    ...     PLACEHOLDER  #Category tags
+    ...     ODS-257
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for ODH Dashboard to Load

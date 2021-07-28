@@ -159,3 +159,19 @@ Fix Spawner Status
          END
       END
    END
+
+User Is Allowed
+   JupyterHub Spawner is Visible
+   Page Should Not Contain  403 : Forbidden
+   Wait Until Page Contains Element  xpath:/html/body/div[1]/form/div/div/div[2]
+
+Logout Via Button
+   Click Element  xpath://a[@id='logout']
+   Wait Until Page Contains  Successfully logged out.
+
+Login Via Button
+   [Documentation]  This takes you back to the login page
+   ...  And you will need to use the `Login To Jupyterhub`
+   ...  Keyword.
+   Click Element  xpath://a[@id='login']
+   Wait Until Page Contains  Log in with

@@ -12,6 +12,9 @@ Suite Teardown   End Web Test
 
 *** Test Cases ***
 Minimal CUDA test
+  [Tags]  Smoke
+  ...     PLACEHOLDER  #Category tags
+  ...     ODS-255
   Wait for ODH Dashboard to Load
   Launch JupyterHub From ODH Dashboard Dropdown
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

@@ -2,11 +2,7 @@
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-<<<<<<< HEAD
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-=======
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubLauncher.robot
->>>>>>> eb44dd2... Minimal tensorflow test
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Begin Web Test

@@ -30,7 +30,7 @@ Login Verify Logout
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service Account
     User Is Allowed
-    Capture Page Screenshot  ${username}-login.png
+    Capture Page Screenshot  special-user-login-{index}.png
     Logout Via Button
     Login Via Button
 

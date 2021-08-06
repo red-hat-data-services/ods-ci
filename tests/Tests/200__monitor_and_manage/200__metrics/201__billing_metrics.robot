@@ -15,12 +15,12 @@ ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:se
 
 *** Test Cases ***
 Verify OpenShift Monitoring results are correct when running undefined queries
-  [Tags]  Sanity  ODS-173
+  [Tags]  Smoke  Sanity  ODS-173
   Run OpenShift Metrics Query  ${METRIC_RHODS_UNDEFINED}
   Metrics.Verify Query Results Dont Contain Data
 
 Test Billing Metric (notebook cpu usage) on OpenShift Monitoring
-  [Tags]  Sanity  ODS-175
+  [Tags]  Smoke  Sanity  ODS-175
   #Skip Test If Previous CPU Usage Is Not Zero
   Run Jupyter Notebook For 5 Minutes
   Verify Previus CPU Usage Is Greater Than Zero

@@ -54,7 +54,6 @@ Remove All Spawner Environment Variables
    END
 
    FOR    ${env}    IN    @{env_vars_list}
-       Log To Console  ${env}
        Remove Spawner Environment Variable   ${env}
    END
 
@@ -170,13 +169,7 @@ Fix Spawner Status
             Launch a new JupyterLab Document
             Close Other JupyterLab Tabs
             Add and Run JupyterLab Code Cell  !rm -rf *
-            Click JupyterLab Menu  File
-            Capture Page Screenshot
-            Click JupyterLab Menu Item  Hub Control Panel
-            Switch Window  JupyterHub
-            Sleep  5
-            Click Element  //*[@id="stop"]
-            Wait Until Page Contains  Start My Server  timeout=15
+            Stop JupyterLab Notebook Server
             Handle Start My Server
          END
       END

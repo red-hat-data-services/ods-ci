@@ -67,16 +67,16 @@ Start JupyterLab Notebook Server
 Open JupyterLab Control Panel
   Open With JupyterLab Menu  File  Hub Control Panel
   Switch Window  JupyterHub
-  
+
 Stop JupyterLab Notebook Server
   Open JupyterLab Control Panel
-  Wait Until Page Contains  Stop My Server  30 seconds
-  # This is a dumb sleep to give the Stop button in the WebUI time to actually work when clicked
-  #TODO: Determine if there is any web element attribute that will allow signify when the Stop button will actually work
-  Sleep  2 seconds
-  Click Element  stop
-  Wait Until Element Is Not Visible   stop  3 minute
-  Wait Until Page Contains  Start My Server  1 minute
+  Run Keyword And Ignore Error   Wait Until Page Contains  Stop My Server   timeout=30
+  Capture Page Screenshot
+  ${stop_enabled} =  Run Keyword And Return Status  Page Should Contain Element    //*[@id="stop"]
+  IF    ${stop_enabled} == True
+    Click Element  //*[@id="stop"]
+    Wait Until Page Contains  Start My Server  timeout=60
+  END
 
 Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out
@@ -96,8 +96,8 @@ Run Cell And Check Output
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Match  ${output}  ${expected_output}
-  
-Maybe Select Kernel  
+
+Maybe Select Kernel
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
@@ -115,15 +115,17 @@ Clean Up Server
   Wait Until Untitled.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs
   Add and Run JupyterLab Code Cell  !rm -rf *
-  
+
 JupyterLab Is Visible
-  ${spawner_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=20
-  [return]  ${spawner_visible}
+  ${jupyterlab_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=60
+  [return]  ${jupyterlab_visible}
 
 Clone Git Repository
   [Arguments]  ${REPO_URL}
   # Make sure we are in the root of the server
-  Click Element  xpath://span[@title="/opt/app-root/src"] 
+  Maybe Open JupyterLab Sidebar  File Browser
+  Navigate Home In JupyterLab Sidebar
+  Click Element  xpath://span[@title="/opt/app-root/src"]
   Open With JupyterLab Menu  Git  Clone a Repository
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  ${REPO_URL}
   Click Element  xpath://div[.="CLONE"]

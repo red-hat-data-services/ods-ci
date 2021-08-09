@@ -6,7 +6,7 @@ Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
 *** Keywords ***
 Begin Web Test
     [Documentation]  This keyword should be used as a Suite Setup; it will log in to the
-    ...              ODH dashboard, checking that the spawner is in a ready state before 
+    ...              ODH dashboard, checking that the spawner is in a ready state before
     ...              handing control over to the test suites.
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -23,13 +23,7 @@ End Web Test
     ${server} =  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
     IF  ${server}==True
         Clean Up Server
-        Click JupyterLab Menu  File
-        Capture Page Screenshot
-        Click JupyterLab Menu Item  Hub Control Panel
-        Switch Window  JupyterHub
-        Sleep  5
-        Click Element  //*[@id="stop"]
-        Wait Until Page Contains  Start My Server  timeout=15
+        Stop JupyterLab Notebook Server
         Capture Page Screenshot
     END
     Close Browser

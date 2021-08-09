@@ -102,6 +102,8 @@ Maybe Select Kernel
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
+  Maybe Open JupyterLab Sidebar  File Browser
+  Navigate Home In JupyterLab Sidebar
   Click Element  xpath://span[@title="/opt/app-root/src"]
   Open With JupyterLab Menu  File  New  Notebook
   Sleep  5
@@ -119,6 +121,10 @@ Clean Up Server
 JupyterLab Is Visible
   ${jupyterlab_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=60
   [return]  ${jupyterlab_visible}
+
+Wait Until JupyterLab Is Loaded
+  [Arguments]   ${timeout}=60
+  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=${timeout}
 
 Clone Git Repository
   [Arguments]  ${REPO_URL}

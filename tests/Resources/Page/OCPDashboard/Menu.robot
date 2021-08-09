@@ -3,6 +3,7 @@ Library  JupyterLibrary
 Library  String
 
 *** Variables ***
+${APP_LAUNCHER_ELEMENT}                 xpath=//*[@aria-label='Application launcher']/button
 ${PERSPECTIVE_SWITCHER_BUTTON_ELEMENT}  xpath=//*[@data-test-id="perspective-switcher-toggle"]
 ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  xpath=//*[@data-test-id="perspective-switcher-toggle"]/span/h2
 ${PERSPECTIVE_ADMINISTRATOR_BUTTON}  xpath=//*[@id="page-sidebar"]/div/nav/div/div/ul/li[1]/*[contains(@class, 'pf-c-dropdown__menu-item')]/h2
@@ -10,6 +11,9 @@ ${PERSPECTIVE_DEVELOPER_BUTTON}      xpath=//*[@id="page-sidebar"]/div/nav/div/d
 
 
 *** Keywords ***
+Wait Until OpenShift Console Is Loaded
+  Wait Until Element Is Enabled    ${APP_LAUNCHER_ELEMENT}  timeout=60
+
 Navigate To Page
    [Arguments]
    ...    ${menu}

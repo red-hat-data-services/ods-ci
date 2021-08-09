@@ -1,4 +1,5 @@
 *** Settings ***
+Library          DebugLibrary
 Resource  OCPDashboard/Menu.robot
 Library   JupyterLibrary
 
@@ -40,5 +41,9 @@ Login To Openshift
     Input Text  id=inputUsername  ${ocp_user_name}
     Input Text  id=inputPassword  ${ocp_user_pw}
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
-    Sleep  10
+    # FIXME: replace this sleep for something more efficient, considering that this method is used for
+    # authentication in OpenShift Console, but also RHODS dashboard and other places
+    Sleep  20
+    # FIXME: this only applies to login to OpenShift Console, but this method is used
+    # for authentication in RHODS dashboard and other places
     Maybe Skip Tour

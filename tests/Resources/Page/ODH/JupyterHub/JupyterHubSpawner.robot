@@ -128,7 +128,6 @@ Server Not Running Is Visible
 
 Handle Server Not Running
    Click Element  xpath://a[@id='start']
-   Wait Until Element Is Visible  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}  timeout=60
 
 Start My Server Is Visible
    ${SMS_visible} =  Run Keyword and Return Status  Page Should Contain  Start My Server
@@ -136,7 +135,6 @@ Start My Server Is Visible
 
 Handle Start My Server
    Click Element  xpath://a[@id='start']
-   Wait Until Element Is Visible  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}  timeout=60
 
 Server Is Stopping Is Visible
    ${SIS_visible} =  Run Keyword and Return Status  Page Should Contain  Your server is stopping.

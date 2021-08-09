@@ -3,6 +3,7 @@ Library          DebugLibrary
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Suite Teardown   End Web Test
 
@@ -14,20 +15,23 @@ Logged into OpenShift
    [Tags]  Sanity  Smoke  ODS-127
    Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
    Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+   Wait Until OpenShift Console Is Loaded
+
 
 Can Launch Jupyterhub
    [Tags]  Sanity  Smoke  ODS-129
    #This keyword will work with accounts that are not cluster admins.
    Launch Jupyterhub via App
    Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+   Wait for ODH Dashboard to Load
    Launch JupyterHub From ODH Dashboard Dropdown
 
 Can Login to Jupyterhub
-   [Tags]  Sanity  Smoke  ODS-128
+   [Tags]  Sanity  Smoke  ODS-128   RunThisTest
    Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']  timeout=30
 
 Can Spawn Notebook
    [Tags]  Sanity
@@ -59,5 +63,3 @@ Can Spawn Notebook
 Can Launch Python3
    [Tags]  Sanity  TBC
    Launch Python3 JupyterHub
-
-

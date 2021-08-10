@@ -4,6 +4,7 @@ import subprocess
 import shutil
 import yaml
 import re
+import sys
 
 def clone_config_repo(**kwargs):
     """
@@ -45,3 +46,30 @@ def read_yaml(filename):
             return yaml.safe_load(fh)
     except OSError as error:
         return None
+
+
+def execute_command(cmd):
+    """
+    Executes command in the local node
+    """
+    try:
+        process = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        output = process.stdout
+        return output
+    except:
+        return None
+
+
+def oc_login(ocp_console_url, username, password):
+    """
+    Login to test cluster using oc cli command
+    """
+    cluster_api_url = ocp_console_url.replace("console-openshift-console.apps", "api")
+    cluster_api_url = re.sub(r'/$','', cluster_api_url) + ":6443"
+    cmd = "oc login -u {} -p {} {} --insecure-skip-tls-verify=true".format(username, password, cluster_api_url)
+    out = execute_command(cmd)
+    if "Login successful" in out:
+        print ("Logged into cluster successfully")
+    else:
+        print ("Failed to login to cluster")
+        sys.exit(1)

@@ -27,7 +27,7 @@ Can Launch Jupyterhub
    Launch JupyterHub From ODH Dashboard Dropdown
 
 Can Login to Jupyterhub
-   [Tags]  Sanity  Smoke  ODS-128   RunThisTest
+   [Tags]  Sanity  Smoke  ODS-128
    Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

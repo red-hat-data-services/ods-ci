@@ -12,7 +12,7 @@ Suite Teardown   End Web Test
 
 *** Test Cases ***
 Minimal CUDA test
-  [Tags]  Smoke
+  [Tags]  PLACEHOLDER
   ...     PLACEHOLDER  #Category tags
   ...     ODS-255
   Wait for ODH Dashboard to Load
@@ -35,7 +35,5 @@ Minimal CUDA test
   #Run Cell And Check Output  !python --version  Python 3.8.7
   Run Cell And Check Output  !nvcc --version | grep nvcc:  nvcc: NVIDIA (R) Cuda compiler driver
   Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.221
-  # Is it supposed to be V11.0.3? Checking
-  #Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.3
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible

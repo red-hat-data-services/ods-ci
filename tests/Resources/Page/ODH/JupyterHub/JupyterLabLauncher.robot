@@ -179,7 +179,7 @@ Clone Git Repository And Open
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
   [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
   Clone Git Repository  ${REPO_URL}
-  Sleep  10
+  Sleep  15
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${NOTEBOOK_TO_RUN}
   Click Element  xpath://div[.="Open"]

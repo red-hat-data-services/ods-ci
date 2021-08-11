@@ -1,7 +1,7 @@
 *** Settings ***
 Resource   ../../Components/Components.resource
 Resource   ../../LoginPage.robot
-Library    SeleniumLibrary
+Library    JupyterLibrary
 
 *** Keywords ***
 Open OperatorHub

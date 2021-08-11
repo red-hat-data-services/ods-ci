@@ -1,4 +1,5 @@
 *** Settings ***
+Library   SeleniumLibrary
 Library   JupyterLibrary
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -6,8 +7,11 @@ Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
 *** Keywords ***
 Begin Web Test
     [Documentation]  This keyword should be used as a Suite Setup; it will log in to the
-    ...              ODH dashboard, checking that the spawner is in a ready state before 
+    ...              ODH dashboard, checking that the spawner is in a ready state before
     ...              handing control over to the test suites.
+
+    Set Library Search Order  SeleniumLibrary
+
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for ODH Dashboard to Load

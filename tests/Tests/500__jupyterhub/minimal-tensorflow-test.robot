@@ -30,14 +30,13 @@ Minimal Tensorflow test
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document  kernel=Python 3 (ipykernel)
-  #Launch a new JupyterLab Document
   Close Other JupyterLab Tabs
   Sleep  5
   Run Cell And Check Output  !python --version  Python 3.8.6
   #Run Cell And Check Output  !python --version  Python 3.8.7
   Run Cell And Check Output  !nvcc --version | grep nvcc:  nvcc: NVIDIA (R) Cuda compiler driver
   Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.221
-  Run Cell And Check Output  !pip show tensorflow | grep Version:  Version: 2.4.1
+  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version:  Version: 2.4.1
   Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/TensorFlow-MNIST-Minimal.ipynb
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible

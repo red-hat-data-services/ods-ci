@@ -15,10 +15,10 @@ Navigate To Page
    ...    ${menu}
    ...    ${submenu}
    Wait Until Page Contains    ${menu}   timeout=150
-   ${is_menu_expanded} =    Is Menu Expanded  ${menu}
-   Run Keyword if    "${is_menu_expanded}" == "false"    Click Menu   ${menu}
+   ${is_menu_expanded} =    Menu.Is Menu Expanded  ${menu}
+   Run Keyword if    "${is_menu_expanded}" == "false"    Menu.Click Menu   ${menu}
    Wait Until Page Contains    ${submenu}
-   Click Submenu    ${submenu}
+   Menu.Click Submenu    ${submenu}
 
 Switch To Administrator Perspective
   Wait Until Page Contains Element     ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  timeout=30

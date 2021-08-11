@@ -3,7 +3,7 @@ Library   SeleniumLibrary
 
 *** Keywords ***
 Open OperatorHub
-    Open OCP Console 
+    Open OCP Console
     Login To Openshift
     Navigate to OperatorHub
     OperatorHub Should Be Open
@@ -15,7 +15,7 @@ Open OCP Console
     Open Page    ${OCP_CONSOLE_URL}
 
 Navigate to OperatorHub
-    Navigate To Page   Operators  OperatorHub
+    Menu.Navigate To Page   Operators  OperatorHub
 
 OperatorHub Should Be Open
     Page Should Be Open    ${OCP_CONSOLE_URL}operatorhub/all-namespaces

@@ -1,5 +1,5 @@
 *** Settings ***
-Resource  OCPDashboard/Menu.robot
+Resource  OCPDashboard/OCPDashboard.resource
 Library   JupyterLibrary
 
 *** Keywords ***

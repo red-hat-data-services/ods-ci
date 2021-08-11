@@ -1,5 +1,5 @@
 *** Settings ***
-Resource      ODHDashboardMenu.robot
+Resource      ../../../Page/Components/Components.resource
 Library       JupyterLibrary
 
 *** Variables ***
@@ -46,7 +46,7 @@ Launch ${dashboard_app} From ODH Dashboard Dropdown
 Verify Service Is Enabled
   [Documentation]   Verify the service appears in Applications > Enabled
   [Arguments]  ${app_name}
-  ODHDashboardMenu.Navigate To Page    Applications    Enabled
+  Menu.Navigate To Page    Applications    Enabled
   Wait Until Page Contains    JupyterHub  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
 
@@ -59,14 +59,14 @@ Verify Service Is Not Enabled
 Verify Service Is Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
   [Arguments]  ${app_name}
-  ODHDashboardMenu.Navigate To Page    Applications    Explore
+  Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    JupyterHub  timeout=30
   Page Should Contain Element    //article//*[.='${app_name}']
 
 Verify Service Provides "Enable" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is an "Enable" button
   [Arguments]  ${app_name}
-  ODHDashboardMenu.Navigate To Page    Applications    Explore
+  Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    JupyterHub  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
   Click Element     xpath://article//*[.='${app_name}']/../..
@@ -76,7 +76,7 @@ Verify Service Provides "Enable" Button In The Explore Page
 Verify Service Provides "Get Started" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is a "Get Started" button
   [Arguments]  ${app_name}
-  ODHDashboardMenu.Navigate To Page    Applications    Explore
+  Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    JupyterHub  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
   Click Element     xpath://article//*[.='${app_name}']/../..

@@ -1,10 +1,12 @@
 *** Settings ***
-Library   SeleniumLibrary
+Resource   ../../Components/Components.resource
+Resource   ../../LoginPage.robot
+Library    SeleniumLibrary
 
 *** Keywords ***
 Open OperatorHub
     Open OCP Console
-    Login To Openshift
+    LoginPage.Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
     Navigate to OperatorHub
     OperatorHub Should Be Open
 

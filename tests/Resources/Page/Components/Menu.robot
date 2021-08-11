@@ -1,13 +1,17 @@
+*** Settings ***
+Library  JupyterLibrary
+Library  String
+
 *** Keywords ***
 Navigate To Page
    [Arguments]
    ...    ${menu}
    ...    ${submenu}
    Wait Until Page Contains    ${menu}   timeout=150
-   ${is_menu_expanded} =    ODHDashboardMenu.Is Menu Expanded  ${menu}
-   Run Keyword if    "${is_menu_expanded}" == "false"    ODHDashboardMenu.Click Menu   ${menu}
+   ${is_menu_expanded} =    Menu.Is Menu Expanded  ${menu}
+   Run Keyword if    "${is_menu_expanded}" == "false"    Menu.Click Menu   ${menu}
    Wait Until Page Contains    ${submenu}
-   ODHDashboardMenu.Click Submenu    ${submenu}
+   Menu.Click Submenu    ${submenu}
 
 Click Menu
    [Arguments]

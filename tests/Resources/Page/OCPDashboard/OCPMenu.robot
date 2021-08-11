@@ -10,16 +10,6 @@ ${PERSPECTIVE_DEVELOPER_BUTTON}      xpath=//*[@id="page-sidebar"]/div/nav/div/d
 
 
 *** Keywords ***
-Navigate To Page
-   [Arguments]
-   ...    ${menu}
-   ...    ${submenu}
-   Wait Until Page Contains    ${menu}   timeout=150
-   ${is_menu_expanded} =    Menu.Is Menu Expanded  ${menu}
-   Run Keyword if    "${is_menu_expanded}" == "false"    Menu.Click Menu   ${menu}
-   Wait Until Page Contains    ${submenu}
-   Menu.Click Submenu    ${submenu}
-
 Switch To Administrator Perspective
   Wait Until Page Contains Element     ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  timeout=30
   ${current_perspective} =   Get Text  ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}
@@ -37,22 +27,6 @@ Switch To Developer Perspective
       Wait Until Page Contains Element    ${PERSPECTIVE_DEVELOPER_BUTTON}
       Click Button    ${PERSPECTIVE_DEVELOPER_BUTTON}
   END
-
-Click Menu
-   [Arguments]
-   ...   ${menu}
-   Click Element    //button[text()="${menu}"]
-
-Click Submenu
-   [Arguments]
-   ...   ${submenu}
-   Click Element   //a[text()="${submenu}"]
-
-Is Menu Expanded
-   [Arguments]
-   ...   ${menu}
-   ${is_menu_expanded} =    Get Element Attribute   //button[text()="${menu}"]   attribute=aria-expanded
-   [Return]    ${is_menu_expanded}
 
 Maybe Skip Tour
    ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id='guided-tour-modal']

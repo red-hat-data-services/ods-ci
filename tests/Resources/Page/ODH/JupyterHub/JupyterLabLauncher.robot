@@ -102,9 +102,7 @@ Maybe Select Kernel
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
-  Maybe Open JupyterLab Sidebar  File Browser
-  Navigate Home In JupyterLab Sidebar
-  Click Element  xpath://span[@title="/opt/app-root/src"]
+  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  File  New  Notebook
   Sleep  5
   Maybe Select Kernel
@@ -128,10 +126,7 @@ Wait Until JupyterLab Is Loaded
 
 Clone Git Repository
   [Arguments]  ${REPO_URL}
-  # Make sure we are in the root of the server
-  Maybe Open JupyterLab Sidebar  File Browser
-  Navigate Home In JupyterLab Sidebar
-  Click Element  xpath://span[@title="/opt/app-root/src"]
+  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  Git  Clone a Repository
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  ${REPO_URL}
   Click Element  xpath://div[.="CLONE"]

@@ -44,7 +44,7 @@ Iterative Image Test
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-    Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+    Fix Spawner Status
     Spawn Notebook With Arguments  image=${image}
     Wait for JupyterLab Splash Screen  timeout=30
     Maybe Select Kernel
@@ -62,13 +62,7 @@ Iterative Image Test
     #This ensures all workloads are run even if one (or more) fails
     Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
     Clean Up Server
-    Click JupyterLab Menu  File
-    Capture Page Screenshot
-    Click JupyterLab Menu Item  Hub Control Panel
-    Switch Window  JupyterHub
-    Sleep  5
-    Click Element  //*[@id="stop"]
-    Wait Until Page Contains  Start My Server  timeout=15
+    Stop JupyterLab Notebook Server
     Capture Page Screenshot
     Go To  ${ODH_DASHBOARD_URL}
     Sleep  10

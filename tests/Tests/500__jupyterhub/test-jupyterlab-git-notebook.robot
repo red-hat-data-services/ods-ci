@@ -61,8 +61,7 @@ Can Launch Python3 Smoke Test Notebook
   ##################################################
   # Git clone repo and run existing notebook
   ##################################################
-  Maybe Open JupyterLab Sidebar  File Browser
-  Navigate Home In JupyterLab Sidebar
+  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  Git  Clone a Repository
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/sophwats/notebook-smoke-test
   Click Element  xpath://div[.="CLONE"]

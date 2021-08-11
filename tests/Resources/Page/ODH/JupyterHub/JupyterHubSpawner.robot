@@ -2,6 +2,7 @@
 Resource  JupyterLabLauncher.robot
 Library  JupyterLibrary
 Library  String
+Library  Collections
 
 *** Variables ***
 ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =  //div[contains(@class,"jsp-spawner__header__title") and .="Start a notebook server"]
@@ -40,13 +41,33 @@ Add Spawner Environment Variable
    Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
    Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}
 
+Remove All Spawner Environment Variables
+   [Documentation]  Removes all existing environment variables in the Spawner
+   @{env_vars_list}=  Create List
+   @{env_elements}=    Get WebElements    xpath://*[.='Variable name']/../../div[2]/input
+
+   # We need to fist get the env values and remove them later to avoid a
+   # selenium error due to modifiying the DOM while iterating its contents
+   FOR    ${element}    IN    @{env_elements}
+       ${txt}=   Get Value  ${element}
+       Append To List  ${env_vars_list}   ${txt}
+   END
+
+   FOR    ${env}    IN    @{env_vars_list}
+       Remove Spawner Environment Variable   ${env}
+   END
+
+
 Remove Spawner Environment Variable
-   [Documentation]  Removes an existing environment variable based on the ${env_var} argument
+   [Documentation]  If it exists, removes an environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
-   Click Element  xpath://input[@id="${env_var}"]/../../../../button
+   ${env-check} =  Spawner Environment Variable Exists   ${env_var}
+   IF  ${env-check}==True
+      Click Element  xpath://input[@id="${env_var}"]/../../../../button
+   END
 
 Spawner Environment Variable Exists
-   [Documentation]  Removes an existing environment variable based on the ${env_var} argument
+   [Documentation]  Checks if an environment variable is set based on the ${env_var} argument
    [Arguments]  ${env_var}
    ${var_visible} =  Run Keyword and Return Status  Element Should Be Visible  id:${env_var}
    [return]  ${var_visible}
@@ -77,12 +98,9 @@ Spawn Notebook With Arguments
    FOR  ${index}  IN RANGE  0  1+${retries}
       Select Notebook Image  ${image}
       Select Container Size  ${size}
+      Remove All Spawner Environment Variables
       FOR  ${key}  ${value}  IN  &{envs}
          Sleep  1
-         ${env-check} =  Spawner Environment Variable Exists  ${key}
-         IF  ${env-check}==True
-            Remove Spawner Environment Variable  ${key}
-         END
          Add Spawner Environment Variable  ${key}  ${value}
       END
       Click Button  Start server
@@ -143,19 +161,14 @@ Fix Spawner Status
       ELSE IF  ${SMS_visible}==True
          Handle Start My Server
       ELSE
-         ${JL_visible} =  JupyterLab Is Visible 
+         ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
             Click Element  xpath://span[@title="/opt/app-root/src"]
             Launch a new JupyterLab Document
             Close Other JupyterLab Tabs
             Add and Run JupyterLab Code Cell  !rm -rf *
-            Click JupyterLab Menu  File
-            Capture Page Screenshot
-            Click JupyterLab Menu Item  Hub Control Panel
-            Switch Window  JupyterHub
-            Sleep  5
-            Click Element  //*[@id="stop"]
-            Wait Until Page Contains  Start My Server  timeout=15
+            Stop JupyterLab Notebook Server
+            Handle Start My Server
          END
       END
    END

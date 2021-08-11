@@ -15,12 +15,12 @@ ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:se
 
 *** Test Cases ***
 Verify OpenShift Monitoring results are correct when running undefined queries
-  [Tags]  Sanity  ODS-173
+  [Tags]  Smoke  Sanity  ODS-173
   Run OpenShift Metrics Query  ${METRIC_RHODS_UNDEFINED}
   Metrics.Verify Query Results Dont Contain Data
 
 Test Billing Metric (notebook cpu usage) on OpenShift Monitoring
-  [Tags]  Sanity  ODS-175
+  [Tags]  Smoke  Sanity  ODS-175
   #Skip Test If Previous CPU Usage Is Not Zero
   Run Jupyter Notebook For 5 Minutes
   Verify Previus CPU Usage Is Greater Than Zero
@@ -65,7 +65,7 @@ Run Jupyter Notebook For 5 Minutes
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for ODH Dashboard to Load
   Iterative Image Test  s2i-generic-data-science-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
-  CleanUp JupyterHub
+
 
 ##TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob. We have to refactor the code not to duplicate this method
 Iterative Image Test
@@ -75,8 +75,8 @@ Iterative Image Test
   Page Should Not Contain    403 : Forbidden
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-  Select Notebook Image  ${image}
-  Spawn Notebook
+  Fix Spawner Status
+  Spawn Notebook With Arguments  image=${image}
   Wait for JupyterLab Splash Screen  timeout=30
   Maybe Select Kernel
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
@@ -85,22 +85,12 @@ Iterative Image Test
   Close Other JupyterLab Tabs
   Sleep  5
   Run Cell And Check Output  print("Hello World!")  Hello World!
-  #Needs to change for RHODS release
-  Run Cell And Check Output  !python --version  Python 3.8.3
-  #Run Cell And Check Output  !python --version  Python 3.8.7
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible
   #This ensures all workloads are run even if one (or more) fails
   Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
   Clean Up Server
-  Click JupyterLab Menu  File
-  Capture Page Screenshot
-  Click JupyterLab Menu Item  Hub Control Panel
-  Switch Window  JupyterHub
-  Sleep  5
-  Click Element  //*[@id="stop"]
-  Wait Until Page Contains  Start My Server  timeout=15
-  Capture Page Screenshot
+  Stop JupyterLab Notebook Server
   Go To  ${ODH_DASHBOARD_URL}
   Sleep  10
 

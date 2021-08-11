@@ -19,12 +19,12 @@ Login To ODH Dashboard
 
 Wait for ODH Dashboard to Load
   [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
-  Wait For Condition  return document.title == ${dashboard_title}
+  Wait For Condition  return document.title == ${dashboard_title}  timeout=30
 
 Wait Until ODH Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
-  # Setting timeout to 10seconds since anything beyond that should be flagged as a UI bug 
-  Wait Until Element is Visible  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]  10seconds
+  # Setting timeout to 10seconds since anything beyond that should be flagged as a UI bug
+  Wait Until Element is Visible  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]  45seconds
 
 Launch ${dashboard_app} From ODH Dashboard Link
   Wait Until ODH Dashboard ${dashboard_app} Is Visible

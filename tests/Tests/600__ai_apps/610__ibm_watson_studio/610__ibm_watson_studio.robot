@@ -1,6 +1,6 @@
 *** Settings ***
-Resource    ../../../Resources/Page/LoginPage.robot
-Resource    ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../Resources/Page/LoginPage.robot
+Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Library         SeleniumLibrary
 Suite Setup     IBM Watson Studio Suite Setup
 Suite Teardown  IBM Watson Studio Suite Teardown

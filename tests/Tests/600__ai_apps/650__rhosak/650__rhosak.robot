@@ -1,6 +1,6 @@
 *** Settings ***
-Resource    ../../../Resources/Page/LoginPage.robot
-Resource    ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../Resources/Page/LoginPage.robot
+Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Library         SeleniumLibrary
 Suite Setup     Kafka Suite Setup
 Suite Teardown  Kafka Suite Teardown

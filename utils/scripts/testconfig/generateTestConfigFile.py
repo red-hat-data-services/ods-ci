@@ -46,6 +46,9 @@ def parse_args():
                         help="Test cluster. Eg: modh-qe-1",
                         action="store", dest="test_cluster",
                         required=True)
+    parser.add_argument("-o", "--setPromotheusToken",
+                        help="append promotheus token to config file",
+                        action="store_true", dest="set_promotheus_token")
     parser.add_argument("-s", "--skip-git-clone",
                         help="If this option is used then cloning config git repo for ods-ci tests is skipped.",
                         action="store_true", dest="skip_clone")
@@ -60,7 +63,7 @@ def get_prometheus_token(cluster, project):
     return prometheus_token.strip("\n")
 
 
-def generate_test_config_file(config_template, config_data, test_cluster):
+def generate_test_config_file(config_template, config_data, test_cluster, set_promotheus_token):
     """
     Generates test config file dynamically by substituting the values in a template file.
     """
@@ -85,8 +88,9 @@ def generate_test_config_file(config_template, config_data, test_cluster):
     oc_login(data["OCP_CONSOLE_URL"], data["OCP_ADMIN_USER"]["USERNAME"], data["OCP_ADMIN_USER"]["PASSWORD"])
 
     # Get prometheus token for test cluster
-    prometheus_token = get_prometheus_token(test_cluster, "redhat-ods-monitoring")
-    data["RHODS_PROMETHEUS_TOKEN"] = prometheus_token
+    if bool(set_promotheus_token):
+        prometheus_token = get_prometheus_token(test_cluster, "redhat-ods-monitoring")
+        data["RHODS_PROMETHEUS_TOKEN"] = prometheus_token
 
     with open(config_file, 'w') as yaml_file:
         yaml_file.write( yaml.dump(data, default_flow_style=False, sort_keys=False))
@@ -111,7 +115,8 @@ def main():
     config_data = read_yaml(config_file)
     
     # Generate test config file
-    generate_test_config_file(args.config_template, config_data, args.test_cluster)
+    generate_test_config_file(args.config_template, config_data, args.test_cluster,
+                              args.set_promotheus_token)
 
 
 if __name__ == '__main__':

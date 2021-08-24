@@ -61,6 +61,7 @@ Verify Service Is Available In The Explore Page
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    JupyterHub  timeout=30
+  Capture Page Screenshot
   Page Should Contain Element    //article//*[.='${app_name}']
 
 Verify Service Provides "Enable" Button In The Explore Page
@@ -70,6 +71,7 @@ Verify Service Provides "Enable" Button In The Explore Page
   Wait Until Page Contains    JupyterHub  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
   Click Element     xpath://article//*[.='${app_name}']/../..
+  Capture Page Screenshot
   Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10   error=${app_name} does not have sidebar with information in the Explore page of ODS Dashboard
   Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${app_name} does not have a "Enable" button in ODS Dashboard
 
@@ -80,6 +82,7 @@ Verify Service Provides "Get Started" Button In The Explore Page
   Wait Until Page Contains    JupyterHub  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
   Click Element     xpath://article//*[.='${app_name}']/../..
+  Capture Page Screenshot
   Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10   error=${app_name} does not have sidebar with information in the Explore page of ODS Dashboard
   Page Should Contain Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   message=${app_name} does not have a "Get started" button in ODS Dashboard
 

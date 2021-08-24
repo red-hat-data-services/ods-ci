@@ -11,9 +11,8 @@ Verify OpenVino Is Available In RHODS Dashboard Explore Page
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for ODH Dashboard to Load
-  Verify Service Is Available In The Explore Page    OpenShift Streams for Apache Kafka
-  Verify Service Provides "Get Started" Button In The Explore Page    OpenShift Streams for Apache Kafka
-  Verify Service Provides "Enable" Button In The Explore Page    OpenShift Streams for Apache Kafka
+  Verify Service Is Available In The Explore Page    OpenVINO
+  Verify Service Provides "Get Started" Button In The Explore Page    OpenVINO
 
 * Keywords ***
 OpenVino Suite Setup

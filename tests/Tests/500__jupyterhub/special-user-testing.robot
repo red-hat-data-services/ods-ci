@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Library          DebugLibrary
 Library          JupyterLibrary
+Suite Setup      Special User Testing Suite Setup
 Suite Teardown   End Web Test
 
 *** Variables ***
@@ -24,6 +25,9 @@ Test Special Usernames
     END
 
 *** Keywords ***
+Special User Testing Suite Setup
+  Set Library Search Order  SeleniumLibrary
+
 Login Verify Logout
     [Arguments]  ${username}  ${password}  ${auth}
     Login To Jupyterhub  ${username}  ${password}  ${auth}

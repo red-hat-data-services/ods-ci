@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Suite Setup      JupyterHub Testing Suite Setup
 Suite Teardown   End Web Test
 
 *** Variables ***
@@ -63,3 +64,8 @@ Can Spawn Notebook
 Can Launch Python3
    [Tags]  Sanity  TBC
    Launch Python3 JupyterHub
+
+
+*** Keywords ***
+JupyterHub Testing Suite Setup
+  Set Library Search Order  SeleniumLibrary

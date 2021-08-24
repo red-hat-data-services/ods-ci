@@ -62,13 +62,14 @@ Can Launch Python3 Smoke Test Notebook
   ##################################################
   # Git clone repo and run existing notebook
   ##################################################
-  Maybe Open JupyterLab Sidebar  File Browser
-  Navigate Home In JupyterLab Sidebar
+  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  Git  Clone a Repository
+  Wait Until Page Contains    Clone a repo   timeout=30
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/lugi0/minimal-nb-image-test
   Click Element  xpath://div[.="CLONE"]
   Sleep  1
   Open With JupyterLab Menu  File  Open from Path…
+  Wait Until Page Contains    Open Path   timeout=30
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  minimal-nb-image-test/minimal-nb.ipynb
   Click Element  xpath://div[.="Open"]
 

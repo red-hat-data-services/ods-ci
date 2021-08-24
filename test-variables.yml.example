@@ -16,3 +16,9 @@ OCP_ADMIN_USER:
 S3:
   AWS_ACCESS_KEY_ID: ID-value
   AWS_SECRET_ACCESS_KEY: Secret-Key
+####################################################################
+# RHODS_PROMETHEUS_TOKEN                                           #
+# Run this command to obtain the token:                            #
+# oc serviceaccounts get-token prometheus -n redhat-ods-monitoring #
+####################################################################
+RHODS_PROMETHEUS_TOKEN: prometheus-token

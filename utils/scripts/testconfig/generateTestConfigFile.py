@@ -9,7 +9,8 @@ import yaml
 import sys
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path+"/../")
-from util import clone_config_repo, read_yaml
+from util import (clone_config_repo, read_yaml,
+                  oc_login, execute_command)
 
 def parse_args():
     """Parse CLI arguments"""
@@ -45,13 +46,24 @@ def parse_args():
                         help="Test cluster. Eg: modh-qe-1",
                         action="store", dest="test_cluster",
                         required=True)
+    parser.add_argument("-o", "--setPromotheusToken",
+                        help="append promotheus token to config file",
+                        action="store_true", dest="set_promotheus_token")
     parser.add_argument("-s", "--skip-git-clone",
                         help="If this option is used then cloning config git repo for ods-ci tests is skipped.",
                         action="store_true", dest="skip_clone")
     return parser.parse_args()
 
+def get_prometheus_token(cluster, project):
+    """
+    Get prometheus token for the given cluster.
+    """
+    cmd = "oc sa get-token prometheus -n {}".format(project)
+    prometheus_token = execute_command(cmd)
+    return prometheus_token.strip("\n")
 
-def generate_test_config_file(config_template, config_data, test_cluster):
+
+def generate_test_config_file(config_template, config_data, test_cluster, set_promotheus_token):
     """
     Generates test config file dynamically by substituting the values in a template file.
     """
@@ -72,6 +84,14 @@ def generate_test_config_file(config_template, config_data, test_cluster):
     data["OCP_ADMIN_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["USERNAME"]
     data["OCP_ADMIN_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["PASSWORD"]
 
+    # Login to test cluster using oc command
+    oc_login(data["OCP_CONSOLE_URL"], data["OCP_ADMIN_USER"]["USERNAME"], data["OCP_ADMIN_USER"]["PASSWORD"])
+
+    # Get prometheus token for test cluster
+    if bool(set_promotheus_token):
+        prometheus_token = get_prometheus_token(test_cluster, "redhat-ods-monitoring")
+        data["RHODS_PROMETHEUS_TOKEN"] = prometheus_token
+
     with open(config_file, 'w') as yaml_file:
         yaml_file.write( yaml.dump(data, default_flow_style=False, sort_keys=False))
 
@@ -89,13 +109,14 @@ def main():
         if not ret:
             sys.exit(1)
     else:
-        print ("Skipping cloning of congig gitlab repo")
+        print ("Skipping cloning of config gitlab repo")
 
     config_file = args.repo_dir + "/test-variables.yml"
     config_data = read_yaml(config_file)
     
     # Generate test config file
-    generate_test_config_file(args.config_template, config_data, args.test_cluster)
+    generate_test_config_file(args.config_template, config_data, args.test_cluster,
+                              args.set_promotheus_token)
 
 
 if __name__ == '__main__':

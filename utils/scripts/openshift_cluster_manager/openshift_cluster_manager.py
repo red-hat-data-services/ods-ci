@@ -91,7 +91,7 @@ class OpenshiftClusterManager():
     def osd_cluster_create(self):
         """Creates OSD cluster"""
 
-        cmd = ("ocm create cluster --aws-account-id {}"
+        cmd = ("ocm create cluster --aws-account-id {} "
                "--aws-access-key-id {} --aws-secret-access-key {} "
                "--ccs --region {} --compute-nodes {} "
                "--compute-machine-type {} "

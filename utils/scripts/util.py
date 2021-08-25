@@ -5,6 +5,7 @@ import shutil
 import yaml
 import re
 import sys
+import time
 
 def clone_config_repo(**kwargs):
     """
@@ -60,16 +61,23 @@ def execute_command(cmd):
         return None
 
 
-def oc_login(ocp_console_url, username, password):
+def oc_login(ocp_console_url, username, password, timeout=120):
     """
     Login to test cluster using oc cli command
     """
     cluster_api_url = ocp_console_url.replace("console-openshift-console.apps", "api")
     cluster_api_url = re.sub(r'/$','', cluster_api_url) + ":6443"
     cmd = "oc login -u {} -p {} {} --insecure-skip-tls-verify=true".format(username, password, cluster_api_url)
-    out = execute_command(cmd)
-    if "Login successful" in out:
-        print ("Logged into cluster successfully")
-    else:
+    count = 0
+    chk_flag = 0
+    while (count <= timeout):
+        out = execute_command(cmd)
+        if ((out is not None) and ("Login successful" in out)):
+            print ("Logged into cluster successfully")
+            chk_flag = 1
+            break
+        time.sleep(5)
+        count += 5
+    if not chk_flag:
         print ("Failed to login to cluster")
         sys.exit(1)

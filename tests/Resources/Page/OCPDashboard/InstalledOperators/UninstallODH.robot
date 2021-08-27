@@ -1,12 +1,12 @@
 *** Keywords ***
 Open Installed Operators
-  Open OCP Console 
+  Open OCP Console
   Login To OCP
   Navigate to Installed Operators
   Installed Operators Should Be Open
 
 Navigate to Installed Operators
-  Navigate To Page  Operators  Installed Operators
+  Menu.Navigate To Page  Operators  Installed Operators
 
 Installed Operators Should Be Open
   Page Should Be Open  ${OCP_CONSOLE_URL}k8s/

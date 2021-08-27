@@ -1,6 +1,6 @@
 *** Settings ***
-Library          DebugLibrary
-Resource  OCPDashboard/Menu.robot
+Resource  OCPDashboard/OCPDashboard.resource
+Library   DebugLibrary
 Library   JupyterLibrary
 
 *** Keywords ***

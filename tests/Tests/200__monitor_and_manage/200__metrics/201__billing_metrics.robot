@@ -45,7 +45,7 @@ Run OpenShift Metrics Query
   [Arguments]  ${query}
   Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   LoginPage.Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
-  Menu.Switch To Administrator Perspective
+  OCPMenu.Switch To Administrator Perspective
   Wait Until Page Contains    Status  timeout=20
   Menu.Navigate To Page   Monitoring  Metrics
   Metrics.Verify Page Loaded

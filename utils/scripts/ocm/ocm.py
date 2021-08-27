@@ -21,6 +21,7 @@ Class for Openshift Cluster Manager
 class OpenshiftClusterManager():
     def __init__(self, args):
 
+        # Initialize instance variables
         self.aws_account_id = args.aws_account_id
         self.aws_access_key_id = args.aws_access_key_id
         self.aws_secret_access_key = args.aws_secret_access_key
@@ -34,11 +35,16 @@ class OpenshiftClusterManager():
         self.skip_rhods_installation = args.skip_rhods_installation
         self.ocm_cli_binary_url = args.ocm_cli_binary_url
         self.create_cluster_admin_user = args.create_cluster_admin_user
+        self.create_ldap_idp = args.create_ldap_idp
+        self.num_users_to_create_per_group = args.num_users_to_create_per_group
 
         self.idp_type = "htpasswd"
         self.idp_name = "htpasswd-cluster-admin"
-        self.htpasswd_cluster_admin = "htpasswd-cluster-admin-user"
-        self.htpasswd_cluster_password = "rhodsPW#123456"
+        self.htpasswd_cluster_admin = args.htpasswd_cluster_admin
+        self.htpasswd_cluster_password = args.htpasswd_cluster_password
+        self.ldap_url = args.ldap_url
+        self.ldap_bind_dn = args.ldap_bind_dn
+        self.ldap_bind_password = args.ldap_bind_password
 
     def _is_ocmcli_installed(self):
         """Checks if ocm cli is installed"""
@@ -188,7 +194,9 @@ class OpenshiftClusterManager():
         """Helper module to render jinja template"""
 
         try:
-            templateLoader = jinja2.FileSystemLoader(searchpath="./templates")
+            templateLoader = jinja2.FileSystemLoader(
+                searchpath=os.path.abspath(
+                    os.path.dirname(__file__)) + "/templates")
             templateEnv = jinja2.Environment(loader=templateLoader)
             template = templateEnv.get_template(template_file)
             outputText = template.render(replace_vars)
@@ -248,6 +256,26 @@ class OpenshiftClusterManager():
                    "30minutes. EXITING".format(addon_name))
             sys.exit(1)
 
+    def list_idps(self):
+        """Lists IDPs for the cluster"""
+
+        cmd = ("ocm list idps --cluster {} --columns name"
+               .format(self.cluster_name))
+        ret = execute_command(cmd)
+        if ret is None:
+            return []
+        if ret != []:
+            ret = ret.split('\n')[1:-1]
+        return ret
+
+    def is_idp_exists(self, idp_name):
+        """Checks if given idp exists in cluster"""
+        ret = self.list_idps()
+        if idp_name in ret:
+            print ("IDP with idp name {} exists!".format(idp_name))
+            return True
+        return False
+
     def install_rhods(self):
         """Installs RHODS addon"""
         replace_vars = {
@@ -267,33 +295,118 @@ class OpenshiftClusterManager():
                   "{}".format(self.cluster_name))
             sys.exit(1)
 
-    def create_idp(self):
+    def create_idp(self, type="htpasswd"):
         """Creates Identity Provider"""
 
-        if self.idp_type == "htpasswd":
+        if type == "htpasswd":
             cmd = ("ocm create idp -c {} -t {} -n {} --username {} "
                    "--password {}".format(self.cluster_name,
                                           self.idp_type,
                                           self.idp_name,
                                           self.htpasswd_cluster_admin,
                                           self.htpasswd_cluster_password))
+            ret = execute_command(cmd)
+            if ret is None:
+                print("Failed to add identity provider of "
+                      "type {}".format(self.idp_type))
+                sys.exit(1)
+        elif (type == "ldap"):
+            ldap_yaml_file = (os.path.abspath(
+                os.path.dirname(__file__)) +
+                "/../../../configs/templates/ldap/ldap.yaml")
+            cmd = "oc apply -f {}".format(ldap_yaml_file)
+            ret = execute_command(cmd)
+            if ret is None:
+                print("Failed to deploy openldap application")
+                sys.exit(1)
+
+            replace_vars = {
+                           "LDAP_URL": self.ldap_url,
+                           "LDAP_BIND_DN": self.ldap_bind_dn,
+                           "LDAP_BIND_PASSWORD": self.ldap_bind_password
+                           }
+            template_file = "create_ldap_idp.jinja"
+            output_file = "create_ldap_idp.json"
+            self._render_template(template_file, output_file, replace_vars)
+
+            cluster_id = self.get_osd_cluster_id()
+            cmd = ("ocm post /api/clusters_mgmt/v1/"
+                   "clusters/{}/identity_providers "
+                   "--body={}".format(cluster_id, output_file))
+            ret = execute_command(cmd)
+            if ret is None:
+                print("Failed to add ldap identity provider")
+                sys.exit(1)
+
+    def delete_idp(self, idp_name):
+        """Deletes Identity Provider"""
+
+        cmd = ("ocm delete idp -c {} {}".format(self.cluster_name,
+                                                idp_name))
         ret = execute_command(cmd)
         if ret is None:
-            print("Failed to add identity provider of "
-                  "type {}".format(self.idp_type))
-            sys.exit(1)
+            print("Failed to delete identity provider of "
+                  "type {}".format(idp_name))
 
-    def add_user_to_group(self, group="cluster-admins"):
+    def add_user_to_group(self, user="", group="cluster-admins"):
         """Adds user to given group"""
 
-        cmd = ("ocm create user {} --cluster {} "
-               "--group={}".format(self.htpasswd_cluster_admin,
-                                   self.cluster_name, group))
+        if user == "":
+            user = self.htpasswd_cluster_admin
+
+        if ((group == "rhods-admins") or
+           (group == "rhods-users") or
+           (group == "rhods-noaccess")):
+            cmd = "oc adm groups add-users {} {}".format(group, user)
+        else:
+            cmd = ("ocm create user {} --cluster {} "
+                   "--group={}".format(user,
+                                       self.cluster_name, group))
         ret = execute_command(cmd)
         if ret is None:
             print("Failed to add user {} to group "
-                  "{}".format(self.htpasswd_cluster_admin, group))
+                  "{}".format(user, group))
             sys.exit(1)
+
+        # Logging users/groups details after adding
+        # given user to group
+
+        cmd = "oc get users"
+        users_list = execute_command(cmd)
+        print ("Users present in cluster: {}".format(users_list)) 
+
+        cmd = "oc get groups"
+        groups_list = execute_command(cmd)
+        print ("Groups present in cluster: {}".format(groups_list))
+
+    def create_group(self, group_name):
+        """Creates new group"""
+
+        cmd = "oc adm groups new {}".format(group_name)
+        ret = execute_command(cmd)
+        if ret is None:
+            print("Failed to add group "
+                  "{}".format(group_name))
+            sys.exit(1)
+
+    def add_users_to_rhods_group(self):
+        """Add users to rhods group"""
+
+        # Adds user ldap-admin1..ldap-adminN
+        for i in range(1, int(self.num_users_to_create_per_group)+1):
+            self.add_user_to_group(user="ldap-admin"+str(i),
+                                   group="rhods-admins")
+
+        # Adds user ldap-user1..ldap-userN
+        for i in range(1, int(self.num_users_to_create_per_group)+1):
+            self.add_user_to_group(user="ldap-users"+str(i),
+                                   group="rhods-users")
+
+        self.create_group("rhods-noaccess")
+        # Adds user ldap-noaccess1..ldap-noaccessN
+        for i in range(1, int(self.num_users_to_create_per_group)+1):
+            self.add_user_to_group(user="ldap-noaccess"+str(i),
+                                   group="rhods-noaccess")
 
     def setup_osd_cluster(self):
         """Sets up the osd cluster"""
@@ -314,6 +427,15 @@ class OpenshiftClusterManager():
             self.create_idp()
             self.add_user_to_group()
 
+        if ((not bool(self.skip_cluster_creation)) or
+           (not bool(self.skip_rhods_installation)) or
+           (bool(self.create_cluster_admin_user))):
+
+            # Waiting 5 minutes to ensure all the cluster services are
+            # up even after cluster is in ready state
+            time.sleep(300)
+
+        print ("Get osd cluster {} Info".format(self.cluster_name))
         self.get_osd_cluster_info()
 
     def login(self):
@@ -373,6 +495,32 @@ def parse_args():
                         help="Number of compute nodes",
                         action="store", dest="num_compute_nodes",
                         default="3")
+    parser.add_argument("-j", "--htpasswd-cluster-admin",
+                        help="Cluster admin user of idp type htpasswd",
+                        action="store", dest="htpasswd_cluster_admin",
+                        default="htpasswd-cluster-admin-user")
+    parser.add_argument("-y", "--htpasswd-cluster-password",
+                        help="htpasswd Cluster admin password",
+                        action="store", dest="htpasswd_cluster_password",
+                        default="rhodsPW#123456")
+    parser.add_argument("-u", "--ldap-url",
+                        help="Ldap url",
+                        action="store", dest="ldap_url",
+                        default=("ldap://openldap.openldap.svc."
+                                 "cluster.local:1389"
+                                 "/dc=example,dc=org?uid"))
+    parser.add_argument("-b", "--ldap-bind-dn",
+                        help="Ldap bind dn",
+                        action="store", dest="ldap_bind_dn",
+                        default="cn=admin,dc=example,dc=org")
+    parser.add_argument("-w", "--ldap-bind-password",
+                        help="Ldap bind password",
+                        action="store", dest="ldap_bind_password",
+                        default="adminpassword")
+    parser.add_argument("-z", "--num-users-to-create-per-group",
+                        help="Ldap bind password",
+                        action="store", dest="num_users_to_create_per_group",
+                        default="20")
     parser.add_argument("-s", "--skip-cluster-creation",
                         help="skip osd cluster creation",
                         action="store_true", dest="skip_cluster_creation")
@@ -382,6 +530,12 @@ def parse_args():
     parser.add_argument("-m", "--create-cluster-admin-user",
                         help="create cluster admin user for login",
                         action="store_true", dest="create_cluster_admin_user")
+    parser.add_argument("-q", "--create-ldap-idp",
+                        help="create ldap idp and add users to rhods groups",
+                        action="store_true", dest="create_ldap_idp")
+    parser.add_argument("-d", "--delete-ldap-idp",
+                        help="delete ldap idp",
+                        action="store_true", dest="delete_ldap_idp")
     parser.add_argument("-o", "--ocmclibinaryurl",
                         help="ocm cli binary url",
                         action="store", dest="ocm_cli_binary_url",
@@ -394,6 +548,29 @@ if __name__ == '__main__':
 
     args = parse_args()
     ocm_obj = OpenshiftClusterManager(args)
+
+    # Install ocm cli if not already installed
     ocm_obj.ocm_cli_install()
+
+    # Perform ocm login to cluster
     ocm_obj.login()
+
+    # Setup OSD Cluster
     ocm_obj.setup_osd_cluster()
+
+    # Create ldap idp and add users to rhods groups
+    if bool(args.create_ldap_idp):
+        ocm_obj.create_idp(type="ldap")
+        ocm_obj.add_users_to_rhods_group()
+
+        # TODO: Add wait mechanism to let ldap IDP
+        # to be in action in cluster
+        time.sleep(120)
+
+    if bool(args.delete_ldap_idp):
+        if (ocm_obj.is_idp_exists("ldap-provider-qe")):
+            ocm_obj.delete_idp("ldap-provider-qe")
+
+            # TODO: Add wait mechanism to let ldap IDP
+            # deletion to be in action in cluster
+            time.sleep(120)

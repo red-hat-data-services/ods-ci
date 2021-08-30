@@ -309,7 +309,6 @@ class OpenshiftClusterManager():
             if ret is None:
                 print("Failed to add identity provider of "
                       "type {}".format(self.idp_type))
-                sys.exit(1)
         elif (type == "ldap"):
             ldap_yaml_file = (os.path.abspath(
                 os.path.dirname(__file__)) +
@@ -336,7 +335,6 @@ class OpenshiftClusterManager():
             ret = execute_command(cmd)
             if ret is None:
                 print("Failed to add ldap identity provider")
-                sys.exit(1)
 
     def delete_idp(self, idp_name):
         """Deletes Identity Provider"""
@@ -366,18 +364,6 @@ class OpenshiftClusterManager():
         if ret is None:
             print("Failed to add user {} to group "
                   "{}".format(user, group))
-            sys.exit(1)
-
-        # Logging users/groups details after adding
-        # given user to group
-
-        cmd = "oc get users"
-        users_list = execute_command(cmd)
-        print ("Users present in cluster: {}".format(users_list)) 
-
-        cmd = "oc get groups"
-        groups_list = execute_command(cmd)
-        print ("Groups present in cluster: {}".format(groups_list))
 
     def create_group(self, group_name):
         """Creates new group"""
@@ -387,7 +373,6 @@ class OpenshiftClusterManager():
         if ret is None:
             print("Failed to add group "
                   "{}".format(group_name))
-            sys.exit(1)
 
     def add_users_to_rhods_group(self):
         """Add users to rhods group"""
@@ -407,6 +392,17 @@ class OpenshiftClusterManager():
         for i in range(1, int(self.num_users_to_create_per_group)+1):
             self.add_user_to_group(user="ldap-noaccess"+str(i),
                                    group="rhods-noaccess")
+
+        # Logging users/groups details after adding
+        # given user to group
+
+        cmd = "oc get users"
+        users_list = execute_command(cmd)
+        print ("Users present in cluster: {}".format(users_list))
+
+        cmd = "oc get groups"
+        groups_list = execute_command(cmd)
+        print ("Groups present in cluster: {}".format(groups_list))
 
     def setup_osd_cluster(self):
         """Sets up the osd cluster"""

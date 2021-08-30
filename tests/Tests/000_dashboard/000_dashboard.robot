@@ -1,6 +1,4 @@
 *** Settings ***
-# Resource  ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-# Library         SeleniumLibrary
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Library         RequestsLibrary
@@ -26,7 +24,7 @@ Verify Resource Link Http status code
     [Tags]  BD-Test
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    #Wait for ODH Dashboard to Load
+    Wait for ODH Dashboard to Load
     Click Link    Resources
     Sleep  5
     ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]

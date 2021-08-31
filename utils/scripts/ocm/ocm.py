@@ -384,7 +384,7 @@ class OpenshiftClusterManager():
 
         # Adds user ldap-user1..ldap-userN
         for i in range(1, int(self.num_users_to_create_per_group)+1):
-            self.add_user_to_group(user="ldap-users"+str(i),
+            self.add_user_to_group(user="ldap-user"+str(i),
                                    group="rhods-users")
 
 	# Adds special users

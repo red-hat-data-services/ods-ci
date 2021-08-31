@@ -10,13 +10,13 @@ Suite Teardown   End Web Test
 
 
 *** Test Cases ***
-Open ODH Dashboard
+Open RHODS Dashboard
   [Tags]  Sanity
-  Wait for ODH Dashboard to Load
+  Wait for RHODS Dashboard to Load
 
 Can Launch Jupyterhub
   [Tags]  Sanity
-  Launch JupyterHub From ODH Dashboard Dropdown
+  Launch JupyterHub From RHODS Dashboard Dropdown
 
 Can Login to Jupyterhub
   [Tags]  Sanity

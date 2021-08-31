@@ -9,9 +9,9 @@ Suite Teardown   End Web Test
 *** Test Cases ***
 Launch JupyterLab
   [Tags]  Sanity
-  Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for ODH Dashboard to Load
-  Launch JupyterHub From ODH Dashboard Dropdown
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for RHODS Dashboard to Load
+  Launch JupyterHub From RHODS Dashboard Dropdown
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

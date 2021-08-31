@@ -388,7 +388,8 @@ class OpenshiftClusterManager():
                                    group="rhods-users")
 
 	# Adds special users
-        for char in [".", "^", "$", "*", "+", "?", "(", ")", "[", "]", "{", "}", "|", "@", ";", "<", ">"]:
+        # "(", ")", "|", "<", ">" not working in OSD
+        for char in [".", "^", "$", "*", "+", "?", "[", "]", "{", "}", "@", ";"]:
             self.add_user_to_group(user="ldap-special"+char,
                                    group="rhods-users")
 

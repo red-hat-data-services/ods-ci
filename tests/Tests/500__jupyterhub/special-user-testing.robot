@@ -17,9 +17,9 @@ Test Special Usernames
     ...     PLACEHOLDER  #Category tags
     ...     ODS-257
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait for ODH Dashboard to Load
-    Launch JupyterHub From ODH Dashboard Dropdown
+    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
+    Launch JupyterHub From RHODS Dashboard Dropdown
     FOR  ${char}  IN  @{CHARS}
         Login Verify Logout  ldap-special${char}  ${TEST_USER.PASSWORD}  ldap-provider-qe
     END

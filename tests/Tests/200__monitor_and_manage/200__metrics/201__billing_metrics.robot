@@ -62,15 +62,15 @@ Verify Previus CPU Usage Is Greater Than Zero
 ## TODO: Add this keyword with the other JupyterHub stuff
 Run Jupyter Notebook For 5 Minutes
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for ODH Dashboard to Load
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for RHODS Dashboard to Load
   Iterative Image Test  s2i-generic-data-science-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
 
 
 ##TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob. We have to refactor the code not to duplicate this method
 Iterative Image Test
   [Arguments]  ${image}  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-  Launch JupyterHub From ODH Dashboard Dropdown
+  Launch JupyterHub From RHODS Dashboard Dropdown
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Page Should Not Contain    403 : Forbidden
   ${authorization_required} =  Is Service Account Authorization Required

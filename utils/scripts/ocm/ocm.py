@@ -149,7 +149,7 @@ class OpenshiftClusterManager():
         console_url = self.get_osd_cluster_console_url()
         cluster_info['OCP_CONSOLE_URL'] = console_url
         odh_dashboard_url = console_url.replace('console-openshift-console',
-                                                'odh-dashboard-redhat-ods-applications')
+                                                'rhods-dashboard-redhat-ods-applications')
         cluster_info['ODH_DASHBOARD_URL'] = odh_dashboard_url
         # TODO: Avoid this hard coding and call
         # create identity provider method once its ready
@@ -384,7 +384,13 @@ class OpenshiftClusterManager():
 
         # Adds user ldap-user1..ldap-userN
         for i in range(1, int(self.num_users_to_create_per_group)+1):
-            self.add_user_to_group(user="ldap-users"+str(i),
+            self.add_user_to_group(user="ldap-user"+str(i),
+                                   group="rhods-users")
+
+	# Adds special users
+        # "(", ")", "|", "<", ">" not working in OSD
+        for char in [".", "^", "$", "*", "+", "?", "[", "]", "{", "}", "@", ";"]:
+            self.add_user_to_group(user="ldap-special"+char,
                                    group="rhods-users")
 
         self.create_group("rhods-noaccess")

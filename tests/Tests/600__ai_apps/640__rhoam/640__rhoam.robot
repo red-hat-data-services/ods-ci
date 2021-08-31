@@ -9,8 +9,8 @@ Suite Teardown  RHOAM Suite Teardown
 Verify RHOAM Is Available In RHODS Dashboard Explore Page
   [Tags]  ODS-271  Smoke  Sanity
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for ODH Dashboard to Load
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for RHODS Dashboard to Load
   Verify Service Is Available In The Explore Page    OpenShift API Management
   Verify Service Provides "Get Started" Button In The Explore Page    OpenShift API Management
 

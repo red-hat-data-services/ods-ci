@@ -23,9 +23,9 @@ Can Launch Jupyterhub
    [Tags]  Sanity  Smoke  ODS-129
    #This keyword will work with accounts that are not cluster admins.
    Launch Jupyterhub via App
-   Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-   Wait for ODH Dashboard to Load
-   Launch JupyterHub From ODH Dashboard Dropdown
+   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+   Wait for RHODS Dashboard to Load
+   Launch JupyterHub From RHODS Dashboard Dropdown
 
 Can Login to Jupyterhub
    [Tags]  Sanity  Smoke  ODS-128

@@ -12,11 +12,11 @@ Suite Teardown   End Web Test
 
 
 *** Test Cases ***
-Open ODH Dashboard
-  Wait for ODH Dashboard to Load
+Open RHODS Dashboard
+  Wait for RHODS Dashboard to Load
 
 Can Launch Jupyterhub
-  Launch JupyterHub From ODH Dashboard Dropdown
+  Launch JupyterHub From RHODS Dashboard Dropdown
 
 Can Login to Jupyterhub
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

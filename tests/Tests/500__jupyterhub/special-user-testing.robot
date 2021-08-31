@@ -9,7 +9,9 @@ Suite Setup      Special User Testing Suite Setup
 Suite Teardown   End Web Test
 
 *** Variables ***
-@{CHARS} =  .  ^  $  *  +  ?  (  )  [  ]  {  }  |  @  ;  <  >
+@{CHARS} =  .  ^  $  *  +  ?  [  ]  {  }  @  ;
+
+# (  ) |  <  > not working in OSD
 
 *** Test Cases ***
 Test Special Usernames

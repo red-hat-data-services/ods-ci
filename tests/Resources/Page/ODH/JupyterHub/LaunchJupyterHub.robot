@@ -11,8 +11,8 @@ Launch Jupyterhub via Routes
    Click Link  Routes
    Maximize Browser Window
    Wait Until Page Contains Element  xpath://input[@data-test-id="item-filter"]
-   Input Text  xpath://input[@data-test-id="item-filter"]  odh-dashboard
-   Wait Until Page Contains  odh-dashboard
+   Input Text  xpath://input[@data-test-id="item-filter"]  rhods-dashboard
+   Wait Until Page Contains  rhods-dashboard
    Sleep  4s
    Input Text  xpath://input[@data-test-id="item-filter"]  jupyterhub
    Wait Until Page Contains  jupyterhub  timeout=15
@@ -23,5 +23,5 @@ Launch Jupyterhub via Routes
 Launch Jupyterhub via App
    Click Element  xpath://header[@id='page-main-header']/div[2]/div[1]/div[1]/nav/button
    Sleep  1
-   Click Element  xpath://a[contains(@href, 'https://odh-dashboard')]
+   Click Element  xpath://a[contains(@href, 'https://rhods-dashboard')]
    Switch Window  NEW

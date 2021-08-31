@@ -9,7 +9,7 @@ Suite Setup      Special User Testing Suite Setup
 Suite Teardown   End Web Test
 
 *** Variables ***
-@{CHARS} =  .  ^  $  *  +  ?  (  )  [  ]  {  }  \\  |  @  ;  <  >
+@{CHARS} =  .  ^  $  *  +  ?  (  )  [  ]  {  }  |  @  ;  <  >
 
 *** Test Cases ***
 Test Special Usernames
@@ -21,7 +21,7 @@ Test Special Usernames
     Wait for ODH Dashboard to Load
     Launch JupyterHub From ODH Dashboard Dropdown
     FOR  ${char}  IN  @{CHARS}
-        Login Verify Logout  htpasswd-special${char}  ${TEST_USER.PASSWORD}  htpasswd-provider-qe
+        Login Verify Logout  ldap-special${char}  ${TEST_USER.PASSWORD}  ldap-provider-qe
     END
 
 *** Keywords ***

@@ -43,11 +43,15 @@ Skip Test If Previous CPU Usage Is Not Zero
   END
 
 Run OpenShift Metrics Query
+  [Documentation]  Runs a query in the Monitoring section of Open Shift
+  ...              Note: in order to run this keyword OCP_ADMIN_USER.USERNAME needs to
+  ...                 belong to a group with "view" role in OpenShift
+  ...              Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
   [Arguments]  ${query}
   Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   LoginPage.Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
   OCPMenu.Switch To Administrator Perspective
-  Wait Until Page Contains    Status  timeout=20
+  Wait Until Page Contains   Monitoring  timeout=20  error=${OCP_ADMIN_USER.USERNAME} can't see the Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
   Menu.Navigate To Page   Monitoring  Metrics
   Metrics.Verify Page Loaded
   Metrics.Run Query  ${query}

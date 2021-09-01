@@ -23,6 +23,7 @@ Test Billing Metric (notebook cpu usage) on OpenShift Monitoring
   [Tags]  Smoke  Sanity  ODS-175
   #Skip Test If Previous CPU Usage Is Not Zero
   Run Jupyter Notebook For 5 Minutes
+  Sleep  120  reason=Wait until cpu usage metrics results are available
   Verify Previus CPU Usage Is Greater Than Zero
 
 *** Keywords ***

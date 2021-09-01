@@ -29,12 +29,12 @@ Can Login to Jupyterhub
 Can Spawn Notebook
   [Tags]  Sanity
   Fix Spawner Status
-  &{S3-credentials}  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
+  &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{S3-credentials}
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity
-  Wait for JupyterLab Splash Screen  timeout=30
+  Wait for JupyterLab Splash Screen  timeout=60
   Maybe Select Kernel
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
@@ -50,6 +50,7 @@ Can Launch Python3 Smoke Test Notebook
   Click Element  xpath://div[.="Open"]
   Wait Until CCFraud-clustering-S3.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs
+  Sleep  5
   Open With JupyterLab Menu  Run  Run All Cells
   Wait Until JupyterLab Code Cell Is Not Active  timeout=300
   JupyterLab Code Cell Error Output Should Not Be Visible

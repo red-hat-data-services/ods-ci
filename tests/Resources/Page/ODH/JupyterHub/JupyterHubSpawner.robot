@@ -99,13 +99,14 @@ Spawn Notebook With Arguments
       Select Notebook Image  ${image}
       Select Container Size  ${size}
       Remove All Spawner Environment Variables
-      FOR  ${key}  ${value}  IN  &{envs}
+      FOR  ${key}  ${value}  IN  &{envs}[envs]
          Sleep  1
          Add Spawner Environment Variable  ${key}  ${value}
       END
       Click Button  Start server
       Wait Until Page Contains  Your server is starting up
       Wait Until Element is Visible  id:progress-bar
+      #Might need to update to react to quicker spawn failures
       Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
       ${spawn_fail} =  Has Spawn Failed
       Exit For Loop If  ${spawn_fail} == False

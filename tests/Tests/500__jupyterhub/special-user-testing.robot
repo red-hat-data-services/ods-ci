@@ -9,10 +9,10 @@ Suite Setup      Special User Testing Suite Setup
 Suite Teardown   End Web Test
 
 *** Variables ***
-@{CHARS} =  .  ^  $  *  ?  [  ]  {  }  @  ;
+@{CHARS} =  .  ^  $  *  ?  [  ]  {  }  @
 
 # (  ) |  <  > not working in OSD
-# + disabled for now
+# + and ; disabled for now
 
 *** Test Cases ***
 Test Special Usernames

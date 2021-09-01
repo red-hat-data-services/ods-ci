@@ -23,8 +23,8 @@ Get HTTP Status Code
 Verify Resource Link Http status code
     [Tags]  ODS-531
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To ODH Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait for ODH Dashboard to Load
+    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
     Click Link    Resources
     Sleep  5
     ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]

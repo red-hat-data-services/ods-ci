@@ -389,7 +389,8 @@ class OpenshiftClusterManager():
 
 	# Adds special users
         # "(", ")", "|", "<", ">" not working in OSD
-        for char in [".", "^", "$", "*", "+", "?", "[", "]", "{", "}", "@", ";"]:
+        # "+" and ";" disabled for now
+        for char in [".", "^", "$", "*", "?", "[", "]", "{", "}", "@"]:
             self.add_user_to_group(user="ldap-special"+char,
                                    group="rhods-users")
 

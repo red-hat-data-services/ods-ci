@@ -98,10 +98,12 @@ Spawn Notebook With Arguments
    FOR  ${index}  IN RANGE  0  1+${retries}
       Select Notebook Image  ${image}
       Select Container Size  ${size}
-      Remove All Spawner Environment Variables
-      FOR  ${key}  ${value}  IN  &{envs}[envs]
-         Sleep  1
-         Add Spawner Environment Variable  ${key}  ${value}
+      IF  &{envs}
+         Remove All Spawner Environment Variables
+         FOR  ${key}  ${value}  IN  &{envs}[envs]
+            Sleep  1
+            Add Spawner Environment Variable  ${key}  ${value}
+         END
       END
       Click Button  Start server
       Wait Until Page Contains  Your server is starting up

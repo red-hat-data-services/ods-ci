@@ -122,7 +122,7 @@ def add_testcase_properties(xml_obj, tcconfig=None):
 def get_polarion_id(xml_obj):
     """Gets testcase name and its polarion ids"""
     tc_data = {}
-    for test_data in xml_obj.findall('.suite/suite/suite/test'):
+    for test_data in xml_obj.findall('.//test'):
         tags = test_data.findall('tag')
         polarion_id_list = []
         for tag in tags:

@@ -27,6 +27,7 @@ setup(
         "pyyaml",
         "pygments",
         "requests",
+        "robotframework-requests",
     ],
     zip_safe=True,
     include_package_data=True,

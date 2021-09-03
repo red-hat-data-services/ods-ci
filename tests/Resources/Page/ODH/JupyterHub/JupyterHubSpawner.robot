@@ -22,6 +22,7 @@ Select Container Size
    [Documentation]  Selects the container size based on the ${container_size} argument
    [Arguments]  ${container_size}
    # Expand List
+   Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawner
    Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[3]/button
    Click Element  xpath://span[.="${container_size}"]/../..
 

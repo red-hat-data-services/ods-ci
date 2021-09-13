@@ -6,3 +6,4 @@ ods_ci.egg-info/
 test-output/
 dist/
 drivers/**/chromedriver
+must-gather-results.txt

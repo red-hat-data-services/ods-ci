@@ -5,6 +5,9 @@ BROWSER:
   OPTIONS: add_argument("--ignore-certificate-errors");add_argument("window-size=1920,1024");add_argument("--disable-dev-shm-usage");add_argument("--no-sandbox")
 OCP_CONSOLE_URL: "http://console-openshift-console.apps.my-cluster.test.redhat.com/"
 ODH_DASHBOARD_URL: "http://odh-dashboard-opendatahub.apps.my-cluster.test.redhat.com/"
+RHODS_PROMETHEUS_URL: "https://prometheus-redhat-ods-monitoring.apps.my-cluster.test.redhat.com/"
+# RHODS_PROMETHEUS_TOKEN can be obtained running: oc serviceaccounts get-token prometheus -n redhat-ods-monitoring #
+RHODS_PROMETHEUS_TOKEN: "prometheus-token"
 TEST_USER:
   AUTH_TYPE: foo-auth
   USERNAME: foo-user
@@ -16,9 +19,3 @@ OCP_ADMIN_USER:
 S3:
   AWS_ACCESS_KEY_ID: ID-value
   AWS_SECRET_ACCESS_KEY: Secret-Key
-####################################################################
-# RHODS_PROMETHEUS_TOKEN                                           #
-# Run this command to obtain the token:                            #
-# oc serviceaccounts get-token prometheus -n redhat-ods-monitoring #
-####################################################################
-RHODS_PROMETHEUS_TOKEN: prometheus-token

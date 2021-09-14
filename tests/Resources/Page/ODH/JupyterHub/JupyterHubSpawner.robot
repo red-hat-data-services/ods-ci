@@ -191,3 +191,11 @@ Login Via Button
    ...  Keyword.
    Click Element  xpath://a[@id='login']
    Wait Until Page Contains  Log in with
+
+Access Spawner API
+  [Arguments]  ${Target}
+  Click Element  xpath://*[@id="thenavbar"]/ul[1]/li[4]/a
+  Click Element  xpath://*[@id="thenavbar"]/ul[1]/li[4]/ul/li/a
+  ${url}=   Get Location
+  ${url}=   Catenate  SEPARATOR=  ${url}  ${Target}
+  Go To  ${url} 

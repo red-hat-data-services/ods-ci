@@ -25,7 +25,7 @@ Login To RHODS Dashboard
 
 Wait for RHODS Dashboard to Load
   [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
-  Wait For Condition  return document.title == ${dashboard_title}  timeout=30
+  Wait For Condition  return document.title == ${dashboard_title}  timeout=60
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments

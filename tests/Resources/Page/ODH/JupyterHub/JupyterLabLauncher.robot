@@ -75,7 +75,7 @@ Stop JupyterLab Notebook Server
   ${stop_enabled} =  Run Keyword And Return Status  Page Should Contain Element    //*[@id="stop"]
   IF    ${stop_enabled} == True
     Click Element  //*[@id="stop"]
-    Wait Until Page Contains  Start My Server  timeout=60
+    Wait Until Page Contains  Start My Server  timeout=120
   END
 
 Logout JupyterLab

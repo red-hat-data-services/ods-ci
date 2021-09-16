@@ -7,6 +7,7 @@ Library     SeleniumLibrary
 
 *** Test Cases ***
 Verify Telemetry Data Is Accessible
+  [Tags]  Sanity
   Set Library Search Order  SeleniumLibrary
   Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   LoginPage.Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
@@ -17,7 +18,7 @@ Verify Telemetry Data Is Accessible
   Launch Jupyterhub via Routes
   Login To Jupyterhub  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
   Access Spawner API  api/instance
-  Page Should Contain  "cluster_id"
+  Wait Until Page Contains  "cluster_id"  timeout=2
   Page Should Contain  "foo": "bar"
   
 

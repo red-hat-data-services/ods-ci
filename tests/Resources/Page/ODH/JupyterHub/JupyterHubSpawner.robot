@@ -7,6 +7,8 @@ Library  Collections
 *** Variables ***
 ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =  //div[contains(@class,"jsp-spawner__header__title") and .="Start a notebook server"]
 
+
+
 *** Keywords ***
 JupyterHub Spawner Is Visible
    ${spawner_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
@@ -15,15 +17,17 @@ JupyterHub Spawner Is Visible
 Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
    [Arguments]  ${notebook_image}
-   Wait Until Element Is Visible  xpath:/html/body/div[1]/form/div/div/div[2]/div[2]/div[1]
+   Wait Until Element Is Visible  xpath://div[@class="jsp-spawner__image-options__image"]  timeout=30  error=No notebook images are present in the JupyterHub Spawner
    Click Element  xpath://input[contains(@id, "${notebook_image}")]
 
 Select Container Size
    [Documentation]  Selects the container size based on the ${container_size} argument
    [Arguments]  ${container_size}
+
+   ${container_size_button_xpath} =  Set Variable  //button[contains(@aria-labelledby, "container-size")]
    # Expand List
-   Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawner
-   Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[3]/button
+   Wait Until Element Is Visible  xpath:${container_size_button_xpath}   timeout=30   error=Container size selector is not present in JupyterHub Spawner
+   Click Element  xpath:${container_size_button_xpath}
    Click Element  xpath://span[.="${container_size}"]/../..
 
 Set Number of required GPUs

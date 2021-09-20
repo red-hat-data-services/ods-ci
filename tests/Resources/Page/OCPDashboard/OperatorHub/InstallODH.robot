@@ -13,6 +13,9 @@ Open OperatorHub
 Install ODH Operator
     Install Operator    opendatahub
 
+Install RHODS Operator
+    Install Operator    rhods
+
 Open OCP Console
     Open Page    ${OCP_CONSOLE_URL}
 
@@ -24,3 +27,6 @@ OperatorHub Should Be Open
 
 ODH Operator Should Be Installed
     Operator Should Be Installed    Open Data Hub Operator
+
+RHODS Operator Should Be installed
+    Operator Should Be Installed    Red Hat OpenShift Data Science

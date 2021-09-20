@@ -17,6 +17,7 @@ setup(
         "reportportal-client",
         "robotframework>=4",
         "robotframework-debuglibrary",
+        "robotframework-requests",
         "robotframework-seleniumlibrary",
         "robotframework-jupyterlibrary>=0.3.1",
         "robotframework-OpenShiftCLI",

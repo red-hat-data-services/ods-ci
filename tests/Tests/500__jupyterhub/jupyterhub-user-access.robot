@@ -14,7 +14,7 @@ ${AUTH_TYPE}     ldap-provider-qe
 
 *** Test Cases ***
 Test User Not In JH Access Groups
-    [Tags]  Smoke
+    [Tags]  Sanity
     ...     PLACEHOLDER  #Category tags
     ...     ODS-503
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
@@ -24,7 +24,7 @@ Test User Not In JH Access Groups
     Login Verify Access Level  ldap-noaccess1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}  none
 
 Test User In JH Admin Group
-    [Tags]  Smoke
+    [Tags]  Sanity
     ...     PLACEHOLDER  #Category tags
     ...     ODS-503
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
@@ -34,7 +34,7 @@ Test User In JH Admin Group
     Login Verify Access Level  ldap-admin1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}  admin
 
 Test User In JH Users Group
-    [Tags]  Smoke
+    [Tags]  Sanity
     ...     PLACEHOLDER  #Category tags
     ...     ODS-503
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

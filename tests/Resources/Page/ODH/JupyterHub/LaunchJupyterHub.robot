@@ -16,10 +16,9 @@ Launch Jupyterhub via Routes
    Sleep  4s
    Input Text  xpath://input[@data-test-id="item-filter"]  jupyterhub
    Wait Until Page Contains  jupyterhub  timeout=15
-   Sleep  1s
    Click Element  partial link:https://jupyterhub
    Sleep  10s
-   Switch Window  NEW
+   Switch Window  JupyterHub
 
 Launch Jupyterhub via App
    Click Element  xpath://header[@id='page-main-header']/div[2]/div[1]/div[1]/nav/button

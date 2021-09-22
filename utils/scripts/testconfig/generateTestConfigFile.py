@@ -46,24 +46,32 @@ def parse_args():
                         help="Test cluster. Eg: modh-qe-1",
                         action="store", dest="test_cluster",
                         required=True)
-    parser.add_argument("-o", "--setPromotheusToken",
-                        help="append promotheus token to config file",
-                        action="store_true", dest="set_promotheus_token")
+    parser.add_argument("-o", "--setPromotheusConfig",
+                        help="append prometheus config to config file",
+                        action="store_true", dest="set_prometheus_config")
     parser.add_argument("-s", "--skip-git-clone",
                         help="If this option is used then cloning config git repo for ods-ci tests is skipped.",
                         action="store_true", dest="skip_clone")
     return parser.parse_args()
 
-def get_prometheus_token(cluster, project):
+def get_prometheus_token(project):
     """
-    Get prometheus token for the given cluster.
+    Get prometheus token for the cluster.
     """
     cmd = "oc sa get-token prometheus -n {}".format(project)
     prometheus_token = execute_command(cmd)
     return prometheus_token.strip("\n")
 
+def get_prometheus_url(project):
+    """
+    Get prometheus url for the cluster.
+    """
+    host_jsonpath = "{.spec.host}"
+    cmd = "oc get route prometheus -n {} -o jsonpath='{}'".format(project, host_jsonpath)
+    prometheus_url = execute_command(cmd)
+    return "https://" + prometheus_url.strip("\n")
 
-def generate_test_config_file(config_template, config_data, test_cluster, set_promotheus_token):
+def generate_test_config_file(config_template, config_data, test_cluster, set_prometheus_config):
     """
     Generates test config file dynamically by substituting the values in a template file.
     """
@@ -87,10 +95,14 @@ def generate_test_config_file(config_template, config_data, test_cluster, set_pr
     # Login to test cluster using oc command
     oc_login(data["OCP_CONSOLE_URL"], data["OCP_ADMIN_USER"]["USERNAME"], data["OCP_ADMIN_USER"]["PASSWORD"])
 
-    # Get prometheus token for test cluster
-    if bool(set_promotheus_token):
-        prometheus_token = get_prometheus_token(test_cluster, "redhat-ods-monitoring")
+    if bool(set_prometheus_config):
+        # Get prometheus token for test cluster
+        prometheus_token = get_prometheus_token("redhat-ods-monitoring")
         data["RHODS_PROMETHEUS_TOKEN"] = prometheus_token
+
+        # Get prometheus url
+        prometheus_url = get_prometheus_url("redhat-ods-monitoring")
+        data["RHODS_PROMETHEUS_URL"] = prometheus_url
 
     with open(config_file, 'w') as yaml_file:
         yaml_file.write( yaml.dump(data, default_flow_style=False, sort_keys=False))
@@ -116,7 +128,7 @@ def main():
     
     # Generate test config file
     generate_test_config_file(args.config_template, config_data, args.test_cluster,
-                              args.set_promotheus_token)
+                              args.set_prometheus_config)
 
 
 if __name__ == '__main__':

@@ -194,6 +194,8 @@ Login Via Button
 
 Access Spawner API
   [Arguments]  ${Target}
+  JupyterHub Spawner is Visible
+  Page Should Contain  Services
   Click Element  xpath://*[@id="thenavbar"]/ul[1]/li[4]/a
   Click Element  xpath://*[@id="thenavbar"]/ul[1]/li[4]/ul/li/a
   ${url}=   Get Location

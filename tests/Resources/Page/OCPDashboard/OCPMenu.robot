@@ -38,4 +38,17 @@ Switch To Developer Perspective
 
 Maybe Skip Tour
    ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id='guided-tour-modal']
-   Run Keyword If  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button
+   Run Keyword If  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/
+  
+Create Secret
+  [Arguments]  ${name}  ${key}  ${value}
+  Menu.Navigate To Page   Workloads  Secrets
+  Wait Until Page Contains  Create  timeout=30
+  Click Button  Create
+  Click Element  xpath://*[@id="generic-link"]
+  Wait Until Page Contains  Secret name  timeout=30
+  Input Text  xpath://*[@id="secret-name"]  ${name}
+  Input Text  xpath://*[@id="0-key"]  ${Key}
+  Input Text  xpath://*[@id="content-scrollable"]/div/form/div[1]/div/div[2]/div/div/div/div/textarea  ${Value}
+  Click Button  Create
+

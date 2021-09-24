@@ -453,6 +453,36 @@ class OpenshiftClusterManager():
             print("Failed to login to aws openshift platform using token")
             sys.exit(1)
 
+    def delete_cluster(self):
+        """ Delete OSD Cluster"""
+
+        cluster_id = self.get_osd_cluster_id()
+        cmd = "ocm delete cluster {}".format(cluster_id)
+
+        ret = execute_command(cmd)
+        if ret is None:
+            print("Failed to delete osd cluster {}".format(self.cluster_name))
+            sys.exit(1)
+
+    def wait_for_osd_cluster_to_get_deleted(self, timeout=3600):
+        """Waits for cluster to get deleted"""
+
+        cluster_exists = self.is_osd_cluster_exists()
+        count = 0
+        check_flag = False
+        while(count <= timeout):
+            cluster_exists = self.is_osd_cluster_exists()
+            if not cluster_exists:
+                print ("{} is deleted".format(self.cluster_name))
+                check_flag = True
+                break
+
+            time.sleep(60)
+            count += 60
+        if not check_flag:
+            print ("{} not deleted even after an hour."
+                   " EXITING".format(self.cluster_name))
+            sys.exit(1)
 
 def parse_args():
     """Parse CLI arguments"""
@@ -539,6 +569,9 @@ def parse_args():
     parser.add_argument("-d", "--delete-ldap-idp",
                         help="delete ldap idp",
                         action="store_true", dest="delete_ldap_idp")
+    parser.add_argument("-g", "--delete-cluster",
+                        help="delete osd cluster",
+                        action="store_true", dest="delete_cluster")
     parser.add_argument("-o", "--ocmclibinaryurl",
                         help="ocm cli binary url",
                         action="store", dest="ocm_cli_binary_url",
@@ -577,3 +610,10 @@ if __name__ == '__main__':
             # TODO: Add wait mechanism to let ldap IDP
             # deletion to be in action in cluster
             time.sleep(120)
+
+    if bool(args.delete_cluster):
+        print ("Deleting OSD Cluster...")
+        ocm_obj.delete_cluster()
+
+        print ("Wait for cluster to get deleted")
+        ocm_obj.wait_for_osd_cluster_to_get_deleted()

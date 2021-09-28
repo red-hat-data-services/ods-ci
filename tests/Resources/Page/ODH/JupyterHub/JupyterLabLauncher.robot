@@ -71,12 +71,18 @@ Open JupyterLab Control Panel
 Stop JupyterLab Notebook Server
   Open JupyterLab Control Panel
   Run Keyword And Ignore Error   Wait Until Page Contains  Stop My Server   timeout=30
+  # This is a dumb sleep to give the Stop button in the WebUI time to actually work when clicked
+  # TODO: Determine if there is any web element attribute that will allow signify when the Stop button will actually work
+  Sleep  2 seconds
   Capture Page Screenshot
   ${stop_enabled} =  Run Keyword And Return Status  Page Should Contain Element    //*[@id="stop"]
   IF    ${stop_enabled} == True
     Click Element  //*[@id="stop"]
+    Wait Until Element Is Not Visible   //*[@id="stop"]  3 minute
     Wait Until Page Contains  Start My Server  timeout=120
+    Capture Page Screenshot
   END
+
 
 Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out

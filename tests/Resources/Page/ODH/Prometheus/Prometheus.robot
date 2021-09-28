@@ -41,6 +41,27 @@ Verify Rules
   ${all_rules}=  Get From Dictionary    ${all_rules['data']}  groups
 
   FOR  ${rule_group}  IN  @{rule_groups}
-    Log To Console  Testing ${rule_group}
     Prometheus.Verify Rule  ${rule_group}  @{all_rules}
   END
+
+Alert Should Be Firing
+  [Arguments]  ${pm_url}  ${pm_token}  ${rule_group}  ${alert}
+  ${all_rules}=  Get Rules   ${pm_url}  ${pm_token}  alert
+  ${all_rules}=  Get From Dictionary    ${all_rules['data']}  groups
+
+  FOR  ${rule}  IN  @{all_rules}
+    ${rule_name}=  Get From Dictionary  ${rule}  name
+    ${rules_list}=  Get From Dictionary  ${rule}  rules
+
+    IF  '${rule_name}' == '${rule_group}'
+      FOR  ${sub_rule}  IN  @{rules_list}
+        ${state}=  Get From Dictionary  ${sub_rule}  state
+        ${name}=  Get From Dictionary  ${sub_rule}  name
+        IF  '${name}' == '${alert}'
+          Should Be Equal As Strings  ${state}  firing  msg=Alert ${alert} should be firing but state = ${state}
+          Return from keyword  ${TRUE}
+        END
+      END
+    END
+  END
+  Fail  msg=${alert} was not found in Prometheus firing rules

@@ -21,7 +21,8 @@ Get HTTP Status Code
 
 *** Test Cases ***
 Verify Resource Link Http status code
-    [Tags]  ODS-531
+    [Tags]  Sanity
+    ...     ODS-531
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load

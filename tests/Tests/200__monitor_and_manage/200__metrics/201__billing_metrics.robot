@@ -16,14 +16,13 @@ ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:se
 *** Test Cases ***
 Verify OpenShift Monitoring results are correct when running undefined queries
   [Tags]  Smoke  Sanity  ODS-173
-  Run OpenShift Metrics Query  ${METRIC_RHODS_UNDEFINED}
+  Run OpenShift Metrics Query  ${METRIC_RHODS_UNDEFINED}  retry-attempts=1
   Metrics.Verify Query Results Dont Contain Data
 
 Test Billing Metric (notebook cpu usage) on OpenShift Monitoring
   [Tags]  Smoke  Sanity  ODS-175
   #Skip Test If Previous CPU Usage Is Not Zero
   Run Jupyter Notebook For 5 Minutes
-  Sleep  120  reason=Wait until cpu usage metrics results are available
   Verify Previus CPU Usage Is Greater Than Zero
 
 *** Keywords ***
@@ -47,14 +46,14 @@ Run OpenShift Metrics Query
   ...              Note: in order to run this keyword OCP_ADMIN_USER.USERNAME needs to
   ...                 belong to a group with "view" role in OpenShift
   ...              Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
-  [Arguments]  ${query}
+  [Arguments]  ${query}  ${retry-attempts}=10
   Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   LoginPage.Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
   OCPMenu.Switch To Administrator Perspective
   Wait Until Page Contains   Monitoring  timeout=20  error=${OCP_ADMIN_USER.USERNAME} can't see the Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
   Menu.Navigate To Page   Monitoring  Metrics
   Metrics.Verify Page Loaded
-  Metrics.Run Query  ${query}
+  Metrics.Run Query  ${query}  ${retry-attempts}
   ${result} =   Metrics.Get Query Results
   [Return]  ${result}
 
@@ -101,4 +100,12 @@ Iterative Image Test
 
 
 CleanUp JupyterHub
+  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for RHODS Dashboard to Load
+  Launch JupyterHub From RHODS Dashboard Dropdown
+  Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Page Should Not Contain    403 : Forbidden
+  ${authorization_required} =  Is Service Account Authorization Required
+  Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
   Common.End Web Test

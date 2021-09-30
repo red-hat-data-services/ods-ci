@@ -6,7 +6,7 @@ Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
 
 *** Test Cases ***
-Logout and Log Back in as an Admin
+Verify "logged in users" are displayed in the dashboard
   [Tags]  Sanity    ODS-354
   Launch JupyterHub From RHODS Dashboard Dropdown
   Click Link  id:logout
@@ -17,15 +17,8 @@ Logout and Log Back in as an Admin
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-
-Go to Admin View of All Users
-  [Tags]  Sanity    ODS-354
   Click Link    Admin
   Wait Until Page Contains Element  id:add-users
-
-Verify User and Admin Are There
-  [Tags]  Sanity    ODS-354
   Page Should Contain   ${OCP_ADMIN_USER.USERNAME}
   Page Should Contain   ${TEST_USER.USERNAME}
   Capture Page Screenshot
-  

@@ -6,9 +6,9 @@ Library  String
 ${APP_LAUNCHER_ELEMENT}                 xpath=//*[@aria-label='Application launcher']/button
 ${PERSPECTIVE_SWITCHER_BUTTON_ELEMENT}  xpath=//*[@data-test-id="perspective-switcher-toggle"]
 ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  xpath=//*[@data-test-id="perspective-switcher-toggle"]/span/h2
-${PERSPECTIVE_ADMINISTRATOR_BUTTON}  xpath=//*[@id="page-sidebar"]/div/nav/div/div/ul/li[1]/*[contains(@class, 'pf-c-dropdown__menu-item')]/h2
-${PERSPECTIVE_DEVELOPER_BUTTON}      xpath=//*[@id="page-sidebar"]/div/nav/div/div/ul/li[2]/*[contains(@class, 'pf-c-dropdown__menu-item')]/h2
-
+${PERSPECTIVE_ADMINISTRATOR_BUTTON}  xpath=//*[@data-test-id="perspective-switcher-menu-option"][starts-with(., "Administrator")]
+${PERSPECTIVE_DEVELOPER_BUTTON}      xpath=//*[@data-test-id="perspective-switcher-menu-option"][starts-with(., "Developer")]
+${LOADING_INDICATOR_ELEMENT}         xpath=//*[@data-test="loading-indicator"]
 
 *** Keywords ***
 Wait Until OpenShift Console Is Loaded
@@ -20,8 +20,11 @@ Switch To Administrator Perspective
   ${current_perspective}=   Get Text  ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}
   IF  '${current_perspective}' != 'Administrator'
       Click Button    ${PERSPECTIVE_SWITCHER_BUTTON_ELEMENT}
-      Wait Until Page Contains Element    ${PERSPECTIVE_ADMINISTRATOR_BUTTON}
+      Wait Until Page Does Not Contain Element   ${LOADING_INDICATOR_ELEMENT}  timeout=30
+      Wait Until Element Is Visible    ${PERSPECTIVE_ADMINISTRATOR_BUTTON}  timeout=30
+      Sleep  1
       Click Element   ${PERSPECTIVE_ADMINISTRATOR_BUTTON}
+      Wait Until Page Does Not Contain Element   ${LOADING_INDICATOR_ELEMENT}  timeout=30
       Wait Until Page Contains Element     ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  timeout=30
   END
 
@@ -31,8 +34,11 @@ Switch To Developer Perspective
   ${current_perspective}=   Get Text  ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}
   IF  '${current_perspective}' != 'Developer'
       Click Button    ${PERSPECTIVE_SWITCHER_BUTTON_ELEMENT}
-      Wait Until Page Contains Element    ${PERSPECTIVE_DEVELOPER_BUTTON}
+      Wait Until Page Does Not Contain Element   ${LOADING_INDICATOR_ELEMENT}  timeout=30
+      Wait Until Element Is Visible    ${PERSPECTIVE_DEVELOPER_BUTTON}  timeout=30
+      Sleep  1
       Click Element   ${PERSPECTIVE_DEVELOPER_BUTTON}
+      Wait Until Page Does Not Contain Element   ${LOADING_INDICATOR_ELEMENT}  timeout=30
       Wait Until Page Contains Element     ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  timeout=30
   END
 

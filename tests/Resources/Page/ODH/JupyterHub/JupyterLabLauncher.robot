@@ -108,6 +108,7 @@ Maybe Select Kernel
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
+  Maybe Accept a JupyterLab Prompt
   Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  File  New  Notebook
   Sleep  5

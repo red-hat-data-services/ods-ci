@@ -31,6 +31,7 @@ class OpenshiftClusterManager():
         self.aws_region = args.aws_region
         self.aws_instance_type = args.aws_instance_type
         self.num_compute_nodes = args.num_compute_nodes
+        self.openshift_version = args.openshift_version
         self.skip_cluster_creation = args.skip_cluster_creation
         self.skip_rhods_installation = args.skip_rhods_installation
         self.ocm_cli_binary_url = args.ocm_cli_binary_url
@@ -97,15 +98,20 @@ class OpenshiftClusterManager():
     def osd_cluster_create(self):
         """Creates OSD cluster"""
 
+        version = ""
+        if self.openshift_version != "":
+            version = "--version {} ".format(self.openshift_version)
+
         cmd = ("ocm create cluster --aws-account-id {} "
                "--aws-access-key-id {} --aws-secret-access-key {} "
                "--ccs --region {} --compute-nodes {} "
-               "--compute-machine-type {} "
+               "--compute-machine-type {} {}"
                "{}".format(self.aws_account_id,
                            self.aws_access_key_id,
                            self.aws_secret_access_key,
                            self.aws_region, self.num_compute_nodes,
-                           self.aws_instance_type, self.cluster_name))
+                           self.aws_instance_type, version, self.cluster_name))
+
         ret = execute_command(cmd)
         if ret is None:
             print ("Failed to create osd cluster {}".format(self.cluster_name))
@@ -528,6 +534,10 @@ def parse_args():
                         help="Number of compute nodes",
                         action="store", dest="num_compute_nodes",
                         default="3")
+    parser.add_argument("--openshift-version",
+                        help="Openshift Version",
+                        action="store", dest="openshift_version",
+                        default="")
     parser.add_argument("-j", "--htpasswd-cluster-admin",
                         help="Cluster admin user of idp type htpasswd",
                         action="store", dest="htpasswd_cluster_admin",

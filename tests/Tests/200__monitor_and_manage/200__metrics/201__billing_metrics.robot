@@ -18,6 +18,7 @@ Verify OpenShift Monitoring results are correct when running undefined queries
   [Tags]  Smoke  Sanity  ODS-173
   Run OpenShift Metrics Query  ${METRIC_RHODS_UNDEFINED}  retry-attempts=1
   Metrics.Verify Query Results Dont Contain Data
+  [Teardown]  SeleniumLibrary.Close All Browsers
 
 Test Billing Metric (notebook cpu usage) on OpenShift Monitoring
   [Tags]  Smoke  Sanity  ODS-175
@@ -50,8 +51,20 @@ Run OpenShift Metrics Query
   Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   LoginPage.Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
   OCPMenu.Switch To Administrator Perspective
-  Wait Until Page Contains   Monitoring  timeout=20  error=${OCP_ADMIN_USER.USERNAME} can't see the Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
-  Menu.Navigate To Page   Monitoring  Metrics
+
+  # In OCP 4.9 metrics are under the Observe menu (it was called Monitoring in 4.8)
+  ${menu_observe_exists} =   Run Keyword and Return Status  Menu.Page Should Contain Menu   Observe
+  IF    ${menu_observe_exists}
+       Menu.Navigate To Page   Observe  Metrics
+  ELSE
+       ${menu_monitoring_exists} =   Run Keyword and Return Status  Menu.Page Should Contain Menu   Monitoring
+       IF    ${menu_monitoring_exists}
+           Menu.Navigate To Page   Monitoring  Metrics
+       ELSE
+           Fail  msg=${OCP_ADMIN_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
+       END
+  END
+
   Metrics.Verify Page Loaded
   Metrics.Run Query  ${query}  ${retry-attempts}
   ${result} =   Metrics.Get Query Results

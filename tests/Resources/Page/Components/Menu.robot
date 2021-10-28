@@ -28,3 +28,8 @@ Is Menu Expanded
    ...   ${menu}
    ${is_menu_expanded} =    Get Element Attribute   //button[text()="${menu}"]   attribute=aria-expanded
    [Return]    ${is_menu_expanded}
+
+Page Should Contain Menu
+   [Arguments]  ${menu}
+   Page Should Contain Element    //button[text()="${menu}"]
+

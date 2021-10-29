@@ -259,7 +259,28 @@ class OpenshiftClusterManager():
             count += 60
         if not check_flag:
             print ("addon {} not in installed state even after "
-                   "30minutes. EXITING".format(addon_name))
+                   "60 minutes. EXITING".format(addon_name))
+            sys.exit(1)
+
+    def wait_for_addon_uninstallation_to_complete(self, addon_name="managed-odh",
+                                                  timeout=3600):
+        """Waits for addon uninstallation to get complete"""
+
+        addon_state = self.get_addon_state(addon_name)
+        count = 0
+        check_flag = False
+        while(count <= timeout):
+            addon_state = self.get_addon_state(addon_name)
+            if addon_state == "not installed":
+                print ("addon {} is in uninstalled state".format(addon_name))
+                check_flag = True
+                break
+
+            time.sleep(60)
+            count += 60
+        if not check_flag:
+            print ("addon {} not in uninstalled state even after "
+                   "60 minutes. EXITING".format(addon_name))
             sys.exit(1)
 
     def list_idps(self):
@@ -282,14 +303,14 @@ class OpenshiftClusterManager():
             return True
         return False
 
-    def install_rhods(self):
-        """Installs RHODS addon"""
+    def install_addon(self, addon_name="managed-odh"):
+        """Installs addon"""
         replace_vars = {
                        "CLUSTER_ID": self.cluster_name,
-                       "ADDON_NAME": "managed-odh"
+                       "ADDON_NAME": addon_name
                        }
         template_file = "install_addon.jinja"
-        output_file = "install_rhods.json"
+        output_file = "install_operator.json"
         self._render_template(template_file, output_file, replace_vars)
 
         cluster_id = self.get_osd_cluster_id()
@@ -297,9 +318,31 @@ class OpenshiftClusterManager():
                "--body={}".format(cluster_id, output_file))
         ret = execute_command(cmd)
         if ret is None:
-            print("Failed to install rhods addon on cluster "
-                  "{}".format(self.cluster_name))
+            print("Failed to install {} addon on cluster "
+                  "{}".format(addon_name, self.cluster_name))
             sys.exit(1)
+
+    def uninstall_addon(self, addon_name="managed-odh"):
+        """Uninstalls addon"""
+
+        addon_state = self.get_addon_state(addon_name)
+        if addon_state != "not installed":
+            cluster_id = self.get_osd_cluster_id()
+            cmd = ("ocm delete /api/clusters_mgmt/v1/clusters/{}/addons/"
+                   "{}".format(cluster_id, addon_name))
+            ret = execute_command(cmd)
+            if ret is None:
+                print("Failed to uninstall {} addon on cluster "
+                      "{}".format(addon_name, self.cluster_name))
+                sys.exit(1)
+
+    def install_rhods(self):
+        """Installs RHODS addon"""
+        self.install_addon(addon_name="managed-odh")
+
+    def uninstall_rhods(self):
+        """Uninstalls RHODS addon"""
+        self.uninstall_addon(addon_name="managed-odh")
 
     def create_idp(self, type="htpasswd"):
         """Creates Identity Provider"""
@@ -383,11 +426,13 @@ class OpenshiftClusterManager():
     def add_users_to_rhods_group(self):
         """Add users to rhods group"""
 
+        self.create_group("rhods-admins")
         # Adds user ldap-admin1..ldap-adminN
         for i in range(1, int(self.num_users_to_create_per_group)+1):
             self.add_user_to_group(user="ldap-admin"+str(i),
                                    group="rhods-admins")
 
+        self.create_group("rhods-users")
         # Adds user ldap-user1..ldap-userN
         for i in range(1, int(self.num_users_to_create_per_group)+1):
             self.add_user_to_group(user="ldap-user"+str(i),
@@ -582,6 +627,9 @@ def parse_args():
     parser.add_argument("-g", "--delete-cluster",
                         help="delete osd cluster",
                         action="store_true", dest="delete_cluster")
+    parser.add_argument("--uninstall-rhods",
+                        help="Uninstall rhods",
+                        action="store_true", dest="uninstall_rhods")
     parser.add_argument("-o", "--ocmclibinaryurl",
                         help="ocm cli binary url",
                         action="store", dest="ocm_cli_binary_url",
@@ -627,3 +675,10 @@ if __name__ == '__main__':
 
         print ("Wait for cluster to get deleted")
         ocm_obj.wait_for_osd_cluster_to_get_deleted()
+
+    if bool(args.uninstall_rhods):
+        print ("Uninstall rhods...")
+        ocm_obj.uninstall_rhods()
+
+        print ("Wait for rhods_to_get_uninstalled")
+        ocm_obj.wait_for_addon_uninstallation_to_complete()

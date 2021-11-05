@@ -9,7 +9,6 @@ Suite Teardown  Anaconda Commercial Edition Suite Teardown
 *** Variables ***
 ${anaconda_appname}=  anaconda-ce
 ${anaconda_key_in}=  Anaconda CE Key
-#${invalid_key}=  275dc7d05ca1fbac0a0c98d41126cad87c498fbe8e5a264e
 ${invalid_key}=  abcdef-invalidkey
 ${error_msg}=  error\nValidation failed\nError attempting to validate. Please check your entries.
 
@@ -32,14 +31,15 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Wait for RHODS Dashboard to Load
   Enable Anaconda  ${invalid_key}
   Wait Until Keyword Succeeds    30  1  Check Connect Button Status  false
-  Capture Page Screenshot
+  Capture Page Screenshot  anaconda_failed_activation.png
   ${text} =  Get Text  xpath://*[@class="pf-c-form__alert"]
   Should Be Equal  ${text}  ${error_msg}
   Click Button    Cancel
   Menu.Navigate To Page    Applications    Enabled
-  # Page Should Not Contain  Anaconda Commercial Edition
+  ## Page Should Not Contain  Anaconda Commercial Edition
+  Wait Until RHODS Dashboard JupyterHub Is Visible
+  Capture Page Screenshot  enabletab_anaconda_notpresent.png
   Page Should Not Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
-  Capture Page Screenshot
 
 
 ** Keywords ***

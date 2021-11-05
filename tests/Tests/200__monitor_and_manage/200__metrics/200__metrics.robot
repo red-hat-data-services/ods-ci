@@ -3,7 +3,7 @@ Resource    ../../../Resources/ODS.robot
 
 *** Variables ***
 
-@{RECORD_GROUPS}  Availability Metrics  SLOs - JupyterHub  SLOs - JupyterHub DB  SLOs - ODH Dashboard  SLOs - RHODS Operator  SLOs - Traefik Proxy  Usage Metrics
+@{RECORD_GROUPS}  Availability Metrics  SLOs - JupyterHub  SLOs - ODH Dashboard  SLOs - RHODS Operator  SLOs - Traefik Proxy  Usage Metrics
 
 @{ALERT_GROUPS}  Builds  DeadManSnitch  RHODS-PVC-Usage  SLOs-haproxy_backend_http_responses_total  SLOs-probe_success
 

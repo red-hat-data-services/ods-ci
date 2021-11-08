@@ -32,24 +32,23 @@ Minimal Tensorflow test
   Launch a new JupyterLab Document  kernel=Python 3 (ipykernel)
   #Launch a new JupyterLab Document
   Close Other JupyterLab Tabs
-  Sleep  5
-  Run Cell And Check Output  !python --version  Python 3.8.6
-  #Run Cell And Check Output  !python --version  Python 3.8.7
-  Run Cell And Check Output  !nvcc --version | grep nvcc:  nvcc: NVIDIA (R) Cuda compiler driver
-  Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.221
-  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version:  Version: 2.4.1
+  Sleep  2
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.6
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !nvcc --version | grep nvcc:  nvcc: NVIDIA (R) Cuda compiler driver
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.221
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version:  Version: 2.4.1
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show jupyterlab | grep Version:  Version: 3.0.16
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show notebook | grep Version:  Version: 6.4.4
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorboard | grep Version:  Version: 2.4.1
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show boto3 | grep Version:  Version: 1.17.11
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show kafka-python | grep Version:  Version: 2.0.2
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show matplotlib | grep Version:  Version: 3.4.1
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show numpy | grep Version:  Version: 1.19.2
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show pandas | grep Version:  Version: 1.2.4
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scikit-learn | grep Version:  Version: 0.24.1
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scipy | grep Version:  Version: 1.6.2
 
-Failing Test Case (CUDA warnings)
-  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-with-warnings.ipynb 
-  Capture Page Screenshot
-  JupyterLab Code Cell Error Output Should Not Be Visible
-
-Passing Test Case (GPU)
+Passing Test Case (CPU)
   Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb 
-  Capture Page Screenshot
-  JupyterLab Code Cell Error Output Should Not Be Visible
-
-Failing Test Case (CPU + Tensorflow warnings)
-  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/tensorflow-cpu_no-warnings.ipynb  
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible

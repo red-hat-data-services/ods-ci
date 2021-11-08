@@ -20,7 +20,6 @@ Begin Web Test
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
-    Sleep  10
     Go To  ${ODH_DASHBOARD_URL}
 
 End Web Test

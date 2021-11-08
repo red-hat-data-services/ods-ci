@@ -38,14 +38,15 @@ Close Other JupyterLab Tabs
     Click Element  ${tab}
     #Click the close tab icon
     Open With JupyterLab Menu  File  Close Tab
-    Maybe Accept a JupyterLab Prompt
+    Maybe Save Changes
   END
+  Sleep  2
   Element Should Be Visible  ${original_tab}
   Element Should Not Be Visible  ${xpath_background_tab}
 
 Close JupyterLab Selected Tab
   Click Element  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(@class,"lm-TabBar-tabCloseIcon")]
-  Maybe Accept a JupyterLab Prompt
+  Maybe Save Changes
 
 JupyterLab Code Cell Error Output Should Not Be Visible
   Element Should Not Be Visible  xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  A JupyterLab code cell output returned an error
@@ -110,16 +111,16 @@ Maybe Select Kernel
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
-  Maybe Accept a JupyterLab Prompt
+  Maybe Save Changes
   Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  File  New  Notebook
-  Sleep  5
+  Sleep  1
   Maybe Select Kernel
   Close Other JupyterLab Tabs
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb
   Click Element  xpath://div[.="Open"]
-  Sleep  5
+  Sleep  1
   Maybe Select Kernel
   Wait Until Untitled.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs
@@ -160,7 +161,7 @@ Clean Up User Notebook
 
 
 JupyterLab Is Visible
-  ${jupyterlab_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=60
+  ${jupyterlab_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=30
   [return]  ${jupyterlab_visible}
 
 Wait Until JupyterLab Is Loaded
@@ -215,10 +216,22 @@ Run Repo and Clean
   Sleep  15
   Click Element  xpath://span[@title="/opt/app-root/src"]
   Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Accept a JupyterLab Prompt
+  Maybe Save Changes
   Open With JupyterLab Menu  File  New  Notebook
   Sleep  5
   Maybe Select Kernel
   Sleep  5
   Add and Run JupyterLab Code Cell  !rm -rf *
   Wait Until JupyterLab Code Cell Is Not Active
+
+Maybe Accept a JupyterLab Prompt
+    [Documentation]    Click the accept button in a JupyterLab dialog (if one is open).
+    #${accept} =    Get WebElements    css:.jp-mod-accept
+    #Run Keyword If    ${accept}    Click Element    ${accept[-1]}
+    ${dialog} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-content ')]
+    Run Keyword If  not ${dialog}  Click Button  xpath=//div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-content ')]/div[2]/button[3]
+
+Maybe Save Changes
+    [Documentation]    Click the save button in a JupyterLab dialog (if one is open).
+    ${dialog} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-content ')]
+    Run Keyword If  not ${dialog}  Click Button  xpath=//div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-content ')]/div[2]/button[3]

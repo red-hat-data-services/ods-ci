@@ -86,3 +86,10 @@ Verify Service Provides "Get Started" Button In The Explore Page
   Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10   error=${app_name} does not have sidebar with information in the Explore page of ODS Dashboard
   Page Should Contain Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   message=${app_name} does not have a "Get started" button in ODS Dashboard
 
+Verify Service Is Available In The Enabled Page
+  [Documentation]   Verify the service appears in Applications > Enabled
+  [Arguments]  ${app_name}
+  Menu.Navigate To Page    Applications    Enabled
+  Wait Until Page Contains    JupyterHub  timeout=30
+  Capture Page Screenshot
+  Page Should Contain Element    //article//*[.='${app_name}']

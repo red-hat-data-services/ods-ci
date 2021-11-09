@@ -6,7 +6,7 @@ Suite Setup     Anaconda Commercial Edition Suite Setup
 Suite Teardown  Anaconda Commercial Edition Suite Teardown
 
 *** Test Cases ***
-Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore Page
+Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabled Page
   [Tags]  ODS-262  Smoke  Sanity
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

@@ -15,9 +15,9 @@ Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabl
   Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Commercial Edition
   ${status}       Run keyword and Return Status         Verify Service Provides "Enable" Button In The Explore Page    Anaconda Commercial Edition 
   Run Keyword If   ${status} == ${False}   Run Keywords
-  ...              Log     Warning: Anaconda Commercial Edition does not have a "Enable" button in ODH Dashboard, Looking in to Enabled Page     FAIL 
-  ...              AND
   ...              Verify Service Is Available In The Enabled Page      Anaconda Commercial Edition 
+  ...              AND
+  ...              FAIL   Anaconda Commercial Edition does not have a "Enable" button in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page
 
 
 * Keywords ***

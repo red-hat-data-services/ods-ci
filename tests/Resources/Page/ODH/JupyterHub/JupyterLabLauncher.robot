@@ -1,5 +1,7 @@
 *** Settings ***
 Library  JupyterLibrary
+Library  jupyter-helper.py
+Library  OperatingSystem
 
 *** Variables ***
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
@@ -122,6 +124,40 @@ Clean Up Server
   Wait Until Untitled.ipynb JupyterLab Tab Is Selected
   Close Other JupyterLab Tabs
   Add and Run JupyterLab Code Cell  !rm -rf *
+
+
+Get User Notebook Pod Name
+  [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyterhub-nb-ldap-2dadmin1)
+  [Arguments]  ${username}
+  ${safe_username}=  Get Safe Username    ${username}
+  ${notebook_pod_name}=   Set Variable  jupyterhub-nb-${safe_username}
+  [Return]  ${notebook_pod_name}
+
+Clean Up User Notebook
+  [Documentation]  Delete all files and folders in the ${username}'s notebook PVC (excluding hidden files and folders).
+...   Note: this command requires ${admin_username}  to be logged to the cluster (oc login ...) and to have the user's notebook pod running (e.g. jupyterhub-nb-ldap-2duser1)
+  [Arguments]  ${admin_username}  ${username}
+
+  # Verify that ${admin_username}  is connected to the cluster
+  ${oc_whoami}=  Run   oc whoami
+  IF    '${oc_whoami}' == '${admin_username}'
+      # We import the library here so it's loaded only when we are connected to the cluster
+      # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
+      # if there is not any connection opened
+      Import Library    OpenShiftCLI
+
+      # Verify that the jupyter notebook pod is running
+      ${notebook_pod_name}=   Get User Notebook Pod Name  ${username}
+      Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+
+      # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
+      # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
+      ${output}=  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
+      Log  ${output}
+  ELSE
+      Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
+  END
+
 
 JupyterLab Is Visible
   ${jupyterlab_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=60

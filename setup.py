@@ -28,6 +28,7 @@ setup(
         "pygments",
         "requests",
         "robotframework-requests",
+        "escapism",
     ],
     zip_safe=True,
     include_package_data=True,

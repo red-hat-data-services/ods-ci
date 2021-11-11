@@ -8,3 +8,5 @@ dist/
 drivers/**/chromedriver
 must-gather-results.txt
 .DS_Store
+.idea/
+Results/

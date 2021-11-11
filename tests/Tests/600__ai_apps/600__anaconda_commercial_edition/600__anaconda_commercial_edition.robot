@@ -24,6 +24,7 @@ Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore Page
   Verify Service Provides "Enable" Button In The Explore Page    Anaconda Commercial Edition
 
 Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
+  [Documentation]  This TC wants to check that if user inserts an invalid key, the Anaconda CE validation fails as expected
   [Tags]  Smoke  Sanity
   ...     ODS-310  ODS-367
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

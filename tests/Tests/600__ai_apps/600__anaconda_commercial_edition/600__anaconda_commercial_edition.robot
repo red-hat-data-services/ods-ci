@@ -29,7 +29,7 @@ Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabl
 
 
 Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
-  [Tags]  Sanity
+  [Tags]  Smoke  Sanity
   ...     ODS-310  ODS-367
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -41,7 +41,6 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Should Be Equal  ${text}  ${error_msg}
   Click Button    Cancel
   Menu.Navigate To Page    Applications    Enabled
-  ## Page Should Not Contain  Anaconda Commercial Edition
   Wait Until RHODS Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
   Page Should Not Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
@@ -72,7 +71,6 @@ Check Connect Button Status
   Should Be Equal    ${status}    ${target_status}
 
 Get Connect Button Status
-  # ${button_status}=  Get Element Attribute    xpath://*/footer/*[contains(@data-ouia-component-id,'OUIA-Generated-Button-primary')]    aria-disabled
   ${button_status}=  Get Element Attribute    xpath://*/footer/*[.='Connect']    aria-disabled
   [Return]   ${button_status}
 

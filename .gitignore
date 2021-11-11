@@ -7,3 +7,5 @@ test-output/
 dist/
 drivers/**/chromedriver
 must-gather-results.txt
+.idea/
+Results/

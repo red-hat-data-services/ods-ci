@@ -1,6 +1,7 @@
 *** Settings ***
 #Library  JupyterLibrary
-Library  JupyterLibrary
+Resource  JupyterLabLauncher.robot
+Library   JupyterLibrary
 
 *** Keywords ***
 Launch Python3 JupyterHub

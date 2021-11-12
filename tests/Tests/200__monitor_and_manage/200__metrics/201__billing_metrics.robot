@@ -95,7 +95,7 @@ Iterative Image Test
   Fix Spawner Status
   Spawn Notebook With Arguments  image=${image}
   Wait for JupyterLab Splash Screen  timeout=30
-  Maybe Select Kernel
+  Maybe Close Popup
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document

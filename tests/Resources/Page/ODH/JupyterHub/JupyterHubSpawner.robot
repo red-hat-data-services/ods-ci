@@ -9,7 +9,7 @@ ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =  //div[contains(@class,"jsp-spawner__header
 
 *** Keywords ***
 JupyterHub Spawner Is Visible
-   ${spawner_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
+   ${spawner_visible} =  Run Keyword and Return Status  Page Should Contain  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
    [return]  ${spawner_visible}
 
 Select Notebook Image
@@ -167,10 +167,15 @@ Fix Spawner Status
       ELSE
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
+            Maybe Close Popup
             Click Element  xpath://span[@title="/opt/app-root/src"]
-            Launch a new JupyterLab Document
+            Open With JupyterLab Menu  File  New  Notebook
+            Sleep  1
+            Maybe Close Popup
             Close Other JupyterLab Tabs
-            Add and Run JupyterLab Code Cell  !rm -rf *
+            Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
+            Open With JupyterLab Menu  File  Close All Tabs
+            Maybe Close Popup
             Stop JupyterLab Notebook Server
             Handle Start My Server
          END

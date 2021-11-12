@@ -5,6 +5,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library          DebugLibrary
 Library          JupyterLibrary
+Library          Screenshot
 Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
 
@@ -23,14 +24,12 @@ Minimal Tensorflow test
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
   Fix Spawner Status
-  # Size needs to change
   Spawn Notebook With Arguments  image=tensorflow  size=Default
   Wait for JupyterLab Splash Screen  timeout=30
-  Maybe Select Kernel
+  Maybe Close Popup
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document  kernel=Python 3 (ipykernel)
-  #Launch a new JupyterLab Document
   Close Other JupyterLab Tabs
   Sleep  2
   Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.6

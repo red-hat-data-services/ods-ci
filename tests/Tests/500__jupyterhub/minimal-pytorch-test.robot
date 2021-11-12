@@ -26,7 +26,7 @@ Minimal PyTorch test
   # Size needs to change
   Spawn Notebook With Arguments  image=pytorch  size=Default
   Wait for JupyterLab Splash Screen  timeout=30
-  Maybe Select Kernel
+  Maybe Close Popup
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document  kernel=Python 3 (ipykernel)

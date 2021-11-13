@@ -61,7 +61,7 @@ def execute_command(cmd):
         return None
 
 
-def oc_login(ocp_console_url, username, password, timeout=120):
+def oc_login(ocp_console_url, username, password, timeout=600):
     """
     Login to test cluster using oc cli command
     """

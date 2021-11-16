@@ -1,12 +1,9 @@
 *** Settings ***
 Library  JupyterLibrary
-<<<<<<< HEAD
 Library  jupyter-helper.py
 Library  OperatingSystem
-=======
 Library  Screenshot
 Library  String
->>>>>>> 310f0b7... Add Keywords for closing popup and running code in current nb
 
 *** Variables ***
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]

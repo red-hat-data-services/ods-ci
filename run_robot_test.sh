@@ -64,7 +64,7 @@ fi
 
 currentpath=`pwd`
 case "$(uname -s)" in
-    Darwin5)
+    Darwin)
          echo "MACOS"
          echo "setting driver  to $currentpath/Drivers/MACOS"
          PATH=$PATH:$currentpath/drivers/MACOS

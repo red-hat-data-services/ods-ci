@@ -48,6 +48,7 @@ Alert Should Be Firing
   [Arguments]  ${pm_url}  ${pm_token}  ${rule_group}  ${alert}
   ${all_rules}=  Get Rules   ${pm_url}  ${pm_token}  alert
   ${all_rules}=  Get From Dictionary    ${all_rules['data']}  groups
+  ${alert_found}=   Set Variable  False
 
   FOR  ${rule}  IN  @{all_rules}
     ${rule_name}=  Get From Dictionary  ${rule}  name
@@ -57,11 +58,29 @@ Alert Should Be Firing
       FOR  ${sub_rule}  IN  @{rules_list}
         ${state}=  Get From Dictionary  ${sub_rule}  state
         ${name}=  Get From Dictionary  ${sub_rule}  name
+        ${duration}=  Get From Dictionary  ${sub_rule}  duration
         IF  '${name}' == '${alert}'
-          Should Be Equal As Strings  ${state}  firing  msg=Alert ${alert} should be firing but state = ${state}
-          Return from keyword  ${TRUE}
+          ${alert_found}=   Set Variable  True
+          Log   Alert "${name}" (duration=${duration}): state=${state}
+          IF    '${state}' == 'firing'
+              Return from keyword  ${TRUE}
+          END
         END
       END
     END
   END
-  Fail  msg=${alert} was not found in Prometheus firing rules
+
+  IF    ${alert_found} == True
+      Fail  msg=Alert "${alert}" was found in Prometheus but it wasn't firing
+  ELSE
+      Fail  msg=Alert "${alert}" was not found in Prometheus firing rules
+  END
+
+
+Wait Until Alert Is Firing
+   [Documentation]  Waits until alert is firing or timeout is reached (failing in that case), checking the alert state every minute
+   [Arguments]    ${pm_url}  ${pm_token}  ${rule_group}  ${alert}  ${timeout}=10 min
+   Log To Console    Waiting for alert "${alert}" to be firing (timeout = ${timeout})
+   Wait Until Keyword Succeeds  ${timeout}  1 min  Alert Should Be Firing  ${pm_url}  ${pm_token}  ${rule_group}  ${alert}
+
+

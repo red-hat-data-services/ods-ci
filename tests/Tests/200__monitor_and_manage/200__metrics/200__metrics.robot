@@ -10,11 +10,11 @@ Resource    ../../../Resources/ODS.robot
 *** Test Cases ***
 
 Test Existence of Prometheus Alerting Rules
-  [Tags]  Sanity  ODS-509
+  [Tags]  Smoke  Sanity  ODS-509
   Check Prometheus Alerting Rules
 
 Test Existence of Prometheus Recording Rules
-  [Tags]  Sanity  ODS-510
+  [Tags]  Smoke  Sanity  ODS-510
   Check Prometheus Recording Rules
 
 *** Keywords ***

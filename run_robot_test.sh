@@ -96,6 +96,7 @@ case "$(uname -s)" in
           echo "Not yet supported OS, but shouldn't be hard for you to fix :) "
           echo "Please add the driver, test and submit PR"
           exit 1
+        ;;
 esac
 
 #TODO: Make this optional so we are not creating/updating the virtualenv everytime we run a test

@@ -181,6 +181,7 @@ Fix Spawner Status
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
             Maybe Close Popup
+            Maybe Open JupyterLab Sidebar   File Browser
             Click Element  xpath://span[@title="/opt/app-root/src"]
             Open With JupyterLab Menu  File  New  Notebook
             Sleep  1

@@ -118,7 +118,6 @@ Check Anaconda CE Image Build Status
   Navigate To Page    Builds    Builds
   Search Last Item Instance By Title in OpenShift Table  search_term=minimal-notebook-anaconda  namespace=redhat-ods-applications
   ${ace_build_status}=  Get Text    xpath://tr[@data-id='0-0']/td/*/span[@data-test='status-text']
-  Log To Console    \nACE BUILD STATUS: ${ace_build_status}
   Run Keyword If    "${ace_build_status}" == "Failed"
   ...    Fail  the Anaconda image build has failed
   ...  ELSE
@@ -151,6 +150,7 @@ Spawn and Check JupyterLab Using Anaconda CE Image
   Add and Run JupyterLab Code Cell  !conda install -y numpy
   Wait Until JupyterLab Code Cell Is Not Active
   Run Cell And Check For Errors  import numpy as np
+  Capture Page Screenshot  conda_lib_install_result.png
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']

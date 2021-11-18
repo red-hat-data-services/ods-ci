@@ -3,6 +3,16 @@ Library   Process
 Library   OperatingSystem
 
 *** Test Cases ***
+Verify that the must-gather image provides RHODS logs and info
+      [Tags]  Smoke  Sanity  ODS-505
+      Get must-gather logs
+      Verify logs for redhat-ods-applications
+      Verify logs for redhat-ods-operator
+      Verify logs for redhat-ods-monitoring
+      [Teardown]  Cleanup must-gather logs
+
+
+*** Keywords ***
 Get must-gather logs
       ${output}    Run process    tests/Tests/505__must_gather/get-must-gather-logs.sh     shell=yes
       Should Not Contain    ${output.stdout}    FAIL

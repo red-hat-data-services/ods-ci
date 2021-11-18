@@ -3,6 +3,7 @@ Force Tags       Smoke  Sanity
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Begin Web Test
@@ -34,7 +35,7 @@ Can Launch Python3 Smoke Test Notebook
   Wait for JupyterLab Splash Screen  timeout=30
 
 
-  Maybe Select Kernel
+  Maybe Close Popup
 
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
@@ -49,7 +50,7 @@ Can Launch Python3 Smoke Test Notebook
   Sleep  5
   Run Cell And Check For Errors  !pip install boto3
 
-  Add and Run JupyterLab Code Cell  import os
+  Add and Run JupyterLab Code Cell in Active Notebook  import os
   Run Cell And Check Output  print("Hello World!")  Hello World!
 
   #Needs to change for RHODS release

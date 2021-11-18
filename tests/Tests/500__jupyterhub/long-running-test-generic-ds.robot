@@ -1,6 +1,8 @@
 *** Settings ***
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Begin Web Test
@@ -33,7 +35,7 @@ Launch JupyterLab
   Spawn Notebook
   Wait for JupyterLab Splash Screen  timeout=30
   Sleep  5
-  Maybe Select Kernel
+  Maybe Close Popup
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document
@@ -45,21 +47,4 @@ Long Running Test Case
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering-S3.ipynb
   Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
-  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/TensorFlow-MNIST-Minimal.ipynb
-
-*** Keywords ***
-
-Run Repo and Clean
-  [Arguments]  ${REPO_URL}  ${NB_NAME}
-  Click Element  xpath://span[@title="/opt/app-root/src"]
-  Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NB_NAME}
-  Sleep  15
-  Click Element  xpath://span[@title="/opt/app-root/src"]
-  Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Accept a JupyterLab Prompt
-  Open With JupyterLab Menu  File  New  Notebook
-  Sleep  5
-  Maybe Select Kernel
-  Sleep  5
-  Add and Run JupyterLab Code Cell  !rm -rf *
-  Wait Until JupyterLab Code Cell Is Not Active
+  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb

@@ -11,7 +11,7 @@ import time
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path+"/../")
 from util import (clone_config_repo, read_yaml,
-                  oc_login, execute_command)
+                  execute_command)
 
 """
 Class for Openshift Cluster Manager
@@ -496,13 +496,17 @@ class OpenshiftClusterManager():
         """ Login to OCM using ocm cli"""
 
         cmd = "ocm login --token=\"{}\" ".format(self.login_token)
+
         if self.testing_platform == "stage":
             cmd += "--url=staging"
 
+        cmd = "OCM_CONFIG=ocm.json." + self.testing_platform + " " + cmd
         ret = execute_command(cmd)
         if ret is None:
             print("Failed to login to aws openshift platform using token")
             sys.exit(1)
+        os.environ["OCM_CONFIG"] =  "ocm.json." + self.testing_platform
+
 
     def delete_cluster(self):
         """ Delete OSD Cluster"""

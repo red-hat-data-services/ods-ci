@@ -57,6 +57,9 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
 Verify User Is Able to Activate Anaconda Commercial Edition
   [Tags]  Sanity  Smoke
   ...     ODS-272  ODS-344  ODS-501
+  [Documentation]  This TC performs the Anaconda CE activation, spawns a JL using the Anaconda image,
+  ...              validate the token, install a library and try to import it.
+  ...              At the end, it stops the JL server and returns to the spawner
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
@@ -74,12 +77,19 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Log  ${val_result}
   Should Be Equal  ${val_result[0]}  ${val_success_msg}
   Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete
-  Spawn Notebook From Dashboard With Arguments   img_displayed_name=Anaconda Commercial Edition  img_real_name=s2i-minimal-notebook-anaconda
-  Sleep  5
+  Go To  ${ODH_DASHBOARD_URL}
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Launch JupyterHub Spawner From Dashboard
+  Wait Until Page Contains Element  xpath://input[@name="Anaconda Commercial Edition"]
+  Wait Until Element Is Enabled    xpath://input[@name="Anaconda Commercial Edition"]   timeout=10
+  Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
+  Wait for JupyterLab Splash Screen  timeout=60
+  Maybe Select Kernel
+  Sleep  3
   Close Other JupyterLab Tabs
   Capture Page Screenshot  closedtabs.png
   Launch a new JupyterLab Document
-  Sleep  5
+  Sleep  3
   Maybe Select Kernel
   Close Other JupyterLab Tabs
   Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${token_val_success_msg}

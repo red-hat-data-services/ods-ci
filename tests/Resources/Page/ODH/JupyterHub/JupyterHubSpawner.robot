@@ -119,10 +119,7 @@ Spawn Notebook With Arguments
       Click Element  xpath://span[@id='jupyterhub-logo']
    END
 
-Spawn Notebook From Dashboard With Arguments
-  [Arguments]  ${img_displayed_name}  ${img_real_name}  ${retries}=1  ${size}=Small  ${spawner_timeout}=600 seconds  &{envs}
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+Launch JupyterHub Spawner From Dashboard
   Menu.Navigate To Page    Applications    Enabled
   Launch JupyterHub From RHODS Dashboard Dropdown
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -130,11 +127,6 @@ Spawn Notebook From Dashboard With Arguments
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
   Fix Spawner Status
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-  Wait Until Page Contains Element  xpath://input[@name="${img_displayed_name}"]
-  Wait Until Element Is Enabled    xpath://input[@name="${img_displayed_name}"]   timeout=600
-  Spawn Notebook With Arguments  retries=${retries}  image=${img_real_name}  size=${size}  spawner_timeout=${spawner_timeout}  &{envs}
-  Wait for JupyterLab Splash Screen  timeout=60
-  Maybe Select Kernel
 
 
 Get Spawner Progress Message

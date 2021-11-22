@@ -10,7 +10,7 @@ Navigate to Installed Operators
   Menu.Navigate To Page  Operators  Installed Operators
 
 Installed Operators Should Be Open
-  Page Should Be Open  ${OCP_CONSOLE_URL}k8s/
+  Page Should Be Open  ${OCP_CONSOLE_URL}/k8s/
   Wait until page contains           Managed Namespaces           timeout=10
 
 Uninstall ODH Operator

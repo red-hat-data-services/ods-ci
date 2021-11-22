@@ -12,5 +12,5 @@ Open Page
 Page Should Be Open
   [Arguments]  ${url}
   ${status}       Run keyword and Return Status      Location Should Contain  ${url}
-  ${new_url}       Remove string    ${url}         https://    /
-  Run Keyword If   ${status} == ${False}    Location Should Contain  ${new_url}
+  ${new_url}       Remove string    ${url}         https://
+  Run Keyword If   ${status} == ${False}    Location Should Contain  ${new_url}[0:-1]

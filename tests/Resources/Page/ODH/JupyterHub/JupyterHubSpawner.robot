@@ -20,7 +20,8 @@ JupyterHub Spawner Is Visible
 Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
    [Arguments]  ${notebook_image}
-   Wait Until Element Is Visible  xpath:/html/body/div[1]/form/div/div/div[2]/div[2]/div[1]
+   Wait Until Element Is Visible  xpath://div[@class="jsp-spawner__image-options"]
+   Wait Until Element Is Visible  xpath://input[contains(@id, "${notebook_image}")]
    Click Element  xpath://input[contains(@id, "${notebook_image}")]
 
 Select Container Size
@@ -28,7 +29,7 @@ Select Container Size
    [Arguments]  ${container_size}
    # Expand List
    Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawner
-   Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[3]/button
+   Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
    Click Element  xpath://span[.="${container_size}"]/../..
 
 Set Number of required GPUs
@@ -86,13 +87,14 @@ Get Spawner Environment Variable Value
 Spawn Notebook
    [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
    [Arguments]  ${spawner_timeout}=600 seconds
-   Click Button  Start server
-   Wait Until Page Contains  Your server is starting up
+   Click Button  Start Server
+   Wait Until Page Contains  Starting server
    Wait Until Element is Visible  id:progress-bar
    Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
 
 Has Spawn Failed
-   ${spawn_status} =  Run Keyword and Return Status  Page Should Contain Element  xpath://p[starts-with(., "Spawn failed")]
+   #${spawn_status} =  Run Keyword and Return Status  Page Should Contain Element  xpath://p[starts-with(., "Spawn failed")]
+   ${spawn_status} =  Run Keyword and Return Status  Page Should Contain  Spawn failed
    [Return]  ${spawn_status}
 
 Spawn Notebook With Arguments
@@ -110,11 +112,14 @@ Spawn Notebook With Arguments
             Add Spawner Environment Variable  ${key}  ${value}
          END
       END
-      Click Button  Start server
-      Wait Until Page Contains  Your server is starting up
+      Click Button  Start Server
+      #Wait Until Page Contains  Your server is starting up
+      Wait Until Page Contains  Starting server
       Wait Until Element is Visible  id:progress-bar
+      #Wait Until Element is Visible  xpath://div[@class='pf-c-progress__bar']
       #Might need to update to react to quicker spawn failures
       Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
+      #Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  xpath://div[@class='pf-c-progress__bar']  ${spawner_timeout}
       ${spawn_fail} =  Has Spawn Failed
       Exit For Loop If  ${spawn_fail} == False
       Click Element  xpath://span[@id='jupyterhub-logo']

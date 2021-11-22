@@ -80,5 +80,5 @@ Click On Searched Operator
 Check IF URL On The Page Is Commercial
     [Arguments]  ${url}
      FOR  ${value}  IN   @{verification_list}
-          Run keyword If       $value in $url     FAIL    URL doesn't look like commerial it conatins '${value}' in it
+          Run keyword If       $value in $url     FAIL    URL doesn't look like commerial it contain '${value}' in it
      END

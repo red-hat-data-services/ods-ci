@@ -18,7 +18,7 @@ Verify RHODS operator information
   Open Installed Operators Page
   #Select All Projects
   Click On Searched Operator      Red Hat OpenShift Data Science
-  ${link_elements}=  Get WebElements    //*[@class="co-clusterserviceversion-details__field"]//a
+  ${link_elements}=  Get WebElements    xpath=//*[@class="co-clusterserviceversion-details__field"]//a
   #Temporary List to hold the url for the verification
   ${temp_list}        Create List
   FOR  ${idx}  ${external_link}  IN ENUMERATE  @{link_elements}  start=1
@@ -29,7 +29,7 @@ Verify RHODS operator information
         ...       ELSE      Fail      URL '${href}' should not be Present in RHODS Cluster Service Detail Section
   END
 
-  Run Keyword IF     "mailto:undefined" not in $temp_list     FAIL    There shouldn't be references to maintainers email
+  Run Keyword IF     "mailto:undefined" not in $temp_list     FAIL    There shouldn't be reference to maintainers email
 
 *** Keywords ***
 
@@ -37,4 +37,4 @@ Get HTTP Status Code
     [Arguments]  ${link_to_check}
     ${response}=    GET  ${link_to_check}   expected_status=any
     Run Keyword And Continue On Failure  Status Should Be  200
-    [Return]  ${response.status_code}
+    Log To Console    HTTP status For The '${link_to_check}' is '${response.status_code}'

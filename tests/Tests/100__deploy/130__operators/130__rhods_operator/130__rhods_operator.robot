@@ -14,7 +14,7 @@ ${commercial_url}              https://www.redhat.com/en/technologies/cloud-comp
 *** Test Cases ***
 Verify RHODS operator information
   [Documentation]  This TC verfiy if the text present in RHODS opeartor Details section
-  [Tags]  ODS-498 Sanity
+  [Tags]  ODS-498   Sanity     Smoke
   Open Installed Operators Page
   #Select All Projects
   Click On Searched Operator      Red Hat OpenShift Data Science

@@ -2,8 +2,8 @@
 Library         SeleniumLibrary
 Library         RequestsLibrary
 Library         Collections
-Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource        ../../../Resources/Common.robot
+Resource        ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource        ../../../../Resources/Common.robot
 Suite Setup     Set Library Search Order  SeleniumLibrary
 Suite Teardown  Close Browser
 

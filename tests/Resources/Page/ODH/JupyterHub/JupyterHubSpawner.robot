@@ -1,5 +1,8 @@
 *** Settings ***
 Resource  JupyterLabLauncher.robot
+Resource  ../../LoginPage.robot
+Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
+Resource  LoginJupyterHub.robot
 Library  JupyterLibrary
 Library  String
 Library  Collections
@@ -115,6 +118,16 @@ Spawn Notebook With Arguments
       Exit For Loop If  ${spawn_fail} == False
       Click Element  xpath://span[@id='jupyterhub-logo']
    END
+
+Launch JupyterHub Spawner From Dashboard
+  Menu.Navigate To Page    Applications    Enabled
+  Launch JupyterHub From RHODS Dashboard Dropdown
+  Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  ${authorization_required} =  Is Service Account Authorization Required
+  Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+  Fix Spawner Status
+  Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+
 
 Get Spawner Progress Message
    [Documentation]  Get the progress message currently displayed

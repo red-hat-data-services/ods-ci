@@ -1,8 +1,15 @@
 *** Settings ***
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../Resources/Page/OCPDashboard/Page.robot
+Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
+Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource        ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource        ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Library         SeleniumLibrary
-Library    XML
+Library         XML
+Library         JupyterLibrary
+Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Commercial Edition Suite Setup
 Suite Teardown  Anaconda Commercial Edition Suite Teardown
 
@@ -11,7 +18,8 @@ ${anaconda_appname}=  anaconda-ce
 ${anaconda_key_in}=  Anaconda CE Key
 ${invalid_key}=  abcdef-invalidkey
 ${error_msg}=  error\nValidation failed\nError attempting to validate. Please check your entries.
-
+${val_success_msg}=  Validation result: 200
+${token_val_success_msg}=  Success! Your token was validated and Conda has been configured.
 
 *** Test Cases ***
 Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabled Page
@@ -21,7 +29,7 @@ Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabl
   Wait for RHODS Dashboard to Load
   Verify Service Is Available In The Explore Page    Anaconda Commercial Edition
   Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Commercial Edition
-  ${status}       Run keyword and Return Status         Verify Service Provides "Enable" Button In The Explore Page    Anaconda Commercial Edition 
+  ${status}       Run keyword and Return Status         Verify Service Provides "Enable" Button In The Explore Page    Anaconda Commercial Edition
   Run Keyword If   ${status} == ${False}   Run Keywords
   ...              Verify Service Is Enabled      Anaconda Commercial Edition 
   ...              AND
@@ -46,6 +54,53 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
   Page Should Not Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
 
+Verify User Is Able to Activate Anaconda Commercial Edition
+  [Tags]  Sanity  Smoke
+  ...     ODS-272  ODS-344  ODS-501
+  [Documentation]  This TC performs the Anaconda CE activation, spawns a JL using the Anaconda image,
+  ...              validate the token, install a library and try to import it.
+  ...              At the end, it stops the JL server and returns to the spawner
+  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for RHODS Dashboard to Load
+  Enable Anaconda  ${ANACONDA_CE.ACTIVATION_KEY}
+  Wait Until Keyword Succeeds    50  1  Page Should Not Contain Element    xpath://*/div[contains(@class, "bullseye")]
+  Capture Page Screenshot  anaconda_success_activation.png
+  Menu.Navigate To Page    Applications    Enabled
+  Wait Until RHODS Dashboard JupyterHub Is Visible
+  Capture Page Screenshot  enabletab_anaconda_present.png
+  Page Should Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
+  Go To  ${OCP_CONSOLE_URL}
+  Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
+  Maybe Skip Tour
+  ${val_result}=  Get Pod Logs  namespace=redhat-ods-applications  pod_search_term=anaconda-ce-periodic-validator-job-custom-run
+  Log  ${val_result}
+  Should Be Equal  ${val_result[0]}  ${val_success_msg}
+  Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete
+  Go To  ${ODH_DASHBOARD_URL}
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Launch JupyterHub Spawner From Dashboard
+  Wait Until Page Contains Element  xpath://input[@name="Anaconda Commercial Edition"]
+  Wait Until Element Is Enabled    xpath://input[@name="Anaconda Commercial Edition"]   timeout=10
+  Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
+  Wait for JupyterLab Splash Screen  timeout=60
+  Maybe Select Kernel
+  Sleep  3
+  Close Other JupyterLab Tabs
+  Capture Page Screenshot  closedtabs.png
+  Launch a new JupyterLab Document
+  Sleep  3
+  Maybe Select Kernel
+  Close Other JupyterLab Tabs
+  Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${token_val_success_msg}
+  Capture Page Screenshot  anaconda_token_val_cell.png
+  Add and Run JupyterLab Code Cell  !conda install -y numpy
+  Wait Until JupyterLab Code Cell Is Not Active
+  Run Cell And Check For Errors  import numpy as np
+  Capture Page Screenshot  conda_lib_install_result.png
+  Maybe Open JupyterLab Sidebar   File Browser
+  Fix Spawner Status  # used to close the server and go back to Spawner
+  Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']
 
 ** Keywords ***
 Anaconda Commercial Edition Suite Setup
@@ -74,5 +129,13 @@ Check Connect Button Status
 Get Connect Button Status
   ${button_status}=  Get Element Attribute    xpath://*/footer/*[.='Connect']    aria-disabled
   [Return]   ${button_status}
+
+Check Anaconda CE Image Build Status
+  [Arguments]  ${target_status}
+  ${ace_build_status}=  Get Build Status    namespace=redhat-ods-applications  build_search_term=minimal-notebook-anaconda
+  Run Keyword If    "${ace_build_status}" == "Failed"
+  ...    Fail  the Anaconda image build has failed
+  ...  ELSE
+  ...    Should Be Equal    ${ace_build_status}    ${target_status}
 
 

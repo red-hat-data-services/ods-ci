@@ -1,5 +1,6 @@
 *** Settings ***
 Library  SeleniumLibrary
+Library  OpenShiftCLI
 
 *** Keywords ***
 Uninstall Operator
@@ -63,3 +64,9 @@ Wait Until Uninstallation Completes
 Operator Should Be Uninstalled
   [Arguments]  ${operator}
   Page Should Not Contain Element  //a[@data-test-operator-row="${operator}"]
+
+Get RHODS version
+    @{list} =  OpenShiftCLI.Get  kind=ClusterServiceVersion  label_selector=olm.copiedFrom=redhat-ods-operator
+    &{dict} =  Set Variable  ${list}[0]
+    Log  ${dict.spec.version}
+    [Return]  ${dict.spec.version}

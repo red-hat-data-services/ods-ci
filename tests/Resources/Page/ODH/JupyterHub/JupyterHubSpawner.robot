@@ -3,9 +3,11 @@ Resource  JupyterLabLauncher.robot
 Resource  ../../LoginPage.robot
 Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
 Resource  LoginJupyterHub.robot
-Library  JupyterLibrary
-Library  String
-Library  Collections
+Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
+Library   JupyterLibrary
+Library   String
+Library   Collections
+Library   ../../../../libs/Helpers.py
 
 *** Variables ***
 ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =  //div[contains(@class,"jsp-spawner__header__title") and .="Start a notebook server"]

@@ -16,7 +16,7 @@ Suite Teardown   End Web Test
 Minimal PyTorch test
   [Tags]  Regression
   ...     PLACEHOLDER  #category tags
-  ...     ODS-217  ODS-218  #Polarion tags
+  ...     PLACEHOLDER  #Polarion tags
   Wait for RHODS Dashboard to Load
   Launch JupyterHub From RHODS Dashboard Dropdown
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

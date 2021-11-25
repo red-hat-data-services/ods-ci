@@ -1,6 +1,7 @@
 *** Settings ***
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Library         SeleniumLibrary
 Library         OpenShiftCLI
 Suite Setup     Kafka Suite Setup
@@ -28,6 +29,12 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
   Capture Page Screenshot  enabletab_rhosak_present.png
   Page Should Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="OpenShift Streams for Apache Kafka"]
   Capture Page Screenshot  kafka_enable_tab.png
+  Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link
+  Sleep  10
+  Login to HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
+  Wait For HCC Splash Page
+  Maybe Skip RHOSAK Tour
+  Wait Until Page Contains    Kafka Instances
   Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
 
 ** Keywords ***
@@ -51,3 +58,4 @@ Enable RHOSAK
   Click Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
   Wait Until Page Contains Element    xpath://div[contains(@id, 'pf-modal-part')]
   Click Button    xpath://footer/button[text()='Enable']
+

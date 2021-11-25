@@ -1,6 +1,7 @@
 *** Settings ***
 Library  SeleniumLibrary
 Library  OpenShiftCLI
+Library  ../../../../libs/Helpers.py
 
 *** Keywords ***
 Uninstall Operator
@@ -70,3 +71,9 @@ Get RHODS version
     &{dict} =  Set Variable  ${list}[0]
     Log  ${dict.spec.version}
     [Return]  ${dict.spec.version}
+
+RHODS Version Is Greater Or Equal Than
+    [Arguments]  ${target}
+    ${ver} =  Get RHODS version
+    ${comparison} =  GTE  ${ver}  ${target}
+    [Return]  ${comparison}

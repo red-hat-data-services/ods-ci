@@ -1,4 +1,5 @@
 *** Settings ***
+Force Tags       Sanity
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -15,7 +16,7 @@ Suite Teardown   End Web Test
 Minimal PyTorch test
   [Tags]  Regression
   ...     PLACEHOLDER  #category tags
-  ...     PLACEHOLDER  #Polarion tags
+  ...     ODS-217  ODS-218  #Polarion tags
   Wait for RHODS Dashboard to Load
   Launch JupyterHub From RHODS Dashboard Dropdown
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -32,7 +33,17 @@ Minimal PyTorch test
   Launch a new JupyterLab Document  kernel=Python 3 (ipykernel)
   Close Other JupyterLab Tabs
   Sleep  5
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.6
+
+Verify Installed Python Version in PyTorch
+  [Tags]  Regression
+  ...     PLACEHOLDER  #category tags
+  ...     ODS-217  #Polarion tags
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.8
+
+Verify Installed Libraries in PyTorch
+  [Tags]  Regression
+  ...     PLACEHOLDER  #category tags
+  ...     ODS-218  #Polarion tags
   Run Keyword And Continue On Failure  Run Cell And Check Output  !nvcc --version | grep nvcc:  nvcc: NVIDIA (R) Cuda compiler driver
   Run Keyword And Continue On Failure  Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.221
   Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show torch | grep Version:  Version: 1.8.1
@@ -46,6 +57,11 @@ Minimal PyTorch test
   Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scipy | grep Version:  Version: 1.6.2
   Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show jupyterlab | grep Version:  Version: 3.0.16
   Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show notebook | grep Version:  Version: 6.4.4
+
+PyTorch Workload test
+  [Tags]  Regression
+  ...     PLACEHOLDER  #category tags
+  ...     PLACEHOLDER  #Polarion tags
   Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible

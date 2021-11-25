@@ -1,4 +1,4 @@
-import string
+from semver import VersionInfo
 from robotlibcore import keyword
 
 
@@ -12,6 +12,8 @@ class Helpers:
 
     @keyword
     def gte(self, version, target):
-        version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
-        target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
+        version=VersionInfo.parse(version)
+        target=VersionInfo.parse(target)
+        #version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
+        #target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
         return version>=target

@@ -62,7 +62,6 @@ Remove All Spawner Environment Variables
        Remove Spawner Environment Variable   ${env}
    END
 
-
 Remove Spawner Environment Variable
    [Documentation]  If it exists, removes an environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}

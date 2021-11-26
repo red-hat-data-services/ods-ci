@@ -75,7 +75,7 @@ Get RHODS version
     Log  ${ver}
     [Return]  ${ver}
 
-RHODS Version Is Greater Or Equal Than
+Is RHODS Version Is Greater Or Equal Than
     [Arguments]  ${target}
     ${ver} =  Get RHODS version
     ${comparison} =  GTE  ${ver}  ${target}

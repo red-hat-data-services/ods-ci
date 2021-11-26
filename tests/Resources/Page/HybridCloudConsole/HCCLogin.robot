@@ -28,3 +28,24 @@ Maybe Skip RHOSAK Tour
    ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//button[text()='Take tour']
    Run Keyword If  ${tour_modal}  Click Button    Not now
 
+Maybe Agree RH Terms and Conditions
+  ${agree_required}=  Run Keyword And Return Status  Page Should Contain  Red Hat Terms and Conditions
+  IF    ${agree_required} == True
+    Wait Until Page Contains Element    xpath=//div[@class='checkbox terms-decision']
+    Select Checkbox    xpath=//input[contains(@id, 'checkbox-term')]
+    Checkbox Should Be Selected  xpath=//input[contains(@id, 'checkbox-term')]
+    Click Button  Submit
+  END
+
+Maybe Accept Cookie Policy
+  ${cookie_required}=  Run Keyword And Return Status  Page Should Contain  We use cookies on this site
+  IF    ${cookie_required} == True
+    Select Frame    xpath=//iframe[@title='TrustArc Cookie Consent Manager']
+    Wait Until Page Contains Element    xpath=//a[contains(@class, 'required')]  timeout=10
+    Click Link    xpath=//a[contains(@class, 'required')]
+    Wait Until Page Contains Element    xpath=//a[contains(@class, 'close')]  timeout=10
+    Click Link    xpath=//a[contains(@class, 'close')]
+    Wait Until Page Does Not Contain    xpath=//iframe[@title='TrustArc Cookie Consent Manager']
+    Unselect Frame
+    Capture Page Screenshot  cookieaccepted.png
+  END

@@ -20,7 +20,7 @@ JupyterHub Spawner Is Visible
 Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
    [Arguments]  ${notebook_image}
-   ${version-check} =  RHODS Version Is Greater Or Equal Than  1.3.0
+   ${version-check} =  Is RHODS Version Is Greater Or Equal Than  1.3.0
    IF  ${version-check}==True
       Wait Until Element Is Visible  xpath://div[@class="jsp-spawner__image-options"]
    ELSE
@@ -34,7 +34,7 @@ Select Container Size
    [Arguments]  ${container_size}
    # Expand List
    Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawner
-   ${version-check} =  RHODS Version Is Greater Or Equal Than  1.3.0
+   ${version-check} =  Is RHODS Version Is Greater Or Equal Than  1.3.0
    IF  ${version-check}==True
       Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
    ELSE
@@ -97,7 +97,7 @@ Get Spawner Environment Variable Value
 Spawn Notebook
    [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
    [Arguments]  ${spawner_timeout}=600 seconds
-   ${version-check} =  RHODS Version Is Greater Or Equal Than  1.3.0
+   ${version-check} =  Is RHODS Version Is Greater Or Equal Than  1.3.0
    IF  ${version-check}==True
       Click Button  Start Server
       Wait Until Page Contains  Starting server
@@ -109,7 +109,7 @@ Spawn Notebook
    Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
 
 Has Spawn Failed
-   ${version-check} =  RHODS Version Is Greater Or Equal Than  1.3.0
+   ${version-check} =  Is RHODS Version Is Greater Or Equal Than  1.3.0
    IF  ${version-check}==True
       ${spawn_status} =  Run Keyword and Return Status  Page Should Contain  Spawn failed
    ELSE
@@ -132,7 +132,7 @@ Spawn Notebook With Arguments
             Add Spawner Environment Variable  ${key}  ${value}
          END
       END
-      ${version-check} =  RHODS Version Is Greater Or Equal Than  1.3.0
+      ${version-check} =  Is RHODS Version Is Greater Or Equal Than  1.3.0
       IF  ${version-check}==True
          Click Button  Start Server
          Wait Until Page Contains  Starting server

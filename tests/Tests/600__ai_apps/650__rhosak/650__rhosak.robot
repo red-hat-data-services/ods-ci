@@ -19,6 +19,7 @@ Verify RHOSAK Is Available In RHODS Dashboard Explore Page
   Verify Service Provides "Get Started" Button In The Explore Page    ${rhosak_displayed_appname}
   Verify Service Provides "Enable" Button In The Explore Page    ${rhosak_displayed_appname}
 
+
 Verify User Can Enable RHOSAK from Dashboard Explore Page
   [Tags]  Sanity  Smoke
   ...     ODS-392
@@ -30,6 +31,25 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
   Login to HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip RHOSAK Tour
   Wait Until Page Contains    Kafka Instances
+  Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
+
+Verify User Is Able to Create a Kafka Stream
+  [Tags]  Sanity  Smoke
+  ...     ODS-392-ext
+  Enable RHOSAK
+  Verify Service Is Enabled  ${rhosak_displayed_appname}
+  Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link
+  Login to HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
+  Maybe Skip RHOSAK Tour
+  Sleep  5
+  Wait Until Page Contains    Create Kafka instance
+  Click Button  Create Kafka instance
+  Sleep  5
+  Maybe Accept Cookie Policy
+  Sleep  5
+  Maybe Agree RH Terms and Conditions
+  Sleep    5
+  # insert kafka stream data and wait until it is ready to use!
   Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
 
 ** Keywords ***
@@ -54,4 +74,3 @@ Enable RHOSAK
   Wait Until Page Contains Element    xpath://div[contains(@id, 'pf-modal-part')]
   Click Button    xpath://footer/button[text()='Enable']
   Wait Until Page Contains Element   xpath://div[@class='pf-c-alert pf-m-success']
-

@@ -4,8 +4,7 @@ Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/OCPDashboard/Page.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource        ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
-Resource        ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Library         SeleniumLibrary
 Library         XML
 Library         JupyterLibrary
@@ -108,6 +107,12 @@ Anaconda Commercial Edition Suite Setup
 
 Anaconda Commercial Edition Suite Teardown
   Close All Browsers
+  Delete ConfigMap using Name          redhat-ods-applications   anaconda-ce-validation-result
+  Delete Pods Using Label Selector     redhat-ods-applications   component.opendatahub.io/name=anaconda-ce
+  Delete BuildConfig using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
+  Delete ImageStream using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
+  Delete Pods Using Label Selector     rhods-notebooks           component=singleuser-server
+  #Delete Secrets using Name            redhat-ods-applications   anaconda-ce-access
 
 Enable Anaconda
   [Arguments]  ${license_key}

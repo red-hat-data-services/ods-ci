@@ -11,6 +11,9 @@ Test Setup      Kafka Test Setup
 *** Variables ***
 ${rhosak_real_appname}=  rhosak
 ${rhosak_displayed_appname}=  OpenShift Streams for Apache Kafka
+${stream_name_test}=  qe-test-stream
+${stream_region_test}=  us-east-1
+${cloud_provider_test}=  Amazon Web Services
 
 *** Test Cases ***
 Verify RHOSAK Is Available In RHODS Dashboard Explore Page
@@ -33,9 +36,9 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
   Wait Until Page Contains    Kafka Instances
   Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
 
-Verify User Is Able to Create a Kafka Stream
+Verify User Is Able to Create And Delete a Kafka Stream
   [Tags]  Sanity  Smoke
-  ...     ODS-392-ext
+  ...     ODS-242
   Enable RHOSAK
   Verify Service Is Enabled  ${rhosak_displayed_appname}
   Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link
@@ -43,14 +46,13 @@ Verify User Is Able to Create a Kafka Stream
   Maybe Skip RHOSAK Tour
   Sleep  5
   Wait Until Page Contains    Create Kafka instance
-  Click Button  Create Kafka instance
-  Sleep  5
-  Maybe Accept Cookie Policy
-  Sleep  5
-  Maybe Agree RH Terms and Conditions
-  Sleep    5
-  # insert kafka stream data and wait until it is ready to use!
+  Create Kafka Stream Instance  stream_name=${stream_name_test}  stream_region=${stream_region_test}  cloud_provider=${cloud_provider_test}
+  Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
+  Wait Until Keyword Succeeds    300  1  Check Stream Status  Ready
+  Delete Kafka Stream Instance  stream_name=${stream_name_test}  stream_owner=${SSO.USERNAME}
+  Wait Until Keyword Succeeds    300  1  Page Should Contain    No results found
   Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
+
 
 ** Keywords ***
 Kafka Suite Setup
@@ -74,3 +76,42 @@ Enable RHOSAK
   Wait Until Page Contains Element    xpath://div[contains(@id, 'pf-modal-part')]
   Click Button    xpath://footer/button[text()='Enable']
   Wait Until Page Contains Element   xpath://div[@class='pf-c-alert pf-m-success']
+
+Check Stream Status
+  [Arguments]  ${target_status}
+  ${status}=  Get Text    xpath://tr[@tabindex='0']/td[@data-label='Status']
+  Should Be Equal    ${status}    ${target_status}
+
+Check Stream Creation
+  Wait Until Keyword Succeeds    300  1  Check Stream Status  Ready
+
+
+Create Kafka Stream Instance
+  [Arguments]  ${stream_name}  ${stream_region}  ${cloud_provider}
+  Click Button  Create Kafka instance
+  Sleep  5
+  Maybe Accept Cookie Policy
+  Sleep  5
+  Maybe Agree RH Terms and Conditions
+  Wait Until Page Contains Element    xpath=//div[@id='modalCreateKafka']  timeout=10
+  ${warn_msg}=  Run Keyword And Return Status    Page Should Not Contain    To deploy a new instance, delete your existing one first
+  IF    ${warn_msg} == ${False}
+     Log  level=WARN  message=The next keywords are going to fail because you cannot create more than one stream at a time.
+  END
+  Input Text    xpath=//input[@id='form-instance-name']    ${stream_name}
+  Click Element    xpath=//div[text()='${cloud_provider}']
+  Select From List By Value    id:cloud-region-select   ${stream_region}
+  Click Button    Create instance
+  Capture Page Screenshot  form.png
+  Sleep    2
+
+Delete Kafka Stream Instance
+  [Arguments]  ${stream_name}  ${stream_owner}
+  Click Button    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/button[@aria-label='Actions']
+  Wait Until Page Contains Element    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[text()='Delete']
+  Click Button    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[text()='Delete']
+  Wait Until Page Contains Element    xpath=//div[contains(@id, 'pf-modal-part')]
+  Input Text    id:name__input   ${stream_name}
+  Click Button    Delete
+
+

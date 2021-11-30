@@ -2,11 +2,22 @@
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
+Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
+Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterLabSidebar.robot
 Library         SeleniumLibrary
 Library         OpenShiftCLI
 Suite Setup     Kafka Suite Setup
 Suite Teardown  Kafka Suite Teardown
 Test Setup      Kafka Test Setup
+
+*** Variables ***
+${rhosak_real_appname}=  rhosak
+${rhosak_displayed_appname}=  OpenShift Streams for Apache Kafka
+${stream_name_test}=  qe-test-stream
+${stream_region_test}=  us-east-1
+${cloud_provider_test}=  Amazon Web Services
+
 
 *** Variables ***
 ${rhosak_real_appname}=  rhosak

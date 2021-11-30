@@ -111,7 +111,6 @@ Anaconda Commercial Edition Suite Teardown
   Delete Pods Using Label Selector     redhat-ods-applications   component.opendatahub.io/name=anaconda-ce
   Delete BuildConfig using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
   Delete ImageStream using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
-  Delete Pods Using Label Selector     rhods-notebooks           component=singleuser-server
   Delete Data From Secrets using Name   redhat-ods-applications   anaconda-ce-access      {"data":null}
 
 Enable Anaconda

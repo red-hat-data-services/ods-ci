@@ -100,9 +100,6 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']
-Verify User
-  [Tags]  Tarun
-   Patch Secrets using Name          redhat-ods-applications   anaconda-ce-access      {"data":null}
 
 ** Keywords ***
 Anaconda Commercial Edition Suite Setup

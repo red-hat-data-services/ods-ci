@@ -14,7 +14,7 @@ ${commercial_url}              https://www.redhat.com/en/technologies/cloud-comp
 *** Test Cases ***
 Verify RHODS operator information
   [Documentation]  This TC verfiy if the text present in RHODS opeartor Details section
-  [Tags]  ODS-498   Sanity     Smoke
+  [Tags]  ODS-498   ODS-624   Sanity
   Open Installed Operators Page
   #Select All Projects
   Click On Searched Operator      Red Hat OpenShift Data Science
@@ -35,6 +35,6 @@ Verify RHODS operator information
 
 Get HTTP Status Code
     [Arguments]  ${link_to_check}
-    ${response}=    GET  ${link_to_check}   expected_status=any
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
     Run Keyword And Continue On Failure  Status Should Be  200
     Log To Console    HTTP status For The '${link_to_check}' is '${response.status_code}'

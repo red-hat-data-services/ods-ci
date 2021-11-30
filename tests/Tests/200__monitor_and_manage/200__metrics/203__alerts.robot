@@ -4,26 +4,25 @@ Resource         ../../../Resources/ODS.robot
 Resource         ../../../Resources/Common.robot
 Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Library          DebugLibrary
 Library          SeleniumLibrary
 Library          JupyterLibrary
-Test Teardown   End Web Test
 
 *** Variables ***
 ${rule_group}=  RHODS-PVC-Usage
 ${alert_90}=  User notebook pvc usage above 90%
 ${alert_100}=  User notebook pvc usage at 100%
 ${notebook_repo_url}=  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
-${notebook_90}=  /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/203__alerts/notebook-pvc-usage/fill-notebook-pvc-over-90.ipynb
-${notebook_100}=  /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/203__alerts/notebook-pvc-usage/fill-notebook-pvc-to-100.ipynb
-${notebook_clean}=  /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/203__alerts/notebook-pvc-usage/fill-notebook-pvc-delete-testfiles.ipynb
+${notebook_90}=  /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/203__alerts/notebook-pvc-usage/fill-pvc-19GB.ipynb
+${notebook_100}=  /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/203__alerts/notebook-pvc-usage/fill-pvc-20GB.ipynb
+
 
 *** Test Cases ***
 Verify alert RHODS-PVC-Usage is fired when user notebook pvc usage is above 90 Percent
-  [Tags]  Sanity  ODS-516 
+  [Tags]  Sanity  ODS-516
   Set Up Alert Test  ${notebook_90}
   Sleep  320
   Prometheus.Alert Should Be Firing  ${RHODS_PROMETHEUS_URL}  ${RHODS_PROMETHEUS_TOKEN}  ${rule_group}  ${alert_90}
+  [Teardown]  Clean Up Files And End Web Test
 
 Verify alert RHODS-PVC-Usage is fired when user notebook pvc usage is 100 Percent
   [Tags]  Sanity  ODS-517

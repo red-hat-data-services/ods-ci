@@ -51,8 +51,7 @@ Verify User Is Able to Create And Delete a Kafka Stream
   Wait Until Keyword Succeeds    300  1  Check Stream Status  Ready
   Delete Kafka Stream Instance  stream_name=${stream_name_test}  stream_owner=${SSO.USERNAME}
   Wait Until Keyword Succeeds    300  1  Page Should Contain    No results found
-  Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
-
+  Delete    kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
 
 ** Keywords ***
 Kafka Suite Setup

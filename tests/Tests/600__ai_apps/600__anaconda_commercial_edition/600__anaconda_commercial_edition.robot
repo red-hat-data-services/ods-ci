@@ -101,7 +101,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']
 
-** Keywords ***
+*** Keywords ***
 Anaconda Commercial Edition Suite Setup
   Set Library Search Order  SeleniumLibrary
 

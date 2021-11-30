@@ -10,7 +10,7 @@ Library         XML
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Commercial Edition Suite Setup
-Suite Teardown  Anaconda Commercial Edition Suite Teardown
+#Suite Teardown  Anaconda Commercial Edition Suite Teardown
 
 *** Variables ***
 ${anaconda_appname}=  anaconda-ce
@@ -100,6 +100,9 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']
+Verify User
+  [Tags]  Tarun
+   Patch Secrets using Name          redhat-ods-applications   anaconda-ce-access      {"data":null}
 
 ** Keywords ***
 Anaconda Commercial Edition Suite Setup
@@ -112,7 +115,7 @@ Anaconda Commercial Edition Suite Teardown
   Delete BuildConfig using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
   Delete ImageStream using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
   Delete Pods Using Label Selector     rhods-notebooks           component=singleuser-server
-  #Delete Secrets using Name            redhat-ods-applications   anaconda-ce-access
+  Delete Data From Secrets using Name   redhat-ods-applications   anaconda-ce-access      {"data":null}
 
 Enable Anaconda
   [Arguments]  ${license_key}

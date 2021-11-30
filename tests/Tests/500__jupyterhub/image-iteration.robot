@@ -18,10 +18,10 @@ Suite Teardown   End Web Test
 ${python_dict}  {'classifiers':[${generic-1}, ${minimal-1}], 'clustering':[${generic-2}, ${generic-3}, ${minimal-2}, ${minimal-3}]}
 
 *** Test Cases ***
-Open RHODS Dashboard
+Open Main Dashboard
   [Tags]  Sanity
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Login To Main Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for ${ODS_PROJECT} Dashboard to Load
 
 Iterative Testing Classifiers
   [Tags]  Sanity  POLARION-ID-Classifiers
@@ -40,7 +40,7 @@ Iterative Testing Clustering
 *** Keywords ***
 Iterative Image Test
     [Arguments]  ${image}  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    Launch JupyterHub From ${ODS_PROJECT} Dashboard Dropdown
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

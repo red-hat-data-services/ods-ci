@@ -25,8 +25,8 @@ ${token_val_success_msg}=  Success! Your token was validated and Conda has been 
 Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabled Page
   [Tags]  ODS-262  Smoke  Sanity
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Login To Main Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for ${ODS_PROJECT} Dashboard to Load
   Verify Service Is Available In The Explore Page    Anaconda Commercial Edition
   Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Commercial Edition
   ${status}       Run keyword and Return Status         Verify Service Provides "Enable" Button In The Explore Page    Anaconda Commercial Edition
@@ -41,8 +41,8 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   [Tags]  Smoke  Sanity
   ...     ODS-310  ODS-367
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Login To Main Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for ${ODS_PROJECT} Dashboard to Load
   Enable Anaconda  ${invalid_key}
   Wait Until Keyword Succeeds    30  1  Check Connect Button Status  false
   Capture Page Screenshot  anaconda_failed_activation.png
@@ -50,7 +50,7 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Should Be Equal  ${text}  ${error_msg}
   Click Button    Cancel
   Menu.Navigate To Page    Applications    Enabled
-  Wait Until RHODS Dashboard JupyterHub Is Visible
+  Wait Until Main Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
   Page Should Not Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
 
@@ -61,13 +61,13 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Login To Main Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for ${ODS_PROJECT} Dashboard to Load
   Enable Anaconda  ${ANACONDA_CE.ACTIVATION_KEY}
   Wait Until Keyword Succeeds    50  1  Page Should Not Contain Element    xpath://*/div[contains(@class, "bullseye")]
   Capture Page Screenshot  anaconda_success_activation.png
   Menu.Navigate To Page    Applications    Enabled
-  Wait Until RHODS Dashboard JupyterHub Is Visible
+  Wait Until Main Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_present.png
   Page Should Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
   Go To  ${OCP_CONSOLE_URL}
@@ -78,7 +78,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Should Be Equal  ${val_result[0]}  ${val_success_msg}
   Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete
   Go To  ${ODH_DASHBOARD_URL}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Login To Main Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Launch JupyterHub Spawner From Dashboard
   Wait Until Page Contains Element  xpath://input[@name="Anaconda Commercial Edition"]
   Wait Until Element Is Enabled    xpath://input[@name="Anaconda Commercial Edition"]   timeout=10

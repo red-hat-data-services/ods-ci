@@ -37,8 +37,8 @@ Set Up Alert Test
     [Arguments]  ${NOTEBOOK_PATH}
     Set Library Search Order  SeleniumLibrary
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Login To Main Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Wait for ${ODS_PROJECT} Dashboard to Load
     Iterative Image Test  s2i-generic-data-science-notebook  ${notebook_repo_url}  ${NOTEBOOK_PATH}
     Capture Page Screenshot
 
@@ -54,7 +54,7 @@ Clean Up Files And End Web Test
 
 Iterative Image Test
     [Arguments]  ${image}  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    Launch JupyterHub From ${ODS_PROJECT} Dashboard Dropdown
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

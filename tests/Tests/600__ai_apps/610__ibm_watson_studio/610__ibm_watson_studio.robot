@@ -9,8 +9,8 @@ Suite Teardown  IBM Watson Studio Suite Teardown
 Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page
   [Tags]  ODS-267  Smoke  Sanity
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Login To Main Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for ${ODS_PROJECT} Dashboard to Load
   Verify Service Is Available In The Explore Page    IBM Watson Studio
   Verify Service Provides "Get Started" Button In The Explore Page    IBM Watson Studio
 

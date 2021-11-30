@@ -17,8 +17,8 @@ Minimal PyTorch test
   [Tags]  Regression
   ...     PLACEHOLDER  #category tags
   ...     PLACEHOLDER  #Polarion tags
-  Wait for RHODS Dashboard to Load
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  Wait for ${ODS_PROJECT} Dashboard to Load
+  Launch JupyterHub From ${ODS_PROJECT} Dashboard Dropdown
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

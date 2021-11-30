@@ -18,9 +18,9 @@ Test User Not In JH Access Groups
     ...     PLACEHOLDER  #Category tags
     ...     ODS-503
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard  ldap-noaccess1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    Login To Main Dashboard  ldap-noaccess1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
+    Wait for ${ODS_PROJECT} Dashboard to Load
+    Launch JupyterHub From ${ODS_PROJECT} Dashboard Dropdown
     Login Verify Access Level  ldap-noaccess1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}  none
 
 Test User In JH Admin Group
@@ -28,9 +28,9 @@ Test User In JH Admin Group
     ...     PLACEHOLDER  #Category tags
     ...     ODS-503
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard  ldap-admin1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    Login To Main Dashboard  ldap-admin1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
+    Wait for ${ODS_PROJECT} Dashboard to Load
+    Launch JupyterHub From ${ODS_PROJECT} Dashboard Dropdown
     Login Verify Access Level  ldap-admin1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}  admin
 
 Test User In JH Users Group
@@ -38,7 +38,7 @@ Test User In JH Users Group
     ...     PLACEHOLDER  #Category tags
     ...     ODS-503
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard  ldap-user1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    Login To Main Dashboard  ldap-user1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
+    Wait for ${ODS_PROJECT} Dashboard to Load
+    Launch JupyterHub From ${ODS_PROJECT} Dashboard Dropdown
     Login Verify Access Level  ldap-user1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}  user

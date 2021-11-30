@@ -11,13 +11,13 @@ Suite Teardown   End Web Test
 
 
 *** Test Cases ***
-Open RHODS Dashboard
+Open Main Dashboard
   [Tags]  Sanity
-  Wait for RHODS Dashboard to Load
+  Wait for ${ODS_PROJECT} Dashboard to Load
 
 Can Launch Jupyterhub
   [Tags]  Sanity
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  Launch JupyterHub From ${ODS_PROJECT} Dashboard Dropdown
 
 Can Login to Jupyterhub
   [Tags]  Sanity

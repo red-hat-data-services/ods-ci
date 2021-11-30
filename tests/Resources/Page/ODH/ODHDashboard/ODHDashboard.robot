@@ -13,7 +13,7 @@ Authorize rhods-dashboard service account
   Checkbox Should Be Selected  user:info
   Click Element  approve
 
-Login To RHODS Dashboard
+Login To Main Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    #Wait Until Page Contains  Log in with
    ${oauth_prompt_visible} =  Is OpenShift OAuth Login Prompt Visible
@@ -23,22 +23,21 @@ Login To RHODS Dashboard
    ${authorize_service_account} =  Is rhods-dashboard Service Account Authorization Required
    Run Keyword If  ${authorize_service_account}  Authorize rhods-dashboard service account
 
-Wait for RHODS Dashboard to Load
-  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
-  Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+Wait for ${ods_project} Dashboard to Load
+  Wait For Condition  return document.title == "${${ods_project}_DASHBOARD_TITLE}"  timeout=15
 
-Wait Until RHODS Dashboard ${dashboard_app} Is Visible
+Wait Until Main Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
   Wait Until Element is Visible  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]  30seconds
 
-Launch ${dashboard_app} From RHODS Dashboard Link
-  Wait Until RHODS Dashboard ${dashboard_app} Is Visible
+Launch ${dashboard_app} From ${ods_project} Dashboard Link
+  Wait Until Main Dashboard ${dashboard_app} Is Visible
   Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
   Switch Window  NEW
 
-Launch ${dashboard_app} From RHODS Dashboard Dropdown
-  Wait Until RHODS Dashboard ${dashboard_app} Is Visible
+Launch ${dashboard_app} From ${ods_project} Dashboard Dropdown
+  Wait Until Main Dashboard ${dashboard_app} Is Visible
   Click Button  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/..//button[contains(@class,pf-c-dropdown__toggle)]
   Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/..//a[.="Launch"]
   Switch Window  NEW

@@ -19,3 +19,6 @@ OCP_ADMIN_USER:
 S3:
   AWS_ACCESS_KEY_ID: ID-value
   AWS_SECRET_ACCESS_KEY: Secret-Key
+
+# If you want to test ODH, set this variable to 'ODH'
+ODS_PROJECT: RHODS

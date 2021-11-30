@@ -10,7 +10,7 @@ Library         XML
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Commercial Edition Suite Setup
-#Suite Teardown  Anaconda Commercial Edition Suite Teardown
+Suite Teardown  Anaconda Commercial Edition Suite Teardown
 
 *** Variables ***
 ${anaconda_appname}=  anaconda-ce

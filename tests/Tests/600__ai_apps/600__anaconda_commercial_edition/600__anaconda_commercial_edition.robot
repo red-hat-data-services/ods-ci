@@ -88,6 +88,8 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Sleep  3
   Close Other JupyterLab Tabs
   Capture Page Screenshot  closedtabs.png
+  ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
+  Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
   Launch a new JupyterLab Document
   Sleep  3
   Maybe Select Kernel

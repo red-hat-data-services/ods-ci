@@ -3,9 +3,10 @@ Resource  JupyterLabLauncher.robot
 Resource  ../../LoginPage.robot
 Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
 Resource  LoginJupyterHub.robot
-Library  JupyterLibrary
-Library  String
-Library  Collections
+Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
+Library   JupyterLibrary
+Library   String
+Library   Collections
 
 *** Variables ***
 ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =  //div[contains(@class,"jsp-spawner__header__title") and .="Start a notebook server"]
@@ -60,7 +61,6 @@ Remove All Spawner Environment Variables
    FOR    ${env}    IN    @{env_vars_list}
        Remove Spawner Environment Variable   ${env}
    END
-
 
 Remove Spawner Environment Variable
    [Documentation]  If it exists, removes an environment variable based on the ${env_var} argument

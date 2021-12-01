@@ -1,5 +1,9 @@
 *** Settings ***
 Library  SeleniumLibrary
+Library  OpenShiftCLI
+Library  OperatingSystem
+Library  String
+Library  ../../../../libs/Helpers.py
 
 *** Keywords ***
 Uninstall Operator
@@ -63,3 +67,18 @@ Wait Until Uninstallation Completes
 Operator Should Be Uninstalled
   [Arguments]  ${operator}
   Page Should Not Contain Element  //a[@data-test-operator-row="${operator}"]
+
+Get RHODS version
+    #@{list} =  OpenShiftCLI.Get  kind=ClusterServiceVersion  label_selector=olm.copiedFrom=redhat-ods-operator
+    #&{dict} =  Set Variable  ${list}[0]
+    #Log  ${dict.spec.version}
+    ${ver} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
+    ${ver} =  Fetch From Left  ${ver}  -
+    Log  ${ver}
+    [Return]  ${ver}
+
+Is RHODS Version Greater Or Equal Than
+    [Arguments]  ${target}
+    ${ver} =  Get RHODS version
+    ${comparison} =  GTE  ${ver}  ${target}
+    [Return]  ${comparison}

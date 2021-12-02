@@ -71,7 +71,7 @@ Verify User Is Able to Create And Delete a Kafka Stream
 
 Verify User Is Able to Produce and Consume Events
   [Tags]  Sanity  Smoke
-  ...     ODS-242-ext
+  ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239
   Enable RHOSAK
   Verify Service Is Enabled  ${rhosak_displayed_appname}
   Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link

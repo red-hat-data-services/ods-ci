@@ -149,21 +149,18 @@ Assign Permissions To ServiceAccount in RHOSAK
   [Arguments]  ${sa_client_id}  ${sa_to_assign}
   Click Button  Manage access
   Wait Until Page Contains Element  xpath=//div[@id='manage-permissions-modal']/form//input[@aria-label='Select an account']
-  # /*/input[aria-label='Select an account']
-  Click Element   xpath=//div[@id='manage-permissions-modal']/form//div[contains(@class, 'pf-m-typeahead')]
-  # Click Element   xpath=//div[@id='manage-permissions-modal']/form//button[@aria-label='Options menu']
-  Execute JavaScript    document.querySelectorAll('[aria-label="Select an account"]').value="${sa_to_assign}";
+  # Click Element   xpath=//div[@id='manage-permissions-modal']/form//div[contains(@class, 'pf-m-typeahead')]
   # Input Text  xpath=//div[@id='manage-permissions-modal']/form//input[@aria-label='Select an account']   ${sa_to_assign}
-  Sleep  10
-  # Click Element  xpath=//div[@id='manage-permissions-modal']/form//li/button/span[text()='${sa_client_id}']
-  # # Click Element  xpath=//input[@arial-label='Select an account']
-  # Wait Until Element Is Enabled  xpath=//button[text()='Next']
-  # Click Button  Next
-  # Wait Until Page Contains  Assign permissions
-  # Click Element  xpath=//button[@aria-label='Options menu']
-  # Wait Until Page Contains Element  xpath=//div/ul[@class='pf-c-select__menu']/li/button[text()='Topic']
-  # Click Element  xpath=//div/ul[@class='pf-c-select__menu']/li/button[text()='Topic']
-  # Click Button  Add
+  Input Text  xpath=//div[(@id='manage-permissions-modal') and (@class='pf-c-modal-box__body')]/form//input[@aria-label='Select an account']   ${sa_to_assign}
+  Sleep  1
+  Click Element   xpath=//div[(@id='manage-permissions-modal') and (@class='pf-c-modal-box__body')]/form//li/button/span[text()='${sa_client_id}']
+  Wait Until Element Is Enabled  xpath=//button[text()='Next']
+  Click Button  Next
+  Wait Until Page Contains  Assign permissions
+  Click Element  xpath=//button[@aria-label='Options menu']
+  Wait Until Page Contains Element  xpath=//div/ul[@class='pf-c-select__menu']/li/button[text()='Topic']
+  Click Element  xpath=//div/ul[@class='pf-c-select__menu']/li/button[text()='Topic']
+  Click Button  Add
 
 
 

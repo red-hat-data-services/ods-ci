@@ -47,13 +47,15 @@ Verify User Is Able to Create And Delete a Kafka Stream
   Sleep  5
   Wait Until Page Contains    Create Kafka instance
   Create Kafka Stream Instance  stream_name=${stream_name_test}  stream_region=${stream_region_test}  cloud_provider=${cloud_provider_test}
+  Capture Page Screenshot  newly_created_stream.png
   Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
   Wait Until Keyword Succeeds    300  1  Check Stream Status  Ready
   Delete Kafka Stream Instance  stream_name=${stream_name_test}  stream_owner=${SSO.USERNAME}
   Wait Until Keyword Succeeds    300  1  Page Should Contain    No results found
-  Delete    kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
+  Capture Page Screenshot  after deleting_stream.png
+  OpenShiftCLI.Delete      kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
 
-** Keywords ***
+*** Keywords ***
 Kafka Suite Setup
   Set Library Search Order  SeleniumLibrary
 

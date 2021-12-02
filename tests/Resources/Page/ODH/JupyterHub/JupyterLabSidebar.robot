@@ -1,7 +1,7 @@
 *** Settings ***
 Library  JupyterLibrary
 Library  String
-
+Library  RequestsLibrary
 *** Variables ***
 
 *** Keywords ***

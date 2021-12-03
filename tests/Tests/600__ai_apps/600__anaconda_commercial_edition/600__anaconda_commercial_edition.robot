@@ -73,7 +73,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Go To  ${OCP_CONSOLE_URL}
   Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
   Maybe Skip Tour
-  ${val_result}=  Get Pod Logs  namespace=redhat-ods-applications  pod_search_term=anaconda-ce-periodic-validator-job-custom-run
+  ${val_result}=  Get Pod Logs Manual Version  namespace=redhat-ods-applications  pod_search_term=anaconda-ce-periodic-validator-job-custom-run
   Log  ${val_result}
   Should Be Equal  ${val_result[0]}  ${val_success_msg}
   Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete

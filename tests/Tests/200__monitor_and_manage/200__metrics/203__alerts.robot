@@ -44,10 +44,12 @@ Set Up Alert Test
 
 Clean Up Files And End Web Test
     [Documentation]  We delete the notebook files using the new -and expererimental- "Clean Up User Notebook" because "End Web Test" doesn't work well when disk is 100% filled
-    Clean Up User Notebook  ${OCP_ADMIN_USER.USERNAME}  ${TEST_USER.USERNAME}
-    Maybe Accept a JupyterLab Prompt
+    Close All JupyterLab Tabs
+    Navigate Home (Root folder) In JupyterLab Sidebar File Browser
+    Delete Folder In User Notebook  ${OCP_ADMIN_USER.USERNAME}  ${TEST_USER.USERNAME}  ods-ci-notebooks-main
+    Maybe Close Popup
     Sleep  5
-    Maybe Accept a JupyterLab Prompt
+    Maybe Close Popup
     Common.End Web Test
 
 Iterative Image Test

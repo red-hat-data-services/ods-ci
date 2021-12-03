@@ -167,7 +167,7 @@ Clean Up User Notebook
   [Arguments]  ${admin_username}  ${username}
 
   # Verify that ${admin_username}  is connected to the cluster
-  ${oc_whoami}=  Run   oc whoami
+  ${oc_whoami} =  Run   oc whoami
   IF    '${oc_whoami}' == '${admin_username}'
       # We import the library here so it's loaded only when we are connected to the cluster
       # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
@@ -175,12 +175,35 @@ Clean Up User Notebook
       Import Library    OpenShiftCLI
 
       # Verify that the jupyter notebook pod is running
-      ${notebook_pod_name}=   Get User Notebook Pod Name  ${username}
+      ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
       Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
-      ${output}=  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
+      ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
+      Log  ${output}
+  ELSE
+      Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
+  END
+
+Delete Folder In User Notebook
+  [Documentation]  Delete recursively the folder  /opt/app-root/src/${folder} in ${username}'s notebook PVC.
+...   Note: this command requires ${admin_username}  to be logged to the cluster (oc login ...) and to have the user's notebook pod running (e.g. jupyterhub-nb-ldap-2duser1)
+  [Arguments]  ${admin_username}  ${username}  ${folder}
+
+  # Verify that ${admin_username}  is connected to the cluster
+  ${oc_whoami} =  Run   oc whoami
+  IF    '${oc_whoami}' == '${admin_username}'
+      # We import the library here so it's loaded only when we are connected to the cluster
+      # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
+      # if there is not any connection opened
+      Import Library    OpenShiftCLI
+
+      # Verify that the jupyter notebook pod is running
+      ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
+      Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+
+      ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
@@ -284,7 +307,7 @@ Add and Run JupyterLab Code Cell in Active Notebook
 
     ${active-nb-tab} =    Get WebElement    xpath:${JL_TABBAR_SELECTED_XPATH}
     ${tab-id} =    Get Element Attribute    ${active-nb-tab}    id
-    
+
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]/div[1]//${add icon}
     Sleep    0.1s
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[contains(concat(' ',normalize-space(@class),' '),' jp-mod-selected ')]

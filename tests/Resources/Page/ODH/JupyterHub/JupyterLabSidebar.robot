@@ -41,4 +41,5 @@ Get HTTP Status Code
     [Arguments]  ${link_to_check}
     ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
     Run Keyword And Continue On Failure  Status Should Be  200
+    #Run Keyword And Warn On Failure  Status Should Be  200
     [Return]  ${response.status_code}

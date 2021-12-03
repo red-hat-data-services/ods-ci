@@ -2,6 +2,7 @@
 Library         SeleniumLibrary
 Library         Collections
 Library         JupyterLibrary
+Library         String
 Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
@@ -10,10 +11,10 @@ Suite Teardown   Plugin Testing Suite Teardown
 
 *** Variables ***
 @{notebook_images}             s2i-minimal-notebook   s2i-generic-data-science-notebook    tensorflow   pytorch
-@{s2i-minimal-notebook}      @jupyterlab/git      nbdime-jupyterlab
-@{s2i-generic-data-science-notebook}   @jupyterlab/git   @jupyter-widgets/jupyterlab-manager  jupyterlab_requirements   nbdime-jupyterlab   jupyterlab-plotly   jupyterlab-s3-browser   @bokeh/jupyter_bokeh   @jupyter-server/resource-usage  @krassowski/jupyterlab-lsp   @elyra/metadata-extension  @elyra/python-editor-extension  @elyra/theme-extension
-@{tensorflow}   @jupyterlab/git   @jupyter-widgets/jupyterlab-manager   jupyterlab-s3-browser   nbdime-jupyterlab  jupyterlab-plotly  @jupyter-server/resource-usage   @krassowski/jupyterlab-lsp   @bokeh/jupyter_bokeh   @elyra/metadata-extension   @elyra/python-editor-extension   @elyra/theme-extension
-@{pytorch}   @jupyterlab/git   @jupyter-widgets/jupyterlab-manager   jupyterlab-s3-browser    nbdime-jupyterlab   jupyterlab-plotly   @jupyter-server/resource-usage    @krassowski/jupyterlab-lsp   @bokeh/jupyter_bokeh    @elyra/metadata-extension   @elyra/python-editor-extension   @elyra/theme-extension
+@{s2i-minimal-notebook}      @jupyterlab/git      nbdime-jupyterlab     Python 3.8
+@{s2i-generic-data-science-notebook}   @jupyterlab/git      @jupyter-widgets/jupyterlab-manager    jupyterlab_requirements   nbdime-jupyterlab   jupyterlab-plotly   jupyterlab-s3-browser   @bokeh/jupyter_bokeh   @jupyter-server/resource-usage  @krassowski/jupyterlab-lsp   @elyra/metadata-extension  @elyra/python-editor-extension  @elyra/theme-extension   Python 3.8
+@{tensorflow}   @jupyterlab/git   @jupyter-widgets/jupyterlab-manager   jupyterlab-s3-browser   nbdime-jupyterlab  jupyterlab-plotly  @jupyter-server/resource-usage   @krassowski/jupyterlab-lsp   @bokeh/jupyter_bokeh   @elyra/metadata-extension   @elyra/python-editor-extension   @elyra/theme-extension    Python 3.8
+@{pytorch}   @jupyterlab/git   @jupyter-widgets/jupyterlab-manager   jupyterlab-s3-browser    nbdime-jupyterlab   jupyterlab-plotly   @jupyter-server/resource-usage    @krassowski/jupyterlab-lsp   @bokeh/jupyter_bokeh    @elyra/metadata-extension   @elyra/python-editor-extension   @elyra/theme-extension   Python 3.8
 &{temporary_data}
 &{image_mismatch_plugins}
 
@@ -34,14 +35,18 @@ Test User Notebook Plugin in JupyterLab
 *** Keywords ***
 Plugin Testing Suite Setup
   Set Library Search Order  SeleniumLibrary
+   ${notebook_pod_name}         Get User Notebook Pod Name         ${TEST_USER.USERNAME}
+   Set Suite Variable     ${notebook_pod_name}
 
 Plugin Testing Suite Teardown
-  Close All Browsers
+   SeleniumLibrary.Close All Browsers
+   Run Keyword And Return Status    Run   oc delete pod ${notebook_pod_name} -n rhods-notebooks
 
 Gather Notebook data
-   ${notebook_data}             Create Dictionary          s2i-minimal-notebook=${s2i-minimal-notebook}         s2i-generic-data-science-notebook=${s2i-generic-data-science-notebook}
+   ${notebook_data}             Create Dictionary          s2i-minimal-notebook=${s2i-minimal-notebook}       s2i-generic-data-science-notebook=${s2i-generic-data-science-notebook}
    ...                          tensorflow=${tensorflow}       pytorch=${pytorch}
    Set Suite Variable     ${notebook_data}
+   Run Keyword And Return Status    Run   oc delete pod ${notebook_pod_name} -n rhods-notebooks
 
 Get the List of Plugins from RHODS notebook images
   FOR  ${image}  IN  @{notebook_images}
@@ -51,15 +56,17 @@ Get the List of Plugins from RHODS notebook images
       Maybe Close Popup
       Sleep  3
       Close Other JupyterLab Tabs
-      ${notebook_pod_name}         Get User Notebook Pod Name         ${TEST_USER.USERNAME}
+      #${notebook_pod_name}         Get User Notebook Pod Name         ${TEST_USER.USERNAME}
       ${temp_data}      Get Install Plugin list from JupyterLab
+      ${py_version}    Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- python --version
+      ${python_image}           Split String From Right	  ${py_version}  	.    1
+      Append To List           ${temp_data}         ${python_image}[0]
       Log    ${temp_data}
       Set To Dictionary   ${temporary_data}      ${image}     ${temp_data}
       sleep  5
       Stop JupyterLab Notebook Server
       Click Link  start
       Sleep  3
-      Fix Spawner Status
   END
 
 Verify the Plugins for each JL images
@@ -67,9 +74,14 @@ Verify the Plugins for each JL images
         ${mistamtch_plugins}    Create List
         ${plugin_names}     Get From Dictionary	   ${temporary_data}     ${image}
         ${old_notebok_plugin}      Get From Dictionary	   ${notebook_data}     ${image}
-        FOR    ${name}    IN    @{plugin_names}
-               Run Keyword If      $name not in $old_notebok_plugin    Append To List    ${mistamtch_plugins}    ${name}
-               ...       ELSE      Log    Plugin '${name}' has not chnaged
+        IF    len(${plugin_names}) >= len(${old_notebok_plugin})
+              FOR    ${name}    IN    @{plugin_names}
+                     Run Keyword If      $name not in $old_notebok_plugin    Append To List    ${mistamtch_plugins}    ${name}
+                     ...       ELSE      Log    Plugin '${name}' has not chnaged
+              END
+              Run Keyword IF   ${mistamtch_plugins} != @{EMPTY}   Set To Dictionary    ${image_mismatch_plugins}        ${image}     ${mistamtch_plugins}
+        ELSE
+            Run Keyword And Continue On Failure          FAIl       Some Plugins has been removed from the '${image}' notebook image
         END
-        Run Keyword IF   ${mistamtch_plugins} != @{EMPTY}   Set To Dictionary    ${image_mismatch_plugins}        ${image}     ${mistamtch_plugins}
+
    END

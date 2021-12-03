@@ -37,7 +37,7 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
   Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
 
 Verify User Is Able to Create And Delete a Kafka Stream
-  [Tags]  Sanity  Smoke
+  [Tags]  Sanity
   ...     ODS-242
   Enable RHOSAK
   Verify Service Is Enabled  ${rhosak_displayed_appname}

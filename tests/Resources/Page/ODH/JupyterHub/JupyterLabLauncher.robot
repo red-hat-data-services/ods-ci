@@ -119,6 +119,17 @@ Run Cell And Check Output
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Match  ${output}  ${expected_output}
 
+Python Version Check
+  [Arguments]  ${expected_version}=3.8
+  Add and Run JupyterLab Code Cell in Active Notebook  !python --version
+  Wait Until JupyterLab Code Cell Is Not Active
+  #Get the text of the last output cell
+  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+  #start is inclusive, end exclusive, get x.y from Python x.y.z string
+  ${output} =  Fetch From Right  ${output}  ${SPACE}
+  ${vers} =  Get Substring  ${output}  0  3
+  Should Match  ${vers}  ${expected_version}
+
 Maybe Select Kernel
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
@@ -139,6 +150,7 @@ Clean Up Server
   Click Element  xpath://div[.="Open"]
   Maybe Close Popup
   Wait Until Untitled.ipynb JupyterLab Tab Is Selected
+  Sleep  5
   Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
 
 

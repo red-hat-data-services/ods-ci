@@ -54,7 +54,7 @@ Iterative Image Test
     Close Other JupyterLab Tabs
     Sleep  5
     Run Cell And Check Output  print("Hello World!")  Hello World!
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.8
+    Python Version Check
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
     #This ensures all workloads are run even if one (or more) fails

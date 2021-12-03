@@ -38,7 +38,7 @@ Verify Installed Python Version in Tensorflow
   [Tags]  Regression
   ...     PLACEHOLDER  #category tags
   ...     ODS-206  #Polarion tags
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.8
+  Python Version Check
 
 Verify Installed Libraries in Tensorflow
   [Tags]  Regression

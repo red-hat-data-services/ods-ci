@@ -38,7 +38,7 @@ Verify Installed Python Version in PyTorch
   [Tags]  Regression
   ...     PLACEHOLDER  #category tags
   ...     ODS-217  #Polarion tags
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.8
+  Python Version Check
 
 Verify Installed Libraries in PyTorch
   [Tags]  Regression

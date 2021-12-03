@@ -19,14 +19,14 @@ ${notebook_clean}=  /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/203
 
 *** Test Cases ***
 Verify alert RHODS-PVC-Usage is fired when user notebook pvc usage is above 90 Percent
-  [Tags]  Sanity  ODS-516
+  [Tags]  Tier2  ODS-516
   Set Up Alert Test  ${notebook_90}
   Sleep  320
   Prometheus.Alert Should Be Firing  ${RHODS_PROMETHEUS_URL}  ${RHODS_PROMETHEUS_TOKEN}  ${rule_group}  ${alert_90}
   [Teardown]  Clean Up Files And End Web Test
 
 Verify alert RHODS-PVC-Usage is fired when user notebook pvc usage is 100 Percent
-  [Tags]  Sanity  ODS-517
+  [Tags]  Tier2  ODS-517
   Set Up Alert Test  ${notebook_100}
   Sleep  320
   Prometheus.Alert Should Be Firing  ${RHODS_PROMETHEUS_URL}  ${RHODS_PROMETHEUS_TOKEN}  ${rule_group}  ${alert_100}

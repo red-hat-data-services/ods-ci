@@ -1,5 +1,10 @@
 *** Settings ***
 Library  SeleniumLibrary
+Library  OpenShiftCLI
+Library  OperatingSystem
+Library  String
+Library  ../../../../libs/Helpers.py
+
 *** Variables ***
 @{verification_list}           beta   preview   stage
 
@@ -66,6 +71,7 @@ Operator Should Be Uninstalled
   [Arguments]  ${operator}
   Page Should Not Contain Element  //a[@data-test-operator-row="${operator}"]
 
+
 Switch To New Tab
     [Arguments]  ${tabname}
      Click Element        //a[contains(text(), "${tabname}")]
@@ -82,3 +88,19 @@ Check IF URL On The Page Is Commercial
      FOR  ${value}  IN   @{verification_list}
           Run keyword If       $value in $url     FAIL    URL doesn't look like commerial it contain '${value}' in it
      END
+
+Get RHODS version
+    #@{list} =  OpenShiftCLI.Get  kind=ClusterServiceVersion  label_selector=olm.copiedFrom=redhat-ods-operator
+    #&{dict} =  Set Variable  ${list}[0]
+    #Log  ${dict.spec.version}
+    ${ver} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
+    ${ver} =  Fetch From Left  ${ver}  -
+    Log  ${ver}
+    [Return]  ${ver}
+
+Is RHODS Version Greater Or Equal Than
+    [Arguments]  ${target}
+    ${ver} =  Get RHODS version
+    ${comparison} =  GTE  ${ver}  ${target}
+    [Return]  ${comparison}
+

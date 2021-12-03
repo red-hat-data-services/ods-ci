@@ -137,6 +137,16 @@ class OpenshiftClusterManager():
             sys.exit(1)
         return cluster_state.strip("\n")
 
+    def get_osd_cluster_version(self):
+        """Gets osd cluster version"""
+
+        cluster_version = self.ocm_describe(filter="--json | jq -r '.version.raw_id'")
+        if cluster_version is None:
+            print ("Unable to retrieve cluster version for "
+                   "cluster name {}. EXITING".format(self.cluster_name))
+            sys.exit(1)
+        return cluster_version.strip("\n")
+
     def get_osd_cluster_console_url(self):
         """Gets osd cluster console url"""
 
@@ -154,6 +164,8 @@ class OpenshiftClusterManager():
         cluster_info = {}
         console_url = self.get_osd_cluster_console_url()
         cluster_info['OCP_CONSOLE_URL'] = console_url
+        cluster_version = self.get_osd_cluster_version()
+        cluster_info['CLUSTER_VERSION'] = cluster_version
         odh_dashboard_url = console_url.replace('console-openshift-console',
                                                 'rhods-dashboard-redhat-ods-applications')
         cluster_info['ODH_DASHBOARD_URL'] = odh_dashboard_url

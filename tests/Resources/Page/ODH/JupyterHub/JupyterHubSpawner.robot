@@ -3,6 +3,7 @@ Resource  JupyterLabLauncher.robot
 Resource  ../../LoginPage.robot
 Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
 Resource  LoginJupyterHub.robot
+Resource  JupyterLabSidebar.robot
 Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 Library   JupyterLibrary
 Library   String

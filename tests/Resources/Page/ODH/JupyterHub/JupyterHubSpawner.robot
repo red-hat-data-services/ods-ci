@@ -225,7 +225,7 @@ Login Via Button
    Wait Until Page Contains  Log in with
 
 Maybe Handle Server Not Running Page
-  ${SNR_visible} =  Run Keyword and Return Status   Wait Until Page Contains    Server not running  timeout=10
+  ${SNR_visible} =  Run Keyword and Return Status   Wait Until Page Contains    Server not running  timeout=15
   IF  ${SNR_visible}==True
          Handle Server Not Running
   END

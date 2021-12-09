@@ -80,6 +80,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Go To  ${ODH_DASHBOARD_URL}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Launch JupyterHub Spawner From Dashboard
+  Maybe Handle Server Not Running Page
   Wait Until Page Contains Element  xpath://input[@name="Anaconda Commercial Edition"]
   Wait Until Element Is Enabled    xpath://input[@name="Anaconda Commercial Edition"]   timeout=10
   Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
@@ -102,6 +103,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Capture Page Screenshot  conda_lib_install_result.png
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
+  Maybe Handle Server Not Running Page
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
 
 ** Keywords ***
@@ -139,5 +141,4 @@ Check Anaconda CE Image Build Status
   ...    Fail  the Anaconda image build has failed
   ...  ELSE
   ...    Should Be Equal    ${ace_build_status}    ${target_status}
-
 

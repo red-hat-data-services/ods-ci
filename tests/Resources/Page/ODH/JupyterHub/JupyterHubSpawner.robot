@@ -192,6 +192,7 @@ Fix Spawner Status
             Maybe Close Popup
             Stop JupyterLab Notebook Server
             Handle Start My Server
+            Maybe Handle Server Not Running Page
          END
       END
    END
@@ -225,7 +226,7 @@ Login Via Button
    Wait Until Page Contains  Log in with
 
 Maybe Handle Server Not Running Page
-  ${SNR_visible} =  Run Keyword and Return Status   Wait Until Page Contains    Server not running  timeout=15
+  ${SNR_visible} =  Run Keyword And Return Status    Wait Until Keyword Succeeds    15    1    Server Not Running Is Visible
   IF  ${SNR_visible}==True
          Handle Server Not Running
   END

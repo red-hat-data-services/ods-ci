@@ -27,13 +27,13 @@ Can Login to Jupyterhub
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
 
 Can Spawn Notebook
-  [Tags]  Sanity
+  [Tags]  Sanity  ODS-902  ODS-904
   Fix Spawner Status
   &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{S3-credentials}
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Sanity
+  [Tags]  Sanity  ODS-910  ODS-911  ODS-921  ODS-924  ODS-929  ODS-931  ODS-333
   Wait for JupyterLab Splash Screen  timeout=60
   Maybe Close Popup
   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected

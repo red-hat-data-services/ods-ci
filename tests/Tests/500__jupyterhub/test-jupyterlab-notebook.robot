@@ -34,7 +34,7 @@ Can Spawn Notebook
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Sanity
+  [Tags]  Sanity  ODS-906
 
   Wait for JupyterLab Splash Screen  timeout=30
   Maybe Close Popup
@@ -45,6 +45,7 @@ Can Launch Python3 Smoke Test Notebook
 
   Add and Run JupyterLab Code Cell in Active Notebook  import os
   Add and Run JupyterLab Code Cell in Active Notebook  print("Hello World!")
+  Python Version Check
   Capture Page Screenshot
 
   JupyterLab Code Cell Error Output Should Not Be Visible

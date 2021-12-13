@@ -141,7 +141,7 @@ Get Spawner Event Log
    [Return] @{event_elements}
 
 Server Not Running Is Visible
-   ${SNR_visible} =  Run Keyword and Return Status  Page Should Contain  Server not running
+   ${SNR_visible} =  Run Keyword and Return Status  Wait Until Page Contains    Server not running  timeout=15
    [return]  ${SNR_visible}
 
 Handle Server Not Running
@@ -226,7 +226,7 @@ Login Via Button
    Wait Until Page Contains  Log in with
 
 Maybe Handle Server Not Running Page
-  ${SNR_visible} =  Run Keyword And Return Status    Wait Until Keyword Succeeds    15    1    Server Not Running Is Visible
+  ${SNR_visible} =  Server Not Running Is Visible
   IF  ${SNR_visible}==True
          Handle Server Not Running
   END

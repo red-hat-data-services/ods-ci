@@ -19,7 +19,12 @@ Open RHODS Dashboard
 
 Can Launch Jupyterhub
   [Tags]  Sanity
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+  IF  ${version-check}==True
+    Launch JupyterHub From RHODS Dashboard Link
+  ELSE
+    Launch JupyterHub From RHODS Dashboard Dropdown
+  END
 
 Can Login to Jupyterhub
   [Tags]  Sanity

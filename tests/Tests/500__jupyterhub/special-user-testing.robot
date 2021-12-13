@@ -22,7 +22,12 @@ Test Special Usernames
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+    ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+    END
     FOR  ${char}  IN  @{CHARS}
         Login Verify Logout  ldap-special${char}  ${TEST_USER.PASSWORD}  ldap-provider-qe
     END

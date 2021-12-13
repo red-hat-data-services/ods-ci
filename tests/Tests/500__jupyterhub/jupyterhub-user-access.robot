@@ -20,7 +20,12 @@ Test User Not In JH Access Groups
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ldap-noaccess1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+    ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+    END
     Login Verify Access Level  ldap-noaccess1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}  none
 
 Test User In JH Admin Group
@@ -30,7 +35,12 @@ Test User In JH Admin Group
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ldap-admin1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+    ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+    END
     Login Verify Access Level  ldap-admin1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}  admin
 
 Test User In JH Users Group
@@ -40,5 +50,10 @@ Test User In JH Users Group
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ldap-user1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+    ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+    END
     Login Verify Access Level  ldap-user1  ${TEST_USER.PASSWORD}  ${AUTH_TYPE}  user

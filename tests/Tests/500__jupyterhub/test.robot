@@ -25,7 +25,12 @@ Can Launch Jupyterhub
    Launch Jupyterhub via App
    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    Wait for RHODS Dashboard to Load
-   Launch JupyterHub From RHODS Dashboard Dropdown
+   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+   IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+   ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+   END
 
 Can Login to Jupyterhub
    [Tags]  Sanity  Smoke  ODS-936

@@ -53,7 +53,12 @@ Clean Up Files And End Web Test
 
 Iterative Image Test
     [Arguments]  ${image}  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+    ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+    END
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

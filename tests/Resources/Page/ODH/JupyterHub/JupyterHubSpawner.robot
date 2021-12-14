@@ -122,7 +122,12 @@ Spawn Notebook With Arguments
 
 Launch JupyterHub Spawner From Dashboard
   Menu.Navigate To Page    Applications    Enabled
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+  IF  ${version-check}==True
+    Launch JupyterHub From RHODS Dashboard Link
+  ELSE
+    Launch JupyterHub From RHODS Dashboard Dropdown
+  END
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

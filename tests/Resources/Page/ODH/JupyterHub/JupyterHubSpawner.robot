@@ -3,6 +3,7 @@ Resource  JupyterLabLauncher.robot
 Resource  ../../LoginPage.robot
 Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
 Resource  LoginJupyterHub.robot
+Resource  JupyterLabSidebar.robot
 Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 Library   JupyterLibrary
 Library   String
@@ -140,7 +141,7 @@ Get Spawner Event Log
    [Return] @{event_elements}
 
 Server Not Running Is Visible
-   ${SNR_visible} =  Run Keyword and Return Status  Page Should Contain  Server not running
+   ${SNR_visible} =  Run Keyword and Return Status  Wait Until Page Contains    Server not running  timeout=15
    [return]  ${SNR_visible}
 
 Handle Server Not Running
@@ -191,6 +192,7 @@ Fix Spawner Status
             Maybe Close Popup
             Stop JupyterLab Notebook Server
             Handle Start My Server
+            Maybe Handle Server Not Running Page
          END
       END
    END
@@ -222,3 +224,9 @@ Login Via Button
    ...  Keyword.
    Click Element  xpath://a[@id='login']
    Wait Until Page Contains  Log in with
+
+Maybe Handle Server Not Running Page
+  ${SNR_visible} =  Server Not Running Is Visible
+  IF  ${SNR_visible}==True
+         Handle Server Not Running
+  END

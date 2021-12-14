@@ -73,7 +73,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Go To  ${OCP_CONSOLE_URL}
   Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
   Maybe Skip Tour
-  ${val_result}=  Get Pod Logs  namespace=redhat-ods-applications  pod_search_term=anaconda-ce-periodic-validator-job-custom-run
+  ${val_result}=  Get Pod Logs From UI  namespace=redhat-ods-applications  pod_search_term=anaconda-ce-periodic-validator-job-custom-run
   Log  ${val_result}
   Should Be Equal  ${val_result[0]}  ${val_success_msg}
   Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete
@@ -102,9 +102,10 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Capture Page Screenshot  conda_lib_install_result.png
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
-  Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']
+  Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
 
-** Keywords ***
+
+*** Keywords ***
 Anaconda Commercial Edition Suite Setup
   Set Library Search Order  SeleniumLibrary
 

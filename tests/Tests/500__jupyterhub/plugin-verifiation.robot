@@ -32,6 +32,7 @@ Test User Notebook Plugin in JupyterLab
     Verify the Plugins for each JL images
     Run Keyword IF     ${image_mismatch_plugins} != &{EMPTY}   Fail    Plugin mismatch Found in the mentioned images '${image_mismatch_plugins}'
     ...       ELSE      Log To Console   All the plugin  is matched between the old and new notebook images
+
 *** Keywords ***
 Plugin Testing Suite Setup
   Set Library Search Order  SeleniumLibrary

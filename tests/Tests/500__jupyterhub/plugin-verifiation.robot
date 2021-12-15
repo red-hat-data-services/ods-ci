@@ -20,7 +20,7 @@ Suite Teardown   Plugin Testing Suite Teardown
 
 *** Test Cases ***
 Test User Notebook Plugin in JupyterLab
-    [Tags]  Smoke  Sanity
+    [Tags]  Sanity
     Gather Notebook data
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -63,7 +63,6 @@ Get the List of Plugins from RHODS notebook images
       Append To List           ${temp_data}         ${python_image}[0]
       Log    ${temp_data}
       Set To Dictionary   ${temporary_data}      ${image}     ${temp_data}
-      sleep  5
       Stop JupyterLab Notebook Server
       Click Link  start
       Sleep  3

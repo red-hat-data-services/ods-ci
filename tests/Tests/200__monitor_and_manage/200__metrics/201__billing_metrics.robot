@@ -87,7 +87,12 @@ Run Jupyter Notebook For 5 Minutes
 ##TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob. We have to refactor the code not to duplicate this method
 Iterative Image Test
   [Arguments]  ${image}  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+  IF  ${version-check}==True
+    Launch JupyterHub From RHODS Dashboard Link
+  ELSE
+    Launch JupyterHub From RHODS Dashboard Dropdown
+  END
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Page Should Not Contain    403 : Forbidden
   ${authorization_required} =  Is Service Account Authorization Required
@@ -116,7 +121,12 @@ CleanUp JupyterHub
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+  IF  ${version-check}==True
+    Launch JupyterHub From RHODS Dashboard Link
+  ELSE
+    Launch JupyterHub From RHODS Dashboard Dropdown
+  END
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Page Should Not Contain    403 : Forbidden
   ${authorization_required} =  Is Service Account Authorization Required

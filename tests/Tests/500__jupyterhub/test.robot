@@ -20,15 +20,20 @@ Logged into OpenShift
 
 
 Can Launch Jupyterhub
-   [Tags]  Sanity  Smoke  ODS-129
+   [Tags]  Sanity  Smoke  ODS-935
    #This keyword will work with accounts that are not cluster admins.
    Launch Jupyterhub via App
    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    Wait for RHODS Dashboard to Load
-   Launch JupyterHub From RHODS Dashboard Dropdown
+   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+   IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+   ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+   END
 
 Can Login to Jupyterhub
-   [Tags]  Sanity  Smoke  ODS-128
+   [Tags]  Sanity  Smoke  ODS-936
    Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
@@ -58,6 +63,10 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_six
    Spawn Notebook
    Wait for JupyterLab Splash Screen  timeout=30
+   Sleep  3
+   Maybe Close Popup
+   ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
+   Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
    Launch a new JupyterLab Document
    Close Other JupyterLab Tabs
 

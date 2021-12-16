@@ -11,13 +11,17 @@ Suite Teardown   End Web Test
 
 *** Variables ***
 
-
 *** Test Cases ***
 Open RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Can Launch Jupyterhub
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+  IF  ${version-check}==True
+    Launch JupyterHub From RHODS Dashboard Link
+  ELSE
+    Launch JupyterHub From RHODS Dashboard Dropdown
+  END
 
 Can Login to Jupyterhub
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -26,10 +30,12 @@ Can Login to Jupyterhub
   Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
 
 Can Spawn Notebook
+  [Tags]  ODS-901  ODS-903
   Fix Spawner Status
   Spawn Notebook With Arguments  image=s2i-minimal-notebook
 
 Can Launch Python3 Smoke Test Notebook
+  [Tags]  ODS-905  ODS-907  ODS-913  ODS-914  ODS-915  ODS-916  ODS-917  ODS-918  ODS-919
 
 
   Wait for JupyterLab Splash Screen  timeout=30
@@ -52,10 +58,7 @@ Can Launch Python3 Smoke Test Notebook
 
   Add and Run JupyterLab Code Cell in Active Notebook  import os
   Run Cell And Check Output  print("Hello World!")  Hello World!
-
-  #Needs to change for RHODS release
-  Run Cell And Check Output  !python --version  Python 3.8.6
-  #Run Cell And Check Output  !python --version  Python 3.8.7
+  Python Version Check
 
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible

@@ -6,6 +6,8 @@ TEST_VARIABLES=""
 TEST_ARTIFACT_DIR="test-output"
 EXTRA_ROBOT_ARGS=""
 SKIP_PIP_INSTALL=0
+TEST_INCLUDE_TAG=""
+TEST_EXCLUDE_TAG=""
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -37,6 +39,19 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
 
+    # Specify included tags 
+    # Example: sanityANDinstall sanityORinstall installNOTsanity
+    --include)
+      shift
+      TEST_INCLUDE_TAG="${TEST_INCLUDE_TAG} --include $1"
+      shift
+      ;;
+    # Specify excluded tags
+    --exclude)
+      shift
+      TEST_EXCLUDE_TAG="${TEST_EXCLUDE_TAG} --exclude $1"
+      shift
+      ;;
     # Additional arguments to pass to the robot cli
     --extra-robot-args)
       shift
@@ -122,4 +137,4 @@ case "$(uname -s)" in
         ;;
 esac
 
-./venv/bin/robot -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}

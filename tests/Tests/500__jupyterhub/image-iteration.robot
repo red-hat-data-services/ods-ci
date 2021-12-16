@@ -32,6 +32,7 @@ Iterative Testing Classifiers
 
 Iterative Testing Clustering
   [Tags]  Sanity  POLARION-ID-Clustering
+  ...     ODS-923  ODS-924
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[clustering]
     Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
@@ -40,7 +41,12 @@ Iterative Testing Clustering
 *** Keywords ***
 Iterative Image Test
     [Arguments]  ${image}  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+    ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+    END
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
@@ -54,9 +60,7 @@ Iterative Image Test
     Close Other JupyterLab Tabs
     Sleep  5
     Run Cell And Check Output  print("Hello World!")  Hello World!
-    #Needs to change for RHODS release
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.6
-    #Run Cell And Check Output  !python --version  Python 3.8.7
+    Python Version Check
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
     #This ensures all workloads are run even if one (or more) fails

@@ -1,5 +1,4 @@
 *** Settings ***
-Force Tags       Smoke  Sanity
 Resource         ../../../Resources/ODS.robot
 Resource         ../../../Resources/Common.robot
 Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -7,7 +6,6 @@ Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library          DebugLibrary
 Library          SeleniumLibrary
 Library          JupyterLibrary
-Test Teardown   End Web Test
 
 *** Variables ***
 ${rule_group}=  RHODS-PVC-Usage
@@ -20,13 +18,14 @@ ${notebook_clean}=  /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/203
 
 *** Test Cases ***
 Verify alert RHODS-PVC-Usage is fired when user notebook pvc usage is above 90 Percent
-  [Tags]  Sanity  ODS-516 
+  [Tags]  Tier2  ODS-516
   Set Up Alert Test  ${notebook_90}
   Sleep  320
   Prometheus.Alert Should Be Firing  ${RHODS_PROMETHEUS_URL}  ${RHODS_PROMETHEUS_TOKEN}  ${rule_group}  ${alert_90}
+  [Teardown]  Clean Up Files And End Web Test
 
 Verify alert RHODS-PVC-Usage is fired when user notebook pvc usage is 100 Percent
-  [Tags]  Sanity  ODS-517
+  [Tags]  Tier2  ODS-517
   Set Up Alert Test  ${notebook_100}
   Sleep  320
   Prometheus.Alert Should Be Firing  ${RHODS_PROMETHEUS_URL}  ${RHODS_PROMETHEUS_TOKEN}  ${rule_group}  ${alert_100}
@@ -44,15 +43,22 @@ Set Up Alert Test
 
 Clean Up Files And End Web Test
     [Documentation]  We delete the notebook files using the new -and expererimental- "Clean Up User Notebook" because "End Web Test" doesn't work well when disk is 100% filled
-    Clean Up User Notebook  ${OCP_ADMIN_USER.USERNAME}  ${TEST_USER.USERNAME}
-    Maybe Accept a JupyterLab Prompt
+    Close All JupyterLab Tabs
+    Navigate Home (Root folder) In JupyterLab Sidebar File Browser
+    Delete Folder In User Notebook  ${OCP_ADMIN_USER.USERNAME}  ${TEST_USER.USERNAME}  ods-ci-notebooks-main
+    Maybe Close Popup
     Sleep  5
-    Maybe Accept a JupyterLab Prompt
+    Maybe Close Popup
     Common.End Web Test
 
 Iterative Image Test
     [Arguments]  ${image}  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-    Launch JupyterHub From RHODS Dashboard Dropdown
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    IF  ${version-check}==True
+      Launch JupyterHub From RHODS Dashboard Link
+    ELSE
+      Launch JupyterHub From RHODS Dashboard Dropdown
+    END
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

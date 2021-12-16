@@ -7,7 +7,7 @@ Library        RequestsLibrary
 Run Query
   [Arguments]  ${pm_url}  ${pm_token}  ${pm_query}
   ${pm_headers}=       Create Dictionary  Authorization=Bearer ${pm_token}
-  ${resp}=       GET   url=${pm_url}/api/v1/query?query=${pm_query}   headers=${pm_headers}   verify=${False}
+  ${resp}=       RequestsLibrary.GET   url=${pm_url}/api/v1/query?query=${pm_query}   headers=${pm_headers}   verify=${False}
   Status Should Be    200    ${resp}
   Log To Console    ${resp.json()}
   [Return]   ${resp}
@@ -15,7 +15,7 @@ Run Query
 Get Rules
   [Arguments]  ${pm_url}  ${pm_token}  ${rule_type}
   ${pm_headers}=       Create Dictionary  Authorization=Bearer ${pm_token}
-  ${resp}=       GET   url=${pm_url}/api/v1/rules?type=${rule_type}   headers=${pm_headers}   verify=${False}
+  ${resp}=       RequestsLibrary.GET   url=${pm_url}/api/v1/rules?type=${rule_type}   headers=${pm_headers}   verify=${False}
   Status Should Be    200    ${resp}
   [Return]  ${resp.json()}
 

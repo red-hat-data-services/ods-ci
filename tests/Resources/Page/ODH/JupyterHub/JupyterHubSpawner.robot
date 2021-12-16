@@ -3,9 +3,11 @@ Resource  JupyterLabLauncher.robot
 Resource  ../../LoginPage.robot
 Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
 Resource  LoginJupyterHub.robot
-Library  JupyterLibrary
-Library  String
-Library  Collections
+Resource  JupyterLabSidebar.robot
+Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
+Library   JupyterLibrary
+Library   String
+Library   Collections
 
 *** Variables ***
 ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =  //div[contains(@class,"jsp-spawner__header__title") and .="Start a notebook server"]
@@ -60,7 +62,6 @@ Remove All Spawner Environment Variables
    FOR    ${env}    IN    @{env_vars_list}
        Remove Spawner Environment Variable   ${env}
    END
-
 
 Remove Spawner Environment Variable
    [Documentation]  If it exists, removes an environment variable based on the ${env_var} argument
@@ -121,7 +122,12 @@ Spawn Notebook With Arguments
 
 Launch JupyterHub Spawner From Dashboard
   Menu.Navigate To Page    Applications    Enabled
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+  IF  ${version-check}==True
+    Launch JupyterHub From RHODS Dashboard Link
+  ELSE
+    Launch JupyterHub From RHODS Dashboard Dropdown
+  END
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
@@ -140,7 +146,7 @@ Get Spawner Event Log
    [Return] @{event_elements}
 
 Server Not Running Is Visible
-   ${SNR_visible} =  Run Keyword and Return Status  Page Should Contain  Server not running
+   ${SNR_visible} =  Run Keyword and Return Status  Wait Until Page Contains    Server not running  timeout=15
    [return]  ${SNR_visible}
 
 Handle Server Not Running
@@ -181,7 +187,7 @@ Fix Spawner Status
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
             Maybe Close Popup
-            Click Element  xpath://span[@title="/opt/app-root/src"]
+            Navigate Home (Root folder) In JupyterLab Sidebar File Browser
             Open With JupyterLab Menu  File  New  Notebook
             Sleep  1
             Maybe Close Popup
@@ -191,6 +197,7 @@ Fix Spawner Status
             Maybe Close Popup
             Stop JupyterLab Notebook Server
             Handle Start My Server
+            Maybe Handle Server Not Running Page
          END
       END
    END
@@ -222,3 +229,9 @@ Login Via Button
    ...  Keyword.
    Click Element  xpath://a[@id='login']
    Wait Until Page Contains  Log in with
+
+Maybe Handle Server Not Running Page
+  ${SNR_visible} =  Server Not Running Is Visible
+  IF  ${SNR_visible}==True
+         Handle Server Not Running
+  END

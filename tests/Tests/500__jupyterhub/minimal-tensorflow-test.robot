@@ -1,4 +1,5 @@
 *** Settings ***
+Force Tags       Sanity
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -18,7 +19,12 @@ Minimal Tensorflow test
   ...     PLACEHOLDER  #Category tags
   ...     PLACEHOLDER  #Polarion tags
   Wait for RHODS Dashboard to Load
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+  IF  ${version-check}==True
+    Launch JupyterHub From RHODS Dashboard Link
+  ELSE
+    Launch JupyterHub From RHODS Dashboard Dropdown
+  END
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
@@ -32,7 +38,17 @@ Minimal Tensorflow test
   Launch a new JupyterLab Document  kernel=Python 3 (ipykernel)
   Close Other JupyterLab Tabs
   Sleep  2
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !python --version  Python 3.8.6
+
+Verify Installed Python Version in Tensorflow
+  [Tags]  Regression
+  ...     PLACEHOLDER  #category tags
+  ...     ODS-206  #Polarion tags
+  Python Version Check
+
+Verify Installed Libraries in Tensorflow
+  [Tags]  Regression
+  ...     PLACEHOLDER  #category tags
+  ...     ODS-207  #Polarion tags
   Run Keyword And Continue On Failure  Run Cell And Check Output  !nvcc --version | grep nvcc:  nvcc: NVIDIA (R) Cuda compiler driver
   Run Keyword And Continue On Failure  Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.221
   Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version:  Version: 2.4.1
@@ -47,7 +63,10 @@ Minimal Tensorflow test
   Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scikit-learn | grep Version:  Version: 0.24.1
   Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scipy | grep Version:  Version: 1.6.2
 
-Passing Test Case (CPU)
+Tensorflow Workload Test
+  [Tags]  Regression
+  ...     PLACEHOLDER  #category tags
+  ...     PLACEHOLDER  #Polarion tags
   Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb 
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible

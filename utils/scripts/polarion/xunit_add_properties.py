@@ -109,13 +109,14 @@ def add_testcase_properties(xml_obj, tcconfig=None):
 
     for key in multile_test_ids.keys():
         for index, testcase in enumerate(xml_obj.findall(expression + "[@name='" + key + "']")):
-            tcproperties = et.Element('properties')
-            test_id = ""
-            test_id = test_id.join(multile_test_ids[testcase.get('name')][index])
-            attribs = {'name': 'polarion-testcase-id', 'value': test_id}
-            element = et.Element('property', attrib=attribs)
-            tcproperties.append(element)
-            testcase.insert(0, tcproperties)
+            if (index < len(multile_test_ids[testcase.get('name')])):
+                tcproperties = et.Element('properties')
+                test_id = ""
+                test_id = test_id.join(multile_test_ids[testcase.get('name')][index])
+                attribs = {'name': 'polarion-testcase-id', 'value': test_id}
+                element = et.Element('property', attrib=attribs)
+                tcproperties.append(element)
+                testcase.insert(0, tcproperties)
  
     return xml_obj
 

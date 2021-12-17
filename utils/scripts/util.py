@@ -49,15 +49,23 @@ def read_yaml(filename):
         return None
 
 
-def execute_command(cmd):
+def execute_command(cmd, get_stderr=False):
     """
     Executes command in the local node
     """
     try:
-        process = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        process = subprocess.run(cmd, shell=True, check=True,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 universal_newlines=True)
         output = process.stdout
+        if get_stderr:
+            err = process.stderr
+            return output, err
         return output
     except:
+        if get_stderr:
+            return None, None
         return None
 
 

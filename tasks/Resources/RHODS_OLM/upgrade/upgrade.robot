@@ -13,7 +13,7 @@ Upgrading RHODS Operator ${operator_version}
 RHODS Operator Should Be Upgraded
   Verify RHODS Upgrade
   Compare RHODS Versions
-  Set Global Variable  ${RHODS_VERSION}  ${new_version}
+ 
   Log  RHODS has been upgraded  console=yes
 
 Compare RHODS Versions
@@ -25,11 +25,4 @@ Compare RHODS Versions
   ELSE 
     Fail  Upgrade has failed
   END
-
-Wait For RHODS Operator Pod Is Running
-  Wait For Pods Number  6
-  ...                   namespace=redhat-ods-operator
-  ...                   label_selector=name=rhods-operator  
-  ...                   timeout=180
-  Log  pod operator created
-  Wait for pods status  namespace=redhat-ods-operator  timeout=180
+  Set Global Variable  ${RHODS_VERSION}  ${new_version}

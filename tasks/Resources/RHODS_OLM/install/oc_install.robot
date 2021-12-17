@@ -30,17 +30,19 @@ Verify RHODS Installation
   ...                   namespace=redhat-ods-monitoring 
   ...                   timeout=1200
   Verify Builds In redhat-ods-applications
-  Wait for pods status  namespace=redhat-ods-applications  timeout=60
+  Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
   Log  Verified redhat-ods-applications  console=yes
-  Wait for pods status  namespace=redhat-ods-operator  timeout=1200
+  Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200
   Log  Verified redhat-ods-operator  console=yes
-  Wait for pods status  namespace=redhat-ods-monitoring  timeout=1200
+  Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=1200
   Log  Verified redhat-ods-monitoring  console=yes
+  Oc Get  kind=Namespace  field_selector=metadata.name=rhods-notebooks
+  Log  "Verified rhods-notebook"
 
 Verify Builds In redhat-ods-applications
   Log  Verifying Builds  console=yes
-  Wait Until Keyword Succeeds  30 min  30x  Verify Builds Number  7
-  Wait Until Keyword Succeeds  30 min  30x  Verify Builds Status  Complete
+  Wait Until Keyword Succeeds  45 min  15 s  Verify Builds Number  7
+  Wait Until Keyword Succeeds  45 min  15 s  Verify Builds Status  Complete
   Log  Builds Verified  console=yes
 
 Verify Builds Number

@@ -21,8 +21,6 @@ ${cloud_provider_test}=  Amazon Web Services
 ${service_account_test}=  qe-sa-autotest
 ${topic_name_test}=   qe-topic-autotest
 ${consumer_group_test}=  qe-cg-autotest
-${PERMISSION_GRID_XPATH_PREFIX}=  table[@aria-label='permission.table.table.permission_list_table']/tbody
-${PERMISSION_GRID_BUTTON_XPATH_PREFIX}=  div/ul[@class='pf-c-select__menu']/li
 ${GIT_REPO_NOTEBOOKS}=  https://github.com/bdattoma/notebook-examples.git
 ${NOTEBOOK_DIR_PATH}=   notebook-examples/kafka-sasl-plain
 ${NOTEBOOK_CONS_FILENAME}=   2_kafka_consumer_print.ipynb

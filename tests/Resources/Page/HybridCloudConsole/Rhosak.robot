@@ -2,6 +2,9 @@
 Library         SeleniumLibrary
 Resource        HCCLogin.robot
 
+*** Variables ***
+${PERMISSION_GRID_XPATH_PREFIX}=  table[@aria-label='permission.table.table.permission_list_table']/tbody
+${PERMISSION_GRID_BUTTON_XPATH_PREFIX}=  div/ul[@class='pf-c-select__menu']/li
 
 *** Keywords ***
 Create Kafka Stream Instance
@@ -119,5 +122,6 @@ Assign Permissions To ServiceAccount in RHOSAK
       Click Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button[text()='${permissionvalue}']
 
       Click Button    Save
-      Wait Until Page Contains Element  xpath=//button[text()='Manage access']
+      Wait Until Page Does Not Contain Element   xpath=//div[(@id='manage-permissions-modal')]
+      # Wait Until Page Contains Element  xpath=//button[text()='Manage access']
   END

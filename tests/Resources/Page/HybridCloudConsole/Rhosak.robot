@@ -18,7 +18,7 @@ Create Kafka Stream Instance
   END
   Input Text    xpath=//input[@id='form-instance-name']    ${stream_name}
   Click Element    xpath=//div[text()='${cloud_provider}']
-  Select From List By Value    id:cloud-region-select   ${stream_region}
+  Select From List By Value    id:form-cloud-region-option   ${stream_region}
   Click Button    Create instance
   Capture Page Screenshot  form.png
 

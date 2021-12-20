@@ -522,9 +522,8 @@ class OpenshiftClusterManager():
         time.sleep(300)
 
     def uninstall_rhods_addon(self):
-        if not self.is_addon_uninstalled():
-            self.uninstall_rhods()
-            self.wait_for_addon_uninstallation_to_complete()
+        self.uninstall_rhods()
+        self.wait_for_addon_uninstallation_to_complete()
 
     def ocm_login(self):
         """ Login to OCM using ocm cli"""
@@ -542,7 +541,6 @@ class OpenshiftClusterManager():
             sys.exit(1)
         os.environ["OCM_CONFIG"] =  "ocm.json." + self.testing_platform
 
-
     def delete_cluster(self):
         """ Delete OSD Cluster"""
 
@@ -553,6 +551,7 @@ class OpenshiftClusterManager():
         if ret is None:
             log.info("Failed to delete osd cluster {}".format(self.cluster_name))
             sys.exit(1)
+        self.wait_for_osd_cluster_to_get_deleted()
 
     def wait_for_osd_cluster_to_get_deleted(self, timeout=3600):
         """Waits for cluster to get deleted"""

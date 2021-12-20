@@ -101,7 +101,7 @@ Verify User Is Able to Produce and Consume Events
   ...                                             topic_to_assign=${topic_name_test}  cg_to_assign=${consumer_group_test}
 
   ## Spawn a notebook with env variables
-  Switch Window  url:${ODH_DASHBOARD_URL}
+  Switch Window  title:Red Hat OpenShift Data Science Dashboard
   Wait for RHODS Dashboard to Load
   Launch JupyterHub Spawner From Dashboard
   Wait Until Page Contains Element  xpath://input[@name="Standard Data Science"]

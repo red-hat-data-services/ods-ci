@@ -328,7 +328,8 @@ Wait Until JupyterLab Code Cell Is Not Active In a Given Tab
   ...              This assumes that there is only one cell currently active and it is the currently selected cell
   ...              It works when there are multiple notebook tabs opened
   [Arguments]  ${tab_id_to_wait}  ${timeout}=120seconds
-  Wait Until Element Is Not Visible  //div[@aria-labelledby="${tab_id_to_wait}"]/div[2]/div[1]/div[2]/div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]   ${timeout}
+  Wait Until Element Is Not Visible  //div[@aria-labelledby="${tab_id_to_wait}"]/div[@aria-label="notebook content"]/div[1]/div[contains(@class, p-Cell-inputWrapper)]/div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]   ${timeout}
+  #Wait Until Element Is Not Visible  //div[@aria-labelledby="${tab_id_to_wait}"]/div[2]/div[1]/div[2]/div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]   ${timeout}
 
 Get Selected Tab ID
   ${active-nb-tab} =    Get WebElement    xpath:${JL_TABBAR_SELECTED_XPATH}
@@ -337,7 +338,8 @@ Get Selected Tab ID
 
 Get JupyterLab Code Output In a Given Tab
    [Arguments]  ${tab_id_to_read}
-   ${outputtext}=  Get Text  (//div[@aria-labelledby="${tab_id_to_read}"]//div[2]/div[1]/div[3]/div[contains(@class,"jp-Cell-outputArea")]/div/div[contains(@class,"jp-RenderedText")])[last()]
+   ${outputtext}=  Get Text  (//div[@aria-labelledby="${tab_id_to_read}"]/div[@aria-label="notebook content"]/div[1]/div[contains(@class, jp-Cell-outputWrapper)]/div[contains(@class,"jp-Cell-outputArea")]//div[contains(@class,"jp-RenderedText")])[last()]
+   # ${outputtext}=  Get Text  (//div[@aria-labelledby="${tab_id_to_read}"]//div[2]/div[1]/div[3]/div[contains(@class,"jp-Cell-outputArea")]/div/div[contains(@class,"jp-RenderedText")])[last()]
    [Return]  ${outputtext}
 
 Select ${filename} Tab

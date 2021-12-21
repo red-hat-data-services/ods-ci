@@ -33,6 +33,8 @@ class OpenshiftClusterManager():
         self.aws_region = args.get("aws_region")
         self.aws_instance_type = args.get("aws_instance_type")
         self.num_compute_nodes = args.get("num_compute_nodes")
+        self.openshift_version = args.get("openshift_version")
+        self.channel_group = args.get("channel_group")
         self.ocm_cli_binary_url = args.get("ocm_cli_binary_url")
         self.num_users_to_create_per_group = args.get("num_users_to_create_per_group")
         self.htpasswd_cluster_admin = args.get("htpasswd_cluster_admin")
@@ -47,6 +49,9 @@ class OpenshiftClusterManager():
         ocm_env = glob.glob(dir_path+"/../../../ocm.json.*")
         if ocm_env != []:
             os.environ['OCM_CONFIG'] = ocm_env[0]
+            match = re.search(r'.*\.(\S+)', (os.path.basename(ocm_env[0])))
+            if match is not None:
+                self.testing_platform = match.group(1)
  
     def _is_ocmcli_installed(self):
         """Checks if ocm cli is installed"""
@@ -99,19 +104,53 @@ class OpenshiftClusterManager():
     def osd_cluster_create(self):
         """Creates OSD cluster"""
 
+        if ((self.channel_group == "candidate") and (self.testing_platform == "prod")):
+            log.error("Channel group 'candidate' is available only for stage environment.")
+            sys.exit(1)
+
         version = ""
         if self.openshift_version != "":
+            version_match = re.match(r'(\d+\.\d+)\-latest',self.openshift_version)
+            if version_match is not None:
+                version = version_match.group(1)
+                chan_grp = ""
+                if (self.channel_group == "candidate"):
+                    chan_grp = "--channel-group {}".format(self.channel_group)
+                 
+                version_cmd = "ocm list versions {} | grep -w \"".format(chan_grp) + re.escape(version) + "*\""
+                log.info("CMD: {}".format(version_cmd))
+                versions = execute_command(version_cmd)
+                if versions is not None:
+                    version = [ver for ver in versions.split("\n") if ver][-1]
+                self.openshift_version = version
+            else:
+                log.info("Using the osd version given by user as it is...")
             version = "--version {} ".format(self.openshift_version)
+        else:
+            log.info("Using the latest osd version available in AWS...")
+
+        channel_grp = ""
+        if (self.channel_group != ""):
+            if ((self.channel_group == "stable") or (self.channel_group == "candidate")):
+                if version == "":
+                    log.error(("Please enter openshift version as argument."
+                               "Channel group option is used along with openshift version."))    
+                    sys.exit(1)
+                else:
+                    channel_grp = "--channel-group {} ".format(self.channel_group)
+            else:
+                log.error("Invalid channel group. Values can be 'stable' or 'candidate'.")
 
         cmd = ("ocm create cluster --aws-account-id {} "
                "--aws-access-key-id {} --aws-secret-access-key {} "
                "--ccs --region {} --compute-nodes {} "
-               "--compute-machine-type {} {}"
+               "--compute-machine-type {} {} {}"
                "{}".format(self.aws_account_id,
                            self.aws_access_key_id,
                            self.aws_secret_access_key,
                            self.aws_region, self.num_compute_nodes,
-                           self.aws_instance_type, version, self.cluster_name))
+                           self.aws_instance_type, version, 
+                           channel_grp, self.cluster_name))
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
@@ -650,6 +689,10 @@ if __name__ == "__main__":
         optional_create_cluster_parser.add_argument("--openshift-version",
             help="Openshift Version",
             action="store", dest="openshift_version",
+            metavar="", default="")
+        optional_create_cluster_parser.add_argument("--channel-group",
+            help="Channel group name. Values can be stable or candidate.",
+            action="store", dest="channel_group",
             metavar="", default="")
 
         create_cluster_parser.set_defaults(func=ocm_obj.create_cluster)

@@ -10,6 +10,10 @@ RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.n
     dnf install -y git python3 unzip chromium chromedriver redhat-lsb-core &&\
     dnf clean all
 
+## Install oc in the container
+COPY oc /usr/local/bin/oc
+RUN chmod 755 /usr/local/bin/oc ; oc version --client
+
 RUN mkdir $HOME/ods-ci
 # Change the WORKDIR so the run script references any files/folders from the root of the repo
 WORKDIR $HOME/ods-ci

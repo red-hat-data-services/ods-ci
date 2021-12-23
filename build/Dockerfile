@@ -19,6 +19,8 @@ RUN mkdir $HOME/ods-ci
 WORKDIR $HOME/ods-ci
 
 COPY tests tests/
+COPY libs libs/
+
 COPY requirements.txt run_robot_test.sh setup.py .
 RUN python3 -m venv venv && source venv/bin/activate && venv/bin/pip3 install -r requirements.txt
 

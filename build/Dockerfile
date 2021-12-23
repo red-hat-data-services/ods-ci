@@ -7,7 +7,7 @@ ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
 ENV HOME /tmp
 
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
-    dnf install -y git python3 unzip chromium chromedriver &&\
+    dnf install -y git python3 unzip chromium chromedriver redhat-lsb-core &&\
     dnf clean all
 
 RUN mkdir $HOME/ods-ci

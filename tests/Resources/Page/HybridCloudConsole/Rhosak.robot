@@ -35,10 +35,8 @@ Check Stream Creation
   Wait Until Keyword Succeeds    300  1  Check Stream Status  Ready
 
 Delete Kafka Stream Instance
-  [Arguments]  ${stream_name}  ${stream_owner}
-  Click Button    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/button[@aria-label='Actions']
-  Wait Until Page Contains Element    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[text()='Delete']
-  Click Button    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[text()='Delete']
+  [Arguments]  ${stream_name}
+  Click From Actions Menu  search_col=Name  search_value=${stream_name}  action=Delete
   Wait Until Page Contains Element    xpath=//div[contains(@id, 'pf-modal-part')]
   Input Text    id:name__input   ${stream_name}
   Click Button    Delete
@@ -66,7 +64,8 @@ Click ${action} Submenu From Actions Menu
 Create Service Account From Connection Menu
   [Arguments]  ${sa_description}
   # Set Log Level    NONE
-  Wait Until Page Contains Element    xpath=//section[contains(@id, 'pf-tab-section-connection')]/div/button[text()='Create service account']
+  ###Wait Until Page Contains Element    xpath=//section[contains(@id, 'pf-tab-section-connection')]/div/button[text()='Create service account']
+  Wait Until Element Is Visible    xpath=//section[contains(@id, 'pf-tab-section-connection')]/div/button[text()='Create service account']
   Click Button  xpath=//section[contains(@id, 'pf-tab-section-connection')]/div/button[text()='Create service account']
   Wait Until Page Contains Element    xpath=//div[@id='modalCreateSAccount']
   Input Text  xpath=//input[@id='text-input-short-description']  ${sa_description}
@@ -126,3 +125,26 @@ Assign Permissions To ServiceAccount in RHOSAK
       Wait Until Page Does Not Contain Element   xpath=//div[(@id='manage-permissions-modal')]
       # Wait Until Page Contains Element  xpath=//button[text()='Manage access']
   END
+
+Enter Stream
+  [Arguments]  ${stream_name}
+  Wait Until Page Contains Element  xpath=//a[text()='${stream_name}']
+  Click Link    xpath=//a[text()='${stream_name}']
+  Wait For HCC Splash Page
+
+Enter Stream ${sec_title} Section
+  Click Button    xpath=//button[@aria-label='${sec_title}']
+  Wait For HCC Splash Page
+
+Click From Actions Menu
+  [Arguments]  ${search_col}  ${search_value}  ${action}
+  ${SEARCH_ROW_PATH}=  Set Variable  //tr/td[@data-label='${search_col}' and //*[text()='${search_value}']]
+  ${SIDE_BUTTON_PATH}=  Set Variable  ${SEARCH_ROW_PATH}/../td[contains(@class, 'pf-c-table__action')]
+  ${ACTION_MENU_PATH}=  Set Variable  ${SIDE_BUTTON_PATH}//button[@aria-label='Actions']
+  ${TARGET_ACTION_PATH}=  Set Variable  ${SIDE_BUTTON_PATH}//button[text()='${action}']
+  Wait Until Page Contains Element    xpath=${ACTION_MENU_PATH}
+  Click Button    xpath=${ACTION_MENU_PATH}
+  Wait Until Page Contains Element    xpath=${TARGET_ACTION_PATH}
+  Click Button    xpath=${TARGET_ACTION_PATH}
+
+

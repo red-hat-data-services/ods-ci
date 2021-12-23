@@ -82,21 +82,19 @@ Verify User Is Able to Produce and Consume Events
   Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
   Wait Until Keyword Succeeds    300  1  Check Stream Status  Ready
   ## Create service account
-  Click Connection Submenu From Actions Menu
+  # Click Connection Submenu From Actions Menu
+  Click From Actions Menu  search_col=Name  search_value=${stream_name_test}  action=Connection
   Wait Until Page Contains Element  xpath=//input[@aria-label="Bootstrap server"]
   ${bootstrap_server}=  Get Element Attribute    xpath=//input[@aria-label="Bootstrap server"]  value
   ${kafka_sa_creds}=  Create Service Account From Connection Menu  sa_description=${service_account_test}
   ## Create topic
-  Wait Until Page Contains Element  xpath=//a[text()='${stream_name_test}']
-  Click Link    xpath=//a[text()='${stream_name_test}']
-  Wait For HCC Splash Page
-  Click Button    xpath=//button[@aria-label='Topics']
-  Wait For HCC Splash Page
+  Enter Stream  stream_name=${stream_name_test}
+  Enter Stream Topics Section
+  # Wait For HCC Splash Page
   Create Topic  topic_name_to_create=${topic_name_test}
   Page Should Contain Element    xpath=//a[text()='${topic_name_test}']
   ## Assign permissions to SA
-  Click Button    xpath=//button[@aria-label='Access']
-  Wait For HCC Splash Page
+  Enter Stream Access Section
   Assign Permissions To ServiceAccount in RHOSAK  sa_client_id=${kafka_sa_creds}[kafka_client_id]  sa_to_assign=${service_account_test}
   ...                                             topic_to_assign=${topic_name_test}  cg_to_assign=${consumer_group_test}
 
@@ -131,6 +129,7 @@ Verify User Is Able to Produce and Consume Events
   Fix Spawner Status
 
 
+
 *** Keywords ***
 Kafka Suite Setup
   Set Library Search Order  SeleniumLibrary
@@ -142,6 +141,12 @@ Kafka Test Setup
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
+
+
+
+
+
+
 
 
 

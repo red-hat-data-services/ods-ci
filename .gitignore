@@ -13,3 +13,4 @@ Results/
 __pycache__/
 oc
 kubeconfig
+htpasswd.txt

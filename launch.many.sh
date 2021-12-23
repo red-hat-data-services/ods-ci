@@ -1,0 +1,72 @@
+#/bin/bash
+
+# todo:
+## create one true cluster admin
+## create X fake users
+## load-test + aggregation of results
+## remove all pvcs.
+## remove all users.
+
+fakeadmin=$(yq  e '.OCP_ADMIN_USER.USERNAME' ./test-variables.yml)
+fakeadminpass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ./test-variables.yml)
+
+fakeadmin="${fakeadmin:-fakeadmin}"
+fakeadminpass="${fakeadminpass:-fakeadminpass}"
+
+
+fakeuser="${fakeuser:-fakeuser}"
+fakeuserpass="${fakeuserpass:-fakeuserpass}"
+
+#debug
+#set | grep fake
+
+htpasswd -c -B -b htpasswd.txt ${fakeadmin} ${fakeadminpass} > /dev/null 2>&1
+for i in {001..100};
+do
+   htpasswd  -B -b htpasswd.txt ${fakeuser}$i ${fakeuserpass} > /dev/null 2>&1
+done
+
+#debug
+#cat htpasswd.txt
+
+
+# oc create secret generic htpass-secret --from-file=htpasswd=htpasswd.txt -n openshift-config
+
+function runfakeuser(){
+    mkdir -p ./test-output/${fakeuser}$1
+    cp ./test-variables.yml ./test-output/${fakeuser}$1/var.yml
+    cp ./kubeconfig ./test-output/${fakeuser}$1/kubeconfig
+    export fake="${fakeuser}${1}"
+    #echo $fake
+    yq e -i '
+        .TEST_USER.USERNAME = strenv(fake)  |
+        .TEST_USER.PASSWORD = "fakepass"
+        ' ./test-output/${fakeuser}$1/var.yml
+
+    # podman run --rm -d \
+    # podman run --rm -it \
+    podman run --rm  \
+        -v $PWD/test-output/${fakeuser}$1/var.yml:/tmp/ods-ci/test-variables.yml:Z \
+        -v $PWD/test-output/${fakeuser}$1:/tmp/ods-ci/test-output:Z \
+        -v $PWD/test-output/${fakeuser}$1/kubeconfig:/tmp/.kube/config:Z \
+        -e RUN_SCRIPT_ARGS='--test-case tests/Tests/500__jupyterhub/test-jupyterlab-git-notebook.robot'  \
+        ods-ci:master
+
+}
+
+
+for i in {001..001};
+do
+    runfakeuser $i &
+done
+
+exit
+
+
+## remember to clean out all the PVCs at the end.
+# for i in {001..040};
+# do
+#     oc -n rhods-notebooks get pvc jupyterhub-nb-fakeuser$i-pvc
+#     oc -n rhods-notebooks delete pvc jupyterhub-nb-fakeuser$i-pvc
+# done
+

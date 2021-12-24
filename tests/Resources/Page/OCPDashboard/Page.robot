@@ -11,7 +11,11 @@ Open Page
 
 Page Should Be Open
   [Arguments]  ${url}
-  Location Should Contain  ${url}
+
+  ${status}       Run keyword and Return Status      Location Should Contain  ${url}
+  ${new_url}       Remove string    ${url}         https://
+  Run Keyword If   ${status} == ${False}    Location Should Contain  ${new_url}
+
 
 Maybe Click Show Default Project Button
   ${switch_button}=  Run Keyword And Return Status    Page Should Contain Element    xpath=//input[@data-test='showSystemSwitch']
@@ -40,3 +44,4 @@ Search Last Item Instance By Title in OpenShift Table
   Sleep  2
   Click Button    xpath://*/th[@data-label='Created']/button  # asc order
   Click Button    xpath://*/th[@data-label='Created']/button  # desc order
+

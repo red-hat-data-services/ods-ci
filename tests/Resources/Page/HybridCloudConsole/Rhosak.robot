@@ -19,7 +19,7 @@ Create Kafka Stream Instance
   Wait Until Page Contains Element    xpath=//div[@id='modalCreateKafka']  timeout=10
   ${warn_msg}=  Run Keyword And Return Status    Page Should Not Contain    To deploy a new instance, delete your existing one first
   IF    ${warn_msg} == ${False}
-     Log  level=WARN  message=The next keywords are going to fail because you cannot create more than one stream at a time.
+     Log  level=ERROR  message=The next keywords are going to fail because you cannot create more than one stream at a time.
   END
   Input Text    xpath=//input[@id='form-instance-name']    ${stream_name}
   Click Element    xpath=//div[text()='${cloud_provider}']

@@ -11,7 +11,7 @@ Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterLabSidebar.robot
 Resource        ../../../Resources/Page/ODH/AiApps/Rhosak.robot
 Suite Setup     Kafka Suite Setup
 Suite Teardown  Kafka Suite Teardown
-Test Setup      Kafka Test Setup
+#Test Setup      Kafka Test Setup
 
 *** Variables ***
 ${rhosak_real_appname}=  rhosak
@@ -110,7 +110,7 @@ Verify User Is Able to Produce and Consume Events
   Wait for JupyterLab Splash Screen  timeout=60
   Maybe Select Kernel
   ## clone JL notebooks from git and run
-  Load Kafka Notebooks From Git  git_repo_http=${GIT_REPO_NOTEBOOKS}
+  Clone Git Repository  REPO_URL=${GIT_REPO_NOTEBOOKS}
   Open Consumer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_CONS_FILENAME}
   ${cons_tab_id} =    Get Selected Tab ID
   Open With JupyterLab Menu  Run  Run All Cells
@@ -131,7 +131,6 @@ Verify User Is Able to Produce and Consume Events
   Clean Up RHOSAK  stream_to_delete=${stream_name_test}
   ...              topic_to_delete=${topic_name_test}
   ...              sa_clientid_to_delete=${kafka_sa_creds}[kafka_client_id]
-
 
 *** Keywords ***
 Kafka Suite Setup

@@ -1,14 +1,7 @@
 *** Settings ***
 Library         SeleniumLibrary
 Library         OpenShiftCLI
-Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../../Resources/Page/Components/Menu.robot
-Resource        ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
-Resource        ../../../Resources/Page/HybridCloudConsole/Rhosak.robot
-Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
-Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterLabSidebar.robot
-Resource        ../../../Resources/Page/ODH/AiApps/Rhosak.robot
+Resource        ../../../Resources/Page/ODH/AiApps/Rhosak.resource
 Suite Setup     Kafka Suite Setup
 Suite Teardown  Kafka Suite Teardown
 Test Setup      Kafka Test Setup

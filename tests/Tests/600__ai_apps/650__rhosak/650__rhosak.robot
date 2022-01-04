@@ -9,12 +9,12 @@ Test Setup      Kafka Test Setup
 *** Variables ***
 ${rhosak_real_appname}=  rhosak
 ${rhosak_displayed_appname}=  OpenShift Streams for Apache Kafka
-${stream_name_test}=  qe-stream-autotest
-${stream_region_test}=  us-east-1
-${cloud_provider_test}=  Amazon Web Services
-${service_account_test}=  qe-sa-autotest
-${topic_name_test}=   qe-topic-autotest
-${consumer_group_test}=  qe-cg-autotest
+${stream_name_test}=  ${RHOSAK_CONFIG_TEST.STREAM_NAME}
+${stream_region_test}=  ${RHOSAK_CONFIG_TEST.STREAM_REGION}
+${cloud_provider_test}=  ${RHOSAK_CONFIG_TEST.CLOUD_PROVIDER}
+${service_account_test}=  ${RHOSAK_CONFIG_TEST.SERVICE_ACCOUNT}
+${topic_name_test}=   ${RHOSAK_CONFIG_TEST.TOPIC_NAME}
+${consumer_group_test}=  ${RHOSAK_CONFIG_TEST.CONSUMER_GROUP}
 ${GIT_REPO_NOTEBOOKS}=  https://github.com/bdattoma/notebook-examples.git
 ${NOTEBOOK_DIR_PATH}=   notebook-examples/kafka-sasl-plain
 ${NOTEBOOK_CONS_FILENAME}=   2_kafka_consumer_print.ipynb

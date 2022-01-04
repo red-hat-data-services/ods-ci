@@ -107,6 +107,7 @@ Verify User Is Able to Produce and Consume Events
   Open Consumer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_CONS_FILENAME}
   ${cons_tab_id} =    Get Selected Tab ID
   Open With JupyterLab Menu  Run  Run All Cells
+  Sleep  0.2
   Open Producer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_PROD_FILENAME}
   ${prod_tab_id} =    Get Selected Tab ID
   Open With JupyterLab Menu  Run  Run All Cells
@@ -136,28 +137,3 @@ Kafka Test Setup
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

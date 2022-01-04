@@ -94,6 +94,13 @@ def generate_test_config_file(config_template, config_data, test_cluster, set_pr
     data["OCP_ADMIN_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["PASSWORD"]
     data["SSO"]["USERNAME"] = config_data["SSO"]["USERNAME"]
     data["SSO"]["PASSWORD"] = config_data["SSO"]["PASSWORD"]
+    data["RHOSAK_CONFIG_TEST"]["STREAM_REGION"] = config_data["RHOSAK_CONFIG_TEST"]["STREAM_REGION"]
+    data["RHOSAK_CONFIG_TEST"]["CLOUD_PROVIDER"] = config_data["RHOSAK_CONFIG_TEST"]["CLOUD_PROVIDER"]
+    data["RHOSAK_CONFIG_TEST"]["STREAM_NAME"] = config_data["RHOSAK_CONFIG_TEST"]["STREAM_NAME"]
+    data["RHOSAK_CONFIG_TEST"]["SERVICE_ACCOUNT"] = config_data["RHOSAK_CONFIG_TEST"]["SERVICE_ACCOUNT"]
+    data["RHOSAK_CONFIG_TEST"]["TOPIC_NAME"] = config_data["RHOSAK_CONFIG_TEST"]["TOPIC_NAME"]
+    data["RHOSAK_CONFIG_TEST"]["CONSUMER_GROUP"] = config_data["RHOSAK_CONFIG_TEST"]["CONSUMER_GROUP"]
+
 
     # Login to test cluster using oc command
     oc_login(data["OCP_CONSOLE_URL"], data["OCP_ADMIN_USER"]["USERNAME"], data["OCP_ADMIN_USER"]["PASSWORD"])

@@ -12,16 +12,6 @@ Check Consumer and Producer Output Equality
   ${consumer_output_list}=  Text To List  text=${consumer_text}
   Should Be Equal    ${producer_output_list}    ${consumer_output_list}[1:]
 
-Load Kafka Notebooks From Git
-  [Arguments]  ${git_repo_http}
-  Open With JupyterLab Menu  File  New  Notebook
-  Sleep  1
-  Maybe Select Kernel
-  Sleep  3
-  Close Other JupyterLab Tabs
-  Clone Git Repository  REPO_URL=${git_repo_http}
-  Sleep  5
-
 Open Producer Notebook
   [Arguments]  ${dir_path}  ${filename}
   # open producer

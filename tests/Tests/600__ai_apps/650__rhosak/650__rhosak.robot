@@ -11,7 +11,7 @@ Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterLabSidebar.robot
 Resource        ../../../Resources/Page/ODH/AiApps/Rhosak.robot
 Suite Setup     Kafka Suite Setup
 Suite Teardown  Kafka Suite Teardown
-#Test Setup      Kafka Test Setup
+Test Setup      Kafka Test Setup
 
 *** Variables ***
 ${rhosak_real_appname}=  rhosak

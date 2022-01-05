@@ -27,7 +27,12 @@ do
    htpasswd  -B -b htpasswd.txt ${fakeuser}$i ${fakeuserpass} > /dev/null 2>&1
 done
 
-# oc create secret generic fakeusers-htpass-secret --from-file=htpasswd.txt --dry-run=client -o yaml -n openshift-config | oc apply -f -
+export KUBECONFIG=./kubeconfig
+# update the content of the secret:
+oc create secret generic htpasswd-secret \
+    --from-file=htpasswd=htpasswd.txt \
+    --dry-run=client -o yaml -n openshift-config \
+    | oc apply -f -
 
 # oc apply -f - <<EOF
 # ---
@@ -84,10 +89,13 @@ function runfakeuser(){
 
 }
 
+runfakeuser 001
+
+exit
 
 for i in {001..001};
 do
-    runfakeuser $i &
+    runfakeuser $i
 done
 
 exit

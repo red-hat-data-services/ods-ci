@@ -3,9 +3,9 @@ Library     SeleniumLibrary
 
 *** Keywords ***
 Install Operator
-    [Arguments]    ${operator}      ${redhat_marketplace}=${None}
+    [Arguments]    ${operator}      ${redhat_marketplace}=None
     Search Operator    ${operator}
-    Run Keyword If  ${redhat_marketplace} is ${None}    Select Non Marketplace Operator   ${operator}
+    Run Keyword If   "${redhat_marketplace}" == "None"    Select Non Marketplace Operator   ${operator}
     ...         ELSE    Select Operator    ${operator}
     ${show_operator_warning_visible} =    Show Operator Warning Is Visible
     Run Keyword If    ${show_operator_warning_visible}   Confirm Show Operator
@@ -25,9 +25,9 @@ Select Non Marketplace Operator
     Click Element    //a[contains(@data-test, "${operator}") and not (contains(@data-test,"rhmp"))]
 
 Select Operator
-    [Arguments]    ${operator}        ${redhat_marketplace}
-    Wait Until Element is Visible    //a[contains(@data-test, "${operator}")]  timeout=50
-    Click Element    //a[contains(@data-test, "${operator}")]
+    [Arguments]    ${operator}
+    Wait Until Element is Visible   //a[contains(@data-test, "${operator}") and (contains(@data-test,"rhmp"))]  timeout=50
+    Click Element    //a[contains(@data-test, "${operator}") and (contains(@data-test,"rhmp"))]
 
 Click Install
     Wait Until Element is Visible    //*[text()="Install"]

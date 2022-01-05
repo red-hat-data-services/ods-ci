@@ -106,25 +106,28 @@ Is RHODS Version Greater Or Equal Than
     [Return]  ${comparison}
 
 Move To Installed Operator instance
-    [Arguments]   ${operator_name}     ${tab_name}
+    [Arguments]   ${operator_name}     ${tab_name}      ${namespace}
     Switch To Administrator Perspective
     Navigate to Installed Operators
     Installed Operators Should Be Open
-    Select All Projects
+    Log To Console   ${namespace}
+    Run Keyword If  "${namespace}" == "None"   Select All Projects
+    ...         ELSE   Select Project By Name   ${namespace}
+    #Select All Projects
     Click On Searched Operator   ${operator_name}
     Switch To New Tab       ${tab_name}
     sleep    5
 
 Create Installed Operator instance
-    [Arguments]    ${operator_name}     ${tab_name}
-    Move To Installed Operator instance    ${operator_name}     ${tab_name}
+    [Arguments]    ${operator_name}     ${tab_name}     ${namespace}=None
+    Move To Installed Operator instance    ${operator_name}     ${tab_name}    ${namespace}
     Click Button     Create ${tab_name}
     Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10
     Click Button      Create
 
 Delete Installed Operator instance
-    [Arguments]    ${operator_name}     ${tab_name}
-    Move To Installed Operator instance    ${operator_name}     ${tab_name}
+    [Arguments]    ${operator_name}     ${tab_name}     ${namespace}=None
+    Move To Installed Operator instance    ${operator_name}     ${tab_name}      ${namespace}
     Wait Until Element is Visible          //button[contains(@data-test-id,"kebab")]          timeout=10
     Click Element   //button[contains(@data-test-id,"kebab")]
     Wait Until Element Is Enabled     //button[contains(text(),"Delete ${tab_name}")]

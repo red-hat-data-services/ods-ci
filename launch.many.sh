@@ -6,6 +6,7 @@
 ## load-test + aggregation of results
 ## remove all pvcs.
 ## remove all users.
+TEST_VARIABLES_FILE=test-variables.yml
 
 fakeadmin=$(yq  e '.OCP_ADMIN_USER.USERNAME' ./test-variables.yml)
 fakeadminpass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ./test-variables.yml)
@@ -72,18 +73,16 @@ function runfakeuser(){
 
     # podman run --rm -d \
     # podman run --rm -it \
-    podman run --rm  \
+    podman run --rm  -it \
         -v $PWD/test-output/${fakeuser}$1/var.yml:/tmp/ods-ci/test-variables.yml:Z \
         -v $PWD/test-output/${fakeuser}$1:/tmp/ods-ci/test-output:Z \
         -e RUN_SCRIPT_ARGS='--test-case tests/Tests/500__jupyterhub/test-jupyterlab-git-notebook.robot'  \
         ods-ci:master
 }
 
-runfakeuser 001
-
-for i in {002..040};
+for i in {001..040};
 do
-    runfakeuser $i
+    runfakeuser $i &
 done
 
 

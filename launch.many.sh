@@ -15,7 +15,8 @@ fakeadminpass="${fakeadminpass:-fakeadminpass}"
 
 
 fakeuser="${fakeuser:-fakeuser}"
-fakeuserpass="${fakeuserpass:-fakeuserpass}"
+fakeuserpass=$(yq  e '.TEST_USER.PASSWORD' ./test-variables.yml)
+fakeuserpass="${fakeuserpass:-fakepass}"
 
 #debug
 #set | grep fake

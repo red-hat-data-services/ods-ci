@@ -62,28 +62,7 @@ Intel_Aikit Suite Setup
 Intel_Aikit Suite Teardown
   Close All Browsers
 
-Verify JupyterNotebook
-  Go To  ${ODH_DASHBOARD_URL}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
-  ${status}       Run keyword and Return Status           Verify Service Is Enabled          ${intel_aikit_container_name} 
-  Run keyword If  ${status}    Launch JupyterHub Spawner From Dashboard
-  ...        ELSE   FAIL      ${intel_aikit_container_name}  tile  is not present in the Enable tab
-  Wait Until Page Contains Element  xpath://input[@name="oneAPI AI Analytics Toolkit"]
-  Wait Until Element Is Enabled    xpath://input[@name="oneAPI AI Analytics Toolkit"]   timeout=10
-  Spawn Notebook With Arguments  image=oneapi-aikit
-  Wait for JupyterLab Splash Screen  timeout=60
-  Maybe Select Kernel
 
-Create Installed Operator instances
-   Switch To Administrator Perspective
-   Navigate to Installed Operators
-   Installed Operators Should Be Open
-   Select All Projects
-   Click On Searched Operator   ${intel_aikit_operator_name} 
-   Switch To New Tab       AIKitContainer
-   sleep    5
-   Click Button     Create AIKitContainer
-   Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10
-   Click Button      Create
+
+
 

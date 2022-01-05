@@ -6,6 +6,7 @@ Suite Setup     Kafka Suite Setup
 Suite Teardown  Kafka Suite Teardown
 Test Setup      Kafka Test Setup
 
+
 *** Variables ***
 ${rhosak_real_appname}=  rhosak
 ${rhosak_displayed_appname}=  OpenShift Streams for Apache Kafka
@@ -19,6 +20,8 @@ ${GIT_REPO_NOTEBOOKS}=  https://github.com/bdattoma/notebook-examples.git
 ${NOTEBOOK_DIR_PATH}=   notebook-examples/kafka-sasl-plain
 ${NOTEBOOK_CONS_FILENAME}=   2_kafka_consumer_print.ipynb
 ${NOTEBOOK_PROD_FILENAME}=   1_kafka_producer.ipynb
+${kafka_client_id}=  "placeholder"
+${kafka_client_secret}=  "placeholder"
 
 *** Test Cases ***
 Verify RHOSAK Is Available In RHODS Dashboard Explore Page
@@ -63,6 +66,9 @@ Verify User Is Able to Create And Delete a Kafka Stream
 Verify User Is Able to Produce and Consume Events
   [Tags]  Sanity  Smoke
   ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239
+  [Teardown]  Clean Up RHOSAK    stream_to_delete=${stream_name_test}
+  ...                            topic_to_delete=${topic_name_test}
+  ...                            sa_clientid_to_delete=${kafka_client_id}
   Enable RHOSAK
   Verify Service Is Enabled  ${rhosak_displayed_appname}
   Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link
@@ -79,6 +85,8 @@ Verify User Is Able to Produce and Consume Events
   Wait Until Page Contains Element  xpath=//input[@aria-label="Bootstrap server"]
   ${bootstrap_server}=  Get Element Attribute    xpath=//input[@aria-label="Bootstrap server"]  value
   ${kafka_sa_creds}=  Create Service Account From Connection Menu  sa_description=${service_account_test}
+  ${kafka_client_id}=  Set Variable  ${kafka_sa_creds}[kafka_client_id]
+  ${kafka_client_secret}=  Set Variable  ${kafka_sa_creds}[kafka_client_secret]
   ## Create topic
   Enter Stream  stream_name=${stream_name_test}
   Enter Stream Topics Section
@@ -87,7 +95,7 @@ Verify User Is Able to Produce and Consume Events
   Page Should Contain Element    xpath=//a[text()='${topic_name_test}']
   ## Assign permissions to SA
   Enter Stream Access Section
-  Assign Permissions To ServiceAccount in RHOSAK  sa_client_id=${kafka_sa_creds}[kafka_client_id]  sa_to_assign=${service_account_test}
+  Assign Permissions To ServiceAccount in RHOSAK  sa_client_id=${kafka_client_id}  sa_to_assign=${service_account_test}
   ...                                             topic_to_assign=${topic_name_test}  cg_to_assign=${consumer_group_test}
 
   ## Spawn a notebook with env variables
@@ -95,8 +103,8 @@ Verify User Is Able to Produce and Consume Events
   Wait for RHODS Dashboard to Load
   Launch JupyterHub Spawner From Dashboard
   Wait Until Page Contains Element  xpath://input[@name="Standard Data Science"]
-  &{notebook_envs}=  Create Dictionary  KAFKA_BOOTSTRAP_SERVER=${bootstrap_server}  KAFKA_USERNAME=${kafka_sa_creds}[kafka_client_id]
-  ...                                   KAFKA_PASSWORD=${kafka_sa_creds}[kafka_client_secret]  KAFKA_TOPIC=${topic_name_test}
+  &{notebook_envs}=  Create Dictionary  KAFKA_BOOTSTRAP_SERVER=${bootstrap_server}  KAFKA_USERNAME=${kafka_client_id}
+  ...                                   KAFKA_PASSWORD=${kafka_client_secret}  KAFKA_TOPIC=${topic_name_test}
   ...                                   KAFKA_CONSUMER_GROUP=${consumer_group_test}
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{notebook_envs}
   Wait for JupyterLab Splash Screen  timeout=60
@@ -120,10 +128,10 @@ Verify User Is Able to Produce and Consume Events
   Check Consumer and Producer Output Equality  producer_text=${producer_output}  consumer_text=${consumer_output}
   Capture Page Screenshot  consumer_run.png
   Fix Spawner Status
-  Switch Window  title:Red Hat OpenShift Streams for Apache Kafka
-  Clean Up RHOSAK  stream_to_delete=${stream_name_test}
-  ...              topic_to_delete=${topic_name_test}
-  ...              sa_clientid_to_delete=${kafka_sa_creds}[kafka_client_id]
+  ### Switch Window  title:Red Hat OpenShift Streams for Apache Kafka
+  ### Clean Up RHOSAK  stream_to_delete=${stream_name_test}
+  ### ...              topic_to_delete=${topic_name_test}
+  ### ...              sa_clientid_to_delete=${kafka_sa_creds}[kafka_client_id]
 
 
 *** Keywords ***
@@ -137,3 +145,4 @@ Kafka Test Setup
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
+

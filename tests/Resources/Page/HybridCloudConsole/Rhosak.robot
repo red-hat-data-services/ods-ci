@@ -186,6 +186,8 @@ Delete Service Account By Client ID
 
 Clean Up RHOSAK
   [Arguments]  ${stream_to_delete}  ${topic_to_delete}  ${sa_clientid_to_delete}
+  OpenShiftCLI.Delete      kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
+  Switch Window  title:Red Hat OpenShift Streams for Apache Kafka
   Menu.Navigate To Page    Streams for Apache Kafka   Kafka Instances
   Enter Stream  stream_name=${stream_to_delete}
   Enter Stream Topics Section
@@ -197,6 +199,3 @@ Clean Up RHOSAK
   Capture Page Screenshot  after deleting_stream.png
   Click Link  Service Accounts
   Delete Service Account By Client ID  client_id_delete=${sa_clientid_to_delete}
-  OpenShiftCLI.Delete      kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
-
-

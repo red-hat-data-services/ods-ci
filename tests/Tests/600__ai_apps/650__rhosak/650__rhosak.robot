@@ -59,7 +59,6 @@ Verify User Is Able to Create And Delete a Kafka Stream
   Wait Until Keyword Succeeds    300  1  Page Should Contain    No results found
   Capture Page Screenshot  after deleting_stream.png
   OpenShiftCLI.Delete      kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
-  Delete    kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
 
 Verify User Is Able to Produce and Consume Events
   [Tags]  Sanity  Smoke

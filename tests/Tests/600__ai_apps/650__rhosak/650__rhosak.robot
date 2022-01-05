@@ -128,10 +128,6 @@ Verify User Is Able to Produce and Consume Events
   Check Consumer and Producer Output Equality  producer_text=${producer_output}  consumer_text=${consumer_output}
   Capture Page Screenshot  consumer_run.png
   Fix Spawner Status
-  ### Switch Window  title:Red Hat OpenShift Streams for Apache Kafka
-  ### Clean Up RHOSAK  stream_to_delete=${stream_name_test}
-  ### ...              topic_to_delete=${topic_name_test}
-  ### ...              sa_clientid_to_delete=${kafka_sa_creds}[kafka_client_id]
 
 
 *** Keywords ***

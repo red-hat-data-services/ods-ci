@@ -51,7 +51,6 @@ Delete Kafka Stream Instance
   Sleep  3
   Wait Until Page Contains    Create Kafka instance
   Wait Until Keyword Succeeds    300  1  Page Should Not Contain Element    xpath=//tr/td[@data-label='Name' and (text()='${stream_name}' or *[text()='${stream_name}'])]
-  # Wait Until Keyword Succeeds    300  1  Page Should Contain    No results found
 
 Create Topic
   [Arguments]  ${topic_name_to_create}
@@ -67,16 +66,8 @@ Create Topic
   Click Button   Finish
   Wait For HCC Splash Page
 
-Click ${action} Submenu From Actions Menu
-  Wait Until Page Contains Element    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/button[@aria-label='Actions']
-  Click Button    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/button[@aria-label='Actions']
-  Wait Until Page Contains Element    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[text()='${action}']
-  Click Button    xpath=//tr[@tabindex='0']/td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[text()='${action}']
-
 Create Service Account From Connection Menu
   [Arguments]  ${sa_description}
-  # Set Log Level    NONE
-  ###Wait Until Page Contains Element    xpath=//section[contains(@id, 'pf-tab-section-connection')]/div/button[text()='Create service account']
   Wait Until Element Is Visible    xpath=//section[contains(@id, 'pf-tab-section-connection')]/div/button[text()='Create service account']
   Click Button  xpath=//section[contains(@id, 'pf-tab-section-connection')]/div/button[text()='Create service account']
   Wait Until Page Contains Element    xpath=//div[@id='modalCreateSAccount']
@@ -135,7 +126,6 @@ Assign Permissions To ServiceAccount in RHOSAK
 
       Click Button    Save
       Wait Until Page Does Not Contain Element   xpath=//div[(@id='manage-permissions-modal')]
-      # Wait Until Page Contains Element  xpath=//button[text()='Manage access']
   END
 
 Enter Stream

@@ -14,7 +14,6 @@ Check Consumer and Producer Output Equality
 
 Open Producer Notebook
   [Arguments]  ${dir_path}  ${filename}
-  # open producer
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${dir_path}/${filename}
   Click Element  xpath://div[.="Open"]

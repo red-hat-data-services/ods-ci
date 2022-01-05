@@ -73,6 +73,7 @@ function runfakeuser(){
     cp ./test-variables.yml ./test-output/${fakeuser}$1/var.yml
     cp ./kubeconfig ./test-output/${fakeuser}$1/kubeconfig
     export fake="${fakeuser}${1}"
+    export fakeuserpass="${fakeuserpass}"
     #echo $fake
     yq e -i '
         .TEST_USER.USERNAME = strenv(fake)  |

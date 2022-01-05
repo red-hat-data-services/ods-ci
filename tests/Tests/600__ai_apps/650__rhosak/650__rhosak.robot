@@ -54,7 +54,7 @@ Verify User Is Able to Create And Delete a Kafka Stream
   Create Kafka Stream Instance  stream_name=${stream_name_test}  stream_region=${stream_region_test}  cloud_provider=${cloud_provider_test}
   Capture Page Screenshot  newly_created_stream.png
   Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
-  Wait Until Keyword Succeeds    300  1  Check Stream Status  Ready
+  Wait Until Keyword Succeeds    300  1  Check Stream Status  target_status=Ready  target_stream=${stream_name_test}
   Delete Kafka Stream Instance  stream_name=${stream_name_test}
   Wait Until Keyword Succeeds    300  1  Page Should Contain    No results found
   Capture Page Screenshot  after deleting_stream.png
@@ -73,7 +73,7 @@ Verify User Is Able to Produce and Consume Events
   ## Create kafka stream
   Create Kafka Stream Instance  stream_name=${stream_name_test}  stream_region=${stream_region_test}  cloud_provider=${cloud_provider_test}
   Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
-  Wait Until Keyword Succeeds    300  1  Check Stream Status  Ready
+  Wait Until Keyword Succeeds    300  1  Check Stream Status  target_status=Ready  target_stream=${stream_name_test}
   ## Create service account
   Click From Actions Menu  search_col=Name  search_value=${stream_name_test}  action=Connection
   Wait Until Page Contains Element  xpath=//input[@aria-label="Bootstrap server"]
@@ -124,6 +124,7 @@ Verify User Is Able to Produce and Consume Events
   Clean Up RHOSAK  stream_to_delete=${stream_name_test}
   ...              topic_to_delete=${topic_name_test}
   ...              sa_clientid_to_delete=${kafka_sa_creds}[kafka_client_id]
+
 
 *** Keywords ***
 Kafka Suite Setup

@@ -30,8 +30,8 @@ Create Kafka Stream Instance
   Wait Until Page Does Not Contain Element    xpath=//div[@id='modalCreateKafka']  timeout=10
 
 Check Stream Status
-  [Arguments]  ${target_status}
-  ${status}=  Get Text    xpath://tr[@tabindex='0']/td[@data-label='Status']
+  [Arguments]  ${target_status}  ${target_stream}
+  ${status}=  Get Text    xpath=//tr[td[@data-label='Name' and *[text()='${target_stream}']]]/td[@data-label='Status']
   Should Be Equal    ${status}    ${target_status}
 
 Check Stream Creation
@@ -47,8 +47,10 @@ Delete Kafka Stream Instance
   Wait Until Element Is Enabled    xpath=//button[text()='Delete']
   Capture Page Screenshot  3.png
   Click Button    Delete
+  Wait Until Page Does Not Contain Element    xpath=//div[@class='pf-l-bullseye']
+  Sleep  3
   Wait Until Page Contains    Create Kafka instance
-  Wait Until Keyword Succeeds    300  1  Page Should Not Contain    xpath=//tr/td[@data-label='Name' and //*[text()='${stream_name}']]
+  Wait Until Keyword Succeeds    300  1  Page Should Not Contain Element    xpath=//tr/td[@data-label='Name' and (text()='${stream_name}' or *[text()='${stream_name}'])]
   # Wait Until Keyword Succeeds    300  1  Page Should Contain    No results found
 
 Create Topic
@@ -169,7 +171,7 @@ Delete Stream Topic
   Wait Until Page Does Not Contains HCC Generic Modal
   Capture Page Screenshot  deleting_after_modal.png
   Wait Until Page Contains    Create topic
-  Wait Until Keyword Succeeds    300  1  Page Should Not Contain    xpath=//tr/td[@data-label='Name' and *[text()='${topic_to_delete}']]
+  Wait Until Keyword Succeeds    300  1  Page Should Not Contain Element    xpath=//tr/td[@data-label='Name' and *[text()='${topic_to_delete}']]
   Capture Page Screenshot  deletion_topic.png
 
 Delete Service Account By Client ID
@@ -179,7 +181,7 @@ Delete Service Account By Client ID
   Click Button  Delete
   Wait Until Page Does Not Contains HCC Generic Modal
   Wait Until Page Contains    Create service account
-  Wait Until Keyword Succeeds    300  1  Page Should Not Contain    xpath=//tr[td[@data-label='Client ID' and text()='${client_id_delete}']]
+  Wait Until Keyword Succeeds    300  1  Page Should Not Contain Element    xpath=//tr/td[@data-label='Client ID' and text()='${client_id_delete}']
 
 
 Clean Up RHOSAK

@@ -33,7 +33,7 @@ Install intelaikit From the Operatorhub
              Install Operator        ${intel_aikit_appname}
              Create Installed Operator instance        ${intel_aikit_operator_name}      AIKitContainer
          ELSE
-                  FAIL      Only one openvino operator is found in upearatorhub
+                  FAIL      Only ${no_of_operator} ${intel_aikit_operator_name} is found in Opearatorhub
          END
     ELSE
         Log To Console       Oprator is already installed

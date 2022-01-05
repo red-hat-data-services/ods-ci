@@ -40,7 +40,7 @@ Search Installed Operator
 
 Is Operator Installed
   [Arguments]  ${operator}
-  sleep    5
+  Run Keyword and Return Status     Wait Until Element is Visible      //a[@data-test-operator-row="${operator}"]    timeout=10
   ${is_installed} =  Run Keyword and Return Status
   ...                Get WebElement  //a[@data-test-operator-row="${operator}"]
   [Return]  ${is_installed}
@@ -80,7 +80,7 @@ Switch To New Tab
 Click On Searched Operator
     [Arguments]   ${operator}
      Search Installed Operator          ${operator}
-     Sleep   3
+     Wait Until Element is Visible     xpath=//a[@data-test-operator-row="${operator}"]    timeout=10
      Click Element       xpath=//a[@data-test-operator-row="${operator}"]
      Wait until page contains           Description           timeout=10
 

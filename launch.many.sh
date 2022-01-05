@@ -20,11 +20,41 @@ fakeuserpass="${fakeuserpass:-fakeuserpass}"
 #debug
 #set | grep fake
 
+# htpasswd -c -B -b htpasswd.txt ${fakeuser}001 ${fakeadminpass} > /dev/null 2>&1
 htpasswd -c -B -b htpasswd.txt ${fakeadmin} ${fakeadminpass} > /dev/null 2>&1
-for i in {001..100};
+for i in {001..200};
 do
    htpasswd  -B -b htpasswd.txt ${fakeuser}$i ${fakeuserpass} > /dev/null 2>&1
 done
+
+# oc create secret generic fakeusers-htpass-secret --from-file=htpasswd.txt --dry-run=client -o yaml -n openshift-config | oc apply -f -
+
+# oc apply -f - <<EOF
+# ---
+# apiVersion: config.openshift.io/v1
+# kind: OAuth
+# metadata:
+#   name: cluster
+# spec:
+#   identityProviders:
+#   - name: fakeusers
+#     mappingMethod: claim
+#     type: HTPasswd
+#     htpasswd:
+#       fileData:
+#         name: fakeusers-htpass-secret
+# EOF
+
+
+
+  # identityProviders:
+  # - name: fakeusers
+  #   mappingMethod: claim
+  #   type: HTPasswd
+  #   htpasswd:
+  #     fileData:
+  #       name: fakeusers-htpass-secret
+
 
 #debug
 #cat htpasswd.txt
@@ -40,7 +70,7 @@ function runfakeuser(){
     #echo $fake
     yq e -i '
         .TEST_USER.USERNAME = strenv(fake)  |
-        .TEST_USER.PASSWORD = "fakepass"
+        .TEST_USER.PASSWORD = strenv(fakeuserpass)
         ' ./test-output/${fakeuser}$1/var.yml
 
     # podman run --rm -d \

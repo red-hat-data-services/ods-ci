@@ -40,6 +40,7 @@ Search Installed Operator
 
 Is Operator Installed
   [Arguments]  ${operator}
+  sleep    5
   ${is_installed} =  Run Keyword and Return Status
   ...                Get WebElement  //a[@data-test-operator-row="${operator}"]
   [Return]  ${is_installed}
@@ -79,7 +80,7 @@ Switch To New Tab
 Click On Searched Operator
     [Arguments]   ${operator}
      Search Installed Operator          ${operator}
-     Sleep   1
+     Sleep   3
      Click Element       xpath=//a[@data-test-operator-row="${operator}"]
      Wait until page contains           Description           timeout=10
 
@@ -104,3 +105,29 @@ Is RHODS Version Greater Or Equal Than
     ${comparison} =  GTE  ${ver}  ${target}
     [Return]  ${comparison}
 
+Move To Installed Operator instance
+    [Arguments]   ${operator_name}     ${tab_name}
+    Switch To Administrator Perspective
+    Navigate to Installed Operators
+    Installed Operators Should Be Open
+    Select All Projects
+    Click On Searched Operator   ${operator_name}
+    Switch To New Tab       ${tab_name}
+    sleep    5
+
+Create Installed Operator instance
+    [Arguments]    ${operator_name}     ${tab_name}
+    Move To Installed Operator instance    ${operator_name}     ${tab_name}
+    Click Button     Create ${tab_name}
+    Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10
+    Click Button      Create
+
+Delete Installed Operator instance
+    [Arguments]    ${operator_name}     ${tab_name}
+    Move To Installed Operator instance    ${operator_name}     ${tab_name}
+    Wait Until Element is Visible          //button[contains(@data-test-id,"kebab")]          timeout=10
+    Click Element   //button[contains(@data-test-id,"kebab")]
+    Wait Until Element Is Enabled     //button[contains(text(),"Delete ${tab_name}")]
+    Click Element   //button[contains(text(),"Delete ${tab_name}")]
+    Wait Until Element Is Enabled   //button[contains(text(),"Delete")]
+    Click Button    Delete

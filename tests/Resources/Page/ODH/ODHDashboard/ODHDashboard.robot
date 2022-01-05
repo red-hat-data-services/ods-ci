@@ -48,6 +48,7 @@ Verify Service Is Enabled
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Enabled
   Wait Until Page Contains    JupyterHub  timeout=30
+  Wait Until Page Contains    ${app_name}  timeout=150
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
 
 Verify Service Is Not Enabled

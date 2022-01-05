@@ -3,10 +3,9 @@ Library     SeleniumLibrary
 
 *** Keywords ***
 Install Operator
-    [Arguments]    ${operator}      ${redhat_marketplace}=None
+    [Arguments]    ${operator}        ${catalog}=operators
     Search Operator    ${operator}
-    Run Keyword If   "${redhat_marketplace}" == "None"    Select Non Marketplace Operator   ${operator}
-    ...         ELSE    Select Operator    ${operator}
+    Select Operator with Catalog Name     ${operator}   ${catalog}
     ${show_operator_warning_visible} =    Show Operator Warning Is Visible
     Run Keyword If    ${show_operator_warning_visible}   Confirm Show Operator
     Click Install
@@ -19,15 +18,10 @@ Search Operator
    Input text    //input[@data-test="search-operatorhub"]   ${operator}
    Press keys    //input[@data-test="search-operatorhub"]   RETURN
 
-Select Non Marketplace Operator
-    [Arguments]    ${operator}
-    Wait Until Element is Visible    //a[contains(@data-test, "${operator}") and not (contains(@data-test,"rhmp"))]   timeout=50
-    Click Element    //a[contains(@data-test, "${operator}") and not (contains(@data-test,"rhmp"))]
-
-Select Operator
-    [Arguments]    ${operator}
-    Wait Until Element is Visible   //a[contains(@data-test, "${operator}") and (contains(@data-test,"rhmp"))]  timeout=50
-    Click Element    //a[contains(@data-test, "${operator}") and (contains(@data-test,"rhmp"))]
+Select Operator with Catalog Name
+    [Arguments]    ${operator}     ${catalog}
+    Wait Until Element is Visible   //a[contains(@data-test, "${operator}") and (contains(@data-test,"${catalog}"))]  timeout=50
+    Click Element    //a[contains(@data-test, "${operator}") and (contains(@data-test,"${catalog}"))]
 
 Click Install
     Wait Until Element is Visible    //*[text()="Install"]
@@ -49,7 +43,7 @@ Operator Should Be Installed
     Page Should Contain    ${operator}
     Page Should Contain    ready for use
 
-Get List Of Operator Available
+Get The Number of Operator Available
    [Arguments]    ${operator}
    Search Operator      ${operator}
    ${no_of_items}        Get Webelements    //a[contains(@data-test, "${operator}")]

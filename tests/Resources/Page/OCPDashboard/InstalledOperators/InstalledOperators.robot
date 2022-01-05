@@ -111,9 +111,8 @@ Move To Installed Operator instance
     Navigate to Installed Operators
     Installed Operators Should Be Open
     Log To Console   ${namespace}
-    Run Keyword If  "${namespace}" == "None"   Select All Projects
+    Run Keyword If  "${namespace}" == "None"   Select Project By Name  All Projects
     ...         ELSE   Select Project By Name   ${namespace}
-    #Select All Projects
     Click On Searched Operator   ${operator_name}
     Switch To New Tab       ${tab_name}
     sleep    5

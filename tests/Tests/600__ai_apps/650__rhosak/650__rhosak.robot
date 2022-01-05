@@ -106,7 +106,7 @@ Verify User Is Able to Produce and Consume Events
   Open Consumer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_CONS_FILENAME}
   ${cons_tab_id} =    Get Selected Tab ID
   Open With JupyterLab Menu  Run  Run All Cells
-  Sleep  0.2
+  Sleep  1
   Open Producer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_PROD_FILENAME}
   ${prod_tab_id} =    Get Selected Tab ID
   Open With JupyterLab Menu  Run  Run All Cells

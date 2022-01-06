@@ -20,7 +20,7 @@ fakeuserpass="${fakeuserpass:-fakepass}"
 
 
 htpasswd -c -B -b htpasswd.txt ${fakeadmin} ${fakeadminpass} > /dev/null 2>&1
-for i in {001..200};
+for i in {0..300};
 do
    htpasswd  -B -b htpasswd.txt ${fakeuser}$i ${fakeuserpass} > /dev/null 2>&1
 done
@@ -80,11 +80,10 @@ function runfakeuser(){
         ods-ci:master
 }
 
-for i in {001..040};
+for i in {0..40};
 do
     runfakeuser $i &
 done
-
 
 
 

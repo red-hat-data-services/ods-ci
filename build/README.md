@@ -74,6 +74,7 @@ oc create ns loadtest
 #### create secret
 
 ```bash
+oc -n loadtest delete secret ods-ci-test-variables
 oc -n loadtest create secret generic ods-ci-test-variables --from-file test-variables.yml
 ```
 
@@ -81,7 +82,7 @@ oc -n loadtest create secret generic ods-ci-test-variables --from-file test-vari
 ### define 1 pod
 
 ```bash
-oc delete -f ./build/ods-ci.job.yaml ; oc apply -f ./build/ods-ci.job.yaml
+oc -n loadtest delete -f ./build/ods-ci.job.yaml ; oc -n loadtest apply -f ./build/ods-ci.job.yaml
 
 ```
 

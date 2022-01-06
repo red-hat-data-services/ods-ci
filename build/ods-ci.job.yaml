@@ -6,7 +6,7 @@ metadata:
     deployment: ods-ci
   name: ods-ci
 spec:
-  parallelism: 50
+  parallelism: 5
   completions: 90
   activeDeadlineSeconds: 18000
   backoffLimit: 6
@@ -43,7 +43,7 @@ spec:
         command: ['sh', '-c']
         args:
           - echo 'starting';
-            sed  "s/fakeuser001/fakeuser${JOB_COMPLETION_INDEX}/g" /tmp/ods-ci-test-variables/test-variables.yml > /varfiles/var.yaml
+            sed  "s/ldapuser1/ldapuser${JOB_COMPLETION_INDEX}/g" /tmp/ods-ci-test-variables/test-variables.yml > /varfiles/var.yaml
         volumeMounts:
           - name: ods-ci-test-variables
             mountPath: /tmp/ods-ci-test-variables

@@ -20,7 +20,7 @@ fakeuserpass="${fakeuserpass:-fakepass}"
 
 
 htpasswd -c -B -b htpasswd.txt ${fakeadmin} ${fakeadminpass} > /dev/null 2>&1
-for i in {0..300};
+for i in {0..600};
 do
    htpasswd  -B -b htpasswd.txt ${fakeuser}$i ${fakeuserpass} > /dev/null 2>&1
 done
@@ -48,15 +48,20 @@ then
     oc cluster-info
     printf "\nconnected as openshift user ' $(oc whoami) '\n"
     echo "since the oc login was successful, continuing."
+
+    # update the content of the secret:
+    oc create secret generic htpasswd-secret \
+        --from-file=htpasswd=htpasswd.txt \
+        --dry-run=client -o yaml -n openshift-config \
+        | oc apply -f -
+
+    ## force a rollout of the Auth
+    oc -n openshift-authentication \
+        rollout restart deployment oauth-openshift
+
 else
     echo "we did not find yq, so not trying the oc login"
 fi
-
-# update the content of the secret:
-oc create secret generic htpasswd-secret \
-    --from-file=htpasswd=htpasswd.txt \
-    --dry-run=client -o yaml -n openshift-config \
-    | oc apply -f -
 
 
 function runfakeuser(){

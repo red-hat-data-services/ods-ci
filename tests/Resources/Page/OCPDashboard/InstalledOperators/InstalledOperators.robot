@@ -117,14 +117,14 @@ Move To Installed Operator instance
     Switch To New Tab       ${tab_name}
     sleep    5
 
-Create Installed Operator instance
+Create tabname Instance For Installed Operator
     [Arguments]    ${operator_name}     ${tab_name}     ${namespace}=None
     Move To Installed Operator instance    ${operator_name}     ${tab_name}    ${namespace}
     Click Button     Create ${tab_name}
     Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10
     Click Button      Create
 
-Delete Installed Operator instance
+Delete tabname Instance For Installed Operator
     [Arguments]    ${operator_name}     ${tab_name}     ${namespace}=None
     Move To Installed Operator instance    ${operator_name}     ${tab_name}      ${namespace}
     Wait Until Element is Visible          //button[contains(@data-test-id,"kebab")]          timeout=10

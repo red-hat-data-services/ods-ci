@@ -32,7 +32,7 @@ Install intelaikit From the Operatorhub
          ${no_of_operator}    Get The Number of Operator Available    ${intel_aikit_appname}
          IF  ${no_of_operator} == ${2}
              Install Operator        ${intel_aikit_appname}
-             Create Installed Operator instance        ${intel_aikit_operator_name}      AIKitContainer
+             Create tabname Instance For Installed Operator        ${intel_aikit_operator_name}      AIKitContainer
              Wait Until Element Is Visible    //table[contains(@class,"ReactVirtualized")]//tr     timeout=10
          ELSE
                   FAIL      Only ${no_of_operator} ${intel_aikit_operator_name} is found in Opearatorhub
@@ -65,7 +65,7 @@ Install intelaikit From the Operatorhub
     Fix Spawner Status
     Go To  ${OCP_CONSOLE_URL}
     Maybe Skip Tour
-    Delete Installed Operator instance     ${intel_aikit_operator_name}      AIKitContainer
+    Delete tabname Instance For Installed Operator     ${intel_aikit_operator_name}      AIKitContainer
     Uninstall Operator      ${intel_aikit_operator_name} 
 
 ***Keywords ***

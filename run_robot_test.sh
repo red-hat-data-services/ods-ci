@@ -144,8 +144,17 @@ fi
 
 #TODO: Make this optional so we are not creating/updating the virtualenv everytime we run a test
 VENV_ROOT=${currentpath}/venv
-#setup virtualenv
-python3 -m venv ${VENV_ROOT}
+
+
+#setup virtualenv, but only if necessary.
+if [ -d "${VENV_ROOT}" ]
+then
+    echo "Directory ${VENV_ROOT} exists. No need to create v-env"
+else
+    echo "Directory ${VENV_ROOT} does not exist. running the venv command"
+    python3 -m venv ${VENV_ROOT}
+fi
+
 source ${VENV_ROOT}/bin/activate
 
 if [[ ${SKIP_PIP_INSTALL} -eq 0 ]]; then

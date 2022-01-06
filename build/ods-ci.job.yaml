@@ -1,0 +1,54 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    deployment: ods-ci
+  name: ods-ci
+spec:
+  parallelism: 50
+  completions: 90
+  activeDeadlineSeconds: 18000
+  backoffLimit: 6
+  completionMode: "Indexed"
+  template:
+    metadata:
+      name: pi
+    spec:
+      containers:
+        - image: quay.io/egranger/ods-ci:v2
+          imagePullPolicy: Always
+          name: ods-ci
+          env:
+            # Use this environment variable to pass args to the ods-ci run script in the container
+            - name: RUN_SCRIPT_ARGS
+              value: "--test-variables-file /varfiles/var.yaml --test-case tests/Tests/500__jupyterhub/test-jupyterlab-git-notebook.robot"
+          volumeMounts:
+              # Mount the test-variables to prevent leaking secure info for the cluster you test against
+            - name: ods-ci-test-variables
+              mountPath: /tmp/ods-ci-test-variables
+            - name: varfiles
+              mountPath: /varfiles
+      restartPolicy: OnFailure
+      volumes:
+        - name: ods-ci-test-variables
+          secret:
+            # Specify Secret that has the necessary test-variables.yml
+            secretName: ods-ci-test-variables
+        - name: varfiles
+          emptyDir: {}
+      initContainers:
+      - name: init-myservice
+        image: busybox:1.28
+        command: ['sh', '-c']
+        args:
+          - echo 'starting';
+            sed  "s/fakeuser001/fakeuser${JOB_COMPLETION_INDEX}/g" /tmp/ods-ci-test-variables/test-variables.yml > /varfiles/var.yaml ;
+            cat /varfiles/var.yaml
+        volumeMounts:
+          - name: ods-ci-test-variables
+            mountPath: /tmp/ods-ci-test-variables
+          - name: varfiles
+            mountPath: /varfiles
+
+#JOB_COMPLETION_INDEX

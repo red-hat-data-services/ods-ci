@@ -17,6 +17,7 @@ curl -L ${oc_url} \
 
 # Build the container (optional if you dont want to use the latest from quay.io/odsci)
 podman build -t ods-ci:master -f build/Dockerfile .
+podman build -t ods-ci:v2 -f build/Dockerfile .
 
 # create the output directory
 mkdir -p $PWD/test-output
@@ -45,11 +46,45 @@ oc create secret generic ods-ci-test-variables --from-file test-variables.yml
 ```
 
 
-### creating many loadtest users in OpenShift
+### creating many loadtest users in podman
+
+```
+bash launch.many.podman.sh
+```
+
+## OpenShift.
+
+### Push the image to quay
+
+```bash
+podman login quay.io
+podman tag localhost/ods-ci:master quay.io/egranger/ods-ci:v1
+podman push                        quay.io/egranger/ods-ci:v1
+podman tag localhost/ods-ci:v2 quay.io/egranger/ods-ci:v2
+podman push                    quay.io/egranger/ods-ci:v2
+```
+
+### Create project in openshift
+
+```
+oc create ns loadtest
 
 ```
 
-bash launch.many.sh
+#### create secret
+
+```bash
+oc -n loadtest create secret generic ods-ci-test-variables --from-file test-variables.yml
 ```
 
 
+### define 1 pod
+
+```bash
+oc delete -f ./build/ods-ci.job.yaml ; oc apply -f ./build/ods-ci.job.yaml
+
+```
+
+### define x jobs
+
+### keeping the results around

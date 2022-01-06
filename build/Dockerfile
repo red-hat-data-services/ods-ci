@@ -24,11 +24,12 @@ RUN mkdir $HOME/ods-ci
 # Change the WORKDIR so the run script references any files/folders from the root of the repo
 WORKDIR $HOME/ods-ci
 
+COPY requirements.txt setup.py .
+RUN python3 -m venv venv && source venv/bin/activate && venv/bin/pip3 install -r requirements.txt
+
 COPY tests tests/
 COPY libs libs/
-
-COPY requirements.txt run_robot_test.sh setup.py .
-RUN python3 -m venv venv && source venv/bin/activate && venv/bin/pip3 install -r requirements.txt
+COPY run_robot_test.sh  .
 
 # Set the group ownership so non-root users can write to /tmp
 RUN chgrp -R 0 /tmp && chmod -R g=u /tmp

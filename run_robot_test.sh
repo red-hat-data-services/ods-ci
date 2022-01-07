@@ -174,7 +174,9 @@ case "$(uname -s)" in
         ;;
 esac
 
+chmod 755 ${TEST_ARTIFACT_DIR}
+
 ./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
 
 ## make the directory easy to read
-chmod -R 777 ${TEST_ARTIFACT_DIR}
+chmod  644 ${TEST_ARTIFACT_DIR}/*

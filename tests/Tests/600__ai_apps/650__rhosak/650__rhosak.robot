@@ -64,7 +64,7 @@ Verify User Is Able to Create And Delete a Kafka Stream
   OpenShiftCLI.Delete      kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
 
 Verify User Is Able to Produce and Consume Events
-  [Tags]  Sanity  Smoke
+  [Tags]  Sanity  Tier2
   ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239
   [Teardown]  Clean Up RHOSAK    stream_to_delete=${stream_name_test}
   ...                            topic_to_delete=${topic_name_test}

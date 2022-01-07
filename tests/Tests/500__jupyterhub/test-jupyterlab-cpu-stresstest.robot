@@ -65,11 +65,6 @@ Git Clone the notebooks we need
   Sleep  10
 
 
-Run the 1 core notebook
-  [Tags]  CPU StressTest
-
-
-
 
 Run the 1 core notebook
   [Tags]  CPU StressTest

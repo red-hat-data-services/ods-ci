@@ -80,8 +80,8 @@ fi
 currentpath=`pwd`
 case "$(uname -s)" in
     Darwin)
-         echo "MACOS"
-         echo "setting driver  to $currentpath/Drivers/MACOS"
+         echo "INFO: MACOS"
+         echo "INFO: setting driver  to $currentpath/Drivers/MACOS"
          PATH=$PATH:$currentpath/drivers/MACOS
          export PATH=$PATH
 
@@ -90,7 +90,7 @@ case "$(uname -s)" in
        case "$(lsb_release --id --short)" in
        "Fedora"|"CentOS")
              ## Bootstrap script to setup drivers ##
-             echo "setting driver  to $currentpath/Drivers/fedora"
+             echo "INFO: setting driver  to $currentpath/Drivers/fedora"
              PATH=$PATH:$currentpath/drivers/fedora
              export PATH=$PATH
 
@@ -125,7 +125,7 @@ then
     oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
 
     ## do an oc login here
-    oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}"
+    oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
 
     ## no point in going further if the login is not working
     retVal=$?

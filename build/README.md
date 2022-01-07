@@ -96,13 +96,21 @@ oc -n loadtest create secret generic ods-ci-test-variables \
 ```
 
 
-### define 1 pod
+### define 1 job
 
 ```bash
-oc -n loadtest delete -f ./build/ods-ci.job.yaml ; oc -n loadtest apply -f ./build/ods-ci.job.yaml
+oc -n loadtest delete -f ./build/ods-ci.job.yaml
+
+## delete stray notebooks if any
+oc get pods -n rhods-notebooks --no-headers=true \
+    | awk '/ldapuser/{print $1}'\
+    | xargs oc delete -n rhods-notebooks pod
+
+oc -n loadtest apply -f ./build/ods-ci.job.yaml
 
 ```
 
-### define x jobs
 
 ### keeping the results around
+
+TODO

@@ -26,7 +26,7 @@ mkdir -p $PWD/test-output
 # Run a single test
 # use the image as-is.
 podman run --rm -it \
-    -v $PWD/perf2-variables.yml:/tmp/ods-ci/test-variables.yml:Z \
+    -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z \
     -v $PWD/test-output:/tmp/ods-ci/test-output:Z \
     -e RUN_SCRIPT_ARGS='--test-case tests/Tests/500__jupyterhub/test-jupyterlab-git-notebook.robot'  \
     ods-ci:v3
@@ -85,8 +85,14 @@ oc create ns loadtest
 
 ```bash
 oc -n loadtest delete secret ods-ci-test-variables
-oc -n loadtest create secret generic ods-ci-test-variables --from-file test-variables.yml
-oc -n loadtest create secret generic ods-ci-test-variables --from-file=test-variables.yml=perf2-variables.yml
+
+## default syntax for default var file:
+oc -n loadtest create secret generic ods-ci-test-variables \
+    --from-file test-variables.yml
+## but if your var file is called something else:
+oc -n loadtest create secret generic ods-ci-test-variables \
+    --from-file=test-variables.yml=perf2-variables.yml
+
 ```
 
 

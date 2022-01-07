@@ -6,17 +6,17 @@ metadata:
     deployment: ods-ci
   name: ods-ci
 spec:
-  parallelism: 5
-  completions: 90
+  parallelism: 2
+  completions: 50
   activeDeadlineSeconds: 18000
   backoffLimit: 6
   completionMode: "Indexed"
   template:
     metadata:
-      name: pi
+      name: ods-ci-loadtest
     spec:
       containers:
-        - image: quay.io/egranger/ods-ci:v2
+        - image: quay.io/egranger/ods-ci:v3
           imagePullPolicy: Always
           name: ods-ci
           env:
@@ -41,13 +41,13 @@ spec:
       - name: init-myservice
         image: busybox:1.28
         command: ['sh', '-c']
+        ## the variable JOB_COMPLETION_INDEX is created by the Job. it goes 0,1,2,3,....
         args:
           - echo 'starting';
             sed  "s/ldapuser1/ldapuser${JOB_COMPLETION_INDEX}/g" /tmp/ods-ci-test-variables/test-variables.yml > /varfiles/var.yaml
+
         volumeMounts:
           - name: ods-ci-test-variables
             mountPath: /tmp/ods-ci-test-variables
           - name: varfiles
             mountPath: /varfiles
-
-#JOB_COMPLETION_INDEX

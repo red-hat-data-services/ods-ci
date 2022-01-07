@@ -15,19 +15,19 @@ Get the OC commands For Cluster registration
     Wait Until Keyword Succeeds    30  1   Element Should Be Visible     //button[contains(@class, 'disabled')]/span[contains(text(),'Generate Secret')]
     sleep  5
     ${elem} =   Get WebElements      xpath://div[@role='textbox']//pre
-    &{List}   	Create Dictionary
+    &{oc_command_dict}   	Create Dictionary
     @{itemname}   Create List     Create namespace         Red Hat Marketplace Subscription          Red Hat Marketplace Kubernetes Secret    Red Hat Marketplace global pull secret
     FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{elem}   start=0
 
-        Set To Dictionary       ${List}      ${itemname[${idx}]}    ${ext_link.text}
+        Set To Dictionary       ${oc_command_dict}      ${itemname[${idx}]}    ${ext_link.text}
 
     END
-    [Return]    ${List}
+    [Return]    ${oc_command_dict}
 
 #Launch Marketplace
 #   Open Browser  ${MARKETPLACE_TEST.URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
 
-Wait For Marketplace Splash Page
+Wait For Marketplace Page To Load
    Wait Until Page Contains Element    xpath://a[contains(text(), 'Workspace')]   timeout=15
    Page Should Contain      Red Hat Marketplace
    Sleep    3
@@ -48,12 +48,12 @@ Login to Marketplace
     Input Text  id=password  ${password}
     Click Button    Log in
   END
-  Run Keyword And Continue On Failure    Wait For Marketplace Splash Page
+  Run Keyword And Continue On Failure    Wait For Marketplace Page To Load
 
 Launch Component from Header Dropdown
    [Arguments]  ${topic}  ${subtopic}
    Wait until Element is Visible       xpath://a[contains(text(), '${topic}')]    timeout=10
-   Click Element           xpath://a[contains(text(), 'Workspace')]
+   Click Element           xpath://a[contains(text(), '${topic}')]
    Wait until Element is Visible  xpath://a[contains(@aria-label, '${subtopic}')]    timeout=20
    Click Element           xpath://a[contains(@aria-label, '${subtopic}')]
    sleep  5

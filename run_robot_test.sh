@@ -84,7 +84,7 @@ case "$(uname -s)" in
          echo "setting driver  to $currentpath/Drivers/MACOS"
          PATH=$PATH:$currentpath/drivers/MACOS
          export PATH=$PATH
-         echo "$PATH"
+
          ;;
     Linux)
        case "$(lsb_release --id --short)" in
@@ -93,7 +93,7 @@ case "$(uname -s)" in
              echo "setting driver  to $currentpath/Drivers/fedora"
              PATH=$PATH:$currentpath/drivers/fedora
              export PATH=$PATH
-             echo $PATH
+
         ;;
         "Ubuntu")
              echo "Not yet supported, but shouldn't be hard for you to fix :) "
@@ -117,7 +117,7 @@ esac
 ## if we have yq installed
 if command -v yq &> /dev/null
 then
-    echo "we found yq"
+    echo "INFO: we found a yq executable"
 
     ## get the user, pass and API hostname for OpenShift
     oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})

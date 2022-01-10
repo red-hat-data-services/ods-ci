@@ -4,6 +4,9 @@ Library         Collections
 
 *** Keywords ***
 Is SSO Login Page Visible
+  Wait Until Element is Visible            //a[contains(@aria-label,"Log in")]
+  Click Element     //a[contains(@aria-label,"Log in")]
+  sleep   5
   ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain    Enter your email to log in
   [Return]  ${login_prompt_visible}
 
@@ -34,9 +37,6 @@ Wait For Marketplace Page To Load
 
 Login to Marketplace
   [Arguments]  ${username}  ${password}
-  Wait Until Element is Visible            //a[contains(@aria-label,"Log in")]
-  Click Element     //a[contains(@aria-label,"Log in")]
-  sleep   5
   ${login-required} =  Is SSO Login Page Visible
   IF    ${login-required} == True
     Wait Until Element is Visible  xpath://input[@id="email"]  timeout=5

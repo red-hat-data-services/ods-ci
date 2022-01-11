@@ -1,3 +1,3 @@
 *** Settings ***
 Resource  ODHDashboard.robot
-Variables  ExploreTabVariables.py
+Variables  AppsInfoDictionary.py

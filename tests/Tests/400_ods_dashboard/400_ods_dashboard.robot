@@ -5,6 +5,8 @@ Library         RequestsLibrary
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
+
+
 *** Keywords ***
 Dashboard Test Setup
   Set Library Search Order  SeleniumLibrary
@@ -37,5 +39,17 @@ Verify Resource Link Http status code
         Log To Console    ${idx}. ${href} gets status code ${status}
     END
 
-
+Verify Explore Tab
+    [Tags]  ODS-488
+    #Log To Console    ${APPS_DICT}
+    Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
+    Click Link    Explore
+    Sleep  3
+    ${n_tiles}=  Get Element Count    xpath://article[contains(@class, 'pf-c-card')]
+    FOR    ${idx}    IN RANGE    1    ${n_tiles}+1
+        ${app_id}=  Get Element Attribute    xpath:(//article[contains(@class, 'pf-c-card')])[${idx}]    id
+        Log To Console    ${app_id}
+    END
 

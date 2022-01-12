@@ -11,7 +11,7 @@ Get Pod Logs From UI
   Search Last Item Instance By Title in OpenShift Table  search_term=${pod_search_term}  namespace=${namespace}
   Click Link    xpath://tr[@data-key='0-0']/td/span/a
   Click Link    Logs
-  Sleep  2
+  Sleep  4
   Capture Page Screenshot  logs_page.png
   ${logs_text}=  Get Text    xpath://div[@class='log-window__lines']
   ${log_rows}=  Text To List  ${logs_text}

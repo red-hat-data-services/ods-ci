@@ -5,6 +5,14 @@ Library         RequestsLibrary
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
+*** Variables ***
+${TILES_XP}=  //article[contains(@class, 'pf-c-card')]
+${HEADER_XP}=  div[@class='pf-c-card__header']
+${TITLE_XP}=  div[@class='pf-c-card__title']
+${DESCR_XP}=  div[@class='pf-c-card__body']
+${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]
+${IMAGE_XP}=  ${HEADER_XP}/*[contains(@class, 'odh-card__header-fallback-img')]
+# check if there is a fallback images instead a real image: <svg class="odh-card__header-brand odh-card__header-brand pf-c-brand odh-card__header-fallback-img"
 
 
 *** Keywords ***
@@ -47,9 +55,9 @@ Verify Explore Tab
     Wait for RHODS Dashboard to Load
     Click Link    Explore
     Sleep  3
-    ${n_tiles}=  Get Element Count    xpath://article[contains(@class, 'pf-c-card')]
+    ${n_tiles}=  Get Element Count    xpath:${TILES_XP}
     FOR    ${idx}    IN RANGE    1    ${n_tiles}+1
-        ${app_id}=  Get Element Attribute    xpath:(//article[contains(@class, 'pf-c-card')])[${idx}]    id
+        ${app_id}=  Get Element Attribute    xpath:(${TILES_XP})[${idx}]    id
         Log To Console    ${app_id}
     END
 

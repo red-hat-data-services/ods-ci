@@ -103,4 +103,3 @@ Is RHODS Version Greater Or Equal Than
     ${ver} =  Get RHODS version
     ${comparison} =  GTE  ${ver}  ${target}
     [Return]  ${comparison}
-

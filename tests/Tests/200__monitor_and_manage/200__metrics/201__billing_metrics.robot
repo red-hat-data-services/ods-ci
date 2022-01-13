@@ -8,10 +8,12 @@ Library        SeleniumLibrary
 Test Setup     Begin Billing Metrics Web Test
 Test Teardown  End Web Billing Metrics Test
 
+
 *** Variables ***
-${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:rate5m
+${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:rate1h
+${METRIC_RHODS_CPU_BEFORE_1.5.0}    cluster:usage:consumption:rhods:cpu:seconds:rate5m
 ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:seconds:rate5m
-@{generic-1}  s2i-generic-data-science-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
+
 
 *** Test Cases ***
 Verify OpenShift Monitoring results are correct when running undefined queries
@@ -22,9 +24,9 @@ Verify OpenShift Monitoring results are correct when running undefined queries
 
 Test Billing Metric (notebook cpu usage) on OpenShift Monitoring
   [Tags]  Smoke  Sanity  ODS-175
-  #Skip Test If Previous CPU Usage Is Not Zero
   Run Jupyter Notebook For 5 Minutes
   Verify Previus CPU Usage Is Greater Than Zero
+
 
 *** Keywords ***
 Begin Billing Metrics Web Test
@@ -35,7 +37,12 @@ End Web Billing Metrics Test
   SeleniumLibrary.Close All Browsers
 
 Skip Test If Previous CPU Usage Is Not Zero
-  ${metrics_value} =   Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
+  IF  ${version-check}==True
+      ${metrics_value} =   Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}
+  ELSE
+      ${metrics_value} =   Run OpenShift Metrics Query    ${METRIC_RHODS_CPU_BEFORE_1.5.0}
+  END
   ${metrics_query_results_contain_data} =  Run Keyword And Return Status     Metrics.Verify Query Results Contain Data
   IF  ${metrics_query_results_contain_data}
     Log To Console    Current CPU usage: ${metrics_value}
@@ -71,7 +78,12 @@ Run OpenShift Metrics Query
   [Return]  ${result}
 
 Verify Previus CPU Usage Is Greater Than Zero
-  ${metrics_value} =   Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
+  IF  ${version-check}==True
+      ${metrics_value} =   Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}
+  ELSE
+      ${metrics_value} =   Run OpenShift Metrics Query    ${METRIC_RHODS_CPU_BEFORE_1.5.0}
+  END
   Metrics.Verify Query Results Contain Data
   Capture Page Screenshot
   Should Be True  ${metrics_value} > 0
@@ -82,7 +94,6 @@ Run Jupyter Notebook For 5 Minutes
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
   Iterative Image Test  s2i-generic-data-science-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
-
 
 ##TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob. We have to refactor the code not to duplicate this method
 Iterative Image Test
@@ -115,7 +126,6 @@ Iterative Image Test
   Stop JupyterLab Notebook Server
   Go To  ${ODH_DASHBOARD_URL}
   Sleep  10
-
 
 CleanUp JupyterHub
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

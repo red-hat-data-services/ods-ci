@@ -19,15 +19,16 @@ JupyterHub Spawner Is Visible
 
 Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
-   [Arguments]  ${notebook_image}
-   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
-   IF  ${version-check}==True
-      Wait Until Element Is Visible  xpath://div[@class="jsp-spawner__image-options"]
+   [Arguments]    ${notebook_image}
+   ${version-check} =    Is RHODS Version Greater Or Equal Than  1.5.0
+   IF    ${version-check}==True
+      Wait Until Element Is Visible    xpath://div[@class="jsp-spawner__image-options"]
    ELSE
-      Wait Until Element Is Visible  xpath:/html/body/div[1]/form/div/div/div[2]/div[2]/div[1]
+      Wait Until Element Is Visible    xpath:/html/body/div[1]/form/div/div/div[2]/div[2]/div[1]
    END
-   Wait Until Element Is Visible  xpath://input[contains(@id, "${notebook_image}")]
-   Click Element  xpath://input[contains(@id, "${notebook_image}")]
+   Wait Until Element Is Visible    xpath://input[contains(@id, "${notebook_image}")]
+   Element Should Be Enabled    xpath://input[contains(@id, "${notebook_image}")]
+   Click Element    xpath://input[contains(@id, "${notebook_image}")]
 
 Select Container Size
    [Documentation]  Selects the container size based on the ${container_size} argument

@@ -146,6 +146,16 @@ Spawn Notebook With Arguments
             END
          END
          Spawn Notebook
+         Wait Until Element is Visible  id:progress-bar
+         Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
+         Wait for JupyterLab Splash Screen  timeout=30
+         Maybe Close Popup
+         ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
+         Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
+         Launch a new JupyterLab Document  kernel=Python 3 (ipykernel)
+         Close Other JupyterLab Tabs
+         Sleep  1
+         Run Cell And Check Output  import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])  ${image}
          ${spawn_fail} =  Has Spawn Failed
          Exit For Loop If  ${spawn_fail} == False
          Click Element  xpath://span[@id='jupyterhub-logo']

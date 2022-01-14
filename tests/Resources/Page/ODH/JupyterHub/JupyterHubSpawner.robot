@@ -248,11 +248,9 @@ Fix Spawner Status
 User Is Allowed
    JupyterHub Spawner is Visible
    Page Should Not Contain  403 : Forbidden
-   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
-   IF  ${version-check}==True
-      Wait Until Element Is Visible  xpath://div[@class="jsp-spawner__image-options"]
-   ELSE
-      Wait Until Element Is Visible  xpath:/html/body/div[1]/form/div/div/div[2]/div[2]/div[1]
+   ${spawner_ready} =    JupyterHub Spawner Is Ready
+   IF  ${spawner_ready}==False
+      Fail    Spawner page was not ready
    END
 
 User Is Not Allowed

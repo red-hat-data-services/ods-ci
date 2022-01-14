@@ -66,7 +66,7 @@ def generate_polarion_config(config_template, config_data, testrun_title):
     with open(config_file, 'r') as fh:
         data = yaml.safe_load(fh)
 
-    data["testrun_info"]["polarion-testrun-title"] = testrun_title 
+    data["testrun_info"]["polarion-testrun-title"] = testrun_title
     data["testrun_info"]["polarion-testrun-id"] = testrun_title
 
     with open(config_file, 'w') as yaml_file:
@@ -80,7 +80,7 @@ def main():
 
     # Clone pylero repo
     ret = clone_config_repo(git_repo = PYLERO_REPO,
-                            git_branch = "master",
+                            git_branch = "main",
                             repo_dir = "pylero")
     if not ret:
         sys.exit(1)

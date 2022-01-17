@@ -31,7 +31,7 @@ Test User Notebook Plugin in JupyterLab
     Get the List of Plugins from RHODS notebook images
     Verify the Plugins for each JL images
     Run Keyword IF     ${image_mismatch_plugins} != &{EMPTY}   Fail    Plugin mismatch Found in the mentioned images '${image_mismatch_plugins}'
-    ...       ELSE      Log To Console   All the plugin  is matched between the old and new notebook images
+    ...       ELSE      Log To Console   All the plugin is matched between the old and new notebook images
 
 *** Keywords ***
 Plugin Testing Suite Setup
@@ -77,11 +77,15 @@ Verify the Plugins for each JL images
         IF    len(${plugin_names}) >= len(${old_notebok_plugin})
               FOR    ${name}    IN    @{plugin_names}
                      Run Keyword If      $name not in $old_notebok_plugin    Append To List    ${mistamtch_plugins}    ${name}
-                     ...       ELSE      Log    Plugin '${name}' has not chnaged
+                     ...       ELSE      Log    Plugin '${name}' has not changed
               END
               Run Keyword IF   ${mistamtch_plugins} != @{EMPTY}   Set To Dictionary    ${image_mismatch_plugins}        ${image}     ${mistamtch_plugins}
         ELSE
-            Run Keyword And Continue On Failure          FAIl       Some Plugins has been removed from the '${image}' notebook image
+              ${missing_plugins}    Create List
+              FOR    ${name}    IN    @{old_notebok_plugin}
+                     Run Keyword If      $name not in $plugin_names   Append To List    ${missing_plugins}    ${name}
+              END
+              Run Keyword And Continue On Failure          FAIL       Plugins '${missing_plugins}' has been removed from the '${image}' notebook image
         END
 
    END

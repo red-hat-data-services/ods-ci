@@ -32,7 +32,6 @@ Create Kafka Stream Instance
 Check Stream Status
   [Arguments]  ${target_status}  ${target_stream}
   ${status}=  Get Text    xpath=//tr[td[@data-label='Name' and (text()='${target_stream}' or *[text()='${target_stream}'])]]/td[@data-label='Status']
-  #${status}=  Get Text    xpath=//tr[td[@data-label='Name' and *[text()='${target_stream}']]]/td[@data-label='Status']
   Should Be Equal    ${status}    ${target_status}
 
 Check Stream Creation

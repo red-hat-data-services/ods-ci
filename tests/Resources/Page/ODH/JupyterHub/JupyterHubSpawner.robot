@@ -152,8 +152,10 @@ Spawn Notebook With Arguments
          Maybe Close Popup
          ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
          Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
-         Launch a new JupyterLab Document  kernel=Python 3 (ipykernel)
+         Open With JupyterLab Menu  File  New  Notebook
+         Maybe Close Popup
          Close Other JupyterLab Tabs
+         Maybe Close Popup
          Sleep  1
          Run Cell And Check Output  import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])  ${image}
          ${spawn_fail} =  Has Spawn Failed

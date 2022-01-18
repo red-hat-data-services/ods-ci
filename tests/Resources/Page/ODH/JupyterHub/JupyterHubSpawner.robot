@@ -153,6 +153,7 @@ Spawn Notebook With Arguments
          ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
          Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
          Open With JupyterLab Menu  File  New  Notebook
+         Sleep  1
          Maybe Close Popup
          Close Other JupyterLab Tabs
          Maybe Close Popup

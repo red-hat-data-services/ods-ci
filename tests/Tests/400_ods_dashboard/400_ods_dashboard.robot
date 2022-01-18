@@ -4,11 +4,13 @@ Resource         ../../Resources/Common.robot
 Library         RequestsLibrary
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
+Variables       ../../Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.py
 
 *** Variables ***
 ${TILES_XP}=  //article[contains(@class, 'pf-c-card')]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
-${TITLE_XP}=  div[@class='pf-c-card__title']
+${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
+${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
 ${DESCR_XP}=  div[@class='pf-c-card__body']
 ${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]
 ${IMAGE_XP}=  ${HEADER_XP}/*[contains(@class, 'odh-card__header-fallback-img')]
@@ -58,6 +60,19 @@ Verify Explore Tab
     ${n_tiles}=  Get Element Count    xpath:${TILES_XP}
     FOR    ${idx}    IN RANGE    1    ${n_tiles}+1
         ${app_id}=  Get Element Attribute    xpath:(${TILES_XP})[${idx}]    id
-        Log To Console    ${app_id}
+        Log    ${app_id}
+        ${card_title}=  Get Text    xpath:(${TILES_XP})[${idx}]/${TITLE_XP}
+        ${card_provider}=  Get Text    xpath:(${TILES_XP})[${idx}]/${PROVIDER_XP}
+        ${card_desc}=  Get Text    xpath:(${TILES_XP})[${idx}]/${DESCR_XP}
+        Run Keyword And Continue On Failure  Should Be Equal   ${card_title}  ${APPS_DICT}[${app_id}][title]
+        Run Keyword And Continue On Failure  Should Be Equal   ${card_provider}  ${APPS_DICT}[${app_id}][provider]
+        Run Keyword And Continue On Failure  Should Be Equal   ${card_desc}  ${APPS_DICT}[${app_id}][description]
+        # check the badges
+
+        # for each tile get sidebar links
+        # for each link checks:
+        #   - link https status
+        #   - link is among the expected ones (add in AppsInfoDic file
     END
+
 

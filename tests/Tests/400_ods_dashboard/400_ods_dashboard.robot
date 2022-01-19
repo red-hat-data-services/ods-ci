@@ -12,7 +12,8 @@ ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
 ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
 ${DESCR_XP}=  div[@class='pf-c-card__body']
-${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]
+${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
+${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]
 ${IMAGE_XP}=  ${HEADER_XP}/*[contains(@class, 'odh-card__header-fallback-img')]
 # check if there is a fallback images instead a real image: <svg class="odh-card__header-brand odh-card__header-brand pf-c-brand odh-card__header-fallback-img"
 
@@ -51,7 +52,6 @@ Verify Resource Link Http status code
 
 Verify Explore Tab
     [Tags]  ODS-488
-    #Log To Console    ${APPS_DICT}
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
@@ -64,10 +64,19 @@ Verify Explore Tab
         ${card_title}=  Get Text    xpath:(${TILES_XP})[${idx}]/${TITLE_XP}
         ${card_provider}=  Get Text    xpath:(${TILES_XP})[${idx}]/${PROVIDER_XP}
         ${card_desc}=  Get Text    xpath:(${TILES_XP})[${idx}]/${DESCR_XP}
+        ${card_badges}=  Get WebElements    xpath:(${TILES_XP})[${idx}]/${BADGES_XP}
+        ${card_badges_titles}=  Create List
+
         Run Keyword And Continue On Failure  Should Be Equal   ${card_title}  ${APPS_DICT}[${app_id}][title]
         Run Keyword And Continue On Failure  Should Be Equal   ${card_provider}  ${APPS_DICT}[${app_id}][provider]
         Run Keyword And Continue On Failure  Should Be Equal   ${card_desc}  ${APPS_DICT}[${app_id}][description]
-        # check the badges
+        FOR    ${cb}    IN    @{card_badges}
+            ${btitle}=  Get Text   ${cb}
+            Append To List    ${card_badges_titles}  ${btitle}
+        END
+        Run Keyword And Continue On Failure  Lists Should Be Equal  ${card_badges_titles}  ${APPS_DICT}[${app_id}][badges]
+        Run Keyword If    $RH_BADGE_TITLE in $card_badges_titles
+        ...    Run Keyword And Continue On Failure  Page Should Contain Element    xpath:(${TILES_XP})[${idx}]/${OFFICIAL_BADGE_XP}
 
         # for each tile get sidebar links
         # for each link checks:

@@ -21,24 +21,24 @@ APPS_DICT = {
      },
      "aikit": {
           "badges": [SELF_BADGE_TITLE],
-          "provider": "by Intel",
+          "provider": "by Intel®",
           "title": "Intel® oneAPI AI Analytics Toolkit Container",
           "description": "The AI Kit is a set of AI software tools to accelerate "
                          "end-to-end data science and analytics pipelines on Intel® architectures."
 
      },
      "jupyterhub": {
-          "badges": [SELF_BADGE_TITLE],
+          "badges": [RH_BADGE_TITLE],
           "provider": "by Jupyter",
           "title": "JupyterHub",
-          "description": "IBM Watson Studio is a platform for embedding AI and machine "
-                         "learning into your business and creating custom models with your own data."
+          "description": "JupyterHub is a multi-user version of the notebook designed "
+                         "for companies, classrooms, and research labs."
 
      },
      "rhoam": {
           "badges": [RH_BADGE_TITLE],
           "provider": "by Red Hat",
-          "title": "OpenShift API ManagementRed Hat",
+          "title": "OpenShift API Management",
           "description": "OpenShift API Management is a service that accelerates time-to-value "
                          "and reduces the cost of delivering API-first, microservices-based applications."
 
@@ -60,11 +60,13 @@ APPS_DICT = {
 
      },
      "pachyderm": {
-          "badges": [CMS_BADGE_TITLE],
+          "badges": [SELF_BADGE_TITLE],
           "provider": "by Pachyderm",
           "title": "Pachyderm",
-          "description": "Pachyderm is a group of products that help data science teams "
-                         "automate and optimize their machine learning operations."
+          "description": "Pachyderm is the data foundation for machine learning. "
+                         "It provides industry-leading data versioning, "
+                         "pipelines, and lineage for data science teams to automate "
+                         "the machine learning lifecycle and optimize machine learning operations (MLOps)."
 
      },
      "perceptiLabs": {
@@ -76,7 +78,7 @@ APPS_DICT = {
 
      },
      "seldon-deploy": {
-          "badges": [CMS_BADGE_TITLE],
+          "badges": [SELF_BADGE_TITLE],
           "provider": "by Seldon",
           "title": "Seldon Deploy",
           "description": "Seldon Deploy is a set of tools to simplify and accelerate "

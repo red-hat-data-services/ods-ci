@@ -158,7 +158,7 @@ Spawn Notebook With Arguments
          Close Other JupyterLab Tabs
          Maybe Close Popup
          Sleep  1
-         Run Cell And Check Output  import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])  ${image}
+         Spawned Image Check    ${image}
          ${spawn_fail} =  Has Spawn Failed
          Exit For Loop If  ${spawn_fail} == False
          Click Element  xpath://span[@id='jupyterhub-logo']
@@ -166,6 +166,14 @@ Spawn Notebook With Arguments
          Click Element  xpath://span[@id='jupyterhub-logo']
       END
    END
+
+Spawned Image Check
+    [Documentation]    This Keyword checks that the spawned image matches a given image name
+    ...                (Presumably the one the user wanted to spawn)
+    [Arguments]    ${image}
+    Run Cell And Check Output    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])    ${image}
+    Open With JupyterLab Menu    Edit    Select All Cells
+    Open With JupyterLab Menu    Edit    Delete Cells
 
 Launch JupyterHub Spawner From Dashboard
   Menu.Navigate To Page    Applications    Enabled

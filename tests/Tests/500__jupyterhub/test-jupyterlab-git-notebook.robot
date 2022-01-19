@@ -17,7 +17,12 @@ Open RHODS Dashboard
 
 Can Launch Jupyterhub
   [Tags]  Sanity
-  Launch JupyterHub From RHODS Dashboard Dropdown
+  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+  IF  ${version-check}==True
+    Launch JupyterHub From RHODS Dashboard Link
+  ELSE
+    Launch JupyterHub From RHODS Dashboard Dropdown
+  END
 
 Can Login to Jupyterhub
   [Tags]  Sanity
@@ -81,5 +86,3 @@ Can Launch Python3 Smoke Test Notebook
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Not Match  ${output}  ERROR*
-
-  Logout JupyterLab

@@ -4,14 +4,13 @@ Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/OCPDashboard/Page.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource        ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
-Resource        ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Library         SeleniumLibrary
 Library         XML
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Commercial Edition Suite Setup
-Suite Teardown  Anaconda Commercial Edition Suite Teardown
+Suite Teardown  Remove Anaconda Commercial Edition Component
 
 *** Variables ***
 ${anaconda_appname}=  anaconda-ce
@@ -73,7 +72,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Go To  ${OCP_CONSOLE_URL}
   Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
   Maybe Skip Tour
-  ${val_result}=  Get Pod Logs  namespace=redhat-ods-applications  pod_search_term=anaconda-ce-periodic-validator-job-custom-run
+  ${val_result}=  Get Pod Logs From UI  namespace=redhat-ods-applications  pod_search_term=anaconda-ce-periodic-validator-job-custom-run
   Log  ${val_result}
   Should Be Equal  ${val_result[0]}  ${val_success_msg}
   Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete
@@ -102,14 +101,20 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Capture Page Screenshot  conda_lib_install_result.png
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
-  Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']
+  Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
 
-** Keywords ***
+
+*** Keywords ***
 Anaconda Commercial Edition Suite Setup
   Set Library Search Order  SeleniumLibrary
 
-Anaconda Commercial Edition Suite Teardown
+Remove Anaconda Commercial Edition Component
   Close All Browsers
+  Delete ConfigMap using Name          redhat-ods-applications   anaconda-ce-validation-result
+  Delete Pods Using Label Selector     redhat-ods-applications   component.opendatahub.io/name=anaconda-ce
+  Delete BuildConfig using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
+  Delete ImageStream using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
+  Delete Data From Secrets using Name   redhat-ods-applications   anaconda-ce-access      {"data":null}
 
 Enable Anaconda
   [Arguments]  ${license_key}

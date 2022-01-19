@@ -6,6 +6,7 @@ import yaml
 import re
 import sys
 import time
+import jinja2
 
 def clone_config_repo(**kwargs):
     """
@@ -49,15 +50,23 @@ def read_yaml(filename):
         return None
 
 
-def execute_command(cmd):
+def execute_command(cmd, get_stderr=False):
     """
     Executes command in the local node
     """
     try:
-        process = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        process = subprocess.run(cmd, shell=True, check=True,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 universal_newlines=True)
         output = process.stdout
+        if get_stderr:
+            err = process.stderr
+            return output, err
         return output
     except:
+        if get_stderr:
+            return None, None
         return None
 
 
@@ -80,4 +89,20 @@ def oc_login(ocp_console_url, username, password, timeout=600):
         count += 5
     if not chk_flag:
         print ("Failed to login to cluster")
+        sys.exit(1)
+
+
+def render_template(search_path, template_file, output_file, replace_vars):
+    """Helper module to render jinja template"""
+
+    try:
+        templateLoader = jinja2.FileSystemLoader(searchpath=search_path)
+        templateEnv = jinja2.Environment(loader=templateLoader)
+        template = templateEnv.get_template(template_file)
+        outputText = template.render(replace_vars)
+        with open(output_file, 'w') as fh:
+            fh.write(outputText)
+    except:
+        print("Failed to render template and create json "
+              "file {}".format(output_file))
         sys.exit(1)

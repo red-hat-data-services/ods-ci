@@ -75,3 +75,9 @@ Maybe Handle Something Went Wrong Page
     Capture Page Screenshot  somethingwentwrong_kafka.png
     Reload Page
   END
+
+Wait Until Page Contains HCC Generic Modal
+  Wait Until Page Contains Element    xpath=//div[contains(@id, 'pf-modal-part')]
+
+Wait Until Page Does Not Contains HCC Generic Modal
+  Wait Until Page Does Not Contain Element    xpath=//div[contains(@id, 'pf-modal-part')]

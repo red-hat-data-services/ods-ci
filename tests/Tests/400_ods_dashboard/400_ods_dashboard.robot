@@ -58,8 +58,7 @@ Verify Explore Tab
     Click Link    Explore
     Sleep  3
     ${n_tiles}=  Get Element Count    xpath:${TILES_XP}
-    FOR    ${idx}    IN RANGE    1    3
-    # FOR    ${idx}    IN RANGE    1    ${n_tiles}+1
+    FOR    ${idx}    IN RANGE    1    ${n_tiles}+1
         ${app_id}=  Get Element Attribute    xpath:(${TILES_XP})[${idx}]    id
         Log    ${app_id}
         ${card_title}=  Get Text    xpath:(${TILES_XP})[${idx}]/${TITLE_XP}

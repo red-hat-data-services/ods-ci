@@ -183,7 +183,7 @@ Clean Up RHOSAK
   Enter Stream Topics Section
   Delete Stream Topic  topic_to_delete=${topic_to_delete}
   Menu.Navigate To Page    Streams for Apache Kafka   Kafka Instances
-  Wait For HCC Splash Page
+  Run Keyword And Ignore Error    Wait For HCC Splash Page
   Wait Until Page Contains    Create Kafka instance
   Delete Kafka Stream Instance  stream_name=${stream_to_delete}
   Capture Page Screenshot  after deleting_stream.png

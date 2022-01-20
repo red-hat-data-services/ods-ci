@@ -7,6 +7,7 @@ Library          DebugLibrary
 Library          SeleniumLibrary
 Library          JupyterLibrary
 
+
 *** Variables ***
 ${rule_group}=  RHODS-PVC-Usage
 ${alert_90}=  User notebook pvc usage above 90%
@@ -43,12 +44,14 @@ Set Up Alert Test
 
 Clean Up Files And End Web Test
     [Documentation]  We delete the notebook files using the new -and expererimental- "Clean Up User Notebook" because "End Web Test" doesn't work well when disk is 100% filled
-    Open With JupyterLab Menu  File  Close All Tabs
+    Maybe Close Popup
+    Run Keyword And Continue On Failure   Open With JupyterLab Menu   File  Close All Tabs
     Maybe Close Popup
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Delete Folder In User Notebook  ${OCP_ADMIN_USER.USERNAME}  ${TEST_USER.USERNAME}  ods-ci-notebooks-main
+    Sleep  10  reason=Waiting for possible JupyterLab pop-up
     Maybe Close Popup
-    Sleep  5
+    Sleep  10  reason=Waiting for possible JupyterLab pop-up
     Maybe Close Popup
     Common.End Web Test
 

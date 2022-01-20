@@ -8,8 +8,8 @@ APPS_DICT = {
           "badges": [PARTNER_BADGE_TITLE],
           "provider": "by Anaconda",
           "title": "Anaconda Commercial Edition",
-          "description": "Anaconda Commercial Edition is the most popular open source "
-                         "package distribution and management experience, optimized for commercial use."
+          "description": "Anaconda Commercial Edition is a popular open source package "
+                         "distribution and management experience that is optimized for commercial use."
      },
      "watson-studio": {
           "badges": [SELF_BADGE_TITLE],

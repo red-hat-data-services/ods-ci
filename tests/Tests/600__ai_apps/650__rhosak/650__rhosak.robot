@@ -44,28 +44,10 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
   Wait Until Page Contains    Kafka Instances
   Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
 
-Verify User Is Able to Create And Delete a Kafka Stream
-  [Tags]  Sanity
-  ...     ODS-242
-  Enable RHOSAK
-  Verify Service Is Enabled  ${rhosak_displayed_appname}
-  Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link
-  Login to HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
-  Maybe Skip RHOSAK Tour
-  Sleep  5
-  Wait Until Page Contains    Create Kafka instance
-  Create Kafka Stream Instance  stream_name=${stream_name_test}  stream_region=${stream_region_test}  cloud_provider=${cloud_provider_test}
-  Capture Page Screenshot  newly_created_stream.png
-  Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
-  Wait Until Keyword Succeeds    450  1  Check Stream Status  target_status=Ready  target_stream=${stream_name_test}
-  Delete Kafka Stream Instance  stream_name=${stream_name_test}
-  Wait Until Keyword Succeeds    300  1  Page Should Contain    No results found
-  Capture Page Screenshot  after deleting_stream.png
-  OpenShiftCLI.Delete      kind=ConfigMap  name=rhosak-validation-result  namespace=redhat-ods-applications
 
 Verify User Is Able to Produce and Consume Events
   [Tags]  Sanity  Tier2
-  ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239
+  ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239  ODS-242
   [Teardown]  Clean Up RHOSAK    stream_to_delete=${stream_name_test}
   ...                            topic_to_delete=${topic_name_test}
   ...                            sa_clientid_to_delete=${kafka_client_id}

@@ -58,7 +58,8 @@ Verify Explore Tab
     Click Link    Explore
     Sleep  3
     ${n_tiles}=  Get Element Count    xpath:${TILES_XP}
-    FOR    ${idx}    IN RANGE    1    ${n_tiles}+1
+    FOR    ${idx}    IN RANGE    1    3
+    # FOR    ${idx}    IN RANGE    1    ${n_tiles}+1
         ${app_id}=  Get Element Attribute    xpath:(${TILES_XP})[${idx}]    id
         Log    ${app_id}
         ${card_title}=  Get Text    xpath:(${TILES_XP})[${idx}]/${TITLE_XP}
@@ -82,6 +83,14 @@ Verify Explore Tab
         # for each link checks:
         #   - link https status
         #   - link is among the expected ones (add in AppsInfoDic file
+        Click Element  xpath:(${TILES_XP})[${idx}]
+        Wait Until Page Contains Element    xpath://div[contains(@class,'odh-markdown-view')]/h1[text()='${card_title}']
+        ${sidebar_links}=  Get WebElements    xpath://div[contains(@class,'pf-c-drawer__panel-main')]//a
+        FOR    ${s_link}    IN    @{sidebar_links}
+            ${link_text}=  Get Text    ${s_link}
+            ${link_href}=  Get Element Attribute    ${s_link}    href
+            Log    ${link_text}
+            ${link_status}=  Get HTTP Status Code   ${link_href}
+        END
+        Click Button  xpath://button[@aria-label='Close drawer panel']
     END
-
-

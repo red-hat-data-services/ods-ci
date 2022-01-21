@@ -146,7 +146,6 @@ Spawn Notebook With Arguments
             END
          END
          Spawn Notebook
-         Wait Until Element is Visible  id:progress-bar
          Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
          Wait for JupyterLab Splash Screen  timeout=30
          Maybe Close Popup

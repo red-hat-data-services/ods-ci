@@ -17,6 +17,16 @@ JupyterHub Spawner Is Visible
    ${spawner_visible} =  Run Keyword and Return Status  Page Should Contain  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
    [return]  ${spawner_visible}
 
+Wait Until JupyterHub Spawner Is Ready
+   # Container size selector is usually the last element to load in the spawner page
+   # Let's use it to check when the spawner has finished loading.
+   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
+   IF  ${version-check}==True
+      Wait Until Page Contains Element    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+   ELSE
+      Wait Until Page Contains Element    xpath:/html/body/div[1]/form/div/div/div[3]/div[3]/button
+   END
+
 Select Notebook Image
    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
    [Arguments]  ${notebook_image}
@@ -123,28 +133,24 @@ Spawn Notebook With Arguments
    ...              By creating a dictionary beforehand, e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
    [Arguments]  ${retries}=1  ${image}=s2i-generic-data-science-notebook  ${size}=Small  ${spawner_timeout}=600 seconds  &{envs}
    FOR  ${index}  IN RANGE  0  1+${retries}
-      Select Notebook Image  ${image}
-      Select Container Size  ${size}
-      IF  &{envs}
-         Remove All Spawner Environment Variables
-         FOR  ${key}  ${value}  IN  &{envs}[envs]
-            Sleep  1
-            Add Spawner Environment Variable  ${key}  ${value}
+      ${spawner_ready} =    Run Keyword and Return Status    Wait Until JupyterHub Spawner Is Ready
+      IF  ${spawner_ready}==True
+         Select Notebook Image  ${image}
+         Select Container Size  ${size}
+         IF  &{envs}
+            Remove All Spawner Environment Variables
+            FOR  ${key}  ${value}  IN  &{envs}[envs]
+               Sleep  1
+               Add Spawner Environment Variable  ${key}  ${value}
+            END
          END
-      END
-      ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
-      IF  ${version-check}==True
-         Click Button  Start Server
-         Wait Until Page Contains  Starting server
+         Spawn Notebook
+         ${spawn_fail} =  Has Spawn Failed
+         Exit For Loop If  ${spawn_fail} == False
+         Click Element  xpath://span[@id='jupyterhub-logo']
       ELSE
-         Click Button  Start server
-         Wait Until Page Contains  Your server is starting up
+         Click Element  xpath://span[@id='jupyterhub-logo']
       END
-      Wait Until Element is Visible  id:progress-bar
-      Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
-      ${spawn_fail} =  Has Spawn Failed
-      Exit For Loop If  ${spawn_fail} == False
-      Click Element  xpath://span[@id='jupyterhub-logo']
    END
 
 Launch JupyterHub Spawner From Dashboard
@@ -232,11 +238,9 @@ Fix Spawner Status
 User Is Allowed
    JupyterHub Spawner is Visible
    Page Should Not Contain  403 : Forbidden
-   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
-   IF  ${version-check}==True
-      Wait Until Element Is Visible  xpath://div[@class="jsp-spawner__image-options"]
-   ELSE
-      Wait Until Element Is Visible  xpath:/html/body/div[1]/form/div/div/div[2]/div[2]/div[1]
+   ${spawner_ready} =    Run Keyword and Return Status    Wait Until JupyterHub Spawner Is Ready
+   IF  ${spawner_ready}==False
+      Fail    Spawner page was not ready
    END
 
 User Is Not Allowed

@@ -89,8 +89,6 @@ Verify User Is Able to Produce and Consume Events
   ...                                   KAFKA_PASSWORD=${kafka_client_secret}  KAFKA_TOPIC=${topic_name_test}
   ...                                   KAFKA_CONSUMER_GROUP=${consumer_group_test}
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{notebook_envs}
-  Wait for JupyterLab Splash Screen  timeout=60
-  Maybe Select Kernel
   ## clone JL notebooks from git and run
   Clone Git Repository  REPO_URL=${GIT_REPO_NOTEBOOKS}
   Open Consumer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_CONS_FILENAME}

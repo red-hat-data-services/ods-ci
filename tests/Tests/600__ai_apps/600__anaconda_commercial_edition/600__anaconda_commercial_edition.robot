@@ -82,17 +82,6 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Wait Until Page Contains Element  xpath://input[@name="Anaconda Commercial Edition"]
   Wait Until Element Is Enabled    xpath://input[@name="Anaconda Commercial Edition"]   timeout=10
   Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
-  Wait for JupyterLab Splash Screen  timeout=60
-  Maybe Select Kernel
-  Sleep  3
-  Close Other JupyterLab Tabs
-  Capture Page Screenshot  closedtabs.png
-  ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
-  Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
-  Launch a new JupyterLab Document
-  Sleep  3
-  Maybe Select Kernel
-  Close Other JupyterLab Tabs
   Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${token_val_success_msg}
   Capture Page Screenshot  anaconda_token_val_cell.png
   Add and Run JupyterLab Code Cell  !conda install -y numpy

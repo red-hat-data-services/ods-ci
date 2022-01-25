@@ -1,5 +1,4 @@
 *** Settings ***
-Library         SeleniumLibrary
 Library         Collections
 
 *** Keywords ***

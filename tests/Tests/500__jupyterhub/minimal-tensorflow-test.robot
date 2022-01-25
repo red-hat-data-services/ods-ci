@@ -44,24 +44,24 @@ Verify Installed Libraries in Tensorflow
   ...     ODS-207  #Polarion tags
   Run Keyword And Continue On Failure  Run Cell And Check Output  !nvcc --version | grep nvcc:  nvcc: NVIDIA (R) Cuda compiler driver
   Run Keyword And Continue On Failure  Run Cell And Check Output  !nvcc --version | grep "Cuda compilation"  Cuda compilation tools, release 11.0, V11.0.221
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show boto3 | grep Version:  Version: 1.17.11
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show kafka-python | grep Version:  Version: 2.0.2
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show matplotlib | grep Version:  Version: 3.4.1
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show numpy | grep Version:  Version: 1.19.2
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show pandas | grep Version:  Version: 1.2.4
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scikit-learn | grep Version:  Version: 0.24.1
-  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scipy | grep Version:  Version: 1.6.2
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show boto3 | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  1.17
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show kafka-python | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  2.0
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show matplotlib | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  3.4
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show numpy | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  1.19
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show pandas | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  1.2
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scikit-learn | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  0.24
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scipy | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  1.6
   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
   IF  ${version-check}==True
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show jupyterlab | grep Version:  Version: 3.2.4
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show notebook | grep Version:  Version: 6.4.6
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version:  Version: 2.7.0
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorboard | grep Version:  Version: 2.6.0
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show jupyterlab | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  3.2
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show notebook | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  6.4
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  2.7
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorboard | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  2.6
   ELSE
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show jupyterlab | grep Version:  Version: 3.0.16
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show notebook | grep Version:  Version: 6.4.4
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version:  Version: 2.4.1
-    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorboard | grep Version:  Version: 2.4.1
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show jupyterlab | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  3.0
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show notebook | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  6.4
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorflow-gpu | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  2.4
+    Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show tensorboard | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  2.4
   END
 
 

@@ -34,6 +34,11 @@ Can Spawn Notebook
   Fix Spawner Status
   Spawn Notebook With Arguments  image=s2i-minimal-notebook
 
+Verify Installed Libraries in Minimal
+  Python Version Check
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show jupyterlab | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  3.2
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show notebook | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  6.4
+
 Can Launch Python3 Smoke Test Notebook
   [Tags]  ODS-905  ODS-907  ODS-913  ODS-914  ODS-915  ODS-916  ODS-917  ODS-918  ODS-919
   ##################################################

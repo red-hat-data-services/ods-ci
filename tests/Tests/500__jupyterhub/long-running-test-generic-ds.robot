@@ -26,6 +26,19 @@ Launch JupyterLab
   &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{S3-credentials}
 
+Verify Installed Libraries in SDS
+  [Tags]  Sanity
+  Python Version Check
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show boto3 | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  1.17
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show kafka-python | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  2.0
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show matplotlib | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  3.4
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show numpy | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  1.19
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show pandas | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  1.2
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scikit-learn | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  0.24
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show scipy | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  1.6
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show jupyterlab | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  3.2
+  Run Keyword And Continue On Failure  Run Cell And Check Output  !pip show notebook | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  6.4
+
 Long Running Test Case
   Run Repo and Clean  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
   Run Repo and Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb

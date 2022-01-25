@@ -111,7 +111,6 @@ Move To Installed Operator Page Tab in Openshift
     Switch To Administrator Perspective
     Navigate to Installed Operators
     Installed Operators Should Be Open
-    Log To Console   ${namespace}
     Run Keyword If  "${namespace}" == "None"   Select Project By Name  All Projects
     ...         ELSE   Select Project By Name   ${namespace}
     Click On Searched Operator   ${operator_name}
@@ -125,6 +124,7 @@ Create Tabname Instance For Installed Operator
     Move To Installed Operator Page Tab in Openshift    ${operator_name}     ${tab_name}    ${namespace}
     ${is_created} =  Run Keyword and Return Status
     ...                Get WebElement  //table[contains(@class,"ReactVirtualized")]//tr
+    Capture Page Screenshot
     IF  not ${is_created}
         Click Button     Create ${tab_name}
         Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10

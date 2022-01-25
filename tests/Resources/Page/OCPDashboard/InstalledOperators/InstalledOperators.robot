@@ -30,8 +30,8 @@ Is All Projects Selected
 
 Select All Projects
   Click Element  //div[@data-test-id="namespace-bar-dropdown"]/div
-  Wait Until Element is Visible  //a[contains(text(), "All Projects")]
-  Click Element  //a[contains(text(), "All Projects")]
+  Wait Until Element is Visible  //*[contains(text(), "All Projects")]
+  Click Element  //*[contains(text(), "All Projects")]
 
 Search Installed Operator
   [Arguments]  ${operator}
@@ -105,7 +105,8 @@ Is RHODS Version Greater Or Equal Than
     ${comparison} =  GTE  ${ver}  ${target}
     [Return]  ${comparison}
 
-Move To Installed Operator instance
+Move To Installed Operator Page Tab in Openshift
+    [Documentation]   This keyword help move to any tab name present inside any installed operator
     [Arguments]   ${operator_name}     ${tab_name}      ${namespace}
     Switch To Administrator Perspective
     Navigate to Installed Operators
@@ -117,19 +118,51 @@ Move To Installed Operator instance
     Switch To New Tab       ${tab_name}
     sleep    5
 
-Create tabname Instance For Installed Operator
+Create Tabname Instance For Installed Operator
+    [Documentation]   This keyword check and create instance(notebook ,Imagestream etc)
+    ...               for installed operator in openshift if not cretaed
     [Arguments]    ${operator_name}     ${tab_name}     ${namespace}=None
-    Move To Installed Operator instance    ${operator_name}     ${tab_name}    ${namespace}
-    Click Button     Create ${tab_name}
-    Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10
-    Click Button      Create
+    Move To Installed Operator Page Tab in Openshift    ${operator_name}     ${tab_name}    ${namespace}
+    ${is_created} =  Run Keyword and Return Status
+    ...                Get WebElement  //table[contains(@class,"ReactVirtualized")]//tr
+    IF  not ${is_created}
+        Click Button     Create ${tab_name}
+        Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10
+        Click Button      Create
+        Wait Until Element Is Visible    //table[contains(@class,"ReactVirtualized")]//tr     timeout=10
+    END
 
-Delete tabname Instance For Installed Operator
+Delete Tabname Instance For Installed Operator
+    [Documentation]   This keyword delete the instance(notebook ,Imagestream instance etc) created for installed operator in openshift
     [Arguments]    ${operator_name}     ${tab_name}     ${namespace}=None
-    Move To Installed Operator instance    ${operator_name}     ${tab_name}      ${namespace}
+    Move To Installed Operator Page Tab in Openshift    ${operator_name}     ${tab_name}      ${namespace}
     Wait Until Element is Visible          //button[contains(@data-test-id,"kebab")]          timeout=10
     Click Element   //button[contains(@data-test-id,"kebab")]
     Wait Until Element Is Enabled     //button[contains(text(),"Delete ${tab_name}")]
     Click Element   //button[contains(text(),"Delete ${tab_name}")]
     Wait Until Element Is Enabled   //button[contains(text(),"Delete")]
     Click Button    Delete
+
+Check If Operator Is Already Install In Opneshift
+    [Documentation]   This keyword verify if operator is already installed and return the status
+    [Arguments]    ${operator_name}
+    Open Installed Operators Page
+    Search Installed Operator    ${operator_name}
+    ${status}   Is Operator Installed        ${operator_name}
+    Run Keyword If  ${status}   Log To Console    Operator "${operator_name}" is already installed
+    [Return]  ${status}
+
+Check And Install Operator in Openshift
+  [Documentation]   This keyword verify if operator is already installed or not
+  ...               If not installed it matched the no of operator present and installs the operator
+  [Arguments]   ${operator_name}    ${operator_appname}   ${expected_number_operator}=2
+  ${status}      Check If Operator Is Already Install In Opneshift    ${operator_name}
+  IF  not ${status}
+         Open OperatorHub
+         ${actual_no_of_operator}    Get The Number of Operator Available    ${operator_appname}
+         IF  ${actual_no_of_operator} == ${expected_number_operator}
+             Install Operator      ${operator_appname}
+         ELSE
+                  FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Opearatorhub
+         END
+  END

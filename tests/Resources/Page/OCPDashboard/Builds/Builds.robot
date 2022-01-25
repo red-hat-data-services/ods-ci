@@ -31,4 +31,12 @@ Dependent Build should not Present
      Run Keyword IF     not ${isExist}        Log    Build attached to Build config has been deleted
      ...        ELSE    FAIL       Attached Build to Build config is not deleted
 
+Check Image Build Status
+  [Arguments]  ${target_status}     ${notebook_name}
+  ${build_status}=  Get Build Status    namespace=redhat-ods-applications  build_search_term=${notebook_name}
+  Run Keyword If    "${build_status}" == "Failed"
+  ...    Fail  The '${notebook_name}' image build has failed
+  ...  ELSE
+  ...    Should Be Equal    ${build_status}    ${target_status}
+
 

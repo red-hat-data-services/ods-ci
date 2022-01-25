@@ -121,6 +121,7 @@ python3 -m venv ${VENV_ROOT}
 source ${VENV_ROOT}/bin/activate
 
 if [[ ${SKIP_PIP_INSTALL} -eq 0 ]]; then
+  ${VENV_ROOT}/bin/pip install --upgrade pip
   ${VENV_ROOT}/bin/pip install -r requirements.txt
 fi
 

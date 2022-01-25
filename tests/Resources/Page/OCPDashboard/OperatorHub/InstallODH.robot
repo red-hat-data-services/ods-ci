@@ -26,5 +26,3 @@ OperatorHub Should Be Open
 ODH Operator Should Be Installed
     Operator Should Be Installed    Open Data Hub Operator
 
-ODH Operator Should Be Installed
-    Operator Should Be Installed    Open Data Hub Operator

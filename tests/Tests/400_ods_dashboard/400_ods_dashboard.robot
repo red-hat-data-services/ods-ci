@@ -2,6 +2,7 @@
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Library         RequestsLibrary
+Library         ../../../libs/Helpers.py
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 Variables       ../../Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.py
@@ -52,12 +53,18 @@ Verify Resource Link Http status code
 
 Verify Explore Tab
     [Tags]  ODS-488
+    # test setup
+    # check num of cards
+    # check card details
+    # check sidebar deails (titles)
+    # check sidebar links (http status + expected links)
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
     Click Link    Explore
     Sleep  3
     ${n_tiles}=  Get Element Count    xpath:${TILES_XP}
+    #FOR    ${idx}    IN RANGE    1    2+1
     FOR    ${idx}    IN RANGE    1    ${n_tiles}+1
         ${app_id}=  Get Element Attribute    xpath:(${TILES_XP})[${idx}]    id
         Log    ${app_id}
@@ -83,13 +90,46 @@ Verify Explore Tab
         #   - link https status
         #   - link is among the expected ones (add in AppsInfoDic file
         Click Element  xpath:(${TILES_XP})[${idx}]
-        Wait Until Page Contains Element    xpath://div[contains(@class,'odh-markdown-view')]/h1[text()='${card_title}']
-        ${sidebar_links}=  Get WebElements    xpath://div[contains(@class,'pf-c-drawer__panel-main')]//a
-        FOR    ${s_link}    IN    @{sidebar_links}
-            ${link_text}=  Get Text    ${s_link}
-            ${link_href}=  Get Element Attribute    ${s_link}    href
-            Log    ${link_text}
-            ${link_status}=  Get HTTP Status Code   ${link_href}
+        ${sidebar_exists}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-c-drawer__panel-main')]
+        Sleep  1
+        #Wait Until Page Contains Element    xpath://div[contains(@class,'odh-markdown-view')]/h1[text()='${APPS_DICT}[${app_id}][sidebar_h1]']
+        IF    $CMS_BADGE_TITLE in $card_badges_titles
+            Run Keyword And Continue On Failure    Should Be Equal   ${sidebar_exists}  ${FALSE}
+        ELSE
+            Run Keyword And Continue On Failure    Should Be Equal   ${sidebar_exists}  ${TRUE}
         END
-        Click Button  xpath://button[@aria-label='Close drawer panel']
+        IF    ${sidebar_exists} == ${TRUE}
+            ${sidebar_links}=  Get WebElements    xpath://div[contains(@class,'pf-c-drawer__panel-main')]//a
+            ${list_links}=  Create List
+            ${list_textlinks}=  Create List
+            FOR    ${link_idx}    ${s_link}    IN ENUMERATE    @{sidebar_links}
+                ${link_text}=  Get Text    ${s_link}
+                ${link_href}=  Get Element Attribute    ${s_link}    href
+                ${link_status}=  Get HTTP Status Code   ${link_href}
+                ${lt_json_list}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}]
+                # ${lt_json_list}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_text}]
+                IF    "partial-matching" in $lt_json_list
+                     Run Keyword And Continue On Failure  Should Contain    ${link_href}    ${lt_json_list}[1]
+                ELSE
+                    Run Keyword And Continue On Failure  Should Be Equal  ${link_href}  ${lt_json_list}[1]
+                END
+                Append To List    ${list_links}  ${link_href}
+                Append To List    ${list_textlinks}  ${link_text}
+            END
+            Log List    ${list_links}
+            Log List    ${list_textlinks}
+            ${n_links}=  Get Length  ${sidebar_links}
+            ${len_appsdict_links}=  Get Length  ${APPS_DICT}[${app_id}][sidebar_links]
+            Run Keyword And Continue On Failure  Should Be Equal  ${n_links}  ${len_appsdict_links}
+
+
+            ${h1}=  Get Text    xpath://div[contains(@class,'odh-markdown-view')]/h1
+            Run Keyword And Continue On Failure  Should Be Equal  ${h1}  ${APPS_DICT}[${app_id}][sidebar_h1]
+            ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__panel-main')]//div[@class='odh-get-started__header']/h1[contains(@class, 'title')]
+            ${getstarted_provider}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__panel-main')]//div[@class='odh-get-started__header']//span[contains(@class, 'provider')]
+            Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_title}  ${APPS_DICT}[${app_id}][title]
+            Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_provider}  ${APPS_DICT}[${app_id}][provider]
+            Click Button  xpath://button[@aria-label='Close drawer panel']
+            Wait Until Page Does Not Contain Element    xpath://div[contains(@class,'odh-markdown-view')]/h1
+        END
     END

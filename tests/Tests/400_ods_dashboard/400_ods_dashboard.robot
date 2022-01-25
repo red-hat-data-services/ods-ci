@@ -1,7 +1,7 @@
 *** Settings ***
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
-Library         RequestsLibrary
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Library         ../../../libs/Helpers.py
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
@@ -22,15 +22,13 @@ ${IMAGE_XP}=  ${HEADER_XP}/*[contains(@class, 'odh-card__header-fallback-img')]
 *** Keywords ***
 Dashboard Test Setup
   Set Library Search Order  SeleniumLibrary
+  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for RHODS Dashboard to Load
 
 Dashboard Test Teardown
   Close All Browsers
 
-Get HTTP Status Code
-    [Arguments]  ${link_to_check}
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
-    Run Keyword And Continue On Failure  Status Should Be  200
-    [Return]  ${response.status_code}
 
 
 *** Test Cases ***
@@ -47,14 +45,22 @@ Verify Resource Link Http status code
     Log To Console    ${len} Links found\n
     FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
         ${href}=  Get Element Attribute    ${ext_link}    href
-        ${status}=  Get HTTP Status Code   ${href}
+        ${status}=  Check HTTP Status Code   link_to_check=${href}
         Log To Console    ${idx}. ${href} gets status code ${status}
     END
 
+Verify Explore Tab Refactoring
+    [Tags]  ODS-488-ref
+    # test setup
+    Click Link    Explore
+    Sleep  3
+    Check Number of Cards
+    Check Cards Details
+
 Verify Explore Tab
     [Tags]  ODS-488
-    # test setup
-    # check num of cards
+    # test setup X
+    # check num of cards X
     # check card details
     # check sidebar deails (titles)
     # check sidebar links (http status + expected links)
@@ -133,3 +139,4 @@ Verify Explore Tab
             Wait Until Page Does Not Contain Element    xpath://div[contains(@class,'odh-markdown-view')]/h1
         END
     END
+

@@ -93,3 +93,128 @@ Go To RHODS Dashboard
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
 
+Check HTTP Status Code
+    [Arguments]  ${link_to_check}  ${expected}=200
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
+    Run Keyword And Continue On Failure  Status Should Be  ${expected}
+    [Return]  ${response.status_code}
+
+Get App ID From Card
+    [Arguments]  ${card_locator}
+    ${id}=  Get Element Attribute    xpath:${card_locator}    id
+    [Return]  ${id}
+
+Check Number of Cards
+    ${N_TILES}=  Get Element Count    xpath:${TILES_XP}
+    Set Suite Variable  ${N_TILES}
+    ${expected_n}=  Get Length    ${APPS_DICT}
+    Run Keyword And Continue On Failure    Should Be Equal  ${N_TILES}  ${expected_n}
+
+Get Card Texts
+    [Arguments]  ${card_locator}
+    ${title}=  Get Text    xpath:${card_locator}/${TITLE_XP}
+    ${provider}=  Get Text    xpath:${card_locator}/${PROVIDER_XP}
+    ${desc}=  Get Text    xpath:${card_locator}/${DESCR_XP}
+    [Return]  ${title}  ${provider}  ${desc}
+
+Check Card Texts
+    [Arguments]  ${card_locator}  ${app_id}
+    ${card_title}  ${card_provider}  ${card_desc}=  Get Card Texts  card_locator=${card_locator}
+    Run Keyword And Continue On Failure  Should Be Equal   ${card_title}  ${APPS_DICT}[${app_id}][title]
+    Run Keyword And Continue On Failure  Should Be Equal   ${card_provider}  ${APPS_DICT}[${app_id}][provider]
+    Run Keyword And Continue On Failure  Should Be Equal   ${card_desc}  ${APPS_DICT}[${app_id}][description]
+
+Get Card Badges Titles
+    [Arguments]  ${card_locator}
+    ${badges}=  Get WebElements    xpath:${card_locator}/${BADGES_XP}
+    ${badges_titles}=  Create List
+    FOR    ${cb}    IN    @{badges}
+        ${btitle}=  Get Text   ${cb}
+        Append To List    ${badges_titles}  ${btitle}
+    END
+    [Return]  ${badges_titles}
+
+Check Card Badges And Return Titles
+    [Arguments]  ${card_locator}  ${app_id}
+    ${card_badges_titles}=  Get Card Badges Titles  card_locator=${card_locator}
+    Run Keyword And Continue On Failure  Lists Should Be Equal  ${card_badges_titles}  ${APPS_DICT}[${app_id}][badges]
+    Run Keyword If    $RH_BADGE_TITLE in $card_badges_titles
+    ...    Run Keyword And Continue On Failure  Page Should Contain Element    xpath:${card_locator}/${OFFICIAL_BADGE_XP}
+    [Return]  ${card_badges_titles}
+
+Open Get Started Sidebar And Return Status
+    [Arguments]  ${card_locator}
+    Click Element  xpath:${card_locator}
+    ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-c-drawer__panel-main')]
+    Sleep  1
+    [Return]  ${status}
+    #Wait Until Page Contains Element    xpath://div[contains(@class,'odh-markdown-view')]/h1[text()='${APPS_DICT}[${app_id}][sidebar_h1]']
+
+Close Get Started Sidebar
+    Click Button  xpath://button[@aria-label='Close drawer panel']
+    Wait Until Page Does Not Contain Element    xpath://div[contains(@class,'odh-markdown-view')]/h1
+
+Check Get Started Sidebar Status
+    [Arguments]  ${sidebar_status}  ${badges_titles}
+    IF    $CMS_BADGE_TITLE in $badges_titles
+        Run Keyword And Continue On Failure    Should Be Equal   ${sidebar_status}  ${FALSE}
+    ELSE
+        Run Keyword And Continue On Failure    Should Be Equal   ${sidebar_status}  ${TRUE}
+    END
+
+Get Sidebar Links
+    ${link_elements}=  Get WebElements    xpath://div[contains(@class,'pf-c-drawer__panel-main')]//a
+    [Return]  ${link_elements}
+
+Check Sidebar Links
+    [Arguments]  ${app_id}
+    ${sidebar_links}=  Get Sidebar Links
+    ${n_links}=  Get Length  ${sidebar_links}
+    ${expected_n_links}=  Get Length  ${APPS_DICT}[${app_id}][sidebar_links]
+    Run Keyword And Continue On Failure  Should Be Equal  ${n_links}  ${expected_n_links}
+    ${list_links}=  Create List
+    ${list_textlinks}=  Create List
+    FOR    ${link_idx}    ${s_link}    IN ENUMERATE    @{sidebar_links}
+        ${link_text}=  Get Text    ${s_link}
+        ${link_href}=  Get Element Attribute    ${s_link}    href
+        ${link_status}=  Check HTTP Status Code   link_to_check=${link_href}  expected=200
+        ${lt_json_list}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}]
+        IF    "partial-matching" in $lt_json_list
+             Run Keyword And Continue On Failure  Should Contain    ${link_href}    ${lt_json_list}[1]
+        ELSE
+            Run Keyword And Continue On Failure  Should Be Equal  ${link_href}  ${lt_json_list}[1]
+        END
+        Append To List    ${list_links}  ${link_href}
+        Append To List    ${list_textlinks}  ${link_text}
+    END
+    Log List    ${list_links}
+    Log List    ${list_textlinks}
+
+Check Sidebar Header Text
+    [Arguments]  ${app_id}
+    ${h1}=  Get Text    xpath://div[contains(@class,'odh-markdown-view')]/h1
+    Run Keyword And Continue On Failure  Should Be Equal  ${h1}  ${APPS_DICT}[${app_id}][sidebar_h1]
+    ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__panel-main')]//div[@class='odh-get-started__header']/h1[contains(@class, 'title')]
+    ${getstarted_provider}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__panel-main')]//div[@class='odh-get-started__header']//span[contains(@class, 'provider')]
+    Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_title}  ${APPS_DICT}[${app_id}][title]
+    Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_provider}  ${APPS_DICT}[${app_id}][provider]
+
+Check Get Started Sidebar
+    [Arguments]  ${card_locator}  ${card_badges}  ${app_id}
+    ${sidebar_exists}=  Open Get Started Sidebar And Return Status  card_locator=${card_locator}
+    Check Get Started Sidebar Status   sidebar_status=${sidebar_exists}   badges_titles=${card_badges}
+    IF    ${sidebar_exists} == ${TRUE}
+        Check Sidebar Links  app_id=${app_id}
+        Check Sidebar Header Text  app_id=${app_id}
+        Close Get Started Sidebar
+    END
+
+Check Cards Details
+   FOR    ${idx}    IN RANGE    1    ${N_TILES}+1
+        ${card_xp}=  Set Variable  (${TILES_XP})[${idx}]
+        ${application_id}=  Get App ID From Card  card_locator=${card_xp}
+        Log    ${application_id}
+        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}
+        ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}
+        Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}
+    END

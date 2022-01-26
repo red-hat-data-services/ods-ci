@@ -1,4 +1,5 @@
 *** Settings ***
-Resource  ODHDashboard.robot
+Resource   ODHDashboard.robot
 Variables  AppsInfoDictionary.py
 Library    RequestsLibrary
+Library    SeleniumLibrary

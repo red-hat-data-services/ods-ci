@@ -6,6 +6,16 @@ Library       JupyterLibrary
 ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}                 //*[@class="pf-c-drawer__panel-main"]//div[@class="odh-get-started__header"]/h1
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
+${TILES_XP}=  //article[contains(@class, 'pf-c-card')]
+${HEADER_XP}=  div[@class='pf-c-card__header']
+${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
+${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
+${DESCR_XP}=  div[@class='pf-c-card__body']
+${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
+${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]
+${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
+${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
+
 
 *** Keywords ***
 Authorize rhods-dashboard service account
@@ -148,7 +158,6 @@ Open Get Started Sidebar And Return Status
     ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-c-drawer__panel-main')]
     Sleep  1
     [Return]  ${status}
-    #Wait Until Page Contains Element    xpath://div[contains(@class,'odh-markdown-view')]/h1[text()='${APPS_DICT}[${app_id}][sidebar_h1]']
 
 Close Get Started Sidebar
     Click Button  xpath://button[@aria-label='Close drawer panel']
@@ -209,6 +218,20 @@ Check Get Started Sidebar
         Close Get Started Sidebar
     END
 
+Get Image Name
+    [Arguments]  ${card_locator}
+    ${src}=  Get Element Attribute    xpath:${card_locator}/${IMAGE_XP}  src
+    ${image_name}=  Fetch From Right    ${src}    ${ODH_DASHBOARD_URL}
+    [Return]  ${src}  ${image_name}
+
+Check Card Image
+    [Arguments]  ${card_locator}  ${app_id}
+    ${src}  ${image_name}=  Get Image Name  card_locator=${card_locator}
+    ${expected_image}=  Set Variable  ${APPS_DICT}[${app_id}][image]
+    Run Keyword And Continue On Failure    Should Be Equal    ${image_name}    ${expected_image}
+    Run Keyword And Continue On Failure    Page Should Not Contain Element    xpath:${card_locator}/${FALLBK_IMAGE_XP}
+
+
 Check Cards Details
    FOR    ${idx}    IN RANGE    1    ${N_TILES}+1
         ${card_xp}=  Set Variable  (${TILES_XP})[${idx}]
@@ -216,5 +239,6 @@ Check Cards Details
         Log    ${application_id}
         Check Card Texts  card_locator=${card_xp}  app_id=${application_id}
         ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}
+        Check Card Image  card_locator=${card_xp}  app_id=${application_id}
         Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}
     END

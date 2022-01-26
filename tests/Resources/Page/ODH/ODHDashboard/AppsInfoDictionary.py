@@ -12,7 +12,7 @@ APPS_DICT = {
           "title": "Anaconda Commercial Edition",
           "description": "Anaconda Commercial Edition is a popular open source package "
                          "distribution and management experience that is optimized for commercial use.",
-          "image": "images/anaconda-ce.svg",
+          "image": "/images/anaconda-ce.svg",
           "sidebar_h1": "Anaconda Commercial Edition",
           "sidebar_links":  [  # link_title, link_url, partial_matching (Optional, True/False)
                ("Get started", "https://anaconda.cloud/register", "partial-matching"),
@@ -27,7 +27,7 @@ APPS_DICT = {
           "title": "IBM Watson Studio",
           "description": "IBM Watson Studio is a platform for embedding AI and machine "
                          "learning into your business and creating custom models with your own data.",
-          "image":  "images/ibm.svg",
+          "image":  "/images/ibm.svg",
           "sidebar_h1": "IBM Watson Studio",
           "sidebar_links":  [
                ("Get started", "https://developer.ibm.com/series/cloud-pak-for-data-learning-path"),
@@ -41,7 +41,7 @@ APPS_DICT = {
           "title": "Intel® oneAPI AI Analytics Toolkit Container",
           "description": "The AI Kit is a set of AI software tools to accelerate "
                          "end-to-end data science and analytics pipelines on Intel® architectures.",
-          "image": "images/oneapi.png",
+          "image": "/images/oneapi.png",
           "sidebar_h1": "AI Kit",
           "sidebar_links": [
                ("Get started", "https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html"),
@@ -58,7 +58,7 @@ APPS_DICT = {
           "title": "JupyterHub",
           "description": "JupyterHub is a multi-user version of the notebook designed "
                          "for companies, classrooms, and research labs.",
-          "image": "images/jupyterhub.svg",
+          "image": "/images/jupyterhub.svg",
           "sidebar_h1": "JupyterHub",
           "sidebar_links": [
                ("Get started", "https://jupyterhub.readthedocs.io/en/stable/getting-started/index.html"),
@@ -80,7 +80,7 @@ APPS_DICT = {
           "title": "OpenShift API Management",
           "description": "OpenShift API Management is a service that accelerates time-to-value "
                          "and reduces the cost of delivering API-first, microservices-based applications.",
-          "image": "images/red-hat.svg",
+          "image": "/images/red-hat.svg",
           "sidebar_h1": "Red Hat OpenShift API Management",
           "sidebar_links": [
                ("Get started", "https://console.redhat.com/openshift/details/", "partial-matching"),
@@ -94,7 +94,7 @@ APPS_DICT = {
           "title": "OpenShift Streams for Apache Kafka",
           "description": "OpenShift Streams for Apache Kafka is a service for streaming data "
                          "that reduces the cost and complexity of delivering real-time applications.",
-          "image": "images/red-hat.svg",
+          "image": "/images/red-hat.svg",
           "sidebar_h1": "Red Hat OpenShift Streams for Apache Kafka",
           "sidebar_links": [
                ("Get started", "https://cloud.redhat.com/beta/application-services/streams/kafkas"),
@@ -108,7 +108,7 @@ APPS_DICT = {
           "title": "OpenVINO",
           "description": "OpenVINO is an open source toolkit to help optimize deep "
                          "learning performance and deploy using an inference engine onto Intel hardware.",
-          "image": "images/openvino.svg",
+          "image": "/images/openvino.svg",
           "sidebar_h1": "OpenVINO Toolkit",
           "sidebar_links": [
                ("Get started", "https://github.com/openvinotoolkit/openvino_notebooks"),
@@ -125,7 +125,7 @@ APPS_DICT = {
                          "It provides industry-leading data versioning, "
                          "pipelines, and lineage for data science teams to automate "
                          "the machine learning lifecycle and optimize machine learning operations (MLOps).",
-          "image": "images/pachyderm.svg",
+          "image": "/images/pachyderm.svg",
           "sidebar_h1": "Pachyderm",
           "sidebar_links": [
                ("Get started", "https://marketplace.redhat.com/en-us/products/pachyderm"),
@@ -147,7 +147,7 @@ APPS_DICT = {
           "title": "PerceptiLabs",
           "description": "PerceptiLabs is a visual modeling tool for editing, managing, "
                          "and monitoring your machine learning models.",
-          "image": "images/percepti-labs.svg",
+          "image": "/images/percepti-labs.svg",
           "sidebar_h1": "PerceptiLabs",
           "sidebar_links": []
 
@@ -158,7 +158,7 @@ APPS_DICT = {
           "title": "Seldon Deploy",
           "description": "Seldon Deploy is a set of tools to simplify and accelerate "
                          "the process of deploying and managing your machine learning models.",
-          "image": "images/seldon.svg",
+          "image": "/images/seldon.svg",
           "sidebar_h1": "Seldon Deploy",
           "sidebar_links": [
                ("Get started", "https://deploy.seldon.io/en/latest/contents/getting-started/"),
@@ -176,7 +176,7 @@ APPS_DICT = {
           "title": "Starburst Galaxy",
           "description": "Starburst Galaxy is a fully managed service to run high-performance "
                          "queries across your various data sources using SQL.",
-          "image": "images/starburst.svg",
+          "image": "/images/starburst.svg",
           "sidebar_h1": "Starburst Galaxy",
           "sidebar_links": [
                ("Get started", "https://www.starburst.io/platform/starburst-galaxy/"),

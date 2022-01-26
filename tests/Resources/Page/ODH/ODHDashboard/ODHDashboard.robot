@@ -109,6 +109,9 @@ Check HTTP Status Code
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 
+Wait Until Cards Are Loaded
+    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-explore-apps__gallery')]
+
 Get App ID From Card
     [Arguments]  ${card_locator}
     ${id}=  Get Element Attribute    xpath:${card_locator}    id

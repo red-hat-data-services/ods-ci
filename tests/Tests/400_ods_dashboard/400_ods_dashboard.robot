@@ -36,7 +36,7 @@ Verify Explore Tab Refactoring
     [Tags]  Sanity
     ...     ODS-488
     Click Link    Explore
-    Sleep  3
+    Wait Until Cards Are Loaded
     Check Number of Cards
     Check Cards Details
 

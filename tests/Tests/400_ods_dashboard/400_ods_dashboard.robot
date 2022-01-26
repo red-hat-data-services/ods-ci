@@ -33,7 +33,7 @@ Verify Resource Link Http status code
     END
 
 Verify Explore Tab Refactoring
-    [Tags]  ODS-488-ref
+    [Tags]  ODS-488
     Click Link    Explore
     Sleep  3
     Check Number of Cards

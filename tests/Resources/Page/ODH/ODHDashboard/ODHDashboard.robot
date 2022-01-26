@@ -87,3 +87,9 @@ Verify Service Provides "Get Started" Button In The Explore Page
   Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10   error=${app_name} does not have sidebar with information in the Explore page of ODS Dashboard
   Page Should Contain Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   message=${app_name} does not have a "Get started" button in ODS Dashboard
 
+Go To RHODS Dashboard
+  [Documentation]   Go to RHOODS dashboard>login  and wait for it to load
+  Go To  ${ODH_DASHBOARD_URL}
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for RHODS Dashboard to Load
+

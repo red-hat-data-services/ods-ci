@@ -3,6 +3,7 @@ Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource        ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource        ../../../Resources/Page/ODH/AiApps/AiApps.resource
 Library         SeleniumLibrary
 Library         OpenShiftCLI
 Suite Setup     Intel_Aikit Suite Setup
@@ -29,7 +30,8 @@ Verify Inetl AIKIT Operator Can Be Installed Using OpenShift Console
    ...              Check and Launch AIKIT notebook image from RHODS dashboard
    Check And Install Operator in Openshift    ${intel_aikit_container_name}    ${intel_aikit_appname}
    Create Tabname Instance For Installed Operator        ${intel_aikit_operator_name}      AIKitContainer    redhat-ods-applications
-   Verify If Intel AIKIT Service is Enabled in RHODS Dashboard
+   Go To RHODS Dashboard
+   Verify Service Is Enabled          ${intel_aikit_container_name}
    Verify JupyterHub Can Spawn AIKIT Notebook
    [Teardown]   Uninstall AIKIT Operator
 
@@ -39,23 +41,3 @@ Intel_Aikit Suite Setup
 
 Intel_Aikit Suite Teardown
   Close All Browsers
-
-Verify If Intel AIKIT Service is Enabled in RHODS Dashboard
-    Go To  ${ODH_DASHBOARD_URL}
-    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
-    Verify Service Is Enabled          ${intel_aikit_container_name}
-
-Uninstall AIKIT Operator
-    Go To  ${OCP_CONSOLE_URL}
-    Maybe Skip Tour
-    Delete Tabname Instance For Installed Operator      ${intel_aikit_operator_name}      AIKitContainer    redhat-ods-applications
-    Uninstall Operator       ${intel_aikit_operator_name}
-    OpenShiftCLI.Delete      kind=ImageStream    namespace=redhat-ods-applications  label_selector=opendatahub.io/notebook-image=true  field_selector=metadata.name==oneapi-aikit
-
-Verify JupyterHub Can Spawn AIKIT Notebook
-    Launch JupyterHub Spawner From Dashboard
-    Wait Until Page Contains Element   xpath://input[@name="oneAPI AI Analytics Toolkit"]
-    Wait Until Element Is Enabled     xpath://input[@name="oneAPI AI Analytics Toolkit"]  timeout=10
-    Spawn Notebook With Arguments  image=oneapi-aikit
-    Fix Spawner Status

@@ -39,12 +39,3 @@ Verify Explore Tab Refactoring
     Wait Until Cards Are Loaded
     Check Number of Cards
     Check Cards Details
-
-Verify Json
-   [Tags]  json
-   ${link_idx}=  Set Variable  0
-   ${link_idx_str}=  Convert To String    ${link_idx}
-   ${tmp}=  Run Keyword and Continue On Failure  Set Variable  ${APPS_DICT}[anaconda-ce][sidebar_links][${link_idx_str}]
-   ${tmp}=  Run Keyword and Continue On Failure  Set Variable  ${APPS_DICT}[anaconda-ce][sidebar_links]['${link_idx}']
-   ${tmp}=  Run Keyword and Continue On Failure  Set Variable  ${APPS_DICT}[anaconda-ce][sidebar_links]["${link_idx}"]
-

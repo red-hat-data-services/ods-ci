@@ -322,3 +322,23 @@ Run Current JupyterLab Code Cell MOD
     ${run icon} =    Get JupyterLab Icon XPath    run
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]/div[1]//${run icon}
     Sleep    0.5s
+
+Wait Until JupyterLab Code Cell Is Not Active In a Given Tab
+  [Documentation]  Waits until the current cell no longer has an active prompt "[*]:".
+  ...              This assumes that there is only one cell currently active and it is the currently selected cell
+  ...              It works when there are multiple notebook tabs opened
+  [Arguments]  ${tab_id_to_wait}  ${timeout}=120seconds
+  Wait Until Element Is Not Visible  //div[@aria-labelledby="${tab_id_to_wait}"]/div[@aria-label="notebook content"]/div[1]/div[contains(@class, p-Cell-inputWrapper)]/div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]   ${timeout}
+
+Get Selected Tab ID
+  ${active-nb-tab} =    Get WebElement    xpath:${JL_TABBAR_SELECTED_XPATH}
+  ${tab-id} =    Get Element Attribute    ${active-nb-tab}    id
+  [Return]  ${tab-id}
+
+Get JupyterLab Code Output In a Given Tab
+   [Arguments]  ${tab_id_to_read}
+   ${outputtext}=  Get Text  (//div[@aria-labelledby="${tab_id_to_read}"]/div[@aria-label="notebook content"]/div[1]/div[contains(@class, jp-Cell-outputWrapper)]/div[contains(@class,"jp-Cell-outputArea")]//div[contains(@class,"jp-RenderedText")])[last()]
+   [Return]  ${outputtext}
+
+Select ${filename} Tab
+  Click Element    xpath:${JL_TABBAR_CONTENT_XPATH}/li/div[.="${filename}"]

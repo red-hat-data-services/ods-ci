@@ -38,16 +38,6 @@ Can Spawn Notebook
 
 Can Run Flask Test Notebook
   [Tags]  Tier2
-
-  Wait for JupyterLab Splash Screen  timeout=30
-
-  Maybe Close Popup
-  ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
-  Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
-  Launch a new JupyterLab Document
-
-  Close Other JupyterLab Tabs
-
   ##################################################
   # Git clone repo and run existing notebook
   ##################################################

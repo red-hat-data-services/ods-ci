@@ -36,19 +36,6 @@ Can Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  ODS-905  ODS-907  ODS-913  ODS-914  ODS-915  ODS-916  ODS-917  ODS-918  ODS-919
-
-
-  Wait for JupyterLab Splash Screen  timeout=30
-
-
-  Maybe Close Popup
-
-  ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
-  Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
-  Launch a new JupyterLab Document
-
-  Close Other JupyterLab Tabs
-
   ##################################################
   # Manual Notebook Input
   ##################################################

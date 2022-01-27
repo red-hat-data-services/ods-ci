@@ -1,6 +1,7 @@
 *** Settings ***
 Resource      ../../../Page/Components/Components.resource
 Library       JupyterLibrary
+Resource       ../../../Common.robot
 
 *** Variables ***
 ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}                 //*[@class="pf-c-drawer__panel-main"]//div[@class="odh-get-started__header"]/h1
@@ -15,6 +16,7 @@ ${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class
 ${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
+${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
 
 
 *** Keywords ***
@@ -109,6 +111,11 @@ Check HTTP Status Code
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 
+Load App Info JSON File
+    ${APPS_DICT}=  Load Json File  ${APPS_DICT_PATH}
+    ${APPS_DICT}=  Set Variable  ${APPS_DICT}[apps]
+    Set Suite Variable  ${APPS_DICT}
+
 Wait Until Cards Are Loaded
     Wait Until Page Contains Element    xpath://div[contains(@class,'odh-explore-apps__gallery')]
 
@@ -187,15 +194,19 @@ Check Sidebar Links
     ${list_links}=  Create List
     ${list_textlinks}=  Create List
     FOR    ${link_idx}    ${s_link}    IN ENUMERATE    @{sidebar_links}
+        ${link_idx}=  Convert To String    ${link_idx}
         ${link_text}=  Get Text    ${s_link}
         ${link_href}=  Get Element Attribute    ${s_link}    href
         ${link_status}=  Check HTTP Status Code   link_to_check=${link_href}  expected=200
-        ${lt_json_list}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}]
-        IF    "partial-matching" in $lt_json_list
-             Run Keyword And Continue On Failure  Should Contain    ${link_href}    ${lt_json_list}[1]
+        ${expected_link}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}][url]
+        ${expected_text}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}][text]
+        ${lt_json_list}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}][matching]
+        IF    $lt_json_list == "partial"
+             Run Keyword And Continue On Failure  Should Contain    ${link_href}  ${expected_link}
         ELSE
-            Run Keyword And Continue On Failure  Should Be Equal  ${link_href}  ${lt_json_list}[1]
+            Run Keyword And Continue On Failure  Should Be Equal  ${link_href}  ${expected_link}
         END
+        Run Keyword And Continue On Failure  Should Be Equal  ${link_text}  ${expected_text}
         Append To List    ${list_links}  ${link_href}
         Append To List    ${list_textlinks}  ${link_text}
     END

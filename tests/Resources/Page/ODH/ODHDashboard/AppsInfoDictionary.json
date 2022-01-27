@@ -1,0 +1,388 @@
+{
+   "apps": {
+     "anaconda-ce": {
+          "badges": ["Partner managed"],
+          "provider": "by Anaconda",
+          "title": "Anaconda Commercial Edition",
+          "description": "Anaconda Commercial Edition is a popular open source package distribution and management experience that is optimized for commercial use.",
+          "image": "/images/anaconda-ce.svg",
+          "sidebar_h1": "Anaconda Commercial Edition",
+          "sidebar_links":  {
+               "0": {
+                    "text": "Get started",
+                    "url": "https://anaconda.cloud/register",
+                    "matching": "partial"
+               },
+              "1": {
+                    "text": "https://www.anaconda.com/products/commercial-edition",
+                    "url": "https://www.anaconda.com/products/commercial-edition",
+                    "matching": "full"
+               },
+              "2": {
+                    "text": "https://anaconda.cloud/register",
+                    "url": "https://anaconda.cloud/register?utm_source=redhat-rhods-summit",
+                    "matching": "full"
+               }
+          }
+
+     },
+     "watson-studio": {
+          "badges": ["Self-managed"],
+          "provider": "by IBM",
+          "title": "IBM Watson Studio",
+          "description": "IBM Watson Studio is a platform for embedding AI and machine learning into your business and creating custom models with your own data.",
+          "image":  "/images/ibm.svg",
+          "sidebar_h1": "IBM Watson Studio",
+          "sidebar_links":  {
+              "0": {
+                    "text": "Get started",
+                    "url": "https://developer.ibm.com/series/cloud-pak-for-data-learning-path",
+                    "matching": "full"
+               },
+              "1": {
+                    "text": "https://marketplace.redhat.com/en-us/products/ibm-watson-studio",
+                    "url": "https://marketplace.redhat.com/en-us/products/ibm-watson-studio",
+                    "matching": "full"
+               },
+              "2": {
+                    "text": "https://marketplace.redhat.com/en-us/documentation/operators",
+                    "url": "https://marketplace.redhat.com/en-us/documentation/operators",
+                    "matching": "full"
+               }
+          }
+     },
+     "aikit": {
+          "badges": ["Self-managed"],
+          "provider": "by Intel®",
+          "title": "Intel® oneAPI AI Analytics Toolkit Container",
+          "description": "The AI Kit is a set of AI software tools to accelerate end-to-end data science and analytics pipelines on Intel® architectures.",
+          "image": "/images/oneapi.png",
+          "sidebar_h1": "AI Kit",
+          "sidebar_links":  {
+
+                "0": {
+                      "text": "Get started",
+                      "url": "https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html",
+                      "matching": "full"
+                },
+                "1": {
+                      "text": "Intel® oneAPI AI Analytics Toolkit",
+                      "url": "https://software.intel.com/content/www/us/en/develop/tools/oneapi/ai-analytics-toolkit.html#gs.2zxkin",
+                      "matching": "full"
+                },
+                "2": {
+                      "text": "https://marketplace.redhat.com/en-us/products/ai-analytics-toolkit",
+                      "url": "https://marketplace.redhat.com/en-us/products/ai-analytics-toolkit",
+                      "matching": "full"
+                },
+                "3": {
+                      "text": "https://marketplace.redhat.com/en-us/documentation/operators",
+                      "url": "https://marketplace.redhat.com/en-us/documentation/operators",
+                      "matching": "full"
+                   },
+                "4": {
+                      "text": "AI Analytics Toolkit Website",
+                      "url": "https://software.intel.com/oneapi/ai-kit",
+                      "matching": "full"
+                     },
+                "5": {
+                      "text": "AI Analytics Toolkit Code Samples",
+                      "url": "https://github.com/oneapi-src/oneAPI-samples/tree/master/AI-and-Analytics",
+                      "matching": "full"
+                }
+            }
+     },
+     "jupyterhub": {
+          "badges": ["Red Hat managed"],
+          "provider": "by Jupyter",
+          "title": "JupyterHub",
+          "description": "JupyterHub is a multi-user version of the notebook designed for companies, classrooms, and research labs.",
+          "image": "/images/jupyterhub.svg",
+          "sidebar_h1": "JupyterHub",
+          "sidebar_links": {
+
+                "0": {
+                      "text": "Get started",
+                      "url": "https://jupyterhub.readthedocs.io/en/stable/getting-started/index.html",
+                      "matching": "full"
+                },
+                "1": {
+                      "text": "Python",
+                      "url": "https://www.python.org/downloads/",
+                      "matching": ""
+                },
+                "2": {
+                      "text": "pip",
+                      "url": "https://pip.pypa.io/en/stable/",
+                      "matching": ""
+                },
+                "3": {
+                      "text": "conda",
+                      "url": "https://conda.io/docs/get-started.html",
+                      "matching": ""
+                },
+                "4": {
+                      "text": "nodejs/npm",
+                      "url": "https://www.npmjs.com/",
+                      "matching": ""
+                },
+                "5": {
+                      "text": "Install nodejs/npm",
+                      "url": "https://docs.npmjs.com/getting-started/installing-node",
+                      "matching": ""
+                },
+                "6": {
+                      "text": "nodejs/npm",
+                      "url": "https://docs.npmjs.com/getting-started/installing-node",
+                      "matching": ""
+                },
+                "7": {
+                      "text": "pluggable authentication module (PAM)",
+                      "url": "https://en.wikipedia.org/wiki/Pluggable_authentication_module",
+                      "matching": ""
+                },
+                "8": {
+                      "text": "default Authenticator",
+                      "url": "getting-started/authenticators-users-basics.md",
+                      "matching": "partial"
+                },
+                "9": {
+                      "text": "Jupyter Notebook",
+                      "url": "https://jupyter.readthedocs.io/en/latest/install.html",
+                      "matching": ""
+                },
+                "10": {
+                      "text": "wiki",
+                      "url": "https://github.com/jupyterhub/jupyterhub/wiki/Using-sudo-to-run-JupyterHub-without-root-privileges",
+                      "matching": ""
+                }
+          }
+     },
+     "rhoam": {
+          "badges": ["Red Hat managed"],
+          "provider": "by Red Hat",
+          "title": "OpenShift API Management",
+          "description": "OpenShift API Management is a service that accelerates time-to-value and reduces the cost of delivering API-first, microservices-based applications.",
+          "image": "/images/red-hat.svg",
+          "sidebar_h1": "Red Hat OpenShift API Management",
+          "sidebar_links": {
+
+                "0": {
+                      "text": "Get started",
+                      "url": "https://console.redhat.com/openshift/details/",
+                      "matching": "partial"
+                },
+                "1": {
+                      "text": "https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-api-management",
+                      "url": "https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-api-management",
+                      "matching": ""
+                },
+                "2": {
+                      "text": "https://access.redhat.com/documentation/en-us/red_hat_openshift_api_management",
+                      "url": "https://access.redhat.com/documentation/en-us/red_hat_openshift_api_management",
+                      "matching": ""
+                }
+            }
+      },
+     "rhosak": {
+          "badges": ["Red Hat managed"],
+          "provider": "by Red Hat",
+          "title": "OpenShift Streams for Apache Kafka",
+          "description": "OpenShift Streams for Apache Kafka is a service for streaming data that reduces the cost and complexity of delivering real-time applications.",
+          "image": "/images/red-hat.svg",
+          "sidebar_h1": "Red Hat OpenShift Streams for Apache Kafka",
+          "sidebar_links": {
+                "0": {
+                      "text": "Get started",
+                      "url": "https://cloud.redhat.com/beta/application-services/streams/kafkas",
+                      "matching": ""
+                },
+                "1": {
+                      "text": "https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka",
+                      "url": "https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka",
+                      "matching": ""
+                },
+                "2": {
+                      "text": "https://cloud.redhat.com/application-services/streams/kafkas",
+                      "url": "https://cloud.redhat.com/beta/application-services/streams/kafkas",
+                      "matching": ""
+                }
+            }
+     },
+     "openvino": {
+          "badges": ["Self-managed"],
+          "provider": "by Intel",
+          "title": "OpenVINO",
+          "description": "OpenVINO is an open source toolkit to help optimize deep learning performance and deploy using an inference engine onto Intel hardware.",
+          "image": "/images/openvino.svg",
+          "sidebar_h1": "OpenVINO Toolkit",
+          "sidebar_links": {
+                "0": {
+                      "text": "Get started",
+                      "url": "https://github.com/openvinotoolkit/openvino_notebooks",
+                      "matching": ""
+                },
+                "1": {
+                      "text": "OpenVINO Toolkit",
+                      "url": "https://software.intel.com/content/www/us/en/develop/tools/openvino-toolkit.html",
+                      "matching": ""
+                },
+                "2": {
+                      "text": "https://marketplace.redhat.com/en-us/products/openvino",
+                      "url": "https://marketplace.redhat.com/en-us/products/openvino",
+                      "matching": ""
+                },
+                "3": {
+                      "text": "https://marketplace.redhat.com/en-us/documentation/operators",
+                      "url": "https://marketplace.redhat.com/en-us/documentation/operators",
+                      "matching": ""
+                }
+            }
+     },
+     "pachyderm": {
+          "badges": ["Self-managed"],
+          "provider": "by Pachyderm",
+          "title": "Pachyderm",
+          "description": "Pachyderm is the data foundation for machine learning. It provides industry-leading data versioning, pipelines, and lineage for data science teams to automate the machine learning lifecycle and optimize machine learning operations (MLOps).",
+          "image": "/images/pachyderm.svg",
+          "sidebar_h1": "Pachyderm",
+          "sidebar_links": {
+                "0": {
+                      "text": "Get started",
+                      "url": "https://marketplace.redhat.com/en-us/products/pachyderm",
+                      "matching": ""
+                },
+                "1": {
+                      "text": "Pachyderm",
+                      "url": "https://www.pachyderm.com/",
+                      "matching": ""
+                },
+                "2": {
+                      "text": "Case studies",
+                      "url": "https://www.pachyderm.com/case-studies/",
+                      "matching": ""
+                },
+                "3": {
+                      "text": "main concepts",
+                      "url": "https://docs.pachyderm.com/latest/concepts/",
+                      "matching": ""
+                },
+                "4": {
+                      "text": "Open CV",
+                      "url": "https://docs.pachyderm.com/latest/getting_started/beginner_tutorial/",
+                      "matching": ""
+                },
+                "5": {
+                      "text": "Subscribe to the operator on Marketplace.",
+                      "url": "https://marketplace.redhat.com/en-us/products/pachyderm",
+                      "matching": ""
+                },
+                "6": {
+                      "text": "Install the operator and validate.",
+                      "url": "https://marketplace.redhat.com/en-us/documentation/operators",
+                      "matching": ""
+                },
+                "7": {
+                      "text": "tutorial",
+                      "url": "https://docs.pachyderm.com/latest/getting_started/beginner_tutorial/",
+                      "matching": ""
+                },
+                "8": {
+                      "text": "Housing prices notebook",
+                      "url": "https://github.com/pachyderm/examples/blob/master/housing-prices-intermediate/housing-prices.ipynb",
+                      "matching": ""
+                },
+                "9": {
+                      "text": "Pachyderm's python client",
+                      "url": "https://python-pachyderm.readthedocs.io/en/stable/",
+                      "matching": ""
+                }
+            }
+     },
+     "perceptiLabs": {
+          "badges": ["Coming soon"],
+          "provider": "by PercetiLabs",
+          "title": "PerceptiLabs",
+          "description": "PerceptiLabs is a visual modeling tool for editing, managing, and monitoring your machine learning models.",
+          "image": "/images/percepti-labs.svg",
+          "sidebar_h1": "PerceptiLabs",
+          "sidebar_links": {}
+
+     },
+     "seldon-deploy": {
+          "badges": ["Self-managed"],
+          "provider": "by Seldon",
+          "title": "Seldon Deploy",
+          "description": "Seldon Deploy is a set of tools to simplify and accelerate the process of deploying and managing your machine learning models.",
+          "image": "/images/seldon.svg",
+          "sidebar_h1": "Seldon Deploy",
+          "sidebar_links": {
+                "0": {
+                      "text": "Get started",
+                      "url": "https://deploy.seldon.io/en/latest/contents/getting-started/",
+                      "matching": ""
+                },
+                "1": {
+                      "text": "Seldon Deploy",
+                      "url": "https://deploy.seldon.io/",
+                      "matching": ""
+                },
+                "2": {
+                      "text": "Seldon Core",
+                      "url": "https://github.com/SeldonIO/seldon-core",
+                      "matching": ""
+                },
+                "3": {
+                      "text": "Seldon Core resources",
+                      "url": "https://docs.seldon.io/projects/seldon-core/en/latest/workflow/overview.html",
+                      "matching": ""
+                },
+                "4": {
+                      "text": "https://deploy.seldon.io/en/v1.2/contents/getting-started/openshift-installation/index.html",
+                      "url": "https://deploy.seldon.io/en/v1.2/contents/getting-started/openshift-installation/index.html",
+                      "matching": ""
+                },
+                "5": {
+                      "text": "https://marketplace.redhat.com/en-us/products/seldon-deploy",
+                      "url": "https://marketplace.redhat.com/en-us/products/seldon-deploy",
+                      "matching": ""
+                },
+                "6": {
+                      "text": "https://marketplace.redhat.com/en-us/documentation/operators",
+                      "url": "https://marketplace.redhat.com/en-us/documentation/operators",
+                      "matching": ""
+                }
+            }
+     },
+     "starburst": {
+          "badges": ["Partner managed", "Beta"],
+          "provider": "by Starburst",
+          "title": "Starburst Galaxy",
+          "description": "Starburst Galaxy is a fully managed service to run high-performance queries across your various data sources using SQL.",
+          "image": "/images/starburst.svg",
+          "sidebar_h1": "Starburst Galaxy",
+          "sidebar_links": {
+                "0": {
+                      "text": "Get started",
+                      "url": "https://www.starburst.io/platform/starburst-galaxy/",
+                      "matching": ""
+                },
+                "1": {
+                      "text": "signing up for beta access.",
+                      "url": "https://www.starburst.io/platform/starburst-galaxy/",
+                      "matching": ""
+                },
+                "2": {
+                      "text": "Starburst Galaxy",
+                      "url": "https://docs.starburst.io/starburst-galaxy/",
+                      "matching": ""
+                },
+                "3": {
+                      "text": "signing up for beta access",
+                      "url": "https://www.starburst.io/platform/starburst-galaxy/",
+                      "matching": ""
+                }
+            }
+    }
+   }
+}

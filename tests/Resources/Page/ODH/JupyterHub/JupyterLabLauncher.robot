@@ -340,7 +340,7 @@ Select ${filename} Tab
 Verify Installed Library Version
     [Arguments]  ${lib}  ${ver}
     ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
-    Run Keyword If  '${status}' == 'FAIL'  Log To Console  "Expected ${lib} at version ${ver}, but ${value}"
+    Run Keyword If  '${status}' == 'FAIL'  Log  "Expected ${lib} at version ${ver}, but ${value}"
 
 Check Versions In JupyterLab
     [Arguments]  ${list}

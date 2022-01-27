@@ -36,8 +36,7 @@ Verify Libraries In Base Images
         Append To List  ${list}  ${text}
         ${tmp} =  Fetch Image Tooltip Info  ${img}
         ${list} =  Combine Lists  ${list}  ${tmp}
-        Log To Console  ${img}
-        Log To Console  ${list}
+        Log  ${list}
         Spawn Notebook With Arguments  image=${img}
         Check Versions In JupyterLab  ${list}
         Clean Up Server

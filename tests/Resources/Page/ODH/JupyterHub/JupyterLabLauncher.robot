@@ -143,16 +143,10 @@ Clean Up Server
   Sleep  1
   Maybe Close Popup
   Open With JupyterLab Menu  File  New  Notebook
-  Sleep  1
+  Sleep  2
   Maybe Close Popup
-  Open With JupyterLab Menu  File  Open from Path…
-  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb
-  Click Element  xpath://div[.="Open"]
-  Maybe Close Popup
-  Wait Until Untitled.ipynb JupyterLab Tab Is Selected
-  Sleep  5
   Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
-
+  Sleep  2
 
 Get User Notebook Pod Name
   [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyterhub-nb-ldap-2dadmin1)
@@ -342,3 +336,23 @@ Get JupyterLab Code Output In a Given Tab
 
 Select ${filename} Tab
   Click Element    xpath:${JL_TABBAR_CONTENT_XPATH}/li/div[.="${filename}"]
+
+Verify Installed Library Version
+    [Arguments]  ${lib}  ${ver}
+    ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
+    Run Keyword If  '${status}' == 'FAIL'  Log To Console  "Expected ${lib} at version ${ver}, but ${value}"
+
+Check Versions In JupyterLab
+    [Arguments]  ${list}
+    FOR  ${str}  IN  @{list}
+        @{info} =  Split String  ${str}  ${SPACE}v
+        IF  "${info}[0]" == "TensorFlow"
+            Verify Installed Library Version  tensorflow-gpu  ${info}[1]
+        ELSE IF  "${info}[0]" == "PyTorch"
+            Verify Installed Library Version  torch  ${info}[1]
+        ELSE IF  "${info}[0]" == "Python"
+            Python Version Check  ${info}[1]
+        ELSE
+            Verify Installed Library Version  ${info}[0]  ${info}[1]
+        END
+    END

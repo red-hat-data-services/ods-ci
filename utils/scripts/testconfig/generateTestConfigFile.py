@@ -100,8 +100,10 @@ def generate_test_config_file(config_template, config_data, test_cluster, set_pr
     data["RHOSAK_CONFIG_TEST"]["SERVICE_ACCOUNT"] = config_data["RHOSAK_CONFIG_TEST"]["SERVICE_ACCOUNT"]
     data["RHOSAK_CONFIG_TEST"]["TOPIC_NAME"] = config_data["RHOSAK_CONFIG_TEST"]["TOPIC_NAME"]
     data["RHOSAK_CONFIG_TEST"]["CONSUMER_GROUP"] = config_data["RHOSAK_CONFIG_TEST"]["CONSUMER_GROUP"]
-
-
+    data["RHODS_BUILD"]["PULL_SECRET"] = config_data["RHODS_BUILD"]["PULL_SECRET"]
+    data["RHODS_BUILD"]["SECRET_FILE"] = config_data["RHODS_BUILD"]["SECRET_FILE"]
+    data["RHODS_BUILD"]["IMAGE"] = config_data["RHODS_BUILD"]["IMAGE"]
+    
     # Login to test cluster using oc command
     oc_login(data["OCP_CONSOLE_URL"], data["OCP_ADMIN_USER"]["USERNAME"], data["OCP_ADMIN_USER"]["PASSWORD"])
 

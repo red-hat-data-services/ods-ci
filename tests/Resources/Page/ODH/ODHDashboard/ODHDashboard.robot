@@ -1,13 +1,13 @@
 *** Settings ***
 Resource      ../../../Page/Components/Components.resource
-Library       JupyterLibrary
 Resource       ../../../Common.robot
+Library       JupyterLibrary
 
 *** Variables ***
 ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}                 //*[@class="pf-c-drawer__panel-main"]//div[@class="odh-get-started__header"]/h1
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
-${TILES_XP}=  //article[contains(@class, 'pf-c-card')]
+${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
 ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
@@ -111,10 +111,10 @@ Check HTTP Status Code
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 
-Load App Info JSON File
-    ${APPS_DICT}=  Load Json File  ${APPS_DICT_PATH}
-    ${APPS_DICT}=  Set Variable  ${APPS_DICT}[apps]
-    Set Suite Variable  ${APPS_DICT}
+Load Expected Data Of RHODS Explore Section
+    ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
+    ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
+    [Return]  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded
     Wait Until Page Contains Element    xpath://div[contains(@class,'odh-explore-apps__gallery')]
@@ -124,11 +124,15 @@ Get App ID From Card
     ${id}=  Get Element Attribute    xpath:${card_locator}    id
     [Return]  ${id}
 
-Check Number of Cards
-    ${N_TILES}=  Get Element Count    xpath:${TILES_XP}
-    Set Suite Variable  ${N_TILES}
-    ${expected_n}=  Get Length    ${APPS_DICT}
-    Run Keyword And Continue On Failure    Should Be Equal  ${N_TILES}  ${expected_n}
+Get Number Of Cards
+    ${n_cards}=   Get Element Count    xpath:${CARDS_XP}
+    [Return]    ${n_cards}
+
+Check Number Of Displayed Cards Is Correct
+    [Arguments]  ${expected_data}
+    ${n_cards}=  Get Number Of Cards
+    ${expected_n_cards}=  Get Length    ${expected_data}
+    Run Keyword And Continue On Failure    Should Be Equal  ${n_cards}  ${expected_n_cards}
 
 Get Card Texts
     [Arguments]  ${card_locator}
@@ -138,11 +142,11 @@ Get Card Texts
     [Return]  ${title}  ${provider}  ${desc}
 
 Check Card Texts
-    [Arguments]  ${card_locator}  ${app_id}
+    [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
     ${card_title}  ${card_provider}  ${card_desc}=  Get Card Texts  card_locator=${card_locator}
-    Run Keyword And Continue On Failure  Should Be Equal   ${card_title}  ${APPS_DICT}[${app_id}][title]
-    Run Keyword And Continue On Failure  Should Be Equal   ${card_provider}  ${APPS_DICT}[${app_id}][provider]
-    Run Keyword And Continue On Failure  Should Be Equal   ${card_desc}  ${APPS_DICT}[${app_id}][description]
+    Run Keyword And Continue On Failure  Should Be Equal   ${card_title}  ${expected_data}[${app_id}][title]
+    Run Keyword And Continue On Failure  Should Be Equal   ${card_provider}  ${expected_data}[${app_id}][provider]
+    Run Keyword And Continue On Failure  Should Be Equal   ${card_desc}  ${expected_data}[${app_id}][description]
 
 Get Card Badges Titles
     [Arguments]  ${card_locator}
@@ -155,9 +159,9 @@ Get Card Badges Titles
     [Return]  ${badges_titles}
 
 Check Card Badges And Return Titles
-    [Arguments]  ${card_locator}  ${app_id}
+    [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
     ${card_badges_titles}=  Get Card Badges Titles  card_locator=${card_locator}
-    Run Keyword And Continue On Failure  Lists Should Be Equal  ${card_badges_titles}  ${APPS_DICT}[${app_id}][badges]
+    Run Keyword And Continue On Failure  Lists Should Be Equal  ${card_badges_titles}  ${expected_data}[${app_id}][badges]
     Run Keyword If    $RH_BADGE_TITLE in $card_badges_titles
     ...    Run Keyword And Continue On Failure  Page Should Contain Element    xpath:${card_locator}/${OFFICIAL_BADGE_XP}
     [Return]  ${card_badges_titles}
@@ -186,10 +190,10 @@ Get Sidebar Links
     [Return]  ${link_elements}
 
 Check Sidebar Links
-    [Arguments]  ${app_id}
+    [Arguments]  ${app_id}  ${expected_data}
     ${sidebar_links}=  Get Sidebar Links
     ${n_links}=  Get Length  ${sidebar_links}
-    ${expected_n_links}=  Get Length  ${APPS_DICT}[${app_id}][sidebar_links]
+    ${expected_n_links}=  Get Length  ${expected_data}[${app_id}][sidebar_links]
     Run Keyword And Continue On Failure  Should Be Equal  ${n_links}  ${expected_n_links}
     ${list_links}=  Create List
     ${list_textlinks}=  Create List
@@ -198,9 +202,9 @@ Check Sidebar Links
         ${link_text}=  Get Text    ${s_link}
         ${link_href}=  Get Element Attribute    ${s_link}    href
         ${link_status}=  Check HTTP Status Code   link_to_check=${link_href}  expected=200
-        ${expected_link}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}][url]
-        ${expected_text}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}][text]
-        ${lt_json_list}=  Set Variable  ${APPS_DICT}[${app_id}][sidebar_links][${link_idx}][matching]
+        ${expected_link}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][url]
+        ${expected_text}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][text]
+        ${lt_json_list}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][matching]
         IF    $lt_json_list == "partial"
              Run Keyword And Continue On Failure  Should Contain    ${link_href}  ${expected_link}
         ELSE
@@ -214,21 +218,21 @@ Check Sidebar Links
     Log List    ${list_textlinks}
 
 Check Sidebar Header Text
-    [Arguments]  ${app_id}
+    [Arguments]  ${app_id}  ${expected_data}
     ${h1}=  Get Text    xpath://div[contains(@class,'odh-markdown-view')]/h1
-    Run Keyword And Continue On Failure  Should Be Equal  ${h1}  ${APPS_DICT}[${app_id}][sidebar_h1]
+    Run Keyword And Continue On Failure  Should Be Equal  ${h1}  ${expected_data}[${app_id}][sidebar_h1]
     ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__panel-main')]//div[@class='odh-get-started__header']/h1[contains(@class, 'title')]
     ${getstarted_provider}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__panel-main')]//div[@class='odh-get-started__header']//span[contains(@class, 'provider')]
-    Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_title}  ${APPS_DICT}[${app_id}][title]
-    Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_provider}  ${APPS_DICT}[${app_id}][provider]
+    Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_title}  ${expected_data}[${app_id}][title]
+    Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_provider}  ${expected_data}[${app_id}][provider]
 
 Check Get Started Sidebar
-    [Arguments]  ${card_locator}  ${card_badges}  ${app_id}
+    [Arguments]  ${card_locator}  ${card_badges}  ${app_id}  ${expected_data}
     ${sidebar_exists}=  Open Get Started Sidebar And Return Status  card_locator=${card_locator}
     Check Get Started Sidebar Status   sidebar_status=${sidebar_exists}   badges_titles=${card_badges}
     IF    ${sidebar_exists} == ${TRUE}
-        Check Sidebar Links  app_id=${app_id}
-        Check Sidebar Header Text  app_id=${app_id}
+        Check Sidebar Links  app_id=${app_id}  expected_data=${expected_data}
+        Check Sidebar Header Text  app_id=${app_id}  expected_data=${expected_data}
         Close Get Started Sidebar
     END
 
@@ -239,20 +243,21 @@ Get Image Name
     [Return]  ${src}  ${image_name}
 
 Check Card Image
-    [Arguments]  ${card_locator}  ${app_id}
+    [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
     ${src}  ${image_name}=  Get Image Name  card_locator=${card_locator}
-    ${expected_image}=  Set Variable  ${APPS_DICT}[${app_id}][image]
+    ${expected_image}=  Set Variable  ${expected_data}[${app_id}][image]
     Run Keyword And Continue On Failure    Should Be Equal    ${image_name}    ${expected_image}
     Run Keyword And Continue On Failure    Page Should Not Contain Element    xpath:${card_locator}/${FALLBK_IMAGE_XP}
 
-
-Check Cards Details
-   FOR    ${idx}    IN RANGE    1    ${N_TILES}+1
-        ${card_xp}=  Set Variable  (${TILES_XP})[${idx}]
+Check Cards Details Are Correct
+   [Arguments]  ${expected_data}
+   ${card_n}=  Get Number Of Cards
+   FOR    ${idx}    IN RANGE    1    ${card_n}+1
+        ${card_xp}=  Set Variable  (${CARDS_XP})[${idx}]
         ${application_id}=  Get App ID From Card  card_locator=${card_xp}
         Log    ${application_id}
-        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}
-        ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}
-        Check Card Image  card_locator=${card_xp}  app_id=${application_id}
-        Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}
+        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
     END

@@ -32,9 +32,9 @@ Dependent Build should not Present
      ...        ELSE    FAIL       Attached Build to Build config is not deleted
 
 Check Image Build Status
-  [Arguments]  ${target_status}     ${notebook_name}
-  ${build_status}=  Get Build Status    namespace=redhat-ods-applications  build_search_term=${notebook_name}
-  Run Keyword If    "${build_status}" == "Failed"
-  ...    Fail  The '${notebook_name}' image build has failed
+  [Arguments]  ${target_status}     ${build_name}   ${namespace}=redhat-ods-applications
+  ${build_status}=  Get Build Status    namespace=${namespace}  build_search_term=${build_name}
+  Run Keyword If    "${build_status}" == "${target_status}"
+  ...    Log   The '${build_name}' image match the expected target status
   ...  ELSE
-  ...    Should Be Equal    ${build_status}    ${target_status}
+  ...    Fail  The '${build_name}' image build status doesn't match the target status '${target_status}'

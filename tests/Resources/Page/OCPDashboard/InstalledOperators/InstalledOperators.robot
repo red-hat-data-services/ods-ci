@@ -143,7 +143,7 @@ Delete Tabname Instance For Installed Operator
     Wait Until Element Is Enabled   //button[contains(text(),"Delete")]
     Click Button    Delete
 
-Check If Operator Is Already Install In Opneshift
+Check If Operator Is Already Installed In Opneshift
     [Documentation]   This keyword verify if operator is already installed and return the status
     [Arguments]    ${operator_name}
     Open Installed Operators Page

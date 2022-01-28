@@ -3,10 +3,11 @@ Resource      ../../../Page/Components/Components.resource
 Resource       ../../../Common.robot
 Library       JupyterLibrary
 
+
 *** Variables ***
-${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}                 //*[@class="pf-c-drawer__panel-main"]//div[@class="odh-get-started__header"]/h1
-${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
-${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
+${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}=                //*[@class="pf-c-drawer__panel-main"]//div[@class="odh-get-started__header"]/h1
+${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
+${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]

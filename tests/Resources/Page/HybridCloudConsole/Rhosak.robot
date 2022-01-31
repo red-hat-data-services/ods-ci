@@ -55,7 +55,7 @@ Delete Kafka Stream Instance
 Create Topic
   [Arguments]  ${topic_name_to_create}
   Click Button  Create topic
-  Wait For HCC Splash Page
+  Run Keyword And Ignore Error    Wait For HCC Splash Page
   Input Text  name:step-topic-name  ${topic_name_to_create}
   Click Button   Next
   Wait Until Page Contains Element  xpath=//h2[text()='Partitions']
@@ -64,7 +64,7 @@ Create Topic
   Click Button   Next
   Wait Until Page Contains Element    xpath=//button[text()='Finish']
   Click Button   Finish
-  Wait For HCC Splash Page
+  Run Keyword And Ignore Error    Wait For HCC Splash Page
 
 Create Service Account From Connection Menu
   [Arguments]  ${sa_description}
@@ -132,11 +132,11 @@ Enter Stream
   [Arguments]  ${stream_name}
   Wait Until Page Contains Element  xpath=//a[text()='${stream_name}']
   Click Link    xpath=//a[text()='${stream_name}']
-  Wait For HCC Splash Page
+  Run Keyword And Ignore Error    Wait For HCC Splash Page
 
 Enter Stream ${sec_title} Section
   Click Button    xpath=//button[@aria-label='${sec_title}']
-  Wait For HCC Splash Page
+  Run Keyword And Ignore Error    Wait For HCC Splash Page
 
 Click From Actions Menu
   [Arguments]  ${search_col}  ${search_value}  ${action}
@@ -183,7 +183,7 @@ Clean Up RHOSAK
   Enter Stream Topics Section
   Delete Stream Topic  topic_to_delete=${topic_to_delete}
   Menu.Navigate To Page    Streams for Apache Kafka   Kafka Instances
-  Wait For HCC Splash Page
+  Run Keyword And Ignore Error    Wait For HCC Splash Page
   Wait Until Page Contains    Create Kafka instance
   Delete Kafka Stream Instance  stream_name=${stream_to_delete}
   Capture Page Screenshot  after deleting_stream.png

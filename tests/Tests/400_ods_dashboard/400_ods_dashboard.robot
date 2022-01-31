@@ -5,17 +5,6 @@ Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
 
-*** Keywords ***
-Dashboard Test Setup
-  Set Library Search Order  SeleniumLibrary
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
-
-Dashboard Test Teardown
-  Close All Browsers
-
-
 *** Test Cases ***
 Verify Resource Link Http status code
     [Tags]  Sanity
@@ -44,3 +33,13 @@ Verify Content In RHODS Explore Section
     Check Number Of Displayed Cards Is Correct  expected_data=${EXP_DATA_DICT}
     Check Cards Details Are Correct   expected_data=${EXP_DATA_DICT}
 
+
+*** Keywords ***
+Dashboard Test Setup
+  Set Library Search Order  SeleniumLibrary
+  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Wait for RHODS Dashboard to Load
+
+Dashboard Test Teardown
+  Close All Browsers

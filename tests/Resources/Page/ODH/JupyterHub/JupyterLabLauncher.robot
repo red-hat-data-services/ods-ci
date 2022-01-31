@@ -341,18 +341,31 @@ Verify Installed Library Version
     [Arguments]  ${lib}  ${ver}
     ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
     Run Keyword If  '${status}' == 'FAIL'  Log  "Expected ${lib} at version ${ver}, but ${value}"
+    [Return]    ${status}
 
 Check Versions In JupyterLab
-    [Arguments]  ${list}
-    FOR  ${str}  IN  @{list}
-        @{info} =  Split String  ${str}  ${SPACE}v
-        IF  "${info}[0]" == "TensorFlow"
-            Verify Installed Library Version  tensorflow-gpu  ${info}[1]
-        ELSE IF  "${info}[0]" == "PyTorch"
-            Verify Installed Library Version  torch  ${info}[1]
-        ELSE IF  "${info}[0]" == "Python"
-            Python Version Check  ${info}[1]
+    [Arguments]  ${libraries-to-check}
+    ${return_status} =    Set Variable    PASS
+    FOR  ${libString}  IN  @{libraries-to-check}
+        # libString = LibName vX.Y -> libDetail= [libName, X.Y]
+        @{libDetail} =  Split String  ${libString}  ${SPACE}v
+        IF  "${libDetail}[0]" == "TensorFlow"
+            ${status} =  Verify Installed Library Version  tensorflow-gpu  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+        ELSE IF  "${libDetail}[0]" == "PyTorch"
+            ${status} =  Verify Installed Library Version  torch  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+        ELSE IF  "${libDetail}[0]" == "Python"
+            ${status} =  Python Version Check  ${libDetail}[1]
         ELSE
-            Verify Installed Library Version  ${info}[0]  ${info}[1]
+            ${status} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
         END
     END
+    [Return]  ${return_status}

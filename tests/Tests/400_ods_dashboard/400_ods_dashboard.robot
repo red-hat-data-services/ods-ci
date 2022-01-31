@@ -26,7 +26,7 @@ Verify Content In RHODS Explore Section
     ...              - Card's details (text, badges, images)
     ...              - Sidebar (titles, links text, links status)
     [Tags]  Sanity
-    ...     ODS-488
+    ...     ODS-488  ODS-993
     ${EXP_DATA_DICT}=   Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait Until Cards Are Loaded

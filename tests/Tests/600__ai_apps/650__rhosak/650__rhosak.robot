@@ -38,80 +38,80 @@ Verify RHOSAK Is Available In RHODS Dashboard Explore Page
 Verify User Can Enable RHOSAK from Dashboard Explore Page
     [Documentation]    Checks it is possible to enable RHOSAK from RHODS Dashboard > Explore Page
     [Tags]    Sanity    Smoke    ODS-392
+    [Teardown]  Remove RHOSAK From Dashboard
     Enable RHOSAK
-    Capture Page Screenshot    kafka_enable_msg.png
-    Verify Service Is Enabled    ${RHOSAK_DISPLAYED_APPNAME}
+    Capture Page Screenshot  kafka_enable_msg.png
+    Verify Service Is Enabled  ${RHOSAK_DISPLAYED_APPNAME}
     Capture Page Screenshot    kafka_enable_tab.png
     Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link    # robocop: disable
-    Login To HCC    ${SSO.USERNAME}    ${SSO.PASSWORD}
+    Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
     Maybe Skip RHOSAK Tour
     Wait Until Page Contains    Kafka Instances
-    Delete Configmap    name=rhosak-validation-result    namespace=redhat-ods-applications
 
 Verify User Is Able to Produce and Consume Events
-    [Documentation]    Checks the end-2-end use case of RHOSAK
-    [Tags]    Sanity    Tier2    ODS-248    ODS-247    ODS-246    ODS-245    ODS-243    ODS-241    ODS-239    ODS-242
-    Enable RHOSAK
-    Verify Service Is Enabled    ${RHOSAK_DISPLAYED_APPNAME}
-    Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link    # robocop: disable
-    Login To HCC    ${SSO.USERNAME}    ${SSO.PASSWORD}
-    Maybe Skip RHOSAK Tour
-    Sleep    5
-    Wait Until Page Contains    Create Kafka instance
-    # Create kafka stream
-    Create Kafka Stream Instance    stream_name=${STREAM_NAME_TEST}    stream_region=${STREAM_REGION_TEST}
-    ...    cloud_provider=${CLOUD_PROVIDER_TEST}
-    Wait Until Keyword Succeeds    450    1    Check Stream Status    target_status=Ready    target_stream=${STREAM_NAME_TEST}
-    # Create service account
-    Click From Actions Menu    search_col=Name    search_value=${STREAM_NAME_TEST}    action=Connection
-    Wait Until Page Contains Element    xpath=//input[@aria-label="Bootstrap server"]
-    ${bootstrap_server}=    Get Element Attribute    xpath=//input[@aria-label="Bootstrap server"]    value
-    ${kafka_sa_creds}=    Create Service Account From Connection Menu    sa_description=${SERVICE_ACCOUNT_TEST}
-    ${KAFKA_CLIENT_ID}=    Set Variable    ${kafka_sa_creds}[KAFKA_CLIENT_ID]
-    ${KAFKA_CLIENT_SECRET}=    Set Variable    ${kafka_sa_creds}[KAFKA_CLIENT_SECRET]
-    # Create topic
-    Enter Stream    stream_name=${STREAM_NAME_TEST}
-    Enter Stream Topics Section
-    # Wait For HCC Splash Page
-    Create Topic    topic_name_to_create=${TOPIC_NAME_TEST}
-    Page Should Contain Element    xpath=//a[text()='${TOPIC_NAME_TEST}']
-    # Assign permissions to SA
-    Enter Stream Access Section
-    Assign Permissions To ServiceAccount In RHOSAK    sa_client_id=${KAFKA_CLIENT_ID}
-    ...    sa_to_assign=${SERVICE_ACCOUNT_TEST}    topic_to_assign=${TOPIC_NAME_TEST}
-    ...    cg_to_assign=${CONSUMER_GROUP_TEST}
+  [Tags]  Sanity  Tier2
+  ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239  ODS-242
+  [Teardown]  Clean Up RHOSAK    stream_to_delete=${stream_name_test}
+  ...                            topic_to_delete=${topic_name_test}
+  ...                            sa_clientid_to_delete=${kafka_client_id}
+  ...                            rhosak_app_id=${rhosak_real_appname}
+  Enable RHOSAK
+  Verify Service Is Enabled  ${rhosak_displayed_appname}
+  Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link
+  Login to HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
+  Maybe Skip RHOSAK Tour
+  Sleep  5
+  Wait Until Page Contains    Create Kafka instance
+  ## Create kafka stream
+  Create Kafka Stream Instance  stream_name=${stream_name_test}  stream_region=${stream_region_test}  cloud_provider=${cloud_provider_test}
+  Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
+  Wait Until Keyword Succeeds    450  1  Check Stream Status  target_status=Ready  target_stream=${stream_name_test}
+  ## Create service account
+  Click From Actions Menu  search_col=Name  search_value=${stream_name_test}  action=Connection
+  Wait Until Page Contains Element  xpath=//input[@aria-label="Bootstrap server"]
+  ${bootstrap_server}=  Get Element Attribute    xpath=//input[@aria-label="Bootstrap server"]  value
+  ${kafka_sa_creds}=  Create Service Account From Connection Menu  sa_description=${service_account_test}
+  ${kafka_client_id}=  Set Variable  ${kafka_sa_creds}[kafka_client_id]
+  ${kafka_client_secret}=  Set Variable  ${kafka_sa_creds}[kafka_client_secret]
+  ## Create topic
+  Enter Stream  stream_name=${stream_name_test}
+  Enter Stream Topics Section
+  # Wait For HCC Splash Page
+  Create Topic  topic_name_to_create=${topic_name_test}
+  Page Should Contain Element    xpath=//a[text()='${topic_name_test}']
+  ## Assign permissions to SA
+  Enter Stream Access Section
+  Assign Permissions To ServiceAccount in RHOSAK  sa_client_id=${kafka_client_id}  sa_to_assign=${service_account_test}
+  ...                                             topic_to_assign=${topic_name_test}  cg_to_assign=${consumer_group_test}
 
-    # Spawn a notebook with env variables
-    Switch Window    title:Red Hat OpenShift Data Science Dashboard
-    Wait For RHODS Dashboard To Load
-    Launch JupyterHub Spawner From Dashboard
-    Wait Until Page Contains Element    xpath://input[@name="Standard Data Science"]
-    &{notebook_envs}=    Create Dictionary    KAFKA_BOOTSTRAP_SERVER=${bootstrap_server}    KAFKA_USERNAME=${KAFKA_CLIENT_ID}
-    ...    KAFKA_PASSWORD=${KAFKA_CLIENT_SECRET}    KAFKA_TOPIC=${TOPIC_NAME_TEST}
-    ...    KAFKA_CONSUMER_GROUP=${CONSUMER_GROUP_TEST}
-    Spawn Notebook With Arguments    image=s2i-generic-data-science-notebook    envs=&{notebook_envs}
-    # clone JL notebooks from git and run
-    Clone Git Repository    REPO_URL=${GIT_REPO_NOTEBOOKS}
-    Open Consumer Notebook    dir_path=${NOTEBOOK_DIR_PATH}    filename=${NOTEBOOK_CONS_FILENAME}
-    ${cons_tab_id}=    Get Selected Tab ID
-    Open With JupyterLab Menu    Run    Run All Cells
-    Sleep    1
-    Open Producer Notebook    dir_path=${NOTEBOOK_DIR_PATH}    filename=${NOTEBOOK_PROD_FILENAME}
-    ${prod_tab_id}=    Get Selected Tab ID
-    Open With JupyterLab Menu    Run    Run All Cells
-    Wait Until JupyterLab Code Cell Is Not Active In A Given Tab    tab_id_to_wait=${prod_tab_id}
-    Capture Page Screenshot    cell_not_active.png
-    ${producer_output}=    Get JupyterLab Code Output In A Given Tab    tab_id_to_read=${prod_tab_id}
-    Capture Page Screenshot    producer_run.png
-    Select ${NOTEBOOK CONS FILENAME} Tab
-    Sleep    3
-    ${consumer_output}=    Get JupyterLab Code Output In A Given Tab    tab_id_to_read=${cons_tab_id}
-    Check Consumer And Producer Output Equality    producer_text=${producer_output}    consumer_text=${consumer_output}
-    Capture Page Screenshot    consumer_run.png
-    Fix Spawner Status
-    [Teardown]    Clean Up RHOSAK    stream_to_delete=${STREAM_NAME_TEST}
-    ...    topic_to_delete=${TOPIC_NAME_TEST}
-    ...    sa_clientid_to_delete=${KAFKA_CLIENT_ID}
+  ## Spawn a notebook with env variables
+  Switch Window  title:Red Hat OpenShift Data Science Dashboard
+  Wait for RHODS Dashboard to Load
+  Launch JupyterHub Spawner From Dashboard
+  Wait Until Page Contains Element  xpath://input[@name="Standard Data Science"]
+  &{notebook_envs}=  Create Dictionary  KAFKA_BOOTSTRAP_SERVER=${bootstrap_server}  KAFKA_USERNAME=${kafka_client_id}
+  ...                                   KAFKA_PASSWORD=${kafka_client_secret}  KAFKA_TOPIC=${topic_name_test}
+  ...                                   KAFKA_CONSUMER_GROUP=${consumer_group_test}
+  Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{notebook_envs}
+  ## clone JL notebooks from git and run
+  Clone Git Repository  REPO_URL=${GIT_REPO_NOTEBOOKS}
+  Open Consumer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_CONS_FILENAME}
+  ${cons_tab_id} =    Get Selected Tab ID
+  Open With JupyterLab Menu  Run  Run All Cells
+  Sleep  1
+  Open Producer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_PROD_FILENAME}
+  ${prod_tab_id} =    Get Selected Tab ID
+  Open With JupyterLab Menu  Run  Run All Cells
+  Wait Until JupyterLab Code Cell Is Not Active In a Given Tab  tab_id_to_wait=${prod_tab_id}
+  Capture Page Screenshot  cell_not_active.png
+  ${producer_output} =  Get JupyterLab Code Output In a Given Tab  tab_id_to_read=${prod_tab_id}
+  Capture Page Screenshot  producer_run.png
+  Select ${NOTEBOOK_CONS_FILENAME} Tab
+  Sleep  3
+  ${consumer_output} =  Get JupyterLab Code Output In a Given Tab  tab_id_to_read=${cons_tab_id}
+  Check Consumer and Producer Output Equality  producer_text=${producer_output}  consumer_text=${consumer_output}
+  Capture Page Screenshot  consumer_run.png
+  Fix Spawner Status
 
 
 *** Keywords ***

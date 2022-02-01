@@ -1,8 +1,10 @@
 *** Settings ***
 Library     SeleniumLibrary
 Library     ../../../../libs/Helpers.py
+Library         OpenShiftCLI
 Resource    ../JupyterHub/JupyterLabLauncher.robot
 Resource    ../../Components/Components.resource
+Resource        ../ODHDashboard/ODHDashboard.robot
 
 
 *** Keywords ***
@@ -37,4 +39,11 @@ Enable RHOSAK
     Click Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
     Wait Until Page Contains Element    xpath://div[contains(@id, 'pf-modal-part')]
     Click Button    xpath://footer/button[text()='Enable']
-    Wait Until Page Contains Element    xpath://div[@class='pf-c-alert pf-m-success']
+    Wait Until Page Contains Element   xpath://div[@class='pf-c-alert pf-m-success']
+
+Remove RHOSAK From Dashboard
+  Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
+  Close All Browsers
+  Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}
+  ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+  Remove Disabled Application From Enabled Page   app_id=${rhosak_real_appname}

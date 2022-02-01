@@ -5,6 +5,8 @@ Library             SeleniumLibrary
 Resource            HCCLogin.robot
 Resource            ../Components/Menu.robot
 Library             OpenShiftCLI
+Resource        ../ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../ODH/AiApps/Rhosak.robot
 
 
 *** Variables ***
@@ -220,7 +222,7 @@ Delete Service Account By Client ID
 
 Clean Up RHOSAK
     [Documentation]    Cleans up all the RHOSAK created resources from RHOSAK and RHODS UI
-    [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}
+    [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}  ${rhosak_app_id}
     OpenShiftCLI.Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Switch Window    title:Red Hat OpenShift Streams for Apache Kafka
     Menu.Navigate To Page    Streams for Apache Kafka    Kafka Instances
@@ -234,3 +236,8 @@ Clean Up RHOSAK
     Capture Page Screenshot    after deleting_stream.png
     Click Link    Service Accounts
     Delete Service Account By Client ID    client_id_delete=${sa_clientid_to_delete}
+    Switch Window  title:Red Hat OpenShift Data Science Dashboard
+    Close All Browsers
+    Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}
+    ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    Remove Disabled Application From Enabled Page   app_id=${rhosak_app_id}

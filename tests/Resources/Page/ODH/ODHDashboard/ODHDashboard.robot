@@ -21,6 +21,12 @@ ${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.jso
 
 
 *** Keywords ***
+Launch Dashboard
+  [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}  ${dashboard_url}  ${browser}  ${browser_options}
+  Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
+  Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
+  Wait for RHODS Dashboard to Load
+
 Authorize rhods-dashboard service account
   Wait Until Page Contains  Authorize Access
   Checkbox Should Be Selected  user:info
@@ -63,6 +69,8 @@ Verify Service Is Enabled
   Wait Until Page Contains    JupyterHub  timeout=30
   Wait Until Page Contains    ${app_name}  timeout=150
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
+  Page Should Not Contain Element    xpath://article//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
+
 
 Verify Service Is Not Enabled
   [Documentation]   Verify the service is not present in Applications > Enabled
@@ -77,6 +85,21 @@ Verify Service Is Available In The Explore Page
   Wait Until Page Contains    JupyterHub  timeout=30
   Capture Page Screenshot
   Page Should Contain Element    //article//*[.='${app_name}']
+
+Remove Disabled Application From Enabled Page
+   [Documentation]  The keyword let you re-enable or remove the card from Enabled page
+   ...              for those application whose license is expired. You can control the action type
+   ...              by setting the "disable" argument to either "disable" or "enable".
+   [Arguments]  ${app_id}
+   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
+   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=90
+   Click Element  xpath:${card_disabled_xp}
+   Wait Until Page Contains   To remove card click
+   ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
+   Click Element  ${buttons_here}[1]
+   Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
+   Capture Page Screenshot  disabled_card_removed.png
+
 
 Verify Service Provides "Enable" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is an "Enable" button

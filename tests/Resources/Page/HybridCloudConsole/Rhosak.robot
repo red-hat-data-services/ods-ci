@@ -88,7 +88,7 @@ Create Service Account From Connection Menu
 
 Assign Permissions To ServiceAccount in RHOSAK
   [Arguments]  ${sa_client_id}  ${sa_to_assign}  ${topic_to_assign}  ${cg_to_assign}
-
+  Reload Page
   &{topic_read_permissions}=  Create Dictionary  resource_name=Topic  search_type=Is  name_text=${topic_to_assign}  permissions_value=Read
   &{topic_write_permissions}=  Create Dictionary  resource_name=Topic  search_type=Is  name_text=${topic_to_assign}  permissions_value=Write
   &{cg_permissions}=  Create Dictionary  resource_name=Consumer group  search_type=Is  name_text=${cg_to_assign}  permissions_value=Read
@@ -117,19 +117,14 @@ Assign Permissions To ServiceAccount in RHOSAK
       ${index}=  Set Variable  1
       Wait Until Page Contains Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}
       Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[1]//button[@aria-label='Options menu']
-      # Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-label='Resource']//button[@aria-label='Options menu']
       Wait Until Page Contains Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button[text()='${resource}']
       Click Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button[text()='${resource}']
 
       Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[2]//button[@aria-label='Options menu']
-      # Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='1']//button[@aria-label='Options menu']
       Wait Until Page Contains Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button/span[text()='${searchtype}']
       Click Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button/span[text()='${searchtype}']
 
       Input Text  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]//input[@aria-label='permission.manage_permissions_dialog.assign_permissions.resource_name_aria']  ${nametext}
-
-      #Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='4']/div[contains(@class, 'f-u-display-flex')]/div//button[@aria-label='Options menu']
-      #Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='4']/div[contains(@class, 'f-u-display-flex')]/div//button[@aria-label='Options menu']
       Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[5]/div//button[@aria-label='Options menu']
       Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[5]/div//button[@aria-label='Options menu']
       Wait Until Page Contains Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button[text()='${permissionvalue}']

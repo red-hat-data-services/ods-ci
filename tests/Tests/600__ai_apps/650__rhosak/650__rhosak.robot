@@ -34,7 +34,6 @@ Verify RHOSAK Is Available In RHODS Dashboard Explore Page
 Verify User Can Enable RHOSAK from Dashboard Explore Page
   [Tags]  Sanity  Smoke
   ...     ODS-392
-  [Teardown]  Remove RHOSAK From Dashboard
   Enable RHOSAK
   Capture Page Screenshot  kafka_enable_msg.png
   Verify Service Is Enabled  ${rhosak_displayed_appname}
@@ -43,6 +42,8 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
   Login to HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip RHOSAK Tour
   Wait Until Page Contains    Kafka Instances
+  Delete Configmap    name=rhosak-validation-result  namespace=redhat-ods-applications
+
 
 Verify User Is Able to Produce and Consume Events
   [Tags]  Sanity  Tier2
@@ -50,7 +51,6 @@ Verify User Is Able to Produce and Consume Events
   [Teardown]  Clean Up RHOSAK    stream_to_delete=${stream_name_test}
   ...                            topic_to_delete=${topic_name_test}
   ...                            sa_clientid_to_delete=${kafka_client_id}
-  ...                            rhosak_app_id=${rhosak_real_appname}
   Enable RHOSAK
   Verify Service Is Enabled  ${rhosak_displayed_appname}
   Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link

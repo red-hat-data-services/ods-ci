@@ -104,7 +104,6 @@ Remove Anaconda Commercial Edition Component
   Delete BuildConfig using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
   Delete ImageStream using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
   Delete Data From Secrets using Name   redhat-ods-applications   anaconda-ce-access      {"data":null}
-  Remove Disabled Application From Enabled Page   app_id=anaconda-ce
 
 Enable Anaconda
   [Arguments]  ${license_key}

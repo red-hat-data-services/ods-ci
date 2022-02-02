@@ -103,7 +103,10 @@ Assign Permissions To ServiceAccount in RHOSAK
       Click Element   xpath=//div[(@id='manage-permissions-modal') and (@class='pf-c-modal-box__body')]/form//div[@class='pf-c-select__menu']/li/button/span[text()='${sa_client_id}']
       Wait Until Element Is Enabled  xpath=//button[text()='Next']
       Click Button  Next
+      Run Keyword And Ignore Error  Wait For HCC Splash Page
       Wait Until Page Contains  Assign permissions
+      Wait Until Page Contains Element  xpath://button[text()='Add permissions']
+      Click Button    Add permission
 
       ${resource}=  Set Variable  ${resource_dict}[resource_name]
       ${searchtype}=  Set Variable  ${resource_dict}[search_type]

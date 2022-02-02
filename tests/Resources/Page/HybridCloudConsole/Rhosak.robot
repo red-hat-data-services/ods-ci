@@ -7,7 +7,8 @@ Resource        ../ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../ODH/AiApps/Rhosak.robot
 
 *** Variables ***
-${PERMISSION_GRID_XPATH_PREFIX}=  table[@aria-label='permission.table.table.permission_list_table']/tbody
+# ${PERMISSION_GRID_XPATH_PREFIX}=  table[@aria-label='permission.table.table.permission_list_table']/tbody
+${PERMISSION_GRID_XPATH_PREFIX}=  table[contains(@class,'pf-m-grid-md')]/tbody
 ${PERMISSION_GRID_BUTTON_XPATH_PREFIX}=  div/ul[@class='pf-c-select__menu']/li
 
 *** Keywords ***
@@ -105,7 +106,7 @@ Assign Permissions To ServiceAccount in RHOSAK
       Click Button  Next
       Run Keyword And Ignore Error  Wait For HCC Splash Page
       Wait Until Page Contains  Assign permissions
-      Wait Until Page Contains Element  xpath://button[text()='Add permissions']
+      Wait Until Page Contains Element  xpath://button[text()='Add permission']
       Click Button    Add permission
 
       ${resource}=  Set Variable  ${resource_dict}[resource_name]
@@ -114,18 +115,23 @@ Assign Permissions To ServiceAccount in RHOSAK
       ${permissionvalue}=  Set Variable  ${resource_dict}[permissions_value]
 
       ${index}=  Set Variable  1
-      Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-label='Resource']//button[@aria-label='Options menu']
+      Wait Until Page Contains Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}
+      Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[1]//button[@aria-label='Options menu']
+      # Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-label='Resource']//button[@aria-label='Options menu']
       Wait Until Page Contains Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button[text()='${resource}']
       Click Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button[text()='${resource}']
 
-      Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='1']//button[@aria-label='Options menu']
+      Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[2]//button[@aria-label='Options menu']
+      # Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='1']//button[@aria-label='Options menu']
       Wait Until Page Contains Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button/span[text()='${searchtype}']
       Click Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button/span[text()='${searchtype}']
 
       Input Text  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]//input[@aria-label='permission.manage_permissions_dialog.assign_permissions.resource_name_aria']  ${nametext}
 
-      Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='4']/div[contains(@class, 'f-u-display-flex')]/div//button[@aria-label='Options menu']
-      Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='4']/div[contains(@class, 'f-u-display-flex')]/div//button[@aria-label='Options menu']
+      #Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='4']/div[contains(@class, 'f-u-display-flex')]/div//button[@aria-label='Options menu']
+      #Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[@data-key='4']/div[contains(@class, 'f-u-display-flex')]/div//button[@aria-label='Options menu']
+      Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[5]/div//button[@aria-label='Options menu']
+      Click Element  xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[5]/div//button[@aria-label='Options menu']
       Wait Until Page Contains Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button[text()='${permissionvalue}']
       Click Element  xpath=//${PERMISSION_GRID_BUTTON_XPATH_PREFIX}/button[text()='${permissionvalue}']
 

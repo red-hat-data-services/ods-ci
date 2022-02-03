@@ -146,7 +146,7 @@ Clean Up Server
   Sleep  2
   Maybe Close Popup
   Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
-  Sleep  2
+  Wait Until JupyterLab Code Cell Is Not Active
 
 Get User Notebook Pod Name
   [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyterhub-nb-ldap-2dadmin1)

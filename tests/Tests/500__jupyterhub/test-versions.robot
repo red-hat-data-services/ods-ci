@@ -30,12 +30,14 @@ Verify Libraries in Minimal Image
     @{additional_libs} =    Create List
     ${status} =  Verify Libraries In Base Image    s2i-minimal-notebook    ${additional_libs}
     Append To List  ${status_list}  ${status}
+    Run Keyword If  '${status}' == 'FAIL'  Fail  Shown and installed libraries for minimal image do not match
 
 Verify Libraries in SDS Image
     @{additional_libs} =    Create List
     Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4
     ${status} =  Verify Libraries In Base Image    s2i-generic-data-science-notebook    ${additional_libs}
     Append To List  ${status_list}  ${status}
+    Run Keyword If  '${status}' == 'FAIL'  Fail  Shown and installed libraries for SDS image do not match
 
 Verify Libraries in PyTorch Image
     [Tags]  ODS-215  ODS-216  ODS-217  ODS-218
@@ -43,6 +45,7 @@ Verify Libraries in PyTorch Image
     Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4
     ${status} =  Verify Libraries In Base Image    pytorch    ${additional_libs}
     Append To List  ${status_list}  ${status}
+    Run Keyword If  '${status}' == 'FAIL'  Fail  Shown and installed libraries for pytorch image do not match
 
 Verify Libraries in Tensorflow Image
     [Tags]  ODS-204  ODS-205  ODS-206  ODS-207
@@ -50,6 +53,7 @@ Verify Libraries in Tensorflow Image
     Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4
     ${status} =  Verify Libraries In Base Image    tensorflow    ${additional_libs}
     Append To List  ${status_list}  ${status}
+    Run Keyword If  '${status}' == 'FAIL'  Fail  Shown and installed libraries for tensorflow image do not match
 
 Verify All Images And Spawner
     [Tags]  ODS-340

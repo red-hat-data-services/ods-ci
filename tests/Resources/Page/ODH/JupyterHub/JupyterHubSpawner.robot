@@ -292,3 +292,32 @@ Maybe Handle Server Not Running Page
   IF  ${SNR_visible}==True
          Handle Server Not Running
   END
+
+Get Container Size
+   [Documentation]   This keyword capture the size from JH spawner page based on container size
+   [Arguments]  ${container_size}
+   Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawne
+   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
+   IF  ${version-check}==True
+      Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+   ELSE
+      Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[3]/button
+   END
+   Wait Until Page Contains Element         xpath://span[.="${container_size}"]/../..  timeout=10
+   ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
+   ${l_data}   Convert To Lower Case    ${data}
+   ${data}    Get Formated Container Size To Dictionary     ${l_data}
+   [Return]  ${data}
+
+Get Formated Container Size To Dictionary
+   [Documentation]   This is the helper keyword to format the size and convert it to Dictionary
+   [Arguments]     ${data}
+   ${limit}    Split String     ${data}
+   ${idx}      Get Index From List    ${limit}    requests:
+   &{f_dict}      Create Dictionary
+   &{limits}   Create Dictionary
+   &{req}      Create Dictionary
+   Set To Dictionary    ${limits}     ${limit[2]}[:-1]=${limit[1]}     ${limit[4]}=${limit[3]}
+   Set To Dictionary    ${req}    ${limit[${idx} + ${2}]}[:-1]=${limit[${idx} + ${1}]}    ${limit[${idx} + ${4}]}=${limit[${idx} + ${3}]}
+   Set To Dictionary    ${f_dict}       limits=${limits}          requests=${req}
+   [Return]    ${f_dict}

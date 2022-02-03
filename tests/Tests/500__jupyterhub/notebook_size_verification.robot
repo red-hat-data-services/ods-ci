@@ -34,7 +34,7 @@ Dashboard Test Teardown
     Close All Browsers
 
 Spawn Notebook And Verify Size
-
+    [Documentation]    This keyword captures and compare resource requests/limits from JH and notebook pod
     FOR    ${container_size}   IN   @{notebook_size}
            ${jh_container_size}      Get Container Size    ${container_size}
            Spawn Notebook With Arguments    size=${container_size}

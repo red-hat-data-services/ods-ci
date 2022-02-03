@@ -19,3 +19,15 @@ OCP_ADMIN_USER:
 S3:
   AWS_ACCESS_KEY_ID: ID-value
   AWS_SECRET_ACCESS_KEY: Secret-Key
+ANACONDA_CE:
+  ACTIVATION_KEY: license-key
+SSO:
+  USERNAME: rh-sso-account
+  PASSWORD: rh-sso-account-pw
+RHOSAK_CONFIG_TEST:
+  STREAM_REGION: stream-aws-region
+  CLOUD_PROVIDER: stream-cloud-provider
+  STREAM_NAME: stream-test-name
+  SERVICE_ACCOUNT: stream-test-sa
+  TOPIC_NAME: stream-test-topic
+  CONSUMER_GROUP: stream-test-cg

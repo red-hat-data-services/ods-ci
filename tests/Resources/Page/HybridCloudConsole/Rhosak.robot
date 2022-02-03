@@ -2,9 +2,9 @@
 Documentation       Collection of keywords to interact with RHOSAK
 
 Library             SeleniumLibrary
-Resource            HCCLogin.robot
-Resource            ../Components/Menu.robot
-Library             OpenShiftCLI
+Library         OpenShiftCLI
+Resource        HCCLogin.robot
+Resource        ../Components/Menu.robot
 Resource        ../ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../ODH/AiApps/Rhosak.robot
 

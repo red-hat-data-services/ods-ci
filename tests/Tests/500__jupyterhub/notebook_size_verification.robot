@@ -21,7 +21,7 @@ ${namespace}           rhods-notebooks
 Verify Spwaned Notebook Size
     [Tags]  Sanity   ODS-1072
      Launch JupyterHub Spawner From Dashboard
-     Spawan Notebook And Verify Size
+     Spawn Notebook And Verify Size
 
 *** Keywords ***
 Dashboard Test Setup
@@ -33,7 +33,7 @@ Dashboard Test Setup
 Dashboard Test Teardown
     Close All Browsers
 
-Spawan Notebook And Verify Size
+Spawn Notebook And Verify Size
 
     FOR    ${container_size}   IN   @{notebook_size}
            ${jh_container_size}      Get Container Size    ${container_size}

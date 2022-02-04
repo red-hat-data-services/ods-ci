@@ -35,3 +35,9 @@ End Web Test
         Capture Page Screenshot
     END
     Close Browser
+
+Load Json File
+    [Arguments]   ${file_path}
+    ${j_file}    Get File    ${file_path}
+    ${obj}    Evaluate    json.loads('''${j_file}''')    json
+    [Return]    ${obj}

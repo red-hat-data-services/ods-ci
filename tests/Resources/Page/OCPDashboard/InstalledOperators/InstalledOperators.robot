@@ -153,16 +153,17 @@ Check If Operator Is Already Installed In Opneshift
     [Return]  ${status}
 
 Check And Install Operator in Openshift
-  [Documentation]   This keyword verify if operator is already installed or not
-  ...               If not installed it matched the no of operator present and installs the operator
-  [Arguments]   ${operator_name}    ${operator_appname}   ${expected_number_operator}=2
-  ${status}      Check If Operator Is Already Install In Opneshift    ${operator_name}
-  IF  not ${status}
-         Open OperatorHub
-         ${actual_no_of_operator}    Get The Number of Operator Available    ${operator_appname}
-         IF  ${actual_no_of_operator} == ${expected_number_operator}
-             Install Operator      ${operator_appname}
-         ELSE
-                  FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Opearatorhub
-         END
-  END
+    [Documentation]   This keyword verify if operator is already installed or not
+    ...               If not installed it matched the no of operator present and installs the operator
+    [Arguments]       ${operator_name}    ${operator_appname}   ${expected_number_operator}=2
+    ${status}       Check If Operator Is Already Installed In Opneshift    ${operator_name}
+    IF  not ${status}
+        Open OperatorHub
+        ${actual_no_of_operator}    Get The Number of Operator Available    ${operator_appname}
+        IF  ${actual_no_of_operator} == ${expected_number_operator}
+            Install Operator      ${operator_appname}
+        ELSE
+            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Opearatorhub
+
+        END
+    END

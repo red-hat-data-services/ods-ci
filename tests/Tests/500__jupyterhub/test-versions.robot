@@ -12,7 +12,7 @@ Suite Teardown   End Web Test
 @{status_list}
 
 *** Test Cases ***
-Verify Installed Libraries
+Open JupyterHub Spawner Page
     [Tags]  ODS-695
     Wait for RHODS Dashboard to Load
     ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
@@ -58,6 +58,8 @@ Verify Libraries in Tensorflow Image
 Verify All Images And Spawner
     [Tags]  ODS-340
     List Should Not Contain Value  ${status_list}  FAIL
+    ${length} =  Get Length  ${status_list}
+    Should Be Equal As Integers  ${length}  4
     Log To Console  ${status_list}
 
 *** Keywords ***

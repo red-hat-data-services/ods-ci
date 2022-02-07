@@ -87,6 +87,8 @@ Create Service Account From Connection Menu
 Assign Permissions To ServiceAccount in RHOSAK
   [Arguments]  ${sa_client_id}  ${sa_to_assign}  ${topic_to_assign}  ${cg_to_assign}
   Reload Page
+  Run Keyword And Ignore Error    Wait For HCC Splash Page
+  Wait Until Page Contains Element    xpath://button[text()='Manage access']
   &{topic_read_permissions}=  Create Dictionary  resource_name=Topic  search_type=Is  name_text=${topic_to_assign}  permissions_value=Read
   &{topic_write_permissions}=  Create Dictionary  resource_name=Topic  search_type=Is  name_text=${topic_to_assign}  permissions_value=Write
   &{cg_permissions}=  Create Dictionary  resource_name=Consumer group  search_type=Is  name_text=${cg_to_assign}  permissions_value=Read

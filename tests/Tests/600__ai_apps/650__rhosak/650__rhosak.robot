@@ -60,7 +60,6 @@ Verify User Is Able to Produce and Consume Events
   Wait Until Page Contains    Create Kafka instance
   ## Create kafka stream
   Create Kafka Stream Instance  stream_name=${stream_name_test}  stream_region=${stream_region_test}  cloud_provider=${cloud_provider_test}
-  Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
   Wait Until Keyword Succeeds    450  1  Check Stream Status  target_status=Ready  target_stream=${stream_name_test}
   ## Create service account
   Click From Actions Menu  search_col=Name  search_value=${stream_name_test}  action=Connection

@@ -1,0 +1,27 @@
+#########################################################
+# Robocop configuration for ods-ci coding style guide   #
+#########################################################
+
+#########################################################
+# Excluded rules                                        #
+#########################################################
+--exclude could-be-forced-tags
+--exclude if-can-be-used
+--exclude todo-in-comment
+#--exclude missing-doc-suite
+#--exclude missing-doc-test-case
+#--exclude missing-doc-keyword
+
+#########################################################
+# Code quality gates                                    #
+#########################################################
+#--configure return_status:quality_gate:E=0:W=769:I=79
+
+#########################################################
+# Rule configuration                                    #
+#########################################################
+# too-many-calls-in-keyword  (default = 10)
+#--configure too-many-calls-in-keyword:max_calls:12
+
+# line-too-long:line_length (default = 120)
+#--configure line-too-long:line_length:130

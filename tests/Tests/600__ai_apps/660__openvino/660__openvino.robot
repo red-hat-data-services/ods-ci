@@ -1,9 +1,17 @@
 *** Settings ***
 Resource        ../../../Resources/Page/LoginPage.robot
-Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource        ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource        ../../../Resources/Page/ODH/AiApps/AiApps.resource
 Library         SeleniumLibrary
 Suite Setup     OpenVino Suite Setup
 Suite Teardown  OpenVino Suite Teardown
+
+*** Variables ***
+${openvino_appname}           ovms
+${openvino_container_name}    OpenVINO
+${openvino_operator_name}    OpenVINO Toolkit Operator
 
 *** Test Cases ***
 Verify OpenVino Is Available In RHODS Dashboard Explore Page
@@ -14,7 +22,19 @@ Verify OpenVino Is Available In RHODS Dashboard Explore Page
   Verify Service Is Available In The Explore Page    OpenVINO
   Verify Service Provides "Get Started" Button In The Explore Page    OpenVINO
 
-* Keywords ***
+Verify Openvino Operator Can Be Installed Using OpenShift Console
+   [Tags]  ODS-675   ODS-702  Sanity
+   [Documentation]  This Test Case Installed Openvino operator in Openshift cluster
+   ...               and Check and Launch AIKIT notebook image from RHODS dashboard
+   Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
+   Create Tabname Instance For Installed Operator        ${openvino_operator_name}       Notebook    redhat-ods-applications
+   Wait Until Keyword Succeeds    900  1     Check Image Build Status   Complete     openvino-notebook
+   Go To RHODS Dashboard
+   Verify Service Is Enabled          ${openvino_container_name}
+   Verify JupyterHub Can Spawn Openvino Notebook
+   [Teardown]   Uninstall Openvino Operator
+
+*** Keywords ***
 OpenVino Suite Setup
   Set Library Search Order  SeleniumLibrary
 

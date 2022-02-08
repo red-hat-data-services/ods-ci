@@ -33,6 +33,24 @@ Verify Content In RHODS Explore Section
     Check Number Of Displayed Cards Is Correct  expected_data=${EXP_DATA_DICT}
     Check Cards Details Are Correct   expected_data=${EXP_DATA_DICT}
 
+Verify Documentation Link Https status code
+    [Tags]  Sanity
+    ...     ODS-327  ODS-492
+    Click Link    Resources
+    Sleep  2
+    #get the documentation link
+    ${href_view_the_doc}=  Get Element Attribute    xpath=//*[@id="root"]/div/div[2]/div/div/div[1]/div/main/div[1]/div/div/div/section/div/p/a    href
+    ${status_for_view_the_doc}=  Get HTTP Status Code    ${href_view_the_doc}
+    Log To Console  ${href_view_the_doc} gets status code ${status_for_view_the_doc}
+    #Click on question mark
+    Click Element    xpath=//*[@id="toggle-id"]
+    ${link_elements}=  Get WebElements    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
+    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
+        ${href}=  Get Element Attribute    ${ext_link}    href
+        ${status}=  Check HTTP Status Code   link_to_check=${href}
+        Log To Console  ${idx}.${href} gets status code ${status}
+    END
+
 
 *** Keywords ***
 Dashboard Test Setup

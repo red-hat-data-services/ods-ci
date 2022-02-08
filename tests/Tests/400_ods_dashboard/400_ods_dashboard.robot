@@ -94,7 +94,7 @@ Verify Documentation Link Https status code
     ${href_view_the_doc}=  Get Element Attribute    xpath=//*[@id="root"]/div/div[2]/div/div/div[1]/div/main/div[1]/div/div/div/section/div/p/a    href
     ${status_for_view_the_doc}=  Get HTTP Status Code    ${href_view_the_doc}
     Log To Console  ${href_view_the_doc} gets status code ${status_for_view_the_doc}
-    #Click on question mark
+    #Clicking on question mark
     Click Element    xpath=//*[@id="toggle-id"]
     ${link_elements}=  Get WebElements    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
     FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1

@@ -21,7 +21,7 @@ Test Teardown       Dashboard Test Teardown
 
 *** Variables ***
 ${namespace}        rhods-notebooks
-@{notebook_size}    Default                                                                         Small    Medium
+@{notebook_size}    Default    Small    Medium
 ${default_size}     {"limits":{"cpu":"2","memory":"8gi"},"requests":{"cpu":"1","memory":"4gi"}}
 ${custome_size}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","memory":"6gi"}}
 

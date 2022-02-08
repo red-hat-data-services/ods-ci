@@ -132,12 +132,16 @@ Spawn Notebook With Arguments
    [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
    ...              It will try again ${retries} times (Default: 1). Environment variables can be passed in as kwargs
    ...              By creating a dictionary beforehand, e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
-   [Arguments]  ${retries}=1  ${image}=s2i-generic-data-science-notebook  ${size}=Small  ${spawner_timeout}=600 seconds  &{envs}
+   [Arguments]  ${retries}=1  ${image}=s2i-generic-data-science-notebook  ${size}=Small  ${spawner_timeout}=600 seconds  ${refresh}=${False}  &{envs}
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword and Return Status    Wait Until JupyterHub Spawner Is Ready
       IF  ${spawner_ready}==True
          Select Notebook Image  ${image}
          Select Container Size  ${size}
+         IF   ${refresh}
+              Reload Page
+              Capture Page Screenshot    reload.png
+         END
          IF  &{envs}
             Remove All Spawner Environment Variables
             FOR  ${key}  ${value}  IN  &{envs}[envs]
@@ -145,7 +149,7 @@ Spawn Notebook With Arguments
                Add Spawner Environment Variable  ${key}  ${value}
             END
          END
-         Spawn Notebook
+         Wait Until Keyword Succeeds    30    1    Spawn Notebook
          Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
          Wait for JupyterLab Splash Screen  timeout=30
          Maybe Close Popup

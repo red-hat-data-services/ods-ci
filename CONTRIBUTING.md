@@ -17,11 +17,12 @@ When contributing to this repository, please first discuss the change you wish t
    ```git checkout -b add-test-ods-542-alerts```
 
 - Develop your feature and create a git commit:
+  - Before committing the code, verify that it is formatted following the _ODS-CI Robot Framework Style Guide_ (see [how](https://github.com/red-hat-data-services/ods-ci/blob/master/docs/check-code-style.md)
+)
   - Add your changes to the commit
     ```
     git add tests/Tests/200__monitor_and_manage/200__metrics/203__alerts.robot
     ```
-   - Check the code formatting following the steps at [check-code-style.md](https://github.com/red-hat-data-services/ods-ci/blob/master/docs/check-code-style.md)
 
    - Sign off your commit using the -s, --signoff option. Write a good commit message (see [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/))
     ```
@@ -32,7 +33,16 @@ When contributing to this repository, please first discuss the change you wish t
 
 - Push your changes:  ```git push```
 
-- Send a PR to ods-ci using Github's web interface
+- Send a PR to ods-ci using GitHub's web interface
+
+- If the PR can't be merged, rebase your branch to master:
+  ```
+  git remote add upstream https://github.com/red-hat-data-services/ods-ci
+  git fetch upstream
+  git checkout add-test-ods-542-alerts
+  git merge upstream/master
+  git push -f
+  ```
 
 - Test your PR in Jenkins using the rhods-ci-pr-test pipeline
    - https://opendatascience-jenkins-csb-rhods.apps.ocp-c1.prod.psi.redhat.com/job/rhods-ci-pr-test
@@ -42,7 +52,7 @@ When contributing to this repository, please first discuss the change you wish t
      - Select TEST_CLUSTER
      - Build
 
-- Once finished, add a comment to the PR with the test run results, and a link like in the example below:
+- Once finished, add a comment to the PR with the test run results, and a link like in the example below and add the label _Verified_ to the PR using GitHub interface:
 
   ```
   https://opendatascience-jenkins-csb-rhods.apps.ocp-c1.prod.psi.redhat.com/job/rhods-ci-pr-test/49/console

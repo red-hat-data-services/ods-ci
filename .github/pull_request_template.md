@@ -1,0 +1,4 @@
+- [ ] Commits are squashed in a cohesive manner and have meaningful messages (see [how](https://cbea.ms/git-commit))
+- [ ] Code is formatted following the _ODS-CI Robot Framework Style Guide_ (see [how](https://github.com/red-hat-data-services/ods-ci/blob/master/docs/check-code-style.md))
+- [ ] For new automated tests: _Automation = Automated_ in Polarion
+- [ ] For new automated tests: _Automated = Yes_ in Jira

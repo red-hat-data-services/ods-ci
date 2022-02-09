@@ -3,13 +3,9 @@ Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Library          DebugLibrary
 
 Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
-
-
-*** Variables ***
 
 
 *** Test Cases ***
@@ -39,19 +35,15 @@ Can Spawn Notebook
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
 
 Can Launch Python3 Notebook And Install Library
-  [Tags]  Sanity ODS-909
+  [Tags]  Sanity 
+  ...     ODS-257
   Add and Run JupyterLab Code Cell in Active Notebook  !pip install paramiko
   Add and Run JupyterLab Code Cell in Active Notebook  import paramiko
   Capture Page Screenshot
-
-  JupyterLab Code Cell Error Output Should Not Be Visible
-
   Wait Until JupyterLab Code Cell Is Not Active
+  JupyterLab Code Cell Error Output Should Not Be Visible
   Capture Page Screenshot
 
-  #Get the text of the last output cell
-  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-  Should Not Match  ${output}  ERROR*
 
   Stop JupyterLab Notebook Server
   Capture Page Screenshot
@@ -61,8 +53,10 @@ Can Launch Python3 Notebook And Install Library
   Capture Page Screenshot
 
   Add and Run JupyterLab Code Cell in Active Notebook  import paramiko
-  Notebook.Wait Until JupyterLab Kernel Is Idle  timeout 30
+  Wait Until JupyterLab Code Cell Is Not Active
+  
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-  Should Match  ${output}  "ModuleNotFoundError: No module named"*
+  Split String    ${output}, " "
+  Should Contain  ${output}  ModuleNotFoundError
   Capture Page Screenshot

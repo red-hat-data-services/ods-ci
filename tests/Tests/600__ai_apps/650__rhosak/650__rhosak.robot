@@ -41,7 +41,7 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
   Capture Page Screenshot  kafka_enable_msg.png
   Verify Service Is Enabled  ${RHOSAK_DISPLAYED_APPNAME}
   Capture Page Screenshot  kafka_enable_tab.png
-  Launch OpenShift Streams For Apache Kafka From RHODS Dashboard Link
+  Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link  # robocop: disable
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip RHOSAK Tour
   Wait Until Page Contains    Kafka Instances
@@ -56,7 +56,7 @@ Verify User Is Able to Produce and Consume Events
   ...                            sa_clientid_to_delete=${KAFKA_CLIENT_ID}
   Enable RHOSAK
   Verify Service Is Enabled  ${RHOSAK_DISPLAYED_APPNAME}
-  Launch OpenShift Streams For Apache Kafka From RHODS Dashboard Link
+  Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link   # robocop: disable
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip RHOSAK Tour
   Sleep  5

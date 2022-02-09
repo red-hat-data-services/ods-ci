@@ -92,7 +92,7 @@ Verify Documentation Link Https status code
     Sleep  2
     #get the documentation link
     ${href_view_the_doc}=  Get Element Attribute    xpath=//*[@id="root"]/div/div[2]/div/div/div[1]/div/main/div[1]/div/div/div/section/div/p/a    href
-    ${status_for_view_the_doc}=  Get HTTP Status Code    ${href_view_the_doc}
+    ${status_for_view_the_doc}=  Check HTTP Status Code    ${href_view_the_doc}
     Log To Console  ${href_view_the_doc} gets status code ${status_for_view_the_doc}
     #Clicking on question mark
     Click Element    xpath=//*[@id="toggle-id"]

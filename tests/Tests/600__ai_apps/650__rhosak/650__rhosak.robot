@@ -42,7 +42,7 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
     Capture Page Screenshot    kafka_enable_msg.png
     Verify Service Is Enabled    ${RHOSAK_DISPLAYED_APPNAME}
     Capture Page Screenshot    kafka_enable_tab.png
-    Launch OpenShift Streams For Apache Kafka From RHODS Dashboard Link    # robocop: disable
+    Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link    # robocop: disable
     Login To HCC    ${SSO.USERNAME}    ${SSO.PASSWORD}
     Maybe Skip RHOSAK Tour
     Wait Until Page Contains    Kafka Instances
@@ -53,7 +53,7 @@ Verify User Is Able to Produce and Consume Events
     [Tags]    Sanity    Tier2    ODS-248    ODS-247    ODS-246    ODS-245    ODS-243    ODS-241    ODS-239    ODS-242
     Enable RHOSAK
     Verify Service Is Enabled    ${RHOSAK_DISPLAYED_APPNAME}
-    Launch OpenShift Streams For Apache Kafka From RHODS Dashboard Link    # robocop: disable
+    Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link    # robocop: disable
     Login To HCC    ${SSO.USERNAME}    ${SSO.PASSWORD}
     Maybe Skip RHOSAK Tour
     Sleep    5

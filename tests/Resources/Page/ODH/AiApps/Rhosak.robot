@@ -28,10 +28,10 @@ Open Consumer Notebook
 
 Enable RHOSAK
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    ${rhosak_displayed_appname}  timeout=30
-  Click Element     xpath://*[@id='${rhosak_real_appname}']
-  Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10   error=${rhosak_real_appname} does not have sidebar with information in the Explore page of ODS Dashboard
-  Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${rhosak_real_appname} does not have a "Enable" button in ODS Dashboard
+  Wait Until Page Contains    ${RHOSAK_DISPLAYED_APPNAME}  timeout=30
+  Click Element     xpath://*[@id='${RHOSAK_REAL_APPNAME}']
+  Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10   error=${RHOSAK_REAL_APPNAME} does not have sidebar with information in the Explore page of ODS Dashboard
+  Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${RHOSAK_REAL_APPNAME} does not have a "Enable" button in ODS Dashboard
   Click Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
   Wait Until Page Contains Element    xpath://div[contains(@id, 'pf-modal-part')]
   Click Button    xpath://footer/button[text()='Enable']

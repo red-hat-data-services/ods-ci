@@ -11,6 +11,43 @@ Test Teardown   Dashboard Test Teardown
 ${RHOSAK_REAL_APPNAME}=         rhosak
 ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
+Check All Links Are working
+  [Documentation]  Verify the all links after appling a filter
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
+  ${len}=  Get Length    ${link_elements}
+  Log To Console    ${len} Links found\n
+  FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
+      ${href}=  Get Element Attribute    ${ext_link}    href
+      ${status}=  Get HTTP Status Code   ${href}
+      Log To Console    ${idx}. ${href} gets status code ${status}
+  END
+
+Check For enabled option
+  [Documentation]  Filter Resources by enabling "enabled" from enable state
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
+  ${len}=  Get Length    ${link_elements}
+  Select Checkbox  id=enabled-filter-checkbox--check-box
+  sleep  10s
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
+  ${lent}=  Get Length    ${link_elements}
+  Should Not Be Equal As Integers  ${len}  ${lent}
+  Check All Links Are working
+  Click Element  id=enabled-filter-checkbox--check-box
+  sleep  5s
+
+Check for not enabled option
+  [Documentation]  Filter Resources by enabling "not enabled" from enable state
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
+  ${len}=  Get Length    ${link_elements}
+  Select Checkbox  id=not-enabled-filter-checkbox--check-box
+  sleep  10s
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
+  ${lent}=  Get Length    ${link_elements}
+  Should Not Be Equal As Integers  ${len}  ${lent}
+  Check All Links Are working
+  Click Element  id=not-enabled-filter-checkbox--check-box
+  sleep  5s
+
 
 *** Test Cases ***
 Verify Resource Link Http status code
@@ -84,6 +121,17 @@ Verify CSS Style Of Getting Started Descriptions
     Open Get Started Sidebar And Return Status    card_locator=${JH_CARDS_XP}
     Capture Page Screenshot    get_started_sidebar.png
     Verify JupyterHub Card CSS Style
+
+Go to RHODS Dashboard, Resources And Filter By enabled state
+  [Documentation]  check if it is possible to filter items by enable state or application
+  [Tags]  ODS-489
+  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  wait for RHODS Dashboard to Load
+  Click Link    Resources
+  sleep  10s
+  Check For enabled option
+  Check for not enabled option
 
 
 *** Keywords ***

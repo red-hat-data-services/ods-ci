@@ -1,10 +1,11 @@
 *** Settings ***
 Documentation       NOTEBOOK_SIZE_VERIFICATION
-...                 Verify spawned server pod has the correct resource requests/limits
+...                 Verify spawned notebook server and it's respective pod
+...                 has the correct resource CPU and memory requests/limits
 ...
 ...                 = Variables =
-...                 | Namespace    | Required |    RHODS Namespace/Project for notebook POD |
-...                 | Notebook size    | Required |    List of container size present on JH page|
+...                 | Namespace       | Required |    RHODS Namespace/Project for notebook POD |
+...                 | Notebook size   | Required |    List of container size present on JH page|
 ...                 | Default size    | Required |    Default container size for Default notebook size|
 ...                 | Custome size    | Required |    Custome conatiner size for Default notebook size|
 
@@ -28,16 +29,17 @@ ${custome_size}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","
 
 *** Test Cases ***
 Verify Spwaned Notebook Size
-    [Documentation]    This test suite refersh and verify the available container
-    ...    size spec with actual assign to notebook pod
+    [Documentation]    Check the available container size spec
+    ...    with actual assign to spwaned notebook pod
     [Tags]    Sanity    ODS-1072
-
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook And Verify Size
 
 Verify Custome Spwaned Notebook Size
-    [Documentation]    This test suite modify and verify it the default notebook conatiner size spec
+    [Documentation]    Modify and verify the default notebook conatiner size spec
+    ...    with spwaned notebook pod and set back to default size
     [Tags]    Sanity    ODS-318
+    ...       ODS-1071
     Launch JupyterHub Spawner From Dashboard
     Modify Default Container Size
     ${d_continer_size}    Create List    Default
@@ -58,7 +60,8 @@ Dashboard Test Teardown
     Close All Browsers
 
 Spawn Notebook And Verify Size
-    [Documentation]    This keyword captures and compare resource requests/limits from JH and notebook pod
+    [Documentation]    Capture and compare CPU/memory resource
+    ...    between JH and notebook pod
     [Arguments]    ${size}=${default_size}    ${notebook_size}=${notebook_size}
     FOR    ${container_size}    IN    @{notebook_size}
         IF    $container_size == 'Default'
@@ -79,11 +82,11 @@ Spawn Notebook And Verify Size
     END
 
 Modify Default Container Size
-    [Documentation]    This keyword is standlone keyword to modify the default container size
+    [Documentation]    Modify the default container size using oc command
     ${output}    Run Process    sh ${CURDIR}/odh_jh_global_profile.sh modify    shell=yes
     Should Not Contain    ${output.stdout}    FAIL
 
 Restore Default Container Size
-    [Documentation]    This keyword is standlone keyword to modify the default container size
+    [Documentation]    Restore default container size using oc command
     ${output}    Run Process    sh ${CURDIR}/odh_jh_global_profile.sh default    shell=yes
     Should Not Contain    ${output.stdout}    FAIL

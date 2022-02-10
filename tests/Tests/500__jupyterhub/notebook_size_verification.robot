@@ -21,10 +21,10 @@ Test Teardown       Dashboard Test Teardown
 
 
 *** Variables ***
-${namespace}        rhods-notebooks
-@{notebook_size}    Default    Small    Medium
-${default_size}     {"limits":{"cpu":"2","memory":"8gi"},"requests":{"cpu":"1","memory":"4gi"}}
-${custome_size}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","memory":"6gi"}}
+${NAMESPACE}        rhods-notebooks
+@{NOTEBOOK_SIZE}    Default    Small    Medium
+${DEFAULT_SIZE}     {"limits":{"cpu":"2","memory":"8gi"},"requests":{"cpu":"1","memory":"4gi"}}
+${CUSTOME_SIZE}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","memory":"6gi"}}
 
 
 *** Test Cases ***
@@ -43,7 +43,7 @@ Verify Custome Spwaned Notebook Size
     Launch JupyterHub Spawner From Dashboard
     Modify Default Container Size
     ${d_continer_size}    Create List    Default
-    Spawn Notebook And Verify Size    size=${custome_size}    notebook_size=${d_continer_size}
+    Spawn Notebook And Verify Size    size=${CUSTOME_SIZE}    NOTEBOOK_SIZE=${d_continer_size}
     Restore Default Container Size
 
 
@@ -62,8 +62,8 @@ Dashboard Test Teardown
 Spawn Notebook And Verify Size
     [Documentation]    Capture and compare CPU/memory resource
     ...    between JH and notebook pod
-    [Arguments]    ${size}=${default_size}    ${notebook_size}=${notebook_size}
-    FOR    ${container_size}    IN    @{notebook_size}
+    [Arguments]    ${size}=${DEFAULT_SIZE}    ${NOTEBOOK_SIZE}=${NOTEBOOK_SIZE}
+    FOR    ${container_size}    IN    @{NOTEBOOK_SIZE}
         IF    $container_size == 'Default'
             ${jh_container_size}    Evaluate    json.loads('''${size}''')    json
         ELSE
@@ -72,7 +72,7 @@ Spawn Notebook And Verify Size
         Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=${container_size}    refresh=${True}
         ${notebook_pod_name}    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
         ${status}    Run
-        ...    oc get pods -n ${namespace} ${notebook_pod_name} -o jsonpath='{.spec.containers[0].resources}'
+        ...    oc get pods -n ${NAMESPACE} ${notebook_pod_name} -o jsonpath='{.spec.containers[0].resources}'
         ${data}    Convert To Lower Case    ${status}
         ${dict_pod_data}    Evaluate    json.loads('''${data}''')    json
         Run Keyword And Continue On Failure    Run Keyword If    &{dict_pod_data} != &{jh_container_size}    Fail

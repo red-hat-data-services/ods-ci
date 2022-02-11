@@ -3,7 +3,8 @@ Library         SeleniumLibrary
 
 *** Keywords ***
 Is SSO Login Page Visible
-  ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in to your Red Hat account
+  ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain Element    xpath://body[@id='rh-login']
+  # ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in to your Red Hat account
   [Return]  ${login_prompt_visible}
 
 Wait For HCC Splash Page

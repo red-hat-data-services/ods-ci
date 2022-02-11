@@ -292,3 +292,25 @@ Maybe Handle Server Not Running Page
   IF  ${SNR_visible}==True
          Handle Server Not Running
   END
+
+Fetch Image Description Info
+    [Arguments]  ${img}
+    ${xpath_img_description} =  Set Variable  //input[contains(@id, "${img}")]/../span
+    ${text} =  Get Text  ${xpath_img_description}
+    ${text} =  Fetch From Left  ${text}  ,
+    [Return]  ${text}
+
+Fetch Image Tooltip Info
+    [Arguments]  ${img}
+    ${xpath_img_tooltip} =  Set Variable  //input[contains(@id, "${img}")]/../label/span/*
+    ${xpath_tooltip_items} =  Set Variable  //span[@class='jsp-spawner__image-options__packages-popover__package']
+    @{tmp-list} =  Create List
+    Click Element  ${xpath_img_tooltip}
+    ${libs} =  Get Element Count  ${xpath_tooltip_items}
+    FOR  ${index}  IN RANGE  1  1+${libs}
+        Sleep  0.1s
+        ${item} =  Get Text  ${xpath_tooltip_items}\[${index}]
+        Append To List  ${tmp-list}  ${item}
+    END
+    Click Element  //div[@class='jsp-app__header__title']
+    [Return]  ${tmp-list}

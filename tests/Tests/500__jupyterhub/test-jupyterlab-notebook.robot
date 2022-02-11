@@ -42,7 +42,6 @@ Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity  ODS-906
   Add and Run JupyterLab Code Cell in Active Notebook  import os
   Add and Run JupyterLab Code Cell in Active Notebook  print("Hello World!")
-  Python Version Check
   Capture Page Screenshot
 
   JupyterLab Code Cell Error Output Should Not Be Visible

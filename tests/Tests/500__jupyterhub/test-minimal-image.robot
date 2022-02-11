@@ -45,7 +45,6 @@ Can Launch Python3 Smoke Test Notebook
 
   Add and Run JupyterLab Code Cell in Active Notebook  import os
   Run Cell And Check Output  print("Hello World!")  Hello World!
-  Python Version Check
 
   Capture Page Screenshot
   JupyterLab Code Cell Error Output Should Not Be Visible

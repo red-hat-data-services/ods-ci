@@ -31,4 +31,10 @@ Dependent Build should not Present
      Run Keyword IF     not ${isExist}        Log    Build attached to Build config has been deleted
      ...        ELSE    FAIL       Attached Build to Build config is not deleted
 
-
+Check Image Build Status
+  [Arguments]  ${target_status}     ${build_name}   ${namespace}=redhat-ods-applications
+  ${build_status}=  Get Build Status    namespace=${namespace}  build_search_term=${build_name}
+  Run Keyword If    "${build_status}" == "${target_status}"
+  ...    Log   The '${build_name}' image match the expected target status
+  ...  ELSE
+  ...    Fail  The '${build_name}' image build status doesn't match the target status '${target_status}'

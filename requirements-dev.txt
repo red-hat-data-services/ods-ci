@@ -1,1 +1,3 @@
 robotframework-lsp
+robotframework-robocop
+robotframework-tidy

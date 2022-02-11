@@ -143,16 +143,10 @@ Clean Up Server
   Sleep  1
   Maybe Close Popup
   Open With JupyterLab Menu  File  New  Notebook
-  Sleep  1
+  Sleep  2
   Maybe Close Popup
-  Open With JupyterLab Menu  File  Open from Path…
-  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  Untitled.ipynb
-  Click Element  xpath://div[.="Open"]
-  Maybe Close Popup
-  Wait Until Untitled.ipynb JupyterLab Tab Is Selected
-  Sleep  5
   Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
-
+  Wait Until JupyterLab Code Cell Is Not Active
 
 Get User Notebook Pod Name
   [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyterhub-nb-ldap-2dadmin1)
@@ -342,3 +336,36 @@ Get JupyterLab Code Output In a Given Tab
 
 Select ${filename} Tab
   Click Element    xpath:${JL_TABBAR_CONTENT_XPATH}/li/div[.="${filename}"]
+
+Verify Installed Library Version
+    [Arguments]  ${lib}  ${ver}
+    ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
+    Run Keyword If  '${status}' == 'FAIL'  Log  "Expected ${lib} at version ${ver}, but ${value}"
+    [Return]    ${status}
+
+Check Versions In JupyterLab
+    [Arguments]  ${libraries-to-check}
+    ${return_status} =    Set Variable    PASS
+    FOR  ${libString}  IN  @{libraries-to-check}
+        # libString = LibName vX.Y -> libDetail= [libName, X.Y]
+        @{libDetail} =  Split String  ${libString}  ${SPACE}v
+        IF  "${libDetail}[0]" == "TensorFlow"
+            ${status} =  Verify Installed Library Version  tensorflow-gpu  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+        ELSE IF  "${libDetail}[0]" == "PyTorch"
+            ${status} =  Verify Installed Library Version  torch  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+        ELSE IF  "${libDetail}[0]" == "Python"
+            ${status} =  Python Version Check  ${libDetail}[1]
+        ELSE
+            ${status} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+        END
+    END
+    [Return]  ${return_status}

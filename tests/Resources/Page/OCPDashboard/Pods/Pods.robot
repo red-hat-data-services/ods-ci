@@ -1,5 +1,6 @@
 *** Settings ***
 Library    OpenShiftCLI
+Library    OperatingSystem
 Resource   ../../OCPDashboard/Page.robot
 Resource   ../../ODH/ODHDashboard/ODHDashboard.robot
 Library    ../../../../libs/Helpers.py
@@ -31,3 +32,15 @@ Check If POD Exists
     ${status}     ${val}       Run keyword and Ignore Error   OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=${label_selector}
     [Return]   ${status}
 
+Verify Operator Pod Status
+    [Documentation]    Verify Pod status
+    [Arguments]  ${namespace}   ${label_selector}  ${expected_status}=Running
+    ${pod_name}    Get POD Name    ${namespace}    ${label_selector}
+    ${status}   Run   oc get pods -n ${namespace} ${pod_name} -o jsonpath='{.status.phase}'
+    Run Keyword IF   $status != $expected_status     Fail     RHODS operator status is not matching with the exepected state
+
+Get POD Name
+    [Documentation]    Get the POD name based on namespace and label selector
+    [Arguments]   ${namespace}   ${label_selector}
+    ${data}       Run keyword   OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=${label_selector}      #name=rhods-operator
+    [Return]      ${data[0]['metadata']['name']}

@@ -297,6 +297,7 @@ Maybe Handle Server Not Running Page
          Handle Server Not Running
   END
 
+
 Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
@@ -325,3 +326,25 @@ Get Formated Container Size To Dictionary
    Set To Dictionary    ${req}    ${limit[${idx} + ${2}]}[:-1]=${limit[${idx} + ${1}]}    ${limit[${idx} + ${4}]}=${limit[${idx} + ${3}]}
    Set To Dictionary    ${f_dict}       limits=${limits}          requests=${req}
    [Return]    ${f_dict}
+
+Fetch Image Description Info
+    [Arguments]  ${img}
+    ${xpath_img_description} =  Set Variable  //input[contains(@id, "${img}")]/../span
+    ${text} =  Get Text  ${xpath_img_description}
+    ${text} =  Fetch From Left  ${text}  ,
+    [Return]  ${text}
+
+Fetch Image Tooltip Info
+    [Arguments]  ${img}
+    ${xpath_img_tooltip} =  Set Variable  //input[contains(@id, "${img}")]/../label/span/*
+    ${xpath_tooltip_items} =  Set Variable  //span[@class='jsp-spawner__image-options__packages-popover__package']
+    @{tmp-list} =  Create List
+    Click Element  ${xpath_img_tooltip}
+    ${libs} =  Get Element Count  ${xpath_tooltip_items}
+    FOR  ${index}  IN RANGE  1  1+${libs}
+        Sleep  0.1s
+        ${item} =  Get Text  ${xpath_tooltip_items}\[${index}]
+        Append To List  ${tmp-list}  ${item}
+    END
+    Click Element  //div[@class='jsp-app__header__title']
+    [Return]  ${tmp-list}

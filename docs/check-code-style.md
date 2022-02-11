@@ -64,3 +64,11 @@ Robocop is a tool that performs static code analysis of Robot Framework code.
   robotidy tests/Tests/.../203__alerts.robot --overwrite
   ```
 
+- Some transformers are not enabled because they aren't 100% reliable. We can run them manually if we want:
+  ```
+  # Example for running the RenameKeywords transformer:
+  #  - We set --config /dev/null to force not to use the default config file (robotidy.toml)
+  #  - Warning: RenameKeywords has only basic support for keywords with embedded variables - use it on your own risk
+  robotidy --config /dev/null --transform RenameKeywords  tests/Resources/Page/ODH/ODHDashboard/ODHDashboard.robot --diff --no-overwrite
+  robotidy --config /dev/null --transform RenameKeywords  tests/Resources/Page/ODH/ODHDashboard/ODHDashboard.robot --diff --overwrite
+  ```

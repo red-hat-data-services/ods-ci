@@ -302,12 +302,7 @@ Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
    Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawne
-   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.5.0
-   IF  ${version-check}==True
-      Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
-   ELSE
-      Click Element  xpath:/html/body/div[1]/form/div/div/div[3]/div[3]/button
-   END
+   Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
    Wait Until Page Contains Element         xpath://span[.="${container_size}"]/../..  timeout=10
    ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
    ${l_data}   Convert To Lower Case    ${data}

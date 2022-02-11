@@ -369,3 +369,21 @@ Check Versions In JupyterLab
         END
     END
     [Return]  ${return_status}
+
+Install And Import Package In JupyterLab
+    [Documentation]  Install any Package and import it
+    [Arguments]  ${package}
+    Add and Run JupyterLab Code Cell in Active Notebook  !pip install ${package}
+    Add and Run JupyterLab Code Cell in Active Notebook  import ${package}
+    Wait Until JupyterLab Code Cell Is Not Active
+    JupyterLab Code Cell Error Output Should Not Be Visible
+    Capture Page Screenshot
+
+Verify Package Is Not Installed In JupyterLab
+    [Documentation]  Check Package is not Installed
+    [Arguments]  ${package_name}
+    Add and Run JupyterLab Code Cell in Active Notebook  import ${package_name}
+    Wait Until JupyterLab Code Cell Is Not Active
+    ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    ${output}   Split String     ${output}   \n\n   
+    Should Match  ${output[-1]}   ModuleNotFoundError: No module named '${package_name}'

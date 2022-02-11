@@ -1,8 +1,8 @@
 FROM centos:centos8
 
 # Use this build arg to set any default test script arguments
-ARG RUN_SCRIPT_ARGS=
 ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
+ENV ROBOT_EXTRA_ARGS=${ROBOT_EXTRA_ARGS}
 
 ENV HOME /tmp
 
@@ -23,4 +23,9 @@ RUN chgrp -R 0 /tmp && chmod -R g=u /tmp
 
 USER 1001
 
-CMD ./run_robot_test.sh --skip-pip-install ${RUN_SCRIPT_ARGS}
+CMD if [ -n "${RUN_SCRIPT_ARGS}" ]; then \
+	        ./run_robot_test.sh --skip-pip-install ${RUN_SCRIPT_ARGS} --extra-robot-args "'${ROBOT_EXTRA_ARGS}'" ;\
+     else \
+            ./run_robot_test.sh --skip-pip-install ${RUN_SCRIPT_ARGS};\
+     fi
+

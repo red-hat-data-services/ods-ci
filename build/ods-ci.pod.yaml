@@ -29,6 +29,9 @@ spec:
         # Use this environment variable to pass args to the ods-ci run script in the container
         - name: RUN_SCRIPT_ARGS
           value: "--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml"
+        - name: ROBOT_EXTRA_ARGS
+          # value: INSERT ROBOT FRAMEWORK ARGS OR LEAVE EMPTY. e.g., -i Smoke. Write inside the quotes
+          value: ""
       volumeMounts:
           # Mount the test-variables to prevent leaking secure info for the cluster you test against
         - name: ods-ci-test-variables

@@ -9,7 +9,7 @@ Is SSO Login Page Visible
 
 Wait For HCC Splash Page
    Wait Until Page Contains Element    xpath://span[contains(@class, 'pf-c-spinner')]   timeout=15
-   Wait Until Page Does Not Contain Element    xpath://span[contains(@class, 'pf-c-spinner')]   timeout=15
+   Wait Until Page Does Not Contain Element    xpath://span[contains(@class, 'pf-c-spinner')]   timeout=20
    Sleep    3
 
 Login to HCC

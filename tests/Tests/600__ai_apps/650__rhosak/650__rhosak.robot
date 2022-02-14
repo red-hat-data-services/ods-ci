@@ -51,47 +51,47 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
 Verify User Is Able to Produce and Consume Events
   [Tags]  Sanity  Tier2
   ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239  ODS-242
-  [Teardown]  Clean Up RHOSAK    stream_to_delete=${stream_name_test}
-  ...                            topic_to_delete=${topic_name_test}
-  ...                            sa_clientid_to_delete=${kafka_client_id}
-  ...                            rhosak_app_id=${rhosak_real_appname}
+  [Teardown]  Clean Up RHOSAK    stream_to_delete=${STREAM_NAME_TEST}
+  ...                            topic_to_delete=${TOPIC_NAME_TEST}
+  ...                            sa_clientid_to_delete=${KAFKA_CLIENT_ID}
+  ...                            rhosak_app_id=${RHOSAK_REAL_APPNAME}
   Enable RHOSAK
-  Verify Service Is Enabled  ${rhosak_displayed_appname}
+  Verify Service Is Enabled  ${RHOSAK_DISPLAYED_APPNAME}
   Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link
   Login to HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip RHOSAK Tour
   Sleep  5
   Wait Until Page Contains    Create Kafka instance
   ## Create kafka stream
-  Create Kafka Stream Instance  stream_name=${stream_name_test}  stream_region=${stream_region_test}  cloud_provider=${cloud_provider_test}
-  Search Item By Name and Owner in RHOSAK Table  name_search_term=${stream_name_test}  owner_search_term=${SSO.USERNAME}
-  Wait Until Keyword Succeeds    450  1  Check Stream Status  target_status=Ready  target_stream=${stream_name_test}
+  Create Kafka Stream Instance  stream_name=${STREAM_NAME_TEST}  stream_region=${STREAM_REGION_TEST}  cloud_provider=${CLOUD_PROVIDER_TEST}
+  Search Item By Name and Owner in RHOSAK Table  name_search_term=${STREAM_NAME_TEST}  owner_search_term=${SSO.USERNAME}
+  Wait Until Keyword Succeeds    450  1  Check Stream Status  target_status=Ready  target_stream=${STREAM_NAME_TEST}
   ## Create service account
-  Click From Actions Menu  search_col=Name  search_value=${stream_name_test}  action=Connection
+  Click From Actions Menu  search_col=Name  search_value=${STREAM_NAME_TEST}  action=Connection
   Wait Until Page Contains Element  xpath=//input[@aria-label="Bootstrap server"]
   ${bootstrap_server}=  Get Element Attribute    xpath=//input[@aria-label="Bootstrap server"]  value
-  ${kafka_sa_creds}=  Create Service Account From Connection Menu  sa_description=${service_account_test}
-  ${kafka_client_id}=  Set Variable  ${kafka_sa_creds}[kafka_client_id]
-  ${kafka_client_secret}=  Set Variable  ${kafka_sa_creds}[kafka_client_secret]
+  ${kafka_sa_creds}=  Create Service Account From Connection Menu  sa_description=${SERVICE_ACCOUNT_TEST}
+  ${KAFKA_CLIENT_ID}=  Set Variable  ${kafka_sa_creds}[KAFKA_CLIENT_ID]
+  ${KAFKA_CLIENT_SECRET}=  Set Variable  ${kafka_sa_creds}[KAFKA_CLIENT_SECRET]
   ## Create topic
-  Enter Stream  stream_name=${stream_name_test}
+  Enter Stream  stream_name=${STREAM_NAME_TEST}
   Enter Stream Topics Section
   # Wait For HCC Splash Page
-  Create Topic  topic_name_to_create=${topic_name_test}
-  Page Should Contain Element    xpath=//a[text()='${topic_name_test}']
+  Create Topic  topic_name_to_create=${TOPIC_NAME_TEST}
+  Page Should Contain Element    xpath=//a[text()='${TOPIC_NAME_TEST}']
   ## Assign permissions to SA
   Enter Stream Access Section
-  Assign Permissions To ServiceAccount in RHOSAK  sa_client_id=${kafka_client_id}  sa_to_assign=${service_account_test}
-  ...                                             topic_to_assign=${topic_name_test}  cg_to_assign=${consumer_group_test}
+  Assign Permissions To ServiceAccount in RHOSAK  sa_client_id=${KAFKA_CLIENT_ID}  sa_to_assign=${SERVICE_ACCOUNT_TEST}
+  ...                                             topic_to_assign=${TOPIC_NAME_TEST}  cg_to_assign=${CONSUMER_GROUP_TEST}
 
   ## Spawn a notebook with env variables
   Switch Window  title:Red Hat OpenShift Data Science Dashboard
   Wait for RHODS Dashboard to Load
   Launch JupyterHub Spawner From Dashboard
   Wait Until Page Contains Element  xpath://input[@name="Standard Data Science"]
-  &{notebook_envs}=  Create Dictionary  KAFKA_BOOTSTRAP_SERVER=${bootstrap_server}  KAFKA_USERNAME=${kafka_client_id}
-  ...                                   KAFKA_PASSWORD=${kafka_client_secret}  KAFKA_TOPIC=${topic_name_test}
-  ...                                   KAFKA_CONSUMER_GROUP=${consumer_group_test}
+  &{notebook_envs}=  Create Dictionary  KAFKA_BOOTSTRAP_SERVER=${bootstrap_server}  KAFKA_USERNAME=${KAFKA_CLIENT_ID}
+  ...                                   KAFKA_PASSWORD=${KAFKA_CLIENT_SECRET}  KAFKA_TOPIC=${TOPIC_NAME_TEST}
+  ...                                   KAFKA_CONSUMER_GROUP=${CONSUMER_GROUP_TEST}
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{notebook_envs}
   ## clone JL notebooks from git and run
   Clone Git Repository  REPO_URL=${GIT_REPO_NOTEBOOKS}

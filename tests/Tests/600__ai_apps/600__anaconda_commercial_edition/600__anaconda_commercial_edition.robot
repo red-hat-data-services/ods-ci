@@ -125,8 +125,7 @@ Enable Anaconda
   Wait Until Page Contains    Anaconda Commercial Edition  timeout=30
   Click Element     xpath://*[@id='${ANACONDA_APPNAME}']
   Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10
-  ...                                 error=${ANACONDA_APPNAME} does not have sidebar with
-  ...                                 information in the Explore page of ODS Dashboard
+  ...                                 error=${ANACONDA_APPNAME} does not have sidebar with information in the Explore page of ODS Dashboard
   Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
   ...                           message=${ANACONDA_APPNAME} does not have a "Enable" button in ODS Dashboard
   Click Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}

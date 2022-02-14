@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       collection of keywords to interact with RHOSAK
+Documentation       Collection of keywords to interact with RHOSAK
 
 Library             SeleniumLibrary
 Resource            HCCLogin.robot
@@ -15,7 +15,7 @@ ${PERMISSION_GRID_BUTTON_XPATH_PREFIX}=     div/ul[@class='pf-c-select__menu']/l
 
 *** Keywords ***
 Create Kafka Stream Instance
-    [Documentation]    Keyword to create a kafka stream from RHOSAK UI
+    [Documentation]    Creates a kafka stream from RHOSAK UI
     [Arguments]    ${stream_name}    ${stream_region}    ${cloud_provider}
     Click Button    Create Kafka instance
     Sleep    5
@@ -37,18 +37,18 @@ Create Kafka Stream Instance
     Wait Until Page Does Not Contain Element    xpath=//div[@id='modalCreateKafka']    timeout=10
 
 Check Stream Status
-    [Documentation]    Keyword to check the kafka stream status from RHOSAK UI
+    [Documentation]    Cehcks the kafka stream status from RHOSAK UI
     [Arguments]    ${target_status}    ${target_stream}
     ${status}=    Get Text
     ...    xpath=//tr[td[@data-label='Name' and (text()='${target_stream}' or *[text()='${target_stream}'])]]/td[@data-label='Status']
     Should Be Equal    ${status}    ${target_status}
 
 Check Stream Creation
-    [Documentation]    Keyword to continuosly check a kafka stream from RHOSAK UI
+    [Documentation]    Continuosly checks a kafka stream from RHOSAK UI
     Wait Until Keyword Succeeds    300    1    Check Stream Status    Ready
 
 Delete Kafka Stream Instance
-    [Documentation]    Keyword to delete a kafka stream from RHOSAK UI
+    [Documentation]    Deletes a kafka stream from RHOSAK UI
     [Arguments]    ${stream_name}
     Click From Actions Menu    search_col=Name    search_value=${stream_name}    action=Delete
     Wait Until Page Contains HCC Generic Modal
@@ -65,7 +65,7 @@ Delete Kafka Stream Instance
     ...    xpath=//tr/td[@data-label='Name' and (text()='${stream_name}' or *[text()='${stream_name}'])]
 
 Create Topic
-    [Documentation]    Keyword to create a topic in a kafka stream from RHOSAK UI
+    [Documentation]    Creates a topic in a kafka stream from RHOSAK UI
     [Arguments]    ${topic_name_to_create}
     Click Button    Create topic
     Run Keyword And Ignore Error    Wait For HCC Splash Page
@@ -80,7 +80,7 @@ Create Topic
     Run Keyword And Ignore Error    Wait For HCC Splash Page
 
 Create Service Account From Connection Menu
-    [Documentation]    Keyword to create a service account (SA) from RHOSAK UI
+    [Documentation]    Creates a service account (SA) from RHOSAK UI
     [Arguments]    ${sa_description}
     Wait Until Element Is Visible
     ...    xpath=//section[contains(@id, 'pf-tab-section-connection')]/div/button[text()='Create service account']
@@ -101,7 +101,7 @@ Create Service Account From Connection Menu
     [Return]    &{service_account_creds}
 
 Assign Permissions To ServiceAccount In RHOSAK
-    [Documentation]    Keyword to configure the SA's permission on a kafka stream from RHOSAK UI
+    [Documentation]    Configures the SA's permission on a kafka stream from RHOSAK UI
     [Arguments]    ${sa_client_id}    ${sa_to_assign}    ${topic_to_assign}    ${cg_to_assign}
     Reload Page
     Run Keyword And Ignore Error    Wait For HCC Splash Page
@@ -166,7 +166,7 @@ Assign Permissions To ServiceAccount In RHOSAK
     END
 
 Enter Stream
-    [Documentation]    Keyword to move inside the kafka stream page from RHOSAK UI
+    [Documentation]    Moves inside the kafka stream page from RHOSAK UI
     [Arguments]    ${stream_name}
     Wait Until Page Contains Element    xpath=//a[text()='${stream_name}']
     Click Link    xpath=//a[text()='${stream_name}']
@@ -178,7 +178,7 @@ Enter Stream ${sec Title} Section
     Run Keyword And Ignore Error    Wait For HCC Splash Page
 
 Click From Actions Menu
-    [Documentation]    Keyword to access actions menu of a kafka stream from RHOSAK UI
+    [Documentation]    Clicks button from actions menu of a kafka stream from RHOSAK UI
     [Arguments]    ${search_col}    ${search_value}    ${action}
     ${SEARCH_ROW_PATH}=    Set Variable
     ...    //tr[td[@data-label='${search_col}' and (text()='${search_value}' or *[text()='${search_value}'])]]
@@ -193,7 +193,7 @@ Click From Actions Menu
     Click Button    xpath=${TARGET_ACTION_PATH}
 
 Delete Stream Topic
-    [Documentation]    Keyword to delete a topic in a kafka stream from RHOSAK UI
+    [Documentation]    Deletes a topic in a kafka stream from RHOSAK UI
     [Arguments]    ${topic_to_delete}
     Click From Actions Menu    search_col=Name    search_value=${topic_to_delete}    action=Delete
     Wait Until Page Contains HCC Generic Modal
@@ -208,7 +208,7 @@ Delete Stream Topic
     Capture Page Screenshot    deletion_topic.png
 
 Delete Service Account By Client ID
-    [Documentation]    Keyword to delete a SA from RHOSAK UI
+    [Documentation]    Deletes a SA from RHOSAK UI
     [Arguments]    ${client_id_delete}
     Click From Actions Menu    search_col=Client ID    search_value=${client_id_delete}    action=Delete service account
     Wait Until Page Contains HCC Generic Modal
@@ -219,7 +219,7 @@ Delete Service Account By Client ID
     ...    xpath=//tr/td[@data-label='Client ID' and text()='${client_id_delete}']
 
 Clean Up RHOSAK
-    [Documentation]    Keyword to clean up all the RHOSAK created resources from RHOSAK and RHODS UI
+    [Documentation]    Cleans up all the RHOSAK created resources from RHOSAK and RHODS UI
     [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}
     OpenShiftCLI.Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Switch Window    title:Red Hat OpenShift Streams for Apache Kafka

@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Suite for testing integration with RHOSAK isv
+Documentation       Test integration with RHOSAK isv
 
 Library             SeleniumLibrary
 Library             OpenShiftCLI
@@ -29,14 +29,14 @@ ${KAFKA_CLIENT_SECRET}=         "placeholder"
 
 *** Test Cases ***
 Verify RHOSAK Is Available In RHODS Dashboard Explore Page
-    [Documentation]    Test Case to check RHOSAK card is present in RHODS Dashboard > Explore Page
+    [Documentation]    Checks RHOSAK card is present in RHODS Dashboard > Explore Page
     [Tags]    ODS-258    Smoke    Sanity
     Verify Service Is Available In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Provides "Get Started" Button In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Provides "Enable" Button In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
 
 Verify User Can Enable RHOSAK from Dashboard Explore Page
-    [Documentation]    Test Case to check it is possible to enable RHOSAK from RHODS Dashboard > Explore Page
+    [Documentation]    Checks it is possible to enable RHOSAK from RHODS Dashboard > Explore Page
     [Tags]    Sanity    Smoke    ODS-392
     Enable RHOSAK
     Capture Page Screenshot    kafka_enable_msg.png
@@ -49,7 +49,7 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
     Delete Configmap    name=rhosak-validation-result    namespace=redhat-ods-applications
 
 Verify User Is Able to Produce and Consume Events
-    [Documentation]    Test Case to check the end-2-end use case of RHOSAK
+    [Documentation]    Checks the end-2-end use case of RHOSAK
     [Tags]    Sanity    Tier2    ODS-248    ODS-247    ODS-246    ODS-245    ODS-243    ODS-241    ODS-239    ODS-242
     Enable RHOSAK
     Verify Service Is Enabled    ${RHOSAK_DISPLAYED_APPNAME}
@@ -116,15 +116,15 @@ Verify User Is Able to Produce and Consume Events
 
 *** Keywords ***
 Kafka Suite Setup
-    [Documentation]    Suite setup keyword for RHOSAK component
+    [Documentation]    Setup for RHOSAK Test Suite
     Set Library Search Order    SeleniumLibrary
 
 Kafka Suite Teardown
-    [Documentation]    Suite teardown keyword for RHOSAK component
+    [Documentation]    Teardown for Test Suite
     Close All Browsers
 
 Kafka Test Setup
-    [Documentation]    Test case setup keyword for RHOSAK component
+    [Documentation]    Setup for RHOSAK Test Cases
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load

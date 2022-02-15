@@ -64,6 +64,7 @@ Remove Test Users From Custom Groups
 Check New Access Configuration Works As Expected
     Go To RHODS Dashboard
     Launch JupyterHub From RHODS Dashboard Link
+    Reload Page   # for possible Gateway error after rolling out
     Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER.USERNAME}
     ...                                   ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    none
     Click Link    Logout
@@ -81,6 +82,7 @@ Check New Access Configuration Works As Expected
 Check Standard Access Configuration Works As Expected
     Go To RHODS Dashboard
     Launch JupyterHub From RHODS Dashboard Link
+    Reload Page   # for possible Gateway error after rolling out
     Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER.USERNAME}
     ...                                   ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    admin
     Click Link    Logout

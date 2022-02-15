@@ -66,8 +66,8 @@ Test User In JH Users Group
 Verify User Can Set Custom RHODS Groups
     [Tags]  Sanity
     ...     ODS-293
-    # Open OCP Console
-    Go To    ${OCP_CONSOLE_URL}
+    Open OCP Console
+    # Go To    ${OCP_CONSOLE_URL}
     Login To OCP
     Create Custom Groups
     Add Test Users To Custom Groups
@@ -81,4 +81,4 @@ Verify User Can Set Custom RHODS Groups
     Add Test Users Back To RHODS Standard Groups
     Remove Test Users From Custom Groups
     Delete Custom Groups
-    Check Standard Access Configuration Works As Expected
+    Check Standard Access nfiguration Works As Expected

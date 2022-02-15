@@ -1,4 +1,5 @@
 *** Settings ***
+Resource  ../../OCPDashboard/Deployments/Deployments.robot
 Library  Collections
 Library  ../../../../libs/Helpers.py
 Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
@@ -71,3 +72,7 @@ Verify JupyterHub Deployment
     Should Not Be Equal As Strings  ${leader}  None
     Should Be Equal As Strings  ${leader-found}  True
     Should Be Equal As Integers  ${standby}  2
+
+
+Rollout JupyterHub
+    Restart Rollout  deployment_name=jupyterhub  namespace=redhat-ods-applications

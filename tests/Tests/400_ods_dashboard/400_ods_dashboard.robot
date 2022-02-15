@@ -96,7 +96,7 @@ Verify Documentation Link Https status code
     Log To Console    ${href_view_the_doc} gets status code ${status_for_view_the_doc}
     # Clicking on question mark
     Click Element    xpath=//*[@id="toggle-id"]
-    ${link_elements}=    Get Link Elements
+    ${link_elements}=    Get Question Mark Links Elements
     FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
         ${href}=    Get Element Attribute    ${ext_link}    href
         ${status}=    Check HTTP Status Code    link_to_check=${href}

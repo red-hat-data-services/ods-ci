@@ -35,15 +35,15 @@ Verify Spwaned Notebook Size
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook And Verify Size
 
-Verify Custome Spwaned Notebook Size
+Verify Custom Spwaned Notebook Size
     [Documentation]    Modify and verify the default notebook conatiner size spec
     ...    with spwaned notebook pod and set back to default size
     [Tags]    Sanity    ODS-318
     ...       ODS-1071
     Launch JupyterHub Spawner From Dashboard
     Modify Default Container Size
-    ${d_continer_size}    Create List    Default
-    Spawn Notebook And Verify Size    size=${CUSTOME_SIZE}    NOTEBOOK_SIZE=${d_continer_size}
+    ${d_container_size}    Create List    Default
+    Spawn Notebook And Verify Size    size=${CUSTOME_SIZE}    NOTEBOOK_SIZE=${d_container_size}
     Restore Default Container Size
 
 

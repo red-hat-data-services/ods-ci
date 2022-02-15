@@ -13,6 +13,9 @@ Robocop is a tool that performs static code analysis of Robot Framework code.
 
   ```
   pip install -r requirements-dev.txt
+
+  # If you had them already but want to force upgrade to the latest version:
+  pip install --upgrade --force-reinstall -r requirements-dev.txt
   ```
 
 - Analyze one file or folder:

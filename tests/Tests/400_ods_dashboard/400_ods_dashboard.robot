@@ -1,10 +1,11 @@
 *** Settings ***
-Resource         ../../Resources/ODS.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource            ../../Resources/ODS.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+
 Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
-Test Setup      Dashboard Test Setup
-Test Teardown   Dashboard Test Teardown
+Test Setup          Dashboard Test Setup
+Test Teardown       Dashboard Test Teardown
 
 
 *** Variables ***
@@ -14,32 +15,30 @@ ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
 *** Test Cases ***
 Verify Resource Link Http status code
-    [Tags]  Sanity
-    ...     ODS-531  ODS-507
+    [Tags]    sanity    ods-531  ODS-507
     Click Link    Resources
-    Sleep  5
-    ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
-    ${len}=  Get Length    ${link_elements}
+    Sleep    5
+    ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
+    ${len}=    Get Length    ${link_elements}
     Log To Console    ${len} Links found\n
-    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
-        ${href}=  Get Element Attribute    ${ext_link}    href
-        ${status}=  Check HTTP Status Code   link_to_check=${href}
+    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
+        ${href}=    Get Element Attribute    ${ext_link}    href
+        ${status}=    Check HTTP Status Code    link_to_check=${href}
         Log To Console    ${idx}. ${href} gets status code ${status}
     END
 
 Verify Content In RHODS Explore Section
-    [Documentation]  It verifies if the content present in Explore section of RHODS corresponds to expected one.
-    ...              It compares the actual data with the one registered in a JSON file. The checks are about:
-    ...              - Card's details (text, badges, images)
-    ...              - Sidebar (titles, links text, links status)
-    [Tags]    Sanity
-    ...       ODS-488  ODS-993  ODS-749  ODS-352  ODS-282
+    [Documentation]    It verifies if the content present in Explore section of RHODS corresponds to expected one.
+    ...    It compares the actual data with the one registered in a JSON file. The checks are about:
+    ...    - Card's details (text, badges, images)
+    ...    - Sidebar (titles, links text, links status)
+    [Tags]    sanity    ods-488    ods-993  ODS-749  ODS-352  ODS-282
     ...       KnownIssues
-    ${EXP_DATA_DICT}=   Load Expected Data Of RHODS Explore Section
+    ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait Until Cards Are Loaded
-    Check Number Of Displayed Cards Is Correct  expected_data=${EXP_DATA_DICT}
-    Check Cards Details Are Correct   expected_data=${EXP_DATA_DICT}
+    Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
+    Check Cards Details Are Correct    expected_data=${EXP_DATA_DICT}
 
 Verify Disabled Cards Can Be Removed
     [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
@@ -86,36 +85,33 @@ Verify CSS Style Of Getting Started Descriptions
     Verify JupyterHub Card CSS Style
 
 Verify Documentation Link Https status code
-    [Documentation]  It verifies the documentation link present in question mark and
-    ...              also checks the RHODS dcoumentation link present in resource page.
-    [Tags]  Sanity
-    ...     ODS-327  ODS-492
+    [Documentation]    It verifies the documentation link present in question mark and
+    ...    also checks the RHODS dcoumentation link present in resource page.
+    [Tags]    sanity    ods-327    ods-492
     Click Link    Resources
-    Sleep  2
+    Sleep    2
     # get the documentation link
-    ${href_view_the_doc}=  Get Element Attribute    //a[@class='odh-dashboard__external-link']    href
-    ${status_for_view_the_doc}=  Check HTTP Status Code    ${href_view_the_doc}
-    Log To Console  ${href_view_the_doc} gets status code ${status_for_view_the_doc}
+    ${href_view_the_doc}=    Get Element Attribute    //a[@class='odh-dashboard__external-link']    href
+    ${status_for_view_the_doc}=    Check HTTP Status Code    ${href_view_the_doc}
+    Log To Console    ${href_view_the_doc} gets status code ${status_for_view_the_doc}
     # Clicking on question mark
     Click Element    xpath=//*[@id="toggle-id"]
-    ${link_elements}=  Get Link Elements
-    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
-        ${href}=  Get Element Attribute    ${ext_link}    href
-        ${status}=  Check HTTP Status Code   link_to_check=${href}
-        Log To Console  ${idx}.${href} gets status code ${status}
+    ${link_elements}=    Get Link Elements
+    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
+        ${href}=    Get Element Attribute    ${ext_link}    href
+        ${status}=    Check HTTP Status Code    link_to_check=${href}
+        Log To Console    ${idx}.${href} gets status code ${status}
     END
-
-
 
 *** Keywords ***
 Dashboard Test Setup
-  Set Library Search Order  SeleniumLibrary
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+    Set Library Search Order    SeleniumLibrary
+    Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
+    Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
 
 Dashboard Test Teardown
-  Close All Browsers
+    Close All Browsers
 
 Verify JupyterHub Card CSS Style
     [Documentation]     Compare the some CSS properties of the Explore page

@@ -1,6 +1,8 @@
 *** Settings ***
-Resource  ../../OCPDashboard/Deployments/Deployments.robot
+Resource    ../../OCPDashboard/DeploymentConfigs/DeploymentConfigs.robot
 Library  Collections
+Library   OpenShiftCLI
+
 Library  ../../../../libs/Helpers.py
 Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 
@@ -73,6 +75,23 @@ Verify JupyterHub Deployment
     Should Be Equal As Strings  ${leader-found}  True
     Should Be Equal As Integers  ${standby}  2
 
+Wait Until JH Deployment Is Ready
+    [Arguments]   ${retries}=50
+    FOR  ${index}  IN RANGE  0  1+${retries}
+        @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
+        ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
+        ${jh_status}=    Run Keyword And Return Status    Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
+        Exit For Loop If    $jh_status == True
+        Sleep    0.5
+    END
+    IF    $jh_status == False
+        Fail    Jupyter Deployment not ready. Checks the logs
+    END
+    Sleep   1
 
 Rollout JupyterHub
-    Restart Rollout  deployment_name=jupyterhub  namespace=redhat-ods-applications
+    Start Rollout   dc_name=jupyterhub  namespace=redhat-ods-applications
+    Wait Until JH Deployment Is Ready
+
+
+

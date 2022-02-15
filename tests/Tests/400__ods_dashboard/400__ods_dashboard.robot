@@ -1,7 +1,7 @@
 *** Settings ***
 Library         OpenShiftCLI
-Resource         ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
-Resource         ../../Resources/ODS.robot
+Resource        ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
+Resource        ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource

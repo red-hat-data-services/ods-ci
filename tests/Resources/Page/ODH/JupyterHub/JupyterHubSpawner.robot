@@ -141,6 +141,7 @@ Spawn Notebook With Arguments
          IF   ${refresh}
               Reload Page
               Capture Page Screenshot    reload.png
+              Wait Until JupyterHub Spawner Is Ready
          END
          IF  &{envs}
             Remove All Spawner Environment Variables
@@ -149,7 +150,7 @@ Spawn Notebook With Arguments
                Add Spawner Environment Variable  ${key}  ${value}
             END
          END
-         Wait Until Keyword Succeeds    30    1    Spawn Notebook
+         Spawn Notebook
          Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
          Wait for JupyterLab Splash Screen  timeout=30
          Maybe Close Popup

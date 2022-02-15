@@ -312,7 +312,7 @@ Re-validate License For Disabled Application From Enabled Page
 
 
 
-Get Link Elements
-    [Documentation]  It return the link elements [sessions and elements] from the question mark
+Get Question Mark Links Elements
+    [Documentation]  It returns the link elements from the question mark
     ${link_elements}=  Get WebElements    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
     [Return]  @{link_elements}

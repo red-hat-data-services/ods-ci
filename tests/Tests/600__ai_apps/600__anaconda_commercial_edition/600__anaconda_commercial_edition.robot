@@ -117,6 +117,7 @@ Remove Anaconda Commercial Edition Component
   ...               ocp_user_auth_type=${TEST_USER.AUTH_TYPE}  dashboard_url=${ODH_DASHBOARD_URL}
   ...               browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
   Remove Disabled Application From Enabled Page   app_id=anaconda-ce
+  Close All Browsers
 
 Enable Anaconda
   [Documentation]  Performs Anaconda activation

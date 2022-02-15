@@ -81,4 +81,4 @@ Verify User Can Set Custom RHODS Groups
     Add Test Users Back To RHODS Standard Groups
     Remove Test Users From Custom Groups
     Delete Custom Groups
-    Check Standard Access nfiguration Works As Expected
+    Check Standard Access Configuration Works As Expected

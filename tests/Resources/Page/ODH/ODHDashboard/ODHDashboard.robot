@@ -92,7 +92,7 @@ Remove Disabled Application From Enabled Page
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
    ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
-   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=90
+   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=120
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']

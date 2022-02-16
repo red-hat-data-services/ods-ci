@@ -55,7 +55,7 @@ Verify Disabled Cards Can Be Removed
     Capture Page Screenshot     after_removal.png
     Success Message Should Contain   ${RHOSAK_DISPLAYED_APPNAME}
 
-Verify Disabled Cards Can Be Re-validated
+Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     [Tags]    Sanity

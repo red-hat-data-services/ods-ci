@@ -17,7 +17,7 @@ Create Group
 
 Delete Group
     [Arguments]   ${group_name}
-    OpenShiftCLI.Delete  kind=Group   name=${group_name}"}
+    OpenShiftCLI.Delete  kind=Group   name=${group_name}
     # Run   oc delete group ${group_name}
 
 Add User To Group

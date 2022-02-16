@@ -294,3 +294,15 @@ Success Message Should Contain
     Wait Until Page Contains Element   xpath:${SUCCESS_MSG_XP}
     ${succ_msg}=   Get Text    xpath:${SUCCESS_MSG_XP}
     Run Keyword And Continue On Failure    Should Contain    ${succ_msg}    ${app_full_name}
+
+Re-validate License For Disabled Application From Enabled Page
+   [Documentation]  The keyword let you re-enable or remove the card from Enabled page
+   ...              for those application whose license is expired. You can control the action type
+   ...              by setting the "disable" argument to either "disable" or "enable".
+   [Arguments]  ${app_id}
+   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
+   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=120
+   Click Element  xpath:${card_disabled_xp}
+   Wait Until Page Contains   To remove card click
+   ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
+   Click Element  ${buttons_here}[0]

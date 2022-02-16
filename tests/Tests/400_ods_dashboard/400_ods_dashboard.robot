@@ -2,6 +2,7 @@
 Resource         ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
+Resource        ../../Resources/Page/ODH/AiApps/Anaconda.robot
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -40,7 +41,8 @@ Verify Content In RHODS Explore Section
     Check Cards Details Are Correct   expected_data=${EXP_DATA_DICT}
 
 Verify Disabled Cards Can Be Removed
-    [Documentation]     Verifies it is possible to remove a disabled card from Enabled page
+    [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
+    ...                 It uses RHOSAK as example to test the feature
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
     Enable RHOSAK
@@ -52,6 +54,27 @@ Verify Disabled Cards Can Be Removed
     Verify Service Is Not Enabled     app_name=${RHOSAK_DISPLAYED_APPNAME}
     Capture Page Screenshot     after_removal.png
     Success Message Should Contain   ${RHOSAK_DISPLAYED_APPNAME}
+
+Verify Disabled Cards Can Be Re-validated
+    [Documentation]   Verifies it is possible to re-validate the license of a disabled card
+    ...               from Enabled page. it uses Anaconda CE as example to test the feature.
+    [Tags]    Sanity
+    ...       ODS-1097
+    [Teardown]    Remove Anaconda Commercial Edition Component
+    Enable Anaconda  license_key=${ANACONDA_CE.ACTIVATION_KEY}
+    Menu.Navigate To Page    Applications    Enabled
+    Wait Until RHODS Dashboard JupyterHub Is Visible
+    Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
+    Close All Browsers
+    Delete ConfigMap Using Name    redhat-ods-applications   anaconda-ce-validation-result
+    Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
+    ...               ocp_user_auth_type=${TEST_USER.AUTH_TYPE}  dashboard_url=${ODH_DASHBOARD_URL}
+    ...               browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    Re-validate License For Disabled Application From Enabled Page     app_id=${ANACONDA_APPNAME}
+    Insert Anaconda License Key   license_key=${ANACONDA_CE.ACTIVATION_KEY}
+    Validate Anaconda License Key
+    Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
+    Success Message Should Contain   ${ANACONDA_DISPLAYED_NAME}
 
 
 *** Keywords ***

@@ -1,41 +1,45 @@
 *** Settings ***
-Force Tags       Sanity
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/gpu.resource
 Library          DebugLibrary
 Library          JupyterLibrary
 Library          Screenshot
 Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
 
-*** Variables ***
-
 
 *** Test Cases ***
 Minimal Tensorflow test
-  [Tags]  Regression
-  ...     PLACEHOLDER  #Category tags
-  ...     PLACEHOLDER  #Polarion tags
-  Wait for RHODS Dashboard to Load
-  ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
-  IF  ${version-check}==True
-    Launch JupyterHub From RHODS Dashboard Link
-  ELSE
-    Launch JupyterHub From RHODS Dashboard Dropdown
-  END
-  Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  ${authorization_required} =  Is Service Account Authorization Required
-  Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-  Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-  Fix Spawner Status
-  Spawn Notebook With Arguments  image=tensorflow  size=Default
+    [Documentation]    Spawns tensorflow image
+    [Tags]  Sanity
+    ...     PLACEHOLDER  #Category tags
+    ...     ODS-XYZ
+    Launch JupyterHub Spawner From Dashboard
+    Spawn Notebook With Arguments  image=tensorflow  size=Default
 
 Tensorflow Workload Test
-  [Tags]  Regression
-  ...     PLACEHOLDER  #category tags
-  ...     PLACEHOLDER  #Polarion tags
-  Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb 
-  Capture Page Screenshot
-  JupyterLab Code Cell Error Output Should Not Be Visible
+    [Documentation]    Runs tensorflow workload
+    [Tags]  Sanity
+    ...     PLACEHOLDER  #category tags
+    ...     ODS-XYZ
+    Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb 
+    Capture Page Screenshot
+    JupyterLab Code Cell Error Output Should Not Be Visible
+
+Tensorflow GPU Test
+    [Documentation]  Spawns Tensorflow image with GPU, confirms it can see it, runs a workload
+    [Tags]  Sanity
+    ...     Resources-GPU
+    ...     ODS-XYZ
+    Clean Up Server
+    Stop JupyterLab Notebook Server
+    Handle Start My Server
+    Wait Until JupyterHub Spawner Is Ready
+    Spawn Notebook With Arguments  image=tensorflow  size=Default  gpus=1
+    Verify Tensorflow Can See GPU
+    Run Repo and Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb 
+    Capture Page Screenshot
+    JupyterLab Code Cell Error Output Should Not Be Visible

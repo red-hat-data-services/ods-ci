@@ -13,7 +13,7 @@ Library   JupyterLibrary
 
 *** Variables ***
 ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =
-...   //div[contains(@class,"jsp-spawner__header__title") and .="Start a notebook server"]
+...   //div[contains(@class,"jsp-app__header__title") and .="Start a notebook server"]
 ${JUPYTERHUB_DROPDOWN_XPATH} =
 ...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
 
@@ -21,7 +21,7 @@ ${JUPYTERHUB_DROPDOWN_XPATH} =
 *** Keywords ***
 JupyterHub Spawner Is Visible
     [Documentation]  Checks if spawner is visibile and returns the status
-    ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
+    ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain Element  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
     [Return]  ${spawner_visible}
 
 Wait Until JupyterHub Spawner Is Ready
@@ -121,14 +121,14 @@ Spawn Notebook With Arguments  # robocop: disable
    ...              By creating a dictionary beforehand
    ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
    [Arguments]  ${retries}=1  ${image}=s2i-generic-data-science-notebook  ${size}=Small
-   ...    ${spawner_timeout}=600 seconds  ${gpu_check}=False  ${gpus}=0  &{envs}
+   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  &{envs}
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
       IF  ${spawner_ready}==True
          Select Notebook Image  ${image}
          Select Container Size  ${size}
-         IF  ${gpu_check}==True
-            Wait Until GPU Dropdown Exists
+         ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
+         IF  ${gpu_visible}==True
             Set Number Of Required GPUs  ${gpus}
          END
          IF  &{envs}
@@ -243,6 +243,7 @@ Fix Spawner Status
             Maybe Close Popup
             Close Other JupyterLab Tabs
             Add And Run JupyterLab Code Cell In Active Notebook  !rm -rf *
+            Wait Until JupyterLab Code Cell Is Not Active
             Open With JupyterLab Menu  File  Close All Tabs
             Maybe Close Popup
             Stop JupyterLab Notebook Server

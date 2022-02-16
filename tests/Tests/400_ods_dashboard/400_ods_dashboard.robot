@@ -1,8 +1,14 @@
 *** Settings ***
 Resource         ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
+
+
+*** Variables ***
+${RHOSAK_REAL_APPNAME}=         rhosak
+${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
 
 *** Test Cases ***
@@ -32,6 +38,20 @@ Verify Content In RHODS Explore Section
     Wait Until Cards Are Loaded
     Check Number Of Displayed Cards Is Correct  expected_data=${EXP_DATA_DICT}
     Check Cards Details Are Correct   expected_data=${EXP_DATA_DICT}
+
+Verify Disabled Cards Can Be Removed
+    [Documentation]     Verifies it is possible to remove a disabled card from Enabled page
+    [Tags]    Sanity
+    ...       ODS-1081    ODS-1092
+    Enable RHOSAK
+    OpenShiftCLI.Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
+    Close All Browsers
+    Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}
+    ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    Remove Disabled Application From Enabled Page    app_id=${RHOSAK_REAL_APPNAME}
+    Verify Service Is Not Enabled     app_name=${RHOSAK_DISPLAYED_APPNAME}
+    Capture Page Screenshot     after_removal.png
+    Success Message Should Contain   ${RHOSAK_DISPLAYED_APPNAME}
 
 
 *** Keywords ***

@@ -40,8 +40,7 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
-  Enable Anaconda  ${INVALID_KEY}
-  Wait Until Keyword Succeeds    30  1  Check Connect Button Status  false
+  Enable Anaconda  license_key=${INVALID_KEY}     license_validity=${FALSE}
   Capture Page Screenshot  anaconda_failed_activation.png
   ${text}=  Get Text  xpath://*[@class="pf-c-form__alert"]
   Should Be Equal  ${text}  ${ERROR_MSG}
@@ -61,7 +60,6 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
   Enable Anaconda  ${ANACONDA_CE.ACTIVATION_KEY}
-  # Wait Until Keyword Succeeds    50  1  Page Should Not Contain Element    xpath://*/div[contains(@class, "bullseye")]
   Capture Page Screenshot  anaconda_success_activation.png
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible
@@ -90,6 +88,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
+
 
 
 *** Keywords ***

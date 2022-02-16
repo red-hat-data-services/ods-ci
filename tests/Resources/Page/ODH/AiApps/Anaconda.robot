@@ -19,7 +19,7 @@ ${TOKEN_VAL_SUCCESS_MSG}=  Success! Your token was validated and Conda has been 
 *** Keywords ***
 Enable Anaconda
   [Documentation]  Performs Anaconda activation
-  [Arguments]  ${license_key}
+  [Arguments]  ${license_key}   ${license_validity}=${TRUE}
   Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    Anaconda Commercial Edition  timeout=30
   Click Element     xpath://*[@id='${ANACONDA_APPNAME}']
@@ -29,7 +29,7 @@ Enable Anaconda
   ...                           message=${ANACONDA_APPNAME} does not have a "Enable" button in ODS Dashboard
   Click Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
   Insert Anaconda License Key   license_key=${license_key}
-  Validate Anaconda License Key
+  Validate Anaconda License Key      license_validity=${license_validity}
 
 Insert Anaconda License Key
   [Arguments]   ${license_key}
@@ -37,8 +37,14 @@ Insert Anaconda License Key
   Input Text    xpath://*[@id='${ANACONDA_KEY_IN}']    ${license_key}
 
 Validate Anaconda License Key
+  [Arguments]     ${license_validity}=${TRUE}
   Click Button    Connect
-  Wait Until Keyword Succeeds    50  1  Page Should Not Contain Element    xpath://*/div[contains(@class, "bullseye")]
+  IF    ${license_validity} == ${TRUE}
+      Wait Until Keyword Succeeds    50  1  Page Should Not Contain Element    xpath://*/div[contains(@class, "bullseye")]
+  ELSE IF   ${license_validity} == ${FALSE}
+      Wait Until Keyword Succeeds    30  1  Check Connect Button Status  false
+  END
+
 
 Check Connect Button Status
   [Documentation]  Checks the "Connect" button status of ACE's card in Explore page.

@@ -132,12 +132,17 @@ Spawn Notebook With Arguments
    [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
    ...              It will try again ${retries} times (Default: 1). Environment variables can be passed in as kwargs
    ...              By creating a dictionary beforehand, e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
-   [Arguments]  ${retries}=1  ${image}=s2i-generic-data-science-notebook  ${size}=Small  ${spawner_timeout}=600 seconds  &{envs}
+   [Arguments]  ${retries}=1  ${image}=s2i-generic-data-science-notebook  ${size}=Small  ${spawner_timeout}=600 seconds  ${refresh}=${False}  &{envs}
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword and Return Status    Wait Until JupyterHub Spawner Is Ready
       IF  ${spawner_ready}==True
          Select Notebook Image  ${image}
          Select Container Size  ${size}
+         IF   ${refresh}
+              Reload Page
+              Capture Page Screenshot    reload.png
+              Wait Until JupyterHub Spawner Is Ready
+         END
          IF  &{envs}
             Remove All Spawner Environment Variables
             FOR  ${key}  ${value}  IN  &{envs}[envs]
@@ -292,6 +297,31 @@ Maybe Handle Server Not Running Page
   IF  ${SNR_visible}==True
          Handle Server Not Running
   END
+
+
+Get Container Size
+   [Documentation]   This keyword capture the size from JH spawner page based on container size
+   [Arguments]  ${container_size}
+   Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawne
+   Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+   Wait Until Page Contains Element         xpath://span[.="${container_size}"]/../..  timeout=10
+   ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
+   ${l_data}   Convert To Lower Case    ${data}
+   ${data}    Get Formated Container Size To Dictionary     ${l_data}
+   [Return]  ${data}
+
+Get Formated Container Size To Dictionary
+   [Documentation]   This is the helper keyword to format the size and convert it to Dictionary
+   [Arguments]     ${data}
+   ${limit}    Split String     ${data}
+   ${idx}      Get Index From List    ${limit}    requests:
+   &{f_dict}      Create Dictionary
+   &{limits}   Create Dictionary
+   &{req}      Create Dictionary
+   Set To Dictionary    ${limits}     ${limit[2]}[:-1]=${limit[1]}     ${limit[4]}=${limit[3]}
+   Set To Dictionary    ${req}    ${limit[${idx} + ${2}]}[:-1]=${limit[${idx} + ${1}]}    ${limit[${idx} + ${4}]}=${limit[${idx} + ${3}]}
+   Set To Dictionary    ${f_dict}       limits=${limits}          requests=${req}
+   [Return]    ${f_dict}
 
 Fetch Image Description Info
     [Arguments]  ${img}

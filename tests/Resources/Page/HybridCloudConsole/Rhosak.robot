@@ -1,11 +1,12 @@
 *** Settings ***
-Documentation   Collection of keywords to interact with RHOSAK
-Library         SeleniumLibrary
-Library         OpenShiftCLI
-Resource        HCCLogin.robot
-Resource        ../Components/Menu.robot
-Resource        ../ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../ODH/AiApps/Rhosak.robot
+Documentation       Collection of keywords to interact with RHOSAK
+
+Library             SeleniumLibrary
+Library             OpenShiftCLI
+Resource            HCCLogin.robot
+Resource            ../Components/Menu.robot
+Resource            ../ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../ODH/AiApps/Rhosak.robot
 
 
 *** Variables ***
@@ -94,7 +95,7 @@ Create Service Account From Connection Menu
     ${KAFKA_CLIENT_ID}=    Get Element Attribute    xpath=//input[@aria-label='Client ID']    value
     ${KAFKA_CLIENT_SECRET}=    Get Element Attribute    xpath=//input[@aria-label='Client secret']    value
     &{service_account_creds}=    Create Dictionary    KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID}
-    ...                                               KAFKA_CLIENT_SECRET=${KAFKA_CLIENT_SECRET}
+    ...    KAFKA_CLIENT_SECRET=${KAFKA_CLIENT_SECRET}
     Select Checkbox    xpath=//input[@class='pf-c-check__input']
     Wait Until Element Is Enabled    xpath=//button[@data-testid='modalCredentials-buttonClose']
     Click Button    xpath=//button[@data-testid='modalCredentials-buttonClose']
@@ -211,7 +212,8 @@ Delete Stream Topic
 Delete Service Account By Client ID
     [Documentation]    Deletes a SA from RHOSAK UI
     [Arguments]    ${client_id_delete}
-    Click From Actions Menu    search_col=Client ID    search_value=${client_id_delete}    action=Delete service account
+    Click From Actions Menu    search_col=Client ID    search_value=${client_id_delete}
+    ...    action=Delete service account
     Wait Until Page Contains HCC Generic Modal
     Click Button    Delete
     Wait Until Page Does Not Contains HCC Generic Modal
@@ -221,7 +223,7 @@ Delete Service Account By Client ID
 
 Clean Up RHOSAK
     [Documentation]    Cleans up all the RHOSAK created resources from RHOSAK and RHODS UI
-    [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}  ${rhosak_app_id}
+    [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}    ${rhosak_app_id}
     OpenShiftCLI.Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Switch Window    title:Red Hat OpenShift Streams for Apache Kafka
     Menu.Navigate To Page    Streams for Apache Kafka    Kafka Instances
@@ -236,6 +238,7 @@ Clean Up RHOSAK
     Click Link    Service Accounts
     Delete Service Account By Client ID    client_id_delete=${sa_clientid_to_delete}
     Close All Browsers
-    Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}
-    ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    Remove Disabled Application From Enabled Page   app_id=${rhosak_app_id}
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    browser_options=${BROWSER.OPTIONS}
+    Remove Disabled Application From Enabled Page    app_id=${rhosak_app_id}

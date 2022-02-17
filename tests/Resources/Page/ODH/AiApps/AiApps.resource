@@ -1,3 +1,3 @@
 *** Settings ***
-Resource        Openvino.robot
-Resource        Aikit.robot
+Resource    Openvino.robot
+Resource    Aikit.robot

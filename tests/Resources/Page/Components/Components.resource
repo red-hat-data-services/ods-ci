@@ -1,2 +1,2 @@
 *** Settings ***
-Resource  Menu.robot
+Resource    Menu.robot

@@ -1,2 +1,2 @@
 *** Settings ***
-Resource  Prometheus.robot
+Resource    Prometheus.robot

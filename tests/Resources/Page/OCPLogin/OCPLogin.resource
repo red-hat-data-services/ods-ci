@@ -1,3 +1,3 @@
 *** Settings ***
-Resource  ../LoginPage.robot
-Resource  OCPLogin.robot
+Resource    ../LoginPage.robot
+Resource    OCPLogin.robot

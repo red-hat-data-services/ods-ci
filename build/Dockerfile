@@ -1,4 +1,4 @@
-FROM centos:centos8
+FROM registry.access.redhat.com/ubi8/ubi:8.1
 
 # Use this build arg to set any default test script arguments
 ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}

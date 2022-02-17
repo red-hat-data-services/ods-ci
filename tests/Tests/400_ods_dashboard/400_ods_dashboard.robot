@@ -73,8 +73,9 @@ Verify License Of Disabled Cards Can Be Re-validated
     Re-validate License For Disabled Application From Enabled Page     app_id=${ANACONDA_APPNAME}
     Insert Anaconda License Key   license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Validate Anaconda License Key
-    Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
     Success Message Should Contain   ${ANACONDA_DISPLAYED_NAME}
+    Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
+
 
 
 *** Keywords ***

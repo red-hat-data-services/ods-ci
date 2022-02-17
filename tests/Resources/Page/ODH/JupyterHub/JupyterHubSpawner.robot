@@ -21,7 +21,8 @@ ${JUPYTERHUB_DROPDOWN_XPATH} =
 *** Keywords ***
 JupyterHub Spawner Is Visible
     [Documentation]  Checks if spawner is visibile and returns the status
-    ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain Element  xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
+    ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain Element
+    ...    xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
     [Return]  ${spawner_visible}
 
 Wait Until JupyterHub Spawner Is Ready
@@ -130,6 +131,8 @@ Spawn Notebook With Arguments  # robocop: disable
          ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
          IF  ${gpu_visible}==True
             Set Number Of Required GPUs  ${gpus}
+         ELSE IF  ${gpu_visible}==False and ${gpus}>0
+            Fail  GPUs required but not available
          END
          IF  &{envs}
             Remove All Spawner Environment Variables

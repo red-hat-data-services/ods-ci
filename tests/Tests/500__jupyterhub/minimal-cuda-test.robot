@@ -4,38 +4,50 @@ Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/gpu.resource
+Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
 Library          JupyterLibrary
-Suite Setup      Begin Web Test
+Suite Setup      Verify CUDA Image Suite Setup
 Suite Teardown   End Web Test
 
 
+*** Variables ***
+${NOTEBOOK_IMAGE} =         minimal-gpu
+${EXPECTED_CUDA_VERSION} =  11.4
+
+
 *** Test Cases ***
-Spawn CUDA Image
+Verify CUDA Image Can Be Spawned With GPU
     [Documentation]    Spawns CUDA image with 1 GPU
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-XYZ
-    Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=minimal-gpu  size=Default  gpus=1
+    Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
-Minimal CUDA Verification
+Verify CUDA Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-XYZ
-    Verify Installed CUDA Version  11.4
+    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
-Verify PyTorch Can See GPUs
+Verify PyTorch Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs PyTorch and verifies it can see the GPU
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-XYZ
-    Verify Pytorch Can See GPU  install=True
+    Verify Pytorch Can See GPU    install=True
 
-Verify Tensorflow Can See GPUs
+Verify Tensorflow Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs Tensorflow and verifies it can see the GPU
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-XYZ
-    Verify Tensorflow Can See GPU  install=True
+    Verify Tensorflow Can See GPU    install=True
+
+
+*** Keywords ***
+Verify CUDA Image Suite Setup
+    [Documentation]    Suite Setup, spawns CUDA img with one GPU attached
+    Begin Web Test
+    Launch JupyterHub Spawner From Dashboard
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1

@@ -14,10 +14,7 @@ ${JLAB CSS ACTIVE DOC}              .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE CELL}             ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
 ${JLAB CSS ACTIVE INPUT}            ${JLAB CSS ACTIVE CELL} .CodeMirror
 ${JLAB XP NB TOOLBAR FRAG}          [contains(@class, 'jp-NotebookPanel-toolbar')]
-${JLAB CSS ACTIVE DOC}              .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE DOC CELLS}        ${JLAB CSS ACTIVE DOC} .jp-Cell
-${JLAB CSS ACTIVE CELL}             ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
-${JLAB CSS ACTIVE INPUT}            ${JLAB CSS ACTIVE CELL} .CodeMirror
 
 
 *** Keywords ***

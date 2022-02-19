@@ -4,7 +4,7 @@ Documentation    TC to verify Pip changes are not permenemt
 
 Resource         ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource         ../../Resources/Common.robot
-Suite Setup      Dashboard Test Setup
+Suite Setup      Test Setup
 Suite Teardown   End Web Test
 
 
@@ -26,7 +26,7 @@ Verify pip Changes not permenant
 
 
 *** Keywords ***
-Dashboard Test Setup
+Test Setup
     [Documentation]  Added customized Setup
     Begin Web Test
     Wait for RHODS Dashboard to Load

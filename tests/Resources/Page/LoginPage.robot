@@ -43,7 +43,7 @@ Login To Openshift
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
     # FIXME: replace this sleep for something more efficient, considering that this method is used for
     # authentication in OpenShift Console, but also RHODS dashboard and other places
-    Sleep  20
+    Sleep  10
     # FIXME: this only applies to login to OpenShift Console, but this method is used
     # for authentication in RHODS dashboard and other places
     Maybe Skip Tour

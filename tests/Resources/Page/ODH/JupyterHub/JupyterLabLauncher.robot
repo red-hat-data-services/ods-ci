@@ -99,25 +99,30 @@ Stop JupyterLab Notebook Server
     Capture Page Screenshot
   END
 
-
 Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out
 
 Run Cell And Check For Errors
-  [Arguments]  ${input}
-  Add and Run JupyterLab Code Cell in Active Notebook  ${input}
-  Wait Until JupyterLab Code Cell Is Not Active
-  #Get the text of the last output cell
-  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-  Should Not Match  ${output}  ERROR*
+    [Arguments]  ${input}
+    Add and Run JupyterLab Code Cell in Active Notebook  ${input}
+    Wait Until JupyterLab Code Cell Is Not Active
+    ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    Should Not Match  ${output}  ERROR*
 
 Run Cell And Check Output
-  [Arguments]  ${input}  ${expected_output}
-  Add and Run JupyterLab Code Cell in Active Notebook  ${input}
-  Wait Until JupyterLab Code Cell Is Not Active
-  #Get the text of the last output cell
-  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-  Should Match  ${output}  ${expected_output}
+    [Arguments]  ${input}  ${expected_output}
+    Add and Run JupyterLab Code Cell in Active Notebook  ${input}
+    Wait Until JupyterLab Code Cell Is Not Active
+    ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    Should Match  ${output}  ${expected_output}
+
+Run Cell And Get Output
+    [Documentation]    Runs a code cell and returns its output
+    [Arguments]    ${input}
+    Add and Run JupyterLab Code Cell in Active Notebook  ${input}
+    Wait Until JupyterLab Code Cell Is Not Active
+    ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    [Return]    ${output}
 
 Python Version Check
   [Arguments]  ${expected_version}=3.8
@@ -203,7 +208,6 @@ Delete Folder In User Notebook
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
   END
 
-
 JupyterLab Is Visible
   ${jupyterlab_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=30
   [return]  ${jupyterlab_visible}
@@ -260,7 +264,7 @@ Run Repo and Clean
   Sleep  15
   Click Element  xpath://span[@title="/opt/app-root/src"]
   Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Accept a JupyterLab Prompt
+  Maybe Close Popup
   Open With JupyterLab Menu  File  New  Notebook
   Sleep  1
   Maybe Close Popup

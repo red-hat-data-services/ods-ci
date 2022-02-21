@@ -66,7 +66,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
     ...               ocp_user_auth_type=${TEST_USER.AUTH_TYPE}  dashboard_url=${ODH_DASHBOARD_URL}
     ...               browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    Re-validate License For Disabled Application From Enabled Page     app_id=${ANACONDA_APPNAME}
+    Re-Validate License For Disabled Application From Enabled Page     app_id=${ANACONDA_APPNAME}
     Insert Anaconda License Key   license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Validate Anaconda License Key
     Success Message Should Contain   ${ANACONDA_DISPLAYED_NAME}

@@ -86,7 +86,7 @@ def generate_test_config_file(config_template, config_data, test_cluster, set_pr
     data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data["ANACONDA_CE"]["ACTIVATION_KEY"]
     data["OCP_CONSOLE_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_CONSOLE_URL"]
     data["ODH_DASHBOARD_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["ODH_DASHBOARD_URL"]
-    data["TEST_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["AUTH_TYPE"] 
+    data["TEST_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["AUTH_TYPE"]
     data["TEST_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["USERNAME"]
     data["TEST_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["PASSWORD"]
     data["OCP_ADMIN_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["AUTH_TYPE"]
@@ -103,7 +103,16 @@ def generate_test_config_file(config_template, config_data, test_cluster, set_pr
     data["RHODS_BUILD"]["PULL_SECRET"] = config_data["RHODS_BUILD"]["PULL_SECRET"]
     data["RHODS_BUILD"]["SECRET_FILE"] = config_data["RHODS_BUILD"]["SECRET_FILE"]
     data["RHODS_BUILD"]["IMAGE"] = config_data["RHODS_BUILD"]["IMAGE"]
-    
+    data["TEST_USER_2"]["AUTH_TYPE"] = config_data["TEST_USER_2"]["AUTH_TYPE"]
+    data["TEST_USER_2"]["USERNAME"] = config_data["TEST_USER_2"]["USERNAME"]
+    data["TEST_USER_2"]["PASSWORD"] = config_data["TEST_USER_2"]["PASSWORD"]
+    data["TEST_USER_3"]["AUTH_TYPE"] = config_data["TEST_USER_3"]["AUTH_TYPE"]
+    data["TEST_USER_3"]["USERNAME"] = config_data["TEST_USER_3"]["USERNAME"]
+    data["TEST_USER_3"]["PASSWORD"] = config_data["TEST_USER_3"]["PASSWORD"]
+    data["TEST_USER_4"]["AUTH_TYPE"] = config_data["TEST_USER_4"]["AUTH_TYPE"]
+    data["TEST_USER_4"]["USERNAME"] = config_data["TEST_USER_4"]["USERNAME"]
+    data["TEST_USER_4"]["PASSWORD"] = config_data["TEST_USER_4"]["PASSWORD"]
+
     # Login to test cluster using oc command
     oc_login(data["OCP_CONSOLE_URL"], data["OCP_ADMIN_USER"]["USERNAME"], data["OCP_ADMIN_USER"]["PASSWORD"])
 
@@ -137,7 +146,7 @@ def main():
 
     config_file = args.repo_dir + "/test-variables.yml"
     config_data = read_yaml(config_file)
-    
+
     # Generate test config file
     generate_test_config_file(args.config_template, config_data, args.test_cluster,
                               args.set_prometheus_config)

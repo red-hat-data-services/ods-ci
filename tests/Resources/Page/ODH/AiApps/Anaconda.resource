@@ -81,3 +81,9 @@ Remove Anaconda Commercial Edition Component
   ...               browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
   Remove Disabled Application From Enabled Page   app_id=anaconda-ce
   Close All Browsers
+
+Anaconda Activation Should Have Failed
+    [Documentation]    Checks if the anaconda activation has failed
+    Capture Page Screenshot  anaconda_failed_activation.png
+    ${text}=  Get Text  xpath://*[@class="pf-c-form__alert"]
+    Should Be Equal  ${text}  ${ERROR_MSG}

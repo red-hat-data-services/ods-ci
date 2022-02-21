@@ -46,4 +46,4 @@ Remove RHOSAK From Dashboard
     Close All Browsers
     Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}
     ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    Remove Disabled Application From Enabled Page   app_id=${rhosak_real_appname}
+    Remove Disabled Application From Enabled Page   app_id=${RHOSAK_REAL_APPNAME}

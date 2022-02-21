@@ -6,7 +6,7 @@ Resource        ../../../Resources/Page/OCPDashboard/Page.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource        ../../../Resources/Page/ODH/AiApps/Anaconda.robot
+Resource        ../../../Resources/Page/ODH/AiApps/Anaconda.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
@@ -41,9 +41,7 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
   Enable Anaconda  license_key=${INVALID_KEY}     license_validity=${FALSE}
-  Capture Page Screenshot  anaconda_failed_activation.png
-  ${text}=  Get Text  xpath://*[@class="pf-c-form__alert"]
-  Should Be Equal  ${text}  ${ERROR_MSG}
+  Anaconda Activation Should Have Failed
   Click Button    Cancel
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible

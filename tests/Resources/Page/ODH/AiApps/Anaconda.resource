@@ -44,6 +44,7 @@ Validate Anaconda License Key
   ELSE IF   ${license_validity} == ${FALSE}
       Wait Until Keyword Succeeds    30  1  Check Connect Button Status  false
   END
+  Capture Page Screenshot     after_validation.png
 
 
 Check Connect Button Status

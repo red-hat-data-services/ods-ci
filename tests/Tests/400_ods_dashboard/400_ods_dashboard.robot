@@ -47,9 +47,9 @@ Verify Disabled Cards Can Be Removed
     ...       ODS-1081    ODS-1092
     Enable RHOSAK
     Remove RHOSAK From Dashboard
+    Success Message Should Contain   ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Is Not Enabled     app_name=${RHOSAK_DISPLAYED_APPNAME}
     Capture Page Screenshot     after_removal.png
-    Success Message Should Contain   ${RHOSAK_DISPLAYED_APPNAME}
 
 Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
@@ -71,7 +71,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     Validate Anaconda License Key
     Success Message Should Contain   ${ANACONDA_DISPLAYED_NAME}
     Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
-
+    Capture Page Screenshot     after_revalidation.png
 
 
 *** Keywords ***

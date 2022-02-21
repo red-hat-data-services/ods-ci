@@ -20,28 +20,28 @@ Verify CUDA Image Can Be Spawned With GPU
     [Documentation]    Spawns CUDA image with 1 GPU
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-XYZ
+    ...     ODS-1141
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 Verify CUDA Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-XYZ
+    ...     ODS-1142
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
 Verify PyTorch Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs PyTorch and verifies it can see the GPU
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-XYZ
+    ...     ODS-1144
     Verify Pytorch Can See GPU    install=True
 
 Verify Tensorflow Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs Tensorflow and verifies it can see the GPU
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-XYZ
+    ...     ODS-1143
     Verify Tensorflow Can See GPU    install=True
 
 

@@ -35,7 +35,7 @@ Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed
     [Tags]  Sanity
     ...     Resources-GPU  # Not actually needed, but we first need to enable operator install by default
-    ...     ODS-XYZ
+    ...     ODS-1157
 
     # Before GPU Node is added to the cluster
     # NS

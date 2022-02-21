@@ -21,14 +21,14 @@ Verify PyTorch Image Can Be Spawned
     [Documentation]    Spawns pytorch image
     [Tags]  Sanity
     ...     PLACEHOLDER  # category tags
-    ...     ODS-XYZ
+    ...     ODS-1149
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 PyTorch Image Workload Test
     [Documentation]    Runs a pytorch workload
     [Tags]  Sanity
     ...     PLACEHOLDER  # category tags
-    ...     ODS-XYZ
+    ...     ODS-1150
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
@@ -37,7 +37,7 @@ Verify PyTorch Image Can Be Spawned With GPU
     [Documentation]    Spawns PyTorch image with 1 GPU
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-XYZ
+    ...     ODS-1145
     Clean Up Server
     Stop JupyterLab Notebook Server
     Handle Start My Server
@@ -48,21 +48,21 @@ Verify PyTorch Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-XYZ
+    ...     ODS-1146
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
 Verify PyTorch Library Can See GPUs In PyTorch Image
     [Documentation]    Verifies PyTorch can see the GPU
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-XYZ
+    ...     ODS-1147
     Verify Pytorch Can See GPU
 
 Verify PyTorch Image GPU Workload
     [Documentation]  Runs a workload on GPUs in PyTorch image
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-XYZ
+    ...     ODS-1148
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
     JupyterLab Code Cell Error Output Should Not Be Visible
 

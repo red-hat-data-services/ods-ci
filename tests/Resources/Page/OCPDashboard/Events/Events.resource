@@ -14,14 +14,14 @@ Get Event Entry From Openshift
     IF    len(${data}) >= ${expected_event}
         ${res_data}    Get Data Based On Object Kind    ${data}    ${object_kind}
     ELSE
-        FAIL    All the Event not captured
+        FAIL    All the Events are not captured
     END
     [Return]    ${res_data}
 
 Get Data Based On Object Kind
-    [Documentation]    Compare and fiter data
+    [Documentation]    Compare and filter data
     ...    from the provided payload based
-    ...    on object kind and retrun the data
+    ...    on object kind and return the data
     ...    in new list
     [Arguments]    ${data}    ${resource_kind}
     @{tem_data}    Create List

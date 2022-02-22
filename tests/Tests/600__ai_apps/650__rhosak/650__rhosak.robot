@@ -49,7 +49,7 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
     Wait Until Page Contains    Kafka Instances
 
 Verify User Is Able to Produce and Consume Events
-  [Tags]  Sanity  Tier2
+  [Tags]  Tier2
   ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239  ODS-242
   [Teardown]  Clean Up RHOSAK    stream_to_delete=${STREAM_NAME_TEST}
   ...                            topic_to_delete=${TOPIC_NAME_TEST}

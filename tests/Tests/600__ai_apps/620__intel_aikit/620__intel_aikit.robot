@@ -25,7 +25,7 @@ Verify intel aikit Is Available In RHODS Dashboard Explore Page
   Verify Service Provides "Get Started" Button In The Explore Page     ${intel_aikit_container_name}
 
 Verify Inetl AIKIT Operator Can Be Installed Using OpenShift Console
-   [Tags]  ODS-760   ODS-702   Sanity
+   [Tags]  ODS-760   ODS-702   Tier2
    [Documentation]  This Test Case Installed Intel AIKIT operator in Openshift cluster
    ...              Check and Launch AIKIT notebook image from RHODS dashboard
    Check And Install Operator in Openshift    ${intel_aikit_container_name}    ${intel_aikit_appname}

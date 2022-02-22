@@ -43,7 +43,7 @@ Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabl
 Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   [Documentation]  Checks that if user inserts an invalid key,
   ...              the Anaconda CE validation fails as expected
-  [Tags]  Smoke  Sanity
+  [Tags]  Tier2
   ...     ODS-310  ODS-367
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -60,7 +60,7 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Page Should Not Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
 
 Verify User Is Able to Activate Anaconda Commercial Edition
-  [Tags]  Sanity  Smoke
+  [Tags]  Tier2
   ...     ODS-272  ODS-344  ODS-501
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.

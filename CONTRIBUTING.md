@@ -40,7 +40,7 @@ When contributing to this repository, please first discuss the change you wish t
   git remote add upstream https://github.com/red-hat-data-services/ods-ci
   git fetch upstream
   git checkout add-test-ods-542-alerts
-  git merge upstream/master
+  git rebase upstream/master
   git push -f
   ```
 

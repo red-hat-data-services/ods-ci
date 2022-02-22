@@ -16,6 +16,7 @@ ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =
 ...   //div[contains(@class,"jsp-app__header__title") and .="Start a notebook server"]
 ${JUPYTERHUB_DROPDOWN_XPATH} =
 ...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
 
 
 *** Keywords ***
@@ -27,6 +28,7 @@ JupyterHub Spawner Is Visible
 
 Wait Until JupyterHub Spawner Is Ready
     [Documentation]  Waits for the spawner page to be ready using the server size dropdown
+    Wait Until Page Contains Element    xpath:${JUPYTERHUB_CONTAINER_SIZE_TITLE}
     Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]
 
 Select Notebook Image
@@ -183,8 +185,9 @@ Launch JupyterHub Spawner From Dashboard
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-    Fix Spawner Status  # TODO: Remove or speed up
+    Fix Spawner Status
     Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+    Wait Until JupyterHub Spawner Is Ready
 
 Get Spawner Progress Message
    [Documentation]  Get the progress message currently displayed

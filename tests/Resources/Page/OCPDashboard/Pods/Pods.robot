@@ -34,18 +34,20 @@ Check If POD Exists
 Verify Operator Pod Status
     [Documentation]    Verify Pod status
     [Arguments]  ${namespace}   ${label_selector}  ${expected_status}=Running
-    ${status}    Get POD Status    ${namespace}    ${label_selector}
-    Run Keyword IF   $status != $expected_status     Fail     RHODS operator status is not matching with the exepected state
+    ${status}    Get Pod Status    ${namespace}    ${label_selector}
+    Run Keyword IF   $status != $expected_status     Fail     RHODS operator status is
+    ...    not matching with the expected state
 
-Get POD Name
+Get Pod Name
     [Documentation]    Get the POD name based on namespace and label selector
     [Arguments]   ${namespace}   ${label_selector}
-    ${data}       Run keyword   OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=${label_selector}      #name=rhods-operator
+    ${data}       Run Keyword   OpenShiftCLI.Get   kind=Pod
+    ...    namespace=${namespace}   label_selector=${label_selector}
     [Return]      ${data[0]['metadata']['name']}
 
 Get Pod Status
     [Documentation]    Get the Pod status based on namespace and label selector
     [Arguments]   ${namespace}   ${label_selector}
-    ${data}       Run keyword   OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=${label_selector}
+    ${data}       Run Keyword   OpenShiftCLI.Get   kind=Pod
+    ...    namespace=${namespace}   label_selector=${label_selector}
     [Return]      ${data[0]['status']['phase']}
-

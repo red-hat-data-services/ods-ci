@@ -26,16 +26,16 @@ Verify RHODS Operator OOM Kill Behaviour
     ...    issue and perfrom some basic validation with RHODS
     [Tags]    ODS-1091    Tier3
     ${dfeault_np_count}    Run    oc get namespace | wc -l
-    Create Namspace In Opneshift
+    Create Namespace In Openshift
     Verify Operator Pod Status    ${NAMESPACE}    name=rhods-operator
-    Basic Dashboard Test Verfication
+    Basic Dashboard Test Verification
     Delete Namespace From Openshift
     ${new__np_count}    Run    oc get namespace | wc -l
     Should Be True    ${dfeault_np_count} == ${new__np_count}    All the dummy namespace created is not deleted
 
 
 *** Keywords ***
-Create Namspace In Opneshift
+Create Namespace In Openshift
     [Documentation]    Create dummy namespace based on number
     [Arguments]    ${number}=${NUMBER}
     FOR    ${counter}    IN RANGE    1    ${number}+1
@@ -53,8 +53,8 @@ Delete Namespace From Openshift
         Log    ${temp_count}
     END
 
-Basic Dashboard Test Verfication
-    [Documentation]    Basic verification of RHHOD feature
+Basic Dashboard Test Verification
+    [Documentation]    Basic verification of RHODS feature
     Begin Web Test
     Wait For RHODS Dashboard To Load
     Launch JupyterHub Spawner From Dashboard

@@ -56,7 +56,6 @@ Verify License Of Disabled Cards Can Be Re-validated
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     [Tags]    Sanity
     ...       ODS-1097
-    [Teardown]    Remove Anaconda Commercial Edition Component
     Enable Anaconda  license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible
@@ -72,6 +71,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     Success Message Should Contain   ${ANACONDA_DISPLAYED_NAME}
     Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
     Capture Page Screenshot     after_revalidation.png
+    [Teardown]    Remove Anaconda Commercial Edition Component
 
 
 *** Keywords ***

@@ -3,7 +3,7 @@ Documentation   139 - KFDEF_EVENT_VERIFICATION
 ...             Verify kfdef event is streaming for redhat-ods-application namespace
 ...
 ...             = Variables =
-...             | Namespace                | Required |        RHODS Namespace/Project for RHODS operator POD |
+...             | Namespace                | Required |        RHODS Namespace/Project |
 ...             | Resource_kind            | Required |        Object resource kind |
 
 Library        Collections

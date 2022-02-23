@@ -6,20 +6,12 @@ Resource        ../../../Resources/Page/OCPDashboard/Page.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource        ../../../Resources/Page/ODH/AiApps/Anaconda.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Commercial Edition Suite Setup
 Suite Teardown  Remove Anaconda Commercial Edition Component
-
-
-*** Variables ***
-${ANACONDA_APPNAME}=  anaconda-ce
-${ANACONDA_KEY_IN}=  Anaconda CE Key
-${INVALID_KEY}=  abcdef-invalidkey
-${ERROR_MSG}=  error\nValidation failed\nError attempting to validate. Please check your entries.
-${VAL_SUCCESS_MSG}=  Validation result: 200
-${TOKEN_VAL_SUCCESS_MSG}=  Success! Your token was validated and Conda has been configured.
 
 
 *** Test Cases ***
@@ -49,11 +41,8 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
-  Enable Anaconda  ${INVALID_KEY}
-  Wait Until Keyword Succeeds    30  1  Check Connect Button Status  false
-  Capture Page Screenshot  anaconda_failed_activation.png
-  ${text}=  Get Text  xpath://*[@class="pf-c-form__alert"]
-  Should Be Equal  ${text}  ${ERROR_MSG}
+  Enable Anaconda  license_key=${INVALID_KEY}     license_validity=${FALSE}
+  Anaconda Activation Should Have Failed
   Click Button    Cancel
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible
@@ -70,7 +59,6 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
   Enable Anaconda  ${ANACONDA_CE.ACTIVATION_KEY}
-  Wait Until Keyword Succeeds    50  1  Page Should Not Contain Element    xpath://*/div[contains(@class, "bullseye")]
   Capture Page Screenshot  anaconda_success_activation.png
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible
@@ -101,58 +89,11 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
 
 
+
 *** Keywords ***
 Anaconda Commercial Edition Suite Setup
   [Documentation]  Setup for ACE test suite
   Set Library Search Order  SeleniumLibrary
 
-Remove Anaconda Commercial Edition Component
-  [Documentation]  Teardown for ACE test suite
-  Close All Browsers
-  Delete ConfigMap Using Name          redhat-ods-applications   anaconda-ce-validation-result
-  Delete Pods Using Label Selector     redhat-ods-applications   component.opendatahub.io/name=anaconda-ce
-  Delete BuildConfig Using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
-  Delete ImageStream Using Name        redhat-ods-applications   s2i-minimal-notebook-anaconda
-  Delete Data From Secrets Using Name   redhat-ods-applications   anaconda-ce-access      {"data":null}
-  Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
-  ...               ocp_user_auth_type=${TEST_USER.AUTH_TYPE}  dashboard_url=${ODH_DASHBOARD_URL}
-  ...               browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-  Remove Disabled Application From Enabled Page   app_id=anaconda-ce
-  Close All Browsers
 
-Enable Anaconda
-  [Documentation]  Performs Anaconda activation
-  [Arguments]  ${license_key}
-  Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    Anaconda Commercial Edition  timeout=30
-  Click Element     xpath://*[@id='${ANACONDA_APPNAME}']
-  Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10
-  ...                                 error=${ANACONDA_APPNAME} does not have sidebar with information in the Explore page of ODS Dashboard
-  Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
-  ...                           message=${ANACONDA_APPNAME} does not have a "Enable" button in ODS Dashboard
-  Click Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
-  Wait Until Page Contains Element    xpath://*[@id='${ANACONDA_KEY_IN}']
-  Input Text    xpath://*[@id='${ANACONDA_KEY_IN}']    ${license_key}
-  Click Button    Connect
 
-Check Connect Button Status
-  [Documentation]  Checks the "Connect" button status of ACE's card in Explore page.
-  ...              This check says the progress of activation process
-  [Arguments]  ${target_status}  # true/false
-  ${status}=  Get Connect Button Status
-  Should Be Equal    ${status}    ${target_status}
-
-Get Connect Button Status
-  [Documentation]  Get the "Connect" button status of ACE's card in Explore page.
-  ${button_status}=  Get Element Attribute    xpath://*/footer/*[.='Connect']    aria-disabled
-  [Return]   ${button_status}
-
-Check Anaconda CE Image Build Status
-  [Documentation]  Checks the ACE's image build status
-  [Arguments]  ${target_status}
-  ${ace_build_status}=  Get Build Status    namespace=redhat-ods-applications
-  ...                                       build_search_term=minimal-notebook-anaconda
-  Run Keyword If    "${ace_build_status}" == "Failed"
-  ...    Fail  the Anaconda image build has failed
-  ...    ELSE
-  ...    Should Be Equal    ${ace_build_status}    ${target_status}

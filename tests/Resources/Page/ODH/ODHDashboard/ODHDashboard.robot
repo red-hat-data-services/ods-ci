@@ -18,6 +18,7 @@ ${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "ti
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
+${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 
 
 *** Keywords ***
@@ -285,3 +286,23 @@ Check Cards Details Are Correct
         Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
     END
+
+Success Message Should Contain
+    [Documentation]    Checks that the confirmation message after enabling/removing
+    ...                an application from Dashboard contains the desired text
+    [Arguments]    ${app_full_name}
+    Wait Until Page Contains Element   xpath:${SUCCESS_MSG_XP}
+    ${succ_msg}=   Get Text    xpath:${SUCCESS_MSG_XP}
+    Run Keyword And Continue On Failure    Should Contain    ${succ_msg}    ${app_full_name}
+
+Re-validate License For Disabled Application From Enabled Page
+   [Documentation]  The keyword let you re-enable or remove the card from Enabled page
+   ...              for those application whose license is expired. You can control the action type
+   ...              by setting the "disable" argument to either "disable" or "enable".
+   [Arguments]  ${app_id}
+   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
+   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=120
+   Click Element  xpath:${card_disabled_xp}
+   Wait Until Page Contains   To remove card click
+   ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
+   Click Element  ${buttons_here}[0]

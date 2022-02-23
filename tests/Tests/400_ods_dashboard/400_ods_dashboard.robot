@@ -80,6 +80,7 @@ Verify CSS Style Of Getting Started Descriptions
     Click Link    Explore
     Wait Until Cards Are Loaded
     Open Get Started Sidebar And Return Status    card_locator=${JH_CARDS_XP}
+    Capture Page Screenshot    get_started_sidebar.png
     Check CSS Property Has The Expected Value    locator=//pre
     ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
     Check CSS Property Has The Expected Value    locator=//div[contains(@class,'odh-markdown-view')]/h1

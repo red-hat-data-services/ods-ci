@@ -30,14 +30,16 @@ ${KAFKA_CLIENT_SECRET}=         "placeholder"
 *** Test Cases ***
 Verify RHOSAK Is Available In RHODS Dashboard Explore Page
     [Documentation]    Checks RHOSAK card is present in RHODS Dashboard > Explore Page
-    [Tags]    ODS-258    Smoke    Sanity
+    [Tags]    Smoke    Sanity
+    ...       ODS-258
     Verify Service Is Available In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Provides "Get Started" Button In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Provides "Enable" Button In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
 
 Verify User Can Enable RHOSAK from Dashboard Explore Page
     [Documentation]    Checks it is possible to enable RHOSAK from RHODS Dashboard > Explore Page
-    [Tags]    Sanity    Smoke    ODS-392
+    [Tags]    Sanity    Smoke
+    ...       ODS-392
     [Teardown]  Remove RHOSAK From Dashboard
     Enable RHOSAK
     Capture Page Screenshot  kafka_enable_msg.png
@@ -49,7 +51,7 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
     Wait Until Page Contains    Kafka Instances
 
 Verify User Is Able to Produce and Consume Events
-  [Tags]  Sanity  Tier2
+  [Tags]  Tier2
   ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239  ODS-242
   [Teardown]  Clean Up RHOSAK    stream_to_delete=${STREAM_NAME_TEST}
   ...                            topic_to_delete=${TOPIC_NAME_TEST}

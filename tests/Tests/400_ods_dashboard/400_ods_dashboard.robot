@@ -83,12 +83,12 @@ Verify CSS Style Of Getting Started Descriptions
     Capture Page Screenshot    get_started_sidebar.png
     Check CSS Property Has The Expected Value    locator=//pre
     ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
-    Check CSS Property Has The Expected Value    locator=//div[contains(@class,'odh-markdown-view')]/h1
+    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-size    exp_value=24px
-    Check CSS Property Has The Expected Value    locator=//div[contains(@class,'odh-markdown-view')]/h1
+    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
-    Check CSS Property Has The Expected Value    locator=//div[contains(@class,'odh-markdown-view')]//p
+    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
     ...    property=margin-bottom    exp_value=8px
 
 

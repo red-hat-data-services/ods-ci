@@ -23,7 +23,8 @@ Verify OpenVino Is Available In RHODS Dashboard Explore Page
   Verify Service Provides "Get Started" Button In The Explore Page    OpenVINO
 
 Verify Openvino Operator Can Be Installed Using OpenShift Console
-   [Tags]  ODS-675   ODS-702  Tier2
+   [Tags]   Tier2
+   ...      ODS-675   ODS-702
    [Documentation]  This Test Case Installed Openvino operator in Openshift cluster
    ...               and Check and Launch AIKIT notebook image from RHODS dashboard
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
@@ -33,6 +34,7 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    Verify Service Is Enabled          ${openvino_container_name}
    Verify JupyterHub Can Spawn Openvino Notebook
    [Teardown]   Uninstall Openvino Operator
+
 
 *** Keywords ***
 OpenVino Suite Setup

@@ -9,6 +9,7 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}=                //*[@class="pf-c-drawer__p
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
+${JH_CARDS_XP}=   //article[@id="jupyterhub"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
 ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
@@ -306,3 +307,9 @@ Re-validate License For Disabled Application From Enabled Page
    Wait Until Page Contains   To remove card click
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[0]
+
+Check CSS Property Has The Expected Value
+    [Arguments]   ${locator}    ${property}    ${exp_value}
+    ${el_text}=   Get Text   xpath:${locator}
+    ${actual_value}=    Get CSS Property Value   xpath:${locator}    ${property}
+    Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}

@@ -73,6 +73,19 @@ Verify License Of Disabled Cards Can Be Re-validated
     Capture Page Screenshot     after_revalidation.png
     [Teardown]    Remove Anaconda Commercial Edition Component
 
+Verify CSS Style Of Getting Started Descriptions
+    [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
+    [Tags]  ODS-XYZ
+    Click Link    Explore
+    Wait Until Cards Are Loaded
+    Open Get Started Sidebar And Return Status   card_locator=${JH_CARDS_XP}
+    Check CSS Property Has The Expected Value    locator=//pre
+    ...                                          property=background-color    exp_value=rgba(245, 245, 245, 1)
+    Check CSS Property Has The Expected Value    locator=//div[contains(@class,'odh-markdown-view')]/h1
+    ...                                          property=font-size    exp_value=24px
+    Check CSS Property Has The Expected Value    locator=//div[contains(@class,'odh-markdown-view')]/h1
+    ...                                          property=color    exp_value=rgba(21, 21, 21, 1)
+
 
 *** Keywords ***
 Dashboard Test Setup

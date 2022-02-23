@@ -41,3 +41,10 @@ Load Json File
     ${j_file}    Get File    ${file_path}
     ${obj}    Evaluate    json.loads('''${j_file}''')    json
     [Return]    ${obj}
+
+Get CSS Property Value
+    [Documentation]    Get the CSS property value of a given element
+    [Arguments]    ${locator}    ${property_name}
+    ${element} =       Get WebElement    ${locator}
+    ${css_prop} =    Call Method       ${element}    value_of_css_property    ${property_name}
+    [Return]     ${css_prop}

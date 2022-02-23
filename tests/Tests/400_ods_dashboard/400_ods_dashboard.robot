@@ -75,7 +75,8 @@ Verify License Of Disabled Cards Can Be Re-validated
 
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
-    [Tags]  ODS-XYZ
+    [Tags]    Smoke
+    ...       ODS-1165
     Click Link    Explore
     Wait Until Cards Are Loaded
     Open Get Started Sidebar And Return Status   card_locator=${JH_CARDS_XP}

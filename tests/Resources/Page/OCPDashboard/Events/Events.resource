@@ -18,7 +18,7 @@ Get Event Entry From Openshift
     END
     [Return]    ${res_data}
 
-Get Data Based On Object Kind
+_Get Data Based On Object Kind
     [Documentation]    Compare and filter data
     ...    from the provided payload based
     ...    on object kind and return the data

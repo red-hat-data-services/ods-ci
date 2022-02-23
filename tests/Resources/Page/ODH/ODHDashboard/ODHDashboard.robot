@@ -309,7 +309,13 @@ Re-validate License For Disabled Application From Enabled Page
    Click Element  ${buttons_here}[0]
 
 Check CSS Property Has The Expected Value
-    [Arguments]   ${locator}    ${property}    ${exp_value}
+    [Documentation]     Compare the actual CSS property value with the expected one
+    [Arguments]   ${locator}    ${property}    ${exp_value}   ${operation}=equal
     ${el_text}=   Get Text   xpath:${locator}
     ${actual_value}=    Get CSS Property Value   xpath:${locator}    ${property}
-    Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
+    IF    $operation == "contains"
+        Run Keyword And Continue On Failure   Should Contain    ${actual_value}    ${exp_value}
+    ELSE
+        Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
+    END
+

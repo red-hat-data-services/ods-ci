@@ -322,18 +322,21 @@ Check CSS Property Has The Expected Value
     END
 
 Check CSS Style Is The Expected One
-    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.7.0
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.7.0
     IF  ${version-check}==True
         Check CSS Property Has The Expected Value    locator=//pre
         ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
+        Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
+    ...    property=margin-bottom    exp_value=8px
     ELSE
         Check CSS Property Has The Expected Value    locator=//pre
         ...    property=background-color    exp_value=rgba(245, 245, 245, 1)
+        Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
+    ...    property=margin-bottom    exp_value=10px
     END
     Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-size    exp_value=24px
     Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
-    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-    ...    property=margin-bottom    exp_value=8px
+

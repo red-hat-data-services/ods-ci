@@ -81,15 +81,7 @@ Verify CSS Style Of Getting Started Descriptions
     Wait Until Cards Are Loaded
     Open Get Started Sidebar And Return Status    card_locator=${JH_CARDS_XP}
     Capture Page Screenshot    get_started_sidebar.png
-    Check CSS Property Has The Expected Value    locator=//pre
-    ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
-    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
-    ...    property=font-size    exp_value=24px
-    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
-    ...    property=font-family    exp_value=RedHatDisplay
-    ...    operation=contains
-    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-    ...    property=margin-bottom    exp_value=8px
+    Check CSS Style Is The Expected One
 
 
 *** Keywords ***

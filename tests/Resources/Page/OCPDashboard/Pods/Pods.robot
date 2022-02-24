@@ -13,7 +13,9 @@ Get Pod Logs From UI
   Click Link    Logs
   Sleep  4
   Capture Page Screenshot  logs_page.png
-  ${logs_text}=  Get Text    xpath://div[@class='log-window__lines']
+  ${logs_text}=  Get Text    xpath://div[@class='log-window__contents']
+  ${logs_text}=  Get Text    xpath://div[@class='log-window__body']
+  # ${logs_text}=  Get Text    xpath://div[@class='log-window__lines']
   ${log_rows}=  Text To List  ${logs_text}
   [Return]  ${log_rows}
 

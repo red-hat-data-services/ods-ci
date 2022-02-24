@@ -28,8 +28,10 @@ Create Custom Groups
     END
     Navigate To Page    User Management    Groups
     Wait Until Page Contains  Create Group
+    Capture Page Screenshot    user_groups.png
     Page Should Contain    ${CUSTOM_ADMINS_GROUP}
     Page Should Contain    ${CUSTOM_USERS_GROUP}
+
 
 Delete Custom Groups
     [Documentation]    Deletes two user groups: custom-admins and customer-users
@@ -37,6 +39,7 @@ Delete Custom Groups
     Delete Group  group_name=${CUSTOM_USERS_GROUP}
     Navigate To Page    User Management    Groups
     Wait Until Page Contains  Create Group
+    Capture Page Screenshot    user_groups_deletion.png
     Page Should Not Contain    ${CUSTOM_ADMINS_GROUP}
     Page Should Not Contain    ${CUSTOM_USERS_GROUP}
 
@@ -76,15 +79,18 @@ Check New Access Configuration Works As Expected
     Handle Bad Gateway Page
     Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER.USERNAME}
     ...                                   ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    none
+    Capture Page Screenshot    perm_denied.png
     Go To RHODS Dashboard
     Launch JupyterHub From RHODS Dashboard Link
     Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_2.USERNAME}
     ...                                   ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}    admin
+    Capture Page Screenshot    perm_admin.png
     Logout Via Button
     Go To RHODS Dashboard
     Launch JupyterHub From RHODS Dashboard Link
     Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_3.USERNAME}
     ...                                   ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}    user
+    Capture Page Screenshot    perm_user.png
     Logout Via Button
 
 Check Standard Access Configuration Works As Expected
@@ -95,11 +101,13 @@ Check Standard Access Configuration Works As Expected
     Handle Bad Gateway Page
     Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER.USERNAME}
     ...                                   ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    admin
+    Capture Page Screenshot    perm_admin_std.png
     Logout Via Button
     Go To RHODS Dashboard
     Launch JupyterHub From RHODS Dashboard Link
     Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_4.USERNAME}
     ...                                   ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}    user
+    Capture Page Screenshot    perm_user_std.png
     Logout Via Button
 
 Apply New Groups Config Map

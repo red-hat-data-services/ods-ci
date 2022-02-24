@@ -31,7 +31,7 @@ Remove User From Group
 Check User Is In A Group
     [Arguments]  ${username}  ${group_name}
     Go To ${group_name} Group Page
-    Page Should Contain    ${username}
+    Page Should Contain Element    xpath://a[text()="${username}"]
 
 Check User Is Not In A Group
     [Arguments]  ${username}  ${group_name}

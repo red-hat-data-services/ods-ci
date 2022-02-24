@@ -361,6 +361,7 @@ Handle Bad Gateway Page
     ...                disappears. It is possible to control how many
     ...                times to try refreshing using 'retries' argument
     [Arguments]   ${retries}=10
+    Capture Page Screenshot    jh_badgateway_kw.png
     FOR    ${counter}    IN RANGE    0    ${retries}+1
         ${bg_present} =    Run Keyword And Return Status    Page Should Contain    Bad Gateway
         IF    $bg_present == True

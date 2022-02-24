@@ -11,6 +11,8 @@ Library       OpenShiftCLI
 *** Variables ***
 ${CUSTOM_ADMINS_GROUP}=   custom-admins-group
 ${CUSTOM_USERS_GROUP}=    custom-users-group
+${STANDARD_ADMINS_GROUP}=  rhods-admins
+${STANDARD_USERS_GROUP}=   rhods-users
 
 
 *** Keywords ***
@@ -47,17 +49,17 @@ Add Test Users To Custom Groups
 
 Remove Test Users From RHODS Standard Groups
     [Documentation]    Removes two tests users from rhods-admins and rhods-users
-    Remove User From Group    username=${TEST_USER_2.USERNAME}    group_name=${OCP_USER_GROUPS.ADMINS}
-    Remove User From Group    username=${TEST_USER_3.USERNAME}    group_name=${OCP_USER_GROUPS.USERS}
-    Check User Is Not In A Group    username=${TEST_USER_2.USERNAME}   group_name=${OCP_USER_GROUPS.ADMINS}
-    Check User Is Not In A Group    username=${TEST_USER_3.USERNAME}   group_name=${OCP_USER_GROUPS.USERS}
+    Remove User From Group    username=${TEST_USER_2.USERNAME}    group_name=${STANDARD_ADMINS_GROUP}
+    Remove User From Group    username=${TEST_USER_3.USERNAME}    group_name=${STANDARD_USERS_GROUP}
+    Check User Is Not In A Group    username=${TEST_USER_2.USERNAME}   group_name=${STANDARD_ADMINS_GROUP}
+    Check User Is Not In A Group    username=${TEST_USER_3.USERNAME}   group_name=${STANDARD_USERS_GROUP}
 
 Add Test Users Back To RHODS Standard Groups
     [Documentation]    Adds two tests users back to rhods-admins and rhods-users
-    Add User To Group    username=${TEST_USER_2.USERNAME}    group_name=${OCP_USER_GROUPS.ADMINS}
-    Add User To Group    username=${TEST_USER_3.USERNAME}    group_name=${OCP_USER_GROUPS.USERS}
-    Check User Is In A Group    username=${TEST_USER_2.USERNAME}   group_name=${OCP_USER_GROUPS.ADMINS}
-    Check User Is In A Group    username=${TEST_USER_3.USERNAME}   group_name=${OCP_USER_GROUPS.USERS}
+    Add User To Group    username=${TEST_USER_2.USERNAME}    group_name=${STANDARD_ADMINS_GROUP}
+    Add User To Group    username=${TEST_USER_3.USERNAME}    group_name=${STANDARD_USERS_GROUP}
+    Check User Is In A Group    username=${TEST_USER_2.USERNAME}   group_name=${STANDARD_ADMINS_GROUP}
+    Check User Is In A Group    username=${TEST_USER_3.USERNAME}   group_name=${STANDARD_USERS_GROUP}
 
 Remove Test Users From Custom Groups
     [Documentation]    Removes two tests users from custom-admins and customer-users groups
@@ -112,7 +114,7 @@ Apply New Groups Config Map
 Restore RHODS Standard Groups Config Map
     [Documentation]    Restores the standard rhods-groups config map
     OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"data":{"admin_groups": "${OCP_USER_GROUPS.ADMINS}","allowed_groups": "${OCP_USER_GROUPS.USERS}"}}
+    ...                   src={"data":{"admin_groups": "${STANDARD_ADMINS_GROUP}","allowed_groups": "${STANDARD_USERS_GROUP}"}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
     OpenShiftCLI.Patch    kind=ConfigMap
     ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "false"}}}

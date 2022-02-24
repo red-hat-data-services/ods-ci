@@ -322,6 +322,9 @@ Check CSS Property Has The Expected Value
     END
 
 Check CSS Style Is The Expected One
+    [Documentation]     Compare the some CSS properties of the Explore page
+    ...                 with the expected ones. The expected values change based
+    ...                 on the RHODS version
     ${version-check}=  Is RHODS Version Greater Or Equal Than  1.7.0
     IF  ${version-check}==True
         Check CSS Property Has The Expected Value    locator=//pre

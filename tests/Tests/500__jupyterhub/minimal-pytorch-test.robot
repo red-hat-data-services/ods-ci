@@ -40,7 +40,7 @@ Verify PyTorch Image Can Be Spawned With GPU
     ...     ODS-1145
     Clean Up Server
     Stop JupyterLab Notebook Server
-    Handle Start My Server
+    Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1
 

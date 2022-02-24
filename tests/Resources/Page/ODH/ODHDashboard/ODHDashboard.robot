@@ -313,6 +313,7 @@ Check CSS Property Has The Expected Value
     [Documentation]     Compare the actual CSS property value with the expected one
     [Arguments]   ${locator}    ${property}    ${exp_value}   ${operation}=equal
     ${el_text}=   Get Text   xpath:${locator}
+    Log    Text of the target element: ${el_text}
     ${actual_value}=    Get CSS Property Value   xpath:${locator}    ${property}
     IF    $operation == "contains"
         Run Keyword And Continue On Failure   Should Contain    ${actual_value}    ${exp_value}

@@ -9,8 +9,8 @@ Library       OpenShiftCLI
 
 
 *** Variables ***
-${CUSTOM_ADMINS_GROUP}=   custom-admins
-${CUSTOM_USERS_GROUP}=    custom-users
+${CUSTOM_ADMINS_GROUP}=   custom-admins-group
+${CUSTOM_USERS_GROUP}=    custom-users-group
 
 
 *** Keywords ***

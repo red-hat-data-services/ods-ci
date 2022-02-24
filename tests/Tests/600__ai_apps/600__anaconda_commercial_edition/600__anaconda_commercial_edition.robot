@@ -51,7 +51,8 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
 
 Verify User Is Able to Activate Anaconda Commercial Edition
   [Tags]  Tier2
-  ...     ODS-272  ODS-344  ODS-501
+  ...     ODS-272  ODS-344  ODS-501  ODS-588
+  ...     KnownIssues
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner

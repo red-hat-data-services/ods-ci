@@ -6,12 +6,12 @@ Library             OpenShiftCLI
 
 
 *** Keywords ***
-Get Event Entry From Openshift
+Get Openshift Event
     [Documentation]    Capture openshift event based on namespace
     ...    and return filtered data, fail if no events are captured
-    [Arguments]    ${namespace}    ${object_kind}    ${fail-if-no-events}=1
+    [Arguments]    ${namespace}    ${object_kind}    ${expected-events-count}=1
     ${data}    Run Keyword    OpenShiftCLI.Get    kind=Event    namespace=${namespace}
-    IF    len(${data}) >= ${fail-if-no-events}
+    IF    len(${data}) >= ${expected-events-count}
         ${res_data}    Get Data Based On Object Kind    ${data}    ${object_kind}
     ELSE
         FAIL    All the Events are not captured

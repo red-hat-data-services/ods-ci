@@ -21,7 +21,7 @@ Verify KFDEF Is Streaming Event
     ...   in openshift after RHODS deployment
     [Tags]    Sanity
     ...       ODS-1005
-    ${ev_data}       Get Event Entry From Openshift     ${NAMESPACE}
+    ${ev_data}    Get Openshift Event    ${NAMESPACE}
     ...    ${RESOURCE_KIND}    2
     Verify KFDEF Event Status    ${ev_data}
 

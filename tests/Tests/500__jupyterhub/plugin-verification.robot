@@ -20,7 +20,9 @@ Suite Teardown   Plugin Testing Suite Teardown
 
 *** Test Cases ***
 Test User Notebook Plugin in JupyterLab
-    [Tags]  Sanity   ODS-486
+    [Tags]  Sanity
+    ...     ODS-486
+    ...     KnownIssues
     Gather Notebook data
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

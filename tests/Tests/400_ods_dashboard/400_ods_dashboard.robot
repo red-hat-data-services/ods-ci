@@ -98,11 +98,8 @@ Verify Documentation Link Https status code
     # Clicking on question mark
     Click Element    xpath=//*[@id="toggle-id"]
     ${link_elements}=    Get Question Mark Links Elements
-    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
-        ${href}=    Get Element Attribute    ${ext_link}    href
-        ${status}=    Check HTTP Status Code    link_to_check=${href}
-        Log To Console    ${idx}.${href} gets status code ${status}
-    END
+    Check External Links Status     links=${link_elements}
+
 
 *** Keywords ***
 Dashboard Test Setup
@@ -135,3 +132,4 @@ Verify JupyterHub Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
+

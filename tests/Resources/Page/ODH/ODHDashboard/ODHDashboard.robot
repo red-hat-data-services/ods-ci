@@ -316,3 +316,12 @@ Get Question Mark Links Elements
     [Documentation]  It returns the link elements from the question mark
     ${link_elements}=  Get WebElements    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
     [Return]  @{link_elements}
+
+Check External Links Status
+    [Documentation]  It iterates through the links and cheks their HTTP status code
+    [Arguments]     ${links}
+    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{links}  start=1
+        ${href}=  Get Element Attribute    ${ext_link}    href
+        ${status}=  Check HTTP Status Code   link_to_check=${href}
+        Log To Console    ${idx}. ${href} gets status code ${status}
+    END

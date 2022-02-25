@@ -51,3 +51,38 @@ Get Pod Status
     ${data}       Run Keyword   OpenShiftCLI.Get   kind=Pod
     ...    namespace=${namespace}   label_selector=${label_selector}
     [Return]      ${data[0]['status']['phase']}
+
+Get POD Names
+    [Documentation]    Get the name of list based on
+    ...    namespace and label selector and return the
+    ...    name of all the pod with matching label selector
+    [Arguments]   ${namespace}   ${label_selector}
+    ${pod_name}    Create List
+    ${status}      Check If POD Exists       ${namespace}        ${label_selector}
+    IF    '${status}'=='PASS'
+         ${data}        OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=${label_selector}
+         FOR    ${index}    ${element}    IN ENUMERATE    @{data}
+                Append To List    ${pod_name}     ${data[${index}]['metadata']['name']}
+         END
+    ELSE
+         FAIL    No POD found with the provided label selector in a given namespace '${namespace}'
+    END
+    [Return]    ${pod_name}
+
+Get Container Restart Counts
+    [Documentation]    Get the container name with restart
+    ...    count for each pod provided
+    [Arguments]        ${name}   ${namespace}
+    ${restart_c}      Create Dictionary
+    FOR    ${element}    IN    @{name}
+        ${c_detail}    Create Dictionary
+        ${data}    OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   field_selector=metadata.name==${element}
+        FOR    ${index}    ${container}    IN ENUMERATE    @{data[0]['status']['containerStatuses']}
+               ${value}    Convert To Integer    ${container['restartCount']}
+               IF    ${value} > ${0}
+                    Set To Dictionary    ${c_detail}     ${container['name']}    ${value}
+               END
+        END
+        Set To Dictionary    ${restart_c}    ${element}    ${c_detail}
+    END
+    [Return]    ${restart_c}

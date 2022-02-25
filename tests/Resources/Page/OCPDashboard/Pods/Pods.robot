@@ -92,11 +92,10 @@ Verify Containers Have Zero Restarts
     ...    Counts for pods
     [Arguments]    ${pod_names}    ${namespace}
     ${pod_restart_data}    Get Containers With Non Zero Restart Counts    ${pod_names}    ${namespace}
-    ${len}    Get Length    ${pod_restart_data}
-    FOR    ${key}    ${value}    IN    &{pod_restart_data}
-        IF    len(${value}) > ${0}
+    FOR    ${pod_name}    ${container_details}    IN    &{pod_restart_data}
+        IF    len(${container_details}) > ${0}
             Run Keyword And Continue On Failure    FAIL
-            ...    Container restart "${value}" found for '${key}' pod.
+            ...    Container restart "${container_details}" found for '${pod_name}' pod.
         ELSE
             Pass Execution    No container with restart count found!
         END

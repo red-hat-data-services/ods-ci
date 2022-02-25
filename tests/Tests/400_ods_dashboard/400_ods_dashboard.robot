@@ -14,7 +14,7 @@ ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
 
 *** Test Cases ***
-Verify Resource Link Http status code
+Verify Resource Link HTTP Status Code
     [Tags]    sanity    ods-531  ODS-507
     Click Link    Resources
     Sleep    5
@@ -48,32 +48,33 @@ Verify Disabled Cards Can Be Removed
     ...       KnownIssues
     Enable RHOSAK
     Remove RHOSAK From Dashboard
-    Success Message Should Contain   ${RHOSAK_DISPLAYED_APPNAME}
-    Verify Service Is Not Enabled     app_name=${RHOSAK_DISPLAYED_APPNAME}
-    Capture Page Screenshot     after_removal.png
+    Success Message Should Contain    ${RHOSAK_DISPLAYED_APPNAME}
+    Verify Service Is Not Enabled    app_name=${RHOSAK_DISPLAYED_APPNAME}
+    Capture Page Screenshot    after_removal.png
 
 Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     [Tags]    Sanity
     ...       ODS-1097   ODS-357
-    Enable Anaconda  license_key=${ANACONDA_CE.ACTIVATION_KEY}
+    Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible
     Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
     Close All Browsers
-    Delete ConfigMap Using Name    redhat-ods-applications   anaconda-ce-validation-result
-    Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
-    ...               ocp_user_auth_type=${TEST_USER.AUTH_TYPE}  dashboard_url=${ODH_DASHBOARD_URL}
-    ...               browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    Re-Validate License For Disabled Application From Enabled Page     app_id=${ANACONDA_APPNAME}
-    Insert Anaconda License Key   license_key=${ANACONDA_CE.ACTIVATION_KEY}
+    Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
+    Re-Validate License For Disabled Application From Enabled Page    app_id=${ANACONDA_APPNAME}
+    Insert Anaconda License Key    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Validate Anaconda License Key
-    Success Message Should Contain   ${ANACONDA_DISPLAYED_NAME}
+    Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME}
     Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
-    Capture Page Screenshot     after_revalidation.png
+    Capture Page Screenshot    after_revalidation.png
     [Teardown]    Remove Anaconda Commercial Edition Component
 
+Verify Documentation Link HTTP Status Code
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
     [Tags]    Smoke

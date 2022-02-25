@@ -4,6 +4,7 @@ Resource   ../../OCPDashboard/Page.robot
 Resource   ../../ODH/ODHDashboard/ODHDashboard.robot
 Library    ../../../../libs/Helpers.py
 
+
 *** Keywords ***
 Get Pod Logs From UI
   [Arguments]  ${namespace}  ${pod_search_term}
@@ -13,9 +14,18 @@ Get Pod Logs From UI
   Click Link    Logs
   Sleep  4
   Capture Page Screenshot  logs_page.png
-  ${logs_text}=  Get Text    xpath://div[@class='log-window__contents']
-  ${logs_text}=  Get Text    xpath://div[@class='log-window__body']
-  # ${logs_text}=  Get Text    xpath://div[@class='log-window__lines']
+  ${log_lines_flag}=   Run Keyword And Return Status    Wait Until Page Contains Element    xpath://div[@class='log-window__lines']
+  ${log_list_flag}=    Run Keyword And Return Status    Wait Until Page Contains Element    xpath://div[@class='pf-c-log-viewer__list']
+  IF    ${log_lines_flag} == ${TRUE}
+      ${logs_text}=  Get Text    xpath://div[@class='log-window__lines']
+  ELSE IF   ${log_list_flag} == ${TRUE}
+      Click Link   Raw
+      Switch Window   NEW
+      ${logs_text}=  Get Text    xpath://pre
+      Close Window
+  ELSE
+      Fail    No logs window found..
+  END
   ${log_rows}=  Text To List  ${logs_text}
   [Return]  ${log_rows}
 

@@ -16,7 +16,7 @@ ${RESOURCE_KIND}       KfDef
 
 
 *** Test Cases ***
-Verify KFDEF Event Entry
+Verify KFDEF Is Streaming Event
     [Documentation]    Perform kfdef event streaming
     ...   in openshift after RHODS deployment
     [Tags]    Sanity

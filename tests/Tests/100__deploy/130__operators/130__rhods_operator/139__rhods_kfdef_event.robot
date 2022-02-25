@@ -19,8 +19,10 @@ ${RESOURCE_KIND}       KfDef
 Verify KFDEF Event Entry
     [Documentation]    Perform kfdef event streaming
     ...   in openshift after RHODS deployment
-    [Tags]    ODS-1005    Sanity
-    ${ev_data}       Get Event Entry From Openshift     ${NAMESPACE}     ${RESOURCE_KIND}
+    [Tags]    Sanity
+    ...       ODS-1005
+    ${ev_data}       Get Event Entry From Openshift     ${NAMESPACE}
+    ...    ${RESOURCE_KIND}    2
     Verify KFDEF Event Status    ${ev_data}
 
 

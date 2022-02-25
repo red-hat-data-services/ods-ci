@@ -9,7 +9,7 @@ Library             OpenShiftCLI
 Get Event Entry From Openshift
     [Documentation]    Capture openshift event based on namespace
     ...    and return filtered data
-    [Arguments]    ${namespace}    ${object_kind}    ${expected_event}=2
+    [Arguments]    ${namespace}    ${object_kind}    ${expected_event}=1
     ${data}    Run Keyword    OpenShiftCLI.Get    kind=Event    namespace=${namespace}
     IF    len(${data}) >= ${expected_event}
         ${res_data}    Get Data Based On Object Kind    ${data}    ${object_kind}

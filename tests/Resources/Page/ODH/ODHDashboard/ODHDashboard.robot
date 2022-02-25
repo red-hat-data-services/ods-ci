@@ -330,12 +330,12 @@ Check CSS Style Is The Expected One
         Check CSS Property Has The Expected Value    locator=//pre
         ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
         Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-    ...    property=margin-bottom    exp_value=8px
+        ...    property=margin-bottom    exp_value=8px
     ELSE
         Check CSS Property Has The Expected Value    locator=//pre
         ...    property=background-color    exp_value=rgba(245, 245, 245, 1)
         Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-    ...    property=margin-bottom    exp_value=10px
+        ...    property=margin-bottom    exp_value=10px
     END
     Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-size    exp_value=24px

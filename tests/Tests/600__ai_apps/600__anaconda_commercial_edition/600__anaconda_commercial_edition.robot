@@ -11,8 +11,6 @@ Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Commercial Edition Suite Setup
-## Suite Teardown  Remove Anaconda Commercial Edition Component
-Library    OpenShiftCLI
 
 
 *** Test Cases ***
@@ -89,20 +87,8 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
+  [Teardown]    Remove Anaconda Commercial Edition Component
 
-Verify logs
-  [Tags]   logs
-  Open Browser   ${OCP_CONSOLE_URL}    browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
-  Maybe Skip Tour
-  ${validator_pod}=   OpenShiftCLI.Get    kind=Pod   label_selector=job-name = anaconda-ce-periodic-validator-job-custom-run
-  ...                namespace=redhat-ods-applications
-  Log    ${validator_pod}
-  # ${val_result}=  Get Pod Logs From UI  namespace=redhat-ods-applications
-  # ...
-  ${val_result}=  Get Pod Logs From UI  namespace=redhat-ods-applications
-  ...                                   pod_search_term=anaconda-ce-periodic-validator-job-custom-run
-  Close All Browsers
 
 *** Keywords ***
 Anaconda Commercial Edition Suite Setup

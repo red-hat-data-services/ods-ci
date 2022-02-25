@@ -17,7 +17,7 @@ Get Pod Logs From UI
     Click Link    xpath://tr[@data-key='0-0']/td/span/a
     Click Link    Logs
     Sleep    4
-    Capture Page Screenshot    logs_page.png
+    # Capture Page Screenshot    logs_page.png
     ${log_lines_flag}=    Run Keyword And Return Status    Wait Until Page Contains Element
     ...    xpath://div[@class='log-window__lines']
     ${log_list_flag}=    Run Keyword And Return Status    Wait Until Page Contains Element
@@ -29,6 +29,7 @@ Get Pod Logs From UI
         Switch Window    NEW
         ${logs_text}=    Get Text    xpath://pre
         Close Window
+        Switch Window    MAIN
     ELSE
         Fail    No logs window found..
     END

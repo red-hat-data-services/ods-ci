@@ -69,20 +69,35 @@ Get POD Names
     END
     [Return]    ${pod_name}
 
-Get Container Restart Counts
+Get Containers With Non Zero Restart Counts
     [Documentation]    Get the container name with restart
     ...    count for each pod provided
-    [Arguments]        ${name}   ${namespace}
-    ${restart_c}      Create Dictionary
-    FOR    ${element}    IN    @{name}
-        ${c_detail}    Create Dictionary
-        ${data}    OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   field_selector=metadata.name==${element}
+    [Arguments]        ${pod_names}   ${namespace}
+    ${pod_restarts}      Create Dictionary
+    FOR    ${pod_name}    IN    @{pod_names}
+        ${container_restarts}    Create Dictionary
+        ${data}    OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   field_selector=metadata.name==${pod_name}
         FOR    ${index}    ${container}    IN ENUMERATE    @{data[0]['status']['containerStatuses']}
                ${value}    Convert To Integer    ${container['restartCount']}
                IF    ${value} > ${0}
-                    Set To Dictionary    ${c_detail}     ${container['name']}    ${value}
+                    Set To Dictionary    ${container_restarts}     ${container['name']}    ${value}
                END
         END
-        Set To Dictionary    ${restart_c}    ${element}    ${c_detail}
+        Set To Dictionary    ${pod_restarts}    ${pod_name}    ${container_restarts}
     END
-    [Return]    ${restart_c}
+    [Return]    ${pod_restarts}
+
+Verify Containers Have Zero Restarts
+    [Documentation]    Get and verify container restart
+    ...    Counts for pods
+    [Arguments]    ${pod_names}    ${namespace}
+    ${pod_restart_data}    Get Containers With Non Zero Restart Counts    ${pod_names}    ${namespace}
+    ${len}    Get Length    ${pod_restart_data}
+    FOR    ${key}    ${value}    IN    &{pod_restart_data}
+        IF    len(${value}) > ${0}
+            Run Keyword And Continue On Failure    FAIL
+            ...    Container restart "${value}" found for '${key}' pod.
+        ELSE
+            Pass Execution    No container with restart count found!
+        END
+    END

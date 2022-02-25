@@ -21,23 +21,5 @@ Verify Traefik Proxy Containers Restart
     ...    container restart
     [Tags]    Sanity
     ...       ODS-1163    KnownIssues
-    ${p_names}    Get POD Names    ${NAMESPACE}    ${LABEL_SELECTOR}
-    Verify Restart Container Verification    ${p_names}
-
-
-*** Keywords ***
-Verify Restart Container Verification
-    [Documentation]    Get and verify container restart
-    ...    Counts for pods
-    [Arguments]    ${names}
-    # Todo:We should move this keyword to common folder in future
-    ${r_data}    Get Container Restart Counts    ${names}    ${NAMESPACE}
-    ${len}    Get Length    ${r_data}
-    FOR    ${key}    ${value}    IN    &{r_data}
-        IF    len(${value}) > ${0}
-            Run Keyword And Continue On Failure    FAIL
-            ...    Container restart "${value}" found for '${key}' pod.
-        ELSE
-            Pass Execution    No container with restart count found!
-        END
-    END
+    ${pod_names}    Get POD Names    ${NAMESPACE}    ${LABEL_SELECTOR}
+    Verify Containers Have Zero Restarts    ${pod_names}    ${NAMESPACE}

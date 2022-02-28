@@ -1,5 +1,6 @@
 from semver import VersionInfo
 from robotlibcore import keyword
+from utils.scripts.ocm.ocm import OpenshiftClusterManager
 
 
 class Helpers:
@@ -23,3 +24,9 @@ class Helpers:
         except ValueError:
             # Returning False on exception as a workaround for when an null (or invalid) semver version is passed
             return False
+
+    @keyword
+    def install_rhoam_addon(self, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.install_rhoam_addon()

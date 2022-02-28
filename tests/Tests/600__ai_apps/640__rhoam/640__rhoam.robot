@@ -1,6 +1,7 @@
 *** Settings ***
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Library         ../../../../libs/Helpers.py
 Library         SeleniumLibrary
 Suite Setup     RHOAM Suite Setup
 Suite Teardown  RHOAM Suite Teardown
@@ -14,7 +15,14 @@ Verify RHOAM Is Available In RHODS Dashboard Explore Page
   Verify Service Is Available In The Explore Page    OpenShift API Management
   Verify Service Provides "Get Started" Button In The Explore Page    OpenShift API Management
 
-* Keywords ***
+
+Verify install
+    [Tags]  rhoam
+    Install Rhoam Addon    cluster_name=qeaisrhods-ti3
+
+
+
+** Keywords ***
 RHOAM Suite Setup
   Set Library Search Order  SeleniumLibrary
 

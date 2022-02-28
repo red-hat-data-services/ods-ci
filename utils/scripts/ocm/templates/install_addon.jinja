@@ -4,5 +4,20 @@
   "addon": {
     "kind": "AddOn",
     "href": "/api/clusters_mgmt/v1/addons/{{ ADDON_NAME }}",
-    "id": "{{ ADDON_NAME }}"  }
+    "id": "{{ ADDON_NAME }}"  },
+    "parameters": {
+        "items":
+		[
+		  {"id": "cidr-range",
+		   "value": "10.1.0.0/26"
+		  },
+          {"id": "addon-managed-api-service",
+		   "value": "1"},
+		  {"id": "addon-resource-required",
+		   "value": "true"},
+		   {"id": "quota",
+		   "value": "100k"},
+
+       ]
+   }
 }

@@ -57,7 +57,7 @@ class OpenshiftClusterManager():
             match = re.search(r'.*\.(\S+)', (os.path.basename(ocm_env[0])))
             if match is not None:
                 self.testing_platform = match.group(1)
- 
+
     def _is_ocmcli_installed(self):
         """Checks if ocm cli is installed"""
         cmd = "ocm version"
@@ -121,7 +121,7 @@ class OpenshiftClusterManager():
                 chan_grp = ""
                 if (self.channel_group == "candidate"):
                     chan_grp = "--channel-group {}".format(self.channel_group)
-                 
+
                 version_cmd = "ocm list versions {} | grep -w \"".format(chan_grp) + re.escape(version) + "*\""
                 log.info("CMD: {}".format(version_cmd))
                 versions = execute_command(version_cmd)
@@ -139,7 +139,7 @@ class OpenshiftClusterManager():
             if ((self.channel_group == "stable") or (self.channel_group == "candidate")):
                 if version == "":
                     log.error(("Please enter openshift version as argument."
-                               "Channel group option is used along with openshift version."))    
+                               "Channel group option is used along with openshift version."))
                     sys.exit(1)
                 else:
                     channel_grp = "--channel-group {} ".format(self.channel_group)
@@ -154,7 +154,7 @@ class OpenshiftClusterManager():
                            self.aws_access_key_id,
                            self.aws_secret_access_key,
                            self.aws_region, self.num_compute_nodes,
-                           self.aws_instance_type, version, 
+                           self.aws_instance_type, version,
                            channel_grp, self.cluster_name))
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
@@ -414,8 +414,9 @@ class OpenshiftClusterManager():
                        }
         template_file = "install_addon.jinja"
         output_file = "install_operator.json"
+        print("\nhere1")
         self._render_template(template_file, output_file, replace_vars)
-
+        print("\nhere2")
         cluster_id = self.get_osd_cluster_id()
         cmd = ("ocm post /api/clusters_mgmt/v1/clusters/{}/addons "
                "--body={}".format(cluster_id, output_file))
@@ -448,6 +449,46 @@ class OpenshiftClusterManager():
     def uninstall_rhods(self):
         """Uninstalls RHODS addon"""
         self.uninstall_addon(addon_name="managed-odh")
+
+    def install_addon_v2(self, addon_name="managed-odh"):
+        """Installs addon"""
+        replace_vars = {
+                       "CLUSTER_ID": self.cluster_name,
+                       "ADDON_NAME": addon_name
+                       }
+        template_file = "install_addon.jinja"
+        output_file = "install_operator.json"
+        print("\nhere1")
+        self._render_template(template_file, output_file, replace_vars)
+        print("\nhere2")
+        cluster_id = self.get_osd_cluster_id()
+        cmd = ("ocm post /api/clusters_mgmt/v1/clusters/{}/addons "
+               "--body={}".format(cluster_id, output_file))
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        if ret is None:
+            log.info("Failed to install {} addon on cluster "
+                  "{}".format(addon_name, self.cluster_name))
+            # sys.exit(1)
+
+    def install_rhoam_addon(self):
+        if not self.is_addon_installed(addon_name="managed-api-service"):
+            self.install_addon_v2(addon_name="managed-api-service")
+            print("\nhere0")
+            cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
+                   --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            if ret is None:
+                log.info("Failed to patch {} useClusterStorage setting"
+                         "{}".format("managed-api-service", self.cluster_name))
+                sys.exit(1)
+            self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
+
+    def uninstall_rhoam_addon(self):
+        """Uninstalls RHOAM addon"""
+        self.uninstall_addon(addon_name="managed-api-service")
+        self.wait_for_addon_uninstallation_to_complete()
 
     def create_idp(self):
         """Creates Identity Provider"""
@@ -904,6 +945,32 @@ if __name__ == "__main__":
             action="store", dest="cluster_name",
             required=True)
         uninstall_rhods_parser.set_defaults(func=ocm_obj.uninstall_rhods_addon)
+
+        # Argument parsers for install_rhoam_addon
+        install_rhoam_parser = subparsers.add_parser(
+            'install_rhoam_addon',
+            help=("Install rhoam addon cluster."),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        required_install_rhoam_parser = install_rhoam_parser.add_argument_group('required arguments')
+
+        required_install_rhoam_parser.add_argument("--cluster-name",
+                                                   help="osd cluster name",
+                                                   action="store", dest="cluster_name",
+                                                   required=True)
+        install_rhoam_parser.set_defaults(func=ocm_obj.install_rhoam_addon)
+
+        # Argument parsers for uninstall_rhoam_addon
+        uninstall_rhoam_parser = subparsers.add_parser(
+            'uninstall_rhoam_addon',
+            help=("Uninstall rhoam addon cluster."),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        required_uninstall_rhoam_parser = uninstall_rhoam_parser.add_argument_group('required arguments')
+
+        required_uninstall_rhoam_parser.add_argument("--cluster-name",
+                                                     help="osd cluster name",
+                                                     action="store", dest="cluster_name",
+                                                     required=True)
+        uninstall_rhoam_parser.set_defaults(func=ocm_obj.uninstall_rhoam_addon)
 
         #Argument parsers for create_idp
         create_idp_parser = subparsers.add_parser(

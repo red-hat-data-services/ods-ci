@@ -10,18 +10,30 @@ Suite Setup         Alerts Suite Setup
 
 
 *** Variables ***
-${NOTEBOOK_REPO_URL}=                   https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
+${NOTEBOOK_REPO_URL}                    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
 
-${TEST_ALERT_PVC90_NOTEBOOK_PATH}=      SEPARATOR=
+${TEST_ALERT_PVC90_NOTEBOOK_PATH}       SEPARATOR=
 ...                                     /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/
 ...                                     203__alerts/notebook-pvc-usage/fill-notebook-pvc-over-90.ipynb
 
-${TEST_ALERT_PVC100_NOTEBOOK_PATH}=     SEPARATOR=
+${TEST_ALERT_PVC100_NOTEBOOK_PATH}      SEPARATOR=
 ...                                     /ods-ci-notebooks-main/notebooks/200__monitor_and_manage/
 ...                                     203__alerts/notebook-pvc-usage/fill-notebook-pvc-to-100.ipynb
 
 
 *** Test Cases ***
+Verify RHODS Prometheus Alerts Are Not Firing Except For DeadManSnitch
+    [Documentation]    Verifies that, in a regular situation, only the DeadManSnitch alert is firing
+    [Tags]    Smoke    Tier1    ODS-540
+    Verify Alert Is Firing And Continue On Failure    DeadManSnitch    DeadManSnitch
+    Verify Alert Is Not Firing And Continue On Failure    Builds    JupyterHub image builds are failing
+    Verify Alert Is Not Firing And Continue On Failure    RHODS-PVC-Usage    User notebook pvc usage above 90%
+    Verify Alert Is Not Firing And Continue On Failure    RHODS-PVC-Usage    User notebook pvc usage at 100%
+    Verify Alert Is Not Firing And Continue On Failure    RHODS-PVC-Usage    User notebook pvc usage above 90%
+    Verify Alert Is Not Firing And Continue On Failure    SLOs-haproxy_backend_http_responses_total
+    ...    RHODS Route Error Burn Rate
+    Verify Alert Is Not Firing And Continue On Failure    SLOs-probe_success    RHODS Probe Success Burn Rate
+
 Verify Alert RHODS-PVC-Usage-Above-90 Is Fired When User PVC Is Above 90 Percent
     [Documentation]    Runs a jupyter notebook to fill the user PVC over 90% and
     ...    verifies that alert "User notebook pvc usage above 90%" is fired
@@ -84,3 +96,28 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     Spawn Notebook With Arguments    image=s2i-generic-data-science-notebook
     Clone Git Repository And Run    ${notebook_repo}    ${notebook_path}
     Sleep    5s
+
+Verify Alert Is Firing And Continue On Failure
+    [Documentation]    Verifies that alert is firing, failing otherwhise but continuing the execution
+    [Arguments]    ${rule_group}    ${alert}
+    Run Keyword And Continue On Failure    Prometheus.Alert Should Be Firing
+    ...    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    ${rule_group}
+    ...    ${alert}
+
+Verify Alert Is Not Firing And Continue On Failure
+    [Documentation]    Verifies that alert is not firing, failing otherwhise but continuing the execution
+    [Arguments]    ${rule_group}    ${alert}
+    Run Keyword And Continue On Failure    Prometheus.Alert Should Not Be Firing
+    ...    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    ${rule_group}
+    ...    ${alert}
+
+Skip Test If Alert Is Already Firing
+    [Documentation]    Skips tests if ${alert} is already firing
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}
+    ${alert_is_firing}=    Run Keyword And Return Status    Alert Should Be Firing
+    ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}
+    Skip If    ${alert_is_firing}    msg=Test skiped because alert "${alert}" is already firing

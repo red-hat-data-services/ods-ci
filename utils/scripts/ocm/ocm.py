@@ -458,14 +458,14 @@ class OpenshiftClusterManager():
                        }
         template_file = "install_addon.jinja"
         output_file = "install_operator.json"
-        print("\nhere1")
+        # output_file = "templates/cp_install_addon.jinja"
         self._render_template(template_file, output_file, replace_vars)
-        print("\nhere2")
         cluster_id = self.get_osd_cluster_id()
         cmd = ("ocm post /api/clusters_mgmt/v1/clusters/{}/addons "
                "--body={}".format(cluster_id, output_file))
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
+        print(ret)
         if ret is None:
             log.info("Failed to install {} addon on cluster "
                   "{}".format(addon_name, self.cluster_name))
@@ -475,15 +475,15 @@ class OpenshiftClusterManager():
         if not self.is_addon_installed(addon_name="managed-api-service"):
             self.install_addon_v2(addon_name="managed-api-service")
             print("\nhere0")
-            cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
-                   --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
-            log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
-            if ret is None:
-                log.info("Failed to patch {} useClusterStorage setting"
-                         "{}".format("managed-api-service", self.cluster_name))
-                sys.exit(1)
-            self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
+            # cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
+            #        --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
+            # log.info("CMD: {}".format(cmd))
+            # ret = execute_command(cmd)
+            # if ret is None:
+            #     log.info("Failed to patch {} useClusterStorage setting"
+            #              "{}".format("managed-api-service", self.cluster_name))
+            #     sys.exit(1)
+            # self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
 
     def uninstall_rhoam_addon(self):
         """Uninstalls RHOAM addon"""

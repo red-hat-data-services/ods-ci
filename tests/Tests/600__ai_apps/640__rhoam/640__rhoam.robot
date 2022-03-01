@@ -18,7 +18,9 @@ Verify RHOAM Is Available In RHODS Dashboard Explore Page
 
 Verify install
     [Tags]  rhoam
-    Install Rhoam Addon    cluster_name=qeaisrhods-ti3
+    Install Rhoam Addon    cluster_name=<clustername>
+
+
 
 
 

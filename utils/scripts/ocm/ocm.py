@@ -450,15 +450,20 @@ class OpenshiftClusterManager():
         """Uninstalls RHODS addon"""
         self.uninstall_addon(addon_name="managed-odh")
 
-    def install_addon_v2(self, addon_name="managed-odh"):
+    def install_addon_v2(self, addon_name="managed-odh",
+                         template_filename="install_addon.jinja",
+                         output_filename="install_operator.json",
+                         add_replace_vars=None):
         """Installs addon"""
         replace_vars = {
                        "CLUSTER_ID": self.cluster_name,
                        "ADDON_NAME": addon_name
                        }
-        template_file = "install_addon.jinja"
-        output_file = "install_operator.json"
-        # output_file = "templates/cp_install_addon.jinja"
+        if add_replace_vars:
+            replace_vars.update(add_replace_vars)
+            print(replace_vars)
+        template_file = template_filename
+        output_file = output_filename
         self._render_template(template_file, output_file, replace_vars)
         cluster_id = self.get_osd_cluster_id()
         cmd = ("ocm post /api/clusters_mgmt/v1/clusters/{}/addons "
@@ -469,21 +474,28 @@ class OpenshiftClusterManager():
         if ret is None:
             log.info("Failed to install {} addon on cluster "
                   "{}".format(addon_name, self.cluster_name))
-            # sys.exit(1)
+            sys.exit(1)
 
     def install_rhoam_addon(self):
-        if not self.is_addon_installed(addon_name="managed-api-service"):
-            self.install_addon_v2(addon_name="managed-api-service")
-            print("\nhere0")
-            # cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
-            #        --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
-            # log.info("CMD: {}".format(cmd))
-            # ret = execute_command(cmd)
-            # if ret is None:
-            #     log.info("Failed to patch {} useClusterStorage setting"
-            #              "{}".format("managed-api-service", self.cluster_name))
-            #     sys.exit(1)
-            # self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
+        # to fix installation status check
+        # if not self.is_addon_installed(addon_name="managed-api-service"):
+        add_vars = {
+            "CIDR": "10.1.0.0/26"
+        }
+        self.install_addon_v2(addon_name="managed-api-service",
+                              template_filename="install_addon_rhoam.jinja",
+                              output_filename="install_rhoam_operator.json",
+                              add_replace_vars=add_vars)
+        print("\nhere0")
+        # cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
+        #        --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
+        # log.info("CMD: {}".format(cmd))
+        # ret = execute_command(cmd)
+        # if ret is None:
+        #     log.info("Failed to patch {} useClusterStorage setting"
+        #              "{}".format("managed-api-service", self.cluster_name))
+        #     sys.exit(1)
+        # self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
 
     def uninstall_rhoam_addon(self):
         """Uninstalls RHOAM addon"""

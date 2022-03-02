@@ -25,14 +25,22 @@ ${TEST_ALERT_PVC100_NOTEBOOK_PATH}      SEPARATOR=
 Verify RHODS Prometheus Alerts Are Not Firing Except For DeadManSnitch
     [Documentation]    Verifies that, in a regular situation, only the DeadManSnitch alert is firing
     [Tags]    Smoke    Tier1    ODS-540
-    Verify Alert Is Firing And Continue On Failure    DeadManSnitch    DeadManSnitch
-    Verify Alert Is Not Firing And Continue On Failure    Builds    JupyterHub image builds are failing
-    Verify Alert Is Not Firing And Continue On Failure    RHODS-PVC-Usage    User notebook pvc usage above 90%
-    Verify Alert Is Not Firing And Continue On Failure    RHODS-PVC-Usage    User notebook pvc usage at 100%
-    Verify Alert Is Not Firing And Continue On Failure    RHODS-PVC-Usage    User notebook pvc usage above 90%
-    Verify Alert Is Not Firing And Continue On Failure    SLOs-haproxy_backend_http_responses_total
-    ...    RHODS Route Error Burn Rate
-    Verify Alert Is Not Firing And Continue On Failure    SLOs-probe_success    RHODS Probe Success Burn Rate
+
+    Verify Alert Is Firing And Continue On Failure
+    ...    DeadManSnitch    DeadManSnitch
+
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    Builds    JupyterHub image builds are failing    alert-duration=300
+
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    alert-duration=120
+
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    RHODS-PVC-Usage    User notebook pvc usage at 100%    alert-duration=120
+
+    Verify "RHODS Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
+
+    Verify "RHODS Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
 
 Verify Alert RHODS-PVC-Usage-Above-90 Is Fired When User PVC Is Above 90 Percent
     [Documentation]    Runs a jupyter notebook to fill the user PVC over 90% and
@@ -45,6 +53,7 @@ Verify Alert RHODS-PVC-Usage-Above-90 Is Fired When User PVC Is Above 90 Percent
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    RHODS-PVC-Usage
     ...    User notebook pvc usage above 90%
+    ...    alert-duration=120
 
     [Teardown]    Teardown PVC Alert Test
 
@@ -59,8 +68,133 @@ Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    RHODS-PVC-Usage
     ...    User notebook pvc usage at 100%
+    ...    alert-duration=120
 
     [Teardown]    Teardown PVC Alert Test
+
+Verify Alert "RHODS Route Error Burn Rate" Is Fired When Traefik Is Down    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" is fired when traefik-proxy is not working
+    [Tags]    Tier3    ODS-738
+
+    Skip    msg=This alert was disabled in RHODS 1.3.0. More info at RHODS-2101
+
+    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-haproxy_backend_http_responses_total
+    ...    RHODS Route Error Burn Rate
+    ...    alert-duration=120
+
+    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    redhat-ods-applications    traefik-proxy    replicas=0
+
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-haproxy_backend_http_responses_total
+    ...    RHODS Route Error Burn Rate
+    ...    alert-duration=120
+    ...    timeout=40 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-haproxy_backend_http_responses_total
+    ...    RHODS Route Error Burn Rate
+    ...    alert-duration=120
+    ...    timeout=5 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alert "RHODS Route Error Burn Rate" Is Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" is fired when rhods-dashboard is not working
+    [Tags]    Tier3    ODS-739
+
+    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-haproxy_backend_http_responses_total
+    ...    RHODS Route Error Burn Rate
+
+    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard    replicas=0
+
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-haproxy_backend_http_responses_total
+    ...    RHODS Route Error Burn Rate
+    ...    alert-duration=120
+    ...    timeout=40 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-haproxy_backend_http_responses_total
+    ...    RHODS Route Error Burn Rate
+    ...    alert-duration=120
+    ...    timeout=5 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alert "RHODS Probe Success Burn Rate" Is Fired When Traefik Is Down    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" is fired when traefik-proxy is not working
+    [Tags]    Tier3    ODS-712
+
+    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS Probe Success Burn Rate
+
+    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    redhat-ods-applications    traefik-proxy    replicas=0
+
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    timeout=40 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    timeout=5 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alert "RHODS Probe Success Burn Rate" Is Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" is fired when rhods-dashboard is not working
+    [Tags]    Tier3    ODS-713
+
+    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS Probe Success Burn Rate
+    ...    alert-duration=120
+
+    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard    replicas=0
+
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    timeout=40 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    timeout=5 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
 
 
 *** Keywords ***
@@ -99,25 +233,49 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
 
 Verify Alert Is Firing And Continue On Failure
     [Documentation]    Verifies that alert is firing, failing otherwhise but continuing the execution
-    [Arguments]    ${rule_group}    ${alert}
+    [Arguments]    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
     Run Keyword And Continue On Failure    Prometheus.Alert Should Be Firing
     ...    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    ${rule_group}
     ...    ${alert}
+    ...    ${alert-duration}
 
 Verify Alert Is Not Firing And Continue On Failure
     [Documentation]    Verifies that alert is not firing, failing otherwhise but continuing the execution
-    [Arguments]    ${rule_group}    ${alert}
+    [Arguments]    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
     Run Keyword And Continue On Failure    Prometheus.Alert Should Not Be Firing
     ...    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    ${rule_group}
     ...    ${alert}
+    ...    ${alert-duration}
+
+Verify "RHODS Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" is not firing for all alert durations
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    alert-duration=120
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    alert-duration=900
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    alert-duration=3600
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    alert-duration=10800
+
+Verify "RHODS Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" is not firing for all alert durations
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=120
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=900
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=3600
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=10800
 
 Skip Test If Alert Is Already Firing
     [Documentation]    Skips tests if ${alert} is already firing
-    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
     ${alert_is_firing}=    Run Keyword And Return Status    Alert Should Be Firing
-    ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}
-    Skip If    ${alert_is_firing}    msg=Test skiped because alert "${alert}" is already firing
+    ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
+    Skip If    ${alert_is_firing}    msg=Test skiped because alert "${alert} ${alert-duration}" is already firing

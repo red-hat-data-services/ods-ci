@@ -30,7 +30,7 @@ Verify RHODS Prometheus Alerts Are Not Firing Except For DeadManSnitch
     ...    DeadManSnitch    DeadManSnitch
 
     Verify Alert Is Not Firing And Continue On Failure
-    ...    Builds    JupyterHub image builds are failing    alert-duration=300
+    ...    Builds    JupyterHub image builds are failing    alert-duration=120
 
     Verify Alert Is Not Firing And Continue On Failure
     ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    alert-duration=120

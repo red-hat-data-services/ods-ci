@@ -20,7 +20,7 @@ Verify CUDA Image Can Be Spawned With GPU
     [Documentation]    Spawns CUDA image with 1 GPU
     [Tags]  Sanity
     ...     Resources-GPU
-    ...     ODS-1141
+    ...     ODS-1141    ODS-346
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 Verify CUDA Image Includes Expected CUDA Version

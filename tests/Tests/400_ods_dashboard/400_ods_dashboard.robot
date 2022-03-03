@@ -15,7 +15,7 @@ ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 *** Test Cases ***
 Verify Resource Link Http status code
     [Tags]  Sanity
-    ...     ODS-531
+    ...     ODS-531  ODS-507
     Click Link    Resources
     Sleep  5
     ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
@@ -32,8 +32,9 @@ Verify Content In RHODS Explore Section
     ...              It compares the actual data with the one registered in a JSON file. The checks are about:
     ...              - Card's details (text, badges, images)
     ...              - Sidebar (titles, links text, links status)
-    [Tags]  Sanity
-    ...     ODS-488  ODS-993
+    [Tags]    Sanity
+    ...       ODS-488  ODS-993  ODS-749  ODS-352  ODS-282
+    ...       KnownIssues
     ${EXP_DATA_DICT}=   Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait Until Cards Are Loaded
@@ -45,6 +46,7 @@ Verify Disabled Cards Can Be Removed
     ...                 It uses RHOSAK as example to test the feature
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
+    ...       KnownIssues
     Enable RHOSAK
     Remove RHOSAK From Dashboard
     Success Message Should Contain   ${RHOSAK_DISPLAYED_APPNAME}
@@ -55,7 +57,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     [Tags]    Sanity
-    ...       ODS-1097
+    ...       ODS-1097   ODS-357
     Enable Anaconda  license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible

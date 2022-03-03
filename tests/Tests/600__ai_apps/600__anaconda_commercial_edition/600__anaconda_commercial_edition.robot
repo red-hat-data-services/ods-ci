@@ -11,7 +11,6 @@ Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Commercial Edition Suite Setup
-Suite Teardown  Remove Anaconda Commercial Edition Component
 
 
 *** Test Cases ***
@@ -51,7 +50,8 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
 
 Verify User Is Able to Activate Anaconda Commercial Edition
   [Tags]  Tier2
-  ...     ODS-272  ODS-344  ODS-501
+  ...     ODS-272  ODS-344  ODS-501  ODS-588
+  ...     KnownIssues
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner
@@ -87,7 +87,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
-
+  [Teardown]    Remove Anaconda Commercial Edition Component
 
 
 *** Keywords ***

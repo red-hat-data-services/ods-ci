@@ -309,37 +309,4 @@ Re-validate License For Disabled Application From Enabled Page
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[0]
 
-Check CSS Property Has The Expected Value
-    [Documentation]     Compare the actual CSS property value with the expected one
-    [Arguments]   ${locator}    ${property}    ${exp_value}   ${operation}=equal
-    ${el_text}=   Get Text   xpath:${locator}
-    Log    Text of the target element: ${el_text}
-    ${actual_value}=    Get CSS Property Value   xpath:${locator}    ${property}
-    IF    $operation == "contains"
-        Run Keyword And Continue On Failure   Should Contain    ${actual_value}    ${exp_value}
-    ELSE
-        Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
-    END
-
-Check CSS Style Is The Expected One
-    [Documentation]     Compare the some CSS properties of the Explore page
-    ...                 with the expected ones. The expected values change based
-    ...                 on the RHODS version
-    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.7.0
-    IF  ${version-check}==True
-        Check CSS Property Has The Expected Value    locator=//pre
-        ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
-        Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-        ...    property=margin-bottom    exp_value=8px
-    ELSE
-        Check CSS Property Has The Expected Value    locator=//pre
-        ...    property=background-color    exp_value=rgba(245, 245, 245, 1)
-        Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-        ...    property=margin-bottom    exp_value=10px
-    END
-    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
-    ...    property=font-size    exp_value=24px
-    Check CSS Property Has The Expected Value    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
-    ...    property=font-family    exp_value=RedHatDisplay
-    ...    operation=contains
 

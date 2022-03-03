@@ -16,7 +16,7 @@ ${LABEL_SELECTOR}       name=traefik-proxy
 
 
 *** Test Cases ***
-Verify Traefik Proxy Containers Restart
+Verify Traefik Proxy Containers Have Zero Restarts
     [Documentation]    Verify traefik proxy
     ...    container restart
     [Tags]    Sanity

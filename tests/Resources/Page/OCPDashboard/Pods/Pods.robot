@@ -86,4 +86,4 @@ Search Pod
     [Arguments]   ${namespace}  ${pod_start_with}
     ${pod} =  Run  oc get pods -n ${namespace} -o json | jq '.items[] | select(.metadata.name | startswith("${pod_start_with}")) | .metadata.name'
     @{list_pods} =  Split String  ${pod}  \n
-    [Return]  ${list_pods}
+    [Return]  ${list_pods}[0]

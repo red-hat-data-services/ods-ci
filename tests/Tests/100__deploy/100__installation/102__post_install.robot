@@ -69,11 +69,10 @@ Verify GPU Operator Deployment  # robocop: disable
 
 Verify That Prometheus Image Is A CPaaS Built Image
     [Tags]    ODS-734    Tier1
-    @{pods} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
-    FOR    ${pod}    IN    @{pods}
-        Verify Container Image    redhat-ods-monitoring    ${pod}    prometheus
-        ...    "registry.redhat.io/openshift4/ose-prometheus"
-        Verify Container Image    redhat-ods-monitoring    ${pod}    oauth-proxy
-        ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
-    END
+    ${pods} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
+    Verify Container Image    redhat-ods-monitoring    ${pods}    prometheus
+    ...    "registry.redhat.io/openshift4/ose-prometheus"
+    Verify Container Image    redhat-ods-monitoring    ${pods}    oauth-proxy
+    ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
+
 

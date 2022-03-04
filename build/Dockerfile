@@ -1,4 +1,5 @@
-FROM registry.access.redhat.com/ubi8/ubi:8.1
+FROM quay.io/centos/centos:stream8
+# FROM registry.access.redhat.com/ubi8/ubi:8.1
 # Use this build arg to set any default test script arguments
 ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
 ENV ROBOT_EXTRA_ARGS=${ROBOT_EXTRA_ARGS}
@@ -16,26 +17,23 @@ RUN curl -L https://github.com/mikefarah/yq/releases/download/v4.16.2/yq_linux_a
 COPY build/oc /usr/local/bin/oc
 # COPY oc /usr/local/bin/oc
 RUN chmod 755 /usr/local/bin/oc &&\
-         oc version --client &&\
-         oc config set-context loadtest
+         oc version --client
 
 RUN mkdir $HOME/ods-ci
 # Change the WORKDIR so the run script references any files/folders from the root of the repo
 WORKDIR $HOME/ods-ci
 
-COPY requirements.txt setup.py .
-RUN python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
-
 COPY tests tests/
 COPY libs libs/
 COPY run_robot_test.sh  .
+COPY requirements.txt setup.py .
+RUN python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
 
 # Set the group ownership so non-root users can write to /tmp
 RUN chgrp -R 0 /tmp && chmod -R g=u /tmp
 RUN chown -R 1001 /tmp
 
 USER 1001
-
 
 CMD if [ -n "${ROBOT_EXTRA_ARGS}" ]; then \
             echo --extra-robot-args "${ROBOT_EXTRA_ARGS}" &&\

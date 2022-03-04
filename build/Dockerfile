@@ -5,6 +5,8 @@ ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
 ENV ROBOT_EXTRA_ARGS=${ROBOT_EXTRA_ARGS}
 ENV HOME /tmp
 
+ARG oc_local_path=build/oc
+
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
     dnf install -y git python3 unzip chromium chromedriver redhat-lsb-core &&\
     dnf clean all
@@ -14,7 +16,8 @@ RUN curl -L https://github.com/mikefarah/yq/releases/download/v4.16.2/yq_linux_a
     chmod +x /usr/bin/yq
 
 ## Install oc in the container
-COPY build/oc /usr/local/bin/oc
+COPY ${oc_local_path} /usr/local/bin/oc
+# COPY build/oc /usr/local/bin/oc
 # COPY oc /usr/local/bin/oc
 RUN chmod 755 /usr/local/bin/oc &&\
          oc version --client

@@ -1,6 +1,7 @@
 *** Settings ***
 Library   SeleniumLibrary
 Library   JupyterLibrary
+Library   OperatingSystem
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
 
@@ -60,3 +61,7 @@ CSS Property Value Should Be
     ELSE
         Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
     END
+
+Get Cluster ID
+    ${cluster_id}=   Run    oc get clusterversion -o json | jq .items[].spec.clusterID
+    [Return]    ${cluster_id}

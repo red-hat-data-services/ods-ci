@@ -36,3 +36,11 @@ class Helpers:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.uninstall_rhoam_addon()
+
+    @keyword
+    def get_cluster_name(self, cluster_identifier):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_identifier
+        cluster_name = ocm_client.get_osd_cluster_name()
+        return cluster_name
+

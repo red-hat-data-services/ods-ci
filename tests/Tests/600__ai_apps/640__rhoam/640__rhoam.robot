@@ -1,5 +1,6 @@
 *** Settings ***
 Resource        ../../../Resources/Page/LoginPage.robot
+Resource        ../../../Resources/Common.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/ODH/AiApps/Rhoam.resource
 Library         ../../../../libs/Helpers.py
@@ -19,6 +20,8 @@ Verify RHOAM Is Available In RHODS Dashboard Explore Page
 
 Verify install
     [Tags]  rhoam
+    ${cluster_id}=   Get Cluster ID
+    ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
     Install Rhoam Addon    cluster_name=<cluster_name>
     Wait Until RHOAM Installation Is Completed    retries=20   retries_interval=2min
 

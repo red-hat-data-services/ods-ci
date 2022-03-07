@@ -22,9 +22,11 @@ ${TEST_ALERT_PVC100_NOTEBOOK_PATH}      SEPARATOR=
 
 
 *** Test Cases ***
-Verify RHODS Prometheus Alerts Are Not Firing Except For DeadManSnitch
+Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that, in a regular situation, only the DeadManSnitch alert is firing
-    [Tags]    Smoke    Tier1    ODS-540
+    [Tags]    Smoke
+    ...       Tier1
+    ...       ODS-540
 
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
@@ -45,7 +47,8 @@ Verify RHODS Prometheus Alerts Are Not Firing Except For DeadManSnitch
 Verify Alert RHODS-PVC-Usage-Above-90 Is Fired When User PVC Is Above 90 Percent
     [Documentation]    Runs a jupyter notebook to fill the user PVC over 90% and
     ...    verifies that alert "User notebook pvc usage above 90%" is fired
-    [Tags]    Tier2    ODS-516
+    [Tags]    Tier2
+    ...       ODS-516
 
     Fill Up User PVC    ${NOTEBOOK_REPO_URL}    ${TEST_ALERT_PVC90_NOTEBOOK_PATH}
 
@@ -60,7 +63,8 @@ Verify Alert RHODS-PVC-Usage-Above-90 Is Fired When User PVC Is Above 90 Percent
 Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
     [Documentation]    Runs a jupyter notebook to fill the user PVC over 100% and
     ...    verifies that alert "User notebook pvc usage at 100%" is fired
-    [Tags]    Tier2    ODS-517
+    [Tags]    Tier2
+    ...       ODS-517
 
     Fill Up User PVC    ${NOTEBOOK_REPO_URL}    ${TEST_ALERT_PVC100_NOTEBOOK_PATH}
 
@@ -74,7 +78,8 @@ Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
 
 Verify Alert "RHODS Route Error Burn Rate" Is Fired When Traefik Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" is fired when traefik-proxy is not working
-    [Tags]    Tier3    ODS-738
+    [Tags]    Tier3
+    ...       ODS-738
 
     Skip    msg=This alert was disabled in RHODS 1.3.0. More info at RHODS-2101
 
@@ -107,7 +112,8 @@ Verify Alert "RHODS Route Error Burn Rate" Is Fired When Traefik Is Down    # ro
 
 Verify Alert "RHODS Route Error Burn Rate" Is Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" is fired when rhods-dashboard is not working
-    [Tags]    Tier3    ODS-739
+    [Tags]    Tier3
+    ...       ODS-739
 
     Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
@@ -137,7 +143,8 @@ Verify Alert "RHODS Route Error Burn Rate" Is Fired When RHODS Dashboard Is Down
 
 Verify Alert "RHODS Probe Success Burn Rate" Is Fired When Traefik Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" is fired when traefik-proxy is not working
-    [Tags]    Tier3    ODS-712
+    [Tags]    Tier3
+    ...       ODS-712
 
     Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
@@ -167,7 +174,8 @@ Verify Alert "RHODS Probe Success Burn Rate" Is Fired When Traefik Is Down    # 
 
 Verify Alert "RHODS Probe Success Burn Rate" Is Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" is fired when rhods-dashboard is not working
-    [Tags]    Tier3    ODS-713
+    [Tags]    Tier3
+    ...       ODS-713
 
     Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}

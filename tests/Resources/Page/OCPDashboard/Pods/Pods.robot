@@ -121,6 +121,6 @@ Verify Containers Have Zero Restarts
             Run Keyword And Continue On Failure    FAIL
             ...    Container restart "${container_details}" found for '${pod_name}' pod.
         ELSE
-            Pass Execution    No container with restart count found!
+            Log    No container with restart count found!
         END
     END

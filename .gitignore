@@ -9,6 +9,7 @@ drivers/**/chromedriver
 must-gather-results.txt
 .DS_Store
 .idea/
+.vscode
 Results/
 results/
 __pycache__/

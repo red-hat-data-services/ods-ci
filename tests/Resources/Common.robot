@@ -41,3 +41,22 @@ Load Json File
     ${j_file}    Get File    ${file_path}
     ${obj}    Evaluate    json.loads('''${j_file}''')    json
     [Return]    ${obj}
+
+Get CSS Property Value
+    [Documentation]    Get the CSS property value of a given element
+    [Arguments]    ${locator}    ${property_name}
+    ${element} =       Get WebElement    ${locator}
+    ${css_prop} =    Call Method       ${element}    value_of_css_property    ${property_name}
+    [Return]     ${css_prop}
+
+CSS Property Value Should Be
+    [Documentation]     Compare the actual CSS property value with the expected one
+    [Arguments]   ${locator}    ${property}    ${exp_value}   ${operation}=equal
+    ${el_text}=   Get Text   xpath:${locator}
+    Log    Text of the target element: ${el_text}
+    ${actual_value}=    Get CSS Property Value   xpath:${locator}    ${property}
+    IF    $operation == "contains"
+        Run Keyword And Continue On Failure   Should Contain    ${actual_value}    ${exp_value}
+    ELSE
+        Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
+    END

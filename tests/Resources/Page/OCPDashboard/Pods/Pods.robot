@@ -1,6 +1,5 @@
 *** Settings ***
 Documentation       Collection of keywords to work with Pods
-
 Library             OpenShiftCLI
 Resource            ../../OCPDashboard/Page.robot
 Resource            ../../ODH/ODHDashboard/ODHDashboard.robot
@@ -75,3 +74,16 @@ Get Pod Status
     ${data}       Run Keyword   OpenShiftCLI.Get   kind=Pod
     ...    namespace=${namespace}   label_selector=${label_selector}
     [Return]      ${data[0]['status']['phase']}
+
+Verify Container Image
+    [Documentation]  Checks if the container image matches  $expected-image-url 
+    [Arguments]   ${namespace}  ${pod}  ${container}  ${expected-image-url}
+    ${image} =  Run  oc get pod ${pod} -n ${namespace} -o json | jq '.spec.containers[] | select(.name == "${container}") | .image'
+    Should Be Equal  ${image}  ${expected-image-url}
+
+Search Pod
+    [Documentation]   Return list of pods   pod_start_with = here ypu have to provide starting of pod name
+    [Arguments]   ${namespace}  ${pod_start_with}
+    ${pod} =  Run  oc get pods -n ${namespace} -o json | jq '.items[] | select(.metadata.name | startswith("${pod_start_with}")) | .metadata.name'
+    @{list_pods} =  Split String  ${pod}  \n
+    [Return]  ${list_pods}[0]

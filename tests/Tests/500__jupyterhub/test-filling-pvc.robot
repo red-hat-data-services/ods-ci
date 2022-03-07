@@ -22,7 +22,7 @@ Get Notifications If Storage Capacity Limits Get Exceeded
     [Tags]    Sanity    
     ...       ODS-539
 
-    ${error} =    Run Git Repo And Return Last Cell Error Text As List    ${LINK_OF_GITHUB}    ${PATH_TO_FILE}
+    ${error} =    Run Git Repo And Return Last Cell Error Text    ${LINK_OF_GITHUB}    ${PATH_TO_FILE}
     Should Be Equal    OSError: [Errno 28] No space left on device    ${error}
     Wait Until Page Contains    File Save Error for ${FILE_NAME}    timeout=150s
     Maybe Close Popup

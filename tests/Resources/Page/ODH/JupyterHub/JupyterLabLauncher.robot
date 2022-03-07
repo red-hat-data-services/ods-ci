@@ -68,7 +68,7 @@ Get JupyterLab Code Cell Error Text
   ${error_txt} =  Get Text  //div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]
   [Return]  ${error_txt}
 
-Run Git Repo And Return Last Cell Error Text As List
+Run Git Repo And Return Last Cell Error Text
   [Documentation]    It actually clones the git repo, runs it and then returns the last error
   [Arguments]    ${REPO_URL}  ${NOTEBOOK_TO_RUN}
   Run Keyword And Ignore Error    Clone Git Repository And Run    ${LINK_OF_GITHUB}    ${PATH_TO_FILE}

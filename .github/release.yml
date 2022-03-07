@@ -1,0 +1,34 @@
+changelog:
+  exclude:
+    labels:
+      - "needs testing"
+      - ":warning: high priority review"
+      - "do not merge"
+      - "ignore for release"
+    authors:
+      - octocat
+  categories:
+    - title: New Tests
+      labels:
+        - "new test"
+    - title: New Libraries
+      labels:
+        - "new lib"
+    - title: New Tasks
+      labels:
+        - "new task"
+    - title: Enhancements
+      labels:
+        - enhancements
+    - title: Enhancements in scripts and CI/CD
+      labels:
+        - utils
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Misc
+      labels:
+        - misc
+    - title: Other Changes
+      labels:
+        - "*"

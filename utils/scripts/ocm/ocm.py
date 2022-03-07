@@ -469,26 +469,43 @@ class OpenshiftClusterManager():
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         print(ret)
+        failure_flag = False
         if ret is None:
             log.info("Failed to install {} addon on cluster "
                   "{}".format(addon_name, self.cluster_name))
-            sys.exit(1)
+            failure_flag = True
+            return failure_flag
+            # sys.exit(1)
+        return failure_flag
 
     def install_rhoam_addon(self):
-        # to fix installation status check
+        def check_secret_existence(secret_name):
+            cmd = "oc get secret {} -n redhat-rhoam-operator".format(secret_name)
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            log.info(ret)
+            print(ret)
+            log.info("\nRET: {}".format(ret))
+            if ret is None or "Error" in ret:
+                log.info("Failed to create {} secret".format(secret_name))
+                get_fail = True
+            else:
+                get_fail = False
+            return get_fail
+
         if not self.is_addon_installed(addon_name="managed-api-service"):
-            # if not self.is_addon_installed(addon_name="managed-api-service"):
             add_vars = {
                 "CIDR": "10.1.0.0/26"
             }
-            self.install_addon_v2(addon_name="managed-api-service",
-                                  template_filename="install_addon_rhoam.jinja",
-                                  output_filename="install_rhoam_operator.json",
-                                  add_replace_vars=add_vars)
-            print("\nSetting the useClusterStorage parameter")
+            failure_flags = []
+            failure = self.install_addon_v2(addon_name="managed-api-service",
+                                            template_filename="install_addon_rhoam.jinja",
+                                            output_filename="install_rhoam_operator.json",
+                                            add_replace_vars=add_vars)
+            failure_flags.append(failure)
             log.info("\nSetting the useClusterStorage parameter")
             rhmi_found = False
-            for retry in range(10):
+            for retry in range(20):
                 cmd = ("""oc get rhmi rhoam  -n redhat-rhoam-operator""")
                 log.info("CMD: {}".format(cmd))
                 ret = execute_command(cmd)
@@ -502,49 +519,48 @@ class OpenshiftClusterManager():
                     break
             if not rhmi_found:
                 log.error("RHMI not found!")
-                sys.exit(1)
+                failure = True
+                failure_flags.append(failure)
+                # sys.exit(1)
 
             cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
-                   --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
+                   --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false-test\"}}'""")
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
             log.info("\nRET: {}".format(ret))
             if ret is None:
                 log.info("Failed to patch RHMI to set useClusterStorage")
-                sys.exit(1)
+                failure = True
+                failure_flags.append(failure)
+                # sys.exit(1)
 
-            print("\nCreating a dms dummy secret...")
             log.info("\nCreating a dms dummy secret...")
             cmd = "oc apply -f templates/dms.yaml"
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
-            if ret is None or "Error" in ret:
-                log.info("Failed to create redhat-rhoam-deadmanssnitch secret")
-                sys.exit(1)
-
-            print("\nCreating a smtp dummy secret...")
+            log.info("\nRET: {}".format(ret))
+            failure = check_secret_existence("redhat-rhoam-deadmanssnitch")
+            failure_flags.append(failure)
             log.info("\nCreating a smtp dummy secret...")
-            cmd = ("""
-                      oc create secret generic redhat-rhoam-smtp -n redhat-rhoam-operator \
-                          --from-literal=host= \
-                          --from-literal=username= \
-                          --from-literal=password= \
-                          --from-literal=port= \
-                          --from-literal=tls=
-                  """)
+            cmd = "oc apply -f templates/smpt.yaml"
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
-            if ret is None or "Error" in ret:
-                log.info("Failed to create redhat-rhoam-smtp secret")
-                sys.exit(1)
-            self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
+            # log.info("\nRET: {}".format(ret))
+            failure = check_secret_existence("redhat-rhoam-smpt")
+            failure_flags.append(failure)
+            if True in failure_flags:
+                log.info("Something got wrong while installing RHOAM: "
+                         "thus system is not waiting for installation status."
+                         "\nPlease check the cluster and try again...")
+            else:
+                self.wait_for_addon_installation_to_complete(addon_name="managed-api-service")
         else:
             log.info("managed-api-service is already installed on {}".format(self.cluster_name))
 
     def uninstall_rhoam_addon(self):
         """Uninstalls RHOAM addon"""
         self.uninstall_addon(addon_name="managed-api-service")
-        self.wait_for_addon_uninstallation_to_complete()
+        self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
 
     def create_idp(self):
         """Creates Identity Provider"""

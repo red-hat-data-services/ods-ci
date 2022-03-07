@@ -74,7 +74,6 @@ Verify License Of Disabled Cards Can Be Re-validated
     Capture Page Screenshot    after_revalidation.png
     [Teardown]    Remove Anaconda Commercial Edition Component
 
-Verify Documentation Link HTTP Status Code
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
     [Tags]    Smoke
@@ -85,20 +84,14 @@ Verify CSS Style Of Getting Started Descriptions
     Capture Page Screenshot    get_started_sidebar.png
     Verify JupyterHub Card CSS Style
 
-Verify Documentation Link Https status code
+Verify Documentation Link HTTP status code
     [Documentation]    It verifies the documentation link present in question mark and
     ...    also checks the RHODS dcoumentation link present in resource page.
-    [Tags]    sanity    ods-327    ods-492
-    Click Link    Resources
-    Sleep    2
-    # get the documentation link
-    ${href_view_the_doc}=    Get Element Attribute    //a[@class='odh-dashboard__external-link']    href
-    ${status_for_view_the_doc}=    Check HTTP Status Code    ${href_view_the_doc}
-    Log To Console    ${href_view_the_doc} gets status code ${status_for_view_the_doc}
-    # Clicking on question mark
-    Click Element    xpath=//*[@id="toggle-id"]
-    ${link_elements}=    Get Question Mark Links Elements
-    Check External Links Status     links=${link_elements}
+    [Tags]    Sanity
+    ...       ODS-327    ods-492
+
+    ${links}=  Get RHODS Documentation Links From Dashboard
+    Check External Links Status     links=${links}
 
 
 *** Keywords ***
@@ -132,4 +125,5 @@ Verify JupyterHub Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
+
 

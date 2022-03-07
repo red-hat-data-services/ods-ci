@@ -37,7 +37,8 @@ Can Spawn Notebook
 
 Verify jupyterlab server pods are spawned in a custom namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)
-    [Tags]    Sanity    ODS-320
+    [Tags]    Sanity    
+    ...       ODS-320
     ${pod_name} =    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
     ${name} =    Remove String    ${pod_name}    jupyterhub-nb-
     Verify Operator Pod Status    namespace=rhods-notebooks    label_selector=jupyterhub.opendatahub.io/user=${name}

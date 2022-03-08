@@ -52,7 +52,7 @@ class OpenshiftClusterManager():
             match = re.search(r'.*\.(\S+)', (os.path.basename(ocm_env[0])))
             if match is not None:
                 self.testing_platform = match.group(1)
- 
+
     def _is_ocmcli_installed(self):
         """Checks if ocm cli is installed"""
         cmd = "ocm version"
@@ -116,7 +116,7 @@ class OpenshiftClusterManager():
                 chan_grp = ""
                 if (self.channel_group == "candidate"):
                     chan_grp = "--channel-group {}".format(self.channel_group)
-                 
+
                 version_cmd = "ocm list versions {} | grep -w \"".format(chan_grp) + re.escape(version) + "*\""
                 log.info("CMD: {}".format(version_cmd))
                 versions = execute_command(version_cmd)
@@ -134,7 +134,7 @@ class OpenshiftClusterManager():
             if ((self.channel_group == "stable") or (self.channel_group == "candidate")):
                 if version == "":
                     log.error(("Please enter openshift version as argument."
-                               "Channel group option is used along with openshift version."))    
+                               "Channel group option is used along with openshift version."))
                     sys.exit(1)
                 else:
                     channel_grp = "--channel-group {} ".format(self.channel_group)
@@ -149,7 +149,7 @@ class OpenshiftClusterManager():
                            self.aws_access_key_id,
                            self.aws_secret_access_key,
                            self.aws_region, self.num_compute_nodes,
-                           self.aws_instance_type, version, 
+                           self.aws_instance_type, version,
                            channel_grp, self.cluster_name))
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
@@ -564,6 +564,17 @@ class OpenshiftClusterManager():
         self.uninstall_rhods()
         self.wait_for_addon_uninstallation_to_complete()
 
+    def install_rhoda_addon(self):
+        if not self.is_addon_installed("dbaas-operator"):
+            self.install_addon("dbaas-operator")
+            self.wait_for_addon_installation_to_complete("dbaas-operator")
+        # Waiting 5 minutes to ensure all the services are up
+        time.sleep(300)
+
+    def uninstall_rhoda_addon(self):
+        self.uninstall_rhoda("dbaas-operator")
+        self.wait_for_addon_uninstallation_to_complete("dbaas-operator")
+
     def ocm_login(self):
         """ Login to OCM using ocm cli"""
 
@@ -789,6 +800,30 @@ if __name__ == "__main__":
             action="store", dest="cluster_name",
             required=True)
         uninstall_rhods_parser.set_defaults(func=ocm_obj.uninstall_rhods_addon)
+
+        #Argument parsers for install_rhoda_addon
+        install_rhoda_parser = subparsers.add_parser(
+            'install_rhoda_addon',
+            help=("Install rhoda addon cluster."),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        required_install_rhoda_parser = install_rhoda_parser.add_argument_group('required arguments')
+        required_install_rhoda_parser.add_argument("--cluster-name",
+            help="osd cluster name",
+            action="store", dest="cluster_name",
+            required=True)
+        install_rhoda_parser.set_defaults(func=ocm_obj.install_rhoda_addon)
+
+        #Argument parsers for uninstall_rhoda_addon
+        uninstall_rhoda_parser = subparsers.add_parser(
+            'uninstall_rhoda_addon',
+            help=("Uninstall rhoda addon cluster."),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        required_uninstall_rhoda_parser = uninstall_rhoda_parser.add_argument_group('required arguments')
+        required_uninstall_rhoda_parser.add_argument("--cluster-name",
+            help="osd cluster name",
+            action="store", dest="cluster_name",
+            required=True)
+        uninstall_rhoda_parser.set_defaults(func=ocm_obj.uninstall_rhoda_addon)
 
         #Argument parsers for create_idp
         create_idp_parser = subparsers.add_parser(

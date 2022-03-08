@@ -2,12 +2,10 @@
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Common.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../../Resources/Page/ODH/AiApps/Rhoam.resource
-Library         ../../../../libs/Helpers.py
 Library         SeleniumLibrary
-Library         OpenShiftCLI
 Suite Setup     RHOAM Suite Setup
 Suite Teardown  RHOAM Suite Teardown
+
 
 *** Test Cases ***
 Verify RHOAM Is Available In RHODS Dashboard Explore Page
@@ -18,17 +16,6 @@ Verify RHOAM Is Available In RHODS Dashboard Explore Page
   Verify Service Is Available In The Explore Page    OpenShift API Management
   Verify Service Provides "Get Started" Button In The Explore Page    OpenShift API Management
 
-Verify install
-    [Tags]  rhoam
-    ${cluster_id}=   Get Cluster ID
-    ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
-    Install Rhoam Addon    cluster_name=<cluster_name>
-    Wait Until RHOAM Installation Is Completed    retries=20   retries_interval=2min
-
-Verify uninstall
-    [Tags]  rhoam-uni
-    Uninstall Rhoam Addon    cluster_name=<cluster_name>
-
 
 *** Keywords ***
 RHOAM Suite Setup
@@ -36,5 +23,6 @@ RHOAM Suite Setup
 
 RHOAM Suite Teardown
   Close All Browsers
+
 
 

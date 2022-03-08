@@ -6,7 +6,7 @@ Library             OperatingSystem
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-
+Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 
 *** Test Cases ***
 Verify Dashboard Deployment
@@ -71,7 +71,7 @@ Verify That Prometheus Image Is A CPaaS Built Image
     [Tags]    Sanity   
     ...     Tier1
     ...     ODS-734    
-    ${pod} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    prometheus
     ...    "registry.redhat.io/openshift4/ose-prometheus"
     Verify Container Image    redhat-ods-monitoring    ${pod}    oauth-proxy
@@ -81,7 +81,7 @@ Verify That Grafana Image Is A Red Hat Built Image
     [Tags]    Sanity    
     ...     Tier1
     ...     ODS-736    
-    ${pod} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=grafana-
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=grafana-
     Verify Container Image    redhat-ods-monitoring    ${pod}    grafana
     ...    "registry.redhat.io/rhel8/grafana:7"
     Verify Container Image    redhat-ods-monitoring    ${pod}    auth-proxy
@@ -91,7 +91,7 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
     [Tags]    Sanity    
     ...     Tier1
     ...     ODS-735    
-    ${pod} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
     Verify Container Image    redhat-ods-monitoring    ${pod}    blackbox-exporter
     ...    "quay.io/integreatly/prometheus-blackbox-exporter:v0.19.0"
 
@@ -99,6 +99,6 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     [Tags]    Sanity    
     ...     Tier1
     ...     ODS-733    
-    ${pod} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    alertmanager
     ...    "registry.redhat.io/openshift4/ose-prometheus-alertmanager"

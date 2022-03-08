@@ -3,8 +3,10 @@ Documentation       RHODS monitoring alerts test suite
 
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
+Library             OperatingSystem
 Library             SeleniumLibrary
 Library             JupyterLibrary
+Library             OpenShiftCLI
 
 Suite Setup         Alerts Suite Setup
 
@@ -204,6 +206,80 @@ Verify Alert "RHODS Probe Success Burn Rate" Is Fired When RHODS Dashboard Is Do
 
     [Teardown]    ODS.Restore Default Deployment Sizes
 
+Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image Build Error
+    [Documentation]     Verify the "JupyterHub image builds are failing" alert when there is a image build failed
+    [Tags]    Sanity
+    ...       Tier2
+    ...       ODS-717
+    ...       KnownIssues
+    ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
+    ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
+    ...    container_to_kill=sti-build
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    ${build_name} =    Start New Build    namespace=redhat-ods-applications
+    ...    buildconfig=s2i-tensorflow-gpu-cuda-11.4.2-notebook
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${build_name}
+    Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    Sleep    10m    reason=Waiting for the alert to keep not firing
+    Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    Sleep    10m    reason=Waiting for the alert to keep not firing
+    Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    Sleep    10m    reason=Waiting for the alert to keep not firing
+    Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    [Teardown]    Delete Build    namespace=redhat-ods-applications    build_name=${failed_build_name}
+
+Verify Alert "JupyterHub Image Builds Are Failing" Fires Up To 30 Minutes When There Is An Image Build Error
+    [Documentation]    Verify that alert is firing up to 30 min and after thar resolve automatically
+    [Tags]    Sanity
+    ...       Tier2
+    ...       ODS-790
+    ...       KnownIssues
+    ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
+    ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    ...    container_to_kill=sti-build
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    Sleep    10m    reason=Waiting for the alert to keep firing
+    Prometheus.Alert Should Be Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    Sleep    10m    reason=Waiting for the alert to keep firing
+    Prometheus.Alert Should Be Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    Sleep    8m    reason=Waiting for the alert to keep firing
+    Prometheus.Alert Should Be Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    Builds
+    ...    JupyterHub image builds are failing
+    [Teardown]    Delete Failed Build And Start New One    namespace=redhat-ods-applications    failed_build_name=${failed_build_name}    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
 
 *** Keywords ***
 Alerts Suite Setup
@@ -232,7 +308,7 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     Wait For RHODS Dashboard To Load
     Launch JupyterHub From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    ${authorization_required}=    Is Service Account Authorization Required
+    ${authorization_required} =    Is Service Account Authorization Required
     Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=s2i-generic-data-science-notebook
@@ -284,6 +360,30 @@ Verify "RHODS Probe Success Burn Rate" Alerts Are Not Firing And Continue On Fai
 Skip Test If Alert Is Already Firing
     [Documentation]    Skips tests if ${alert} is already firing
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
-    ${alert_is_firing}=    Run Keyword And Return Status    Alert Should Be Firing
+    ${alert_is_firing} =    Run Keyword And Return Status    Alert Should Be Firing
     ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
     Skip If    ${alert_is_firing}    msg=Test skiped because alert "${alert} ${alert-duration}" is already firing
+
+Provoke Image Build Failure
+    [Documentation]    Starts New Build after some time it fail the build and return name of failed build
+    [Arguments]    ${namespace}    ${build_name_includes}    ${build_config_name}    ${container_to_kill}
+    ${build} =    Search Last Build    namespace=${namespace}    build_name_includes=${build_name_includes}
+    Delete Build    namespace=${namespace}    build_name=${build}
+    ${failed_build_name} =    Start New Build    namespace=${namespace}
+    ...    buildconfig=${build_config_name}
+    ${pod_name} =    Find First Pod By Name    namespace=${namespace}    pod_start_with=${failed_build_name}
+    Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
+    ...    expected_status=Running
+    Wait Until Container Exist  namespace=${namespace}  pod_name=${pod_name}  container_to_check=${container_to_kill}
+    Run Command In Container    namespace=${namespace}    pod_name=${pod_name}    command=/bin/kill 1    container_name=${container_to_kill}
+    Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
+    ...    expected_status=Failed    timeout=5 min
+    [Return]    ${failed_build_name}
+
+Delete Failed Build And Start New One
+    [Documentation]    It will delete failed build and start new build
+    [Arguments]    ${namespace}    ${failed_build_name}    ${build_config_name}
+    Delete Build    namespace=${namespace}    build_name=${failed_build_name}
+    ${build_name} =    Start New Build    namespace=${namespace}
+    ...    buildconfig=${build_config_name}
+    Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}

@@ -12,32 +12,35 @@ Suite Teardown   Custom Image Teardown
 
 *** Variables ***
 ${YAML} =         configs/resources/custom_image.yaml
+${IMG_NAME} =     custom-test-image
 
 
 *** Test Cases ***
 Verify ImageStream Can Be Created
     [Documentation]    Applies the YAML and Gets the ImageStream
-    [Tags]    Sanity
+    [Tags]    Tier2
     ...       ODS-1208
-    ${apply_status} =    Run Keyword And Return Status    Run    oc apply -f ${YAML}
+    ${apply_result} =    Run Keyword And Return Status    Run    oc apply -f ${YAML}
+    Should Be Equal    "${apply_result}"    "True"
     # OpenShiftCLI.Apply    kind=ImageStream    src="configs/resources/custom_image.yaml"
     # ...    namespace=redhat-ods-applications
-    ${get_status} =    OpenShiftCLI.Get    kind=ImageStream    field_selector=metadata.name==custom-test-image
+    ${get_metadata} =    OpenShiftCLI.Get    kind=ImageStream    field_selector=metadata.name==${IMG_NAME}
     ...    namespace=redhat-ods-applications
-    Log To Console    ${get_status}
+    &{data} =    Set Variable    ${get_metadata}[0]
+    Should Be Equal    ${data.metadata.name}    ${IMG_NAME}
 
 Verify Custom Image Spawn
     [Documentation]    Tries spawning the custom image
-    [Tags]    Sanity
+    [Tags]    Tier2
     ...       ODS-1208
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=custom-test-image  size=Default
+    Spawn Notebook With Arguments  image=${IMG_NAME}  size=Default
 
 
 *** Keywords ***
 Custom Image Teardown
     [Documentation]    Closes the JL server and deletes the ImageStream
     End Web Test
-    OpenShiftCLI.Delete    kind=ImageStream    field_selector=metadata.name==custom-test-image
+    OpenShiftCLI.Delete    kind=ImageStream    field_selector=metadata.name==${IMG_NAME}
     ...    namespace=redhat-ods-applications

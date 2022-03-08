@@ -28,8 +28,8 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     [Tags]  Tier3
     ...     ODS-1136
     ${cluster_id}=   Get Cluster ID
-    ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
-    Set Suite Variable     ${cluster_name}
+    ${CLUSTER_NAME}=   Get Cluster Name     cluster_identifier=${cluster_id}
+    Set Suite Variable     ${CLUSTER_NAME}
     Verify RHOAM Is Enabled IN RHODS Dashboard
     Uninstall RHODS From OSD Cluster
     RHODS Operator Should Be Uninstalled
@@ -42,7 +42,7 @@ RHOAM Suite Setup
 
 RHOAM Suite Teardown
     [Documentation]    RHOAM Suite teardown. It triggers RHOAM Uninstallation
-    Uninstall Rhoam Addon    cluster_name=${cluster_name}
+    Uninstall Rhoam Addon    cluster_name=${CLUSTER_NAME}
     Close All Browsers
 
 Uninstall RHODS From OSD Cluster

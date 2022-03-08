@@ -172,6 +172,16 @@ class OpenshiftClusterManager():
             sys.exit(1)
         return cluster_name.strip("\n")
 
+    def get_osd_cluster_name(self):
+        """Gets osd cluster Name"""
+
+        cluster_name = self.ocm_describe(filter="--json | jq -r '.name'")
+        if cluster_name is None:
+            log.info("Unable to retrieve cluster ID for "
+                     "cluster name {}. EXITING".format(self.cluster_name))
+            sys.exit(1)
+        return cluster_name.strip("\n")
+
     def get_osd_cluster_state(self):
         """Gets osd cluster state"""
 
@@ -552,8 +562,8 @@ class OpenshiftClusterManager():
                 log.info("Something got wrong while installing RHOAM: "
                          "thus system is not waiting for installation status."
                          "\nPlease check the cluster and try again...")
-            else:
-                self.wait_for_addon_installation_to_complete(addon_name="managed-api-service")
+            # else:
+            #    self.wait_for_addon_installation_to_complete(addon_name="managed-api-service")
         else:
             log.info("managed-api-service is already installed on {}".format(self.cluster_name))
 

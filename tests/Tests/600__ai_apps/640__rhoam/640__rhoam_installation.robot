@@ -20,6 +20,7 @@ Verify RHOAM Can Be Installed
     ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
     Install Rhoam Addon    cluster_name=${cluster_name}
     Wait Until RHOAM Installation Is Completed    retries=20   retries_interval=2min
+    Verify RHOAM Is Enabled IN RHODS Dashboard
 
 Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     [Documentation]    Verifies RHODS can be successfully uninstalled when
@@ -29,10 +30,7 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     ${cluster_id}=   Get Cluster ID
     ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
     Set Suite Variable     ${cluster_name}
-    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
-    ...    browser_options=${BROWSER.OPTIONS}    $ocp_user_name    $ocp_user_pw    $ocp_user_auth_type    $dashboard_url    $browser    $browser_options
-    Verify Service Is Enabled    app_name=OpenShift API Management
+    Verify RHOAM Is Enabled IN RHODS Dashboard
     Uninstall RHODS From OSD Cluster
     RHODS Operator Should Be Uninstalled
 

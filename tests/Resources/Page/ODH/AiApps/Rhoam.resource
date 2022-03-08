@@ -1,9 +1,13 @@
 *** Settings ***
 Documentation       Keyword suites to interact with Anaconda Commercial Edition
 
+Resource            ../../ODH/ODHDashboard/ODHDashboard.robot
 Library             OpenShiftCLI
 Library             OperatingSystem
 
+
+*** Variables ***
+${RHOAM_DISPLAYED_NAME}=    OpenShift API Management
 
 *** Keywords ***
 Get RHOAM Installation Stage
@@ -31,3 +35,8 @@ Wait Until RHOAM Installation Is Completed
         Fail    RHOAM didn't get "complete" stage after ${retries} retries. Check the installation..
     END
 
+Verify RHOAM Is Enabled IN RHODS Dashboard
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    browser_options=${BROWSER.OPTIONS}    $ocp_user_name    $ocp_user_pw    $ocp_user_auth_type    $dashboard_url    $browser    $browser_options
+    Verify Service Is Enabled    app_name=${RHOAM_DISPLAYED_NAME}

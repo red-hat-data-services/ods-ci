@@ -44,8 +44,5 @@ class Helpers:
         ocm_client.cluster_name = cluster_identifier
         cluster_name = ocm_client.ocm_describe(filter="--json | jq -r '.name'")
         cluster_name = cluster_name.strip("\n")
-        if cluster_name is None:
-            logger.error("Unable to retrieve cluster name for "
-                         "cluster ID {}. EXITING".format(cluster_identifier))
         return cluster_name
 

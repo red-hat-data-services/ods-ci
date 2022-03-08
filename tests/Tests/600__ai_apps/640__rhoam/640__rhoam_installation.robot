@@ -9,7 +9,7 @@ Library         ../../../../libs/Helpers.py
 Library         SeleniumLibrary
 Library         OpenShiftCLI
 Suite Setup     RHOAM Suite Setup
-Suite Teardown  RHOAM Suite Teardown
+# Suite Teardown  RHOAM Suite Teardown
 
 
 *** Test Cases ***
@@ -28,7 +28,7 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     [Tags]  Tier3
     ...     ODS-1136
     ${cluster_id}=   Get Cluster ID
-    ${CLUSTER_NAME}=   Get Cluster Name     cluster_identifier=${cluster_id}
+    ${CLUSTER_NAME}=   Get Cluster Name By ID     cluster_id=${cluster_id}
     Set Suite Variable     ${CLUSTER_NAME}
     Verify RHOAM Is Enabled IN RHODS Dashboard
     Uninstall RHODS From OSD Cluster

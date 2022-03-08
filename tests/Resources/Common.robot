@@ -2,6 +2,7 @@
 Library   SeleniumLibrary
 Library   JupyterLibrary
 Library   OperatingSystem
+Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
 
@@ -64,4 +65,15 @@ CSS Property Value Should Be
 
 Get Cluster ID
     ${cluster_id}=   Run    oc get clusterversion -o json | jq .items[].spec.clusterID
+    IF    not $cluster_id
+        Fail    Unable to retrieve cluster ID. Are you logged using `oc login` command?
+    END
     [Return]    ${cluster_id}
+
+Get Cluster Name By ID
+    [Arguments]     ${cluster_id}
+    ${cluster_name}=    Get Cluster Name     cluster_identifier=${cluster_id}
+    IF    not $cluster_name
+        Fail    Unable to retrieve cluster name for cluster ID ${cluster_id}
+    END
+    [Return]    ${cluster_name}

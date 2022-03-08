@@ -1,7 +1,7 @@
 from semver import VersionInfo
 from robotlibcore import keyword
 from utils.scripts.ocm.ocm import OpenshiftClusterManager
-
+from robot.api import logger
 
 class Helpers:
     """Custom keywords written in Python"""
@@ -40,7 +40,12 @@ class Helpers:
     @keyword
     def get_cluster_name(self, cluster_identifier):
         ocm_client = OpenshiftClusterManager()
+        # to manipulate ocm_describe on line 45
         ocm_client.cluster_name = cluster_identifier
-        cluster_name = ocm_client.get_osd_cluster_name()
+        cluster_name = ocm_client.ocm_describe(filter="--json | jq -r '.name'")
+        cluster_name = cluster_name.strip("\n")
+        if cluster_name is None:
+            logger.error("Unable to retrieve cluster name for "
+                         "cluster ID {}. EXITING".format(cluster_identifier))
         return cluster_name
 

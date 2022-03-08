@@ -1,6 +1,6 @@
-# ODS-CI
+# ODA-CI
 
-ODS-CI is a framework to test Red Hat Open Data Science features and functionality
+ODA-CI is a framework to test Red Hat Open Database Operator features and functionality
 using QE tiered testing.
 
 # Requirements

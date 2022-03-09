@@ -46,3 +46,15 @@ class Helpers:
         cluster_name = cluster_name.strip("\n")
         return cluster_name
 
+    @keyword
+    def is_rhods_addon_installed(self, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        install_flag= ocm_client.is_addon_installed(addon_name="managed-odh")
+        return install_flag
+
+    @keyword
+    def uninstall_rhods_using_addon(self, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.uninstall_rhods()

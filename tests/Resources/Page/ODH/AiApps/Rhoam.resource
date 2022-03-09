@@ -2,8 +2,7 @@
 Documentation       Keyword suites to interact with Anaconda Commercial Edition
 
 Resource            ../../ODH/ODHDashboard/ODHDashboard.robot
-Library             OpenShiftCLI
-Library             OperatingSystem
+Library             OpenShiftLibrary
 
 
 *** Variables ***
@@ -21,10 +20,9 @@ RHOAM Installation Stage Should Be
     Should Be Equal    ${rhmi_stage}    ${exp_stage}
 
 Wait Until RHOAM Installation Is Completed
-    [Arguments]     ${retries}=20   ${retries_interval}=2min
-    # Wait Until Keyword Succeeds    40 min    1 min    RHOAM Installation Stage Should Be   complete
+    [Arguments]     ${retries}=30   ${retries_interval}=2min
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-        Log To Console    checking rhoam stage: retry ${retry_idx}+1
+        Log To Console    checking rhoam stage: retry ${retry_idx}
         ${current_stage}=   Get RHOAM Installation Stage
         Log To Console    RHOAM current installation stage: ${current_stage}
         ${completed_flag}=     Run Keyword And Return Status    Should Be Equal    ${current_stage}    complete

@@ -4,12 +4,13 @@ Resource        ../../../Resources/Common.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/ODH/AiApps/Rhoam.resource
 Resource        ../../../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
+Resource        ../../../../tasks/Resources/RHODS_OLM/uninstall/oc_uninstall.robot
 Resource        ../../../../tasks/Resources/RHODS_OLM/config/cluster.robot
 Library         ../../../../libs/Helpers.py
 Library         SeleniumLibrary
-Library         OpenShiftCLI
+Library         OpenShiftLibrary
 Suite Setup     RHOAM Suite Setup
-# Suite Teardown  RHOAM Suite Teardown
+Suite Teardown  RHOAM Suite Teardown
 
 
 *** Test Cases ***
@@ -39,6 +40,7 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
 RHOAM Suite Setup
     [Documentation]    RHOAM Suite setup
     Set Library Search Order  SeleniumLibrary
+    Set Library Search Order  OpenShiftLibrary
 
 RHOAM Suite Teardown
     [Documentation]    RHOAM Suite teardown. It triggers RHOAM Uninstallation
@@ -47,5 +49,13 @@ RHOAM Suite Teardown
 
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation
+    ${addon_installed}=     Is Rhods Addon Installed    ${CLUSTER_NAME}
+    IF    ${addon_installed} == ${TRUE}
+        Uninstall Rhods Using Addon    ${CLUSTER_NAME}
+    ELSE
+        Uninstall RHODS Using OLM
+    END
+
+Uninstall RHODS Using OLM
     Selected Cluster Type OSD
     Uninstall RHODS

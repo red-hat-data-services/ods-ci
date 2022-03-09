@@ -21,6 +21,7 @@ setup(
         "robotframework-seleniumlibrary",
         "robotframework-jupyterlibrary>=0.3.1",
         "robotframework-OpenShiftCLI==1.0.1",
+        "robotframework-openshift",
         "ipython",
         "pytest",
         "pytest-logger",

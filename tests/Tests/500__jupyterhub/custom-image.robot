@@ -16,8 +16,9 @@ ${IMG_NAME} =     custom-test-image
 
 
 *** Test Cases ***
-Verify ImageStream Can Be Created
+Verify Custom Image Can Be Added
     [Documentation]    Applies the YAML and Gets the ImageStream
+    ...                Then loads the spawner and tries using the custom img
     [Tags]    Tier2
     ...       ODS-1208
     ${apply_result} =    Run Keyword And Return Status    Run    oc apply -f ${YAML}
@@ -28,11 +29,6 @@ Verify ImageStream Can Be Created
     ...    namespace=redhat-ods-applications
     &{data} =    Set Variable    ${get_metadata}[0]
     Should Be Equal    ${data.metadata.name}    ${IMG_NAME}
-
-Verify Custom Image Spawn
-    [Documentation]    Tries spawning the custom image
-    [Tags]    Tier2
-    ...       ODS-1208
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=${IMG_NAME}  size=Default

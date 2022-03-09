@@ -524,7 +524,7 @@ class OpenshiftClusterManager():
                 # sys.exit(1)
 
             cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
-                   --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false-test\"}}'""")
+                   --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
             log.info("\nRET: {}".format(ret))

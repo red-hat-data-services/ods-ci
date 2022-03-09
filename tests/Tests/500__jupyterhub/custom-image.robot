@@ -11,7 +11,7 @@ Suite Teardown   Custom Image Teardown
 
 
 *** Variables ***
-${YAML} =         configs/resources/custom_image.yaml
+${YAML} =         tests/Resources/Files/custom_image.yaml
 ${IMG_NAME} =     custom-test-image
 
 
@@ -21,14 +21,8 @@ Verify Custom Image Can Be Added
     ...                Then loads the spawner and tries using the custom img
     [Tags]    Tier2
     ...       ODS-1208
-    ${apply_result} =    Run Keyword And Return Status    Run    oc apply -f ${YAML}
-    Should Be Equal    "${apply_result}"    "True"
-    # OpenShiftCLI.Apply    kind=ImageStream    src="configs/resources/custom_image.yaml"
-    # ...    namespace=redhat-ods-applications
-    ${get_metadata} =    OpenShiftCLI.Get    kind=ImageStream    field_selector=metadata.name==${IMG_NAME}
-    ...    namespace=redhat-ods-applications
-    &{data} =    Set Variable    ${get_metadata}[0]
-    Should Be Equal    ${data.metadata.name}    ${IMG_NAME}
+    Apply Custom ImageStream And Check Status
+    Get ImageStream Metadata And Check Name
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=${IMG_NAME}  size=Default
@@ -40,3 +34,17 @@ Custom Image Teardown
     End Web Test
     OpenShiftCLI.Delete    kind=ImageStream    field_selector=metadata.name==${IMG_NAME}
     ...    namespace=redhat-ods-applications
+
+Apply Custom ImageStream And Check Status
+    [Documentation]    Applies a custom ImageStream as a YAML and checks the status
+    ${apply_result} =    Run Keyword And Return Status    Run    oc apply -f ${YAML}
+    Should Be Equal    "${apply_result}"    "True"
+    # OpenShiftCLI.Apply    kind=ImageStream    src="tests/Resources/Files/custom_image.yaml"
+    # ...    namespace=redhat-ods-applications
+
+Get ImageStream Metadata And Check Name
+    [Documentation]    Gets the metadata of an ImageStream and checks name of the image
+    ${get_metadata} =    OpenShiftCLI.Get    kind=ImageStream    field_selector=metadata.name==${IMG_NAME}
+    ...    namespace=redhat-ods-applications
+    &{data} =    Set Variable    ${get_metadata}[0]
+    Should Be Equal    ${data.metadata.name}    ${IMG_NAME}

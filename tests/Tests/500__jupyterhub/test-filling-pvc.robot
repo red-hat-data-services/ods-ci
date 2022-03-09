@@ -29,7 +29,7 @@ Verify Users Get Notifications If Storage Capacity Limits Get Exceeded
     ...       ODS-539
 
     ${error} =    Run Git Repo And Return Last Cell Error Text    ${LINK_OF_GITHUB}    ${PATH_TO_FILE}
-    Error Test Should Be Expected Text    OSError: [Errno 28] No space left on device    ${error}
+    Cell Error Message Should Be    OSError: [Errno 28] No space left on device    ${error}
     Wait Until Page Contains    File Save Error for ${FILE_NAME}    timeout=150s
     Maybe Close Popup
     Clean Up User Notebook    ${OCP_ADMIN_USER.USERNAME}    ${TEST_USER.USERNAME}
@@ -41,3 +41,11 @@ Server Setup
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Default
+
+
+Cell Error Message Should Be
+  [Documentation]    It checks for the expected error and test error
+  [Arguments]    ${expected_error}    ${error_of_cell}
+  ${error} =    Split String    ${error_of_cell}    \n\n
+  Should Be Equal    ${expected_error}    ${error[-1]}
+

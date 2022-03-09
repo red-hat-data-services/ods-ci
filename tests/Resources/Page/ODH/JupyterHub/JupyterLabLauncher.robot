@@ -75,12 +75,6 @@ Run Git Repo And Return Last Cell Error Text
   ${output} =    Get JupyterLab Code Cell Error Text
   [Return]    ${output}
 
-Error Test Should Be Expected Text
-  [Documentation]    It checks for the expected error and test error
-  [Arguments]    ${expected_error}    ${error_of_cell}
-  ${error} =    Split String    ${error_of_cell}    \n\n
-  Should Be Equal    ${expected_error}    ${error[-1]}
-
 Wait Until JupyterLab Code Cell Is Not Active
   [Documentation]  Waits until the current cell no longer has an active prompt "[*]:". This assumes that there is only one cell currently active and it is the currently selected cell
   [Arguments]  ${timeout}=120seconds

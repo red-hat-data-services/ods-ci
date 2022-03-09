@@ -38,5 +38,5 @@ Wait Until RHOAM Installation Is Completed
 Verify RHOAM Is Enabled IN RHODS Dashboard
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
-    ...    browser_options=${BROWSER.OPTIONS}    $ocp_user_name    $ocp_user_pw    $ocp_user_auth_type    $dashboard_url    $browser    $browser_options
+    ...    browser_options=${BROWSER.OPTIONS}
     Verify Service Is Enabled    app_name=${RHOAM_DISPLAYED_NAME}

@@ -22,6 +22,22 @@ ${TEST_ALERT_PVC100_NOTEBOOK_PATH}      SEPARATOR=
 
 
 *** Test Cases ***
+Verify All Alerts Are Critical
+    [Documentation]    Verifies that, in a regular situation, only the DeadManSnitch alert is firing
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-1227
+
+    Verify "RHODS Probe Success Burn Rate" Are Critical And Continue On Failure
+
+    Verify "RHODS Route Error Burn Rate" Are Critical And Continue On Failure
+
+    Verify "User Notebook PVC Usage" Are Critical And Continue On Failure
+
+    Verify "DeadManSnitch" Is Critical And Continue On Failure
+
+    Verify "JupyterHub Image Builds Are Failing" Is Critical And Continue On Failure
+
 Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that, in a regular situation, only the DeadManSnitch alert is firing
     [Tags]    Smoke
@@ -280,6 +296,56 @@ Verify "RHODS Probe Success Burn Rate" Alerts Are Not Firing And Continue On Fai
     ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
     ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=10800
+
+Verify "RHODS Probe Success Burn Rate" Are Critical And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" is critical
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=3600
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=10800
+
+Verify "RHODS Route Error Burn Rate" Are Critical And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" is critical
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate   critical    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate   critical    alert-duration=3600
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    critical    alert-duration=10800
+
+Verify "User Notebook PVC Usage" Are Critical And Continue On Failure
+    [Documentation]    Verifies that alert "User notebook pvc usage" is critical
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    RHODS-PVC-Usage    User notebook pvc usage at 100%    critical    alert-duration=120
+
+Verify "DeadManSnitch" Is Critical And Continue On Failure
+    [Documentation]    Verifies that alert "DeadManSnitch" is critical
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    DeadManSnitch    DeadManSnitch    critical
+
+Verify "JupyterHub Image Builds Are Failing" Is Critical And Continue On Failure
+    [Documentation]    Verifies that alert "JupyterHub image builds are failing" is critical
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    Builds    JupyterHub image builds are failing    critical    alert-duration=120
+
+Verify Alert Has A Given Severity And Continue On Failure
+    [Documentation]    Verifies that alert has a certain severity, failing otherwhise but continuing the execution
+    [Arguments]    ${rule_group}    ${alert}    ${alert-severity}    ${alert-duration}=${EMPTY}
+    Run Keyword And Continue On Failure    Prometheus.Alert Severity Should Be
+    ...    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    ${rule_group}
+    ...    ${alert}
+    ...    ${alert-severity}
+    ...    ${alert-duration}
 
 Skip Test If Alert Is Already Firing
     [Documentation]    Skips tests if ${alert} is already firing

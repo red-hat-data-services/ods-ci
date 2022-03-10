@@ -142,9 +142,9 @@ Set Standard RHODS Groups Variables
     [Documentation]     Sets the RHODS groups name based on RHODS version
     ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
     IF    ${version_check} == True
-        ${STANDARD_ADMINS_GROUP}=    Set Suite Variable    dedicated-admins
-        ${STANDARD_USERS_GROUP}=     Set Suite Variable    system:authenticated
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      dedicated-admins
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       'system:authenticated'
     ELSE
-        ${STANDARD_ADMINS_GROUP}=    Set Suite Variable    rhods-admins
-        ${STANDARD_USERS_GROUP}=     Set Suite Variable    rhods-users
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      rhods-admins
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       rhods-users
     END

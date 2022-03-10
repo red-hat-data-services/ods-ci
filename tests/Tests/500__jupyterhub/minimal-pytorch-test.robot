@@ -63,7 +63,7 @@ Verify PyTorch Image GPU Workload
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-1148
-    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
+    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
     JupyterLab Code Cell Error Output Should Not Be Visible
 
 

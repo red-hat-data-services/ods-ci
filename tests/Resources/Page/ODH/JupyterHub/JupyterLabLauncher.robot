@@ -4,6 +4,7 @@ Library  jupyter-helper.py
 Library  OperatingSystem
 Library  Screenshot
 Library  String
+Library    OpenShiftCLI
 
 *** Variables ***
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
@@ -389,5 +390,13 @@ Verify Package Is Not Installed In JupyterLab
     Add and Run JupyterLab Code Cell in Active Notebook  import ${package_name}
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-    ${output}   Split String     ${output}   \n\n   
+    ${output}   Split String     ${output}   \n\n
     Should Match  ${output[-1]}   ModuleNotFoundError: No module named '${package_name}'
+
+Get User Notebook PVC Name
+  [Documentation]   Returns notebook pod name for given username
+  ...    (e.g. for user ldap-admin10 it will be jupyterhub-nb-ldap-2dadmin10-pvc)
+  [Arguments]  ${username}
+  ${safe_username} =   Get Safe Username    ${username}
+  ${notebook_pod_name} =   Set Variable  jupyterhub-nb-${safe_username}-pvc
+  [Return]    ${notebook_pod_name}

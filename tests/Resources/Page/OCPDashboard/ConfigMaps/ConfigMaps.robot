@@ -19,3 +19,17 @@ Check If ConfigMap Exists
     ${status}     ${val}  Run keyword and Ignore Error   OpenShiftCLI.Get  kind=ConfigMap  namespace=${namespace}   field_selector=metadata.name==${configmap_name}
     [Return]   ${status}
 
+Get PVC Size
+    [Documentation]    Get configure PVC size from configmap
+    [Arguments]   ${namespace}   ${configmap_name}=jupyterhub-cfg
+    ${data}    OpenShiftCLI.Get  kind=ConfigMap  namespace=${namespace}
+    ...    field_selector=metadata.name==${configmap_name}
+    ${size}    Set Variable      ${data[0]['data']['singleuser_pvc_size']}
+    ${int_size}   Convert To Integer    ${size}[:-2]
+    [Return]   ${int_size}
+
+Change PVC Size From ConfigMap
+    [Documentation]    Configure PVC size for JH
+    [Arguments]   ${size}    ${configmap_name}=jupyterhub-cfg
+    OpenShiftCLI.Patch   kind=ConfigMap  name=${configmap_name}  namespace=${NAMESPACE}
+    ...    src={"data":{"singleuser_pvc_size": "${size}"}}

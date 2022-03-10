@@ -137,3 +137,14 @@ Restore Standard Configuration
     Remove Test Users From Custom Groups
     Delete Custom Groups
     Check Standard Access Configuration Works As Expected
+
+Set Standard RHODS Groups Variables
+    [Documentation]     Sets the RHODS groups name based on RHODS version
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
+    IF    ${version_check} == True
+        ${STANDARD_ADMINS_GROUP}=    Set Suite Variable    dedicated-admins
+        ${STANDARD_USERS_GROUP}=     Set Suite Variable    system:authenticated
+    ELSE
+        ${STANDARD_ADMINS_GROUP}=    Set Suite Variable    rhods-admins
+        ${STANDARD_USERS_GROUP}=     Set Suite Variable    rhods-users
+    END

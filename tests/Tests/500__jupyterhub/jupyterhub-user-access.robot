@@ -68,7 +68,7 @@ Verify User Can Set Custom RHODS Groups
     ...                different from rhods-admins and rhods-users
     [Tags]  Sanity
     ...     ODS-293
-    [Teardown]   Restore Standard Configuration
+    [Setup]      Set Standard RHODS Groups Variables
     Open OCP Console
     Login To OCP
     Create Custom Groups
@@ -77,3 +77,4 @@ Verify User Can Set Custom RHODS Groups
     Apply New Groups Config Map
     Rollout JupyterHub
     Check New Access Configuration Works As Expected
+    [Teardown]   Restore Standard Configuration

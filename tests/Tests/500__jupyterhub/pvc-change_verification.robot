@@ -29,13 +29,14 @@ ${NS_SIZE}    0
 *** Test Cases ***
 Verify User Can Spawn Notebook With PVC Change
     [Documentation]   Verify if user can spawn notebook
-    ...    for supported PVC change
+    ...    for supported PVC size git change
     [Tags]    Smoke
     ...       Sanity
     ...       ODS-1228
     ...       Resources-PVC
     Check If PVC Change Is Permanent    ${S_SIZE}Gi
     Roll Out Jupyter Deployement Config
+    Launch RHODS Dashboard
     Run Keyword And Continue On Failure   Verify Notebook Size     600s    ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
     Verify PVC Size     ${S_SIZE}       ${pvc_size}
@@ -48,7 +49,17 @@ Verify User Can Not Spawn Notebbok With Unsupported Size
     ...       Resources-PVC
     Check If PVC Change Is Permanent     ${NS_SIZE}Gi
     Roll Out Jupyter Deployement Config
+    Launch RHODS Dashboard
     ${status}     Run Keyword And Return Status   Verify Notebook Size   60s   ${NS_SIZE}
     Page Should Contain    Server request failed to start
     Run Keyword IF    '${status}'=='FAIL'   Log   Unable to Spawn Notebook
     ...   for unsupported values
+
+
+*** Keywords ***
+Launch RHODS Dashboard
+    [Documentation]    Launch RHODS Dashboard
+    Set Library Search Order  SeleniumLibrary
+    Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Wait For RHODS Dashboard To Load

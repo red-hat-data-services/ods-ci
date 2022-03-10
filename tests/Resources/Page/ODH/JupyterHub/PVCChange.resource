@@ -4,9 +4,10 @@ Documentation   Set of Keywords for PVC change support
 
 *** Keywords ***
 Check If PVC Change Is Permanent
-    [Documentation]    Check IF PVC chnages are not reverted back
+    [Documentation]   Check if PVC changes are not reverted back
     [Arguments]    ${NUMBERS}
     May Be Delete PVC
+    May Be Delete Notebook POD    rhods-notebooks
     ${size}    Get PVC Size    redhat-ods-applications
     Change PVC Size From ConfigMap     ${NUMBERS}
     Sleep    15s
@@ -20,8 +21,6 @@ Check If PVC Change Is Permanent
 Verify Notebook Size
    [Arguments]    ${timeout}     ${size}
    [Documentation]   Laucnh JH spawner and compare size
-   Set Library Search Order  SeleniumLibrary
-   Begin Web Test
    Launch JupyterHub Spawner From Dashboard
    Spawn Notebook With Arguments    image=s2i-minimal-notebook    spawner_timeout=${timeout}
    Run Cell And Check Output    ${SIZE_CODE}   ${size}
@@ -35,16 +34,17 @@ Verify PVC Size
 PVC Size Test Teardown
     [Documentation]    PVC change teardown
     SeleniumLibrary.Close All Browsers
+    May Be Delete PVC
+    May Be Delete Notebook POD    rhods-notebooks
     Change PVC Size From ConfigMap     20Gi
     Roll Out Jupyter Deployement Config
-    May Be Delete PVC
 
 Roll Out Jupyter Deployement Config
     [Documentation]    Rollout deployementconfig for JH
     ${rollout_result}    Run Keyword And Return Status
     ...    Run    oc rollout latest dc/jupyterhub -n ${NAMESPACE}
     Should Be Equal    "${rollout_result}"    "True"
-    Sleep    20s
+    Sleep    120s
 
 May Be Delete PVC
     [Documentation]    Delete PVC from openshift
@@ -62,3 +62,10 @@ Get Notebook PVC Size
     ${size}    Set Variable    ${data[0]['status']['capacity']['storage']}
     ${int_size}   Convert To Integer    ${size}[:-2]
     [Return]   ${int_size}
+
+May Be Delete Notebook POD
+    [Documentation]   Delete Notebook Pod Name based on Name
+    [Arguments]     ${namespace}
+    ${username}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
+    Run Keyword And Return Status    OpenShiftCLI.Delete    kind=Pod    namespace=${namespace}
+    ...    field_selector=metadata.name==${username}

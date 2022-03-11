@@ -30,7 +30,7 @@ Tensorflow Workload Test
     [Tags]  Sanity
     ...     PLACEHOLDER  # category tags
     ...     ODS-1156
-    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
+    Run Repo And Clean  https://github.com/redhat-rhods-qe/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
 
@@ -64,7 +64,7 @@ Verify Tensorflow Image GPU Workload
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-1154
-    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
+    Run Repo And Clean  https://github.com/redhat-rhods-qe/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
     JupyterLab Code Cell Error Output Should Not Be Visible
 
 

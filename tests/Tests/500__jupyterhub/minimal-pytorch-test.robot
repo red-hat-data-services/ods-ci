@@ -29,7 +29,7 @@ PyTorch Image Workload Test
     [Tags]  Sanity
     ...     PLACEHOLDER  # category tags
     ...     ODS-1150
-    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
+    Run Repo And Clean  https://github.com/redhat-rhods-qe/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
 
@@ -63,7 +63,7 @@ Verify PyTorch Image GPU Workload
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-1148
-    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
+    Run Repo And Clean  https://github.com/redhat-rhods-qe/notebook-benchmarks  notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
     JupyterLab Code Cell Error Output Should Not Be Visible
 
 

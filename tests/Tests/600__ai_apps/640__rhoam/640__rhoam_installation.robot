@@ -39,8 +39,8 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
 *** Keywords ***
 RHOAM Suite Setup
     [Documentation]    RHOAM Suite setup
-    Set Library Search Order  SeleniumLibrary
-    Set Library Search Order  OpenShiftLibrary
+    Set Library Search Order  OpenShiftLibrary  SeleniumLibrary
+    # Set Library Search Order  OpenShiftLibrary
 
 RHOAM Suite Teardown
     [Documentation]    RHOAM Suite teardown. It triggers RHOAM Uninstallation

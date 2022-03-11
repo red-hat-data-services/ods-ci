@@ -116,7 +116,7 @@ Apply New Groups Config Map
     ...                   src={"data":{"admin_groups": "${CUSTOM_ADMINS_GROUP}","allowed_groups": "${CUSTOM_USERS_GROUP}"}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
     OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${STANDARD_GROUPS_MODIFIED}"}}}
+    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "true"}}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
 
 Restore RHODS Standard Groups Config Map
@@ -125,7 +125,7 @@ Restore RHODS Standard Groups Config Map
     ...                   src={"data":{"admin_groups": "${STANDARD_ADMINS_GROUP}","allowed_groups": "${STANDARD_USERS_GROUP}"}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
     OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "true"}}}
+    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${STANDARD_GROUPS_MODIFIED}"}}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
 
 Restore Standard Configuration

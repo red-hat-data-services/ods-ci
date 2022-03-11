@@ -120,5 +120,9 @@ Verify Cuda Builds Are Completed
     ${len} =    Get Length    ${builds}
     FOR    ${ind}    IN RANGE    1    ${len}
         @{pre} =    Split String    ${builds}[${ind}]
+        ${is_cuda_build} =   Run Keyword And Return Status   Should Contain    ${pre}[0]    cuda
+        IF    ${is_cuda_build} == True
+            Should Be Equal As Strings    ${pre}[3]    Complete
+        END
         Should Be Equal As Strings    ${pre}[3]    Complete
     END

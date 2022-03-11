@@ -23,7 +23,7 @@ ${NAMESPACE}    redhat-ods-applications
 ${S_SIZE}       15
 ${SIZE_CODE}    import subprocess;
 ...    int(subprocess.check_output(['df','-h', '/opt/app-root/src']).split()[8].decode('utf-8')[:-1])
-${NS_SIZE}    0
+@{NS_SIZE}      0    -15
 
 
 *** Test Cases ***
@@ -32,7 +32,7 @@ Verify User Can Spawn Notebook With PVC Change
    ...    for supported PVC size git change
    [Tags]    Smoke
    ...       Sanity
-   ...       ODS-1228
+   ...       ODS-1228    ODS-1221
    ...       Resources-PVC
    Check If PVC Change Is Permanent    ${S_SIZE}Gi
    Roll Out Jupyter Deployment Config
@@ -45,15 +45,9 @@ Verify User Can Not Spawn Notebbok With Unsupported Size
    [Documentation]   Verify if user should not able to
    ...    spawn notebook for supported PVC change
    [Tags]    Tier2
-   ...       ODS-1229
+   ...       ODS-1229    ODS-1233
    ...       Resources-PVC
-   Check If PVC Change Is Permanent     ${NS_SIZE}Gi
-   Roll Out Jupyter Deployment Config
-   Launch RHODS Dashboard
-   ${status}     Run Keyword And Return Status   Verify Notebook Size   60s   ${NS_SIZE}
-   Page Should Contain    Server request failed to start
-   Run Keyword IF    '${status}'=='FAIL'   Log   Unable to Spawn Notebook
-   ...   for unsupported values
+   Verify Multiple Unsupported Size    ${NS_SIZE}
 
 
 *** Keywords ***
@@ -63,3 +57,16 @@ Launch RHODS Dashboard
    Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    Wait For RHODS Dashboard To Load
+
+Verify Multiple Unsupported Size
+   [Documentation]   Verify Mulitple unsupported size
+   [Arguments]      ${NS_SIZES}
+   FOR    ${NS_SIZE}    IN    @{NS_SIZES}
+       Check If PVC Change Is Permanent     ${NS_SIZE}Gi
+       Roll Out Jupyter Deployment Config
+       Launch RHODS Dashboard
+       ${status}     Run Keyword And Return Status   Verify Notebook Size   60s   ${NS_SIZE}
+       Page Should Contain    Server request failed to start
+       Run Keyword IF    '${status}'=='FAIL'   Log   Unable to Spawn Notebook
+       ...   for unsupported values
+   END

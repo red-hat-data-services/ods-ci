@@ -1,5 +1,4 @@
 *** Settings ***
-<<<<<<< HEAD
 Documentation       Post install test cases that mainly verify OCP resources and objects
 Library             String
 Library             OpenShiftCLI
@@ -67,7 +66,7 @@ Verify GPU Operator Deployment  # robocop: disable
     # ...   nvidia-driver-daemonset-49.84.202201212103-0 DS
     # ...   nvidia-node-status-exporter DS
     # ...   nvidia-operator-validator DS
-    
+
 Verify That Prometheus Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...     Tier1
@@ -121,8 +120,5 @@ Verify Cuda Builds Are Completed
     ${len} =    Get Length    ${builds}
     FOR    ${ind}    IN RANGE    1    ${len}
         @{pre} =    Split String    ${builds}[${ind}]
-        ${is_cuda_build} =   Run Keyword And Return Status   Should Contain    ${pre}[0]    cuda
-        IF    ${is_cuda_build} == True
-            Should Be Equal As Strings    ${pre}[3]    Complete
-        END
+        Should Be Equal As Strings    ${pre}[3]    Complete
     END

@@ -31,9 +31,9 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     ${cluster_id}=   Get Cluster ID
     ${CLUSTER_NAME}=   Get Cluster Name By ID     cluster_id=${cluster_id}
     Set Suite Variable     ${CLUSTER_NAME}
-    Verify RHOAM Is Enabled IN RHODS Dashboard
+    Verify RHOAM Is Enabled In RHODS Dashboard
     Uninstall RHODS From OSD Cluster
-    RHODS Operator Should Be Uninstalled
+    Wait Until RHODS Installation Is Completed
 
 
 *** Keywords ***
@@ -44,7 +44,9 @@ RHOAM Suite Setup
 
 RHOAM Suite Teardown
     [Documentation]    RHOAM Suite teardown. It triggers RHOAM Uninstallation
+    Log To Console    Starting uninstallation of RHOAM Addon...
     Uninstall Rhoam Addon    cluster_name=${CLUSTER_NAME}
+    Log To Console    RHOAM Addon has been uninstalled!
     Close All Browsers
 
 Uninstall RHODS From OSD Cluster
@@ -59,3 +61,22 @@ Uninstall RHODS From OSD Cluster
 Uninstall RHODS Using OLM
     Selected Cluster Type OSD
     Uninstall RHODS
+
+Wait Until RHODS Installation Is Completed
+    [Arguments]     ${retries}=30   ${retries_interval}=2min
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        Log To Console    checking RHODS uninstall status: retry ${retry_idx}
+        ${ns_deleted}=     Run Keyword And Return Status    RHODS Namespaces Should Not Exist
+        Exit For Loop If    $ns_deleted == True
+        Sleep    ${retries_interval}
+    END
+    IF    $ns_deleted == False
+        Fail    RHODS didn't get "complete" stage after ${retries} retries
+        ...     (time between retries: ${retries_interval}). Check the cluster..
+    END
+
+RHODS Namespaces Should Not Exist
+    Verify Project Does Not Exists  rhods-notebook
+    Verify Project Does Not Exists  redhat-ods-monitoring
+    Verify Project Does Not Exists  redhat-ods-applications
+    Verify Project Does Not Exists  redhat-ods-operator

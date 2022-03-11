@@ -30,7 +30,8 @@ Wait Until RHOAM Installation Is Completed
         Sleep    ${retries_interval}
     END
     IF    $completed_flag == False
-        Fail    RHOAM didn't get "complete" stage after ${retries} retries. Check the installation..
+        Fail    RHOAM didn't get "complete" stage after ${retries} retries.
+        ...     (time between retries: ${retries_interval}). Check the cluster..
     END
 
 Verify RHOAM Is Enabled IN RHODS Dashboard

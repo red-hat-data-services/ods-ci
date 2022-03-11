@@ -3,7 +3,7 @@ Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/AccessGroups.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/AccessGroups.resource
 Resource         ../../Resources/Page/OCPLogin/OCPLogin.robot
 Library          OperatingSystem
 Library          DebugLibrary

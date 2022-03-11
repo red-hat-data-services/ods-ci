@@ -25,8 +25,7 @@ Get PVC Size
     ${data}    OpenShiftCLI.Get  kind=ConfigMap  namespace=${namespace}
     ...    field_selector=metadata.name==${configmap_name}
     ${size}    Set Variable      ${data[0]['data']['singleuser_pvc_size']}
-    ${int_size}   Convert To Integer    ${size}[:-2]
-    [Return]   ${int_size}
+    [Return]   ${size}[:-2]
 
 Change PVC Size From ConfigMap
     [Documentation]    Configure PVC size for JH

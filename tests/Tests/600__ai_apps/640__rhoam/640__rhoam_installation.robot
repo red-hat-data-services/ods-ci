@@ -20,7 +20,7 @@ Verify RHOAM Can Be Installed
     ${cluster_id}=   Get Cluster ID
     ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
     Install Rhoam Addon    cluster_name=${cluster_name}
-    Wait Until RHOAM Installation Is Completed    retries=20   retries_interval=2min
+    Wait Until RHOAM Installation Is Completed    retries=30   retries_interval=2min
     Verify RHOAM Is Enabled IN RHODS Dashboard
 
 Verify RHODS Can Be Uninstalled When RHOAM Is Installed

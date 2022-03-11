@@ -312,7 +312,8 @@ Re-validate License For Disabled Application From Enabled Page
 Get Question Mark Links
     [Documentation]      It returns the link elements from the question mark
     @{links_list}=  Create List
-    @{link_elements}=  Get WebElements    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
+    @{link_elements}=  Get WebElements
+    ...    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
     FOR  ${link}  IN  @{link_elements}
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}

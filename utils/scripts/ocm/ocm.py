@@ -505,7 +505,7 @@ class OpenshiftClusterManager():
             failure_flags.append(failure)
             log.info("\nSetting the useClusterStorage parameter")
             rhmi_found = False
-            for retry in range(20):
+            for retry in range(30):
                 cmd = ("""oc get rhmi rhoam  -n redhat-rhoam-operator""")
                 log.info("CMD: {}".format(cmd))
                 ret = execute_command(cmd)

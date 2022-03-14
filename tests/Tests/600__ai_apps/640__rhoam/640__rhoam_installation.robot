@@ -33,7 +33,7 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     Set Suite Variable     ${CLUSTER_NAME}
     Verify RHOAM Is Enabled In RHODS Dashboard
     Uninstall RHODS From OSD Cluster
-    Wait Until RHODS Installation Is Completed
+    Wait Until RHODS Uninstallation Is Completed
 
 
 *** Keywords ***
@@ -62,7 +62,7 @@ Uninstall RHODS Using OLM
     Selected Cluster Type OSD
     Uninstall RHODS
 
-Wait Until RHODS Installation Is Completed
+Wait Until RHODS Uninstallation Is Completed
     [Arguments]     ${retries}=30   ${retries_interval}=2min
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         Log To Console    checking RHODS uninstall status: retry ${retry_idx}

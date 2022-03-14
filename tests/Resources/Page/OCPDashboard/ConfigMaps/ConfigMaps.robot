@@ -29,6 +29,8 @@ Get PVC Size
 
 Change PVC Size From ConfigMap
     [Documentation]    Configure PVC size for JH
+    ...    Supported size are whole number(ex: 120Gi,10Gi etc)
+    ...    Decimal,alphabet charcter and number below 1 is not supported
     [Arguments]   ${size}    ${configmap_name}=jupyterhub-cfg
     OpenShiftCLI.Patch   kind=ConfigMap  name=${configmap_name}  namespace=${NAMESPACE}
     ...    src={"data":{"singleuser_pvc_size": "${size}"}}

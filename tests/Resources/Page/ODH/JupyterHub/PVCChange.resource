@@ -5,14 +5,17 @@ Documentation   Set of Keywords for PVC change support
 *** Keywords ***
 Check If PVC Change Is Permanent
     [Documentation]   Check if PVC changes are not reverted back
-    [Arguments]    ${NUMBERS}
-    May Be Delete PVC
-    May Be Delete Notebook POD    rhods-notebooks
+    [Arguments]    ${PVC_SIZE}
+    ${status}    ${pvc_name}    Run Keyword And Ignore Error
+    ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
+    May Be Delete PVC     ${pvc_name}
+    ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
+    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
     ${size}    Get PVC Size    redhat-ods-applications
-    Change PVC Size From ConfigMap     ${NUMBERS}
+    Change PVC Size From ConfigMap     ${PVC_SIZE}
     Sleep    15s
     ${new_size}    Get PVC Size    redhat-ods-applications
-    IF  ${new_size} == ${NUMBERS}[:-2]
+    IF  ${new_size} == ${PVC_SIZE}[:-2]
         Should Not Be Equal As Strings    '${size}'    '${new_size}'
     ELSE
         Fail    Unable to change the default PVC size
@@ -34,8 +37,11 @@ Verify PVC Size
 PVC Size Test Teardown
     [Documentation]    PVC change teardown
     SeleniumLibrary.Close All Browsers
-    May Be Delete PVC
-    May Be Delete Notebook POD    rhods-notebooks
+    ${status}    ${pvc_name}    Run Keyword And Ignore Error
+    ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
+    May Be Delete PVC     ${pvc_name}
+    ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
+    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
     Change PVC Size From ConfigMap     20Gi
     Roll Out Jupyter Deployment Config
 
@@ -48,8 +54,7 @@ Roll Out Jupyter Deployment Config
 
 May Be Delete PVC
     [Documentation]    Delete PVC from openshift
-    ${status}    ${pvc_name}    Run Keyword And Ignore Error
-    ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
+    [Arguments]    ${pvc_name}
     Run Keyword And Return Status    OpenShiftCLI.Delete    kind=PersistentVolumeClaim
     ...   field_selector=metadata.name==${pvc_name}    namespace=rhods-notebooks
 
@@ -65,7 +70,6 @@ Get Notebook PVC Size
 
 May Be Delete Notebook POD
     [Documentation]   Delete Notebook Pod Name based on Name
-    [Arguments]     ${namespace}
-    ${username}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
+    [Arguments]     ${namespace}    ${pod_name}
     Run Keyword And Return Status    OpenShiftCLI.Delete    kind=Pod    namespace=${namespace}
-    ...    field_selector=metadata.name==${username}
+    ...    field_selector=metadata.name==${pod_name}

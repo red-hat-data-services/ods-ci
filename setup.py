@@ -31,6 +31,8 @@ setup(
         "robotframework-requests",
         "escapism",
         "semver>=2,<3",
+        "rpaframework"
+        "semver>=2,<3",
         "yq"
     ],
     zip_safe=True,

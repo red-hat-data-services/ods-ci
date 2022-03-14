@@ -4,6 +4,9 @@ Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/ODH/AiApps/AiApps.resource
 Resource            src.yaml
+Resource            ../../../Resources/RHOSiSecurity.resource
+
+Suite Setup         Pachyderm Test Suite
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown
 
@@ -29,6 +32,10 @@ Verify Pachyderm Can Be Installed Using OpenShift Console
     [Teardown]  Uninstall Pachyderm Operator
 
 *** Keywords ***
+Pachyderm Test Suite
+    Set Library Search Order  SeleniumLibrary
+    Protect Keywords
+
 Dashboard Test Setup
     Set Library Search Order    SeleniumLibrary
     Open Browser    ${OCP_CONSOLE_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}

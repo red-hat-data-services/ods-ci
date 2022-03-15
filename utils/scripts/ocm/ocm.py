@@ -430,12 +430,23 @@ class OpenshiftClusterManager():
         """Uninstalls RHODS addon"""
         self.uninstall_addon(addon_name="managed-odh")
 
+    def is_secret_existent(self, secret_name, namespace):
+        cmd = "oc get secret {} -n {}".format(secret_name, namespace)
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        log.info("\nRET: {}".format(ret))
+        if ret is None or "Error" in ret:
+            log.info("Failed to find {} secret".format(secret_name))
+            return False
+        else:
+            return True
+
     def install_addon(self, addon_name="managed-odh",
-                         template_filename="install_addon.jinja",
-                         output_filename="install_operator.json",
-                         add_replace_vars=None,
-                         exit_on_failure=True
-                         ):
+                      template_filename="install_addon.jinja",
+                      output_filename="install_operator.json",
+                      add_replace_vars=None,
+                      exit_on_failure=True
+                      ):
         """Installs addon"""
         replace_vars = {
                        "CLUSTER_ID": self.cluster_name,
@@ -514,23 +525,28 @@ class OpenshiftClusterManager():
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
             log.info("\nRET: {}".format(ret))
-            failure = self.check_secret_existence(secret_name="redhat-rhoam-deadmanssnitch",
-                                                  namespace="redhat-rhoam-operator")
-            failure_flags.append(failure)
-            if failure:
+            res = self.is_secret_existent(secret_name="redhat-rhoam-deadmanssnitch",
+                                          namespace="redhat-rhoam-operator")
+            if res:
+                failure_flags.append(False)
+            else:
+                failure_flags.append(True)
                 log.info("Failed to create redhat-rhoam-deadmanssnitch secret")
                 if exit_on_failure:
                     sys.exit(1)
+
 
             log.info("\nCreating a smtp dummy secret...")
             cmd = "oc apply -f templates/smpt.yaml"
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
-            failure = self.check_secret_existence(secret_name="redhat-rhoam-smpt",
-                                                  namespace="redhat-rhoam-operator")
-            failure_flags.append(failure)
-            if failure:
-                log.info("Failed to create redhat-rhoam-deadmanssnitch secret")
+            res = self.is_secret_existent(secret_name="redhat-rhoam-smpt",
+                                          namespace="redhat-rhoam-operator")
+            if res:
+                failure_flags.append(False)
+            else:
+                failure_flags.append(True)
+                log.info("Failed to create redhat-rhoam-smpt secret")
                 if exit_on_failure:
                     sys.exit(1)
 
@@ -547,18 +563,6 @@ class OpenshiftClusterManager():
         """Uninstalls RHOAM addon"""
         self.uninstall_addon(addon_name="managed-api-service", exit_on_failure=exit_on_failure)
         self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
-
-    def check_secret_existence(self, secret_name, namespace):
-        cmd = "oc get secret {} -n {}".format(secret_name, namespace)
-        log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
-        log.info("\nRET: {}".format(ret))
-        if ret is None or "Error" in ret:
-            log.info("Failed to find {} secret".format(secret_name))
-            get_fail = True
-        else:
-            get_fail = False
-        return get_fail
 
     def create_idp(self):
         """Creates Identity Provider"""

@@ -1,4 +1,5 @@
 *** Settings ***
+<<<<<<< HEAD
 Documentation       Test Suite to verify installed library versions
 
 Resource            ../../Resources/ODS.robot
@@ -11,6 +12,17 @@ Suite Setup         Load Spawner Page
 Suite Teardown      End Web Test
 
 Force Tags          JupyterHub
+=======
+Documentation    Test Suite to verify installed library versions
+Resource         ../../Resources/ODS.robot
+Resource         ../../Resources/Common.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Library          JupyterLibrary
+Library          OpenShiftLibrary
+Suite Setup      Load Spawner Page
+Suite Teardown   End Web Test
+>>>>>>> 442ccb8... Added tests to verify there are no errors with distutil library
 
 
 *** Variables ***
@@ -57,6 +69,16 @@ Verify All Images And Spawner
     Should Be Equal As Integers    ${length}    4
     Log To Console    ${status_list}
 
+Verify There Are No Errors With Distutil Library
+    [Documentation]    Verifies that notebook can be spawned ,
+    ...                python version is greater than or equal to 3.8 and
+    ...                there are no errors in logs
+    [Tags]    Sanity
+    ...       ODS-586
+    Spawn Notebook With Arguments    image=pytorch    size=Default
+    Verify Python Version In Notebook
+    Verify Errors In Logs
+
 
 *** Keywords ***
 Verify Libraries In Base Image    # robocop: disable
@@ -93,3 +115,16 @@ Verify List Of Libraries In Image
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for ${image} image do not match
 
+Verify Python Version In Notebook
+    [Documentation]    Verifies python version >=3.8
+    ${python_version} =    Run Cell And Get Output    !python --version
+    ${python_version} =    Fetch From Right    ${python_version}    ${SPACE}
+    ${version_check} =    GTE    ${python_version}    3.8.0
+    Should Be Equal As Strings    ${version_check}    True
+
+Verify Errors In Logs
+    [Documentation]    Verifies that there are no errors in Logs
+    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications
+    FOR    ${pod}    IN    @{pods}
+        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}    namespace=redhat-ods-applications    container=${pod['spec']['containers'][0]['name']}
+    END

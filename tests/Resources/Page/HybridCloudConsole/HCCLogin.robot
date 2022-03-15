@@ -24,7 +24,7 @@ Login to HCC
     Input Text  id=password  ${password}
     Click Button    Log in
   END
-  Run Keyword And Continue On Failure    Wait For HCC Splash Page
+  Run Keyword And Ignore Error     Wait For HCC Splash Page
   Maybe Handle Something Went Wrong Page
 
 Maybe Skip RHOSAK Tour

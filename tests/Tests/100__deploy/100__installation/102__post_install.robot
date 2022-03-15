@@ -111,6 +111,13 @@ Verify Pytorch And Tensorflow Can Be Spawned
     Verify Image Can Be Spawned  image=pytorch  size=Default
     Verify Image Can Be Spawned  image=tensorflow  size=Default
 
+Verify That Blackbox-exporter Is Protected With Auth-proxy
+    [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
+    [Tags]  Sanity
+    ...     Tier1
+    ...     ODS-1090
+    Verify BlackboxExporter Includes Oauth Proxy
+    Verify Authentication Is Required To Access BlackboxExporter
 
 *** Keywords ***
 Verify Cuda Builds Are Completed
@@ -126,3 +133,24 @@ Verify Cuda Builds Are Completed
         END
         Should Be Equal As Strings    ${pre}[3]    Complete
     END
+
+Verify Authentication Is Required To Access BlackboxExporter
+    [Documentation]    Verifies authentication is required to access blackbox exporter. To do so, 
+    ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target. 
+    ...                The test fails if the response is not a prompt to log in with OpenShift
+    @{links} =    Get Target Endpoints    target_name=user_facing_endpoints_status
+    Length Should Be    ${links}    2
+    ${pod_name} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
+    FOR    ${link}    IN    @{links}
+        ${command} =    Set Variable    curl --insecure ${link}
+        ${output} =    Run Command In Container    namespace=redhat-ods-monitoring    pod_name=${pod_name}
+        ...    command=${command}    container_name=prometheus
+        Should Contain    ${output}    Log in with OpenShift    msg=Log in with OpenShift should be required to access blackbox-exporter
+    END
+
+Verify BlackboxExporter Includes Oauth Proxy
+    [Documentation]     Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
+    @{containers} =    Get Containers    pod_name=${pod}    namespace=redhat-ods-monitoring
+    List Should Contain Value    ${containers}    oauth-proxy
+    List Should Contain Value    ${containers}    blackbox-exporter

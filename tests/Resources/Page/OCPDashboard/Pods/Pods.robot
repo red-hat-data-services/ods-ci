@@ -166,3 +166,11 @@ Find First Pod By Name
     [Arguments]   ${namespace}  ${pod_start_with}
     ${list_pods} =  Search Pod  namespace=${namespace}  pod_start_with=${pod_start_with}
     [Return]  ${list_pods}[0]
+
+Get Containers
+    [Documentation]    Returns list of containers
+    [Arguments]    ${pod_name}    ${namespace}
+    ${containers}    Run    oc get pod ${pod_name} -n ${namespace} -o json | jq '.spec.containers[] | .name'
+    ${containers}    Replace String    ${containers}    "    ${EMPTY}
+    @{containers}    Split String    ${containers}    \n
+    [Return]    ${containers}

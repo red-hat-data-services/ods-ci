@@ -406,25 +406,6 @@ class OpenshiftClusterManager():
             return True
         return False
 
-    # def install_addon(self, addon_name="managed-odh"):
-    #     """Installs addon - OLD version"""
-    #     replace_vars = {
-    #                    "CLUSTER_ID": self.cluster_name,
-    #                    "ADDON_NAME": addon_name
-    #                    }
-    #     template_file = "install_addon.jinja"
-    #     output_file = "install_operator.json"
-    #     self._render_template(template_file, output_file, replace_vars)
-    #     cluster_id = self.get_osd_cluster_id()
-    #     cmd = ("ocm post /api/clusters_mgmt/v1/clusters/{}/addons "
-    #            "--body={}".format(cluster_id, output_file))
-    #     log.info("CMD: {}".format(cmd))
-    #     ret = execute_command(cmd)
-    #     if ret is None:
-    #         log.info("Failed to install {} addon on cluster "
-    #               "{}".format(addon_name, self.cluster_name))
-    #         sys.exit(1)
-
     def uninstall_addon(self, addon_name="managed-odh", exit_on_failure=True):
         """Uninstalls addon"""
 

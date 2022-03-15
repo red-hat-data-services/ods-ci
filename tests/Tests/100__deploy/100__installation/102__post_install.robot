@@ -13,7 +13,7 @@ Verify Dashboard Deployment
     [Documentation]  Verifies RHODS Dashboard deployment
     [Tags]    Sanity
     ...       ODS-546
-    @{dashboard} =  Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deployment = rhods-dashboard
+    @{dashboard} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deployment = rhods-dashboard
     ${containerNames} =  Create List  rhods-dashboard  oauth-proxy
     Verify Deployment  ${dashboard}  2  2  ${containerNames}
 
@@ -21,7 +21,7 @@ Verify Traefik Deployment
     [Documentation]  Verifies RHODS Traefik deployment
     [Tags]    Sanity
     ...       ODS-546
-    @{traefik} =  Get  kind=Pod  namespace=redhat-ods-applications  label_selector=name = traefik-proxy
+    @{traefik} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=name = traefik-proxy
     ${containerNames} =  Create List  traefik-proxy  configmap-puller
     Verify Deployment  ${traefik}  3  2  ${containerNames}
 
@@ -29,7 +29,7 @@ Verify JH Deployment
     [Documentation]  Verifies RHODS JH deployment
     [Tags]    Sanity
     ...       ODS-546  ODS-294
-    @{JH} =  Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
+    @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
     ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
     Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
 
@@ -68,7 +68,7 @@ Verify GPU Operator Deployment  # robocop: disable
     # ...   nvidia-operator-validator DS
 
 Verify That Prometheus Image Is A CPaaS Built Image
-    [Tags]    Sanity   
+    [Tags]    Sanity
     ...     Tier1
     ...     ODS-734    
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
@@ -78,7 +78,7 @@ Verify That Prometheus Image Is A CPaaS Built Image
     ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
 Verify That Grafana Image Is A Red Hat Built Image
-    [Tags]    Sanity    
+    [Tags]    Sanity
     ...     Tier1
     ...     ODS-736    
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=grafana-
@@ -88,7 +88,7 @@ Verify That Grafana Image Is A Red Hat Built Image
     ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
 Verify That Blackbox-exporter Image Is A CPaaS Built Image
-    [Tags]    Sanity    
+    [Tags]    Sanity
     ...     Tier1
     ...     ODS-735    
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
@@ -96,9 +96,33 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
     ...    "quay.io/integreatly/prometheus-blackbox-exporter:v0.19.0"
 
 Verify That Alert Manager Image Is A CPaaS Built Image
-    [Tags]    Sanity    
+    [Tags]    Sanity
     ...     Tier1
     ...     ODS-733    
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    alertmanager
     ...    "registry.redhat.io/openshift4/ose-prometheus-alertmanager"
+
+Verify Pytorch And Tensorflow Can Be Spawned
+    [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
+    [Tags]    Sanity
+    ...       ODS-480
+    Verify Cuda Builds Are Completed
+    Verify Image Can Be Spawned  image=pytorch  size=Default
+    Verify Image Can Be Spawned  image=tensorflow  size=Default
+
+
+*** Keywords ***
+Verify Cuda Builds Are Completed
+    [Documentation]    Verify All Cuda Builds have status as Complete
+    ${Pods} =    Run    oc get build -n redhat-ods-applications
+    @{builds} =    Split String    ${Pods}    \n
+    ${len} =    Get Length    ${builds}
+    FOR    ${ind}    IN RANGE    1    ${len}
+        @{pre} =    Split String    ${builds}[${ind}]
+        ${is_cuda_build} =   Run Keyword And Return Status   Should Contain    ${pre}[0]    cuda
+        IF    ${is_cuda_build} == True
+            Should Be Equal As Strings    ${pre}[3]    Complete
+        END
+        Should Be Equal As Strings    ${pre}[3]    Complete
+    END

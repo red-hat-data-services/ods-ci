@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library          JupyterLibrary
+Library          OpenShiftLibrary
 Suite Setup      Load Spawner Page
 Suite Teardown   End Web Test
 
@@ -66,6 +67,16 @@ Verify All Images And Spawner
     Should Be Equal As Integers  ${length}  4
     Log To Console  ${status_list}
 
+Verify There Are No Errors With Distutil Library
+    [Documentation]    Verifies that notebook can be spawned ,
+    ...                python version is greater than or equal to 3.8 and
+    ...                there are no errors in logs
+    [Tags]    Sanity
+    ...       ODS-586
+    Spawn Notebook With Arguments    image=pytorch    size=Default
+    Verify Python Version In Notebook
+    Verify Errors In Logs
+
 
 *** Keywords ***
 Verify Libraries In Base Image  # robocop: disable
@@ -94,3 +105,17 @@ Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
+
+Verify Python Version In Notebook
+    [Documentation]    Verifies python version >=3.8
+    ${python_version} =    Run Cell And Get Output    !python --version
+    ${python_version} =    Fetch From Right    ${python_version}    ${SPACE}
+    ${version_check} =    GTE    ${python_version}    3.8.0
+    Should Be Equal As Strings    ${version_check}    True
+
+Verify Errors In Logs
+    [Documentation]    Verifies that there are no errors in Logs
+    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications
+    FOR    ${pod}    IN    @{pods}
+        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}    namespace=redhat-ods-applications
+    END

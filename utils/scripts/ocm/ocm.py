@@ -475,6 +475,28 @@ class OpenshiftClusterManager():
                 return failure_flag
         return failure_flag
 
+    def is_oc_obj_existent(self, kind, name, namespace,
+                           retries=30, retry_sec_interval=3):
+        log.info("\nGetting {} with name {} from {} namespace."
+                 "In case of failure, the operation will be repeated every {} seconds, "
+                 "maximum {} times".format(kind, name, namespace, retry_sec_interval, retries))
+        found = False
+        for retry in range(retries):
+            cmd = ("""oc get {} {}  -n {}""".format(kind, name, namespace))
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            if ret is None or "Error" in ret:
+                log.info("Failed to find {} object. It may not be ready yet. Trying again in {} seconds".format(kind, retry_sec_interval))
+                time.sleep(retry_sec_interval)
+                continue
+            else:
+                log.info("{} object called {} found!".format(kind, name))
+                found = True
+                break
+        if not found:
+            log.error("{} object called {} not found (ns: {}).".format(kind, name, namespace))
+        return found
+
     def install_rhoam_addon(self, exit_on_failure=True):
         if not self.is_addon_installed(addon_name="managed-api-service"):
             add_vars = {
@@ -487,26 +509,34 @@ class OpenshiftClusterManager():
                                          add_replace_vars=add_vars,
                                          exit_on_failure=exit_on_failure)
             failure_flags.append(failure)
-            log.info("\nSetting the useClusterStorage parameter")
-            rhmi_found = False
-            for retry in range(30):
-                cmd = ("""oc get rhmi rhoam  -n redhat-rhoam-operator""")
-                log.info("CMD: {}".format(cmd))
-                ret = execute_command(cmd)
-                if ret is None or "Error" in ret:
-                    log.info("Failed to get RHMI object. It may not be ready yet. Trying again in 3 seconds")
-                    time.sleep(3)
-                    continue
-                else:
-                    log.info("RHMI object ready to be patched!")
-                    rhmi_found = True
-                    break
+            log.info("\nSetting the useClusterStorage parameter to 'false'")
+            rhmi_found = self.is_oc_obj_existent(kind="rhmi", name="rhoam",
+                                                 namespace="redhat-rhoam-operato",
+                                                 retries=35, retry_sec_interval=3)
             if not rhmi_found:
-                log.error("RHMI not found!")
                 failure = True
                 failure_flags.append(failure)
                 if exit_on_failure:
                     sys.exit(1)
+            # rhmi_found = False
+            # for retry in range(30):
+            #     cmd = ("""oc get rhmi rhoam  -n redhat-rhoam-operator""")
+            #     log.info("CMD: {}".format(cmd))
+            #     ret = execute_command(cmd)
+            #     if ret is None or "Error" in ret:
+            #         log.info("Failed to get RHMI object. It may not be ready yet. Trying again in 3 seconds")
+            #         time.sleep(3)
+            #         continue
+            #     else:
+            #         log.info("RHMI object ready to be patched!")
+            #         rhmi_found = True
+            #         break
+            # if not rhmi_found:
+            #     log.error("RHMI not found!")
+            #     failure = True
+            #     failure_flags.append(failure)
+            #     if exit_on_failure:
+            #         sys.exit(1)
 
             cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
                    --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")

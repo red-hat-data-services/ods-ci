@@ -6,7 +6,7 @@ Library             OperatingSystem
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-
+Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 
 *** Test Cases ***
 Verify Dashboard Deployment
@@ -68,37 +68,61 @@ Verify GPU Operator Deployment  # robocop: disable
     # ...   nvidia-operator-validator DS
 
 Verify That Prometheus Image Is A CPaaS Built Image
-    [Tags]    Sanity   
+    [Tags]    Sanity
     ...     Tier1
     ...     ODS-734    
-    ${pod} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    prometheus
     ...    "registry.redhat.io/openshift4/ose-prometheus"
     Verify Container Image    redhat-ods-monitoring    ${pod}    oauth-proxy
     ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
 Verify That Grafana Image Is A Red Hat Built Image
-    [Tags]    Sanity    
+    [Tags]    Sanity
     ...     Tier1
     ...     ODS-736    
-    ${pod} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=grafana-
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=grafana-
     Verify Container Image    redhat-ods-monitoring    ${pod}    grafana
     ...    "registry.redhat.io/rhel8/grafana:7"
     Verify Container Image    redhat-ods-monitoring    ${pod}    auth-proxy
     ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
 Verify That Blackbox-exporter Image Is A CPaaS Built Image
-    [Tags]    Sanity    
+    [Tags]    Sanity
     ...     Tier1
     ...     ODS-735    
-    ${pod} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
     Verify Container Image    redhat-ods-monitoring    ${pod}    blackbox-exporter
     ...    "quay.io/integreatly/prometheus-blackbox-exporter:v0.19.0"
 
 Verify That Alert Manager Image Is A CPaaS Built Image
-    [Tags]    Sanity    
+    [Tags]    Sanity
     ...     Tier1
     ...     ODS-733    
-    ${pod} =    Search Pod    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
+    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    alertmanager
     ...    "registry.redhat.io/openshift4/ose-prometheus-alertmanager"
+
+Verify Pytorch And Tensorflow Can Be Spawned
+    [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
+    [Tags]    Sanity
+    ...       ODS-480
+    Verify Cuda Builds Are Completed
+    Verify Image Can Be Spawned  image=pytorch  size=Default
+    Verify Image Can Be Spawned  image=tensorflow  size=Default
+
+
+*** Keywords ***
+Verify Cuda Builds Are Completed
+    [Documentation]    Verify All Cuda Builds have status as Complete
+    ${Pods} =    Run    oc get build -n redhat-ods-applications
+    @{builds} =    Split String    ${Pods}    \n
+    ${len} =    Get Length    ${builds}
+    FOR    ${ind}    IN RANGE    1    ${len}
+        @{pre} =    Split String    ${builds}[${ind}]
+        ${is_cuda_build} =   Run Keyword And Return Status   Should Contain    ${pre}[0]    cuda
+        IF    ${is_cuda_build} == True
+            Should Be Equal As Strings    ${pre}[3]    Complete
+        END
+        Should Be Equal As Strings    ${pre}[3]    Complete
+    END

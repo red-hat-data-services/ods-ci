@@ -132,8 +132,37 @@ Verify Container Image
     Should Be Equal  ${image}  ${expected-image-url}
 
 Search Pod
-    [Documentation]   Return list of pods   pod_start_with = here ypu have to provide starting of pod name
+    [Documentation]   Returns list pod  ${pod_start_with} = here ypu have to provide starting of pod name
     [Arguments]   ${namespace}  ${pod_start_with}
     ${pod} =  Run  oc get pods -n ${namespace} -o json | jq '.items[] | select(.metadata.name | startswith("${pod_start_with}")) | .metadata.name'
     @{list_pods} =  Split String  ${pod}  \n
+    [Return]  ${list_pods}
+
+Run Command In Container
+    [Documentation]    Executes a command in a container.
+    ...    If ${container_name} is omitted, the first container in the pod will be chosen
+    [Arguments]    ${namespace}    ${pod_name}    ${command}    ${container_name}=${EMPTY}
+    IF    "${container_name}" == "${EMPTY}"
+        ${output}    Run    oc exec ${pod_name} -n ${namespace} -- ${command}
+    ELSE
+        ${output}    Run    oc exec ${pod_name} -n ${namespace} -c ${container_name} -- ${command}
+    END
+    [Return]    ${output}
+
+Wait Until Container Exist
+    [Documentation]     Waits until container is exists
+    [Arguments]     ${namespace}    ${pod_name}    ${container_to_check}    ${timeout}=5 min
+    Wait Until Keyword Succeeds    ${timeout}    1 min
+    ...    Check Is Container Exist    namespace=${namespace}  pod_name=${pod_name}  container_to_check=${container_to_check}
+
+Check Is Container Exist
+    [Documentation]     Checks container is exist or if not then fails
+    [Arguments]     ${namespace}    ${pod_name}    ${container_to_check}
+    ${container_name} =  Run  oc get pod ${pod_name} -n ${namespace} -o json | jq '.spec.containers[] | select(.name == "${container_to_check}") | .name'
+    Should Be Equal    "${container_to_check}"    ${container_name}
+
+Find First Pod By Name
+    [Documentation]   Returns first occurred pod  ${pod_start_with} = here ypu have to provide starting of pod name
+    [Arguments]   ${namespace}  ${pod_start_with}
+    ${list_pods} =  Search Pod  namespace=${namespace}  pod_start_with=${pod_start_with}
     [Return]  ${list_pods}[0]

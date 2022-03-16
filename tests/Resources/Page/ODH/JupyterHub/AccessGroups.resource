@@ -52,17 +52,26 @@ Add Test Users To Custom Groups
 
 Remove Test Users From RHODS Standard Groups
     [Documentation]    Removes two tests users from rhods-admins and rhods-users
-    Remove User From Group    username=${TEST_USER_2.USERNAME}    group_name=${STANDARD_ADMINS_GROUP}
-    Remove User From Group    username=${TEST_USER_3.USERNAME}    group_name=${STANDARD_USERS_GROUP}
-    Check User Is Not In A Group    username=${TEST_USER_2.USERNAME}   group_name=${STANDARD_ADMINS_GROUP}
-    Check User Is Not In A Group    username=${TEST_USER_3.USERNAME}   group_name=${STANDARD_USERS_GROUP}
+    IF    ':' not in $STANDARD_ADMINS_GROUP
+        Remove User From Group    username=${TEST_USER_2.USERNAME}    group_name=${STANDARD_ADMINS_GROUP}
+        Check User Is Not In A Group    username=${TEST_USER_2.USERNAME}   group_name=${STANDARD_ADMINS_GROUP}
+    END
+    IF    ':' not in $STANDARD_USERS_GROUP
+        Remove User From Group    username=${TEST_USER_3.USERNAME}    group_name=${STANDARD_USERS_GROUP}
+        Check User Is Not In A Group    username=${TEST_USER_3.USERNAME}   group_name=${STANDARD_USERS_GROUP}
+    END
 
 Add Test Users Back To RHODS Standard Groups
     [Documentation]    Adds two tests users back to rhods-admins and rhods-users
-    Add User To Group    username=${TEST_USER_2.USERNAME}    group_name=${STANDARD_ADMINS_GROUP}
-    Add User To Group    username=${TEST_USER_3.USERNAME}    group_name=${STANDARD_USERS_GROUP}
-    Check User Is In A Group    username=${TEST_USER_2.USERNAME}   group_name=${STANDARD_ADMINS_GROUP}
-    Check User Is In A Group    username=${TEST_USER_3.USERNAME}   group_name=${STANDARD_USERS_GROUP}
+    IF    ':' not in $STANDARD_ADMINS_GROUP
+        Add User To Group    username=${TEST_USER_2.USERNAME}    group_name=${STANDARD_ADMINS_GROUP}
+        Check User Is In A Group    username=${TEST_USER_2.USERNAME}   group_name=${STANDARD_ADMINS_GROUP}
+    END
+    IF    ':' not in $STANDARD_USERS_GROUP
+        Add User To Group    username=${TEST_USER_3.USERNAME}    group_name=${STANDARD_USERS_GROUP}
+        Check User Is In A Group    username=${TEST_USER_3.USERNAME}   group_name=${STANDARD_USERS_GROUP}
+    END
+
 
 Remove Test Users From Custom Groups
     [Documentation]    Removes two tests users from custom-admins and customer-users groups
@@ -99,8 +108,8 @@ Check Standard Access Configuration Works As Expected
     Go To RHODS Dashboard
     Launch JupyterHub From RHODS Dashboard Link
     Handle Bad Gateway Page
-    Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER.USERNAME}
-    ...                                   ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    admin
+    Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER_2.USERNAME}
+    ...                                   ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}    admin
     Capture Page Screenshot    perm_admin_std.png
     Logout Via Button
     Go To RHODS Dashboard
@@ -143,10 +152,10 @@ Set Standard RHODS Groups Variables
     ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
     IF    ${version_check} == True
         Set Suite Variable    ${STANDARD_ADMINS_GROUP}      dedicated-admins
-        Set Suite Variable    ${STANDARD_USERS_GROUP}       'system:authenticated'
-        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       'true'
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       system:authenticated
+        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       true
     ELSE
         Set Suite Variable    ${STANDARD_ADMINS_GROUP}      rhods-admins
         Set Suite Variable    ${STANDARD_USERS_GROUP}       rhods-users
-        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       'false'
+        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       false
     END

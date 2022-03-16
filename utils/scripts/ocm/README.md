@@ -1,4 +1,4 @@
-# Openshift Dedicated Cluster operations in AWS with OCM CLI
+# Openshift Dedicated Cluster operations in AWS with OCM CLI and Openshift API
 Script to provision Openshift Dediated (OSD) on AWS and with other functionalities like creating identity providers(IDP) to access the cluster, installing/uninstalling add-ons and retreiving the cluster info with the aid of Openshift Cluster Manager CLI tool ([ocm-cli](https://github.com/openshift-online/ocm-cli.git))
 
 # Prerequisites

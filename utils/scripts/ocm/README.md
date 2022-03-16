@@ -1,14 +1,14 @@
-# Provision Openshift Dedicated Cluster in AWS
-Script to install Openshift Dediated (OSD) on AWS with the aid of Openshift Cluster Manager CLI tool ([ocm-cli](https://github.com/openshift-online/ocm-cli.git))
+# Openshift Dedicated Cluster operations in AWS with OCM CLI
+Script to provision Openshift Dediated (OSD) on AWS and with other functionalities like creating identity providers(IDP) to access the cluster, installing/uninstalling add-ons and retreiving the cluster info with the aid of Openshift Cluster Manager CLI tool ([ocm-cli](https://github.com/openshift-online/ocm-cli.git))
 
 # Prerequisites
 - Python 3.x
-- Install ocm cli
+- [Install ocm cli](#Install%20OCM-CLI)
 - access_key and secret_access_key for the AWS account user *ocdCcsAdmin*
 
 Follow the below instructions to install ocm cli, if already installed skip to [Instructions](#Instructions) section
 
-# Install OCM command line tool
+# Install OCM-CLI
 Openshift Cluster Manager command line tool can be directly build from the source page.
 _Please refer the GitHub
 [releases page](https://github.com/openshift-online/ocm-cli/releases) page for the latest release version available, using outdated ocm cli might cause error_. 
@@ -57,7 +57,6 @@ Available sub commands:
                         Uninstall rhods addon cluster.
     create_idp          Add an Identity providers to determine how users log into the cluster.
 ```
-ocm.py script uses ocm cli to provision and destroy cluster along with other functionalities like creating identity providers(IDP) to access the cluster, installing/uninstalling add-ons and retreiving the cluster info
 
 # Instructions
 Clone the [ODS-CI](https://github.com/red-hat-data-services/ods-ci.git) repository
@@ -76,7 +75,7 @@ Retrieve the access token from [here](https://console.redhat.com/openshift/token
     
 Replace the field <token_here>.
 
-*Note:* Argument --url=staging sets the targeted environment for OSD to deploy. _url=staging_ deploys a cluster in [staging](https://qaprodauth.cloud.redhat.com/) environment. If the argument removed, cluster would get deployed in [production](https://console.redhat.com/) environment
+*Note:* Argument --url=staging sets the target environment to deploy OSD. Mentioning _url=staging_ deploys the cluster in staging environment. If the argument removed, cluster deployed in [production](https://console.redhat.com/) environment
 
 ### Create Cluster
 To deploy a OSD cluster on AWS
@@ -85,16 +84,34 @@ To deploy a OSD cluster on AWS
     
 Replace the fields <account_id>, <access_key>, <secret_accesskey> and <cluster_name>.
 
+<cluster_name> accepts maximum length of 15 alpha numeric characters and word separator "-"
+
 *Note:* AWS account access_key and secret_accesskey for the user ocdCcsAdmin should be used to create a cluster, please refer [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html) to get more details about AWS identity and Access Management.
 
 ### Install RHODS addon
     
 ```python3 ocm.py install_rhods_addon --cluster-name <clustername>```
     
-Replace the field <clustername> to the cluster name deployed
+Replace the field <clustername> to cluster name
 
-### Create IDP
+### Create Identity Providers (IDP)
+    
+Identity providers allow us to access the cluster. Current script version supports two IDP types,
+- htpasswd
+- LDAP
+    
+##### htpasswd
     
 ```python3 ocm.py create_idp --type htpasswd --cluster <cluster_name>  --htpasswd-cluster-password <password>```
     
-Identity providers should be created in order to access the cluster created. The above command creates IDP type of htpasswd with the default IDP name htpasswd-cluster-admin and User name htpasswd-cluster-admin-user
+Replace the fields <cluster_name> and <password>
+
+The above command creates IDP type of htpasswd with the default IDP name htpasswd-cluster-admin and User name htpasswd-cluster-admin-user
+   
+##### LDAP
+
+```python3 ocm.py create_idp --type ldap --cluster <cluster_name> --ldap-bind-password <password>```
+    
+Replace the fields <cluster_name> and <password>
+    
+The above command creates IDP type of ldap with the password given

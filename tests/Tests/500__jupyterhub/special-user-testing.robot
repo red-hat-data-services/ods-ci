@@ -1,5 +1,5 @@
 *** Settings ***
-Force Tags       Smoke  Sanity
+Force Tags       Smoke  Sanity    JupyterHub
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot

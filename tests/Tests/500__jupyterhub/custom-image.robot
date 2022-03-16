@@ -8,6 +8,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
 Library          JupyterLibrary
 Library          OpenShiftCLI
 Suite Teardown   Custom Image Teardown
+Force Tags       JupyterHub
 
 
 *** Variables ***

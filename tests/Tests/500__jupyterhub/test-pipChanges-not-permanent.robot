@@ -6,6 +6,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource         ../../Resources/Common.robot
 Suite Setup      Test Setup
 Suite Teardown   End Web Test
+Force Tags       JupyterHub
 
 
 *** Test Cases ***

@@ -89,10 +89,12 @@ Replace the fields <account_id>, <access_key>, <secret_accesskey> and <cluster_n
 *Note:* AWS account access_key and secret_accesskey for the user ocdCcsAdmin should be used to create a cluster, please refer [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html) to get more details about AWS identity and Access Management.
 
 ### Install RHODS addon
+
+Once the Cluster deployed, RHODS addon can be installed using the below command
     
-```python3 ocm.py install_rhods_addon --cluster-name <clustername>```
+```python3 ocm.py install_rhods_addon --cluster-name <cluster_name>```
     
-Replace the field <clustername> to cluster name
+Replace the field <cluster_name> to cluster name
 
 ### Create Identity Providers (IDP)
     
@@ -102,16 +104,16 @@ Identity providers allow us to access the cluster. Current script version suppor
     
 ##### htpasswd
     
-```python3 ocm.py create_idp --type htpasswd --cluster <cluster_name>  --htpasswd-cluster-password <password>```
+```python3 ocm.py create_idp --type htpasswd --cluster <cluster_name>  --htpasswd-cluster-password <ht_password>```
     
-Replace the fields <cluster_name> and <password>
+Replace the fields <cluster_name> and <ht_password>
 
 The above command creates IDP type of htpasswd with the default IDP name htpasswd-cluster-admin and User name htpasswd-cluster-admin-user
    
 ##### LDAP
 
-```python3 ocm.py create_idp --type ldap --cluster <cluster_name> --ldap-bind-password <password>```
+```python3 ocm.py create_idp --type ldap --cluster <cluster_name> --ldap-bind-password <ht_password>```
     
-Replace the fields <cluster_name> and <password>
+Replace the fields <cluster_name> and <ht_password>
     
 The above command creates IDP type of ldap with the password given

@@ -147,18 +147,17 @@ Maybe Select Kernel
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
-  Sleep  1
-  Maybe Close Popup
-  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
-  Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Close Popup
-  Sleep  1
-  Maybe Close Popup
-  Open With JupyterLab Menu  File  New  Notebook
-  Sleep  2
-  Maybe Close Popup
-  Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
-  Wait Until JupyterLab Code Cell Is Not Active
+    [Documentation]    Cleans up user server and checks that everything has been removed
+    [Arguments]    ${admin_username}=${OCP_ADMIN_USER.USERNAME}    ${username}=${TEST_USER.USERNAME}
+    Run Keyword And Continue On Failure    Open With JupyterLab Menu    File    Close All Tabs
+    Maybe Close Popup
+    Clean Up User Notebook    ${admin_username}    ${username}
+    Sleep  5s
+    Maybe Close Popup
+    Wait Until User Server Is Clean
+    Maybe Close Popup
+    ${ls_server} =    Exec Command In User Notebook    command=ls    admin_username=${admin_username}    username=${username}
+    Should Match    "${ls_server}"    "${EMPTY}"
 
 Get User Notebook Pod Name
   [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyterhub-nb-ldap-2dadmin1)
@@ -166,6 +165,25 @@ Get User Notebook Pod Name
   ${safe_username}=  Get Safe Username    ${username}
   ${notebook_pod_name}=   Set Variable  jupyterhub-nb-${safe_username}
   [Return]  ${notebook_pod_name}
+
+Wait Until User Server Is Clean
+    [Documentation]    Waits until the JL UI does not show any items (folders/files) in the user's server
+    [Arguments]    ${timeout}=15s
+    Wait Until Page Does Not Contain Element    xpath://li[contains(concat(' ',normalize-space(@class),' '),' jp-DirListing-item ')]    ${timeout}
+
+# Could replace Clean Up User Notebook and Delete Folder In User Notebook
+Exec Command In User Notebook
+    [Documentation]    Runs ${command} in the user's server and returns the result
+    [Arguments]    ${command}    ${admin_username}=${OCP_ADMIN_USER.USERNAME}    ${username}=${TEST_USER.USERNAME}
+    ${oc_whoami} =  Run   oc whoami
+    IF    '${oc_whoami}' == '${admin_username}'
+        ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
+        Search Pods    ${notebook_pod_name}    namespace=rhods-notebooks
+        ${output} =  Run    oc exec ${notebook_pod_name} -n rhods-notebooks -- ${command}
+    ELSE
+        Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
+    END
+    [Return]    ${output}
 
 Clean Up User Notebook
   [Documentation]  Delete all files and folders in the ${username}'s notebook PVC (excluding hidden files and folders).
@@ -265,21 +283,10 @@ Handle Kernel Restarts
   END
 
 Run Repo and Clean
-  [Arguments]  ${REPO_URL}  ${NB_NAME}
-  Click Element  xpath://span[@title="/opt/app-root/src"]
-  Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NB_NAME}
-  Sleep  15
-  Click Element  xpath://span[@title="/opt/app-root/src"]
-  Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Close Popup
-  Open With JupyterLab Menu  File  New  Notebook
-  Sleep  1
-  Maybe Close Popup
-  Sleep  1
-  Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
-  Wait Until JupyterLab Code Cell Is Not Active
-  Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Close Popup
+    [Arguments]  ${REPO_URL}  ${NB_NAME}
+    Click Element  xpath://span[@title="/opt/app-root/src"]
+    Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NB_NAME}
+    Clean Up Server
 
 Maybe Close Popup
     [Documentation]    Click the last button in a JupyterLab dialog (if one is open).

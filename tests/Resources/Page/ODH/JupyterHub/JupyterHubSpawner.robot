@@ -248,15 +248,7 @@ Fix Spawner Status
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
             Maybe Close Popup
-            Navigate Home (Root Folder) In JupyterLab Sidebar File Browser
-            Open With JupyterLab Menu  File  New  Notebook
-            Sleep  1
-            Maybe Close Popup
-            Close Other JupyterLab Tabs
-            Add And Run JupyterLab Code Cell In Active Notebook  !rm -rf *
-            Wait Until JupyterLab Code Cell Is Not Active
-            Open With JupyterLab Menu  File  Close All Tabs
-            Maybe Close Popup
+            Clean Up Server
             Stop JupyterLab Notebook Server
             Handle Start My Server
             Maybe Handle Server Not Running Page

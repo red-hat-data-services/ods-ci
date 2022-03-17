@@ -8,6 +8,7 @@ Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Suite Setup     Plugin Testing Suite Setup
 Suite Teardown   Plugin Testing Suite Teardown
+Force Tags       JupyterHub
 
 *** Variables ***
 @{notebook_images}             s2i-minimal-notebook   s2i-generic-data-science-notebook    tensorflow   pytorch

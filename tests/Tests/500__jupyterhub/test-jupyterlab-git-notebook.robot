@@ -6,6 +6,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library          DebugLibrary
 Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
+Force Tags       JupyterHub
 
 *** Variables ***
 

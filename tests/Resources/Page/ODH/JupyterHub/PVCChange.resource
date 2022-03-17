@@ -21,7 +21,8 @@ Verify Notebook Size
     [Documentation]   Launch JH spawner and compare size
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=s2i-minimal-notebook    spawner_timeout=${timeout}
-    Run Cell And Check Output    ${SIZE_CODE}   ${size}
+    Run Keyword And Warn On Failure    Run Cell And Check Output
+    ...   ${SIZE_CODE}   ${size}
     Fix Spawner Status
 
 Verify PVC Size

@@ -309,4 +309,25 @@ Re-validate License For Disabled Application From Enabled Page
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[0]
 
+Set PVC Value In RHODS Dashboard
+    [Documentation]    Change the default value for PVC
+    ...    only whole number is selected
+    [Arguments]    ${size}
+    Menu.Navigate To Page    Settings    Cluster settings
+    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
+    Run Keywords
+    ...   Input Text    //input[@id="pvc-size-input"]    ${size}
+    ...  AND
+    ...    Press Keys    //input[@id="pvc-size-input"]    RETURN
+    Wait Until Keyword Succeeds    30    1
+    ...    Wait Until Page Contains    Cluster settings updated successfully.
+
+Restore PVC Value To Default Size
+   [Documentation]    Set the PVC value to default
+   ...    valie i.e., 20Gi
+   Menu.Navigate To Page    Settings    Cluster settings
+   Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
+   Click Button    Restore Defaults
+   Wait Until Keyword Succeeds    30    1
+   ...    Wait Until Page Contains    Cluster settings updated successfully.
 

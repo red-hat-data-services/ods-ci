@@ -15,8 +15,7 @@ Resource         ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 
-Test Teardown   PVC Size Test Teardown
-
+Test Setup      PVC Size Test Setup
 
 *** Variables ***
 ${NAMESPACE}    redhat-ods-applications
@@ -27,26 +26,44 @@ ${SIZE_CODE}    import subprocess;
 
 
 *** Test Cases ***
-Verify User Can Spawn Notebook With PVC Change
+Verify Supported Notebook PVC Size Using Backend
     [Documentation]   Verify if user can spawn notebook
-    ...    for supported PVC size git change
+    ...    for supported PVC size got changed
     [Tags]    Smoke
     ...       Sanity
     ...       ODS-1228    ODS-1221
     ...       Resources-PVC
-    Change PVC And Rollout JH Deployment Config    ${S_SIZE}Gi
-    Run Keyword And Continue On Failure   Verify Notebook Size     600s    ${S_SIZE}
+    Change And Apply PVC size    ${S_SIZE}Gi
+    Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
     Verify PVC Size     ${S_SIZE}       ${pvc_size}
+    [Teardown]    PVC Size Test Teardown
 
-Verify User Can Not Spawn Notebbok With Unsupported Size
+Verify Unsupported Notebook PVC Size Using Backend
     [Documentation]   Verify if user should not able to
     ...    spawn notebook for supported PVC change
     [Tags]    Tier2
     ...       ODS-1229    ODS-1233
     ...       Resources-PVC
     Verify Multiple Unsupported Size    ${NS_SIZE}
+    [Teardown]    PVC Size Test Teardown
 
+Verify Supported Notebook PVC Size Using UI
+   [Documentation]   Verify if dedicated admin user able to chnage PVC
+    ...    and RHODS user is able to spawn notebook for supported PVC
+    ...    change using UI
+    [Tags]    Smoke
+    ...       Sanity
+    ...       ODS-1220    ODS-1222
+    Add User To Dedicated Admin Group
+    Launch RHODS Dashboard
+    Set PVC Value In RHODS Dashboard    ${S_SIZE}
+    Sleep    35
+    Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
+    ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
+    Verify PVC Size     ${S_SIZE}       ${pvc_size}
+    Go To    ${ODH_DASHBOARD_URL}
+    Restore PVC Value To Default Size
 
 *** Keywords ***
 Launch RHODS Dashboard
@@ -60,17 +77,25 @@ Verify Multiple Unsupported Size
     [Documentation]   Verify Mulitple unsupported size
     [Arguments]      ${NS_SIZES}
     FOR    ${NS_SIZE}    IN    @{NS_SIZES}
-       Change PVC And Rollout JH Deployment Config     ${NS_SIZE}Gi
+       Change And Apply PVC size     ${NS_SIZE}Gi
        ${status}     Run Keyword And Return Status   Verify Notebook Size   60s   ${NS_SIZE}
        Run Keyword And Continue On Failure    Page Should Contain    Server request failed to start
        Run Keyword IF    '${status}'=='FAIL'   Log   Unable to Spawn Notebook
        ...   for unsupported values
     END
 
-Change PVC And Rollout JH Deployment Config
+Change And Apply PVC size
     [Documentation]    Make PVC change to configmap
     ...    and rollout deployment config
     [Arguments]     ${size}
     Check If PVC Change Is Permanent    ${size}
     Roll Out Jupyter Deployment Config
     Launch RHODS Dashboard
+
+PVC Size Test Setup
+    [Documentation]    PVC change suite setup
+    ${status}    ${pvc_name}    Run Keyword And Ignore Error
+    ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
+    May Be Delete PVC     ${pvc_name}
+    ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
+    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}

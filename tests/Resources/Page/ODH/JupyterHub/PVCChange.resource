@@ -6,11 +6,6 @@ Documentation   Set of Keywords for PVC change support
 Check If PVC Change Is Permanent
     [Documentation]   Check if PVC changes are not reverted back
     [Arguments]    ${PVC_SIZE}
-    ${status}    ${pvc_name}    Run Keyword And Ignore Error
-    ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
-    May Be Delete PVC     ${pvc_name}
-    ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
-    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
     ${size}    Get PVC Size    redhat-ods-applications
     Change PVC Size From ConfigMap     ${PVC_SIZE}
     Sleep    15s
@@ -73,3 +68,7 @@ May Be Delete Notebook POD
     [Arguments]     ${namespace}    ${pod_name}
     Run Keyword And Return Status    OpenShiftCLI.Delete    kind=Pod    namespace=${namespace}
     ...    field_selector=metadata.name==${pod_name}
+
+Add User To Dedicated Admin Group
+    [Arguments]  ${username}=${TEST_USER.USERNAME}  ${group_name}=dedicated-admins
+    Run    oc adm groups add-users ${group_name} ${username}

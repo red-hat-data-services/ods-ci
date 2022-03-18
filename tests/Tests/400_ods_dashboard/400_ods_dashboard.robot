@@ -96,10 +96,7 @@ Verify Documentation Link HTTP status code
 
 *** Keywords ***
 Dashboard Test Setup
-    Set Library Search Order    SeleniumLibrary
-    Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
 
 Dashboard Test Teardown
     Close All Browsers

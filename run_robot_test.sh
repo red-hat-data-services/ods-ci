@@ -1,5 +1,6 @@
 #/bin/bash
 
+SKIP_OC_LOGIN = true
 TEST_CASE_FILE=tests/Tests
 TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
@@ -11,6 +12,12 @@ TEST_EXCLUDE_TAG=""
 
 while [ "$#" -gt 0 ]; do
   case $1 in
+    --skip-oclogin)
+      shift
+      SKIP_OC_LOGIN=$1
+      shift
+      ;;
+
     # Override/Add global variables specified in the test variables file
     --test-variable)
       shift
@@ -116,31 +123,36 @@ esac
 
 ## if we have yq installed
 if command -v yq &> /dev/null
-then
-    echo "INFO: we found a yq executable"
+    then
+        echo "INFO: we found a yq executable"
+        if ! ${SKIP_OC_LOGIN}
+            then
+                echo "INFO: OC Login enabled"
 
-    ## get the user, pass and API hostname for OpenShift
-    oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})
-    oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ${TEST_VARIABLES_FILE})
-    oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
+                ## get the user, pass and API hostname for OpenShift
+                oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})
+                oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ${TEST_VARIABLES_FILE})
+                oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
 
-    ## do an oc login here
-    oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
-    
-    ## no point in going further if the login is not working
-    retVal=$?
-    if [ $retVal -ne 0 ]; then
-        echo "The oc login command seems to have failed"
-        echo "Please review the content of ${TEST_VARIABLES_FILE}"
-        exit $retVal
-    fi
-    oc cluster-info
-    printf "\nconnected as openshift user ' $(oc whoami) '\n"
-    echo "since the oc login was successful, continuing."
-else
-    echo "we did not find yq, so not trying the oc login"
+                ## do an oc login here
+                oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
+
+                ## no point in going further if the login is not working
+                retVal=$?
+                if [ $retVal -ne 0 ]; then
+                    echo "The oc login command seems to have failed"
+                    echo "Please review the content of ${TEST_VARIABLES_FILE}"
+                    exit $retVal
+                fi
+                oc cluster-info
+                printf "\nconnected as openshift user ' $(oc whoami) '\n"
+                echo "since the oc login was successful, continuing."
+            else
+                echo "skipping OC login as per parameter --skip-oclogin"
+        fi
+    else
+        echo "we did not find yq, so not trying the oc login"
 fi
-
 
 #TODO: Make this optional so we are not creating/updating the virtualenv everytime we run a test
 VENV_ROOT=${currentpath}/venv

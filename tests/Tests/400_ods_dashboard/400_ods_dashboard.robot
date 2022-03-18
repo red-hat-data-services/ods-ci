@@ -96,6 +96,7 @@ Verify Documentation Link HTTP status code
 
 *** Keywords ***
 Dashboard Test Setup
+    Set Library Search Order  SeleniumLibrary
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
 
 Dashboard Test Teardown

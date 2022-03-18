@@ -47,19 +47,25 @@ Verify Unsupported Notebook PVC Size Using Backend
     [Teardown]    PVC Size Test Teardown
 
 Verify Supported Notebook PVC Size Using UI
-   [Documentation]   Verify if dedicated admin user able to chnage PVC
+    [Documentation]   Verify if dedicated admin user able to chnage PVC
     ...    and RHODS user is able to spawn notebook for supported PVC
-    ...    change using UI
+    ...    and verify PVC size
     [Tags]    Smoke
     ...       Sanity
     ...       ODS-1220    ODS-1222
-    Add User To Dedicated Admin Group
-    Launch RHODS Dashboard
-    Set PVC Value In RHODS Dashboard    ${S_SIZE}
-    Sleep    60
-    Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
-    ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
-    Verify PVC Size     ${S_SIZE}       ${pvc_size}
+    Verify PVC change using UI     ${S_SIZE}
+    [Teardown]    PVC Size UI Test Teardown
+
+Verify Unsupported Notebook PVC Size Using UI
+        [Documentation]   Verify if dedicated admin user able to chnage PVC
+    ...    and RHODS user is able to spawn notebook for unsupported PVC
+    ...    and verify PVC size
+    [Tags]    Smoke
+    ...       Sanity
+    ...       ODS-1220    ODS-1222
+    FOR    ${size}    IN    @{NS_SIZE}
+         Verify PVC change using UI   ${size}
+    END
     [Teardown]    PVC Size UI Test Teardown
 
 *** Keywords ***
@@ -96,3 +102,14 @@ PVC Size Suite Teadrown
     May Be Delete PVC     ${pvc_name}
     ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
     May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
+
+Verify PVC change using UI
+   [Documentation]   Basic PVC change verification
+    [Arguments]     ${S_SIZE}
+    Add User To Dedicated Admin Group
+    Launch RHODS Dashboard
+    Set PVC Value In RHODS Dashboard    ${S_SIZE}
+    Sleep    60
+    Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
+    ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
+    Verify PVC Size     ${S_SIZE}       ${pvc_size}

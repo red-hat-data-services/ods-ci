@@ -1,5 +1,5 @@
 # Openshift Dedicated Cluster operations in AWS with OCM CLI and Openshift API
-Script to provision Openshift Dediated (OSD) on AWS and with other functionalities like creating identity providers(IDP) to access the cluster, installing/uninstalling add-ons and retreiving the cluster info with the aid of Openshift Cluster Manager CLI tool ([ocm-cli](https://github.com/openshift-online/ocm-cli.git))
+Script to provision Openshift Dedicated (OSD) on AWS and with other functionalities like creating identity providers(IDP) to access the cluster, installing/uninstalling add-ons and retrieving the cluster info with the aid of Openshift Cluster Manager CLI tool ([ocm-cli](https://github.com/openshift-online/ocm-cli.git))
 
 # Prerequisites
 - Python 3.x
@@ -14,23 +14,23 @@ _Please refer the GitHub
 [releases page](https://github.com/openshift-online/ocm-cli/releases) page for the latest release version available, using outdated ocm cli might cause error_. 
 
 ```
-$ mkdir -p ~/bin
-$ curl -Lo ~/bin/ocm https://github.com/openshift-online/ocm-cli/releases/download/<<updateme>>/ocm-linux-amd64
-$ chmod +x ~/bin/ocm
+ mkdir -p ~/bin
+ curl -Lo ~/bin/ocm https://github.com/openshift-online/ocm-cli/releases/download/<<updateme>>/ocm-linux-amd64
+ chmod +x ~/bin/ocm
 ```
 Replace the value *updateme* on the above command to the targetted release version
 
 For example, To install version 0.1.62
 
 ```
-$ mkdir -p ~/bin
-$ curl -Lo ~/bin/ocm https://github.com/openshift-online/ocm-cli/releases/download/v0.1.62/ocm-linux-amd64
-$ chmod +x ~/bin/ocm
+mkdir -p ~/bin
+curl -Lo ~/bin/ocm https://github.com/openshift-online/ocm-cli/releases/download/v0.1.62/ocm-linux-amd64
+chmod +x ~/bin/ocm
 ```
 
 # Usage
 ```
-$ python ocm.py -h
+python3 ocm.py -h
 usage: ocm.py [-h] {ocm_login,create_cluster,delete_cluster,delete_idp,get_osd_cluster_info,update_osd_cluster_info,install_rhods_addon,install_gpu_addon,add_machine_pool,uninstall_rhods_addon,create_idp} ...
 
 Script to generate test config file
@@ -71,7 +71,7 @@ Navigate to ocm directory
 Before creating a cluster, user should login to OCM using access tokens.
 Retrieve the access token from [here](https://console.redhat.com/openshift/token/show) and login to ocm by running the below script
     
-``` python ocm.py ocm_login --token "<token_here>"  --url=staging```
+``` python3 ocm.py ocm_login --token "<token_here>"  --url=staging```
     
 Replace the field <token_here>.
 
@@ -80,7 +80,7 @@ Replace the field <token_here>.
 ### Create Cluster
 To deploy a OSD cluster on AWS
 
-``` python ocm.py create_cluster --aws-account-id <account_id> --aws-accesskey-id <access_key> --aws-secret-accesskey <secret_accesskey> --cluster-name <cluster_name>```
+``` python3 ocm.py create_cluster --aws-account-id <account_id> --aws-accesskey-id <access_key> --aws-secret-accesskey <secret_accesskey> --cluster-name <cluster_name>```
     
 Replace the fields <account_id>, <access_key>, <secret_accesskey> and <cluster_name>.
 
@@ -92,7 +92,7 @@ Replace the fields <account_id>, <access_key>, <secret_accesskey> and <cluster_n
 
 Once the Cluster deployed, RHODS addon can be installed using the below command
     
-```python3 ocm.py install_rhods_addon --cluster-name <cluster_name>```
+``` python3 ocm.py install_rhods_addon --cluster-name <cluster_name>```
     
 Replace the field <cluster_name> to cluster name
 
@@ -104,7 +104,7 @@ Identity providers allow us to access the cluster. Current script version suppor
     
 ##### htpasswd
     
-```python3 ocm.py create_idp --type htpasswd --cluster <cluster_name>  --htpasswd-cluster-password <ht_password>```
+``` python3 ocm.py create_idp --type htpasswd --cluster <cluster_name>  --htpasswd-cluster-password <ht_password>```
     
 Replace the fields <cluster_name> and <ht_password>
 
@@ -112,7 +112,7 @@ The above command creates IDP type of htpasswd with the default IDP name htpassw
    
 ##### LDAP
 
-```python3 ocm.py create_idp --type ldap --cluster <cluster_name> --ldap-bind-password <ht_password>```
+``` python3 ocm.py create_idp --type ldap --cluster <cluster_name> --ldap-bind-password <ht_password>```
     
 Replace the fields <cluster_name> and <ht_password>
     

@@ -356,6 +356,15 @@ Fetch Image Tooltip Info
     Click Element  //div[@class='jsp-app__header__title']
     [Return]  ${tmp_list}
 
+Spawn Notebooks And Set S3 Credentials
+    [Documentation]     Spawn a jupyter notebook server and set the env variables
+    ...                 to connect with AWS S3
+    [Arguments]     ${image}=s2i-generic-data-science-notebook
+    Set Log Level    NONE
+    &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
+    Spawn Notebook With Arguments  image=${image}  envs=&{S3-credentials}
+    Set Log Level    INFO
+
 Handle Bad Gateway Page
     [Documentation]    It reloads the JH page until Bad Gateway error page
     ...                disappears. It is possible to control how many

@@ -24,20 +24,11 @@ Open JupyterHub Spawner Page
     ...       ODS-695
     Pass Execution    Passing tests, as suite setup ensures that spawner can be loaded
 
-Verify Git Plugin
-    [Documentation]    Verifies git plugin is installed
-    [Tags]    Sanity
-    ...       ODS-452
-    @{additional_libs} =    Create List
-    Append To List    ${additional_libs}    JupyterLab-git v0.30
-    ${status} =    Verify Libraries In Base Image    s2i-minimal-notebook    ${additional_libs}
-    Append To List    ${status_list}    ${status}
-    Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for SDS image do not match
-
 Verify Libraries in Minimal Image
     [Documentation]    Verifies libraries in Minimal Python image
     [Tags]    Sanity
     @{additional_libs} =    Create List
+    Append To List    ${additional_libs}    JupyterLab-git v0.30
     ${status} =    Verify Libraries In Base Image    s2i-minimal-notebook    ${additional_libs}
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for minimal image do not match
@@ -46,7 +37,7 @@ Verify Libraries in SDS Image
     [Documentation]    Verifies libraries in Standard Data Science image
     [Tags]    Sanity
     @{additional_libs} =    Create List
-    Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4
+    Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4    JupyterLab-git v0.30
     ${status} =    Verify Libraries In Base Image    s2i-generic-data-science-notebook    ${additional_libs}
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for SDS image do not match
@@ -56,7 +47,7 @@ Verify Libraries in PyTorch Image
     [Tags]    Sanity
     ...       ODS-215    ODS-216    ODS-217    ODS-218
     @{additional_libs} =    Create List
-    Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4
+    Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4    JupyterLab-git v0.30
     ${status} =    Verify Libraries In Base Image    pytorch    ${additional_libs}
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for pytorch image do not match
@@ -66,7 +57,7 @@ Verify Libraries in Tensorflow Image
     [Tags]    Sanity
     ...       ODS-204    ODS-205    ODS-206    ODS-207
     @{additional_libs} =    Create List
-    Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4
+    Append To List    ${additional_libs}    JupyterLab v3.2    Notebook v6.4    JupyterLab-git v0.30
     ${status} =    Verify Libraries In Base Image    tensorflow    ${additional_libs}
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for tensorflow image do not match

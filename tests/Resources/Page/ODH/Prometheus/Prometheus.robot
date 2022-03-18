@@ -168,3 +168,11 @@ Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=5 min
     Wait Until Keyword Succeeds    ${timeout}    1 min
     ...    Alert Should Not Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
+
+Get Target Endpoints
+    [Documentation]     Returns list of Endpoint URLs
+    [Arguments]         ${target_name}
+    ${links} =  Run  curl -X GET -H "Authorization:Bearer ${RHODS_PROMETHEUS_TOKEN}" -u ${OCP_ADMIN_USER.USERNAME}:${OCP_ADMIN_USER.PASSWORD} -k ${RHODS_PROMETHEUS_URL}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'
+    ${links}    Replace String    ${links}    "    ${EMPTY}
+    @{links} =  Split String  ${links}  \n
+    [Return]    ${links}

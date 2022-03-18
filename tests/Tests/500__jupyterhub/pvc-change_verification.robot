@@ -19,34 +19,34 @@ Test Setup      PVC Size Test Setup
 
 *** Variables ***
 ${NAMESPACE}    redhat-ods-applications
-${S_SIZE}       4
+${S_SIZE}       4.5
 ${SIZE_CODE}    import subprocess;
 ...    int(subprocess.check_output(['df','-h', '/opt/app-root/src']).split()[8].decode('utf-8')[:-1])
 @{NS_SIZE}      0    -15    abc    6.2
 
 
 *** Test Cases ***
-Verify Supported Notebook PVC Size Using Backend
+Verify User Can  Spawn Notebook After Changing PVC Size Using Backend
     [Documentation]   Verify if user can spawn notebook
     ...    for supported PVC size got changed
     [Tags]    Smoke
     ...       Sanity
-    ...       ODS-1228    ODS-1221
+    ...       ODS-1221
     Change And Apply PVC size    ${S_SIZE}Gi
     Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
     Verify PVC Size     ${S_SIZE}       ${pvc_size}
     [Teardown]    PVC Size Test Teardown
 
-Verify Unsupported Notebook PVC Size Using Backend
+Verify User Cannot Set An Unsupported PVC Size Using Backend
     [Documentation]   Verify if user should not able to
     ...    spawn notebook for supported PVC change
-    [Tags]    Tier2
-    ...       ODS-1229    ODS-1233
+    [Tags]    ODS-1229
+    ...       ODS-1233
     Verify Multiple Unsupported Size    ${NS_SIZE}
     [Teardown]    PVC Size Test Teardown
 
-Verify Supported Notebook PVC Size Using UI
+Verify User Can  Spawn Notebook After Changing PVC Size Using UI
     [Documentation]   Verify if dedicated admin user able to chnage PVC
     ...    and RHODS user is able to spawn notebook for supported PVC
     ...    and verify PVC size
@@ -56,13 +56,12 @@ Verify Supported Notebook PVC Size Using UI
     Verify PVC change using UI     ${S_SIZE}
     [Teardown]    PVC Size UI Test Teardown
 
-Verify Unsupported Notebook PVC Size Using UI
+Verify User Cannot Set An Unsupported PVC Size Using The UI
         [Documentation]   Verify if dedicated admin user able to chnage PVC
     ...    and RHODS user is able to spawn notebook for unsupported PVC
     ...    and verify PVC size
-    [Tags]    Smoke
-    ...       Sanity
-    ...       ODS-1220    ODS-1222
+    [Tags]    Sanity
+    ...       ODS-1223
     FOR    ${size}    IN    @{NS_SIZE}
          Verify PVC change using UI   ${size}
     END
@@ -112,4 +111,4 @@ Verify PVC change using UI
     Sleep    60
     Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
-    Verify PVC Size     ${S_SIZE}       ${pvc_size}
+    Run Keyword And Continue On Failure    Verify PVC Size     ${S_SIZE}       ${pvc_size}

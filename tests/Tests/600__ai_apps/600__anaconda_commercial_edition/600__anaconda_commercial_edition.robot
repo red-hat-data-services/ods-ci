@@ -7,7 +7,7 @@ Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource        ../../../Resources/Page/ODH/AiApps/Anaconda.resource
-Resource        ../../../Resources/RHOSiSecurity.resource
+Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py

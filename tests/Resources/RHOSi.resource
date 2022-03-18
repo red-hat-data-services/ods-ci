@@ -12,5 +12,5 @@ Library     RPA.RobotLogListener
 
 
 *** Keywords ***
-Protect Keywords
+Protect Sensitive Variables In Keywords
     Register Protected Keywords     names=@{PROTECTED_KEYWORDS}

@@ -1,7 +1,7 @@
 *** Settings ***
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../../Resources/RHOSiSecurity.resource
+Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Suite Setup     IBM Watson Studio Suite Setup
 Suite Teardown  IBM Watson Studio Suite Teardown
@@ -18,7 +18,7 @@ Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page
 * Keywords ***
 IBM Watson Studio Suite Setup
   Set Library Search Order  SeleniumLibrary
-  Protect Keywords
+  Protect Sensitive Variables In Keywords
 
 IBM Watson Studio Suite Teardown
   Close All Browsers

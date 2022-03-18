@@ -4,7 +4,7 @@ Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/ODH/AiApps/AiApps.resource
 Resource            src.yaml
-Resource            ../../../Resources/RHOSiSecurity.resource
+Resource            ../../../Resources/RHOSi.resource
 
 Suite Setup         Pachyderm Test Suite
 Test Setup          Dashboard Test Setup
@@ -34,7 +34,7 @@ Verify Pachyderm Can Be Installed Using OpenShift Console
 *** Keywords ***
 Pachyderm Test Suite
     Set Library Search Order  SeleniumLibrary
-    Protect Keywords
+    Protect Sensitive Variables In Keywords
 
 Dashboard Test Setup
     Set Library Search Order    SeleniumLibrary

@@ -337,5 +337,5 @@ Check External Links Status
     [Arguments]     ${links}
     FOR  ${idx}  ${href}  IN ENUMERATE  @{links}  start=1
         ${status}=  Check HTTP Status Code   link_to_check=${href}
-        Log To Console    ${idx}. ${href} gets status code ${status}
+        Log    ${idx}. ${href} gets status code ${status}
     END

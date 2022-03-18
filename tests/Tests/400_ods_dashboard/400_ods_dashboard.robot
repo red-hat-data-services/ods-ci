@@ -15,7 +15,8 @@ ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
 *** Test Cases ***
 Verify Resource Link HTTP Status Code
-    [Tags]    sanity    ods-531  ODS-507
+    [Tags]    Sanity
+    ...       ODS-531    ODS-507
     Click Link    Resources
     Sleep    5
     ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
@@ -32,7 +33,8 @@ Verify Content In RHODS Explore Section
     ...    It compares the actual data with the one registered in a JSON file. The checks are about:
     ...    - Card's details (text, badges, images)
     ...    - Sidebar (titles, links text, links status)
-    [Tags]    sanity    ods-488    ods-993  ODS-749  ODS-352  ODS-282
+    [Tags]    Sanity
+    ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
     ...       KnownIssues
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
@@ -84,12 +86,11 @@ Verify CSS Style Of Getting Started Descriptions
     Capture Page Screenshot    get_started_sidebar.png
     Verify JupyterHub Card CSS Style
 
-Verify Documentation Link HTTP status code
+Verify Documentation Link HTTP Status Code
     [Documentation]    It verifies the documentation link present in question mark and
     ...    also checks the RHODS dcoumentation link present in resource page.
     [Tags]    Sanity
-    ...       ODS-327    ods-492
-
+    ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
     Check External Links Status     links=${links}
 
@@ -123,5 +124,3 @@ Verify JupyterHub Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
-
-

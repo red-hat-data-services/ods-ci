@@ -12,5 +12,13 @@ Library     RPA.RobotLogListener
 
 
 *** Keywords ***
+RHOSi Setup
+    [Documentation]    Applies RHOSi Settings. The suggested usage of this keyword
+    ...                is to call it inside all the Suite Setup keywords.
+    ...                Do Not extend this keyword for high-level setup,
+    ...                e.g., don't open browser
+    Protect Sensitive Variables In Keywords
+    # TO DO: oc login
+
 Protect Sensitive Variables In Keywords
     Register Protected Keywords     names=@{PROTECTED_KEYWORDS}

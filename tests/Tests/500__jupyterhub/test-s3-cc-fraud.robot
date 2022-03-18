@@ -3,7 +3,7 @@ Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Library          DebugLibrary
-Library          JupyterLibrary tes
+Library          JupyterLibrary
 Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
 Force Tags       JupyterHub

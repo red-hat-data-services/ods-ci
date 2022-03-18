@@ -14,7 +14,7 @@ Library         JupyterLibrary
 Resource         ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
-
+Suite Teardown  PVC Size Suite Teadrown
 Test Setup      PVC Size Test Setup
 
 *** Variables ***
@@ -22,7 +22,7 @@ ${NAMESPACE}    redhat-ods-applications
 ${S_SIZE}       4
 ${SIZE_CODE}    import subprocess;
 ...    int(subprocess.check_output(['df','-h', '/opt/app-root/src']).split()[8].decode('utf-8')[:-1])
-@{NS_SIZE}      0    -15    6.2    abc
+@{NS_SIZE}      0    -15    abc    6.2
 
 
 *** Test Cases ***
@@ -32,7 +32,6 @@ Verify Supported Notebook PVC Size Using Backend
     [Tags]    Smoke
     ...       Sanity
     ...       ODS-1228    ODS-1221
-    ...       Resources-PVC
     Change And Apply PVC size    ${S_SIZE}Gi
     Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
@@ -44,7 +43,6 @@ Verify Unsupported Notebook PVC Size Using Backend
     ...    spawn notebook for supported PVC change
     [Tags]    Tier2
     ...       ODS-1229    ODS-1233
-    ...       Resources-PVC
     Verify Multiple Unsupported Size    ${NS_SIZE}
     [Teardown]    PVC Size Test Teardown
 
@@ -63,6 +61,7 @@ Verify Supported Notebook PVC Size Using UI
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
     Verify PVC Size     ${S_SIZE}       ${pvc_size}
     [Teardown]    PVC Size UI Test Teardown
+
 *** Keywords ***
 Launch RHODS Dashboard
     [Documentation]    Launch RHODS Dashboard
@@ -90,16 +89,10 @@ Change And Apply PVC size
     Roll Out Jupyter Deployment Config
     Launch RHODS Dashboard
 
-PVC Size Test Setup
-    [Documentation]    PVC change suite setup
+PVC Size Suite Teadrown
+    [Documentation]   PVC size suite teardown
     ${status}    ${pvc_name}    Run Keyword And Ignore Error
     ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
     May Be Delete PVC     ${pvc_name}
     ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
     May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
-
-PVC Size UI Test Teardown
-    [Documentation]    Teardown for UI test
-    Go To    ${ODH_DASHBOARD_URL}
-    Restore PVC Value To Default Size
-    Close All Browsers

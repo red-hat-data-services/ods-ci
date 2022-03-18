@@ -33,11 +33,6 @@ Verify PVC Size
 PVC Size Test Teardown
     [Documentation]    PVC change teardown
     SeleniumLibrary.Close All Browsers
-    ${status}    ${pvc_name}    Run Keyword And Ignore Error
-    ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
-    May Be Delete PVC     ${pvc_name}
-    ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
-    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
     Change PVC Size From ConfigMap     20Gi
     Roll Out Jupyter Deployment Config
 
@@ -73,3 +68,17 @@ May Be Delete Notebook POD
 Add User To Dedicated Admin Group
     [Arguments]  ${username}=${TEST_USER.USERNAME}  ${group_name}=dedicated-admins
     Run    oc adm groups add-users ${group_name} ${username}
+
+PVC Size Test Setup
+    [Documentation]    PVC change suite setup
+    ${status}    ${pvc_name}    Run Keyword And Ignore Error
+    ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
+    May Be Delete PVC     ${pvc_name}
+    ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
+    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
+
+PVC Size UI Test Teardown
+    [Documentation]    Teardown for UI test
+    Go To    ${ODH_DASHBOARD_URL}
+    Restore PVC Value To Default Size
+    Close All Browsers

@@ -11,44 +11,6 @@ Test Teardown   Dashboard Test Teardown
 ${RHOSAK_REAL_APPNAME}=         rhosak
 ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
-Check All Links Are working
-  [Documentation]  Verify the all links after appling a filter
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
-  ${len}=  Get Length    ${link_elements}
-  Log To Console    ${len} Links found\n
-  FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
-      ${href}=  Get Element Attribute    ${ext_link}    href
-      ${status}=  Get HTTP Status Code   ${href}
-      Log To Console    ${idx}. ${href} gets status code ${status}
-  END
-
-Check For enabled option
-  [Documentation]  Filter Resources by enabling "enabled" from enable state
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
-  ${len}=  Get Length    ${link_elements}
-  Select Checkbox  id=enabled-filter-checkbox--check-box
-  sleep  10s
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
-  ${lent}=  Get Length    ${link_elements}
-  Should Not Be Equal As Integers  ${len}  ${lent}
-  Check All Links Are working
-  Click Element  id=enabled-filter-checkbox--check-box
-  sleep  5s
-
-Check for not enabled option
-  [Documentation]  Filter Resources by enabling "not enabled" from enable state
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
-  ${len}=  Get Length    ${link_elements}
-  Select Checkbox  id=not-enabled-filter-checkbox--check-box
-  sleep  10s
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
-  ${lent}=  Get Length    ${link_elements}
-  Should Not Be Equal As Integers  ${len}  ${lent}
-  Check All Links Are working
-  Click Element  id=not-enabled-filter-checkbox--check-box
-  sleep  5s
-
-
 *** Test Cases ***
 Verify Resource Link Http status code
     [Tags]  Sanity
@@ -165,3 +127,41 @@ Verify JupyterHub Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
+
+Check All Links Are working
+  [Documentation]  Verify the all links after appling a filter
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
+  ${len}=  Get Length    ${link_elements}
+  Log To Console    ${len} Links found\n
+  FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
+      ${href}=  Get Element Attribute    ${ext_link}    href
+      ${status}=  Get HTTP Status Code   ${href}
+      Log To Console    ${idx}. ${href} gets status code ${status}
+  END
+
+Check For enabled option
+  [Documentation]  Filter Resources by enabling "enabled" from enable state
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
+  ${len}=  Get Length    ${link_elements}
+  Select Checkbox  id=enabled-filter-checkbox--check-box
+  sleep  10s
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
+  ${lent}=  Get Length    ${link_elements}
+  Should Not Be Equal As Integers  ${len}  ${lent}
+  Check All Links Are working
+  Click Element  id=enabled-filter-checkbox--check-box
+  sleep  5s
+
+Check for not enabled option
+  [Documentation]  Filter Resources by enabling "not enabled" from enable state
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
+  ${len}=  Get Length    ${link_elements}
+  Select Checkbox  id=not-enabled-filter-checkbox--check-box
+  sleep  10s
+  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
+  ${lent}=  Get Length    ${link_elements}
+  Should Not Be Equal As Integers  ${len}  ${lent}
+  Check All Links Are working
+  Click Element  id=not-enabled-filter-checkbox--check-box
+  sleep  5s
+

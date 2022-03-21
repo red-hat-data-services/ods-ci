@@ -309,4 +309,33 @@ Re-validate License For Disabled Application From Enabled Page
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[0]
 
+Get Question Mark Links
+    [Documentation]      It returns the link elements from the question mark
+    @{links_list}=  Create List
+    @{link_elements}=  Get WebElements
+    ...    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
+    FOR  ${link}  IN  @{link_elements}
+         ${href}=    Get Element Attribute    ${link}    href
+         Append To List    ${links_list}    ${href}
+    END
+    [Return]  @{links_list}
 
+Get RHODS Documentation Links From Dashboard
+    [Documentation]    It returns a list containing rhods documentation links
+    Click Link    Resources
+    Sleep    2
+    # get the documentation link
+    ${href_view_the_doc}=    Get Element Attribute    //a[@class='odh-dashboard__external-link']    href
+    Click Element    xpath=//*[@id="toggle-id"]
+    ${links}=    Get Question Mark Links
+    # inserting at 0th position
+    Insert Into List    ${links}    0    ${href_view_the_doc}
+    [Return]  @{links}
+
+Check External Links Status
+    [Documentation]      It iterates through the links and cheks their HTTP status code
+    [Arguments]     ${links}
+    FOR  ${idx}  ${href}  IN ENUMERATE  @{links}  start=1
+        ${status}=  Check HTTP Status Code   link_to_check=${href}
+        Log    ${idx}. ${href} gets status code ${status}
+    END

@@ -35,6 +35,21 @@ Can Spawn Notebook
     Fix Spawner Status
     Spawn Notebook With Arguments    image=s2i-minimal-notebook
 
+Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
+    [Documentation]    Verify Tensorflow Can Be Installed In The Minimal Python image via pip
+    [Tags]    ODS-555
+    Open With JupyterLab Menu    File    New    Notebook
+    Sleep    1
+    Maybe Close Popup
+    Close Other JupyterLab Tabs
+    Maybe Close Popup
+    Sleep    1
+    Add and Run JupyterLab Code Cell In Active Notebook    !pip install tensorflow
+    ${output} =    Run Cell And Get Output
+    ...    !pip show tensorflow | grep Name: | awk '{split($0,a); print a[2]}' | awk '{split($0,b); printf "%s", b[1]}'
+    Should Be Equal    tensorflow    ${output}
+    Log To Console    ${output[-1]}
+
 Verify jupyterlab server pods are spawned in a custom namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)
     [Tags]    ODS-320
@@ -83,5 +98,5 @@ Can Launch Python3 Smoke Test Notebook
     #Get the text of the last output cell
     ${output} =    Get Text    (//div[contains(@class,"jp-OutputArea-output")])[last()]
     Should Not Match    ${output}    ERROR*
-    Should Be Equal As Strings    ${output}    [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]
-
+    Should Be Equal As Strings    ${output}
+    ...    [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]

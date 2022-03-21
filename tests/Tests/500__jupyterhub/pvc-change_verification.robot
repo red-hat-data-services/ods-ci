@@ -26,7 +26,7 @@ ${SIZE_CODE}    import subprocess;
 
 
 *** Test Cases ***
-Verify User Can  Spawn Notebook After Changing PVC Size Using Backend
+Verify User Can Spawn Notebook After Changing PVC Size Using Backend
     [Documentation]   Verify if user can spawn notebook
     ...    for supported PVC size got changed
     [Tags]    Smoke

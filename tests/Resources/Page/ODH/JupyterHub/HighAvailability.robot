@@ -1,5 +1,7 @@
 *** Settings ***
 Library  Collections
+Library  ../../../../libs/Helpers.py
+Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 
 *** Keywords ***
 Verify Deployment
@@ -35,6 +37,17 @@ Verify JupyterHub Deployment
 
     FOR  ${index}  IN RANGE  0  ${nPods}
         &{pod} =  Set Variable  ${component}[${index}]
+        ${version-check} =  Is RHODS Version Greater Or Equal Than  1.9.0
+        IF  ${version-check}==True
+            # Grab x.y.z version of jupyterhub
+            ${jh_version} =    Run  oc -n redhat-ods-applications exec ${pod.metadata.name} -c jupyterhub -- pip show jupyterhub | grep Version: | awk '{split($0,a); print a[2]}'
+            # 1.5 <= ${jh_version} < 2.0
+            ${min} =    GTE    ${jh_version}    1.5.0
+            ${max} =    GTE    1.9.99    ${jh_version}
+            IF  ${min}==False or ${max}==False
+                Fail    msg=JH version ${jh_version} is wrong (should be >=1.5,<2.0)
+            END
+        END
         FOR  ${j}  IN RANGE  0  ${nContainers}
             IF  '${pod.status.containerStatuses[${j}].name}' == 'jupyterhub'
                 #leader's pod is recognized by jupyterhub container in ready status

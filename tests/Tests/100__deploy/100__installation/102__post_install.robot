@@ -1,19 +1,23 @@
 *** Settings ***
 Documentation       Post install test cases that mainly verify OCP resources and objects
+
 Library             String
-Library             OpenShiftCLI
 Library             OperatingSystem
+Library             OpenShiftCLI
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
+Resource            ../../../Resources/ODS.robot
+
 
 *** Test Cases ***
 Verify Dashboard Deployment
     [Documentation]  Verifies RHODS Dashboard deployment
     [Tags]    Sanity
     ...       ODS-546
-    @{dashboard} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deployment = rhods-dashboard
+    @{dashboard} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications
+    ...    label_selector=deployment = rhods-dashboard
     ${containerNames} =  Create List  rhods-dashboard  oauth-proxy
     Verify Deployment  ${dashboard}  2  2  ${containerNames}
 
@@ -68,9 +72,10 @@ Verify GPU Operator Deployment  # robocop: disable
     # ...   nvidia-operator-validator DS
 
 Verify That Prometheus Image Is A CPaaS Built Image
+    [Documentation]    Verifies the images used for prometheus
     [Tags]    Sanity
-    ...     Tier1
-    ...     ODS-734    
+    ...       Tier1
+    ...       ODS-734
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    prometheus
     ...    "registry.redhat.io/openshift4/ose-prometheus"
@@ -78,9 +83,10 @@ Verify That Prometheus Image Is A CPaaS Built Image
     ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
 Verify That Grafana Image Is A Red Hat Built Image
+    [Documentation]    Verifies the images used for grafana
     [Tags]    Sanity
-    ...     Tier1
-    ...     ODS-736    
+    ...       Tier1
+    ...       ODS-736
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=grafana-
     Verify Container Image    redhat-ods-monitoring    ${pod}    grafana
     ...    "registry.redhat.io/rhel8/grafana:7"
@@ -88,17 +94,19 @@ Verify That Grafana Image Is A Red Hat Built Image
     ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
 Verify That Blackbox-exporter Image Is A CPaaS Built Image
+    [Documentation]    Verifies the image used for blackbox-exporter
     [Tags]    Sanity
-    ...     Tier1
-    ...     ODS-735    
+    ...       Tier1
+    ...       ODS-735
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
     Verify Container Image    redhat-ods-monitoring    ${pod}    blackbox-exporter
     ...    "quay.io/integreatly/prometheus-blackbox-exporter:v0.19.0"
 
 Verify That Alert Manager Image Is A CPaaS Built Image
+    [Documentation]    Verifies the image used for alertmanager
     [Tags]    Sanity
-    ...     Tier1
-    ...     ODS-733    
+    ...       Tier1
+    ...       ODS-733
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    alertmanager
     ...    "registry.redhat.io/openshift4/ose-prometheus-alertmanager"
@@ -119,6 +127,30 @@ Verify That Blackbox-exporter Is Protected With Auth-proxy
     Verify BlackboxExporter Includes Oauth Proxy
     Verify Authentication Is Required To Access BlackboxExporter
 
+Verify That "Usage Data Collection" Is Enabled By Default
+    [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
+    [Tags]    Tier1
+    ...       Sanity
+    ...       ODS-1234
+
+    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
+    IF    ${version_check}==True
+        ODS.Usage Data Collection Should Be Enabled
+        ...    msg="Usage Data Collection" should be enabled by default after installing ODS
+    ELSE
+        ODS.Usage Data Collection Should Not Be Enabled
+        ...    msg="Usage Data Collection" should not be enabled by default after installing ODS
+    END
+
+Verify Tracking Key Used For "Usage Data Collection"
+    [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
+    [Tags]    Tier1
+    ...       Sanity
+    ...       ODS-1235
+
+    ODS.Verify "Usage Data Collection" Key
+
+
 *** Keywords ***
 Verify Cuda Builds Are Completed
     [Documentation]    Verify All Cuda Builds have status as Complete
@@ -135,8 +167,8 @@ Verify Cuda Builds Are Completed
     END
 
 Verify Authentication Is Required To Access BlackboxExporter
-    [Documentation]    Verifies authentication is required to access blackbox exporter. To do so, 
-    ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target. 
+    [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,
+    ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target.
     ...                The test fails if the response is not a prompt to log in with OpenShift
     @{links} =    Get Target Endpoints    target_name=user_facing_endpoints_status
     Length Should Be    ${links}    2
@@ -145,11 +177,13 @@ Verify Authentication Is Required To Access BlackboxExporter
         ${command} =    Set Variable    curl --insecure ${link}
         ${output} =    Run Command In Container    namespace=redhat-ods-monitoring    pod_name=${pod_name}
         ...    command=${command}    container_name=prometheus
-        Should Contain    ${output}    Log in with OpenShift    msg=Log in with OpenShift should be required to access blackbox-exporter
+        Should Contain    ${output}    Log in with OpenShift
+        ...    msg=Log in with OpenShift should be required to access blackbox-exporter
     END
 
 Verify BlackboxExporter Includes Oauth Proxy
-    [Documentation]     Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
+    [Documentation]     Verifies the blackbok-exporter inludes 2 containers one for
+    ...                 application and second for oauth proxy
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
     @{containers} =    Get Containers    pod_name=${pod}    namespace=redhat-ods-monitoring
     List Should Contain Value    ${containers}    oauth-proxy

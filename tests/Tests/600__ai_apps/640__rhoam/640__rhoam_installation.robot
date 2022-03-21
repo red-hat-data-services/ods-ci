@@ -53,11 +53,12 @@ RHOAM Suite Teardown
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation
     ${addon_installed}=     Is Rhods Addon Installed    ${CLUSTER_NAME}
-    IF    ${addon_installed} == ${TRUE}
-        Uninstall Rhods Using Addon    ${CLUSTER_NAME}
-    ELSE
-        Uninstall RHODS Using OLM
-    END
+    Uninstall RHODS Using OLM
+    # IF    ${addon_installed} == ${TRUE}
+    #     Uninstall Rhods Using Addon    ${CLUSTER_NAME}
+    # ELSE
+    #     Uninstall RHODS Using OLM
+    # END
 
 Uninstall RHODS Using OLM
     Selected Cluster Type OSD

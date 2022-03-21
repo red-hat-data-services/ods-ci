@@ -5,7 +5,6 @@ Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Begin Web Test
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
 
 *** Variables ***
 #{xyz-n}  image  repo_URL  notebook_path

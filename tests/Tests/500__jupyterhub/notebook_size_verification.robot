@@ -18,7 +18,6 @@ Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown
-Force Tags          JupyterHub
 
 
 *** Variables ***

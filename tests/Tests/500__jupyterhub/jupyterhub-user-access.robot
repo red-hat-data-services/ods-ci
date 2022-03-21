@@ -8,7 +8,6 @@ Library          OpenShiftCLI
 Library          OperatingSystem
 Suite Setup      Special User Testing Suite Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
 
 *** Variables ***
 ${AUTH_TYPE}     ldap-provider-qe

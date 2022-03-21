@@ -45,10 +45,6 @@ class OpenshiftClusterManager():
         self.ldap_test_password = args.get("ldap_test_password")
         self.idp_type = args.get("idp_type")
         self.idp_name = args.get("idp_name")
-        self.pool_instance_type = args.get("pool_instance_type")
-        self.pool_node_count = args.get("pool_node_count")
-        self.taints = args.get("taints")
-        self.pool_name = args.get("pool_name")
 
         ocm_env = glob.glob(dir_path+"/../../../ocm.json.*")
         if ocm_env != []:
@@ -311,22 +307,6 @@ class OpenshiftClusterManager():
             return None
         return match.group(1).strip()
 
-    def add_machine_pool(self):
-        """Adds machine pool to the given cluster"""
-        cmd = ("ocm create machinepool --cluster {} "
-               "--instance-type {} --replicas {} "
-               "--taints {} "
-               "{}".format(self.cluster_name,
-                           self.pool_instance_type,
-                           self.pool_node_count, self.taints,
-                           self.pool_name))
-        log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
-        if ret is None:
-            log.info("Failed to add machine pool {}".format(self.cluster_name))
-            sys.exit(1)
-        time.sleep(60)
-
     def wait_for_addon_installation_to_complete(self, addon_name="managed-odh",
                                                 timeout=3600):
         """Waits for addon installation to get complete"""
@@ -580,13 +560,6 @@ class OpenshiftClusterManager():
         # Waiting 5 minutes to ensure all the services are up
         time.sleep(300)
 
-    def install_gpu_addon(self):
-        if not self.is_addon_installed(addon_name="gpu-operator-certified-addon"):
-            self.install_addon(addon_name="gpu-operator-certified-addon")
-            self.wait_for_addon_installation_to_complete(addon_name="gpu-operator-certified-addon")
-        # Waiting 5 minutes to ensure all the services are up
-        time.sleep(300)
-
     def uninstall_rhods_addon(self):
         self.uninstall_rhods()
         self.wait_for_addon_uninstallation_to_complete()
@@ -803,52 +776,6 @@ if __name__ == "__main__":
             action="store", dest="cluster_name",
             required=True)
         install_rhods_parser.set_defaults(func=ocm_obj.install_rhods_addon)
-
-        #Argument parsers for install_rhods_addon
-        install_gpu_parser = subparsers.add_parser(
-            'install_gpu_addon',
-            help=("Install gpu addon cluster."),
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        required_install_gpu_parser = install_gpu_parser.add_argument_group('required arguments')
-
-        required_install_gpu_parser.add_argument("--cluster-name",
-            help="osd cluster name",
-            action="store", dest="cluster_name",
-            required=True)
-        install_gpu_parser.set_defaults(func=ocm_obj.install_gpu_addon)
-
-        #Argument parsers for create_cluster
-        add_machinepool_parser = subparsers.add_parser(
-            'add_machine_pool',
-            help=("Adds machine pool to given cluster via OCM."),
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-        optional_machinepool_cluster_parser = add_machinepool_parser._action_groups.pop()
-        required_machinepool_cluster_parser = add_machinepool_parser.add_argument_group('required arguments')
-        add_machinepool_parser._action_groups.append(optional_machinepool_cluster_parser)
-
-        required_machinepool_cluster_parser.add_argument("--cluster-name",
-            help="osd cluster name",
-            action="store", dest="cluster_name",
-            required=True)
-
-        optional_machinepool_cluster_parser.add_argument("--instance-type",
-            help="Machine pool instance type",
-            action="store", dest="pool_instance_type", metavar="",
-            default="g4dn.xlarge")
-        optional_machinepool_cluster_parser.add_argument("--worker-node-count",
-            help="Machine pool worker node count",
-            action="store", dest="pool_node_count", metavar="",
-            default="1")
-        optional_machinepool_cluster_parser.add_argument("--taints",
-            help="Machine pool taints information",
-            action="store", dest="taints", metavar="",
-            default="nvidia.com/gpu=NONE:NoSchedule")
-        optional_machinepool_cluster_parser.add_argument("--pool-name",
-            help="Machine pool name",
-            action="store", dest="pool_name", metavar="",
-            default="gpunode")
-        add_machinepool_parser.set_defaults(func=ocm_obj.add_machine_pool)
 
         #Argument parsers for uninstall_rhods_addon
         uninstall_rhods_parser = subparsers.add_parser(

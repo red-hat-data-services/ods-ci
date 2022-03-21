@@ -17,9 +17,9 @@ RUN curl -L https://github.com/mikefarah/yq/releases/download/v4.16.2/yq_linux_a
     chmod +x /usr/bin/yq
 
 ## Install oc in the container
-RUN curl -L https://mirror.openshift.com/pub/openshift-v$(echo $OC_VERSION | cut -d'.' -f 1)/x86_64/clients/ocp/$OC_CHANNEL-$OC_VERSION/openshift-client-linux.tar.gz -o ./oc_client.tar.gz && \
-    tar xvf oc_client.tar.gz -C /usr/local/bin/ && \
-    rm -rf oc_client.tar.gz && rm /usr/local/bin/README.md
+RUN curl -L https://mirror.openshift.com/pub/openshift-v$(echo $OC_VERSION | cut -d'.' -f 1)/x86_64/clients/ocp/$OC_CHANNEL-$OC_VERSION/openshift-client-linux.tar.gz -o $HOME/oc_client.tar.gz && \
+    tar xvf $HOME/oc_client.tar.gz -C /usr/local/bin/ && \
+    rm -rf $HOME/oc_client.tar.gz && rm /usr/local/bin/README.md
 
 RUN chmod 755 /usr/local/bin/oc &&\
          oc version --client

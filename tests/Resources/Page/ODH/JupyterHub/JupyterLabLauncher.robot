@@ -149,6 +149,7 @@ Maybe Select Kernel
 Clean Up Server
     [Documentation]    Cleans up user server and checks that everything has been removed
     [Arguments]    ${admin_username}=${OCP_ADMIN_USER.USERNAME}    ${username}=${TEST_USER.USERNAME}
+    Maybe Close Popup
     Run Keyword And Continue On Failure    Open With JupyterLab Menu    File    Close All Tabs
     Maybe Close Popup
     Clean Up User Notebook    ${admin_username}    ${username}

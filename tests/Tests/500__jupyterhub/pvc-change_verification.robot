@@ -62,7 +62,7 @@ Verify User Cannot Set An Unsupported PVC Size Using The UI
         [Documentation]   Verify if dedicated admin user able to chnage PVC
     ...    and RHODS user is able to spawn notebook for unsupported PVC
     ...    and verify PVC size
-    [Tags]    Sanity
+    [Tags]    Tier2
     ...       ODS-1223
     FOR    ${size}    IN    @{NS_SIZE}
          Verify PVC change using UI   ${size}

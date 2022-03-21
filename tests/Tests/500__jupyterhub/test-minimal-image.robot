@@ -9,7 +9,7 @@ Library             JupyterLibrary
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
 
-Force Tags          Smoke    Sanity
+Force Tags          Smoke    Sanity    JupyterHub
 
 
 *** Test Cases ***

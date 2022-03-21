@@ -7,6 +7,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library          JupyterLibrary
 Suite Setup      Load Spawner Page
 Suite Teardown   End Web Test
+Force Tags       JupyterHub
 
 
 *** Variables ***

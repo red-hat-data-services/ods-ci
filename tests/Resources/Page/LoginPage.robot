@@ -19,6 +19,14 @@ Is OpenShift OAuth Login Prompt Visible
    ${result} =  Evaluate  ${login_prompt_visible} and ${oauth_login}
    [Return]  ${result}
 
+OpenShift Login Visible While Reaching RHODS
+    Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+    Page Should Contain     Log in with
+    Click Button    Log in with OpenShift
+    Page Should Contain     Log in with…
+    Click Link  htpasswd-cluster-admin
+    Page Should Contain     Log in to your account
+
 Is OpenShift Login Visible
    ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in with
    Return From Keyword If  ${login_prompt_visible}  True

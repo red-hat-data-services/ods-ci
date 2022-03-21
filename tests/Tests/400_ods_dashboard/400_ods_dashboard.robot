@@ -13,6 +13,10 @@ ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
 
 *** Test Cases ***
+Verify That Login Page Is Shown When Reaching The RHODS Page
+    [Tags]  ODS-694
+    OpenShift Login Visible While Reaching RHODS
+
 Verify Resource Link Http status code
     [Tags]  Sanity
     ...     ODS-531  ODS-507

@@ -19,6 +19,7 @@ ${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "ti
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
+${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 
@@ -139,7 +140,12 @@ Check HTTP Status Code
     [Return]  ${response.status_code}
 
 Load Expected Data Of RHODS Explore Section
-    ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.8.0
+    IF  ${version-check}==True
+        ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
+    ELSE
+        ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
+    END
     ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
     [Return]  ${apps_dict_obj}
 

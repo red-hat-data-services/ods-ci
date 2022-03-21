@@ -31,6 +31,7 @@ Verify User Can Spawn Notebook After Changing PVC Size Using Backend
     ...    for supported PVC size got changed
     [Tags]    Smoke
     ...       Sanity
+    ...       Tier1
     ...       ODS-1221
     Change And Apply PVC size    ${S_SIZE}Gi
     Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
@@ -41,8 +42,8 @@ Verify User Can Spawn Notebook After Changing PVC Size Using Backend
 Verify User Cannot Set An Unsupported PVC Size Using Backend
     [Documentation]   Verify if user should not able to
     ...    spawn notebook for supported PVC change
-    [Tags]    ODS-1229
-    ...       ODS-1233
+    [Tags]    Tier2
+    ...       ODS-1229
     Verify Multiple Unsupported Size    ${NS_SIZE}
     [Teardown]    PVC Size Test Teardown
 
@@ -52,6 +53,7 @@ Verify User Can Spawn Notebook After Changing PVC Size Using UI
     ...    and verify PVC size
     [Tags]    Smoke
     ...       Sanity
+    ...       Tier1
     ...       ODS-1220    ODS-1222
     Verify PVC change using UI     ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks

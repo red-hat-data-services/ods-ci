@@ -75,6 +75,16 @@ Verify License Of Disabled Cards Can Be Re-validated
     Capture Page Screenshot     after_revalidation.png
     [Teardown]    Remove Anaconda Commercial Edition Component
 
+Verify CSS Style Of Getting Started Descriptions
+    [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
+    [Tags]    Smoke
+    ...       ODS-1165
+    Click Link    Explore
+    Wait Until Cards Are Loaded
+    Open Get Started Sidebar And Return Status    card_locator=${JH_CARDS_XP}
+    Capture Page Screenshot    get_started_sidebar.png
+    Verify JupyterHub Card CSS Style
+
 
 *** Keywords ***
 Dashboard Test Setup
@@ -85,3 +95,25 @@ Dashboard Test Setup
 
 Dashboard Test Teardown
   Close All Browsers
+
+Verify JupyterHub Card CSS Style
+    [Documentation]     Compare the some CSS properties of the Explore page
+    ...                 with the expected ones. The expected values change based
+    ...                 on the RHODS version
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.7.0
+    IF  ${version-check}==True
+        CSS Property Value Should Be    locator=//pre
+        ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
+        CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
+        ...    property=margin-bottom    exp_value=8px
+    ELSE
+        CSS Property Value Should Be    locator=//pre
+        ...    property=background-color    exp_value=rgba(245, 245, 245, 1)
+        CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
+        ...    property=margin-bottom    exp_value=10px
+    END
+    CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
+    ...    property=font-size    exp_value=24px
+    CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
+    ...    property=font-family    exp_value=RedHatDisplay
+    ...    operation=contains

@@ -9,6 +9,7 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}=                //*[@class="pf-c-drawer__p
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
+${JH_CARDS_XP}=   //article[@id="jupyterhub"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
 ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
@@ -19,6 +20,7 @@ ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallbac
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
 ${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary_latest.json
+${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 
 
@@ -69,7 +71,7 @@ Verify Service Is Enabled
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Enabled
   Wait Until Page Contains    JupyterHub  timeout=30
-  Wait Until Page Contains    ${app_name}  timeout=150
+  Wait Until Page Contains    ${app_name}  timeout=180
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
   Page Should Not Contain Element    xpath://article//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
 
@@ -312,3 +314,5 @@ Re-validate License For Disabled Application From Enabled Page
    Wait Until Page Contains   To remove card click
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[0]
+
+

@@ -355,3 +355,13 @@ Fetch Image Tooltip Info
     END
     Click Element  //div[@class='jsp-app__header__title']
     [Return]  ${tmp_list}
+
+Verify Image Can Be Spawned
+    [Documentation]    Verifies that an image with given arguments can be spawned
+    [Arguments]    ${retries}=1    ${image}=s2i-generic-data-science-notebook    ${size}=Small    ${spawner_timeout}=600 seconds
+    ...    ${gpus}=0    ${refresh}=${False}    &{envs}
+    Begin Web Test
+    Launch JupyterHub Spawner From Dashboard
+    Spawn Notebook With Arguments    ${retries}    ${image}    ${size}
+    ...    ${spawner_timeout}    ${gpus}    ${refresh}    &{envs}
+    End Web Test

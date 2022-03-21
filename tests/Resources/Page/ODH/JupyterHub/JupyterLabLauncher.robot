@@ -66,7 +66,14 @@ JupyterLab Code Cell Error Output Should Not Be Visible
 
 Get JupyterLab Code Cell Error Text
   ${error_txt} =  Get Text  //div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]
-  [Return]
+  [Return]  ${error_txt}
+
+Run Git Repo And Return Last Cell Error Text
+  [Documentation]    It actually clones the git repo, runs it and then returns the error
+  [Arguments]    ${REPO_URL}  ${NOTEBOOK_TO_RUN}
+  Run Keyword And Ignore Error    Clone Git Repository And Run    ${LINK_OF_GITHUB}    ${PATH_TO_FILE}
+  ${output} =    Get JupyterLab Code Cell Error Text
+  [Return]    ${output}
 
 Wait Until JupyterLab Code Cell Is Not Active
   [Documentation]  Waits until the current cell no longer has an active prompt "[*]:". This assumes that there is only one cell currently active and it is the currently selected cell
@@ -389,5 +396,5 @@ Verify Package Is Not Installed In JupyterLab
     Add and Run JupyterLab Code Cell in Active Notebook  import ${package_name}
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-    ${output}   Split String     ${output}   \n\n   
+    ${output}   Split String     ${output}   \n\n
     Should Match  ${output[-1]}   ModuleNotFoundError: No module named '${package_name}'

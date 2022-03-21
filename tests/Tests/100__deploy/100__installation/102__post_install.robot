@@ -115,7 +115,7 @@ Verify That "Usage Data Collection" Is Enabled By Default
     [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
     [Tags]    Tier1
     ...       Sanity
-    ...       ODS-1219
+    ...       ODS-1234
 
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
     IF    ${version_check}==True
@@ -125,3 +125,11 @@ Verify That "Usage Data Collection" Is Enabled By Default
         ODS.Usage Data Collection Should Not Be Enabled
         ...    msg="Usage Data Collection" should not be enabled by default after installing ODS
     END
+
+Verify Tracking Key Used For "Usage Data Collection"
+    [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
+    [Tags]    Tier1
+    ...       Sanity
+    ...       ODS-1235
+
+   ODS.Verify "Usage Data Collection" Key

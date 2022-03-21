@@ -84,9 +84,8 @@ Verify User Cannot Set An Unsupported PVC Size Using The UI
 Launch RHODS Dashboard
     [Documentation]    Launch RHODS Dashboard
     Set Library Search Order  SeleniumLibrary
-    Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load
+    Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
 
 Verify Multiple Unsupported Size
     [Documentation]   Verify Mulitple unsupported size

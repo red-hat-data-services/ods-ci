@@ -19,10 +19,10 @@ Test Setup      PVC Size Test Setup
 
 *** Variables ***
 ${NAMESPACE}    redhat-ods-applications
-${S_SIZE}       4.5
+${S_SIZE}       4
 ${SIZE_CODE}    import subprocess;
 ...    int(subprocess.check_output(['df','-h', '/opt/app-root/src']).split()[8].decode('utf-8')[:-1])
-@{NS_SIZE}      0    -15    abc    6.2
+@{NS_SIZE}      0    abc    @3#
 
 
 *** Test Cases ***
@@ -54,6 +54,8 @@ Verify User Can  Spawn Notebook After Changing PVC Size Using UI
     ...       Sanity
     ...       ODS-1220    ODS-1222
     Verify PVC change using UI     ${S_SIZE}
+    ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
+    Verify PVC Size     ${S_SIZE}       ${pvc_size}
     [Teardown]    PVC Size UI Test Teardown
 
 Verify User Cannot Set An Unsupported PVC Size Using The UI
@@ -64,6 +66,15 @@ Verify User Cannot Set An Unsupported PVC Size Using The UI
     ...       ODS-1223
     FOR    ${size}    IN    @{NS_SIZE}
          Verify PVC change using UI   ${size}
+         ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
+         ${status}    Run Keyword And Return Status    Verify PVC Size     1       ${pvc_size}
+         IF   '${status}' != 'True'
+               Log     Actul size and assigned size is mismatch
+         ELSE
+               Log     User is able to spawn and set the Unsupported size
+               Run Keyword And Continue On Failure    Fail
+         END
+         PVC Size Suite Teadrown
     END
     [Teardown]    PVC Size UI Test Teardown
 
@@ -96,11 +107,11 @@ Change And Apply PVC size
 
 PVC Size Suite Teadrown
     [Documentation]   PVC size suite teardown
+    ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
+    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
     ${status}    ${pvc_name}    Run Keyword And Ignore Error
     ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
     May Be Delete PVC     ${pvc_name}
-    ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
-    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
 
 Verify PVC change using UI
    [Documentation]   Basic PVC change verification
@@ -110,5 +121,3 @@ Verify PVC change using UI
     Set PVC Value In RHODS Dashboard    ${S_SIZE}
     Sleep    60
     Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
-    ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
-    Run Keyword And Continue On Failure    Verify PVC Size     ${S_SIZE}       ${pvc_size}

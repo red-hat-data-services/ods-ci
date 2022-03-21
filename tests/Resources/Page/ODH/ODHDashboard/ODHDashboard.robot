@@ -21,6 +21,7 @@ ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
+${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
 
 
 *** Keywords ***
@@ -74,11 +75,10 @@ Verify Service Is Enabled
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
   Page Should Not Contain Element    xpath://article//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
 
-
 Verify Service Is Not Enabled
   [Documentation]   Verify the service is not present in Applications > Enabled
   [Arguments]  ${app_name}
-  ${app_is_enabled} =  Run Keyword And Return Status   Verify Service Is Enabled    ${app_name}
+  ${app_is_enabled}=  Run Keyword And Return Status   Verify Service Is Enabled    ${app_name}
   Should Be True   not ${app_is_enabled}   msg=${app_name} should not be enabled in ODS Dashboard
 
 Verify Service Is Available In The Explore Page
@@ -88,6 +88,27 @@ Verify Service Is Available In The Explore Page
   Wait Until Page Contains    JupyterHub  timeout=30
   Capture Page Screenshot
   Page Should Contain Element    //article//*[.='${app_name}']
+
+Verify Cluster Settings Is Available
+    [Documentation]   Verifies submenu Settings > Cluster settings" is visible
+    Page Should Contain    Settings
+    Menu.Navigate To Page    Settings    Cluster settings
+    Capture Page Screenshot
+    Wait Until Page Contains    Update global settings for all users    timeout=30
+    Wait Until Page Contains Element    ${USAGE_DATA_COLLECTION_XP}    timeout=30
+
+Verify Cluster Settings Is Not Available
+    [Documentation]   Verifies submenu Settings > Cluster settings" is not visible
+    ${cluster_settings_available}=     Run Keyword And Return Status    Verify Cluster Settings Is Available
+    Should Be True    not ${cluster_settings_available}    msg=Cluster Settings shoudn't be visible for this user
+
+Enable "Usage Data Collection"
+    [Documentation]   Once in Settings > Cluster Settings, enables "Usage Data Collection"
+    Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+
+Disable "Usage Data Collection"
+    [Documentation]   Once in Settings > Cluster Settings, disables "Usage Data Collection"
+    Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
 
 Remove Disabled Application From Enabled Page
    [Documentation]  The keyword let you re-enable or remove the card from Enabled page
@@ -102,7 +123,6 @@ Remove Disabled Application From Enabled Page
    Click Element  ${buttons_here}[1]
    Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
    Capture Page Screenshot  disabled_card_removed.png
-
 
 Verify Service Provides "Enable" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is an "Enable" button
@@ -308,5 +328,3 @@ Re-validate License For Disabled Application From Enabled Page
    Wait Until Page Contains   To remove card click
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[0]
-
-

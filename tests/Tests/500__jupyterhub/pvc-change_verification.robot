@@ -46,7 +46,7 @@ Verify User Cannot Set An Unsupported PVC Size Using Backend
     Verify Multiple Unsupported Size    ${NS_SIZE}
     [Teardown]    PVC Size Test Teardown
 
-Verify User Can  Spawn Notebook After Changing PVC Size Using UI
+Verify User Can Spawn Notebook After Changing PVC Size Using UI
     [Documentation]   Verify if dedicated admin user able to chnage PVC
     ...    and RHODS user is able to spawn notebook for supported PVC
     ...    and verify PVC size

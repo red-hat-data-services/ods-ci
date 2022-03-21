@@ -65,7 +65,7 @@ Uninstall RHODS Using OLM
     Uninstall RHODS
 
 Wait Until RHODS Uninstallation Is Completed
-    [Arguments]     ${retries}=30   ${retries_interval}=2min
+    [Arguments]     ${retries}=1   ${retries_interval}=2min
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         Log To Console    checking RHODS uninstall status: retry ${retry_idx}
         ${ns_deleted}=     Run Keyword And Return Status    RHODS Namespaces Should Not Exist

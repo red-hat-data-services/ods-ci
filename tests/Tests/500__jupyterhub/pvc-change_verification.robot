@@ -22,7 +22,7 @@ ${NAMESPACE}    redhat-ods-applications
 ${S_SIZE}       4
 ${SIZE_CODE}    import subprocess;
 ...    int(subprocess.check_output(['df','-h', '/opt/app-root/src']).split()[8].decode('utf-8')[:-1])
-@{NS_SIZE}      0    abc    @3#
+@{NS_SIZE}      0    abc    6.5   -12
 
 
 *** Test Cases ***
@@ -67,7 +67,7 @@ Verify User Cannot Set An Unsupported PVC Size Using The UI
     FOR    ${size}    IN    @{NS_SIZE}
          Verify PVC change using UI   ${size}
          ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
-         ${status}    Run Keyword And Return Status    Verify PVC Size     1       ${pvc_size}
+         ${status}    Run Keyword And Return Status    Verify PVC Size     ${size}       ${pvc_size}
          IF   '${status}' != 'True'
                Log     Actul size and assigned size is mismatch
          ELSE

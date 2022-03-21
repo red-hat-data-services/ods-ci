@@ -4,8 +4,9 @@ FROM quay.io/centos/centos:stream8
 ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
 ENV ROBOT_EXTRA_ARGS=${ROBOT_EXTRA_ARGS}
 ENV HOME /tmp
+ARG OC_VERSION=4.10
+ARG OC_CHANNEL=stable
 
-ARG oc_local_path=build/oc
 
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
     dnf install -y git python3 unzip chromium chromedriver redhat-lsb-core &&\
@@ -16,9 +17,10 @@ RUN curl -L https://github.com/mikefarah/yq/releases/download/v4.16.2/yq_linux_a
     chmod +x /usr/bin/yq
 
 ## Install oc in the container
-COPY ${oc_local_path} /usr/local/bin/oc
-# COPY build/oc /usr/local/bin/oc
-# COPY oc /usr/local/bin/oc
+RUN curl -L https://mirror.openshift.com/pub/openshift-v$(echo $OC_VERSION | cut -d'.' -f 1)/x86_64/clients/ocp/$OC_CHANNEL-$OC_VERSION/openshift-client-linux.tar.gz -o ./oc_client.tar.gz && \
+    tar xvf oc_client.tar.gz -C /usr/local/bin/ && \
+    rm -rf oc_client.tar.gz && rm /usr/local/bin/README.md
+
 RUN chmod 755 /usr/local/bin/oc &&\
          oc version --client
 

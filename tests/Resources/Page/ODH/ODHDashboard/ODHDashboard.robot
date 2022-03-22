@@ -22,6 +22,7 @@ ${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.jso
 ${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
+${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
 
 
 *** Keywords ***
@@ -345,3 +346,24 @@ Check External Links Status
         ${status}=  Check HTTP Status Code   link_to_check=${href}
         Log    ${idx}. ${href} gets status code ${status}
     END
+
+Verify Cluster Settings Is Available
+    [Documentation]    Verifies submenu Settings > Cluster settings" is visible
+    Page Should Contain    Settings
+    Menu.Navigate To Page    Settings    Cluster settings
+    Capture Page Screenshot
+    Wait Until Page Contains    Update global settings for all users    timeout=30
+    Wait Until Page Contains Element    ${USAGE_DATA_COLLECTION_XP}    timeout=30
+
+Verify Cluster Settings Is Not Available
+    [Documentation]    Verifies submenu Settings > Cluster settings is not visible
+    ${cluster_settings_available}=    Run Keyword And Return Status    Verify Cluster Settings Is Available
+    Should Not Be True    ${cluster_settings_available}    msg=Cluster Settings shoudn't be visible for this user
+
+Enable "Usage Data Collection"
+    [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
+    Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+
+Disable "Usage Data Collection"
+    [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
+    Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}

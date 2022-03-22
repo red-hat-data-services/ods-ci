@@ -134,9 +134,15 @@ Verify JupyterHub Card CSS Style
 Check GPU Tutorials
     ${version-check} =  Is RHODS Version Greater Or Equal Than  1.9.0
     IF  ${version-check}==True
+        ${elements}=  Get WebElements      //article
+        ${len}=  Get Length    ${elements}
+        Should Be Equal As Integers     ${len}  1
         Page Should Contain     //article[@id="python-gpu-numba-tutorial"]
         Page Should Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
     ELSE
+        ${elements}=  Get WebElements      //article
+        ${len}=  Get Length    ${elements}
+        Should Be Equal As Integers     ${len}  0
         Page Should Not Contain     //article[@id="python-gpu-numba-tutorial"]
         Page Should Not Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
     END

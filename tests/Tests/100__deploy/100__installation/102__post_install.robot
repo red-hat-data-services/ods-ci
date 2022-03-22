@@ -150,6 +150,14 @@ Verify Tracking Key Used For "Usage Data Collection"
 
     ODS.Verify "Usage Data Collection" Key
 
+Verify RHODS Release Version Number
+    [Documentation]    Verify RHODS version matches x.y.z-build format
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-478
+    ${version} =  Get RHODS Version
+    Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
+
 
 *** Keywords ***
 Verify Cuda Builds Are Completed

@@ -37,18 +37,22 @@ Can Spawn Notebook
 
 Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     [Documentation]    Verify Tensorflow Can Be Installed In The Minimal Python image via pip
-    [Tags]    ODS-555
+    [Tags]    ODS-555  ODS-908
     Open With JupyterLab Menu    File    New    Notebook
     Sleep    1
     Maybe Close Popup
     Close Other JupyterLab Tabs
     Maybe Close Popup
     Sleep    1
-    Add and Run JupyterLab Code Cell In Active Notebook    !pip install tensorflow
-    ${output} =    Run Cell And Get Output
+    Add and Run JupyterLab Code Cell In Active Notebook    !pip install tensorflow==2.7
+    ${version} =    Run Cell And Get Output
+#    ...    !pip show tensorflow | grep Name: | awk '{split($0,a); print a[2]}' | awk '{split($0,b); printf "%s", b[1]}'
+    !pip show JupyterLab | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
+    Should Be Equal    2.7.0    ${version}
+    Add and Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow
+    ${updated version} =    Run Cell And Get Output
     ...    !pip show tensorflow | grep Name: | awk '{split($0,a); print a[2]}' | awk '{split($0,b); printf "%s", b[1]}'
-    Should Be Equal    tensorflow    ${output}
-    Log To Console    ${output[-1]}
+    Should Not Be Equal    ${updated version}    ${output}
 
 Verify jupyterlab server pods are spawned in a custom namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)

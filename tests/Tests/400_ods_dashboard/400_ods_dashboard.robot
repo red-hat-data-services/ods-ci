@@ -1,22 +1,26 @@
 *** Settings ***
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-
 Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
-Test Setup          Dashboard Test Setup
-Test Teardown       Dashboard Test Teardown
-
+Resource        ../../Resources/Page/LoginPage.robot
+Test Setup      Dashboard Test Setup
+Test Teardown   Dashboard Test Teardown
 
 *** Variables ***
 ${RHOSAK_REAL_APPNAME}=         rhosak
 ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
-
 *** Test Cases ***
-Verify Resource Link HTTP Status Code
-    [Tags]    Sanity
-    ...       ODS-531    ODS-507
+Verify That Login Page Is Shown When Reaching The RHODS Page
+    [Tags]      Sanity
+    ...         ODS-694
+    [Setup]     Test Setup For Login Page
+    Check OpenShift Login Visible
+
+Verify Resource Link Http status code
+    [Tags]  Sanity
+    ...     ODS-531  ODS-507
     Click Link    Resources
     Sleep    5
     ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
@@ -124,3 +128,13 @@ Verify JupyterHub Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
+
+Test Setup For Login Page
+    Set Library Search Order  SeleniumLibrary
+    Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+
+Check OpenShift Login Visible
+    ${result}=  Is OpenShift Login Visible
+    IF  ${result}=='false'
+        FAIL    OpenShift Login Visible
+    END

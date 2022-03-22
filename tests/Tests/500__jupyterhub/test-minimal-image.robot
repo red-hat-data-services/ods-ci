@@ -3,6 +3,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource    ../../../venv/lib/python3.8/site-packages/JupyterLibrary/clients/jupyterlab/Shell.resource
 Library             DebugLibrary
 Library             JupyterLibrary
 
@@ -11,6 +12,8 @@ Suite Teardown      End Web Test
 
 Force Tags          Smoke    Sanity    JupyterHub
 
+*** Variables ***
+${RequirementsFileRepo}=    https://github.com/redhat-rhods-qe/useful-files.git
 
 *** Test Cases ***
 Open RHODS Dashboard
@@ -37,22 +40,22 @@ Can Spawn Notebook
 
 Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     [Documentation]    Verify Tensorflow Can Be Installed In The Minimal Python image via pip
-    [Tags]    ODS-555  ODS-908
+    [Tags]    ODS-555    ODS-908    ODS-535
+    Clone Git Repository    ${RequirementsFileRepo}
     Open With JupyterLab Menu    File    New    Notebook
     Sleep    1
     Maybe Close Popup
     Close Other JupyterLab Tabs
     Maybe Close Popup
     Sleep    1
-    Add and Run JupyterLab Code Cell In Active Notebook    !pip install tensorflow==2.7
+    Add and Run JupyterLab Code Cell In Active Notebook    !pip install -r useful-files/requirements.txt
     ${version} =    Run Cell And Get Output
-#    ...    !pip show tensorflow | grep Name: | awk '{split($0,a); print a[2]}' | awk '{split($0,b); printf "%s", b[1]}'
-    !pip show JupyterLab | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
+    ...    !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
     Should Be Equal    2.7.0    ${version}
     Add and Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow
     ${updated version} =    Run Cell And Get Output
-    ...    !pip show tensorflow | grep Name: | awk '{split($0,a); print a[2]}' | awk '{split($0,b); printf "%s", b[1]}'
-    Should Not Be Equal    ${updated version}    ${output}
+    ...    !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
+    Should Not Be Equal    ${updated version}    ${version}
 
 Verify jupyterlab server pods are spawned in a custom namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)

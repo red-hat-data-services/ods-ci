@@ -169,7 +169,7 @@ Get User Notebook Pod Name
 
 Wait Until User Server Is Clean
     [Documentation]    Waits until the JL UI does not show any items (folders/files) in the user's server
-    [Arguments]    ${timeout}=15s
+    [Arguments]    ${timeout}=30s
     Wait Until Page Does Not Contain Element    xpath://li[contains(concat(' ',normalize-space(@class),' '),' jp-DirListing-item ')]    ${timeout}
 
 # Could replace Clean Up User Notebook and Delete Folder In User Notebook

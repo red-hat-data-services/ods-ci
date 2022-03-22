@@ -94,6 +94,12 @@ Verify Documentation Link HTTP Status Code
     ${links}=  Get RHODS Documentation Links From Dashboard
     Check External Links Status     links=${links}
 
+Verify GPU Tutorials Are Displayed In Resource Section
+    [Tags]      ODS-1226
+    Click Link    Resources
+    Sleep   5
+    Input Text      xpath://input[@class="pf-c-search-input__text-input"]   GPU
+    Check GPU Tutorials
 
 *** Keywords ***
 Dashboard Test Setup
@@ -124,3 +130,13 @@ Verify JupyterHub Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
+
+Check GPU Tutorials
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.9.0
+    IF  ${version-check}==True
+        Page Should Contain     //article[@id="python-gpu-numba-tutorial"]
+        Page Should Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
+    ELSE
+        Page Should Not Contain     //article[@id="python-gpu-numba-tutorial"]
+        Page Should Not Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
+    END

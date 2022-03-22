@@ -103,6 +103,7 @@ Is RHODS Version Greater Or Equal Than
     [Arguments]  ${target}
     ${ver} =  Get RHODS version
     ${comparison} =  GTE  ${ver}  ${target}
+    # Returns True or False
     [Return]  ${comparison}
 
 Move To Installed Operator Page Tab in Openshift

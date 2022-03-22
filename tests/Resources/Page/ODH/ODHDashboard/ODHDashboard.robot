@@ -19,6 +19,7 @@ ${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "ti
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
+${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 
@@ -139,7 +140,12 @@ Check HTTP Status Code
     [Return]  ${response.status_code}
 
 Load Expected Data Of RHODS Explore Section
-    ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.8.0
+    IF  ${version-check}==True
+        ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
+    ELSE
+        ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
+    END
     ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
     [Return]  ${apps_dict_obj}
 
@@ -309,4 +315,33 @@ Re-validate License For Disabled Application From Enabled Page
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[0]
 
+Get Question Mark Links
+    [Documentation]      It returns the link elements from the question mark
+    @{links_list}=  Create List
+    @{link_elements}=  Get WebElements
+    ...    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
+    FOR  ${link}  IN  @{link_elements}
+         ${href}=    Get Element Attribute    ${link}    href
+         Append To List    ${links_list}    ${href}
+    END
+    [Return]  @{links_list}
 
+Get RHODS Documentation Links From Dashboard
+    [Documentation]    It returns a list containing rhods documentation links
+    Click Link    Resources
+    Sleep    2
+    # get the documentation link
+    ${href_view_the_doc}=    Get Element Attribute    //a[@class='odh-dashboard__external-link']    href
+    Click Element    xpath=//*[@id="toggle-id"]
+    ${links}=    Get Question Mark Links
+    # inserting at 0th position
+    Insert Into List    ${links}    0    ${href_view_the_doc}
+    [Return]  @{links}
+
+Check External Links Status
+    [Documentation]      It iterates through the links and cheks their HTTP status code
+    [Arguments]     ${links}
+    FOR  ${idx}  ${href}  IN ENUMERATE  @{links}  start=1
+        ${status}=  Check HTTP Status Code   link_to_check=${href}
+        Log    ${idx}. ${href} gets status code ${status}
+    END

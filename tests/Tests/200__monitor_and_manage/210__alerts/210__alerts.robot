@@ -222,10 +222,9 @@ Verify Alert "RHODS Probe Success Burn Rate" Is Fired When RHODS Dashboard Is Do
 
     [Teardown]    ODS.Restore Default Deployment Sizes
 
-Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image Build Error
+Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image Build Error    # robocop: disable:too-long-test-case
     [Documentation]     Verify the "JupyterHub image builds are failing" alert when there is a image build failed
-    [Tags]    Sanity
-    ...       Tier2
+    [Tags]    Tier2
     ...       ODS-717
     ...       KnownIssues
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
@@ -263,10 +262,9 @@ Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image 
     ...    JupyterHub image builds are failing
     [Teardown]    Delete Build    namespace=redhat-ods-applications    build_name=${failed_build_name}
 
-Verify Alert "JupyterHub Image Builds Are Failing" Fires Up To 30 Minutes When There Is An Image Build Error
+Verify Alert "JupyterHub Image Builds Are Failing" Fires Up To 30 Minutes When There Is An Image Build Error     # robocop: disable:too-long-test-case
     [Documentation]    Verify that alert is firing up to 30 min and after thar resolve automatically
-    [Tags]    Sanity
-    ...       Tier2
+    [Tags]    Tier2
     ...       ODS-790
     ...       KnownIssues
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
@@ -295,7 +293,9 @@ Verify Alert "JupyterHub Image Builds Are Failing" Fires Up To 30 Minutes When T
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
-    [Teardown]    Delete Failed Build And Start New One    namespace=redhat-ods-applications    failed_build_name=${failed_build_name}    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    [Teardown]    Delete Failed Build And Start New One    namespace=redhat-ods-applications
+    ...    failed_build_name=${failed_build_name}    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+
 
 *** Keywords ***
 Alerts Suite Setup
@@ -441,7 +441,8 @@ Provoke Image Build Failure
     Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
     ...    expected_status=Running
     Wait Until Container Exist  namespace=${namespace}  pod_name=${pod_name}  container_to_check=${container_to_kill}
-    Run Command In Container    namespace=${namespace}    pod_name=${pod_name}    command=/bin/kill 1    container_name=${container_to_kill}
+    Run Command In Container    namespace=${namespace}    pod_name=${pod_name}
+    ...    command=/bin/kill 1    container_name=${container_to_kill}
     Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
     ...    expected_status=Failed    timeout=5 min
     [Return]    ${failed_build_name}

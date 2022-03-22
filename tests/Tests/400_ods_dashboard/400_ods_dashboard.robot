@@ -7,7 +7,6 @@ Resource        ../../Resources/Page/LoginPage.robot
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
-
 *** Variables ***
 ${RHOSAK_REAL_APPNAME}=         rhosak
 ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
@@ -124,3 +123,13 @@ Verify JupyterHub Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
+
+Test Setup For Login Page
+    Set Library Search Order  SeleniumLibrary
+    Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+
+Check OpenShift Login Visible
+    ${result}=  Is OpenShift Login Visible
+    IF  ${result}=='false'
+        FAIL    OpenShift Login Visible
+    END

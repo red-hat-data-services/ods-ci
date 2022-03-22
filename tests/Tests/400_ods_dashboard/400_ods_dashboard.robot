@@ -3,6 +3,7 @@ Resource         ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
+Resource        ../../Resources/Page/LoginPage.robot
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -14,8 +15,10 @@ ${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 
 *** Test Cases ***
 Verify That Login Page Is Shown When Reaching The RHODS Page
-    [Tags]  ODS-694
-    OpenShift Login Visible While Reaching RHODS
+    [Tags]      Sanity
+    ...         ODS-694
+    [Setup]     Test Setup For Login Page
+    Check OpenShift Login Visible
 
 Verify Resource Link Http status code
     [Tags]  Sanity

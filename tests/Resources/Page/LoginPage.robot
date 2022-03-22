@@ -2,6 +2,7 @@
 Resource  OCPDashboard/OCPDashboard.resource
 Library   DebugLibrary
 Library   JupyterLibrary
+Library     SeleniumLibrary
 
 *** Keywords ***
 Is ${service_account_name} Service Account Authorization Required
@@ -19,19 +20,21 @@ Is OpenShift OAuth Login Prompt Visible
    ${result} =  Evaluate  ${login_prompt_visible} and ${oauth_login}
    [Return]  ${result}
 
-OpenShift Login Visible While Reaching RHODS
+Test Setup For Login Page
+    Set Library Search Order  SeleniumLibrary
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Page Should Contain     Log in with
-    Click Button    Log in with OpenShift
-    Page Should Contain     Log in with…
-    Click Link  htpasswd-cluster-admin
-    Page Should Contain     Log in to your account
 
 Is OpenShift Login Visible
    ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in with
    Return From Keyword If  ${login_prompt_visible}  True
    ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in to your account
    [Return]  ${login_prompt_visible}
+
+Check OpenShift Login Visible
+    ${result}=  Is OpenShift Login Visible
+    IF  ${result}=='false'
+        FAIL    OpenShift Login Visible
+    END
 
 Select Login Authentication Type
    [Arguments]  ${auth_type}

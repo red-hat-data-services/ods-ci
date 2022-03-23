@@ -75,7 +75,28 @@ Can Launch Python3
    [Tags]  Sanity  TBC
    Launch Python3 JupyterHub
 
+Verify Message That Image Builds Are In Progress
+    [Documentation]     Verifies that Image Builds In Progress are Shown In RHODS Dashboard
+    [Tags]      Sanity
+    ...         Tier1
+    ...         ODS-460
+    ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
+    Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
+    ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
+    Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    Verify Given Message In RHODS Dashboard Notifications  message=Notebook images are building
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
+    Verify Given Message In RHODS Dashboard Notifications  message=All notebook image builds are complete
+
 
 *** Keywords ***
 JupyterHub Testing Suite Setup
   Set Library Search Order  SeleniumLibrary
+
+Verify Given Message In RHODS Dashboard Notifications
+    [Documentation]    Verifies Notifications contain given Message
+    [Arguments]     ${message}
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Page Should Contain Element
+    ...    xpath=//*[contains(text(),'${message}')]

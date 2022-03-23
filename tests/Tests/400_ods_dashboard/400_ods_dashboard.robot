@@ -84,17 +84,49 @@ Verify CSS Style Of Getting Started Descriptions
     Capture Page Screenshot    get_started_sidebar.png
     Verify JupyterHub Card CSS Style
 
-Go to RHODS Dashboard, Resources And Filter By enabled state
-  [Documentation]  check if it is possible to filter items by enable state or application
-  [Tags]  ODS-489
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  wait for RHODS Dashboard to Load
-  Click Link    Resources
-  sleep  10s
-  Check For enabled option
-  Check for not enabled option
-
+Verify Advanced filtering by status, provider, types from Resources tab is working as expected
+    [Documentation]    check if it is possible to filter items by enabling various filters like status,provider
+    [Tags]    ODS-489
+    Click Link    Resources
+    Wait Until Page Contains    Self-managed
+    #Filter by enabled filter
+    Select Checkbox Using Id    enabled-filter-checkbox--check-box
+    @{expected_items} =    Create List    Creating a Jupyter notebook
+    ...    Deploying a sample Python application using Flask and OpenShift
+    ...    How to install Python packages on your notebook server    How to update notebook server settings
+    ...    How to use data from Amazon S3 buckets    How to view installed packages on your notebook server
+    ...    JupyterHub
+    Verify The Cards Using Selector And It Value    selector=pf-c-card__title odh-card__doc-title
+    ...    list_of_items=${expected_items}
+    Deselct Checkbox Using Id    enabled-filter-checkbox--check-box
+    # Filter by application (aka provider)
+    @{expected_items} =    Create List    by Anaconda Commercial Edition
+    Select Checkbox Using Id    Anaconda Commercial Edition--check-box
+    Verify The Cards Using Selector And It Value    selector=pf-c-card__title odh-card__doc-title
+    ...    list_of_items=${expected_items}    index_of_text=1
+    Deselct Checkbox Using Id    id=Anaconda Commercial Edition--check-box
+    # Filter by resource type
+    Select Checkbox Using Id    id=documentation--check-box
+    @{expected_items} =    Create List    Documentation
+    Verify The Cards Using Selector And It Value    selector=pf-c-card__title odh-card__doc-title
+    ...    list_of_items=${expected_items}    index_of_text=2
+    Deselct Checkbox Using Id    id=documentation--check-box
+    # Filter by filter by provider type
+    Select Checkbox Using Id    id=Red Hat managed--check-box
+    @{expected_items} =    Create List    Connecting to Red Hat OpenShift Streams for Apache Kafka
+    ...    Creating a Jupyter notebook    Deploying a sample Python application using Flask and OpenShift
+    ...    How to install Python packages on your notebook server    How to update notebook server settings
+    ...    How to use data from Amazon S3 buckets    How to view installed packages on your notebook server
+    ...    JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka    PerceptiLabs
+    ...    Securing a deployed model using Red Hat OpenShift API Management
+    Verify The Cards Using Selector And It Value    selector=pf-c-card__title odh-card__doc-title
+    ...    list_of_items=${expected_items}
+    # Filter by using more than one filter
+    Select Checkbox Using Id    id=documentation--check-box
+    @{expected_items} =    Create List    JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
+    ...    PerceptiLabs
+    Verify The Cards Using Selector And It Value    selector=pf-c-card__title odh-card__doc-title
+    ...    list_of_items=${expected_items}
 
 *** Keywords ***
 Dashboard Test Setup
@@ -128,40 +160,23 @@ Verify JupyterHub Card CSS Style
     ...    property=font-family    exp_value=RedHatDisplay
     ...    operation=contains
 
-Check All Links Are working
-  [Documentation]  Verify the all links after appling a filter
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
-  ${len}=  Get Length    ${link_elements}
-  Log To Console    ${len} Links found\n
-  FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
-      ${href}=  Get Element Attribute    ${ext_link}    href
-      ${status}=  Get HTTP Status Code   ${href}
-      Log To Console    ${idx}. ${href} gets status code ${status}
-  END
+Select Checkbox Using Id
+    [Documentation]    Select check-box
+    [Arguments]    ${id}
+    Select Checkbox    id=${id}
+    sleep    10s
+ 
+Deselct Checkbox Using Id
+    [Documentation]    Deselect check-box
+    [Arguments]    ${id}
+    Click Element    id=${id}
+    sleep    10s
 
-Check For enabled option
-  [Documentation]  Filter Resources by enabling "enabled" from enable state
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
-  ${len}=  Get Length    ${link_elements}
-  Select Checkbox  id=enabled-filter-checkbox--check-box
-  sleep  10s
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
-  ${lent}=  Get Length    ${link_elements}
-  Should Not Be Equal As Integers  ${len}  ${lent}
-  Check All Links Are working
-  Click Element  id=enabled-filter-checkbox--check-box
-  sleep  5s
-
-Check for not enabled option
-  [Documentation]  Filter Resources by enabling "not enabled" from enable state
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
-  ${len}=  Get Length    ${link_elements}
-  Select Checkbox  id=not-enabled-filter-checkbox--check-box
-  sleep  10s
-  ${link_elements}=  Get WebElements    //a[@class="odh-card__footer__link"]
-  ${lent}=  Get Length    ${link_elements}
-  Should Not Be Equal As Integers  ${len}  ${lent}
-  Check All Links Are working
-  Click Element  id=not-enabled-filter-checkbox--check-box
-  sleep  5s
-
+Verify The Cards Using Selector And It Value
+    [Documentation]    virifies the items
+    [Arguments]    ${selector}    ${list_of_items}    ${index_of_text}=0
+    @{items} =    Get WebElements    //div[@class="${selector}"]
+    FOR    ${item}    IN    @{items}
+        @{texts} =    Split String    ${item.text}    \n
+        List Should Contain Value    ${list_of_items}    ${texts}[${index_of_text}]
+    END

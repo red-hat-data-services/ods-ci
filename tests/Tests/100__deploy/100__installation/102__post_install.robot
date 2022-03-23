@@ -70,7 +70,7 @@ Verify GPU Operator Deployment  # robocop: disable
 Verify That Prometheus Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...     Tier1
-    ...     ODS-734    
+    ...     ODS-734
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    prometheus
     ...    "registry.redhat.io/openshift4/ose-prometheus"
@@ -80,7 +80,7 @@ Verify That Prometheus Image Is A CPaaS Built Image
 Verify That Grafana Image Is A Red Hat Built Image
     [Tags]    Sanity
     ...     Tier1
-    ...     ODS-736    
+    ...     ODS-736
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=grafana-
     Verify Container Image    redhat-ods-monitoring    ${pod}    grafana
     ...    "registry.redhat.io/rhel8/grafana:7"
@@ -90,7 +90,7 @@ Verify That Grafana Image Is A Red Hat Built Image
 Verify That Blackbox-exporter Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...     Tier1
-    ...     ODS-735    
+    ...     ODS-735
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
     Verify Container Image    redhat-ods-monitoring    ${pod}    blackbox-exporter
     ...    "quay.io/integreatly/prometheus-blackbox-exporter:v0.19.0"
@@ -98,10 +98,18 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
 Verify That Alert Manager Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...     Tier1
-    ...     ODS-733    
+    ...     ODS-733
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Verify Container Image    redhat-ods-monitoring    ${pod}    alertmanager
     ...    "registry.redhat.io/openshift4/ose-prometheus-alertmanager"
+
+Verify Oath-Proxy Image Is fetched From CPaaS
+    [Tags]      Sanity
+    ...         Tier1
+    ...         ODS-666
+    ${pod} =    Find First Pod By Name  namespace=redhat-ods-applications   pod_start_with=rhods-dashboard-
+    Verify Container Image      redhat-ods-applications     ${pod}      oauth-proxy
+    ...     "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
 Verify Pytorch And Tensorflow Can Be Spawned
     [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
@@ -135,8 +143,8 @@ Verify Cuda Builds Are Completed
     END
 
 Verify Authentication Is Required To Access BlackboxExporter
-    [Documentation]    Verifies authentication is required to access blackbox exporter. To do so, 
-    ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target. 
+    [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,
+    ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target.
     ...                The test fails if the response is not a prompt to log in with OpenShift
     @{links} =    Get Target Endpoints    target_name=user_facing_endpoints_status
     Length Should Be    ${links}    2

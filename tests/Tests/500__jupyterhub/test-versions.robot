@@ -27,26 +27,26 @@ Open JupyterHub Spawner Page
 Verify Libraries in Minimal Image
     [Documentation]    Verifies libraries in Minimal Python image
     [Tags]    Sanity
-    Verify The Libraries In Base Image    s2i-minimal-notebook    JupyterLab-git v0.30
+    Verify List Of Libraries In Image    s2i-minimal-notebook    JupyterLab-git v0.30
 #
 
 Verify Libraries in SDS Image
     [Documentation]    Verifies libraries in Standard Data Science image
     [Tags]    Sanity
-    Verify The Libraries In Base Image    s2i-generic-data-science-notebook    JupyterLab v3.2    Notebook v6.4
+    Verify List Of Libraries In Image    s2i-generic-data-science-notebook    JupyterLab v3.2    Notebook v6.4
     ...    JupyterLab-git v0.30
 
 Verify Libraries in PyTorch Image
     [Documentation]    Verifies libraries in PyTorch image
     [Tags]    Sanity
     ...       ODS-215    ODS-216    ODS-217    ODS-218
-    Verify The Libraries In Base Image    pytorch    JupyterLab v3.2    Notebook v6.4    JupyterLab-git v0.30
+    Verify List Of Libraries In Image    pytorch    JupyterLab v3.2    Notebook v6.4    JupyterLab-git v0.30
 
 Verify Libraries in Tensorflow Image
     [Documentation]    Verifies libraries in Tensorflow image
     [Tags]    Sanity
     ...       ODS-204    ODS-205    ODS-206    ODS-207
-    Verify The Libraries In Base Image    tensorflow    JupyterLab v3.2    Notebook v6.4    JupyterLab-git v0.30
+    Verify List Of Libraries In Image    tensorflow    JupyterLab v3.2    Notebook v6.4    JupyterLab-git v0.30
 
 Verify All Images And Spawner
     [Documentation]    Verifies that all images have the correct libraries
@@ -86,7 +86,7 @@ Load Spawner Page
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
 
-Verify The Libraries In Base Image
+Verify List Of Libraries In Image
     [Documentation]    It checks that libraries are installed or not in ${image} image
     [Arguments]    ${image}    @{additional_libs}
     ${status} =    Verify Libraries In Base Image    ${image}    ${additional_libs}

@@ -78,7 +78,7 @@ Can Launch Python3
 Verify Message That Image Builds Are In Progress
     [Documentation]     Verifies that Image Builds In Progress are Shown In RHODS Dashboard
     [Tags]      Sanity
-    ...         Tier1
+    ...         Tier2
     ...         ODS-460
     ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
     Delete Build    namespace=redhat-ods-applications    build_name=${build_name}

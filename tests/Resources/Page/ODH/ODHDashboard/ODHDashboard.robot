@@ -368,6 +368,12 @@ Disable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
     Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
 
+Search Items In Resources Section
+    [Arguments]     ${element}
+    Click Link      Resources
+    Sleep   5
+    Input Text  xpath://input[@class="pf-c-search-input__text-input"]       ${element}
+
 Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
     [Arguments]    ${user_name}

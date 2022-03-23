@@ -110,9 +110,7 @@ Verify Logged In Users Are Displayed In The Dashboard
 
 Search and Verify GPU Items Appears In Resources Page
     [Tags]  ODS-1226
-    Click Link  Resources
-    Sleep   5
-    Input Text  xpath://input[@class="pf-c-search-input__text-input"]   GPU
+    Search Items In Resources Section   GPU
     Check GPU Resources
 
 *** Keywords ***
@@ -171,3 +169,4 @@ Check GPU Resources
         Page Should Not Contain     //article[@id="python-gpu-numba-tutorial"]
         Page Should Not Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
     END
+

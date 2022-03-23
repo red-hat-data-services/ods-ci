@@ -1,6 +1,7 @@
 #/bin/bash
 
-SKIP_OC_LOGIN = true
+SKIP_OC_LOGIN=true
+SET_RHODS_URLS=false
 TEST_CASE_FILE=tests/Tests
 TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
@@ -22,6 +23,12 @@ while [ "$#" -gt 0 ]; do
     --test-variable)
       shift
       TEST_VARIABLES="${TEST_VARIABLES} --variable $1"
+      shift
+      ;;
+
+    --set-urls-variables)
+      shift
+      SET_RHODS_URLS=$1
       shift
       ;;
 
@@ -149,10 +156,21 @@ if command -v yq &> /dev/null
                 echo "since the oc login was successful, continuing."
             else
                 echo "skipping OC login as per parameter --skip-oclogin"
+                if ${SET_RHODS_URLS}
+                    then
+                        echo "INFO: getting RHODS URLs from the cluster as per --set-urls-variables"
+                        ocp_console="https://$(oc get route console -n openshift-console -o jsonpath='{.spec.host}{"\n"}')"
+                        rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
+                        TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard}"
+                        echo "OCP Console URL set to: ${ocp_console}"
+                        echo "RHODS Dashboard URL set to: ${rhods_dashboard}"
+                fi
         fi
     else
         echo "we did not find yq, so not trying the oc login"
 fi
+
+
 
 #TODO: Make this optional so we are not creating/updating the virtualenv everytime we run a test
 VENV_ROOT=${currentpath}/venv

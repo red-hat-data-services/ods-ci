@@ -1,4 +1,5 @@
 *** Settings ***
+Resource  ../../OCPDashboard/Pods/Pods.robot
 Library  JupyterLibrary
 Library  jupyter-helper.py
 Library  OperatingSystem
@@ -148,7 +149,7 @@ Maybe Select Kernel
 
 Clean Up Server
     [Documentation]    Cleans up user server and checks that everything has been removed
-    [Arguments]    ${admin_username}=${OCP_ADMIN_USER.USERNAME}    ${username}=${TEST_USER.USERNAME}
+    [Arguments]    ${username}=${TEST_USER.USERNAME}
     Maybe Close Popup
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Run Keyword And Continue On Failure    Open With JupyterLab Menu    File    Close All Tabs
@@ -158,7 +159,8 @@ Clean Up Server
     Maybe Close Popup
     Wait Until User Server Is Clean
     Maybe Close Popup
-    ${ls_server} =    Exec Command In User Notebook    command=ls    admin_username=${admin_username}    username=${username}
+    ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
+    ${ls_server} =  Run Command In Container    rhods-notebooks    ${notebook_pod_name}    ls
     Should Match    "${ls_server}"    "${EMPTY}"
 
 Get User Notebook Pod Name
@@ -172,20 +174,6 @@ Wait Until User Server Is Clean
     [Documentation]    Waits until the JL UI does not show any items (folders/files) in the user's server
     [Arguments]    ${timeout}=30s
     Wait Until Page Does Not Contain Element    xpath://li[contains(concat(' ',normalize-space(@class),' '),' jp-DirListing-item ')]    ${timeout}
-
-# Could replace Clean Up User Notebook and Delete Folder In User Notebook
-Exec Command In User Notebook
-    [Documentation]    Runs ${command} in the user's server and returns the result
-    [Arguments]    ${command}    ${admin_username}=${OCP_ADMIN_USER.USERNAME}    ${username}=${TEST_USER.USERNAME}
-    ${oc_whoami} =  Run   oc whoami
-    IF    '${oc_whoami}' == '${admin_username}'
-        ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-        Search Pods    ${notebook_pod_name}    namespace=rhods-notebooks
-        ${output} =  Run    oc exec ${notebook_pod_name} -n rhods-notebooks -- ${command}
-    ELSE
-        Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
-    END
-    [Return]    ${output}
 
 Clean Up User Notebook
   [Documentation]  Delete all files and folders in the ${username}'s notebook PVC (excluding hidden files and folders).

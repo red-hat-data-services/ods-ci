@@ -108,6 +108,12 @@ Verify Logged In Users Are Displayed In The Dashboard
     ...       Tier1
     Verify Username Displayed On RHODS Dashboard   ${TEST_USER.USERNAME}
 
+Search and Verify GPU Items Appears In Resources Page
+    [Tags]  ODS-1226
+    Click Link  Resources
+    Sleep   5
+    Input Text  xpath://input[@class="pf-c-search-input__text-input"]   GPU
+    Check GPU Resources
 
 *** Keywords ***
 Verify JupyterHub Card CSS Style
@@ -149,3 +155,19 @@ Dashboard Test Setup
 
 Dashboard Test Teardown
     Close All Browsers
+
+Check GPU Resources
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.9.0
+    IF  ${version-check}==True
+        ${elements}=  Get WebElements      //article
+        ${len}=  Get Length    ${elements}
+        Should Be Equal As Integers     ${len}  1
+        Page Should Contain     //article[@id="python-gpu-numba-tutorial"]
+        Page Should Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
+    ELSE
+        ${elements}=  Get WebElements      //article
+        ${len}=  Get Length    ${elements}
+        Should Be Equal As Integers     ${len}  0
+        Page Should Not Contain     //article[@id="python-gpu-numba-tutorial"]
+        Page Should Not Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
+    END

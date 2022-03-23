@@ -150,6 +150,7 @@ Clean Up Server
     [Documentation]    Cleans up user server and checks that everything has been removed
     [Arguments]    ${admin_username}=${OCP_ADMIN_USER.USERNAME}    ${username}=${TEST_USER.USERNAME}
     Maybe Close Popup
+    Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Run Keyword And Continue On Failure    Open With JupyterLab Menu    File    Close All Tabs
     Maybe Close Popup
     Clean Up User Notebook    ${admin_username}    ${username}
@@ -284,9 +285,11 @@ Handle Kernel Restarts
   END
 
 Run Repo and Clean
-    [Arguments]  ${REPO_URL}  ${NB_NAME}
-    Click Element  xpath://span[@title="/opt/app-root/src"]
-    Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NB_NAME}
+    [Arguments]    ${REPO_URL}    ${NB_NAME}
+    [Documentation]    Clones a given repository and runs a given file. Cleans up
+    ...    The server after execution is over, removing the cloned repository.
+    Navigate Home (Root folder) In JupyterLab Sidebar File Browser
+    Run Keyword And Continue On Failure    Clone Git Repository And Run    ${REPO_URL}    ${NB_NAME}
     Clean Up Server
 
 Maybe Close Popup

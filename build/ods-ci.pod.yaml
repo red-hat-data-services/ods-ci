@@ -20,15 +20,16 @@ spec:
   securityContext:
     # This is required to make the test-output volume Writable
     fsGroup: 0
+  serviceAccountName: rhods-test-runner
   containers:
 
     - image: <INSERT URL TO YOUR BUILT IMAGE>
       imagePullPolicy: Always
-      name: ods-ci
+      name: ods-ci-testrun
       env:
         # Use this environment variable to pass args to the ods-ci run script in the container
         - name: RUN_SCRIPT_ARGS
-          value: "--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml"
+          value: "--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml --skip-oclogin true --set-urls-variables true"
         - name: ROBOT_EXTRA_ARGS
           # value: INSERT ROBOT FRAMEWORK ARGS OR LEAVE EMPTY. e.g., -i Smoke. Write inside the quotes
           value: ""

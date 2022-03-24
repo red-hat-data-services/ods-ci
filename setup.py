@@ -15,7 +15,7 @@ setup(
     author_email="ods-ci@redhat.com",
     install_requires=[
         "reportportal-client",
-        "robotframework>=4",
+        "robotframework==4.*",
         "robotframework-debuglibrary",
         "robotframework-requests",
         "robotframework-seleniumlibrary",

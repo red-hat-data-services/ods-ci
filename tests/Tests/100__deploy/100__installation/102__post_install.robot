@@ -111,6 +111,14 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     Verify Container Image    redhat-ods-monitoring    ${pod}    alertmanager
     ...    "registry.redhat.io/openshift4/ose-prometheus-alertmanager"
 
+Verify Oath-Proxy Image Is fetched From CPaaS
+    [Tags]      Sanity
+    ...         Tier1
+    ...         ODS-666
+    ${pod} =    Find First Pod By Name  namespace=redhat-ods-applications   pod_start_with=rhods-dashboard-
+    Verify Container Image      redhat-ods-applications     ${pod}      oauth-proxy
+    ...     "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
+
 Verify Pytorch And Tensorflow Can Be Spawned
     [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
     [Tags]    Sanity

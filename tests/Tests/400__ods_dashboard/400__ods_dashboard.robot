@@ -101,15 +101,15 @@ Verify Documentation Link HTTP Status Code
     ${links}=  Get RHODS Documentation Links From Dashboard
     Check External Links Status     links=${links}
 
+Verify Logged In Users Are Displayed In The Dashboard
+    [Documentation]    It verifies that logged in users username is displayed on RHODS Dashboard.
+    [Tags]    Sanity
+    ...       ODS-354
+    ...       Tier1
+    Verify Username Displayed On RHODS Dashboard   ${TEST_USER.USERNAME}
+
 
 *** Keywords ***
-Dashboard Test Setup
-    Set Library Search Order  SeleniumLibrary
-    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-
-Dashboard Test Teardown
-    Close All Browsers
-
 Verify JupyterHub Card CSS Style
     [Documentation]     Compare the some CSS properties of the Explore page
     ...                 with the expected ones. The expected values change based
@@ -141,3 +141,11 @@ Check OpenShift Login Visible
     IF  ${result}=='false'
         FAIL    OpenShift Login Is Not Visible
     END
+
+Dashboard Test Setup
+    Set Library Search Order    SeleniumLibrary
+    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+
+Dashboard Test Teardown
+    Close All Browsers

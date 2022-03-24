@@ -367,3 +367,8 @@ Enable "Usage Data Collection"
 Disable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
     Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
+
+Verify Username Displayed On RHODS Dashboard
+    [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
+    [Arguments]    ${user_name}
+    Element Text Should Be    xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]    ${user_name}

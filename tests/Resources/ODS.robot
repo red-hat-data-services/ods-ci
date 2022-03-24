@@ -11,6 +11,8 @@ Resource            ../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
 Resource            ../../tasks/Resources/RHODS_OLM/uninstall/oc_uninstall.robot
 Resource            ../../tasks/Resources/RHODS_OLM/config/cluster.robot
 
+Library  OpenShiftLibrary
+
 
 *** Variables ***
 ${USAGE_DATA_COLLECTION_DEFAULT_SEGMENT_PUBLIC_KEY}     KRUhoAIEpWlGuz4sWixae1vAXKKGlD5K
@@ -149,3 +151,9 @@ Get RHODS URL From OpenShift Using UI
     ...     //a[@data-test="application-launcher-item" and starts-with(@href,'https://rhods')]
     ${href}  Get Element Attribute    ${link_elements}    href
     [Return]   ${href}
+
+Verify Config Map Group Contains Expected Values
+    [Documentation]    Verifies if the group contains the expected value
+    [Arguments]    ${config_map}   ${group}    ${expected_value}
+    ${configmap}=  Oc Get  kind=ConfigMap  namespace=redhat-ods-applications  name=rhods-groups-config  api_version=v1
+    Should Be Equal As Strings  ${configmap[0]['data']['''${group}''']}   ${expected_value}

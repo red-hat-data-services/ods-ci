@@ -85,3 +85,11 @@ Can Launch Python3 Smoke Test Notebook
     Should Not Match    ${output}    ERROR*
     Should Be Equal As Strings    ${output}    [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]
 
+Verify Git Plugin is Installed
+    [Documentation]     Spawns a minimal notebook and checks if git plugin is installed
+    [Tags]      Tier1
+    ...         ODS-452
+    Launch JupyterHub Spawner From Dashboard
+    Spawn Notebook With Arguments    image=s2i-minimal-notebook
+    Sleep    10s
+    Page Should Contain Element    xpath=//*[contains(text(),'Git')]

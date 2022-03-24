@@ -81,7 +81,7 @@ Verify Message That Image Builds Are In Progress
     ...         Tier2
     ...         ODS-460
     Delete Last Pytorch Build
-    Start New Pytorch Build
+    ${new_buildname}=  Start New Pytorch Build
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     RHODS Notification Drawer Should Contain  message=Notebook images are building
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
@@ -101,3 +101,4 @@ Start New Pytorch Build
     [Documentation]     Starts new Pytorch build and waits until status is running
     ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
+    [Return]    ${new_buildname}

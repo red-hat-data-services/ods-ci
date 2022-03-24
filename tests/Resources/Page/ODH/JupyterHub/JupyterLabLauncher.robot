@@ -1,4 +1,5 @@
 *** Settings ***
+Resource  ../../OCPDashboard/Pods/Pods.robot
 Library  JupyterLibrary
 Library  jupyter-helper.py
 Library  OperatingSystem
@@ -147,18 +148,20 @@ Maybe Select Kernel
   Run Keyword If  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
-  Sleep  1
-  Maybe Close Popup
-  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
-  Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Close Popup
-  Sleep  1
-  Maybe Close Popup
-  Open With JupyterLab Menu  File  New  Notebook
-  Sleep  2
-  Maybe Close Popup
-  Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
-  Wait Until JupyterLab Code Cell Is Not Active
+    [Documentation]    Cleans up user server and checks that everything has been removed
+    [Arguments]    ${username}=${TEST_USER.USERNAME}
+    Maybe Close Popup
+    Navigate Home (Root folder) In JupyterLab Sidebar File Browser
+    Run Keyword And Continue On Failure    Open With JupyterLab Menu    File    Close All Tabs
+    Maybe Close Popup
+    Clean Up User Notebook    ${admin_username}    ${username}
+    Sleep  5s
+    Maybe Close Popup
+    Wait Until User Server Is Clean
+    Maybe Close Popup
+    ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
+    ${ls_server} =  Run Command In Container    rhods-notebooks    ${notebook_pod_name}    ls
+    Should Match    "${ls_server}"    "${EMPTY}"
 
 Get User Notebook Pod Name
   [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyterhub-nb-ldap-2dadmin1)
@@ -166,6 +169,11 @@ Get User Notebook Pod Name
   ${safe_username}=  Get Safe Username    ${username}
   ${notebook_pod_name}=   Set Variable  jupyterhub-nb-${safe_username}
   [Return]  ${notebook_pod_name}
+
+Wait Until User Server Is Clean
+    [Documentation]    Waits until the JL UI does not show any items (folders/files) in the user's server
+    [Arguments]    ${timeout}=30s
+    Wait Until Page Does Not Contain Element    xpath://li[contains(concat(' ',normalize-space(@class),' '),' jp-DirListing-item ')]    ${timeout}
 
 Clean Up User Notebook
   [Documentation]  Delete all files and folders in the ${username}'s notebook PVC (excluding hidden files and folders).
@@ -265,21 +273,12 @@ Handle Kernel Restarts
   END
 
 Run Repo and Clean
-  [Arguments]  ${REPO_URL}  ${NB_NAME}
-  Click Element  xpath://span[@title="/opt/app-root/src"]
-  Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NB_NAME}
-  Sleep  15
-  Click Element  xpath://span[@title="/opt/app-root/src"]
-  Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Close Popup
-  Open With JupyterLab Menu  File  New  Notebook
-  Sleep  1
-  Maybe Close Popup
-  Sleep  1
-  Add and Run JupyterLab Code Cell in Active Notebook  !rm -rf *
-  Wait Until JupyterLab Code Cell Is Not Active
-  Open With JupyterLab Menu  File  Close All Tabs
-  Maybe Close Popup
+    [Arguments]    ${REPO_URL}    ${NB_NAME}
+    [Documentation]    Clones a given repository and runs a given file. Cleans up
+    ...    The server after execution is over, removing the cloned repository.
+    Navigate Home (Root folder) In JupyterLab Sidebar File Browser
+    Run Keyword And Continue On Failure    Clone Git Repository And Run    ${REPO_URL}    ${NB_NAME}
+    Clean Up Server
 
 Maybe Close Popup
     [Documentation]    Click the last button in a JupyterLab dialog (if one is open).

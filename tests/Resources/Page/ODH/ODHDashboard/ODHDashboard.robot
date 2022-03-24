@@ -375,8 +375,3 @@ Dashboard Test Setup
 
 Dashboard Test Teardown
     Close All Browsers
-
-Verify Username Displayed On RHODS Dashboard
-    [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
-    [Arguments]    ${user_name}
-    Element Text Should Be    xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]    ${user_name}

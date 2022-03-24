@@ -174,3 +174,10 @@ Get Containers
     ${containers}    Replace String    ${containers}    "    ${EMPTY}
     @{containers}    Split String    ${containers}    \n
     [Return]    ${containers}
+
+Get User Server Node
+    [Documentation]    Returns the name of the node on which the user's server pod is running
+    [Arguments]    ${username}=${TEST_USER.USERNAME}
+    ${pod_name} =    Get User Notebook Pod Name    ${username}
+    ${node_name} =    Run    oc describe Pod ${pod_name} -n rhods-notebooks | grep Node: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"/"); print b[1]}'
+    [Return]    ${node_name}

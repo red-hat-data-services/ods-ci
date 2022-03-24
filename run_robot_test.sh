@@ -128,6 +128,21 @@ case "$(uname -s)" in
         ;;
 esac
 
+
+# automatically get cluster URLs if already log into or running in a pod
+if ${SET_RHODS_URLS}
+    then
+        echo "INFO: getting RHODS URLs from the cluster as per --set-urls-variables"
+        ocp_console=$(oc whoami --show-console)
+        # ocp_console="https://$(oc get route console -n openshift-console -o jsonpath='{.spec.host}{"\n"}')"
+        rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
+        api_server=$(oc whoami --show-server)
+        TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard}"
+        echo "OCP Console URL set to: ${ocp_console}"
+        echo "RHODS Dashboard URL set to: ${rhods_dashboard}"
+        echo "RHODS API Server URL set to: ${api_server}"
+fi
+
 ## if we have yq installed
 if command -v yq &> /dev/null
     then
@@ -137,9 +152,14 @@ if command -v yq &> /dev/null
                 echo "INFO: OC Login enabled"
 
                 ## get the user, pass and API hostname for OpenShift
+                if ${SET_RHODS_URLS}
+                    then
+                        oc_host=${api_server}
+                    else
+                        oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
+                fi
                 oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})
                 oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ${TEST_VARIABLES_FILE})
-                oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
 
                 ## do an oc login here
                 oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
@@ -156,15 +176,6 @@ if command -v yq &> /dev/null
                 echo "since the oc login was successful, continuing."
             else
                 echo "skipping OC login as per parameter --skip-oclogin"
-                if ${SET_RHODS_URLS}
-                    then
-                        echo "INFO: getting RHODS URLs from the cluster as per --set-urls-variables"
-                        ocp_console="https://$(oc get route console -n openshift-console -o jsonpath='{.spec.host}{"\n"}')"
-                        rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
-                        TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard}"
-                        echo "OCP Console URL set to: ${ocp_console}"
-                        echo "RHODS Dashboard URL set to: ${rhods_dashboard}"
-                fi
         fi
     else
         echo "we did not find yq, so not trying the oc login"

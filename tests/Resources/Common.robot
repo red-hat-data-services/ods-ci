@@ -6,6 +6,7 @@ Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
 
+
 *** Keywords ***
 Begin Web Test
     [Documentation]  This keyword should be used as a Suite Setup; it will log in to the
@@ -17,7 +18,7 @@ Begin Web Test
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.4.0
     IF  ${version-check}==True
       Launch JupyterHub From RHODS Dashboard Link
     ELSE
@@ -30,7 +31,7 @@ Begin Web Test
     Go To  ${ODH_DASHBOARD_URL}
 
 End Web Test
-    ${server} =  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
+    ${server}=  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
     IF  ${server}==True
         Clean Up Server
         Stop JupyterLab Notebook Server
@@ -40,15 +41,15 @@ End Web Test
 
 Load Json File
     [Arguments]   ${file_path}
-    ${j_file}    Get File    ${file_path}
-    ${obj}    Evaluate    json.loads('''${j_file}''')    json
+    ${j_file}=    Get File    ${file_path}
+    ${obj}=    Evaluate    json.loads('''${j_file}''')    json
     [Return]    ${obj}
 
 Get CSS Property Value
     [Documentation]    Get the CSS property value of a given element
     [Arguments]    ${locator}    ${property_name}
-    ${element} =       Get WebElement    ${locator}
-    ${css_prop} =    Call Method       ${element}    value_of_css_property    ${property_name}
+    ${element}=       Get WebElement    ${locator}
+    ${css_prop}=    Call Method       ${element}    value_of_css_property    ${property_name}
     [Return]     ${css_prop}
 
 CSS Property Value Should Be
@@ -64,13 +65,15 @@ CSS Property Value Should Be
     END
 
 Get Cluster ID
+    [Documentation]     Retrieves the ID of the currently connected cluster
     ${cluster_id}=   Run    oc get clusterversion -o json | jq .items[].spec.clusterID
     IF    not $cluster_id
         Fail    Unable to retrieve cluster ID. Are you logged using `oc login` command?
     END
     [Return]    ${cluster_id}
 
-Get Cluster Name By ID
+Get Cluster Name By Cluster ID
+    [Documentation]     Retrieves the name of the currently connected cluster given its ID
     [Arguments]     ${cluster_id}
     ${cluster_name}=    Get Cluster Name     cluster_identifier=${cluster_id}
     IF    not $cluster_name

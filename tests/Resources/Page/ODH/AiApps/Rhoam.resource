@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Keyword suites to interact with Anaconda Commercial Edition
+Documentation       Keyword suites to interact with RHOAM addon
 
 Resource            ../../ODH/ODHDashboard/ODHDashboard.robot
 Library             OpenShiftLibrary
@@ -8,18 +8,21 @@ Library             OpenShiftLibrary
 *** Variables ***
 ${RHOAM_DISPLAYED_NAME}=    OpenShift API Management
 
+
 *** Keywords ***
 Get RHOAM Installation Stage
-    # ${rhmi_obj}=    OpenshiftCLI.Get    kind=RHMI    name=rhoam    namespace=redhat-rhoam-operator
+    [Documentation]     Get the installation stage by reading the "RHOAM installation object" YAML
     ${rhmi_stage}=     Run    oc get rhmi rhoam -n redhat-rhoam-operator -o json | jq .status.stage | sed 's/"//g'
     [Return]    ${rhmi_stage}
 
 RHOAM Installation Stage Should Be
+    [Documentation]     Check if the current installation stage is the expected one
     [Arguments]    ${exp_stage}
     ${current_stage}=   Get RHOAM Installation Stage
     Should Be Equal    ${rhmi_stage}    ${exp_stage}
 
 Wait Until RHOAM Installation Is Completed
+    [Documentation]     It waits until the installation is completed (i.e., stage is equal to "complete")
     [Arguments]     ${retries}=30   ${retries_interval}=2min
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         Log To Console    checking rhoam stage: retry ${retry_idx}
@@ -34,7 +37,9 @@ Wait Until RHOAM Installation Is Completed
         ...     (time between retries: ${retries_interval}). Check the cluster..
     END
 
-Verify RHOAM Is Enabled IN RHODS Dashboard
+Verify RHOAM Is Enabled In RHODS Dashboard
+    [Documentation]     Open the RHODS dashboard and checks if the RHOAM card
+    ...                 is present in Enabled page
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}

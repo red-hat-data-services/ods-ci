@@ -137,7 +137,7 @@ Restore RHODS Standard Groups Config Map
     ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${STANDARD_GROUPS_MODIFIED}"}}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
 
-Restore Standard Configuration
+Restore Standard RHODS Groups Configuration
     [Documentation]    Restores the standard RHODS access configuration
     Restore RHODS Standard Groups Config Map
     Rollout JupyterHub

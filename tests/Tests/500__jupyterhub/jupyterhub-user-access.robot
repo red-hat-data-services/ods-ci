@@ -77,4 +77,4 @@ Verify User Can Set Custom RHODS Groups
     Apply New Groups Config Map
     Rollout JupyterHub
     Check New Access Configuration Works As Expected
-    [Teardown]   Restore Standard Configuration
+    [Teardown]   Restore Standard RHODS Groups Configuration

@@ -378,3 +378,25 @@ Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
     [Arguments]    ${user_name}
     Element Text Should Be    xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]    ${user_name}
+
+Set PVC Value In RHODS Dashboard
+    [Documentation]    Change the default value for PVC
+    ...    only whole number is selected
+    [Arguments]    ${size}
+    Menu.Navigate To Page    Settings    Cluster settings
+    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
+    Run Keywords
+    ...   Input Text    //input[@id="pvc-size-input"]    ${size}
+    ...  AND
+    ...    Press Keys    //input[@id="pvc-size-input"]    RETURN
+    Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
+    ...    Wait Until Page Contains    Cluster settings updated successfully.
+
+Restore PVC Value To Default Size
+    [Documentation]    Set the PVC value to default
+    ...    valie i.e., 20Gi
+    Menu.Navigate To Page    Settings    Cluster settings
+    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
+    Click Button    Restore Default
+    Wait Until Keyword Succeeds    30    1
+    ...    Wait Until Page Contains    Cluster settings updated successfully.

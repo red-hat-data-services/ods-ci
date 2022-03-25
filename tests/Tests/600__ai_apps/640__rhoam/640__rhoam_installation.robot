@@ -28,7 +28,7 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     ...                RHOAM addon is installed on the same cluster
     [Tags]  Tier3
     ...     ODS-1136
-    ...     Destructive
+    ...     DestructiveTest
     ...     Execution-Time-Over-2h
     ${cluster_id}=   Get Cluster ID
     ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}

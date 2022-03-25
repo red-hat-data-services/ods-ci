@@ -38,12 +38,12 @@ Verify Two Servers Can Be Spawned
     ${node_first} =    Get User Server Node
     Close Browser
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard  ldap-user5  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Launch JupyterHub Spawner From Dashboard    username=ldap-user5
+    Launch JupyterHub Spawner From Dashboard    username=${TEST_USER_2.USERNAME}
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1
     ${serial_second} =    Get GPU Serial Number
-    ${node_second} =    Get User Server Node    username=ldap-user5
+    ${node_second} =    Get User Server Node    username=${TEST_USER_2.USERNAME}
     Should Not Be Equal    ${serial_first}    ${serial_second}
     Should Not Be Equal    ${node_first}    ${node_second}
     @{gpu_nodes} =    Get GPU nodes
@@ -59,7 +59,7 @@ Spawner Suite Setup
 
 Double User Teardown
     [Documentation]    Suite Teardown to close two servers
-    Clean Up Server    username=ldap-user5
+    Clean Up Server    username=${TEST_USER_2.USERNAME}
     Stop JupyterLab Notebook Server
     Close Browser
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

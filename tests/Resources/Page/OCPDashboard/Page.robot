@@ -5,7 +5,7 @@ Library  SeleniumLibrary
 Open Page
   [Arguments]  ${url}
   Open Browser  ${url}
-  ...           browser=${BROWSER.NAME}    
+  ...           browser=${BROWSER.NAME}
   ...           options=${BROWSER.OPTIONS}
   Page Should be Open  ${url}
 

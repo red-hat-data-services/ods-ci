@@ -9,6 +9,7 @@ Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Verify PyTorch Image Suite Setup
 Suite Teardown   End Web Test
+Force Tags       JupyterHub
 
 
 *** Variables ***
@@ -63,7 +64,7 @@ Verify PyTorch Image GPU Workload
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-1148
-    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
+    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
     JupyterLab Code Cell Error Output Should Not Be Visible
 
 

@@ -19,8 +19,10 @@ ${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "ti
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
+${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
+${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
 
 
 *** Keywords ***
@@ -70,7 +72,7 @@ Verify Service Is Enabled
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Enabled
   Wait Until Page Contains    JupyterHub  timeout=30
-  Wait Until Page Contains    ${app_name}  timeout=150
+  Wait Until Page Contains    ${app_name}  timeout=180
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
   Page Should Not Contain Element    xpath://article//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
 
@@ -139,7 +141,12 @@ Check HTTP Status Code
     [Return]  ${response.status_code}
 
 Load Expected Data Of RHODS Explore Section
-    ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.8.0
+    IF  ${version-check}==True
+        ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
+    ELSE
+        ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
+    END
     ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
     [Return]  ${apps_dict_obj}
 
@@ -331,3 +338,65 @@ Restore PVC Value To Default Size
    Wait Until Keyword Succeeds    30    1
    ...    Wait Until Page Contains    Cluster settings updated successfully.
 
+Get Question Mark Links
+    [Documentation]      It returns the link elements from the question mark
+    @{links_list}=  Create List
+    @{link_elements}=  Get WebElements
+    ...    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
+    FOR  ${link}  IN  @{link_elements}
+         ${href}=    Get Element Attribute    ${link}    href
+         Append To List    ${links_list}    ${href}
+    END
+    [Return]  @{links_list}
+
+Get RHODS Documentation Links From Dashboard
+    [Documentation]    It returns a list containing rhods documentation links
+    Click Link    Resources
+    Sleep    2
+    # get the documentation link
+    ${href_view_the_doc}=    Get Element Attribute    //a[@class='odh-dashboard__external-link']    href
+    Click Element    xpath=//*[@id="toggle-id"]
+    ${links}=    Get Question Mark Links
+    # inserting at 0th position
+    Insert Into List    ${links}    0    ${href_view_the_doc}
+    [Return]  @{links}
+
+Check External Links Status
+    [Documentation]      It iterates through the links and cheks their HTTP status code
+    [Arguments]     ${links}
+    FOR  ${idx}  ${href}  IN ENUMERATE  @{links}  start=1
+        ${status}=  Check HTTP Status Code   link_to_check=${href}
+        Log    ${idx}. ${href} gets status code ${status}
+    END
+
+Verify Cluster Settings Is Available
+    [Documentation]    Verifies submenu Settings > Cluster settings" is visible
+    Page Should Contain    Settings
+    Menu.Navigate To Page    Settings    Cluster settings
+    Capture Page Screenshot
+    Wait Until Page Contains    Update global settings for all users    timeout=30
+    Wait Until Page Contains Element    ${USAGE_DATA_COLLECTION_XP}    timeout=30
+
+Verify Cluster Settings Is Not Available
+    [Documentation]    Verifies submenu Settings > Cluster settings is not visible
+    ${cluster_settings_available}=    Run Keyword And Return Status    Verify Cluster Settings Is Available
+    Should Not Be True    ${cluster_settings_available}    msg=Cluster Settings shoudn't be visible for this user
+
+Enable "Usage Data Collection"
+    [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
+    Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+
+Disable "Usage Data Collection"
+    [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
+    Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
+
+Search Items In Resources Section
+    [Arguments]     ${element}
+    Click Link      Resources
+    Sleep   5
+    Input Text  xpath://input[@class="pf-c-search-input__text-input"]       ${element}
+
+Verify Username Displayed On RHODS Dashboard
+    [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
+    [Arguments]    ${user_name}
+    Element Text Should Be    xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]    ${user_name}

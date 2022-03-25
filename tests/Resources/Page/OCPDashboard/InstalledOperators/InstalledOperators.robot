@@ -95,14 +95,15 @@ Get RHODS version
     #&{dict} =  Set Variable  ${list}[0]
     #Log  ${dict.spec.version}
     ${ver} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
-    ${ver} =  Fetch From Left  ${ver}  -
     Log  ${ver}
     [Return]  ${ver}
 
 Is RHODS Version Greater Or Equal Than
     [Arguments]  ${target}
     ${ver} =  Get RHODS version
+    ${ver} =  Fetch From Left  ${ver}  -
     ${comparison} =  GTE  ${ver}  ${target}
+    # Returns True or False
     [Return]  ${comparison}
 
 Move To Installed Operator Page Tab in Openshift

@@ -50,7 +50,7 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
 
 Verify User Is Able to Activate Anaconda Commercial Edition
   [Tags]  Tier2
-  ...     ODS-272  ODS-344  ODS-501  ODS-588
+  ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082
   ...     KnownIssues
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
@@ -87,6 +87,8 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
+  Verify Jupyter Lab Version    3.1.4
+  Verify Notebook Lab Version   6.4.1
   [Teardown]    Remove Anaconda Commercial Edition Component
 
 

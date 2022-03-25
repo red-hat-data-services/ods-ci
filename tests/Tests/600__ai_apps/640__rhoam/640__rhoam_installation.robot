@@ -16,6 +16,7 @@ Verify RHOAM Can Be Installed
     [Documentation]    Verifies RHOAM Addon can be successfully installed
     [Tags]  Tier3
     ...     ODS-273
+    ...     Execution-Time-Over-40min
     ${cluster_id}=   Get Cluster ID
     ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
     Install Rhoam Addon    cluster_name=${cluster_name}
@@ -27,6 +28,8 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     ...                RHOAM addon is installed on the same cluster
     [Tags]  Tier3
     ...     ODS-1136
+    ...     Destructive
+    ...     Execution-Time-Over-2h
     ${cluster_id}=   Get Cluster ID
     ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
     Set Suite Variable     ${CLUSTER_NAME}

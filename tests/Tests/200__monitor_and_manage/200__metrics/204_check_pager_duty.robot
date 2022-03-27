@@ -24,6 +24,7 @@ ${SECRET_NAME}          redhat-rhods-pagerduty
 PagerDuty Dummy Secret Verification
      [Documentation]    Verification of PagerDuty Secret
      [Tags]  Sanity
+     ...     Tier1
      ...     ODS-737
      ...     Deployment-Cli
      ${service_key}   Get PagerDuty Key From Alertmanager ConfigMap

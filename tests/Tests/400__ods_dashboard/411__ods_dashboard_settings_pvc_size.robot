@@ -19,7 +19,7 @@ Test Setup      PVC Size Test Setup
 
 *** Variables ***
 ${NAMESPACE}    redhat-ods-applications
-${S_SIZE}       4
+${S_SIZE}       15
 ${SIZE_CODE}    import subprocess;
 ...    int(subprocess.check_output(['df','-h', '/opt/app-root/src']).split()[8].decode('utf-8')[:-1])
 @{NS_SIZE}      0    abc    6.5   -12
@@ -44,6 +44,7 @@ Verify User Cannot Set An Unsupported PVC Size Using Backend
     ...    spawn notebook for supported PVC change
     [Tags]    Tier2
     ...       ODS-1229
+    ...       KnownIssues
     Verify Multiple Unsupported Size    ${NS_SIZE}
     [Teardown]    PVC Size Test Teardown
 

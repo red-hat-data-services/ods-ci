@@ -155,7 +155,7 @@ Spawn Notebook With Arguments  # robocop: disable
                Add Spawner Environment Variable  ${key}  ${value}
             END
          END
-         Spawn Notebook
+         Spawn Notebook    ${spawner_timeout}
          Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
          ...    id:progress-bar  ${spawner_timeout}
          Wait For JupyterLab Splash Screen  timeout=30

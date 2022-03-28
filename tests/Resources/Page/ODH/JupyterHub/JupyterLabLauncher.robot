@@ -150,7 +150,7 @@ Maybe Select Kernel
 
 Clean Up Server
     [Documentation]    Cleans up user server and checks that everything has been removed
-    [Arguments]    ${username}=${TEST_USER.USERNAME}
+    [Arguments]    ${username}=${TEST_USER.USERNAME}    ${admin_username}=${OCP_ADMIN_USER.USERNAME}
     Maybe Close Popup
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Run Keyword And Continue On Failure    Open With JupyterLab Menu    File    Close All Tabs

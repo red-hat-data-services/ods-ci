@@ -28,8 +28,8 @@ JupyterHub Spawner Is Visible
 
 Wait Until JupyterHub Spawner Is Ready
     [Documentation]  Waits for the spawner page to be ready using the server size dropdown
-    Wait Until Page Contains Element    xpath:${JUPYTERHUB_CONTAINER_SIZE_TITLE}
-    Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]
+    Wait Until Page Contains Element    xpath:${JUPYTERHUB_CONTAINER_SIZE_TITLE}    timeout=15s
+    Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]    timeout=15s
 
 Select Notebook Image
     [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
@@ -59,6 +59,13 @@ Set Number Of Required GPUs
     [Arguments]  ${gpus}
     Click Element  xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]
     Click Element  xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]/ul/li[.="${gpus}"]
+
+Fetch Max Number Of GPUs In Spawner Page
+    [Documentation]    Returns the maximum number of GPUs a user can request from the spawner
+    Click Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]
+    ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
+    ${maxGPUs} =    Convert To Integer    ${maxGPUs}
+    [Return]    ${maxGPUs}
 
 Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
@@ -180,9 +187,10 @@ Spawned Image Check
 
 Launch JupyterHub Spawner From Dashboard
     [Documentation]  Launches JupyterHub from the RHODS Dashboard
+    [Arguments]    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}    ${auth}=${TEST_USER.AUTH_TYPE}
     Menu.Navigate To Page    Applications    Enabled
     Launch JupyterHub From RHODS Dashboard Link
-    Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Login To Jupyterhub  ${username}  ${password}  ${auth}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status

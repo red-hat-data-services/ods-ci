@@ -49,6 +49,7 @@ class OpenshiftClusterManager():
         self.pool_node_count = args.get("pool_node_count")
         self.taints = args.get("taints")
         self.pool_name = args.get("pool_name")
+        self.reuse_machine_pool = args.get("reuse_machine_pool")
 
         ocm_env = glob.glob(dir_path+"/../../../ocm.json.*")
         if ocm_env != []:
@@ -311,21 +312,37 @@ class OpenshiftClusterManager():
             return None
         return match.group(1).strip()
 
-    def add_machine_pool(self):
-        """Adds machine pool to the given cluster"""
-        cmd = ("ocm create machinepool --cluster {} "
-               "--instance-type {} --replicas {} "
-               "--taints {} "
-               "{}".format(self.cluster_name,
-                           self.pool_instance_type,
-                           self.pool_node_count, self.taints,
-                           self.pool_name))
-        log.info("CMD: {}".format(cmd))
+    def check_if_machine_pool_exists(self):
+        """Checks if given machine pool name already
+           exists in cluster"""
+
+        cmd = ("/bin/ocm list machinepools --cluster {} "
+               "| grep -w {}".format(self.cluster_name, self.pool_name))
         ret = execute_command(cmd)
         if ret is None:
-            log.info("Failed to add machine pool {}".format(self.cluster_name))
-            sys.exit(1)
-        time.sleep(60)
+            return False
+        return True
+
+    def add_machine_pool(self):
+        """Adds machine pool to the given cluster"""
+        if bool(self.reuse_machine_pool) and self.check_if_machine_pool_exists():
+            log.info("MachinePool with name {} exists in cluster "
+                     "{}. Hence "
+                     "reusing it".format(self.pool_name,self.cluster_name))
+        else:
+            cmd = ("/bin/ocm create machinepool --cluster {} "
+                   "--instance-type {} --replicas {} "
+                   "--taints {} "
+                   "{}".format(self.cluster_name,
+                               self.pool_instance_type,
+                               self.pool_node_count, self.taints,
+                               self.pool_name))
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            if ret is None:
+                log.info("Failed to add machine pool {}".format(self.cluster_name))
+                sys.exit(1)
+            time.sleep(60)
 
     def wait_for_addon_installation_to_complete(self, addon_name="managed-odh",
                                                 timeout=3600):
@@ -850,6 +867,9 @@ if __name__ == "__main__":
             help="Machine pool name",
             action="store", dest="pool_name", metavar="",
             default="gpunode")
+        optional_machinepool_cluster_parser.add_argument("--reuse-machine-pool",
+            help="",
+            action="store_true", dest="reuse_machine_pool")
         add_machinepool_parser.set_defaults(func=ocm_obj.add_machine_pool)
 
         #Argument parsers for uninstall_rhods_addon

@@ -25,20 +25,25 @@ ${TEST_ALERT_PVC100_NOTEBOOK_PATH}      SEPARATOR=
 
 *** Test Cases ***
 Verify All Alerts Are Critical
-    [Documentation]    Verifies that, in a regular situation, only the DeadManSnitch alert is firing
+    [Documentation]    Verifies that all alerts have critical severity
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1227
 
-    Verify "RHODS Probe Success Burn Rate" Are Critical And Continue On Failure
+    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.9.0
+    IF    ${version_check}==True
+        Verify "RHODS Probe Success Burn Rate" Are Critical And Continue On Failure
 
-    Verify "RHODS Route Error Burn Rate" Are Critical And Continue On Failure
+        Verify "RHODS Route Error Burn Rate" Are Critical And Continue On Failure
 
-    Verify "User Notebook PVC Usage" Are Critical And Continue On Failure
+        Verify "User Notebook PVC Usage" Are Critical And Continue On Failure
 
-    Verify "DeadManSnitch" Is Critical And Continue On Failure
+        Verify "DeadManSnitch" Is Critical And Continue On Failure
 
-    Verify "JupyterHub Image Builds Are Failing" Is Critical And Continue On Failure
+        Verify "JupyterHub Image Builds Are Failing" Is Critical And Continue On Failure
+    ELSE
+        Skip    msg=Critical alert severity is set since RHODS 1.9.0
+    END
 
 Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that, in a regular situation, only the DeadManSnitch alert is firing

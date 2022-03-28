@@ -134,7 +134,7 @@ Run Cell And Get Output
     [Return]    ${output}
 
 Python Version Check
-  [Arguments]  ${expected_version}=3.8
+  [Arguments]  ${expected_version}=3.8  ${comparator}=Equal
   Add and Run JupyterLab Code Cell in Active Notebook  !python --version
   Wait Until JupyterLab Code Cell Is Not Active
   #Get the text of the last output cell
@@ -142,7 +142,15 @@ Python Version Check
   #start is inclusive, end exclusive, get x.y from Python x.y.z string
   ${output} =  Fetch From Right  ${output}  ${SPACE}
   ${vers} =  Get Substring  ${output}  0  3
-  Should Match  ${vers}  ${expected_version}
+  IF    "${comparator}" == "Equal"
+        Should Match  ${vers}  ${expected_version}
+  ELSE IF   "${comparator}"=="GTE"
+        ${res}=  GTE  3.9.1  3.8.0
+        Should Be Equal As Strings    ${res}    True
+  ELSE IF   "${comparator}"=="LTE"
+        ${res}=  LTE  ${vers}  ${expected_version}
+        Should Be Equal As Strings    ${res}    True
+  END
 
 Maybe Select Kernel
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]

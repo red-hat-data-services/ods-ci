@@ -75,8 +75,7 @@ Verify There Are No Errors With Distutil Library
     ...                there are no errors in logs
     [Tags]    Sanity
     ...       ODS-586
-    Spawn Notebook With Arguments    image=pytorch    size=Default
-    Verify Python Version In Notebook
+    Verify Python Version In All Images
     Verify Errors In Logs
 
 
@@ -127,4 +126,21 @@ Verify Errors In Logs
     @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications
     FOR    ${pod}    IN    @{pods}
         ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}    namespace=redhat-ods-applications    container=${pod['spec']['containers'][0]['name']}
+        Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
     END
+
+Verify Python Version In All Images
+    [Documentation]     Spawns all images and Verifies Python Version >=3.8
+    @{image_list} =  Create List  minimal-gpu  pytorch  tensorflow  s2i-generic-data-science-notebook  s2i-minimal-notebook
+    FOR    ${image}    IN    @{image_list}
+        ${server} =  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
+        IF  ${server}==True
+            Clean Up Server
+            Stop JupyterLab Notebook Server
+            Fix Spawner Status
+        END
+        Spawn Notebook With Arguments    image=${image}
+        Python Version Check  expected_version=3.8   comparator=GTE
+    END
+
+

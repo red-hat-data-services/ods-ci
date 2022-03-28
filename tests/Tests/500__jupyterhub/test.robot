@@ -85,8 +85,7 @@ Verify Message That Image Builds Are In Progress
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     RHODS Notification Drawer Should Contain  message=Notebook images are building
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
-    RHODS Notification Drawer Should Contain  message=All notebook image builds are complete
-
+    Wait Until Page Contains Element    xpath=//*[contains(text(),'All notebook image builds are complete')]  timeout=5 min
 
 *** Keywords ***
 JupyterHub Testing Suite Setup

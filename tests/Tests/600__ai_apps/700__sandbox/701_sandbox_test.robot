@@ -11,9 +11,9 @@ Suite Teardown  Sandbox Suite Teardown
 
 *** Variables ***
 ${SANDBOX_AUTH_TYPE}   DevSandbox
-${SANDBOX_USERNAME}    rhods-qe
-${SANDBOX_PASSWORD}    rhodsPW#123
-${SANDBOX_OCP_URL}     https://console-openshift-console.apps.rhods-sb-stage.ju9j.p1.openshiftapps.com
+${SANDBOX_USERNAME}    *******
+${SANDBOX_PASSWORD}    *******
+${SANDBOX_OCP_URL}     *******
 
 
 *** Test Cases ***

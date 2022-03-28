@@ -400,3 +400,10 @@ Restore PVC Value To Default Size
     Click Button    Restore Default
     Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Cluster settings updated successfully.
+
+RHODS Notification Drawer Should Contain
+    [Documentation]    Verifies RHODS Notifications contains given Message
+    [Arguments]     ${message}
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Page Should Contain Element
+    ...    xpath=//*[contains(text(),'${message}')]

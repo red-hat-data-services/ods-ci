@@ -231,6 +231,7 @@ Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image 
     [Documentation]     Verify the "JupyterHub image builds are failing" alert when there is a image build failed
     [Tags]    Tier2
     ...       ODS-717
+    ...       Execution-Time-Over-30m
     ...       KnownIssues
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
@@ -271,6 +272,7 @@ Verify Alert "JupyterHub Image Builds Are Failing" Fires Up To 30 Minutes When T
     [Documentation]    Verify that alert is firing up to 30 min and after thar resolve automatically
     [Tags]    Tier2
     ...       ODS-790
+    ...       Execution-Time-Over-30m
     ...       KnownIssues
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook

@@ -77,8 +77,7 @@ Can Launch Python3
 
 Verify Message That Image Builds Are In Progress
     [Documentation]     Verifies that Image Builds In Progress are Shown In RHODS Dashboard
-    [Tags]      Sanity
-    ...         Tier2
+    [Tags]      Tier2
     ...         ODS-460
     Delete Last Pytorch Build
     ${new_buildname}=  Start New Pytorch Build

@@ -24,7 +24,8 @@ Verify OpenVino Is Available In RHODS Dashboard Explore Page
 
 Verify Openvino Operator Can Be Installed Using OpenShift Console
    [Tags]   Tier2
-   ...      ODS-675   ODS-702   ODS-495
+   ...      ODS-675
+   ...      ODS-495
    [Documentation]  This Test Case Installed Openvino operator in Openshift cluster
    ...               and Check and Launch AIKIT notebook image from RHODS dashboard
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}

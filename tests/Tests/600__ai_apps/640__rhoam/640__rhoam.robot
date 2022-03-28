@@ -21,7 +21,7 @@ Verify RHOAM Is Available In RHODS Dashboard Explore Page
 *** Keywords ***
 RHOAM Suite Setup
   Set Library Search Order  SeleniumLibrary
-  Protect Sensitive Variables In Keywords
+  RHOSi Setup
 
 RHOAM Suite Teardown
   Close All Browsers

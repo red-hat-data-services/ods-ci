@@ -5,6 +5,7 @@ Library   OperatingSystem
 Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource  RHOSi.resource
 
 
 *** Keywords ***
@@ -14,6 +15,8 @@ Begin Web Test
     ...              handing control over to the test suites.
 
     Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
+
 
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

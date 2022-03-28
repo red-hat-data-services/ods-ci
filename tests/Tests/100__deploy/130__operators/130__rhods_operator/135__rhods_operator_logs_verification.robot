@@ -6,10 +6,15 @@ Documentation   135 - RHODS_OPERATOR_LOGS_VERIFICATION
 ...             | Namespace                | Required |        RHODS Namespace/Project for RHODS operator POD |
 ...             | REGEX_PATTERN            | Required |        Regular Expression Pattern to match the erro msg in capture log|
 
+Resource      ../../../../Resources/RHOSi.resource
+
 Library        Collections
 Library        OpenShiftCLI
 Library        OperatingSystem
 Library        String
+
+Suite Setup     RHOSi Setup
+
 
 *** Variables ***
 ${namespace}           redhat-ods-operator

@@ -88,7 +88,9 @@ Verify Message That Image Builds Are In Progress
 
 *** Keywords ***
 JupyterHub Testing Suite Setup
-  Set Library Search Order  SeleniumLibrary
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
+
 
 Delete Last Pytorch Build
     [Documentation]     Searches for last build which contains pytorch and deletes it

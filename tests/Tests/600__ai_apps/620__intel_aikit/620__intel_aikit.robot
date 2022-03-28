@@ -42,7 +42,7 @@ Verify Inetl AIKIT Operator Can Be Installed Using OpenShift Console
 ***Keywords ***
 Intel_Aikit Suite Setup
   Set Library Search Order  SeleniumLibrary
-  Protect Sensitive Variables In Keywords
+  RHOSi Setup
 
 Intel_Aikit Suite Teardown
   Close All Browsers

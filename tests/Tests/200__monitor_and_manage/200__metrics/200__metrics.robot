@@ -1,8 +1,11 @@
 *** Settings ***
+Resource        ../../../Resources/ODS.robot
 Resource            ../../../Resources/ODS.robot
 Test Setup          Begin Metrics Web Test
 Test Teardown       End Metrics Web Test
 
+
+Suite Setup     RHOSi Setup
 
 *** Variables ***
 @{RECORD_GROUPS}    Availability Metrics    SLOs - JupyterHub    SLOs - ODH Dashboard    SLOs - RHODS Operator    SLOs - Traefik Proxy    Usage Metrics

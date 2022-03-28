@@ -42,7 +42,7 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
 *** Keywords ***
 OpenVino Suite Setup
   Set Library Search Order  SeleniumLibrary
-  Protect Sensitive Variables In Keywords
+  RHOSi Setup
 
 OpenVino Suite Teardown
   Close All Browsers

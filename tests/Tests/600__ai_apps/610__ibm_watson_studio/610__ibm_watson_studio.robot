@@ -18,7 +18,7 @@ Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page
 * Keywords ***
 IBM Watson Studio Suite Setup
   Set Library Search Order  SeleniumLibrary
-  Protect Sensitive Variables In Keywords
+  RHOSi Setup
 
 IBM Watson Studio Suite Teardown
   Close All Browsers

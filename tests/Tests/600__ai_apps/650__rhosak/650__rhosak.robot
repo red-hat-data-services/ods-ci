@@ -120,7 +120,7 @@ Verify User Is Able to Produce and Consume Events
 Kafka Suite Setup
     [Documentation]    Setup for RHOSAK Test Suite
     Set Library Search Order    SeleniumLibrary
-    Protect Sensitive Variables In Keywords
+    RHOSi Setup
 
 Kafka Suite Teardown
     [Documentation]    Teardown for Test Suite

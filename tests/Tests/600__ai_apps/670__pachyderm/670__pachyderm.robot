@@ -34,7 +34,7 @@ Verify Pachyderm Can Be Installed Using OpenShift Console
 *** Keywords ***
 Pachyderm Test Suite
     Set Library Search Order  SeleniumLibrary
-    Protect Sensitive Variables In Keywords
+    RHOSi Setup
 
 Dashboard Test Setup
     Set Library Search Order    SeleniumLibrary

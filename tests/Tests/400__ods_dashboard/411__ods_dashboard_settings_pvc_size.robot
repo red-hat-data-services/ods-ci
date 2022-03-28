@@ -14,6 +14,7 @@ Library         JupyterLibrary
 Resource         ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Suite Setup     RHOSi Setup
 Suite Teardown  PVC Size Suite Teadrown
 Test Setup      PVC Size Test Setup
 

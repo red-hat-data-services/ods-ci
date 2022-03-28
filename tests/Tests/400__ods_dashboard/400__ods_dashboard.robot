@@ -187,6 +187,7 @@ Check OpenShift Login Visible
 
 Dashboard Test Setup
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
 

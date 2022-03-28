@@ -314,6 +314,7 @@ Verify Alert "JupyterHub Image Builds Are Failing" Fires At Least 20 Minutes Whe
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
 
 Teardown PVC Alert Test
     [Documentation]    Deletes user notebook files using the new "Clean Up User Notebook"

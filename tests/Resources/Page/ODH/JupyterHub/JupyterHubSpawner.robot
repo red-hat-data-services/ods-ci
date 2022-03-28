@@ -371,4 +371,6 @@ Verify Library Version Is Greater Than
     [Arguments]     ${library}      ${target}
     ${ver} =  Run Cell And Get Output   !pip show ${library} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
     ${comparison} =  GTE  ${ver}  ${target}
-    [Return]  ${comparison}
+    IF  ${comparison}==False
+        FAIL    Library Version Is Smaller Than Expected
+    END

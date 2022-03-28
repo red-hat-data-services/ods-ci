@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation       Applies RHOSi settings to run the test suites
 Library     RPA.RobotLogListener
 
 
@@ -9,6 +10,7 @@ Library     RPA.RobotLogListener
 ...                         Login to OCP
 ...                         Login to Openshift
 ...                         Login to Jupyterhub
+...                         Verify Username Displayed On RHODS Dashboard
 
 
 *** Keywords ***
@@ -21,4 +23,6 @@ RHOSi Setup
     # TO DO: oc login
 
 Protect Sensitive Variables In Keywords
+    [Documentation]     Register keywords which use sensitive data as "Protected"
+    ...                 to turn their log level to NONE using RobotLogListener by Robocorp
     Register Protected Keywords     names=@{PROTECTED_KEYWORDS}

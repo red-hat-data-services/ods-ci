@@ -84,13 +84,12 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Wait Until JupyterLab Code Cell Is Not Active
   Run Cell And Check For Errors  import numpy as np
   Capture Page Screenshot  conda_lib_install_result.png
+  Verify Library Version Is Greater Than    jupyterlab  3.1.4
+  Verify Library Version Is Greater Than    notebook    6.4.1
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
-  Verify Jupyter Lab Version    3.1.4
-  Verify Notebook Lab Version   6.4.1
   [Teardown]    Remove Anaconda Commercial Edition Component
-
 
 *** Keywords ***
 Anaconda Commercial Edition Suite Setup

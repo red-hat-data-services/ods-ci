@@ -7,6 +7,7 @@ Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library             JupyterLibrary
 Library             OpenShiftLibrary
 
+
 Suite Setup         Load Spawner Page
 Suite Teardown      End Web Test
 
@@ -125,5 +126,5 @@ Verify Python Version In All Images
             Fix Spawner Status
         END
         Spawn Notebook With Arguments    image=${image}    size=Default
-        Python Version Check    expected_version=3.8    comparator=GTE
+        Python Version Check    expected_version=3.8    compare=GTE
     END

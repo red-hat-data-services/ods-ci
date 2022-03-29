@@ -5,7 +5,8 @@ Library  jupyter-helper.py
 Library  OperatingSystem
 Library  Screenshot
 Library  String
-Library    OpenShiftCLI
+Library  OpenShiftCLI
+Library  ../../../../libs/Helpers.py
 
 *** Variables ***
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
@@ -134,7 +135,7 @@ Run Cell And Get Output
     [Return]    ${output}
 
 Python Version Check
-  [Arguments]  ${expected_version}=3.8  ${comparator}=Equal
+  [Arguments]  ${expected_version}=3.8  ${compare}=Equal
   Add and Run JupyterLab Code Cell in Active Notebook  !python --version
   Wait Until JupyterLab Code Cell Is Not Active
   #Get the text of the last output cell
@@ -142,15 +143,7 @@ Python Version Check
   #start is inclusive, end exclusive, get x.y from Python x.y.z string
   ${output} =  Fetch From Right  ${output}  ${SPACE}
   ${vers} =  Get Substring  ${output}  0  3
-  IF    "${comparator}" == "Equal"
-        Should Match  ${vers}  ${expected_version}
-  ELSE IF   "${comparator}"=="GTE"
-        ${res}=  GTE  ${vers}  ${expected_version}
-        Should Be Equal As Strings    ${res}    True
-  ELSE IF   "${comparator}"=="LTE"
-        ${res}=  LTE  ${vers}  ${expected_version}
-        Should Be Equal As Strings    ${res}    True
-  END
+  Compare Strings  ${vers}  ${expected_version}  ${compare}
 
 Maybe Select Kernel
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]

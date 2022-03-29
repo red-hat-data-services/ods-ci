@@ -86,8 +86,6 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Capture Page Screenshot  conda_lib_install_result.png
   Run Keyword And Continue On Failure   Verify Library Version Is Greater Than  jupyterlab  3.1.4
   Run Keyword And Continue On Failure   Verify Library Version Is Greater Than  notebook    6.4.1
-  #Verify Library Version Is Greater Than    jupyterlab  3.1.4
-  #Verify Library Version Is Greater Than    notebook    6.4.1
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15

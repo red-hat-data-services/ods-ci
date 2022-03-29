@@ -1,28 +1,16 @@
 *** Settings ***
-<<<<<<< HEAD
 Documentation       Test Suite to verify installed library versions
-
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library             JupyterLibrary
+Library             OpenShiftLibrary
 
 Suite Setup         Load Spawner Page
 Suite Teardown      End Web Test
 
 Force Tags          JupyterHub
-=======
-Documentation    Test Suite to verify installed library versions
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Library          JupyterLibrary
-Library          OpenShiftLibrary
-Suite Setup      Load Spawner Page
-Suite Teardown   End Web Test
->>>>>>> 442ccb8... Added tests to verify there are no errors with distutil library
 
 
 *** Variables ***
@@ -71,8 +59,8 @@ Verify All Images And Spawner
 
 Verify There Are No Errors With Distutil Library
     [Documentation]    Verifies that notebook can be spawned ,
-    ...                python version is greater than or equal to 3.8 and
-    ...                there are no errors in logs
+    ...    python version is greater than or equal to 3.8 and
+    ...    there are no errors in logs
     [Tags]    Sanity
     ...       ODS-586
     Verify Python Version In All Images
@@ -125,22 +113,23 @@ Verify Errors In Logs
     [Documentation]    Verifies that there are no errors in Logs
     @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications
     FOR    ${pod}    IN    @{pods}
-        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}    namespace=redhat-ods-applications    container=${pod['spec']['containers'][0]['name']}
+        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}    namespace=redhat-ods-applications
+        ...    container=${pod['spec']['containers'][0]['name']}
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
     END
 
 Verify Python Version In All Images
-    [Documentation]     Spawns all images and Verifies Python Version >=3.8
-    @{image_list} =  Create List  minimal-gpu  pytorch  tensorflow  s2i-generic-data-science-notebook  s2i-minimal-notebook
+    [Documentation]    Spawns all images and Verifies Python Version >=3.8
+    @{image_list} =    Create List    minimal-gpu    pytorch    tensorflow    s2i-generic-data-science-notebook
+    ...    s2i-minimal-notebook
     FOR    ${image}    IN    @{image_list}
-        ${server} =  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
-        IF  ${server}==True
+        ${server} =    Run Keyword and Return Status    Page Should Contain Element
+        ...    //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
+        IF    ${server}==True
             Clean Up Server
             Stop JupyterLab Notebook Server
             Fix Spawner Status
         END
-        Spawn Notebook With Arguments    image=${image}
-        Python Version Check  expected_version=3.8   comparator=GTE
+        Spawn Notebook With Arguments    image=${image}    size=Default
+        Python Version Check    expected_version=3.8    comparator=GTE
     END
-
-

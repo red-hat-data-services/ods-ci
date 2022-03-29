@@ -62,6 +62,7 @@ Verify There Are No Errors With Distutil Library
     ...    python version is greater than or equal to 3.8 and
     ...    there are no errors in logs
     [Tags]    Sanity
+    ...       Tier2
     ...       ODS-586
     Verify Python Version In All Images
     Verify Errors In Logs
@@ -101,13 +102,6 @@ Verify List Of Libraries In Image
     ${status} =    Verify Libraries In Base Image    ${image}    ${additional_libs}
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for ${image} image do not match
-
-Verify Python Version In Notebook
-    [Documentation]    Verifies python version >=3.8
-    ${python_version} =    Run Cell And Get Output    !python --version
-    ${python_version} =    Fetch From Right    ${python_version}    ${SPACE}
-    ${version_check} =    GTE    ${python_version}    3.8.0
-    Should Be Equal As Strings    ${version_check}    True
 
 Verify Errors In Logs
     [Documentation]    Verifies that there are no errors in Logs

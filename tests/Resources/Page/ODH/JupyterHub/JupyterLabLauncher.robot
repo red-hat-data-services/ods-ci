@@ -145,7 +145,7 @@ Python Version Check
   IF    "${comparator}" == "Equal"
         Should Match  ${vers}  ${expected_version}
   ELSE IF   "${comparator}"=="GTE"
-        ${res}=  GTE  3.9.1  3.8.0
+        ${res}=  GTE  ${vers}  ${expected_version}
         Should Be Equal As Strings    ${res}    True
   ELSE IF   "${comparator}"=="LTE"
         ${res}=  LTE  ${vers}  ${expected_version}

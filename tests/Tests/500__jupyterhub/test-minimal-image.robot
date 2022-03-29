@@ -54,7 +54,7 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     ${updated version} =    Run Cell And Get Output
     ...    !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
     Should Not Be Equal    ${updated version}    ${version}
-    Clean Up User Notebook    ${OCP_ADMIN_USER.USERNAME}    ${TEST_USER.USERNAME}
+    Clean Up Server
 
 Verify jupyterlab server pods are spawned in a custom namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)

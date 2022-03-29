@@ -1,6 +1,6 @@
 #/bin/bash
 
-SKIP_OC_LOGIN=true
+SKIP_OC_LOGIN=false
 SET_RHODS_URLS=false
 TEST_CASE_FILE=tests/Tests
 TEST_VARIABLES_FILE=test-variables.yml

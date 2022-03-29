@@ -46,14 +46,11 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     Close Other Tabs
     Add and Run JupyterLab Code Cell In Active Notebook    !pip install -r useful-files/requirements.txt --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
-    ${version} =    Run Cell And Get Output
-    ...    !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
-    Should Be Equal    2.7.0    ${version}
+    ${version} =    Verify Installed Library Version    tensorflow    2.7
     Add and Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
-    ${updated version} =    Run Cell And Get Output
-    ...    !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
-    Should Not Be Equal    ${updated version}    ${version}
+    ${updated version} =    Verify Installed Library Version    tensorflow    2.8
+    Should Not Be Equal    ${updated version}[1]    ${version}[1]
     Clean Up Server
 
 Verify jupyterlab server pods are spawned in a custom namespace

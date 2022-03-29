@@ -353,7 +353,7 @@ Verify Installed Library Version
     [Arguments]  ${lib}  ${ver}
     ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
     Run Keyword If  '${status}' == 'FAIL'  Log  "Expected ${lib} at version ${ver}, but ${value}"
-    [Return]    ${status}
+    [Return]    ${status}    ${value}
 
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
@@ -363,19 +363,19 @@ Check Versions In JupyterLab
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
         IF  "${libDetail}[0]" == "TensorFlow"
             ${status} =  Verify Installed Library Version  tensorflow-gpu  ${libDetail}[1]
-            IF  '${status}' == 'FAIL'
+            IF  '${status}[0]' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
         ELSE IF  "${libDetail}[0]" == "PyTorch"
             ${status} =  Verify Installed Library Version  torch  ${libDetail}[1]
-            IF  '${status}' == 'FAIL'
+            IF  '${status}[0]' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
         ELSE IF  "${libDetail}[0]" == "Python"
             ${status} =  Python Version Check  ${libDetail}[1]
         ELSE
             ${status} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
-            IF  '${status}' == 'FAIL'
+            IF  '${status}[0]' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
         END

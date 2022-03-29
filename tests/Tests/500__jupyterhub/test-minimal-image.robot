@@ -3,7 +3,6 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource    ../../../venv/lib/python3.8/site-packages/JupyterLibrary/clients/jupyterlab/Shell.resource
 Library             DebugLibrary
 Library             JupyterLibrary
 
@@ -43,12 +42,8 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     [Tags]    ODS-555    ODS-908    ODS-535
     ...       Tier1
     Clone Git Repository    ${RequirementsFileRepo}
-    Open With JupyterLab Menu    File    New    Notebook
-    Sleep    1
-    Maybe Close Popup
-    Close Other JupyterLab Tabs
-    Maybe Close Popup
-    Sleep    1
+    Open New Notebook
+    Close Other Tabs
     Add and Run JupyterLab Code Cell In Active Notebook    !pip install -r useful-files/requirements.txt --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
     ${version} =    Run Cell And Get Output
@@ -111,3 +106,15 @@ Can Launch Python3 Smoke Test Notebook
     Should Not Match    ${output}    ERROR*
     Should Be Equal As Strings    ${output}
     ...    [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]
+
+*** Keyword ***
+Open New Notebook
+    [Documentation]    Opens one new jupyter notebook
+    Open With JupyterLab Menu    File    New    Notebook
+    Sleep    1
+    Maybe Close Popup
+Close Other Tabs
+    [Documentation]    Closes other jupyterlab tabs
+    Close Other JupyterLab Tabs
+    Maybe Close Popup
+    Sleep    1

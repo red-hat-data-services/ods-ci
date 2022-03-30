@@ -32,7 +32,7 @@ class Helpers:
         ocm_client.install_rhoam_addon(exit_on_failure=False)
 
     @keyword
-    def uninstall_rhoam_addon(self, cluster_name):
+    def uninstall_rhoam_using_addon_flow(self, cluster_name):
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.uninstall_rhoam_addon(exit_on_failure=False)

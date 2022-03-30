@@ -7,7 +7,7 @@ Resource        ../../../Resources/ODS.robot
 Library         ../../../../libs/Helpers.py
 Library         SeleniumLibrary
 Library         OpenShiftLibrary
-Suite Setup     RHOAM Suite Setup
+Suite Setup     RHOAM Install Suite Setup
 Suite Teardown  RHOAM Suite Teardown
 
 
@@ -17,11 +17,7 @@ Verify RHOAM Can Be Installed
     [Tags]  Tier3
     ...     ODS-273
     ...     Execution-Time-Over-30min
-    ${cluster_id}=   Get Cluster ID
-    ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
-    Install Rhoam Addon    cluster_name=${cluster_name}
-    Wait Until RHOAM Installation Is Completed    retries=35   retries_interval=2min
-    Verify RHOAM Is Enabled IN RHODS Dashboard
+    Pass Execution    Passing tests, as suite setup ensures that RHOAM installs correctly
 
 Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     [Documentation]    Verifies RHODS can be successfully uninstalled when
@@ -30,19 +26,21 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     ...     ODS-1136
     ...     DestructiveTest
     ...     Execution-Time-Over-2h
-    ${cluster_id}=   Get Cluster ID
-    ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
-    Set Suite Variable     ${CLUSTER_NAME}
     Verify RHOAM Is Enabled In RHODS Dashboard
     Uninstall RHODS From OSD Cluster
     Wait Until RHODS Uninstallation Is Completed
 
 
 *** Keywords ***
-RHOAM Suite Setup
+RHOAM Install Suite Setup
     [Documentation]    RHOAM Suite setup
     Set Library Search Order  OpenShiftLibrary  SeleniumLibrary
-    # Set Library Search Order  OpenShiftLibrary
+    ${cluster_id}=   Get Cluster ID
+    ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
+    Set Suite Variable     ${CLUSTER_NAME}
+    Install Rhoam Addon    cluster_name=${CLUSTER_NAME}
+    Wait Until RHOAM Installation Is Completed    retries=35   retries_interval=2min
+    Verify RHOAM Is Enabled IN RHODS Dashboard
 
 RHOAM Suite Teardown
     [Documentation]    RHOAM Suite teardown. It triggers RHOAM Uninstallation
@@ -50,4 +48,5 @@ RHOAM Suite Teardown
     Uninstall Rhoam Addon    cluster_name=${CLUSTER_NAME}
     Log To Console    RHOAM Addon has been uninstalled!
     Close All Browsers
+
 

@@ -16,7 +16,7 @@ Verify RHOAM Can Be Installed
     [Documentation]    Verifies RHOAM Addon can be successfully installed
     [Tags]  Tier3
     ...     ODS-273
-    ...     Execution-Time-Over-40min
+    ...     Execution-Time-Over-30min
     ${cluster_id}=   Get Cluster ID
     ${cluster_name}=   Get Cluster Name     cluster_identifier=${cluster_id}
     Install Rhoam Addon    cluster_name=${cluster_name}

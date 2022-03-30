@@ -8,6 +8,7 @@ Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 
 *** Keywords ***
 Verify Deployment
+    [Documentation]     verifies the status of a Deployment in Openshift
     [Arguments]  ${component}  ${nPods}  ${nContainers}  ${containerNames}
     #No. of replicas
     Length Should Be  ${component}  ${nPods}
@@ -29,6 +30,8 @@ Verify Deployment
     END
 
 Verify JupyterHub Deployment
+    [Documentation]     Enriched version of "Verify Deployment" keyword to check status
+    ...                 of JupyterHub deployment
     [Arguments]  ${component}  ${nPods}  ${nContainers}  ${containerNames}
     #Standard deployment check
     Verify Deployment  ${component}  ${nPods}  ${nContainers}  ${containerNames}
@@ -76,6 +79,7 @@ Verify JupyterHub Deployment
     Should Be Equal As Integers  ${standby}  2
 
 Wait Until JH Deployment Is Ready
+    [Documentation]     Wait Until jupyterhub deployment is completed
     [Arguments]   ${retries}=50
     FOR  ${index}  IN RANGE  0  1+${retries}
         @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
@@ -90,6 +94,7 @@ Wait Until JH Deployment Is Ready
     Sleep   1
 
 Rollout JupyterHub
+    [Documentation]     Rollouts JupyterHub deployment and wait until it is finished
     Start Rollout   dc_name=jupyterhub  namespace=redhat-ods-applications
     Wait Until JH Deployment Is Ready
 

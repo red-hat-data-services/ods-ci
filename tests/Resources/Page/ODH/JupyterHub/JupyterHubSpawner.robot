@@ -360,12 +360,13 @@ Handle Bad Gateway Page
     [Documentation]    It reloads the JH page until Bad Gateway error page
     ...                disappears. It is possible to control how many
     ...                times to try refreshing using 'retries' argument
-    [Arguments]   ${retries}=10
+    [Arguments]   ${retries}=10     ${retry_interval}=1s
     Capture Page Screenshot    jh_badgateway_kw.png
     FOR    ${counter}    IN RANGE    0    ${retries}+1
         ${bg_present} =    Run Keyword And Return Status    Page Should Contain    Bad Gateway
         IF    $bg_present == True
             Reload Page
+            Sleep    ${retry_interval}
         END
         Exit For Loop If    $bg_present == False
     END

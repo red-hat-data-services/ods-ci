@@ -11,8 +11,8 @@ Library       OpenShiftCLI
 *** Variables ***
 ${CUSTOM_ADMINS_GROUP}=   custom-admins-group
 ${CUSTOM_USERS_GROUP}=    custom-users-group
-${STANDARD_ADMINS_GROUP}=  rhods-admins
-${STANDARD_USERS_GROUP}=   rhods-users
+${STANDARD_ADMINS_GROUP}=  dedicated-admins
+${STANDARD_USERS_GROUP}=   system:authenticated
 
 
 *** Keywords ***

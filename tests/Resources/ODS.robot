@@ -68,3 +68,16 @@ Usage Data Collection Should Not Be Enabled
     [Arguments]    ${msg}="Usage Data Collection" should not be enabled
     ${enabled}=    ODS.Is Usage Data Collection Enabled
     Should Not Be True    ${enabled}    msg=${msg}
+
+Set Standard RHODS Groups Variables
+    [Documentation]     Sets the RHODS groups name based on RHODS version
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
+    IF    ${version_check} == True
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      dedicated-admins
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       system:authenticated
+        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       true
+    ELSE
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      rhods-admins
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       rhods-users
+        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       false
+    END

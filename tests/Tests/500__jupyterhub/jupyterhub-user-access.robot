@@ -10,7 +10,6 @@ Library          DebugLibrary
 Library          JupyterLibrary
 Library          OpenShiftCLI
 Suite Setup      Special User Testing Suite Setup
-Suite Teardown   End Web Test
 Force Tags       JupyterHub
 
 

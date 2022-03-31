@@ -12,20 +12,20 @@ Verify Any OpenShift User Can Spawn JupyterLab Notebooks
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1164
-    Verify Groups ConfigMap Contains The Expected OCP Groups
+    Verify RHODS Groups ConfigMap Contains The Expected OCP Groups
     Verify User Can Spawn A Notebook
 
 
 *** Keywords ***
-Verify Groups ConfigMap Contains The Expected OCP Groups
-    [Documentation]    Verify that ConfigMap contains expected Groups
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
+Verify RHODS Groups ConfigMap Contains The Expected OCP Groups
+    [Documentation]    Verify that RHODS Groups ConfigMap contains expected Groups
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
     IF    ${version_check} == True
-        Verify Config Map Group Contains Expected Values   rhods-groups-config  admin_groups   dedicated-admins
-        Verify Config Map Group Contains Expected Values   rhods-groups-config  allowed_groups   system:authenticated
+        &{exp_values}=  Create Dictionary  admin_groups=dedicated-admins  allowed_groups=system:authenticated
+        Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
     ELSE
-        Verify Config Map Group Contains Expected Values   rhods-groups-config  admin_groups   rhods-admins
-        Verify Config Map Group Contains Expected Values   rhods-groups-config  allowed_groups   rhods-users
+        &{exp_values}=  Create Dictionary  admin_groups=rhods-admins  allowed_groups=rhods-users
+        Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
     END
 
 Verify User Can Spawn A Notebook

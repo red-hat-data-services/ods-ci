@@ -152,8 +152,21 @@ Get RHODS URL From OpenShift Using UI
     ${href}  Get Element Attribute    ${link_elements}    href
     [Return]   ${href}
 
-Verify Config Map Group Contains Expected Values
+Verify RHODS Groups Config Map Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
-    [Arguments]    ${config_map}   ${group}    ${expected_value}
-    ${configmap}=  Oc Get  kind=ConfigMap  namespace=redhat-ods-applications  name=rhods-groups-config  api_version=v1
-    Should Be Equal As Strings  ${configmap[0]['data']['''${group}''']}   ${expected_value}
+    [Arguments]        &{exp_values}
+    ${configmap}=  Oc Get  kind=ConfigMap  namespace=redhat-ods-applications  name=rhods-groups-config
+    FOR    ${group}    IN    @{exp_values.keys()}
+        Should Be Equal As Strings  ${configmap[0]["data"]["${group}"]}   ${exp_values["${group}"]}
+    END
+
+Verify Default Access Groups Settings
+    [Documentation]     Verifies that ODS contains the expected default groups settings
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
+    IF    ${version_check} == True
+        &{exp_values}=  Create Dictionary  admin_groups=dedicated-admins  allowed_groups=system:authenticated
+        Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
+    ELSE
+        &{exp_values}=  Create Dictionary  admin_groups=rhods-admins  allowed_groups=rhods-users
+        Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
+    END

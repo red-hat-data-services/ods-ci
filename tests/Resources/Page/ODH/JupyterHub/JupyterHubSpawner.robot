@@ -6,6 +6,7 @@ Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
 Resource  LoginJupyterHub.robot
 Resource  JupyterLabSidebar.robot
 Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
+Library   ../../../../libs/Helpers.py
 Library   String
 Library   Collections
 Library   JupyterLibrary
@@ -365,3 +366,11 @@ Verify Image Can Be Spawned
     Spawn Notebook With Arguments    ${retries}    ${image}    ${size}
     ...    ${spawner_timeout}    ${gpus}    ${refresh}    &{envs}
     End Web Test
+
+Verify Library Version Is Greater Than
+    [Arguments]     ${library}      ${target}
+    ${ver} =  Run Cell And Get Output   !pip show ${library} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
+    ${comparison} =  GTE  ${ver}  ${target}
+    IF  ${comparison}==False
+        Run Keyword And Continue On Failure     FAIL    Library Version Is Smaller Than Expected
+    END

@@ -1,7 +1,7 @@
 # ODS-CI Container Image
 
 A [Dockerfile](Dockerfile) is available for running tests in a container.
-The latest build can be downloaded from: https://quay.io/odsci/ods-ci:latest
+The latest build can be downloaded from: https://quay.io/odsci/ods-ci:latest (<em>this image has been deprecated, a new one will be available soon. Please build your own image using the instructions below</em>)
 
 eg: podman pull quay.io/odsci/ods-ci:latest
 
@@ -11,7 +11,44 @@ $ podman build -t ods-ci:master -f build/Dockerfile .
 
 # Mount a file volume to provide a test-variables.yml file at runtime
 # Mount a volume to preserve the test run artifacts
-$ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z -v $PWD/test-output:/tmp/ods-ci/test-output:Z ods-ci:master
+$ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
+                  -v $PWD/test-output:/tmp/ods-ci/test-output:Z
+                  ods-ci:master
+```
+Additional arguments for container build
+```bash
+# oc CLI version to install
+OC_VERSION (default: 4.10)
+OC_CHANNEL (default: stable)
+
+# example
+podman build -t ods-ci:master -f build/Dockerfile .
+             --build-arg OC_CHANNEL=latest
+             --build-arg OC_VERSION=4.9
+
+```
+Additional arguments for container run
+```bash
+# env variables to control test execution
+RUN_SCRIPT_ARGS:
+  --skip-oclogin (default: false): script does not perform login using OC CLI
+  --set-urls-variables (default: false): script gets automatically the cluster URLs (i.e., OCP Console, RHODS Dashboard, OCP API Server)
+  --include: run only test cases with the given tags (e.g., --include Smoke --include XYZ)
+  --exclude: do not run the test cases with the given tag (e.g., --exclude LongLastingTC)
+  --test-variable: set a global RF variable
+  --test-variables-file (default: test-variables.yml): set the RF file containing global variables to use in TCs
+  --test-case: run only the test cases from the given robot file
+  --test-artifact-dir: set the RF output directory to store log files
+
+ROBOT_EXTRA_ARGS: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun )
+
+# example
+$ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
+                  -v $PWD/test-output:/tmp/ods-ci/test-output:Z
+                  -e ROBOT_EXTRA_ARGS='-l NONE'
+                  -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
+                  ods-ci:master
+
 ```
 
 ### Running the ods-ci container image in OpenShift

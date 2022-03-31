@@ -160,13 +160,13 @@ Check GPU Resources
         ${elements}=  Get WebElements      //article
         ${len}=  Get Length    ${elements}
         Should Be Equal As Integers     ${len}  1
-        Page Should Contain     //article[@id="python-gpu-numba-tutorial"]
-        Page Should Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
+        Page Should Contain Element     //article[@id="python-gpu-numba-tutorial"]
+        Page Should Contain Element     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
     ELSE
         ${elements}=  Get WebElements      //article
         ${len}=  Get Length    ${elements}
         Should Be Equal As Integers     ${len}  0
-        Page Should Not Contain     //article[@id="python-gpu-numba-tutorial"]
-        Page Should Not Contain     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
+        Page Should Not Contain Element     //article[@id="python-gpu-numba-tutorial"]
+        Page Should Not Contain Element     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
     END
 

@@ -16,6 +16,7 @@ metadata:
   labels:
     deployment: ods-ci
   name: ods-ci
+  namespace: ods-ci
 spec:
   securityContext:
     # This is required to make the test-output volume Writable

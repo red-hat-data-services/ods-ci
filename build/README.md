@@ -28,7 +28,7 @@ podman build -t ods-ci:master -f build/Dockerfile .
 
 ```
 Additional arguments for container run
-```bash
+```
 # env variables to control test execution
 RUN_SCRIPT_ARGS:
   --skip-oclogin (default: false): script does not perform login using OC CLI
@@ -41,21 +41,32 @@ RUN_SCRIPT_ARGS:
   --test-artifact-dir: set the RF output directory to store log files
 
 ROBOT_EXTRA_ARGS: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun )
+```
 
+Example of test execution using the container
+```bash
 # example
 $ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
                   -v $PWD/test-output:/tmp/ods-ci/test-output:Z
                   -e ROBOT_EXTRA_ARGS='-l NONE'
                   -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
                   ods-ci:master
-
 ```
 
 ### Running the ods-ci container image in OpenShift
 
-After building the container, you can deploy the container in a pod running on OpenShift. You can use [this](./ods-ci.pod.yaml) PersistentVolumeClaim and Pod definition to deploy the ods-ci container.  NOTE: This example pod attaches a PVC to preserve the test artifacts directory between runs and mounts the test-variables.yml file from a Secret.
+After building the container, you can deploy the container in a pod running on OpenShift. You can use [this](./ods-ci.pod.yaml) PersistentVolumeClaim and Pod definition to deploy the ods-ci container.
+Before deploying the pod:
+- create the namespace/project "ods-ci"
+- apply the rbac settings
+- create a secret to store your "test-variables.yml" file
+
+NOTE: This example pod attaches a PVC to preserve the test artifacts directory between runs and mounts the test-variables.yml file from a Secret.
 
 ```
+# Apply rbac settings
+oc apply -f ods_ci_rbac.yaml
+
 # Creates a Secret with test variables that can be mounted in ODS-CI container
 oc create secret generic ods-ci-test-variables --from-file test-variables.yml
 ```

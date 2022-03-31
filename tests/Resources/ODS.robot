@@ -104,19 +104,23 @@ Set Default Access Groups Settings
 
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation
-    ${addon_installed}=     Is Rhods Addon Installed    ${CLUSTER_NAME}
+    [Arguments]     ${clustername}
+    ${addon_installed}=     Is Rhods Addon Installed    ${clustername}
     Uninstall RHODS Using OLM
     # IF    ${addon_installed} == ${TRUE}
-    #     Uninstall Rhods Using Addon    ${CLUSTER_NAME}
+    #     Uninstall Rhods Using Addon    ${clustername}
     # ELSE
     #     Uninstall RHODS Using OLM
     # END
 
 Uninstall RHODS Using OLM
+    [Documentation]     Uninstalls RHODS using OLM script
     Selected Cluster Type OSD
     Uninstall RHODS
 
 Wait Until RHODS Uninstallation Is Completed
+    [Documentation]     Waits until RHODS uninstallation process is completed.
+    ...                 It finishes when all the RHODS namespaces have been deleted.
     [Arguments]     ${retries}=1   ${retries_interval}=2min
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         Log To Console    checking RHODS uninstall status: retry ${retry_idx}

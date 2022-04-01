@@ -134,6 +134,7 @@ Wait Until RHODS Uninstallation Is Completed
     END
 
 RHODS Namespaces Should Not Exist
+    [Documentation]     Checks if the RHODS namespace do not exist on openshift
     Verify Project Does Not Exists  rhods-notebook
     Verify Project Does Not Exists  redhat-ods-monitoring
     Verify Project Does Not Exists  redhat-ods-applications

@@ -27,7 +27,7 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     ...     DestructiveTest
     ...     Execution-Time-Over-2h
     Verify RHOAM Is Enabled In RHODS Dashboard
-    Uninstall RHODS From OSD Cluster
+    Uninstall RHODS From OSD Cluster    clustername=${CLUSTER_NAME}
     Wait Until RHODS Uninstallation Is Completed
 
 

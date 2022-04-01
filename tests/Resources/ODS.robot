@@ -139,3 +139,33 @@ RHODS Namespaces Should Not Exist
     Verify Project Does Not Exists  redhat-ods-monitoring
     Verify Project Does Not Exists  redhat-ods-applications
     Verify Project Does Not Exists  redhat-ods-operator
+
+Get Notification Email From Addon-Managed-Odh-Parameters Secret
+    [Documentation]    Gets email form addon-managed-odh-parameters secret
+    ${resp} =    Oc Get  kind=Secret  namespace=redhat-ods-operator  name=addon-managed-odh-parameters
+    ${resp} =  Evaluate  dict(${resp[0]["metadata"]["annotations"]["kubectl.kubernetes.io/last-applied-configuration"]})
+    [Return]  ${resp["stringData"]["notification-email"]}
+
+Notification Email In Alertmanager ConfigMap Should Be
+    [Documentation]    Check expected email is present in Alertmanager
+    [Arguments]        ${email_to_check}
+    ${resp} =    Run  oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.receivers[] | select(.name == "user-notifications") | .email_configs[0].to'
+    Should Be Equal As Strings    "${email_to_check}"    ${resp}
+
+Email In Addon-Managed-Odh-Parameters Secret Should Be
+    [Documentation]     Verifies the email is same with expected-email
+    [Arguments]     ${expected_email}
+    ${email_from_secret} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
+    Should Be Equal As Strings    ${expected_email}    ${email_from_secret}
+
+Wait Until Notification Email From Addon-Managed-Odh-Parameters Contains
+    [Documentation]     Wait unitl notification email is changed in Addon-Managed-Odh-Parameters
+    [Arguments]    ${email}  ${timeout}=5 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
+    ...    Email In Addon-Managed-Odh-Parameters Secret Should Be    ${email}
+
+Wait Until Notification Email In Alertmanager ConfigMap Is
+    [Documentation]     Wait unitl notification email is changed in Alertmanager ConfigMap
+    [Arguments]    ${email}  ${timeout}=5 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
+    ...    Notification Email In Alertmanager ConfigMap Should Be    ${email}

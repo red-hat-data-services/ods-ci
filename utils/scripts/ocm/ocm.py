@@ -659,6 +659,7 @@ class OpenshiftClusterManager():
             sys.exit(1)
 
     def update_notification_email_address(self, addon_name, email_address):
+        """Update notification email to Addons"""
         replace_vars = {
                        "EMAIL_ADDER": email_address
                        }

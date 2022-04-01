@@ -658,9 +658,9 @@ class OpenshiftClusterManager():
                    " EXITING".format(self.cluster_name))
             sys.exit(1)
 
-    def update_notification_email_address(self, addon_name):
+    def update_notification_email_address(self, addon_name, email_address):
         replace_vars = {
-                       "EMAIL_ADDER": self.cluster_name,
+                       "EMAIL_ADDER": email_address
                        }
         template_file = "notification_email.jinja"
         output_file = "notification_email.json"

@@ -10,6 +10,7 @@ Library          DebugLibrary
 Library          JupyterLibrary
 Library          OpenShiftCLI
 Suite Setup      Special User Testing Suite Setup
+Suite Teardown   Close All Browsers
 Force Tags       JupyterHub
 
 
@@ -33,8 +34,7 @@ Verify User Can Set Custom RHODS Groups
     Create Custom Groups
     Add Test Users To Custom Groups
     Remove Test Users From RHODS Standard Groups
-    Apply New Groups Config Map
-    Rollout JupyterHub
+    Set Custom Access Groups
     Check New Access Configuration Works As Expected
     [Teardown]   Restore Standard RHODS Groups Configuration
 
@@ -102,6 +102,11 @@ Remove Test Users From Custom Groups
     Check User Is Not In A Group    username=${TEST_USER_2.USERNAME}   group_name=${CUSTOM_ADMINS_GROUP}
     Check User Is Not In A Group    username=${TEST_USER_3.USERNAME}   group_name=${CUSTOM_USERS_GROUP}
 
+Set Custom Access Groups
+    [Documentation]    Set custom rhods groups to access JH
+    Apply Access Groups Settings    admins_group=${CUSTOM_ADMINS_GROUP}
+    ...     users_group=${CUSTOM_USERS_GROUP}   groups_modified_flag=true
+
 Check New Access Configuration Works As Expected
     [Documentation]    Checks if the new access configuration (using two custom groups)
     ...                works as expected in JH
@@ -141,31 +146,13 @@ Check Standard Access Configuration Works As Expected
     Capture Page Screenshot    perm_user_std.png
     Logout Via Button
 
-Apply New Groups Config Map
-    [Documentation]    Changes the rhods-groups config map to set the new access configuration
-    OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"data":{"admin_groups": "${CUSTOM_ADMINS_GROUP}","allowed_groups": "${CUSTOM_USERS_GROUP}"}}
-    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
-    OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "true"}}}
-    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
-
-Restore RHODS Standard Groups Config Map
-    [Documentation]    Restores the standard rhods-groups config map
-    OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"data":{"admin_groups": "${STANDARD_ADMINS_GROUP}","allowed_groups": "${STANDARD_USERS_GROUP}"}}
-    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
-    OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${STANDARD_GROUPS_MODIFIED}"}}}
-    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
-
 Restore Standard RHODS Groups Configuration
     [Documentation]    Restores the standard RHODS access configuration
-    Restore RHODS Standard Groups Config Map
-    Rollout JupyterHub
+    Set Default Access Groups Settings
     Go To    ${OCP_CONSOLE_URL}
     Add Test Users Back To RHODS Standard Groups
     Remove Test Users From Custom Groups
     Delete Custom Groups
     Check Standard Access Configuration Works As Expected
+
 

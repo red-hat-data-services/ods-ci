@@ -14,7 +14,6 @@ ${pachyderm_operator_name}      Pachyderm
 ${pachyderm_appname}            pachyderm
 
 
-
 *** Test Cases ***
 Verify Pachyderm Can Be Installed Using OpenShift Console
     [Tags]      Tier2

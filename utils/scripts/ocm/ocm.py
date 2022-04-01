@@ -658,6 +658,26 @@ class OpenshiftClusterManager():
                    " EXITING".format(self.cluster_name))
             sys.exit(1)
 
+    def update_notification_email_address(self, addon_name, email_address):
+        """Update notification email to Addons"""
+        replace_vars = {
+                       "EMAIL_ADDER": email_address
+                       }
+        template_file = "notification_email.jinja"
+        output_file = "notification_email.json"
+        self._render_template(template_file, output_file, replace_vars)
+        cluster_id = self.get_osd_cluster_id()
+        cmd = ("ocm patch /api/clusters_mgmt/v1/clusters/{}/addons/{} "
+               "--body={}".format(cluster_id, addon_name, output_file))
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        if ret is None:
+            log.info("Failed to update email address to {} addon on cluster "
+                  "{}".format(addon_name, self.cluster_name))
+            sys.exit(1)
+
+
+
 if __name__ == "__main__":
 
         #Instance for OpenshiftClusterManager Class

@@ -1,9 +1,6 @@
 # ODS-CI Container Image
 
-A [Dockerfile](Dockerfile) is available for running tests in a container.
-The latest build can be downloaded from: https://quay.io/odsci/ods-ci:latest (<em>this image has been deprecated, a new one will be available soon. Please build your own image using the instructions below</em>)
-
-eg: podman pull quay.io/odsci/ods-ci:latest
+A [Dockerfile](Dockerfile) is available for running tests in a container. Below you can read how to build and run ods-ci test suites container.
 
 ```bash
 # Build the container (optional if you dont want to use the latest from quay.io/odsci)

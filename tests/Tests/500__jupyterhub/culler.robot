@@ -10,7 +10,7 @@ Force Tags       JupyterHub
 
 
 *** Variables ***
-${DEFAULT_CULLER_TIMEOUT} =    xyz
+${DEFAULT_CULLER_TIMEOUT} =    31536000
 ${CUSTOM_CULLER_TIMEOUT} =     600
 
 
@@ -24,8 +24,6 @@ Verify Default Culler Timeout
 Verify Culler Timeout Can Be Updated
     [Documentation]    Verifies culler timeout can be updated
     [Tags]  Sanity
-    ...     Resources-GPU
-    ...     ODS-1142
     # Modify Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
     # Try out invalid timeouts? 
     # Verify UI default == configmap default?
@@ -33,6 +31,11 @@ Verify Culler Timeout Can Be Updated
     Should Not Be Equal  ${current_timeout}  ${DEFAULT_CULLER_TIMEOUT}
     Should Be Equal   ${current_timeout}  ${CUSTOM_CULLER_TIMEOUT}
     # Run  oc exec ${CULLER_POD} -n redhat-ods-applications -- printenv CULLER_TIMEOUT
+    # jupyterhub-idle-culler-[0-9]+-[a-zA-Z0-9]{5}
+    # What if multiple returned? name1name2 attached together, check length of name
+    # length should be 30 or 31 chars (double digit on the rollout ID) [IF USING -z OPTION FOR GREP]
+    # [WITHOUT -z OPTION] both names returned on two lines, can do "split lines" or similar and check no. of items (probably better)
+    # ${CULLER_POD} =  Run  oc get pod -l app=jupyterhub-idle-culler -n redhat-ods-applications | grep -zoP jupyterhub-idle-culler-[0-9]+-[a-zA-Z0-9]{5}
 
 Verify Culler Kills Inactive Server
     [Documentation]    Verifies that the culler kills an inactive 
@@ -72,7 +75,33 @@ Spawn Minimal Image
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=s2i-minimal-notebook  size=Default
 
+Get Culler Pod
+    [Documentation]    Finds the current culler pod and returns the name
+    ${culler_pod_name} =  Run  oc get pod ...
+    [Return]  ${culler_pod_name}
+
 Get Culler Timeout
     [Documentation]    Gets the current culler timeout
     ${current_timeout} =  Run  oc describe configmap jupyterhub-cfg -n redhat-ods-applications | grep -zoP '(culler_timeout:\n----\n)\d+\n' | grep -zoP "\d+"
+    # jupyterhub-idle-culler-[0-9]+-[a-zA-Z0-9]{5}
+    # What if multiple returned? name1name2 attached together, check length of name
+    # length should be 30 or 31 chars (double digit on the rollout ID) [IF USING -z OPTION FOR GREP]
+    # [WITHOUT -z OPTION] both names returned on two lines, can do "split lines" or similar and check no. of items (probably better)
+    # ${CULLER_POD} =  Run  oc get pod -l app=jupyterhub-idle-culler -n redhat-ods-applications | grep -zoP jupyterhub-idle-culler-[0-9]+-[a-zA-Z0-9]{5}
+    ${culler-env-timeout} =  Run  oc exec ${CULLER_POD} -n redhat-ods-applications -- printenv CULLER_TIMEOUT
+    Should Be Equal  ${current_timeout}  ${culler-env-timeout}
     [Return]  ${current_timeout}
+
+Modify Culler Timeout
+    [Documentation]    Modifies the culler timeout via UI
+    [Arguments]    ${new_timeout}
+    PASS
+
+Set Default Culler Timeout
+    [Documentation]    Sets the default culler timeout via UI
+    Modify Culler Timeout  ${DEFAULT_CULLER_TIMEOUT}
+
+Teardown
+    [Documentation]    Teardown for the test
+    Set Default Culler Timeout
+    End Web Test

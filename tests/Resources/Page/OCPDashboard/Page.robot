@@ -56,15 +56,13 @@ Search Last Item Instance By Title in OpenShift Table
 Delete Project By Name
   [Arguments]  ${project_name}
   Menu.Navigate To Page   Home    Projects
-  Sleep     2
+  Wait Until Page Contains Element      //input[@data-test-id="item-filter"]
   Input Text    //input[@data-test-id="item-filter"]    ${project_name}
   Sleep     5
-  Click Button  //button[@class="pf-c-dropdown__toggle pf-m-plain"]
-  Click Button  Delete Project
+  Click Button      //button[@class="pf-c-dropdown__toggle pf-m-plain"]
   Sleep     5
-  Page Should Contain Element   //div[@class="modal-header"]
+  Click Button      //button[@data-test-action="Delete Project"]
+  Wait Until Page Contains Element      //div[@class="modal-header"]    10
   Input Text    //input[@data-test="project-name-input"]    ${project_name}
   Click Button  //button[@data-test="confirm-action"]
-  Sleep     5
-  Wait Until Page Contains      No projects found
 

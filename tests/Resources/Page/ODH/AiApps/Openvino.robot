@@ -24,4 +24,6 @@ Verify JupyterHub Can Spawn Openvino Notebook
     Wait Until Element Is Enabled    xpath://input[@name="OpenVINO™ Toolkit"]    timeout=10
     Spawn Notebook With Arguments    image=openvino-notebook
     Run Cell And Check Output    !pwd    /opt/app-root/src
+    Verify Library Version Is Greater Than  jupyterlab  3.1.4
+    Verify Library Version Is Greater Than  notebook    6.4.1
     Fix Spawner Status

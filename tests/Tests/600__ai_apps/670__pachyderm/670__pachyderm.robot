@@ -14,14 +14,13 @@ ${pachyderm_operator_name}      Pachyderm
 ${pachyderm_appname}            pachyderm
 
 
-
 *** Test Cases ***
 Verify Pachyderm Can Be Installed Using OpenShift Console
     [Tags]      Tier2
     ...         ODS-1137    ODS-1138
     Check And Install Operator in Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
     Create Project      pachyderm
-    Run     oc create secret generic pachyderm-aws-secret -n pachyderm --from-literal=access-id=${S3.AWS_ACCESS_KEY_ID} --from-literal=access-secret=${S3.AWS_SECRET_ACCESS_KEY} --from-literal=region=us-east-1 --from-literal=bucket=ods-ci-pachyderm
+    Create Pachyderm AWS-Secret
     Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     pachyderm
     Wait Until Keyword Succeeds     120     1       Wait Until Status Is Running
     Go To RHODS Dashboard
@@ -40,3 +39,7 @@ Dashboard Test Teardown
 
 Wait Until Status Is Running
     Element Text Should Be    //span[@data-test="status-text"]      Running
+
+Create Pachyderm AWS-Secret
+    Run     oc create secret generic pachyderm-aws-secret -n pachyderm --from-literal=access-id=${S3.AWS_ACCESS_KEY_ID} --from-literal=access-secret=${S3.AWS_SECRET_ACCESS_KEY} --from-literal=region=us-east-1 --from-literal=bucket=ods-ci-pachyderm
+

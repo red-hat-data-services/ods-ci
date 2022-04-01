@@ -3,7 +3,7 @@ Library             SeleniumLibrary
 Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/ODH/AiApps/AiApps.resource
-
+Resource            src.yaml
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown
 
@@ -41,5 +41,4 @@ Wait Until Status Is Running
     Element Text Should Be    //span[@data-test="status-text"]      Running
 
 Create Pachyderm AWS-Secret
-    Run     oc create secret generic pachyderm-aws-secret -n pachyderm --from-literal=access-id=${S3.AWS_ACCESS_KEY_ID} --from-literal=access-secret=${S3.AWS_SECRET_ACCESS_KEY} --from-literal=region=us-east-1 --from-literal=bucket=ods-ci-pachyderm
-
+    OpenShiftCLI.Create     kind=Secret     src=tests/Tests/600__ai_apps/670__pachyderm/src.yaml        api_version=v1      namespace=pachyderm

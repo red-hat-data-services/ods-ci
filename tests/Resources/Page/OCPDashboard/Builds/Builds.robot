@@ -86,3 +86,27 @@ Wait Until All Builds Are Complete
     FOR    ${build_data}    IN    @{builds_data}
         Wait Until Build Status Is    namespace=${namespace}    build_name=${build_data['metadata']['name']}  expected_status=Complete
     END
+
+Provoke Image Build Failure
+    [Documentation]    Starts New Build after some time it fail the build and return name of failed build
+    [Arguments]    ${namespace}    ${build_name_includes}    ${build_config_name}    ${container_to_kill}
+    ${build} =    Search Last Build    namespace=${namespace}    build_name_includes=${build_name_includes}
+    Delete Build    namespace=${namespace}    build_name=${build}
+    ${failed_build_name} =    Start New Build    namespace=${namespace}
+    ...    buildconfig=${build_config_name}
+    ${pod_name} =    Find First Pod By Name    namespace=${namespace}    pod_start_with=${failed_build_name}
+    Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
+    ...    expected_status=Running
+    Wait Until Container Exist  namespace=${namespace}  pod_name=${pod_name}  container_to_check=${container_to_kill}
+    Run Command In Container    namespace=${namespace}    pod_name=${pod_name}    command=/bin/kill 1    container_name=${container_to_kill}
+    Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
+    ...    expected_status=Failed    timeout=5 min
+    [Return]    ${failed_build_name}
+
+Delete Failed Build And Start New One
+    [Documentation]    It will delete failed build and start new build
+    [Arguments]    ${namespace}    ${failed_build_name}    ${build_config_name}
+    Delete Build    namespace=${namespace}    build_name=${failed_build_name}
+    ${build_name} =    Start New Build    namespace=${namespace}
+    ...    buildconfig=${build_config_name}
+    Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}    expected_status=Complete

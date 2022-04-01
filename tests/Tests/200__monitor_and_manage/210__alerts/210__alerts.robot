@@ -3,6 +3,7 @@ Documentation       RHODS monitoring alerts test suite
 
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
+Resource            ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library             OperatingSystem
 Library             SeleniumLibrary
 Library             JupyterLibrary
@@ -232,7 +233,6 @@ Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image 
     [Tags]    Tier2
     ...       ODS-717
     ...       Execution-Time-Over-30m
-
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build

@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+
 Suite Setup      JupyterHub Testing Suite Setup
 Suite Teardown   End Web Test
 Force Tags       JupyterHub
@@ -77,7 +78,8 @@ Can Launch Python3
 
 Verify Message That Image Builds Are In Progress
     [Documentation]     Verifies that Image Builds In Progress are Shown In RHODS Dashboard
-    [Tags]      Tier2
+    [Tags]      Sanity
+    ...         Tier2
     ...         ODS-460
     Delete Last Pytorch Build
     ${new_buildname}=  Start New Pytorch Build
@@ -85,6 +87,18 @@ Verify Message That Image Builds Are In Progress
     RHODS Notification Drawer Should Contain  message=Notebook images are building
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
     Wait Until Page Contains Element    xpath=//*[contains(text(),'All notebook image builds are complete')]  timeout=5 min
+
+Verify Failing Images Are Shown In Notifications
+    [Documentation]    Verifies failing Notebook names are shown in RHODS Dashboard Notifications
+    [Tags]    Sanity
+    ...       ODS-470
+    ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
+    ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    ...    container_to_kill=sti-build
+    Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    RHODS Notification Drawer Should Contain  message=Notebook image build PyTorch failed
+    [Teardown]    Delete Failed Build And Start New One   namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+
 
 *** Keywords ***
 JupyterHub Testing Suite Setup

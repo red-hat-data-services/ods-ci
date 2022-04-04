@@ -58,3 +58,10 @@ class Helpers:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.uninstall_rhods()
+
+    @keyword
+    def update_notification_email_address(self, cluster_name, email_address, addon_name='managed-odh'):
+        """Update notification email for add-ons using OCM"""
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.update_notification_email_address(addon_name, email_address)

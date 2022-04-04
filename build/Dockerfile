@@ -34,12 +34,6 @@ COPY run_robot_test.sh  .
 COPY requirements.txt setup.py .
 RUN python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
 
-# Set the group ownership so non-root users can write to /tmp
-RUN chgrp -R 0 /tmp && chmod -R g=u /tmp
-RUN chown -R 1001 /tmp
-
-USER 1001
-
 CMD if [ -n "${ROBOT_EXTRA_ARGS}" ]; then \
             echo --extra-robot-args "${ROBOT_EXTRA_ARGS}" &&\
 	        ./run_robot_test.sh --skip-pip-install ${RUN_SCRIPT_ARGS} --extra-robot-args "${ROBOT_EXTRA_ARGS}" ;\

@@ -27,6 +27,7 @@ Maybe Click Show Default Project Button
   END
 
 Create Project
+    [Documentation]     This keyword is use to create a project in OCP Console.
     [Arguments]  ${project_name}
     Menu.Navigate To Page   Home    Projects
     Click Button    xpath://button[@id="yaml-create"]
@@ -54,6 +55,7 @@ Search Last Item Instance By Title in OpenShift Table
   Click Button    xpath://*/th[@data-label='Created']/button  # desc order
 
 Delete Project By Name
+  [Documentation]       This keyword is use to delete the project in OCP Console.
   [Arguments]  ${project_name}
   Menu.Navigate To Page   Home    Projects
   Wait Until Page Contains Element      //input[@data-test-id="item-filter"]

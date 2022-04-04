@@ -16,6 +16,7 @@ ${pachyderm_appname}            pachyderm
 
 *** Test Cases ***
 Verify Pachyderm Can Be Installed Using OpenShift Console
+    [Documentation]     Check if it is possible to install and deploy pachyderm server successfully.
     [Tags]      Tier2
     ...         ODS-1137    ODS-1138
     Check And Install Operator in Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
@@ -38,7 +39,9 @@ Dashboard Test Teardown
     Close All Browsers
 
 Wait Until Status Is Running
+    [Documentation]     This keyword should be used to check if the status changes from Initializing to Running.
     Wait Until Keyword Succeeds     120     1       Element Text Should Be    //span[@data-test="status-text"]      Running
 
 Create Pachyderm AWS-Secret
+    [Documentation]     This keyword should be used to create a Pachyderm AWS Secret.
     OpenShiftCLI.Create     kind=Secret     src=tests/Tests/600__ai_apps/670__pachyderm/src.yaml        api_version=v1      namespace=pachyderm

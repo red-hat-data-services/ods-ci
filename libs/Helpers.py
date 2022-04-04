@@ -1,9 +1,11 @@
 from semver import VersionInfo
 from robotlibcore import keyword
+from utils.scripts.ocm.ocm import OpenshiftClusterManager
 
 
 class Helpers:
     """Custom keywords written in Python"""
+
     @keyword
     def text_to_list(self, text):
         rows = text.split('\n')
@@ -15,11 +17,18 @@ class Helpers:
         """ Returns True if the SemVer version >= target
             and otherwise False including if an exception is thrown """
         try:
-            version=VersionInfo.parse(version)
-            target=VersionInfo.parse(target)
-            #version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
-            #target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
-            return version>=target
+            version = VersionInfo.parse(version)
+            target = VersionInfo.parse(target)
+            # version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
+            # target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
+            return version >= target
         except ValueError:
             # Returning False on exception as a workaround for when an null (or invalid) semver version is passed
             return False
+
+    @keyword
+    def update_notification_email_address(self, cluster_name, email_address, addon_name='managed-odh'):
+        """Update notification email for add-ons using OCM"""
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.update_notification_email_address(addon_name, email_address)

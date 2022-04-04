@@ -191,7 +191,7 @@ Clean Up User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftCLI.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
@@ -216,7 +216,7 @@ Delete Folder In User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftCLI.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}

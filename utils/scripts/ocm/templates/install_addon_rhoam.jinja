@@ -1,0 +1,27 @@
+{
+  "kind": "Cluster",
+  "href": "/api/clusters_mgmt/v1/clusters/{{ CLUSTER_ID }}",
+  "addon": {
+    "kind": "AddOn",
+    "href": "/api/clusters_mgmt/v1/addons/{{ ADDON_NAME }}",
+    "id": "{{ ADDON_NAME }}"
+    },
+    "parameters": {
+        "items":
+                [
+                  {
+                  "id": "cidr-range",
+                   "value": "{{ CIDR }}"
+                  },
+                  {
+                  "id": "addon-managed-api-service",
+                   "value": "1"
+                   },
+                  {
+                  "id": "addon-resource-required",
+                   "value": "true"
+                   }
+               ]
+    }
+
+}

@@ -6,6 +6,10 @@ Resource            ./Page/LoginPage.robot
 Resource            ./Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource            ./Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource            ./Page/ODH/Prometheus/Prometheus.resource
+Resource            ./Page/ODH/JupyterHub/HighAvailability.robot
+Resource            ../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
+Resource            ../../tasks/Resources/RHODS_OLM/uninstall/oc_uninstall.robot
+Resource            ../../tasks/Resources/RHODS_OLM/config/cluster.robot
 
 
 *** Variables ***
@@ -68,3 +72,70 @@ Usage Data Collection Should Not Be Enabled
     [Arguments]    ${msg}="Usage Data Collection" should not be enabled
     ${enabled}=    ODS.Is Usage Data Collection Enabled
     Should Not Be True    ${enabled}    msg=${msg}
+
+Set Standard RHODS Groups Variables
+    [Documentation]     Sets the RHODS groups name based on RHODS version
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
+    IF    ${version_check} == True
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      dedicated-admins
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       system:authenticated
+        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       true
+    ELSE
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      rhods-admins
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       rhods-users
+        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       false
+    END
+
+Apply Access Groups Settings
+    [Documentation]    Changes the rhods-groups config map to set the new access configuration
+    [Arguments]     ${admins_group}   ${users_group}    ${groups_modified_flag}
+    OpenShiftCLI.Patch    kind=ConfigMap
+    ...                   src={"data":{"admin_groups": "${admins_group}","allowed_groups": "${users_group}"}}
+    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
+    OpenShiftCLI.Patch    kind=ConfigMap
+    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${groups_modified_flag}"}}}
+    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
+    Rollout JupyterHub
+
+Set Default Access Groups Settings
+    [Documentation]    Restores the default rhods-groups config map
+    Apply Access Groups Settings     admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=${STANDARD_GROUPS_MODIFIED}
+
+Uninstall RHODS From OSD Cluster
+    [Documentation]    Selects the cluster type and triggers the RHODS uninstallation
+    [Arguments]     ${clustername}
+    ${addon_installed}=     Is Rhods Addon Installed    ${clustername}
+    Uninstall RHODS Using OLM
+    # IF    ${addon_installed} == ${TRUE}
+    #     Uninstall Rhods Using Addon    ${clustername}
+    # ELSE
+    #     Uninstall RHODS Using OLM
+    # END
+
+Uninstall RHODS Using OLM
+    [Documentation]     Uninstalls RHODS using OLM script
+    Selected Cluster Type OSD
+    Uninstall RHODS
+
+Wait Until RHODS Uninstallation Is Completed
+    [Documentation]     Waits until RHODS uninstallation process is completed.
+    ...                 It finishes when all the RHODS namespaces have been deleted.
+    [Arguments]     ${retries}=1   ${retries_interval}=2min
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        Log To Console    checking RHODS uninstall status: retry ${retry_idx}
+        ${ns_deleted}=     Run Keyword And Return Status    RHODS Namespaces Should Not Exist
+        Exit For Loop If    $ns_deleted == True
+        Sleep    ${retries_interval}
+    END
+    IF    $ns_deleted == False
+        Fail    RHODS didn't get "complete" stage after ${retries} retries
+        ...     (time between retries: ${retries_interval}). Check the cluster..
+    END
+
+RHODS Namespaces Should Not Exist
+    [Documentation]     Checks if the RHODS namespace do not exist on openshift
+    Verify Project Does Not Exists  rhods-notebook
+    Verify Project Does Not Exists  redhat-ods-monitoring
+    Verify Project Does Not Exists  redhat-ods-applications
+    Verify Project Does Not Exists  redhat-ods-operator

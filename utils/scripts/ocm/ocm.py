@@ -57,7 +57,7 @@ class OpenshiftClusterManager():
             match = re.search(r'.*\.(\S+)', (os.path.basename(ocm_env[0])))
             if match is not None:
                 self.testing_platform = match.group(1)
- 
+
     def _is_ocmcli_installed(self):
         """Checks if ocm cli is installed"""
         cmd = "ocm version"
@@ -121,7 +121,7 @@ class OpenshiftClusterManager():
                 chan_grp = ""
                 if (self.channel_group == "candidate"):
                     chan_grp = "--channel-group {}".format(self.channel_group)
-                 
+
                 version_cmd = "ocm list versions {} | grep -w \"".format(chan_grp) + re.escape(version) + "*\""
                 log.info("CMD: {}".format(version_cmd))
                 versions = execute_command(version_cmd)
@@ -139,7 +139,7 @@ class OpenshiftClusterManager():
             if ((self.channel_group == "stable") or (self.channel_group == "candidate")):
                 if version == "":
                     log.error(("Please enter openshift version as argument."
-                               "Channel group option is used along with openshift version."))    
+                               "Channel group option is used along with openshift version."))
                     sys.exit(1)
                 else:
                     channel_grp = "--channel-group {} ".format(self.channel_group)
@@ -154,7 +154,7 @@ class OpenshiftClusterManager():
                            self.aws_access_key_id,
                            self.aws_secret_access_key,
                            self.aws_region, self.num_compute_nodes,
-                           self.aws_instance_type, version, 
+                           self.aws_instance_type, version,
                            channel_grp, self.cluster_name))
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
@@ -406,27 +406,7 @@ class OpenshiftClusterManager():
             return True
         return False
 
-    def install_addon(self, addon_name="managed-odh"):
-        """Installs addon"""
-        replace_vars = {
-                       "CLUSTER_ID": self.cluster_name,
-                       "ADDON_NAME": addon_name
-                       }
-        template_file = "install_addon.jinja"
-        output_file = "install_operator.json"
-        self._render_template(template_file, output_file, replace_vars)
-
-        cluster_id = self.get_osd_cluster_id()
-        cmd = ("ocm post /api/clusters_mgmt/v1/clusters/{}/addons "
-               "--body={}".format(cluster_id, output_file))
-        log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
-        if ret is None:
-            log.info("Failed to install {} addon on cluster "
-                  "{}".format(addon_name, self.cluster_name))
-            sys.exit(1)
-
-    def uninstall_addon(self, addon_name="managed-odh"):
+    def uninstall_addon(self, addon_name="managed-odh", exit_on_failure=True):
         """Uninstalls addon"""
 
         addon_state = self.get_addon_state(addon_name)
@@ -439,7 +419,8 @@ class OpenshiftClusterManager():
             if ret is None:
                 log.info("Failed to uninstall {} addon on cluster "
                       "{}".format(addon_name, self.cluster_name))
-                sys.exit(1)
+                if exit_on_failure:
+                    sys.exit(1)
 
     def install_rhods(self):
         """Installs RHODS addon"""
@@ -448,6 +429,170 @@ class OpenshiftClusterManager():
     def uninstall_rhods(self):
         """Uninstalls RHODS addon"""
         self.uninstall_addon(addon_name="managed-odh")
+
+    def is_secret_existent(self, secret_name, namespace):
+        cmd = "oc get secret {} -n {}".format(secret_name, namespace)
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        log.info("\nRET: {}".format(ret))
+        if ret is None or "Error" in ret:
+            log.info("Failed to find {} secret".format(secret_name))
+            return False
+        else:
+            return True
+
+    def install_addon(self, addon_name="managed-odh",
+                      template_filename="install_addon.jinja",
+                      output_filename="install_operator.json",
+                      add_replace_vars=None,
+                      exit_on_failure=True
+                      ):
+        """Installs addon"""
+        replace_vars = {
+                       "CLUSTER_ID": self.cluster_name,
+                       "ADDON_NAME": addon_name
+                       }
+        if add_replace_vars:
+            replace_vars.update(add_replace_vars)
+            print(replace_vars)
+        template_file = template_filename
+        output_file = output_filename
+        self._render_template(template_file, output_file, replace_vars)
+        cluster_id = self.get_osd_cluster_id()
+        cmd = ("ocm post /api/clusters_mgmt/v1/clusters/{}/addons "
+               "--body={}".format(cluster_id, output_file))
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        log.info("\nRET: {}".format(ret))
+        failure_flag = False
+        if ret is None:
+            log.info("Failed to install {} addon on cluster "
+                  "{}".format(addon_name, self.cluster_name))
+            failure_flag = True
+            if exit_on_failure:
+                sys.exit(1)
+            else:
+                return failure_flag
+        return failure_flag
+
+    def is_oc_obj_existent(self, kind, name, namespace,
+                           retries=30, retry_sec_interval=3):
+        log.info("\nGetting {} with name {} from {} namespace."
+                 "In case of failure, the operation will be repeated every {} seconds, "
+                 "maximum {} times".format(kind, name, namespace, retry_sec_interval, retries))
+        found = False
+        for retry in range(retries):
+            cmd = ("""oc get {} {}  -n {}""".format(kind, name, namespace))
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            if ret is None or "Error" in ret:
+                log.info("Failed to find {} object. It may not be ready yet. Trying again in {} seconds".format(kind, retry_sec_interval))
+                time.sleep(retry_sec_interval)
+                continue
+            else:
+                log.info("{} object called {} found!".format(kind, name))
+                found = True
+                break
+        if not found:
+            log.error("{} object called {} not found (ns: {}).".format(kind, name, namespace))
+        return found
+
+    def install_rhoam_addon(self, exit_on_failure=True):
+        if not self.is_addon_installed(addon_name="managed-api-service"):
+            add_vars = {
+                "CIDR": "10.1.0.0/26"
+            }
+            failure_flags = []
+            failure = self.install_addon(addon_name="managed-api-service",
+                                         template_filename="install_addon_rhoam.jinja",
+                                         output_filename="install_rhoam_operator.json",
+                                         add_replace_vars=add_vars,
+                                         exit_on_failure=exit_on_failure)
+            failure_flags.append(failure)
+            log.info("\nSetting the useClusterStorage parameter to 'false'")
+            rhmi_found = self.is_oc_obj_existent(kind="rhmi", name="rhoam",
+                                                 namespace="redhat-rhoam-operato",
+                                                 retries=35, retry_sec_interval=3)
+            if not rhmi_found:
+                failure = True
+                failure_flags.append(failure)
+                if exit_on_failure:
+                    sys.exit(1)
+            # rhmi_found = False
+            # for retry in range(30):
+            #     cmd = ("""oc get rhmi rhoam  -n redhat-rhoam-operator""")
+            #     log.info("CMD: {}".format(cmd))
+            #     ret = execute_command(cmd)
+            #     if ret is None or "Error" in ret:
+            #         log.info("Failed to get RHMI object. It may not be ready yet. Trying again in 3 seconds")
+            #         time.sleep(3)
+            #         continue
+            #     else:
+            #         log.info("RHMI object ready to be patched!")
+            #         rhmi_found = True
+            #         break
+            # if not rhmi_found:
+            #     log.error("RHMI not found!")
+            #     failure = True
+            #     failure_flags.append(failure)
+            #     if exit_on_failure:
+            #         sys.exit(1)
+
+            cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
+                   --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            log.info("\nRET: {}".format(ret))
+            if ret is None:
+                log.info("Failed to patch RHMI to set useClusterStorage")
+                failure = True
+                failure_flags.append(failure)
+                if exit_on_failure:
+                    sys.exit(1)
+
+            log.info("\nCreating a dms dummy secret...")
+            cmd = "oc apply -f templates/dms.yaml"
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            log.info("\nRET: {}".format(ret))
+            res = self.is_secret_existent(secret_name="redhat-rhoam-deadmanssnitch",
+                                          namespace="redhat-rhoam-operator")
+            if res:
+                failure_flags.append(False)
+            else:
+                failure_flags.append(True)
+                log.info("Failed to create redhat-rhoam-deadmanssnitch secret")
+                if exit_on_failure:
+                    sys.exit(1)
+
+
+            log.info("\nCreating a smtp dummy secret...")
+            cmd = "oc apply -f templates/smpt.yaml"
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            res = self.is_secret_existent(secret_name="redhat-rhoam-smpt",
+                                          namespace="redhat-rhoam-operator")
+            if res:
+                failure_flags.append(False)
+            else:
+                failure_flags.append(True)
+                log.info("Failed to create redhat-rhoam-smpt secret")
+                if exit_on_failure:
+                    sys.exit(1)
+
+            if True in failure_flags:
+                log.info("Something got wrong while installing RHOAM: "
+                         "thus system is not waiting for installation status."
+                         "\nPlease check the cluster and try again...")
+            # else:
+            #    self.wait_for_addon_installation_to_complete(addon_name="managed-api-service")
+        else:
+            log.info("managed-api-service is already installed on {}".format(self.cluster_name))
+
+    def uninstall_rhoam_addon(self, exit_on_failure=True):
+        """Uninstalls RHOAM addon"""
+        self.uninstall_addon(addon_name="managed-api-service", exit_on_failure=exit_on_failure)
+        self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
 
     def create_idp(self):
         """Creates Identity Provider"""
@@ -904,6 +1049,32 @@ if __name__ == "__main__":
             action="store", dest="cluster_name",
             required=True)
         uninstall_rhods_parser.set_defaults(func=ocm_obj.uninstall_rhods_addon)
+
+        # Argument parsers for install_rhoam_addon
+        install_rhoam_parser = subparsers.add_parser(
+            'install_rhoam_addon',
+            help=("Install rhoam addon cluster."),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        required_install_rhoam_parser = install_rhoam_parser.add_argument_group('required arguments')
+
+        required_install_rhoam_parser.add_argument("--cluster-name",
+                                                   help="osd cluster name",
+                                                   action="store", dest="cluster_name",
+                                                   required=True)
+        install_rhoam_parser.set_defaults(func=ocm_obj.install_rhoam_addon)
+
+        # Argument parsers for uninstall_rhoam_addon
+        uninstall_rhoam_parser = subparsers.add_parser(
+            'uninstall_rhoam_addon',
+            help=("Uninstall rhoam addon cluster."),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        required_uninstall_rhoam_parser = uninstall_rhoam_parser.add_argument_group('required arguments')
+
+        required_uninstall_rhoam_parser.add_argument("--cluster-name",
+                                                     help="osd cluster name",
+                                                     action="store", dest="cluster_name",
+                                                     required=True)
+        uninstall_rhoam_parser.set_defaults(func=ocm_obj.uninstall_rhoam_addon)
 
         #Argument parsers for create_idp
         create_idp_parser = subparsers.add_parser(

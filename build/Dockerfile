@@ -36,4 +36,4 @@ RUN  chmod +x run.sh
 COPY requirements.txt setup.py .
 RUN  python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
 
-ENTRYPOINT ["./run.sh", "${ROBOT_EXTRA_ARGS}", "${RUN_SCRIPT_ARGS}"]
+ENTRYPOINT ["./run.sh"]

@@ -72,3 +72,37 @@ class Helpers:
         m, s = divmod(int(seconds), 60)
         h, m = divmod(m, 60)
         return h, m
+
+    @keyword
+    def install_rhoam_addon(self, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.install_rhoam_addon(exit_on_failure=False)
+
+    @keyword
+    def uninstall_rhoam_using_addon_flow(self, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.uninstall_rhoam_addon(exit_on_failure=False)
+
+    @keyword
+    def get_cluster_name(self, cluster_identifier):
+        ocm_client = OpenshiftClusterManager()
+        # to manipulate ocm_describe on line 45
+        ocm_client.cluster_name = cluster_identifier
+        cluster_name = ocm_client.ocm_describe(filter="--json | jq -r '.name'")
+        cluster_name = cluster_name.strip("\n")
+        return cluster_name
+
+    @keyword
+    def is_rhods_addon_installed(self, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        install_flag= ocm_client.is_addon_installed(addon_name="managed-odh")
+        return install_flag
+
+    @keyword
+    def uninstall_rhods_using_addon(self, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.uninstall_rhods()

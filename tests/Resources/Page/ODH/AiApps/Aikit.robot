@@ -26,4 +26,6 @@ Verify JupyterHub Can Spawn AIKIT Notebook
     Wait Until Page Contains Element    xpath://input[@name="oneAPI AI Analytics Toolkit"]
     Wait Until Element Is Enabled    xpath://input[@name="oneAPI AI Analytics Toolkit"]    timeout=10
     Spawn Notebook With Arguments    image=oneapi-aikit
+    Verify Library Version Is Greater Than  jupyterlab  3.1.4
+    Verify Library Version Is Greater Than  notebook    6.4.1
     Fix Spawner Status

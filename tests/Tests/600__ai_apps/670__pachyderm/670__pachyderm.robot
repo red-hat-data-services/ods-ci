@@ -22,7 +22,7 @@ Verify Pachyderm Can Be Installed Using OpenShift Console
     Create Project      pachyderm
     Create Pachyderm AWS-Secret
     Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     pachyderm
-    Wait Until Keyword Succeeds     120     1       Wait Until Status Is Running
+    Wait Until Status Is Running
     Go To RHODS Dashboard
     Verify Service Is Enabled    Pachyderm
     [Teardown]  Uninstall Pachyderm Operator
@@ -38,7 +38,7 @@ Dashboard Test Teardown
     Close All Browsers
 
 Wait Until Status Is Running
-    Element Text Should Be    //span[@data-test="status-text"]      Running
+    Wait Until Keyword Succeeds     120     1       Element Text Should Be    //span[@data-test="status-text"]      Running
 
 Create Pachyderm AWS-Secret
     OpenShiftCLI.Create     kind=Secret     src=tests/Tests/600__ai_apps/670__pachyderm/src.yaml        api_version=v1      namespace=pachyderm

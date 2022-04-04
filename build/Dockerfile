@@ -31,13 +31,9 @@ WORKDIR $HOME/ods-ci
 COPY tests tests/
 COPY libs libs/
 COPY run_robot_test.sh  .
+COPY build/run.sh  .
+RUN  chmod +x run.sh
 COPY requirements.txt setup.py .
-RUN python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
+RUN  python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
 
-CMD if [ -n "${ROBOT_EXTRA_ARGS}" ]; then \
-            echo --extra-robot-args "${ROBOT_EXTRA_ARGS}" &&\
-	        ./run_robot_test.sh --skip-pip-install ${RUN_SCRIPT_ARGS} --extra-robot-args "${ROBOT_EXTRA_ARGS}" ;\
-     else \
-            echo execute all &&\
-            ./run_robot_test.sh --skip-pip-install ${RUN_SCRIPT_ARGS};\
-     fi
+ENTRYPOINT ["./run.sh", "${ROBOT_EXTRA_ARGS}", "${RUN_SCRIPT_ARGS}"]

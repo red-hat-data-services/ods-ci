@@ -1,5 +1,6 @@
 *** Settings ***
 Resource      ../../../Page/Components/Components.resource
+Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
 Resource       ../../../Common.robot
 Library       JupyterLibrary
 

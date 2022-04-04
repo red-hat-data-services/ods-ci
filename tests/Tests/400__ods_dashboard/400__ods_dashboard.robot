@@ -1,12 +1,14 @@
 *** Settings ***
-Resource            ../../Resources/ODS.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-
+Library         OpenShiftCLI
+Resource        ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
+Resource        ../../Resources/ODS.robot
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource        ../../Resources/Page/LoginPage.robot
-Test Setup          Dashboard Test Setup
-Test Teardown       Dashboard Test Teardown
+Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
+Test Setup      Dashboard Test Setup
+Test Teardown   Dashboard Test Teardown
 
 
 *** Variables ***

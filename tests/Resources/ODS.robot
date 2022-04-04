@@ -6,6 +6,7 @@ Resource            ./Page/LoginPage.robot
 Resource            ./Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource            ./Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource            ./Page/ODH/Prometheus/Prometheus.resource
+Resource            ./Page/ODH/JupyterHub/HighAvailability.robot
 
 
 *** Variables ***
@@ -68,3 +69,32 @@ Usage Data Collection Should Not Be Enabled
     [Arguments]    ${msg}="Usage Data Collection" should not be enabled
     ${enabled}=    ODS.Is Usage Data Collection Enabled
     Should Not Be True    ${enabled}    msg=${msg}
+
+Set Standard RHODS Groups Variables
+    [Documentation]     Sets the RHODS groups name based on RHODS version
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
+    IF    ${version_check} == True
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      dedicated-admins
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       system:authenticated
+        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       true
+    ELSE
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      rhods-admins
+        Set Suite Variable    ${STANDARD_USERS_GROUP}       rhods-users
+        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       false
+    END
+
+Apply Access Groups Settings
+    [Documentation]    Changes the rhods-groups config map to set the new access configuration
+    [Arguments]     ${admins_group}   ${users_group}    ${groups_modified_flag}
+    OpenShiftCLI.Patch    kind=ConfigMap
+    ...                   src={"data":{"admin_groups": "${admins_group}","allowed_groups": "${users_group}"}}
+    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
+    OpenShiftCLI.Patch    kind=ConfigMap
+    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${groups_modified_flag}"}}}
+    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
+    Rollout JupyterHub
+
+Set Default Access Groups Settings
+    [Documentation]    Restores the default rhods-groups config map
+    Apply Access Groups Settings     admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=${STANDARD_GROUPS_MODIFIED}

@@ -357,6 +357,24 @@ Fetch Image Tooltip Info
     Click Element  //div[@class='jsp-app__header__title']
     [Return]  ${tmp_list}
 
+Handle Bad Gateway Page
+    [Documentation]    It reloads the JH page until Bad Gateway error page
+    ...                disappears. It is possible to control how many
+    ...                times to try refreshing using 'retries' argument
+    [Arguments]   ${retries}=10     ${retry_interval}=1s
+    Capture Page Screenshot    jh_badgateway_kw.png
+    FOR    ${counter}    IN RANGE    0    ${retries}+1
+        ${bg_present} =    Run Keyword And Return Status    Page Should Contain    Bad Gateway
+        IF    $bg_present == True
+            Reload Page
+            Sleep    ${retry_interval}
+        END
+        Exit For Loop If    $bg_present == False
+    END
+    IF    $bg_present == True
+        Fail    Bad Gateway error page appears
+    END
+
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
     [Arguments]    ${retries}=1    ${image}=s2i-generic-data-science-notebook    ${size}=Small    ${spawner_timeout}=600 seconds

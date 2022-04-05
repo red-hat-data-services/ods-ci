@@ -39,9 +39,9 @@ Dashboard Test Teardown
     Close All Browsers
 
 Wait Until Status Is Running
-    [Documentation]     This keyword should be used to check if the status changes from Initializing to Running.
+    [Documentation]     Checks if the status changes from Initializing to Running.
     Wait Until Keyword Succeeds     120     1       Element Text Should Be    //span[@data-test="status-text"]      Running
 
 Create Pachyderm AWS-Secret
-    [Documentation]     This keyword should be used to create a Pachyderm AWS Secret.
+    [Documentation]     Creates a Pachyderm AWS Secret.
     OpenShiftCLI.Create     kind=Secret     src=tests/Tests/600__ai_apps/670__pachyderm/src.yaml        api_version=v1      namespace=pachyderm

@@ -1,12 +1,11 @@
 *** Settings ***
 Documentation       Resource file for pachyderm operator
-Library             OpenShiftCLI
 Library             SeleniumLibrary
 
 
 *** Keywords ***
 Uninstall Pachyderm Operator
-    [Documentation]    Uninstall pachyderm operator and it's realted component
+    [Documentation]    Uninstall pachyderm operator and its related component.
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
     Delete Tabname Instance For Installed Operator    ${pachyderm_operator_name}    Pachyderm       pachyderm

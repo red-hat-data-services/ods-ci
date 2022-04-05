@@ -44,4 +44,8 @@ Wait Until Status Is Running
 
 Create Pachyderm AWS-Secret
     [Documentation]     Creates a Pachyderm AWS Secret.
-    OpenShiftCLI.Create     kind=Secret     src=tests/Tests/600__ai_apps/670__pachyderm/src.yaml        api_version=v1      namespace=pachyderm
+    Run     oc create secret generic pachyderm-aws-secret -n pachyderm --from-literal=access-id=${S3.AWS_ACCESS_KEY_ID} --from-literal=access-secret=${S3.AWS_SECRET_ACCESS_KEY} --from-literal=region=us-east-1 --from-literal=bucket=ods-ci-pachyderm
+    Menu.Navigate To Page       Workloads   Secrets
+    Wait Until Page Contains Element        //input[@data-test-id="item-filter"]
+    Input Text      //input[@data-test-id="item-filter"]    pachyderm-aws-secret
+    Wait Until Page Contains Element        //a[@data-test-id="pachyderm-aws-secret"]       10

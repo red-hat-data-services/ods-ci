@@ -405,8 +405,9 @@ Restore PVC Value To Default Size
     ...    Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Cluster settings updated successfully.
     ...    AND
-    ...    Sleep    30s
+    ...    Sleep    10s
     ...    AND
+    ...    Wait Until Keyword Succeeds    30    1
     ...    Wait Until JH Deployment Is Ready
 
 RHODS Notification Drawer Should Contain

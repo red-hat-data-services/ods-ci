@@ -404,7 +404,7 @@ Restore PVC Value To Default Size
     ...    Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Cluster settings updated successfully.
     ...    AND
-    ...    Sleep    10s
+    ...    Sleep    15s    msg=Wait for new deploymen to occur
     ...    AND
     ...    Wait Until Keyword Succeeds    30    1
     ...    Wait Until JH Deployment Is Ready

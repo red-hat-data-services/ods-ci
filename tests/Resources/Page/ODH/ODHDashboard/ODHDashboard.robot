@@ -2,6 +2,7 @@
 Resource      ../../../Page/Components/Components.resource
 Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
 Resource       ../../../Common.robot
+Resource       ../JupyterHub/ODHJupyterhub.resource
 Library       JupyterLibrary
 
 
@@ -393,14 +394,20 @@ Set PVC Value In RHODS Dashboard
     Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Cluster settings updated successfully.
 
+
 Restore PVC Value To Default Size
     [Documentation]    Set the PVC value to default
     ...    valie i.e., 20Gi
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
     Click Button    Restore Default
-    Wait Until Keyword Succeeds    30    1
+    Run Keywords
+    ...    Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Cluster settings updated successfully.
+    ...    AND
+    ...    Sleep    30s
+    ...    AND
+    ...    Wait Until JH Deployment Is Ready
 
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message

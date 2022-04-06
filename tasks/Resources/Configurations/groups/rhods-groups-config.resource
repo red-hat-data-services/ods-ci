@@ -9,10 +9,15 @@ ${RHODS_GROUPS_CONFIG} =        tasks/Resources/Configurations/groups/rhods_grou
 
 
 *** Keywords ***
-Modify RHODS Groups
+Modify ODS Groups
     [Documentation]    (string, string) -> list(dict)
+    ...    Args:
+    ...        admin_groups(str): One or more comma separated admin groups
+    ...        allowed_groups(str): One or more comma separated allowed groups
+    ...    Returns:
+    ...        group_config(list(dict)): Groups data from configmap 
     [Arguments]    ${admin_groups}    ${allowed_groups}
-    ${modified_label} =    Set Rhods Groups Modified Label    ${admin_groups}    ${allowed_groups}
+    ${modified_label} =    Set ODS Groups Modified Label    ${admin_groups}    ${allowed_groups}
     &{template_data} =    Create Dictionary
     ...    admin_groups=${admin_groups}
     ...    allowed_groups=${allowed_groups}
@@ -22,8 +27,13 @@ Modify RHODS Groups
     Restart JupyterHub Pods
     [Return]    ${groups_config[0]['data']}
 
-Set Rhods Groups Modified Label
+Set ODS Groups Modified Label
     [Documentation]    (str, str) -> str
+    ...    Args:
+    ...        admin_groups(str): One or more comma separated admin groups
+    ...        allowed_groups(str): One or more comma separated allowed groups
+    ...    Returns:
+    ...        modified_label(str): Modify label to true or false depending on default groups  
     [Arguments]    ${admin_groups}    ${allowed_groups}
 
     IF    "${admin_groups}" == "${DEFAULT_ADMIN_GROUPS}" and "${allowed_groups}" == "${DEFAULT_ALLOWED_GROUPS}"

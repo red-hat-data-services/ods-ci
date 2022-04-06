@@ -88,7 +88,7 @@ case "$(uname -s)" in
          ;;
     Linux)
        case "$(lsb_release --id --short)" in
-       "Fedora"|"CentOS")
+       "Fedora"|"CentOS"|"RedHatEnterprise")
              ## Bootstrap script to setup drivers ##
              echo "setting driver  to $currentpath/Drivers/fedora"
              PATH=$PATH:$currentpath/drivers/fedora

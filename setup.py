@@ -20,7 +20,7 @@ setup(
         "robotframework-requests",
         "robotframework-seleniumlibrary",
         "robotframework-jupyterlibrary>=0.3.1",
-        "robotframework-openshift",
+        "robotframework-openshift==1.0.0",
         "robotframework-OpenShiftCLI==1.0.1",
         "ipython",
         "pytest",

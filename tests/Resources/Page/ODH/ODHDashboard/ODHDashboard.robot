@@ -404,9 +404,8 @@ Restore PVC Value To Default Size
     ...    Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Cluster settings updated successfully.
     ...    AND
-    ...    Sleep    15s    msg=Wait for new deploymen to occur
+    ...    Sleep    20s    msg=Wait for new deploymen to occur
     ...    AND
-    ...    Wait Until Keyword Succeeds    30    1
     ...    Wait Until JH Deployment Is Ready
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message

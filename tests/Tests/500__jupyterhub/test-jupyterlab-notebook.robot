@@ -54,3 +54,30 @@ Can Launch Python3 Smoke Test Notebook
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Not Match  ${output}  ERROR*
+
+Verify A Default Image Is Provided And Starts Successfully
+    [Documentation]    Verify that, if a user doesn't explicitly select any jupyter image
+    ...    a default one is selected and it can be spawned successfully
+    [Tags]    Sanity
+    ...       ODS-469
+    Launch JupyterHub Spawner From Dashboard
+    Spawn Notebook
+    ${has_spawn_failed} =    Has Spawn Failed
+    Should Be Equal As Strings    ${has_spawn_failed}    False
+    Sleep    30s
+    Click Element    xpath=//div[@title='Python 3']
+    Verify Notebook Name And Image Tag
+
+
+*** Keywords ***
+Verify Notebook Name And Image Tag
+    [Documentation]    Verifies that expected notebook is spawned and image tag is not latest
+    ${user_name} =    Fetch From Right    ${TEST_USER.USERNAME}    -
+    ${user_name} =    Set Variable    jupyterhub-singleuser-profile-ldap-2d${user_name}
+    ${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
+    ...    field_selector=metadata.name=${user_name}
+    @{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
+    @{notebook_details} =    Split String    ${userdata}[1]    :
+    ${notebook_name} =    Strip String    ${notebook_details}[1]
+    Spawned Image Check    image=${notebook_name}
+    Should Not Be Equal As Strings    ${notebook_details}[2]    latest    strip_spaces=True

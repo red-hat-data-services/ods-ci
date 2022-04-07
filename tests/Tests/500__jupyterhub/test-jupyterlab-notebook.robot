@@ -72,11 +72,7 @@ Verify A Default Image Is Provided And Starts Successfully
 *** Keywords ***
 Verify Notebook Name And Image Tag
     [Documentation]    Verifies that expected notebook is spawned and image tag is not latest
-    ${user_name} =    Fetch From Right    ${TEST_USER.USERNAME}    -
-    ${user_name} =    Set Variable    jupyterhub-singleuser-profile-ldap-2d${user_name}
-    ${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
-    ...    field_selector=metadata.name=${user_name}
-    @{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
+    @{user_data} =    Get Previously Selected Notebook Image Details
     @{notebook_details} =    Split String    ${userdata}[1]    :
     ${notebook_name} =    Strip String    ${notebook_details}[1]
     Spawned Image Check    image=${notebook_name}

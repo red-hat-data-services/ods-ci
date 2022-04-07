@@ -10,6 +10,7 @@ Library   ../../../../libs/Helpers.py
 Library   String
 Library   Collections
 Library   JupyterLibrary
+Library   OpenShiftLibrary
 
 
 *** Variables ***
@@ -392,3 +393,12 @@ Verify Library Version Is Greater Than
     IF  ${comparison}==False
         Run Keyword And Continue On Failure     FAIL    Library Version Is Smaller Than Expected
     END
+
+Get Previously Selected Notebook Image Details
+    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
+    ${user_name} =    Set Variable    jupyterhub-singleuser-profile-${safe_username}
+    ${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
+    ...    field_selector=metadata.name=${user_name}
+    @{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
+    [Return]    ${user_data}
+

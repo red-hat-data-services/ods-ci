@@ -396,7 +396,7 @@ Set PVC Value In RHODS Dashboard
 
 Restore PVC Value To Default Size
     [Documentation]    Set the PVC value to default
-    ...    valie i.e., 20Gi
+    ...    value i.e., 20Gi
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
     Click Button    Restore Default
@@ -404,9 +404,10 @@ Restore PVC Value To Default Size
     ...    Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Cluster settings updated successfully.
     ...    AND
-    ...    Sleep    20s    msg=Wait for new deploymen to occur
+    ...    Sleep    20s    msg=NOTE: This change will cause juypterhub to restart. It will take 30 seconds before juypterhub will be available. #robocop:disable
     ...    AND
     ...    Wait Until JH Deployment Is Ready
+
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message
     [Arguments]     ${message}

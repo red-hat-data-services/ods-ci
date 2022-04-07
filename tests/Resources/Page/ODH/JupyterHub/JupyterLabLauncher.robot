@@ -6,7 +6,7 @@ Library  OperatingSystem
 Library  Screenshot
 Library  String
 Library  OpenShiftCLI
-Library  ../../../../libs/Helpers.py
+
 
 *** Variables ***
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
@@ -135,7 +135,7 @@ Run Cell And Get Output
     [Return]    ${output}
 
 Python Version Check
-  [Arguments]  ${expected_version}=3.8  ${compare}=Equal
+  [Arguments]  ${expected_version}=3.8
   Add and Run JupyterLab Code Cell in Active Notebook  !python --version
   Wait Until JupyterLab Code Cell Is Not Active
   #Get the text of the last output cell
@@ -143,7 +143,7 @@ Python Version Check
   #start is inclusive, end exclusive, get x.y from Python x.y.z string
   ${output} =  Fetch From Right  ${output}  ${SPACE}
   ${vers} =  Get Substring  ${output}  0  3
-  Compare Strings  ${vers}  ${expected_version}  ${compare}
+  Should Match  ${vers}  ${expected_version}
 
 Maybe Select Kernel
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
@@ -192,7 +192,7 @@ Clean Up User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      OpenShiftCLI.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
@@ -217,7 +217,7 @@ Delete Folder In User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      OpenShiftCLI.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}

@@ -59,14 +59,11 @@ Verify All Images And Spawner
     Log To Console    ${status_list}
 
 Verify There Are No Errors With Distutil Library
-    [Documentation]    Verifies that notebook can be spawned ,
-    ...    python version is greater than or equal to 3.8 and
-    ...    there are no errors in logs
+    [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
     [Tags]    Sanity
     ...       Tier2
     ...       ODS-586
-    Verify Python Version In All Images
-    Verify Errors In Logs
+    Verify Errors In Jupyterhub Logs
 
 
 *** Keywords ***
@@ -104,27 +101,14 @@ Verify List Of Libraries In Image
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for ${image} image do not match
 
-Verify Errors In Logs
-    [Documentation]    Verifies that there are no errors in Logs
+Verify Errors In Jupyterhub Logs
+    [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs
     @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications
     FOR    ${pod}    IN    @{pods}
-        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}    namespace=redhat-ods-applications
+        ${match} =  Get Regexp Matches   ${pod['metadata']['name']}    jupyterhub-1-*
+        ${match_length} =  Get Length    ${match}
+        Continue For Loop If    "${pod['metadata']['name']}"=="jupyterhub-1-deploy" or ${match_length}==0
+        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=redhat-ods-applications
         ...    container=${pod['spec']['containers'][0]['name']}
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
-    END
-
-Verify Python Version In All Images
-    [Documentation]    Spawns all images and Verifies Python Version >=3.8
-    @{image_list} =    Create List    minimal-gpu    pytorch    tensorflow    s2i-generic-data-science-notebook
-    ...    s2i-minimal-notebook
-    FOR    ${image}    IN    @{image_list}
-        ${server} =    Run Keyword and Return Status    Page Should Contain Element
-        ...    //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
-        IF    ${server}==True
-            Clean Up Server
-            Stop JupyterLab Notebook Server
-            Fix Spawner Status
-        END
-        Spawn Notebook With Arguments    image=${image}    size=Default
-        Python Version Check    expected_version=3.8    compare=GTE
     END

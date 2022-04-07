@@ -65,12 +65,3 @@ class Helpers:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.update_notification_email_address(addon_name, email_address)
-
-    @keyword
-    def Compare_Strings(self,version,target,compare):
-        if compare=='Equal':
-            return version==target
-        elif compare=='GTE':
-            return version>=target
-        elif compare=='LTE':
-            return version<=target

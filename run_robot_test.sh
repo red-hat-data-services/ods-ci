@@ -10,6 +10,9 @@ EXTRA_ROBOT_ARGS=""
 SKIP_PIP_INSTALL=0
 TEST_INCLUDE_TAG=""
 TEST_EXCLUDE_TAG=""
+EMAIL_REPORT=true
+EMAIL_TO=""
+EMAIL_FROM=""
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -79,6 +82,24 @@ while [ "$#" -gt 0 ]; do
       SKIP_PIP_INSTALL=1
       ;;
 
+    --email-report)
+      shift
+      EMAIL_REPORT=$1
+      shift
+      ;;
+
+    --email-from)
+      shift
+      EMAIL_FROM=$1
+      shift
+      ;;
+
+    --email-to)
+      shift
+      EMAIL_TO=$1
+      shift
+      ;;
+
     *)
       echo "Unknown command line switch: $1"
       exit 1
@@ -86,6 +107,17 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+if ${EMAIL_REPORT}
+    then
+      echo "Email Report is enabled"
+      if [ -z "${EMAIL_FROM}" ] || [ -z "${EMAIL_TO}" ]
+        then
+          echo "--email-from and/or --email-to is missing. Please, set them or disable --email-report"
+          exit 1
+      fi
+      echo "Test Execution results will be sent to ${EMAIL_TO} from ${EMAIL_FROM}"
+fi
+echo ${TEST_VARIABLES_FILE}
 if [[ ! -f "${TEST_VARIABLES_FILE}" ]]; then
   echo "Robot Framework test variable file (test-variables.yml) is missing"
   exit 1
@@ -208,3 +240,17 @@ case "$(uname -s)" in
 esac
 
 ./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+
+# send test artifacts by email
+if ${EMAIL_REPORT}
+ then
+     tar cvzf rf_results.tar.gz ${TEST_ARTIFACT_DIR} &> /dev/null
+     size=$(du -k rf_results.tar.gz | cut -f1)
+     if [ "${size}" -gt 1 ]
+        then
+            echo "Test results artifacts are too large for email"
+            rm rf_results.tar.gz
+            tar cvzf rf_results_html.tar.gz $(find ${TEST_ARTIFACT_DIR} -regex  '.*\(xml\|html\)$') &> /dev/null
+     fi
+     ./venv/bin/python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" -a "rf_results.tar.gz"
+fi

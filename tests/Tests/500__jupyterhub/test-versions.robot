@@ -15,6 +15,7 @@ Force Tags          JupyterHub
 
 *** Variables ***
 @{status_list}      # robocop: disable
+&{package_versions}      # robocop: disable
 
 
 *** Test Cases ***

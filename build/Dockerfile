@@ -32,6 +32,7 @@ COPY tests tests/
 COPY libs libs/
 COPY run_robot_test.sh  .
 COPY build/run.sh  .
+COPY utils/scripts/Sender  utils/scripts/Sender/
 RUN  chmod +x run.sh
 COPY requirements.txt setup.py .
 RUN  python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt

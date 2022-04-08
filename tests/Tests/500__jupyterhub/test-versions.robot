@@ -58,10 +58,9 @@ Verify All Images And Spawner
     Should Be Equal As Integers    ${length}    4
     Log To Console    ${status_list}
 
-Verify There Are No Errors With Distutil Library
+Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
-    [Tags]    Sanity
-    ...       Tier2
+    [Tags]    Tier2
     ...       ODS-586
     Verify Errors In Jupyterhub Logs
 

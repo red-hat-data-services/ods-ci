@@ -5,7 +5,7 @@ Library  jupyter-helper.py
 Library  OperatingSystem
 Library  Screenshot
 Library  String
-Library  OpenShiftCLI
+Library  OpenShiftLibrary
 
 
 *** Variables ***

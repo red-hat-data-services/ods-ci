@@ -5,7 +5,6 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-
 Suite Setup      JupyterHub Testing Suite Setup
 Suite Teardown   End Web Test
 Force Tags       JupyterHub
@@ -86,7 +85,6 @@ Verify Message That Image Builds Are In Progress
     RHODS Notification Drawer Should Contain  message=Notebook images are building
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
     Wait Until Page Contains Element    xpath=//*[contains(text(),'All notebook image builds are complete')]  timeout=5 min
-
 
 *** Keywords ***
 JupyterHub Testing Suite Setup

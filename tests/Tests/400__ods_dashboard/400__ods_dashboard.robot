@@ -158,6 +158,21 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
+<<<<<<< HEAD
+=======
+Verify Failing Images Are Shown In Notifications
+    [Documentation]    Verifies failing Notebook names are shown in RHODS Dashboard Notifications
+    [Tags]    Sanity
+    ...       ODS-470
+    Clear RHODS Notifications
+    ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
+    ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    ...    container_to_kill=sti-build
+    RHODS Notification Drawer Should Contain  message=Notebook image build PyTorch failed
+    Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+
+
+>>>>>>> bb3fbf5... Added Clear Notifications Keyword
 *** Keywords ***
 RHODS Dahsboard Pod Should Contain OauthProxy Container
     ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard

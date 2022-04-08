@@ -162,7 +162,7 @@ Verify RHODS Release Version Number
     [Documentation]    Verify RHODS version matches x.y.z-build format
     [Tags]    Sanity
     ...       Tier1
-    ...       ODS-478
+    ...       ODS-478   ODS-472
     ${version} =  Get RHODS Version
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 

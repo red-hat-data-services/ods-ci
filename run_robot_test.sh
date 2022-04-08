@@ -13,6 +13,7 @@ TEST_EXCLUDE_TAG=""
 EMAIL_REPORT=true
 EMAIL_TO=""
 EMAIL_FROM=""
+EMAIL_SERVER="localhost"
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -97,6 +98,11 @@ while [ "$#" -gt 0 ]; do
     --email-to)
       shift
       EMAIL_TO=$1
+      shift
+      ;;
+   --email-server)
+      shift
+      EMAIL_SERVER=$1
       shift
       ;;
 
@@ -246,11 +252,11 @@ if ${EMAIL_REPORT}
  then
      tar cvzf rf_results.tar.gz ${TEST_ARTIFACT_DIR} &> /dev/null
      size=$(du -k rf_results.tar.gz | cut -f1)
-     if [ "${size}" -gt 1 ]
+     if [ "${size}" -gt 20000 ]
         then
             echo "Test results artifacts are too large for email"
             rm rf_results.tar.gz
-            tar cvzf rf_results_html.tar.gz $(find ${TEST_ARTIFACT_DIR} -regex  '.*\(xml\|html\)$') &> /dev/null
+            tar cvzf rf_results.tar.gz $(find ${TEST_ARTIFACT_DIR} -regex  '.*\(xml\|html\)$') &> /dev/null
      fi
-     ./venv/bin/python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" -a "rf_results.tar.gz"
+     ./venv/bin/python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" -v ${EMAIL_SERVER} -a "rf_results.tar.gz"
 fi

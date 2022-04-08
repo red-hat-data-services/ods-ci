@@ -20,14 +20,15 @@ class EmailSender(Sender):
     def prepare_payload(self, text: str = "",
                         attachments: Optional[List[Any]] = None) -> None:
         self._message.attach(MIMEText(text))
-        for filepath in attachments:
-            with open(filepath, "rb") as file:
-                part = MIMEApplication(
-                    file.read(),
-                    Name=basename(filepath)
-                )
-                part['Content-Disposition'] = 'attachment; filename="%s"' % basename(filepath)
-                self._message.attach(part)
+        if attachments is not None:
+            for filepath in attachments:
+                with open(filepath, "rb") as file:
+                    part = MIMEApplication(
+                        file.read(),
+                        Name=basename(filepath)
+                    )
+                    part['Content-Disposition'] = 'attachment; filename="%s"' % basename(filepath)
+                    self._message.attach(part)
 
     def prepare_header(self):
         self._message['From'] = self._sender_address
@@ -66,4 +67,3 @@ class EmailSender(Sender):
 
     def get_message(self):
         return self._message
-

@@ -4,6 +4,10 @@ from EmailSender import EmailSender
 
 def send_email_report(sender, receiver, subject, text, attachments, server):
     print("Composing your email...")
+    print("Sender:", sender)
+    print("Receiver:", receiver)
+    print("Server:", server)
+
     reporter = EmailSender()
     reporter.set_sender_address(sender_address=sender)
     reporter.set_receiver_addresses(receiver_addresses=receiver)

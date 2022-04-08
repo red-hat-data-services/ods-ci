@@ -103,11 +103,8 @@ Verify List Of Libraries In Image
 
 Verify Errors In Jupyterhub Logs
     [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs
-    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications
+    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications  label_selector=app=jupyterhub
     FOR    ${pod}    IN    @{pods}
-        ${match} =  Get Regexp Matches   ${pod['metadata']['name']}    jupyterhub-1-*
-        ${match_length} =  Get Length    ${match}
-        Continue For Loop If    "${pod['metadata']['name']}"=="jupyterhub-1-deploy" or ${match_length}==0
         ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=redhat-ods-applications
         ...    container=${pod['spec']['containers'][0]['name']}
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'

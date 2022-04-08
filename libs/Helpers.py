@@ -65,3 +65,10 @@ class Helpers:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.update_notification_email_address(addon_name, email_address)
+
+    @keyword
+    def convert_to_hours_and_minutes(self, seconds):
+        """ Converts seconds in hours and minutes """
+        m, s = divmod(int(seconds), 60)
+        h, m = divmod(m, 60)
+        return h, m

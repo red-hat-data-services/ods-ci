@@ -328,5 +328,6 @@ Verify RHODS Notification After Logging Out
 
 Restart Failed Build and Close Browser
     [Documentation]     Deletes failed build and starts new build , Closes All Browsers
+    [Arguments]     ${failed_build_name}
     Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
     Dashboard Test Teardown

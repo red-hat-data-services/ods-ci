@@ -3,30 +3,26 @@ Documentation       Test Suite to verify installed library versions
 
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+
 Library             JupyterLibrary
 
 Suite Setup         Load Spawner Page
 Suite Teardown      End Web Test
 
+*** Variables ***
+@{LIST_OF_IMAGES} =    s2i-minimal-notebook    s2i-generic-data-science-notebook
+...                    pytorch    tensorflow
+@{EXPECTED_PERMISSIONS} =       0775    0    1001
+@{FOLDER_TO_CHECK} =            /opt/app-root/lib    /opt/app-root/share
 
 *** Test Cases ***
 Verify Folder Permissions
     [Documentation]    It checks Access, Gid, Uid of /opt/app-root/lib and /opt/app-root/shares
-    [Tags]    ODS-486
+    [Tags]    ODS-48699
     ...       Tier2
-    @{list_of_images} =    Create List
-    Append To List
-    ...    ${list_of_images}
-    ...    s2i-minimal-notebook
-    ...    s2i-generic-data-science-notebook
-    ...    pytorch
-    ...    tensorflow
-    ${permissions} =    Create List    0775    0    1001
-    ${path} =    Create List    lib    share
-    FOR    ${img}    IN    @{list_of_images}
-        Verify The Permissions Of Folder In Image    ${img}    ${path}    ${permissions}
+    FOR    ${img}    IN    @{LIST_OF_IMAGES}
+        Verify The Permissions Of Folder In Image    ${img}    ${FOLDER_TO_CHECK}    ${EXPECTED_PERMISSIONS}
     END
 
 
@@ -57,13 +53,13 @@ Verify The Permissions Of Folder
     [Arguments]    ${path}    @{permission}
     Run Keyword And Continue On Failure
     ...    Run Cell And Check Output
-    ...    !stat /opt/app-root/${path} | grep Access | awk '{split($2,b,"."); printf "%s", b[1]}' | awk '{split($0, c, "/"); printf c[1]}' | cut -c 2-5
+    ...    !stat ${path} | grep Access | awk '{split($2,b,"."); printf "%s", b[1]}' | awk '{split($0, c, "/"); printf c[1]}' | cut -c 2-5
     ...    ${permission}[0]
     Run Keyword And Continue On Failure
     ...    Run Cell And Check Output
-    ...    !stat /opt/app-root/${path} | grep Uid | awk '{split($9,b,"."); printf "%s", b[1]}' | awk '{split($0, c, "/"); printf c[1]}'
+    ...    !stat ${path} | grep Uid | awk '{split($9,b,"."); printf "%s", b[1]}' | awk '{split($0, c, "/"); printf c[1]}'
     ...    ${permission}[1]
     Run Keyword And Continue On Failure
     ...    Run Cell And Check Output
-    ...    !stat /opt/app-root/${path} | grep Gid | awk '{split($5,b,"."); printf "%s", b[1]}' | awk '{split($0, c, "/"); printf c[1]}'
+    ...    !stat ${path} | grep Gid | awk '{split($5,b,"."); printf "%s", b[1]}' | awk '{split($0, c, "/"); printf c[1]}'
     ...    ${permission}[2]

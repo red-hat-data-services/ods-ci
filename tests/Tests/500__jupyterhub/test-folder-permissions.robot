@@ -19,7 +19,7 @@ Suite Teardown      End Web Test
 *** Test Cases ***
 Verify Folder Permissions
     [Documentation]    It checks Access, Gid, Uid of /opt/app-root/lib and /opt/app-root/shares
-    [Tags]    ODS-48699
+    [Tags]    ODS-486
     ...       Tier2
     FOR    ${img}    IN    @{LIST_OF_IMAGES}
         Verify The Permissions Of Folder In Image    ${img}    ${FOLDER_TO_CHECK}    ${EXPECTED_PERMISSIONS}

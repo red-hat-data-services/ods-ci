@@ -166,6 +166,12 @@ Verify RHODS Release Version Number
     ${version} =  Get RHODS Version
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 
+Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
+    [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
+    [Tags]    Tier2
+    ...       ODS-586
+    Verify Errors In Jupyterhub Logs
+
 
 *** Keywords ***
 Verify Cuda Builds Are Completed
@@ -204,3 +210,12 @@ Verify BlackboxExporter Includes Oauth Proxy
     @{containers} =    Get Containers    pod_name=${pod}    namespace=redhat-ods-monitoring
     List Should Contain Value    ${containers}    oauth-proxy
     List Should Contain Value    ${containers}    blackbox-exporter
+
+Verify Errors In Jupyterhub Logs
+    [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs
+    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications  label_selector=app=jupyterhub
+    FOR    ${pod}    IN    @{pods}
+        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=redhat-ods-applications
+        ...    container=${pod['spec']['containers'][0]['name']}
+        Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
+    END

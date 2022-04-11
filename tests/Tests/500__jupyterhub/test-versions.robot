@@ -58,12 +58,6 @@ Verify All Images And Spawner
     Should Be Equal As Integers    ${length}    4
     Log To Console    ${status_list}
 
-Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
-    [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
-    [Tags]    Tier2
-    ...       ODS-586
-    Verify Errors In Jupyterhub Logs
-
 
 *** Keywords ***
 Verify Libraries In Base Image    # robocop: disable
@@ -99,12 +93,3 @@ Verify List Of Libraries In Image
     ${status} =    Verify Libraries In Base Image    ${image}    ${additional_libs}
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for ${image} image do not match
-
-Verify Errors In Jupyterhub Logs
-    [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs
-    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications  label_selector=app=jupyterhub
-    FOR    ${pod}    IN    @{pods}
-        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=redhat-ods-applications
-        ...    container=${pod['spec']['containers'][0]['name']}
-        Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
-    END

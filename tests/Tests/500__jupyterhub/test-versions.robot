@@ -93,3 +93,4 @@ Verify List Of Libraries In Image
     ${status} =    Verify Libraries In Base Image    ${image}    ${additional_libs}
     Append To List    ${status_list}    ${status}
     Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for ${image} image do not match
+

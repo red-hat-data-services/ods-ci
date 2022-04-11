@@ -167,7 +167,6 @@ Verify Failing Images Are Shown In Notifications
     ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
     RHODS Notification Drawer Should Contain  message=Notebook image build PyTorch failed
-    Close All Browsers
     [Teardown]     Restart Failed Build and Close Browser  failed_build_name=${failed_build_name}
 
 

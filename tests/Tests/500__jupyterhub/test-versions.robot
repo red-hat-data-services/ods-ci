@@ -1,11 +1,11 @@
 *** Settings ***
 Documentation       Test Suite to verify installed library versions
+
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library             JupyterLibrary
-Library             OpenShiftLibrary
 
 
 Suite Setup         Load Spawner Page

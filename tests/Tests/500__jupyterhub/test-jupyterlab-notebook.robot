@@ -64,8 +64,10 @@ Verify A Default Image Is Provided And Starts Successfully
     Spawn Notebook
     ${has_spawn_failed} =    Has Spawn Failed
     Should Be Equal As Strings    ${has_spawn_failed}    False
-    Sleep    30s
-    Click Element    xpath=//div[@title='Python 3']
+    Wait For JupyterLab Splash Screen  timeout=30
+    Open With JupyterLab Menu  File  New  Notebook
+    Sleep    1
+    Maybe Close Popup
     Verify Notebook Name And Image Tag
 
 

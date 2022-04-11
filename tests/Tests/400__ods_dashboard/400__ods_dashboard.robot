@@ -320,14 +320,13 @@ Verify Anaconda Success Message Based On Version
         Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME_LATEST}
     END
 
-Restart Failed Build and Close Browser
-    [Documentation]     Deletes failed build and starts new build , Closes All Browsers
-    [Arguments]     ${failed_build_name}    ${build_config}
-    Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=${build_config}
-    Dashboard Test Teardown
-
 Verify RHODS Notification After Logging Out
     [Documentation]     Logs out from RHODS Dashboard and then relogin to check notifications
     Go To    ${ODH_DASHBOARD_URL}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     RHODS Notification Drawer Should Contain  message=Notebook image build TensorFlow failed
+
+Restart Failed Build and Close Browser
+    [Documentation]     Deletes failed build and starts new build , Closes All Browsers
+    Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    Dashboard Test Teardown

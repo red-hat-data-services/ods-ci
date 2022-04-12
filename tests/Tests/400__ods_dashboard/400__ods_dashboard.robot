@@ -115,6 +115,13 @@ Search and Verify GPU Items Appears In Resources Page
     Search Items In Resources Section   GPU
     Check GPU Resources
 
+Verify Quick Starts Work As Expected
+    [Tags]  ODS-1166    ODS-1306
+    ...     ODS-1307    ODS-1308
+    Verify Quick Starts Work As Expected When All the Steps Marked As Yes   create-jupyter-notebook-anaconda
+    Verify Quick Starts Work As Expected When Restarting The Previous One   create-jupyter-notebook-anaconda
+    Verify Quick Starts Work As Expected When One Of The Step Marked As No  openvino-inference-notebook
+
 *** Keywords ***
 Verify JupyterHub Card CSS Style
     [Documentation]     Compare the some CSS properties of the Explore page
@@ -171,4 +178,49 @@ Check GPU Resources
         Page Should Not Contain Element     //article[@id="python-gpu-numba-tutorial"]
         Page Should Not Contain Element     //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
     END
+
+Verify Quick Starts Work As Expected When All the Steps Marked As Yes
+    [Arguments]     ${element}
+    Open QuickStart Element in Resource Section By Name     ${element}
+    ${count}=   Get The Count Of Description
+    Click Button    //button[@data-test="Start button"]
+    Wait Until Page Contains Element    //div[@class="pfext-quick-start-content"]
+    FOR     ${index}    IN RANGE    ${count}
+        Run Keyword And Continue On Failure     Move To Next Step By Clicking Yes
+        IF  ${index} != ${count-1}
+            Click Button    //button[@data-testid="qs-drawer-next"]
+        END
+    END
+    Verify Previous Description     ${count}
+    Run Keyword And Continue On Failure         Move To Next Step By Clicking Yes
+    Click Button    //button[@data-testid="qs-drawer-next"]
+    Click Button    //button[@data-testid="qs-drawer-next"]
+    Verify And Close The Sidebar
+    Verify The Progress Of The Items    ${element}  Complete
+
+Verify Quick Starts Work As Expected When Restarting The Previous One
+    [Arguments]     ${element}
+    Element Text Should Be  //article[@id="${element}"]//a      Restart
+    Open QuickStart Element in Resource Section By Name     ${element}
+    Element Text Should Be  //article[@id="${element}"]//a      Close
+    Verify And Close The Sidebar
+    CLick Button        //button[@data-test="cancel button"]
+    Verify And Close The Sidebar
+    Click Button        //button[@data-test="leave button"]
+    Element Text Should Be  //article[@id="${element}"]//a      Open
+
+Verify Quick Starts Work As Expected When One Of The Step Marked As No
+    [Arguments]     ${element}
+    Open QuickStart Element in Resource Section By Name     ${element}
+    ${count}=   Get The Count Of Description
+    ${count}=   Evaluate    ${count} - 1
+    Click Button    //button[@data-test="Start button"]
+    Wait Until Page Contains Element    //div[@class="pfext-quick-start-content"]
+    FOR     ${index}    IN RANGE    ${count}
+        Run Keyword And Continue On Failure     Move To Next Step By Clicking Yes
+        Click Button    //button[@data-testid="qs-drawer-next"]
+    END
+    Run Keyword And Continue On Failure         Move To Next Step By Clicking No
+    Verify And Close The Sidebar
+    Verify The Progress Of The Items    ${element}      Failed
 

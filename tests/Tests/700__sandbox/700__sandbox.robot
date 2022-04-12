@@ -15,7 +15,7 @@ Verify Application Switcher Have Only OpenShift Console Link
     ...    openshift conosle link
     [Tags]     ODS-309
     ...        Sandbox
-    Check Openshift Console
+    Check Only OpenShift Link Is Present In Application Launcher
 
 Verify ISV Integration Enablement Is Disabled
     [Documentation]    Verifies that all the ISV integration
@@ -33,13 +33,7 @@ Verify RHODS "Support" Link Hidden In ODH Dashboard
     ...   as in sandbox they should have only the documentation link
     [Tags]    ODS-526
     ...       Sandbox
-    Click Element    xpath=//*[@id="toggle-id"]
-    ${links_avialble}   Get WebElements
-    ...    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
-    FOR  ${link}  IN  @{links_avialble}
-         ${href}    Get Element Attribute    ${link}    href
-         Run Keyword And Continue On Failure   Should Not Contain   ${href}   support   ignore_case=True
-    END
+    Verify Support Link Is Not Present in RHODS Dashbaord
 
 Verify JupyterHub Spawner Only Allows Small Server Size In Sandbox Environment
     [Documentation]    Only Default and Small size is present
@@ -66,8 +60,8 @@ Verify That Idle JupyterLab Servers Are Culled In Sandbox Environment After 24h
 
 
 *** Keywords ***
-Check Openshift Console
-     [Documentation]  capture and check if only OSD link is present
+Check Only OpenShift Link Is Present In Application Launcher
+     [Documentation]  Capture and check if only Openshift link is present
      Click Element     //button[@aria-label="Application launcher"]
      Wait Until Element Is Visible        //a[@class="pf-m-external pf-c-app-launcher__menu-item"]
      ${link_elements}  Get WebElements    //a[@class='pf-m-external pf-c-app-launcher__menu-item']
@@ -95,3 +89,13 @@ Verify None Of The Card Are Enabled
     ${link_elements}  Get WebElements    //article[@class="pf-c-card pf-m-selectable odh-card"]
     ${length}      Get Length    ${link_elements}
     Run Keyword If  ${length} != ${0}    Fail     '${length}' tiles in Explore section is Enabled
+
+Verify Support Link Is Not Present in RHODS Dashbaord
+    [Documentation]   Check suppurt url is not present in the sandbox RHODS dashabord
+    Click Element    xpath=//*[@id="toggle-id"]
+    ${links_available}   Get WebElements
+    ...    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
+    FOR  ${link}  IN  @{links_available}
+         ${href}    Get Element Attribute    ${link}    href
+         Run Keyword And Continue On Failure   Should Not Contain   ${href}   support   ignore_case=True
+    END

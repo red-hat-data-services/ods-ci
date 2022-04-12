@@ -139,3 +139,14 @@ RHODS Namespaces Should Not Exist
     Verify Project Does Not Exists  redhat-ods-monitoring
     Verify Project Does Not Exists  redhat-ods-applications
     Verify Project Does Not Exists  redhat-ods-operator
+
+Disable Access To Grafana Using OpenShift Port Forwarding
+    [Documentation]   Kill process running in background based on Id
+    [Arguments]  ${PROC}
+    Close Browser
+    Terminate Process   ${PROC}
+
+Enable Access To Grafana Using OpenShift Port Forwarding
+    [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
+    ${PROC} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
+    [Return]    ${PROC}

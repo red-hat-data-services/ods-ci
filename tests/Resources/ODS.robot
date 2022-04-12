@@ -143,7 +143,6 @@ RHODS Namespaces Should Not Exist
 Get RHODS URL From OpenShift Using UI
     [Documentation]    Capture and return rhods url from
     ...     OpenShift console
-    Switch To Administrator Perspective
     Click Element     //button[@aria-label="Application launcher"]
     Wait Until Element Is Visible    //a[@data-test="application-launcher-item"]
     ${link_elements}  Get WebElements

@@ -34,8 +34,9 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 
 *** Test Cases ***
 Verify That Login Page Is Shown When Reaching The RHODS Page
-    [Tags]    Sanity    ODS-694
-    [Setup]    Test Setup For Login Page
+    [Tags]      Sanity
+    ...         ODS-694
+    [Setup]     Test Setup For Login Page
     Check OpenShift Login Visible
 
 Verify Resource Link HTTP Status Code
@@ -67,8 +68,8 @@ Verify Content In RHODS Explore Section
     Check Cards Details Are Correct    expected_data=${EXP_DATA_DICT}
 
 Verify Disabled Cards Can Be Removed
-    [Documentation]    Verifies it is possible to remove a disabled card from Enabled page.
-    ...    It uses RHOSAK as example to test the feature
+    [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
+    ...                 It uses RHOSAK as example to test the feature
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
     ...       KnownIssues
@@ -79,10 +80,10 @@ Verify Disabled Cards Can Be Removed
     Capture Page Screenshot    after_removal.png
 
 Verify License Of Disabled Cards Can Be Re-validated
-    [Documentation]    Verifies it is possible to re-validate the license of a disabled card
-    ...    from Enabled page. it uses Anaconda CE as example to test the feature.
+    [Documentation]   Verifies it is possible to re-validate the license of a disabled card
+    ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     [Tags]    Sanity
-    ...       ODS-1097    ODS-357
+    ...       ODS-1097   ODS-357
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible
@@ -115,15 +116,15 @@ Verify Documentation Link HTTP Status Code
     ...    also checks the RHODS dcoumentation link present in resource page.
     [Tags]    Sanity
     ...       ODS-327    ODS-492
-    ${links}=    Get RHODS Documentation Links From Dashboard
-    Check External Links Status    links=${links}
+    ${links}=  Get RHODS Documentation Links From Dashboard
+    Check External Links Status     links=${links}
 
 Verify Logged In Users Are Displayed In The Dashboard
     [Documentation]    It verifies that logged in users username is displayed on RHODS Dashboard.
     [Tags]    Sanity
     ...       ODS-354
     ...       Tier1
-    Verify Username Displayed On RHODS Dashboard    ${TEST_USER.USERNAME}
+    Verify Username Displayed On RHODS Dashboard   ${TEST_USER.USERNAME}
 
 Search and Verify GPU Items Appears In Resources Page
     [Tags]    Sanity
@@ -153,6 +154,13 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
+
+Verify Quick Starts Work As Expected
+    [Tags]  ODS-1166    ODS-1306
+    ...     ODS-1307    ODS-1308
+    Verify Quick Starts Work As Expected When All the Steps Marked As Yes   create-jupyter-notebook-anaconda
+    Verify Quick Starts Work As Expected When Restarting The Previous One   create-jupyter-notebook-anaconda
+    Verify Quick Starts Work As Expected When One Of The Step Marked As No  openvino-inference-notebook
 
 *** Keywords ***
 Verify JupyterHub Card CSS Style
@@ -274,3 +282,48 @@ Filter By Using More Than One Filter And Check Output
     FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
         Deselect Checkbox Using Id    id=${id}
     END
+Verify Quick Starts Work As Expected When All the Steps Marked As Yes
+    [Arguments]     ${element}
+    Open QuickStart Element in Resource Section By Name     ${element}
+    ${count}=   Get The Count Of Description
+    Click Button    //button[@data-test="Start button"]
+    Wait Until Page Contains Element    //div[@class="pfext-quick-start-content"]
+    FOR     ${index}    IN RANGE    ${count}
+        Run Keyword And Continue On Failure     Move To Next Step By Clicking Yes
+        IF  ${index} != ${count-1}
+            Click Button    //button[@data-testid="qs-drawer-next"]
+        END
+    END
+    Verify Previous Description     ${count}
+    Run Keyword And Continue On Failure         Move To Next Step By Clicking Yes
+    Click Button    //button[@data-testid="qs-drawer-next"]
+    Click Button    //button[@data-testid="qs-drawer-next"]
+    Verify And Close The Sidebar
+    Verify The Progress Of The Items    ${element}  Complete
+
+Verify Quick Starts Work As Expected When Restarting The Previous One
+    [Arguments]     ${element}
+    Element Text Should Be  //article[@id="${element}"]//a      Restart
+    Open QuickStart Element in Resource Section By Name     ${element}
+    Element Text Should Be  //article[@id="${element}"]//a      Close
+    Verify And Close The Sidebar
+    CLick Button        //button[@data-test="cancel button"]
+    Verify And Close The Sidebar
+    Click Button        //button[@data-test="leave button"]
+    Element Text Should Be  //article[@id="${element}"]//a      Open
+
+Verify Quick Starts Work As Expected When One Of The Step Marked As No
+    [Arguments]     ${element}
+    Open QuickStart Element in Resource Section By Name     ${element}
+    ${count}=   Get The Count Of Description
+    ${count}=   Evaluate    ${count} - 1
+    Click Button    //button[@data-test="Start button"]
+    Wait Until Page Contains Element    //div[@class="pfext-quick-start-content"]
+    FOR     ${index}    IN RANGE    ${count}
+        Run Keyword And Continue On Failure     Move To Next Step By Clicking Yes
+        Click Button    //button[@data-testid="qs-drawer-next"]
+    END
+    Run Keyword And Continue On Failure         Move To Next Step By Clicking No
+    Verify And Close The Sidebar
+    Verify The Progress Of The Items    ${element}      Failed
+

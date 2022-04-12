@@ -2,42 +2,35 @@
 Documentation    Test Suite for Sandbox Test cases
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Library         String
 Library         SeleniumLibrary
 Suite Setup     Begin Web Test
 Suite Teardown  End Web Test
 
 
-*** Variables ***
-${SANDBOX_AUTH_TYPE}   *******
-${SANDBOX_USERNAME}    *******
-${SANDBOX_PASSWORD}    *******
-${SANDBOX_OCP_URL}     *******
-
-
 *** Test Cases ***
-Verify Application Switcher Have Only Opneshift Console Link
+Verify Application Switcher Have Only OpenShift Console Link
     [Documentation]    Application switcher should have only
     ...    openshift conosle link
     [Tags]     ODS-309
     ...        Sandbox
     Check Openshift Console
 
-Verify ISV integration enablement IS Disabled
-    [Documentation]    All the isv integration
-    ...   component should be diabled
+Verify ISV Integration Enablement Is Disabled
+    [Documentation]    Verifies that all the ISV integration
+    ...   components are disabled in the Dashboard
     [Tags]     ODS-530
     ...        Sandbox
     Click Link    Explore
     Capture Page Screenshot   explor.png
     Wait Until Cards Are Loaded
     Sleep    5s
-    ${link_elements}  Get WebElements    //article[@class="pf-c-card odh-card m-disabled"]
-    ${length}      Get Length    ${link_elements}
-    Run Keyword If  ${length} != ${11}    Fail     '${length}' tiles in Explore section is disabled
+    Verify None Of The Card Are Enabled
 
-Verify Support Link Doesn't Exist
-    [Documentation]   Only documentaion link is present
+Verify RHODS "Support" Link Hidden In ODH Dashboard
+    [Documentation]   Verify support link disabled/hidden
+    ...   as in sandbox they should have only the documentation link
     [Tags]    ODS-526
     ...       Sandbox
     Click Element    xpath=//*[@id="toggle-id"]
@@ -48,19 +41,21 @@ Verify Support Link Doesn't Exist
          Run Keyword And Continue On Failure   Should Not Contain   ${href}   support   ignore_case=True
     END
 
-Verify only small size is available for sandbox enviroinment
+Verify JupyterHub Spawner Only Allows Small Server Size In Sandbox Environment
     [Documentation]    Only Default and Small size is present
     ...    on spawner
     [Tags]     ODS-528
     ...        Sandbox
     Navigate To Page    Applications    Enabled
     Launch JupyterHub Spawner From Dashboard
-    Match Small And Default Container Size
+    Available Container Sizes Should Be
 
-Verify that idle Jupyterhub servers are culled
-    [Documentation]   Jupyterhub should be culled
+Verify That Idle JupyterLab Servers Are Culled In Sandbox Environment After 24h
+    [Documentation]   Jupyterlab Servershould be culled
     ...    after 24 hours
     [Tags]     ODS-547
+    ...        Sandbox
+    ...        Execution-Time-Over-1d
     Spawn Notebook With Arguments
     ${jl_title}     Get Title
     Switch Window    title=Red Hat OpenShift Data Science Dashboard
@@ -71,17 +66,6 @@ Verify that idle Jupyterhub servers are culled
 
 
 *** Keywords ***
-Get RHODS URL From OCP
-    [Documentation]    Capture and return rhods url from
-    ...     OCP console
-    Switch To Administrator Perspective
-    Click Element     //button[@aria-label="Application launcher"]
-    Wait Until Element Is Visible    //a[@data-test="application-launcher-item"]
-    ${link_elements}  Get WebElements
-    ...     //a[@data-test="application-launcher-item" and starts-with(@href,'https://rhods')]
-    ${href}  Get Element Attribute    ${link_elements}    href
-    [Return]   ${href}
-
 Check Openshift Console
      [Documentation]  capture and check if only OSD link is present
      Click Element     //button[@aria-label="Application launcher"]
@@ -96,20 +80,18 @@ Check Openshift Console
            Run Keyword And Continue On Failure    Fail    More than one link is present
      END
 
-Match Small And Default Container Size
+Available Container Sizes Should Be
     [Documentation]  Capture the avialble size and compare
     ...   the value
-    Wait Until Page Contains    Container size    timeout=30
-    ...    error=Container size selector is not present in JupyterHub Spawner
-    ${size}    Create List
-    Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
-    ${link_elements}   Get WebElements  xpath://*[@class="pf-c-select__menu-item-main"]
-    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
-          ${text}      Get Text    ${ext_link}
-          Append To List    ${size}     ${text}
-    END
+    ${size}    Get List Of All Available Container Size
     Run Keywords     List Should Contain Value    ${size}    Default
     ...    AND
     ...    List Should Contain Value    ${size}    Small
     ...    AND
     ...    List Should Not Contain Value    ${size}    Medium
+
+Verify None Of The Card Are Enabled
+    [Documentation]    Verify none of the cards available in explore section is enabled
+    ${link_elements}  Get WebElements    //article[@class="pf-c-card pf-m-selectable odh-card"]
+    ${length}      Get Length    ${link_elements}
+    Run Keyword If  ${length} != ${0}    Fail     '${length}' tiles in Explore section is Enabled

@@ -392,3 +392,16 @@ Verify Library Version Is Greater Than
     IF  ${comparison}==False
         Run Keyword And Continue On Failure     FAIL    Library Version Is Smaller Than Expected
     END
+
+Get List Of All Available Container Size
+    [Documentation]  This keyword capture the available sizes from JH spawner page
+    Wait Until Page Contains    Container size    timeout=30
+    ...    error=Container size selector is not present in JupyterHub Spawner
+    ${size}    Create List
+    Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
+    ${link_elements}   Get WebElements  xpath://*[@class="pf-c-select__menu-item-main"]
+    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
+          ${text}      Get Text    ${ext_link}
+          Append To List    ${size}     ${text}
+    END
+    [Return]    ${size}

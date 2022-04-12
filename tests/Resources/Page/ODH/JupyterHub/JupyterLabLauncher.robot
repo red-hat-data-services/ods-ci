@@ -125,6 +125,7 @@ Run Cell And Check Output
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     Should Match  ${output}  ${expected_output}
+    [Return]    ${output}
 
 Run Cell And Get Output
     [Documentation]    Runs a code cell and returns its output
@@ -407,3 +408,9 @@ Get User Notebook PVC Name
     ${safe_username} =   Get Safe Username    ${username}
     ${notebook_pod_name} =   Set Variable  jupyterhub-nb-${safe_username}-pvc
     [Return]    ${notebook_pod_name}
+
+Open New Notebook
+    [Documentation]    Opens one new jupyter notebook
+    Open With JupyterLab Menu    File    New    Notebook
+    Sleep    1
+    Maybe Close Popup

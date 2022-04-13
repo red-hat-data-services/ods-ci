@@ -50,7 +50,9 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     Add and Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
     ${updated version} =    Verify Installed Library Version    tensorflow    2.8
-    Should Not Be Equal    ${updated version}[1]    ${version}[1]
+    ${version} =    Convert To Number    ${version}[1]
+    ${updated version}=    Convert To Number    ${updated version}[1]
+    Run Keyword Unless    ${updated version} > ${version}    Fail
     Clean Up Server
 
 Verify jupyterlab server pods are spawned in a custom namespace

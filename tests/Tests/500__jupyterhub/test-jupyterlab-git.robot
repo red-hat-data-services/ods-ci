@@ -10,7 +10,7 @@ Suite Teardown   End Web Test
 
 
 *** Variables ***
-${REPO_URL} =    ****
+${REPO_URL} =    *****
 ${DIR_NAME} =  Python
 ${FILE_PATH} =   Python/file.ipynb
 ${EMAIL_ID} =  user@gmail.com
@@ -19,15 +19,13 @@ ${COMMIT_MSG} =  commit msg2
 
 
 *** Test Cases ***
-# Have a remote repository configured
-# File -> save all changes
-# Click git -> simple staging
-# Click git -> push to remote
 
 Verify Pushing Project Changes Remote Repository
     [Tags]  ODS-326
     ...     Tier1
-    Push Some Changes to Repo    ${GITHUB_USER.USERNAME}  ${GITHUB_USER.TOKEN}   ${FILE_PATH}    ${REPO_URL}    ${COMMIT_MSG}
+    ${randnum}=  Generate Random String  9  [NUMBERS]
+    ${commit_message} =    Catenate    ${COMMIT_MSG}    ${randnum}
+    Push Some Changes to Repo    ${GITHUB_USER.USERNAME}  ${GITHUB_USER.TOKEN}   ${FILE_PATH}    ${REPO_URL}    ${commit_message}
 
 Verify updating your project with changes from a git repository
   [Tags]    ODS-324
@@ -40,29 +38,26 @@ Verify updating your project with changes from a git repository
   Close Other JupyterLab Tabs
   Maybe Close Popup
   Sleep    1
-  ${ouput1}=  Run Cell And Get Output    !git log --name-status HEAD^..HEAD
-  Log To Console    output 1.1 ${ouput1}
-  ${ouput1}=  Run Cell And Get Output    !git log --name-status HEAD^..HEAD
-  Log To Console    output 1.2 ${ouput1}
-  Log To Console    ---------
+
+  ${commit_msg1}=  Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
+  
 
   Add and Run JupyterLab Code Cell in Active Notebook  ! mkdir ../folder/
-  Log To Console    After !mkdir ../folder/
-  Add and Run JupyterLab Code Cell in Active Notebook  ! ls
-  Log To Console    After !ls
+  
+
   Sleep    5s
-  Open With JupyterLab Menu  File  Open from Path…
-  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  folder
-  Click Element  xpath://div[.="Open"]
-  Sleep    5s
+
+  Open Folder or File    folder
+  
+  ${randnum}=  Generate Random String  9  [NUMBERS]
+  ${commit_message} =    Catenate    ${COMMIT_MSG}    ${randnum}
   #now do here some changes
-  Push Some Changes to Repo    ${GITHUB_USER.USERNAME}    ${GITHUB_USER.TOKEN}    folder/${FILE_PATH}    ${REPO_URL}    ${COMMIT_MSG}
+  Push Some Changes to Repo    ${GITHUB_USER.USERNAME}    ${GITHUB_USER.TOKEN}    folder/${FILE_PATH}    ${REPO_URL}    ${commit_message}
   #go to previous dir
   Close All JupyterLab Tabs
-  Open With JupyterLab Menu  File  Open from Path…
-  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${DIR_NAME}
-  Click Element  xpath://div[.="Open"]
-  Sleep    1s
+
+  Open Folder or File    ${DIR_NAME}
+
   Open With JupyterLab Menu    Git    Pull from Remote
   Sleep    2s
   Open With JupyterLab Menu    File    New    Notebook
@@ -71,8 +66,8 @@ Verify updating your project with changes from a git repository
   Close Other JupyterLab Tabs
   Maybe Close Popup
   Sleep    1
-  ${output2}=  Run Cell And Get Output    !git log --name-status HEAD^..HEAD
-  Log To Console    output2.2 ${ouput2}
+  ${commit_msg2}=  Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
+  Should Not Be Equal    ${commit_msg2}    ${commit_msg1}
 
 
 
@@ -85,25 +80,17 @@ Server Setup
 
 
 Push Some Changes to Repo
-    [Arguments]  ${github username}  ${token}   ${filepath}    ${githublink}    ${commitmsg}
-    Sleep    1s
-    Open With JupyterLab Menu    File    New    Notebook
-    Sleep    2s
-    Maybe Close Popup
-    Close Other JupyterLab Tabs
-    Maybe Close Popup
-    Sleep    1
-    ${ouput1}=  Run Cell And Get Output    !git clone ${githublink}
-    Sleep  15
-    Open With JupyterLab Menu  File  Open from Path…
-    Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${filepath}
-    Click Element  xpath://div[.="Open"]
+    [Arguments]  ${github username}  ${token}   ${filepath}    ${githublink}    ${commitmsgg}
 
-    Sleep    1s
+    Clone Git Repository In Current Folder      ${githublink}
+
+    Open Folder or File    ${filepath}
+
     Maybe Close Popup
-    Sleep    1s
+    Sleep    2s
     Wait Until JupyterLab Code Cell Is Not Active
-    Run Cell And Get Output  print("Hi Hello")
+    Run Cell And Get Output  print("Hi \\n Hello")
+    Sleep    1s
     Add and Run JupyterLab Code Cell in Active Notebook  print("Hi Hello")
     Sleep    2s
     Open With JupyterLab Menu  File  Save Notebook
@@ -112,8 +99,8 @@ Push Some Changes to Repo
     Click Element   xpath=//*[@id="tab-key-6"]/div[1]
     Log to Console  After clicking on git icon
     #-------------------
-    ${randnum}=  Generate Random String  9  [NUMBERS]
-    Input Text    xpath=//*[@id="jp-git-sessions"]/div/form/input[1]    ${commitmsg} ${randnum}
+
+    Input Text    xpath=//*[@id="jp-git-sessions"]/div/form/input[1]    ${commitmsgg}
     #click on commit button
     Sleep    2s
     Click Button    xpath=//*[@id="jp-git-sessions"]/div/form/input[2]
@@ -144,13 +131,32 @@ Push Some Changes to Repo
     sleep  2s
 
     Open With JupyterLab Menu  File  New  Notebook
-    Sleep  5s
+    Sleep  2s
     Maybe Close Popup
     Wait Until JupyterLab Code Cell Is Not Active
 
-    Add and Run JupyterLab Code Cell in Active Notebook  !git log --name-status HEAD^..HEAD
-    ${output}=  Run Cell And Get Output    !git log --name-status HEAD^..HEAD
-
+    Add and Run JupyterLab Code Cell in Active Notebook    !git log --name-status HEAD^..HEAD | sed -n 5p
+    ${output}=  Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
     sleep  2s
-    ${contains}=  Evaluate   "${commitmsg} ${randnum}" in """${output}"""
-    Should Be Equal     ${True}    ${contains}
+    Should Be Equal     ${commitmsgg.strip()}    ${output.strip()}
+
+
+Open Folder or File
+    [Arguments]    ${path}
+    Open With JupyterLab Menu  File  Open from Path…
+    Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${path}
+    Click Element  xpath://div[.="Open"]
+    Sleep    2s
+
+Clone Git Repository In Current Folder
+    [Aguments]     ${github_link}
+    Open With JupyterLab Menu    File    New    Notebook
+    Sleep    2s
+    Maybe Close Popup
+    Close Other JupyterLab Tabs
+    Maybe Close Popup
+    Sleep    1
+    Run Cell And Get Output    !git clone ${githublink}
+    Sleep  15
+
+

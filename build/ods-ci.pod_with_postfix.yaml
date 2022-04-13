@@ -33,7 +33,7 @@ spec:
       env:
         # Use this environment variable to pass args to the ods-ci run script in the container
         - name: RUN_SCRIPT_ARGS
-          value: "--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml --skip-oclogin true --set-urls-variables true"
+          value: "--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml --skip-oclogin true --set-urls-variables true --email-report true --email-from ods-ci-results@redhat.com --email-to <youremail>@redhat.com"
         - name: ROBOT_EXTRA_ARGS
           # value: INSERT ROBOT FRAMEWORK ARGS OR LEAVE EMPTY. e.g., -i Smoke. Write inside the quotes
           value: ""

@@ -2,17 +2,32 @@ import argparse
 from EmailSender import EmailSender
 
 
-def send_email_report(sender, receiver, subject, text, attachments, server):
+def send_email_report(sender, receiver, subject, text, attachments,
+                      server, server_user, server_pw, ssl):
     print("Composing your email...")
     print("Sender:", sender)
     print("Receiver:", receiver)
     print("Server:", server)
 
+    if ssl is None:
+        ssl = False
+    elif ssl.lower() == "true":
+        ssl = True
+    else:
+        ssl = False
+
+    if server_user.lower() == "none":
+        server_user = None
+    if server_pw.lower() == "none":
+        server_pw = None
+
+
     reporter = EmailSender()
     reporter.set_sender_address(sender_address=sender)
     reporter.set_receiver_addresses(receiver_addresses=receiver)
     reporter.set_subject(subject=subject)
-    reporter.set_server(server=server)
+    reporter.set_server(server=server, use_ssl=ssl)
+    reporter.set_server_auth(usr=server_user, pw=server_pw)
     reporter.prepare_header()
     reporter.prepare_payload(text=text,
                              attachments=attachments)
@@ -65,7 +80,19 @@ if __name__ == "__main__":
 
     args_email_sender_parser.add_argument("-v", "--server",
                                           help="SMTP server",
-                                          action="store", default="localhost",
+                                          action="store", default="localhost:587",
+                                          required=False)
+    args_email_sender_parser.add_argument("-u", "--server-user",
+                                          help="SMTP server user",
+                                          action="store", default="None",
+                                          required=False)
+    args_email_sender_parser.add_argument("-p", "--server-pw",
+                                          help="SMTP server pw",
+                                          action="store", default="None",
+                                          required=False)
+    args_email_sender_parser.add_argument("-l", "--ssl",
+                                          help="Use SSL SMTP server",
+                                          action="store", default="false",
                                           required=False)
 
     args = parser.parse_args()
@@ -75,5 +102,8 @@ if __name__ == "__main__":
                       args.subject,
                       args.text,
                       args.attachments,
-                      args.server
+                      args.server,
+                      args.server_user,
+                      args.server_pw,
+                      args.ssl
                       )

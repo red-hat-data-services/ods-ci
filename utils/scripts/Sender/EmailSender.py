@@ -1,6 +1,6 @@
 from Sender import Sender
 from typing import Any, List, Optional
-import smtplib
+import smtplib, ssl
 from os.path import basename
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -15,6 +15,10 @@ class EmailSender(Sender):
         self._receiver_addresses = None
         self._subject = None
         self._server = "127.0.0.1"
+        self._port = 587
+        self._server_usr = ""
+        self._server_pw = ""
+        self._use_ssl = False
         self._message = MIMEMultipart()
 
     def prepare_payload(self, text: str = "",
@@ -37,30 +41,48 @@ class EmailSender(Sender):
         self._message['Subject'] = self._subject
 
     def send(self):
-        smtp = smtplib.SMTP(self._server)
+        context = ssl.create_default_context()
+        print("use ssl: ", self._use_ssl)
+        if self._use_ssl:
+            smtp = smtplib.SMTP_SSL(host=self._server, port=self._port, context=context)
+        else:
+            smtp = smtplib.SMTP(host=self._server, port=self._port)
+            smtp.starttls(context=context)
+        if self._server_usr and self._server_pw:
+            smtp.login(self._server_usr, self._server_pw)
         smtp.sendmail(self._sender_address, self._receiver_addresses, self._message.as_string())
         smtp.close()
 
     def set_sender_address(self, sender_address: str) -> None:
         self._sender_address = sender_address
 
-    def get_sender_address(self):
+    def get_sender_address(self) -> str:
         return self._sender_address
 
     def set_receiver_addresses(self, receiver_addresses: List) -> None:
         self._receiver_addresses = receiver_addresses
 
-    def get_receiver_addresses(self):
+    def get_receiver_addresses(self) -> List:
         return self._receiver_addresses
 
     def set_subject(self, subject: str) -> None:
         self._subject = subject
 
-    def get_subject(self):
+    def get_subject(self) -> str:
         return self._subject
 
-    def set_server(self, server: str) -> None:
-        self._server = server
+    def set_server(self, server: str, use_ssl: bool = True) -> None:
+        if ":" in server:
+            server = server.split(":")
+            self._server = server[0]
+            self._port = server[1]
+        else:
+            self._server = server
+        self._use_ssl = use_ssl
+
+    def set_server_auth(self, usr: str, pw: str) -> None:
+        self._server_usr = usr
+        self._server_pw = pw
 
     def get_server(self):
         return self._server

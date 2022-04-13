@@ -14,6 +14,8 @@ EMAIL_REPORT=true
 EMAIL_TO=""
 EMAIL_FROM=""
 EMAIL_SERVER="localhost"
+EMAIL_SERVER_USER="None"
+EMAIL_SERVER_PW="None"
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -100,9 +102,22 @@ while [ "$#" -gt 0 ]; do
       EMAIL_TO=$1
       shift
       ;;
+
    --email-server)
       shift
       EMAIL_SERVER=$1
+      shift
+      ;;
+
+   --email-server-user)
+      shift
+      EMAIL_SERVER_USER=$1
+      shift
+      ;;
+
+   --email-server-pw)
+      shift
+      EMAIL_SERVER_PW=$1
       shift
       ;;
 
@@ -245,7 +260,7 @@ case "$(uname -s)" in
         ;;
 esac
 
-./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+# ./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
 
 # send test artifacts by email
 if ${EMAIL_REPORT}
@@ -258,5 +273,5 @@ if ${EMAIL_REPORT}
             rm rf_results.tar.gz
             tar cvzf rf_results.tar.gz $(find ${TEST_ARTIFACT_DIR} -regex  '.*\(xml\|html\)$') &> /dev/null
      fi
-     ./venv/bin/python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" -v ${EMAIL_SERVER} -a "rf_results.tar.gz"
+     ./venv/bin/python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" -v ${EMAIL_SERVER} -a "rf_results.tar.gz" -u  ${EMAIL_SERVER_USER}  -p  ${EMAIL_SERVER_PW}
 fi

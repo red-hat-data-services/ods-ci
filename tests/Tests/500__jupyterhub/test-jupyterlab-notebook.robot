@@ -60,21 +60,19 @@ Verify A Default Image Is Provided And Starts Successfully
     ...    a default one is selected and it can be spawned successfully
     [Tags]    Sanity
     ...       ODS-469
+    @{user_data} =    Get Previously Selected Notebook Image Details
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook
+    Open New Notebook In Jupyterlab Menu
+    Verify Notebook Name And Image Tag  user_data=${user_data}
     ${has_spawn_failed} =    Has Spawn Failed
     Should Be Equal As Strings    ${has_spawn_failed}    False
-    Wait For JupyterLab Splash Screen  timeout=30
-    Open With JupyterLab Menu  File  New  Notebook
-    Sleep    1
-    Maybe Close Popup
-    Verify Notebook Name And Image Tag
 
 
 *** Keywords ***
 Verify Notebook Name And Image Tag
     [Documentation]    Verifies that expected notebook is spawned and image tag is not latest
-    @{user_data} =    Get Previously Selected Notebook Image Details
+    [Arguments]    ${user_data}
     @{notebook_details} =    Split String    ${userdata}[1]    :
     ${notebook_name} =    Strip String    ${notebook_details}[1]
     Spawned Image Check    image=${notebook_name}

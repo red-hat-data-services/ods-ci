@@ -7,7 +7,6 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Library          ../../../libs/Helpers.py
 Library          OpenShiftLibrary
-#Library         JupyterLibrary
 Suite Teardown   End Web Test
 Force Tags       JupyterHub
 
@@ -20,7 +19,8 @@ ${CUSTOM_CULLER_TIMEOUT} =     300
 *** Test Cases ***
 Verify Default Culler Timeout
     [Documentation]    Checks default culler timeout
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
+    ...    ODS-1255
     Disable Culler
     ${current_timeout} =  Get Culler Timeout
     Should Be Equal  ${DEFAULT_CULLER_TIMEOUT}  ${current_timeout}
@@ -28,7 +28,8 @@ Verify Default Culler Timeout
 
 Verify Culler Timeout Can Be Updated
     [Documentation]    Verifies culler timeout can be updated
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
+    ...    ODS-1231
     Modify Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
     ${current_timeout} =  Get Culler Timeout
     Should Not Be Equal  ${current_timeout}  ${DEFAULT_CULLER_TIMEOUT}
@@ -38,9 +39,12 @@ Verify Culler Timeout Can Be Updated
 Verify Culler Kills Inactive Server
     [Documentation]    Verifies that the culler kills an inactive 
     ...    server after timeout has passed.
-    [Tags]  Sanity
+    [Tags]    Sanity    Tier1
+    ...    ODS-1254
     Spawn Minimal Image
-    Run Cell And Check Output  print("Hello World")  Hello World
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    notebooks/500__jupyterhub/Inactive.ipynb
+    Open With JupyterLab Menu    Run    Run All Cells
+    Wait Until JupyterLab Code Cell Is Not Active
     Open With JupyterLab Menu    File    Save Notebook
     Close Browser
     Sleep    ${${CUSTOM_CULLER_TIMEOUT}+60}
@@ -55,10 +59,11 @@ Verify Culler Kills Inactive Server
 Verify Culler Does Not Kill Active Server
     [Documentation]    Verifies that the culler does not kill an active 
     ...    server even after timeout has passed.
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
+    ...    ODS-1253
     Spawn Minimal Image
-    # Need to update with nb that keeps printing otherwise it's considered inactive
-    Add and Run JupyterLab Code Cell in Active Notebook    import time;print("Hello");time.sleep(${${CUSTOM_CULLER_TIMEOUT}*2});print("Goodbye")
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    notebooks/500__jupyterhub/Active.ipynb
+    Open With JupyterLab Menu    Run    Run All Cells
     Open With JupyterLab Menu    File    Save Notebook
     Close Browser
     Sleep    ${${CUSTOM_CULLER_TIMEOUT}+60}
@@ -67,6 +72,9 @@ Verify Culler Does Not Kill Active Server
     # Verify Culler Logs ?
 
 Verify Do Not Stop Idle Notebooks
+    [Documentation]    Disables the culler (default configuration) and verifies nb is not culled
+    [Tags]    Sanity    Tier1
+    ...    ODS-1230
     Disable Culler
     Close Browser
     Spawn Minimal Image
@@ -86,7 +94,6 @@ Spawn Minimal Image
 
 Get Culler Pod
     [Documentation]    Finds the current culler pod and returns the name
-    #${culler_pod_name} =  Run  oc get pod -l app=jupyterhub-idle-culler -n redhat-ods-applications | grep -zoP jupyterhub-idle-culler-[0-9]+-[a-zA-Z0-9]{5}
     ${culler_pod} =  OpenShiftLibrary.Oc Get  kind=Pod  label_selector=app=jupyterhub-idle-culler  namespace=redhat-ods-applications
     ${length} =  Get Length  ${culler_pod}
     # Only 1 culler pod, correct one
@@ -96,12 +103,6 @@ Get Culler Pod
     # There can be more than one during rollout
         Sleep  10s
         ${culler_pod_name} =  Get Culler Pod
-        #FOR  ${pod}  IN  @{culler_pod}
-        #    Log  ${pod}
-        #    IF  ${pod}[status][phase]=='Running'
-        #        ${culler_pod_name} =  Set Variable  ${pod}[metadata][name]
-        #    END
-        #END
     END
     Log  ${culler_pod}
     Log  ${culler_pod_name}
@@ -123,10 +124,12 @@ Modify Culler Timeout
     [Arguments]    ${new_timeout}
     Open Dashboard Cluster Settings
     Set Timeout To  ${new_timeout}
+    # Click button to save/apply the new timeout (need final UI)
     # Enough time to start the rollout
     Sleep  60s
 
 Open Dashboard Cluster Settings
+    [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
     Set Library Search Order    SeleniumLibrary
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}

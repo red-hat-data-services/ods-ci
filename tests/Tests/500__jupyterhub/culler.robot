@@ -42,7 +42,7 @@ Verify Culler Kills Inactive Server
     [Tags]    Sanity    Tier1
     ...       ODS-1254
     Spawn Minimal Image
-    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/Inactive.ipynb
+    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
     Open With JupyterLab Menu    File    Save Notebook
     Close Browser
     Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
@@ -56,7 +56,7 @@ Verify Culler Does Not Kill Active Server
     [Tags]    Sanity    Tier1
     ...       ODS-1253
     Spawn Minimal Image
-    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/Active.ipynb
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Active.ipynb
     Open With JupyterLab Menu    Run    Run All Cells
     Open With JupyterLab Menu    File    Save Notebook
     Close Browser
@@ -71,7 +71,7 @@ Verify Do Not Stop Idle Notebooks
     Disable Culler
     Close Browser
     Spawn Minimal Image
-    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/Inactive.ipynb
+    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
     Open With JupyterLab Menu    File    Save Notebook
     Close Browser
     Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
@@ -138,7 +138,7 @@ Open Dashboard Cluster Settings
     Click Element  xpath://a[.="Cluster settings"]
 
 Set Timeout To
-    [Documentation]    Helper to modify culler timeout via UI
+    [Documentation]    Modifies the notebook culler timeout using the dashboard UI setting it to ${new_timeout} seconds
     [Arguments]    ${new_timeout}
     ${hours}  ${minutes} =  Convert To Hours And Minutes  ${new_timeout}
     Sleep  5

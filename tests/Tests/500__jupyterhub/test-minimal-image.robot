@@ -8,7 +8,6 @@ Library             JupyterLibrary
 
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
-Test Teardown       Clean Up Server
 
 Force Tags          Smoke    Sanity    JupyterHub
 

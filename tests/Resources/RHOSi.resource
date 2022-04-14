@@ -11,6 +11,7 @@ Library     RPA.RobotLogListener
 ...                         Login to Openshift
 ...                         Login to Jupyterhub
 ...                         Verify Username Displayed On RHODS Dashboard
+...                         Create Pachyderm AWS-Secret
 
 
 *** Keywords ***

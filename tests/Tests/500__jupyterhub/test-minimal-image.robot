@@ -5,6 +5,7 @@ Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library             DebugLibrary
 Library             JupyterLibrary
+Library             ../../../../libs/Helpers.py
 
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
@@ -50,9 +51,8 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     Add and Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
     ${updated version} =    Verify Installed Library Version    tensorflow    2.8
-    ${version} =    Convert To Number    ${version}[1]
-    ${updated version}=    Convert To Number    ${updated version}[1]
-    Run Keyword Unless    ${updated version} > ${version}    Fail
+    ${res} =      GT    ${updated version}[1].0    ${version}[1].0
+    Run Keyword Unless    ${res}    Fail
 
 
 Verify jupyterlab server pods are spawned in a custom namespace

@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Test Suite to verify installed library versions
+Documentation       Test Suite to check the folder permissions
 
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
@@ -12,18 +12,17 @@ Suite Teardown      End Web Test
 
 *** Variables ***
 @{LIST_OF_IMAGES} =    s2i-minimal-notebook    s2i-generic-data-science-notebook
-...                    pytorch    tensorflow
+...                    pytorch    tensorflow    minimal-gpu
 @{EXPECTED_PERMISSIONS} =       0775    0    1001
 @{FOLDER_TO_CHECK} =            /opt/app-root/lib    /opt/app-root/share
 
 *** Test Cases ***
 Verify Folder Permissions
-    [Documentation]    It checks Access, Gid, Uid of /opt/app-root/lib and /opt/app-root/shares
+    [Documentation]    Checks Access, Gid, Uid of /opt/app-root/lib and /opt/app-root/shares
     [Tags]    ODS-486
     ...       Tier2
-    FOR    ${img}    IN    @{LIST_OF_IMAGES}
-        Verify The Permissions Of Folder In Image    ${img}    ${FOLDER_TO_CHECK}    ${EXPECTED_PERMISSIONS}
-    END
+    Verify Folder Permissions For Images    image_list=${LIST_OF_IMAGES}
+    ...    folder_to_check=${FOLDER_TO_CHECK}    expected_permissions=${EXPECTED_PERMISSIONS}
 
 
 *** Keywords ***
@@ -63,3 +62,10 @@ Verify The Permissions Of Folder
     ...    Run Cell And Check Output
     ...    !stat ${path} | grep Gid | awk '{split($5,b,"."); printf "%s", b[1]}' | awk '{split($0, c, "/"); printf c[1]}'
     ...    ${permission}[2]
+
+Verify Folder Permissions For Images
+    [Documentation]    Checks the folder permissions in each image
+    [Arguments]    ${image_list}    ${folder_to_check}    ${expected_permissions}
+    FOR    ${img}    IN    @{image_list}
+        Verify The Permissions Of Folder In Image    ${img}    ${folder_to_check}    ${expected_permissions}
+    END

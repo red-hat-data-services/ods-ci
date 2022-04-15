@@ -10,7 +10,6 @@ Library   ../../../../libs/Helpers.py
 Library   String
 Library   Collections
 Library   JupyterLibrary
-Library   OpenShiftLibrary
 
 
 *** Variables ***
@@ -162,7 +161,14 @@ Spawn Notebook With Arguments  # robocop: disable
          ...    id:progress-bar  ${spawner_timeout}
          Wait For JupyterLab Splash Screen  timeout=30
          Maybe Close Popup
-         Open New Notebook In Jupyterlab Menu
+         ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
+         Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
+         Open With JupyterLab Menu  File  New  Notebook
+         Sleep  1
+         Maybe Close Popup
+         Close Other JupyterLab Tabs
+         Maybe Close Popup
+         Sleep  1
          Spawned Image Check    ${image}
          ${spawn_fail} =  Has Spawn Failed
          Exit For Loop If  ${spawn_fail} == False
@@ -386,22 +392,3 @@ Verify Library Version Is Greater Than
     IF  ${comparison}==False
         Run Keyword And Continue On Failure     FAIL    Library Version Is Smaller Than Expected
     END
-
-Get Previously Selected Notebook Image Details
-    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
-    ${user_name} =    Set Variable    jupyterhub-singleuser-profile-${safe_username}
-    ${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
-    ...    field_selector=metadata.name=${user_name}
-    @{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
-    [Return]    ${user_data}
-
-Open New Notebook In Jupyterlab Menu
-    [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu
-    ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
-    Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
-    Open With JupyterLab Menu  File  New  Notebook
-    Sleep  1
-    Maybe Close Popup
-    Close Other JupyterLab Tabs
-    Maybe Close Popup
-    Sleep  1

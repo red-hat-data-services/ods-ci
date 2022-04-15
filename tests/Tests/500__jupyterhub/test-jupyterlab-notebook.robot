@@ -54,26 +54,3 @@ Can Launch Python3 Smoke Test Notebook
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Not Match  ${output}  ERROR*
-
-Verify A Default Image Is Provided And Starts Successfully
-    [Documentation]    Verify that, if a user doesn't explicitly select any jupyter image
-    ...    a default one is selected and it can be spawned successfully
-    [Tags]    Sanity
-    ...       ODS-469
-    @{user_data} =    Get Previously Selected Notebook Image Details
-    Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook
-    Open New Notebook In Jupyterlab Menu
-    Verify Notebook Name And Image Tag  user_data=${user_data}
-    ${has_spawn_failed} =    Has Spawn Failed
-    Should Be Equal As Strings    ${has_spawn_failed}    False
-
-
-*** Keywords ***
-Verify Notebook Name And Image Tag
-    [Documentation]    Verifies that expected notebook is spawned and image tag is not latest
-    [Arguments]    ${user_data}
-    @{notebook_details} =    Split String    ${userdata}[1]    :
-    ${notebook_name} =    Strip String    ${notebook_details}[1]
-    Spawned Image Check    image=${notebook_name}
-    Should Not Be Equal As Strings    ${notebook_details}[2]    latest    strip_spaces=True

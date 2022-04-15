@@ -63,9 +63,14 @@ Set Number Of Required GPUs
 
 Fetch Max Number Of GPUs In Spawner Page
     [Documentation]    Returns the maximum number of GPUs a user can request from the spawner
-    Click Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]
-    ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
-    ${maxGPUs} =    Convert To Integer    ${maxGPUs}
+    ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
+    IF  ${gpu_visible}==True
+       Click Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]
+       ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
+       ${maxGPUs} =    Convert To Integer    ${maxGPUs}
+    ELSE
+       ${maxGPUs} =    Set Variable    ${0}
+    END
     [Return]    ${maxGPUs}
 
 Add Spawner Environment Variable

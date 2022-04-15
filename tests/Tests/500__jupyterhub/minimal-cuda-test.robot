@@ -61,7 +61,12 @@ Verify CUDA Image Suite Setup
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Launch JupyterHub Spawner From Dashboard    ${TEST_USER_2.USERNAME}    ${TEST_USER.PASSWORD}
     ...    ${TEST_USER.AUTH_TYPE}
+    # This will fail in case there are two nodes with the same number of GPUs
+    # Since the overall available number won't change even after 1 GPU is assigned
+    # However I can't think of a better way to execute this check, under the assumption that
+    # the Resources-GPU tag will always ensure there is 1 node with 1 GPU on the cluster.
+    ${maxNo} =    Find Max Number Of GPUs In One Node
     ${maxSpawner} =    Fetch Max Number Of GPUs In Spawner Page
-    Should Be Equal    ${maxSpawner}    ${0}
+    Should Be Equal    ${maxSpawner}    ${maxNo-1}
     Close Browser
     Switch Browser  ${old_browser}[0]

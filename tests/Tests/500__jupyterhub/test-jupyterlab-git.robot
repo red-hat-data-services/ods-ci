@@ -19,8 +19,9 @@ ${COMMIT_MSG}       commit msg2
 
 *** Test Cases ***
 Verify Pushing Project Changes Remote Repository
+    [Documentation]    Verifies that changes has been pushed successfully to remote repository
     [Tags]    ODS-326
-    ...       Tier1
+    ...       Sanity    Tier1
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
     Push Some Changes to Repo
@@ -31,9 +32,10 @@ Verify Pushing Project Changes Remote Repository
     ...    ${commit_message}
     Clean Up Server
 
-Verify updating your project with changes from a git repository
+Verify Updating Project With Changes From Git Repository
+    [Documentation]    Verifies that changes has been pulled successfully to local repository
     [Tags]    ODS-324
-    ...       Tier1
+    ...       Sanity    Tier1
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
     Open With JupyterLab Menu    File    New    Notebook
@@ -117,9 +119,7 @@ Push Some Changes to Repo
     Maybe Close Popup
     Wait Until JupyterLab Code Cell Is Not Active
 
-    Add and Run JupyterLab Code Cell in Active Notebook    !git log --name-status HEAD^..HEAD | sed -n 5p
-    ${output}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
-    sleep    2s
+    ${output}=    Get Last Commit Message
     Should Be Equal    ${commitmsgg.strip()}    ${output.strip()}
 
 Open Folder or File
@@ -164,3 +164,7 @@ Push Changes To Remote
     Input Text    //input[@class='jp-mod-styled'][2]    ${token}
     Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]    #click on submit
 
+Get Last Commit Message
+    Add and Run JupyterLab Code Cell in Active Notebook    !git log --name-status HEAD^..HEAD | sed -n 5p
+    ${output}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
+    [Return]    ${output}

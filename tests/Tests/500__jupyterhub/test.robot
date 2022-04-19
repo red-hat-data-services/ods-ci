@@ -86,6 +86,7 @@ Verify Message That Image Builds Are In Progress
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
     RHODS Notification Drawer Should Contain  message=All notebook image builds are complete
 
+
 *** Keywords ***
 JupyterHub Testing Suite Setup
     Set Library Search Order  SeleniumLibrary

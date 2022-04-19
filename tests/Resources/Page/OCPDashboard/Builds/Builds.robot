@@ -98,6 +98,7 @@ Provoke Image Build Failure
     Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
     ...    expected_status=Running
     Wait Until Container Exist  namespace=${namespace}  pod_name=${pod_name}  container_to_check=${container_to_kill}
+    Sleep    60s    reason=Waiting extra time to make sure the container has started
     Run Command In Container    namespace=${namespace}    pod_name=${pod_name}    command=/bin/kill 1    container_name=${container_to_kill}
     Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
     ...    expected_status=Failed    timeout=5 min
@@ -110,3 +111,14 @@ Delete Failed Build And Start New One
     ${build_name} =    Start New Build    namespace=${namespace}
     ...    buildconfig=${build_config_name}
     Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}    expected_status=Complete
+
+Delete Last Pytorch Build
+    [Documentation]     Searches for last build which contains pytorch and deletes it
+    ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
+    Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
+
+Start New Pytorch Build
+    [Documentation]     Starts new Pytorch build and waits until status is running
+    ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
+    [Return]    ${new_buildname}

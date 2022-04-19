@@ -591,14 +591,14 @@ RHODS Notification Drawer Should Not Contain
     [Arguments]     ${message}
     Click Element    xpath=//*[contains(@class,'notification-badge')]
     Page Should Not Contain  text=${message}
-    Click Element    xpath=//*[contains(@class,'notification-badge')]
-    Wait Until Page Contains Element    xpath=//*[contains(text(),'${message}')]  timeout=2min
+    Close Notification Drawer
 
-Clear RHODS Notifications
+Clear Dashboard Notifications
     [Documentation]     Clears Notifications present in RHODS dashboard
     Click Element    xpath=//*[contains(@class,'notification-badge')]
-    Sleep  20s
+    Sleep  2s
     ${notification_count} =  Get Element Count    class:odh-dashboard__notification-drawer__item-remove
     FOR    ${index}    IN RANGE    ${notification_count}
         Click Element    xpath=//*[contains(@class,"odh-dashboard__notification-drawer__item-remove")]
     END
+    Close Notification Drawer

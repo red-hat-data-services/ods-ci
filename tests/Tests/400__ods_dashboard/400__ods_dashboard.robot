@@ -158,16 +158,23 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
-Verify Failing Images Are Shown In Notifications
-    [Documentation]    Verifies failing Notebook names are shown in RHODS Dashboard Notifications
+Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
+    [Documentation]    Verifies that Notifications are shown when Notebook Builds are finished and atleast one fails
     [Tags]    Sanity
-    ...       ODS-470
-    Clear RHODS Notifications
-    ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
-    ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    ...       ODS-470  ODS-718
+    Clear Dashboard Notifications
+    ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
+    Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
+    ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
+    ${failed_build_name}=  Provoke Image Build Failure    namespace=redhat-ods-applications
+    ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
-    RHODS Notification Drawer Should Contain  message=Notebook image build PyTorch failed
-    [Teardown]     Restart Failed Build and Close Browser  failed_build_name=${failed_build_name}
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
+    RHODS Notification Drawer Should Contain  message=builds completed successfully
+    RHODS Notification Drawer Should Contain  message=TensorFlow build image failed
+    Verify RHODS Notification After Logging Out
+    [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
 
 
 *** Keywords ***
@@ -315,6 +322,13 @@ Verify Anaconda Success Message Based On Version
 
 Restart Failed Build and Close Browser
     [Documentation]     Deletes failed build and starts new build , Closes All Browsers
-    [Arguments]     ${failed_build_name}
-    Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    [Arguments]     ${failed_build_name}    ${build_config}
+    Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=${build_config}
     Dashboard Test Teardown
+
+Verify RHODS Notification After Logging Out
+    [Documentation]     Logs out from RHODS Dashboard and then relogin to check notifications
+    Go To    ${ODH_DASHBOARD_URL}
+    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Wait For RHODS Dashboard To Load
+    RHODS Notification Drawer Should Contain  message=Notebook image build TensorFlow failed

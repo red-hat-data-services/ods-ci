@@ -330,5 +330,4 @@ Verify RHODS Notification After Logging Out
     [Documentation]     Logs out from RHODS Dashboard and then relogin to check notifications
     Go To    ${ODH_DASHBOARD_URL}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load
     RHODS Notification Drawer Should Contain  message=Notebook image build TensorFlow failed

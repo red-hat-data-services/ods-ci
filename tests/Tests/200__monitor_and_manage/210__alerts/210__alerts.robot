@@ -233,6 +233,7 @@ Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image 
     [Tags]    Tier2
     ...       ODS-717
     ...       Execution-Time-Over-30m
+
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
@@ -310,7 +311,7 @@ Verify Alert "JupyterHub Image Builds Are Failing" Fires At Least 20 Minutes Whe
     ...    failed_build_name=${failed_build_name}    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
 
 Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or Testing
-    [Documentation]     Verify that MT-SRE are not paged for alerts in clusters used for development or testing	
+    [Documentation]     Verify that MT-SRE are not paged for alerts in clusters used for development or testing
     [Tags]              Sanity
     ...                 ODS-1058
     ...                 Tier1
@@ -325,7 +326,7 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
     Check Particular Text Is Present In Rhods-operator's Log  text_to_check=${text_to_check}
     Verify Receiver Value In Configmap Alertmanager Is  receiver=${receiver}
     [Teardown]    Close All Browsers
-    
+
 *** Keywords ***
 Alerts Suite Setup
     [Documentation]    Test suite configuration
@@ -459,32 +460,6 @@ Skip Test If Alert Is Already Firing
     ${alert_is_firing} =    Run Keyword And Return Status    Alert Should Be Firing
     ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
     Skip If    ${alert_is_firing}    msg=Test skiped because alert "${alert} ${alert-duration}" is already firing
-
-Provoke Image Build Failure
-    [Documentation]    Starts New Build after some time it fail the build and return name of failed build
-    [Arguments]    ${namespace}    ${build_name_includes}    ${build_config_name}    ${container_to_kill}
-    ${build} =    Search Last Build    namespace=${namespace}    build_name_includes=${build_name_includes}
-    Delete Build    namespace=${namespace}    build_name=${build}
-    ${failed_build_name} =    Start New Build    namespace=${namespace}
-    ...    buildconfig=${build_config_name}
-    ${pod_name} =    Find First Pod By Name    namespace=${namespace}    pod_start_with=${failed_build_name}
-    Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
-    ...    expected_status=Running
-    Wait Until Container Exist  namespace=${namespace}  pod_name=${pod_name}  container_to_check=${container_to_kill}
-    Sleep    60s    reason=Waiting extra time to make sure the container has started
-    Run Command In Container    namespace=${namespace}    pod_name=${pod_name}
-    ...    command=/bin/kill 1    container_name=${container_to_kill}
-    Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
-    ...    expected_status=Failed    timeout=5 min
-    [Return]    ${failed_build_name}
-
-Delete Failed Build And Start New One
-    [Documentation]    It will delete failed build and start new build
-    [Arguments]    ${namespace}    ${failed_build_name}    ${build_config_name}
-    Delete Build    namespace=${namespace}    build_name=${failed_build_name}
-    ${build_name} =    Start New Build    namespace=${namespace}
-    ...    buildconfig=${build_config_name}
-    Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}
 
 Check Cluster Name Contain "Aisrhods" Or Not
     [Documentation]     Return true if cluster name contains aisrhods and if not return false

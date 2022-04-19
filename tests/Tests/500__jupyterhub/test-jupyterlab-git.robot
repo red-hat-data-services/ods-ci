@@ -11,7 +11,7 @@ Suite Teardown      End Web Test
 
 
 *** Variables ***
-${REPO_URL}         https://github.com/Pranav-Code-007/Python.git
+${REPO_URL}         ****
 ${DIR_NAME}         Python
 ${FILE_PATH}        Python/file.ipynb
 ${COMMIT_MSG}       commit msg2

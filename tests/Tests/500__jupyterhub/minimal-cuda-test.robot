@@ -49,9 +49,8 @@ Verify Cuda Image Have NVCC Installed
     [Documentation]     Verifies NVCC Version in Minimal CUDA Image
     [Tags]  Sanity
     ...     ODS-483
-    ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version| grep "release"| awk '{print $5}'
-    ${nvcc_version} =  Fetch From Left    ${nvcc_version}  ,
-    Should Be Equal As Strings    ${nvcc_version}  ${EXPECTED_CUDA_VERSION}
+    ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
+    Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
 
 
 *** Keywords ***

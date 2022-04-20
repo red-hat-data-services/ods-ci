@@ -232,74 +232,80 @@ Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image 
     [Tags]    Tier2
     ...       ODS-717
     ...       Execution-Time-Over-30m
-    ...       KnownIssues
+
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
+
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
+
     ${build_name} =    Start New Build    namespace=redhat-ods-applications
     ...    buildconfig=s2i-tensorflow-gpu-cuda-11.4.2-notebook
+
     Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${build_name}
+
+    Wait Until Build Status Is    namespace=redhat-ods-applications
+    ...    build_name=${build_name}    expected_status=Complete
+
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
+
     Sleep    10m    reason=Waiting for the alert to keep not firing
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
+
     Sleep    10m    reason=Waiting for the alert to keep not firing
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
+
     Sleep    10m    reason=Waiting for the alert to keep not firing
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
+
     [Teardown]    Delete Build    namespace=redhat-ods-applications    build_name=${failed_build_name}
 
-Verify Alert "JupyterHub Image Builds Are Failing" Fires Up To 30 Minutes When There Is An Image Build Error     # robocop: disable:too-long-test-case
-    [Documentation]    Verify that alert is firing up to 30 min and after thar resolve automatically
+Verify Alert "JupyterHub Image Builds Are Failing" Fires At Least 20 Minutes When There Is An Image Build Error     # robocop: disable:too-long-test-case
+    [Documentation]    Verify that build alert fires at least 20 minutes when there is an image
+    ...                build error and then it resolves automatically
     [Tags]    Tier2
     ...       ODS-790
     ...       Execution-Time-Over-30m
-    ...       KnownIssues
+
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
+
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
-    Sleep    10m    reason=Waiting for the alert to keep firing
+
+    Sleep    20m    reason=Waiting for the alert to keep firing
     Prometheus.Alert Should Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
-    Sleep    10m    reason=Waiting for the alert to keep firing
-    Prometheus.Alert Should Be Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    Builds
-    ...    JupyterHub image builds are failing
-    Sleep    8m    reason=Waiting for the alert to keep firing
-    Prometheus.Alert Should Be Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    Builds
-    ...    JupyterHub image builds are failing
+
     Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
     ...    JupyterHub image builds are failing
+    ...    timeout=15min
+
     [Teardown]    Delete Failed Build And Start New One    namespace=redhat-ods-applications
     ...    failed_build_name=${failed_build_name}    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
 
@@ -448,6 +454,7 @@ Provoke Image Build Failure
     Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
     ...    expected_status=Running
     Wait Until Container Exist  namespace=${namespace}  pod_name=${pod_name}  container_to_check=${container_to_kill}
+    Sleep    60s    reason=Waiting extra time to make sure the container has started
     Run Command In Container    namespace=${namespace}    pod_name=${pod_name}
     ...    command=/bin/kill 1    container_name=${container_to_kill}
     Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}

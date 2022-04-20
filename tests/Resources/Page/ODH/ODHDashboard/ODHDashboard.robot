@@ -387,10 +387,13 @@ Set PVC Value In RHODS Dashboard
     [Arguments]    ${size}
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
-    Run Keywords
-    ...   Input Text    //input[@id="pvc-size-input"]    ${size}
-    ...  AND
-    ...    Press Keys    //input[@id="pvc-size-input"]    RETURN
+    Input Text    //input[@id="pvc-size-input"]    ${size}
+    ${version-check}    Is RHODS Version Greater Or Equal Than    1.10.0
+    IF    ${version-check}==True
+        Click Button  Save changes
+    ELSE
+        Press Keys    //input[@id="pvc-size-input"]    RETURN
+    END
     Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Cluster settings updated successfully.
 

@@ -20,8 +20,7 @@ ${COMMIT_MSG}       commit msg2
 *** Test Cases ***
 Verify Pushing Project Changes Remote Repository
     [Documentation]    Verifies that changes has been pushed successfully to remote repository
-    [Tags]    ODS-326
-    ...       Sanity    Tier1
+    [Tags]    ODS-326    Sanity    Tier1
     Set Staging Status
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
@@ -35,17 +34,14 @@ Verify Pushing Project Changes Remote Repository
 
 Verify Updating Project With Changes From Git Repository
     [Documentation]    Verifies that changes has been pulled successfully to local repository
-    [Tags]    ODS-324
-    ...       Sanity    Tier1
+    [Tags]    ODS-324    Sanity    Tier1
     Set Staging Status
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
     Open New Notebook
     ${commit_msg1}=    Get Last Commit Message
     Add and Run JupyterLab Code Cell in Active Notebook    ! mkdir ../folder/
-
     Sleep    2s
-
     Open Folder or File    folder
 
     ${randnum}=    Generate Random String    9    [NUMBERS]
@@ -84,29 +80,19 @@ Push Some Changes to Repo
     Clone Git Repository In Current Folder    ${githublink}
     Close All JupyterLab Tabs
     Open Folder or File    ${filepath}
-    Maybe Close Popup
-    Sleep    2s
-    Wait Until JupyterLab Code Cell Is Not Active
-    Sleep    2s
-    Run Cell And Get Output    print("Hi Hello")
-    Sleep    2s
-    Open With JupyterLab Menu    File    Save Notebook
-    Sleep    2s
-    Open With JupyterLab Menu    Git    Simple staging
-
-    Commit Changes    commit_message=${commitmsgg}    name=${GITHUB_USER.USERNAME}     email_id=${GITHUB_USER.EMAIL}
+    Enter Text In File And Save    code=print("Hi Hello")
+    Set Staging Status    status=ON
+    Commit Changes    commit_message=${commitmsgg}    name=${GITHUB_USER.USERNAME}    email_id=${GITHUB_USER.EMAIL}
 
     #click on push to remote
 
-    Push Changes To Remote     github_username=${GITHUB_USER.USERNAME}    token=${GITHUB_USER.TOKEN}
+    Push Changes To Remote    github_username=${GITHUB_USER.USERNAME}    token=${GITHUB_USER.TOKEN}
 
-    Sleep    5s
-    Open With JupyterLab Menu    Git    Simple staging
+    Set Staging Status    status=OFF
     Close All JupyterLab Tabs
     sleep    2s
 
     Open New Notebook
-    Add and Run JupyterLab Code Cell in Active Notebook    !git log --name-status HEAD^..HEAD | sed -n 5p
     ${output}=    Get Last Commit Message
     Should Be Equal    ${commitmsgg.strip()}    ${output.strip()}
 
@@ -115,6 +101,8 @@ Open Folder or File
     Open With JupyterLab Menu    File    Open from Path…
     Input Text    xpath=//input[@placeholder="/path/relative/to/jlab/root"]    ${path}
     Click Element    xpath://div[.="Open"]
+    Sleep    2s
+    Maybe Close Popup
     Sleep    2s
 
 Clone Git Repository In Current Folder
@@ -146,6 +134,7 @@ Push Changes To Remote
     Input Text    //input[@class='jp-mod-styled'][1]    ${github_username}
     Input Text    //input[@class='jp-mod-styled'][2]    ${token}
     Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]    #click on submit
+    Sleep    3s
 
 Get Last Commit Message
     ${output}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
@@ -157,10 +146,16 @@ Simple Staging Not Clicked
     Element Should Be Visible    //li[@class="lm-Menu-item p-Menu-item"][4]
 
 Set Staging Status
-    ${status} =  Run Keyword And Return Status    Simple Staging Not Clicked
-    Run Keyword And Continue On Failure    Open With JupyterLab Menu    Git
-    IF    "${status}" == "False"
+    [Arguments]    ${status}=INITIALLY_OFF
+    IF    "${status}"=="OFF" OR "${status}"=="ON"
         Open With JupyterLab Menu    Git    Simple staging
+    ELSE
+        ${curr_status}=    Run Keyword And Return Status    Simple Staging Not Clicked
+        IF    "${curr_status}" == "False"
+            Sleep    2s
+            Open With JupyterLab Menu    Git    Simple staging
+            Sleep    2s
+        END
     END
 
 Open New Notebook
@@ -170,3 +165,12 @@ Open New Notebook
     Close Other JupyterLab Tabs
     Maybe Close Popup
     Sleep    1
+
+Enter Text In File And Save
+    [Arguments]    ${code}
+    Wait Until JupyterLab Code Cell Is Not Active
+    Sleep    2s
+    Run Cell And Get Output    ${code}
+    Sleep    2s
+    Open With JupyterLab Menu    File    Save Notebook
+    Sleep    2s

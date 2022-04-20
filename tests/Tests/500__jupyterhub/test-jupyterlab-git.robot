@@ -40,16 +40,11 @@ Verify Updating Project With Changes From Git Repository
     Set Staging Status
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
-    Open With JupyterLab Menu    File    New    Notebook
-    Sleep    2s
-    Maybe Close Popup
-    Close Other JupyterLab Tabs
-    Maybe Close Popup
-    Sleep    1
-    ${commit_msg1}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
+    Open New Notebook
+    ${commit_msg1}=    Get Last Commit Message
     Add and Run JupyterLab Code Cell in Active Notebook    ! mkdir ../folder/
 
-    Sleep    4s
+    Sleep    2s
 
     Open Folder or File    folder
 
@@ -70,13 +65,8 @@ Verify Updating Project With Changes From Git Repository
 
     Open With JupyterLab Menu    Git    Pull from Remote
     Sleep    2s
-    Open With JupyterLab Menu    File    New    Notebook
-    Sleep    2s
-    Maybe Close Popup
-    Close Other JupyterLab Tabs
-    Maybe Close Popup
-    Sleep    1
-    ${commit_msg2}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
+    Open New Notebook
+    ${commit_msg2}=    Get Last Commit Message
     Should Not Be Equal    ${commit_msg2}    ${commit_msg1}
     Clean Up Server
 
@@ -115,11 +105,8 @@ Push Some Changes to Repo
     Close All JupyterLab Tabs
     sleep    2s
 
-    Open With JupyterLab Menu    File    New    Notebook
-    Sleep    2s
-    Maybe Close Popup
-    Wait Until JupyterLab Code Cell Is Not Active
-
+    Open New Notebook
+    Add and Run JupyterLab Code Cell in Active Notebook    !git log --name-status HEAD^..HEAD | sed -n 5p
     ${output}=    Get Last Commit Message
     Should Be Equal    ${commitmsgg.strip()}    ${output.strip()}
 
@@ -132,12 +119,7 @@ Open Folder or File
 
 Clone Git Repository In Current Folder
     [Arguments]    ${github_link}
-    Open With JupyterLab Menu    File    New    Notebook
-    Sleep    2s
-    Maybe Close Popup
-    Close Other JupyterLab Tabs
-    Maybe Close Popup
-    Sleep    1
+    Open New Notebook
     Run Cell And Get Output    !git clone ${github_link}
     Sleep    15
 
@@ -166,7 +148,6 @@ Push Changes To Remote
     Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]    #click on submit
 
 Get Last Commit Message
-    Add and Run JupyterLab Code Cell in Active Notebook    !git log --name-status HEAD^..HEAD | sed -n 5p
     ${output}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
     [Return]    ${output}
 
@@ -181,3 +162,11 @@ Set Staging Status
     IF    "${status}" == "False"
         Open With JupyterLab Menu    Git    Simple staging
     END
+
+Open New Notebook
+    Open With JupyterLab Menu    File    New    Notebook
+    Sleep    2s
+    Maybe Close Popup
+    Close Other JupyterLab Tabs
+    Maybe Close Popup
+    Sleep    1

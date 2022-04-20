@@ -7,6 +7,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
 Library          JupyterLibrary
 Library          OpenShiftCLI
+Library          OpenShiftLibrary
 Suite Teardown   Custom Image Teardown
 Force Tags       JupyterHub
 

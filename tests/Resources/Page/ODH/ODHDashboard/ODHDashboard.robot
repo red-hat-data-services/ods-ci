@@ -25,6 +25,12 @@ ${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictio
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
+${CUSTOM_IMAGE_SOFTWARE_TABLE}=  //caption[contains(., "the advertised software")]/../tbody
+${CUSTOM_IMAGE_PACKAGE_TABLE}=  //caption[contains(., "the advertised packages")]/../tbody
+${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}=  tr[last()]/td[last()]/button[1]  # Edit OR Save button of last row (depends on context)
+${CUSTOM_IMAGE_LAST_ROW_LAST_BTN}=  tr[last()]/td[last()]/button[last()]  # Remove button of last row
+${CUSTOM_IMAGE_LAST_ROW_NAME}=  tr[last()]/td[1]
+${CUSTOM_IMAGE_LAST_ROW_VERSION}=  tr[last()]/td[2]
 
 
 *** Keywords ***
@@ -414,3 +420,80 @@ RHODS Notification Drawer Should Contain
     Click Element    xpath=//*[contains(@class,'notification-badge')]
     Page Should Contain Element
     ...    xpath=//*[contains(text(),'${message}')]
+
+Open Notebook Images Page
+    [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
+    Page Should Contain    Settings
+    Menu.Navigate To Page    Settings    Notebook Images
+    Page Should Contain    Notebook image settings
+
+Import New Image
+    [Documentation]  software and packages should be lists of lists
+    [Arguments]  ${repo}  ${name}  ${description}  @{software}  @{packages}
+    Open Image Import Popup
+    Input Text    xpath://input[@id="notebook-image-repository-input"]    ${repo}
+    Input Text    xpath://input[@id="notebook-image-name-input"]    ${name}
+    Input Text    xpath://input[@id="notebook-image-description-input"]    ${description}
+    Add Softwares To Custom Image    @{software}
+    Add Packages To Custom Image    @{packages}
+    Click Element    xpath://button[.="Import"]
+
+Open Image Import Popup
+    [Documentation]
+    ${first_image} =  Run Keyword And Return Status  Page Should Contain Element  xpath://button[.="Import image"]
+    IF  ${first_image}==True
+        Click Element  xpath://button[.="Import image"]
+    ELSE 
+        Click Element  xpath://button[.="Import new image"]
+    END
+    Wait Until Page Contains    Import Notebook images
+
+#Take first for loop out
+Add Softwares To Custom Image
+    [Documentation]
+    [Arguments]  @{software}
+    Click Element  xpath://button/span[.="Software"]
+    FOR  ${sublist}  IN  @{software}
+        Click Element  xpath://button[.="Add Software"]
+        Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}
+        FOR  ${element}  IN  @{sublist}
+            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}  ${element}[0]
+            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}  ${element}[1]
+            Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}
+        END
+    END
+
+#Take first for loop out
+Add Packages To Custom Image
+    [Documentation]
+    [Arguments]  @{packages}
+    Click Element  xpath://button/span[.="Packages"]
+    FOR  ${sublist}  IN  @{packages}
+        Click Element  xpath://button[.="Add Software"]
+        Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}
+        FOR  ${element}  IN  @{sublist}
+            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}  ${element}[0]
+            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}  ${element}[1]
+            Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}
+        END
+    END
+
+Remove Software From Custom Image
+
+Remove Package From Custom Image
+
+Delete Image
+
+Edit Image
+
+Expand Image Details
+
+Verify Image Description
+
+Verify Image Name
+
+Verify User
+
+Enable Image
+
+Disable Image

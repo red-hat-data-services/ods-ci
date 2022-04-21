@@ -7,6 +7,7 @@ Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
+Library         OpenShiftLibrary
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -142,6 +143,18 @@ Verify Filters Are Working On Resources Page
     Filter By Provider Type And Check Output
     Filter By Application (Aka Povider) And Check Output
     Filter By Using More Than One Filter And Check Output
+
+Verify Notebook images are building is not shown when no images are building
+    [Documentation]     Verifies that RHODS Dashbaord doesn't contain Notebook Images are building Notification , if no build is running
+    [Tags]    Sanity
+    ...       ODS-307
+    ${builds_data}=  Oc Get  kind=Build  namespace=redhat-ods-applications
+    FOR    ${build_data}    IN    @{builds_data}
+        Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${build_data['metadata']['name']}  expected_status=Complete
+    END
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Page Should Not Contain  text=Notebooks images are building
+
 
 *** Keywords ***
 Verify JupyterHub Card CSS Style

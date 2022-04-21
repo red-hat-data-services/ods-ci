@@ -31,6 +31,8 @@ ${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}=  tr[last()]/td[last()]/button[1]  # Edit OR 
 ${CUSTOM_IMAGE_LAST_ROW_LAST_BTN}=  tr[last()]/td[last()]/button[last()]  # Remove button of last row
 ${CUSTOM_IMAGE_LAST_ROW_NAME}=  tr[last()]/td[1]
 ${CUSTOM_IMAGE_LAST_ROW_VERSION}=  tr[last()]/td[2]
+${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
+${CUSTOM_IMAGE_REMOVE_BTN}=  button[@id="delete-package-software-button"]
 
 
 *** Keywords ***
@@ -479,21 +481,92 @@ Add Packages To Custom Image
     END
 
 Remove Software From Custom Image
+    [Documentation]
+    [Arguments]  ${software_name}
+    Click Element  xpath://button/span[.="Software"]
+    Click Button  xpath://td[.="${software_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
 
 Remove Package From Custom Image
+    [Documentation]
+    [Arguments]  ${package_name}
+    Click Element  xpath://button/span[.="Packages"]
+    Click Button  xpath://td[.="${package_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
 
 Delete Image
+    [Documentation]
+    [Arguments]  ${image_name}
+    Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
+    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-delete-button"]
+    Wait Until Page Contains  Delete Notebook Image
+    Click Button  xpath://button[.="Delete"]
 
-Edit Image
+Open Edit Menu For Image
+    [Documentation]
+    [Arguments]  ${image_name}
+    Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
+    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-edit-button"]
+    Wait Until Page Contains  Delete Notebook Image
 
 Expand Image Details
+    [Documentation]
+    [Arguments]  ${image_name}
+    ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    IF  ${is_expanded}==False
+        Click Button  xpath://td[.="${image_name}"]/../td[1]//button
+    END
+
+Collapse Image Details
+    [Documentation]
+    [Arguments]  ${image_name}
+    ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    IF  ${is_expanded}==True
+        Click Button  xpath://td[.="${image_name}"]/../td[1]//button
+    END
 
 Verify Image Description
+    [Documentation]
+    [Arguments]  ${image_name}  ${expected_description}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="Description"][.="${expected_description}"]
+    IF  ${exists}==False
+        ${desc} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="Description"]
+        Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
+        FAIL
+    END
+    [Return]  ${exists}
 
 Verify Image Name
+    [Documentation]
+    [Arguments]  ${image_name}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]
+    IF  ${exists}==False
+        Log  ${image_name} not visible in page
+        FAIL
+    END
+    [Return]  ${exists}
 
 Verify User
+    [Documentation]
+    [Arguments]  ${image_name}  ${expected_user}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="User"][.="${expected_user}"]
+    IF  ${exists}==False
+        ${user} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="User"]
+        Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
+        FAIL
+    END
+    [Return]  ${exists}
 
 Enable Image
+    [Documentation]
+    [Arguments]  ${image_name}
+    ${is_enabled} =  # Need to find a check
+    IF  ${is_enabled}==False
+        Click Element  xpath://td[.="${image_name}"]/..//input
+    END
 
 Disable Image
+    [Documentation]
+    [Arguments]  ${image_name}
+    ${is_enabled} =  # Need to find a check
+    IF  ${is_enabled}==True
+        Click Element  xpath://td[.="${image_name}"]/..//input
+    END

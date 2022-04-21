@@ -17,6 +17,7 @@ EMAIL_SERVER="localhost"
 EMAIL_SERVER_USER="None"
 EMAIL_SERVER_PW="None"
 EMAIL_SERVER_SSL=false
+EMAIL_SERVER_UNSECURE=false
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -125,6 +126,12 @@ while [ "$#" -gt 0 ]; do
     --email-server-ssl)
       shift
       EMAIL_SERVER_SSL=$1
+      shift
+      ;;
+
+    --email-server-unsecure)
+      shift
+      EMAIL_SERVER_UNSECURE=$1
       shift
       ;;
 
@@ -282,5 +289,5 @@ if ${EMAIL_REPORT}
      fi
      ./venv/bin/python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" \
                         -v ${EMAIL_SERVER} -a "rf_results.tar.gz" -u  ${EMAIL_SERVER_USER}  -p  ${EMAIL_SERVER_PW} \
-                        -l ${EMAIL_SERVER_SSL}
+                        -l ${EMAIL_SERVER_SSL} -d ${EMAIL_SERVER_UNSECURE}
 fi

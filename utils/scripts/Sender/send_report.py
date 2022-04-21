@@ -3,7 +3,7 @@ from EmailSender import EmailSender
 
 
 def send_email_report(sender, receiver, subject, text, attachments,
-                      server, server_user, server_pw, ssl):
+                      server, server_user, server_pw, ssl,  unsecure):
     print("Composing your email...")
     print("Sender:", sender)
     print("Receiver:", receiver)
@@ -16,6 +16,13 @@ def send_email_report(sender, receiver, subject, text, attachments,
     else:
         ssl = False
 
+    if unsecure is None:
+        unsecure = False
+    elif unsecure.lower() == "true":
+        unsecure = True
+    else:
+        unsecure = False
+
     if server_user.lower() == "none":
         server_user = None
     if server_pw.lower() == "none":
@@ -26,7 +33,7 @@ def send_email_report(sender, receiver, subject, text, attachments,
     reporter.set_sender_address(sender_address=sender)
     reporter.set_receiver_addresses(receiver_addresses=receiver)
     reporter.set_subject(subject=subject)
-    reporter.set_server(server=server, use_ssl=ssl)
+    reporter.set_server(server=server, use_ssl=ssl, use_unsecure=unsecure)
     reporter.set_server_auth(usr=server_user, pw=server_pw)
     reporter.prepare_header()
     reporter.prepare_payload(text=text,
@@ -94,6 +101,10 @@ if __name__ == "__main__":
                                           help="Use SSL SMTP server",
                                           action="store", default="false",
                                           required=False)
+    args_email_sender_parser.add_argument("-d", "--unsecure",
+                                          help="Use unsecure SMTP server (no encryption)",
+                                          action="store", default="false",
+                                          required=False)
 
     args = parser.parse_args()
 
@@ -105,5 +116,6 @@ if __name__ == "__main__":
                       args.server,
                       args.server_user,
                       args.server_pw,
-                      args.ssl
+                      args.ssl,
+                      args.unsecure
                       )

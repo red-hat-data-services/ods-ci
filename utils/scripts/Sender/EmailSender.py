@@ -19,6 +19,7 @@ class EmailSender(Sender):
         self._server_usr = ""
         self._server_pw = ""
         self._use_ssl = False
+        self._use_unsecure = False
         self._message = MIMEMultipart()
 
     def prepare_payload(self, text: str = "",
@@ -42,10 +43,14 @@ class EmailSender(Sender):
 
     def send(self):
         context = ssl.create_default_context()
-        print("use ssl: ", self._use_ssl)
-        if self._use_ssl:
+        print("use SMTP with ssl: ", self._use_ssl)
+        print("use unsecure SMTP (no encryption): ", self._use_unsecure)
+        if self._use_unsecure:
+            smtp = smtplib.SMTP(host=self._server, port=self._port)
+        elif self._use_ssl:
             smtp = smtplib.SMTP_SSL(host=self._server, port=self._port, context=context)
         else:
+            print("--> using SMTP with TLS")
             smtp = smtplib.SMTP(host=self._server, port=self._port)
             smtp.starttls(context=context)
         if self._server_usr and self._server_pw:
@@ -71,7 +76,7 @@ class EmailSender(Sender):
     def get_subject(self) -> str:
         return self._subject
 
-    def set_server(self, server: str, use_ssl: bool = True) -> None:
+    def set_server(self, server: str, use_ssl: bool = False, use_unsecure: bool = False) -> None:
         if ":" in server:
             server = server.split(":")
             self._server = server[0]
@@ -79,6 +84,7 @@ class EmailSender(Sender):
         else:
             self._server = server
         self._use_ssl = use_ssl
+        self._use_unsecure = use_unsecure
 
     def set_server_auth(self, usr: str, pw: str) -> None:
         self._server_usr = usr

@@ -42,8 +42,10 @@ RUN_SCRIPT_ARGS:
     --email-server (default: localhost): set the smtp server to use
     --email-server-user: (optional, depending on the smtp server) username to access smtp server
     --email-server-pw: (optional, depending on the smtp server) password to access smtp server
-    --email-server-ssl (default: false): set the encryption type to SSL. When false, the container uses TLS (using STARTTLS) by default
+    --email-server-ssl (default: false): set the encryption type to SSL
+    --email-server-unsecure (default: false): no encryption applied, using SMTP unsecure connection
 
+* The container uses TLS (using STARTTLS) by default if --email-server-ssl and --email-server-unsecure are set to false
 
 ROBOT_EXTRA_ARGS: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun )
 ```

@@ -50,8 +50,8 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     ${version} =    Verify Installed Library Version    tensorflow    2.7
     Add and Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
-    ${updated version} =    Verify Installed Library Version    tensorflow    2.8
-    ${res} =      GT    ${updated version}[1].0    ${version}[1].0
+    ${updated_version} =    Verify Installed Library Version    tensorflow    2.8
+    ${res} =      GT    ${updated_version}[1].0    ${version}[1].0
     Run Keyword Unless    ${res}    Fail
 
 

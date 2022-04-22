@@ -21,8 +21,8 @@ Verify Default Culler Timeout
     [Documentation]    Checks default culler timeout
     [Tags]    Sanity    Tier1
     ...       ODS-1255
-    Disable Culler
-    ${current_timeout} =  Get Culler Timeout
+    Disable Notebook Culler
+    ${current_timeout} =  Get And Verify Notebook Culler Timeout
     Should Be Equal  ${DEFAULT_CULLER_TIMEOUT}  ${current_timeout}
     Close Browser
 
@@ -30,8 +30,8 @@ Verify Culler Timeout Can Be Updated
     [Documentation]    Verifies culler timeout can be updated
     [Tags]    Sanity    Tier1
     ...       ODS-1231
-    Modify Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
-    ${current_timeout} =  Get Culler Timeout
+    Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
+    ${current_timeout} =  Get And Verify Notebook Culler Timeout
     Should Not Be Equal  ${current_timeout}  ${DEFAULT_CULLER_TIMEOUT}
     Should Be Equal   ${current_timeout}  ${CUSTOM_CULLER_TIMEOUT}
     Close Browser
@@ -68,7 +68,7 @@ Verify Do Not Stop Idle Notebooks
     [Documentation]    Disables the culler (default configuration) and verifies nb is not culled
     [Tags]    Sanity    Tier1
     ...       ODS-1230
-    Disable Culler
+    Disable Notebook Culler
     Close Browser
     Spawn Minimal Image
     Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
@@ -86,7 +86,7 @@ Spawn Minimal Image
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=s2i-minimal-notebook  size=Default
 
-Get Culler Pod
+Get Notebook Culler Pod Name
     [Documentation]    Finds the current culler pod and returns the name
     ${culler_pod} =  OpenShiftLibrary.Oc Get  kind=Pod
     ...    label_selector=app=jupyterhub-idle-culler  namespace=redhat-ods-applications
@@ -97,30 +97,40 @@ Get Culler Pod
     ELSE
         # There can be more than one during rollout
         Sleep  10s
-        ${culler_pod_name} =  Get Culler Pod
+        ${culler_pod_name} =  Get Notebook Culler Pod Name
     END
     Log  ${culler_pod}
     Log  ${culler_pod_name}
     [Return]  ${culler_pod_name}
 
-Get Culler Timeout
-    [Documentation]    Gets the current culler timeout
-    ${current_timeout} =  OpenShiftLibrary.Oc Get  kind=ConfigMap  name=jupyterhub-cfg
-    ...    namespace=redhat-ods-applications  fields=['data.culler_timeout']
-    ${current_timeout} =  Set Variable  ${current_timeout[0]['data.culler_timeout']}
+Get And Verify Notebook Culler Timeout
+    [Documentation]    Gets the current culler timeout from configmap and culler pod, compares the two
+    ...    And returns the value
+    ${current_timeout} =  Get Notebook Culler Timeout From Configmap
     Log  ${current_timeout}
-    Log To Console  ${current_timeout}
-    ${CULLER_POD} =  Get Culler Pod
-    ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -c jupyterhub-idle-culler
-    ...    -n redhat-ods-applications -- printenv CULLER_TIMEOUT
+    ${culler_env_timeout} =  Get Notebook Culler Timeout From Culler Pod
+    Log  ${culler_env_timeout}
     Should Be Equal  ${current_timeout}  ${culler_env_timeout}
     [Return]  ${current_timeout}
 
-Modify Culler Timeout
+Get Notebook Culler Timeout From Configmap
+    [Documentation]    Gets the current culler timeout from configmap
+    ${current_timeout} =  OpenShiftLibrary.Oc Get  kind=ConfigMap  name=jupyterhub-cfg
+    ...    namespace=redhat-ods-applications  fields=['data.culler_timeout']
+    ${current_timeout} =  Set Variable  ${current_timeout[0]['data.culler_timeout']}
+    [Return]  ${current_timeout}
+
+Get Notebook Culler Timeout From Culler Pod
+    [Documentation]    Gets the current culler timeout from culler pod
+    ${CULLER_POD} =  Get Notebook Culler Pod Name
+    ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -c jupyterhub-idle-culler -n redhat-ods-applications -- printenv CULLER_TIMEOUT  # robocop: disable
+    [Return]  ${culler_env_timeout}
+
+Modify Notebook Culler Timeout
     [Documentation]    Modifies the culler timeout via UI
     [Arguments]    ${new_timeout}
     Open Dashboard Cluster Settings
-    Set Timeout To  ${new_timeout}
+    Set Notebook Culler Timeout  ${new_timeout}
     # Enough time to start the rollout
     Sleep  60s
 
@@ -137,7 +147,7 @@ Open Dashboard Cluster Settings
     END
     Click Element  xpath://a[.="Cluster settings"]
 
-Set Timeout To
+Set Notebook Culler Timeout
     [Documentation]    Modifies the notebook culler timeout using the dashboard UI setting it to ${new_timeout} seconds
     [Arguments]    ${new_timeout}
     ${hours}  ${minutes} =  Convert To Hours And Minutes  ${new_timeout}
@@ -151,7 +161,7 @@ Set Timeout To
     Input Text  //input[@id="minute-input"]  ${minutes}
     Click Button  Save changes
 
-Disable Culler
+Disable Notebook Culler
     [Documentation]    Disables the culler (i.e. sets the default timeout of 1 year)
     Open Dashboard Cluster Settings
     Sleep  5
@@ -164,6 +174,6 @@ Disable Culler
 
 Teardown
     [Documentation]    Teardown for the test
-    Disable Culler
+    Disable Notebook Culler
     Launch JupyterHub Spawner From Dashboard
     End Web Test

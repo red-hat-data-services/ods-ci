@@ -6,7 +6,10 @@ Library             SeleniumLibrary
 *** Keywords ***
 Uninstall Pachyderm Operator
     [Documentation]    Uninstall pachyderm operator and its related component.
-    Go To    ${OCP_CONSOLE_URL}
+    Run Cell And Check For Errors   pachctl delete pipeline edges
+    Close All Browsers
+    Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+    LoginPage.Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
     Maybe Skip Tour
     Delete Tabname Instance For Installed Operator    ${pachyderm_operator_name}    Pachyderm       pachyderm
     Uninstall Operator    ${pachyderm_operator_name}

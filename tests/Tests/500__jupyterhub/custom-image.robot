@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation    Testing the backend for custom images (Adding ImageStream to redhat-ods-applications)
+Documentation    Testing custom image imports (Adding ImageStream to redhat-ods-applications)
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -27,13 +27,13 @@ ${IMAGESTREAM_NAME}=
 *** Test Cases ***
 Verify Admin User Can Access Custom Notebook Settings
     Set Library Search Order  SeleniumLibrary
-    Launch Dashboard    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}
-    ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
     Open Notebook Images Page
 
 Verify Custom Image Can Be Added
-    [Documentation]    Applies the YAML and Gets the ImageStream
+    [Documentation]    Imports the custom image via UI
     ...                Then loads the spawner and tries using the custom img
     [Tags]    Tier2
     ...       ODS-1208
@@ -46,12 +46,14 @@ Verify Custom Image Can Be Added
 *** Keywords ***
 Custom Image Teardown
     [Documentation]    Closes the JL server and deletes the ImageStream
+    Stop JupyterLab Notebook Server
+    Go To  ${ODH_DASHBOARD_URL}
+    Open Notebook Images Page
+    Delete Image  ${IMG_NAME}
     End Web Test
-    OpenShiftCLI.Delete    kind=ImageStream    field_selector=metadata.name==${IMG_NAME}
-    ...    namespace=redhat-ods-applications
 
 Apply Custom ImageStream And Check Status
-    [Documentation]    Applies a custom ImageStream as a YAML and checks the status
+    [Documentation]    Imports a custom ImageStream via UI and checks the status
     ${curr_date} =  Get Time  year month day hour min sec
     ${curr_date} =  Catenate  SEPARATOR=  @{curr_date}
 
@@ -59,16 +61,10 @@ Apply Custom ImageStream And Check Status
     ${IMG_NAME} =  Catenate  ${IMG_NAME}  ${curr_date}
     Set Global Variable  ${IMG_NAME}  ${IMG_NAME}
 
-
     ${apply_result} =    Run Keyword And Return Status    Import New Image
     ...    ${IMG_URL}     ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
-
-    #${apply_result} =    Run Keyword And Return Status    Run    oc apply -f ${YAML}
-    #Should Be Equal    "${apply_result}"    "True"
-    # OpenShiftCLI.Apply    kind=ImageStream    src="tests/Resources/Files/custom_image.yaml"
-    # ...    namespace=redhat-ods-applications
 
 Get ImageStream Metadata And Check Name
     [Documentation]    Gets the metadata of an ImageStream and checks name of the image

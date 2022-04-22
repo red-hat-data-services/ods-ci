@@ -13,7 +13,8 @@ Suite Teardown      End Web Test
 Force Tags          Smoke    Sanity    JupyterHub
 
 *** Variables ***
-${RequirementsFileRepo}=    https://github.com/redhat-rhods-qe/useful-files.git
+${RequirementsFileRepo}=    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main.git
+${RequirementsFilePath}=    ods-ci-notebooks-main/notebooks/500__jupyterhub/test-minimal-image/
 
 *** Test Cases ***
 Open RHODS Dashboard
@@ -42,10 +43,10 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     [Documentation]    Verify Tensorflow Can Be Installed In The Minimal Python image via pip
     [Tags]    ODS-555    ODS-908    ODS-535
     ...       Tier1
-    Clone Git Repository    ${RequirementsFileRepo}
+    Clone Git Repository And Open    ${RequirementsFileRepo}    ${RequirementsFilePath}
     Open New Notebook
     Close Other JupyterLab Tabs
-    Add and Run JupyterLab Code Cell In Active Notebook    !pip install -r useful-files/requirements.txt --progress-bar off
+    Add and Run JupyterLab Code Cell In Active Notebook    !pip install -r requirements.txt --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
     ${version} =    Verify Installed Library Version    tensorflow    2.7
     Add and Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off

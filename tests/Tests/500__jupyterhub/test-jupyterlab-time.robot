@@ -19,10 +19,12 @@ Suite Teardown      End Web Test
 *** Test Cases ***
 Average Time For Spawning
     [Documentation]    Calculates avg time taken by server to start
-    [Tags]    Tag
+    [Tags]    ODS-691
+    ...       Tier2
     ${total_avg} =    Set Variable
     FOR    ${image}    IN    @{LIST_OF_IMAGES}
         ${avg} =    Set Variable
+        Spawn and Stop Server    ${image}
         FOR    ${counter}    IN RANGE    4
             ${sum} =    Spawn and Stop Server    ${image}
             ${avg} =    Evaluate    ${avg} + ${sum}
@@ -46,11 +48,15 @@ Load Spawner Page
 Spawn and Stop Server
     [Documentation]    Returns time to start a server
     [Arguments]    ${image}
+    Select Notebook Image  ${image}
+    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
     ${time1} =    Get Time    format=%H:%M:%S.%f
-    Spawn Notebook With Arguments    image=${image}
+    Spawn Notebook
+    Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
+         ...    id:progress-bar    timeout=600s
+    Wait For JupyterLab Splash Screen    timeout=30
     ${time2} =    Get Time
     ${time} =    Subtract Date From Date    ${time2}    ${time1}
-    Clean Up Server
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
     Wait For RHODS Dashboard To Load

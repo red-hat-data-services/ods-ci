@@ -15,7 +15,11 @@ Force Tags       JupyterHub
 
 *** Variables ***
 ${YAML} =         tests/Resources/Files/custom_image.yaml
-${IMG_NAME} =     custom-test-image
+${IMG_NAME} =            custom-test-image
+${IMG_URL} =             quay.io/thoth-station/s2i-lab-elyra:v0.1.1
+${IMG_DESCRIPTION} =     Testing Only This image is only for illustration purposes, and comes with no support. Do not use.
+&{IMG_SOFTWARE} =        Experimental Image. Do not use!=""
+&{IMG_PACKAGES} =        elyra=2.2.4
 
 
 *** Test Cases ***
@@ -34,6 +38,7 @@ Verify Custom Image Can Be Added
     Apply Custom ImageStream And Check Status
     Get ImageStream Metadata And Check Name
     Launch JupyterHub Spawner From Dashboard
+    Debug
     Spawn Notebook With Arguments  image=${IMG_NAME}  size=Default
 
 
@@ -46,15 +51,18 @@ Custom Image Teardown
 
 Apply Custom ImageStream And Check Status
     [Documentation]    Applies a custom ImageStream as a YAML and checks the status
+    ${curr_date} =  Get Time  year month day hour min sec
+    ${curr_date} =  Catenate  SEPARATOR=  @{curr_date}
 
-    ${software} =   Create Dictionary    Python=x.y.z    CUDA=1.2.3
-    ${packages} =   Create Dictionary    my-pkg=a.b.c    foo-bar=4.5.6
-    ${apply_result} =    Run Keyword And Return Status    Import New Image  
-    ...    quay.io/thoth-station/s2i-lab-elyra:v0.1.1
-    ...    Custom Image
-    ...    Testing Only This image is only for illustration purposes, and comes with no support. Do not use.
-    ...    software=${software}
-    ...    packages=${packages}
+    # Create a unique notebook name for this test run
+    ${IMG_NAME} =  Catenate  ${IMG_NAME}  ${curr_date}
+    Set Global Variable  ${IMG_NAME}  ${IMG_NAME}
+
+
+    ${apply_result} =    Run Keyword And Return Status    Import New Image
+    ...    ${IMG_URL}     ${IMG_NAME}    ${IMG_DESCRIPTION}
+    ...    software=${IMG_SOFTWARE}
+    ...    packages=${IMG_PACKAGES}
 
     #${apply_result} =    Run Keyword And Return Status    Run    oc apply -f ${YAML}
     #Should Be Equal    "${apply_result}"    "True"
@@ -63,7 +71,10 @@ Apply Custom ImageStream And Check Status
 
 Get ImageStream Metadata And Check Name
     [Documentation]    Gets the metadata of an ImageStream and checks name of the image
-    ${get_metadata} =    OpenShiftCLI.Get    kind=ImageStream    field_selector=metadata.name==${IMG_NAME}
+    ${get_metadata} =    OpenShiftCLI.Get    kind=ImageStream    label_selector=app.kubernetes.io/created-by=byon
     ...    namespace=redhat-ods-applications
-    &{data} =    Set Variable    ${get_metadata}[0]
-    Should Be Equal    ${data.metadata.name}    ${IMG_NAME}
+    FOR     ${imagestream}    IN    @{get_metadata}
+      ${image_name} =    Evaluate    $imagestream['metadata']['annotations']['opendatahub.io/notebook-image-name']
+      Exit For Loop If    '${image_name}' == '${IMG_NAME}'
+    END
+    Should Be Equal    ${image_name}    ${IMG_NAME}

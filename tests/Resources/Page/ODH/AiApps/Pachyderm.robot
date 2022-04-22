@@ -8,6 +8,7 @@ Uninstall Pachyderm Operator
     [Documentation]    Uninstall pachyderm operator and its related component.
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
+    Delete Pods Using Label Selector    pachyderm       app=pipeline-edges-v1
     Delete Tabname Instance For Installed Operator    ${pachyderm_operator_name}    Pachyderm       pachyderm
     Uninstall Operator    ${pachyderm_operator_name}
     Delete Project By Name      pachyderm

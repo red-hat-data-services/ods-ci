@@ -335,6 +335,16 @@ Fetch Image Description Info
     ${text} =  Fetch From Left  ${text}  ,
     [Return]  ${text}
 
+Fetch Image Tooltip Description
+    [Documentation]  Fetches Description in image tooltip
+    [Arguments]  ${img}
+    ${xpath_img_tooltip} =  Set Variable  //input[contains(@id, "${img}")]/../label/span/*
+    ${xpath_tooltip_desc} =  Set Variable  //span[@class="jsp-spawner__image-options__packages-popover__title"]
+    Click Element  ${xpath_img_tooltip}
+    ${desc} =  Get Text  ${xpath_tooltip_desc}
+    Click Element  //div[@class='jsp-app__header__title']
+    [Return]  ${desc}
+
 Fetch Image Tooltip Info
     [Documentation]  Fetches libraries in image tooltip text
     [Arguments]  ${img}

@@ -497,11 +497,12 @@ Remove Package From Custom Image
     Click Button  xpath://td[.="${package_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
 
 Delete Image
+# Need to check if image is REALLY deleted
     [Documentation]
     [Arguments]  ${image_name}
     Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
     Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-delete-button"]
-    Wait Until Page Contains  Delete Notebook Image
+    Wait Until Page Contains  Do you wish to permanently delete ${image_name}?
     Click Button  xpath://button[.="Delete"]
 
 Open Edit Menu For Image

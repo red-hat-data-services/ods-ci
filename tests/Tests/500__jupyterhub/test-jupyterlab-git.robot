@@ -20,7 +20,8 @@ ${COMMIT_MSG}       commit msg2
 *** Test Cases ***
 Verify Pushing Project Changes Remote Repository
     [Documentation]    Verifies that changes has been pushed successfully to remote repository
-    [Tags]    ODS-326    Sanity    Tier1
+    [Tags]    ODS-326
+    ...       Sanity    Tier1
     Set Staging Status
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
@@ -34,7 +35,8 @@ Verify Pushing Project Changes Remote Repository
 
 Verify Updating Project With Changes From Git Repository
     [Documentation]    Verifies that changes has been pulled successfully to local repository
-    [Tags]    ODS-324    Sanity    Tier1
+    [Tags]    ODS-324
+    ...       Sanity    Tier1
     Set Staging Status
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
@@ -53,12 +55,8 @@ Verify Updating Project With Changes From Git Repository
     ...    folder/${FILE_PATH}
     ...    ${REPO_URL}
     ...    ${commit_message}
-
-    #go to previous dir
     Close All JupyterLab Tabs
-
     Open Folder or File    ${DIR_NAME}
-
     Open With JupyterLab Menu    Git    Pull from Remote
     Sleep    2s
     Open New Notebook
@@ -74,29 +72,25 @@ Server Setup
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Default
 
-Push Some Changes to Repo
+Push Some Changes To Repo
+    [Documentation]    Make some changes in ${filepath} and push to remote repo
     [Arguments]    ${github username}    ${token}    ${filepath}    ${githublink}    ${commitmsgg}
-
     Clone Git Repository In Current Folder    ${githublink}
     Close All JupyterLab Tabs
     Open Folder or File    ${filepath}
     Enter Text In File And Save    code=print("Hi Hello")
     Set Staging Status    status=ON
     Commit Changes    commit_message=${commitmsgg}    name=${GITHUB_USER.USERNAME}    email_id=${GITHUB_USER.EMAIL}
-
-    #click on push to remote
-
     Push Changes To Remote    github_username=${GITHUB_USER.USERNAME}    token=${GITHUB_USER.TOKEN}
-
     Set Staging Status    status=OFF
     Close All JupyterLab Tabs
-    sleep    2s
-
+    Sleep    2s
     Open New Notebook
     ${output}=    Get Last Commit Message
     Should Be Equal    ${commitmsgg.strip()}    ${output.strip()}
 
-Open Folder or File
+Open Folder Or File
+    [Documentation]    Opens the folder or file
     [Arguments]    ${path}
     Open With JupyterLab Menu    File    Open from Path…
     Input Text    xpath=//input[@placeholder="/path/relative/to/jlab/root"]    ${path}
@@ -106,13 +100,14 @@ Open Folder or File
     Sleep    2s
 
 Clone Git Repository In Current Folder
+    [Documentation]    Clones git repository in current folder
     [Arguments]    ${github_link}
     Open New Notebook
     Run Cell And Get Output    !git clone ${github_link}
     Sleep    15
 
 Commit Changes
-    [Documentation]    It does the git commit
+    [Documentation]    It does the git commit with commit message
     [Arguments]    ${commit_message}    ${name}    ${email_id}
     Click Element    xpath=//*[@id="tab-key-6"]/div[1]    #Git Icon
     Input Text    xpath=//*[@id="jp-git-sessions"]/div/form/input[1]    ${commit_message}
@@ -125,27 +120,28 @@ Commit Changes
     Sleep    4s
 
 Push Changes To Remote
+    [Documentation]    Push changes to remote directory
     [Arguments]    ${github_username}    ${token}
     Open With JupyterLab Menu    Git    Push to Remote
     Wait Until Page Contains    Git credentials required    timeout=200s
-
-    # enter the credentials username and token
-
     Input Text    //input[@class='jp-mod-styled'][1]    ${github_username}
     Input Text    //input[@class='jp-mod-styled'][2]    ${token}
-    Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]    #click on submit
+    Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]
     Sleep    3s
 
 Get Last Commit Message
+    [Documentation]    Return the last cpmmit message
     ${output}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
     [Return]    ${output}
 
 Simple Staging Not Clicked
+    [Documentation]    Ensures that Simple Staging has not clicked
     Open With JupyterLab Menu    Git
     Element Should Not Be Visible    //li/div[@class="f1vya9e0 lm-Menu-itemIcon p-Menu-itemIcon"]
     Element Should Be Visible    //li[@class="lm-Menu-item p-Menu-item"][4]
 
 Set Staging Status
+    [Documentation]    Sets the staging status
     [Arguments]    ${status}=INITIALLY_OFF
     IF    "${status}"=="OFF" OR "${status}"=="ON"
         Open With JupyterLab Menu    Git    Simple staging
@@ -159,6 +155,7 @@ Set Staging Status
     END
 
 Open New Notebook
+    [Documentation]    Opens new notebook
     Open With JupyterLab Menu    File    New    Notebook
     Sleep    2s
     Maybe Close Popup
@@ -167,6 +164,7 @@ Open New Notebook
     Sleep    1
 
 Enter Text In File And Save
+    [Documentation]    Enters text in current opened file
     [Arguments]    ${code}
     Wait Until JupyterLab Code Cell Is Not Active
     Sleep    2s

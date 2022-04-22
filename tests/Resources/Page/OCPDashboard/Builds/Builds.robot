@@ -1,5 +1,6 @@
 *** Settings ***
 Library    OpenShiftCLI
+Library    OpenShiftLibrary
 Resource   ../../OCPDashboard/Page.robot
 Resource   ../../ODH/ODHDashboard/ODHDashboard.robot
 
@@ -77,3 +78,10 @@ Wait Until Build Status Is
     [Arguments]    ${namespace}    ${build_name}    ${expected_status}=Complete    ${timeout}=20 min
     Wait Until Keyword Succeeds    ${timeout}    1 min
     ...    Build Status Should Be    ${namespace}    ${build_name}    ${expected_status}
+
+Wait Until All Builds Are Complete
+    [Documentation]     Waits until all the builds are in Complete State
+    ${builds_data} =  Oc Get  kind=Build  namespace=redhat-ods-applications
+    FOR    ${build_data}    IN    @{builds_data}
+        Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${build_data['metadata']['name']}  expected_status=Complete
+    END

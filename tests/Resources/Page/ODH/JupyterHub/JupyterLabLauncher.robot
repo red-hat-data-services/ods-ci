@@ -238,11 +238,23 @@ Wait Until JupyterLab Is Loaded
   Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=${timeout}
 
 Clone Git Repository
+  [Documentation]    Clones git repository and logs error message if fails to clone
   [Arguments]  ${REPO_URL}
-  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
-  Open With JupyterLab Menu  Git  Clone a Repository
-  Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  ${REPO_URL}
-  Click Element  xpath://div[.="CLONE"]
+  ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
+    IF    "${status}" == "PASS"
+        ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
+        Delete Folder In User Notebook
+        ...    admin_username=${OCP_ADMIN_USER.USERNAME}
+        ...    username=${TEST_USER.USERNAME}
+        ...    folder=${dir_name}
+        ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
+        IF    "${status}" == "PASS"
+            Log    Error Message : ${err_msg}
+            FAIL
+        END
+    ELSE
+        Wait Until Page Contains    Successfully cloned    timeout=200s
+    END
 
 Clone Git Repository And Open
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
@@ -429,6 +441,40 @@ Open New Notebook
     Open With JupyterLab Menu    File    New    Notebook
     Sleep    1
     Maybe Close Popup
+
+Clone Repo
+    [Documentation]    Clones git repo
+    [Arguments]    ${REPO_URL}
+    Navigate Home (Root folder) In JupyterLab Sidebar File Browser
+    Open With JupyterLab Menu    Git    Clone a Repository
+    Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${REPO_URL}
+    Click Element    xpath://div[.="CLONE"]
+
+
+Clone Repo and Return Error Message
+    [Arguments]    ${REPO_URL}
+    Clone Repo    ${REPO_URL}
+    Wait Until Page Contains    Cloning...    timeout=5s
+    ${err_msg} =    Did Error Occur While Cloning Git Repo
+    [RETURN]    ${err_msg}
+
+Get Directory Name From Git Repo URL
+    [Documentation]    Returns directory name from repo link
+    [Arguments]    ${REPO_URL}
+    @{ans} =    Split Path    ${REPO_URL}
+    ${ans} =    Remove String    ${ans}[1]    .git
+    [RETURN]    ${ans}
+
+Did Error Occur While Cloning Git Repo
+    [Documentation]    Returns error when it fails to clones and Keyword Fails when error doesn't occur
+    ${err_msg} =    Set Variable    No error
+    Wait Until Page Contains    Failed to clone    timeout=3s
+    Click Button    //div[@class="MuiSnackbar-root MuiSnackbar-anchorOriginBottomRight"]/div/div/button    #click show
+    ${err_msg} =    Get Text    //div/div/span[@class="lm-Widget p-Widget jp-Dialog-body"]    #get error text
+    #dismiss button
+    Click Button
+    ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"]
+    [RETURN]    ${err_msg}
 
 Verify Git Plugin
     [Documentation]     Checks if it can successfully clone a repository.

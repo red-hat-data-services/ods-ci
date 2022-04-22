@@ -27,8 +27,9 @@ ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
 ${CUSTOM_IMAGE_SOFTWARE_TABLE}=  //caption[contains(., "the advertised software")]/../tbody
 ${CUSTOM_IMAGE_PACKAGE_TABLE}=  //caption[contains(., "the advertised packages")]/../tbody
-${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}=  tr[last()]/td[last()]/button[1]  # Edit OR Save button of last row (depends on context)
-${CUSTOM_IMAGE_LAST_ROW_LAST_BTN}=  tr[last()]/td[last()]/button[last()]  # Remove button of last row
+${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}=  tr[last()]/td[last()]/button[@id="save-package-software-button"]  # Save button
+${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}=  tr[last()]/td[last()]/button[@id="edit-package-software-button"]  # Edit OR Save button of last row (depends on context)
+${CUSTOM_IMAGE_LAST_ROW_DELETE_BTN}=  tr[last()]/td[last()]/button[@id="delete-package-software-button"]  # Remove button of last row
 ${CUSTOM_IMAGE_LAST_ROW_NAME}=  tr[last()]/td[1]
 ${CUSTOM_IMAGE_LAST_ROW_VERSION}=  tr[last()]/td[2]
 ${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
@@ -427,17 +428,18 @@ Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
     Page Should Contain    Settings
     Menu.Navigate To Page    Settings    Notebook Images
+    Wait Until Page Contains    Notebook image settings
     Page Should Contain    Notebook image settings
 
 Import New Image
     [Documentation]  software and packages should be lists of lists
-    [Arguments]  ${repo}  ${name}  ${description}  @{software}  @{packages}
+    [Arguments]  ${repo}  ${name}  ${description}  ${software}  ${packages}
     Open Image Import Popup
     Input Text    xpath://input[@id="notebook-image-repository-input"]    ${repo}
     Input Text    xpath://input[@id="notebook-image-name-input"]    ${name}
     Input Text    xpath://input[@id="notebook-image-description-input"]    ${description}
-    Add Softwares To Custom Image    @{software}
-    Add Packages To Custom Image    @{packages}
+    Add Softwares To Custom Image    ${software}
+    Add Packages To Custom Image    ${packages}
     Click Element    xpath://button[.="Import"]
 
 Open Image Import Popup
@@ -456,12 +458,13 @@ Add Softwares To Custom Image
     [Arguments]  @{software}
     Click Element  xpath://button/span[.="Software"]
     FOR  ${sublist}  IN  @{software}
-        Click Element  xpath://button[.="Add Software"]
-        Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}
         FOR  ${element}  IN  @{sublist}
-            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}  ${element}[0]
-            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}  ${element}[1]
-            Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}
+            Wait Until Element Is Visible    xpath://button[.="Add Software" or .="Add software"]
+            Click Element  xpath://button[.="Add Software" or .="Add software"]
+            Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}
+            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}/input[@id="software-package-input"]  ${element}
+            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}/input[@id="version-input"]  ${sublist}[${element}]
+            Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}
         END
     END
 
@@ -471,12 +474,13 @@ Add Packages To Custom Image
     [Arguments]  @{packages}
     Click Element  xpath://button/span[.="Packages"]
     FOR  ${sublist}  IN  @{packages}
-        Click Element  xpath://button[.="Add Software"]
-        Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}
         FOR  ${element}  IN  @{sublist}
-            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}  ${element}[0]
-            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}  ${element}[1]
-            Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_FIRST_BTN}
+            Wait Until Element Is Visible    xpath://button[.="Add Package" or .="Add package"]
+            Click Element  xpath://button[.="Add Package" or .="Add package"]
+            Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}
+            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}/input[@id="software-package-input"]  ${element}
+            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}/input[@id="version-input"]  ${sublist}[${element}]
+            Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}
         END
     END
 

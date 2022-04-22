@@ -19,7 +19,9 @@ ${IMG_NAME} =            custom-test-image
 ${IMG_URL} =             quay.io/thoth-station/s2i-lab-elyra:v0.1.1
 ${IMG_DESCRIPTION} =     Testing Only This image is only for illustration purposes, and comes with no support. Do not use.
 &{IMG_SOFTWARE} =        Experimental Image. Do not use!=""
-&{IMG_PACKAGES} =        elyra=2.2.4
+&{IMG_PACKAGES} =        elyra=2.2.4    foo-pkg=a.b.c
+# Place holder for the imagestream name of BYON notebook created for this test run
+${IMAGESTREAM_NAME}=
 
 
 *** Test Cases ***
@@ -38,8 +40,7 @@ Verify Custom Image Can Be Added
     Apply Custom ImageStream And Check Status
     Get ImageStream Metadata And Check Name
     Launch JupyterHub Spawner From Dashboard
-    Debug
-    Spawn Notebook With Arguments  image=${IMG_NAME}  size=Default
+    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Default
 
 
 *** Keywords ***
@@ -78,3 +79,5 @@ Get ImageStream Metadata And Check Name
       Exit For Loop If    '${image_name}' == '${IMG_NAME}'
     END
     Should Be Equal    ${image_name}    ${IMG_NAME}
+    ${IMAGESTREAM_NAME} =   Set Variable    ${imagestream}[metadata][name]
+    ${IMAGESTREAM_NAME} =   Set Global Variable    ${IMAGESTREAM_NAME}

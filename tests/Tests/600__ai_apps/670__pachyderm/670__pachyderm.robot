@@ -5,10 +5,8 @@ Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/ODH/AiApps/AiApps.resource
 Resource            ../../../Resources/RHOSi.resource
 
-Suite Setup         Pachyderm Test Suite
-Test Setup          Dashboard Test Setup
-Test Teardown       Dashboard Test Teardown
-
+Suite Setup         Pachyderm Suite Setup
+Suite Teardown      Pachyderm Suite Teardown
 
 *** Variables ***
 ${pachyderm_container_name}     Pachyderm
@@ -17,44 +15,61 @@ ${pachyderm_appname}            pachyderm
 
 
 *** Test Cases ***
-Verify Pachyderm Can Be Installed And Pipeline Can Be Created
-    [Documentation]     Check if it is possible to install and deploy pachyderm server successfully
-    ...                 and a smaple pipline can be cretaed using jupyterlab.
+Verify Pachyderm Can Be Installed And Deploy Its Server
+    [Documentation]     Check if it is possible to install and deploy pachyderm.
     [Tags]      Tier2
-    ...         ODS-1137    ODS-1138    ODS-1161
-    Check And Install Operator in Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
-    Create Project      pachyderm
-    Create Pachyderm AWS-Secret
-    Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     pachyderm
-    Wait Until Status Is Running
-    ${version}=     Get Pachyderm Sample Version
+    ...         ODS-1137    ODS-1138
+    Pass Execution      Passing test, as suite setup ensures Pachyderm operator is installed correctly.
+
+Verify Pachyderm Pipeline Can Be Created
+    [Documentation]     Checks if it is possible to create sample pipline using jupyterlab.
+    [Tags]      Tier2
+    ...         ODS-1161
+    Go To    ${OCP_CONSOLE_URL}
+    ${version}=     Get Pachd Version
     Go To RHODS Dashboard
     Verify Service Is Enabled    Pachyderm
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
     Create Pachyderm Pipeline Using JupyterLab     ${version}
-    Verify Pipline Pod Creation
-    [Teardown]  Uninstall Pachyderm Operator
+    Verify Pipeline Pod Creation
+    [Teardown]  Delete Pipeline And Stop JupyterLab Server
 
 *** Keywords ***
-Pachyderm Test Suite
-    Set Library Search Order  SeleniumLibrary
-    RHOSi Setup
-
-Dashboard Test Setup
+Pachyderm Suite Setup
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
     Open Browser    ${OCP_CONSOLE_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login to OCP
     Wait Until OpenShift Console Is Loaded
+    Check And Install Operator in Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
+    Create Project      pachyderm
+    Create Pachyderm AWS-Secret
+    Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}
+    Wait Until Status Is Running
 
-Dashboard Test Teardown
+Pachyderm Suite Teardown
+    Go To    ${OCP_CONSOLE_URL}
+    Delete Tabname Instance For Installed Operator    ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}
+    Uninstall Operator    ${pachyderm_operator_name}
+    Delete Project By Name      pachyderm
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    browser_options=${BROWSER.OPTIONS}
+    Remove Disabled Application From Enabled Page    app_id=pachyderm
     Close All Browsers
 
 Wait Until Status Is Running
     [Documentation]     Checks if the status changes from Initializing to Running.
     Wait Until Keyword Succeeds     120     1       Element Text Should Be    //span[@data-test="status-text"]      Running
 
-Get Pachyderm Sample Version
+Get Pachd Version
+    [Documentation]     Checks and returns the version of pachd.
+    Menu.Navigate To Page       Operators       Installed Operators
+    Select Project By Name      ${pachyderm_appname}
+    Click On Searched Operator      ${pachyderm_operator_name}
+    Switch To New Tab       ${pachyderm_operator_name}
+    Wait Until Page Contains Element    //a[@data-test-operand-link="pachyderm-sample"]
     Click Element   //a[@data-test-operand-link="pachyderm-sample"]
     Wait Until Page Contains Element    (//dd[@data-test-selector="details-item-value__Version"])[1]
     ${version}=     Get Text        (//dd[@data-test-selector="details-item-value__Version"])[1]
@@ -70,7 +85,8 @@ Create Pachyderm AWS-Secret
     Input Text      //input[@data-test-id="item-filter"]    pachyderm-aws-secret
     Wait Until Page Contains Element        //a[@data-test-id="pachyderm-aws-secret"]       10
 
-Verify Pipline Pod Creation
+Verify Pipeline Pod Creation
+    [Documentation]     Checks pipeline pod has been created in workloads.
     ${status}=    Check If POD Exists    pachyderm      app=pipeline-edges-v1
     Run Keyword IF    '${status}'=='FAIL'    FAIL
     ...    PODS with Label '${label_selector}' is not present in '${namespace}' namespace
@@ -85,8 +101,8 @@ Create Command In Multiple Lines
     [Return]    ${command_string}
 
 Create Pachyderm Pipeline Using JupyterLab
+    [Documentation]     Creates pachyderm pipeline by running multiple commands on jupyterlab.
     [Arguments]     ${version}
-    Run Cell And Check For Errors   !git clone https://github.com/Jooho/pachyderm-operator-manifests
     Run Cell And Check For Errors   !curl -o /tmp/pachctl.tar.gz -L https://github.com/pachyderm/pachyderm/releases/download/v${version}/pachctl_${version}_linux_amd64.tar.gz && tar -xvf /tmp/pachctl.tar.gz -C /tmp && cp /tmp/pachctl_${version}_linux_amd64/pachctl /opt/app-root/bin/
     Run Cell And Check For Errors   !echo '{"pachd_address":"pachd.pachyderm.svc.cluster.local:30650"}' | pachctl config set context pachyderm --overwrite
     Run Cell And Check For Errors   !pachctl config set active-context pachyderm
@@ -101,4 +117,3 @@ Create Pachyderm Pipeline Using JupyterLab
     Run Cell And Check For Errors   ${command_string}
     Run Cell And Check For Errors   !pachctl create pipeline -f https://raw.githubusercontent.com/pachyderm/pachyderm/master/examples/opencv/edges.json
     Run Cell And Check For Errors   !pachctl list job
-

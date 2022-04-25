@@ -1,5 +1,7 @@
 #/bin/bash
 
+SKIP_OC_LOGIN=false
+SET_RHODS_URLS=false
 TEST_CASE_FILE=tests/Tests
 TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
@@ -8,13 +10,33 @@ EXTRA_ROBOT_ARGS=""
 SKIP_PIP_INSTALL=0
 TEST_INCLUDE_TAG=""
 TEST_EXCLUDE_TAG=""
+EMAIL_REPORT=true
+EMAIL_TO=""
+EMAIL_FROM=""
+EMAIL_SERVER="localhost"
+EMAIL_SERVER_USER="None"
+EMAIL_SERVER_PW="None"
+EMAIL_SERVER_SSL=false
+EMAIL_SERVER_UNSECURE=false
 
 while [ "$#" -gt 0 ]; do
   case $1 in
+    --skip-oclogin)
+      shift
+      SKIP_OC_LOGIN=$1
+      shift
+      ;;
+
     # Override/Add global variables specified in the test variables file
     --test-variable)
       shift
       TEST_VARIABLES="${TEST_VARIABLES} --variable $1"
+      shift
+      ;;
+
+    --set-urls-variables)
+      shift
+      SET_RHODS_URLS=$1
       shift
       ;;
 
@@ -39,7 +61,7 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
 
-    # Specify included tags 
+    # Specify included tags
     # Example: sanityANDinstall sanityORinstall installNOTsanity
     --include)
       shift
@@ -65,6 +87,54 @@ while [ "$#" -gt 0 ]; do
       SKIP_PIP_INSTALL=1
       ;;
 
+    --email-report)
+      shift
+      EMAIL_REPORT=$1
+      shift
+      ;;
+
+    --email-from)
+      shift
+      EMAIL_FROM=$1
+      shift
+      ;;
+
+    --email-to)
+      shift
+      EMAIL_TO=$1
+      shift
+      ;;
+
+   --email-server)
+      shift
+      EMAIL_SERVER=$1
+      shift
+      ;;
+
+   --email-server-user)
+      shift
+      EMAIL_SERVER_USER=$1
+      shift
+      ;;
+
+   --email-server-pw)
+      shift
+      EMAIL_SERVER_PW=$1
+      shift
+      ;;
+
+    --email-server-ssl)
+      shift
+      EMAIL_SERVER_SSL=$1
+      shift
+      ;;
+
+    --email-server-unsecure)
+      shift
+      EMAIL_SERVER_UNSECURE=$1
+      shift
+      ;;
+
     *)
       echo "Unknown command line switch: $1"
       exit 1
@@ -72,6 +142,17 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+if ${EMAIL_REPORT}
+    then
+      echo "Email Report is enabled"
+      if [ -z "${EMAIL_FROM}" ] || [ -z "${EMAIL_TO}" ]
+        then
+          echo "--email-from and/or --email-to is missing. Please, set them or disable --email-report"
+          exit 1
+      fi
+      echo "Test Execution results will be sent to ${EMAIL_TO} from ${EMAIL_FROM}"
+fi
+echo ${TEST_VARIABLES_FILE}
 if [[ ! -f "${TEST_VARIABLES_FILE}" ]]; then
   echo "Robot Framework test variable file (test-variables.yml) is missing"
   exit 1
@@ -114,6 +195,61 @@ case "$(uname -s)" in
         ;;
 esac
 
+
+# automatically get cluster URLs if already log into or running in a pod
+if ${SET_RHODS_URLS}
+    then
+        echo "INFO: getting RHODS URLs from the cluster as per --set-urls-variables"
+        ocp_console=$(oc whoami --show-console)
+        # ocp_console="https://$(oc get route console -n openshift-console -o jsonpath='{.spec.host}{"\n"}')"
+        rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
+        api_server=$(oc whoami --show-server)
+        TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard}"
+        echo "OCP Console URL set to: ${ocp_console}"
+        echo "RHODS Dashboard URL set to: ${rhods_dashboard}"
+        echo "RHODS API Server URL set to: ${api_server}"
+fi
+
+## if we have yq installed
+if command -v yq &> /dev/null
+    then
+        echo "INFO: we found a yq executable"
+        if ! ${SKIP_OC_LOGIN}
+            then
+                echo "INFO: OC Login enabled"
+
+                ## get the user, pass and API hostname for OpenShift
+                if ${SET_RHODS_URLS}
+                    then
+                        oc_host=${api_server}
+                    else
+                        oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
+                fi
+                oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})
+                oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ${TEST_VARIABLES_FILE})
+
+                ## do an oc login here
+                oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
+
+                ## no point in going further if the login is not working
+                retVal=$?
+                if [ $retVal -ne 0 ]; then
+                    echo "The oc login command seems to have failed"
+                    echo "Please review the content of ${TEST_VARIABLES_FILE}"
+                    exit $retVal
+                fi
+                oc cluster-info
+                printf "\nconnected as openshift user ' $(oc whoami) '\n"
+                echo "since the oc login was successful, continuing."
+            else
+                echo "skipping OC login as per parameter --skip-oclogin"
+        fi
+    else
+        echo "we did not find yq, so not trying the oc login"
+fi
+
+
+
 #TODO: Make this optional so we are not creating/updating the virtualenv everytime we run a test
 VENV_ROOT=${currentpath}/venv
 #setup virtualenv
@@ -139,3 +275,19 @@ case "$(uname -s)" in
 esac
 
 ./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+
+# send test artifacts by email
+if ${EMAIL_REPORT}
+ then
+     tar cvzf rf_results.tar.gz ${TEST_ARTIFACT_DIR} &> /dev/null
+     size=$(du -k rf_results.tar.gz | cut -f1)
+     if [ "${size}" -gt 20000 ]
+        then
+            echo "Test results artifacts are too large for email"
+            rm rf_results.tar.gz
+            tar cvzf rf_results.tar.gz $(find ${TEST_ARTIFACT_DIR} -regex  '.*\(xml\|html\)$') &> /dev/null
+     fi
+     ./venv/bin/python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" \
+                        -v ${EMAIL_SERVER} -a "rf_results.tar.gz" -u  ${EMAIL_SERVER_USER}  -p  ${EMAIL_SERVER_PW} \
+                        -l ${EMAIL_SERVER_SSL} -d ${EMAIL_SERVER_UNSECURE}
+fi

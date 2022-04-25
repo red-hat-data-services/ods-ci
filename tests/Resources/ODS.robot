@@ -169,3 +169,13 @@ Wait Until Notification Email In Alertmanager ConfigMap Is
     [Arguments]    ${email}  ${timeout}=5 min
     Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Notification Email In Alertmanager ConfigMap Should Be    ${email}
+
+Get RHODS URL From OpenShift Using UI
+    [Documentation]    Capture and return rhods url from
+    ...     OpenShift console
+    Click Element     //button[@aria-label="Application launcher"]
+    Wait Until Element Is Visible    //a[@data-test="application-launcher-item"]
+    ${link_elements}  Get WebElements
+    ...     //a[@data-test="application-launcher-item" and starts-with(@href,'https://rhods')]
+    ${href}  Get Element Attribute    ${link_elements}    href
+    [Return]   ${href}

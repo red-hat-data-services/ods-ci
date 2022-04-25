@@ -6,4 +6,5 @@ Resource  JupyterHubSpawner.robot
 Resource  JupyterHubDashboard.robot
 Resource  JupyterLabLauncher.robot
 Resource  JupyterLabSidebar.robot
-
+Resource  PVCChange.resource
+Resource  HighAvailability.robot

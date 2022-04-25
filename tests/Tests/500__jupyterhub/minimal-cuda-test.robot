@@ -45,6 +45,13 @@ Verify Tensorflow Library Can See GPUs In Minimal CUDA
     ...     ODS-1143
     Verify Tensorflow Can See GPU    install=True
 
+Verify Cuda Image Have NVCC Installed
+    [Documentation]     Verifies NVCC Version in Minimal CUDA Image
+    [Tags]  Sanity
+    ...     ODS-483
+    ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
+    Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
+
 
 *** Keywords ***
 Verify CUDA Image Suite Setup

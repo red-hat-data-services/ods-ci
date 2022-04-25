@@ -42,7 +42,7 @@ Validate Anaconda License Key
     [Arguments]    ${license_validity}=${TRUE}
     Click Button    Connect
     IF    ${license_validity} == ${TRUE}
-        Wait Until Keyword Succeeds    50    1    Page Should Not Contain Element
+        Wait Until Keyword Succeeds    60    1    Page Should Not Contain Element
         ...    xpath://*/div[contains(@class, "bullseye")]
     ELSE IF    ${license_validity} == ${FALSE}
         Wait Until Keyword Succeeds    30    1    Check Connect Button Status    false

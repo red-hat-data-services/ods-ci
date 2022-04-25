@@ -5,6 +5,8 @@ Library  jupyter-helper.py
 Library  OperatingSystem
 Library  Screenshot
 Library  String
+Library  OpenShiftLibrary
+
 
 *** Variables ***
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
@@ -190,7 +192,7 @@ Clean Up User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
@@ -215,7 +217,7 @@ Delete Folder In User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
@@ -356,6 +358,7 @@ Verify Installed Library Version
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
     ${return_status} =    Set Variable    PASS
+    @{packages} =    Create List    Python    Boto3    Kafka-Python    Matplotlib    Scikit-learn    Pandas    Scipy    Numpy
     FOR  ${libString}  IN  @{libraries-to-check}
         # libString = LibName vX.Y -> libDetail= [libName, X.Y]
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
@@ -377,6 +380,12 @@ Check Versions In JupyterLab
               ${return_status} =    Set Variable    FAIL
             END
         END
+        Continue For Loop If  "${libDetail}[0]" not in ${packages}
+        Run Keyword If    "${libDetail}[0]" not in ${package_versions}
+        ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
+        IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
+             ${return_status} =    Set Variable    FAIL
+        END
     END
     [Return]  ${return_status}
 
@@ -397,3 +406,11 @@ Verify Package Is Not Installed In JupyterLab
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     ${output}   Split String     ${output}   \n\n
     Should Match  ${output[-1]}   ModuleNotFoundError: No module named '${package_name}'
+
+Get User Notebook PVC Name
+    [Documentation]   Returns notebook pod name for given username
+    ...    (e.g. for user ldap-admin10 it will be jupyterhub-nb-ldap-2dadmin10-pvc)
+    [Arguments]  ${username}
+    ${safe_username} =   Get Safe Username    ${username}
+    ${notebook_pod_name} =   Set Variable  jupyterhub-nb-${safe_username}-pvc
+    [Return]    ${notebook_pod_name}

@@ -6,9 +6,11 @@ Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
 Resource  LoginJupyterHub.robot
 Resource  JupyterLabSidebar.robot
 Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
+Library   ../../../../libs/Helpers.py
 Library   String
 Library   Collections
 Library   JupyterLibrary
+Library   OpenShiftLibrary
 
 
 *** Variables ***
@@ -155,19 +157,12 @@ Spawn Notebook With Arguments  # robocop: disable
                Add Spawner Environment Variable  ${key}  ${value}
             END
          END
-         Spawn Notebook
+         Spawn Notebook    ${spawner_timeout}
          Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
          ...    id:progress-bar  ${spawner_timeout}
          Wait For JupyterLab Splash Screen  timeout=30
          Maybe Close Popup
-         ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
-         Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
-         Open With JupyterLab Menu  File  New  Notebook
-         Sleep  1
-         Maybe Close Popup
-         Close Other JupyterLab Tabs
-         Maybe Close Popup
-         Sleep  1
+         Open New Notebook In Jupyterlab Menu
          Spawned Image Check    ${image}
          ${spawn_fail} =  Has Spawn Failed
          Exit For Loop If  ${spawn_fail} == False
@@ -356,6 +351,24 @@ Fetch Image Tooltip Info
     Click Element  //div[@class='jsp-app__header__title']
     [Return]  ${tmp_list}
 
+Handle Bad Gateway Page
+    [Documentation]    It reloads the JH page until Bad Gateway error page
+    ...                disappears. It is possible to control how many
+    ...                times to try refreshing using 'retries' argument
+    [Arguments]   ${retries}=10     ${retry_interval}=1s
+    Capture Page Screenshot    jh_badgateway_kw.png
+    FOR    ${counter}    IN RANGE    0    ${retries}+1
+        ${bg_present} =    Run Keyword And Return Status    Page Should Contain    Bad Gateway
+        IF    $bg_present == True
+            Reload Page
+            Sleep    ${retry_interval}
+        END
+        Exit For Loop If    $bg_present == False
+    END
+    IF    $bg_present == True
+        Fail    Bad Gateway error page appears
+    END
+
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
     [Arguments]    ${retries}=1    ${image}=s2i-generic-data-science-notebook    ${size}=Small    ${spawner_timeout}=600 seconds
@@ -365,3 +378,43 @@ Verify Image Can Be Spawned
     Spawn Notebook With Arguments    ${retries}    ${image}    ${size}
     ...    ${spawner_timeout}    ${gpus}    ${refresh}    &{envs}
     End Web Test
+
+Verify Library Version Is Greater Than
+    [Arguments]     ${library}      ${target}
+    ${ver} =  Run Cell And Get Output   !pip show ${library} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
+    ${comparison} =  GTE  ${ver}  ${target}
+    IF  ${comparison}==False
+        Run Keyword And Continue On Failure     FAIL    Library Version Is Smaller Than Expected
+    END
+
+Get List Of All Available Container Size
+    [Documentation]  This keyword capture the available sizes from JH spawner page
+    Wait Until Page Contains    Container size    timeout=30
+    ...    error=Container size selector is not present in JupyterHub Spawner
+    ${size}    Create List
+    Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
+    ${link_elements}   Get WebElements  xpath://*[@class="pf-c-select__menu-item-main"]
+    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
+          ${text}      Get Text    ${ext_link}
+          Append To List    ${size}     ${text}
+    END
+    [Return]    ${size}
+
+Get Previously Selected Notebook Image Details
+    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
+    ${user_name} =    Set Variable    jupyterhub-singleuser-profile-${safe_username}
+    ${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
+    ...    field_selector=metadata.name=${user_name}
+    @{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
+    [Return]    ${user_data}
+
+Open New Notebook In Jupyterlab Menu
+    [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu
+    ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
+    Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
+    Open With JupyterLab Menu  File  New  Notebook
+    Sleep  1
+    Maybe Close Popup
+    Close Other JupyterLab Tabs
+    Maybe Close Popup
+    Sleep  1

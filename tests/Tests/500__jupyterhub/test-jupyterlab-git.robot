@@ -3,6 +3,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource    ../../../venv/lib/python3.8/site-packages/JupyterLibrary/clients/jupyterlab/Shell.resource
 Library             OpenShiftCLI
 Library             DebugLibrary
 
@@ -15,7 +16,6 @@ ${REPO_URL}         ****
 ${DIR_NAME}         Python
 ${FILE_PATH}        Python/file.ipynb
 ${COMMIT_MSG}       commit msg2
-
 
 *** Test Cases ***
 Verify Pushing Project Changes Remote Repository
@@ -143,12 +143,14 @@ Simple Staging Not Clicked
 Set Staging Status
     [Documentation]    Sets the staging status
     [Arguments]    ${status}=INITIALLY_OFF
-    IF    "${status}"=="OFF" OR "${status}"=="ON"
+    IF    "${status}"=="OFF" or "${status}"=="ON"
         Open With JupyterLab Menu    Git    Simple staging
     ELSE
         ${curr_status}=    Run Keyword And Return Status    Simple Staging Not Clicked
         IF    "${curr_status}" == "False"
-            Sleep    2s
+            Sleep    1s
+            Run Keyword And Continue On Failure    Open With JupyterLab Menu    Git
+            Sleep    1s
             Open With JupyterLab Menu    Git    Simple staging
             Sleep    2s
         END

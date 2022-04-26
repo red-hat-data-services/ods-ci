@@ -9,7 +9,7 @@ Library             ../../../../libs/Helpers.py
 
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
-
+Test Teardown       Clean Up Server
 Force Tags          Smoke    Sanity    JupyterHub
 
 *** Variables ***
@@ -56,7 +56,7 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     Run Keyword Unless    ${res}    Fail
 
 
-Verify jupyterlab server pods are spawned in a custom namespace
+Verify Jupyterlab Server Pods Are Spawned An a Custom Namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)
     [Tags]    ODS-320
     ${pod_name} =    Get User Notebook Pod Name    ${TEST_USER.USERNAME}

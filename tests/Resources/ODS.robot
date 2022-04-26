@@ -142,6 +142,36 @@ RHODS Namespaces Should Not Exist
     Verify Project Does Not Exists  redhat-ods-applications
     Verify Project Does Not Exists  redhat-ods-operator
 
+Get Notification Email From Addon-Managed-Odh-Parameters Secret
+    [Documentation]    Gets email form addon-managed-odh-parameters secret
+    ${resp} =    Oc Get  kind=Secret  namespace=redhat-ods-operator  name=addon-managed-odh-parameters
+    ${resp} =  Evaluate  dict(${resp[0]["metadata"]["annotations"]["kubectl.kubernetes.io/last-applied-configuration"]})
+    [Return]  ${resp["stringData"]["notification-email"]}
+
+Notification Email In Alertmanager ConfigMap Should Be
+    [Documentation]    Check expected email is present in Alertmanager
+    [Arguments]        ${email_to_check}
+    ${resp} =    Run  oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.receivers[] | select(.name == "user-notifications") | .email_configs[0].to'
+    Should Be Equal As Strings    "${email_to_check}"    ${resp}
+
+Email In Addon-Managed-Odh-Parameters Secret Should Be
+    [Documentation]     Verifies the email is same with expected-email
+    [Arguments]     ${expected_email}
+    ${email_from_secret} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
+    Should Be Equal As Strings    ${expected_email}    ${email_from_secret}
+
+Wait Until Notification Email From Addon-Managed-Odh-Parameters Contains
+    [Documentation]     Wait unitl notification email is changed in Addon-Managed-Odh-Parameters
+    [Arguments]    ${email}  ${timeout}=5 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
+    ...    Email In Addon-Managed-Odh-Parameters Secret Should Be    ${email}
+
+Wait Until Notification Email In Alertmanager ConfigMap Is
+    [Documentation]     Wait unitl notification email is changed in Alertmanager ConfigMap
+    [Arguments]    ${email}  ${timeout}=5 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
+    ...    Notification Email In Alertmanager ConfigMap Should Be    ${email}
+
 Get RHODS URL From OpenShift Using UI
     [Documentation]    Capture and return rhods url from
     ...     OpenShift console
@@ -151,6 +181,7 @@ Get RHODS URL From OpenShift Using UI
     ...     //a[@data-test="application-launcher-item" and starts-with(@href,'https://rhods')]
     ${href}  Get Element Attribute    ${link_elements}    href
     [Return]   ${href}
+
 
 Verify RHODS Groups Config Map Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
@@ -170,3 +201,14 @@ Verify Default Access Groups Settings
         &{exp_values}=  Create Dictionary  admin_groups=rhods-admins  allowed_groups=rhods-users
         Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
     END
+
+Disable Access To Grafana Using OpenShift Port Forwarding
+    [Documentation]   Kill process running in background based on Id
+    [Arguments]  ${PROC}
+    Terminate Process   ${PROC}
+
+Enable Access To Grafana Using OpenShift Port Forwarding
+    [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
+    ${PROC} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
+    [Return]    ${PROC}
+

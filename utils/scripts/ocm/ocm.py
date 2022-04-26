@@ -735,7 +735,7 @@ class OpenshiftClusterManager():
 
         # Waiting 5 minutes to ensure all the cluster services are
         # up even after cluster is in ready state
-        time.sleep(300)
+        time.sleep(600)
 
     def install_rhods_addon(self):
         if not self.is_addon_installed():

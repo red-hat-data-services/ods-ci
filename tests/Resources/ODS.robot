@@ -149,3 +149,13 @@ Get RHODS URL From OpenShift Using UI
     ...     //a[@data-test="application-launcher-item" and starts-with(@href,'https://rhods')]
     ${href}  Get Element Attribute    ${link_elements}    href
     [Return]   ${href}
+
+Disable Access To Grafana Using OpenShift Port Forwarding
+    [Documentation]   Kill process running in background based on Id
+    [Arguments]  ${PROC}
+    Terminate Process   ${PROC}
+
+Enable Access To Grafana Using OpenShift Port Forwarding
+    [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
+    ${PROC} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
+    [Return]    ${PROC}

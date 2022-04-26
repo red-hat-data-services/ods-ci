@@ -3,7 +3,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource    ../../../venv/lib/python3.8/site-packages/JupyterLibrary/clients/jupyterlab/Shell.resource
+
 Library             OpenShiftCLI
 Library             DebugLibrary
 
@@ -12,9 +12,9 @@ Suite Teardown      End Web Test
 
 
 *** Variables ***
-${REPO_URL}         ****
-${DIR_NAME}         Python
-${FILE_PATH}        Python/file.ipynb
+${REPO_URL}         https://github.com/ods-qe-test/ODS-QE-Github-Test.git
+${DIR_NAME}         ODS-QE-Github-Test
+${FILE_PATH}        ODS-QE-Github-Test/test-file.ipynb
 ${COMMIT_MSG}       commit msg2
 
 *** Test Cases ***

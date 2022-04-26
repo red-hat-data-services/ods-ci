@@ -20,10 +20,10 @@ Go To Grafana Dashbord Search
     ...    Click Element    ${GRAFANA_SEARCH_BUTTON}
 
 Wait Until Grafana Page Is UP
-    [Arguments]  ${TIMEOUT}  ${RETRIES}=1
+    [Arguments]  ${RETRIES}  ${TIMEOUT}=1
     [Documentation]  Wait until grafana Page is up and running
-    FOR  ${i}   IN RANGE  ${TIMEOUT}
-        Sleep  ${RETRIES}   msg=Waiting until port forwarding is active
+    FOR  ${i}   IN RANGE  ${RETRIES}
+        Sleep  ${TIMEOUT}   msg=Waiting until port forwarding is active
         ${ret_code}  ${Output} =   Run And Return Rc And Output  GET http://localhost:3001/api/health
         Exit For Loop IF  ${ret_code} == 0
     END

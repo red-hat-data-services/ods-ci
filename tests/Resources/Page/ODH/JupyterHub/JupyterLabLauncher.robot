@@ -358,6 +358,7 @@ Verify Installed Library Version
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
     ${return_status} =    Set Variable    PASS
+    @{packages} =    Create List    Python    Boto3    Kafka-Python    Matplotlib    Scikit-learn    Pandas    Scipy    Numpy
     FOR  ${libString}  IN  @{libraries-to-check}
         # libString = LibName vX.Y -> libDetail= [libName, X.Y]
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
@@ -378,6 +379,12 @@ Check Versions In JupyterLab
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
+        END
+        Continue For Loop If  "${libDetail}[0]" not in ${packages}
+        Run Keyword If    "${libDetail}[0]" not in ${package_versions}
+        ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
+        IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
+             ${return_status} =    Set Variable    FAIL
         END
     END
     [Return]  ${return_status}

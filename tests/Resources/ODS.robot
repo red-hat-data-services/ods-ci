@@ -153,7 +153,6 @@ Get RHODS URL From OpenShift Using UI
 Disable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]   Kill process running in background based on Id
     [Arguments]  ${PROC}
-    Close Browser
     Terminate Process   ${PROC}
 
 Enable Access To Grafana Using OpenShift Port Forwarding

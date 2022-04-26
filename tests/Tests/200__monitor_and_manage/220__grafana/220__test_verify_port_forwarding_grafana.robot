@@ -4,11 +4,12 @@ Documentation   Verify that MT-SRE can connect to Grafana-dashboard using port-f
 ...             = Variables =
 ...             | PROC             | Required |        To store process id|
 
-Library        OperatingSystem
-Library        Process
-Resource       ../../Resources/Page/OCPDashboard/Monitoring/Grafana.robot
-Resource       ../../Resources/ODS.robot
-Suite Setup    Set Library Search Order  SeleniumLibrary
+Library          OperatingSystem
+Library          Process
+Resource         ../../../Resources/Page/OCPDashboard/Monitoring/Grafana.robot
+Resource         ../../../Resources/ODS.robot
+Suite Setup      Set Library Search Order  SeleniumLibrary
+Suite Teardown   Close Browser
 
 
 *** Variables ***
@@ -25,7 +26,7 @@ Verify That MT-SRE Can Connect To Grafana Using Port Forwarding
     # Enable Port Forwarding
     ${PROC} =  Enable Access To Grafana Using OpenShift Port Forwarding
     # Check if Grafna is UP and running
-    ${response} =   Wait Until Grafana Page Is UP  TIMEOUT=7
+    ${response} =   Wait Until Grafana Page Is UP  RETRIES=7
     Should Contain   ${response}     "database": "ok",
     # Open Browser
     Open Browser  http://localhost:3001  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

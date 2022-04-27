@@ -391,11 +391,11 @@ Set PVC Value In RHODS Dashboard
     ${version-check}    Is RHODS Version Greater Or Equal Than    1.10.0
     IF    ${version-check}==True
         Click Button  Save changes
-        Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
+        Wait Until Keyword Succeeds    30    1
         ...    Wait Until Page Contains    Settings changes saved.
     ELSE
         Press Keys    //input[@id="pvc-size-input"]    RETURN
-        Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
+        Wait Until Keyword Succeeds    30    1
         ...    Wait Until Page Contains    Cluster settings updated successfully.
     END
 

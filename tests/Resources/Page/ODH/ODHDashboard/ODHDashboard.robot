@@ -423,3 +423,10 @@ RHODS Notification Drawer Should Contain
     Click Element    xpath=//*[contains(@class,'notification-badge')]
     Page Should Contain Element
     ...    xpath=//*[contains(text(),'${message}')]
+
+RHODS Notification Drawer Should Not Contain
+    [Documentation]    Verifies RHODS Notifications does not contain given Message
+    [Arguments]     ${message}
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Page Should Not Contain  text=${message}
+    Click Element    xpath=//*[contains(@class,'notification-badge')]

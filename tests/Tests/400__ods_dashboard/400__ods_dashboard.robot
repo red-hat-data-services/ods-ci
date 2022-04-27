@@ -143,6 +143,15 @@ Verify Filters Are Working On Resources Page
     Filter By Application (Aka Povider) And Check Output
     Filter By Using More Than One Filter And Check Output
 
+Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
+    [Documentation]     Verifies that RHODS Notification Drawer doesn't contain "Notebook Images are building", if no build is running
+    [Tags]    Sanity
+    ...       ODS-307
+    ...       Tier1
+    Wait Until All Builds Are Complete  namespace=redhat-ods-applications
+    RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
+
+
 *** Keywords ***
 Verify JupyterHub Card CSS Style
     [Documentation]    Compare the some CSS properties of the Explore page

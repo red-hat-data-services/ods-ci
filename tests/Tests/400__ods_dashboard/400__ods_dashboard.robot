@@ -147,7 +147,8 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     [Documentation]     Verifies that RHODS Notification Drawer doesn't contain "Notebook Images are building", if no build is running
     [Tags]    Sanity
     ...       ODS-307
-    Wait Until All Builds Are Complete
+    ...       Tier1
+    Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
 

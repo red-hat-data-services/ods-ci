@@ -81,7 +81,8 @@ Wait Until Build Status Is
 
 Wait Until All Builds Are Complete
     [Documentation]     Waits until all the builds are in Complete State
-    ${builds_data} =  Oc Get  kind=Build  namespace=redhat-ods-applications
+    [Arguments]    ${namespace}
+    ${builds_data} =  Oc Get  kind=Build  namespace=${namespace}
     FOR    ${build_data}    IN    @{builds_data}
-        Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${build_data['metadata']['name']}  expected_status=Complete
+        Wait Until Build Status Is    namespace=${namespace}    build_name=${build_data['metadata']['name']}  expected_status=Complete
     END

@@ -11,6 +11,8 @@ Resource            ../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
 Resource            ../../tasks/Resources/RHODS_OLM/uninstall/oc_uninstall.robot
 Resource            ../../tasks/Resources/RHODS_OLM/config/cluster.robot
 
+Library  OpenShiftLibrary
+
 
 *** Variables ***
 ${USAGE_DATA_COLLECTION_DEFAULT_SEGMENT_PUBLIC_KEY}     KRUhoAIEpWlGuz4sWixae1vAXKKGlD5K
@@ -180,6 +182,26 @@ Get RHODS URL From OpenShift Using UI
     ${href}  Get Element Attribute    ${link_elements}    href
     [Return]   ${href}
 
+
+Verify RHODS Groups Config Map Contains Expected Values
+    [Documentation]    Verifies if the group contains the expected value
+    [Arguments]        &{exp_values}
+    ${configmap}=  Oc Get  kind=ConfigMap  namespace=redhat-ods-applications  name=rhods-groups-config
+    FOR    ${group}    IN    @{exp_values.keys()}
+        Should Be Equal As Strings  ${configmap[0]["data"]["${group}"]}   ${exp_values["${group}"]}
+    END
+
+Verify Default Access Groups Settings
+    [Documentation]     Verifies that ODS contains the expected default groups settings
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
+    IF    ${version_check} == True
+        &{exp_values}=  Create Dictionary  admin_groups=dedicated-admins  allowed_groups=system:authenticated
+        Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
+    ELSE
+        &{exp_values}=  Create Dictionary  admin_groups=rhods-admins  allowed_groups=rhods-users
+        Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
+    END
+
 Disable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]   Kill process running in background based on Id
     [Arguments]  ${PROC}
@@ -189,3 +211,4 @@ Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
     ${PROC} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
     [Return]    ${PROC}
+

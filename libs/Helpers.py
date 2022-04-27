@@ -3,6 +3,7 @@ from robotlibcore import keyword
 from utils.scripts.ocm.ocm import OpenshiftClusterManager
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
+from robot.api import logger, FatalError
 
 class Helpers:
     """Custom keywords written in Python"""
@@ -47,7 +48,9 @@ class Helpers:
     def install_rhoam_addon(self, cluster_name):
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
-        ocm_client.install_rhoam_addon(exit_on_failure=False)
+        result = ocm_client.install_rhoam_addon(exit_on_failure=False)
+        if not result:
+            raise FatalError("Something got wrong while installing RHOAM. Check the logs")
 
     @keyword
     def uninstall_rhoam_using_addon_flow(self, cluster_name):

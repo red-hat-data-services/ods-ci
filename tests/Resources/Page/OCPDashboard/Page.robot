@@ -46,10 +46,10 @@ Search Last Item Instance By Title in OpenShift Table
   [Arguments]  ${search_term}  ${namespace}=All Projects
   Select Project By Name    ${namespace}
   Wait Until Page Contains Element    xpath://input[@data-test='name-filter-input']
-  Wait Until Page Contains Element    xpath://a[contains(., "${search_term}")]
   Clear Element Text    xpath://input[@data-test='name-filter-input']
   Input Text    xpath://input[@data-test='name-filter-input']    ${search_term}
   Sleep  2
+  Wait Until Page Contains Element    xpath://a[contains(., "${search_term}")]
   Click Button    xpath://*/th[@data-label='Created']/button  # asc order
   Click Button    xpath://*/th[@data-label='Created']/button  # desc order
 
@@ -67,3 +67,8 @@ Delete Project By Name
   Input Text    //input[@data-test="project-name-input"]    ${project_name}
   Click Button  //button[@data-test="confirm-action"]
 
+Select Last Item Instance By Title In OpenShift Table
+    [Documentation]    Searches last item instance and clicks on it
+    [Arguments]    ${search_term}    ${namespace}=All Projects
+    Search Last Item Instance By Title In OpenShift Table    ${search_term}    ${namespace}
+    Click Link    xpath://a[contains(., "${search_term}")]

@@ -611,6 +611,24 @@ class OpenshiftClusterManager():
                       "type {}".format(self.idp_type))
             self.add_user_to_group()
 
+            time.sleep(10)
+
+            # Add this code as a workaround for IDP discovery issue
+            # Delete the idp and re-create it again
+            log.info("Deleting idp and re-create it again as a workaround for IDP discovery issue")
+            self.delete_user()
+            self.delete_idp()
+
+            time.sleep(10)
+
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            if ret is None:
+                log.info("Failed to add identity provider of "
+                      "type {}".format(self.idp_type))
+            self.add_user_to_group()
+
+
         elif (self.idp_type == "ldap"):
             ldap_yaml_file = (os.path.abspath(
                 os.path.dirname(__file__)) +
@@ -671,6 +689,21 @@ class OpenshiftClusterManager():
         ret = execute_command(cmd)
         if ret is None:
             log.info("Failed to add user {} to group "
+                  "{}".format(user, group))
+
+    def delete_user(self, user="", group="cluster-admins"):
+        """Deletes user"""
+
+        if user == "":
+            user = self.htpasswd_cluster_admin
+
+        cmd = ("ocm delete user {} --cluster {} "
+               "--group={}".format(user,
+                                   self.cluster_name, group))
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        if ret is None:
+            log.info("Failed to delete user {} of group "
                   "{}".format(user, group))
 
     def create_group(self, group_name):

@@ -24,7 +24,7 @@ Verify Pachyderm Can Be Installed And Pipeline Can Be Created
     Create Pachyderm AWS-Secret
     Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     pachyderm
     Wait Until Status Is Running
-    ${version}=     Get Pachyderm Sample Version
+    ${version}=     Get Pachd Version
     Go To RHODS Dashboard
     Verify Service Is Enabled    Pachyderm
     Launch JupyterHub Spawner From Dashboard
@@ -47,7 +47,7 @@ Wait Until Status Is Running
     [Documentation]     Checks if the status changes from Initializing to Running.
     Wait Until Keyword Succeeds     120     1       Element Text Should Be    //span[@data-test="status-text"]      Running
 
-Get Pachyderm Sample Version
+Get Pachd Version
     Click Element   //a[@data-test-operand-link="pachyderm-sample"]
     Wait Until Page Contains Element    (//dd[@data-test-selector="details-item-value__Version"])[1]
     ${version}=     Get Text        (//dd[@data-test-selector="details-item-value__Version"])[1]

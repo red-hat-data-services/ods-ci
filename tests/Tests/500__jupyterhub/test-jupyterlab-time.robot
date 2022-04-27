@@ -3,6 +3,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Library             ../../../../libs/Helpers.py
 Library             DateTime
 Library             OpenShiftCLI
 Library             DebugLibrary
@@ -15,10 +16,11 @@ Suite Teardown      End Web Test
 @{LIST_OF_IMAGES}       s2i-minimal-notebook    s2i-generic-data-science-notebook
 ...                     pytorch                 tensorflow    minimal-gpu
 
+${LIMIT_TIME} =    40
 
 *** Test Cases ***
 Average Time For Spawning
-    [Documentation]    Calculates avg time taken by server to start
+    [Documentation]    Verifies that average spawn time for all JupyterHub images is less than 40 seconds
     [Tags]    ODS-691
     ...       Tier2
     ${total_avg} =    Set Variable
@@ -37,6 +39,8 @@ Average Time For Spawning
     ${len} =    Get Length    ${LIST_OF_IMAGES}
     ${total_avg} =    Evaluate    ${total_avg} / ${len}
     Log    total_avg time to spawn ${total_avg}
+    ${result} =    lt    ${total_avg}.0    ${LIMIT_TIME}.0.0
+    Run Keyword Unless    ${result}    Fail
 
 
 *** Keywords ***

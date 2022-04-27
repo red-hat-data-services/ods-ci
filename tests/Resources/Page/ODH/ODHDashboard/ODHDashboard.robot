@@ -387,12 +387,17 @@ Set PVC Value In RHODS Dashboard
     [Arguments]    ${size}
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
-    Run Keywords
-    ...   Input Text    //input[@id="pvc-size-input"]    ${size}
-    ...  AND
-    ...    Press Keys    //input[@id="pvc-size-input"]    RETURN
-    Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
-    ...    Wait Until Page Contains    Cluster settings updated successfully.
+    Input Text    //input[@id="pvc-size-input"]    ${size}
+    ${version-check}    Is RHODS Version Greater Or Equal Than    1.9.0
+    IF    ${version-check}==True
+        Click Button  Save changes
+        Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
+        ...    Wait Until Page Contains    Settings changes saved.
+    ELSE
+        Press Keys    //input[@id="pvc-size-input"]    RETURN
+        Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
+        ...    Wait Until Page Contains    Cluster settings updated successfully.
+    END
 
 Restore PVC Value To Default Size
     [Documentation]    Set the PVC value to default
@@ -400,13 +405,17 @@ Restore PVC Value To Default Size
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
     Click Button    Restore Default
-    Run Keywords
-    ...    Wait Until Keyword Succeeds    30    1
-    ...    Wait Until Page Contains    Cluster settings updated successfully.
-    ...    AND
-    ...    Sleep    20s    msg=NOTE: This change will cause juypterhub to restart. It will take 30 seconds before juypterhub will be available. #robocop:disable
-    ...    AND
-    ...    Wait Until JH Deployment Is Ready
+    ${version-check}    Is RHODS Version Greater Or Equal Than    1.9.0
+    IF    ${version-check}==True
+          Click Button  Save changes
+          Wait Until Keyword Succeeds    30    1
+          ...    Wait Until Page Contains    Settings changes saved.
+    ELSE
+          Wait Until Keyword Succeeds    30    1
+          ...    Wait Until Page Contains    Cluster settings updated successfully.
+    END
+    Sleep    20s    msg=NOTE: This change will cause juypterhub to restart. It will take 30 seconds before juypterhub will be available. #robocop:disable
+    Wait Until JH Deployment Is Ready
 
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message

@@ -148,6 +148,8 @@ Set Staging Status
     ELSE
         ${curr_status}=    Run Keyword And Return Status    Simple Staging Not Clicked
         IF    "${curr_status}" == "False"
+            Sleep    1s
+            Run Keyword And Continue On Failure    Open With JupyterLab Menu    Git
             Sleep    2s
             Open With JupyterLab Menu    Git    Simple staging
             Sleep    2s

@@ -31,7 +31,7 @@ Verify Pushing Project Changes Remote Repository
     ...    ${FILE_PATH}
     ...    ${REPO_URL}
     ...    ${commit_message}
-    Clean Up Server
+    [Teardown]    Clean Up Server
 
 Verify Updating Project With Changes From Git Repository
     [Documentation]    Verifies that changes has been pulled successfully to local repository
@@ -62,7 +62,7 @@ Verify Updating Project With Changes From Git Repository
     Open New Notebook
     ${commit_msg2}=    Get Last Commit Message
     Should Not Be Equal    ${commit_msg2}    ${commit_msg1}
-    Clean Up Server
+    [Teardown]    Clean Up Server
 
 
 *** Keywords ***

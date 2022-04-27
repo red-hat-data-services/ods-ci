@@ -125,6 +125,7 @@ Run Cell And Check Output
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     Should Match  ${output}  ${expected_output}
+    [Return]    ${output}
 
 Run Cell And Get Output
     [Documentation]    Runs a code cell and returns its output
@@ -353,7 +354,7 @@ Verify Installed Library Version
     [Arguments]  ${lib}  ${ver}
     ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
     Run Keyword If  '${status}' == 'FAIL'  Log  "Expected ${lib} at version ${ver}, but ${value}"
-    [Return]    ${status}
+    [Return]    ${status}    ${value}
 
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
@@ -363,19 +364,19 @@ Check Versions In JupyterLab
         # libString = LibName vX.Y -> libDetail= [libName, X.Y]
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
         IF  "${libDetail}[0]" == "TensorFlow"
-            ${status} =  Verify Installed Library Version  tensorflow-gpu  ${libDetail}[1]
+            ${status}  ${value} =  Verify Installed Library Version  tensorflow-gpu  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
         ELSE IF  "${libDetail}[0]" == "PyTorch"
-            ${status} =  Verify Installed Library Version  torch  ${libDetail}[1]
+            ${status}  ${value} =  Verify Installed Library Version  torch  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
         ELSE IF  "${libDetail}[0]" == "Python"
             ${status} =  Python Version Check  ${libDetail}[1]
         ELSE
-            ${status} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
+            ${status}  ${value} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
@@ -414,3 +415,9 @@ Get User Notebook PVC Name
     ${safe_username} =   Get Safe Username    ${username}
     ${notebook_pod_name} =   Set Variable  jupyterhub-nb-${safe_username}-pvc
     [Return]    ${notebook_pod_name}
+
+Open New Notebook
+    [Documentation]    Opens one new jupyter notebook
+    Open With JupyterLab Menu    File    New    Notebook
+    Sleep    1
+    Maybe Close Popup

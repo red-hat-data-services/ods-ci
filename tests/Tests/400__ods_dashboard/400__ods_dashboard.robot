@@ -33,6 +33,10 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     Securing a deployed model using Red Hat OpenShift API Management
 @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
 ...                                     PerceptiLabs
+${RHOSAK_REAL_APPNAME}=         rhosak
+${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
+@{builds_to_be_deleted}  pytorch  tensorflow  minimal  cuda-s2i-thoth
+@{images}  PyTorch  TensorFlow  CUDA
 
 
 *** Test Cases ***
@@ -163,19 +167,17 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     [Documentation]     Verifies that Notifications are shown in RHODS Dashboard when Notebook builds haven't started
     [Tags]    Sanity
     ...       ODS-1347
-    ${builds_to_be_deleted}=  Create List  pytorch  tensorflow  minimal  cuda-s2i-thoth
-    Delete Multiple Builds  builds_to_be_deleted=${builds_to_be_deleted}
+    Delete Multiple Builds
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${last_cuda_build}
-    ${images}=  Create List  PyTorch  TensorFlow  CUDA
-    Verify Notification Saying Notebook Builds Not Started  images=${images}
-    Clear RHODS Notifications
+    Verify Notification Saying Notebook Builds Not Started
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${last_cuda_build}  expected_status=Complete
     Remove Values From List    ${images}  CUDA
-    ${minimal_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-minimal-gpu-cuda-11.4.2-notebook
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${minimal_cuda_build}
+    Verify Notification Saying Notebook Builds Not Started
     RHODS Notification Drawer Should Contain    message=Notebook images are building
-    Verify Notification Saying Notebook Builds Not Started  images=${images}
-    [Teardown]   Start Remaining Builds And Close Browser
+    RHODS Notification Drawer Should Not Contain    message=CUDA
+    ${minimal_cuda_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=minimal
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${minimal_cuda_build}
+    [Teardown]   Wait Until Remaining Builds Are Complete And Close Browser
 
 
 *** Keywords ***
@@ -323,25 +325,25 @@ Verify Anaconda Success Message Based On Version
 
 Delete Multiple Builds
     [Documentation]     Deletes Multiple Builds
-    [Arguments]     ${builds_to_be_deleted}
-    FOR    ${build}    IN    @{builds_to_be deleted}
+    FOR    ${build}    IN    @{builds_to_be_deleted}
         ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=${build}
         Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
     END
 
 Verify Notification Saying Notebook Builds Not Started
     [Documentation]     Verifies RHODS Notification Drawer Contains Names of Image Builds which have not started
-    [Arguments]     ${images}
+    Sleep    3min  reason=Wait for Notification
+    Reload Page
     RHODS Notification Drawer Should Contain    message=These notebook image builds have not started:
     FOR    ${image}    IN    @{images}
         RHODS Notification Drawer Should Contain    message=${image}
     END
 
-Start Remaining Builds And Close Browser
-    [Documentation]     Starts Remaining builds and closes browser
-    ${builds_to_be_created}=  Create List  s2i-pytorch-gpu-cuda-11.4.2-notebook  s2i-tensorflow-gpu-cuda-11.4.2-notebook
-    FOR    ${build_config}    IN    @{builds_to_be_created}
-        ${build_name}=  Start New Build    namespace=redhat-ods-applications    buildconfig=${build_config}
-        Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${build_name}  expected_status=Complete
-    END
+Wait Until Remaining Builds Are Complete And Close Browser
+    [Documentation]     Waits Until Remaining builds have Status as Complete and Closes Browser
+    Sleep    1min  reason=Wait for Pytorch and Tensorflow Builds to start
+    ${pytorch_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=pytorch
+    ${tensorflow_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=tensorflow
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${pytorch_build}  expected_status=Complete
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${tensorflow_build}  expected_status=Complete
     Dashboard Test Teardown

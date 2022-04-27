@@ -33,8 +33,6 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     Securing a deployed model using Red Hat OpenShift API Management
 @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
 ...                                     PerceptiLabs
-${RHOSAK_REAL_APPNAME}=         rhosak
-${RHOSAK_DISPLAYED_APPNAME}=    OpenShift Streams for Apache Kafka
 @{builds_to_be_deleted}  pytorch  tensorflow  minimal  cuda-s2i-thoth
 @{images}  PyTorch  TensorFlow  CUDA
 

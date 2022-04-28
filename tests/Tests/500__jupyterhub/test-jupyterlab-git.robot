@@ -3,10 +3,12 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource    ../../../venv/lib/python3.8/site-packages/JupyterLibrary/clients/jupyterlab/Shell.resource
 
 Library             OpenShiftCLI
 Library             DebugLibrary
 
+Test Teardown       Clean Up Server
 Suite Setup         Server Setup
 Suite Teardown      End Web Test
 
@@ -25,13 +27,13 @@ Verify Pushing Project Changes Remote Repository
     Set Staging Status
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
+    Run Keyword And Return Status    Open New Notebook
     Push Some Changes to Repo
     ...    ${GITHUB_USER.USERNAME}
     ...    ${GITHUB_USER.TOKEN}
     ...    ${FILE_PATH}
     ...    ${REPO_URL}
     ...    ${commit_message}
-    [Teardown]    Clean Up Server
 
 Verify Updating Project With Changes From Git Repository
     [Documentation]    Verifies that changes has been pulled successfully to local repository
@@ -62,7 +64,6 @@ Verify Updating Project With Changes From Git Repository
     Open New Notebook
     ${commit_msg2}=    Get Last Commit Message
     Should Not Be Equal    ${commit_msg2}    ${commit_msg1}
-    [Teardown]    Clean Up Server
 
 
 *** Keywords ***
@@ -75,10 +76,13 @@ Server Setup
 Push Some Changes To Repo
     [Documentation]    Make some changes in ${filepath} and push to remote repo
     [Arguments]    ${github username}    ${token}    ${filepath}    ${githublink}    ${commitmsgg}
+#    Debug
     Clone Git Repository In Current Folder    ${githublink}
     Close All JupyterLab Tabs
     Open Folder or File    ${filepath}
-    Enter Text In File And Save    code=print("Hi Hello")
+    Open With JupyterLab Menu    Edit    Select All Cells
+    Open With JupyterLab Menu    Edit    Delete Cells
+    Enter Text In File And Save    code=print("Hi Hello ${commitmsgg}")
     Set Staging Status    status=ON
     Commit Changes    commit_message=${commitmsgg}    name=${GITHUB_USER.USERNAME}    email_id=${GITHUB_USER.EMAIL}
     Push Changes To Remote    github_username=${GITHUB_USER.USERNAME}    token=${GITHUB_USER.TOKEN}
@@ -117,7 +121,6 @@ Commit Changes
     Input Text    //input[@class='jp-mod-styled'][1]    ${name}
     Input Text    //input[@class='jp-mod-styled'][2]    ${email_id}
     Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]    #click on submit
-    Sleep    4s
 
 Push Changes To Remote
     [Documentation]    Push changes to remote directory
@@ -127,7 +130,7 @@ Push Changes To Remote
     Input Text    //input[@class='jp-mod-styled'][1]    ${github_username}
     Input Text    //input[@class='jp-mod-styled'][2]    ${token}
     Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]
-    Sleep    3s
+    Sleep    4s
 
 Get Last Commit Message
     [Documentation]    Return the last cpmmit message

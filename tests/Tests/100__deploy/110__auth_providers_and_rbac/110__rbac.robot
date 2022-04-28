@@ -1,7 +1,6 @@
 *** Settings ***
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Library             OpenShiftCLI
 
 Suite Setup         Set Library Search Order  SeleniumLibrary
 Suite Teardown      End Web Test

@@ -9,8 +9,6 @@ Delete Pipeline And Stop JupyterLab Server
     Run Cell And Check For Errors   !pachctl delete pipeline edges
     Clean Up Server
     Stop JupyterLab Notebook Server
-    Handle Start My Server
-    Maybe Handle Server Not Running Page
 
 Uninstall Pachyderm Operator
     [Documentation]    Uninstall pachyderm operator and its related component.

@@ -22,7 +22,7 @@ ${NAMESPACE}    redhat-ods-applications
 ${S_SIZE}       15
 ${SIZE_CODE}    import subprocess;
 ...    int(subprocess.check_output(['df','-h', '/opt/app-root/src']).split()[8].decode('utf-8')[:-1])
-@{NS_SIZE}      0    abc    6.5   -12
+@{NS_SIZE}      0    6.5   -1
 
 
 *** Test Cases ***

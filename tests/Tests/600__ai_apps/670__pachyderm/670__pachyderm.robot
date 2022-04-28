@@ -79,7 +79,6 @@ Create Command In Multiple Lines
 
 Create Pachyderm Pipeline Using JupyterLab
     [Arguments]     ${version}
-    Run Cell And Check For Errors   !git clone https://github.com/Jooho/pachyderm-operator-manifests
     Run Cell And Check For Errors   !curl -o /tmp/pachctl.tar.gz -L https://github.com/pachyderm/pachyderm/releases/download/v${version}/pachctl_${version}_linux_amd64.tar.gz && tar -xvf /tmp/pachctl.tar.gz -C /tmp && cp /tmp/pachctl_${version}_linux_amd64/pachctl /opt/app-root/bin/
     Run Cell And Check For Errors   !echo '{"pachd_address":"pachd.pachyderm.svc.cluster.local:30650"}' | pachctl config set context pachyderm --overwrite
     Run Cell And Check For Errors   !pachctl config set active-context pachyderm

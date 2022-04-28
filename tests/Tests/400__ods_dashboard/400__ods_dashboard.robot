@@ -591,26 +591,8 @@ Check GPU Resources
         Page Should Contain Element    //a[@href=${gpu_re_link}[1]]
     END
 
-Select Checkbox Using Id
-    [Documentation]    Select check-box
-    [Arguments]    ${id}
-    Select Checkbox    id=${id}
-    sleep    1s
-
-Deselect Checkbox Using Id
-    [Documentation]    Deselect check-box
-    [Arguments]    ${id}
-    Unselect Checkbox    id=${id}
-    sleep    1s
-
-Verify The Resources Are Filtered
-    [Documentation]    verified the items, ${index_of_text} is index text appear on resource 0 = title,1=provider,2=tag(like documentation,tutorial)
-    [Arguments]    ${selector}    ${list_of_items}    ${index_of_text}=0
-    @{items}=    Get WebElements    //div[@class="${selector}"]
-    FOR    ${item}    IN    @{items}
-        @{texts}=    Split String    ${item.text}    \n
-        List Should Contain Value    ${list_of_items}    ${texts}[${index_of_text}]
-    END
+Wait Until Resource Page Is Loaded
+    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
 
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled

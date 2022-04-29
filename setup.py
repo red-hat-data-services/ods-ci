@@ -31,7 +31,8 @@ setup(
         "robotframework-requests",
         "escapism",
         "semver>=2,<3",
-        "yq"
+        "yq",
+        "jinja2"
     ],
     zip_safe=True,
     include_package_data=True,

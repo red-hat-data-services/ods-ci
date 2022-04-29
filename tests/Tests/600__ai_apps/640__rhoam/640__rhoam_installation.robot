@@ -39,7 +39,7 @@ RHOAM Install Suite Setup
     ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
     Set Suite Variable     ${CLUSTER_NAME}
     Install Rhoam Addon    cluster_name=${CLUSTER_NAME}
-    Wait Until RHOAM Installation Is Completed    retries=35   retries_interval=2min
+    Wait Until RHOAM Installation Is Completed    retries=40   retries_interval=5min
     Verify RHOAM Is Enabled IN RHODS Dashboard
 
 RHOAM Suite Teardown

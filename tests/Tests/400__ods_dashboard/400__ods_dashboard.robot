@@ -168,10 +168,12 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     Delete Multiple Builds
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
     Verify Notification Saying Notebook Builds Not Started
+    Clear Dashboard Notifications
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${last_cuda_build}  expected_status=Complete
     Remove Values From List    ${images}  CUDA
-    Verify Notification Saying Notebook Builds Not Started
     RHODS Notification Drawer Should Contain    message=Notebook images are building
+    Sleep  20s  reason=Wait For Minimal Cuda Build to Start and Notifications
+    Verify Notification Saying Notebook Builds Not Started
     RHODS Notification Drawer Should Not Contain    message=CUDA
     ${minimal_cuda_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=minimal
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${minimal_cuda_build}
@@ -330,7 +332,7 @@ Delete Multiple Builds
 
 Verify Notification Saying Notebook Builds Not Started
     [Documentation]     Verifies RHODS Notification Drawer Contains Names of Image Builds which have not started
-    Sleep    3min  reason=Wait for Notification
+    Sleep    10s  reason=Wait For Notifications
     Reload Page
     RHODS Notification Drawer Should Contain    message=These notebook image builds have not started:
     FOR    ${image}    IN    @{images}
@@ -339,7 +341,6 @@ Verify Notification Saying Notebook Builds Not Started
 
 Wait Until Remaining Builds Are Complete And Close Browser
     [Documentation]     Waits Until Remaining builds have Status as Complete and Closes Browser
-    Sleep    1min  reason=Wait for Pytorch and Tensorflow Builds to start
     ${pytorch_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=pytorch
     ${tensorflow_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=tensorflow
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${pytorch_build}  expected_status=Complete

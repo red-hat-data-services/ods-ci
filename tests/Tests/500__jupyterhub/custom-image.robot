@@ -88,8 +88,8 @@ Test Bad Image Import
     Apply Custom ImageStream And Check Status
     Get ImageStream Metadata And Check Name
     Launch JupyterHub Spawner From Dashboard
-    Element Should Not Be Enabled  xpath://input[contains(@id, "${IMAGESTREAM_NAME}")]
-    #Run Keyword And Continue On Failure  Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Default
+    # Imgs imported with a broken/wrong url will be disabled in the spawner
+    Element Should Be Disabled  xpath://input[contains(@id, "${IMAGESTREAM_NAME}")]
     ${IMG_URL}=  Set Variable  ${OG_URL}
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Reset Image Name

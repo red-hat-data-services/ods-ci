@@ -7,6 +7,7 @@ Library             SeleniumLibrary
 *** Keywords ***
 Uninstall AIKIT Operator
     [Documentation]    Uninstall intel aikit operator and it's realted component
+    Clean Up Server
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
     Delete Tabname Instance For Installed Operator    ${intel_aikit_operator_name}    AIKitContainer

@@ -36,6 +36,8 @@ Verify Inetl AIKIT Operator Can Be Installed Using OpenShift Console
    Go To RHODS Dashboard
    Verify Service Is Enabled          ${intel_aikit_container_name}
    Verify JupyterHub Can Spawn AIKIT Notebook
+   Clone Git Repository      https://github.com/sclorg/nodejs-ex.git
+   Verify File Present In The File Explorer      nodejs-ex
    [Teardown]   Uninstall AIKIT Operator
 
 ***Keywords ***

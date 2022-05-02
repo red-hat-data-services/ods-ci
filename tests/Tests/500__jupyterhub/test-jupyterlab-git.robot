@@ -3,7 +3,6 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource    ../../../venv/lib/python3.8/site-packages/JupyterLibrary/clients/jupyterlab/Shell.resource
 
 Library             OpenShiftCLI
 Library             DebugLibrary
@@ -76,7 +75,6 @@ Server Setup
 Push Some Changes To Repo
     [Documentation]    Make some changes in ${filepath} and push to remote repo
     [Arguments]    ${github username}    ${token}    ${filepath}    ${githublink}    ${commitmsgg}
-#    Debug
     Clone Git Repository In Current Folder    ${githublink}
     Close All JupyterLab Tabs
     Open Folder or File    ${filepath}
@@ -117,7 +115,7 @@ Commit Changes
     Input Text    xpath=//*[@id="jp-git-sessions"]/div/form/input[1]    ${commit_message}
     Sleep    2s
     Click Button    xpath=//*[@id="jp-git-sessions"]/div/form/input[2]    #click on commit button
-    Wait Until Page Contains    Who is committing?
+    Wait Until Page Contains    Who is committing?    timeout=10s
     Input Text    //input[@class='jp-mod-styled'][1]    ${name}
     Input Text    //input[@class='jp-mod-styled'][2]    ${email_id}
     Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]    #click on submit

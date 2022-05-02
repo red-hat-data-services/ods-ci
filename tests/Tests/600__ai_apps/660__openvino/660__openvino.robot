@@ -27,6 +27,7 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    ...      ODS-675
    ...      ODS-495
    ...      ODS-1236
+   ...      ODS-651
    [Documentation]  This Test Case Installed Openvino operator in Openshift cluster
    ...               and Check and Launch AIKIT notebook image from RHODS dashboard
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
@@ -35,6 +36,8 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    Go To RHODS Dashboard
    Verify Service Is Enabled          ${openvino_container_name}
    Verify JupyterHub Can Spawn Openvino Notebook
+   Clone Git Repository      https://github.com/sclorg/nodejs-ex.git
+   Verify File Present In The File Explorer      nodejs-ex
    [Teardown]   Uninstall Openvino Operator
 
 

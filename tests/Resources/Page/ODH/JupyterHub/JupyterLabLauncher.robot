@@ -12,6 +12,7 @@ Library  OpenShiftLibrary
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
 ${JL_TABBAR_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[contains(@class,"lm-mod-current p-mod-current")]
 ${JL_TABBAR_NOT_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[not(contains(@class,"lm-mod-current p-mod-current"))]
+${JL_FILES_CONTENT_XPATH} = //div[contains(@class,"jp-FileBrowser-listing")]
 ${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
 ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
@@ -261,6 +262,11 @@ Clone Git Repository And Run
   Sleep  1
   JupyterLab Code Cell Error Output Should Not Be Visible
 
+Verify File Present In The File Explorer
+  [Documentation]   It checks if the file presnt in the file explorer on sidebar of jupyterlab.
+  [Arguments]       ${filename}
+  Wait Until Page Contains Element      ${JL_FILES_CONTENT_XPATH}/ul/li[contains(@title,"Name: ${filename}")]
+
 Handle Kernel Restarts
   #This section has to be slightly reworked still. Sometimes the pop-up is not in div[8] but in div[7]
 
@@ -414,3 +420,5 @@ Get User Notebook PVC Name
     ${safe_username} =   Get Safe Username    ${username}
     ${notebook_pod_name} =   Set Variable  jupyterhub-nb-${safe_username}-pvc
     [Return]    ${notebook_pod_name}
+
+

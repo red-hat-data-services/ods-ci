@@ -34,6 +34,8 @@ ${CUSTOM_IMAGE_LAST_ROW_NAME}=  tr[last()]/td[1]
 ${CUSTOM_IMAGE_LAST_ROW_VERSION}=  tr[last()]/td[2]
 ${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
 ${CUSTOM_IMAGE_REMOVE_BTN}=  button[@id="delete-package-software-button"]
+${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//button
+${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
 
 
 *** Keywords ***
@@ -423,6 +425,7 @@ RHODS Notification Drawer Should Contain
     Click Element    xpath=//*[contains(@class,'notification-badge')]
     Page Should Contain Element
     ...    xpath=//*[contains(text(),'${message}')]
+    Close Notification Drawer
 
 Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
@@ -574,4 +577,11 @@ Disable Image
     ${is_enabled} =  # Need to find a check
     IF  ${is_enabled}==True
         Click Element  xpath://td[.="${image_name}"]/..//input
+    END
+
+Close Notification Drawer
+    [Documentation]
+    ${closed}=  Run Keyword And Return Status  Page Should Contain Element  ${NOTIFICATION_DRAWER_CLOSED}
+    IF  ${closed}==False
+        Click Element  ${NOTIFICATION_DRAWER_CLOSE_BTN}
     END

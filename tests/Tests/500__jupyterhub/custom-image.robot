@@ -30,6 +30,7 @@ Verify Admin User Can Access Custom Notebook Settings
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
+    Sleep  2
     Open Notebook Images Page
 
 Verify Custom Image Can Be Added
@@ -87,7 +88,8 @@ Test Bad Image Import
     Apply Custom ImageStream And Check Status
     Get ImageStream Metadata And Check Name
     Launch JupyterHub Spawner From Dashboard
-    Run Keyword And Continue On Failure  Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Default
+    Element Should Not Be Enabled  xpath://input[contains(@id, "${IMAGESTREAM_NAME}")]
+    #Run Keyword And Continue On Failure  Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Default
     ${IMG_URL}=  Set Variable  ${OG_URL}
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Reset Image Name

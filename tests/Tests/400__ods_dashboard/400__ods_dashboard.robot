@@ -126,7 +126,8 @@ Verify Logged In Users Are Displayed In The Dashboard
     Verify Username Displayed On RHODS Dashboard    ${TEST_USER.USERNAME}
 
 Search and Verify GPU Items Appears In Resources Page
-    [Tags]    Tier1
+    [Tags]    Sanity
+    ...       Tier1
     ...       ODS-1226
     Search Items In Resources Section    GPU
     Check GPU Resources

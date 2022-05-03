@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../Resources/RHOSi.resource
 Library          JupyterLibrary
 Library          OpenShiftCLI
 Library          OpenShiftLibrary
@@ -107,6 +108,7 @@ Test Bad Image Import
 Custom Notebook Settings Suite Setup
     [Documentation]    Navigates to the Custom Notebook Settings page
     ...    in the RHODS dashboard.
+    RHOSi Setup
     Set Library Search Order  SeleniumLibrary
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}

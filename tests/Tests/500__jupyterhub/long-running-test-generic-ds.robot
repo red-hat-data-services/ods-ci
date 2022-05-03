@@ -24,8 +24,7 @@ Launch JupyterLab
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
   Fix Spawner Status
-  &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
-  Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{S3-credentials}
+  Spawn Notebooks And Set S3 Credentials    image=s2i-generic-data-science-notebook
 
 Long Running Test Case
   Run Repo and Clean  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb

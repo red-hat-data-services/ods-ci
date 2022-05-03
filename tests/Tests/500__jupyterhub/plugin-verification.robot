@@ -6,6 +6,7 @@ Library         String
 Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource        ../../Resources/RHOSi.resource
 Suite Setup     Plugin Testing Suite Setup
 Suite Teardown   Plugin Testing Suite Teardown
 Force Tags       JupyterHub
@@ -38,7 +39,8 @@ Test User Notebook Plugin in JupyterLab
 
 *** Keywords ***
 Plugin Testing Suite Setup
-  Set Library Search Order  SeleniumLibrary
+   Set Library Search Order  SeleniumLibrary
+   RHOSi Setup
    ${notebook_pod_name}         Get User Notebook Pod Name         ${TEST_USER.USERNAME}
    Set Suite Variable     ${notebook_pod_name}
 

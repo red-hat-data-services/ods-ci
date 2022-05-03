@@ -35,8 +35,7 @@ Can Login to Jupyterhub
 Can Spawn Notebook
   [Tags]  Sanity  ODS-902  ODS-904
   Fix Spawner Status
-  &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
-  Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{S3-credentials}
+  Spawn Notebooks And Set S3 Credentials    image=s2i-generic-data-science-notebook
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity  ODS-910  ODS-911  ODS-921  ODS-924  ODS-929  ODS-931  ODS-333

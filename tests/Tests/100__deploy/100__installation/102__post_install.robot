@@ -4,12 +4,18 @@ Documentation       Post install test cases that mainly verify OCP resources and
 Library             String
 Library             OperatingSystem
 Library             OpenShiftCLI
+Library             OpenShiftLibrary
+Library             ../../../../libs/Helpers.py
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 Resource            ../../../Resources/ODS.robot
 
+Suite Setup         RHOSi Setup
+
+Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
+Resource            ../../../Resources/Common.robot
 
 *** Test Cases ***
 Verify Dashboard Deployment
@@ -166,12 +172,26 @@ Verify RHODS Release Version Number
     ${version} =  Get RHODS Version
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 
+Verify Users Can Update Notification Email After Installing RHODS With The AddOn Flow
+    [Documentation]    Vrifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
+    [Tags]    Tier2
+    ...       ODS-673
+    ...       KnownIssues
+    ...       Deployment-AddOnFlow
+    ${email_to_change} =    Set Variable    dummyemail1@redhat.com
+    ${cluster_id} =    Get Cluster ID
+    ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
+    ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
+    Update Notification Email Address    ${cluster_name}    ${email_to_change}
+    Wait Until Notification Email From Addon-Managed-Odh-Parameters Contains  email=${email_to_change}
+    Wait Until Notification Email In Alertmanager ConfigMap Is    ${email_to_change}
+    [Teardown]    Update Notification Email Address    ${cluster_name}    ${current_email}
+
 Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
     [Tags]    Tier2
     ...       ODS-586
     Verify Errors In Jupyterhub Logs
-
 
 *** Keywords ***
 Verify Cuda Builds Are Completed

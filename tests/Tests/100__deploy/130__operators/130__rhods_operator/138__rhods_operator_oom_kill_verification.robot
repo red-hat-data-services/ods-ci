@@ -13,6 +13,8 @@ Resource            ../../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.reso
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../../Resources/Common.robot
 
+Suite Setup         RHOSi Setup
+
 
 *** Variables ***
 ${NAMESPACE}    redhat-ods-operator

@@ -13,6 +13,11 @@ Library        OperatingSystem
 Library        String
 Library        OpenShiftCLI
 
+Resource       ../../../Resources/RHOSi.resource
+
+Suite Setup     RHOSi Setup
+
+
 
 *** Variables ***
 ${NAMESPACE}            redhat-ods-monitoring
@@ -33,7 +38,7 @@ PagerDuty Dummy Secret Verification
 
 *** Keywords ***
 Get PagerDuty Key From Alertmanager ConfigMap
-     [Documentation]    Get Service Key From Alertmanager ConfigMap   
+     [Documentation]    Get Service Key From Alertmanager ConfigMap
      ${c_data}   OpenShiftCLI.Get  kind=ConfigMap  namespace=${NAMESPACE}   field_selector=metadata.name==${CONFIGMAP_NAME}
      ${a_data}    Set Variable     ${c_data[0]['data']['alertmanager.yml']}
      ${match_list}      Get Regexp Matches   ${a_data}     service_key(:).*

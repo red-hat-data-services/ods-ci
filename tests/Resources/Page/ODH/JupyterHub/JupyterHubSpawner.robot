@@ -64,9 +64,14 @@ Set Number Of Required GPUs
 
 Fetch Max Number Of GPUs In Spawner Page
     [Documentation]    Returns the maximum number of GPUs a user can request from the spawner
-    Click Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]
-    ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
-    ${maxGPUs} =    Convert To Integer    ${maxGPUs}
+    ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
+    IF  ${gpu_visible}==True
+       Click Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]
+       ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
+       ${maxGPUs} =    Convert To Integer    ${maxGPUs}
+    ELSE
+       ${maxGPUs} =    Set Variable    ${0}
+    END
     [Return]    ${maxGPUs}
 
 Add Spawner Environment Variable
@@ -361,6 +366,15 @@ Fetch Image Tooltip Info
     Click Element  //div[@class='jsp-app__header__title']
     [Return]  ${tmp_list}
 
+Spawn Notebooks And Set S3 Credentials
+    [Documentation]     Spawn a jupyter notebook server and set the env variables
+    ...                 to connect with AWS S3
+    [Arguments]     ${image}=s2i-generic-data-science-notebook
+    Set Log Level    NONE
+    &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
+    Spawn Notebook With Arguments  image=${image}  envs=&{S3-credentials}
+    Set Log Level    INFO
+
 Handle Bad Gateway Page
     [Documentation]    It reloads the JH page until Bad Gateway error page
     ...                disappears. It is possible to control how many
@@ -396,6 +410,19 @@ Verify Library Version Is Greater Than
     IF  ${comparison}==False
         Run Keyword And Continue On Failure     FAIL    Library Version Is Smaller Than Expected
     END
+
+Get List Of All Available Container Size
+    [Documentation]  This keyword capture the available sizes from JH spawner page
+    Wait Until Page Contains    Container size    timeout=30
+    ...    error=Container size selector is not present in JupyterHub Spawner
+    ${size}    Create List
+    Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
+    ${link_elements}   Get WebElements  xpath://*[@class="pf-c-select__menu-item-main"]
+    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
+          ${text}      Get Text    ${ext_link}
+          Append To List    ${size}     ${text}
+    END
+    [Return]    ${size}
 
 Get Previously Selected Notebook Image Details
     ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}

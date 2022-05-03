@@ -15,6 +15,7 @@ Library             Process
 Library             SeleniumLibrary
 Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../Resources/RHOSi.resource
 
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown
@@ -52,6 +53,7 @@ Verify Custom Spwaned Notebook Size
 Dashboard Test Setup
     [Documentation]    Open browser and load RHODS dashboard
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load

@@ -3,6 +3,7 @@ Force Tags       Smoke  Sanity    JupyterHub
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../Resources/RHOSi.resource
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Special User Testing Suite Setup
@@ -35,6 +36,7 @@ Test Special Usernames
 *** Keywords ***
 Special User Testing Suite Setup
   Set Library Search Order  SeleniumLibrary
+  RHOSi Setup
 
 Login Verify Logout
     [Arguments]  ${username}  ${password}  ${auth}

@@ -20,7 +20,7 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     How to install Python packages on your notebook server              How to update notebook server settings
 ...                                     How to use data from Amazon S3 buckets                              How to view installed packages on your notebook server
 ...                                     JupyterHub
-@{EXPECTED_ITEMS_FOR_APPLICATION}       Create List                                                         by Anaconda Commercial Edition
+@{EXPECTED_ITEMS_FOR_APPLICATION}       Create List                                                         by Anaconda Professional
 @{EXPECTED_ITEMS_FOR_RESOURCE_TYPE}     Create List                                                         Tutorial
 @{EXPECTED_ITEMS_FOR_PROVIDER_TYPE}     Create List                                                         Connecting to Red Hat OpenShift Streams for Apache Kafka
 ...                                     Creating a Jupyter notebook                                         Deploying a sample Python application using Flask and OpenShift
@@ -98,7 +98,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME}
     Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
     Capture Page Screenshot    after_revalidation.png
-    [Teardown]    Remove Anaconda Commercial Edition Component
+    [Teardown]    Remove Anaconda Professional Component
 
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
@@ -245,10 +245,10 @@ Filter Resources By Status "Enabled" And Check Output
 
 Filter By Application (Aka Povider) And Check Output
     [Documentation]    Filter by application (aka provider)
-    Select Checkbox Using Id    Anaconda Commercial Edition--check-box
+    Select Checkbox Using Id    Anaconda Professional--check-box
     Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
     ...    list_of_items=${EXPECTED_ITEMS_FOR_APPLICATION}    index_of_text=1
-    Deselect Checkbox Using Id    id=Anaconda Commercial Edition--check-box
+    Deselect Checkbox Using Id    id=Anaconda Professional--check-box
 
 Filter By Resource Type And Check Output
     [Documentation]    Filter by resource type

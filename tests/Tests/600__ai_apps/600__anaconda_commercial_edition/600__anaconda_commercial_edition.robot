@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation   Test integration with Anaconda Commerical Edition ISV
+Documentation   Test integration with Anaconda ISV
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/OCPDashboard/Page.robot
@@ -11,7 +11,11 @@ Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
+<<<<<<< HEAD
 Suite Setup     Anaconda Professional Suite Setup
+=======
+Suite Setup     Anaconda Suite Setup
+>>>>>>> 11a6190 (Add test to update Anaconda Professional from Anaconda Commercial Edition)
 
 
 *** Test Cases ***
@@ -23,12 +27,21 @@ Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Pag
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
+<<<<<<< HEAD
   Verify Service Is Available In The Explore Page    Anaconda Professional
   Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Professional
   ${status}=   Run Keyword And Return Status
   ...               Verify Service Provides "Enable" Button In The Explore Page    Anaconda Professional
   Run Keyword If   ${status} == ${False}   Run Keywords
   ...              Verify Service Is Enabled      Anaconda Professional
+=======
+  Verify Service Is Available In The Explore Page Based On Version
+  Verify Service Provides "Get Started" Button In The Explore Page Based On Version
+  ${status}=   Run Keyword And Return Status
+  ...               Verify Service Provides "Enable" Button In The Explore Page Based On Version
+  Run Keyword If   ${status} == ${False}   Run Keywords
+  ...              Verify Service Is Enabled Based On Version
+>>>>>>> 11a6190 (Add test to update Anaconda Professional from Anaconda Commercial Edition)
   ...              AND
   ...              FAIL   Anaconda Professional does not have a "Enable" button
   ...                     in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
@@ -47,7 +60,11 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
+<<<<<<< HEAD
   Page Should Not Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Professional"]
+=======
+  Verify Anaconda Card Not Present Based On Version
+>>>>>>> 11a6190 (Add test to update Anaconda Professional from Anaconda Commercial Edition)
 
 Verify User Is Able to Activate Anaconda Professional
   [Tags]  Tier2
@@ -64,7 +81,11 @@ Verify User Is Able to Activate Anaconda Professional
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_present.png
+<<<<<<< HEAD
   Page Should Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Professional"]
+=======
+  Verify Anaconda Card Present Based On Version
+>>>>>>> 11a6190 (Add test to update Anaconda Professional from Anaconda Commercial Edition)
   Go To  ${OCP_CONSOLE_URL}
   Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
   Maybe Skip Tour
@@ -76,8 +97,13 @@ Verify User Is Able to Activate Anaconda Professional
   Go To  ${ODH_DASHBOARD_URL}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Launch JupyterHub Spawner From Dashboard
+<<<<<<< HEAD
   Wait Until Page Contains Element  xpath://input[@name="Anaconda Professional"]
   Wait Until Element Is Enabled    xpath://input[@name="Anaconda Professional"]   timeout=10
+=======
+  Verify Anaconda Element Present Based On Version
+  Verify Anaconda Element Enabled Based On Version
+>>>>>>> 11a6190 (Add test to update Anaconda Professional from Anaconda Commercial Edition)
   Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
   Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${TOKEN_VAL_SUCCESS_MSG}
   Capture Page Screenshot  anaconda_token_val_cell.png
@@ -89,11 +115,19 @@ Verify User Is Able to Activate Anaconda Professional
   Verify Library Version Is Greater Than  notebook    6.4.1
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
+<<<<<<< HEAD
   Wait Until Page Contains Element  xpath://input[@name='Anaconda Professional']  timeout=15
   [Teardown]    Remove Anaconda Professional Component
 
 *** Keywords ***
 Anaconda Professional Suite Setup
+=======
+  Verify Anaconda Element Present Based On Version
+  [Teardown]    Remove Anaconda Commercial Edition Component
+
+*** Keywords ***
+Anaconda Suite Setup
+>>>>>>> 11a6190 (Add test to update Anaconda Professional from Anaconda Commercial Edition)
   [Documentation]  Setup for ACE test suite
   Set Library Search Order  SeleniumLibrary
   RHOSi Setup

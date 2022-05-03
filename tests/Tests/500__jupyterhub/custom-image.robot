@@ -8,6 +8,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
 Library          JupyterLibrary
 Library          OpenShiftCLI
 Library          OpenShiftLibrary
+Suite Setup      Custom Notebook Settings Suite Setup
 Suite Teardown   End Web Test
 Force Tags       JupyterHub
 
@@ -26,23 +27,22 @@ ${IMAGESTREAM_NAME}=
 
 *** Test Cases ***
 Verify Admin User Can Access Custom Notebook Settings
-    Set Library Search Order  SeleniumLibrary
-    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
-    ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
-    Sleep  2
-    Open Notebook Images Page
+    [Documentation]    Verifies an admin user can reach the custom notebook
+    ...    settings page.
+    [Tags]    Sanity    Tier1
+    ...       ODS-
+    Pass Execution    Passing tests, as suite setup ensures page can be reached
 
 Verify Custom Image Can Be Added
     [Documentation]    Imports the custom image via UI
     ...                Then loads the spawner and tries using the custom img
-    [Tags]    Tier2
+    [Tags]    Sanity    Tier1
     ...       ODS-1208
-    Apply Custom ImageStream And Check Status
+    Create Custom Image
     Get ImageStream Metadata And Check Name
-    Verify Image Name  ${IMG_NAME}
-    Verify Image Description  ${IMG_NAME}  ${IMG_DESCRIPTION}
-    Verify User  ${IMG_NAME}  ${TEST_USER.USERNAME}
+    Verify Custom Image Is Listed  ${IMG_NAME}
+    Verify Custom Image Description  ${IMG_NAME}  ${IMG_DESCRIPTION}
+    Verify Custom Image Owner  ${IMG_NAME}  ${TEST_USER.USERNAME}
     Launch JupyterHub Spawner From Dashboard
 
     # These keywords need to be reworked to function here
@@ -58,7 +58,9 @@ Verify Custom Image Can Be Added
 
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
-    Apply Custom ImageStream And Check Status
+    [Tags]    Sanity    Tier1
+    ...       ODS-
+    Create Custom Image
     Sleep  1
     Import New Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
@@ -70,22 +72,26 @@ Test Duplicate Image
 
 Test Bad Image URL
     [Documentation]  Test adding an image with a bad repo URL (should fail)
+    [Tags]    Sanity    Tier1
+    ...       ODS-
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  quay.io/RandomName/RandomImage:v1.2.3
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
-    Apply Custom ImageStream And Check Status
+    Create Custom Image
     RHODS Notification Drawer Should Contain  Unable to add notebook image ${IMG_NAME}
     ${IMG_URL}=  Set Variable  ${OG_URL}
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Reset Image Name
-    # No image created, teardown not needed
 
 Test Bad Image Import
-    [Documentation]  Import a broken image and confirm it cannot spawn
+    [Documentation]  Import a broken image and confirm it is disabled
+    ...    in the JH spawner page
+    [Tags]    Sanity    Tier1
+    ...       ODS-
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  randomstring
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
-    Apply Custom ImageStream And Check Status
+    Create Custom Image
     Get ImageStream Metadata And Check Name
     Launch JupyterHub Spawner From Dashboard
     # Imgs imported with a broken/wrong url will be disabled in the spawner
@@ -93,20 +99,39 @@ Test Bad Image Import
     ${IMG_URL}=  Set Variable  ${OG_URL}
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Reset Image Name
+    [Teardown]    Custom Image Teardown    cleanup=False
 
 
 *** Keywords ***
+
+Custom Notebook Settings Suite Setup
+    [Documentation]    Navigates to the Custom Notebook Settings page
+    ...    in the RHODS dashboard.
+    Set Library Search Order  SeleniumLibrary
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
+    Sleep  2
+    Open Notebook Images Page
+
 Custom Image Teardown
     [Documentation]    Closes the JL server and deletes the ImageStream
-    Clean Up Server
-    Stop JupyterLab Notebook Server
+    [Arguments]    ${cleanup}=True
+    IF  ${cleanup}==True
+        Server Cleanup
+    END
     Go To  ${ODH_DASHBOARD_URL}
     Open Notebook Images Page
     Sleep  1
     Delete Image  ${IMG_NAME}
     Reset Image Name
 
-Apply Custom ImageStream And Check Status
+Server Cleanup
+    [Documentation]  helper keyword to clean up JL server
+    Clean Up Server
+    Stop JupyterLab Notebook Server
+
+Create Custom Image
     [Documentation]    Imports a custom ImageStream via UI and checks the status
     ${curr_date} =  Get Time  year month day hour min sec
     ${curr_date} =  Catenate  SEPARATOR=  @{curr_date}
@@ -115,10 +140,8 @@ Apply Custom ImageStream And Check Status
     ${IMG_NAME} =  Catenate  ${IMG_NAME}  ${curr_date}
     Set Global Variable  ${IMG_NAME}  ${IMG_NAME}
 
-    ${apply_result} =    Run Keyword And Return Status    Import New Image
-    ...    ${IMG_URL}     ${IMG_NAME}    ${IMG_DESCRIPTION}
-    ...    software=${IMG_SOFTWARE}
-    ...    packages=${IMG_PACKAGES}
+    Import New Image    ${IMG_URL}     ${IMG_NAME}    ${IMG_DESCRIPTION}
+    ...    software=${IMG_SOFTWARE}    packages=${IMG_PACKAGES}
 
 Get ImageStream Metadata And Check Name
     [Documentation]    Gets the metadata of an ImageStream and checks name of the image

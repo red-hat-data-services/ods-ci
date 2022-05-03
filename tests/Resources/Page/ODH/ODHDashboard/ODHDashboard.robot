@@ -531,7 +531,7 @@ Collapse Image Details
         Click Button  xpath://td[.="${image_name}"]/../td[1]//button
     END
 
-Verify Image Description
+Verify Custom Image Description
     [Documentation]
     [Arguments]  ${image_name}  ${expected_description}
     ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="Description"][.="${expected_description}"]
@@ -542,7 +542,7 @@ Verify Image Description
     END
     [Return]  ${exists}
 
-Verify Image Name
+Verify Custom Image Is Listed
     [Documentation]
     [Arguments]  ${image_name}
     ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]
@@ -552,7 +552,7 @@ Verify Image Name
     END
     [Return]  ${exists}
 
-Verify User
+Verify Custom Image Owner
     [Documentation]
     [Arguments]  ${image_name}  ${expected_user}
     ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="User"][.="${expected_user}"]

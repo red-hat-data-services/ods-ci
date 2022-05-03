@@ -443,11 +443,12 @@ Open Notebook Images Page
     Wait Until Page Contains    Notebook image settings
     Page Should Contain    Notebook image settings
 
-Import New Image
-    [Documentation]  software and packages should be lists of lists
-    [Arguments]  ${repo}  ${name}  ${description}  ${software}  ${packages}
+Import New Custom Image
+    [Documentation]    Opens the Custom Image import view and imports an image
+    ...    Software and Packages should be passed as dictionaries
+    [Arguments]    ${repo}    ${name}    ${description}    ${software}    ${packages}
     Sleep  1
-    Open Image Import Popup
+    Open Custom Image Import Popup
     Input Text    xpath://input[@id="notebook-image-repository-input"]    ${repo}
     Input Text    xpath://input[@id="notebook-image-name-input"]    ${name}
     Input Text    xpath://input[@id="notebook-image-description-input"]    ${description}
@@ -455,8 +456,8 @@ Import New Image
     Add Packages To Custom Image    ${packages}
     Click Element    xpath://button[.="Import"]
 
-Open Image Import Popup
-    [Documentation]
+Open Custom Image Import Popup
+    [Documentation]    Opens the Custom Image import view, using the appropriate button
     ${first_image} =  Run Keyword And Return Status  Page Should Contain Element  xpath://button[.="Import image"]
     IF  ${first_image}==True
         Click Element  xpath://button[.="Import image"]
@@ -465,10 +466,9 @@ Open Image Import Popup
     END
     Wait Until Page Contains    Import Notebook images
 
-#Take first for loop out
 Add Softwares To Custom Image
-    [Documentation]
-    [Arguments]  @{software}
+    [Documentation]    Loops through a dictionary to add software to the custom img metadata
+    [Arguments]    @{software}
     Click Element  xpath://button/span[.="Software"]
     FOR  ${sublist}  IN  @{software}
         FOR  ${element}  IN  @{sublist}
@@ -481,10 +481,9 @@ Add Softwares To Custom Image
         END
     END
 
-#Take first for loop out
 Add Packages To Custom Image
-    [Documentation]
-    [Arguments]  @{packages}
+    [Documentation]    Loops through a dictionary to add packages to the custom img metadata
+    [Arguments]    @{packages}
     Click Element  xpath://button/span[.="Packages"]
     FOR  ${sublist}  IN  @{packages}
         FOR  ${element}  IN  @{sublist}
@@ -498,73 +497,79 @@ Add Packages To Custom Image
     END
 
 Remove Software From Custom Image
-    [Documentation]
-    [Arguments]  ${software_name}
+    [Documentation]    Removes specific software from a custom image's metadata
+    ...    Assuming the edit view of said image is already open
+    [Arguments]    ${software_name}
     Click Element  xpath://button/span[.="Software"]
     Click Button  xpath://td[.="${software_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
 
 Remove Package From Custom Image
-    [Documentation]
-    [Arguments]  ${package_name}
+    [Documentation]    Removes specific package from a custom image's metadata
+    ...    Assuming the edit view of said image is already open
+    [Arguments]    ${package_name}
     Click Element  xpath://button/span[.="Packages"]
     Click Button  xpath://td[.="${package_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
 
-Delete Image
+Delete Custom Image
 # Need to check if image is REALLY deleted
-    [Documentation]
-    [Arguments]  ${image_name}
+    [Documentation]    Deletes a custom image through the dashboard UI. 
+    ...    Needs an additional check on removed ImageStream
+    [Arguments]    ${image_name}
     Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
     Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-delete-button"]
     Wait Until Page Contains  Do you wish to permanently delete ${image_name}?
     Click Button  xpath://button[.="Delete"]
 
-Open Edit Menu For Image
-    [Documentation]
-    [Arguments]  ${image_name}
+Open Edit Menu For Custom Image
+    [Documentation]    Opens the edit view for a specific custom image
+    [Arguments]    ${image_name}
     Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
     Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-edit-button"]
     Wait Until Page Contains  Delete Notebook Image
 
-Expand Image Details
-    [Documentation]
-    [Arguments]  ${image_name}
+Expand Custom Image Details
+    [Documentation]    Expands a custom image's row in the dashboard UI
+    [Arguments]    ${image_name}
     ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
     IF  ${is_expanded}==False
         Click Button  xpath://td[.="${image_name}"]/../td[1]//button
     END
 
-Collapse Image Details
-    [Documentation]
-    [Arguments]  ${image_name}
+Collapse Custom Image Details
+    [Documentation]    Collapses a custom image's row in the dashboard UI
+    [Arguments]    ${image_name}
     ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
     IF  ${is_expanded}==True
         Click Button  xpath://td[.="${image_name}"]/../td[1]//button
     END
 
 Verify Custom Image Description
-    [Documentation]
-    [Arguments]  ${image_name}  ${expected_description}
+    [Documentation]    Verifies that the description shown in the dashboard UI
+    ...    matches the given one
+    [Arguments]    ${image_name}    ${expected_description}
     ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="Description"][.="${expected_description}"]
     IF  ${exists}==False
         ${desc} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="Description"]
         Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
         FAIL
     END
-    [Return]  ${exists}
+    [Return]    ${exists}
 
 Verify Custom Image Is Listed
-    [Documentation]
-    [Arguments]  ${image_name}
+    [Documentation]    Verifies that the custom image is displayed in the dashboard
+    ...    UI with the correct name
+    [Arguments]    ${image_name}
     ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]
     IF  ${exists}==False
         Log  ${image_name} not visible in page
         FAIL
     END
-    [Return]  ${exists}
+    [Return]    ${exists}
 
 Verify Custom Image Owner
-    [Documentation]
-    [Arguments]  ${image_name}  ${expected_user}
+    [Documentation]    Verifies that the user listed for an image in the dahsboard
+    ...    UI matches the given one
+    [Arguments]    ${image_name}    ${expected_user}
     ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="User"][.="${expected_user}"]
     IF  ${exists}==False
         ${user} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="User"]
@@ -573,24 +578,24 @@ Verify Custom Image Owner
     END
     [Return]  ${exists}
 
-Enable Image
-    [Documentation]
-    [Arguments]  ${image_name}
+Enable Custom Image
+    [Documentation]    Enables a custom image (i.e. displayed in JH) [WIP]
+    [Arguments]    ${image_name}
     ${is_enabled} =  # Need to find a check
     IF  ${is_enabled}==False
         Click Element  xpath://td[.="${image_name}"]/..//input
     END
 
-Disable Image
-    [Documentation]
-    [Arguments]  ${image_name}
+Disable Custom Image
+    [Documentation]    Disables a custom image (i.e. not displayed in JH) [WIP]
+    [Arguments]    ${image_name}
     ${is_enabled} =  # Need to find a check
     IF  ${is_enabled}==True
         Click Element  xpath://td[.="${image_name}"]/..//input
     END
 
 Close Notification Drawer
-    [Documentation]
+    [Documentation]    Closes the dashboard notification drawer, if it is open
     ${closed}=  Run Keyword And Return Status  Page Should Contain Element  ${NOTIFICATION_DRAWER_CLOSED}
     IF  ${closed}==False
         Click Element  ${NOTIFICATION_DRAWER_CLOSE_BTN}

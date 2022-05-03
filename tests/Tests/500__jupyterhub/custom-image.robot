@@ -64,12 +64,12 @@ Test Duplicate Image
     Sleep  1
     Create Custom Image
     Sleep  1
-    Import New Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
+    Import New Custom Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
     RHODS Notification Drawer Should Contain  Unable to add notebook image ${IMG_NAME}
     Sleep  1
-    Delete Image  ${IMG_NAME}
+    Delete Custom Image  ${IMG_NAME}
     Reset Image Name
 
 Test Bad Image URL
@@ -125,7 +125,7 @@ Custom Image Teardown
     Go To  ${ODH_DASHBOARD_URL}
     Open Notebook Images Page
     Sleep  1
-    Delete Image  ${IMG_NAME}
+    Delete Custom Image  ${IMG_NAME}
     Reset Image Name
 
 Server Cleanup
@@ -134,7 +134,7 @@ Server Cleanup
     Stop JupyterLab Notebook Server
 
 Create Custom Image
-    [Documentation]    Imports a custom ImageStream via UI and checks the status
+    [Documentation]    Imports a custom ImageStream via UI
     ${curr_date} =  Get Time  year month day hour min sec
     ${curr_date} =  Catenate  SEPARATOR=  @{curr_date}
 
@@ -142,7 +142,7 @@ Create Custom Image
     ${IMG_NAME} =  Catenate  ${IMG_NAME}  ${curr_date}
     Set Global Variable  ${IMG_NAME}  ${IMG_NAME}
 
-    Import New Image    ${IMG_URL}     ${IMG_NAME}    ${IMG_DESCRIPTION}
+    Import New Custom Image    ${IMG_URL}     ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}    packages=${IMG_PACKAGES}
 
 Get ImageStream Metadata And Check Name
@@ -158,5 +158,6 @@ Get ImageStream Metadata And Check Name
     ${IMAGESTREAM_NAME} =   Set Global Variable    ${IMAGESTREAM_NAME}
 
 Reset Image Name
+    [Documentation]    Helper to reset the global variable img name to default value
     ${IMG_NAME} =  Set Variable  custom-test-image
     Set Global Variable  ${IMG_NAME}  ${IMG_NAME}

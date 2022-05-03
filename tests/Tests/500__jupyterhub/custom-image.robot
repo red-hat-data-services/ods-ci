@@ -60,6 +60,7 @@ Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
     [Tags]    Sanity    Tier1
     ...       ODS-
+    Sleep  1
     Create Custom Image
     Sleep  1
     Import New Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
@@ -98,7 +99,6 @@ Test Bad Image Import
     Element Should Be Disabled  xpath://input[contains(@id, "${IMAGESTREAM_NAME}")]
     ${IMG_URL}=  Set Variable  ${OG_URL}
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
-    Reset Image Name
     [Teardown]    Custom Image Teardown    cleanup=False
 
 

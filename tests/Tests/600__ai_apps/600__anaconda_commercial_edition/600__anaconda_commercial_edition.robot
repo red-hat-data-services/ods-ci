@@ -15,7 +15,7 @@ Suite Setup     Anaconda Suite Setup
 
 
 *** Test Cases ***
-Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabled Page
+Verify Anaconda Is Available In RHODS Dashboard Explore/Enabled Page
   [Documentation]  Tests if ACE and its Activation button are present in Explore page.
   ...              If the button is not there, it checks if ACE is already enabled
   [Tags]  Smoke  Sanity
@@ -28,12 +28,12 @@ Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabl
   ${status}=   Run Keyword And Return Status
   ...               Verify Service Provides "Enable" Button In The Explore Page Based On Version
   Run Keyword If   ${status} == ${False}   Run Keywords
-  ...              Verify Service Is Enabled Based On Version
+  ...              Verify Anaconda Service Is Enabled Based On Version
   ...              AND
-  ...              FAIL   Anaconda Commercial Edition does not have a "Enable" button
+  ...              FAIL   Anaconda does not have a "Enable" button
   ...                     in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
 
-Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
+Verify Anaconda Fails Activation When Key Is Invalid
   [Documentation]  Checks that if user inserts an invalid key,
   ...              the Anaconda CE validation fails as expected
   [Tags]  Tier2
@@ -49,7 +49,7 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
   Verify Anaconda Card Not Present Based On Version
 
-Verify User Is Able to Activate Anaconda Commercial Edition
+Verify User Is Able to Activate Anaconda
   [Tags]  Tier2
   ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082
   ...     KnownIssues
@@ -90,7 +90,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
   Verify Anaconda Element Present Based On Version
-  [Teardown]    Remove Anaconda Commercial Edition Component
+  [Teardown]    Remove Anaconda Component
 
 *** Keywords ***
 Anaconda Suite Setup

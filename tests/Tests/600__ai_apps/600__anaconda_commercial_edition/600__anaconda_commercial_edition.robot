@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation   Test integration with Anaconda ISV
+Documentation   Test integration with Anaconda Commerical Edition ISV
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/OCPDashboard/Page.robot
@@ -15,7 +15,7 @@ Suite Setup     Anaconda Suite Setup
 
 
 *** Test Cases ***
-Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabled Page
+Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Page
   [Documentation]  Tests if ACE and its Activation button are present in Explore page.
   ...              If the button is not there, it checks if ACE is already enabled
   [Tags]  Smoke  Sanity

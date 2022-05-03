@@ -8,7 +8,8 @@ Library             JupyterLibrary
 
 *** Variables ***
 ${ANACONDA_APPNAME}=            anaconda-ce
-${ANACONDA_DISPLAYED_NAME}=     Anaconda Professional
+${ANACONDA_DISPLAYED_NAME}=     Anaconda Commercial Edition
+${ANACONDA_DISPLAYED_NAME_LATEST}=    Anaconda Professional
 ${ANACONDA_KEY_IN}=             Anaconda CE Key
 ${INVALID_KEY}=                 abcdef-invalidkey
 ${ERROR_MSG}=                   error\nValidation failed\nError attempting to validate. Please check your entries.
@@ -71,7 +72,7 @@ Check Anaconda CE Image Build Status
     ...    ELSE
     ...    Should Be Equal    ${ace_build_status}    ${target_status}
 
-Remove Anaconda Professional Component
+Remove Anaconda Component
     [Documentation]    Teardown for ACE test suite
     Remove Anaconda Components For Validation
     Delete BuildConfig Using Name    redhat-ods-applications    s2i-minimal-notebook-anaconda
@@ -157,7 +158,7 @@ Verify Service Provides "Enable" Button In The Explore Page Based On Version
     Verify Service Provides "Enable" Button In The Explore Page     Anaconda Professional
   END
 
-Verify Service Is Enabled Based On Version
+Verify Anaconda Service Is Enabled Based On Version
   [Documentation]   Checks service is enabled based on version.
   ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
   IF  ${version-check}==False

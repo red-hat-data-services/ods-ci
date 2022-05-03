@@ -86,7 +86,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible
-    Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
+    Verify Anaconda Service Is Enabled Based On Version
     Close All Browsers
     Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
@@ -96,9 +96,13 @@ Verify License Of Disabled Cards Can Be Re-validated
     Insert Anaconda License Key    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Validate Anaconda License Key
     Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME}
-    Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
+    Verify Anaconda Service Is Enabled Based On Version
     Capture Page Screenshot    after_revalidation.png
+<<<<<<< HEAD
     [Teardown]    Remove Anaconda Professional Component
+=======
+    [Teardown]    Remove Anaconda Component
+>>>>>>> 33de412 (Merge branch 'name_change' of github.com:risusing/ods-ci into name_change)
 
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
@@ -273,4 +277,13 @@ Filter By Using More Than One Filter And Check Output
     ...    list_of_items=${EXPECTED_ITEMS_FOR_COMBINATIONS}
     FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
         Deselect Checkbox Using Id    id=${id}
+    END
+
+Verify Anaconda Success Message Based On Version
+    [Documentaion]  Checks Anaconda success message based on version
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
+    IF  ${version-check}==False
+        Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME}
+    ELSE
+        Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME_LATEST}
     END

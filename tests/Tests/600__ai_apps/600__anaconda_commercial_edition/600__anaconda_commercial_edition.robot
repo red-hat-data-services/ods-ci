@@ -19,7 +19,11 @@ Suite Setup     Anaconda Suite Setup
 
 
 *** Test Cases ***
+<<<<<<< HEAD
 Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Page
+=======
+Verify Anaconda Is Available In RHODS Dashboard Explore/Enabled Page
+>>>>>>> 33de412 (Merge branch 'name_change' of github.com:risusing/ods-ci into name_change)
   [Documentation]  Tests if ACE and its Activation button are present in Explore page.
   ...              If the button is not there, it checks if ACE is already enabled
   [Tags]  Smoke  Sanity
@@ -40,6 +44,7 @@ Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Pag
   ${status}=   Run Keyword And Return Status
   ...               Verify Service Provides "Enable" Button In The Explore Page Based On Version
   Run Keyword If   ${status} == ${False}   Run Keywords
+<<<<<<< HEAD
   ...              Verify Service Is Enabled Based On Version
 >>>>>>> 11a6190 (Add test to update Anaconda Professional from Anaconda Commercial Edition)
   ...              AND
@@ -47,6 +52,14 @@ Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Pag
   ...                     in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
 
 Verify Anaconda Professional Fails Activation When Key Is Invalid
+=======
+  ...              Verify Anaconda Service Is Enabled Based On Version
+  ...              AND
+  ...              FAIL   Anaconda does not have a "Enable" button
+  ...                     in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
+
+Verify Anaconda Fails Activation When Key Is Invalid
+>>>>>>> 33de412 (Merge branch 'name_change' of github.com:risusing/ods-ci into name_change)
   [Documentation]  Checks that if user inserts an invalid key,
   ...              the Anaconda CE validation fails as expected
   [Tags]  Tier2
@@ -66,7 +79,11 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
   Verify Anaconda Card Not Present Based On Version
 >>>>>>> 11a6190 (Add test to update Anaconda Professional from Anaconda Commercial Edition)
 
+<<<<<<< HEAD
 Verify User Is Able to Activate Anaconda Professional
+=======
+Verify User Is Able to Activate Anaconda
+>>>>>>> 33de412 (Merge branch 'name_change' of github.com:risusing/ods-ci into name_change)
   [Tags]  Tier2
   ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082
   ...     KnownIssues
@@ -123,7 +140,7 @@ Verify User Is Able to Activate Anaconda Professional
 Anaconda Professional Suite Setup
 =======
   Verify Anaconda Element Present Based On Version
-  [Teardown]    Remove Anaconda Commercial Edition Component
+  [Teardown]    Remove Anaconda Component
 
 *** Keywords ***
 Anaconda Suite Setup

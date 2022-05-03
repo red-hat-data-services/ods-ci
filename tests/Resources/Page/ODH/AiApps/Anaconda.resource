@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Keyword suites to interact with Anaconda Commercial Edition
+Documentation       Keyword suites to interact with Anaconda Professional
 
 Resource            ../../../Page/LoginPage.robot
 Library             SeleniumLibrary
@@ -8,7 +8,7 @@ Library             JupyterLibrary
 
 *** Variables ***
 ${ANACONDA_APPNAME}=            anaconda-ce
-${ANACONDA_DISPLAYED_NAME}=     Anaconda Commercial Edition
+${ANACONDA_DISPLAYED_NAME}=     Anaconda Professional
 ${ANACONDA_KEY_IN}=             Anaconda CE Key
 ${INVALID_KEY}=                 abcdef-invalidkey
 ${ERROR_MSG}=                   error\nValidation failed\nError attempting to validate. Please check your entries.
@@ -21,7 +21,7 @@ Enable Anaconda
     [Documentation]    Performs Anaconda activation
     [Arguments]    ${license_key}    ${license_validity}=${TRUE}
     Menu.Navigate To Page    Applications    Explore
-    Wait Until Page Contains    Anaconda Commercial Edition    timeout=30
+    Wait Until Page Contains    Anaconda Professional    timeout=30
     Click Element    xpath://*[@id='${ANACONDA_APPNAME}']
     Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}    timeout=10
     ...    error=${ANACONDA_APPNAME} does not have sidebar with information in the Explore page of ODS Dashboard
@@ -71,7 +71,7 @@ Check Anaconda CE Image Build Status
     ...    ELSE
     ...    Should Be Equal    ${ace_build_status}    ${target_status}
 
-Remove Anaconda Commercial Edition Component
+Remove Anaconda Professional Component
     [Documentation]    Teardown for ACE test suite
     Close All Browsers
     Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result

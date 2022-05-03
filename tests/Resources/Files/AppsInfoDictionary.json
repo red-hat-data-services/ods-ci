@@ -355,7 +355,7 @@
             }
      },
      "starburst": {
-          "badges": ["Partner managed", "Beta"],
+          "badges": ["Partner managed"],
           "provider": "by Starburst",
           "title": "Starburst Galaxy",
           "description": "Starburst Galaxy is a fully managed service to run high-performance queries across your various data sources using SQL.",
@@ -368,17 +368,12 @@
                       "matching": ""
                 },
                 "1": {
-                      "text": "signing up for beta access.",
-                      "url": "https://www.starburst.io/platform/starburst-galaxy/",
-                      "matching": ""
-                },
-                "2": {
                       "text": "Starburst Galaxy",
                       "url": "https://docs.starburst.io/starburst-galaxy/",
                       "matching": ""
                 },
-                "3": {
-                      "text": "signing up for beta access",
+                "2": {
+                      "text": "here",
                       "url": "https://www.starburst.io/platform/starburst-galaxy/",
                       "matching": ""
                 }

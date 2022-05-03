@@ -31,14 +31,14 @@ Verify Admin User Can Access Custom Notebook Settings
     [Documentation]    Verifies an admin user can reach the custom notebook
     ...    settings page.
     [Tags]    Sanity    Tier1
-    ...       ODS-
+    ...       ODS-1366
     Pass Execution    Passing tests, as suite setup ensures page can be reached
 
 Verify Custom Image Can Be Added
     [Documentation]    Imports the custom image via UI
     ...                Then loads the spawner and tries using the custom img
     [Tags]    Sanity    Tier1
-    ...       ODS-1208
+    ...       ODS-1208    ODS-1365
     Create Custom Image
     Get ImageStream Metadata And Check Name
     Verify Custom Image Is Listed  ${IMG_NAME}
@@ -60,7 +60,7 @@ Verify Custom Image Can Be Added
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
     [Tags]    Sanity    Tier1
-    ...       ODS-
+    ...       ODS-1368
     Sleep  1
     Create Custom Image
     Sleep  1
@@ -75,7 +75,7 @@ Test Duplicate Image
 Test Bad Image URL
     [Documentation]  Test adding an image with a bad repo URL (should fail)
     [Tags]    Sanity    Tier1
-    ...       ODS-
+    ...       ODS-1367
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  quay.io/RandomName/RandomImage:v1.2.3
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
@@ -89,7 +89,7 @@ Test Bad Image Import
     [Documentation]  Import a broken image and confirm it is disabled
     ...    in the JH spawner page
     [Tags]    Sanity    Tier1
-    ...       ODS-
+    ...       ODS-1364
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  randomstring
     Set Global Variable  ${IMG_URL}  ${IMG_URL}

@@ -7,6 +7,7 @@ Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource        ../../../Resources/Page/ODH/AiApps/Anaconda.resource
+Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
@@ -95,6 +96,4 @@ Verify User Is Able to Activate Anaconda Commercial Edition
 Anaconda Commercial Edition Suite Setup
   [Documentation]  Setup for ACE test suite
   Set Library Search Order  SeleniumLibrary
-
-
-
+  RHOSi Setup

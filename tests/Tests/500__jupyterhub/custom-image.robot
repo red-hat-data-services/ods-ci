@@ -5,8 +5,10 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../Resources/RHOSi.resource
 Library          JupyterLibrary
 Library          OpenShiftCLI
+Suite Setup      RHOSi Setup
 Suite Teardown   Custom Image Teardown
 Force Tags       JupyterHub
 

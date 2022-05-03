@@ -8,7 +8,7 @@ Documentation       132 - RHODS_TRAEFIK_PROXY_CONTAINER_RESTART_VERIFICATION
 ...                 | LABEL_SELECTOR    | Required |    Label selector for traefik proxy|
 
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-
+Suite Setup         RHOSi Setup
 
 *** Variables ***
 ${NAMESPACE}            redhat-ods-applications

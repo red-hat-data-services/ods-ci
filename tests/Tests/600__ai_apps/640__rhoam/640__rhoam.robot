@@ -1,6 +1,7 @@
 *** Settings ***
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Suite Setup     RHOAM Suite Setup
 Suite Teardown  RHOAM Suite Teardown
@@ -20,6 +21,7 @@ Verify RHOAM Is Available In RHODS Dashboard Explore Page
 *** Keywords ***
 RHOAM Suite Setup
   Set Library Search Order  SeleniumLibrary
+  RHOSi Setup
 
 RHOAM Suite Teardown
   Close All Browsers

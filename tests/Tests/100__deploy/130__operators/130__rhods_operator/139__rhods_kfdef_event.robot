@@ -8,7 +8,9 @@ Documentation   139 - KFDEF_EVENT_VERIFICATION
 
 Library        Collections
 Resource       ../../../../Resources/Page/OCPDashboard/Events/Events.resource
+Resource       ../../../../Resources/RHOSi.resource
 
+Suite Setup     RHOSi Setup
 
 *** Variables ***
 ${NAMESPACE}           redhat-ods-applications

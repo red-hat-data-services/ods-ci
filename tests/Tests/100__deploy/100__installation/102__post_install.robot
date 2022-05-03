@@ -11,6 +11,9 @@ Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 Resource            ../../../Resources/ODS.robot
+
+Suite Setup         RHOSi Setup
+
 Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../Resources/Common.robot
 

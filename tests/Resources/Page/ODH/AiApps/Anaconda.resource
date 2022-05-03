@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Keyword suites to interact with Anaconda Commercial Edition
+Documentation       Keyword suites to interact with Anaconda
 
 Resource            ../../../Page/LoginPage.robot
 Library             SeleniumLibrary

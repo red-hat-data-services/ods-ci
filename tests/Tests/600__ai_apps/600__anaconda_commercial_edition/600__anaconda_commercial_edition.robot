@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation   Test integration with Anaconda ISV
+Documentation   Test integration with Anaconda Commerical Edition ISV
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/OCPDashboard/Page.robot

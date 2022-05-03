@@ -437,6 +437,7 @@ Open Notebook Images Page
 Import New Image
     [Documentation]  software and packages should be lists of lists
     [Arguments]  ${repo}  ${name}  ${description}  ${software}  ${packages}
+    Sleep  1
     Open Image Import Popup
     Input Text    xpath://input[@id="notebook-image-repository-input"]    ${repo}
     Input Text    xpath://input[@id="notebook-image-name-input"]    ${name}

@@ -21,7 +21,7 @@ Verify Pachyderm Can Be Installed And Deploy Its Server
     Pass Execution      Passing test, as suite setup ensures Pachyderm operator is installed correctly.
 
 Verify Pachyderm Pipeline Can Be Created
-    [Documentation]     Check if it is possible to create smaple pipline using jupyterlab.
+    [Documentation]     Checks if it is possible to create smaple pipline using jupyterlab.
     [Tags]      Tier2
     ...         ODS-1161
     Go To    ${OCP_CONSOLE_URL}
@@ -62,6 +62,7 @@ Wait Until Status Is Running
     Wait Until Keyword Succeeds     120     1       Element Text Should Be    //span[@data-test="status-text"]      Running
 
 Get Pachd Version
+    [Documentation]     Checks and returns the version of pachd.
     Menu.Navigate To Page       Operators       Installed Operators
     Select Project By Name      ${pachyderm_appname}
     Click On Searched Operator      ${pachyderm_operator_name}
@@ -82,7 +83,8 @@ Create Pachyderm AWS-Secret
     Input Text      //input[@data-test-id="item-filter"]    pachyderm-aws-secret
     Wait Until Page Contains Element        //a[@data-test-id="pachyderm-aws-secret"]       10
 
-Verify Pipline Pod Creation
+Verify Pipeline Pod Creation
+    [Documentation]     Checks pipeline pod has been created in workloads.
     ${status}=    Check If POD Exists    pachyderm      app=pipeline-edges-v1
     Run Keyword IF    '${status}'=='FAIL'    FAIL
     ...    PODS with Label '${label_selector}' is not present in '${namespace}' namespace
@@ -97,6 +99,7 @@ Create Command In Multiple Lines
     [Return]    ${command_string}
 
 Create Pachyderm Pipeline Using JupyterLab
+    [Documentation]     Creates pachyderm pipeline by running multiple commands on jupyterlab.
     [Arguments]     ${version}
     Run Cell And Check For Errors   !curl -o /tmp/pachctl.tar.gz -L https://github.com/pachyderm/pachyderm/releases/download/v${version}/pachctl_${version}_linux_amd64.tar.gz && tar -xvf /tmp/pachctl.tar.gz -C /tmp && cp /tmp/pachctl_${version}_linux_amd64/pachctl /opt/app-root/bin/
     Run Cell And Check For Errors   !echo '{"pachd_address":"pachd.pachyderm.svc.cluster.local:30650"}' | pachctl config set context pachyderm --overwrite

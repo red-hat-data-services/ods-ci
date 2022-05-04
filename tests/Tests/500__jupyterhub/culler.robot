@@ -22,7 +22,6 @@ Verify Default Culler Timeout
     [Tags]    Sanity    Tier1
     ...       ODS-1255
     Disable Notebook Culler
-    Sleep  30s  # Give time for rollout
     ${current_timeout} =  Get And Verify Notebook Culler Timeout
     Should Be Equal  ${DEFAULT_CULLER_TIMEOUT}  ${current_timeout}
     Close Browser
@@ -57,12 +56,11 @@ Verify Culler Kills Inactive Server
         ...    ${notebook_pod_name}  namespace=rhods-notebooks
         Exit For Loop If  ${culled}==True
         Sleep  30s
-        ${drift} =  Set Variable  ${drift}+${30}
+        ${drift} =  Evaluate  ${drift}+${30}
     END
     IF  ${drift}>${120}
         Fail    Drift was over 2 minutes, it was ${drift} seconds
     END
-
 
 Verify Culler Does Not Kill Active Server
     [Documentation]    Verifies that the culler does not kill an active
@@ -145,8 +143,7 @@ Modify Notebook Culler Timeout
     [Arguments]    ${new_timeout}
     Open Dashboard Cluster Settings
     Set Notebook Culler Timeout  ${new_timeout}
-    # Enough time to start the rollout
-    Sleep  60s
+    Sleep  30s  msg=Give time for rollout
 
 Open Dashboard Cluster Settings
     [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
@@ -185,6 +182,7 @@ Disable Notebook Culler
         Click Element  xpath://input[@id="culler-timeout-unlimited"]
         Click Button  Save changes
     END
+    Sleep  30s  msg=Give time for rollout
 
 Teardown
     [Documentation]    Teardown for the test

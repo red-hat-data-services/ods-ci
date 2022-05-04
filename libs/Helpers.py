@@ -3,7 +3,6 @@ from robotlibcore import keyword
 from utils.scripts.ocm.ocm import OpenshiftClusterManager
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
-from robot.api import logger, FatalError
 
 
 class Helpers:

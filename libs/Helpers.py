@@ -5,6 +5,7 @@ from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
 from robot.api import logger, FatalError
 
+
 class Helpers:
     """Custom keywords written in Python"""
     def __init__(self):
@@ -50,7 +51,8 @@ class Helpers:
         ocm_client.cluster_name = cluster_name
         result = ocm_client.install_rhoam_addon(exit_on_failure=False)
         if not result:
-            raise FatalError("Something got wrong while installing RHOAM. Check the logs")
+            self.BuiltIn.fail("Something got wrong while installing RHOAM. Check the logs")
+
 
     @keyword
     def uninstall_rhoam_using_addon_flow(self, cluster_name):

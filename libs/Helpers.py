@@ -2,9 +2,13 @@ from semver import VersionInfo
 from robotlibcore import keyword
 from utils.scripts.ocm.ocm import OpenshiftClusterManager
 from robot.api import logger
+from robot.libraries.BuiltIn import BuiltIn
 
 class Helpers:
     """Custom keywords written in Python"""
+    def __init__(self):
+        self.BuiltIn = BuiltIn()
+
     @keyword
     def text_to_list(self, text):
         rows = text.split('\n')
@@ -78,7 +82,9 @@ class Helpers:
         """Update notification email for add-ons using OCM"""
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
-        ocm_client.update_notification_email_address(addon_name, email_address)
+        status = ocm_client.update_notification_email_address(addon_name, email_address, exit_on_failure=False)
+        if not status:
+            self.BuiltIn.fail("Unable to update notification email, Check if operator is installed via Add-on")
 
     @keyword
     def convert_to_hours_and_minutes(self, seconds):

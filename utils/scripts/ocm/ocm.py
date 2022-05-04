@@ -836,7 +836,7 @@ class OpenshiftClusterManager():
                    " EXITING".format(self.cluster_name))
             sys.exit(1)
 
-    def update_notification_email_address(self, addon_name, email_address):
+    def update_notification_email_address(self, addon_name, email_address, exit_on_failure=True):
         """Update notification email to Addons"""
         replace_vars = {
                        "EMAIL_ADDER": email_address
@@ -852,8 +852,10 @@ class OpenshiftClusterManager():
         if ret is None:
             log.info("Failed to update email address to {} addon on cluster "
                   "{}".format(addon_name, self.cluster_name))
-            sys.exit(1)
-
+            if exit_on_failure:
+                sys.exit(1)
+            else:
+                return False
 
 
 if __name__ == "__main__":

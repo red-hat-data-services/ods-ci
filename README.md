@@ -17,12 +17,12 @@ using QE tiered testing.
   1. Edit the test variables file to include information required for this test run.
      You will need to add info required for test execution:
 
-     * URLs based on the test case you are executing
-       ** OpenShift Console
-       ** Open Data Hub Dashboard
-       ** JupyterHub
-     * Test user credentials
-     * Browser webdriver to use for testing
+     * URLs based on the test case you are executing.<br>
+        ** OpenShift Console.<br>
+        ** Open Data Hub Dashboard.<br>
+        ** JupyterHub.<br>
+     * Test user credentials.
+     * Browser webdriver to use for testing.
 
 
   1. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite

@@ -231,7 +231,7 @@ class OpenshiftClusterManager():
         """Updates osd cluster information and stores in config file"""
 
         with open(config_file, 'r') as file:
-            config_data = yaml.load(file)
+            config_data = yaml.safe_load(file)
 
         if self.ldap_test_password != "":
             config_data[self.cluster_name]['TEST_USER']['PASSWORD'] = self.ldap_test_password

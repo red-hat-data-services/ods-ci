@@ -152,7 +152,7 @@ def main():
 
     root = parse_xml(args.xunit_xml_file)
     with open(args.config_file) as config:
-        testsuite_config = yaml.load(config)
+        testsuite_config = yaml.safe_load(config)
 
     tc_config = get_polarion_id(parse_xml(args.robot_result_xml_file))
     root = add_testsuite_properties(root, testsuite_config["testrun_info"])

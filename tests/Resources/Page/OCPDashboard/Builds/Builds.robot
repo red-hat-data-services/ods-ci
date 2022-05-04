@@ -86,3 +86,38 @@ Wait Until All Builds Are Complete
     FOR    ${build_data}    IN    @{builds_data}
         Wait Until Build Status Is    namespace=${namespace}    build_name=${build_data['metadata']['name']}  expected_status=Complete
     END
+
+Delete Multiple Builds
+    [Documentation]     Deletes Multiple Builds in the given namespace
+    [Arguments]   @{build_name_list}  ${namespace}
+    FOR    ${build}    IN    @{build_name_list}
+        ${build_name}=  Search Last Build  namespace=${namespace}    build_name_includes=${build}
+        Delete Build    namespace=${namespace}    build_name=${build_name}
+    END
+
+Start Remaining Builds And Wait Until All Builds Are Complete
+    [Documentation]    Starts new build if build fails or is not started , Waits until all builds are complete
+    ${build_configs} =    Create List    11.4.2-cuda-s2i-base-ubi8    11.4.2-cuda-s2i-core-ubi8
+    ...    11.4.2-cuda-s2i-py38-ubi8    11.4.2-cuda-s2i-thoth-ubi8-py38    s2i-minimal-gpu-cuda-11.4.2-notebook
+    ...    s2i-pytorch-gpu-cuda-11.4.2-notebook    s2i-tensorflow-gpu-cuda-11.4.2-notebook
+    ${builds} =    Create List    cuda-s2i-base    cuda-s2i-core    cuda-s2i-py    cuda-s2i-thoth    minimal    pytorch
+    ...    tensorflow
+    ${no_of_builds} =    Get Length    ${builds}
+    FOR    ${ind}    IN RANGE    ${no_of_builds}
+        ${build_name} =    Search Last Build    namespace=redhat-ods-applications
+        ...    build_name_includes=${builds}[${ind}]
+        IF    "${build_name}" == ""
+            ${build_name} =    Start New Build    namespace=redhat-ods-applications
+            ...    buildconfig=${build_configs}[${ind}]
+        ELSE
+            ${build_status} =    Get Build Status    namespace=redhat-ods-applications
+            ...    build_search_term=${build_name}
+            IF    "${build_status}" == "Failed"
+                Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
+                ${build_name} =    Start New Build    namespace=redhat-ods-applications
+                ...    buildconfig=${build_configs}[${ind}]
+            END
+        END
+        Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${build_name}
+        ...    expected_status=Complete
+    END

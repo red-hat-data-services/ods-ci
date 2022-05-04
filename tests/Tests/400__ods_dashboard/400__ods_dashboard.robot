@@ -33,7 +33,6 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     Securing a deployed model using Red Hat OpenShift API Management
 @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
 ...                                     PerceptiLabs
-@{builds_to_be_deleted}  pytorch  tensorflow  minimal  cuda-s2i-thoth
 @{images}  PyTorch  TensorFlow  CUDA
 
 
@@ -165,18 +164,16 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     [Documentation]     Verifies that Notifications are shown in RHODS Dashboard when Notebook builds haven't started
     [Tags]    Sanity
     ...       ODS-1347
-    Delete Multiple Builds
+    ...       Tier1
+    Delete Multiple Builds  pytorch  tensorflow  minimal  cuda-s2i-thoth  namespace=redhat-ods-applications
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
     Verify Notification Saying Notebook Builds Not Started
     Clear Dashboard Notifications
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${last_cuda_build}  expected_status=Complete
     Remove Values From List    ${images}  CUDA
-    RHODS Notification Drawer Should Contain    message=Notebook images are building
-    Sleep  20s  reason=Wait For Minimal Cuda Build to Start and Notifications
     Verify Notification Saying Notebook Builds Not Started
+    RHODS Notification Drawer Should Contain    message=Notebook images are building
     RHODS Notification Drawer Should Not Contain    message=CUDA
-    ${minimal_cuda_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=minimal
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${minimal_cuda_build}
     [Teardown]   Wait Until Remaining Builds Are Complete And Close Browser
 
 
@@ -323,16 +320,9 @@ Verify Anaconda Success Message Based On Version
         Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME_LATEST}
     END
 
-Delete Multiple Builds
-    [Documentation]     Deletes Multiple Builds
-    FOR    ${build}    IN    @{builds_to_be_deleted}
-        ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=${build}
-        Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
-    END
-
 Verify Notification Saying Notebook Builds Not Started
     [Documentation]     Verifies RHODS Notification Drawer Contains Names of Image Builds which have not started
-    Sleep    10s  reason=Wait For Notifications
+    Sleep  1min  reason=Wait For Notifications
     Reload Page
     RHODS Notification Drawer Should Contain    message=These notebook image builds have not started:
     FOR    ${image}    IN    @{images}
@@ -341,8 +331,7 @@ Verify Notification Saying Notebook Builds Not Started
 
 Wait Until Remaining Builds Are Complete And Close Browser
     [Documentation]     Waits Until Remaining builds have Status as Complete and Closes Browser
-    ${pytorch_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=pytorch
-    ${tensorflow_build}=  Search Last Build    namespace=redhat-ods-applications    build_name_includes=tensorflow
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${pytorch_build}  expected_status=Complete
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${tensorflow_build}  expected_status=Complete
+    Go To  url=${OCP_CONSOLE_URL}
+    Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
+    Start Remaining Builds And Wait Until All Builds Are Complete
     Dashboard Test Teardown

@@ -855,7 +855,7 @@ class OpenshiftClusterManager():
             if exit_on_failure:
                 sys.exit(1)
             else:
-                return True
+                return False
 
 
 if __name__ == "__main__":

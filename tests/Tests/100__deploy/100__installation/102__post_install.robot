@@ -11,6 +11,7 @@ Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Page/ODH/Grafana/Grafana.resource
 
 Suite Setup         RHOSi Setup
 
@@ -185,6 +186,24 @@ Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Tags]    Tier2
     ...       ODS-586
     Verify Errors In Jupyterhub Logs
+
+Verify Grafana Is Connected To Prometheus Using TLS
+    [Documentation]    Verifies Grafana is connected to Prometheus using TLS
+    [Tags]    Tier2
+    ...       ODS-963
+    [Setup]  Set Library Search Order  Selenium Library
+    ${res} =    Run
+    ...    oc get secret/grafana-datasources -n redhat-ods-monitoring -o json | jq -r '.data["datasources.yaml"]' | base64 -d | jq '.datasources[0] | .jsonData.tlsSkipVerify'
+    Run Keyword If    "${res}"!="false" and "${res}"!="null"
+    ...    Fail    msg=TlsSkipVerify is neither false nor empty
+    ${grafana_url} =  Get Grafana URL
+    Launch Grafana    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    grafana_url=https://${grafana_url}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    Select Explore
+    Select Data Source  datasource_name=Monitoring
+    Run Promql Query  query=traefik_backend_server_up
+    Page Should Contain  text=Graph
+    [Teardown]  Close Browser
+
 
 *** Keywords ***
 Verify Cuda Builds Are Completed

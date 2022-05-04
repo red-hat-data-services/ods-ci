@@ -22,6 +22,7 @@ Verify Default Culler Timeout
     [Tags]    Sanity    Tier1
     ...       ODS-1255
     Disable Notebook Culler
+    Sleep  30s  # Give time for rollout
     ${current_timeout} =  Get And Verify Notebook Culler Timeout
     Should Be Equal  ${DEFAULT_CULLER_TIMEOUT}  ${current_timeout}
     Close Browser
@@ -45,10 +46,23 @@ Verify Culler Kills Inactive Server
     Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
     Open With JupyterLab Menu    File    Save Notebook
     Close Browser
-    Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
+    Sleep    ${CUSTOM_CULLER_TIMEOUT}
     ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    Run Keyword And Expect Error  Pods not found in search  OpenShiftLibrary.Search Pods
-    ...    ${notebook_pod_name}  namespace=rhods-notebooks
+    ${culled} =  Set Variable  False
+    ${drift} =  Set Variable  ${0}
+    # Wait for maximum 10 minutes over timeout
+    FOR  ${index}  IN RANGE  20
+        ${culled} =  Run Keyword And Return Status  Run Keyword And Expect Error
+        ...    Pods not found in search  OpenShiftLibrary.Search Pods
+        ...    ${notebook_pod_name}  namespace=rhods-notebooks
+        Exit For Loop If  ${culled}==True
+        Sleep  30s
+        ${drift} =  Set Variable  ${drift}+${30}
+    END
+    IF  ${drift}>${120}
+        Fail    Drift was over 2 minutes, it was ${drift} seconds
+    END
+
 
 Verify Culler Does Not Kill Active Server
     [Documentation]    Verifies that the culler does not kill an active

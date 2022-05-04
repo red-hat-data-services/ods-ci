@@ -82,7 +82,7 @@ class Helpers:
         """Update notification email for add-ons using OCM"""
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
-        status = ocm_client.update_notification_email_address(addon_name, email_address)
+        status = ocm_client.update_notification_email_address(addon_name, email_address, exit_on_failure=False)
         if not status:
             self.BuiltIn.fail("Unable to update notification email, Check if operator is installed via Add-on")
 

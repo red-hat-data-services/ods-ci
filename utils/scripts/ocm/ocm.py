@@ -852,7 +852,7 @@ class OpenshiftClusterManager():
         if ret is None:
             log.info("Failed to update email address to {} addon on cluster "
                   "{}".format(addon_name, self.cluster_name))
-            sys.exit(1)
+            return False
 
 
 

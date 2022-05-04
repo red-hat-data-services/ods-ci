@@ -149,3 +149,31 @@ Get RHODS URL From OpenShift Using UI
     ...     //a[@data-test="application-launcher-item" and starts-with(@href,'https://rhods')]
     ${href}  Get Element Attribute    ${link_elements}    href
     [Return]   ${href}
+
+Verify Resources Values
+    [Documentation]    (string, string, list) -> None
+    ...    Args:
+    ...        actual(str): Field with the actual value of the resource
+    ...        expected(str): Expected value
+    ...        resources(list(dict)): Resources from OpenShiftLibrary 
+    ...    Returns:
+    ...        None 
+    [Arguments]    ${actual}    ${expected}    @{resources}
+    FOR    ${resource}    IN    @{resources}
+        &{dict} =    Set Variable    ${resource}
+        Should Be Equal As Strings    ${dict.${actual}}    ${expected}
+    END
+
+Verify Resources Values Using RegExp
+    [Documentation]    (string, string, list) -> None
+    ...    Args:
+    ...        actual(str): Field with the actual value of the resource
+    ...        expected(str): Expected regular expression
+    ...        resources(list(dict)): Resources from OpenShiftLibrary 
+    ...    Returns:
+    ...        None 
+    [Arguments]    ${actual}    ${expected}    @{resources}
+    FOR    ${resource}    IN    @{resources}
+        &{dict} =    Set Variable    ${resource}
+        Should Match Regexp    ${dict.${actual}}    ${expected}
+    END

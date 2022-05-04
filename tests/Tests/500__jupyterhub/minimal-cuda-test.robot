@@ -59,6 +59,8 @@ Verify CUDA Image Suite Setup
     [Documentation]    Suite Setup, spawns CUDA img with one GPU attached
     ...    Additionally, checks that the number of available GPUs decreases
     ...    after the GPU is assigned.
+    Set Library Search Order  SeleniumLibrary
+    Close All Browsers
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1

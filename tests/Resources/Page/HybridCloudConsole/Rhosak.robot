@@ -223,13 +223,16 @@ Delete Service Account By Client ID
 Clean Up RHOSAK
     [Documentation]    Cleans up all the RHOSAK created resources from RHOSAK and RHODS UI
     [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}  ${rhosak_app_id}
-    ${modal_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=//*[contains(@class, "modal")]
-    IF    ${modal_exists}==${TRUE}
-       Click Button    xpath=//button[@aria-label="Close"]
-       ${confirm_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=${CONFIRM_WARNING_XP}
-       IF    ${confirm_exists}==${TRUE}
-            Click Button   xpath=${CONFIRM_WARNING_FIRST_BUTTON_XP}
-       END
+    ${window_title}=    Get Title
+    IF    $window_title == "Streams for Apache Kafka | Red Hat OpenShift Application Services"
+        ${modal_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=//*[contains(@class, "modal")]
+        IF    ${modal_exists}==${TRUE}
+           Click Button    xpath=//button[@aria-label="Close"]
+           ${confirm_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=${CONFIRM_WARNING_XP}
+           IF    ${confirm_exists}==${TRUE}
+                Click Button   xpath=${CONFIRM_WARNING_FIRST_BUTTON_XP}
+           END
+        END
     END
     OpenShiftCLI.Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Switch Window    title:Red Hat OpenShift Streams for Apache Kafka

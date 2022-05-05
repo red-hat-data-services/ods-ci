@@ -15,13 +15,13 @@ ${pachyderm_appname}            pachyderm
 
 *** Test Cases ***
 Verify Pachyderm Can Be Installed And Deploy Its Server
-    [Documentation]     Check if it is possible to install pachyderm operator and it's server can be deployed.
+    [Documentation]     Check if it is possible to install and deploy pachyderm.
     [Tags]      Tier2
     ...         ODS-1137    ODS-1138
     Pass Execution      Passing test, as suite setup ensures Pachyderm operator is installed correctly.
 
 Verify Pachyderm Pipeline Can Be Created
-    [Documentation]     Checks if it is possible to create smaple pipline using jupyterlab.
+    [Documentation]     Checks if it is possible to create sample pipline using jupyterlab.
     [Tags]      Tier2
     ...         ODS-1161
     Go To    ${OCP_CONSOLE_URL}
@@ -31,7 +31,7 @@ Verify Pachyderm Pipeline Can Be Created
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
     Create Pachyderm Pipeline Using JupyterLab     ${version}
-    Verify Pipline Pod Creation
+    Verify Pipeline Pod Creation
     [Teardown]  Delete Pipeline And Stop JupyterLab Server
 
 *** Keywords ***

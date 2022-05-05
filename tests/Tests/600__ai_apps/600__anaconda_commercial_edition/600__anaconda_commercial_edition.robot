@@ -51,11 +51,12 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
 
 Verify User Is Able to Activate Anaconda Professional
   [Tags]  Tier2
-  ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082  ODS-1304
+  ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082  ODS-1304  ODS-462
   ...     ProductBug
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner
+  Verify Anaconda In Kfdef
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
@@ -99,3 +100,8 @@ Anaconda Suite Setup
   [Documentation]  Setup for ACE test suite
   Set Library Search Order  SeleniumLibrary
   RHOSi Setup
+
+Verify Anaconda In Kfdef
+    [Documentation]  Verifies if Anaconda is present in Kfdef
+    ${application_names}=  Run  oc get kfdef -n redhat-ods-applications -o json | jq ' .items[0] | select(.metadata.name="opendatahub") | [.spec.applications[].name]'
+    Should Contain  ${application_names}  anaconda-ce

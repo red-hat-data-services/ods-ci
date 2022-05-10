@@ -150,7 +150,7 @@ Get RHODS URL From OpenShift Using UI
     ${href}  Get Element Attribute    ${link_elements}    href
     [Return]   ${href}
 
-Verify Resources Values
+Verify Resources Field Values
     [Documentation]    (string, string, list) -> None
     ...    Args:
     ...        actual(str): Field with the actual value of the resource
@@ -164,7 +164,7 @@ Verify Resources Values
         Should Be Equal As Strings    ${dict.${actual}}    ${expected}
     END
 
-Verify Resources Values Using RegExp
+Verify Resources Field Values Using RegExp
     [Documentation]    (string, string, list) -> None
     ...    Args:
     ...        actual(str): Field with the actual value of the resource

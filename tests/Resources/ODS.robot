@@ -182,6 +182,34 @@ Get RHODS URL From OpenShift Using UI
     ${href}  Get Element Attribute    ${link_elements}    href
     [Return]   ${href}
 
+OpenShift Resource Field Value Should Be Equal As Strings
+    [Documentation]    
+    ...    Args:
+    ...        actual(str): Field with the actual value of the resource
+    ...        expected(str): Expected value
+    ...        resources(list(dict)): Resources from OpenShiftLibrary 
+    ...    Returns:
+    ...        None 
+    [Arguments]    ${actual}    ${expected}    @{resources}
+    FOR    ${resource}    IN    @{resources}
+        &{dict} =    Set Variable    ${resource}
+        Should Be Equal As Strings    ${dict.${actual}}    ${expected}
+    END
+
+OpenShift Resource Field Value Should Match Regexp
+    [Documentation]
+    ...    Args:
+    ...        actual(str): Field with the actual value of the resource
+    ...        expected(str): Expected regular expression
+    ...        resources(list(dict)): Resources from OpenShiftLibrary 
+    ...    Returns:
+    ...        None 
+    [Arguments]    ${actual}    ${expected}    @{resources}
+    FOR    ${resource}    IN    @{resources}
+        &{dict} =    Set Variable    ${resource}
+        Should Match Regexp    ${dict.${actual}}    ${expected}
+    END
+
 
 Verify RHODS Groups Config Map Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value

@@ -66,6 +66,7 @@ Verify CUDA Image Suite Setup
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1
     # Verifies that now there are no GPUs available for selection
     @{old_browser} =  Get Browser Ids
+    Sleep  30s  msg=Give time to spawner to update GPU count
     Launch Dashboard    ${TEST_USER2.USERNAME}    ${TEST_USER2.PASSWORD}    ${TEST_USER2.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Launch JupyterHub Spawner From Dashboard    ${TEST_USER_2.USERNAME}    ${TEST_USER.PASSWORD}

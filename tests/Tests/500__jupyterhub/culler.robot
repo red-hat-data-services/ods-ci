@@ -45,10 +45,22 @@ Verify Culler Kills Inactive Server
     Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
     Open With JupyterLab Menu    File    Save Notebook
     Close Browser
-    Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
+    Sleep    ${CUSTOM_CULLER_TIMEOUT}
     ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    Run Keyword And Expect Error  Pods not found in search  OpenShiftLibrary.Search Pods
-    ...    ${notebook_pod_name}  namespace=rhods-notebooks
+    ${culled} =  Set Variable  False
+    ${drift} =  Set Variable  ${0}
+    # Wait for maximum 10 minutes over timeout
+    FOR  ${index}  IN RANGE  20
+        ${culled} =  Run Keyword And Return Status  Run Keyword And Expect Error
+        ...    Pods not found in search  OpenShiftLibrary.Search Pods
+        ...    ${notebook_pod_name}  namespace=rhods-notebooks
+        Exit For Loop If  ${culled}==True
+        Sleep  30s
+        ${drift} =  Evaluate  ${drift}+${30}
+    END
+    IF  ${drift}>${120}
+        Fail    Drift was over 2 minutes, it was ${drift} seconds
+    END
 
 Verify Culler Does Not Kill Active Server
     [Documentation]    Verifies that the culler does not kill an active
@@ -131,8 +143,7 @@ Modify Notebook Culler Timeout
     [Arguments]    ${new_timeout}
     Open Dashboard Cluster Settings
     Set Notebook Culler Timeout  ${new_timeout}
-    # Enough time to start the rollout
-    Sleep  60s
+    Sleep  30s  msg=Give time for rollout
 
 Open Dashboard Cluster Settings
     [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
@@ -171,6 +182,7 @@ Disable Notebook Culler
         Click Element  xpath://input[@id="culler-timeout-unlimited"]
         Click Button  Save changes
     END
+    Sleep  30s  msg=Give time for rollout
 
 Teardown
     [Documentation]    Teardown for the test

@@ -7,10 +7,12 @@ Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource        ../../../Resources/Page/ODH/AiApps/Anaconda.resource
+Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Commercial Edition Suite Setup
+Suite Teardown  Close All Browsers
 
 
 *** Test Cases ***
@@ -47,6 +49,7 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Wait Until RHODS Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
   Page Should Not Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
+  [Teardown]    Remove Anaconda Components For Validation
 
 Verify User Is Able to Activate Anaconda Commercial Edition
   [Tags]  Tier2
@@ -95,6 +98,4 @@ Verify User Is Able to Activate Anaconda Commercial Edition
 Anaconda Commercial Edition Suite Setup
   [Documentation]  Setup for ACE test suite
   Set Library Search Order  SeleniumLibrary
-
-
-
+  RHOSi Setup

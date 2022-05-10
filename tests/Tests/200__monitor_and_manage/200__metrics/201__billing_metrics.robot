@@ -31,6 +31,7 @@ Test Billing Metric (notebook cpu usage) on OpenShift Monitoring
 *** Keywords ***
 Begin Billing Metrics Web Test
   Set Library Search Order  SeleniumLibrary
+  RHOSi Setup
 
 End Web Billing Metrics Test
   CleanUp JupyterHub

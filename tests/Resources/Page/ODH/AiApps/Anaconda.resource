@@ -45,7 +45,7 @@ Validate Anaconda License Key
         Wait Until Keyword Succeeds    60    1    Page Should Not Contain Element
         ...    xpath://*/div[contains(@class, "bullseye")]
     ELSE IF    ${license_validity} == ${FALSE}
-        Wait Until Keyword Succeeds    30    1    Check Connect Button Status    false
+        Wait Until Keyword Succeeds    40    2    Check Connect Button Status    false
     END
     Capture Page Screenshot    after_validation.png
 
@@ -73,17 +73,20 @@ Check Anaconda CE Image Build Status
 
 Remove Anaconda Commercial Edition Component
     [Documentation]    Teardown for ACE test suite
-    Close All Browsers
-    Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result
-    Delete Pods Using Label Selector    redhat-ods-applications    component.opendatahub.io/name=anaconda-ce
+    Remove Anaconda Components For Validation
     Delete BuildConfig Using Name    redhat-ods-applications    s2i-minimal-notebook-anaconda
     Delete ImageStream Using Name    redhat-ods-applications    s2i-minimal-notebook-anaconda
-    Delete Data From Secrets Using Name    redhat-ods-applications    anaconda-ce-access    {"data":null}
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
     Remove Disabled Application From Enabled Page    app_id=anaconda-ce
-    Close All Browsers
+
+Remove Anaconda Components For Validation
+    [Documentation]    Teardown for ACE test suite
+    Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result
+    Delete Pods Using Label Selector    redhat-ods-applications    component.opendatahub.io/name=anaconda-ce
+    Delete Data From Secrets Using Name    redhat-ods-applications    anaconda-ce-access    {"data":null}
+
 
 Anaconda Activation Should Have Failed
     [Documentation]    Checks if the anaconda activation has failed

@@ -25,6 +25,17 @@ ${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictio
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
+${CUSTOM_IMAGE_SOFTWARE_TABLE}=  //caption[contains(., "the advertised software")]/../tbody
+${CUSTOM_IMAGE_PACKAGE_TABLE}=  //caption[contains(., "the advertised packages")]/../tbody
+${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}=  tr[last()]/td[last()]/button[@id="save-package-software-button"]  # Save button
+${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}=  tr[last()]/td[last()]/button[@id="edit-package-software-button"]  # Edit OR Save button of last row (depends on context)
+${CUSTOM_IMAGE_LAST_ROW_DELETE_BTN}=  tr[last()]/td[last()]/button[@id="delete-package-software-button"]  # Remove button of last row
+${CUSTOM_IMAGE_LAST_ROW_NAME}=  tr[last()]/td[1]
+${CUSTOM_IMAGE_LAST_ROW_VERSION}=  tr[last()]/td[2]
+${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
+${CUSTOM_IMAGE_REMOVE_BTN}=  button[@id="delete-package-software-button"]
+${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//button
+${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
 
 
 *** Keywords ***
@@ -387,12 +398,17 @@ Set PVC Value In RHODS Dashboard
     [Arguments]    ${size}
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
-    Run Keywords
-    ...   Input Text    //input[@id="pvc-size-input"]    ${size}
-    ...  AND
-    ...    Press Keys    //input[@id="pvc-size-input"]    RETURN
-    Run Keyword and Return Status    Wait Until Keyword Succeeds    30    1
-    ...    Wait Until Page Contains    Cluster settings updated successfully.
+    Input Text    //input[@id="pvc-size-input"]    ${size}
+    ${version-check}    Is RHODS Version Greater Or Equal Than    1.10.0
+    IF    ${version-check}==True
+        Click Button  Save changes
+        Wait Until Keyword Succeeds    30    1
+        ...    Wait Until Page Contains    Settings changes saved.
+    ELSE
+        Press Keys    //input[@id="pvc-size-input"]    RETURN
+        Wait Until Keyword Succeeds    30    1
+        ...    Wait Until Page Contains    Cluster settings updated successfully.
+    END
 
 Restore PVC Value To Default Size
     [Documentation]    Set the PVC value to default
@@ -400,13 +416,17 @@ Restore PVC Value To Default Size
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
     Click Button    Restore Default
-    Run Keywords
-    ...    Wait Until Keyword Succeeds    30    1
-    ...    Wait Until Page Contains    Cluster settings updated successfully.
-    ...    AND
-    ...    Sleep    20s    msg=NOTE: This change will cause juypterhub to restart. It will take 30 seconds before juypterhub will be available. #robocop:disable
-    ...    AND
-    ...    Wait Until JH Deployment Is Ready
+    ${version-check}    Is RHODS Version Greater Or Equal Than    1.10.0
+    IF    ${version-check}==True
+          Click Button  Save changes
+          Wait Until Keyword Succeeds    30    1
+          ...    Wait Until Page Contains    Settings changes saved.
+    ELSE
+          Wait Until Keyword Succeeds    30    1
+          ...    Wait Until Page Contains    Cluster settings updated successfully.
+    END
+    Sleep    20s    msg=NOTE: This change will cause juypterhub to restart. It will take 30 seconds before juypterhub will be available. #robocop:disable
+    Wait Until JH Deployment Is Ready
 
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message
@@ -414,3 +434,176 @@ RHODS Notification Drawer Should Contain
     Click Element    xpath=//*[contains(@class,'notification-badge')]
     Page Should Contain Element
     ...    xpath=//*[contains(text(),'${message}')]
+    Close Notification Drawer
+
+Open Notebook Images Page
+    [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
+    Page Should Contain    Settings
+    Menu.Navigate To Page    Settings    Notebook Images
+    Wait Until Page Contains    Notebook image settings
+    Page Should Contain    Notebook image settings
+
+Import New Custom Image
+    [Documentation]    Opens the Custom Image import view and imports an image
+    ...    Software and Packages should be passed as dictionaries
+    [Arguments]    ${repo}    ${name}    ${description}    ${software}    ${packages}
+    Sleep  1
+    Open Custom Image Import Popup
+    Input Text    xpath://input[@id="notebook-image-repository-input"]    ${repo}
+    Input Text    xpath://input[@id="notebook-image-name-input"]    ${name}
+    Input Text    xpath://input[@id="notebook-image-description-input"]    ${description}
+    Add Softwares To Custom Image    ${software}
+    Add Packages To Custom Image    ${packages}
+    Click Element    xpath://button[.="Import"]
+
+Open Custom Image Import Popup
+    [Documentation]    Opens the Custom Image import view, using the appropriate button
+    ${first_image} =  Run Keyword And Return Status  Page Should Contain Element  xpath://button[.="Import image"]
+    IF  ${first_image}==True
+        Click Element  xpath://button[.="Import image"]
+    ELSE 
+        Click Element  xpath://button[.="Import new image"]
+    END
+    Wait Until Page Contains    Import Notebook images
+
+Add Softwares To Custom Image
+    [Documentation]    Loops through a dictionary to add software to the custom img metadata
+    [Arguments]    @{software}
+    Click Element  xpath://button/span[.="Software"]
+    FOR  ${sublist}  IN  @{software}
+        FOR  ${element}  IN  @{sublist}
+            Wait Until Element Is Visible    xpath://button[.="Add Software" or .="Add software"]
+            Click Element  xpath://button[.="Add Software" or .="Add software"]
+            Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}
+            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}/input[@id="software-package-input"]  ${element}
+            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}/input[@id="version-input"]  ${sublist}[${element}]
+            Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}
+        END
+    END
+
+Add Packages To Custom Image
+    [Documentation]    Loops through a dictionary to add packages to the custom img metadata
+    [Arguments]    @{packages}
+    Click Element  xpath://button/span[.="Packages"]
+    FOR  ${sublist}  IN  @{packages}
+        FOR  ${element}  IN  @{sublist}
+            Wait Until Element Is Visible    xpath://button[.="Add Package" or .="Add package"]
+            Click Element  xpath://button[.="Add Package" or .="Add package"]
+            Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}
+            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}/input[@id="software-package-input"]  ${element}
+            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}/input[@id="version-input"]  ${sublist}[${element}]
+            Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}
+        END
+    END
+
+Remove Software From Custom Image
+    [Documentation]    Removes specific software from a custom image's metadata
+    ...    Assuming the edit view of said image is already open
+    [Arguments]    ${software_name}
+    Click Element  xpath://button/span[.="Software"]
+    Click Button  xpath://td[.="${software_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
+
+Remove Package From Custom Image
+    [Documentation]    Removes specific package from a custom image's metadata
+    ...    Assuming the edit view of said image is already open
+    [Arguments]    ${package_name}
+    Click Element  xpath://button/span[.="Packages"]
+    Click Button  xpath://td[.="${package_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
+
+Delete Custom Image
+# Need to check if image is REALLY deleted
+    [Documentation]    Deletes a custom image through the dashboard UI. 
+    ...    Needs an additional check on removed ImageStream
+    [Arguments]    ${image_name}
+    Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
+    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-delete-button"]
+    Wait Until Page Contains  Do you wish to permanently delete ${image_name}?
+    Click Button  xpath://button[.="Delete"]
+
+Open Edit Menu For Custom Image
+    [Documentation]    Opens the edit view for a specific custom image
+    [Arguments]    ${image_name}
+    Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
+    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-edit-button"]
+    Wait Until Page Contains  Delete Notebook Image
+
+Expand Custom Image Details
+    [Documentation]    Expands a custom image's row in the dashboard UI
+    [Arguments]    ${image_name}
+    ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    IF  ${is_expanded}==False
+        Click Button  xpath://td[.="${image_name}"]/../td[1]//button
+    END
+
+Collapse Custom Image Details
+    [Documentation]    Collapses a custom image's row in the dashboard UI
+    [Arguments]    ${image_name}
+    ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    IF  ${is_expanded}==True
+        Click Button  xpath://td[.="${image_name}"]/../td[1]//button
+    END
+
+Verify Custom Image Description
+    [Documentation]    Verifies that the description shown in the dashboard UI
+    ...    matches the given one
+    [Arguments]    ${image_name}    ${expected_description}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="Description"][.="${expected_description}"]
+    IF  ${exists}==False
+        ${desc} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="Description"]
+        Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
+        FAIL
+    END
+    [Return]    ${exists}
+
+Verify Custom Image Is Listed
+    [Documentation]    Verifies that the custom image is displayed in the dashboard
+    ...    UI with the correct name
+    [Arguments]    ${image_name}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]
+    IF  ${exists}==False
+        Log  ${image_name} not visible in page
+        FAIL
+    END
+    [Return]    ${exists}
+
+Verify Custom Image Owner
+    [Documentation]    Verifies that the user listed for an image in the dahsboard
+    ...    UI matches the given one
+    [Arguments]    ${image_name}    ${expected_user}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="User"][.="${expected_user}"]
+    IF  ${exists}==False
+        ${user} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="User"]
+        Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
+        FAIL
+    END
+    [Return]  ${exists}
+
+Enable Custom Image
+    [Documentation]    Enables a custom image (i.e. displayed in JH) [WIP]
+    [Arguments]    ${image_name}
+    ${is_enabled} =  # Need to find a check
+    IF  ${is_enabled}==False
+        Click Element  xpath://td[.="${image_name}"]/..//input
+    END
+
+Disable Custom Image
+    [Documentation]    Disables a custom image (i.e. not displayed in JH) [WIP]
+    [Arguments]    ${image_name}
+    ${is_enabled} =  # Need to find a check
+    IF  ${is_enabled}==True
+        Click Element  xpath://td[.="${image_name}"]/..//input
+    END
+
+Close Notification Drawer
+    [Documentation]    Closes the dashboard notification drawer, if it is open
+    ${closed}=  Run Keyword And Return Status  Page Should Contain Element  ${NOTIFICATION_DRAWER_CLOSED}
+    IF  ${closed}==False
+        Click Element  ${NOTIFICATION_DRAWER_CLOSE_BTN}
+    END
+
+RHODS Notification Drawer Should Not Contain
+    [Documentation]    Verifies RHODS Notifications does not contain given Message
+    [Arguments]     ${message}
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Page Should Not Contain  text=${message}
+    Click Element    xpath=//*[contains(@class,'notification-badge')]

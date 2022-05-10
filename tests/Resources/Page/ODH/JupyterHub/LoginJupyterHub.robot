@@ -1,9 +1,12 @@
 *** Settings ***
 Library  JupyterLibrary
 
+Resource  ../../../RHOSi.resource
+
 *** Keywords ***
 Special User Testing Suite Setup
   Set Library Search Order  SeleniumLibrary
+  RHOSi Setup
 
 Login To Jupyterhub
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
@@ -26,10 +29,10 @@ Login Verify Access Level
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service Account
    IF  '${expected_result}'=='none'
-     User Is Not Allowed  
+     User Is Not Allowed
    ELSE IF  '${expected_result}'=='admin'
      User Is JupyterHub Admin
    ELSE IF  '${expected_result}'=='user'
      User Is Not JupyterHub Admin
-   END   
+   END
    Capture Page Screenshot  verify-access-level-{$expected_result}.png

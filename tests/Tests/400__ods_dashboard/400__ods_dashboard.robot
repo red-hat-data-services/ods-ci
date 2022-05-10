@@ -126,7 +126,9 @@ Verify Logged In Users Are Displayed In The Dashboard
     Verify Username Displayed On RHODS Dashboard    ${TEST_USER.USERNAME}
 
 Search and Verify GPU Items Appears In Resources Page
-    [Tags]    ODS-1226
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-1226
     Search Items In Resources Section    GPU
     Check GPU Resources
 
@@ -142,6 +144,15 @@ Verify Filters Are Working On Resources Page
     Filter By Provider Type And Check Output
     Filter By Application (Aka Povider) And Check Output
     Filter By Using More Than One Filter And Check Output
+
+Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
+    [Documentation]     Verifies that RHODS Notification Drawer doesn't contain "Notebook Images are building", if no build is running
+    [Tags]    Sanity
+    ...       ODS-307
+    ...       Tier1
+    Wait Until All Builds Are Complete  namespace=redhat-ods-applications
+    RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
+
 
 *** Keywords ***
 Verify JupyterHub Card CSS Style
@@ -178,6 +189,7 @@ Check OpenShift Login Visible
 
 Dashboard Test Setup
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
 

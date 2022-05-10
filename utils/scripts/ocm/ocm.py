@@ -50,6 +50,7 @@ class OpenshiftClusterManager():
         self.taints = args.get("taints")
         self.pool_name = args.get("pool_name")
         self.reuse_machine_pool = args.get("reuse_machine_pool")
+        self.notification_email = args.get("notification_email")
 
         ocm_env = glob.glob(dir_path+"/../../../ocm.json.*")
         if ocm_env != []:
@@ -231,7 +232,7 @@ class OpenshiftClusterManager():
         """Updates osd cluster information and stores in config file"""
 
         with open(config_file, 'r') as file:
-            config_data = yaml.load(file)
+            config_data = yaml.safe_load(file)
 
         if self.ldap_test_password != "":
             config_data[self.cluster_name]['TEST_USER']['PASSWORD'] = self.ldap_test_password
@@ -424,7 +425,13 @@ class OpenshiftClusterManager():
 
     def install_rhods(self):
         """Installs RHODS addon"""
-        self.install_addon(addon_name="managed-odh")
+        add_vars = {
+                       "NOTIFICATION_EMAIL": self.notification_email
+                   }
+        self.install_addon(addon_name="managed-odh",
+                           template_filename="install_addon_rhods.jinja",
+                           output_filename="install_operator_rhods.json",
+                           add_replace_vars=add_vars)
 
     def uninstall_rhods(self):
         """Uninstalls RHODS addon"""
@@ -511,32 +518,13 @@ class OpenshiftClusterManager():
             failure_flags.append(failure)
             log.info("\nSetting the useClusterStorage parameter to 'false'")
             rhmi_found = self.is_oc_obj_existent(kind="rhmi", name="rhoam",
-                                                 namespace="redhat-rhoam-operato",
+                                                 namespace="redhat-rhoam-operator",
                                                  retries=35, retry_sec_interval=3)
             if not rhmi_found:
                 failure = True
                 failure_flags.append(failure)
                 if exit_on_failure:
                     sys.exit(1)
-            # rhmi_found = False
-            # for retry in range(30):
-            #     cmd = ("""oc get rhmi rhoam  -n redhat-rhoam-operator""")
-            #     log.info("CMD: {}".format(cmd))
-            #     ret = execute_command(cmd)
-            #     if ret is None or "Error" in ret:
-            #         log.info("Failed to get RHMI object. It may not be ready yet. Trying again in 3 seconds")
-            #         time.sleep(3)
-            #         continue
-            #     else:
-            #         log.info("RHMI object ready to be patched!")
-            #         rhmi_found = True
-            #         break
-            # if not rhmi_found:
-            #     log.error("RHMI not found!")
-            #     failure = True
-            #     failure_flags.append(failure)
-            #     if exit_on_failure:
-            #         sys.exit(1)
 
             cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
                    --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
@@ -550,33 +538,27 @@ class OpenshiftClusterManager():
                 if exit_on_failure:
                     sys.exit(1)
 
-            log.info("\nCreating a dms dummy secret...")
-            cmd = "oc apply -f templates/dms.yaml"
-            log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
-            log.info("\nRET: {}".format(ret))
+            log.info("\nChecking dms secret exists...")
             res = self.is_secret_existent(secret_name="redhat-rhoam-deadmanssnitch",
                                           namespace="redhat-rhoam-operator")
             if res:
                 failure_flags.append(False)
+                log.info("redhat-rhoam-dms secret found!")
             else:
                 failure_flags.append(True)
-                log.info("Failed to create redhat-rhoam-deadmanssnitch secret")
+                log.info("redhat-rhoam-deadmanssnitch secret was not created during installation")
                 if exit_on_failure:
                     sys.exit(1)
 
-
-            log.info("\nCreating a smtp dummy secret...")
-            cmd = "oc apply -f templates/smpt.yaml"
-            log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
-            res = self.is_secret_existent(secret_name="redhat-rhoam-smpt",
+            log.info("\nChecking smtp secret exists..")
+            res = self.is_secret_existent(secret_name="redhat-rhoam-smtp",
                                           namespace="redhat-rhoam-operator")
             if res:
                 failure_flags.append(False)
+                log.info("redhat-rhoam-smpt secret found!")
             else:
                 failure_flags.append(True)
-                log.info("Failed to create redhat-rhoam-smpt secret")
+                log.info("redhat-rhoam-smpt secret was not created during installation")
                 if exit_on_failure:
                     sys.exit(1)
 
@@ -584,6 +566,9 @@ class OpenshiftClusterManager():
                 log.info("Something got wrong while installing RHOAM: "
                          "thus system is not waiting for installation status."
                          "\nPlease check the cluster and try again...")
+                return False
+
+            return True
             # else:
             #    self.wait_for_addon_installation_to_complete(addon_name="managed-api-service")
         else:
@@ -610,6 +595,24 @@ class OpenshiftClusterManager():
                 log.info("Failed to add identity provider of "
                       "type {}".format(self.idp_type))
             self.add_user_to_group()
+
+            time.sleep(10)
+
+            # Add this code as a workaround for IDP discovery issue
+            # Delete the idp and re-create it again
+            log.info("Deleting idp and re-create it again as a workaround for IDP discovery issue")
+            self.delete_user()
+            self.delete_idp()
+
+            time.sleep(10)
+
+            log.info("CMD: {}".format(cmd))
+            ret = execute_command(cmd)
+            if ret is None:
+                log.info("Failed to add identity provider of "
+                      "type {}".format(self.idp_type))
+            self.add_user_to_group()
+
 
         elif (self.idp_type == "ldap"):
             ldap_yaml_file = (os.path.abspath(
@@ -671,6 +674,21 @@ class OpenshiftClusterManager():
         ret = execute_command(cmd)
         if ret is None:
             log.info("Failed to add user {} to group "
+                  "{}".format(user, group))
+
+    def delete_user(self, user="", group="cluster-admins"):
+        """Deletes user"""
+
+        if user == "":
+            user = self.htpasswd_cluster_admin
+
+        cmd = ("ocm delete user {} --cluster {} "
+               "--group={}".format(user,
+                                   self.cluster_name, group))
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        if ret is None:
+            log.info("Failed to delete user {} of group "
                   "{}".format(user, group))
 
     def create_group(self, group_name):
@@ -746,7 +764,9 @@ class OpenshiftClusterManager():
 
     def install_gpu_addon(self):
         if not self.is_addon_installed(addon_name="gpu-operator-certified-addon"):
-            self.install_addon(addon_name="gpu-operator-certified-addon")
+            self.install_addon(addon_name="gpu-operator-certified-addon",
+                               template_filename="install_addon_gpu.jinja",
+                               output_filename="install_operator_gpu.json")
             self.wait_for_addon_installation_to_complete(addon_name="gpu-operator-certified-addon")
         # Waiting 5 minutes to ensure all the services are up
         time.sleep(300)
@@ -803,7 +823,7 @@ class OpenshiftClusterManager():
                    " EXITING".format(self.cluster_name))
             sys.exit(1)
 
-    def update_notification_email_address(self, addon_name, email_address):
+    def update_notification_email_address(self, addon_name, email_address, exit_on_failure=True):
         """Update notification email to Addons"""
         replace_vars = {
                        "EMAIL_ADDER": email_address
@@ -819,8 +839,10 @@ class OpenshiftClusterManager():
         if ret is None:
             log.info("Failed to update email address to {} addon on cluster "
                   "{}".format(addon_name, self.cluster_name))
-            sys.exit(1)
-
+            if exit_on_failure:
+                sys.exit(1)
+            else:
+                return False
 
 
 if __name__ == "__main__":
@@ -985,6 +1007,10 @@ if __name__ == "__main__":
         required_install_rhods_parser.add_argument("--cluster-name",
             help="osd cluster name",
             action="store", dest="cluster_name",
+            required=True)
+        required_install_rhods_parser.add_argument("--notification-email",
+            help="Notification email address",
+            action="store", dest="notification_email",
             required=True)
         install_rhods_parser.set_defaults(func=ocm_obj.install_rhods_addon)
 

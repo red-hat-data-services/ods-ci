@@ -340,6 +340,16 @@ Fetch Image Description Info
     ${text} =  Fetch From Left  ${text}  ,
     [Return]  ${text}
 
+Fetch Image Tooltip Description
+    [Documentation]  Fetches Description in image tooltip
+    [Arguments]  ${img}
+    ${xpath_img_tooltip} =  Set Variable  //input[contains(@id, "${img}")]/../label/span/*
+    ${xpath_tooltip_desc} =  Set Variable  //span[@class="jsp-spawner__image-options__packages-popover__title"]
+    Click Element  ${xpath_img_tooltip}
+    ${desc} =  Get Text  ${xpath_tooltip_desc}
+    Click Element  //div[@class='jsp-app__header__title']
+    [Return]  ${desc}
+
 Fetch Image Tooltip Info
     [Documentation]  Fetches libraries in image tooltip text
     [Arguments]  ${img}
@@ -355,6 +365,15 @@ Fetch Image Tooltip Info
     END
     Click Element  //div[@class='jsp-app__header__title']
     [Return]  ${tmp_list}
+
+Spawn Notebooks And Set S3 Credentials
+    [Documentation]     Spawn a jupyter notebook server and set the env variables
+    ...                 to connect with AWS S3
+    [Arguments]     ${image}=s2i-generic-data-science-notebook
+    Set Log Level    NONE
+    &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
+    Spawn Notebook With Arguments  image=${image}  envs=&{S3-credentials}
+    Set Log Level    INFO
 
 Handle Bad Gateway Page
     [Documentation]    It reloads the JH page until Bad Gateway error page

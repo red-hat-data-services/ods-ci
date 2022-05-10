@@ -2,14 +2,33 @@ from semver import VersionInfo
 from robotlibcore import keyword
 from utils.scripts.ocm.ocm import OpenshiftClusterManager
 from robot.api import logger
+from robot.libraries.BuiltIn import BuiltIn
+
 
 class Helpers:
     """Custom keywords written in Python"""
+    def __init__(self):
+        self.BuiltIn = BuiltIn()
+
     @keyword
     def text_to_list(self, text):
         rows = text.split('\n')
         print(rows)
         return rows
+
+    @keyword
+    def gt(self, version, target):
+        """ Returns True if the version > target
+            and otherwise False including if an exception is thrown """
+        try:
+            version = VersionInfo.parse(version)
+            target = VersionInfo.parse(target)
+            # version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
+            # target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
+            return version > target
+        except ValueError:
+            # Returning False on exception as a workaround for when an null (or invalid) semver version is passed
+            return False
 
     @keyword
     def gte(self, version, target):
@@ -18,8 +37,8 @@ class Helpers:
         try:
             version=VersionInfo.parse(version)
             target=VersionInfo.parse(target)
-            #version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
-            #target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
+            # version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
+            # target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
             return version>=target
         except ValueError:
             # Returning False on exception as a workaround for when an null (or invalid) semver version is passed
@@ -29,7 +48,10 @@ class Helpers:
     def install_rhoam_addon(self, cluster_name):
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
-        ocm_client.install_rhoam_addon(exit_on_failure=False)
+        result = ocm_client.install_rhoam_addon(exit_on_failure=False)
+        if not result:
+            self.BuiltIn.fail("Something got wrong while installing RHOAM. Check the logs")
+
 
     @keyword
     def uninstall_rhoam_using_addon_flow(self, cluster_name):
@@ -64,7 +86,9 @@ class Helpers:
         """Update notification email for add-ons using OCM"""
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
-        ocm_client.update_notification_email_address(addon_name, email_address)
+        status = ocm_client.update_notification_email_address(addon_name, email_address, exit_on_failure=False)
+        if not status:
+            self.BuiltIn.fail("Unable to update notification email, Check if operator is installed via Add-on")
 
     @keyword
     def convert_to_hours_and_minutes(self, seconds):

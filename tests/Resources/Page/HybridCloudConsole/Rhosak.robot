@@ -12,6 +12,8 @@ Resource        ../ODH/AiApps/Rhosak.robot
 # ${PERMISSION_GRID_XPATH_PREFIX}=    table[@aria-label='permission.table.table.permission_list_table']/tbody
 ${PERMISSION_GRID_XPATH_PREFIX}=            table[contains(@class,'pf-m-grid-md')]/tbody
 ${PERMISSION_GRID_BUTTON_XPATH_PREFIX}=     div/ul[@class='pf-c-select__menu']/li
+${CONFIRM_WARNING_XP}=   //div[(contains(@class, "modal")) and (contains(@class, "warning"))]
+${CONFIRM_WARNING_FIRST_BUTTON_XP}=   ${CONFIRM_WARNING_XP}//button[contains(@class, "pf-m-primary")]
 
 
 *** Keywords ***
@@ -154,8 +156,7 @@ Assign Permissions To ServiceAccount In RHOSAK
         Input Text
         ...    xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]//input[@aria-label='permission.manage_permissions_dialog.assign_permissions.resource_name_aria']
         ...    ${nametext}
-        Click Element
-        ...    xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[5]/div//button[@aria-label='Options menu']
+
         Click Element
         ...    xpath=//${PERMISSION_GRID_XPATH_PREFIX}/tr[${index}]/td[5]/div//button[@aria-label='Options menu']
         Wait Until Page Contains Element
@@ -222,6 +223,17 @@ Delete Service Account By Client ID
 Clean Up RHOSAK
     [Documentation]    Cleans up all the RHOSAK created resources from RHOSAK and RHODS UI
     [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}  ${rhosak_app_id}
+    ${window_title}=    Get Title
+    IF    $window_title == "Streams for Apache Kafka | Red Hat OpenShift Application Services"
+        ${modal_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=//*[contains(@class, "modal")]
+        IF    ${modal_exists}==${TRUE}
+           Click Button    xpath=//button[@aria-label="Close"]
+           ${confirm_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=${CONFIRM_WARNING_XP}
+           IF    ${confirm_exists}==${TRUE}
+                Click Button   xpath=${CONFIRM_WARNING_FIRST_BUTTON_XP}
+           END
+        END
+    END
     OpenShiftCLI.Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Switch Window    title:Red Hat OpenShift Streams for Apache Kafka
     Menu.Navigate To Page    Streams for Apache Kafka    Kafka Instances

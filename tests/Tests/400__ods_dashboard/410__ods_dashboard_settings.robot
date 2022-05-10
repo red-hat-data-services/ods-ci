@@ -83,6 +83,7 @@ Restore Default Configuration For "Usage Data Collection" And TearDown
 Dashboard Settings Suite Setup
     [Documentation]    Suite setup
     Set Library Search Order    SeleniumWireLibrary    SeleniumLibrary
+    RHOSi Setup
 
 Dashboard Settings Test Teardown
     [Documentation]    Test teardown

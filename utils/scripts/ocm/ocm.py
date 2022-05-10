@@ -518,32 +518,13 @@ class OpenshiftClusterManager():
             failure_flags.append(failure)
             log.info("\nSetting the useClusterStorage parameter to 'false'")
             rhmi_found = self.is_oc_obj_existent(kind="rhmi", name="rhoam",
-                                                 namespace="redhat-rhoam-operato",
+                                                 namespace="redhat-rhoam-operator",
                                                  retries=35, retry_sec_interval=3)
             if not rhmi_found:
                 failure = True
                 failure_flags.append(failure)
                 if exit_on_failure:
                     sys.exit(1)
-            # rhmi_found = False
-            # for retry in range(30):
-            #     cmd = ("""oc get rhmi rhoam  -n redhat-rhoam-operator""")
-            #     log.info("CMD: {}".format(cmd))
-            #     ret = execute_command(cmd)
-            #     if ret is None or "Error" in ret:
-            #         log.info("Failed to get RHMI object. It may not be ready yet. Trying again in 3 seconds")
-            #         time.sleep(3)
-            #         continue
-            #     else:
-            #         log.info("RHMI object ready to be patched!")
-            #         rhmi_found = True
-            #         break
-            # if not rhmi_found:
-            #     log.error("RHMI not found!")
-            #     failure = True
-            #     failure_flags.append(failure)
-            #     if exit_on_failure:
-            #         sys.exit(1)
 
             cmd = ("""oc patch rhmi rhoam -n redhat-rhoam-operator \
                    --type=merge --patch '{\"spec\":{\"useClusterStorage\": \"false\"}}'""")
@@ -557,33 +538,27 @@ class OpenshiftClusterManager():
                 if exit_on_failure:
                     sys.exit(1)
 
-            log.info("\nCreating a dms dummy secret...")
-            cmd = "oc apply -f templates/dms.yaml"
-            log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
-            log.info("\nRET: {}".format(ret))
+            log.info("\nChecking dms secret exists...")
             res = self.is_secret_existent(secret_name="redhat-rhoam-deadmanssnitch",
                                           namespace="redhat-rhoam-operator")
             if res:
                 failure_flags.append(False)
+                log.info("redhat-rhoam-dms secret found!")
             else:
                 failure_flags.append(True)
-                log.info("Failed to create redhat-rhoam-deadmanssnitch secret")
+                log.info("redhat-rhoam-deadmanssnitch secret was not created during installation")
                 if exit_on_failure:
                     sys.exit(1)
 
-
-            log.info("\nCreating a smtp dummy secret...")
-            cmd = "oc apply -f templates/smpt.yaml"
-            log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
-            res = self.is_secret_existent(secret_name="redhat-rhoam-smpt",
+            log.info("\nChecking smtp secret exists..")
+            res = self.is_secret_existent(secret_name="redhat-rhoam-smtp",
                                           namespace="redhat-rhoam-operator")
             if res:
                 failure_flags.append(False)
+                log.info("redhat-rhoam-smpt secret found!")
             else:
                 failure_flags.append(True)
-                log.info("Failed to create redhat-rhoam-smpt secret")
+                log.info("redhat-rhoam-smpt secret was not created during installation")
                 if exit_on_failure:
                     sys.exit(1)
 
@@ -591,6 +566,9 @@ class OpenshiftClusterManager():
                 log.info("Something got wrong while installing RHOAM: "
                          "thus system is not waiting for installation status."
                          "\nPlease check the cluster and try again...")
+                return False
+
+            return True
             # else:
             #    self.wait_for_addon_installation_to_complete(addon_name="managed-api-service")
         else:

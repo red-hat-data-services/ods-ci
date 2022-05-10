@@ -76,6 +76,8 @@ Verify CUDA Image Suite Setup
     # the Resources-GPU tag will always ensure there is 1 node with 1 GPU on the cluster.
     ${maxNo} =    Find Max Number Of GPUs In One Node
     ${maxSpawner} =    Fetch Max Number Of GPUs In Spawner Page
-    Should Be Equal    ${maxSpawner}    ${maxNo-1}
+    # Need to continue execution even on failure or the whole suite will be failed
+    # And not executed at all.
+    Run Keyword And Warn On Failure  Should Be Equal    ${maxSpawner}    ${maxNo-1}
     Close Browser
     Switch Browser  ${old_browser}[0]

@@ -50,6 +50,7 @@ class OpenshiftClusterManager():
         self.taints = args.get("taints")
         self.pool_name = args.get("pool_name")
         self.reuse_machine_pool = args.get("reuse_machine_pool")
+        self.notification_email = args.get("notification_email")
 
         ocm_env = glob.glob(dir_path+"/../../../ocm.json.*")
         if ocm_env != []:
@@ -424,7 +425,13 @@ class OpenshiftClusterManager():
 
     def install_rhods(self):
         """Installs RHODS addon"""
-        self.install_addon(addon_name="managed-odh")
+        add_vars = {
+                       "NOTIFICATION_EMAIL": self.notification_email
+                   }
+        self.install_addon(addon_name="managed-odh",
+                           template_filename="install_addon_rhods.jinja",
+                           output_filename="install_operator_rhods.json",
+                           add_replace_vars=add_vars)
 
     def uninstall_rhods(self):
         """Uninstalls RHODS addon"""
@@ -779,7 +786,9 @@ class OpenshiftClusterManager():
 
     def install_gpu_addon(self):
         if not self.is_addon_installed(addon_name="gpu-operator-certified-addon"):
-            self.install_addon(addon_name="gpu-operator-certified-addon")
+            self.install_addon(addon_name="gpu-operator-certified-addon",
+                               template_filename="install_addon_gpu.jinja",
+                               output_filename="install_operator_gpu.json")
             self.wait_for_addon_installation_to_complete(addon_name="gpu-operator-certified-addon")
         # Waiting 5 minutes to ensure all the services are up
         time.sleep(300)
@@ -1020,6 +1029,10 @@ if __name__ == "__main__":
         required_install_rhods_parser.add_argument("--cluster-name",
             help="osd cluster name",
             action="store", dest="cluster_name",
+            required=True)
+        required_install_rhods_parser.add_argument("--notification-email",
+            help="Notification email address",
+            action="store", dest="notification_email",
             required=True)
         install_rhods_parser.set_defaults(func=ocm_obj.install_rhods_addon)
 

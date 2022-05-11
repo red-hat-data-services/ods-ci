@@ -50,7 +50,6 @@ Verify Updating Project With Changes From Git Repository
 
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
-    #now do here some changes
     Push Some Changes to Repo
     ...    ${GITHUB_USER.USERNAME}
     ...    ${GITHUB_USER.TOKEN}
@@ -112,7 +111,7 @@ Clone Git Repository In Current Folder
 Commit Changes
     [Documentation]    It does the git commit with commit message
     [Arguments]    ${commit_message}    ${name}    ${email_id}
-    Click Element    xpath=//*[@id="tab-key-6"]/div[1]    #Git Icon
+    Click Element    xpath=//*[@id="tab-key-6"]/div[1]
     Input Text    xpath=//*[@id="jp-git-sessions"]/div/form/input[1]    ${commit_message}
     Sleep    2s
     ${attr} =    Get Element Attribute    //*[@id="jp-git-sessions"]/div/form/input[2]    title
@@ -120,11 +119,11 @@ Commit Changes
         Set Staging Status    OFF
         Set Staging Status    ON
     END
-    Click Button    xpath=//*[@id="jp-git-sessions"]/div/form/input[2]    #click on commit button
+    Click Button    xpath=//*[@id="jp-git-sessions"]/div/form/input[2]
     Wait Until Page Contains    Who is committing?    timeout=10s
     Input Text    //input[@class='jp-mod-styled'][1]    ${name}
     Input Text    //input[@class='jp-mod-styled'][2]    ${email_id}
-    Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]    #click on submit
+    Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]
 
 Push Changes To Remote
     [Documentation]    Push changes to remote directory

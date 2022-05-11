@@ -3,6 +3,7 @@ Documentation       Post install test cases that verify OCP Dashboard resources 
 
 Library             OpenShiftLibrary
 Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 
 *** Test Cases ***
 Verify Dashboard Is Shipped And Enabled Within ODS
@@ -10,17 +11,15 @@ Verify Dashboard Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-233
+    ...       ODS-546
     @{dashboard_pods_info} =    Fetch Dashboard Pods
     @{dashboard_deployments_info} =    Fetch Dashboard Deployments
     @{dashboard_services_info} =    Fetch Dashboard Services
     @{dashboard_routes_info} =    Fetch Dashboard Routes
     @{dashboard_replicasets_info} =    Fetch Dashboard ReplicaSets
+    Verify Dashboard Deployment
     OpenShift Resource Field Value Should Be Equal As Strings    status.phase    Running    @{dashboard_pods_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.containerStatuses[0].name    oauth-proxy    @{dashboard_pods_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.containerStatuses[1].name    rhods-dashboard    @{dashboard_pods_info}
     OpenShift Resource Field Value Should Be Equal As Strings    status.conditions[2].status    True    @{dashboard_pods_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    2    @{dashboard_deployments_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas    2    @{dashboard_deployments_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.ports[0].port    8443    @{dashboard_services_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.ports[0].protocol    TCP    @{dashboard_services_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.ports[0].targetPort    8443    @{dashboard_services_info}
@@ -81,3 +80,10 @@ Fetch Dashboard ReplicaSets
     @{dashboard_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=redhat-ods-applications
     ...    label_selector=app=rhods-dashboard
     [Return]    @{dashboard_replicasets_info}
+
+Verify Dashboard Deployment
+    [Documentation]  Verifies RHODS Dashboard deployment
+    @{dashboard} =  Oc Get    kind=Pod    namespace=redhat-ods-applications    api_version=v1
+    ...    label_selector=deployment = rhods-dashboard
+    ${containerNames} =    Create List    rhods-dashboard    oauth-proxy
+    Verify Deployment    ${dashboard}    2    2    ${containerNames}

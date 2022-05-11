@@ -22,6 +22,7 @@ Verify Dashboard Deployment
     [Documentation]  Verifies RHODS Dashboard deployment
     [Tags]    Sanity
     ...       ODS-546
+    ...       ODS-233
     @{dashboard} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications
     ...    label_selector=deployment = rhods-dashboard
     ${containerNames} =  Create List  rhods-dashboard  oauth-proxy

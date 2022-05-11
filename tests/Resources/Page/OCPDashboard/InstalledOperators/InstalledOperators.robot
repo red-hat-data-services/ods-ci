@@ -94,7 +94,9 @@ Get RHODS version
     #@{list} =  OpenShiftCLI.Get  kind=ClusterServiceVersion  label_selector=olm.copiedFrom=redhat-ods-operator
     #&{dict} =  Set Variable  ${list}[0]
     #Log  ${dict.spec.version}
-    ${ver} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
+    #${ver} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
+    ${ver} =  Set Variable  ${RHODS_VERSION}
+    ${ver} =  Fetch From Left  ${ver}  -
     Log  ${ver}
     [Return]  ${ver}
 

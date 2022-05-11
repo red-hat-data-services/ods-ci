@@ -18,6 +18,7 @@ ${DIR_NAME}         ODS-QE-Github-Test
 ${FILE_PATH}        ODS-QE-Github-Test/test-file.ipynb
 ${COMMIT_MSG}       commit msg2
 
+
 *** Test Cases ***
 Verify Pushing Project Changes Remote Repository
     [Documentation]    Verifies that changes has been pushed successfully to remote repository
@@ -114,6 +115,11 @@ Commit Changes
     Click Element    xpath=//*[@id="tab-key-6"]/div[1]    #Git Icon
     Input Text    xpath=//*[@id="jp-git-sessions"]/div/form/input[1]    ${commit_message}
     Sleep    2s
+    ${attr} =    Get Element Attribute    //*[@id="jp-git-sessions"]/div/form/input[2]    title
+    IF    '''${attr}''' == 'Disabled: No files are staged for commit'
+        Set Staging Status    OFF
+        Set Staging Status    ON
+    END
     Click Button    xpath=//*[@id="jp-git-sessions"]/div/form/input[2]    #click on commit button
     Wait Until Page Contains    Who is committing?    timeout=10s
     Input Text    //input[@class='jp-mod-styled'][1]    ${name}

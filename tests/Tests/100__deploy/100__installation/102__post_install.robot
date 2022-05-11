@@ -193,10 +193,7 @@ Verify Grafana Is Connected To Prometheus Using TLS
     ...       ODS-963
     [Setup]  Set Library Search Order  Selenium Library
     ${res} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=redhat-ods-monitoring
-    ${decode} =  Evaluate  base64.b64decode("${res[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
-    ${decode} =  Evaluate  json.loads('''${decode}''')  json
-    Run Keyword If  'tlsSkipVerify' in ${decode['datasources'][0]['jsonData']}
-    ...  Should Be Equal As Strings  ${decode['datasources'][0]['jsonData']['tlsSkipVerify']}  False
+    Check TLS Is Enabled  secret=${res}
     ${grafana_url} =  Get Grafana URL
     Launch Grafana    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    grafana_url=https://${grafana_url}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     Select Explore
@@ -252,3 +249,11 @@ Verify Errors In Jupyterhub Logs
         ...    container=${pod['spec']['containers'][0]['name']}
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
     END
+
+Check TLS Is Enabled
+    [Documentation]    Verifies TLS Is Enabled
+    [Arguments]     ${secret}
+    ${secret} =  Evaluate  base64.b64decode("${secret[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
+    ${secret} =  Evaluate  json.loads('''${secret}''')  json
+    Run Keyword If  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
+    ...  Should Be Equal As Strings  ${secret['datasources'][0]['jsonData']['tlsSkipVerify']}  False

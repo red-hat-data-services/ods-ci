@@ -444,29 +444,29 @@ Open New Notebook
 
 Clone Repo
     [Documentation]    Clones git repo
-    [Arguments]    ${REPO_URL}
+    [Arguments]    ${repo_url}
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Open With JupyterLab Menu    Git    Clone a Repository
-    Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${REPO_URL}
+    Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${repo_url}
     Click Element    xpath://div[.="CLONE"]
 
 
 Clone Repo and Return Error Message
-    [Arguments]    ${REPO_URL}
-    Clone Repo    ${REPO_URL}
+    [Arguments]    ${repo_url}
+    Clone Repo    ${repo_url}
     Wait Until Page Contains    Cloning...    timeout=5s
-    ${err_msg} =    Did Error Occur While Cloning Git Repo
+    ${err_msg} =    Get Git Clone Error Message
     [RETURN]    ${err_msg}
 
 Get Directory Name From Git Repo URL
     [Documentation]    Returns directory name from repo link
-    [Arguments]    ${REPO_URL}
-    @{ans} =    Split Path    ${REPO_URL}
+    [Arguments]    ${repo_url}
+    @{ans} =    Split Path    ${repo_url}
     ${ans} =    Remove String    ${ans}[1]    .git
     [RETURN]    ${ans}
 
-Did Error Occur While Cloning Git Repo
-    [Documentation]    Returns error when it fails to clones and Keyword Fails when error doesn't occur
+Get Git Clone Error Message
+    [Documentation]    Returns expected error after a git clone operation. Fails if error didn't occur
     ${err_msg} =    Set Variable    No error
     Wait Until Page Contains    Failed to clone    timeout=3s
     Click Button    //div[@class="MuiSnackbar-root MuiSnackbar-anchorOriginBottomRight"]/div/div/button    #click show

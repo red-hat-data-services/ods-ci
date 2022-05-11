@@ -8,7 +8,7 @@ Verify Blackbox Exporter Is Shipped And Enabled Within ODS
     [Documentation]    Verify Blackbox Exporter Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
-    ...       ODS-238
+    ...       ODS-235
     @{blackbox_exporter_pods_info} =    Fetch Blackbox Exporter Pods Info
     @{blackbox_exporter_deployment_info} =    Fetch Blackbox Exporter Deployments Info
     @{blackbox_exporter_services_info} =    Fetch Blackbox Exporter Services Info

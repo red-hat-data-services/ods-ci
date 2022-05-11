@@ -75,23 +75,23 @@ Git Clone the notebooks we need
 
 
 
-Run the 1 core notebook
-  [Tags]  CPU StressTest 1 core
-  Capture Page Screenshot
-  Open With JupyterLab Menu  File  Open from Path…
-  Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  PublicNotebooks/CPU.Stress.1.core.ipynb
-  Click Element  xpath://div[.="Open"]
-  Wait Until CPU.Stress.1.core.ipynb JupyterLab Tab Is Selected
-  Close Other JupyterLab Tabs
-  Capture Page Screenshot
-  Open With JupyterLab Menu  Run  Run All Cells
-  Capture Page Screenshot
+# Run the 1 core notebook
+#   [Tags]  CPU StressTest 1 core
+#   Capture Page Screenshot
+#   Open With JupyterLab Menu  File  Open from Path…
+#   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  PublicNotebooks/CPU.Stress.1.core.ipynb
+#   Click Element  xpath://div[.="Open"]
+#   Wait Until CPU.Stress.1.core.ipynb JupyterLab Tab Is Selected
+#   Close Other JupyterLab Tabs
+#   Capture Page Screenshot
+#   Open With JupyterLab Menu  Run  Run All Cells
+#   Capture Page Screenshot
 
-  ## because the test will take 10 minutes
-  Wait Until JupyterLab Code Cell Is Not Active  timeout=3000
-  Capture Page Screenshot
-  Run Cell And Check Output  print("done")  done
-  Capture Page Screenshot
+#   ## because the test will take 10 minutes
+#   Wait Until JupyterLab Code Cell Is Not Active  timeout=3000
+#   Capture Page Screenshot
+#   Run Cell And Check Output  print("done")  done
+#   Capture Page Screenshot
 
 Run the all cores notebook
   [Tags]  CPU StressTest all cores

@@ -63,7 +63,6 @@ Verify OpenVINO Image Is Tracked By Notification System In RHODS Dashboard
     Wait Until Page Contains    Notebook images are running
     [Teardown]   Uninstall Openvino Operator
 
-
 *** Keywords ***
 OpenVino Suite Setup
   Set Library Search Order  SeleniumLibrary

@@ -51,7 +51,7 @@ Verify OpenVINO Image Is Tracked By Notification System In RHODS Dashboard
     Click Element    //a[@class="co-resource-item__resource-name"]
     Wait Until Page Contains    Build details
     @{link_elements}=  Get WebElements
-    ...    //*[@id="content-scrollable"]/section/div[2]/div[2]/div/div/div[1]/dl/dd[3]/div
+    ...    //div[@class='co-m-label-list']
     @{list} =    Create List
     FOR  ${link}  IN  @{link_elements}
           ${txt} =    Get Text    ${link}

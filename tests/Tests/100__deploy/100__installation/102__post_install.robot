@@ -18,15 +18,6 @@ Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../Resources/Common.robot
 
 *** Test Cases ***
-Verify Dashboard Deployment
-    [Documentation]  Verifies RHODS Dashboard deployment
-    [Tags]    Sanity
-    ...       ODS-546
-    @{dashboard} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications
-    ...    label_selector=deployment = rhods-dashboard
-    ${containerNames} =  Create List  rhods-dashboard  oauth-proxy
-    Verify Deployment  ${dashboard}  2  2  ${containerNames}
-
 Verify Traefik Deployment
     [Documentation]  Verifies RHODS Traefik deployment
     [Tags]    Sanity

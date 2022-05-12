@@ -24,23 +24,23 @@ ${TEST_ALERT_PVC100_NOTEBOOK_PATH}      SEPARATOR=
 
 
 *** Test Cases ***
-Verify All Alerts Are Critical
-    [Documentation]    Verifies that all alerts have critical severity
+Verify All Alerts Severity
+    [Documentation]    Verifies that all alerts have severity
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1227
 
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.9.0
     IF    ${version_check}==True
-        Verify "RHODS Probe Success Burn Rate" Are Critical And Continue On Failure
+        Verify "RHODS Probe Success Burn Rate" Alerts Severity And Continue On Failure
 
-        Verify "RHODS Route Error Burn Rate" Are Critical And Continue On Failure
+        Verify "RHODS Route Error Burn Rate" Alerts Severity And Continue On Failure
 
-        Verify "User Notebook PVC Usage" Are Critical And Continue On Failure
+        Verify "User Notebook PVC Usage" Alerts Severity And Continue On Failure
 
-        Verify "DeadManSnitch" Is Critical And Continue On Failure
+        Verify "DeadManSnitch" Alerts Severity And Continue On Failure
 
-        Verify "JupyterHub Image Builds Are Failing" Is Critical And Continue On Failure
+        Verify "JupyterHub Image Builds Are Failing" Alerts Severity And Continue On Failure
     ELSE
         Skip    msg=Critical alert severity is set since RHODS 1.9.0
     END
@@ -387,44 +387,44 @@ Verify "RHODS Probe Success Burn Rate" Alerts Are Not Firing And Continue On Fai
     Verify Alert Is Not Firing And Continue On Failure
     ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=10800
 
-Verify "RHODS Probe Success Burn Rate" Are Critical And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" is critical
+Verify "RHODS Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=3600
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=10800
+    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    warning    alert-duration=10800
 
-Verify "RHODS Route Error Burn Rate" Are Critical And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" is critical
+Verify "RHODS Route Error Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate   critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate   critical    alert-duration=3600
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate   warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    critical    alert-duration=10800
+    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    warning    alert-duration=10800
 
-Verify "User Notebook PVC Usage" Are Critical And Continue On Failure
-    [Documentation]    Verifies that alert "User notebook pvc usage" is critical
+Verify "User Notebook PVC Usage" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "User notebook pvc usage" is warning
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    critical    alert-duration=120
+    ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    warning    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    RHODS-PVC-Usage    User notebook pvc usage at 100%    critical    alert-duration=120
+    ...    RHODS-PVC-Usage    User notebook pvc usage at 100%    warning    alert-duration=120
 
-Verify "DeadManSnitch" Is Critical And Continue On Failure
+Verify "DeadManSnitch" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "DeadManSnitch" is critical
     Verify Alert Has A Given Severity And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch    critical
 
-Verify "JupyterHub Image Builds Are Failing" Is Critical And Continue On Failure
-    [Documentation]    Verifies that alert "JupyterHub image builds are failing" is critical
+Verify "JupyterHub Image Builds Are Failing" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "JupyterHub image builds are failing" is warning
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    Builds    JupyterHub image builds are failing    critical    alert-duration=120
+    ...    Builds    JupyterHub image builds are failing    warning    alert-duration=120
 
 Verify Alert Has A Given Severity And Continue On Failure
     [Documentation]    Verifies that alert has a certain severity, failing otherwhise but continuing the execution

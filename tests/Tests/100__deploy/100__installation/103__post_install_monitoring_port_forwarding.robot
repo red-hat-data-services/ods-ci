@@ -23,7 +23,7 @@ Verify That MT-SRE Can Connect To Grafana Using Port Forwarding
     Open Browser  http://localhost:3001  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Go To Grafana Dashboard Search
     Verify If Jupyterhub Sli Is Present
-    [Teardown]  Kill Process  ${grafana_port_forwarding_process}
+    [Teardown]  Terminate Process  ${grafana_port_forwarding_process}
 
 Verify MT-SRE Can Connect To Prometheus Using Port-Forwarding
     [Documentation]    Verifies that MT-SRE can connect to Prometheus using Port-forwarding
@@ -33,7 +33,7 @@ Verify MT-SRE Can Connect To Prometheus Using Port-Forwarding
     Wait Until HTTP Status Code Is  url=http://localhost:9090  retry=10x  expected_status_code=200
     Go To  http://localhost:9090
     Verify Access To Prometheus Using Browser
-    [Teardown]  Kill Process  ${prometheus_port_forwarding_process}
+    [Teardown]  Terminate Process  ${prometheus_port_forwarding_process}
 
 Verify MT-SRE Can Connect To Alert Manager Using Port-forwarding
     [Documentation]    Verifies that MT-SRE can connect to Alert Manager using Port Forwarding
@@ -43,7 +43,7 @@ Verify MT-SRE Can Connect To Alert Manager Using Port-forwarding
     Wait Until HTTP Status Code Is  url=http://localhost:9093  retry=10x  expected_status_code=200
     Go To  http://localhost:9093
     Verify Access To Alert Manager Using Browser
-    [Teardown]  Kill Process  ${alertmanager_port_forwarding_process}
+    [Teardown]  Terminate Process  ${alertmanager_port_forwarding_process}
 
 
 *** Keywords ***

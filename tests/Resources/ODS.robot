@@ -202,11 +202,6 @@ Verify Default Access Groups Settings
         Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
     END
 
-Kill Process
-    [Documentation]   Kill process running in background based on Id
-    [Arguments]  ${proc}
-    Terminate Process   ${proc}
-
 Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
     ${grafana_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable

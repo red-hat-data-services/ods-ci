@@ -98,11 +98,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     Verify Anaconda Success Message Based On Version
     Verify Anaconda Service Is Enabled Based On Version
     Capture Page Screenshot    after_revalidation.png
-<<<<<<< HEAD
-    [Teardown]    Remove Anaconda Professional Component
-=======
     [Teardown]    Remove Anaconda Component
->>>>>>> 33de412 (Merge branch 'name_change' of github.com:risusing/ods-ci into name_change)
 
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
@@ -280,7 +276,7 @@ Filter By Using More Than One Filter And Check Output
     END
 
 Verify Anaconda Success Message Based On Version
-    [Documentaion]  Checks Anaconda success message based on version
+    [Documentation]  Checks Anaconda success message based on version
     ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
     IF  ${version-check}==False
         Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME}

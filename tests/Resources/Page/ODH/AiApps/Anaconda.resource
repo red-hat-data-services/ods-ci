@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Keyword suites to interact with Anaconda
+Documentation       Keyword suites to interact with Anaconda Professional
 
 Resource            ../../../Page/LoginPage.robot
 Library             SeleniumLibrary
@@ -123,12 +123,12 @@ Verify Anaconda Card Present Based On Version
   END
 
 Verify Anaconda Card Not Present Based On Version
-  [Documentaion]    Checks Anaconda card is not present based on version.
+  [Documentation]    Checks Anaconda card is not present based on version.
   ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
   IF  ${version-check}==False
-    Page Should Contain Not Element     xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
+    Page Should Not Contain Element     xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
   ELSE
-    Page Should Contain Not Element     xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Professional"]
+    Page Should Not Contain Element     xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Professional"]
   END
 
 Verify Service Is Available In The Explore Page Based On Version
@@ -141,7 +141,7 @@ Verify Service Is Available In The Explore Page Based On Version
   END
 
 Verify Service Provides "Get Started" Button In The Explore Page Based On Version
-  [Documentaion]    Checks service provides "get started" button in explore based on version.
+  [Documentation]    Checks service provides "get started" button in explore based on version.
   ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
   IF  ${version-check}==False
     Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Commercial Edition
@@ -168,7 +168,7 @@ Verify Anaconda Service Is Enabled Based On Version
   END
 
 Verify Page Contain Anaconda Based On Version
-  [Documentaion]    Checks page contain Anaconda text or not based on version.
+  [Documentation]    Checks page contain Anaconda text or not based on version.
   ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
   IF  ${version-check}==False
     Wait Until Page Contains    Anaconda Commercial Edition     timeout=30

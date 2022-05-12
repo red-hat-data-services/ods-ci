@@ -16,8 +16,9 @@ Verify Default Access Groups Settings And JupyterLab Notebook Access
     Verify User Can Spawn A Notebook
 
 Verify Empty Group Doesnt Allow Users To Spawn Notebooks
-    [Documentation]   Verify that USer is unable to Access Jupyterhub after modifying Access Groups in rhods-groups-config
+    [Documentation]   Verify that User is unable to Access Jupyterhub after modifying Access Groups in rhods-groups-config
     [Tags]    Sanity
+    ...       Tier1
     ...       ODS-572
     Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/admin_groups", "value":""}]'
     Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/allowed_groups", "value":""}]'
@@ -37,12 +38,6 @@ Verify User Can Spawn A Notebook
 
 Update Access Groups In RHODS Groups Config
     [Documentation]    Updates the values of Access Groups in rhods-group-config.
-    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check} == True
-        Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/admin_groups", "value":"dedicated-admins"}]'
-        Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/allowed_groups", "value":"system:authenticated"}]'
-    ELSE
-        Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/admin_groups", "value":"rhods-admins"}]'
-        Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/allowed_groups", "value":"rhods-users"}]'
-    END
+    Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/admin_groups", "value":"dedicated-admins"}]'
+    Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/allowed_groups", "value":"system:authenticated"}]'
     Run  oc rollout latest dc/jupyterhub -n redhat-ods-applications

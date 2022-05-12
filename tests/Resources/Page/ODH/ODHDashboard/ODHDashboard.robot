@@ -147,12 +147,6 @@ Go To RHODS Dashboard
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
 
-Check HTTP Status Code
-    [Arguments]  ${link_to_check}  ${expected}=200
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
-    Run Keyword And Continue On Failure  Status Should Be  ${expected}
-    [Return]  ${response.status_code}
-
 Load Expected Data Of RHODS Explore Section
     ${version-check}=   Is RHODS Version Greater Or Equal Than  1.8.0
     IF  ${version-check}==True
@@ -461,7 +455,7 @@ Open Custom Image Import Popup
     ${first_image} =  Run Keyword And Return Status  Page Should Contain Element  xpath://button[.="Import image"]
     IF  ${first_image}==True
         Click Element  xpath://button[.="Import image"]
-    ELSE 
+    ELSE
         Click Element  xpath://button[.="Import new image"]
     END
     Wait Until Page Contains    Import Notebook images
@@ -512,7 +506,7 @@ Remove Package From Custom Image
 
 Delete Custom Image
 # Need to check if image is REALLY deleted
-    [Documentation]    Deletes a custom image through the dashboard UI. 
+    [Documentation]    Deletes a custom image through the dashboard UI.
     ...    Needs an additional check on removed ImageStream
     [Arguments]    ${image_name}
     Click Button  xpath://td[.="${image_name}"]/../td[last()]//button

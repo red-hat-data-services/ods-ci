@@ -183,13 +183,13 @@ Get RHODS URL From OpenShift Using UI
     [Return]   ${href}
 
 OpenShift Resource Field Value Should Be Equal As Strings
-    [Documentation]    
+    [Documentation]
     ...    Args:
     ...        actual(str): Field with the actual value of the resource
     ...        expected(str): Expected value
-    ...        resources(list(dict)): Resources from OpenShiftLibrary 
+    ...        resources(list(dict)): Resources from OpenShiftLibrary
     ...    Returns:
-    ...        None 
+    ...        None
     [Arguments]    ${actual}    ${expected}    @{resources}
     FOR    ${resource}    IN    @{resources}
         &{dict} =    Set Variable    ${resource}
@@ -201,9 +201,9 @@ OpenShift Resource Field Value Should Match Regexp
     ...    Args:
     ...        actual(str): Field with the actual value of the resource
     ...        expected(str): Expected regular expression
-    ...        resources(list(dict)): Resources from OpenShiftLibrary 
+    ...        resources(list(dict)): Resources from OpenShiftLibrary
     ...    Returns:
-    ...        None 
+    ...        None
     [Arguments]    ${actual}    ${expected}    @{resources}
     FOR    ${resource}    IN    @{resources}
         &{dict} =    Set Variable    ${resource}

@@ -418,9 +418,9 @@ RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message
     [Arguments]     ${message}
     Click Element    xpath=//*[contains(@class,'notification-badge')]
-    Page Should Contain  text=${message}
-    Click Element    xpath=//*[contains(@class,'notification-badge')]
-
+    Page Should Contain Element
+    ...    xpath=//*[contains(text(),'${message}')]
+    Close Notification Drawer
 
 Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
@@ -602,4 +602,4 @@ Clear Dashboard Notifications
     FOR    ${index}    IN RANGE    ${notification_count}
         Click Element    xpath=//*[contains(@class,"odh-dashboard__notification-drawer__item-remove")]
     END
-    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Close Notification Drawer

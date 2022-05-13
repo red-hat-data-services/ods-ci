@@ -21,7 +21,9 @@ Resource            ../../../Resources/Common.robot
 Verify Traefik Deployment
     [Documentation]  Verifies RHODS Traefik deployment
     [Tags]    Sanity
+    ...       Tier1
     ...       ODS-546
+    ...       ODS-552
     @{traefik} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=name = traefik-proxy
     ${containerNames} =  Create List  traefik-proxy  configmap-puller
     Verify Deployment  ${traefik}  3  2  ${containerNames}

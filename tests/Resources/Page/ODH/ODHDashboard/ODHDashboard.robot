@@ -248,7 +248,7 @@ Check Sidebar Links
         ${link_idx}=  Convert To String    ${link_idx}
         ${link_text}=  Get Text    ${s_link}
         ${link_href}=  Get Element Attribute    ${s_link}    href
-        ${link_status}=  Check HTTP Status Code   link_to_check=${link_href}  expected=200
+        ${link_status}=  Run Keyword And Continue On Failure  Check HTTP Status Code   link_to_check=${link_href}  expected=200
         ${expected_link}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][url]
         ${expected_text}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][text]
         ${lt_json_list}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][matching]
@@ -303,10 +303,10 @@ Check Cards Details Are Correct
         ${card_xp}=  Set Variable  (${CARDS_XP})[${idx}]
         ${application_id}=  Get App ID From Card  card_locator=${card_xp}
         Log    ${application_id}
-        Run Keyword And Continue On Failure  Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
-        Run Keyword And Continue On Failure  Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
-        Run Keyword And Continue On Failure  Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
+        Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
     END
 
 Success Message Should Contain

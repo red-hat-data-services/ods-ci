@@ -31,7 +31,7 @@ Verify Traefik Deployment
 Verify JH Deployment
     [Documentation]  Verifies RHODS JH deployment
     [Tags]    Sanity
-    ...       ODS-546  ODS-294  ODS-1250
+    ...       ODS-546  ODS-294  ODS-1250  ODS-237
     @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
     ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
     Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}

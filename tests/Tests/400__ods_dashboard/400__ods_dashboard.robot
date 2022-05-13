@@ -7,6 +7,7 @@ Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
+Resource        ../../Resources/Common.robot
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 

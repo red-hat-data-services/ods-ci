@@ -2,6 +2,7 @@
 Library   SeleniumLibrary
 Library   JupyterLibrary
 Library   OperatingSystem
+Library   RequestsLibrary
 Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -83,3 +84,16 @@ Get Cluster Name By Cluster ID
         Fail    Unable to retrieve cluster name for cluster ID ${cluster_id}
     END
     [Return]    ${cluster_name}
+
+Wait Until HTTP Status Code Is
+    [Documentation]     Waits Until Status Code Of URl Matches expected Status Code
+    [Arguments]  ${url}   ${expected_status_code}=200  ${retry}=1m   ${retry_interval}=15s
+    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
+    ...    Check HTTP Status Code    ${url}    ${expected_status_code}
+
+Check HTTP Status Code
+    [Documentation]     Verifies Status Code of URL Matches Expected Status Code
+    [Arguments]  ${link_to_check}  ${expected}=200
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
+    Run Keyword And Continue On Failure  Status Should Be  ${expected}
+    [Return]  ${response.status_code}

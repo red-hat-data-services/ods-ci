@@ -245,10 +245,16 @@ Filter Resources By Status "Enabled" And Check Output
 
 Filter By Application (Aka Povider) And Check Output
     [Documentation]    Filter by application (aka provider)
-    Select Checkbox Using Id    Anaconda Professional--check-box
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
+    IF  ${version-check}==False
+        ${id_name} =  Set Variable    Anaconda Commercial Edition--check-box
+    ELSE
+        ${id_name} =  Set Variable    Anaconda Professional--check-box
+    END
+    Select Checkbox Using Id    ${id_name}
     Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
     ...    list_of_items=${EXPECTED_ITEMS_FOR_APPLICATION}    index_of_text=1
-    Deselect Checkbox Using Id    id=Anaconda Professional--check-box
+    Deselect Checkbox Using Id    id=${id_name}
 
 Filter By Resource Type And Check Output
     [Documentation]    Filter by resource type

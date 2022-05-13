@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation   Test integration with Anaconda Commerical Edition ISV
+Documentation   Test integration with Anaconda ISV
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/Page/OCPDashboard/Page.robot
@@ -11,12 +11,11 @@ Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
-Suite Setup     Anaconda Commercial Edition Suite Setup
-Suite Teardown  Close All Browsers
+Suite Setup     Anaconda Suite Setup
 
 
 *** Test Cases ***
-Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabled Page
+Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Page
   [Documentation]  Tests if ACE and its Activation button are present in Explore page.
   ...              If the button is not there, it checks if ACE is already enabled
   [Tags]  Smoke  Sanity
@@ -24,17 +23,17 @@ Verify Anaconda Commercial Edition Is Available In RHODS Dashboard Explore/Enabl
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
-  Verify Service Is Available In The Explore Page    Anaconda Commercial Edition
-  Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Commercial Edition
+  Verify Service Is Available In The Explore Page Based On Version
+  Verify Service Provides "Get Started" Button In The Explore Page Based On Version
   ${status}=   Run Keyword And Return Status
-  ...               Verify Service Provides "Enable" Button In The Explore Page    Anaconda Commercial Edition
+  ...               Verify Service Provides "Enable" Button In The Explore Page Based On Version
   Run Keyword If   ${status} == ${False}   Run Keywords
-  ...              Verify Service Is Enabled      Anaconda Commercial Edition
+  ...              Verify Anaconda Service Is Enabled Based On Version
   ...              AND
-  ...              FAIL   Anaconda Commercial Edition does not have a "Enable" button
+  ...              FAIL   Anaconda Professional does not have a "Enable" button
   ...                     in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
 
-Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
+Verify Anaconda Professional Fails Activation When Key Is Invalid
   [Documentation]  Checks that if user inserts an invalid key,
   ...              the Anaconda CE validation fails as expected
   [Tags]  Tier2
@@ -48,10 +47,9 @@ Verify Anaconda Commercial Edition Fails Activation When Key Is Invalid
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
-  Page Should Not Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
-  [Teardown]    Remove Anaconda Components For Validation
+  Verify Anaconda Card Not Present Based On Version
 
-Verify User Is Able to Activate Anaconda Commercial Edition
+Verify User Is Able to Activate Anaconda Professional
   [Tags]  Tier2
   ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082
   ...     KnownIssues
@@ -66,7 +64,7 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_present.png
-  Page Should Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
+  Verify Anaconda Card Present Based On Version
   Go To  ${OCP_CONSOLE_URL}
   Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
   Maybe Skip Tour
@@ -78,8 +76,8 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Go To  ${ODH_DASHBOARD_URL}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Launch JupyterHub Spawner From Dashboard
-  Wait Until Page Contains Element  xpath://input[@name="Anaconda Commercial Edition"]
-  Wait Until Element Is Enabled    xpath://input[@name="Anaconda Commercial Edition"]   timeout=10
+  Run Keyword And Continue On Failure  Verify Anaconda Element Present Based On Version
+  Run Keyword And Continue On Failure  Verify Anaconda Element Enabled Based On Version
   Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
   Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${TOKEN_VAL_SUCCESS_MSG}
   Capture Page Screenshot  anaconda_token_val_cell.png
@@ -91,11 +89,11 @@ Verify User Is Able to Activate Anaconda Commercial Edition
   Verify Library Version Is Greater Than  notebook    6.4.1
   Maybe Open JupyterLab Sidebar   File Browser
   Fix Spawner Status  # used to close the server and go back to Spawner
-  Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
-  [Teardown]    Remove Anaconda Commercial Edition Component
+  Verify Anaconda Element Present Based On Version
+  [Teardown]    Remove Anaconda Component
 
 *** Keywords ***
-Anaconda Commercial Edition Suite Setup
+Anaconda Suite Setup
   [Documentation]  Setup for ACE test suite
   Set Library Search Order  SeleniumLibrary
   RHOSi Setup

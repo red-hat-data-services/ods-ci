@@ -20,8 +20,8 @@ ${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class
 ${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
-${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
-${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary_latest.json
+${APPS_DICT_PATH}=  tests/Resources/Files/AppsInfoDictionary.json
+${APPS_DICT_PATH_LATEST}=   tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
@@ -154,7 +154,7 @@ Check HTTP Status Code
     [Return]  ${response.status_code}
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.8.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.11.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE
@@ -248,7 +248,7 @@ Check Sidebar Links
         ${link_idx}=  Convert To String    ${link_idx}
         ${link_text}=  Get Text    ${s_link}
         ${link_href}=  Get Element Attribute    ${s_link}    href
-        ${link_status}=  Check HTTP Status Code   link_to_check=${link_href}  expected=200
+        ${link_status}=  Run Keyword And Continue On Failure  Check HTTP Status Code   link_to_check=${link_href}  expected=200
         ${expected_link}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][url]
         ${expected_text}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][text]
         ${lt_json_list}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][matching]

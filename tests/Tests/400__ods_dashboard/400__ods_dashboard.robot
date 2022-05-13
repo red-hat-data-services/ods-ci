@@ -20,7 +20,7 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     How to install Python packages on your notebook server              How to update notebook server settings
 ...                                     How to use data from Amazon S3 buckets                              How to view installed packages on your notebook server
 ...                                     JupyterHub
-@{EXPECTED_ITEMS_FOR_APPLICATION}       Create List                                                         by Anaconda Commercial Edition
+@{EXPECTED_ITEMS_FOR_APPLICATION}       Create List                                                         by Anaconda Professional
 @{EXPECTED_ITEMS_FOR_RESOURCE_TYPE}     Create List                                                         Tutorial
 @{EXPECTED_ITEMS_FOR_PROVIDER_TYPE}     Create List                                                         Connecting to Red Hat OpenShift Streams for Apache Kafka
 ...                                     Creating a Jupyter notebook                                         Deploying a sample Python application using Flask and OpenShift
@@ -86,7 +86,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible
-    Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
+    Verify Anaconda Service Is Enabled Based On Version
     Close All Browsers
     Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
@@ -95,10 +95,10 @@ Verify License Of Disabled Cards Can Be Re-validated
     Re-Validate License For Disabled Application From Enabled Page    app_id=${ANACONDA_APPNAME}
     Insert Anaconda License Key    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Validate Anaconda License Key
-    Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME}
-    Verify Service Is Enabled    ${ANACONDA_DISPLAYED_NAME}
+    Verify Anaconda Success Message Based On Version
+    Verify Anaconda Service Is Enabled Based On Version
     Capture Page Screenshot    after_revalidation.png
-    [Teardown]    Remove Anaconda Commercial Edition Component
+    [Teardown]    Remove Anaconda Component
 
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
@@ -245,10 +245,16 @@ Filter Resources By Status "Enabled" And Check Output
 
 Filter By Application (Aka Povider) And Check Output
     [Documentation]    Filter by application (aka provider)
-    Select Checkbox Using Id    Anaconda Commercial Edition--check-box
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
+    IF  ${version-check}==False
+        ${id_name} =  Set Variable    Anaconda Commercial Edition--check-box
+    ELSE
+        ${id_name} =  Set Variable    Anaconda Professional--check-box
+    END
+    Select Checkbox Using Id    ${id_name}
     Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
     ...    list_of_items=${EXPECTED_ITEMS_FOR_APPLICATION}    index_of_text=1
-    Deselect Checkbox Using Id    id=Anaconda Commercial Edition--check-box
+    Deselect Checkbox Using Id    id=${id_name}
 
 Filter By Resource Type And Check Output
     [Documentation]    Filter by resource type
@@ -273,4 +279,13 @@ Filter By Using More Than One Filter And Check Output
     ...    list_of_items=${EXPECTED_ITEMS_FOR_COMBINATIONS}
     FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
         Deselect Checkbox Using Id    id=${id}
+    END
+
+Verify Anaconda Success Message Based On Version
+    [Documentation]  Checks Anaconda success message based on version
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
+    IF  ${version-check}==False
+        Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME}
+    ELSE
+        Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME_LATEST}
     END

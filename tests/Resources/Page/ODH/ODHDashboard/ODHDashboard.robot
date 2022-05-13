@@ -387,61 +387,6 @@ Search Items In Resources Section
     Sleep   5
     Input Text  xpath://input[@class="pf-c-search-input__text-input"]       ${element}
 
-Open QuickStart Element in Resource Section By Name
-    [Documentation]     It opens the element by enabling Quick Start filter in Resources Section of ODS Dashboard.
-    [Arguments]     ${element}
-    Click Link      Resources
-    Sleep   5
-    Select Checkbox     //input[@id="quickstart--check-box"]
-    Wait Until Page Contains Element    //article[@id="${element}"]
-    Click Link          //article[@id="${element}"]//a
-    Wait Until Page Contains ELement    //div[@class="pf-c-drawer__panel-main"]     5
-
-Get The Count Of Description
-    [Documentation]     Gives the count of description which is shown while starting the tour.
-    ${count}=   Get ELement Count   //div[@class="pfext-quick-start-content"]/ul/li
-    [Return]    ${count}
-
-Close The Sidebar By Clicking Leave
-    Verify And Close The Sidebar
-    Wait Until Page Contains Element        //div[@data-testid="qs-drawer-close"]//button
-    Click Button       //div[@data-testid="qs-drawer-close"]//button
-    Page Should Not Contain Element     //div[@class="pf-c-drawer__panel-main"]
-
-Verify The Progress Of The Items
-    [Documentation]     Verifies the label on the item card which shows the progress and closes the sidebar.
-    [Arguments]     ${element}  ${progress_string}
-    IF  '${progress_string}'=='In Progress'
-        Element Text Should Be      //article[@id="${element}"]//span[@class="pf-c-label pf-m-purple pf-m-outline"]     In Progress
-    ELSE IF     '${progress_string}'=='Complete'
-        Element Text Should Be      //article[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]      Complete
-    ELSE IF     '${progress_string}'=='Failed'
-        Element Text Should Be      //article[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]        Failed
-    END
-
-Verify And Close The Sidebar
-    Wait Until Page Contains ELement    //div[@class="pf-c-drawer__panel-main"]     5
-    Page Should Contain Element     //div[@data-testid="qs-drawer-close"]/button
-    Click Button        //div[@data-testid="qs-drawer-close"]/button
-
-Move To Next Step By Clicking Yes
-    Wait Until Page Contains Element    //input[@data-testid="qs-drawer-check-yes"]
-    Click Button    //input[@data-testid="qs-drawer-check-yes"]
-
-Move To Next Step By Clicking No
-    Wait Until Page Contains Element    //input[@data-testid="qs-drawer-check-no"]
-    Click Button    //input[@data-testid="qs-drawer-check-no"]
-    Click Button    //button[@data-testid="qs-drawer-next"]
-
-Verify Previous Description
-    [Arguments]     ${count}
-    Click Button    //button[@data-testid="qs-drawer-back"]
-    IF  ${count} == 1
-        Element Text Should Be      //span[@class="pfext-quick-start-task-header__subtitle"]    1 of 1
-    ELSE
-        Element Text Should Be      //span[@class="pfext-quick-start-task-header__subtitle"]    ${count-1} of ${count}
-    END
-
 Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
     [Arguments]    ${user_name}
@@ -516,7 +461,7 @@ Open Custom Image Import Popup
     ${first_image} =  Run Keyword And Return Status  Page Should Contain Element  xpath://button[.="Import image"]
     IF  ${first_image}==True
         Click Element  xpath://button[.="Import image"]
-    ELSE 
+    ELSE
         Click Element  xpath://button[.="Import new image"]
     END
     Wait Until Page Contains    Import Notebook images
@@ -567,7 +512,7 @@ Remove Package From Custom Image
 
 Delete Custom Image
 # Need to check if image is REALLY deleted
-    [Documentation]    Deletes a custom image through the dashboard UI. 
+    [Documentation]    Deletes a custom image through the dashboard UI.
     ...    Needs an additional check on removed ImageStream
     [Arguments]    ${image_name}
     Click Button  xpath://td[.="${image_name}"]/../td[last()]//button

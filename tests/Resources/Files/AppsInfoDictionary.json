@@ -3,10 +3,10 @@
      "anaconda-ce": {
           "badges": ["Partner managed"],
           "provider": "by Anaconda",
-          "title": "Anaconda Professional",
-          "description": "Anaconda Professional is a popular open source package distribution and management experience that is optimized for commercial use.",
+          "title": "Anaconda Anaconda Commercial Edition",
+          "description": "Anaconda Anaconda Commercial Edition is a popular open source package distribution and management experience that is optimized for commercial use.",
           "image": "/images/anaconda-ce.svg",
-          "sidebar_h1": "Anaconda Professional",
+          "sidebar_h1": "Anaconda Anaconda Commercial Edition",
           "sidebar_links":  {
                "0": {
                     "text": "Get started",

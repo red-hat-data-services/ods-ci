@@ -28,7 +28,7 @@ Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Pag
   ${status}=   Run Keyword And Return Status
   ...               Verify Service Provides "Enable" Button In The Explore Page Based On Version
   Run Keyword If   ${status} == ${False}   Run Keywords
-  ...              Verify Service Is Enabled Based On Version
+  ...              Verify Anaconda Service Is Enabled Based On Version
   ...              AND
   ...              FAIL   Anaconda Professional does not have a "Enable" button
   ...                     in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable

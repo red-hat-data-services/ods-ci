@@ -154,7 +154,7 @@ Check HTTP Status Code
     [Return]  ${response.status_code}
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.11.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.1.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE

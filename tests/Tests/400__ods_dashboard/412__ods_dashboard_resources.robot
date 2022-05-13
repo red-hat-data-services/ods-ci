@@ -45,29 +45,29 @@ Verify Quick Starts Work As Expected When All Steps Are Marked As Yes
             Go To Next QuickStart Step
         END
     END
-    Go Back And Check Previouse Step Is Selected     n_steps=${count}   exp_step=${count-1}
+    Run Keyword And Continue On Failure     Go Back And Check Previouse Step Is Selected     n_steps=${count}   exp_step=${count-1}
     Run Keyword And Continue On Failure         Mark Step Check As Yes
     Go To Next QuickStart Step
     Go To Next QuickStart Step
     Close QuickStart From Button
-    Page Should Not Contain QuickStart Sidebar
-    QuickStart Status Should Be    ${element}  Complete
+    Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
+    Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  Complete
 
 Verify Quick Starts Work As Expected When Restarting The Previous One
     [Arguments]    ${element}
-    Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Restart
-    QuickStart Status Should Not Be Set     ${element}
+    Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Restart
+    Run Keyword And Continue On Failure     QuickStart Status Should Not Be Set     ${element}
     Open QuickStart Element in Resource Section By Name     ${element}
     ${count}=   Get The Count Of QuickStart Steps
-    Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Close
+    Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Close
     Continue QuickStart
-    Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
+    Run Keyword And Continue On Failure     Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
     Close QuickStart From Top     decision=cancel
-    Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
+    Run Keyword And Continue On Failure     Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
     Close QuickStart From Top     decision=leave
-    Page Should Not Contain QuickStart Sidebar
-    QuickStart Status Should Be    ${element}  In Progress
-    Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
+    Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
+    Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  In Progress
+    Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
 
 Verify Quick Starts Work As Expected When One Step Is Marked As No
     [Arguments]     ${element}
@@ -83,7 +83,7 @@ Verify Quick Starts Work As Expected When One Step Is Marked As No
         Go To Next QuickStart Step
     END
     Close QuickStart From Button
-    QuickStart Status Should Be    ${element}      Failed
+    Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      Failed
 
 Verify Quick Starts Work As Expected When All Steps Are Skipped
     [Arguments]     ${element}
@@ -93,8 +93,8 @@ Verify Quick Starts Work As Expected When All Steps Are Skipped
     FOR     ${index}    IN RANGE    ${count}
         Go To Next QuickStart Step
     END
-    QuickStart Status Should Be    ${element}      In Progress
-    Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
+    Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      In Progress
+    Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
 
 Verify Quick Starts Work As Expected When At Least One Step Is Skipped
     [Arguments]     ${element}
@@ -107,5 +107,5 @@ Verify Quick Starts Work As Expected When At Least One Step Is Skipped
         END
         Go To Next QuickStart Step
     END
-    QuickStart Status Should Be    ${element}      In Progress
-    Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
+    Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      In Progress
+    Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue

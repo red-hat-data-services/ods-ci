@@ -15,11 +15,11 @@ Verify Quick Starts Work As Expected
     ...     ODS-1166    ODS-1306
     ...     ODS-1307    ODS-1308
     ...     ODS-1402    ODS-1403
-    Verify Quick Starts Work As Expected When All the Steps Marked As Yes   create-jupyter-notebook-anaconda
+    Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   create-jupyter-notebook-anaconda
     Verify Quick Starts Work As Expected When Restarting The Previous One   create-jupyter-notebook-anaconda
-    Verify Quick Starts Work As Expected When One Of The Step Marked As No  openvino-inference-notebook
     Verify Quick Starts Work As Expected When All Steps Are Skipped         create-jupyter-notebook
     Verify Quick Starts Work As Expected When At Least One Step Is Skipped      deploy-python-model
+    Verify Quick Starts Work As Expected When One Step Is Marked As No  openvino-inference-notebook
 
 
 *** Keywords ***
@@ -34,7 +34,7 @@ Resources Test Setup
 Resources Test Teardown
     Close All Browsers
 
-Verify Quick Starts Work As Expected When All the Steps Marked As Yes
+Verify Quick Starts Work As Expected When All Steps Are Marked As Yes
     [Arguments]    ${element}
     Open QuickStart Element in Resource Section By Name     ${element}
     ${count}=   Get The Count Of QuickStart Steps
@@ -69,7 +69,7 @@ Verify Quick Starts Work As Expected When Restarting The Previous One
     QuickStart Status Should Be    ${element}  In Progress
     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
 
-Verify Quick Starts Work As Expected When One Of The Step Marked As No
+Verify Quick Starts Work As Expected When One Step Is Marked As No
     [Arguments]     ${element}
     Open QuickStart Element in Resource Section By Name     ${element}
     ${count}=   Get The Count Of QuickStart Steps

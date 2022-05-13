@@ -76,8 +76,8 @@ Verify User Is Able to Activate Anaconda Professional
   Go To  ${ODH_DASHBOARD_URL}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Launch JupyterHub Spawner From Dashboard
-  Verify Anaconda Element Present Based On Version
-  Verify Anaconda Element Enabled Based On Version
+  Run Keyword And Continue On Failure  Verify Anaconda Element Present Based On Version
+  Run Keyword And Continue On Failure  Verify Anaconda Element Enabled Based On Version
   Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
   Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${TOKEN_VAL_SUCCESS_MSG}
   Capture Page Screenshot  anaconda_token_val_cell.png

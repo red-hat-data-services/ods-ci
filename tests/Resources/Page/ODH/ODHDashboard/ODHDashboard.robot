@@ -303,10 +303,10 @@ Check Cards Details Are Correct
         ${card_xp}=  Set Variable  (${CARDS_XP})[${idx}]
         ${application_id}=  Get App ID From Card  card_locator=${card_xp}
         Log    ${application_id}
-        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        Run Keyword And Continue On Failure  Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
-        Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
-        Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
+        Run Keyword And Continue On Failure  Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        Run Keyword And Continue On Failure  Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
     END
 
 Success Message Should Contain

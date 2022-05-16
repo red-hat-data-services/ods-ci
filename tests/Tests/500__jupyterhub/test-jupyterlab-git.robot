@@ -3,6 +3,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../Resources/RHOSi.resource
 
 Library             OpenShiftCLI
 Library             DebugLibrary
@@ -68,6 +69,7 @@ Verify Updating Project With Changes From Git Repository
 *** Keywords ***
 Server Setup
     [Documentation]    Suite Setup
+    RHOSi Setup
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Default

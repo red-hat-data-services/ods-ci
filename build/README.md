@@ -36,7 +36,7 @@ RUN_SCRIPT_ARGS:
   --test-variables-file (default: test-variables.yml): set the RF file containing global variables to use in TCs
   --test-case: run only the test cases from the given robot file
   --test-artifact-dir: set the RF output directory to store log files
-  --email-report (default: true): send the test run artifacts via email
+  --email-report (default: false): send the test run artifacts via email
     --email-from: (mandatory if email report is true) set the sender email address
     --email-to: (mandatory if email report is true) set the email address which will receive the result artifacts
     --email-server (default: localhost): set the smtp server to use

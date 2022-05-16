@@ -28,6 +28,7 @@ Average Time For Spawning
         ${avg} =    Set Variable
         Spawn and Stop Server    ${image}
         FOR    ${counter}    IN RANGE    4
+            Close Previous Tabs
             ${sum} =    Spawn and Stop Server    ${image}
             ${avg} =    Evaluate    ${avg} + ${sum}
         END
@@ -64,7 +65,20 @@ Spawn and Stop Server
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
     Wait For RHODS Dashboard To Load
+
     Launch JupyterHub From RHODS Dashboard Link
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
     [Return]    ${time}
+
+Close Previous Tabs
+    ${windowhandles}=  Get Window Handles
+
+    ${len} =    Get Length    ${windowhandles}
+    ${len} =    Evaluate    ${len} - 1
+
+    FOR    ${counter}    IN RANGE    ${len}
+        Switch Window  ${windowhandles}[${counter}]
+        close window
+    END
+    Switch Window  ${windowhandles}[${len}]

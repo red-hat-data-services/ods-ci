@@ -245,3 +245,7 @@ Enable Access To Alert Manager Using OpenShift Port Forwarding
     ${alertmanager_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep prometheus | awk '{print $1}') 9093   shell=True  # robocop: disable
     [Return]    ${alertmanager_port_forwarding_process}
 
+Get Grafana Url
+    [Documentation]  Returns Grafana URL
+    ${grafana_url} =    Run    oc get routes/grafana -n redhat-ods-monitoring -o json | jq -r '.spec.host'
+    [Return]    ${grafana_url}

@@ -193,12 +193,7 @@ Verify Grafana Is Connected To Prometheus Using TLS
     ...       ODS-963
     [Setup]  Set Library Search Order  Selenium Library
     Verify Grafana Datasources Have TLS Enabled
-    ${grafana_url} =  Get Grafana URL
-    Launch Grafana    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    grafana_url=https://${grafana_url}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    Select Explore
-    Select Data Source  datasource_name=Monitoring
-    Run Promql Query  query=traefik_backend_server_up
-    Page Should Contain  text=Graph
+    Verify Grafana Can Obtain Data From Prometheus Datasource
     [Teardown]  Close Browser
 
 
@@ -256,3 +251,13 @@ Verify Grafana Datasources Have TLS Enabled
     ${secret} =  Evaluate  json.loads('''${secret}''')  json
     Run Keyword If  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
     ...  Should Be Equal As Strings  ${secret['datasources'][0]['jsonData']['tlsSkipVerify']}  False
+
+Verify Grafana Can Obtain Data From Prometheus Datasource
+    [Documentation]   Verifies Grafana Can Obtain Data From Prometheus Datasource
+    ${grafana_url} =  Get Grafana URL
+    Launch Grafana    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    grafana_url=https://${grafana_url}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    Select Explore
+    Select Data Source  datasource_name=Monitoring
+    Run Promql Query  query=traefik_backend_server_up
+    Page Should Contain  text=Graph
+

@@ -65,15 +65,14 @@ Spawn and Stop Server
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
     Wait For RHODS Dashboard To Load
-
     Launch JupyterHub From RHODS Dashboard Link
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
     [Return]    ${time}
 
 Close Previous Tabs
+    [Documentation]    Closes the previous opened tabs
     ${windowhandles}=  Get Window Handles
-
     ${len} =    Get Length    ${windowhandles}
     ${len} =    Evaluate    ${len} - 1
 

@@ -158,7 +158,88 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
+Verify Favorite Resource Cards
+    [Tags]    ODS-389
+    Click Link    Resources
+    Sleep    5s
+   ${list_of_tile} =    Get List Of Ids Of Tiles
+   Verify Star Icons Are Clickable    ${list_of_tile}
+
+    FOR  ${index}  IN RANGE    27    48
+         Click Element    //*[@id="${list_of_tile}[${index}]"]/div[1]/span
+         ${clicked} =     Get Element Attribute    //*[@id="${list_of_tile}[${index}]"]/div[1]/span    class
+         Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
+    END
+
+    ${list_of_new_tile} =    Get List Of Ids Of Tiles
+
+    Lists Should Be Equal    ${list_of_tile}    ${27}    ${48}
+    ...                      ${list_of_new_tile}    ${0}    ${21}
+
+    Click Button    //*[@id="list-view"]
+    Sleep    5s
+
+
+    ${list_of_new_tile} =    Get List Of Atrributes    //div[@class="odh-list-item__doc-title"]    id
+
+    Lists Should Be Equal    ${list_of_new_tile}    ${0}    ${42}
+    ...                      ${list_of_tile}    ${27}    ${48}   ${2}
+
+    Click Button    //*[@id="card-view"]
+    Sleep    2s
+    FOR  ${index}  IN RANGE    27    48
+         Log To Console    ${index}    ${list_of_tile}[${index}]
+         Click Element    //*[@id="${list_of_tile}[${index}]"]/div[1]/span
+         ${clicked} =     Get Element Attribute    //*[@id="${list_of_tile}[${index}]"]/div[1]/span    class
+    END
+
+
 *** Keywords ***
+Verify Star Icons Are Clickable
+    [Documentation]    Verifies that star icons in the resources page are clickable
+    [Arguments]    ${list_of_ids}
+    FOR    ${element}    IN    @{list_of_ids}
+         ${not_clicked} =    Get Element Attribute    //*[@id="${element}"]/div[1]/span    class
+         Should Be Equal    ${not_clicked}    odh-dashboard__favorite
+         Click Element    //*[@id="${element}"]/div[1]/span
+         ${clicked} =    Get Element Attribute    //*[@id="${element}"]/div[1]/span    class
+         Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
+         Click Element    //*[@id="${element}"]/div[1]/span
+    END
+
+Lists Should Be Equal
+    [Documentation]    Checks that lists are equal or not,
+    ...                end indexes are exclusive in range
+    [Arguments]    ${list1}    ${start_index1}    ${end_index1}
+    ...            ${list2}    ${start_index2}    ${end_index2}    ${step_list2}=${1}
+    FOR    ${index1}  IN RANGE    ${start_index1}    ${end_index1}    ${step_list2}
+        Should Be Equal    ${list1}[${index1}]    ${list2}[${start_index2}]
+        ${start_index2} =    Evaluate    ${start_index2} + ${1}
+    END
+
+Get List Of Ids Of Tiles
+    [Documentation]    Returns the list of ids of tiles present in resources page
+    ${link_elements}=
+    ...    Get WebElements    //article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card" and not(starts-with(@id, '#'))]
+    ${list_of_ids}=    Create List
+    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
+        ${ids}=    Get Element Attribute    ${ext_link}    id
+        Append To List    ${list_of_ids}    ${ids}
+    END
+    [Return]    ${list_of_ids}
+
+Get List Of Atrributes
+    [Arguments]    ${xpath}    ${attribute}
+    ${xpath} =    Remove String    ${xpath}    ]
+    ${link_elements}=
+    ...    Get WebElements    ${xpath} and not(starts-with(@${attribute}, '#'))]
+    ${list_of_atrributes}=    Create List
+    FOR    ${ext_link}    IN    @{link_elements}
+        ${ids}=    Get Element Attribute    ${ext_link}    ${attribute}
+        Append To List    ${list_of_atrributes}    ${ids}
+    END
+    [Return]    ${list_of_atrributes}
+
 RHODS Dahsboard Pod Should Contain OauthProxy Container
     ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard
     FOR    ${pod_name}    IN   @{list_of_pods}

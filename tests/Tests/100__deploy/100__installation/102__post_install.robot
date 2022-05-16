@@ -192,8 +192,7 @@ Verify Grafana Is Connected To Prometheus Using TLS
     [Tags]    Tier2
     ...       ODS-963
     [Setup]  Set Library Search Order  Selenium Library
-    ${res} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=redhat-ods-monitoring
-    Check TLS Is Enabled  secret=${res}
+    Verify Grafana Datasources Have TLS Enabled
     ${grafana_url} =  Get Grafana URL
     Launch Grafana    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    grafana_url=https://${grafana_url}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     Select Explore
@@ -250,9 +249,9 @@ Verify Errors In Jupyterhub Logs
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
     END
 
-Check TLS Is Enabled
-    [Documentation]    Verifies TLS Is Enabled
-    [Arguments]     ${secret}
+Verify Grafana Datasources Have TLS Enabled
+    [Documentation]    Verifies TLS Is Enabled in Grafana Datasources
+    ${secret} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=redhat-ods-monitoring
     ${secret} =  Evaluate  base64.b64decode("${secret[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
     ${secret} =  Evaluate  json.loads('''${secret}''')  json
     Run Keyword If  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}

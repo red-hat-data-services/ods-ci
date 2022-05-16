@@ -35,8 +35,9 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 
 *** Test Cases ***
 Verify That Login Page Is Shown When Reaching The RHODS Page
-    [Tags]    Sanity    ODS-694
-    [Setup]    Test Setup For Login Page
+    [Tags]      Sanity
+    ...         ODS-694
+    [Setup]     Test Setup For Login Page
     Check OpenShift Login Visible
 
 Verify Resource Link HTTP Status Code
@@ -68,8 +69,8 @@ Verify Content In RHODS Explore Section
     Check Cards Details Are Correct    expected_data=${EXP_DATA_DICT}
 
 Verify Disabled Cards Can Be Removed
-    [Documentation]    Verifies it is possible to remove a disabled card from Enabled page.
-    ...    It uses RHOSAK as example to test the feature
+    [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
+    ...                 It uses RHOSAK as example to test the feature
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
     ...       KnownIssues
@@ -80,10 +81,10 @@ Verify Disabled Cards Can Be Removed
     Capture Page Screenshot    after_removal.png
 
 Verify License Of Disabled Cards Can Be Re-validated
-    [Documentation]    Verifies it is possible to re-validate the license of a disabled card
-    ...    from Enabled page. it uses Anaconda CE as example to test the feature.
+    [Documentation]   Verifies it is possible to re-validate the license of a disabled card
+    ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     [Tags]    Sanity
-    ...       ODS-1097    ODS-357
+    ...       ODS-1097   ODS-357
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible
@@ -116,15 +117,15 @@ Verify Documentation Link HTTP Status Code
     ...    also checks the RHODS dcoumentation link present in resource page.
     [Tags]    Sanity
     ...       ODS-327    ODS-492
-    ${links}=    Get RHODS Documentation Links From Dashboard
-    Check External Links Status    links=${links}
+    ${links}=  Get RHODS Documentation Links From Dashboard
+    Check External Links Status     links=${links}
 
 Verify Logged In Users Are Displayed In The Dashboard
     [Documentation]    It verifies that logged in users username is displayed on RHODS Dashboard.
     [Tags]    Sanity
     ...       ODS-354
     ...       Tier1
-    Verify Username Displayed On RHODS Dashboard    ${TEST_USER.USERNAME}
+    Verify Username Displayed On RHODS Dashboard   ${TEST_USER.USERNAME}
 
 Search and Verify GPU Items Appears In Resources Page
     [Tags]    Sanity
@@ -153,7 +154,6 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     ...       Tier1
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
-
 
 *** Keywords ***
 Verify JupyterHub Card CSS Style

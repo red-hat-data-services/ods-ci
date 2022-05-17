@@ -8,6 +8,7 @@ Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource        ../../Resources/Common.robot
+Resource        ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -154,6 +155,15 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     ...       Tier1
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
+
+Ability to specify admin users(s) who can configure ODH for other users
+    [Tags]    ODS-355
+    ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard
+    Log To Console    listof pods ${list_of_pods}
+    FOR    ${pod_name}    IN   @{list_of_pods}
+        ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=redhat-ods-applications
+        Should Be Equal    oauth-proxy    ${container_name}[1]
+    END
 
 *** Keywords ***
 Verify JupyterHub Card CSS Style

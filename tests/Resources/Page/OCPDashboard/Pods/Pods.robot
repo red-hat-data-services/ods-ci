@@ -8,15 +8,19 @@ Library             ../../../../libs/Helpers.py
 
 *** Keywords ***
 Get Pod Logs From UI
-    [Documentation]    Get pod logs text from OCP UI
-    [Arguments]    ${namespace}    ${pod_search_term}
+    [Documentation]    Get pod logs text from OCP UI ${container_button_id} is button id on log page
+    [Arguments]    ${namespace}    ${pod_search_term}   ${container_button_id}=${EMPTY} 
     Navigate To Page    Workloads    Pods
     Search Last Item Instance By Title In OpenShift Table    search_term=${pod_search_term}
     ...    namespace=${namespace}
     Click Link    xpath://tr[@data-key='0-0']/td/span/a
-    Click Link    Logs
-    Sleep    4
-    Capture Page Screenshot    logs_page.png
+    IF    "${container_button_id}" == "${EMPTY}"
+        Click Link    Logs
+        Sleep    4
+        Capture Page Screenshot    logs_page.png
+    ELSE
+        Go To Log Tab And Select A Container  container_button_id=${container_button_id}
+    END
     ${log_lines_flag}=    Run Keyword And Return Status    Wait Until Page Contains Element
     ...    xpath://div[@class='log-window__lines']
     ${log_list_flag}=    Run Keyword And Return Status    Wait Until Page Contains Element
@@ -181,3 +185,13 @@ Get User Server Node
     ${pod_name} =    Get User Notebook Pod Name    ${username}
     ${node_name} =    Run    oc describe Pod ${pod_name} -n rhods-notebooks | grep Node: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"/"); print b[1]}'
     [Return]    ${node_name}
+
+Go To Log Tab And Select A Container
+    [Documentation]     Click on log tab and change container with help of ${container_button_id}
+    [Arguments]         ${container_button_id}
+    Click Link    Logs
+    Sleep    4
+    Click Button    xpath://div[@class="resource-log"]//button[@data-test-id="dropdown-button"]
+    Click Button    id=${container_button_id}
+    Sleep    4
+    Capture Page Screenshot    logs_page.png

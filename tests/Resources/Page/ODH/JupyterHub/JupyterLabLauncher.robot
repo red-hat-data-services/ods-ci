@@ -50,6 +50,7 @@ Close Other JupyterLab Tabs
   ${jl_tabs} =  Get WebElements  ${xpath_background_tab}
 
   FOR  ${tab}  IN  @{jl_tabs}
+    maybe Close Popup
     #Select the tab we want to close
     Maybe Close Popup
     Click Element  ${tab}

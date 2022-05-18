@@ -1,4 +1,5 @@
-FROM quay.io/centos/centos:stream8
+FROM registry.access.redhat.com/ubi8/ubi
+# FROM quay.io/centos/centos:stream8
 # FROM registry.access.redhat.com/ubi8/ubi:8.1
 # Use this build arg to set any default test script arguments
 ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
@@ -9,8 +10,9 @@ ARG OC_CHANNEL=stable
 
 
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
-    dnf install -y jq git python3 unzip chromium chromedriver redhat-lsb-core &&\
-    dnf clean all
+    dnf install -y jq git unzip chromium chromedriver redhat-lsb-core &&\
+    dnf clean all && \
+    yum install -y python38
 
 ## Install yq in the image
 RUN curl -L https://github.com/mikefarah/yq/releases/download/v4.16.2/yq_linux_amd64 -o /usr/bin/yq &&\
@@ -39,6 +41,7 @@ COPY utils/scripts/logger.py  utils/scripts/logger.py
 COPY utils/scripts/util.py  utils/scripts/util.py
 RUN  chmod +x run.sh
 COPY requirements.txt setup.py .
+RUN  python3 --version
 RUN  python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
 
 ENTRYPOINT ["./run.sh"]

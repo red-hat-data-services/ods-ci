@@ -79,6 +79,12 @@ PVC Size Test Setup
 
 PVC Size UI Test Teardown
     [Documentation]    Teardown for UI test
+    [Arguments]     ${default_verification}=False
     Go To    ${ODH_DASHBOARD_URL}
     Restore PVC Value To Default Size
+    IF    ${default_verification} == True
+          Run Keyword And Warn On Failure   Verify Notebook Size   600s    ${20}
+          ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
+          Verify PVC Size     ${20}       ${pvc_size}
+    END
     Close All Browsers

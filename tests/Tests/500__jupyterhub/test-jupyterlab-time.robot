@@ -19,26 +19,13 @@ Suite Teardown      End Web Test
 ${LIMIT_TIME} =    40
 
 *** Test Cases ***
-Average Time For Spawning
+Verify Average Spawn Time Is Less Than 40 Seconds
     [Documentation]    Verifies that average spawn time for all JupyterHub images is less than 40 seconds
     [Tags]    ODS-691
     ...       Tier2
-    ${total_avg} =    Set Variable
-    FOR    ${image}    IN    @{LIST_OF_IMAGES}
-        ${avg} =    Set Variable
-        Spawn and Stop Server    ${image}
-        FOR    ${counter}    IN RANGE    4
-            Close Previous Tabs
-            ${sum} =    Spawn and Stop Server    ${image}
-            ${avg} =    Evaluate    ${avg} + ${sum}
-        END
-        ${avg} =    Evaluate    ${avg}/4
-        Log    ${avg}
-        ${total_avg} =    Evaluate    ${total_avg} + ${avg}
-
-    END
+    ${total_time} =    Get The Total Time For Spawning
     ${len} =    Get Length    ${LIST_OF_IMAGES}
-    ${total_avg} =    Evaluate    ${total_avg} / ${len}
+    ${total_avg} =    Evaluate    ${total_time} / ${len}
     Log    total_avg time to spawn ${total_avg}
     ${result} =    lt    ${total_avg}.0    ${LIMIT_TIME}.0.0
     Run Keyword Unless    ${result}    Fail
@@ -49,6 +36,23 @@ Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
+
+Get The Total Time For Spawning
+    [Documentation]    Returns the total of average time for spawning the images
+    ${total_time} =    Set Variable
+    FOR    ${image}    IN    @{LIST_OF_IMAGES}
+        ${avg} =    Set Variable
+        Spawn and Stop Server    ${image}
+        FOR    ${counter}    IN RANGE    4
+            Close Previous Tabs
+            ${sum} =    Spawn and Stop Server    ${image}
+            ${avg} =    Evaluate    ${avg} + ${sum}
+        END
+        ${avg} =    Evaluate    ${avg}/4
+        Log    ${avg}
+        ${total_time} =    Evaluate    ${total_time} + ${avg}
+    END
+    [Return]    ${total_time}
 
 Spawn and Stop Server
     [Documentation]    Returns time to start a server

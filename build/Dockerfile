@@ -1,6 +1,5 @@
 FROM registry.access.redhat.com/ubi8/ubi
-# FROM quay.io/centos/centos:stream8
-# FROM registry.access.redhat.com/ubi8/ubi:8.1
+
 # Use this build arg to set any default test script arguments
 ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
 ENV ROBOT_EXTRA_ARGS=${ROBOT_EXTRA_ARGS}

@@ -162,52 +162,47 @@ Verify Favorite Resource Cards
     [Tags]    ODS-389
     Click Link    Resources
     Sleep    5s
-   ${list_of_tile} =    Get List Of Ids Of Tiles
-   Verify Star Icons Are Clickable    ${list_of_tile}
+    Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
+    Click Button    //button[@data-key="name"]
+    Sleep    1s
+    ${list_of_tile} =    Get List Of Ids Of Tiles
+    Verify Star Icons Are Clickable    ${list_of_tile}
 
-    FOR  ${index}  IN RANGE    27    48
-         Click Element    //*[@id="${list_of_tile}[${index}]"]/div[1]/span
-         ${clicked} =     Get Element Attribute    //*[@id="${list_of_tile}[${index}]"]/div[1]/span    class
-         Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
-    END
+    Add The Range Of Tiles In Favourite    ${list_of_tile}    27    48
 
     ${list_of_new_tile} =    Get List Of Ids Of Tiles
 
-    Lists Should Be Equal    ${list_of_tile}    ${27}    ${48}
+    List Should Be Equal    ${list_of_tile}    ${27}    ${48}
     ...                      ${list_of_new_tile}    ${0}    ${21}
 
+    ${list_of_ids_of_favourite} =    Get Slice From List    ${list_of_new_tile}    ${0}    ${21}
     Click Button    //*[@id="list-view"]
-    Sleep    5s
-
+    Sleep    2s
 
     ${list_of_new_tile} =    Get List Of Atrributes    //div[@class="odh-list-item__doc-title"]    id
 
-    Lists Should Be Equal    ${list_of_new_tile}    ${0}    ${42}
+    List Should Be Equal    ${list_of_new_tile}    ${0}    ${42}
     ...                      ${list_of_tile}    ${27}    ${48}   ${2}
 
     Click Button    //*[@id="card-view"]
     Sleep    2s
-    FOR  ${index}  IN RANGE    27    48
-         Log To Console    ${index}    ${list_of_tile}[${index}]
-         Click Element    //*[@id="${list_of_tile}[${index}]"]/div[1]/span
-         ${clicked} =     Get Element Attribute    //*[@id="${list_of_tile}[${index}]"]/div[1]/span    class
-    END
 
+    Change The Sort and Check With The List    ${list_of_ids_of_favourite}    type
+    Change The Sort and Check With The List    ${list_of_ids_of_favourite}    application
+    Change The Sort and Check With The List    ${list_of_ids_of_favourite}    duration
+
+    Remove The Range Of Tiles From Favourite    ${list_of_tile}    27    48
 
 *** Keywords ***
 Verify Star Icons Are Clickable
     [Documentation]    Verifies that star icons in the resources page are clickable
     [Arguments]    ${list_of_ids}
-    FOR    ${element}    IN    @{list_of_ids}
-         ${not_clicked} =    Get Element Attribute    //*[@id="${element}"]/div[1]/span    class
-         Should Be Equal    ${not_clicked}    odh-dashboard__favorite
-         Click Element    //*[@id="${element}"]/div[1]/span
-         ${clicked} =    Get Element Attribute    //*[@id="${element}"]/div[1]/span    class
-         Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
-         Click Element    //*[@id="${element}"]/div[1]/span
+    FOR    ${id}    IN    @{list_of_ids}
+         Set Item As Favourite    ${id}
+         Remove Item From Favourite    ${id}
     END
 
-Lists Should Be Equal
+List Should Be Equal
     [Documentation]    Checks that lists are equal or not,
     ...                end indexes are exclusive in range
     [Arguments]    ${list1}    ${start_index1}    ${end_index1}
@@ -229,6 +224,7 @@ Get List Of Ids Of Tiles
     [Return]    ${list_of_ids}
 
 Get List Of Atrributes
+    [Documentation]    Returns the list of attributes
     [Arguments]    ${xpath}    ${attribute}
     ${xpath} =    Remove String    ${xpath}    ]
     ${link_elements}=
@@ -239,6 +235,43 @@ Get List Of Atrributes
         Append To List    ${list_of_atrributes}    ${ids}
     END
     [Return]    ${list_of_atrributes}
+
+Set Item As Favourite
+    [Documentation]    Add the tiles in favourite
+    [Arguments]    ${id}
+    ${not_clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
+    Should Be Equal    ${not_clicked}    odh-dashboard__favorite
+    Click Element    //*[@id="${id}"]/div[1]/span
+
+Remove Item From Favourite
+    [Documentation]    Removes the tiles from favourite
+    [Arguments]    ${id}
+    ${clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
+    Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
+    Click Element    //*[@id="${id}"]/div[1]/span
+
+Add The Range Of Tiles In Favourite
+    [Documentation]    Adds the range of tiles in favourite
+    [Arguments]    ${list_of_ids}    ${start_index}    ${end_index}
+    FOR  ${index}  IN RANGE    ${start_index}    ${end_index}
+         Set Item As Favourite    ${list_of_ids}[${index}]
+    END
+
+Remove The Range Of Tiles From Favourite
+    [Documentation]    Adds the range of tiles in favourite
+    [Arguments]    ${list_of_ids}    ${start_index}    ${end_index}
+    FOR  ${index}  IN RANGE    27    48
+         Remove Item From Favourite    ${list_of_ids}[${index}]
+    END
+
+Change The Sort and Check With The List
+    [Arguments]    ${list_of_ids_of_favourite}    ${sort_type}
+    Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
+    Click Button    //button[@data-key="${sort_type}"]
+    Sleep    2s
+    ${new_list_of_tile} =    Get List Of Ids Of Tiles
+    ${new_list_of_tile} =    Get Slice From List    ${new_list_of_tile}    0    21
+    Lists Should Be Equal    ${new_list_of_tile}    ${list_of_ids_of_favourite}    ignore_order=${True}
 
 RHODS Dahsboard Pod Should Contain OauthProxy Container
     ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard

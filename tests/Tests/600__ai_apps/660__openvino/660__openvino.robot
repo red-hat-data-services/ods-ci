@@ -12,7 +12,7 @@ Suite Teardown  OpenVino Suite Teardown
 *** Variables ***
 ${openvino_appname}           ovms
 ${openvino_container_name}    OpenVINO
-${openvino_operator_name}    OpenVINO Toolkit Operator
+${openvino_operator_name}     OpenVINO Toolkit Operator
 
 *** Test Cases ***
 Verify OpenVino Is Available In RHODS Dashboard Explore Page

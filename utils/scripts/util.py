@@ -1,14 +1,14 @@
 
-import ast
 import json
 import os
-import subprocess
-import shutil
-import yaml
 import re
+import shutil
+import subprocess
 import sys
 import time
+
 import jinja2
+import yaml
 
 def clone_config_repo(**kwargs):
     """
@@ -109,19 +109,21 @@ def render_template(search_path, template_file, output_file, replace_vars):
               "file {}".format(output_file))
         sys.exit(1)
 
-def read_data_from_json(filename=None):
-    """Helper to read Json file"""
-    file = open(filename, "r")
-    contents = file.read()
+def read_data_from_json(filename):
+    """
+    Helper to read Json file
+    """
     try:
-        data = ast.literal_eval(contents)
-        file.close()
+        with open(filename, 'r') as f:
+            data = json.load(f)
         return data
     except:
         return None
 
 
-def write_data_from_json(filename=None, data=None):
-    """Helper to write Json file"""
+def write_data_in_json(filename, data):
+    """
+    Helper to write JSON file
+    """
     with open(filename, 'w') as convert_file:
         convert_file.write(json.dumps(data))

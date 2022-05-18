@@ -60,7 +60,8 @@ Verify User Can Spawn Notebook After Changing PVC Size Using UI
     Verify PVC change using UI     ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
     Verify PVC Size     ${S_SIZE}       ${pvc_size}
-    [Teardown]    PVC Size UI Test Teardown
+    PVC Size Suite Teadrown
+    [Teardown]    PVC Size UI Test Teardown     True
 
 Verify User Cannot Set An Unsupported PVC Size Using The UI
         [Documentation]   Verify if dedicated admin user able to chnage PVC

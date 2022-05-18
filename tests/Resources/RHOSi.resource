@@ -12,6 +12,9 @@ Library     RPA.RobotLogListener
 ...                         Login to Jupyterhub
 ...                         Verify Username Displayed On RHODS Dashboard
 ...                         Create Pachyderm AWS-Secret
+...                         Push Changes To Remote
+...                         Commit Changes
+...                         Push Some Changes To Repo
 
 
 *** Keywords ***

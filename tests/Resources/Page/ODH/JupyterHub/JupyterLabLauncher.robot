@@ -49,6 +49,7 @@ Close Other JupyterLab Tabs
 
   FOR  ${tab}  IN  @{jl_tabs}
     #Select the tab we want to close
+    Maybe Close Popup
     Click Element  ${tab}
     #Click the close tab icon
     Open With JupyterLab Menu  File  Close Tab

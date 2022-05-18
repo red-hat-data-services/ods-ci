@@ -1,4 +1,6 @@
 
+import ast
+import json
 import os
 import subprocess
 import shutil
@@ -106,3 +108,20 @@ def render_template(search_path, template_file, output_file, replace_vars):
         print("Failed to render template and create json "
               "file {}".format(output_file))
         sys.exit(1)
+
+def read_data_from_json(filename=None):
+    """Helper to read Json file"""
+    file = open(filename, "r")
+    contents = file.read()
+    try:
+        data = ast.literal_eval(contents)
+        file.close()
+        return data
+    except:
+        return None
+
+
+def write_data_from_json(filename=None, data=None):
+    """Helper to write Json file"""
+    with open(filename, 'w') as convert_file:
+        convert_file.write(json.dumps(data))

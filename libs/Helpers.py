@@ -17,18 +17,6 @@ class Helpers:
         return rows
 
     @keyword
-    def lt(self, version, target):
-        """ Returns True if the SemVer version < target
-            and otherwise False including if an exception is thrown """
-        try:
-            version = VersionInfo.parse(version)
-            target = VersionInfo.parse(target)
-            return version < target
-        except ValueError:
-            # Returning False on exception as a workaround for when an null (or invalid) semver version is passed
-            return False
-
-    @keyword
     def gt(self, version, target):
         """ Returns True if the version > target
             and otherwise False including if an exception is thrown """

@@ -593,3 +593,16 @@ RHODS Notification Drawer Should Not Contain
     Click Element    xpath=//*[contains(@class,'notification-badge')]
     Page Should Not Contain  text=${message}
     Click Element    xpath=//*[contains(@class,'notification-badge')]
+
+Get List Of Atrributes
+    [Documentation]    Returns the list of attributes
+    [Arguments]    ${xpath}    ${attribute}
+    ${xpath} =    Remove String    ${xpath}    ]
+    ${link_elements}=
+    ...    Get WebElements    ${xpath} and not(starts-with(@${attribute}, '#'))]
+    ${list_of_atrributes}=    Create List
+    FOR    ${ext_link}    IN    @{link_elements}
+        ${ids}=    Get Element Attribute    ${ext_link}    ${attribute}
+        Append To List    ${list_of_atrributes}    ${ids}
+    END
+    [Return]    ${list_of_atrributes}

@@ -167,7 +167,6 @@ Verify Favorite Resource Cards
     Sleep    1s
     ${list_of_tile} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile}
-
     Add The Range Of Tiles In Favourite    ${list_of_tile}    27    48
 
     ${list_of_new_tile} =    Get List Of Ids Of Tiles
@@ -183,10 +182,8 @@ Verify Favorite Resource Cards
 
     List Should Be Equal    ${list_of_new_tile}    ${0}    ${42}
     ...                      ${list_of_tile}    ${27}    ${48}   ${2}
-
     Click Button    //*[@id="card-view"]
     Sleep    2s
-
     Change The Sort and Check With The List    ${list_of_ids_of_favourite}    type
     Change The Sort and Check With The List    ${list_of_ids_of_favourite}    application
     Change The Sort and Check With The List    ${list_of_ids_of_favourite}    duration
@@ -214,27 +211,9 @@ List Should Be Equal
 
 Get List Of Ids Of Tiles
     [Documentation]    Returns the list of ids of tiles present in resources page
-    ${link_elements}=
-    ...    Get WebElements    //article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card" and not(starts-with(@id, '#'))]
-    ${list_of_ids}=    Create List
-    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
-        ${ids}=    Get Element Attribute    ${ext_link}    id
-        Append To List    ${list_of_ids}    ${ids}
-    END
+    ${list_of_ids}=    Get List Of Atrributes
+    ...    xpath=//article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
     [Return]    ${list_of_ids}
-
-Get List Of Atrributes
-    [Documentation]    Returns the list of attributes
-    [Arguments]    ${xpath}    ${attribute}
-    ${xpath} =    Remove String    ${xpath}    ]
-    ${link_elements}=
-    ...    Get WebElements    ${xpath} and not(starts-with(@${attribute}, '#'))]
-    ${list_of_atrributes}=    Create List
-    FOR    ${ext_link}    IN    @{link_elements}
-        ${ids}=    Get Element Attribute    ${ext_link}    ${attribute}
-        Append To List    ${list_of_atrributes}    ${ids}
-    END
-    [Return]    ${list_of_atrributes}
 
 Set Item As Favourite
     [Documentation]    Add the tiles in favourite
@@ -260,18 +239,23 @@ Add The Range Of Tiles In Favourite
 Remove The Range Of Tiles From Favourite
     [Documentation]    Adds the range of tiles in favourite
     [Arguments]    ${list_of_ids}    ${start_index}    ${end_index}
-    FOR  ${index}  IN RANGE    27    48
+    FOR  ${index}  IN RANGE    ${start_index}    ${end_index}
          Remove Item From Favourite    ${list_of_ids}[${index}]
     END
 
 Change The Sort and Check With The List
     [Arguments]    ${list_of_ids_of_favourite}    ${sort_type}
-    Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
-    Click Button    //button[@data-key="${sort_type}"]
-    Sleep    2s
+    Change The Sort    ${sort_type}
     ${new_list_of_tile} =    Get List Of Ids Of Tiles
     ${new_list_of_tile} =    Get Slice From List    ${new_list_of_tile}    0    21
     Lists Should Be Equal    ${new_list_of_tile}    ${list_of_ids_of_favourite}    ignore_order=${True}
+
+Change The Sort
+    [Documentation]    Changes the sort of items in resource page
+    [Arguments]    ${sort_type}
+    Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
+    Click Button    //button[@data-key="${sort_type}"]
+    Sleep    1s
 
 RHODS Dahsboard Pod Should Contain OauthProxy Container
     ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard

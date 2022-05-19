@@ -253,7 +253,7 @@ if command -v yq &> /dev/null
                     else
                         echo "Performing oc login using service account"
                         sa_token=$(oc serviceaccounts get-token ${SERVICE_ACCOUNT} -n ${SA_NAMESPACE})
-                        oc login --token=$sa_token --server=${oc_host}
+                        oc login --token=$sa_token --server=${oc_host} --insecure-skip-tls-verify=true
                 fi
 
                 ## no point in going further if the login is not working

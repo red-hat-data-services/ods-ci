@@ -23,12 +23,10 @@ Verify Average Spawn Time Is Less Than 40 Seconds
     [Documentation]    Verifies that average spawn time for all JupyterHub images is less than 40 seconds
     [Tags]    ODS-691
     ...       Tier2
-    ${total_time} =    Get The Total Time For Spawning
     ${len} =    Get Length    ${LIST_OF_IMAGES}
-    ${total_avg} =    Evaluate    ${total_time} / ${len}
-    Log    total_avg time to spawn ${total_avg}
-    ${result} =    lt    ${total_avg}.0    ${LIMIT_TIME}.0.0
-    Run Keyword Unless    ${result}    Fail
+    ${avg_time} =    Get Average Time For Spawning    ${len}
+    Log    total_avg time to spawn ${avg_time}
+    Average Spawning Time Should Be Less Than    ${avg_time}    ${LIMIT_TIME}
 
 
 *** Keywords ***
@@ -37,8 +35,9 @@ Load Spawner Page
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
 
-Get The Total Time For Spawning
+Get Average Time For Spawning
     [Documentation]    Returns the total of average time for spawning the images
+    [Arguments]    ${number_of_images}
     ${total_time} =    Set Variable
     FOR    ${image}    IN    @{LIST_OF_IMAGES}
         ${avg} =    Set Variable
@@ -49,10 +48,17 @@ Get The Total Time For Spawning
             ${avg} =    Evaluate    ${avg} + ${sum}
         END
         ${avg} =    Evaluate    ${avg}/4
-        Log    ${avg}
         ${total_time} =    Evaluate    ${total_time} + ${avg}
     END
+    ${average_time} =    Evaluate    ${total_time} / ${number_of_images}
     [Return]    ${total_time}
+
+Average Spawning Time Should Be Less Than
+    [Documentation]    Checks than average time is less than ${time}
+    [Arguments]    ${avg_time}    ${time}
+    ${result} =    lt    ${avg_time}.0    ${time}.0.0
+    Run Keyword Unless    ${result}    Fail
+
 
 Spawn and Stop Server
     [Documentation]    Returns time to start a server

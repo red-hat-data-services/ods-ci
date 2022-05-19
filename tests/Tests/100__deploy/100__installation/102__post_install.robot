@@ -216,7 +216,7 @@ Verify Authentication Is Required To Access BlackboxExporter
     [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,
     ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target.
     ...                The test fails if the response is not a prompt to log in with OpenShift
-    @{links} =    Get Target Endpoints    target_name=user_facing_endpoints_status
+    @{links} =    Get Target Endpoints    target_name=user_facing_endpoints_status    pm_url=${RHODS_PROMETHEUS_URL}    pm_token=${RHODS_PROMETHEUS_TOKEN}    username${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     Length Should Be    ${links}    2
     ${pod_name} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     FOR    ${link}    IN    @{links}

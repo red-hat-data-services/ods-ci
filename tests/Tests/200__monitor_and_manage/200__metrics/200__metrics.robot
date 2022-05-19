@@ -6,6 +6,8 @@ Test Teardown       End Metrics Web Test
 
 
 Suite Setup     RHOSi Setup
+Resource    ../../../Resources/ODS.robot
+Library     DateTime
 
 *** Variables ***
 @{RECORD_GROUPS}    Availability Metrics    SLOs - JupyterHub    SLOs - ODH Dashboard    SLOs - RHODS Operator    SLOs - Traefik Proxy    Usage Metrics
@@ -64,6 +66,22 @@ Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
 
 
+Verify JupyterHub Leader Monitoring Using ODS Prometheus
+    [Documentation]    Verifies the only one endpoint is up at a time in JupyterHub Matrics 
+    [Tags]    Sanity
+    ...       ODS-689
+    ...       Tier1
+    @{endpoints} =    Prometheus.Get Target Endpoints Which Have State Up
+    ...    target_name=JupyterHub Metrics
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    username=${OCP_ADMIN_USER.USERNAME}
+    ...    password=${OCP_ADMIN_USER.PASSWORD}
+    ${Length} =    Get Length    ${endpoints}
+    Should Be Equal As Integers    ${Length}    1
+    ${query_result} =    Prometheus.Run Range Query    pm_query=up{job="JupyterHub Metrics"}    pm_url=${RHODS_PROMETHEUS_URL}    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    Verify That There Was Only 1 Jupyterhub Server Available At A Time  query_result=${query_result}
+    
 *** Keywords ***
 Begin Metrics Web Test
     Set Library Search Order    SeleniumLibrary
@@ -118,3 +136,19 @@ Iterative Image Test
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
     Sleep    10    reason=Waiting for ODH Dashboard home page to load
+
+Verify That There Was Only 1 Jupyterhub Server Available At A Time
+    [Documentation]    Verify that there was only 1 jupyterhub server available at a time
+    [Arguments]        ${query_result}
+    @{data} =  BuiltIn.Evaluate   list(${query_result.json()["data"]["result"]})
+    Log  ${data}
+    @{list_to_check}  Create List
+    FOR  ${time_value}  IN  @{data}
+        @{values} =  BuiltIn.Evaluate   list(${time_value["values"]})
+        FOR  ${v}  IN  @{values}
+            IF  ${v[1]} == 1
+                List Should Not Contain Value  ${list_to_check}  ${v[0]}  msg=More than one endpoints are up at same time
+                Append To List  ${list_to_check}  ${v[0]}
+            END
+        END
+    END

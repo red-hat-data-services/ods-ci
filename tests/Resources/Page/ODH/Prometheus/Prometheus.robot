@@ -17,6 +17,28 @@ Run Query
     # Log To Console    ${resp.json()}
     [Return]    ${resp}
 
+Run Range Query
+    [Documentation]    Runs a prometheus range query, in order to obtain the result of a PromQL expression over a given time range. More info at:
+    ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
+    ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
+    [Arguments]    ${pm_query}    ${pm_url}    ${pm_token}    ${interval}=12h     ${steps}=172
+    ${time} =    Get Start Time And End Time  interval=${interval}
+    ${pm_headers}=    Create Dictionary    Authorization=Bearer ${RHODS_PROMETHEUS_TOKEN}
+    ${resp}=    RequestsLibrary.GET    url=${RHODS_PROMETHEUS_URL}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    ...    headers=${pm_headers}    verify=${False}
+    Status Should Be    200    ${resp}
+    [Return]    ${resp}
+
+Get Start Time And End Time
+    [Documentation]     Returns start and end time for Query range from current time
+    [Arguments]         ${interval}   # like 12h  7 days etc
+    ${end_time} =  Get Current Date
+    ${end_time} =  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${end_time}").timestamp()
+    ${start_time} =    Subtract Time From Date    ${end_time}    ${interval}
+    ${start_time} =  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${start_time}").timestamp()
+    @{time} =  Create List  ${start_time}  ${end_time}
+    [Return]    ${time}
+
 Get Rules
     [Documentation]    Gets Prometheus rules
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_type}
@@ -171,8 +193,16 @@ Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
 
 Get Target Endpoints
     [Documentation]     Returns list of Endpoint URLs
-    [Arguments]         ${target_name}
+    [Arguments]         ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
     ${links} =  Run  curl -X GET -H "Authorization:Bearer ${RHODS_PROMETHEUS_TOKEN}" -u ${OCP_ADMIN_USER.USERNAME}:${OCP_ADMIN_USER.PASSWORD} -k ${RHODS_PROMETHEUS_URL}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'
+    ${links}    Replace String    ${links}    "    ${EMPTY}
+    @{links} =  Split String  ${links}  \n
+    [Return]    ${links}
+
+Get Target Endpoints Which Have State Up
+    [Documentation]    Returns list of endpoints who have state is "UP"
+    [Arguments]        ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
+    ${links} =  Run  curl -X GET -H "Authorization:Bearer ${pm_token}" -u ${pm_token}:${password} -k ${pm_token}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | select(.health == "up") | .globalUrl'
     ${links}    Replace String    ${links}    "    ${EMPTY}
     @{links} =  Split String  ${links}  \n
     [Return]    ${links}

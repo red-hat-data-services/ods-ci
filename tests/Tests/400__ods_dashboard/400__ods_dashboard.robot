@@ -188,6 +188,15 @@ Verify Favorite Resource Cards
     Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    duration
     [Teardown]    Remove Items From favorites    @{favorite_ids}
 
+Verify Switcher to Masterhead
+    [Tags]    ODS-771
+    Go To RHODS Dashboard
+    Click Button    //button[@class="pf-c-app-launcher__toggle"]
+    ${cluster_id} =    Get Cluster ID
+    ${list_of_links} =    Get Links From Switcher
+    ${status}    Run Keyword And Return Status    Is Environment Staging    ${list_of_links}[1]
+    Check Links For OpenShift Clusetr Manager    ${list_of_links}[1]    ${cluster_id}    ${status}
+
 *** Keywords ***
 Favorite Items Should Be Listed First
     [Documentation]    Compares the ids and checks that favorite Items
@@ -263,6 +272,30 @@ RHODS Dahsboard Pod Should Contain OauthProxy Container
         ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=redhat-ods-applications
         List Should Contain Value    ${container_name}    oauth-proxy
     END
+
+Is Environment Staging
+    [Arguments]    ${link}
+    Should Contain    ${link}    qaprodauth
+
+Check Links For OpenShift Clusetr Manager
+    [Arguments]    ${link}    ${cluster_id}    ${is_env_type_stage}
+    ${cluster_id} =    Remove String    ${cluster_id}    "
+    IF    "${is_env_type_stage}" == "True"
+        Should Be Equal    ${link}    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
+    ELSE
+        Should Be Equal    ${link}    https://cloud.redhat.com/openshift/details/${cluster_id}
+    END
+
+Get Links From Switcher
+    [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link
+    ${list_of_links} =    Create List
+    ${link_elements}=    Get WebElements    //a[@class="pf-m-external pf-c-app-launcher__menu-item" and not(starts-with(@href, '#'))]
+    FOR    ${ext_link}    IN    @{link_elements}
+        ${href}=    Get Element Attribute    ${ext_link}    href
+        ${status}=    Check HTTP Status Code    link_to_check=${href}
+        Append To List    ${list_of_links}    ${href}
+    END
+    [Return]    ${list_of_links}
 
 Verify JupyterHub Card CSS Style
     [Documentation]    Compare the some CSS properties of the Explore page
@@ -398,3 +431,4 @@ Verify Anaconda Success Message Based On Version
     ELSE
         Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME_LATEST}
     END
+

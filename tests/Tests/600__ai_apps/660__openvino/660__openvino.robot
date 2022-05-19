@@ -16,12 +16,12 @@ ${openvino_operator_name}     OpenVINO Toolkit Operator
 
 *** Test Cases ***
 Verify OpenVino Is Available In RHODS Dashboard Explore Page
-  [Tags]  ODS-258  Smoke  Sanity
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
-  Verify Service Is Available In The Explore Page    OpenVINO
-  Verify Service Provides "Get Started" Button In The Explore Page    OpenVINO
+   [Tags]  ODS-258  Smoke  Sanity
+   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+   Wait for RHODS Dashboard to Load
+   Verify Service Is Available In The Explore Page    OpenVINO
+   Verify Service Provides "Get Started" Button In The Explore Page    OpenVINO
 
 Verify Openvino Operator Can Be Installed Using OpenShift Console
    [Tags]   Tier2
@@ -64,9 +64,24 @@ Verify OpenVINO Image Is Tracked By Notification System In RHODS Dashboard
     [Teardown]   Uninstall Openvino Operator
 
 *** Keywords ***
+Get The Labels Of Build
+    [Arguments]    ${namespace}    ${build_search_term}
+    Get Build Status    namespace=${namespace}    build_search_term=${build_search_term}
+    Click Element    //a[@class="co-resource-item__resource-name"]
+    Wait Until Page Contains    Build details
+    @{link_elements}=  Get WebElements
+    ...    //div[@class='co-m-label-list']
+    @{list} =    Create List
+    FOR  ${link}  IN  @{link_elements}
+          ${txt} =    Get Text    ${link}
+          Append To List    ${list}    ${txt}
+    END
+    [Return]    ${list}
+
+*** Keywords ***
 OpenVino Suite Setup
-  Set Library Search Order  SeleniumLibrary
-  RHOSi Setup
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
 
 OpenVino Suite Teardown
-  Close All Browsers
+    Close All Browsers

@@ -50,7 +50,7 @@ Get Average Time For Spawning
         ${total_time} =    Evaluate    ${total_time} + ${avg}
     END
     ${average_time} =    Evaluate    ${total_time} / ${number_of_images}
-    [Return]    ${total_time}
+    [Return]    ${average_time}
 
 Average Spawning Time Should Be Less Than
     [Documentation]    Checks than average time is less than ${time}

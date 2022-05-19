@@ -38,7 +38,9 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 Verify That Login Page Is Shown When Reaching The RHODS Page
     [Tags]      Sanity
     ...         ODS-694
+    ...         ODS-355
     [Setup]     Test Setup For Login Page
+    RHODS Dahsboard Pod Should Contain OauthProxy Container
     Check OpenShift Login Visible
 
 Verify Resource Link HTTP Status Code
@@ -156,16 +158,14 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
-Ability to specify admin users(s) who can configure ODH for other users
-    [Tags]    ODS-355
+*** Keywords ***
+RHODS Dahsboard Pod Should Contain OauthProxy Container
     ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard
-    Log To Console    listof pods ${list_of_pods}
     FOR    ${pod_name}    IN   @{list_of_pods}
         ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=redhat-ods-applications
-        Should Be Equal    oauth-proxy    ${container_name}[1]
+        List Should Contain Value    ${container_name}    oauth-proxy
     END
 
-*** Keywords ***
 Verify JupyterHub Card CSS Style
     [Documentation]    Compare the some CSS properties of the Explore page
     ...    with the expected ones. The expected values change based

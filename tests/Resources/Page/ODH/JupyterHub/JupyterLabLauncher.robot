@@ -186,7 +186,7 @@ Clean Up User Notebook
 
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
-  IF    '${oc_whoami}' == '${admin_username}'
+  IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # We import the library here so it's loaded only when we are connected to the cluster
       # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
       # if there is not any connection opened
@@ -211,7 +211,7 @@ Delete Folder In User Notebook
 
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
-  IF    '${oc_whoami}' == '${admin_username}'
+  IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # We import the library here so it's loaded only when we are connected to the cluster
       # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
       # if there is not any connection opened

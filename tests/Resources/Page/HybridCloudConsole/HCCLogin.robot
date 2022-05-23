@@ -29,7 +29,7 @@ Login to HCC
 
 Maybe Skip RHOSAK Tour
    ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//button[text()='Take tour']
-   Run Keyword If  ${tour_modal}  Click Button    Not now
+   Run Keyword If  ${tour_modal}  Click Button    Show me later
 
 Maybe Agree RH Terms and Conditions
   ${agree_required}=  Run Keyword And Return Status  Page Should Contain  Red Hat Terms and Conditions

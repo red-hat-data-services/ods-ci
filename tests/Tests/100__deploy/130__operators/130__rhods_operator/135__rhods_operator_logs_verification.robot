@@ -18,7 +18,7 @@ Suite Setup     RHOSi Setup
 
 *** Variables ***
 ${namespace}           redhat-ods-operator
-${regex_pattern}       level=([Ee]rror).*
+${regex_pattern}       level=([Ee]rror).*|([Ff]ailed) to list .*
 
 *** Test Cases ***
 Verify RHODS Operator log

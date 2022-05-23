@@ -254,6 +254,9 @@ if command -v yq &> /dev/null
                         echo "Performing oc login using service account"
                         sa_token=$(oc serviceaccounts get-token ${SERVICE_ACCOUNT} -n ${SA_NAMESPACE})
                         oc login --token=$sa_token --server=${oc_host} --insecure-skip-tls-verify=true
+                        sa_fullname=$(oc whoami)
+                        TEST_VARIABLES="${TEST_VARIABLES} --variable SERVICE_ACCOUNT.NAME:${SERVICE_ACCOUNT} --variable SERVICE_ACCOUNT.FULL_NAME:${sa_fullname}"
+
                 fi
 
                 ## no point in going further if the login is not working

@@ -29,7 +29,8 @@ Additional arguments for container run
 # env variables to control test execution
 RUN_SCRIPT_ARGS:
   --skip-oclogin (default: false): script does not perform login using OC CLI
-    --service-account (default: ""): if assigned, ODS-CI will try to log into the cluster using the given service account. ODS-CI automatically creates SERVICE_ACCOUNT.NAME and SERVICE_ACCOUNT.FULL_NAME global variables to be used in tests.
+    --service-account (default: ""): if assigned, ODS-CI will try to log into the cluster using the given service account.
+            ODS-CI automatically creates SERVICE_ACCOUNT.NAME and SERVICE_ACCOUNT.FULL_NAME global variables to be used in tests.
     --sa-namespace (default: "default"): the namespace where the service account is created
   --set-urls-variables (default: false): script gets automatically the cluster URLs (i.e., OCP Console, RHODS Dashboard, OCP API Server)
   --include: run only test cases with the given tags (e.g., --include Smoke --include XYZ)

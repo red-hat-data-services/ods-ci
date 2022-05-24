@@ -303,6 +303,8 @@ case "$(uname -s)" in
 esac
 
 ./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+exit_status=$(echo $?)
+echo ${exit_status}
 
 # send test artifacts by email
 if ${EMAIL_REPORT}
@@ -319,3 +321,5 @@ if ${EMAIL_REPORT}
                         -v ${EMAIL_SERVER} -a "rf_results.tar.gz" -u  ${EMAIL_SERVER_USER}  -p  ${EMAIL_SERVER_PW} \
                         -l ${EMAIL_SERVER_SSL} -d ${EMAIL_SERVER_UNSECURE}
 fi
+
+exit ${exit_status}

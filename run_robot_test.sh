@@ -1,6 +1,8 @@
 #/bin/bash
 
 SKIP_OC_LOGIN=false
+SERVICE_ACCOUNT=""
+SA_NAMESPACE="default"
 SET_RHODS_URLS=false
 TEST_CASE_FILE=tests/Tests
 TEST_VARIABLES_FILE=test-variables.yml
@@ -24,6 +26,18 @@ while [ "$#" -gt 0 ]; do
     --skip-oclogin)
       shift
       SKIP_OC_LOGIN=$1
+      shift
+      ;;
+
+    --service-account)
+      shift
+      SERVICE_ACCOUNT=$1
+      shift
+      ;;
+
+    --sa-namespace)
+      shift
+      SA_NAMESPACE=$1
       shift
       ;;
 
@@ -204,10 +218,13 @@ if ${SET_RHODS_URLS}
         # ocp_console="https://$(oc get route console -n openshift-console -o jsonpath='{.spec.host}{"\n"}')"
         rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
         api_server=$(oc whoami --show-server)
-        TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard}"
+        prom_server="https://$(oc get route prometheus -n redhat-ods-monitoring -o jsonpath='{.spec.host}{"\n"}')"
+        prom_token="$(oc serviceaccounts get-token prometheus -n redhat-ods-monitoring)"
+        TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard} --variable RHODS_PROMETHEUS_URL:${prom_server} --variable RHODS_PROMETHEUS_TOKEN:${prom_token}"
         echo "OCP Console URL set to: ${ocp_console}"
         echo "RHODS Dashboard URL set to: ${rhods_dashboard}"
         echo "RHODS API Server URL set to: ${api_server}"
+        echo "RHODS Prometheus URL set to: ${prom_server}"
 fi
 
 ## if we have yq installed
@@ -225,11 +242,22 @@ if command -v yq &> /dev/null
                     else
                         oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
                 fi
-                oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})
-                oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ${TEST_VARIABLES_FILE})
 
-                ## do an oc login here
-                oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
+
+                if [ -z "${SERVICE_ACCOUNT}" ]
+                    then
+                        echo "Performing oc login using username and password"
+                        oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})
+                        oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ${TEST_VARIABLES_FILE})
+                        oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
+                    else
+                        echo "Performing oc login using service account"
+                        sa_token=$(oc serviceaccounts get-token ${SERVICE_ACCOUNT} -n ${SA_NAMESPACE})
+                        oc login --token=$sa_token --server=${oc_host} --insecure-skip-tls-verify=true
+                        sa_fullname=$(oc whoami)
+                        TEST_VARIABLES="${TEST_VARIABLES} --variable SERVICE_ACCOUNT.NAME:${SERVICE_ACCOUNT} --variable SERVICE_ACCOUNT.FULL_NAME:${sa_fullname}"
+
+                fi
 
                 ## no point in going further if the login is not working
                 retVal=$?

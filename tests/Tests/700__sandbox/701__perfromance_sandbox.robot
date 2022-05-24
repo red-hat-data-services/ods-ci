@@ -10,7 +10,7 @@ Library         String
 ${NAMESPACE}     openshift-kube-apiserver
 ${LABEL_SELECTOR}     app=openshift-kube-apiserver
 ${MEMORY_THRESHOLD}    102400
-${PERF_CODE}    go run setup/main.go --users 50 --default 50  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
+${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
 
 
 *** Test Cases ***

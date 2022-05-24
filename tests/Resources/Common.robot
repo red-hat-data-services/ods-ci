@@ -97,3 +97,10 @@ Check HTTP Status Code
     ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
+
+Verify NPM Version
+    [Documentation]  Verifies the installed version of an NPM library
+    ...    against an expected version in a given pod/container
+    [Arguments]  ${library}  ${expected_version}  ${pod}  ${namespace}  ${container}=""
+    ${installed_version} =  Run  oc exec -n ${namespace} ${pod} -c ${container} -- npm list --depth=0 | awk -F@ '/${library}/ { print $2}'
+    Should Be Equal  ${installed_version}  ${expected_version}

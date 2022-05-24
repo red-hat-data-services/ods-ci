@@ -1,10 +1,11 @@
 *** Settings ***
 Resource    ../../OCPDashboard/DeploymentConfigs/DeploymentConfigs.robot
-Library  Collections
-Library   OpenShiftCLI
+Resource    ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
+Resource    ../../../Common.robot
+Library     Collections
+Library     OpenShiftCLI
+Library     ../../../../libs/Helpers.py
 
-Library  ../../../../libs/Helpers.py
-Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 
 *** Keywords ***
 Verify Deployment
@@ -43,20 +44,17 @@ Verify JupyterHub Deployment
 
     FOR  ${index}  IN RANGE  0  ${nPods}
         &{pod} =  Set Variable  ${component}[${index}]
-        ${version-check} =  Is RHODS Version Greater Or Equal Than  1.9.0
-        IF  ${version-check}==True
-            # Grab x.y.z version of jupyterhub
-            ${jh_version} =    Run  oc -n redhat-ods-applications exec ${pod.metadata.name} -c jupyterhub -- pip show jupyterhub | grep Version: | awk '{split($0,a); print a[2]}'
-            # 1.5 <= ${jh_version} < 2.0
-            ${min} =    GTE    ${jh_version}    1.5.0
-            ${max} =    GTE    1.9.99    ${jh_version}
-            IF  ${min}==False or ${max}==False
-                Fail    msg=JH version ${jh_version} is wrong (should be >=1.5,<2.0)
-            END
+        # Grab x.y.z version of jupyterhub
+        ${jh_version} =    Run  oc -n redhat-ods-applications exec ${pod.metadata.name} -c jupyterhub -- pip show jupyterhub | grep Version: | awk '{split($0,a); print a[2]}'
+        # 1.5 <= ${jh_version} < 2.0
+        ${min} =    GTE    ${jh_version}    1.5.0
+        ${max} =    GTE    1.9.99    ${jh_version}
+        IF  ${min}==False or ${max}==False
+            Fail    msg=JH version ${jh_version} is wrong (should be >=1.5,<2.0)
         END
         FOR  ${j}  IN RANGE  0  ${nContainers}
             IF  '${pod.status.containerStatuses[${j}].name}' == 'jupyterhub'
-                #leader's pod is recognized by jupyterhub container in ready status
+                # leader's pod is recognized by jupyterhub container in ready status
                 IF  '${pod.status.containerStatuses[${j}].ready}' == 'True'
                     IF  ${leader-found}
                         Log  ${leader}, ${pod.metadata.name}
@@ -67,8 +65,8 @@ Verify JupyterHub Deployment
                         Log  Leader Found: ${leader}
                     END
                 ELSE
-                    #there should be two pods with jupyterhub not in ready status
-                    #increase value by one
+                    # there should be two pods with jupyterhub not in ready status
+                    # increase value by one
                     ${standby} =  Set Variable  ${standby+1}
                 END
             END
@@ -77,6 +75,11 @@ Verify JupyterHub Deployment
     Should Not Be Equal As Strings  ${leader}  None
     Should Be Equal As Strings  ${leader-found}  True
     Should Be Equal As Integers  ${standby}  2
+    # Check this only if the deployment is correct and the leader is identified
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.11.0
+    IF  ${version-check}==True
+        Verify NPM Version  url-parse  1.5.10  ${leader}  redhat-ods-applications  jupyterhub
+    END
 
 Wait Until JH Deployment Is Ready
     [Documentation]     Wait Until jupyterhub deployment is completed

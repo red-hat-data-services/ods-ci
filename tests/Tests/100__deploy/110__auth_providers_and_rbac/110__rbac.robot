@@ -20,11 +20,9 @@ Verify Empty Group Doesnt Allow Users To Spawn Notebooks
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-572
-    Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/admin_groups", "value":""}]'
-    Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/allowed_groups", "value":""}]'
-    Run  oc rollout latest dc/jupyterhub -n redhat-ods-applications
+    Apply Access Groups Settings    admins_group=    users_group=    groups_modified_flag=true
     Run Keyword And Expect Error  *  Verify User Can Spawn A Notebook
-    [Teardown]  Update Access Groups In RHODS Groups Config
+    [Teardown]    Set Default Access Groups
 
 
 *** Keywords ***
@@ -36,8 +34,7 @@ Verify User Can Spawn A Notebook
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Default
 
-Update Access Groups In RHODS Groups Config
-    [Documentation]    Updates the values of Access Groups in rhods-group-config.
-    Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/admin_groups", "value":"dedicated-admins"}]'
-    Run  oc patch configmap rhods-groups-config -n redhat-ods-applications --type="json" -p='[{"op":"replace", "path":"/data/allowed_groups", "value":"system:authenticated"}]'
-    Run  oc rollout latest dc/jupyterhub -n redhat-ods-applications
+Set Default Access Groups
+    [Documentation]  Sets values of RHODS Groups to Default Values
+    Set Standard RHODS Groups Variables
+    Set Default Access Groups Settings

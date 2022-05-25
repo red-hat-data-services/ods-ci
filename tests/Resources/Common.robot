@@ -101,6 +101,6 @@ Check HTTP Status Code
 Verify NPM Version
     [Documentation]  Verifies the installed version of an NPM library
     ...    against an expected version in a given pod/container
-    [Arguments]  ${library}  ${expected_version}  ${pod}  ${namespace}  ${container}=""
-    ${installed_version} =  Run  oc exec -n ${namespace} ${pod} -c ${container} -- npm list --depth=0 | awk -F@ '/${library}/ { print $2}'
+    [Arguments]  ${library}  ${expected_version}  ${pod}  ${namespace}  ${container}=""  ${prefix}=""  ${depth}=0
+    ${installed_version} =  Run  oc exec -n ${namespace} ${pod} -c ${container} -- npm list --prefix ${prefix} --depth=${depth} | awk -F@ '/${library}/ { print $2}'
     Should Be Equal  ${installed_version}  ${expected_version}

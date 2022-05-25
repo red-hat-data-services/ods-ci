@@ -115,6 +115,8 @@ def generate_test_config_file(config_template, config_data, test_cluster, set_pr
     data["GITHUB_USER"]["EMAIL"] = config_data["GITHUB_USER"]["EMAIL"]
     data["GITHUB_USER"]["USERNAME"] = config_data["GITHUB_USER"]["USERNAME"]
     data["GITHUB_USER"]["TOKEN"] = config_data["GITHUB_USER"]["TOKEN"]
+    data["SERVICE_ACCOUNT"]["NAME"] = config_data["SERVICE_ACCOUNT"]["NAME"]
+    data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data["SERVICE_ACCOUNT"]["FULL_NAME"]
 
     # Login to test cluster using oc command
     oc_login(data["OCP_CONSOLE_URL"], data["OCP_ADMIN_USER"]["USERNAME"], data["OCP_ADMIN_USER"]["PASSWORD"])

@@ -16,7 +16,7 @@ Verify Default Access Groups Settings And JupyterLab Notebook Access
     Verify User Can Spawn A Notebook
 
 Verify Empty Group Doesnt Allow Users To Spawn Notebooks
-    [Documentation]   Verify that User is unable to Access Jupyterhub after modifying Access Groups in rhods-groups-config
+    [Documentation]   Verify that User is unable to Access Jupyterhub after setting Access Groups in rhods-groups-config to Empty
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-572

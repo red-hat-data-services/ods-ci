@@ -84,7 +84,7 @@ Verify JupyterHub Deployment
 
 Wait Until JH Deployment Is Ready
     [Documentation]     Wait Until jupyterhub deployment is completed
-    [Arguments]   ${retries}=70
+    [Arguments]   ${retries}=50
     FOR  ${index}  IN RANGE  0  1+${retries}
         @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
         ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar

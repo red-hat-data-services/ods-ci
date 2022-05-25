@@ -118,7 +118,7 @@ def read_data_from_json(filename):
             data = json.load(f)
         return data
     except:
-        return {}
+        return None
 
 
 def write_data_in_json(filename, data):

@@ -367,13 +367,22 @@ Verify Cluster Settings Is Not Available
     ${cluster_settings_available}=    Run Keyword And Return Status    Verify Cluster Settings Is Available
     Should Not Be True    ${cluster_settings_available}    msg=Cluster Settings shoudn't be visible for this user
 
+Save Changes In Cluster Settings
+    [Documentation]    Clicks on the "Save changes" button in Cluster Settings and
+    ...    waits until "Settings changes saved." is shown
+    Click Button    Save changes
+    Wait Until Keyword Succeeds    30    1
+    ...    Wait Until Page Contains    Settings changes saved.
+
 Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
     Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+    Save Changes In Cluster Settings
 
 Disable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
     Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
+    Save Changes In Cluster Settings
 
 Search Items In Resources Section
     [Arguments]     ${element}
@@ -393,16 +402,7 @@ Set PVC Value In RHODS Dashboard
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
     Input Text    //input[@id="pvc-size-input"]    ${size}
-    ${version-check}    Is RHODS Version Greater Or Equal Than    1.10.0
-    IF    ${version-check}==True
-        Click Button  Save changes
-        Wait Until Keyword Succeeds    30    1
-        ...    Wait Until Page Contains    Settings changes saved.
-    ELSE
-        Press Keys    //input[@id="pvc-size-input"]    RETURN
-        Wait Until Keyword Succeeds    30    1
-        ...    Wait Until Page Contains    Cluster settings updated successfully.
-    END
+    Save Changes In Cluster Settings
 
 Restore PVC Value To Default Size
     [Documentation]    Set the PVC value to default
@@ -410,15 +410,7 @@ Restore PVC Value To Default Size
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
     Click Button    Restore Default
-    ${version-check}    Is RHODS Version Greater Or Equal Than    1.10.0
-    IF    ${version-check}==True
-          Click Button  Save changes
-          Wait Until Keyword Succeeds    30    1
-          ...    Wait Until Page Contains    Settings changes saved.
-    ELSE
-          Wait Until Keyword Succeeds    30    1
-          ...    Wait Until Page Contains    Cluster settings updated successfully.
-    END
+    Save Changes In Cluster Settings
     Sleep    20s    msg=NOTE: This change will cause juypterhub to restart. It will take 30 seconds before juypterhub will be available. #robocop:disable
     Wait Until JH Deployment Is Ready
 

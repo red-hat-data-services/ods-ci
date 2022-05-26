@@ -183,13 +183,13 @@ Get RHODS URL From OpenShift Using UI
     [Return]   ${href}
 
 OpenShift Resource Field Value Should Be Equal As Strings
-    [Documentation]    
+    [Documentation]
     ...    Args:
     ...        actual(str): Field with the actual value of the resource
     ...        expected(str): Expected value
-    ...        resources(list(dict)): Resources from OpenShiftLibrary 
+    ...        resources(list(dict)): Resources from OpenShiftLibrary
     ...    Returns:
-    ...        None 
+    ...        None
     [Arguments]    ${actual}    ${expected}    @{resources}
     FOR    ${resource}    IN    @{resources}
         &{dict} =    Set Variable    ${resource}
@@ -201,15 +201,25 @@ OpenShift Resource Field Value Should Match Regexp
     ...    Args:
     ...        actual(str): Field with the actual value of the resource
     ...        expected(str): Expected regular expression
-    ...        resources(list(dict)): Resources from OpenShiftLibrary 
+    ...        resources(list(dict)): Resources from OpenShiftLibrary
     ...    Returns:
-    ...        None 
+    ...        None
     [Arguments]    ${actual}    ${expected}    @{resources}
     FOR    ${resource}    IN    @{resources}
         &{dict} =    Set Variable    ${resource}
         Should Match Regexp    ${dict.${actual}}    ${expected}
     END
 
+OpenShift Resource Component Should Contain Field
+    [Documentation]    Checks if the specified OpenShift resource component contains
+    ...                the specified field
+    ...    Args:
+    ...        resource_component: Resource component
+    ...        field: Field
+    ...    Returns:
+    ...        None
+    [Arguments]    ${resource_component}    ${field}
+    Run Keyword And Continue On Failure    Should Contain    ${resource_component}    ${field}
 
 Verify RHODS Groups Config Map Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
@@ -249,3 +259,50 @@ Get Grafana Url
     [Documentation]  Returns Grafana URL
     ${grafana_url} =    Run    oc get routes/grafana -n redhat-ods-monitoring -o json | jq -r '.spec.host'
     [Return]    ${grafana_url}
+
+Verify CPU And Memory Requests And Limits Are Defined For Pod
+    [Documentation]    Verifies that CPU and memory requests and limits are defined
+    ...                for the specified pod
+    ...    Args:
+    ...        pod_info: Pod information
+    ...    Returns:
+    ...        None
+    [Arguments]    ${pod_info}
+    &{pod_info_dict}=    Set Variable    ${pod_info}
+    FOR    ${container_info}    IN    @{pod_info_dict.spec.containers}
+        Verify CPU And Memory Requests And Limits Are Defined For Pod Container    ${container_info}
+    END
+
+Verify CPU And Memory Requests And Limits Are Defined For Pod Container
+    [Documentation]    Verifies that CPU and memory requests and limits are defined
+    ...                for the specified container
+    ...    Args:
+    ...        container_info: Container information
+    ...    Returns:
+    ...        None
+    [Arguments]    ${container_info}
+    &{container_info_dict} =    Set Variable    ${container_info}
+    OpenShift Resource Component Should Contain Field     ${container_info_dict}    resources
+    Run Keyword If   'resources' in ${container_info_dict}
+    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources}    requests
+    Run Keyword If   'resources' in ${container_info_dict}
+    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources}    limits
+    Run Keyword If   'requests' in ${container_info_dict.resources}
+    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.requests}    cpu
+    Run Keyword If   'requests' in ${container_info_dict.resources}
+    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.requests}    memory
+    Run Keyword If   'limits' in ${container_info_dict.resources}
+    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.limits}    cpu
+    Run Keyword If   'limits' in ${container_info_dict.resources}
+    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.limits}    memory
+
+Fetch Project Pods Info
+    [Documentation]    Fetches information of all Pods for the specified Project
+    ...    Args:
+    ...        project: Project name
+    ...    Returns:
+    ...        project_pods_info: List of Project Pods information
+    [Arguments]    ${project}
+    @{project_pods_info}=    Oc Get    kind=Pod    api_version=v1    namespace=${project}
+    [Return]    @{project_pods_info}
+

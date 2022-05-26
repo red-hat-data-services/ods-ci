@@ -26,7 +26,7 @@ Verify RHODS Performance For Sandbox Onboarding Process
 
 
 *** Keywords ***
-Capture Memory Utilization Of Openshift API Server POD
+Capture And Validate Memory Utilization Of Openshift API Server POD
     [Documentation]  Capture and compare the realtime memory utilization
     ${memory_usage}     Run    kubectl top pod -n ${NAMESPACE} -l ${LABEL_SELECTOR} | awk '{if(NR>1)print $3}'
     ${memory}    Split String    ${memory_usage}   \n
@@ -56,7 +56,7 @@ Run Performance Test On RHODS Operator
            ${status}   Is Process Running    perf
            IF    ${status} == True
                 Run Keyword And Warn On Failure    Should Be Equal  ${result}  ${NONE}
-                Capture Memory Utilization Of Openshift API Server POD
+                Capture And Validate Memory Utilization Of Openshift API Server POD
                 Sleep  30s
            ELSE
                 Exit For Loop

@@ -1,4 +1,4 @@
-git *** Settings ***
+*** Settings ***
 Documentation    Test Suite for Performance Sandbox Test cases
 Library         OperatingSystem
 Library         Collections

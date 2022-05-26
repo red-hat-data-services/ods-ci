@@ -4,14 +4,12 @@ Resource            ../../../Resources/ODS.robot
 Test Setup          Begin Metrics Web Test
 Test Teardown       End Metrics Web Test
 
-
 Suite Setup     RHOSi Setup
 Resource    ../../../Resources/ODS.robot
 Library     DateTime
 
 *** Variables ***
 @{RECORD_GROUPS}    Availability Metrics    SLOs - JupyterHub    SLOs - ODH Dashboard    SLOs - RHODS Operator    SLOs - Traefik Proxy    Usage Metrics
-
 @{ALERT_GROUPS}     Builds                  DeadManSnitch    RHODS-PVC-Usage    SLOs-haproxy_backend_http_responses_total    SLOs-probe_success
 
 
@@ -65,9 +63,8 @@ Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     @{list_values} =    Create List    1    0
     Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
 
-
 Verify JupyterHub Leader Monitoring Using ODS Prometheus
-    [Documentation]    Verifies the only one endpoint is up at a time in JupyterHub Matrics 
+    [Documentation]    Verifies the only one endpoint is up at a time in JupyterHub Metrics
     [Tags]    Sanity
     ...       ODS-689
     ...       Tier1
@@ -81,7 +78,8 @@ Verify JupyterHub Leader Monitoring Using ODS Prometheus
     Should Be Equal As Integers    ${Length}    1
     ${query_result} =    Prometheus.Run Range Query    pm_query=up{job="JupyterHub Metrics"}    pm_url=${RHODS_PROMETHEUS_URL}    pm_token=${RHODS_PROMETHEUS_TOKEN}
     Verify That There Was Only 1 Jupyterhub Server Available At A Time  query_result=${query_result}
-    
+
+
 *** Keywords ***
 Begin Metrics Web Test
     Set Library Search Order    SeleniumLibrary

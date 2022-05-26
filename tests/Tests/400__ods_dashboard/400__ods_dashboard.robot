@@ -322,7 +322,7 @@ Verify Anaconda Success Message Based On Version
 
 Verify Notification Saying Notebook Builds Not Started
     [Documentation]     Verifies RHODS Notification Drawer Contains Names of Image Builds which have not started
-    Sleep  1min  reason=Wait For Notifications
+    Sleep  2min  reason=Wait For Notifications
     Reload Page
     RHODS Notification Drawer Should Contain    message=These notebook image builds have not started:
     FOR    ${image}    IN    @{images}

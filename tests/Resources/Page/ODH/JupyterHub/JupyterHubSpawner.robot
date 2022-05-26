@@ -442,3 +442,37 @@ Open New Notebook In Jupyterlab Menu
     Close Other JupyterLab Tabs
     Maybe Close Popup
     Sleep  1
+
+Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    [Documentation]    Log in N users and run notebook for each of them
+    [Arguments]    ${list_of_usernames}
+    FOR    ${username}    IN    @{list_of_usernames}
+        Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
+        Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+        Wait for RHODS Dashboard to Load
+        Launch JupyterHub From RHODS Dashboard Link
+        Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+        Page Should Not Contain    403 : Forbidden
+        ${authorization_required} =    Is Service Account Authorization Required
+        Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+        Fix Spawner Status
+        Spawn Notebook With Arguments
+    END
+    [Teardown]    SeleniumLibrary.Close All Browsers
+
+CleanUp JupyterHub For N users
+    [Documentation]    Cleans JupyterHub for N users
+    [Arguments]    ${list_of_usernames}
+    SeleniumLibrary.Close All Browsers
+    FOR    ${username}    IN    @{list_of_usernames}
+        Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
+        Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+        Wait for RHODS Dashboard to Load
+        Launch JupyterHub From RHODS Dashboard Link
+        Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+        Page Should Not Contain    403 : Forbidden
+        ${authorization_required} =    Is Service Account Authorization Required
+        Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+        Stop JupyterLab Notebook Server
+    END
+    [Teardown]    SeleniumLibrary.Close All Browsers

@@ -170,7 +170,7 @@ Set Notebook Culler Timeout
     END
     Input Text  //input[@id="hour-input"]  ${hours}
     Input Text  //input[@id="minute-input"]  ${minutes}
-    Click Button  Save changes
+    Save Changes In Cluster Settings
 
 Disable Notebook Culler
     [Documentation]    Disables the culler (i.e. sets the default timeout of 1 year)
@@ -180,7 +180,7 @@ Disable Notebook Culler
     ...    xpath://input[@id="hour-input"][@disabled=""]
     IF  ${disabled_field}==False
         Click Element  xpath://input[@id="culler-timeout-unlimited"]
-        Click Button  Save changes
+        Save Changes In Cluster Settings
     END
     Sleep  30s  msg=Give time for rollout
 

@@ -17,13 +17,7 @@ Verify That Administrators Can Access "Cluster Settings"
     ...       ODS-1216
 
     Open ODS Dashboard With Admin User
-
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check}==True
-        Verify Cluster Settings Is Available
-    ELSE
-        Skip    msg=Cluster settings was introduced in RHODS 1.8.0
-    END
+    Verify Cluster Settings Is Available
     [Teardown]    Dashboard Settings Test Teardown
 
 Verify That Not Admin Users Can Not Access "Cluster Settings"
@@ -44,18 +38,13 @@ Verify That "Usage Data Collection" Can Be Set In "Cluster Settings"
     ...       Sanity
     ...       ODS-1218
     Open ODS Dashboard With Admin User
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check}==True
-        Verify Cluster Settings Is Available
-        ODHDashboard.Enable "Usage Data Collection"
-        Capture Page Screenshot
-        ODS.Usage Data Collection Should Be Enabled
-        ODHDashboard.Disable "Usage Data Collection"
-        Capture Page Screenshot
-        ODS.Usage Data Collection Should Not Be Enabled
-    ELSE
-        Skip    msg=Cluster settings was introduced in RHODS 1.8.0
-    END
+    Verify Cluster Settings Is Available
+    ODHDashboard.Enable "Usage Data Collection"
+    Capture Page Screenshot
+    ODS.Usage Data Collection Should Be Enabled
+    ODHDashboard.Disable "Usage Data Collection"
+    Capture Page Screenshot
+    ODS.Usage Data Collection Should Not Be Enabled
     [Teardown]    Restore Default Configuration For "Usage Data Collection" And TearDown
 
 

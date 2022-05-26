@@ -47,7 +47,7 @@ Verify rhods-dashboard ClusterRole Rules
     &{rule_2} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[1]
     @{rule_2_expected_verbs}=    Create List    get    list    watch
     @{rule_2_expected_apigroups}=    Create List    operators.coreos.com
-    @{rule_2_expected_resources}=    Create List    clusterserviceversions
+    @{rule_2_expected_resources}=    Create List    clusterserviceversions    subscriptions
     Verify rhods-dashboard ClusterRole Rule    ${rule_2}    ${rule_2_expected_verbs}    ${rule_2_expected_apigroups}    ${rule_2_expected_resources}
     &{rule_3} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[2]
     @{rule_3_expected_verbs}=    Create List    get    list    watch

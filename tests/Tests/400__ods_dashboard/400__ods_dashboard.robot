@@ -33,7 +33,14 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     Securing a deployed model using Red Hat OpenShift API Management
 @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
 ...                                     PerceptiLabs
-@{images}  PyTorch  TensorFlow  CUDA
+@{IMAGES}                               PyTorch  TensorFlow  CUDA
+@{BUILDS_TO_BE_DELETED}                 pytorch  tensorflow  minimal  cuda-s2i-thoth
+@{BUILD_CONFIGS}                        11.4.2-cuda-s2i-base-ubi8    11.4.2-cuda-s2i-core-ubi8
+...                                     11.4.2-cuda-s2i-py38-ubi8    11.4.2-cuda-s2i-thoth-ubi8-py38
+...                                     s2i-minimal-gpu-cuda-11.4.2-notebook  s2i-pytorch-gpu-cuda-11.4.2-notebook
+...                                     s2i-tensorflow-gpu-cuda-11.4.2-notebook
+@{BUILDS_TO_BE_CHECKED}                 cuda-s2i-base    cuda-s2i-core    cuda-s2i-py    cuda-s2i-thoth
+...                                     minimal    pytorch  tensorflow
 
 
 *** Test Cases ***
@@ -165,12 +172,12 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     [Tags]    Sanity
     ...       ODS-1347
     ...       Tier1
-    Delete Multiple Builds  pytorch  tensorflow  minimal  cuda-s2i-thoth  namespace=redhat-ods-applications
+    Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
     Verify Notification Saying Notebook Builds Not Started
     Clear Dashboard Notifications
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${last_cuda_build}  expected_status=Complete
-    Remove Values From List    ${images}  CUDA
+    Remove Values From List    ${IMAGES}  CUDA
     Verify Notification Saying Notebook Builds Not Started
     RHODS Notification Drawer Should Contain    message=Notebook images are building
     RHODS Notification Drawer Should Not Contain    message=CUDA
@@ -325,7 +332,7 @@ Verify Notification Saying Notebook Builds Not Started
     Sleep  2min  reason=Wait For Notifications
     Reload Page
     RHODS Notification Drawer Should Contain    message=These notebook image builds have not started:
-    FOR    ${image}    IN    @{images}
+    FOR    ${image}    IN    @{IMAGES}
         RHODS Notification Drawer Should Contain    message=${image}
     END
 
@@ -333,5 +340,5 @@ Wait Until Remaining Builds Are Complete And Close Browser
     [Documentation]     Waits Until Remaining builds have Status as Complete and Closes Browser
     Go To  url=${OCP_CONSOLE_URL}
     Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
-    Start Remaining Builds And Wait Until All Builds Are Complete
+    Start Remaining Builds And Wait Until All Builds Are Complete  builds=${BUILDS_TO_BE_CHECKED}  build_configs=${BUILD_CONFIGS}
     Dashboard Test Teardown

@@ -97,11 +97,7 @@ Delete Multiple Builds
 
 Start Remaining Builds And Wait Until All Builds Are Complete
     [Documentation]    Starts new build if build fails or is not started , Waits until all builds are complete
-    ${build_configs} =    Create List    11.4.2-cuda-s2i-base-ubi8    11.4.2-cuda-s2i-core-ubi8
-    ...    11.4.2-cuda-s2i-py38-ubi8    11.4.2-cuda-s2i-thoth-ubi8-py38    s2i-minimal-gpu-cuda-11.4.2-notebook
-    ...    s2i-pytorch-gpu-cuda-11.4.2-notebook    s2i-tensorflow-gpu-cuda-11.4.2-notebook
-    ${builds} =    Create List    cuda-s2i-base    cuda-s2i-core    cuda-s2i-py    cuda-s2i-thoth    minimal    pytorch
-    ...    tensorflow
+    [Arguments]    ${builds}  ${build_configs}
     ${no_of_builds} =    Get Length    ${builds}
     FOR    ${ind}    IN RANGE    ${no_of_builds}
         ${build_name} =    Search Last Build    namespace=redhat-ods-applications

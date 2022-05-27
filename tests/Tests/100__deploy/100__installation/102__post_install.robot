@@ -226,7 +226,7 @@ Verify Authentication Is Required To Access BlackboxExporter
     Length Should Be    ${links}    2
     ${pod_name} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     FOR    ${link}    IN    @{links}
-        ${command} =    Set Variable    curl --insecure ${link}
+        ${command} =    Set Variable    curl --silent --insecure ${link}
         ${output} =    Run Command In Container    namespace=redhat-ods-monitoring    pod_name=${pod_name}
         ...    command=${command}    container_name=prometheus
         Should Contain    ${output}    Log in with OpenShift

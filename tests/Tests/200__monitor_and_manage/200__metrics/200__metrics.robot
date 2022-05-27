@@ -100,8 +100,12 @@ Read Current CPU Usage
     ${Expression} =    Set Variable
     ...    sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0", container="",pod=~"jupyterhub-nb.*",namespace="rhods-notebooks"}[1h]))
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${Expression}
-    [Return]    ${resp.json()["data"]["result"][0]["value"][-1]}
-
+    IF    ${resp.json()["data"]["result"]} == []
+        ${cpu_usage}    Set Variable    0
+    ELSE
+        ${cpu_usage}    Set Variable    ${resp.json()["data"]["result"][0]["value"][-1]}
+    END
+    [Return]    ${cpu_usage}
 ## TODO: Add this keyword with the other JupyterHub stuff
 
 Run Jupyter Notebook For 5 Minutes

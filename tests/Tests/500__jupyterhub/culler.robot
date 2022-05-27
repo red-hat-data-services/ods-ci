@@ -59,7 +59,7 @@ Verify Culler Kills Inactive Server
         ${drift} =  Evaluate  ${drift}+${30}
     END
     IF  ${drift}>${120}
-        Fail    Drift was over 2 minutes, it was ${drift} seconds
+        Fail    Drift was over 2 minutes, it was ${drift} seconds    ProductBug
     END
 
 Verify Culler Does Not Kill Active Server

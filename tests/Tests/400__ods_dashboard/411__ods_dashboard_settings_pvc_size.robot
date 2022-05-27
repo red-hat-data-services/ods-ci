@@ -45,7 +45,7 @@ Verify User Cannot Set An Unsupported PVC Size Using Backend
     ...    spawn notebook for supported PVC change
     [Tags]    Tier2
     ...       ODS-1229
-    ...       KnownIssues
+    ...       ProductBug
     Verify Multiple Unsupported Size    ${NS_SIZE}
     [Teardown]    PVC Size Test Teardown
 

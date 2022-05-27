@@ -23,8 +23,8 @@ Run Range Query
     ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
     [Arguments]    ${pm_query}    ${pm_url}    ${pm_token}    ${interval}=12h     ${steps}=172
     ${time} =    Get Start Time And End Time  interval=${interval}
-    ${pm_headers}=    Create Dictionary    Authorization=Bearer ${RHODS_PROMETHEUS_TOKEN}
-    ${resp}=    RequestsLibrary.GET    url=${RHODS_PROMETHEUS_URL}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
+    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}
     ...    headers=${pm_headers}    verify=${False}
     Status Should Be    200    ${resp}
     [Return]    ${resp}
@@ -113,7 +113,6 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
         Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
     END
 
-
 Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if a given Prometheus alert does not have the expected severity
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-severity}    ${alert-duration}=${EMPTY}
@@ -155,8 +154,6 @@ Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
         Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
     END
 
-
-
 Alerts Should Be Equal
     [Documentation]    Compares two alerts names and fails if they are different.
     ...    If ${alert1-duration} is not empty, compare it also with ${alert2-duration}
@@ -194,15 +191,15 @@ Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
 Get Target Endpoints
     [Documentation]     Returns list of Endpoint URLs
     [Arguments]         ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
-    ${links} =  Run  curl -X GET -H "Authorization:Bearer ${RHODS_PROMETHEUS_TOKEN}" -u ${OCP_ADMIN_USER.USERNAME}:${OCP_ADMIN_USER.PASSWORD} -k ${RHODS_PROMETHEUS_URL}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'
-    ${links}    Replace String    ${links}    "    ${EMPTY}
-    @{links} =  Split String  ${links}  \n
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${username}:${password} -k ${pm_url}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'
+    ${links}=    Replace String    ${links}    "    ${EMPTY}
+    @{links}=    Split String  ${links}  \n
     [Return]    ${links}
 
 Get Target Endpoints Which Have State Up
     [Documentation]    Returns list of endpoints who have state is "UP"
     [Arguments]        ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
-    ${links} =  Run  curl -X GET -H "Authorization:Bearer ${pm_token}" -u ${pm_token}:${password} -k ${pm_token}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | select(.health == "up") | .globalUrl'
-    ${links}    Replace String    ${links}    "    ${EMPTY}
-    @{links} =  Split String  ${links}  \n
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${pm_token}:${password} -k ${pm_token}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | select(.health == "up") | .globalUrl'
+    ${links}=    Replace String    ${links}    "    ${EMPTY}
+    @{links}=    Split String  ${links}  \n
     [Return]    ${links}

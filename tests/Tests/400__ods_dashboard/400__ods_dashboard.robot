@@ -61,7 +61,7 @@ Verify Content In RHODS Explore Section
     ...    - Sidebar (titles, links text, links status)
     [Tags]    Sanity
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
-    ...       KnownIssues
+    ...       ProductBug
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait Until Cards Are Loaded
@@ -73,7 +73,7 @@ Verify Disabled Cards Can Be Removed
     ...                 It uses RHOSAK as example to test the feature
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
-    ...       KnownIssues
+    ...       ProductBug
     Enable RHOSAK
     Remove RHOSAK From Dashboard
     Success Message Should Contain    ${RHOSAK_DISPLAYED_APPNAME}

@@ -30,8 +30,8 @@ Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Pag
   Run Keyword If   ${status} == ${False}   Run Keywords
   ...              Verify Anaconda Service Is Enabled Based On Version
   ...              AND
-  ...              FAIL   Anaconda Professional does not have a "Enable" button
-  ...                     in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
+  ...              FAIL   msg=Anaconda Professional does not have a "Enable"
+  ...    button in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
 
 Verify Anaconda Professional Fails Activation When Key Is Invalid
   [Documentation]  Checks that if user inserts an invalid key,
@@ -52,7 +52,7 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
 Verify User Is Able to Activate Anaconda Professional
   [Tags]  Tier2
   ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082
-  ...     KnownIssues
+  ...     ProductBug
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner
@@ -91,6 +91,7 @@ Verify User Is Able to Activate Anaconda Professional
   Fix Spawner Status  # used to close the server and go back to Spawner
   Verify Anaconda Element Present Based On Version
   [Teardown]    Remove Anaconda Component
+
 
 *** Keywords ***
 Anaconda Suite Setup

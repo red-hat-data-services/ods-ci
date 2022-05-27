@@ -24,7 +24,7 @@ Force Tags       JupyterHub
 Test User Notebook Plugin in JupyterLab
     [Tags]  Sanity
     ...     ODS-486
-    ...     KnownIssues
+    ...     ProductBug
     Gather Notebook data
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation       Collections of keyword to handle Deployment config objects in OCP
 Library     OpenShiftLibrary
 
 
@@ -15,8 +16,8 @@ Start Rollout
 
 Wait Until Rollout Is Started
     [Documentation]     Wait until the old pods are replace with the new ones after a rollout is triggered
-    [Arguments]     ${namespace}  ${label_selector}   ${comparison_fields}=['metadata.name']  ${retries}=5   ${retries_interval}=5s
-    ${previous_pods}=    Oc Get    kind=Pod  namespace=${namespace}   label_selector=${label_selector}   fields=${comparison_fields}
+    [Arguments]     ${previous_pods}    ${namespace}    ${label_selector}
+    ...             ${comparison_fields}=['metadata.name']    ${retries}=5    ${retries_interval}=5s
     Log     ${previous_pods}
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         ${current_pods}=    Oc Get    kind=Pod  namespace=${namespace}   label_selector=${label_selector}   fields=${comparison_fields}

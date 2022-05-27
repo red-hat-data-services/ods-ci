@@ -13,21 +13,24 @@ ${commercial_url}              https://www.redhat.com/en/technologies/cloud-comp
 
 *** Test Cases ***
 Verify RHODS operator information
-  [Documentation]  This TC verfiy if the text present in RHODS opeartor Details section
-  [Tags]  ODS-498   ODS-624   Sanity
-  Open Installed Operators Page
-  #Select All Projects
-  Click On Searched Operator      Red Hat OpenShift Data Science
-  ${link_elements}=  Get WebElements    xpath=//*[@class="co-clusterserviceversion-details__field"]//a
-  #Temporary List to hold the url for the verification
-  ${temp_list}        Create List
-  FOR  ${idx}  ${external_link}  IN ENUMERATE  @{link_elements}  start=1
+    [Documentation]  This TC verfiy if the text present in RHODS opeartor Details section
+    [Tags]  Sanity
+    ...     ODS-498
+    ...     ODS-624
+    ...     FlakyTest
+    Open Installed Operators Page
+    #Select All Projects
+    Click On Searched Operator      Red Hat OpenShift Data Science
+    ${link_elements}=  Get WebElements    xpath=//*[@class="co-clusterserviceversion-details__field"]//a
+    #Temporary List to hold the url for the verification
+    ${temp_list}        Create List
+    FOR  ${idx}  ${external_link}  IN ENUMERATE  @{link_elements}  start=1
         ${href}=    Get Element Attribute    ${external_link}    href
         Append to List      ${temp_list}       ${href}
         Run Keyword IF      $href == "mailto:undefined"   Continue For Loop
         ...    ELSE IF     '${href}' == '${commercial_url}'   Get HTTP Status Code   ${href}
         ...       ELSE      Fail      URL '${href}' should not be Present in RHODS Cluster Service Detail Section
-  END
+   END
 
   Run Keyword IF     "mailto:undefined" not in $temp_list     FAIL    There shouldn't be reference to maintainers email
 

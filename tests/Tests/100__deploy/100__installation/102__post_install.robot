@@ -201,6 +201,7 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ...                for all containers in all pods for all ODS projects
     [Tags]    Sanity
     ...       Tier1
+    ...       ProductBug
     ...       ODS-385
     ...       ODS-554
     ...       ODS-556

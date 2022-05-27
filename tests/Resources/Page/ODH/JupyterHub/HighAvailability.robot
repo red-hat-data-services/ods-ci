@@ -99,7 +99,11 @@ Wait Until JH Deployment Is Ready
 
 Rollout JupyterHub
     [Documentation]     Rollouts JupyterHub deployment and wait until it is finished
-    Start Rollout   dc_name=jupyterhub  namespace=redhat-ods-applications
+    ${current_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=jupyterhub
+    ...                 fields=['metadata.name']
+    Start Rollout     dc_name=jupyterhub    namespace=redhat-ods-applications
+    Wait Until Rollout Is Started     previous_pods=${current_pods}     namespace=redhat-ods-applications
+    ...                               label_selector=app=jupyterhub
     Wait Until JH Deployment Is Ready
 
 

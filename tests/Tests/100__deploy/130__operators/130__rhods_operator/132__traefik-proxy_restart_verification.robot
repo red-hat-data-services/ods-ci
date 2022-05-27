@@ -20,6 +20,6 @@ Verify Traefik Proxy Containers Have Zero Restarts
     [Documentation]    Verify traefik proxy
     ...    container restart
     [Tags]    Sanity
-    ...       ODS-1163    KnownIssues
+    ...       ODS-1163    ProductBug
     ${pod_names}    Get POD Names    ${NAMESPACE}    ${LABEL_SELECTOR}
     Verify Containers Have Zero Restarts    ${pod_names}    ${NAMESPACE}

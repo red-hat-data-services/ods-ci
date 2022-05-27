@@ -170,7 +170,7 @@ Verify Users Can Update Notification Email After Installing RHODS With The AddOn
     [Documentation]    Vrifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
     [Tags]    Tier2
     ...       ODS-673
-    ...       KnownIssues
+    ...       ProductBug
     ...       Deployment-AddOnFlow
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_id} =    Get Cluster ID

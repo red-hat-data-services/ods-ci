@@ -100,6 +100,7 @@ Wait Until JH Deployment Is Ready
 Rollout JupyterHub
     [Documentation]     Rollouts JupyterHub deployment and wait until it is finished
     Start Rollout   dc_name=jupyterhub  namespace=redhat-ods-applications
+    Wait Until Rollout Is Started       namespace=redhat-ods-applications  label_selector=app=jupyterhub
     Wait Until JH Deployment Is Ready
 
 

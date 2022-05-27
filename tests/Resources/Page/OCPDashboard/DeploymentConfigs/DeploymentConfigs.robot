@@ -17,10 +17,10 @@ Wait Until Rollout Is Started
     [Documentation]     Wait until the old pods are replace with the new ones after a rollout is triggered
     [Arguments]     ${namespace}  ${label_selector}   ${comparison_fields}=['metadata.name']  ${retries}=5   ${retries_interval}=5s
     ${previous_pods}=    Oc Get    kind=Pod  namespace=${namespace}   label_selector=${label_selector}   fields=${comparison_fields}
-    Log To Console      ${previous_pods}
+    Log     ${previous_pods}
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         ${current_pods}=    Oc Get    kind=Pod  namespace=${namespace}   label_selector=${label_selector}   fields=${comparison_fields}
-        Log To Console      ${current_pods}
+        Log      ${current_pods}
         ${equal_flag}=     Run Keyword And Return Status    Should Not Be Equal As Strings    ${previous_pods}    ${current_pods}
         Exit For Loop If    $equal_flag == True
         Sleep    ${retries_interval}

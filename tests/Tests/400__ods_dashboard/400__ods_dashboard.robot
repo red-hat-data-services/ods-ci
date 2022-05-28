@@ -160,35 +160,36 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
 
 Verify Favorite Resource Cards
     [Tags]    ODS-389
+    [Documentation]    Verifies that there is a clickable star icon on each tile and tiles get
+    ...                sorted after adding them in favourites in list and tile view and even changing
+    ...                the sort, favourite tiles are still listed first
     Click Link    Resources
     Sleep    5s
-    Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
-    Click Button    //button[@data-key="name"]
-    Sleep    1s
-    ${list_of_tile} =    Get List Of Ids Of Tiles
-    Verify Star Icons Are Clickable    ${list_of_tile}
-    Add The Range Of Tiles In Favourite    ${list_of_tile}    27    48
+    Sort Resources By    name
+    ${list_of_tile_ids} =    Get List Of Ids Of Tiles
+    Verify Star Icons Are Clickable    ${list_of_tile_ids}
+    Add The Range Of Tiles In Favourite    ${list_of_tile_ids}    27    48
 
-    ${list_of_new_tile} =    Get List Of Ids Of Tiles
+    ${list_of_new_tile_ids} =    Get List Of Ids Of Tiles
 
-    List Should Be Equal    ${list_of_tile}    ${27}    ${48}
-    ...                      ${list_of_new_tile}    ${0}    ${21}
+    List Should Be Equal    ${list_of_tile_ids}    ${27}    ${48}
+    ...                      ${list_of_new_tile_ids}    ${0}    ${21}
 
-    ${list_of_ids_of_favourite} =    Get Slice From List    ${list_of_new_tile}    ${0}    ${21}
+    ${list_of_ids_of_favourite} =    Get Slice From List    ${list_of_new_tile_ids}    ${0}    ${21}
     Click Button    //*[@id="list-view"]
     Sleep    2s
 
-    ${list_of_new_tile} =    Get List Of Atrributes    //div[@class="odh-list-item__doc-title"]    id
+    ${list_of_new_tile_ids} =    Get List Of Atrributes    //div[@class="odh-list-item__doc-title"]    id
 
-    List Should Be Equal    ${list_of_new_tile}    ${0}    ${42}
-    ...                      ${list_of_tile}    ${27}    ${48}   ${2}
+    List Should Be Equal    ${list_of_new_tile_ids}    ${0}    ${42}
+    ...                      ${list_of_tile_ids}    ${27}    ${48}   ${2}
     Click Button    //*[@id="card-view"]
     Sleep    2s
     Change The Sort and Check With The List    ${list_of_ids_of_favourite}    type
     Change The Sort and Check With The List    ${list_of_ids_of_favourite}    application
     Change The Sort and Check With The List    ${list_of_ids_of_favourite}    duration
 
-    Remove The Range Of Tiles From Favourite    ${list_of_tile}    27    48
+    Remove The Range Of Tiles From Favourite    ${list_of_tile_ids}    27    48
 
 *** Keywords ***
 Verify Star Icons Are Clickable
@@ -245,7 +246,7 @@ Remove The Range Of Tiles From Favourite
 
 Change The Sort and Check With The List
     [Arguments]    ${list_of_ids_of_favourite}    ${sort_type}
-    Change The Sort    ${sort_type}
+    Sort Resources By    ${sort_type}
     ${new_list_of_tile} =    Get List Of Ids Of Tiles
     ${new_list_of_tile} =    Get Slice From List    ${new_list_of_tile}    0    21
     Lists Should Be Equal    ${new_list_of_tile}    ${list_of_ids_of_favourite}    ignore_order=${True}

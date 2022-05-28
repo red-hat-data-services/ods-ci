@@ -98,6 +98,19 @@ Check HTTP Status Code
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 
+Get List Of Atrributes
+    [Documentation]    Returns the list of attributes
+    [Arguments]    ${xpath}    ${attribute}
+    ${xpath} =    Remove String    ${xpath}    ]
+    ${link_elements}=
+    ...    Get WebElements    ${xpath} and not(starts-with(@${attribute}, '#'))]
+    ${list_of_atrributes}=    Create List
+    FOR    ${ext_link}    IN    @{link_elements}
+        ${ids}=    Get Element Attribute    ${ext_link}    ${attribute}
+        Append To List    ${list_of_atrributes}    ${ids}
+    END
+    [Return]    ${list_of_atrributes}
+
 Verify NPM Version
     [Documentation]  Verifies the installed version of an NPM library
     ...    against an expected version in a given pod/container

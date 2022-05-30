@@ -8,6 +8,7 @@ Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource        ../../Resources/Common.robot
+Resource        ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -37,7 +38,9 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 Verify That Login Page Is Shown When Reaching The RHODS Page
     [Tags]      Sanity
     ...         ODS-694
+    ...         ODS-355
     [Setup]     Test Setup For Login Page
+    RHODS Dahsboard Pod Should Contain OauthProxy Container
     Check OpenShift Login Visible
 
 Verify Resource Link HTTP Status Code
@@ -156,6 +159,13 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
 *** Keywords ***
+RHODS Dahsboard Pod Should Contain OauthProxy Container
+    ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard
+    FOR    ${pod_name}    IN   @{list_of_pods}
+        ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=redhat-ods-applications
+        List Should Contain Value    ${container_name}    oauth-proxy
+    END
+
 Verify JupyterHub Card CSS Style
     [Documentation]    Compare the some CSS properties of the Explore page
     ...    with the expected ones. The expected values change based

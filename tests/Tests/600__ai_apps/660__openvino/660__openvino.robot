@@ -13,6 +13,7 @@ Suite Teardown  OpenVino Suite Teardown
 ${openvino_appname}           ovms
 ${openvino_container_name}    OpenVINO
 ${openvino_operator_name}     OpenVINO Toolkit Operator
+${openvino_build_label}       opendatahub.io/build_type\n=\nnotebook_image
 
 *** Test Cases ***
 Verify OpenVino Is Available In RHODS Dashboard Explore Page
@@ -27,43 +28,30 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    [Tags]   Tier2
    ...      ODS-675
    ...      ODS-495
-   ...      ODS-1236
    ...      ODS-651
-   [Documentation]  This Test Case Installed Openvino operator in Openshift cluster
-   ...               and Check and Launch Openvino notebook image from RHODS dashboard
+   ...      ODS-652
+   ...      ODS-1236
+   [Documentation]  This Test Case Installed Openvino operator in Openshift cluster,
+   ...              Cheks whether RHODS notification shows the Notebook images are running after installing openvino
+   ...               and Check and Launch AIKIT notebook image from RHODS dashboard
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
    Create Tabname Instance For Installed Operator        ${openvino_operator_name}       Notebook    redhat-ods-applications
-   Wait Until Keyword Succeeds    1200      1   Check Image Build Status    Complete        openvino-notebook
+   Wait Until Keyword Succeeds    1200    1     Check Image Build Status   Complete     openvino-notebook
+   Openvino Build Should Contain The Label    ${openvino_build_label}
    Go To RHODS Dashboard
+   RHODS Notification Drawer Should Contain    message=Notebook images are building
    Verify Service Is Enabled          ${openvino_container_name}
    Verify JupyterHub Can Spawn Openvino Notebook
    Verify Git Plugin
    [Teardown]   Remove Openvino Operator
 
-Verify OpenVINO Image Is Tracked By Notification System In RHODS Dashboard
-    [Tags]    Tier2
-    ...       ODS-652
-    [Documentation]  Cheks whether RHODS notification shows the Notebook images are running after installing openvino
-    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
-    Create Tabname Instance For Installed Operator        ${openvino_operator_name}       Notebook    redhat-ods-applications
-    Wait Until Keyword Succeeds    900  1     Check Image Build Status   Complete     openvino-notebook
-    Get Build Status    namespace=redhat-ods-applications    build_search_term=openvino-notebook
-    Click Element    //a[@class="co-resource-item__resource-name"]
-    Wait Until Page Contains    Build details
-    @{link_elements}=  Get WebElements
-    ...    //div[@class='co-m-label-list']
-    @{list} =    Create List
-    FOR  ${link}  IN  @{link_elements}
-          ${txt} =    Get Text    ${link}
-          Append To List    ${list}    ${txt}
-    END
-    Run Keyword And Return Status    Should Contain    ${list}[0]    opendatahub.io/build_type\n=\nnotebook_image
-    Go To RHODS Dashboard
-    Click Button    //*[@id="root"]/div/header/div[2]/div/div[1]/button    #bell icon
-    Wait Until Page Contains    Notebook images are running
-    [Teardown]   Uninstall Openvino Operator
-
 *** Keywords ***
+Openvino Build Should Contain The Label
+    [Documentation]    Checks that openvino has the label ${openvino_build_label}
+    [Arguments]    ${openvino_build_label}
+    ${build_list} =    Get The Labels Of Build    namespace=redhat-ods-applications    build_search_term=openvino-notebook
+    Should Contain    ${build_list}[0]    ${openvino_build_label}
+
 OpenVino Suite Setup
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup

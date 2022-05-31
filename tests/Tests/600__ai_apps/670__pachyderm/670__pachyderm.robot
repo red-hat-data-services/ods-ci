@@ -15,7 +15,7 @@ ${pachyderm_appname}            pachyderm
 
 
 *** Test Cases ***
-Verify Pachyderm Can Be Installed And Deploy Its Server
+Verify Pachyderm Can Be Installed And Deployed
     [Documentation]     Check if it is possible to install and deploy pachyderm.
     [Tags]      Tier2
     ...         ODS-1137    ODS-1138
@@ -31,7 +31,7 @@ Verify Pachyderm Pipeline Can Be Created
     Verify Service Is Enabled    Pachyderm
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
-    Create Pachyderm Pipeline Using JupyterLab     ${version}
+    Create Pachyderm Pipeline Using JupyterLab     ${pachctl_version}
     Verify Pipeline Pod Creation
     [Teardown]  Delete Pipeline And Stop JupyterLab Server
 
@@ -102,7 +102,7 @@ Create Command In Multiple Lines
 
 Create Pachyderm Pipeline Using JupyterLab
     [Documentation]     Creates pachyderm pipeline by running multiple commands on jupyterlab.
-    [Arguments]     ${version}
+    [Arguments]     ${pachctl_version}
     Run Cell And Check For Errors   !curl -o /tmp/pachctl.tar.gz -L https://github.com/pachyderm/pachyderm/releases/download/v${version}/pachctl_${version}_linux_amd64.tar.gz && tar -xvf /tmp/pachctl.tar.gz -C /tmp && cp /tmp/pachctl_${version}_linux_amd64/pachctl /opt/app-root/bin/
     Run Cell And Check For Errors   !echo '{"pachd_address":"pachd.pachyderm.svc.cluster.local:30650"}' | pachctl config set context pachyderm --overwrite
     Run Cell And Check For Errors   !pachctl config set active-context pachyderm

@@ -64,21 +64,6 @@ Verify OpenVINO Image Is Tracked By Notification System In RHODS Dashboard
     [Teardown]   Uninstall Openvino Operator
 
 *** Keywords ***
-Get The Labels Of Build
-    [Arguments]    ${namespace}    ${build_search_term}
-    Get Build Status    namespace=${namespace}    build_search_term=${build_search_term}
-    Click Element    //a[@class="co-resource-item__resource-name"]
-    Wait Until Page Contains    Build details
-    @{link_elements}=  Get WebElements
-    ...    //div[@class='co-m-label-list']
-    @{list} =    Create List
-    FOR  ${link}  IN  @{link_elements}
-          ${txt} =    Get Text    ${link}
-          Append To List    ${list}    ${txt}
-    END
-    [Return]    ${list}
-
-*** Keywords ***
 OpenVino Suite Setup
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup

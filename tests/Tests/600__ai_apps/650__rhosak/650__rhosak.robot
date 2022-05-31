@@ -60,6 +60,7 @@ Verify User Is Able to Produce and Consume Events
   ...                            rhosak_app_id=${RHOSAK_REAL_APPNAME}
   Enable RHOSAK
   Verify Service Is Enabled  ${RHOSAK_DISPLAYED_APPNAME}
+  Check Doc And Quick Start Link In Enabled Page Tile    rhosak
   Launch OpenShift Streams for Apache Kafka From RHODS Dashboard Link
   Login to HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip RHOSAK Tour

@@ -600,3 +600,13 @@ Sort Resources By
     Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
     Click Button    //button[@data-key="${sort_type}"]
     Sleep    1s
+
+Check Doc And Quick Start Link In Enabled Page Tile
+    [Documentation]    Checks for the Doc and Quick Start Link in the tile of enabled page
+    ...                ${id} is the id of the tile
+    [Arguments]    ${id}
+    Click Button    //article[@id="${id}"]/div/div/div/button
+    ${href} =    Get Element Attribute    //a[contains(text(),"View documentation")]    href
+    Check HTTP Status Code    ${href}
+    Click Element    //a[contains(text(),"Open quick start")]
+    Wait Until Page Contains    Start

@@ -29,6 +29,7 @@ Verify Pachyderm Pipeline Can Be Created
     ${pachctl_version}=     Get Pachd Version
     Go To RHODS Dashboard
     Verify Service Is Enabled    Pachyderm
+    Check Doc And Quick Start Link In Enabled Page Tile    pachyderm
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
     Create Pachyderm Pipeline Using JupyterLab     ${pachctl_version}

@@ -26,7 +26,7 @@ Verify Pachyderm Pipeline Can Be Created
     [Tags]      Tier2
     ...         ODS-1161
     Go To    ${OCP_CONSOLE_URL}
-    ${version}=     Get Pachd Version
+    ${pachctl_version}=     Get Pachd Version
     Go To RHODS Dashboard
     Verify Service Is Enabled    Pachyderm
     Launch JupyterHub Spawner From Dashboard

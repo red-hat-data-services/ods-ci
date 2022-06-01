@@ -160,54 +160,47 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
 
 Verify Favorite Resource Cards
     [Tags]    ODS-389
-    [Documentation]    Verifies that there is a clickable star icon on each tile and tiles get
-    ...                sorted after adding them in favourites in list and tile view and even changing
-    ...                the sort, favourite tiles are still listed first
+    [Documentation]    Veerifies the item in Resource page can be marked se favourite.
+    ...                It checks if favorite items are always listed as first regardless
+    ...                the view type or sorting
     Click Link    Resources
     Sleep    5s
     Sort Resources By    name
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile_ids}
-    Add The Range Of Tiles In Favourite    ${list_of_tile_ids}    27    48
 
-    ${list_of_new_tile_ids} =    Get List Of Ids Of Tiles
+    ${range_list} =    Get Slice From List    ${list_of_tile_ids}    ${27}    ${48}
+    Add The Items In Favourites    @{range_list}
 
-    List Should Be Equal    ${list_of_tile_ids}    ${27}    ${48}
-    ...                      ${list_of_new_tile_ids}    ${0}    ${21}
+    ${list_of_tile_ids} =    Get List Of Ids Of Tiles
+    Favorite Items Should Be Listed First    ${range_list}    ${list_of_tile_ids}    ${21}
 
-    ${list_of_ids_of_favourite} =    Get Slice From List    ${list_of_new_tile_ids}    ${0}    ${21}
     Click Button    //*[@id="list-view"]
     Sleep    2s
+    ${list_view_tiles} =    Get The List Of Ids of Tiles In List View
+    Favorite Items Should Be Listed First    ${range_list}    ${list_view_tiles}    ${21}
 
-    ${list_of_new_tile_ids} =    Get List Of Atrributes    //div[@class="odh-list-item__doc-title"]    id
-
-    List Should Be Equal    ${list_of_new_tile_ids}    ${0}    ${42}
-    ...                      ${list_of_tile_ids}    ${27}    ${48}   ${2}
     Click Button    //*[@id="card-view"]
     Sleep    2s
-    Change The Sort and Check With The List    ${list_of_ids_of_favourite}    type
-    Change The Sort and Check With The List    ${list_of_ids_of_favourite}    application
-    Change The Sort and Check With The List    ${list_of_ids_of_favourite}    duration
-
-    Remove The Range Of Tiles From Favourite    ${list_of_tile_ids}    27    48
+    Change The Sort and Check With The List    ${range_list}    type
+    Change The Sort and Check With The List    ${range_list}    application
+    Change The Sort and Check With The List    ${range_list}    duration
+    Remove Items From Favourites    @{range_list}
 
 *** Keywords ***
+Favorite Items Should Be Listed First
+    [Documentation]    Compares the ids and checks that Favourite Items
+    ...                are listed first
+    [Arguments]    ${list_of_fav_items_id}    ${list_of_all_items_id}    ${range}
+    ${new_list_of_tile} =    Get Slice From List    ${list_of_all_items_id}    0    ${range}
+    Lists Should Be Equal    ${new_list_of_tile}    ${list_of_fav_items_id}    ignore_order=${True}
+
 Verify Star Icons Are Clickable
     [Documentation]    Verifies that star icons in the resources page are clickable
     [Arguments]    ${list_of_ids}
     FOR    ${id}    IN    @{list_of_ids}
          Set Item As Favourite    ${id}
-         Remove Item From Favourite    ${id}
-    END
-
-List Should Be Equal
-    [Documentation]    Checks that lists are equal or not,
-    ...                end indexes are exclusive in range
-    [Arguments]    ${list1}    ${start_index1}    ${end_index1}
-    ...            ${list2}    ${start_index2}    ${end_index2}    ${step_list2}=${1}
-    FOR    ${index1}  IN RANGE    ${start_index1}    ${end_index1}    ${step_list2}
-        Should Be Equal    ${list1}[${index1}]    ${list2}[${start_index2}]
-        ${start_index2} =    Evaluate    ${start_index2} + ${1}
+         Remove An Item From Favourite    ${id}
     END
 
 Get List Of Ids Of Tiles
@@ -223,33 +216,44 @@ Set Item As Favourite
     Should Be Equal    ${not_clicked}    odh-dashboard__favorite
     Click Element    //*[@id="${id}"]/div[1]/span
 
-Remove Item From Favourite
+Remove An Item From Favourite
     [Documentation]    Removes the tiles from favourite
     [Arguments]    ${id}
     ${clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
     Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
     Click Element    //*[@id="${id}"]/div[1]/span
 
-Add The Range Of Tiles In Favourite
-    [Documentation]    Adds the range of tiles in favourite
-    [Arguments]    ${list_of_ids}    ${start_index}    ${end_index}
-    FOR  ${index}  IN RANGE    ${start_index}    ${end_index}
-         Set Item As Favourite    ${list_of_ids}[${index}]
-    END
-
-Remove The Range Of Tiles From Favourite
-    [Documentation]    Adds the range of tiles in favourite
-    [Arguments]    ${list_of_ids}    ${start_index}    ${end_index}
-    FOR  ${index}  IN RANGE    ${start_index}    ${end_index}
-         Remove Item From Favourite    ${list_of_ids}[${index}]
+Add The Items In Favourites
+    [Documentation]    Add the tiles in the favourites
+    [Arguments]    @{list_of_ids}
+    FOR    ${id}    IN     @{list_of_ids}
+        Set Item As Favourite    ${id}
     END
 
 Change The Sort and Check With The List
+    [Documentation]    Changes the sort type of tile and checks that favourites
+    ...                favourite items are still listed first
     [Arguments]    ${list_of_ids_of_favourite}    ${sort_type}
     Sort Resources By    ${sort_type}
     ${new_list_of_tile} =    Get List Of Ids Of Tiles
-    ${new_list_of_tile} =    Get Slice From List    ${new_list_of_tile}    0    21
-    Lists Should Be Equal    ${new_list_of_tile}    ${list_of_ids_of_favourite}    ignore_order=${True}
+    Favorite Items Should Be Listed First    ${list_of_ids_of_favourite}    ${new_list_of_tile}    ${21}
+
+Get The List Of Ids of Tiles In List View
+    [Documentation]    Returns the list of ids of tiles in list view
+    ${list_of_new_tile_ids} =    Get List Of Atrributes    //div[@class="odh-list-item__doc-title"]    id
+    ${len} =    Get Length    ${list_of_new_tile_ids}
+    ${list_of_ids_in_list_view} =    Create List
+    FOR    ${index}    IN RANGE    0    ${len}    2
+        Append To List    ${list_of_ids_in_list_view}    ${list_of_new_tile_ids}[${index}]
+    END
+    [Return]    ${list_of_ids_in_list_view}
+
+Remove Items From Favourites
+    [Documentation]    Removes the items from favourites
+    [Arguments]    @{list_of_ids}
+    FOR    ${id}    IN     @{list_of_ids}
+        Remove An Item From Favourite    ${id}
+    END
 
 Change The Sort
     [Documentation]    Changes the sort of items in resource page

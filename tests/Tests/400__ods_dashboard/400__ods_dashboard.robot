@@ -160,6 +160,7 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
 
 Verify Favorite Resource Cards
     [Tags]    ODS-389
+    ...       Tier1
     [Documentation]    Veerifies the item in Resource page can be marked se favourite.
     ...                It checks if favorite items are always listed as first regardless
     ...                the view type or sorting

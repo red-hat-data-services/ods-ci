@@ -186,7 +186,7 @@ Verify Favorite Resource Cards
     Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    type
     Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    application
     Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    duration
-    Remove Items From Favourites    @{favourite_ids}
+    [Teardown]    Remove Items From Favourites    @{favourite_ids}
 
 *** Keywords ***
 Favorite Items Should Be Listed First
@@ -255,6 +255,7 @@ Remove Items From Favourites
     FOR    ${id}    IN     @{list_of_ids}
         Remove An Item From Favourite    ${id}
     END
+    Close Browser
 
 Change The Sort
     [Documentation]    Changes the sort of items in resource page

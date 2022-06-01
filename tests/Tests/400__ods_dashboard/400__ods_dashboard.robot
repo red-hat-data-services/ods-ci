@@ -170,23 +170,23 @@ Verify Favorite Resource Cards
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile_ids}
 
-    ${range_list} =    Get Slice From List    ${list_of_tile_ids}    ${27}    ${48}
-    Add The Items In Favourites    @{range_list}
+    ${favourite_ids} =    Get Slice From List    ${list_of_tile_ids}    ${27}    ${48}
+    Add The Items In Favourites    @{favourite_ids}
 
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
-    Favorite Items Should Be Listed First    ${range_list}    ${list_of_tile_ids}    ${21}
+    Favorite Items Should Be Listed First    ${favourite_ids}    ${list_of_tile_ids}    ${21}
 
     Click Button    //*[@id="list-view"]
-    Sleep    2s
+    Sleep    0.5s
     ${list_view_tiles} =    Get The List Of Ids of Tiles In List View
-    Favorite Items Should Be Listed First    ${range_list}    ${list_view_tiles}    ${21}
+    Favorite Items Should Be Listed First    ${favourite_ids}    ${list_view_tiles}    ${21}
 
     Click Button    //*[@id="card-view"]
-    Sleep    2s
-    Change The Sort and Check With The List    ${range_list}    type
-    Change The Sort and Check With The List    ${range_list}    application
-    Change The Sort and Check With The List    ${range_list}    duration
-    Remove Items From Favourites    @{range_list}
+    Sleep    0.5s
+    Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    type
+    Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    application
+    Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    duration
+    Remove Items From Favourites    @{favourite_ids}
 
 *** Keywords ***
 Favorite Items Should Be Listed First
@@ -231,7 +231,7 @@ Add The Items In Favourites
         Set Item As Favourite    ${id}
     END
 
-Change The Sort and Check With The List
+Favorite Items Should Be Listed First When Sorted By
     [Documentation]    Changes the sort type of tile and checks that favourites
     ...                favourite items are still listed first
     [Arguments]    ${list_of_ids_of_favourite}    ${sort_type}

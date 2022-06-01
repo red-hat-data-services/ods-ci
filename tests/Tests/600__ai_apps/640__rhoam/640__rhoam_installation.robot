@@ -17,6 +17,7 @@ Verify RHOAM Can Be Installed
     [Tags]  Tier3
     ...     ODS-1310
     ...     Execution-Time-Over-30min
+    Check Doc And Quick Start Link In Enabled Page Tile    rhoam
     Pass Execution    Passing tests, as suite setup ensures that RHOAM installs correctly
 
 Verify RHODS Can Be Uninstalled When RHOAM Is Installed

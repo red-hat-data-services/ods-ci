@@ -609,4 +609,5 @@ Check Doc And Quick Start Link In Enabled Page Tile
     ${href} =    Get Element Attribute    //a[contains(text(),"View documentation")]    href
     Check HTTP Status Code    ${href}
     Click Element    //a[contains(text(),"Open quick start")]
-    Wait Until Page Contains    Start
+    Page Should Contain QuickStart Sidebar
+    Click Button    //button[@aria-label="Close drawer panel"]

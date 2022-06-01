@@ -56,6 +56,8 @@ Close QuickStart From Top
 Page Should Not Contain QuickStart Sidebar
     Wait Until Page Does Not Contain ELement    //div[@class="pf-c-drawer__panel-main"]     5
 
+Page Should Contain QuickStart Sidebar
+    Wait Until Page Contains Element    //div[@class="pf-c-drawer__panel-main"]     5
 
 Close QuickStart From Button
     Click Button    //button[@data-testid="qs-drawer-close"]

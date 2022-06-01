@@ -121,8 +121,10 @@ Verify NPM Version
 Get The Labels Of Build
     [Documentation]    Returns the labels of the build
     [Arguments]    ${namespace}    ${build_search_term}
-    Get Build Status    namespace=${namespace}    build_search_term=${build_search_term}
-    Click Element    //a[@class="co-resource-item__resource-name"]
+    Select Project By Name    ${namespace}
+    Navigate To Page    Builds    Builds
+    sleep    1s
+    Click Element    //a[contains(text(),"${build_search_term}")]
     Wait Until Page Contains    Build details
     @{link_elements}=  Get WebElements
     ...    //div[@class='co-m-label-list']
@@ -131,7 +133,7 @@ Get The Labels Of Build
           ${txt} =    Get Text    ${link}
           Append To List    ${list}    ${txt}
     END
-    [Return]    ${list}
+    [Return]    ${list}[0]
 
 Get Cluster Name From Console URL
     [Documentation]    Get the cluster name from the Openshift console URL

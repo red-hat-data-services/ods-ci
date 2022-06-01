@@ -103,7 +103,7 @@ Create Command In Multiple Lines
 Create Pachyderm Pipeline Using JupyterLab
     [Documentation]     Creates pachyderm pipeline by running multiple commands on jupyterlab.
     [Arguments]     ${pachctl_version}
-    Run Cell And Check For Errors   !curl -o /tmp/pachctl.tar.gz -L https://github.com/pachyderm/pachyderm/releases/download/${pachctl_version}/pachctl_${pachctl_version}_linux_amd64.tar.gz && tar -xvf /tmp/pachctl.tar.gz -C /tmp && cp /tmp/pachctl_${pachctl_version}_linux_amd64/pachctl /opt/app-root/bin/
+    Run Cell And Check For Errors   !curl -o /tmp/pachctl.tar.gz -L https://github.com/pachyderm/pachyderm/releases/download/v${pachctl_version}/pachctl_${pachctl_version}_linux_amd64.tar.gz && tar -xvf /tmp/pachctl.tar.gz -C /tmp && cp /tmp/pachctl_${pachctl_version}_linux_amd64/pachctl /opt/app-root/bin/
     Run Cell And Check For Errors   !echo '{"pachd_address":"pachd.pachyderm.svc.cluster.local:30650"}' | pachctl config set context pachyderm --overwrite
     Run Cell And Check For Errors   !pachctl config set active-context pachyderm
     Run Cell And Check For Errors   !pachctl config get active-context

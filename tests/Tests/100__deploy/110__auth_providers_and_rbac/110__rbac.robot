@@ -21,7 +21,7 @@ Verify Empty Group Doesnt Allow Users To Spawn Notebooks
     ...       Tier1
     ...       ODS-572
     Apply Access Groups Settings    admins_group=    users_group=    groups_modified_flag=true
-    Run Keyword And Expect Error  *  Verify User Can Spawn A Notebook
+    Verify User Can Spawn A Notebook
     [Teardown]    Set Default Access Groups
 
 
@@ -31,8 +31,14 @@ Verify User Can Spawn A Notebook
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
-    Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Default
+    Menu.Navigate To Page    Applications    Enabled
+    Launch JupyterHub From RHODS Dashboard Link
+    Login To Jupyterhub  ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ${authorization_required} =  Is Service Account Authorization Required
+    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    Fix Spawner Status
+    Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+    Run Keyword And Expect Error    *    Wait Until JupyterHub Spawner Is Ready
 
 Set Default Access Groups
     [Documentation]  Sets values of RHODS Groups to Default Values

@@ -64,7 +64,6 @@ Clone Git Repository
   Log  ${err_msg}
 
 Get Current User
-  Get Location
   ${url} =  Get Location
   ${current_user} =  Evaluate  '${url}'.split("/")[-2]
   [Return]  ${current_user}

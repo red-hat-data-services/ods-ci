@@ -194,7 +194,7 @@ Verify Switcher to Masterhead
     Click Button    //button[@class="pf-c-app-launcher__toggle"]
     ${cluster_id} =    Get Cluster ID
     ${list_of_links} =    Get Links From Switcher
-    ${status}    Run Keyword And Return Status    Is Environment Staging    ${list_of_links}[1]
+    ${status}    Run Keyword And Return Status    Is Environment Staging    ${list_of_links}[0]
     Check Links For OpenShift Clusetr Manager    ${list_of_links}[1]    ${cluster_id}    ${status}
 
 *** Keywords ***

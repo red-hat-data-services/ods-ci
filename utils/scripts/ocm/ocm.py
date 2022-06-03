@@ -853,7 +853,7 @@ class OpenshiftClusterManager():
         get the latest  candidate version
         Args:
             osd_major_version (str):  Major version of the release. For example in 4.8.10 : 4 is major version
-            osd_minor_version (str):  Major version of the release. For example in 4.8.10 : 4 is minor version
+            osd_minor_version (str):  Minor version of the release. For example in 4.8.10 : 4 is minor version
             Example 4.8 = osd_major_version.osd_minor_version       
         """
         cmd = ("ocm list versions --channel-group  candidate |"
@@ -883,7 +883,7 @@ class OpenshiftClusterManager():
     def compare_with_old_version_file(self):
         """
         Compares the latest osd version in the json  file and Updates
-        Run key
+        Run key, RUN key stores the list of ods-version needs to be trigger
         """
         lst_to_trigger_job = []
         old_data = read_data_from_json(filename=self.osd_latest_version_data)

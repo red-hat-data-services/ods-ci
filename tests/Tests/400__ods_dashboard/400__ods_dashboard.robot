@@ -190,12 +190,13 @@ Verify Favorite Resource Cards
 
 Verify Switcher to Masterhead
     [Tags]    ODS-771
+    [Documentation]    Checks the link in switcher and also check the link of OCM in staging
     Go To RHODS Dashboard
     Click Button    //button[@class="pf-c-app-launcher__toggle"]
     ${cluster_id} =    Get Cluster ID
     ${list_of_links} =    Get Links From Switcher
-    ${status}    Run Keyword And Return Status    Is Environment Staging    ${list_of_links}[0]
-    Check Links For OpenShift Clusetr Manager    ${list_of_links}[1]    ${cluster_id}    ${status}
+    Check Application Switcher Links To Openshift Console    ${list_of_links}[0]
+    Check Application Switcher Links To Openshift Cluster Manager    ${list_of_links}[1]    ${cluster_id}
 
 *** Keywords ***
 Favorite Items Should Be Listed First
@@ -274,16 +275,17 @@ RHODS Dahsboard Pod Should Contain OauthProxy Container
     END
 
 Is Environment Staging
-    [Arguments]    ${link}
-    Should Contain    ${link}    qaprodauth
+    [Documentation]    Return true if environment is staging otherwise fails
+    ${list_of_links} =    Get Links From Switcher
+    Should Contain    ${list_of_links}[0]   qaprodauth
 
-Check Links For OpenShift Clusetr Manager
-    [Arguments]    ${link}    ${cluster_id}    ${is_env_type_stage}
+Check Application Switcher Links To Openshift Cluster Manager
+    [Arguments]    ${link}    ${cluster_id}
+    ${status}    Run Keyword And Return Status    Is Environment Staging
     ${cluster_id} =    Remove String    ${cluster_id}    "
-    IF    "${is_env_type_stage}" == "True"
-        Should Be Equal    ${link}    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
-    ELSE
-        Should Be Equal    ${link}    https://cloud.redhat.com/openshift/details/${cluster_id}
+     Should Be Equal    ${link}    https://cloud.redhat.com/openshift/details/${cluster_id}
+    IF    "${status}" == "True"
+        Check HTTP Status Code    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
     END
 
 Get Links From Switcher
@@ -292,10 +294,16 @@ Get Links From Switcher
     ${link_elements}=    Get WebElements    //a[@class="pf-m-external pf-c-app-launcher__menu-item" and not(starts-with(@href, '#'))]
     FOR    ${ext_link}    IN    @{link_elements}
         ${href}=    Get Element Attribute    ${ext_link}    href
-        ${status}=    Check HTTP Status Code    link_to_check=${href}
         Append To List    ${list_of_links}    ${href}
     END
     [Return]    ${list_of_links}
+
+Check Application Switcher Links To Openshift Console
+    [Documentation]    Checks the HTTP status of OpenShift Console
+    [Arguments]    ${link}
+    ${status} =    Check HTTP Status Code    ${link}
+    Should Be Equal    ${status}    ${200}
+
 
 Verify JupyterHub Card CSS Style
     [Documentation]    Compare the some CSS properties of the Explore page

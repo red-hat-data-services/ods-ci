@@ -51,13 +51,8 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
 
 Verify User Is Able to Activate Anaconda Professional
   [Tags]  Tier2
-<<<<<<< HEAD
   ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082
   ...     ProductBug
-=======
-  ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082  ODS-1304
-  ...     KnownIssues
->>>>>>> 9237b6a... Add test to Verify Git Plugin
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner

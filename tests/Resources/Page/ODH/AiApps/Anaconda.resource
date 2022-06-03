@@ -74,7 +74,6 @@ Check Anaconda CE Image Build Status
 
 Remove Anaconda Component
     [Documentation]    Teardown for ACE test suite
-    Clean Up Server
     Remove Anaconda Components For Validation
     Delete BuildConfig Using Name    redhat-ods-applications    s2i-minimal-notebook-anaconda
     Delete ImageStream Using Name    redhat-ods-applications    s2i-minimal-notebook-anaconda

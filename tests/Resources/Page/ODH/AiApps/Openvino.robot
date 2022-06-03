@@ -11,7 +11,6 @@ ${OPENVINO_IMAGE_XP}=   //input[contains(@name,"OpenVINO™ Toolkit")]
 *** Keywords ***
 Uninstall Openvino Operator
     [Documentation]    Uninstall openvino operator and it's realted component
-    Clean Up Server
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
     Delete Tabname Instance For Installed Operator    ${openvino_operator_name}    Notebook    redhat-ods-applications

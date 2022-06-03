@@ -5,6 +5,7 @@ Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
 Resource            ../../../Resources/OCP.resource
+Resource            ../../../Resources/Page/ODH/Grafana/Grafana.resource
 Library             JupyterLibrary
 Library             SeleniumLibrary
 
@@ -16,11 +17,11 @@ Test Teardown       End Web Billing Metrics Test
 ${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:rate1h
 ${METRIC_RHODS_CPU_BEFORE_1.5.0}    cluster:usage:consumption:rhods:cpu:seconds:rate5m
 ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:seconds:rate5m
-
+${METRIC_RHODS_ACTIVE_USERS}        cluster:usage:consumption:rhods:active_users
 
 *** Test Cases ***
 Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
-    [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries 
+    [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries
     [Tags]    Smoke
     ...       Sanity
     ...       ODS-173
@@ -68,6 +69,29 @@ Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometh
     ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:active_users
     Should Be Equal    ${value}    2    msg=Active Users are not equal to length of list or N users
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
+Test Metric "Active Users" On Telemeter
+    [Documentation]    Verifies the openshift metrics and telemeter shows
+    ...                the same rhods active users
+    [Tags]    ODS-1054
+    ...       Tier1
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    ...    list_of_usernames=${list_of_usernames}
+    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:active_users
+    Log    ${value}
+    ${cluster_id} =    Get Cluster ID
+    ${time} =    Get Start Time And End Time    interval=15m
+    ${steps} =    Set Variable    15
+    ${query} =    cluster:usage:consumption:rhods:active_users{_id="${cluster_id}"}
+    ${url}=    ${pm_url}/api/v1/query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    Open Browser     ${url}    ${BROWSER.NAME}
+    @{data} =    Get WebElements    //pre
+    &{data} =    Evaluate    dict(${data[0].text})
+    ${data} =    ${data}["data"]["result"]["values"][0][1]
+    Should Be Equal    ${value}    ${data}
+    [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
 
 Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitoring Prometheus
     [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing number of running pods

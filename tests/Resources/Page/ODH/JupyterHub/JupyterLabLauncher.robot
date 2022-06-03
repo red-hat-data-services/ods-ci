@@ -12,7 +12,6 @@ Library  OpenShiftLibrary
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
 ${JL_TABBAR_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[contains(@class,"lm-mod-current p-mod-current")]
 ${JL_TABBAR_NOT_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[not(contains(@class,"lm-mod-current p-mod-current"))]
-${JL_FILES_CONTENT_XPATH} = //div[contains(@class,"jp-FileBrowser-listing")]
 ${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
 ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
@@ -21,8 +20,8 @@ ${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE DOC CELLS}    ${JLAB CSS ACTIVE DOC} .jp-Cell
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
 ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
-${repo_url}             https://github.com/sclorg/nodejs-ex.git
-${file_name}            nodejs-ex
+${REPO_URL}             https://github.com/sclorg/nodejs-ex.git
+${FILE_NAME}            nodejs-ex
 
 *** Keywords ***
 Get JupyterLab Selected Tab Label
@@ -269,7 +268,7 @@ Clone Git Repository And Run
 Verify File Present In The File Explorer
   [Documentation]   It checks if the file presnt in the file explorer on sidebar of jupyterlab.
   [Arguments]       ${filename}
-  Wait Until Page Contains Element      ${JL_FILES_CONTENT_XPATH}/ul/li[contains(@title,"Name: ${filename}")]
+  Wait Until Page Contains Element      //div[contains(@class,"jp-FileBrowser-listing")]/ul/li[contains(@title,"Name: ${filename}")]    10
 
 Handle Kernel Restarts
   #This section has to be slightly reworked still. Sometimes the pop-up is not in div[8] but in div[7]
@@ -433,5 +432,5 @@ Open New Notebook
 
 Verify Git Plugin
     [Documentation]     Checks if it can successfully clone a repository.
-    Clone Git Repository      ${repo_url}
-    Verify File Present In The File Explorer      ${file_name}
+    Clone Git Repository      ${REPO_URL}
+    Verify File Present In The File Explorer      ${FILE_NAME}

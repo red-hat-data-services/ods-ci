@@ -26,7 +26,7 @@ Verify intel aikit Is Available In RHODS Dashboard Explore Page
   Verify Service Is Available In The Explore Page     ${intel_aikit_container_name}
   Verify Service Provides "Get Started" Button In The Explore Page     ${intel_aikit_container_name}
 
-Verify Inetl AIKIT Operator Can Be Installed Using OpenShift Console
+Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    [Tags]   Tier2
    ...      ODS-760
    ...      ODS-1237
@@ -39,7 +39,7 @@ Verify Inetl AIKIT Operator Can Be Installed Using OpenShift Console
    Verify Service Is Enabled          ${intel_aikit_container_name}
    Verify JupyterHub Can Spawn AIKIT Notebook
    Verify Git Plugin
-   [Teardown]   Uninstall AIKIT Operator
+   [Teardown]   Remove AIKIT Operator
 
 ***Keywords ***
 Intel_Aikit Suite Setup

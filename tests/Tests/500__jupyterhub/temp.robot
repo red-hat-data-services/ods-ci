@@ -48,9 +48,10 @@ Clone Git Repository
   [Arguments]  ${REPO_URL}    ${delete_existing_repo}=True
   IF    "${delete_existing_repo}" == "True"
         ${dir_name} =    Get Directory Name From Git Repo URL    ${link}
+        ${curent_user} =    Get Current User
         Delete Folder In User Notebook
         ...    admin_username=${OCP_ADMIN_USER.USERNAME}
-        ...    username=${TEST_USER.USERNAME}
+        ...    username=${curent_user}
         ...    folder=${dir_name}
   END
   Navigate Home (Root folder) In JupyterLab Sidebar File Browser
@@ -61,3 +62,10 @@ Clone Git Repository
   ${err_msg} =  Set Variable
   ${status}    ${err_msg}     Run Keyword and Ignore Error    Get Git Clone Error Message
   Log  ${err_msg}
+
+Get Current User
+  Get Location
+  ${url} =  Get Location
+  ${current_user} =  Evaluate  '${url}'.split("/")[-2]
+  [Return]  ${current_user}
+

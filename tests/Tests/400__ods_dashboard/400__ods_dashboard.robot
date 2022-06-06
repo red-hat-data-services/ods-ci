@@ -161,36 +161,36 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
 Verify Favorite Resource Cards
     [Tags]    ODS-389
     ...       Tier1
-    [Documentation]    Veerifies the item in Resource page can be marked se favourite.
+    [Documentation]    Verifies the item in Resource page can be marked se favorite.
     ...                It checks if favorite items are always listed as first regardless
     ...                the view type or sorting
     Click Link    Resources
-    Sleep    5s
+    Wait Until Element Is Visible    //div[@class="pf-l-gallery pf-m-gutter odh-learning-paths__gallery"]
     Sort Resources By    name
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile_ids}
 
-    ${favourite_ids} =    Get Slice From List    ${list_of_tile_ids}    ${27}    ${48}
-    Add The Items In Favourites    @{favourite_ids}
+    ${favorite_ids} =    Get Slice From List    ${list_of_tile_ids}    ${27}    ${48}
+    Add The Items In Favorites    @{favorite_ids}
 
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
-    Favorite Items Should Be Listed First    ${favourite_ids}    ${list_of_tile_ids}    ${21}
+    Favorite Items Should Be Listed First    ${favorite_ids}    ${list_of_tile_ids}    ${21}
 
     Click Button    //*[@id="list-view"]
     Sleep    0.5s
     ${list_view_tiles} =    Get The List Of Ids of Tiles In List View
-    Favorite Items Should Be Listed First    ${favourite_ids}    ${list_view_tiles}    ${21}
+    Favorite Items Should Be Listed First    ${favorite_ids}    ${list_view_tiles}    ${21}
 
     Click Button    //*[@id="card-view"]
     Sleep    0.5s
-    Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    type
-    Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    application
-    Favorite Items Should Be Listed First When Sorted By    ${favourite_ids}    duration
-    [Teardown]    Remove Items From Favourites    @{favourite_ids}
+    Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    type
+    Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    application
+    Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    duration
+    [Teardown]    Remove Items From favorites    @{favorite_ids}
 
 *** Keywords ***
 Favorite Items Should Be Listed First
-    [Documentation]    Compares the ids and checks that Favourite Items
+    [Documentation]    Compares the ids and checks that favorite Items
     ...                are listed first
     [Arguments]    ${list_of_fav_items_id}    ${list_of_all_items_id}    ${range}
     ${new_list_of_tile} =    Get Slice From List    ${list_of_all_items_id}    0    ${range}
@@ -200,8 +200,8 @@ Verify Star Icons Are Clickable
     [Documentation]    Verifies that star icons in the resources page are clickable
     [Arguments]    ${list_of_ids}
     FOR    ${id}    IN    @{list_of_ids}
-         Set Item As Favourite    ${id}
-         Remove An Item From Favourite    ${id}
+         Set Item As Favorite    ${id}
+         Remove An Item From Favorite    ${id}
     END
 
 Get List Of Ids Of Tiles
@@ -210,34 +210,34 @@ Get List Of Ids Of Tiles
     ...    xpath=//article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
     [Return]    ${list_of_ids}
 
-Set Item As Favourite
-    [Documentation]    Add the tiles in favourite
+Set Item As Favorite
+    [Documentation]    Add the tiles in favorite
     [Arguments]    ${id}
     ${not_clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
     Should Be Equal    ${not_clicked}    odh-dashboard__favorite
     Click Element    //*[@id="${id}"]/div[1]/span
 
-Remove An Item From Favourite
-    [Documentation]    Removes the tiles from favourite
+Remove An Item From Favorite
+    [Documentation]    Removes the tiles from favorite
     [Arguments]    ${id}
     ${clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
     Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
     Click Element    //*[@id="${id}"]/div[1]/span
 
-Add The Items In Favourites
-    [Documentation]    Add the tiles in the favourites
+Add The Items In Favorites
+    [Documentation]    Add the tiles in the favorites
     [Arguments]    @{list_of_ids}
     FOR    ${id}    IN     @{list_of_ids}
-        Set Item As Favourite    ${id}
+        Set Item As favorite    ${id}
     END
 
 Favorite Items Should Be Listed First When Sorted By
-    [Documentation]    Changes the sort type of tile and checks that favourites
-    ...                favourite items are still listed first
-    [Arguments]    ${list_of_ids_of_favourite}    ${sort_type}
+    [Documentation]    Changes the sort type of tile and checks that favorites
+    ...                favorite items are still listed first
+    [Arguments]    ${list_of_ids_of_favorite}    ${sort_type}
     Sort Resources By    ${sort_type}
     ${new_list_of_tile} =    Get List Of Ids Of Tiles
-    Favorite Items Should Be Listed First    ${list_of_ids_of_favourite}    ${new_list_of_tile}    ${21}
+    Favorite Items Should Be Listed First    ${list_of_ids_of_favorite}    ${new_list_of_tile}    ${21}
 
 Get The List Of Ids of Tiles In List View
     [Documentation]    Returns the list of ids of tiles in list view
@@ -249,11 +249,11 @@ Get The List Of Ids of Tiles In List View
     END
     [Return]    ${list_of_ids_in_list_view}
 
-Remove Items From Favourites
-    [Documentation]    Removes the items from favourites
+Remove Items From Favorites
+    [Documentation]    Removes the items from favorites
     [Arguments]    @{list_of_ids}
     FOR    ${id}    IN     @{list_of_ids}
-        Remove An Item From Favourite    ${id}
+        Remove An Item From Favorite    ${id}
     END
     Close Browser
 

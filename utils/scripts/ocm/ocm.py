@@ -901,14 +901,16 @@ class OpenshiftClusterManager():
             if self.osd_major_version not in old_data:
                 if self.osd_major_version in new_data:
                     for version in new_data[self.osd_major_version].keys():
-                        lst_to_trigger_job.append(version)
+                        if version != "":
+                            lst_to_trigger_job.append("{}-latest".format(version))
                     old_data.update(new_data)
                 if self.osd_major_version not in new_data:
                     return None
             else:
                 for ods_version in old_data[self.osd_major_version].keys():
                     if old_data[self.osd_major_version][ods_version] != new_data[self.osd_major_version][ods_version]:
-                        lst_to_trigger_job.append(ods_version)
+                        if old_data != "":
+                            lst_to_trigger_job.append("{}-latest".format(ods_version))
                 old_data.update(new_data)
 
         old_data["RUN"] = list(filter(None, lst_to_trigger_job))

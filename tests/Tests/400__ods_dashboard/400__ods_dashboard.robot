@@ -258,7 +258,7 @@ Remove Items From Favorites
     Close Browser
 
 Change The Sort
-    [Documentation]    Changes the sorting type to ${sort_type} to sort the items in the explore page
+    [Documentation]    Changes the sorting type to ${sort_type} to sort the items in the resouces page
     [Arguments]    ${sort_type}
     Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
     Click Button    //button[@data-key="${sort_type}"]

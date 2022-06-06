@@ -33,7 +33,6 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
 ...                                     PerceptiLabs
 
-
 *** Test Cases ***
 Verify That Login Page Is Shown When Reaching The RHODS Page
     [Tags]      Sanity
@@ -193,10 +192,8 @@ Verify Switcher to Masterhead
     [Documentation]    Checks the link in switcher and also check the link of OCM in staging
     Go To RHODS Dashboard
     Click Button    //button[@class="pf-c-app-launcher__toggle"]
-    ${cluster_id} =    Get Cluster ID
-    ${list_of_links} =    Get Links From Switcher
-    Check Application Switcher Links To Openshift Console    ${list_of_links}[0]
-    Check Application Switcher Links To Openshift Cluster Manager    ${list_of_links}[1]    ${cluster_id}
+    Check Application Switcher Links To Openshift Console
+    Check Application Switcher Links To Openshift Cluster Manager
 
 *** Keywords ***
 Favorite Items Should Be Listed First
@@ -280,12 +277,18 @@ Is Environment Staging
     Should Contain    ${list_of_links}[0]   qaprodauth
 
 Check Application Switcher Links To Openshift Cluster Manager
-    [Arguments]    ${link}    ${cluster_id}
+    ${ocm_staging_link} =    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/
+    ${cluster_id} =    Get Cluster ID
+    ${list_of_links} =    Get Links From Switcher
     ${status}    Run Keyword And Return Status    Is Environment Staging
     ${cluster_id} =    Remove String    ${cluster_id}    "
-     Should Be Equal    ${link}    https://cloud.redhat.com/openshift/details/${cluster_id}
+     Should Be Equal    ${list_of_links}[1]    https://cloud.redhat.com/openshift/details/${cluster_id}
     IF    "${status}" == "True"
-        Check HTTP Status Code    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
+        Check HTTP Status Code    ${ocm_staging_link}${cluster_id}
+        Go To    ${ocm_staging_link}${cluster_id}
+        Wait Until Page Contains    Clusters
+    ELSE
+        Check HTTP Status Code    https://cloud.redhat.com/openshift/details/${cluster_id}
     END
 
 Get Links From Switcher
@@ -300,8 +303,9 @@ Get Links From Switcher
 
 Check Application Switcher Links To Openshift Console
     [Documentation]    Checks the HTTP status of OpenShift Console
-    [Arguments]    ${link}
-    ${status} =    Check HTTP Status Code    ${link}
+    ${list_of_links} =    Get Links From Switcher
+    ${status} =    Check HTTP Status Code    ${list_of_links}[0]
+    Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}
     Should Be Equal    ${status}    ${200}
 
 

@@ -159,7 +159,7 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
 Verify Favorite Resource Cards
-    [Tags]    ODS-389
+    [Tags]    ODS-389    ODS-384
     ...       Tier1
     [Documentation]    Verifies the item in Resource page can be marked se favorite.
     ...                It checks if favorite items are always listed as first regardless

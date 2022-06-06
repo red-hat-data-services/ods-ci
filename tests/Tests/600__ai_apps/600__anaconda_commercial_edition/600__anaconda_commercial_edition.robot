@@ -80,8 +80,8 @@ Verify User Is Able to Activate Anaconda Professional
   Run Keyword And Continue On Failure  Verify Anaconda Element Present Based On Version
   Run Keyword And Continue On Failure  Verify Anaconda Element Enabled Based On Version
   Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
-  Verify Git Plugin
   Capture Page Screenshot
+  Verify Git Plugin
   Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${TOKEN_VAL_SUCCESS_MSG}
   Capture Page Screenshot  anaconda_token_val_cell.png
   Add And Run JupyterLab Code Cell  !conda install -y numpy

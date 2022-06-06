@@ -38,7 +38,7 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    Verify Service Is Enabled          ${openvino_container_name}
    Verify JupyterHub Can Spawn Openvino Notebook
    Verify Git Plugin
-   [Teardown]   Uninstall Openvino Operator
+   [Teardown]   Remove Openvino Operator
 
 
 *** Keywords ***

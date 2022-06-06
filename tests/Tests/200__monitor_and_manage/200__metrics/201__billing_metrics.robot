@@ -92,6 +92,24 @@ Test Metric "Active Users" On Telemeter
     Should Be Equal    ${value}    ${data}
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
+Test metric "Notebook Cpu Usage" on Telemeter
+    [Documentation]    Verifies prometheus and grafana shows the same CPU usage.
+    [Tags]    ODS-181
+    ${cluster_id} =    Get Cluster ID
+    Run Jupyter Notebook For 10 Minutes
+    ${pm_query} =
+    ${value} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
+    ...           pm_token=${RHODS_PROMETHEUS_TOKEN}    interval=12h     steps=172
+    Log  value ${value}
+    ${time} =    Get Start Time And End Time    interval=12h
+    ${steps} =    Set Variable    172
+    ${query} =    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id="${cluster_id}"}
+    ${url}=    ${pm_url}/api/v1/query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    Open Browser     ${url}    ${BROWSER.NAME}
+    @{data} =    Get WebElements    //pre
+    &{data} =    Evaluate    dict(${data[0].text})
+    ${data} =    ${data}["data"]["result"]["values"][0][1]
+    Should Be Equal    ${value}    ${data}
 
 Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitoring Prometheus
     [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing number of running pods
@@ -128,6 +146,16 @@ Test Setup For Matrics Web Test
 Test Teardown For Matrics Web Test
     [Documentation]     Closes all browsers
     SeleniumLibrary.Close All Browsers
+
+Run Jupyter Notebook For 10 Minutes
+    [Documentation]     Opens jupyter notebook and run for 5 min
+    Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
+    Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
+    Iterative Image Test
+    ...    s2i-generic-data-science-notebook
+    ...    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main.git
+    ...    ods-ci-notebooks-main/notebooks/200__monitor_and_manage/200__metrics/stress-cpu-all-cores-600-60.ipynb
 
 Run Query On Metrics And Return Value
     [Documentation]    Fires query in metrics through web browser and returns value

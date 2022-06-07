@@ -111,6 +111,27 @@ Test metric "Notebook Cpu Usage" on Telemeter
     ${data} =    ${data}["data"]["result"]["values"][0][1]
     Should Be Equal    ${value}    ${data}
 
+Test metric "rhods_total_users" on Telemeter
+    [Documentation]    Verifies the prometheus and telemeter shows
+    ...                the same numbers of total rhods users
+    [Tags]    ODS-635
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    ...    list_of_usernames=${list_of_usernames}
+    ${pm_query} =    Set Variable    rhods_total_users
+    ${value} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
+    ...           pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ${time} =    Get Start Time And End Time    interval=12h
+    ${steps} =    Set Variable    172
+    ${query} =    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id="${cluster_id}"}
+    ${url}=    ${pm_url}/api/v1/query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    Open Browser     ${url}    ${BROWSER.NAME}
+    @{data} =    Get WebElements    //pre
+    &{data} =    Evaluate    dict(${data[0].text})
+    ${data} =    ${data}["data"]["result"]["values"][0][1]
+    Should Be Equal    ${value}    ${data}
+
+
 Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitoring Prometheus
     [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing number of running pods
     [Tags]    Sanity

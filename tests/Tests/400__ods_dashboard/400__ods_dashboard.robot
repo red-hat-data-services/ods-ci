@@ -305,7 +305,7 @@ Check Application Switcher Links To Openshift Console
     [Documentation]    Checks the HTTP status of OpenShift Console
     ${list_of_links} =    Get Links From Switcher
     ${status} =    Check HTTP Status Code    ${list_of_links}[0]
-    Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}
+    Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
     Should Be Equal    ${status}    ${200}
 
 

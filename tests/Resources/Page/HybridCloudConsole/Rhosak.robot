@@ -38,7 +38,7 @@ Create Kafka Stream Instance
     Click Element    xpath=//li/*[text()="${stream_region}"]
     Click Button    Create instance
     Capture Page Screenshot    form.png
-    Wait Until Page Does Not Contain Element    xpath=//div[@id='modalCreateKafka']    timeout=10
+    Wait Until Page Does Not Contain Element    xpath=//div[@id='modalCreateKafka']    timeout=20
 
 Check Stream Status
     [Documentation]    Cehcks the kafka stream status from RHOSAK UI

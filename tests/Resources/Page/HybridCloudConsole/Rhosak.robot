@@ -31,10 +31,11 @@ Create Kafka Stream Instance
     IF    ${warn_msg} == ${False}
         Log    level=ERROR    message=The next keywords will fail because you cannot create more than one stream.
     END
+    Wait Until Element Is Enabled    xpath=//input[@id='form-instance-name']
     Input Text    xpath=//input[@id='form-instance-name']    ${stream_name}
     Click Element    xpath=//div[text()='${cloud_provider}']
     Click Element    id:form-cloud-region-option
-    Select From List By Value    id:form-cloud-region-option    ${stream_region}
+    Click Element    xpath=//li/*[text()="${stream_region}"]
     Click Button    Create instance
     Capture Page Screenshot    form.png
     Wait Until Page Does Not Contain Element    xpath=//div[@id='modalCreateKafka']    timeout=10

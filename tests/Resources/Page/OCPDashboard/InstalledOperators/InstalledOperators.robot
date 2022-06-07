@@ -130,7 +130,7 @@ Create Tabname Instance For Installed Operator
         Click Button     Create ${tab_name}
         Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10
         Click Button      Create
-        Wait Until Element Is Visible    //table[contains(@class,"ReactVirtualized")]//tr     timeout=10
+        Wait Until Element Is Visible    //table[contains(@class,"ReactVirtualized")]//tr     timeout=20
     END
 
 Delete Tabname Instance For Installed Operator

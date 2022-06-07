@@ -257,13 +257,6 @@ Remove Items From Favorites
     END
     Close Browser
 
-Change The Sort
-    [Documentation]    Changes the sorting type to ${sort_type} to sort the items in the resouces page
-    [Arguments]    ${sort_type}
-    Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
-    Click Button    //button[@data-key="${sort_type}"]
-    Sleep    1s
-
 RHODS Dahsboard Pod Should Contain OauthProxy Container
     ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard
     FOR    ${pod_name}    IN   @{list_of_pods}

@@ -74,7 +74,6 @@ Verify User Is Able to Activate Anaconda Professional
   Should Be Equal  ${val_result[0]}  ${VAL_SUCCESS_MSG}
   Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete
   Go To  ${ODH_DASHBOARD_URL}
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Launch JupyterHub Spawner From Dashboard
   Run Keyword And Continue On Failure  Verify Anaconda Element Present Based On Version

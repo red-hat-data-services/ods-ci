@@ -44,6 +44,7 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ${openvino_appname}           ovms
 ${openvino_container_name}    OpenVINO
 ${openvino_operator_name}     OpenVINO Toolkit Operator
+${CUSTOM_EMPTY_GROUP}                   empty-group
 
 
 *** Test Cases ***
@@ -184,7 +185,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
-    Verify Notifications After Build Is Complete  
+    Verify Notifications After Build Is Complete
     Verify RHODS Notification After Logging Out
     [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
 
@@ -233,7 +234,7 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     RHODS Notification Drawer Should Contain    message=Notebook images are building
     RHODS Notification Drawer Should Not Contain    message=CUDA
     [Teardown]   Wait Until Remaining Builds Are Complete And Close Browser
-    
+
 Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninstalled
    [Documentation]     Verify "Enabled" keeps being available after one of the ISV operators if uninstalled
    [Tags]      Sanity
@@ -247,7 +248,64 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
 
 
+Verify Error Message When A RHODS Group Is Empty
+    [Tags]  ODS-1408
+    ...     Sanity
+    Set Library Search Order    SeleniumLibrary
+    Set Standard RHODS Groups Variables
+    ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
+    ...                        fields=['metadata.name']
+    ${lenghts_list}=   Create List
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{dash_pods}
+        Log    ${index}: ${pod_name}[metadata.name]
+        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}[metadata.name]
+        Log     ${pod_logs_lines}[${n_lines-1}]
+        Run Keyword And Continue On Failure     Should Not Contain   container=${pod_logs_lines}
+        ...     item=Failed to get groups: TypeError: Cannot read property 'includes' of undefined
+        Run Keyword And Continue On Failure     Should Not Contain   container=${pod_logs_lines}
+        ...     item=Failed to get groups: HttpError: HTTP request failed
+        Set Empty Group
+        ${pod_logs_lines}   ${n_lines_new}=     Get Dashboard Pods Logs     pod_name=${pod_name}[metadata.name]
+        Append To List   ${lenghts_list}    ${n_lines}
+        Should Be Equal     ${n_lines_new}  ${n_lines+1}
+        Log     ${pod_logs_lines}[${n_lines_new-1}]
+        Run Keyword And Continue On Failure     Should Contain   container=${pod_logs_lines}
+        ...     item=Failed to get groups: TypeError: Cannot read property 'includes' of undefined
+    END
+    [Teardown]      Set Default Groups And Check Logs Do Not Change   ${pod_name}[metadata.name]
+
+
 *** Keywords ***
+Get Dashboard Pods Logs
+    [Arguments]     ${pod_name}
+    ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
+    ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
+    ${n_lines}=     Get Length    ${pod_logs_lines}
+    [Return]    ${pod_logs_lines}   ${n_lines}
+
+Set Empty Group
+    Apply Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+    Sleep   15s
+
+
+Set Default Groups And Check Logs Do Not Change
+    [Arguments]     ${pod_name}
+    Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+    Sleep   10s
+    ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
+    ...                        fields=['metadata.name']
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{dash_pods}
+        ${pod_logs}=    Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
+        ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
+        ${n_lines_new2}=     Get Length    ${pod_logs_lines}
+        Should Be Equal     ${n_lines_new2}  ${n_lines_new}
+    END
+
+
+
+
 Favorite Items Should Be Listed First
     [Documentation]    Compares the ids and checks that favorite Items
     ...                are listed first

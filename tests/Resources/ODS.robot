@@ -97,12 +97,13 @@ Apply Access Groups Settings
     OpenShiftCLI.Patch    kind=ConfigMap
     ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${groups_modified_flag}"}}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
-    Rollout JupyterHub
+    # Rollout JupyterHub
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map
     Apply Access Groups Settings     admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=${STANDARD_GROUPS_MODIFIED}
+    Rollout JupyterHub
 
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation

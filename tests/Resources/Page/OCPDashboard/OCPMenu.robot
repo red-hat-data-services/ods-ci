@@ -45,3 +45,4 @@ Switch To Developer Perspective
 Maybe Skip Tour
    ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id='guided-tour-modal']
    Run Keyword If  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button
+  

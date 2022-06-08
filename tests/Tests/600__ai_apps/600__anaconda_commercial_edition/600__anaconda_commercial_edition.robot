@@ -51,7 +51,7 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
 
 Verify User Is Able to Activate Anaconda Professional
   [Tags]  Tier2
-  ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082
+  ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082  ODS-1304
   ...     ProductBug
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
@@ -79,6 +79,7 @@ Verify User Is Able to Activate Anaconda Professional
   Run Keyword And Continue On Failure  Verify Anaconda Element Present Based On Version
   Run Keyword And Continue On Failure  Verify Anaconda Element Enabled Based On Version
   Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
+  Verify Git Plugin
   Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${TOKEN_VAL_SUCCESS_MSG}
   Capture Page Screenshot  anaconda_token_val_cell.png
   Add And Run JupyterLab Code Cell  !conda install -y numpy

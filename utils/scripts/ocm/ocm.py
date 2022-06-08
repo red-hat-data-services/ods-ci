@@ -12,7 +12,8 @@ import glob
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path+"/../")
 from util import (clone_config_repo, read_yaml,
-                  execute_command)
+                  execute_command, write_data_in_json,
+                  read_data_from_json)
 from logger import log
 
 """
@@ -51,7 +52,10 @@ class OpenshiftClusterManager():
         self.pool_name = args.get("pool_name")
         self.reuse_machine_pool = args.get("reuse_machine_pool")
         self.notification_email = args.get("notification_email")
-
+        self.osd_minor_version_start = args.get("osd_minor_version_start")
+        self.osd_minor_version_end = args.get("osd_minor_version_end")
+        self.osd_major_version = args.get("osd_major_version")
+        self.osd_latest_version_data = args.get("osd_latest_version_data")
         ocm_env = glob.glob(dir_path+"/../../../ocm.json.*")
         if ocm_env != []:
             os.environ['OCM_CONFIG'] = ocm_env[0]
@@ -844,6 +848,75 @@ class OpenshiftClusterManager():
             else:
                 return False
 
+    def get_latest_osd_candidate_version(self, osd_major_version, osd_minor_version):
+        """
+        get the latest  candidate version
+        Args:
+            osd_major_version (str):  Major version of the release. For example in 4.8.10 : 4 is major version
+            osd_minor_version (str):  Minor version of the release. For example in 4.8.10 : 4 is minor version
+            Example 4.8 = osd_major_version.osd_minor_version       
+        """
+        cmd = ("ocm list versions --channel-group  candidate |"
+               " grep  ^{}.{}|tail -1".format(osd_major_version, osd_minor_version))
+        ret = execute_command(cmd)
+        if ret is None:
+            log.info("Failed  to get latest version of ODS ")
+        return ret
+
+    def get_all_osd_versions(self):
+        """
+        gets the latest osd version and convert it in list
+        Example:
+            {'4': {'4.8': '4.8.39', '4.9': '4.9.33', '4.10': '4.10.14'}, '5': {'': ''}}
+        """
+        # Dict that will be converted into json file
+        latest_osd_versions_data = {}
+        dic = {}
+        for candidate_version in range(int(self.osd_minor_version_start), int(self.osd_minor_version_end)):
+            version = (self.get_latest_osd_candidate_version(
+                self.osd_major_version, candidate_version)).split("-")[0]
+            dic[".".join(version.split(".")[:2])] = version
+            latest_osd_versions_data[str(self.osd_major_version)] = dic
+        log.info(latest_osd_versions_data)
+        return latest_osd_versions_data
+
+    def compare_with_old_version_file(self):
+        """
+        Compares the latest osd version in the json  file and Updates
+        Run key, RUN key stores the list of ods-version needs to be trigger
+        """
+        lst_to_trigger_job = []
+        old_data = read_data_from_json(filename=self.osd_latest_version_data)
+        if not old_data:
+            old_data = {}
+        new_data = self.get_all_osd_versions()
+
+        if new_data == old_data:
+            old_data.update(new_data)
+            log.info("All the osd version in file is up to date. file_data:{}".format(old_data))
+            new_data["RUN"] = None
+            write_data_in_json(filename=self.osd_latest_version_data, data=old_data)
+            return None
+        else:
+            if self.osd_major_version not in old_data:
+                if self.osd_major_version in new_data:
+                    for version in new_data[self.osd_major_version].keys():
+                        if version != "":
+                            lst_to_trigger_job.append("{}-latest".format(version))
+                    old_data.update(new_data)
+                if self.osd_major_version not in new_data:
+                    return None
+            else:
+                for ods_version in old_data[self.osd_major_version].keys():
+                    if old_data[self.osd_major_version][ods_version] != new_data[self.osd_major_version][ods_version]:
+                        if old_data != "":
+                            lst_to_trigger_job.append("{}-latest".format(ods_version))
+                old_data.update(new_data)
+
+        old_data["RUN"] = list(filter(None, lst_to_trigger_job))
+        write_data_in_json(filename=self.osd_latest_version_data, data=old_data)
+        log.info("File is updated to : {} ".format(old_data))
+
 
 if __name__ == "__main__":
 
@@ -860,6 +933,30 @@ if __name__ == "__main__":
 
         subparsers = parser.add_subparsers(title='Available sub commands',
                                            help='sub-command help')
+        
+        # Argument parsers for get ods_latest version
+        get_latest_osd_candidate_json = subparsers.add_parser(
+            'get_latest_osd_candidate_json',
+            help="Parser to get osd chnages in json file",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        get_latest_osd_candidate_json.add_argument("--json-path",
+                                                help="json file path to store osd latest version details."
+                                                    "The file should be created already.",
+                                                action="store", dest="osd_latest_version_data",
+                                                required=True)
+        get_latest_osd_candidate_json.add_argument("--osd-major-version",
+                                                help="osd-major-version version",
+                                                action="store", dest="osd_major_version",
+                                                required=True)
+        get_latest_osd_candidate_json.add_argument("--osd-minor-version-start",
+                                                help="osd minor version start range",
+                                                action="store", dest="osd_minor_version_start",
+                                                required=True)
+        get_latest_osd_candidate_json.add_argument("--osd-minor-version-end",
+                                                help="osd-minor-version end range",
+                                                action="store", dest="osd_minor_version_end",
+                                                required=True)
+        get_latest_osd_candidate_json.set_defaults(func=ocm_obj.compare_with_old_version_file)
 
         #Argument parsers for ocm_login
         ocm_login_parser = subparsers.add_parser(

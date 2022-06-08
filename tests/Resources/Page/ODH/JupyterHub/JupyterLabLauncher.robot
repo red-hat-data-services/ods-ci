@@ -20,6 +20,8 @@ ${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE DOC CELLS}    ${JLAB CSS ACTIVE DOC} .jp-Cell
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
 ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
+${REPO_URL}             https://github.com/sclorg/nodejs-ex.git
+${FILE_NAME}            nodejs-ex
 
 *** Keywords ***
 Get JupyterLab Selected Tab Label
@@ -263,6 +265,11 @@ Clone Git Repository And Run
   Sleep  1
   JupyterLab Code Cell Error Output Should Not Be Visible
 
+Verify File Present In The File Explorer
+  [Documentation]   It checks if the file presnt in the file explorer on sidebar of jupyterlab.
+  [Arguments]       ${filename}
+  Wait Until Page Contains Element      //div[contains(@class,"jp-FileBrowser-listing")]/ul/li[contains(@title,"Name: ${filename}")]    10
+
 Handle Kernel Restarts
   #This section has to be slightly reworked still. Sometimes the pop-up is not in div[8] but in div[7]
 
@@ -422,3 +429,8 @@ Open New Notebook
     Open With JupyterLab Menu    File    New    Notebook
     Sleep    1
     Maybe Close Popup
+
+Verify Git Plugin
+    [Documentation]     Checks if it can successfully clone a repository.
+    Clone Git Repository      ${REPO_URL}
+    Verify File Present In The File Explorer      ${FILE_NAME}

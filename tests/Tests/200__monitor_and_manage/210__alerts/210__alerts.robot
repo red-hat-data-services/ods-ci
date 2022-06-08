@@ -310,7 +310,7 @@ Verify Alert "JupyterHub Image Builds Are Failing" Fires At Least 20 Minutes Whe
     ...    failed_build_name=${failed_build_name}    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
 
 Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or Testing
-    [Documentation]     Verify that MT-SRE are not paged for alerts in clusters used for development or testing	
+    [Documentation]     Verify that MT-SRE are not paged for alerts in clusters used for development or testing
     [Tags]              Sanity
     ...                 ODS-1058
     ...                 Tier1
@@ -325,7 +325,7 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
     Check Particular Text Is Present In Rhods-operator's Log  text_to_check=${text_to_check}
     Verify Receiver Value In Configmap Alertmanager Is  receiver=${receiver}
     [Teardown]    Close All Browsers
-    
+
 *** Keywords ***
 Alerts Suite Setup
     [Documentation]    Test suite configuration
@@ -488,8 +488,7 @@ Delete Failed Build And Start New One
 
 Check Cluster Name Contain "Aisrhods" Or Not
     [Documentation]     Return true if cluster name contains aisrhods and if not return false
-    ${cluster_id} =     Get Cluster ID
-    ${cluster_name} =    Get Cluster Name By Cluster ID  cluster_id=${cluster_id}
+    ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${return_value} =  Evaluate  "aisrhods" in "${cluster_name}"
     [Return]  ${return_value}
 

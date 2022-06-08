@@ -3,6 +3,7 @@ Resource      ../../../Page/Components/Components.resource
 Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
 Resource       ../../../Common.robot
 Resource       ../JupyterHub/ODHJupyterhub.resource
+Resource      ODHDashboardResources.resource
 Library       JupyterLibrary
 
 

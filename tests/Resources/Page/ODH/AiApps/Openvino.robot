@@ -9,6 +9,11 @@ ${OPENVINO_IMAGE_XP}=   //input[contains(@name,"OpenVINO™ Toolkit")]
 
 
 *** Keywords ***
+Remove Openvino Operator
+    [Documentation]     Cleans up the server and uninstall the openvino operator.
+    Fix Spawner Status
+    Uninstall Openvino Operator
+
 Uninstall Openvino Operator
     [Documentation]    Uninstall openvino operator and it's realted component
     Go To    ${OCP_CONSOLE_URL}
@@ -31,4 +36,3 @@ Verify JupyterHub Can Spawn Openvino Notebook
     Run Cell And Check Output    !pwd    /opt/app-root/src
     Verify Library Version Is Greater Than  jupyterlab  3.1.4
     Verify Library Version Is Greater Than  notebook    6.4.1
-    Fix Spawner Status

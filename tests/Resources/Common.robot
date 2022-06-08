@@ -119,6 +119,6 @@ Verify NPM Version
     Should Be Equal  ${installed_version}  ${expected_version}
 
 Get Cluster Name From Console URL
-    [Documentation]    Get the cluster name from the Openshitf console URL
+    [Documentation]    Get the cluster name from the Openshift console URL
     ${name}=    Split String    ${OCP_CONSOLE_URL}        .
     [Return]    ${name}[2]

@@ -438,5 +438,5 @@ Wait Until Remaining Builds Are Complete And Close Browser
     [Documentation]     Waits Until Remaining builds have Status as Complete and Closes Browser
     Go To  url=${OCP_CONSOLE_URL}
     Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
-    Start Remaining Builds And Wait Until All Builds Are Complete  builds=${BUILDS_TO_BE_CHECKED}  build_configs=${BUILD_CONFIGS}
+    Rebuild Missing Or Failed Builds  builds=${BUILDS_TO_BE_CHECKED}  build_configs=${BUILD_CONFIGS}  namespace=redhat-ods-applications
     Dashboard Test Teardown

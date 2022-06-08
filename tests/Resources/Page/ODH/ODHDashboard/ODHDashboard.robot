@@ -593,3 +593,10 @@ RHODS Notification Drawer Should Not Contain
     Click Element    xpath=//*[contains(@class,'notification-badge')]
     Page Should Not Contain  text=${message}
     Click Element    xpath=//*[contains(@class,'notification-badge')]
+
+Sort Resources By
+    [Documentation]    Changes the sort of items in resource page
+    [Arguments]    ${sort_type}
+    Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
+    Click Button    //button[@data-key="${sort_type}"]
+    Sleep    1s

@@ -48,7 +48,8 @@ Verify Tensorflow Library Can See GPUs In Minimal CUDA
 
 Verify Cuda Image Have NVCC Installed
     [Documentation]     Verifies NVCC Version in Minimal CUDA Image
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
+    ...     Resources-GPU
     ...     ODS-483
     ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
     Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found

@@ -1,12 +1,14 @@
 
+import json
 import os
-import subprocess
-import shutil
-import yaml
 import re
+import shutil
+import subprocess
 import sys
 import time
+
 import jinja2
+import yaml
 
 def clone_config_repo(**kwargs):
     """
@@ -106,3 +108,22 @@ def render_template(search_path, template_file, output_file, replace_vars):
         print("Failed to render template and create json "
               "file {}".format(output_file))
         sys.exit(1)
+
+def read_data_from_json(filename):
+    """
+    Helper to read Json file
+    """
+    try:
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        return data
+    except:
+        return None
+
+
+def write_data_in_json(filename, data):
+    """
+    Helper to write JSON file
+    """
+    with open(filename, 'w') as convert_file:
+        convert_file.write(json.dumps(data))

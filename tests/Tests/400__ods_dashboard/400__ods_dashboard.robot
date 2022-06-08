@@ -176,8 +176,106 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     Verify RHODS Notification After Logging Out
     [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
 
+Verify Favorite Resource Cards
+    [Tags]    ODS-389    ODS-384
+    ...       Tier1
+    [Documentation]    Verifies the item in Resource page can be marked se favorite.
+    ...                It checks if favorite items are always listed as first regardless
+    ...                the view type or sorting
+    Click Link    Resources
+    Wait Until Element Is Visible    //div[@class="pf-l-gallery pf-m-gutter odh-learning-paths__gallery"]
+    Sort Resources By    name
+    ${list_of_tile_ids} =    Get List Of Ids Of Tiles
+    Verify Star Icons Are Clickable    ${list_of_tile_ids}
+
+    ${favorite_ids} =    Get Slice From List    ${list_of_tile_ids}    ${27}    ${48}
+    Add The Items In Favorites    @{favorite_ids}
+
+    ${list_of_tile_ids} =    Get List Of Ids Of Tiles
+    Favorite Items Should Be Listed First    ${favorite_ids}    ${list_of_tile_ids}    ${21}
+
+    Click Button    //*[@id="list-view"]
+    Sleep    0.5s
+    ${list_view_tiles} =    Get The List Of Ids of Tiles In List View
+    Favorite Items Should Be Listed First    ${favorite_ids}    ${list_view_tiles}    ${21}
+
+    Click Button    //*[@id="card-view"]
+    Sleep    0.5s
+    Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    type
+    Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    application
+    Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    duration
+    [Teardown]    Remove Items From favorites    @{favorite_ids}
+
 
 *** Keywords ***
+Favorite Items Should Be Listed First
+    [Documentation]    Compares the ids and checks that favorite Items
+    ...                are listed first
+    [Arguments]    ${list_of_fav_items_id}    ${list_of_all_items_id}    ${range}
+    ${new_list_of_tile} =    Get Slice From List    ${list_of_all_items_id}    0    ${range}
+    Lists Should Be Equal    ${new_list_of_tile}    ${list_of_fav_items_id}    ignore_order=${True}
+
+Verify Star Icons Are Clickable
+    [Documentation]    Verifies that star icons in the resources page are clickable
+    [Arguments]    ${list_of_ids}
+    FOR    ${id}    IN    @{list_of_ids}
+         Set Item As Favorite    ${id}
+         Remove An Item From Favorite    ${id}
+    END
+
+Get List Of Ids Of Tiles
+    [Documentation]    Returns the list of ids of tiles present in resources page
+    ${list_of_ids}=    Get List Of Atrributes
+    ...    xpath=//article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
+    [Return]    ${list_of_ids}
+
+Set Item As Favorite
+    [Documentation]    Add the tiles in favorite
+    [Arguments]    ${id}
+    ${not_clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
+    Should Be Equal    ${not_clicked}    odh-dashboard__favorite
+    Click Element    //*[@id="${id}"]/div[1]/span
+
+Remove An Item From Favorite
+    [Documentation]    Removes the tiles from favorite
+    [Arguments]    ${id}
+    ${clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
+    Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
+    Click Element    //*[@id="${id}"]/div[1]/span
+
+Add The Items In Favorites
+    [Documentation]    Add the tiles in the favorites
+    [Arguments]    @{list_of_ids}
+    FOR    ${id}    IN     @{list_of_ids}
+        Set Item As favorite    ${id}
+    END
+
+Favorite Items Should Be Listed First When Sorted By
+    [Documentation]    Changes the sort type of tile and checks that favorites
+    ...                favorite items are still listed first
+    [Arguments]    ${list_of_ids_of_favorite}    ${sort_type}
+    Sort Resources By    ${sort_type}
+    ${new_list_of_tile} =    Get List Of Ids Of Tiles
+    Favorite Items Should Be Listed First    ${list_of_ids_of_favorite}    ${new_list_of_tile}    ${21}
+
+Get The List Of Ids of Tiles In List View
+    [Documentation]    Returns the list of ids of tiles in list view
+    ${list_of_new_tile_ids} =    Get List Of Atrributes    //div[@class="odh-list-item__doc-title"]    id
+    ${len} =    Get Length    ${list_of_new_tile_ids}
+    ${list_of_ids_in_list_view} =    Create List
+    FOR    ${index}    IN RANGE    0    ${len}    2
+        Append To List    ${list_of_ids_in_list_view}    ${list_of_new_tile_ids}[${index}]
+    END
+    [Return]    ${list_of_ids_in_list_view}
+
+Remove Items From Favorites
+    [Documentation]    Removes the items from favorites
+    [Arguments]    @{list_of_ids}
+    FOR    ${id}    IN     @{list_of_ids}
+        Remove An Item From Favorite    ${id}
+    END
+    Close Browser
+
 RHODS Dahsboard Pod Should Contain OauthProxy Container
     ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard
     FOR    ${pod_name}    IN   @{list_of_pods}

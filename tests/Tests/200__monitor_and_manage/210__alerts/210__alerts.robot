@@ -463,8 +463,7 @@ Skip Test If Alert Is Already Firing
 
 Check Cluster Name Contain "Aisrhods" Or Not
     [Documentation]     Return true if cluster name contains aisrhods and if not return false
-    ${cluster_id} =     Get Cluster ID
-    ${cluster_name} =    Get Cluster Name By Cluster ID  cluster_id=${cluster_id}
+    ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${return_value} =  Evaluate  "aisrhods" in "${cluster_name}"
     [Return]  ${return_value}
 

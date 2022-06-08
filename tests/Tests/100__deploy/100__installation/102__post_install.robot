@@ -209,6 +209,13 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-monitoring
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-operator
 
+Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
+    [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
+    [Tags]    Tier2
+    ...       ODS-699
+    Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
+    Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
+
 *** Keywords ***
 Verify Cuda Builds Are Completed
     [Documentation]    Verify All Cuda Builds have status as Complete
@@ -291,3 +298,21 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     FOR    ${pod_info}    IN    @{project_pods_info}
         Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
     END
+
+Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
+    [Documentation]     wait and checks Operator have changed app grafana to prometheus
+    Sleep    10m    msg=wait to operator reverts the Changes
+    Wait Until Keyword Succeeds    5min    30s    Verify In Rhods-Monitor-Federation App Is    expected_app_name=prometheus
+
+Verify In Rhods-Monitor-Federation App Is
+    [Documentation]     Verifies in rhods-monitor-federation, app is showing ${expected_app_name}
+    [Arguments]         ${expected_app_name}
+    ${data} =    OpenShiftLibrary.Oc Get    kind=ServiceMonitor   namespace=redhat-ods-monitoring    field_selector=metadata.name==rhods-monitor-federation
+    ${app_name}    Set Variable    ${data[0]['spec']['selector']['matchLabels']['app']}
+    Should Be Equal    ${expected_app_name}    ${app_name}
+
+Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
+    [Documentation]     Replace app to "Prometheus" with "Grafana" in Rhods-Monirot-Federation
+    OpenShiftLibrary.Oc Patch    kind=ServiceMonitor
+    ...                   src={"spec":{"selector":{"matchLabels": {"app":"grafana"}}}}
+    ...                   name=rhods-monitor-federation   namespace=redhat-ods-monitoring  type=merge

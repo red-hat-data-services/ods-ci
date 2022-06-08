@@ -98,9 +98,27 @@ Check HTTP Status Code
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 
+Get List Of Atrributes
+    [Documentation]    Returns the list of attributes
+    [Arguments]    ${xpath}    ${attribute}
+    ${xpath} =    Remove String    ${xpath}    ]
+    ${link_elements}=
+    ...    Get WebElements    ${xpath} and not(starts-with(@${attribute}, '#'))]
+    ${list_of_atrributes}=    Create List
+    FOR    ${ext_link}    IN    @{link_elements}
+        ${ids}=    Get Element Attribute    ${ext_link}    ${attribute}
+        Append To List    ${list_of_atrributes}    ${ids}
+    END
+    [Return]    ${list_of_atrributes}
+
 Verify NPM Version
     [Documentation]  Verifies the installed version of an NPM library
     ...    against an expected version in a given pod/container
     [Arguments]  ${library}  ${expected_version}  ${pod}  ${namespace}  ${container}=""  ${prefix}=""  ${depth}=0
     ${installed_version} =  Run  oc exec -n ${namespace} ${pod} -c ${container} -- npm list --prefix ${prefix} --depth=${depth} | awk -F@ '/${library}/ { print $2}'
     Should Be Equal  ${installed_version}  ${expected_version}
+
+Get Cluster Name From Console URL
+    [Documentation]    Get the cluster name from the Openshift console URL
+    ${name}=    Split String    ${OCP_CONSOLE_URL}        .
+    [Return]    ${name}[2]

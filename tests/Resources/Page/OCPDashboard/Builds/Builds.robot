@@ -95,25 +95,25 @@ Delete Multiple Builds
         Delete Build    namespace=${namespace}    build_name=${build_name}
     END
 
-Start Remaining Builds And Wait Until All Builds Are Complete
+Rebuild Missing Or Failed Builds
     [Documentation]    Starts new build if build fails or is not started , Waits until all builds are complete
-    [Arguments]    ${builds}  ${build_configs}
+    [Arguments]    ${builds}  ${build_configs}  ${namespace}
     ${no_of_builds} =    Get Length    ${builds}
     FOR    ${ind}    IN RANGE    ${no_of_builds}
-        ${build_name} =    Search Last Build    namespace=redhat-ods-applications
+        ${build_name} =    Search Last Build    namespace=${namespace}
         ...    build_name_includes=${builds}[${ind}]
         IF    "${build_name}" == ""
-            ${build_name} =    Start New Build    namespace=redhat-ods-applications
+            ${build_name} =    Start New Build    namespace=${namespace}
             ...    buildconfig=${build_configs}[${ind}]
         ELSE
-            ${build_status} =    Get Build Status    namespace=redhat-ods-applications
+            ${build_status} =    Get Build Status    namespace=${namespace}
             ...    build_search_term=${build_name}
-            IF    "${build_status}" == "Failed"
-                Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
-                ${build_name} =    Start New Build    namespace=redhat-ods-applications
+            IF    "${build_status}" == "Failed" or "${build_status}" == "Error"
+                Delete Build    namespace=${namespace}    build_name=${build_name}
+                ${build_name} =    Start New Build    namespace=${namespace}
                 ...    buildconfig=${build_configs}[${ind}]
             END
         END
-        Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${build_name}
+        Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}
         ...    expected_status=Complete
     END

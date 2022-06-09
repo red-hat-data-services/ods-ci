@@ -444,7 +444,7 @@ Open New Notebook
     Maybe Close Popup
 
 Clone Repo
-    [Documentation]    Clones the git repo without logging the errors
+    [Documentation]    It is a private keyword used by other keyword to clone the git repo
     [Tags]    Private Keyword
     [Arguments]    ${repo_url}
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser

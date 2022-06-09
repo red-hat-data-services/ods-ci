@@ -18,6 +18,7 @@ ${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:
 ${METRIC_RHODS_CPU_BEFORE_1.5.0}    cluster:usage:consumption:rhods:cpu:seconds:rate5m
 ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:seconds:rate5m
 ${METRIC_RHODS_ACTIVE_USERS}        cluster:usage:consumption:rhods:active_users
+${telmeter_url}                     https://telemeter-lts-dashboards.datahub.redhat.com/api/datasources/proxy/2/api/v1/
 
 *** Test Cases ***
 Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
@@ -75,22 +76,25 @@ Test Metric "Active Users" On Telemeter
     ...                the same rhods active users
     [Tags]    ODS-1054
     ...       Tier1
-    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
-    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:active_users
-    Log    ${value}
+    ${value} =    Run OpenShift Metrics Query    query=${METRIC_RHODS_ACTIVE_USERS}
     ${cluster_id} =    Get Cluster ID
     ${time} =    Get Start Time And End Time    interval=15m
     ${steps} =    Set Variable    15
-    ${query} =    cluster:usage:consumption:rhods:active_users{_id="${cluster_id}"}
-    ${url}=    ${pm_url}/api/v1/query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    ${query} =    Set Variable    cluster:usage:consumption:rhods:active_users{_id=${cluster_id}}
+    ${url}=    Set Variable    ${telmeter_url}query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
     Open Browser     ${url}    ${BROWSER.NAME}
+    Click Button    //button[@type="submit"]
+    Click Element    //a[@title="Log in with SSO"]
     @{data} =    Get WebElements    //pre
     &{data} =    Evaluate    dict(${data[0].text})
-    ${data} =    ${data}["data"]["result"]["values"][0][1]
+    Close Browser
+    ${data} =    Set Variable    ${data["data"]["result"][0]["values"][-1][1]}
     Should Be Equal    ${value}    ${data}
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
 
 Test metric "Notebook Cpu Usage" on Telemeter
     [Documentation]    Verifies prometheus and grafana shows the same CPU usage.

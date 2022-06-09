@@ -244,9 +244,10 @@ Clone Git Repository
   ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
     IF    "${status}" == "PASS"
         ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
+        ${current_user} =    Get Current User
         Delete Folder In User Notebook
         ...    admin_username=${OCP_ADMIN_USER.USERNAME}
-        ...    username=${TEST_USER.USERNAME}
+        ...    username=${current_user}
         ...    folder=${dir_name}
         ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
         IF    "${status}" == "PASS"
@@ -481,3 +482,9 @@ Verify Git Plugin
     [Documentation]     Checks if it can successfully clone a repository.
     Clone Git Repository      ${REPO_URL}
     Verify File Present In The File Explorer      ${FILE_NAME}
+
+Get Current User
+   [Documentation]    Returns the current user
+   ${url} =  Get Location
+   ${current_user} =  Evaluate  '${url}'.split("/")[4]
+   [Return]  ${current_user}

@@ -7,7 +7,7 @@
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-#Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library             OpenShiftCLI
 Library             DebugLibrary
 
@@ -43,28 +43,28 @@ Server Setup
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Default
 
-Clone Git Repository
-  [Documentation]    Clones git repository and logs error message if fails to clone
-  [Arguments]  ${REPO_URL}    ${delete_existing_repo}=True
-  IF    "${delete_existing_repo}" == "True"
-        ${dir_name} =    Get Directory Name From Git Repo URL    ${link}
-        ${curent_user} =    Get Current User
-        Delete Folder In User Notebook
-        ...    admin_username=${OCP_ADMIN_USER.USERNAME}
-        ...    username=${curent_user}
-        ...    folder=${dir_name}
-  END
-  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
-  Open With JupyterLab Menu    Git    Clone a Repository
-  Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${link}
-  Click Element    xpath://div[.="CLONE"]
-  Wait Until Page Contains    Cloning...    timeout=5s
-  ${err_msg} =  Set Variable
-  ${status}    ${err_msg}     Run Keyword and Ignore Error    Get Git Clone Error Message
-  Log  ${err_msg}
-
-Get Current User
-  ${url} =  Get Location
-  ${current_user} =  Evaluate  '${url}'.split("/")[-2]
-  [Return]  ${current_user}
+#Clone Git Repository
+#  [Documentation]    Clones git repository and logs error message if fails to clone
+#  [Arguments]  ${REPO_URL}    ${delete_existing_repo}=True
+#  IF    "${delete_existing_repo}" == "True"
+#        ${dir_name} =    Get Directory Name From Git Repo URL    ${link}
+#        ${curent_user} =    Get Current User
+#        Delete Folder In User Notebook
+#        ...    admin_username=${OCP_ADMIN_USER.USERNAME}
+#        ...    username=${curent_user}
+#        ...    folder=${dir_name}
+#  END
+#  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
+#  Open With JupyterLab Menu    Git    Clone a Repository
+#  Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${link}
+#  Click Element    xpath://div[.="CLONE"]
+#  Wait Until Page Contains    Cloning...    timeout=5s
+#  ${err_msg} =  Set Variable
+#  ${status}    ${err_msg}     Run Keyword and Ignore Error    Get Git Clone Error Message
+#  Log  ${err_msg}
+#
+#Get Current User
+#  ${url} =  Get Location
+#  ${current_user} =  Evaluate  '${url}'.split("/")[-2]
+#  [Return]  ${current_user}
 

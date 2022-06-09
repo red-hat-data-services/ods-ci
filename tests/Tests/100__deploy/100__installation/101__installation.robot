@@ -33,6 +33,7 @@ Verify User Can Access RHODS Documentation From OCM Console
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   ${cluster_id} =     Get Cluster ID
   ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
+  Wait Until Page Contains Element  ${cluster_name}     10
   Click Link    ${cluster_name}
   Wait Until Page Contains Element    //div[@id="cl-details-top"]     20
   Click Button      //button[@data-ouia-component-id="Add-ons"]

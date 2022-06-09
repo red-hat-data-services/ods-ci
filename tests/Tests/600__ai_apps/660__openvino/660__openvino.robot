@@ -34,7 +34,7 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    [Documentation]  This Test Case Installed Openvino operator in Openshift cluster,
    ...              Cheks whether RHODS notification shows the Notebook images are running after installing openvino
    ...               and Check and Launch AIKIT notebook image from RHODS dashboard
-   Run Keyword and Ignore Error    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
+   Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
    Create Tabname Instance For Installed Operator        ${openvino_operator_name}       Notebook    redhat-ods-applications
    Wait Until Keyword Succeeds    1200    1     Check Image Build Status   Complete     openvino-notebook
    Openvino Build Should Contain The Label    ${openvino_build_label}

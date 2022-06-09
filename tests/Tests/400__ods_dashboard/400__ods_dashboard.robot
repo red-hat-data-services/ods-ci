@@ -275,7 +275,6 @@ Get Logs Lengths Before Setting An Empty Group
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         Log    ${pod_name}
         ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}
-        Log     ${pod_logs_lines}[${n_lines-1}]
         Run Keyword And Warn On Failure     Should Not Contain   container=${pod_logs_lines}
         ...     item=Failed to get groups: TypeError: Cannot read property 'includes' of null
         Run Keyword And Warn On Failure     Should Not Contain   container=${pod_logs_lines}

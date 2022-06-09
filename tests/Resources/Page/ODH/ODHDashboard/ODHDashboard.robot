@@ -623,4 +623,9 @@ Get Dashboard Pods Logs
     ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
     ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
     ${n_lines}=     Get Length    ${pod_logs_lines}
+    Log     ${pod_logs_lines}[${n_lines-3}:]
+    IF   "${pod_logs_lines}[${n_lines-1}]" == "${EMPTY}"
+        Remove From List    ${pod_logs_lines}   ${n_lines-1}
+        ${n_lines}=     Get Length    ${pod_logs_lines}
+    END
     [Return]    ${pod_logs_lines}   ${n_lines}

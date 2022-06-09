@@ -251,6 +251,9 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
 Verify Error Message When A RHODS Group Is Empty
     [Tags]  ODS-1408
     ...     Sanity
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when an empty group
+    ...                 is set as admin in "rhods-group-config" ConfigMap
     [Setup]     Set Standard RHODS Groups Variables
     Set Library Search Order    SeleniumLibrary
     Create Group    group_name=${CUSTOM_EMPTY_GROUP}
@@ -271,6 +274,8 @@ Verify Error Message When A RHODS Group Is Empty
 
 *** Keywords ***
 Get Logs Lengths Before Setting An Empty Group
+    [Documentation]     Computes the number of lines present in the logs of both the dashboard pods
+    ...                 and returns them as dictionary
     ${lenghts_dict}=    Create Dictionary
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         Log    ${pod_name}
@@ -284,6 +289,7 @@ Get Logs Lengths Before Setting An Empty Group
     [Return]    ${lenghts_dict}
 
 New Lines In Logs Of Dashboard Pods Should Contain
+    [Documentation]     Verifies that newly generated lines in the logs contain the given message
     [Arguments]     ${exp_msg}      ${prev_logs_lenghts}
     &{new_logs_lenghts}=   Create Dictionary
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
@@ -300,6 +306,7 @@ New Lines In Logs Of Dashboard Pods Should Contain
     [Return]    ${new_logs_lenghts}
 
 Wait Until New Log Lines Are Generated In Dashboard Pods
+    [Documentation]     Waits until new messages in the logs are generated
     [Arguments]     ${prev_length}  ${pod_name}  ${retries}=10    ${retries_interval}=5s
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}
@@ -314,10 +321,14 @@ Wait Until New Log Lines Are Generated In Dashboard Pods
     [Return]    ${pod_logs_lines}[${prev_length-1}:]     ${n_lines}
 
 Set Empty Group
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
     Apply Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
 Set Default Groups And Check Logs Do Not Change
+    [Documentation]     Teardown for ODS-1408. It sets the default configuration of "rhods-groups-config"
+    ...                 ConfigMap and checks if no new lines are generated in the logs after that.
     [Arguments]     ${lenghts_dict}
     Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
@@ -328,6 +339,7 @@ Set Default Groups And Check Logs Do Not Change
     Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
 
 Logs Of Dashboard Pods Should Not Contain New Lines
+    [Documentation]     Checks if no new lines are generated in the logs after that.
     [Arguments]     ${lenghts_dict}
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_lenght=${lenghts_dict}[${pod_name}]  pod_name=${pod_name}

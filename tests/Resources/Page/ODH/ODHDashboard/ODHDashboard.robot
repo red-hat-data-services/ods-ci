@@ -610,6 +610,7 @@ Clear Dashboard Notifications
     END
     Close Notification Drawer
 Get Dashboard Pods Names
+    [Documentation]     Retrieves the names of dashboard pods
     ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
     ...                        fields=['metadata.name']
     ${names}=   Create List
@@ -619,6 +620,7 @@ Get Dashboard Pods Names
     [Return]   ${names}
 
 Get Dashboard Pods Logs
+    [Documentation]     Fetches the logs from one dashboard pod
     [Arguments]     ${pod_name}
     ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
     ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n

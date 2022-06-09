@@ -171,8 +171,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
-    RHODS Notification Drawer Should Contain  message=2 of 3 builds completed successfully
-    RHODS Notification Drawer Should Contain  message=TensorFlow build image failed
+    Verify Notifications After Build Is Complete
     Verify RHODS Notification After Logging Out
     [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
 
@@ -429,3 +428,11 @@ Restart Failed Build and Close Browser
     [Arguments]     ${failed_build_name}  ${build_config}
     Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=${build_config}
     Dashboard Test Teardown
+
+Verify Notifications After Build Is Complete
+    [Documentation]  Verifies Notifications after build status is complete
+    RHODS Notification Drawer Should Contain  message=2
+    RHODS Notification Drawer Should Contain  message=of
+    RHODS Notification Drawer Should Contain  message=3
+    RHODS Notification Drawer Should Contain  message=builds completed successfully
+    RHODS Notification Drawer Should Contain  message=TensorFlow build image failed

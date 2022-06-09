@@ -847,6 +847,8 @@ class OpenshiftClusterManager():
                 sys.exit(1)
             else:
                 return False
+        else:
+            return ret
 
     def get_latest_osd_candidate_version(self, osd_major_version, osd_minor_version):
         """
@@ -854,7 +856,7 @@ class OpenshiftClusterManager():
         Args:
             osd_major_version (str):  Major version of the release. For example in 4.8.10 : 4 is major version
             osd_minor_version (str):  Minor version of the release. For example in 4.8.10 : 4 is minor version
-            Example 4.8 = osd_major_version.osd_minor_version       
+            Example 4.8 = osd_major_version.osd_minor_version
         """
         cmd = ("ocm list versions --channel-group  candidate |"
                " grep  ^{}.{}|tail -1".format(osd_major_version, osd_minor_version))
@@ -933,7 +935,7 @@ if __name__ == "__main__":
 
         subparsers = parser.add_subparsers(title='Available sub commands',
                                            help='sub-command help')
-        
+
         # Argument parsers for get ods_latest version
         get_latest_osd_candidate_json = subparsers.add_parser(
             'get_latest_osd_candidate_json',

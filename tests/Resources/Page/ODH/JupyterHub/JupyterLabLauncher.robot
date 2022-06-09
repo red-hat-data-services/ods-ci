@@ -50,7 +50,6 @@ Close Other JupyterLab Tabs
   ${jl_tabs} =  Get WebElements  ${xpath_background_tab}
 
   FOR  ${tab}  IN  @{jl_tabs}
-    maybe Close Popup
     #Select the tab we want to close
     Maybe Close Popup
     Click Element  ${tab}
@@ -445,7 +444,8 @@ Open New Notebook
     Maybe Close Popup
 
 Clone Repo
-    [Documentation]    Clones git repo
+    [Documentation]    Clones the git repo without logging the errors
+    [Tags]    Private Keyword
     [Arguments]    ${repo_url}
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Open With JupyterLab Menu    Git    Clone a Repository
@@ -454,6 +454,8 @@ Clone Repo
 
 
 Clone Repo and Return Error Message
+    [Documentation]    Clones the github repository and returns the error
+    [Tags]    Private Keyword
     [Arguments]    ${repo_url}
     Clone Repo    ${repo_url}
     Wait Until Page Contains    Cloning...    timeout=5s

@@ -111,9 +111,3 @@ Verify Anaconda In Kfdef
     END
     Should Contain  ${applications_names}  anaconda-ce
 
-Check Doc And Quick Start Link In Anaconda
-    Click Button    //article[@id="anaconda-ce"]/div/div/div/button
-    ${href} =    Get Element Attribute    //a[contains(text(),"View documentation")]    href
-    Check HTTP Status Code    ${href}
-    Click Element    //a[contains(text(),"Open quick start")]
-    Wait Until Page Contains    With Anaconda Professional

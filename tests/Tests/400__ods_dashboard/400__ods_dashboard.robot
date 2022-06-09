@@ -270,7 +270,7 @@ Verify Error Message When A RHODS Group Is Empty
         ...     exp_msg=Failed to get groups: TypeError: Cannot read property 'includes' of null
         ...     prev_logs_lenghts=${lenghts_dict_before}
     END
-    [Teardown]      Set Default Groups And Check Logs Do Not Change   ${lenghts_dict_after}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change   lenghts_dict=${lenghts_dict_after}  delete_group=${TRUE}
 
 Verify Error Message When A RHODS Group Does Not Exist
     [Tags]  ODS-1494
@@ -286,7 +286,7 @@ Verify Error Message When A RHODS Group Does Not Exist
     ${lenghts_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
     ...     exp_msg=${EXP_ERROR_INEXISTENT_GRP}
     ...     prev_logs_lenghts=${lenghts_dict_before}
-    [Teardown]      Set Default Groups And Check Logs Do Not Change   ${lenghts_dict_after}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change   lenghts_dict=${lenghts_dict_after}
 
 
 *** Keywords ***
@@ -360,16 +360,18 @@ Set RHODS Admin Group To Inexistent Group
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
 Set Default Groups And Check Logs Do Not Change
-    [Documentation]     Teardown for ODS-1408. It sets the default configuration of "rhods-groups-config"
+    [Documentation]     Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "rhods-groups-config"
     ...                 ConfigMap and checks if no new lines are generated in the logs after that.
-    [Arguments]     ${lenghts_dict}
+    [Arguments]     ${lenghts_dict}     ${delete_group}=${FALSE}
     Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_lenght=${lenghts_dict}[${pod_name}]  pod_name=${pod_name}
         Should Be Equal     ${new_lines_flag}   ${FALSE}
     END
-    Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
+    IF  "${delete_group}" == "${TRUE}"
+        Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
+    END
 
 Logs Of Dashboard Pods Should Not Contain New Lines
     [Documentation]     Checks if no new lines are generated in the logs after that.

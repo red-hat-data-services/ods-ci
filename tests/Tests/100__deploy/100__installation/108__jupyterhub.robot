@@ -30,6 +30,17 @@ Verify JupyterHub DB Is Shipped And Enabled Within ODS
     OpenShift Resource Field Value Should Match Regexp    spec.clusterIP    ^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$
     ...    @{jupyterhubdb_services_info}
 
+Verify PostgreSQL Is Not Deployed When AWS RDS Is Enabled
+    [Documentation]    Verifies if PostgreSQL is not deployed when AWS RDS is enabled
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-336
+    ${cluster_platform_type}=    Fetch Cluster Platform Type
+    Skip if    "${cluster_platform_type}" != "AWS"
+    ...    This test only applies to AWS clusters
+    Run Keyword And Expect Error    ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Fetch JupyterHub DB Pods Info
+
 *** Keywords ***
 Fetch JupyterHub DB Pods Info
     [Documentation]  Fetches information about JupyterHub DB Pods

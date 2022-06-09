@@ -609,3 +609,18 @@ Clear Dashboard Notifications
         Click Element    xpath=//*[contains(@class,"odh-dashboard__notification-drawer__item-remove")]
     END
     Close Notification Drawer
+Get Dashboard Pods Names
+    ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
+    ...                        fields=['metadata.name']
+    ${names}=   Create List
+    FOR    ${pod_name}    IN    @{dash_pods}
+        Append To List      ${names}    ${pod_name}[metadata.name]
+    END
+    [Return]   ${names}
+
+Get Dashboard Pods Logs
+    [Arguments]     ${pod_name}
+    ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
+    ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
+    ${n_lines}=     Get Length    ${pod_logs_lines}
+    [Return]    ${pod_logs_lines}   ${n_lines}

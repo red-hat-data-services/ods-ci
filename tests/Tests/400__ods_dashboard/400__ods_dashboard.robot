@@ -251,60 +251,89 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
 Verify Error Message When A RHODS Group Is Empty
     [Tags]  ODS-1408
     ...     Sanity
+    [Setup]     Set Standard RHODS Groups Variables
     Set Library Search Order    SeleniumLibrary
-    Set Standard RHODS Groups Variables
-    ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
-    ...                        fields=['metadata.name']
-    ${lenghts_list}=   Create List
-    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{dash_pods}
-        Log    ${index}: ${pod_name}[metadata.name]
-        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}[metadata.name]
-        Log     ${pod_logs_lines}[${n_lines-1}]
-        Run Keyword And Continue On Failure     Should Not Contain   container=${pod_logs_lines}
-        ...     item=Failed to get groups: TypeError: Cannot read property 'includes' of undefined
-        Run Keyword And Continue On Failure     Should Not Contain   container=${pod_logs_lines}
-        ...     item=Failed to get groups: HttpError: HTTP request failed
-        Set Empty Group
-        ${pod_logs_lines}   ${n_lines_new}=     Get Dashboard Pods Logs     pod_name=${pod_name}[metadata.name]
-        Append To List   ${lenghts_list}    ${n_lines}
-        Should Be Equal     ${n_lines_new}  ${n_lines+1}
-        Log     ${pod_logs_lines}[${n_lines_new-1}]
-        Run Keyword And Continue On Failure     Should Contain   container=${pod_logs_lines}
-        ...     item=Failed to get groups: TypeError: Cannot read property 'includes' of undefined
+    Create Group    group_name=${CUSTOM_EMPTY_GROUP}
+    ${dash_pods_name}=   Get Dashboard Pods Names
+    Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
+    ${lenghts_dict_before}=     Get Logs Lengths Before Setting An Empty Group
+    Set Empty Group
+    ${version-check}=    Is RHODS Version Greater Or Equal Than  1.13.0
+    IF  ${version-check}==True
+        Logs Of Dashboard Pods Should Not Contain New Lines     ${lenghts_dict_before}
+    ELSE
+        ${lenghts_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
+        ...     exp_msg=Failed to get groups: TypeError: Cannot read property 'includes' of null
+        ...     prev_logs_lenghts=${lenghts_dict_before}
     END
-    [Teardown]      Set Default Groups And Check Logs Do Not Change   ${pod_name}[metadata.name]
+    [Teardown]      Set Default Groups And Check Logs Do Not Change   ${lenghts_dict_after}
 
 
 *** Keywords ***
-Get Dashboard Pods Logs
-    [Arguments]     ${pod_name}
-    ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
-    ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
-    ${n_lines}=     Get Length    ${pod_logs_lines}
-    [Return]    ${pod_logs_lines}   ${n_lines}
+Get Logs Lengths Before Setting An Empty Group
+    ${lenghts_dict}=    Create Dictionary
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
+        Log    ${pod_name}
+        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}
+        Log     ${pod_logs_lines}[${n_lines-1}]
+        Run Keyword And Warn On Failure     Should Not Contain   container=${pod_logs_lines}
+        ...     item=Failed to get groups: TypeError: Cannot read property 'includes' of null
+        Run Keyword And Warn On Failure     Should Not Contain   container=${pod_logs_lines}
+        ...     item=Failed to get groups: HttpError: HTTP request failed
+        Set To Dictionary   ${lenghts_dict}     ${pod_name}  ${n_lines}
+    END
+    [Return]    ${lenghts_dict}
+
+New Lines In Logs Of Dashboard Pods Should Contain
+    [Arguments]     ${exp_msg}      ${prev_logs_lenghts}
+    &{new_logs_lenghts}=   Create Dictionary
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
+        Log    ${pod_name}
+        ${pod_log_lines_new}    ${n_lines_new}=   Wait Until New Log Lines Are Generated In Dashboard Pods
+        ...     prev_length=${prev_logs_lenghts}[${pod_name}]  pod_name=${pod_name}
+        Set To Dictionary   ${new_logs_lenghts}     ${pod_name}    ${n_lines_new}
+        Log     ${pod_log_lines_new}
+        FOR    ${line_idx}    ${line}    IN ENUMERATE    @{pod_log_lines_new}
+            Run Keyword And Continue On Failure     Should Contain   container=${line}
+            ...     item=${exp_msg}
+        END
+    END
+    [Return]    ${new_logs_lenghts}
+
+Wait Until New Log Lines Are Generated In Dashboard Pods
+    [Arguments]     ${prev_length}  ${pod_name}  ${retries}=10    ${retries_interval}=5s
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}
+        Log     ${n_lines} vs ${prev_length}
+        ${equal_flag}=     Run Keyword And Return Status    Should Be True     "${n_lines}" > "${prev_length}"
+        Exit For Loop If    $equal_flag == True
+        Sleep    ${retries_interval}
+    END
+    IF    $equal_flag == False
+        Fail    Something got wrong. Check the logs
+    END
+    [Return]    ${pod_logs_lines}[${prev_length-1}:]     ${n_lines}
 
 Set Empty Group
     Apply Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
-    Sleep   15s
-
 
 Set Default Groups And Check Logs Do Not Change
-    [Arguments]     ${pod_name}
+    [Arguments]     ${lenghts_dict}
     Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
-    Sleep   10s
-    ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
-    ...                        fields=['metadata.name']
-    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{dash_pods}
-        ${pod_logs}=    Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
-        ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
-        ${n_lines_new2}=     Get Length    ${pod_logs_lines}
-        Should Be Equal     ${n_lines_new2}  ${n_lines_new}
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
+        ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_lenght=${lenghts_dict}[${pod_name}]  pod_name=${pod_name}
+        Should Be Equal     ${new_lines_flag}   ${FALSE}
     END
+    Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
 
-
-
+Logs Of Dashboard Pods Should Not Contain New Lines
+    [Arguments]     ${lenghts_dict}
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
+        ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_lenght=${lenghts_dict}[${pod_name}]  pod_name=${pod_name}
+        Should Be Equal     ${new_lines_flag}   ${FALSE}
+    END
 
 Favorite Items Should Be Listed First
     [Documentation]    Compares the ids and checks that favorite Items

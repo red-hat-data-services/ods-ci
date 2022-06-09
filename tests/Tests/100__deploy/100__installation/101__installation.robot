@@ -1,14 +1,15 @@
- *** Settings ***
+*** Settings ***
 Documentation    Tests to verify that ODH in Openshift can be
 ...              installed from Dashboard
 Metadata         Version    0.0.1
+Resource         ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource         ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource         ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource         ../../../Resources/Common.robot
 Resource         ../../../Resources/RHOSi.resource
 Library          ../../../../utils/scripts/ocm/ocm.py
 Library          ../../../../libs/Helpers.py
-Library          SeleniumLibrary
+Library         SeleniumLibrary
 Suite Setup      OCM Suite Setup
 Suite Teardown   OCM Suite Teardown
 Test Setup       OCM Test Setup
@@ -30,9 +31,9 @@ Verify User Can Access RHODS Documentation From OCM Console
   ...     Tier-2
   Decide OCM URL And Open Link
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
-  ${cluster_id} =     Get Cluster ID
-  ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
-  Click Link    ${cluster_name}
+  #${cluster_id} =     Get Cluster ID
+  #${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
+  Click Link    qeaisrhods-ssr
   Wait Until Page Contains Element    //div[@id="cl-details-top"]     20
   Click Button      //button[@data-ouia-component-id="Add-ons"]
   Click Element     //article[@data-ouia-component-id="card-addon-managed-odh"]

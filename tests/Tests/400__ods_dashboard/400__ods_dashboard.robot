@@ -10,6 +10,7 @@ Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource        ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Suite Setup     Dashboard Suite Setup
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -45,6 +46,7 @@ ${openvino_appname}           ovms
 ${openvino_container_name}    OpenVINO
 ${openvino_operator_name}     OpenVINO Toolkit Operator
 ${CUSTOM_EMPTY_GROUP}                   empty-group
+${CUSTOM_INEXISTENT_GROUP}              inexistent-group
 
 
 *** Test Cases ***
@@ -254,13 +256,12 @@ Verify Error Message When A RHODS Group Is Empty
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an empty group
     ...                 is set as admin in "rhods-group-config" ConfigMap
-    [Setup]     Set Standard RHODS Groups Variables
-    Set Library Search Order    SeleniumLibrary
+    [Setup]     Set Variables For Group Testing
     Create Group    group_name=${CUSTOM_EMPTY_GROUP}
     ${dash_pods_name}=   Get Dashboard Pods Names
     Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
     ${lenghts_dict_before}=     Get Logs Lengths Before Setting An Empty Group
-    Set Empty Group
+    Set RHODS Admin Group Empty Group
     ${version-check}=    Is RHODS Version Greater Or Equal Than  1.13.0
     IF  ${version-check}==True
         Logs Of Dashboard Pods Should Not Contain New Lines     ${lenghts_dict_before}
@@ -271,8 +272,34 @@ Verify Error Message When A RHODS Group Is Empty
     END
     [Teardown]      Set Default Groups And Check Logs Do Not Change   ${lenghts_dict_after}
 
+Verify Error Message When A RHODS Group Does Not Exist
+    [Tags]  ODS-1494
+    ...     Sanity
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when an inexistent group
+    ...                 is set as admin in "rhods-group-config" ConfigMap
+    [Setup]     Set Variables For Group Testing
+    ${dash_pods_name}=   Get Dashboard Pods Names
+    Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
+    ${lenghts_dict_before}=     Get Logs Lengths Before Setting An Empty Group
+    Set RHODS Admin Group To Inexistent Group
+    ${lenghts_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
+    ...     exp_msg=${EXP_ERROR_INEXISTENT_GRP}
+    ...     prev_logs_lenghts=${lenghts_dict_before}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change   ${lenghts_dict_after}
+
 
 *** Keywords ***
+Set Variables For Group Testing
+    Set Standard RHODS Groups Variables
+    ${version-check}=    Is RHODS Version Greater Or Equal Than  1.13.0
+    IF  ${version-check}==True
+        ${exp_msg}=     Set Variable    Error retrieving Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
+    ELSE
+        ${exp_msg}=     Set Variable    Failed to get groups: HttpError: HTTP request failed
+    END
+    Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      ${exp_msg}
+
 Get Logs Lengths Before Setting An Empty Group
     [Documentation]     Computes the number of lines present in the logs of both the dashboard pods
     ...                 and returns them as dictionary
@@ -320,10 +347,16 @@ Wait Until New Log Lines Are Generated In Dashboard Pods
     END
     [Return]    ${pod_logs_lines}[${prev_length-1}:]     ${n_lines}
 
-Set Empty Group
+Set RHODS Admin Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
     Apply Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+
+Set RHODS Admin Group To Inexistent Group
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given inexistent group
+    Apply Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
 Set Default Groups And Check Logs Do Not Change
@@ -446,10 +479,12 @@ Check OpenShift Login Visible
     END
 
 Dashboard Test Setup
-    Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+
+Dashboard Suite Setup
+    Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
 
 Dashboard Test Teardown
     Close All Browsers

@@ -118,7 +118,7 @@ Verify NPM Version
     ${installed_version} =  Run  oc exec -n ${namespace} ${pod} -c ${container} -- npm list --prefix ${prefix} --depth=${depth} | awk -F@ '/${library}/ { print $2}'
     Should Be Equal  ${installed_version}  ${expected_version}
 
-Get The Labels Of Build
+Get Build Labels
     [Documentation]    Returns the labels of the build
     [Arguments]    ${namespace}    ${build_search_term}
     Select Project By Name    ${namespace}

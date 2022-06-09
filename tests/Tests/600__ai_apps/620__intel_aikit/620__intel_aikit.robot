@@ -37,7 +37,7 @@ Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    Create Tabname Instance For Installed Operator        ${intel_aikit_operator_name}      AIKitContainer    redhat-ods-applications
    Go To RHODS Dashboard
    Verify Service Is Enabled          ${intel_aikit_container_name}
-   Check Doc And Quick Start Link In Enabled Page Tile    aikit
+   Check Doc And Quick Start Link In Enabled Page Tile    id=aikit    name=ai-analytics-toolkit
    Verify JupyterHub Can Spawn AIKIT Notebook
    Verify Git Plugin
    [Teardown]   Remove AIKIT Operator

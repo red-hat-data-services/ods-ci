@@ -35,7 +35,7 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    Create Tabname Instance For Installed Operator        ${openvino_operator_name}       Notebook    redhat-ods-applications
    Wait Until Keyword Succeeds    1200      1   Check Image Build Status    Complete        openvino-notebook
    Go To RHODS Dashboard
-   Check Doc And Quick Start Link In Enabled Page Tile    openvino
+   Check Doc And Quick Start Link In Enabled Page Tile    id=openvino    name=openvinotoolkit
    Verify Service Is Enabled          ${openvino_container_name}
    Verify JupyterHub Can Spawn Openvino Notebook
    Verify Git Plugin

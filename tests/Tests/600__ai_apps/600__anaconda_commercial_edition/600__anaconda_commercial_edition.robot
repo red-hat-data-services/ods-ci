@@ -65,7 +65,7 @@ Verify User Is Able to Activate Anaconda Professional
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard JupyterHub Is Visible
   Capture Page Screenshot  enabletab_anaconda_present.png
-  Check Doc And Quick Start Link In Enabled Page Tile    anaconda-ce
+  Check Doc And Quick Start Link In Enabled Page Tile    id=anaconda-ce    name=anaconda
   Verify Anaconda Card Present Based On Version
   Go To  ${OCP_CONSOLE_URL}
   Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}

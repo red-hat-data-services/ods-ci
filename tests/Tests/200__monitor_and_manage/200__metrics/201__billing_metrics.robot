@@ -6,6 +6,7 @@ Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.ro
 Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/ODH/Grafana/Grafana.resource
+Library             DateTime
 Library             JupyterLibrary
 Library             SeleniumLibrary
 

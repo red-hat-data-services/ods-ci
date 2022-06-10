@@ -31,12 +31,10 @@ Verify User Can Access RHODS Documentation From OCM Console
   ...     Tier-2
   Decide OCM URL And Open Link
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
-  ${cluster_id} =     Get Cluster ID
-  ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
-  Wait Until Page Contains Element  ${cluster_name}     10
-  Click Link    ${cluster_name}
+  Open Cluster By Name
   Wait Until Page Contains Element    //div[@id="cl-details-top"]     20
   Click Button      //button[@data-ouia-component-id="Add-ons"]
+  Wait Until Page Contains Element      //article[@data-ouia-component-id="card-addon-managed-odh"]     10
   Click Element     //article[@data-ouia-component-id="card-addon-managed-odh"]
   Page Should Contain Element       //div[@class="pf-l-flex pf-m-space-items-lg pf-m-column"]//a
   Verify Documentation Is Accessible
@@ -70,3 +68,12 @@ Verify Documentation Is Accessible
   ${status}=    Check HTTP Status Code    ${link}
   Run Keyword IF  ${status}!=200      FAIL
   ...     Documentation Is Not Accessible
+
+Open Cluster By Name
+  [Documentation]     Opens the cluster by name from the list of clusters.
+  ${cluster_id} =     Get Cluster ID
+  ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
+  Wait Until Page Contains Element  //input[@class="pf-c-form-control cluster-list-filter"]
+  Input Text    //input[@class="pf-c-form-control cluster-list-filter"]     ${cluster_name}
+  Wait Until Page Contains Element  //table[@class="pf-c-table pf-m-grid-md"]//a    10
+  Click Link    //table[@class="pf-c-table pf-m-grid-md"]//a

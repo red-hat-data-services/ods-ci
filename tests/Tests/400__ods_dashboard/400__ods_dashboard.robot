@@ -199,9 +199,8 @@ Verify Favorite Resource Cards
 
 Verify Notifications Are Shown When Notebook Builds Have Not Started
     [Documentation]     Verifies that Notifications are shown in RHODS Dashboard when Notebook builds haven't started
-    [Tags]    Sanity
+    [Tags]    Tier3
     ...       ODS-1347
-    ...       Tier1
     ...       Execution-Time-Over-30m
     Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38

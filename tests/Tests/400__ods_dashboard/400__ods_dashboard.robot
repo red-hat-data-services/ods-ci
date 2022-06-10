@@ -284,7 +284,6 @@ Check Application Switcher Links To Openshift Cluster Manager
     ${status}    Run Keyword And Return Status    Is Environment Staging
     IF    "${status}" == "True"
         Check HTTP Status Code    ${ocm_staging_link}${cluster_id}
-        Should Be Equal    ${list_of_links}[1]    ${ocm_staging_link}${cluster_id}
         Go To    ${ocm_staging_link}${cluster_id}
         ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
         Wait Until Page Contains    ${cluster_name}

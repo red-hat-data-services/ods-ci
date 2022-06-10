@@ -327,4 +327,14 @@ Fetch Cluster Infrastructure Info
     &{cluster_infrastructure_info}=    Set Variable    ${resources_info_list}[0]
     [Return]    &{cluster_infrastructure_info}
 
+OpenShift Resource Component Field Should Not Be Empty
+    [Documentation]    Checks if the specified OpenShift resource component field is not empty
+    ...                the specified field
+    ...    Args:
+    ...        resource_component_field: Resource component field
+    ...        field: Field
+    ...    Returns:
+    ...        None
+    [Arguments]    ${resource_component_field}
+    Run Keyword And Continue On Failure    Should Not Be Empty    ${resource_component_field}
 

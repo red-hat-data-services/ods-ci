@@ -2,7 +2,6 @@
 Documentation       Post install test cases that verify OCP JupyterHub resources and objects
 
 Library             OpenShiftLibrary
-Resource            ../../../Resources/Resources.robot
 Resource          ../../../Resources/ODS.robot
 
 *** Test Cases ***
@@ -41,6 +40,24 @@ Verify PostgreSQL Is Not Deployed When AWS RDS Is Enabled
     Run Keyword And Expect Error    ResourceOperationFailed: Get failed\nReason: Not Found
     ...    Fetch JupyterHub DB Pods Info
 
+Verify JupyterHub Receives Credentials And Creates Instance Of AWS RDS
+    [Documentation]    Verifies if JupyterHub receives the credentials for AWS RDS
+    ...                and creates the AWS RDS instance
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-337
+    ...       ODS-338
+    ${cluster_platform_type}=    Fetch Cluster Platform Type
+    Skip if    "${cluster_platform_type}" != "AWS"
+    ...    This test only applies to AWS clusters
+    &{jupyterhub_rds_secret_info}=    Fetch JupyterHub RDS Secret Info
+    ${username}=    Evaluate  base64.b64decode("${jupyterhub_rds_secret_info.data.username}").decode('utf-8')  modules=base64
+    ${password}=    Evaluate  base64.b64decode("${jupyterhub_rds_secret_info.data.password}").decode('utf-8')  modules=base64
+    ${host}=    Evaluate  base64.b64decode("${jupyterhub_rds_secret_info.data.host}").decode('utf-8')  modules=base64
+    OpenShift Resource Component Field Should Not Be Empty    ${host}
+    OpenShift Resource Component Field Should Not Be Empty    ${username}
+    OpenShift Resource Component Field Should Not Be Empty    ${password}
+
 *** Keywords ***
 Fetch JupyterHub DB Pods Info
     [Documentation]  Fetches information about JupyterHub DB Pods
@@ -70,3 +87,14 @@ Fetch JupyterHub DB ReplicationControllers Info
     @{jupyterhub_db_replicationcontrollers_info} =    Oc Get    kind=ReplicationController    api_version=v1    namespace=redhat-ods-applications
     ...    name=jupyterhub-db-1
     [Return]    @{jupyterhub_db_replicationcontrollers_info}
+
+Fetch JupyterHub RDS Secret Info
+    [Documentation]  Fetches information about JupyterHub RDS Secret
+    ...    Args:
+    ...        None
+    ...    Returns:
+    ...        jupyterhub_rds_secret(dict): JupyterHub RDS Secret information
+    @{resources_info_list}=    Oc Get    kind=Secret    api_version=v1    namespace=redhat-ods-applications
+    ...    name=jupyterhub-rds-secret
+     &{jupyterhub_rds_secret_info}=    Set Variable    ${resources_info_list}[0]
+    [Return]    &{jupyterhub_rds_secret_info}

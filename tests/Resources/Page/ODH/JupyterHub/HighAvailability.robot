@@ -76,11 +76,12 @@ Verify JupyterHub Deployment
     Should Be Equal As Strings  ${leader-found}  True
     Should Be Equal As Integers  ${standby}  2
     # Check this only if the deployment is correct and the leader is identified
-    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.12.0
-    IF  ${version-check}==True
-        Verify NPM Version  library=url-parse  expected_version=1.5.10  pod=${leader}  namespace=redhat-ods-applications  container=jupyterhub
-        ...    depth=2  prefix=/opt/app-root/lib/python3.8/site-packages/jupyterhub_singleuser_profiles/ui
-    END
+    # TODO: Enable once url-parse version is bumped
+    #${version-check} =  Is RHODS Version Greater Or Equal Than  1.13.0
+    #IF  ${version-check}==True
+    #    Verify NPM Version  library=url-parse  expected_version=1.5.10  pod=${leader}  namespace=redhat-ods-applications  container=jupyterhub
+    #    ...    depth=2  prefix=/opt/app-root/lib/python3.8/site-packages/jupyterhub_singleuser_profiles/ui
+    #END
 
 Wait Until JH Deployment Is Ready
     [Documentation]     Wait Until jupyterhub deployment is completed

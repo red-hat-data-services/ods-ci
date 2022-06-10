@@ -321,13 +321,12 @@ Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
 Verify CPU And Memory Requests For Image And Base Cuda Pods
     [Documentation]     Verifies CPU and Memory Requests for image and base cuda pods
     [Arguments]   ${namespace}=redhat-ods-applications
-    ${res} =  Oc Get  kind=Pod  namespace=${namespace}
-    ${len} =  Get Length    ${res}
-    FOR    ${ind}    IN RANGE    0  ${len}
-        Run Keyword If    "cuda-s2i" in "${res[${ind}]['metadata']['name']}"
-        ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${res[${ind}]['spec']['containers'][0]['resources']['requests']}
-        Run Keyword If    "minimal-gpu" in "${res[${ind}]['metadata']['name']}" or "pytorch" in "${res[${ind}]['metadata']['name']}" or "tensorflow" in "${res[${ind}]['metadata']['name']}"
-        ...    Verify Requests Contains Expected Values  cpu=4  memory=8Gi  requests=${res[${ind}]['spec']['containers'][0]['resources']['requests']}
+    ${pods} =  Oc Get  kind=Pod  namespace=${namespace}
+    FOR    ${pod}    IN  @{pods}
+        Run Keyword If    "cuda-s2i" in "${pod['metadata']['name']}"
+        ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod['spec']['containers'][0]['resources']['requests']}
+        Run Keyword If    "minimal-gpu" in "${pod['metadata']['name']}" or "pytorch" in "${pod['metadata']['name']}" or "tensorflow" in "${pod['metadata']['name']}"
+        ...    Verify Requests Contains Expected Values  cpu=4  memory=8Gi  requests=${pod['spec']['containers'][0]['resources']['requests']}
     END
 
 Verify Requests Contains Expected Values

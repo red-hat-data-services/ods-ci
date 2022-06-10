@@ -202,6 +202,7 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     [Tags]    Sanity
     ...       ODS-1347
     ...       Tier1
+    ...       Execution-Time-Over-30m
     Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
     Verify Notification Saying Notebook Builds Not Started

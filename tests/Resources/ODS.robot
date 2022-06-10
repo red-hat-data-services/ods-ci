@@ -306,3 +306,35 @@ Fetch Project Pods Info
     @{project_pods_info}=    Oc Get    kind=Pod    api_version=v1    namespace=${project}
     [Return]    @{project_pods_info}
 
+Fetch Cluster Platform Type
+    [Documentation]  Fetches the platform type of the cluster
+    ...    Args:
+    ...        None
+    ...    Returns:
+    ...        cluster_platform_type(str): Platform type of the cluster
+    &{cluster_infrastructure_info}=    Fetch Cluster Infrastructure Info
+    ${cluster_platform_type}=    Set Variable    ${cluster_infrastructure_info.spec.platformSpec.type}
+    [Return]    ${cluster_platform_type}
+
+
+Fetch Cluster Infrastructure Info
+    [Documentation]  Fetches information about the infrastructure of the cluster
+    ...    Args:
+    ...        None
+    ...    Returns:
+    ...        cluster_infrastructure_info(dict): Dictionary containing the information of the infrastructure of the cluster
+    @{resources_info_list}=    Oc Get    kind=Infrastructure    api_version=config.openshift.io/v1    name=cluster
+    &{cluster_infrastructure_info}=    Set Variable    ${resources_info_list}[0]
+    [Return]    &{cluster_infrastructure_info}
+
+OpenShift Resource Component Field Should Not Be Empty
+    [Documentation]    Checks if the specified OpenShift resource component field is not empty
+    ...                the specified field
+    ...    Args:
+    ...        resource_component_field: Resource component field
+    ...        field: Field
+    ...    Returns:
+    ...        None
+    [Arguments]    ${resource_component_field}
+    Run Keyword And Continue On Failure    Should Not Be Empty    ${resource_component_field}
+

@@ -17,7 +17,7 @@ ${intel_aikit_operator_name}    Intel® oneAPI AI Analytics Toolkit Operator
 ${image_path}                   image-registry.openshift-image-registry.svc:5000/redhat-ods-applications
 
 *** Test Cases ***
-Verify intel aikit Is Available In RHODS Dashboard Explore Page
+Verify Intel AIKIT Is Available In RHODS Dashboard Explore Page
   [Tags]  Smoke  Sanity
   ...     ODS-1017
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

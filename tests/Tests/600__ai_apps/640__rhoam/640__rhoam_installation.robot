@@ -15,7 +15,7 @@ Suite Teardown  RHOAM Suite Teardown
 Verify RHOAM Can Be Installed
     [Documentation]    Verifies RHOAM Addon can be successfully installed
     [Tags]  Tier3
-    ...     ODS-273
+    ...     ODS-1310
     ...     Execution-Time-Over-30min
     Pass Execution    Passing tests, as suite setup ensures that RHOAM installs correctly
 

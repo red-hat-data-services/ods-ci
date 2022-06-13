@@ -288,11 +288,20 @@ Check Application Switcher Links To Openshift Cluster Manager
         Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
         Go To    ${ocm_staging_link}
         ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
-        Wait Until Page Contains    ${cluster_name}    timeout=10s
+        Login To OCM
+        Wait Until Page Contains    ${cluster_name}
     ELSE
         Check HTTP Status Code    https://cloud.redhat.com/openshift/details/${cluster_id}
 
     END
+
+Login To OCM
+    Input text    //div[@class="pf-c-form__group"]/input    ${SSO.USERNAME}
+    Click Button   //*[@id="login-show-step2"]
+    Sleep   1s
+    Input text    //*[@id="password"]    ${SSO.PASSWORD}
+    Click Button    //*[@id="rh-password-verification-submit-button"]
+
 
 Get Links From Switcher
     [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link

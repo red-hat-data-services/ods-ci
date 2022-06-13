@@ -31,6 +31,7 @@ Verify User Can Access RHODS Documentation From OCM Console
   ...     Tier-2
   Decide OCM URL And Open Link
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
+  Maybe Skip OCM Tour
   Open Cluster By Name
   Wait Until Page Contains Element    //div[@id="cl-details-top"]     20
   Click Button      //button[@data-ouia-component-id="Add-ons"]
@@ -77,3 +78,7 @@ Open Cluster By Name
   Input Text    //input[@class="pf-c-form-control cluster-list-filter"]     ${cluster_name}
   Wait Until Page Contains Element  //table[@class="pf-c-table pf-m-grid-md"]//a    10
   Click Link    //table[@class="pf-c-table pf-m-grid-md"]//a
+
+Maybe Skip OCM Tour
+  ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id="pendo-guide-container"]
+  Run Keyword If  ${tour_modal}  Click Element  xpath=//button[@class="_pendo-close-guide"]

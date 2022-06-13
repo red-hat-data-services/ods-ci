@@ -277,21 +277,21 @@ Is Environment Staging
     Should Contain    ${list_of_links}[0]   devshift.org
 
 Check Application Switcher Links To Openshift Cluster Manager
-    ${ocm_staging_link} =    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/
     ${cluster_id} =    Get Cluster ID
     ${cluster_id} =    Remove String    ${cluster_id}    "
+    ${ocm_staging_link} =    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
+    ${ocm_prod_link} =    Set Variable    https://cloud.redhat.com/openshift/details/${cluster_id}
     ${list_of_links} =    Get Links From Switcher
     ${status}    Run Keyword And Return Status    Is Environment Staging
     IF    "${status}" == "True"
-        ${ocm_staging_link} =    Set Variable    ${ocm_staging_link}${cluster_id}
-        Log    ${ocm_staging_link}
         Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
         Go To    ${ocm_staging_link}
         ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
         Login To OCM
-        Wait Until Page Contains    ${cluster_name}
+        Wait Until Element Is Visible    //div[@class="pf-l-split__item"]/h1
+        Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
     ELSE
-        Check HTTP Status Code    https://cloud.redhat.com/openshift/details/${cluster_id}
+        Check HTTP Status Code    ${ocm_prod_link}
 
     END
 

@@ -283,12 +283,15 @@ Check Application Switcher Links To Openshift Cluster Manager
     ${list_of_links} =    Get Links From Switcher
     ${status}    Run Keyword And Return Status    Is Environment Staging
     IF    "${status}" == "True"
-        Check HTTP Status Code    ${ocm_staging_link}${cluster_id}
-        Go To    ${ocm_staging_link}${cluster_id}
+        ${ocm_staging_link} =    Set Variable    ${ocm_staging_link}${cluster_id}
+        Log    ${ocm_staging_link}
+        Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
+        Go To    ${ocm_staging_link}
         ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
-        Wait Until Page Contains    ${cluster_name}
+        Wait Until Page Contains    ${cluster_name}    timeout=10s
     ELSE
         Check HTTP Status Code    https://cloud.redhat.com/openshift/details/${cluster_id}
+
     END
 
 Get Links From Switcher

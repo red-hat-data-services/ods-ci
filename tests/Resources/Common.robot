@@ -93,8 +93,8 @@ Wait Until HTTP Status Code Is
 
 Check HTTP Status Code
     [Documentation]     Verifies Status Code of URL Matches Expected Status Code
-    [Arguments]  ${link_to_check}  ${expected}=200
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
+    [Arguments]  ${link_to_check}  ${expected}=200    ${verify_ssl}=${True}
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    verify=${verify_ssl}
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 

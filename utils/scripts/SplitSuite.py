@@ -9,9 +9,6 @@ from itertools import islice
 import math
 
 
-MAX_SUITE_LEVELS = 2
-
-
 def chunked(lst, nchunk):
     iter_lst = iter(lst)
     return iter(lambda: list(islice(iter_lst, nchunk)), [])

@@ -19,7 +19,7 @@ ${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:
 ${METRIC_RHODS_CPU_BEFORE_1.5.0}    cluster:usage:consumption:rhods:cpu:seconds:rate5m
 ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:seconds:rate5m
 ${METRIC_RHODS_ACTIVE_USERS}        cluster:usage:consumption:rhods:active_users
-${telmeter_url}                     https://telemeter-lts-dashboards.datahub.redhat.com/api/datasources/proxy/2/api/v1/
+${telemeter_url}                     https://telemeter-lts-dashboards.datahub.redhat.com/
 
 *** Test Cases ***
 Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
@@ -77,22 +77,16 @@ Test Metric "Active Users" On Telemeter
     ...                the same rhods active users
     [Tags]    ODS-1054
     ...       Tier1
-     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
-    ${value} =    Run OpenShift Metrics Query    query=${METRIC_RHODS_ACTIVE_USERS}
+    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:active_users
     ${cluster_id} =    Get Cluster ID
-    ${time} =    Get Start Time And End Time    interval=15m
-    ${steps} =    Set Variable    15
     ${query} =    Set Variable    cluster:usage:consumption:rhods:active_users{_id=${cluster_id}}
-    ${url}=    Set Variable    ${telmeter_url}query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
-    Open Browser     ${url}    ${BROWSER.NAME}
-    Click Button    //button[@type="submit"]
-    Click Element    //a[@title="Log in with SSO"]
-    @{data} =    Get WebElements    //pre
-    &{data} =    Evaluate    dict(${data[0].text})
-    Close Browser
-    ${data} =    Set Variable    ${data["data"]["result"][0]["values"][-1][1]}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telmeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    2
     Should Be Equal    ${value}    ${data}
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
@@ -102,19 +96,17 @@ Test metric "Notebook Cpu Usage" on Telemeter
     [Tags]    ODS-181
     ${cluster_id} =    Get Cluster ID
     Run Jupyter Notebook For 10 Minutes
-    ${pm_query} =
-    ${value} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
+    ${pm_query} =    Set Variable    sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0",
+    ...    container="",pod=~"jupyterhub-nb.*",namespace="rhods-notebooks"}[1h]))
+    ${usage} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
     ...           pm_token=${RHODS_PROMETHEUS_TOKEN}    interval=12h     steps=172
     Log  value ${value}
-    ${time} =    Get Start Time And End Time    interval=12h
-    ${steps} =    Set Variable    172
-    ${query} =    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id="${cluster_id}"}
-    ${url}=    ${pm_url}/api/v1/query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
-    Open Browser     ${url}    ${BROWSER.NAME}
-    @{data} =    Get WebElements    //pre
-    &{data} =    Evaluate    dict(${data[0].text})
-    ${data} =    ${data}["data"]["result"]["values"][0][1]
-    Should Be Equal    ${value}    ${data}
+    ${query} =   Set Variable    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id="${cluster_id}"}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telmeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    data_source=2
+    Should Be Equal    ${usage}    ${data}
 
 Test metric "rhods_total_users" on Telemeter
     [Documentation]    Verifies the prometheus and telemeter shows
@@ -123,18 +115,16 @@ Test metric "rhods_total_users" on Telemeter
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
-    ${pm_query} =    Set Variable    rhods_total_users
-    ${value} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
-    ...           pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ${time} =    Get Start Time And End Time    interval=12h
-    ${steps} =    Set Variable    172
-    ${query} =    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id="${cluster_id}"}
-    ${url}=    ${pm_url}/api/v1/query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
-    Open Browser     ${url}    ${BROWSER.NAME}
-    @{data} =    Get WebElements    //pre
-    &{data} =    Evaluate    dict(${data[0].text})
-    ${data} =    ${data}["data"]["result"]["values"][0][1]
-    Should Be Equal    ${value}    ${data}
+    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+    ${rhods_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    rhods_total_users
+    ${rhods_total_users} =    Set Variable   ${rhods_total_users.json()["data"]["result"][0]["value"][-1]}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${cluster_id} =    Get Cluster ID
+    ${query} =    Set Variable    rhods_total_users{_id=${cluster_id}}
+    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    data_source=2
+    Should Be Equal    ${rhods_total_users}    ${data}
 
 
 Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitoring Prometheus
@@ -174,7 +164,7 @@ Test Teardown For Matrics Web Test
     SeleniumLibrary.Close All Browsers
 
 Run Jupyter Notebook For 10 Minutes
-    [Documentation]     Opens jupyter notebook and run for 5 min
+    [Documentation]     Opens jupyter notebook and run for 10 min
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
@@ -301,4 +291,3 @@ Skip Test If Current Active Users Count Is Not Zero
     Skip if
     ...    ${current_value} > 0
     ...    The current active users count is not zero.Current Count:${current_value}.Skiping test
-

@@ -70,10 +70,6 @@ Verify GPU Operator Deployment  # robocop: disable
     #Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  DSName=nvidia-driver-daemonset-*
     Verify DaemonSet Status  label=app=nvidia-node-status-exporter  DSName=nvidia-node-status-exporter
     Verify DaemonSet Status  label=app=nvidia-operator-validator  DSName=nvidia-operator-validator
-    # TODO: 
-    # ...   gpu-cluster-policy CP
-
-    #@{obj} =  OpenShiftCLI.Get  kind=NodeFeatureDiscovery
     Verify CR Status  CRD=NodeFeatureDiscovery  CR_name=ocp-gpu-addon
 
 Verify That Prometheus Image Is A CPaaS Built Image

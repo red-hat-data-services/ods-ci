@@ -277,6 +277,7 @@ Is Environment Staging
     Should Contain    ${list_of_links}[0]   devshift.org
 
 Check Application Switcher Links To Openshift Cluster Manager
+    [Documentation]    Checks for HTTP status of OCM link in application switcher
     ${cluster_id} =    Get Cluster ID
     ${cluster_id} =    Remove String    ${cluster_id}    "
     ${ocm_staging_link} =    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}

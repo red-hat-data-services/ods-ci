@@ -289,15 +289,19 @@ Check Application Switcher Links To Openshift Cluster Manager
         Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
         Go To    ${ocm_staging_link}
         Login To OCM
-        Wait Until Element Is Visible    //div[@class="pf-l-split__item"]/h1
-        Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
+        Wait Until OCM Page Is Loaded    ${cluster_name}
     ELSE
         Check HTTP Status Code    ${ocm_prod_link}
         Go To    ${ocm_prod_link}
         Login To OCM
-        Wait Until Element Is Visible    //div[@class="pf-l-split__item"]/h1
-        Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
+        Wait Until OCM Page Is Loaded    ${cluster_name}
     END
+
+Wait Until OCM Page Is Loaded
+    [Documentation]     wait until the OCM page loads for ${cluster_name}
+    [Arguments]    ${cluster_name}
+    Wait Until Element Is Visible    //div[@class="pf-l-split__item"]/h1
+    Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
 
 Login To OCM
     Input text    //div[@class="pf-c-form__group"]/input    ${SSO.USERNAME}

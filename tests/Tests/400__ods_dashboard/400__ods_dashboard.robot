@@ -283,16 +283,19 @@ Check Application Switcher Links To Openshift Cluster Manager
     ${ocm_prod_link} =    Set Variable    https://cloud.redhat.com/openshift/details/${cluster_id}
     ${list_of_links} =    Get Links From Switcher
     ${status}    Run Keyword And Return Status    Is Environment Staging
+    ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
     IF    "${status}" == "True"
         Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
         Go To    ${ocm_staging_link}
-        ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
         Login To OCM
         Wait Until Element Is Visible    //div[@class="pf-l-split__item"]/h1
         Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
     ELSE
         Check HTTP Status Code    ${ocm_prod_link}
-
+        Go To    ${ocm_prod_link}
+        Login To OCM
+        Wait Until Element Is Visible    //div[@class="pf-l-split__item"]/h1
+        Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
     END
 
 Login To OCM

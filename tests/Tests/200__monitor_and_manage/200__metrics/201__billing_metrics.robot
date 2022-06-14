@@ -83,6 +83,7 @@ Test Metric "Active Users" On Telemeter
     ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:active_users
     ${cluster_id} =    Get Cluster ID
     ${query} =    Set Variable    cluster:usage:consumption:rhods:active_users{_id=${cluster_id}}
+    Sleep  15m
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
     ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telmeter_url}
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}

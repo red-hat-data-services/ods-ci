@@ -38,3 +38,13 @@ Verify Namespace Status
     @{NS_obj} =  OpenShiftCLI.Get  kind=Namespace  label_selector=${label}
     &{NS_obj_dictionary} =  Set Variable  ${NS_obj}[0]
     Should Be Equal  ${NS_obj_dictionary.status.phase}  Active
+
+Verify CR Status
+    [Documentation]  Verifies that a CR exists, that it's available
+    ...    and that the name matches
+    [Arguments]  ${CRD}  ${CR_name}
+    @{CR_obj} =  OpenShiftCLI.Get  kind=${CRD}
+    &{CR_obj_dictionary} =  Set Variable  ${CR_obj}[0]
+    Should Match  ${CR_obj_dictionary.metadata.name}  ${CR_name}
+    Should Be Equal  ${CR_obj_dictionary.status.conditions[0].type}  Available
+    Should Be Equal  ${CR_obj_dictionary.status.conditions[0].status}  True

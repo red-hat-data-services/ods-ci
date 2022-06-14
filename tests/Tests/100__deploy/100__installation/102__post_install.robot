@@ -45,15 +45,15 @@ Verify GPU Operator Deployment  # robocop: disable
 
     # Before GPU Node is added to the cluster
     # NS
-    Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-gpu-operator
+    Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-nvidia-gpu-addon
     # Node-Feature-Discovery Operator
-    Verify Operator Status  label=operators.coreos.com/node-feature-discovery-operator.redhat-gpu-operator
-    ...    operator_name=node-feature-discovery-operator.v*
+    Verify Operator Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
+    ...    operator_name=nfd.v*
     # GPU Operator
-    Verify Operator Status  label=operators.coreos.com/gpu-operator-certified-addon.redhat-gpu-operator
-    ...    operator_name=gpu-operator-certified-addon.v*
+    Verify Operator Status  label=operators.coreos.com/gpu-operator-certified.redhat-nvidia-gpu-addon
+    ...    operator_name=gpu-operator-certified.v*
     # nfd-controller-manager
-    Verify Deployment Status  label=operators.coreos.com/node-feature-discovery-operator.redhat-gpu-operator
+    Verify Deployment Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
     ...    DName=nfd-controller-manager
     # nfd-master
     Verify DaemonSet Status  label=app=nfd-master  DSName=nfd-master
@@ -61,15 +61,20 @@ Verify GPU Operator Deployment  # robocop: disable
     Verify DaemonSet Status  label=app=nfd-worker  DSName=nfd-worker
 
     # After GPU Node is added to the cluster
-    # TODO: gpu-feature-discovery DS
-    # ...   nvidia-container-toolkit-daemonset DS
+    Verify DaemonSet Status  label=app=gpu-feature-discovery  DSName=gpu-feature-discovery
+    Verify DaemonSet Status  label=app=nvidia-container-toolkit-daemonset  DSName=nvidia-container-toolkit-daemonset
+    Verify DaemonSet Status  label=app=nvidia-dcgm-exporter  DSName=nvidia-dcgm-exporter
+    Verify DaemonSet Status  label=app=nvidia-dcgm  DSName=nvidia-dcgm
+    Verify DaemonSet Status  label=app=nvidia-device-plugin-daemonset  DSName=nvidia-device-plugin-daemonset
+    #app=nvidia-driver-daemonset-410.84.202205191234-0
+    #Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  DSName=nvidia-driver-daemonset-*
+    Verify DaemonSet Status  label=app=nvidia-node-status-exporter  DSName=nvidia-node-status-exporter
+    Verify DaemonSet Status  label=app=nvidia-operator-validator  DSName=nvidia-operator-validator
+    # TODO: 
     # ...   gpu-cluster-policy CP
-    # ...   nvidia-dcgm-exporter DS
-    # ...   nvidia-dcgm DS
-    # ...   nvidia-device-plugin-daemonset DS
-    # ...   nvidia-driver-daemonset-49.84.202201212103-0 DS
-    # ...   nvidia-node-status-exporter DS
-    # ...   nvidia-operator-validator DS
+
+    #@{obj} =  OpenShiftCLI.Get  kind=NodeFeatureDiscovery
+    Verify CR Status  CRD=NodeFeatureDiscovery  CR_name=ocp-gpu-addon
 
 Verify That Prometheus Image Is A CPaaS Built Image
     [Documentation]    Verifies the images used for prometheus

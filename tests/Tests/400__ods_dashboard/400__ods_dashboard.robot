@@ -280,8 +280,8 @@ Check Application Switcher Links To Openshift Cluster Manager
     ${cluster_id} =    Get Cluster ID
     ${cluster_id} =    Remove String    ${cluster_id}    "
     ${ocm_staging_link} =    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
-    ${ocm_prod_link} =    Set Variable    https://cloud.redhat.com/openshift/details/${cluster_id}
     ${list_of_links} =    Get Links From Switcher
+    ${ocm_prod_link} =    Set Variable    ${list_of_links}[1]
     ${status}    Run Keyword And Return Status    Is Environment Staging
     ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
     IF    "${status}" == "True"

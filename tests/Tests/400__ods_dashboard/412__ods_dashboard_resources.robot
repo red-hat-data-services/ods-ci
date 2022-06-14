@@ -7,6 +7,8 @@ Resource        ../../Resources/Page/LoginPage.robot
 Test Setup      Resources Test Setup
 Test Teardown   Resources Test Teardown
 
+*** Variables ***
+${SUCCESS_STEP}     h3[@class="pf-c-title pf-m-md pfext-quick-start-task-header__title pfext-quick-start-task-header__title-success"]
 
 *** Test Cases ***
 Verify Quick Starts Work As Expected
@@ -15,7 +17,9 @@ Verify Quick Starts Work As Expected
     ...     ODS-1166    ODS-1306
     ...     ODS-1307    ODS-1308
     ...     ODS-1402    ODS-1403
+    ...     ODS-1406
     Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   create-jupyter-notebook-anaconda
+    Verify Quick Starts Work As Expected When Restarted And Left In Between     create-jupyter-notebook-anaconda
     Verify Quick Starts Work As Expected When Restarting The Previous One   create-jupyter-notebook-anaconda
     Verify Quick Starts Work As Expected When All Steps Are Skipped         create-jupyter-notebook
     Verify Quick Starts Work As Expected When At Least One Step Is Skipped      deploy-python-model
@@ -109,3 +113,27 @@ Verify Quick Starts Work As Expected When At Least One Step Is Skipped
     END
     Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      In Progress
     Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
+
+Verify Quick Starts Work As Expected When Restarted And Left In Between
+    [Arguments]     ${element}
+    QuickStart Status Should Be    ${element}  Complete
+    Open QuickStart Element in Resource Section By Name     ${element}
+    Page Should Not Contain         //article[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
+    ${count}=   Get The Count Of QuickStart Steps
+    Click Button    //button[@data-testid="qs-drawer-continue"]
+    Wait Until Page Contains Element    //div[@class="pfext-quick-start-content"]
+    ${temp_count}   Set Variable    2
+    FOR     ${index}    IN RANGE    ${temp_count}
+        Click Button    //button[@data-test="Next button"]
+        Run Keyword And Continue On Failure     Mark Step Check As Yes
+        Go To Next QuickStart Step
+    END
+    Close QuickStart From Top     decision=leave
+    Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
+    Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  In Progress
+    Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
+    Click Link      //article[@id="${element}"]//a
+    Wait Until Page Contains ELement    //div[@class="pf-c-drawer__panel-main"]     5
+    FOR     ${index}    IN RANGE    ${temp_count}
+        Page Should Contain Element     //div[@class="pfext-quick-start-tasks__list"]/li[${index}+1]//${SUCCESS_STEP}
+    END

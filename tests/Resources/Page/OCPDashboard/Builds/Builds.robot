@@ -86,3 +86,20 @@ Wait Until All Builds Are Complete
     FOR    ${build_data}    IN    @{builds_data}
         Wait Until Build Status Is    namespace=${namespace}    build_name=${build_data['metadata']['name']}  expected_status=Complete
     END
+
+Get Build Labels
+    [Documentation]    Returns the labels of the build
+    [Arguments]    ${namespace}    ${build_search_term}
+    Select Project By Name    ${namespace}
+    Navigate To Page    Builds    Builds
+    sleep    1s
+    Click Element    //a[contains(text(),"${build_search_term}")]
+    Wait Until Page Contains    Build details
+    @{link_elements}=  Get WebElements
+    ...    //div[@class='co-m-label-list']
+    @{list} =    Create List
+    FOR  ${link}  IN  @{link_elements}
+          ${txt} =    Get Text    ${link}
+          Append To List    ${list}    ${txt}
+    END
+    [Return]    ${list}[0]

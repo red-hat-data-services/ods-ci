@@ -118,23 +118,6 @@ Verify NPM Version
     ${installed_version} =  Run  oc exec -n ${namespace} ${pod} -c ${container} -- npm list --prefix ${prefix} --depth=${depth} | awk -F@ '/${library}/ { print $2}'
     Should Be Equal  ${installed_version}  ${expected_version}
 
-Get Build Labels
-    [Documentation]    Returns the labels of the build
-    [Arguments]    ${namespace}    ${build_search_term}
-    Select Project By Name    ${namespace}
-    Navigate To Page    Builds    Builds
-    sleep    1s
-    Click Element    //a[contains(text(),"${build_search_term}")]
-    Wait Until Page Contains    Build details
-    @{link_elements}=  Get WebElements
-    ...    //div[@class='co-m-label-list']
-    @{list} =    Create List
-    FOR  ${link}  IN  @{link_elements}
-          ${txt} =    Get Text    ${link}
-          Append To List    ${list}    ${txt}
-    END
-    [Return]    ${list}[0]
-
 Get Cluster Name From Console URL
     [Documentation]    Get the cluster name from the Openshift console URL
     ${name}=    Split String    ${OCP_CONSOLE_URL}        .

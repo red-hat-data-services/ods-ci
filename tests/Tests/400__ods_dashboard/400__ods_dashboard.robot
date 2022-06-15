@@ -283,9 +283,9 @@ Check Application Switcher Links To Openshift Cluster Manager
     ${ocm_staging_link} =    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
     ${list_of_links} =    Get Links From Switcher
     ${ocm_prod_link} =    Set Variable    ${list_of_links}[1]
-    ${status}    Run Keyword And Return Status    Is Environment Staging
+    ${cluster_env} =    Fetch ODS Cluster Environment
     ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
-    IF    "${status}" == "True"
+    IF    "${cluster_env}" == "stage"
         Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
         Go To    ${ocm_staging_link}
         Login To OCM

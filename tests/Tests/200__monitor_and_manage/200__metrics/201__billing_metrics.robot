@@ -85,7 +85,7 @@ Test Metric "Active Users" On Telemeter
     ${query} =    Set Variable    cluster:usage:consumption:rhods:active_users{_id=${cluster_id}}
     Sleep  15m
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
-    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telmeter_url}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    2
     Should Be Equal    ${value}    ${data}
@@ -97,19 +97,21 @@ Test metric "Notebook Cpu Usage" on Telemeter
     [Tags]    ODS-181
     ${cluster_id} =    Get Cluster ID
     Run Jupyter Notebook For 10 Minutes
-    ${pm_query} =    Set Variable    sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0",
-    ...    container="",pod=~"jupyterhub-nb.*",namespace="rhods-notebooks"}[1h]))
+    ${pm_query} =    Set Variable
+    ...  sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0", container="",pod=~"jupyterhub-nb.*",namespace="rhods-notebooks"}[1h]))
     ${usage} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
     ...           pm_token=${RHODS_PROMETHEUS_TOKEN}    interval=12h     steps=172
-    Log  value ${value}
-    ${query} =   Set Variable    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id="${cluster_id}"}
+    Log   ${usage.json()}
+    ${usage} =   Set Variable  ${usage.json()["data"]["result"][0]["values"][-1][1]}
+    Log   str(${usage})
+    ${query} =   Set Variable    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id=${cluster_id}}
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
-    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telmeter_url}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    data_source=2
     Should Be Equal    ${usage}    ${data}
 
-Test metric "rhods_total_users" on Telemeter
+Test metric "Rhods_Total_Users" On Telemeter
     [Documentation]    Verifies the prometheus and telemeter shows
     ...                the same numbers of total rhods users
     [Tags]    ODS-635
@@ -138,6 +140,42 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
     ...    list_of_usernames=${list_of_usernames}
     ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:pod:up
     Should Not Be Empty    ${value}    msg=Matrics does not contains value for pod:up query
+    [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
+Test metric "Rhods_Aggregate_Availability" on Telemeter
+    [Documentation]
+    [Tags]    ODS-638
+    ...       Tier1
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    ...    list_of_usernames=${list_of_usernames}
+    ${rhods_aggregate_availability} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    ...                                 rhods_aggregate_availability
+    ${rhods_aggregate_availability} =    Set Variable   ${rhods_aggregate_availability.json()["data"]["result"][0]["value"][-1]}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${cluster_id} =    Get Cluster ID
+    ${query} =    Set Variable    rhods_aggregate_availability{_id=${cluster_id}}
+    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    data_source=2
+    Should Be Equal    ${rhods_aggregate_availability}    ${data}
+    [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
+Test Metric "Active Notebook Pod Time" On Telemeter
+    [Documentation]
+    [Tags]    ODS-1056
+    ...       Tier1
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    ...    list_of_usernames=${list_of_usernames}
+    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:pod:up
+    ${cluster_id} =    Get Cluster ID
+    ${query} =    Set Variable    cluster:usage:consumption:rhods:pod:up{_id=${cluster_id}}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    2
+    Should Be Equal    ${value}    ${data}
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
 

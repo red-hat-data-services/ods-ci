@@ -4,13 +4,14 @@ Library         OperatingSystem
 Library         Collections
 Library         Process
 Library         String
-
+Library         OpenShiftLibrary
+Suite Setup     Performance Suite Setup
 
 *** Variables ***
 ${NAMESPACE}     openshift-kube-apiserver
 ${LABEL_SELECTOR}     app=openshift-kube-apiserver
 ${MEMORY_THRESHOLD}    102400
-${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
+${PERF_CODE}    go run setup/main.go --users 250 --default 250  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
 
 
 *** Test Cases ***
@@ -20,7 +21,6 @@ Verify RHODS Performance For Sandbox Onboarding Process
     [Tags]     ODS-1404
     ...        Sandbox
     ...        Performance-Test
-    Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git
     Run Keyword And Continue On Failure    Run Performance Test On RHODS Operator
     Verify Sandbox Toolchain Data
 
@@ -65,8 +65,8 @@ Run Performance Test On RHODS Operator
 
 Verify Sandbox Toolchain Data
     [Documentation]    Compare the memory utilization of kube api server pod
-    ${result}  Run   cat ${EXECDIR}/log.txt | grep "invalid\\|failed"
-    IF    "failed" in $result or "invalid" in $result
+    ${result}  Run   cat ${EXECDIR}/log.txt | grep "invalid\\|failed\\|error"
+    IF    "failed" in $result or "invalid" in $result or "error" in $result
            FAIL    RHODS onboarding script is not executed successfully.Check log for more detail.
     ELSE
            ${k_data}  Run   cat ${EXECDIR}/log.txt | grep -i "openshift-kube-apiserver"
@@ -79,3 +79,9 @@ Verify Sandbox Toolchain Data
                   ...   expected in toolchain result=> ${km_data[0]} : ${m_value}
            END
     END
+
+Performance Suite Setup
+    #${key}     Set Variable    ${CURDIR}/olm.yaml
+    #Oc Apply    kind=OLMConfig    src=olm.yaml   #Not working
+    Run    oc apply -f ${CURDIR}/olm.yaml
+    Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git

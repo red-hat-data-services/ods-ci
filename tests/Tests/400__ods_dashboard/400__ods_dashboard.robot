@@ -271,11 +271,6 @@ RHODS Dahsboard Pod Should Contain OauthProxy Container
         List Should Contain Value    ${container_name}    oauth-proxy
     END
 
-Is Environment Staging
-    [Documentation]    Return true if environment is staging otherwise fails
-    ${list_of_links} =    Get Links From Switcher
-    Should Contain    ${list_of_links}[0]   devshift.org
-
 Check Application Switcher Links To Openshift Cluster Manager
     [Documentation]    Checks for HTTP status of OCM link in application switcher
     ${cluster_id} =    Get Cluster ID

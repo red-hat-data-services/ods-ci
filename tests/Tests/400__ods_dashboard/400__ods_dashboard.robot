@@ -32,7 +32,7 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     Securing a deployed model using Red Hat OpenShift API Management
 @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
 ...                                     PerceptiLabs
-
+${DASHBOARD_LABEL_SELECTOR}       app=rhods-dashboard
 
 *** Test Cases ***
 Verify That Login Page Is Shown When Reaching The RHODS Page
@@ -187,6 +187,14 @@ Verify Favorite Resource Cards
     Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    application
     Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    duration
     [Teardown]    Remove Items From favorites    @{favorite_ids}
+
+Verify Dashboard Pod Is Not Getting Restarted	
+    [Documentation]    Verify Dashboard Pod container restart
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-374
+    ${pod_names}    Get POD Names    redhat-ods-applications    ${DASHBOARD_LABEL_SELECTOR}
+    Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-applications
 
 *** Keywords ***
 Favorite Items Should Be Listed First

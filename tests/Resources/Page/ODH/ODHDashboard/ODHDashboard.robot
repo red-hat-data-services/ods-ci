@@ -608,11 +608,7 @@ Check Doc And Quick Start Link In Enabled Page Tile
     [Arguments]    ${id}    ${name}
     Click Button    //article[@id="${id}"]/div/div/div/button    # 3 dots
     Click Element    //a[contains(text(),"View documentation")]
-    @{windowtitles}    Get Window Titles
-    ${windowtoopen} =    Get From List    ${Windowtitles}    -1
-    Switch Window    ${windowtoopen}
-    Close Window
-    Switch Window     Red Hat OpenShift Data Science Dashboard
+    Close Newly Opened Tab     Red Hat OpenShift Data Science Dashboard
     Click Element    //article[@id="${id}"]/div/div/div/button
     ${href} =    Get Element Attribute    //a[contains(text(),"View documentation")]    href
     Should Contain    ${href}    ${name}
@@ -620,3 +616,12 @@ Check Doc And Quick Start Link In Enabled Page Tile
     Click Element    //a[contains(text(),"Open quick start")]
     Page Should Contain QuickStart Sidebar
     Close QuickStart From Top    decision=None
+
+Close Newly Opened Tab
+    [Documentation]    Closes the newly opened tab and switches to ${tab_to_switch}
+    [Arguments]    ${tab_to_switch}=MAIN
+    @{windowtitles}    Get Window Titles
+    ${windowtoopen} =    Get From List    ${Windowtitles}    -1
+    Switch Window    ${windowtoopen}
+    Close Window
+    Switch Window     ${tab_to_switch}

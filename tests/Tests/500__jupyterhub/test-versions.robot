@@ -49,7 +49,7 @@ Verify Libraries in PyTorch Image
 Verify Libraries in Tensorflow Image
     [Documentation]    Verifies libraries in Tensorflow image
     [Tags]    Sanity
-    ...       ODS-204    ODS-205    ODS-206    ODS-207
+    ...       ODS-204    ODS-205    ODS-206    ODS-207  ODS-474
     Verify List Of Libraries In Image    tensorflow    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify All Images And Spawner

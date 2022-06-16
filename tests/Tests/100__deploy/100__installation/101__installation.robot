@@ -7,6 +7,7 @@ Resource         ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource         ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource         ../../../Resources/Common.robot
 Resource         ../../../Resources/RHOSi.resource
+Resource         ../../../Resources/ODS.robot
 Library          ../../../../utils/scripts/ocm/ocm.py
 Library          ../../../../libs/Helpers.py
 Library         SeleniumLibrary
@@ -55,8 +56,8 @@ OCM Test Setup
 
 Decide OCM URL And Open Link
   [Documentation]   Decides OCM URL based on the OpenShift Console URL and open the URL.
-  ${bool}=  Evaluate    "devshift.org" in """${OCP_CONSOLE_URL}"""
-  IF    ${bool} == True
+  ${cluster_type}=  Fetch ODS Cluster Environment
+  IF    "${cluster_type}" == "stage"
         ${OCM_URL}=     Set Variable    ${Stage_URL}
   ELSE
         ${OCM_URL}=     Set Variable    ${Prod_URL}
@@ -70,15 +71,3 @@ Verify Documentation Is Accessible
   Run Keyword IF  ${status}!=200      FAIL
   ...     Documentation Is Not Accessible
 
-Open Cluster By Name
-  [Documentation]     Opens the cluster by name from the list of clusters.
-  ${cluster_id} =     Get Cluster ID
-  ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
-  Wait Until Page Contains Element  //input[@class="pf-c-form-control cluster-list-filter"]
-  Input Text    //input[@class="pf-c-form-control cluster-list-filter"]     ${cluster_name}
-  Wait Until Page Contains Element  //table[@class="pf-c-table pf-m-grid-md"]//a    10
-  Click Link    //table[@class="pf-c-table pf-m-grid-md"]//a
-
-Maybe Skip OCM Tour
-  ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id="pendo-guide-container"]
-  Run Keyword If  ${tour_modal}  Click Element  xpath=//button[@class="_pendo-close-guide"]

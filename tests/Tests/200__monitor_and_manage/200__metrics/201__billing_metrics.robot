@@ -19,6 +19,8 @@ ${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:
 ${METRIC_RHODS_CPU_BEFORE_1.5.0}    cluster:usage:consumption:rhods:cpu:seconds:rate5m
 ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:seconds:rate5m
 ${METRIC_RHODS_ACTIVE_USERS}        cluster:usage:consumption:rhods:active_users
+${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:rate1h
+${METRIC_RHODS_PODUP}
 ${telemeter_url}                     https://telemeter-lts-dashboards.datahub.redhat.com/
 
 *** Test Cases ***
@@ -76,7 +78,7 @@ Test Metric "Active Users" On Telemeter
     [Documentation]    Verifies the openshift metrics and telemeter shows
     ...                the same rhods active users
     [Tags]    ODS-1054
-    ...       Tier1
+    ...       Tier2
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
@@ -87,7 +89,8 @@ Test Metric "Active Users" On Telemeter
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
     ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    2
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}   ${data_source}   ${query}
     Should Be Equal    ${value}    ${data}
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
@@ -95,26 +98,27 @@ Test Metric "Active Users" On Telemeter
 Test metric "Notebook Cpu Usage" on Telemeter
     [Documentation]    Verifies prometheus and grafana shows the same CPU usage.
     [Tags]    ODS-181
+    ...       Tier1
     ${cluster_id} =    Get Cluster ID
     Run Jupyter Notebook For 10 Minutes
     ${pm_query} =    Set Variable
     ...  sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0", container="",pod=~"jupyterhub-nb.*",namespace="rhods-notebooks"}[1h]))
     ${usage} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
     ...           pm_token=${RHODS_PROMETHEUS_TOKEN}    interval=12h     steps=172
-    Log   ${usage.json()}
     ${usage} =   Set Variable  ${usage.json()["data"]["result"][0]["values"][-1][1]}
-    Log   str(${usage})
     ${query} =   Set Variable    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id=${cluster_id}}
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
     ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    data_source=2
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}     ${data_source}     ${query}
     Should Be Equal    ${usage}    ${data}
 
 Test metric "Rhods_Total_Users" On Telemeter
     [Documentation]    Verifies the prometheus and telemeter shows
     ...                the same numbers of total rhods users
     [Tags]    ODS-635
+    ...       Tier1
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
@@ -126,7 +130,8 @@ Test metric "Rhods_Total_Users" On Telemeter
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     ${cluster_id} =    Get Cluster ID
     ${query} =    Set Variable    rhods_total_users{_id=${cluster_id}}
-    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    data_source=2
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}    ${data_source}    ${query}
     Should Be Equal    ${rhods_total_users}    ${data}
 
 
@@ -143,7 +148,8 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
 Test metric "Rhods_Aggregate_Availability" on Telemeter
-    [Documentation]
+    [Documentation]    Verifies the prometheus and telemeter shows
+    ...                the same rhods aggregate availability
     [Tags]    ODS-638
     ...       Tier1
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
@@ -157,12 +163,14 @@ Test metric "Rhods_Aggregate_Availability" on Telemeter
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     ${cluster_id} =    Get Cluster ID
     ${query} =    Set Variable    rhods_aggregate_availability{_id=${cluster_id}}
-    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    data_source=2
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}    ${data_source}    ${query}
     Should Be Equal    ${rhods_aggregate_availability}    ${data}
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
 Test Metric "Active Notebook Pod Time" On Telemeter
-    [Documentation]
+    [Documentation]    Verifies the openshift metrics and telemeter shows
+    ...                the same active notebook pod time
     [Tags]    ODS-1056
     ...       Tier1
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
@@ -174,15 +182,27 @@ Test Metric "Active Notebook Pod Time" On Telemeter
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
     ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    ${data} =    Run Range Query In Browser    ${query}    ${telemeter_url}    2
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}    ${data_source}    ${query}
     Should Be Equal    ${value}    ${data}
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
 
 *** Keywords ***
+Get Telemeter DataSource For ODS Environment
+    [Documentation]    Returns the (int)datasource for telemeter
+    ${env} =  Fetch ODS Cluster Environment
+    ${data_source} =  Set Variable
+    IF    "${env}" == "stage"
+        ${data_source} =    Set Variable    ${2}
+    ELSE
+        ${data_source} =    Set Variable    ${1}
+    END
+    [Return]    ${data_source}
+
 Begin Billing Metrics Web Test
-  Set Library Search Order  SeleniumLibrary
-  RHOSi Setup
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
 
 End Web Billing Metrics Test
     CleanUp JupyterHub

@@ -19,8 +19,7 @@ ${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:
 ${METRIC_RHODS_CPU_BEFORE_1.5.0}    cluster:usage:consumption:rhods:cpu:seconds:rate5m
 ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:seconds:rate5m
 ${METRIC_RHODS_ACTIVE_USERS}        cluster:usage:consumption:rhods:active_users
-${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:rate1h
-${METRIC_RHODS_PODUP}
+${METRIC_RHODS_PODUP}               cluster:usage:consumption:rhods:pod:up
 ${telemeter_url}                     https://telemeter-lts-dashboards.datahub.redhat.com/
 
 *** Test Cases ***
@@ -82,9 +81,9 @@ Test Metric "Active Users" On Telemeter
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
-    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:active_users
+    ${value} =    Run OpenShift Metrics Query    query=${METRIC_RHODS_ACTIVE_USERS}
     ${cluster_id} =    Get Cluster ID
-    ${query} =    Set Variable    cluster:usage:consumption:rhods:active_users{_id=${cluster_id}}
+    ${query} =    Set Variable    ${METRIC_RHODS_ACTIVE_USERS}{_id=${cluster_id}}
     Sleep  15m
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
     ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
@@ -106,7 +105,7 @@ Test metric "Notebook Cpu Usage" on Telemeter
     ${usage} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
     ...           pm_token=${RHODS_PROMETHEUS_TOKEN}    interval=12h     steps=172
     ${usage} =   Set Variable  ${usage.json()["data"]["result"][0]["values"][-1][1]}
-    ${query} =   Set Variable    cluster:usage:consumption:rhods:cpu:seconds:rate1h{_id=${cluster_id}}
+    ${query} =   Set Variable    ${METRIC_RHODS_CPU}{_id=${cluster_id}}
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
     ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
@@ -176,9 +175,9 @@ Test Metric "Active Notebook Pod Time" On Telemeter
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
-    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:pod:up
+    ${value} =    Run OpenShift Metrics Query    query=${METRIC_RHODS_PODUP}
     ${cluster_id} =    Get Cluster ID
-    ${query} =    Set Variable    cluster:usage:consumption:rhods:pod:up{_id=${cluster_id}}
+    ${query} =    Set Variable    ${METRIC_RHODS_PODUP}{_id=${cluster_id}}
     Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
     ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
     ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}

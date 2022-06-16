@@ -30,8 +30,7 @@ Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Pag
   Run Keyword If   ${status} == ${False}   Run Keywords
   ...              Verify Anaconda Service Is Enabled Based On Version
   ...              AND
-  ...              FAIL   msg=Anaconda Professional does not have a "Enable"
-  ...    button in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
+  ...              FAIL   msg=Anaconda Professional does not have a "Enable" button in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
 
 Verify Anaconda Professional Fails Activation When Key Is Invalid
   [Documentation]  Checks that if user inserts an invalid key,

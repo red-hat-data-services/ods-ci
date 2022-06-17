@@ -47,7 +47,7 @@ Authorize Grafana Service Account
 Select Explore
     [Documentation]  Selects Explore From Grafana Home Page
     Click Element    xpath=/html/body/grafana-app/sidemenu/div[2]/div[3]/a/span
-    Wait Until Page Contains Element    xpath=//div[contains(@class,'grafana-select-value')]
+    Wait Until Page Contains Element    xpath=//div[contains(@class,'grafana-select-value')]    timeout=60
 
 Select Data Source
     [Documentation]  Selects The Given Data Source

@@ -23,6 +23,7 @@ Can Uninstall RHODS Operator
   
 Can Upgrade RHODS Operator
   [Tags]  upgrade
+  ...     ODS-543
   Given Selected Cluster Type ${cluster_type} 
   When Upgrading RHODS Operator ${operator_version}
   Then RHODS Operator Should Be Upgraded 

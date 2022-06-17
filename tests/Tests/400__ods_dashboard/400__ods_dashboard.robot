@@ -90,6 +90,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     [Tags]    Sanity
     ...       ODS-1097   ODS-357
+    ...       FlakyTest
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible

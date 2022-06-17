@@ -30,8 +30,7 @@ Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Pag
   Run Keyword If   ${status} == ${False}   Run Keywords
   ...              Verify Anaconda Service Is Enabled Based On Version
   ...              AND
-  ...              FAIL   msg=Anaconda Professional does not have a "Enable"
-  ...    button in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
+  ...              FAIL   msg=Anaconda Professional does not have a "Enable" button in ODH Dashboard since it has been alreday Enabled and Present in Enabled Page  # robocop: disable
 
 Verify Anaconda Professional Fails Activation When Key Is Invalid
   [Documentation]  Checks that if user inserts an invalid key,
@@ -51,11 +50,12 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
 
 Verify User Is Able to Activate Anaconda Professional
   [Tags]  Tier2
-  ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082  ODS-1304
+  ...     ODS-272  ODS-344  ODS-501  ODS-588  ODS-1082  ODS-1304  ODS-462   ODS-283
   ...     ProductBug
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner
+  Verify Anaconda In Kfdef
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
@@ -99,3 +99,12 @@ Anaconda Suite Setup
   [Documentation]  Setup for ACE test suite
   Set Library Search Order  SeleniumLibrary
   RHOSi Setup
+
+Verify Anaconda In Kfdef
+    [Documentation]  Verifies if Anaconda is present in Kfdef
+    ${res}=  Oc Get  kind=KfDef  namespace=redhat-ods-applications
+    @{applications_names} =  Create List
+    FOR    ${application}    IN    @{res[0]['spec']['applications']}
+        Append To List    ${applications_names}  ${application['name']}
+    END
+    Should Contain  ${applications_names}  anaconda-ce

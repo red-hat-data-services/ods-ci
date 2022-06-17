@@ -41,6 +41,9 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     s2i-tensorflow-gpu-cuda-11.4.2-notebook
 @{BUILDS_TO_BE_CHECKED}                 cuda-s2i-base    cuda-s2i-core    cuda-s2i-py    cuda-s2i-thoth
 ...                                     minimal    pytorch  tensorflow
+${openvino_appname}           ovms
+${openvino_container_name}    OpenVINO
+${openvino_operator_name}     OpenVINO Toolkit Operator
 
 
 *** Test Cases ***
@@ -213,7 +216,17 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     RHODS Notification Drawer Should Not Contain    message=CUDA
     [Teardown]   Wait Until Remaining Builds Are Complete And Close Browser
     
-    
+Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninstalled
+   [Documentation]     Verify "Enabled" keeps being available after one of the ISV operators if uninstalled
+   [Tags]      Sanity
+   ...         ODS-1491
+   ...         Tier1
+   Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
+   Close All Browsers
+   Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
+   Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
+   [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
+
 *** Keywords ***
 Favorite Items Should Be Listed First
     [Documentation]    Compares the ids and checks that favorite Items
@@ -294,18 +307,10 @@ Verify JupyterHub Card CSS Style
     [Documentation]    Compare the some CSS properties of the Explore page
     ...    with the expected ones. The expected values change based
     ...    on the RHODS version
-    ${version-check}=    Is RHODS Version Greater Or Equal Than    1.7.0
-    IF    ${version-check}==True
-        CSS Property Value Should Be    locator=//pre
-        ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
-        CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-        ...    property=margin-bottom    exp_value=8px
-    ELSE
-        CSS Property Value Should Be    locator=//pre
-        ...    property=background-color    exp_value=rgba(245, 245, 245, 1)
-        CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-        ...    property=margin-bottom    exp_value=10px
-    END
+    CSS Property Value Should Be    locator=//pre
+    ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
+    CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
+    ...    property=margin-bottom    exp_value=8px
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-size    exp_value=24px
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
@@ -440,3 +445,36 @@ Wait Until Remaining Builds Are Complete And Close Browser
     Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
     Rebuild Missing Or Failed Builds  builds=${BUILDS_TO_BE_CHECKED}  build_configs=${BUILD_CONFIGS}  namespace=redhat-ods-applications
     Dashboard Test Teardown
+
+Verify Operator Is Added On ODS Dashboard
+    [Documentation]     It checks operator is present on ODS Dashboard in Enabled section
+    [Arguments]         ${operator_name}
+    Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    Wait Until Keyword Succeeds    10x    1m    Verify Service Is Enabled  app_name=${operator_name}
+    Close Browser
+
+Uninstall Operator And Check Enabled Page Is Rendering
+    [Documentation]    Uninstall Operator And Check Enabled Page(ODS) Is Rendering, Not shwoing "Error loading components"
+    [Arguments]     ${operator_name}    ${operator_appname}
+    Open Installed Operators Page
+    Uninstall Operator    ${operator_name}
+    Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    Page Should Not Contain    Error loading components
+
+Check And Uninstall Operator In Openshift
+    [Documentation]     it checks operator is uninstalled if not then uninstall it
+    [Arguments]       ${operator_name}    ${operator_appname}   ${expected_number_operator}=2
+    ${status}       Check If Operator Is Already Installed In Opneshift    ${operator_name}
+    IF  ${status}
+        Open OperatorHub
+        ${actual_no_of_operator}    Get The Number of Operator Available    ${operator_appname}
+        IF  ${actual_no_of_operator} == ${expected_number_operator}
+            Uninstall Operator    ${operator_name}
+        ELSE
+            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Opearatorhub
+
+        END
+    END
+    Close All Browsers

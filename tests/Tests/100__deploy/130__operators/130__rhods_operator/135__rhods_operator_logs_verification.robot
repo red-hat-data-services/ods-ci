@@ -22,7 +22,9 @@ ${regex_pattern}       level=([Ee]rror).*|([Ff]ailed) to list .*
 
 *** Test Cases ***
 Verify RHODS Operator log
-   [Tags]  ODS-1007   Sanity
+   [Tags]  Sanity
+   ...     ProductBug
+   ...     ODS-1007
    #Get the POD name
    ${data}       Run keyword   OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=name=rhods-operator
    #Capture the logs based on containers

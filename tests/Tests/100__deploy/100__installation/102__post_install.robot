@@ -173,8 +173,7 @@ Verify Users Can Update Notification Email After Installing RHODS With The AddOn
     ...       ProductBug
     ...       Deployment-AddOnFlow
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
-    ${cluster_id} =    Get Cluster ID
-    ${cluster_name} =    Get Cluster Name By Cluster ID    ${cluster_id}
+    ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
     Update Notification Email Address    ${cluster_name}    ${email_to_change}
     Wait Until Notification Email From Addon-Managed-Odh-Parameters Contains  email=${email_to_change}

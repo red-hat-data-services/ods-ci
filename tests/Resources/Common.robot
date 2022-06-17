@@ -117,3 +117,8 @@ Verify NPM Version
     [Arguments]  ${library}  ${expected_version}  ${pod}  ${namespace}  ${container}=""  ${prefix}=""  ${depth}=0
     ${installed_version} =  Run  oc exec -n ${namespace} ${pod} -c ${container} -- npm list --prefix ${prefix} --depth=${depth} | awk -F@ '/${library}/ { print $2}'
     Should Be Equal  ${installed_version}  ${expected_version}
+
+Get Cluster Name From Console URL
+    [Documentation]    Get the cluster name from the Openshift console URL
+    ${name}=    Split String    ${OCP_CONSOLE_URL}        .
+    [Return]    ${name}[2]

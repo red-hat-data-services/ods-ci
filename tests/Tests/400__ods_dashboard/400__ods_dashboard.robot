@@ -251,6 +251,7 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
 
 
 Verify Error Message When A RHODS Group Is Empty
+Verify Error Message In Logs When A RHODS Group Is Empty
     [Tags]  ODS-1408
     ...     Sanity
     [Documentation]     Verifies the messages printed out in the logs of
@@ -262,13 +263,13 @@ Verify Error Message When A RHODS Group Is Empty
     Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
     ${lenghts_dict_before}=     Get Lenghts Of Dashboard Pods Logs
     Set RHODS Admins Group Empty Group
-    ${lenghts_dict_after}=    Check Dashboard Logs Based On Version   lenghts_dict=${lenghts_dict_before}
+    Logs Of Dashboard Pods Should Not Contain New Lines     lenghts_dict=${lenghts_dict_before}
     Set Default Groups And Check Logs Do Not Change   delete_group=${TRUE}
     Set RHODS Users Group Empty Group
-    Logs Of Dashboard Pods Should Not Contain New Lines    lenghts_dict=${lenghts_dict_after}
+    Logs Of Dashboard Pods Should Not Contain New Lines    lenghts_dict=${lenghts_dict_before}
     [Teardown]      Set Default Groups And Check Logs Do Not Change     delete_group=${TRUE}
 
-Verify Error Message When A RHODS Group Does Not Exist
+Verify Error Message In Logs When A RHODS Group Does Not Exist
     [Tags]  ODS-1494
     ...     Sanity
     [Documentation]     Verifies the messages printed out in the logs of
@@ -287,17 +288,25 @@ Verify Error Message When A RHODS Group Does Not Exist
     Logs Of Dashboard Pods Should Not Contain New Lines    lenghts_dict=${lenghts_dict_after}
     [Teardown]      Set Default Groups And Check Logs Do Not Change
 
+Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admins
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when 'system:authenticated'
+    ...                 is set as admin in "rhods-group-config" ConfigMap
+    [Setup]     Set Variables For Group Testing
+    ${dash_pods_name}=   Get Dashboard Pods Names
+    Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
+    ${lenghts_dict_before}=     Get Lenghts Of Dashboard Pods Logs
+    Set RHODS Admins Group To system:authenticated
+    ${lenghts_dict_after}=    New Lines In Logs Of Dashboard Pods Should Contain
+    ...     exp_msg=${EXP_ERROR_SYS_AUTH}
+    ...     prev_logs_lenghts=${lenghts_dict_before}
+
 
 *** Keywords ***
 Set Variables For Group Testing
     Set Standard RHODS Groups Variables
-    ${version-check}=    Is RHODS Version Greater Or Equal Than  1.13.0
-    IF  ${version-check}==True
-        ${exp_msg}=     Set Variable    Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
-    ELSE
-        ${exp_msg}=     Set Variable    Failed to get groups: HttpError: HTTP request failed
-    END
-    Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      ${exp_msg}
+    Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
+    Set Suite Variable      ${EXP_ERROR_SYS_AUTH}      Error: It is not allowed to set \"system:authenticated\" or an empty string as admin group.
 
 Get Lenghts Of Dashboard Pods Logs
     [Documentation]     Computes the number of lines present in the logs of both the dashboard pods
@@ -342,24 +351,16 @@ Wait Until New Log Lines Are Generated In Dashboard Pods
     END
     [Return]    ${pod_logs_lines}[${prev_length-1}:]     ${n_lines}
 
-Check Dashboard Logs Based On Version
-    [Arguments]     ${lenghts_dict}
-    ${version-check}=    Is RHODS Version Greater Or Equal Than  1.13.0
-    IF  ${version-check}==True
-        Logs Of Dashboard Pods Should Not Contain New Lines     ${lenghts_dict}
-        ${lenght}=      Set Variable    ${lenghts_dict}
-    ELSE
-        ${lenghts_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
-        ...     exp_msg=Failed to get groups: TypeError: Cannot read property 'includes' of null
-        ...     prev_logs_lenghts=${lenghts_dict}
-        ${lenght}=      Set Variable    ${lenghts_dict_after}
-    END
-    [Return]    ${lenght}
-
 Set RHODS Admins Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
     Apply Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+
+Set RHODS Admins Group To system:authenticated
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
+    Apply Access Groups Settings    admins_group=system:authenticated
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
 Set RHODS Users Group Empty Group

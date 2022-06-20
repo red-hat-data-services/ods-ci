@@ -122,3 +122,10 @@ Get Cluster Name From Console URL
     [Documentation]    Get the cluster name from the Openshift console URL
     ${name}=    Split String    ${OCP_CONSOLE_URL}        .
     [Return]    ${name}[2]
+
+Clean Resource YAML Before Creating It
+    [Arguments]    ${yaml_data}
+    ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
+    Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
+    [Return]   ${clean_yaml_data}
+

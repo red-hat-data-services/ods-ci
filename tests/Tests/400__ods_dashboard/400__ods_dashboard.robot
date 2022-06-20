@@ -1,5 +1,6 @@
 *** Settings ***
 Library         OpenShiftCLI
+Library         OpenShiftLibrary
 Resource        ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource        ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
@@ -259,8 +260,6 @@ Verify Error Message In Logs When A RHODS Group Is Empty
     ...                 is set as admin in "rhods-group-config" ConfigMap
     [Setup]     Set Variables For Group Testing
     Create Group    group_name=${CUSTOM_EMPTY_GROUP}
-    ${dash_pods_name}=   Get Dashboard Pods Names
-    Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
     Set RHODS Admins Group Empty Group
     Logs Of Dashboard Pods Should Not Contain New Lines     lengths_dict=${lengths_dict_before}
@@ -276,8 +275,6 @@ Verify Error Message In Logs When A RHODS Group Does Not Exist
     ...                 dashboard pods are the ones expected when an inexistent group
     ...                 is set as admin in "rhods-group-config" ConfigMap
     [Setup]     Set Variables For Group Testing
-    ${dash_pods_name}=   Get Dashboard Pods Names
-    Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
     Set RHODS Admins Group To Inexistent Group
     ${lengths_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
@@ -288,15 +285,13 @@ Verify Error Message In Logs When A RHODS Group Does Not Exist
     Logs Of Dashboard Pods Should Not Contain New Lines    lengths_dict=${lengths_dict_after}
     [Teardown]      Set Default Groups And Check Logs Do Not Change
 
-Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admins
+Verify Error Message In Logs When erify Error Message In Logs When All Authenticated Users Are Set As RHODS Admins
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when 'system:authenticated'
     ...                 is set as admin in "rhods-group-config" ConfigMap
     [Tags]    Sanity
     ...       ODS-1500
     [Setup]     Set Variables For Group Testing
-    ${dash_pods_name}=   Get Dashboard Pods Names
-    Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
     Set RHODS Admins Group To system:authenticated
     ${lengths_dict_after}=    New Lines In Logs Of Dashboard Pods Should Contain
@@ -304,12 +299,58 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     ...     prev_logs_lengths=${lengths_dict_before}
     [Teardown]      Set Default Groups And Check Logs Do Not Change
 
+Verify Error Message In Logs When RHODS Groups ConfigMaps Do Not Exist
+    [Tags]    Sanity
+    ...       ODS-1945
+    [Setup]     Set Variables For Group Testing
+    ${groups_configmaps_dict}=     Get ConfigMaps For RHODS Groups Configuration
+    ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
+    Delete RHODS Config Map     name=${RHODS_GROUPS_CONFIG_CM}
+    ${lengths_dict_after}=      New Lines In Logs Of Dashboard Pods Should Contain
+    ...     exp_msg=${EXP_ERROR_MISSING_RGC}
+    ...     prev_logs_lengths=${lengths_dict_before}
+    Restore Group ConfigMap And Check Logs Do Not Change    cm_yaml=${groups_configmaps_dict}[rgc]
+    Delete RHODS Config Map     name=${GROUPS_CONFIG_CM}
+    ${lengths_dict_after}=      New Lines In Logs Of Dashboard Pods Should Contain
+    ...     exp_msg=${EXP_ERROR_MISSING_GC}
+    ...     prev_logs_lengths=${lengths_dict_after}
+    [Teardown]      Restore Group ConfigMaps And Check Logs Do Not Change     cm_yamls=${groups_configmaps_dict}
+
 
 *** Keywords ***
 Set Variables For Group Testing
     Set Standard RHODS Groups Variables
     Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
     Set Suite Variable      ${EXP_ERROR_SYS_AUTH}      Error: It is not allowed to set \\"system:authenticated\\" or an empty string as admin group.
+    Set Suite Variable      ${EXP_ERROR_MISSING_RGC}      Error: Failed to retrieve ConfigMap ${RHODS_GROUPS_CONFIG_CM}, might be malformed or doesn't exist.
+    Set Suite Variable      ${EXP_ERROR_MISSING_GC}      Error: Failed to retrieve ConfigMap ${GROUPS_CONFIG_CM}, might be malformed or doesn't exist.
+    ${dash_pods_name}=   Get Dashboard Pods Names
+    Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
+
+Delete RHODS Config Map
+    [Arguments]     ${name}  ${namespace}=redhat-ods-applications
+    OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
+
+Restore Group ConfigMap And Check Logs Do Not Change
+    [Arguments]   ${cm_yaml}
+    ${clean_yaml}=    Clean Resource YAML Before Creating It    ${cm_yaml}
+    Log    ${clean_yaml}
+    OpenShiftLibrary.Oc Create    kind=ConfigMap    src=${clean_yaml}   namespace=redhat-ods-applications
+    ${lengths_dict}=    Get Lengths of Dashboard Pods Logs
+    Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
+
+Restore Group ConfigMaps And Check Logs Do Not Change
+    [Arguments]    ${cm_yamls}
+    ${cm_dicts}=      Run Keyword And Continue On Failure    Get ConfigMaps For RHODS Groups Configuration
+    FOR    ${key}    IN   @{cm_dicts.keys()}
+        ${cm}=    Get From Dictionary    dictionary=${cm_dicts}    key=${key}
+        IF   $cm is not None
+            Restore Group ConfigMap And Check Logs Do Not Change    cm_yaml=${cm_yamls}[${key}]
+        END
+    END
+
+
+
 
 Get Lengths Of Dashboard Pods Logs
     [Documentation]     Computes the number of lines present in the logs of both the dashboard pods
@@ -391,10 +432,6 @@ Set Default Groups And Check Logs Do Not Change
     ${lengths_dict}=    Get Lengths of Dashboard Pods Logs
     Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
-    # FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
-    #     ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_length=${lengths_dict}[${pod_name}]  pod_name=${pod_name}
-    #     Should Be Equal     ${new_lines_flag}   ${FALSE}
-    # END
     Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
     IF  "${delete_group}" == "${TRUE}"
         Delete Group    group_name=${CUSTOM_EMPTY_GROUP}

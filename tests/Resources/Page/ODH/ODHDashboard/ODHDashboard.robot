@@ -36,6 +36,8 @@ ${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
 ${CUSTOM_IMAGE_REMOVE_BTN}=  button[@id="delete-package-software-button"]
 ${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//button
 ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
+${GROUPS_CONFIG_CM}=    groups-config
+${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 
 
 *** Keywords ***
@@ -631,3 +633,17 @@ Get Dashboard Pods Logs
         ${n_lines}=     Get Length    ${pod_logs_lines}
     END
     [Return]    ${pod_logs_lines}   ${n_lines}
+
+Get ConfigMaps For RHODS Groups Configuration
+    [Documentation]     Returns a dictionary containing "rhods-group-config" and "groups-config"
+    ...                 ConfigMaps
+    ${rgc_yaml}=     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${RHODS_GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
+    ${gc_yaml}=      OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
+    IF   $rgc_yaml is None
+        ${rgc_yaml}=    Create List
+    END
+    IF   $gc_yaml is None
+        ${gc_yaml}=    Create List
+    END
+    ${group_config_maps}=   Create Dictionary     rgc=${rgc_yaml}[0]     gc=${gc_yaml}[0]
+    [Return]    ${group_config_maps}

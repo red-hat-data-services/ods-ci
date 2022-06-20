@@ -260,17 +260,13 @@ Verify Error Message When A RHODS Group Is Empty
     Create Group    group_name=${CUSTOM_EMPTY_GROUP}
     ${dash_pods_name}=   Get Dashboard Pods Names
     Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
-    ${lenghts_dict_before}=     Get Logs Lengths Before Setting An Empty Group
-    Set RHODS Admin Group Empty Group
-    ${version-check}=    Is RHODS Version Greater Or Equal Than  1.13.0
-    IF  ${version-check}==True
-        Logs Of Dashboard Pods Should Not Contain New Lines     ${lenghts_dict_before}
-    ELSE
-        ${lenghts_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
-        ...     exp_msg=Failed to get groups: TypeError: Cannot read property 'includes' of null
-        ...     prev_logs_lenghts=${lenghts_dict_before}
-    END
-    [Teardown]      Set Default Groups And Check Logs Do Not Change   lenghts_dict=${lenghts_dict_after}  delete_group=${TRUE}
+    ${lenghts_dict_before}=     Get Lenghts Of Dashboard Pods Logs
+    Set RHODS Admins Group Empty Group
+    ${lenghts_dict_after}=    Check Dashboard Logs Based On Version   lenghts_dict=${lenghts_dict_before}
+    Set Default Groups And Check Logs Do Not Change   delete_group=${TRUE}
+    Set RHODS Users Group Empty Group
+    Logs Of Dashboard Pods Should Not Contain New Lines    lenghts_dict=${lenghts_dict_after}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change     delete_group=${TRUE}
 
 Verify Error Message When A RHODS Group Does Not Exist
     [Tags]  ODS-1494
@@ -281,12 +277,15 @@ Verify Error Message When A RHODS Group Does Not Exist
     [Setup]     Set Variables For Group Testing
     ${dash_pods_name}=   Get Dashboard Pods Names
     Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
-    ${lenghts_dict_before}=     Get Logs Lengths Before Setting An Empty Group
-    Set RHODS Admin Group To Inexistent Group
+    ${lenghts_dict_before}=     Get Lenghts Of Dashboard Pods Logs
+    Set RHODS Admins Group To Inexistent Group
     ${lenghts_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
     ...     exp_msg=${EXP_ERROR_INEXISTENT_GRP}
     ...     prev_logs_lenghts=${lenghts_dict_before}
-    [Teardown]      Set Default Groups And Check Logs Do Not Change   lenghts_dict=${lenghts_dict_after}
+    Set Default Groups And Check Logs Do Not Change
+    Set RHODS Users Group To Inexistent Group
+    Logs Of Dashboard Pods Should Not Contain New Lines    lenghts_dict=${lenghts_dict_after}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change
 
 
 *** Keywords ***
@@ -294,23 +293,19 @@ Set Variables For Group Testing
     Set Standard RHODS Groups Variables
     ${version-check}=    Is RHODS Version Greater Or Equal Than  1.13.0
     IF  ${version-check}==True
-        ${exp_msg}=     Set Variable    Error retrieving Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
+        ${exp_msg}=     Set Variable    Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
     ELSE
         ${exp_msg}=     Set Variable    Failed to get groups: HttpError: HTTP request failed
     END
     Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      ${exp_msg}
 
-Get Logs Lengths Before Setting An Empty Group
+Get Lenghts Of Dashboard Pods Logs
     [Documentation]     Computes the number of lines present in the logs of both the dashboard pods
     ...                 and returns them as dictionary
     ${lenghts_dict}=    Create Dictionary
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         Log    ${pod_name}
         ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}
-        Run Keyword And Warn On Failure     Should Not Contain   container=${pod_logs_lines}
-        ...     item=Failed to get groups: TypeError: Cannot read property 'includes' of null
-        Run Keyword And Warn On Failure     Should Not Contain   container=${pod_logs_lines}
-        ...     item=Failed to get groups: HttpError: HTTP request failed
         Set To Dictionary   ${lenghts_dict}     ${pod_name}  ${n_lines}
     END
     [Return]    ${lenghts_dict}
@@ -347,28 +342,56 @@ Wait Until New Log Lines Are Generated In Dashboard Pods
     END
     [Return]    ${pod_logs_lines}[${prev_length-1}:]     ${n_lines}
 
-Set RHODS Admin Group Empty Group
+Check Dashboard Logs Based On Version
+    [Arguments]     ${lenghts_dict}
+    ${version-check}=    Is RHODS Version Greater Or Equal Than  1.13.0
+    IF  ${version-check}==True
+        Logs Of Dashboard Pods Should Not Contain New Lines     ${lenghts_dict}
+        ${lenght}=      Set Variable    ${lenghts_dict}
+    ELSE
+        ${lenghts_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
+        ...     exp_msg=Failed to get groups: TypeError: Cannot read property 'includes' of null
+        ...     prev_logs_lenghts=${lenghts_dict}
+        ${lenght}=      Set Variable    ${lenghts_dict_after}
+    END
+    [Return]    ${lenght}
+
+Set RHODS Admins Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
     Apply Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
-Set RHODS Admin Group To Inexistent Group
+Set RHODS Users Group Empty Group
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
+    Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${CUSTOM_EMPTY_GROUP}   groups_modified_flag=true
+
+Set RHODS Admins Group To Inexistent Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given inexistent group
     Apply Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+    ...     users_group=${STANDARD_ADMINS_GROUP}   groups_modified_flag=true
+
+Set RHODS Users Group To Inexistent Group
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given inexistent group
+    Apply Access Groups Settings    admins_group=${STANDARD_USERS_GROUP}
+    ...     users_group=${CUSTOM_INEXISTENT_GROUP}   groups_modified_flag=true
 
 Set Default Groups And Check Logs Do Not Change
     [Documentation]     Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "rhods-groups-config"
     ...                 ConfigMap and checks if no new lines are generated in the logs after that.
-    [Arguments]     ${lenghts_dict}     ${delete_group}=${FALSE}
+    [Arguments]     ${delete_group}=${FALSE}
+    ${lenghts_dict}=    Get Lenghts of Dashboard Pods Logs
     Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
-    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
-        ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_lenght=${lenghts_dict}[${pod_name}]  pod_name=${pod_name}
-        Should Be Equal     ${new_lines_flag}   ${FALSE}
-    END
+    # FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
+    #     ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_lenght=${lenghts_dict}[${pod_name}]  pod_name=${pod_name}
+    #     Should Be Equal     ${new_lines_flag}   ${FALSE}
+    # END
+    Logs Of Dashboard Pods Should Not Contain New Lines  lenghts_dict=${lenghts_dict}
     IF  "${delete_group}" == "${TRUE}"
         Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
     END
@@ -378,7 +401,7 @@ Logs Of Dashboard Pods Should Not Contain New Lines
     [Arguments]     ${lenghts_dict}
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_lenght=${lenghts_dict}[${pod_name}]  pod_name=${pod_name}
-        Should Be Equal     ${new_lines_flag}   ${FALSE}
+        Run Keyword And Continue On Failure     Should Be Equal     ${new_lines_flag}   ${FALSE}
     END
 
 Favorite Items Should Be Listed First

@@ -9,7 +9,7 @@ Suite Teardown  RHOAM Suite Teardown
 
 *** Test Cases ***
 Verify RHOAM Is Available In RHODS Dashboard Explore Page
-  [Tags]    Smoke   Tier1    Sanity
+  [Tags]    Smoke   Tier1
   ...       ODS-271
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

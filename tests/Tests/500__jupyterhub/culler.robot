@@ -41,6 +41,7 @@ Verify Culler Kills Inactive Server
     ...    server after timeout has passed.
     [Tags]    Sanity    Tier1
     ...       ODS-1254
+    ...       ProductBug
     Spawn Minimal Image
     Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
     Open With JupyterLab Menu    File    Save Notebook
@@ -59,7 +60,7 @@ Verify Culler Kills Inactive Server
         ${drift} =  Evaluate  ${drift}+${30}
     END
     IF  ${drift}>${120}
-        Fail    Drift was over 2 minutes, it was ${drift} seconds    ProductBug
+        Fail    Drift was over 2 minutes, it was ${drift} seconds
     END
 
 Verify Culler Does Not Kill Active Server

@@ -344,7 +344,7 @@ Restore Group ConfigMaps And Check Logs Do Not Change
     ${cm_dicts}=      Run Keyword And Continue On Failure    Get ConfigMaps For RHODS Groups Configuration
     FOR    ${key}    IN   @{cm_dicts.keys()}
         ${cm}=    Get From Dictionary    dictionary=${cm_dicts}    key=${key}
-        IF   $cm is not None
+        IF   $cm is None
             Restore Group ConfigMap And Check Logs Do Not Change    cm_yaml=${cm_yamls}[${key}]
         END
     END

@@ -11,7 +11,7 @@ Suite Setup     Performance Suite Setup
 ${NAMESPACE}     openshift-kube-apiserver
 ${LABEL_SELECTOR}     app=openshift-kube-apiserver
 ${MEMORY_THRESHOLD}    102400
-${PERF_CODE}    go run setup/main.go --users 250 --default 250  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
+${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
 
 
 *** Test Cases ***
@@ -81,7 +81,6 @@ Verify Sandbox Toolchain Data
     END
 
 Performance Suite Setup
-    #${key}     Set Variable    ${CURDIR}/olm.yaml
-    #Oc Apply    kind=OLMConfig    src=olm.yaml   #Not working
+    #Oc Apply    kind=OLMConfig    src=${CURDIR}/olm.yaml   #Not working
     Run    oc apply -f ${CURDIR}/olm.yaml
     Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git

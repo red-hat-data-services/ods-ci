@@ -252,8 +252,8 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
 
 Verify Error Message When A RHODS Group Is Empty
 Verify Error Message In Logs When A RHODS Group Is Empty
-    [Tags]  ODS-1408
-    ...     Sanity
+    [Tags]  Sanity
+    ...     ODS-1408
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an empty group
     ...                 is set as admin in "rhods-group-config" ConfigMap
@@ -270,8 +270,8 @@ Verify Error Message In Logs When A RHODS Group Is Empty
     [Teardown]      Set Default Groups And Check Logs Do Not Change     delete_group=${TRUE}
 
 Verify Error Message In Logs When A RHODS Group Does Not Exist
-    [Tags]  ODS-1494
-    ...     Sanity
+    [Tags]  Sanity
+    ...     ODS-1494
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an inexistent group
     ...                 is set as admin in "rhods-group-config" ConfigMap
@@ -292,6 +292,8 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when 'system:authenticated'
     ...                 is set as admin in "rhods-group-config" ConfigMap
+    [Tags]    Sanity
+    ...       ODS-1500
     [Setup]     Set Variables For Group Testing
     ${dash_pods_name}=   Get Dashboard Pods Names
     Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
@@ -300,6 +302,7 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     ${lenghts_dict_after}=    New Lines In Logs Of Dashboard Pods Should Contain
     ...     exp_msg=${EXP_ERROR_SYS_AUTH}
     ...     prev_logs_lenghts=${lenghts_dict_before}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change
 
 
 *** Keywords ***

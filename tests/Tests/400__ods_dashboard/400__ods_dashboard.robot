@@ -251,7 +251,6 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
 
 
-Verify Error Message When A RHODS Group Is Empty
 Verify Error Message In Logs When A RHODS Group Is Empty
     [Tags]  Sanity
     ...     ODS-1408
@@ -285,7 +284,7 @@ Verify Error Message In Logs When A RHODS Group Does Not Exist
     Logs Of Dashboard Pods Should Not Contain New Lines    lengths_dict=${lengths_dict_after}
     [Teardown]      Set Default Groups And Check Logs Do Not Change
 
-Verify Error Message In Logs When erify Error Message In Logs When All Authenticated Users Are Set As RHODS Admins
+Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admins
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when 'system:authenticated'
     ...                 is set as admin in "rhods-group-config" ConfigMap

@@ -314,6 +314,8 @@ Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
 
 *** Keywords ***
 Set Variables For Group Testing
+    [Documentation]     Sets the suite variables used by the test cases for checking
+     ...                Dashboard logs about rhods groups
     Set Standard RHODS Groups Variables
     Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
     Set Suite Variable      ${EXP_ERROR_SYS_AUTH}      Error: It is not allowed to set \\"system:authenticated\\" or an empty string as admin group.
@@ -321,11 +323,9 @@ Set Variables For Group Testing
     ${dash_pods_name}=   Get Dashboard Pods Names
     Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
 
-Delete RHODS Config Map
-    [Arguments]     ${name}  ${namespace}=redhat-ods-applications
-    OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
-
 Restore Group ConfigMap And Check Logs Do Not Change
+    [Documentation]    Creates the given configmap and checks the logs of Dashboard
+    ...                pods do not show new lines
     [Arguments]   ${cm_yaml}
     ${clean_yaml}=    Clean Resource YAML Before Creating It    ${cm_yaml}
     Log    ${clean_yaml}
@@ -334,6 +334,8 @@ Restore Group ConfigMap And Check Logs Do Not Change
     Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
 
 Restore Group ConfigMaps And Check Logs Do Not Change
+    [Documentation]    Creates the given configmaps and checks the logs of Dashboard
+    ...                pods do not show new lines after restoring each of the given CMs
     [Arguments]    ${cm_yamls}
     ${cm_dicts}=      Run Keyword And Continue On Failure    Get ConfigMaps For RHODS Groups Configuration
     FOR    ${key}    IN   @{cm_dicts.keys()}
@@ -343,9 +345,6 @@ Restore Group ConfigMaps And Check Logs Do Not Change
             Restore Group ConfigMap And Check Logs Do Not Change    cm_yaml=${cm_yamls}[${key}]
         END
     END
-
-
-
 
 Get Lengths Of Dashboard Pods Logs
     [Documentation]     Computes the number of lines present in the logs of both the dashboard pods

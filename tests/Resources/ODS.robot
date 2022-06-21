@@ -338,3 +338,9 @@ OpenShift Resource Component Field Should Not Be Empty
     [Arguments]    ${resource_component_field}
     Run Keyword And Continue On Failure    Should Not Be Empty    ${resource_component_field}
 
+Delete RHODS Config Map
+    [Documentation]    Deletes the given config map. It assumes the namespace is
+    ...                redhat-ods-applications, but can be changed using the
+    ...                corresponding argument
+    [Arguments]     ${name}  ${namespace}=redhat-ods-applications
+    OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}

@@ -299,6 +299,9 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     [Teardown]      Set Default Groups And Check Logs Do Not Change
 
 Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when "rhods-groups-config"
+    ...                 ConfigMap does not exist
     [Tags]    Sanity
     ...       ODS-1495
     [Setup]     Set Variables For Group Testing

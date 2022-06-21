@@ -309,11 +309,6 @@ Verify Error Message In Logs When RHODS Groups ConfigMaps Do Not Exist
     ${lengths_dict_after}=      New Lines In Logs Of Dashboard Pods Should Contain
     ...     exp_msg=${EXP_ERROR_MISSING_RGC}
     ...     prev_logs_lengths=${lengths_dict_before}
-    Restore Group ConfigMap And Check Logs Do Not Change    cm_yaml=${groups_configmaps_dict}[rgc]
-    Delete RHODS Config Map     name=${GROUPS_CONFIG_CM}
-    ${lengths_dict_after}=      New Lines In Logs Of Dashboard Pods Should Contain
-    ...     exp_msg=${EXP_ERROR_MISSING_GC}
-    ...     prev_logs_lengths=${lengths_dict_after}
     [Teardown]      Restore Group ConfigMaps And Check Logs Do Not Change     cm_yamls=${groups_configmaps_dict}
 
 
@@ -323,7 +318,6 @@ Set Variables For Group Testing
     Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
     Set Suite Variable      ${EXP_ERROR_SYS_AUTH}      Error: It is not allowed to set \\"system:authenticated\\" or an empty string as admin group.
     Set Suite Variable      ${EXP_ERROR_MISSING_RGC}      Error: Failed to retrieve ConfigMap ${RHODS_GROUPS_CONFIG_CM}, might be malformed or doesn't exist.
-    Set Suite Variable      ${EXP_ERROR_MISSING_GC}      Error: Failed to retrieve ConfigMap ${GROUPS_CONFIG_CM}, might be malformed or doesn't exist.
     ${dash_pods_name}=   Get Dashboard Pods Names
     Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
 
@@ -344,7 +338,8 @@ Restore Group ConfigMaps And Check Logs Do Not Change
     ${cm_dicts}=      Run Keyword And Continue On Failure    Get ConfigMaps For RHODS Groups Configuration
     FOR    ${key}    IN   @{cm_dicts.keys()}
         ${cm}=    Get From Dictionary    dictionary=${cm_dicts}    key=${key}
-        IF   $cm is None
+        ${null}=    Run Keyword And Return Status   Should Be Equal     ${cm}   ${EMPTY}
+        IF   ${null} == ${TRUE}
             Restore Group ConfigMap And Check Logs Do Not Change    cm_yaml=${cm_yamls}[${key}]
         END
     END

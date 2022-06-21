@@ -637,13 +637,14 @@ Get Dashboard Pods Logs
 Get ConfigMaps For RHODS Groups Configuration
     [Documentation]     Returns a dictionary containing "rhods-group-config" and "groups-config"
     ...                 ConfigMaps
-    ${rgc_yaml}=     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${RHODS_GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
-    ${gc_yaml}=      OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
-    IF   $rgc_yaml is None
-        ${rgc_yaml}=    Create List
+    ${rgc_status}   ${rgc_yaml}=     Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${RHODS_GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
+    ${gc_status}   ${gc_yaml}=      Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
+    IF   $rgc_status == 'FAIL'
+        ${rgc_yaml}=    Create List   ${EMPTY}
     END
-    IF   $gc_yaml is None
-        ${gc_yaml}=    Create List
+    IF   $gc_status == 'FAIL'
+        ${gc_yaml}=    Create List    ${EMPTY}
     END
     ${group_config_maps}=   Create Dictionary     rgc=${rgc_yaml}[0]     gc=${gc_yaml}[0]
+    Log     ${group_config_maps}
     [Return]    ${group_config_maps}

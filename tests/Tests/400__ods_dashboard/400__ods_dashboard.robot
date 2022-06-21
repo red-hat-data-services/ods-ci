@@ -299,7 +299,7 @@ Verify Error Message In Logs When erify Error Message In Logs When All Authentic
     ...     prev_logs_lengths=${lengths_dict_before}
     [Teardown]      Set Default Groups And Check Logs Do Not Change
 
-Verify Error Message In Logs When RHODS Groups ConfigMaps Do Not Exist
+Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
     [Tags]    Sanity
     ...       ODS-1495
     [Setup]     Set Variables For Group Testing

@@ -97,7 +97,6 @@ Apply Access Groups Settings
     OpenShiftCLI.Patch    kind=ConfigMap
     ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${groups_modified_flag}"}}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
-    # Rollout JupyterHub
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map

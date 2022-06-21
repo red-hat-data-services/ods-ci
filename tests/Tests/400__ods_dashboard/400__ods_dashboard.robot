@@ -320,7 +320,7 @@ Set Variables For Group Testing
      ...                Dashboard logs about rhods groups
     Set Standard RHODS Groups Variables
     Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
-    Set Suite Variable      ${EXP_ERROR_SYS_AUTH}      Error: It is not allowed to set \\"system:authenticated\\" or an empty string as admin group.
+    Set Suite Variable      ${EXP_ERROR_SYS_AUTH}      Error: It is not allowed to set system:authenticated or an empty string as admin group.
     Set Suite Variable      ${EXP_ERROR_MISSING_RGC}      Error: Failed to retrieve ConfigMap ${RHODS_GROUPS_CONFIG_CM}, might be malformed or doesn't exist.
     ${dash_pods_name}=   Get Dashboard Pods Names
     Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}

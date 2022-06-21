@@ -301,7 +301,7 @@ Verify Error Message In Logs When erify Error Message In Logs When All Authentic
 
 Verify Error Message In Logs When RHODS Groups ConfigMaps Do Not Exist
     [Tags]    Sanity
-    ...       ODS-1945
+    ...       ODS-1495
     [Setup]     Set Variables For Group Testing
     ${groups_configmaps_dict}=     Get ConfigMaps For RHODS Groups Configuration
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs

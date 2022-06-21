@@ -203,7 +203,7 @@ Clean Up User Notebook
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
       Log  ${output}
   ELSE
-      Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
+      Log  "This command requires ${admin_username} to be connected to the cluster (oc login ...)"
   END
 
 Delete Folder In User Notebook
@@ -226,7 +226,7 @@ Delete Folder In User Notebook
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
   ELSE
-      Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
+      Log  "This command requires ${admin_username} to be connected to the cluster (oc login ...)"
   END
 
 JupyterLab Is Visible

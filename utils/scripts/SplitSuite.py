@@ -51,7 +51,6 @@ class SplitSuite(SuiteVisitor):
                 for lev in range(2, self.max_suite_level+1):
                     print(">>> Extracting suites with level: ", lev)
                     current_lev_suites = next_lev_suites.copy()
-                    # print(">>> Suites: ", current_lev_suites)
                     if lev == self.max_suite_level:
                         sub_suites_list += current_lev_suites
                         continue

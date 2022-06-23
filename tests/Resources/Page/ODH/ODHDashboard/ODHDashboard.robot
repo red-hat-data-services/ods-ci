@@ -600,3 +600,13 @@ Sort Resources By
     Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
     Click Button    //button[@data-key="${sort_type}"]
     Sleep    1s
+
+Clear Dashboard Notifications
+    [Documentation]     Clears Notifications present in RHODS dashboard
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Sleep  5s  reason=To avoid element not interactable exception
+    ${notification_count}=  Get Element Count    class:odh-dashboard__notification-drawer__item-remove
+    FOR    ${index}    IN RANGE    ${notification_count}
+        Click Element    xpath=//*[contains(@class,"odh-dashboard__notification-drawer__item-remove")]
+    END
+    Close Notification Drawer

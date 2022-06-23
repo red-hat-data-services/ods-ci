@@ -86,3 +86,34 @@ Wait Until All Builds Are Complete
     FOR    ${build_data}    IN    @{builds_data}
         Wait Until Build Status Is    namespace=${namespace}    build_name=${build_data['metadata']['name']}  expected_status=Complete
     END
+
+Delete Multiple Builds
+    [Documentation]     Deletes Multiple Builds in the given namespace
+    [Arguments]   @{build_name_list}  ${namespace}
+    FOR    ${build}    IN    @{build_name_list}
+        ${build_name}=  Search Last Build  namespace=${namespace}    build_name_includes=${build}
+        Delete Build    namespace=${namespace}    build_name=${build_name}
+    END
+
+Rebuild Missing Or Failed Builds
+    [Documentation]    Starts new build if build fails or is not started , Waits until all builds are complete
+    [Arguments]    ${builds}  ${build_configs}  ${namespace}
+    ${no_of_builds} =    Get Length    ${builds}
+    FOR    ${ind}    IN RANGE    ${no_of_builds}
+        ${build_name} =    Search Last Build    namespace=${namespace}
+        ...    build_name_includes=${builds}[${ind}]
+        IF    "${build_name}" == ""
+            ${build_name} =    Start New Build    namespace=${namespace}
+            ...    buildconfig=${build_configs}[${ind}]
+        ELSE
+            ${build_status} =    Get Build Status    namespace=${namespace}
+            ...    build_search_term=${build_name}
+            IF    "${build_status}" == "Failed" or "${build_status}" == "Error"
+                Delete Build    namespace=${namespace}    build_name=${build_name}
+                ${build_name} =    Start New Build    namespace=${namespace}
+                ...    buildconfig=${build_configs}[${ind}]
+            END
+        END
+        Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}
+        ...    expected_status=Complete
+    END

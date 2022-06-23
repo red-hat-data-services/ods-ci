@@ -3,6 +3,7 @@ Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+
 Library          DebugLibrary
 
 Suite Setup      Begin Web Test
@@ -66,6 +67,7 @@ Verify A Default Image Is Provided And Starts Successfully
     @{user_data} =    Get Previously Selected Notebook Image Details
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook
+    Wait For JupyterLab Splash Screen  timeout=30
     Open New Notebook In Jupyterlab Menu
     Verify Notebook Name And Image Tag  user_data=${user_data}
     ${has_spawn_failed} =    Has Spawn Failed

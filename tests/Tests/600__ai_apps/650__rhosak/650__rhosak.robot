@@ -31,7 +31,7 @@ ${KAFKA_CLIENT_SECRET}=         "placeholder"
 *** Test Cases ***
 Verify RHOSAK Is Available In RHODS Dashboard Explore Page
     [Documentation]    Checks RHOSAK card is present in RHODS Dashboard > Explore Page
-    [Tags]    Smoke    Sanity
+    [Tags]    Smoke
     ...       ODS-258
     Verify Service Is Available In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Provides "Get Started" Button In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}

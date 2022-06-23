@@ -16,7 +16,8 @@ ${openvino_operator_name}    OpenVINO Toolkit Operator
 
 *** Test Cases ***
 Verify OpenVino Is Available In RHODS Dashboard Explore Page
-  [Tags]  ODS-258  Smoke  Sanity
+  [Tags]  Smoke
+  ...     ODS-493
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load

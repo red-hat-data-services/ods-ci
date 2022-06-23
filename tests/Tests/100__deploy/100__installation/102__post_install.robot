@@ -122,7 +122,7 @@ Verify Oath-Proxy Image Is fetched From CPaaS
 Verify Pytorch And Tensorflow Can Be Spawned
     [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
     [Tags]    Sanity
-    ...       ODS-480
+    ...       ODS-480  ODS-481
     Verify Cuda Builds Are Completed
     Verify Image Can Be Spawned  image=pytorch  size=Default
     Verify Image Can Be Spawned  image=tensorflow  size=Default

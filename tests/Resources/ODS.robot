@@ -90,6 +90,13 @@ Set Standard RHODS Groups Variables
 
 Apply Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
+    ...                and rolls out JH to make the changes effecting in Jupyter
+    [Arguments]     ${admins_group}   ${users_group}    ${groups_modified_flag}
+    Set Access Groups Settings    admins_group=${admins_group}   users_group=${users_group}    groups_modified_flag=${groups_modified_flag}
+    Rollout JupyterHub
+
+Set Access Groups Settings
+    [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}    ${groups_modified_flag}
     OpenShiftCLI.Patch    kind=ConfigMap
     ...                   src={"data":{"admin_groups": "${admins_group}","allowed_groups": "${users_group}"}}
@@ -102,7 +109,6 @@ Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map
     Apply Access Groups Settings     admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=${STANDARD_GROUPS_MODIFIED}
-    Rollout JupyterHub
 
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation

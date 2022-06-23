@@ -250,7 +250,6 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
    [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
 
-
 Verify Error Message In Logs When A RHODS Group Is Empty
     [Tags]  Sanity
     ...     ODS-1408
@@ -394,31 +393,31 @@ Wait Until New Log Lines Are Generated In Dashboard Pods
 Set RHODS Admins Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
-    Apply Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
+    Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
 Set RHODS Admins Group To system:authenticated
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
-    Apply Access Groups Settings    admins_group=system:authenticated
+    Set Access Groups Settings    admins_group=system:authenticated
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
 Set RHODS Users Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
-    Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${CUSTOM_EMPTY_GROUP}   groups_modified_flag=true
 
 Set RHODS Admins Group To Inexistent Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given inexistent group
-    Apply Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
+    Set Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
 Set RHODS Users Group To Inexistent Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given inexistent group
-    Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${CUSTOM_INEXISTENT_GROUP}   groups_modified_flag=true
 
 Set Default Groups And Check Logs Do Not Change
@@ -426,7 +425,7 @@ Set Default Groups And Check Logs Do Not Change
     ...                 ConfigMap and checks if no new lines are generated in the logs after that.
     [Arguments]     ${delete_group}=${FALSE}
     ${lengths_dict}=    Get Lengths of Dashboard Pods Logs
-    Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
     Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
     IF  "${delete_group}" == "${TRUE}"

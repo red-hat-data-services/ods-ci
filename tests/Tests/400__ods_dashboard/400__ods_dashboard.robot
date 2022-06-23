@@ -196,6 +196,7 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    [Tags]      Sanity
    ...         ODS-1491
    ...         Tier1
+   ...         ProductBug
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
    Close All Browsers
    Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}

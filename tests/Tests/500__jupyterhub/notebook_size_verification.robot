@@ -33,7 +33,9 @@ ${CUSTOME_SIZE}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","
 Verify Spwaned Notebook Size
     [Documentation]    Check the available container size spec
     ...    with actual assign to spwaned notebook pod
-    [Tags]    Sanity    ODS-1072
+    [Tags]    Sanity
+    ...       FlakyTest
+    ...       ODS-1072
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook And Verify Size
 

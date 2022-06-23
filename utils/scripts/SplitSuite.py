@@ -19,13 +19,6 @@ def fetch_subsuites(parent):
     return children
 
 
-def fetch_subsuites_from_list(parents_list):
-    children = []
-    for parent in parents_list:
-        children += fetch_subsuites(parent)
-    return children
-
-
 def fetch_suites_names(suites_list):
     names = [s.name for s in suites_list]
     return names

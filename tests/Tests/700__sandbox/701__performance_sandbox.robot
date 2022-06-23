@@ -84,5 +84,5 @@ Performance Suite Setup
     [Documentation]    Disable CopiedCSVs in OLMConfig to not watch csv created in every namespace
     ...   since copied CSVs consume an untenable amount of resources, such as OLM’s memory usage,
     ...   cluster etcd limits, and networking
-    Run    oc apply -f ${CURDIR}/olm.yaml
+    Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
     Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git

@@ -81,6 +81,8 @@ Verify Sandbox Toolchain Data
     END
 
 Performance Suite Setup
-    #Oc Apply    kind=OLMConfig    src=${CURDIR}/olm.yaml   #Not working
+    [Documentation]    Disable CopiedCSVs in OLMConfig to not watch csv created in every namespace
+    ...   since copied CSVs consume an untenable amount of resources, such as OLM’s memory usage,
+    ...   cluster etcd limits, and networking
     Run    oc apply -f ${CURDIR}/olm.yaml
     Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git

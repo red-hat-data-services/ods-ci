@@ -54,23 +54,23 @@ Verify GPU Operator Deployment  # robocop: disable
     ...    operator_name=gpu-operator-certified.v*
     # nfd-controller-manager
     Verify Deployment Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
-    ...    DName=nfd-controller-manager
+    ...    dname=nfd-controller-manager
     # nfd-master
-    Verify DaemonSet Status  label=app=nfd-master  DSName=nfd-master
+    Verify DaemonSet Status  label=app=nfd-master  dsname=nfd-master
     # nfd-worker
-    Verify DaemonSet Status  label=app=nfd-worker  DSName=nfd-worker
+    Verify DaemonSet Status  label=app=nfd-worker  dsname=nfd-worker
 
     # After GPU Node is added to the cluster
-    Verify DaemonSet Status  label=app=gpu-feature-discovery  DSName=gpu-feature-discovery
-    Verify DaemonSet Status  label=app=nvidia-container-toolkit-daemonset  DSName=nvidia-container-toolkit-daemonset
-    Verify DaemonSet Status  label=app=nvidia-dcgm-exporter  DSName=nvidia-dcgm-exporter
-    Verify DaemonSet Status  label=app=nvidia-dcgm  DSName=nvidia-dcgm
-    Verify DaemonSet Status  label=app=nvidia-device-plugin-daemonset  DSName=nvidia-device-plugin-daemonset
+    Verify DaemonSet Status  label=app=gpu-feature-discovery  dsname=gpu-feature-discovery
+    Verify DaemonSet Status  label=app=nvidia-container-toolkit-daemonset  dsname=nvidia-container-toolkit-daemonset
+    Verify DaemonSet Status  label=app=nvidia-dcgm-exporter  dsname=nvidia-dcgm-exporter
+    Verify DaemonSet Status  label=app=nvidia-dcgm  dsname=nvidia-dcgm
+    Verify DaemonSet Status  label=app=nvidia-device-plugin-daemonset  dsname=nvidia-device-plugin-daemonset
     #app=nvidia-driver-daemonset-410.84.202205191234-0
-    #Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  DSName=nvidia-driver-daemonset-*
-    Verify DaemonSet Status  label=app=nvidia-node-status-exporter  DSName=nvidia-node-status-exporter
-    Verify DaemonSet Status  label=app=nvidia-operator-validator  DSName=nvidia-operator-validator
-    Verify CR Status  CRD=NodeFeatureDiscovery  CR_name=ocp-gpu-addon
+    #Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  dsname=nvidia-driver-daemonset-*
+    Verify DaemonSet Status  label=app=nvidia-node-status-exporter  dsname=nvidia-node-status-exporter
+    Verify DaemonSet Status  label=app=nvidia-operator-validator  dsname=nvidia-operator-validator
+    Verify CR Status  crd=NodeFeatureDiscovery  cr_name=ocp-gpu-addon
 
 Verify That Prometheus Image Is A CPaaS Built Image
     [Documentation]    Verifies the images used for prometheus

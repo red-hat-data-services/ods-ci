@@ -80,18 +80,19 @@ Verify Message That Image Builds Are In Progress
     [Tags]      Tier2
     ...         ODS-460
     ...         ODS-381
+    ...         ODS-1348
     Delete Last Pytorch Build
     ${new_buildname}=  Start New Pytorch Build
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     RHODS Notification Drawer Should Contain  message=Notebook images are building
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
-    Wait Until Page Contains Element    xpath=//*[contains(text(),'All notebook image builds are complete')]  timeout=5 min
+    RHODS Notification Drawer Should Contain  message=All notebook image builds are complete
+
 
 *** Keywords ***
 JupyterHub Testing Suite Setup
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup
-
 
 Delete Last Pytorch Build
     [Documentation]     Searches for last build which contains pytorch and deletes it

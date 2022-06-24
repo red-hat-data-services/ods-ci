@@ -611,6 +611,7 @@ Clear Dashboard Notifications
         Click Element    xpath=//*[contains(@class,"odh-dashboard__notification-drawer__item-remove")]
     END
     Close Notification Drawer
+
 Get Dashboard Pods Names
     [Documentation]     Retrieves the names of dashboard pods
     ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
@@ -621,7 +622,7 @@ Get Dashboard Pods Names
     END
     [Return]   ${names}
 
-Get Dashboard Pods Logs
+Get Dashboard Pod Logs
     [Documentation]     Fetches the logs from one dashboard pod
     [Arguments]     ${pod_name}
     ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard

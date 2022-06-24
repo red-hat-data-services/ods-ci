@@ -357,7 +357,7 @@ Get Lengths Of Dashboard Pods Logs
     ${lengths_dict}=    Create Dictionary
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         Log    ${pod_name}
-        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}
+        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pod Logs     pod_name=${pod_name}
         Set To Dictionary   ${lengths_dict}     ${pod_name}  ${n_lines}
     END
     [Return]    ${lengths_dict}
@@ -368,7 +368,7 @@ New Lines In Logs Of Dashboard Pods Should Contain
     &{new_logs_lengths}=   Create Dictionary
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         Log    ${pod_name}
-        ${pod_log_lines_new}    ${n_lines_new}=   Wait Until New Log Lines Are Generated In Dashboard Pods
+        ${pod_log_lines_new}    ${n_lines_new}=   Wait Until New Log Lines Are Generated In A Dashboard Pod
         ...     prev_length=${prev_logs_lengths}[${pod_name}]  pod_name=${pod_name}
         Set To Dictionary   ${new_logs_lengths}     ${pod_name}    ${n_lines_new}
         Log     ${pod_log_lines_new}
@@ -379,11 +379,11 @@ New Lines In Logs Of Dashboard Pods Should Contain
     END
     [Return]    ${new_logs_lengths}
 
-Wait Until New Log Lines Are Generated In Dashboard Pods
+Wait Until New Log Lines Are Generated In A Dashboard Pod
     [Documentation]     Waits until new messages in the logs are generated
     [Arguments]     ${prev_length}  ${pod_name}  ${retries}=10    ${retries_interval}=3s
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pods Logs     pod_name=${pod_name}
+        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pod Logs     pod_name=${pod_name}
         Log     ${n_lines} vs ${prev_length}
         ${equal_flag}=     Run Keyword And Return Status    Should Be True     "${n_lines}" > "${prev_length}"
         Exit For Loop If    $equal_flag == True
@@ -441,7 +441,7 @@ Logs Of Dashboard Pods Should Not Contain New Lines
     [Arguments]     ${lengths_dict}
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
         ${new_lines_flag}=  Run Keyword And Return Status
-        ...                 Wait Until New Log Lines Are Generated In Dashboard Pods
+        ...                 Wait Until New Log Lines Are Generated In A Dashboard Pod
         ...                 prev_length=${lengths_dict}[${pod_name}]  pod_name=${pod_name}
         Run Keyword And Continue On Failure     Should Be Equal     ${new_lines_flag}   ${FALSE}
     END

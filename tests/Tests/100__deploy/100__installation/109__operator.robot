@@ -31,7 +31,7 @@ Verify That The Operator Pod Does Not Get Stuck After Upgrade
     ...       ODS-818
     ${operator_pod_info}=    Fetch operator Pod Info
     ${length}=    Get length    ${operator_pod_info}
-    IF    ${length} == 2
+    IF    ${length} == 1
         ${crashloopbackoff}=    Verify Operator Pods Have CrashLoopBackOff Status After upgrade    ${operator_pod_info}
         IF   ${crashloopbackoff}
             Log Error And Fail Pods When Pods Were Terminated    ${operator_pod_info}    Opertator Pod Stuck

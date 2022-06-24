@@ -335,7 +335,7 @@ Restore Group ConfigMap And Check Logs Do Not Change
     ${clean_yaml}=    Clean Resource YAML Before Creating It    ${cm_yaml}
     Log    ${clean_yaml}
     OpenShiftLibrary.Oc Create    kind=ConfigMap    src=${clean_yaml}   namespace=redhat-ods-applications
-    ${lengths_dict}=    Get Lengths of Dashboard Pods Logs
+    ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
     Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
 
 Restore Group ConfigMaps And Check Logs Do Not Change
@@ -400,7 +400,7 @@ Set RHODS Admins Group Empty Group
     Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
 
-Set RHODS Admins Group To system:authenticated
+Set RHODS Admins Group To system:authenticated    # robocop:disable
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
     Set Access Groups Settings    admins_group=system:authenticated
@@ -428,7 +428,7 @@ Set Default Groups And Check Logs Do Not Change
     [Documentation]     Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "rhods-groups-config"
     ...                 ConfigMap and checks if no new lines are generated in the logs after that.
     [Arguments]     ${delete_group}=${FALSE}
-    ${lengths_dict}=    Get Lengths of Dashboard Pods Logs
+    ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
     Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
@@ -440,7 +440,9 @@ Logs Of Dashboard Pods Should Not Contain New Lines
     [Documentation]     Checks if no new lines are generated in the logs after that.
     [Arguments]     ${lengths_dict}
     FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
-        ${new_lines_flag}=  Run Keyword And Return Status     Wait Until New Log Lines Are Generated In Dashboard Pods    prev_length=${lengths_dict}[${pod_name}]  pod_name=${pod_name}
+        ${new_lines_flag}=  Run Keyword And Return Status
+        ...                 Wait Until New Log Lines Are Generated In Dashboard Pods
+        ...                 prev_length=${lengths_dict}[${pod_name}]  pod_name=${pod_name}
         Run Keyword And Continue On Failure     Should Be Equal     ${new_lines_flag}   ${FALSE}
     END
 

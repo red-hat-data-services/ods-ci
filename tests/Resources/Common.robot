@@ -124,6 +124,8 @@ Get Cluster Name From Console URL
     [Return]    ${name}[2]
 
 Clean Resource YAML Before Creating It
+    [Documentation]    Removes from a yaml of an Openshift resource the metadata which prevent
+    ...                the yaml to be applied after being copied
     [Arguments]    ${yaml_data}
     ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
     Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations

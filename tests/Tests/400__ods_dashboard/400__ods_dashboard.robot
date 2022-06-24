@@ -252,6 +252,7 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
 
 Verify Error Message In Logs When A RHODS Group Is Empty
     [Tags]  Sanity
+    ...     Tier1
     ...     ODS-1408
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an empty group
@@ -268,6 +269,7 @@ Verify Error Message In Logs When A RHODS Group Is Empty
 
 Verify Error Message In Logs When A RHODS Group Does Not Exist
     [Tags]  Sanity
+    ...     Tier1
     ...     ODS-1494
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an inexistent group
@@ -288,6 +290,7 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     ...                 dashboard pods are the ones expected when 'system:authenticated'
     ...                 is set as admin in "rhods-group-config" ConfigMap
     [Tags]    Sanity
+    ...       Tier1
     ...       ODS-1500
     [Setup]     Set Variables For Group Testing
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
@@ -302,6 +305,7 @@ Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
     ...                 dashboard pods are the ones expected when "rhods-groups-config"
     ...                 ConfigMap does not exist
     [Tags]    Sanity
+    ...       Tier1
     ...       ODS-1495
     [Setup]     Set Variables For Group Testing
     ${groups_configmaps_dict}=     Get ConfigMaps For RHODS Groups Configuration
@@ -316,7 +320,7 @@ Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
 *** Keywords ***
 Set Variables For Group Testing
     [Documentation]     Sets the suite variables used by the test cases for checking
-     ...                Dashboard logs about rhods groups
+    ...                 Dashboard logs about rhods groups
     Set Standard RHODS Groups Variables
     Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
     Set Suite Variable      ${EXP_ERROR_SYS_AUTH}      Error: It is not allowed to set system:authenticated or an empty string as admin group.

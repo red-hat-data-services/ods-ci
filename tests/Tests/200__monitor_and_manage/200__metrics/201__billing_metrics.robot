@@ -5,6 +5,8 @@ Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
 Resource            ../../../Resources/OCP.resource
+Resource            ../../../Resources/Page/ODH/Grafana/Grafana.resource
+Library             DateTime
 Library             JupyterLibrary
 Library             SeleniumLibrary
 
@@ -16,11 +18,13 @@ Test Teardown       End Web Billing Metrics Test
 ${METRIC_RHODS_CPU}                 cluster:usage:consumption:rhods:cpu:seconds:rate1h
 ${METRIC_RHODS_CPU_BEFORE_1.5.0}    cluster:usage:consumption:rhods:cpu:seconds:rate5m
 ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:seconds:rate5m
-
+${METRIC_RHODS_ACTIVE_USERS}        cluster:usage:consumption:rhods:active_users
+${METRIC_RHODS_PODUP}               cluster:usage:consumption:rhods:pod:up
+${telemeter_url}                     https://telemeter-lts-dashboards.datahub.redhat.com/
 
 *** Test Cases ***
 Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
-    [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries 
+    [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries
     [Tags]    Smoke
     ...       Sanity
     ...       ODS-173
@@ -69,6 +73,67 @@ Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometh
     Should Be Equal    ${value}    2    msg=Active Users are not equal to length of list or N users
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
+Test Metric "Active Users" On Telemeter
+    [Documentation]    Verifies the openshift metrics and telemeter shows
+    ...                the same rhods active users
+    [Tags]    ODS-1054
+    ...       Tier2
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    ...    list_of_usernames=${list_of_usernames}
+    ${value} =    Run OpenShift Metrics Query    query=${METRIC_RHODS_ACTIVE_USERS}
+    ${cluster_id} =    Get Cluster ID
+    ${query} =    Set Variable    ${METRIC_RHODS_ACTIVE_USERS}{_id=${cluster_id}}
+    Sleep  15m
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}   ${data_source}   ${query}
+    Should Be Equal    ${value}    ${data}
+    [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
+
+Test metric "Notebook Cpu Usage" on Telemeter
+    [Documentation]    Verifies prometheus and grafana shows the same CPU usage.
+    [Tags]    ODS-181
+    ...       Tier1
+    ${cluster_id} =    Get Cluster ID
+    Run Jupyter Notebook For 10 Minutes
+    ${pm_query} =    Set Variable
+    ...  sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0", container="",pod=~"jupyterhub-nb.*",namespace="rhods-notebooks"}[1h]))
+    ${usage} =    Run Range Query    ${pm_query}    pm_url=${RHODS_PROMETHEUS_URL}
+    ...           pm_token=${RHODS_PROMETHEUS_TOKEN}    interval=12h     steps=172
+    ${usage} =   Set Variable  ${usage.json()["data"]["result"][0]["values"][-1][1]}
+    ${query} =   Set Variable    ${METRIC_RHODS_CPU}{_id=${cluster_id}}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}     ${data_source}     ${query}
+    Should Be Equal    ${usage}    ${data}
+
+Test metric "Rhods_Total_Users" On Telemeter
+    [Documentation]    Verifies the prometheus and telemeter shows
+    ...                the same numbers of total rhods users
+    [Tags]    ODS-635
+    ...       Tier1
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    ...    list_of_usernames=${list_of_usernames}
+    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+    ${rhods_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    rhods_total_users
+    ${rhods_total_users} =    Set Variable   ${rhods_total_users.json()["data"]["result"][0]["value"][-1]}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${cluster_id} =    Get Cluster ID
+    ${query} =    Set Variable    rhods_total_users{_id=${cluster_id}}
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}    ${data_source}    ${query}
+    Should Be Equal    ${rhods_total_users}    ${data}
+
+
 Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitoring Prometheus
     [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing number of running pods
     [Tags]    Sanity
@@ -81,11 +146,62 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
     Should Not Be Empty    ${value}    msg=Matrics does not contains value for pod:up query
     [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
 
+Test metric "Rhods_Aggregate_Availability" on Telemeter
+    [Documentation]    Verifies the prometheus and telemeter shows
+    ...                the same rhods aggregate availability
+    [Tags]    ODS-638
+    ...       Tier1
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    ...    list_of_usernames=${list_of_usernames}
+    ${rhods_aggregate_availability} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    ...                                 rhods_aggregate_availability
+    ${rhods_aggregate_availability} =    Set Variable   ${rhods_aggregate_availability.json()["data"]["result"][0]["value"][-1]}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${cluster_id} =    Get Cluster ID
+    ${query} =    Set Variable    rhods_aggregate_availability{_id=${cluster_id}}
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}    ${data_source}    ${query}
+    Should Be Equal    ${rhods_aggregate_availability}    ${data}
+    [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
+Test Metric "Active Notebook Pod Time" On Telemeter
+    [Documentation]    Verifies the openshift metrics and telemeter shows
+    ...                the same active notebook pod time
+    [Tags]    ODS-1056
+    ...       Tier1
+    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    ...    list_of_usernames=${list_of_usernames}
+    ${value} =    Run OpenShift Metrics Query    query=${METRIC_RHODS_PODUP}
+    ${cluster_id} =    Get Cluster ID
+    ${query} =    Set Variable    ${METRIC_RHODS_PODUP}{_id=${cluster_id}}
+    Launch Grafana    ocp_user_name=${MY_USER.USERNAME}    ocp_user_pw=${MY_USER.PASSWORD}
+    ...               ocp_user_auth_type=my_ldap_provider    grafana_url=${telemeter_url}
+    ...               browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ${data_source} =   Get Telemeter DataSource For ODS Environment
+    ${data} =    Run Range Query In Browser    ${telemeter_url}    ${data_source}    ${query}
+    Should Be Equal    ${value}    ${data}
+    [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
 
 *** Keywords ***
+Get Telemeter DataSource For ODS Environment
+    [Documentation]    Returns the (int)datasource for telemeter
+    ${env} =  Fetch ODS Cluster Environment
+    ${data_source} =  Set Variable
+    IF    "${env}" == "stage"
+        ${data_source} =    Set Variable    ${2}
+    ELSE
+        ${data_source} =    Set Variable    ${1}
+    END
+    [Return]    ${data_source}
+
 Begin Billing Metrics Web Test
-  Set Library Search Order  SeleniumLibrary
-  RHOSi Setup
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
 
 End Web Billing Metrics Test
     CleanUp JupyterHub
@@ -104,6 +220,16 @@ Test Setup For Matrics Web Test
 Test Teardown For Matrics Web Test
     [Documentation]     Closes all browsers
     SeleniumLibrary.Close All Browsers
+
+Run Jupyter Notebook For 10 Minutes
+    [Documentation]     Opens jupyter notebook and run for 10 min
+    Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
+    Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
+    Iterative Image Test
+    ...    s2i-generic-data-science-notebook
+    ...    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main.git
+    ...    ods-ci-notebooks-main/notebooks/200__monitor_and_manage/200__metrics/stress-cpu-all-cores-600-60.ipynb
 
 Run Query On Metrics And Return Value
     [Documentation]    Fires query in metrics through web browser and returns value
@@ -223,4 +349,3 @@ Skip Test If Current Active Users Count Is Not Zero
     Skip if
     ...    ${current_value} > 0
     ...    The current active users count is not zero.Current Count:${current_value}.Skiping test
-

@@ -61,3 +61,19 @@ Run Promql Query
     [Arguments]  ${query}
     Press Keys    xpath=//span[contains(text(),'Enter a PromQL query')]    ${query}
     Press Keys    None    SHIFT+ENTER
+
+Run Range Query In Browser
+    [Documentation]    Returns result of  a grafana range query, in order to obtain the result for a given time range.
+    ...                For datasource,     1:history     2:recent-stage    3:recent
+    [Arguments]    ${grafana_url}    ${data_source}    ${query}    ${interval}=12h     ${steps}=172
+    ${time} =    Get Start Time And End Time    interval=${interval}
+    ${url}=    Set Variable    ${grafana_url}/api/datasources/proxy/${data_source}/api/v1/query_range?query=${query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    Go To    ${url}
+    @{data} =    Get WebElements    //pre
+    &{data} =    Evaluate    dict(${data[0].text})
+    IF  ${data} == []
+        ${data} =   Set Variable    0
+    ELSE
+        ${data} =    Set Variable    ${data["data"]["result"][0]["values"][-1][1]}
+    END
+    [Return]    ${data}

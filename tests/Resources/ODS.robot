@@ -338,3 +338,18 @@ OpenShift Resource Component Field Should Not Be Empty
     [Arguments]    ${resource_component_field}
     Run Keyword And Continue On Failure    Should Not Be Empty    ${resource_component_field}
 
+
+Fetch ODS Cluster Environment
+    [Documentation]  Fetches the environment type of the cluster
+    ...        project: Project name
+    ...    Returns:
+    ...        Cluster Environment (str)
+   ${match} =    Fetch Cluster Platform Type
+   Run Keyword Unless    "${match}" == 'AWS'    FAIL
+   ${match} =    Run Keyword And Ignore Error  Should Contain    ${OCP_CONSOLE_URL}    devshift.org
+   IF    "${match}[0]" == "PASS"
+       ${cluster_type} =  Set Variable  stage
+   ELSE
+       ${cluster_type} =  Set Variable  production
+   END
+   [Return]    ${cluster_type}

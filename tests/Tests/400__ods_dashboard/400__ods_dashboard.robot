@@ -246,6 +246,24 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
    [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
 
+Verify external links in Quick Starts are not broken
+        [Tags]    Tier1
+        ...       ODS-1305
+        [Documentation]    Verify external links in Quick Starts are not broken
+        Click Link    Resources
+        Wait Until Resource Page Is Loaded
+        Wait Until Element Is Visible   xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
+        ${qucickStartElements}=   Get WebElements    xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
+        Scroll Element Into View   xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
+        FOR    ${quickstartTile}    IN     @{qucickStartElements}
+            Click Element  ${quickstartTile}
+            Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
+            ${sideWindowButtons}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
+
+            Get Urls and validation of quickStrat Tiles
+            # Click Restrat Button
+            Click Element  //*[@class="pf-c-button pf-m-link pfext-quick-start-footer__restartbtn"]
+        END
 
 *** Keywords ***
 Favorite Items Should Be Listed First
@@ -516,3 +534,34 @@ Check And Uninstall Operator In Openshift
         END
     END
     Close All Browsers
+
+Validate URls
+    [Documentation]   validates  urls
+    [Arguments]  ${urls}
+    FOR  ${url}   IN   ${urls}
+        Log To Console  ${url}
+        ${status}=    Check HTTP Status Code    link_to_check=${url}
+        Log To Console     ${url}  gets status code ${status}
+    END
+
+Get Urls and validation of quickStrat Tiles
+    [Documentation]     Clicks on the side window and  validate all Url
+    ${sideWindowButtons}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
+    FOR    ${sideWindowButton}    IN     @{sideWindowButtons}
+
+            ${status}   Run Keyword And Return Status   Click Element  ${sideWindowButton}
+            IF  ${status} == False
+                Click Button    Next
+            END
+
+            FOR    ${counter}    IN RANGE    5
+                Press Keys    NONE    TAB
+            END
+            Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
+
+            # get all urls from the  side windows
+            ${status}   ${urls}    Run Keyword And Ignore Error   Get Element Attribute    //div[@Class="pf-c-drawer__panel-main"]//a[@rel="noopener noreferrer"]    href
+            Run Keyword IF      '${status}'=='FAIL'   Continue For Loop
+
+            Validate URls   ${urls}
+    END

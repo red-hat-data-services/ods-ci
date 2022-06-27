@@ -45,31 +45,32 @@ Verify GPU Operator Deployment  # robocop: disable
 
     # Before GPU Node is added to the cluster
     # NS
-    Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-gpu-operator
+    Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-nvidia-gpu-addon
     # Node-Feature-Discovery Operator
-    Verify Operator Status  label=operators.coreos.com/node-feature-discovery-operator.redhat-gpu-operator
-    ...    operator_name=node-feature-discovery-operator.v*
+    Verify Operator Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
+    ...    operator_name=nfd.v*
     # GPU Operator
-    Verify Operator Status  label=operators.coreos.com/gpu-operator-certified-addon.redhat-gpu-operator
-    ...    operator_name=gpu-operator-certified-addon.v*
+    Verify Operator Status  label=operators.coreos.com/gpu-operator-certified.redhat-nvidia-gpu-addon
+    ...    operator_name=gpu-operator-certified.v*
     # nfd-controller-manager
-    Verify Deployment Status  label=operators.coreos.com/node-feature-discovery-operator.redhat-gpu-operator
-    ...    DName=nfd-controller-manager
+    Verify Deployment Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
+    ...    dname=nfd-controller-manager
     # nfd-master
-    Verify DaemonSet Status  label=app=nfd-master  DSName=nfd-master
+    Verify DaemonSet Status  label=app=nfd-master  dsname=nfd-master
     # nfd-worker
-    Verify DaemonSet Status  label=app=nfd-worker  DSName=nfd-worker
+    Verify DaemonSet Status  label=app=nfd-worker  dsname=nfd-worker
 
     # After GPU Node is added to the cluster
-    # TODO: gpu-feature-discovery DS
-    # ...   nvidia-container-toolkit-daemonset DS
-    # ...   gpu-cluster-policy CP
-    # ...   nvidia-dcgm-exporter DS
-    # ...   nvidia-dcgm DS
-    # ...   nvidia-device-plugin-daemonset DS
-    # ...   nvidia-driver-daemonset-49.84.202201212103-0 DS
-    # ...   nvidia-node-status-exporter DS
-    # ...   nvidia-operator-validator DS
+    Verify DaemonSet Status  label=app=gpu-feature-discovery  dsname=gpu-feature-discovery
+    Verify DaemonSet Status  label=app=nvidia-container-toolkit-daemonset  dsname=nvidia-container-toolkit-daemonset
+    Verify DaemonSet Status  label=app=nvidia-dcgm-exporter  dsname=nvidia-dcgm-exporter
+    Verify DaemonSet Status  label=app=nvidia-dcgm  dsname=nvidia-dcgm
+    Verify DaemonSet Status  label=app=nvidia-device-plugin-daemonset  dsname=nvidia-device-plugin-daemonset
+    #app=nvidia-driver-daemonset-410.84.202205191234-0
+    #Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  dsname=nvidia-driver-daemonset-*
+    Verify DaemonSet Status  label=app=nvidia-node-status-exporter  dsname=nvidia-node-status-exporter
+    Verify DaemonSet Status  label=app=nvidia-operator-validator  dsname=nvidia-operator-validator
+    Verify CR Status  crd=NodeFeatureDiscovery  cr_name=ocp-gpu-addon
 
 Verify That Prometheus Image Is A CPaaS Built Image
     [Documentation]    Verifies the images used for prometheus
@@ -122,7 +123,7 @@ Verify Oath-Proxy Image Is fetched From CPaaS
 Verify Pytorch And Tensorflow Can Be Spawned
     [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
     [Tags]    Sanity
-    ...       ODS-480
+    ...       ODS-480  ODS-481
     Verify Cuda Builds Are Completed
     Verify Image Can Be Spawned  image=pytorch  size=Default
     Verify Image Can Be Spawned  image=tensorflow  size=Default
@@ -162,7 +163,7 @@ Verify RHODS Release Version Number
     [Documentation]    Verify RHODS version matches x.y.z-build format
     [Tags]    Sanity
     ...       Tier1
-    ...       ODS-478
+    ...       ODS-478   ODS-472
     ${version} =  Get RHODS Version
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 
@@ -204,6 +205,7 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ...       ODS-385
     ...       ODS-554
     ...       ODS-556
+    ...       ODS-313
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-applications
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-monitoring
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-operator
@@ -296,6 +298,12 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ${project_pods_info}=    Fetch Project Pods Info    ${project}
     FOR    ${pod_info}    IN    @{project_pods_info}
         Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
+        IF    "${project}" == "redhat-ods-applications"
+            Run Keyword If    "cuda-s2i" in "${pod_info['metadata']['name']}"
+            ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
+            Run Keyword If    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
+            ...    Verify Requests Contains Expected Values  cpu=4  memory=8Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
+        END
     END
 
 Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
@@ -315,3 +323,9 @@ Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     OpenShiftLibrary.Oc Patch    kind=ServiceMonitor
     ...                   src={"spec":{"selector":{"matchLabels": {"app":"grafana"}}}}
     ...                   name=rhods-monitor-federation   namespace=redhat-ods-monitoring  type=merge
+
+Verify Requests Contains Expected Values
+    [Documentation]     Verifies cpu and memory requests contain expected values
+    [Arguments]   ${cpu}  ${memory}  ${requests}
+    Should Be Equal As Strings    ${requests['cpu']}  ${cpu}
+    Should Be Equal As Strings    ${requests['memory']}  ${memory}

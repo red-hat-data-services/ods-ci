@@ -31,7 +31,7 @@ ${KAFKA_CLIENT_SECRET}=         "placeholder"
 *** Test Cases ***
 Verify RHOSAK Is Available In RHODS Dashboard Explore Page
     [Documentation]    Checks RHOSAK card is present in RHODS Dashboard > Explore Page
-    [Tags]    Smoke    Sanity
+    [Tags]    Smoke
     ...       ODS-258
     Verify Service Is Available In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Provides "Get Started" Button In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
@@ -53,7 +53,7 @@ Verify User Can Enable RHOSAK from Dashboard Explore Page
 
 Verify User Is Able to Produce and Consume Events
   [Tags]  Tier2
-  ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-241  ODS-239  ODS-242
+  ...     ODS-248  ODS-247  ODS-246  ODS-245  ODS-243  ODS-239  ODS-242
   [Teardown]  Clean Up RHOSAK    stream_to_delete=${STREAM_NAME_TEST}
   ...                            topic_to_delete=${TOPIC_NAME_TEST}
   ...                            sa_clientid_to_delete=${KAFKA_CLIENT_ID}

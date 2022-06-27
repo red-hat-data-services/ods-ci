@@ -4,7 +4,8 @@ Library         OperatingSystem
 Library         Collections
 Library         Process
 Library         String
-
+Library         OpenShiftLibrary
+Suite Setup     Performance Suite Setup
 
 *** Variables ***
 ${NAMESPACE}     openshift-kube-apiserver
@@ -20,7 +21,6 @@ Verify RHODS Performance For Sandbox Onboarding Process
     [Tags]     ODS-1404
     ...        Sandbox
     ...        Performance-Test
-    Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git
     Run Keyword And Continue On Failure    Run Performance Test On RHODS Operator
     Verify Sandbox Toolchain Data
 
@@ -65,8 +65,8 @@ Run Performance Test On RHODS Operator
 
 Verify Sandbox Toolchain Data
     [Documentation]    Compare the memory utilization of kube api server pod
-    ${result}  Run   cat ${EXECDIR}/log.txt | grep "invalid\\|failed"
-    IF    "failed" in $result or "invalid" in $result
+    ${result}  Run   cat ${EXECDIR}/log.txt | grep "invalid\\|failed\\|error"
+    IF    "failed" in $result or "invalid" in $result or "error" in $result
            FAIL    RHODS onboarding script is not executed successfully.Check log for more detail.
     ELSE
            ${k_data}  Run   cat ${EXECDIR}/log.txt | grep -i "openshift-kube-apiserver"
@@ -79,3 +79,10 @@ Verify Sandbox Toolchain Data
                   ...   expected in toolchain result=> ${km_data[0]} : ${m_value}
            END
     END
+
+Performance Suite Setup
+    [Documentation]    Disable CopiedCSVs in OLMConfig to not watch csv created in every namespace
+    ...   since copied CSVs consume an untenable amount of resources, such as OLM’s memory usage,
+    ...   cluster etcd limits, and networking
+    Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
+    Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git

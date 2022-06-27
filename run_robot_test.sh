@@ -278,10 +278,10 @@ fi
 
 
 
-#TODO: Make this optional so we are not creating/updating the virtualenv everytime we run a test
 VENV_ROOT=${currentpath}/venv
-#setup virtualenv
-python3 -m venv ${VENV_ROOT}
+if [[ ! -d "${VENV_ROOT}" ]]; then
+  python3 -m venv ${VENV_ROOT}
+fi
 source ${VENV_ROOT}/bin/activate
 
 if [[ ${SKIP_PIP_INSTALL} -eq 0 ]]; then

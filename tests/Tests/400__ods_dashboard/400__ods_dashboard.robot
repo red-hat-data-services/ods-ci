@@ -9,6 +9,7 @@ Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource        ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -32,6 +33,17 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ...                                     Securing a deployed model using Red Hat OpenShift API Management
 @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
 ...                                     PerceptiLabs
+@{IMAGES}                               PyTorch  TensorFlow  CUDA
+@{BUILDS_TO_BE_DELETED}                 pytorch  tensorflow  minimal  cuda-s2i-thoth
+@{BUILD_CONFIGS}                        11.4.2-cuda-s2i-base-ubi8    11.4.2-cuda-s2i-core-ubi8
+...                                     11.4.2-cuda-s2i-py38-ubi8    11.4.2-cuda-s2i-thoth-ubi8-py38
+...                                     s2i-minimal-gpu-cuda-11.4.2-notebook  s2i-pytorch-gpu-cuda-11.4.2-notebook
+...                                     s2i-tensorflow-gpu-cuda-11.4.2-notebook
+@{BUILDS_TO_BE_CHECKED}                 cuda-s2i-base    cuda-s2i-core    cuda-s2i-py    cuda-s2i-thoth
+...                                     minimal    pytorch  tensorflow
+${openvino_appname}           ovms
+${openvino_container_name}    OpenVINO
+${openvino_operator_name}     OpenVINO Toolkit Operator
 
 
 *** Test Cases ***
@@ -88,6 +100,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     [Tags]    Sanity
     ...       ODS-1097   ODS-357
+    ...       FlakyTest
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard JupyterHub Is Visible
@@ -158,6 +171,23 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
+Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
+    [Documentation]    Verifies that Notifications are shown when Notebook Builds are finished and atleast one fails
+    [Tags]    Sanity
+    ...       ODS-470  ODS-718
+    Clear Dashboard Notifications
+    ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
+    Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
+    ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
+    ${failed_build_name}=  Provoke Image Build Failure    namespace=redhat-ods-applications
+    ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
+    ...    container_to_kill=sti-build
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
+    Verify Notifications After Build Is Complete  
+    Verify RHODS Notification After Logging Out
+    [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
+
 Verify Favorite Resource Cards
     [Tags]    ODS-389    ODS-384
     ...       Tier1
@@ -187,6 +217,35 @@ Verify Favorite Resource Cards
     Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    application
     Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    duration
     [Teardown]    Remove Items From favorites    @{favorite_ids}
+
+Verify Notifications Are Shown When Notebook Builds Have Not Started
+    [Documentation]     Verifies that Notifications are shown in RHODS Dashboard when Notebook builds haven't started
+    [Tags]    Tier3
+    ...       ODS-1347
+    ...       Execution-Time-Over-30m
+    Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
+    ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
+    Verify Notification Saying Notebook Builds Not Started
+    Clear Dashboard Notifications
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${last_cuda_build}  expected_status=Complete
+    Remove Values From List    ${IMAGES}  CUDA
+    Verify Notification Saying Notebook Builds Not Started
+    RHODS Notification Drawer Should Contain    message=Notebook images are building
+    RHODS Notification Drawer Should Not Contain    message=CUDA
+    [Teardown]   Wait Until Remaining Builds Are Complete And Close Browser
+    
+Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninstalled
+   [Documentation]     Verify "Enabled" keeps being available after one of the ISV operators if uninstalled
+   [Tags]      Sanity
+   ...         ODS-1491
+   ...         Tier1
+   ...         ProductBug
+   Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
+   Close All Browsers
+   Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
+   Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
+   [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
+
 
 *** Keywords ***
 Favorite Items Should Be Listed First
@@ -268,18 +327,10 @@ Verify JupyterHub Card CSS Style
     [Documentation]    Compare the some CSS properties of the Explore page
     ...    with the expected ones. The expected values change based
     ...    on the RHODS version
-    ${version-check}=    Is RHODS Version Greater Or Equal Than    1.7.0
-    IF    ${version-check}==True
-        CSS Property Value Should Be    locator=//pre
-        ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
-        CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-        ...    property=margin-bottom    exp_value=8px
-    ELSE
-        CSS Property Value Should Be    locator=//pre
-        ...    property=background-color    exp_value=rgba(245, 245, 245, 1)
-        CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
-        ...    property=margin-bottom    exp_value=10px
-    END
+    CSS Property Value Should Be    locator=//pre
+    ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
+    CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
+    ...    property=margin-bottom    exp_value=8px
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-size    exp_value=24px
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
@@ -398,3 +449,70 @@ Verify Anaconda Success Message Based On Version
     ELSE
         Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME_LATEST}
     END
+
+Verify RHODS Notification After Logging Out
+    [Documentation]     Logs out from RHODS Dashboard and then relogin to check notifications
+    Go To    ${ODH_DASHBOARD_URL}
+    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    RHODS Notification Drawer Should Contain  message=Notebook image build TensorFlow failed
+
+Restart Failed Build and Close Browser
+    [Documentation]     Deletes failed build and starts new build , Closes All Browsers
+    [Arguments]     ${failed_build_name}  ${build_config}
+    Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=${build_config}
+    Dashboard Test Teardown
+
+Verify Notifications After Build Is Complete
+    [Documentation]  Verifies Notifications after build status is complete
+    RHODS Notification Drawer Should Contain  message=builds completed successfully
+    RHODS Notification Drawer Should Contain  message=TensorFlow build image failed
+    RHODS Notification Drawer Should Contain  message=Contact your administrator to retry failed images
+
+Verify Notification Saying Notebook Builds Not Started
+    [Documentation]     Verifies RHODS Notification Drawer Contains Names of Image Builds which have not started
+    Sleep  2min  reason=Wait For Notifications
+    Reload Page
+    RHODS Notification Drawer Should Contain    message=These notebook image builds have not started:
+    FOR    ${image}    IN    @{IMAGES}
+        RHODS Notification Drawer Should Contain    message=${image}
+    END
+
+Wait Until Remaining Builds Are Complete And Close Browser
+    [Documentation]     Waits Until Remaining builds have Status as Complete and Closes Browser
+    Go To  url=${OCP_CONSOLE_URL}
+    Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
+    Rebuild Missing Or Failed Builds  builds=${BUILDS_TO_BE_CHECKED}  build_configs=${BUILD_CONFIGS}  namespace=redhat-ods-applications
+    Dashboard Test Teardown
+
+Verify Operator Is Added On ODS Dashboard
+    [Documentation]     It checks operator is present on ODS Dashboard in Enabled section
+    [Arguments]         ${operator_name}
+    Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    Wait Until Keyword Succeeds    10x    1m    Verify Service Is Enabled  app_name=${operator_name}
+    Close Browser
+
+Uninstall Operator And Check Enabled Page Is Rendering
+    [Documentation]    Uninstall Operator And Check Enabled Page(ODS) Is Rendering, Not shwoing "Error loading components"
+    [Arguments]     ${operator_name}    ${operator_appname}
+    Open Installed Operators Page
+    Uninstall Operator    ${operator_name}
+    Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    Page Should Not Contain    Error loading components
+
+Check And Uninstall Operator In Openshift
+    [Documentation]     it checks operator is uninstalled if not then uninstall it
+    [Arguments]       ${operator_name}    ${operator_appname}   ${expected_number_operator}=2
+    ${status}       Check If Operator Is Already Installed In Opneshift    ${operator_name}
+    IF  ${status}
+        Open OperatorHub
+        ${actual_no_of_operator}    Get The Number of Operator Available    ${operator_appname}
+        IF  ${actual_no_of_operator} == ${expected_number_operator}
+            Uninstall Operator    ${operator_name}
+        ELSE
+            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Opearatorhub
+
+        END
+    END
+    Close All Browsers

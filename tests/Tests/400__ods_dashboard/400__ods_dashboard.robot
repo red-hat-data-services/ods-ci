@@ -184,7 +184,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
-    Verify Notifications After Build Is Complete  
+    Verify Notifications After Build Is Complete
     Verify RHODS Notification After Logging Out
     [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
 
@@ -221,7 +221,7 @@ Verify Favorite Resource Cards
 Verify Notifications Are Shown When Notebook Builds Have Not Started
     [Documentation]     Verifies that Notifications are shown in RHODS Dashboard when Notebook builds haven't started
     [Tags]    Tier3
-    ...       ODS-1347
+    ...       ODS-1347  ODS-444
     ...       Execution-Time-Over-30m
     Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
@@ -233,7 +233,7 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     RHODS Notification Drawer Should Contain    message=Notebook images are building
     RHODS Notification Drawer Should Not Contain    message=CUDA
     [Teardown]   Wait Until Remaining Builds Are Complete And Close Browser
-    
+
 Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninstalled
    [Documentation]     Verify "Enabled" keeps being available after one of the ISV operators if uninstalled
    [Tags]      Sanity

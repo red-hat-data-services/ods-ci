@@ -1,5 +1,6 @@
 *** Settings ***
 Library         OpenShiftCLI
+Library         OpenShiftLibrary
 Resource        ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource        ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
@@ -10,6 +11,7 @@ Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource        ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Suite Setup     Dashboard Suite Setup
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -44,6 +46,8 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ${openvino_appname}           ovms
 ${openvino_container_name}    OpenVINO
 ${openvino_operator_name}     OpenVINO Toolkit Operator
+${CUSTOM_EMPTY_GROUP}                   empty-group
+${CUSTOM_INEXISTENT_GROUP}              inexistent-group
 
 
 *** Test Cases ***
@@ -184,7 +188,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
-    Verify Notifications After Build Is Complete  
+    Verify Notifications After Build Is Complete
     Verify RHODS Notification After Logging Out
     [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
 
@@ -233,7 +237,7 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     RHODS Notification Drawer Should Contain    message=Notebook images are building
     RHODS Notification Drawer Should Not Contain    message=CUDA
     [Teardown]   Wait Until Remaining Builds Are Complete And Close Browser
-    
+
 Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninstalled
    [Documentation]     Verify "Enabled" keeps being available after one of the ISV operators if uninstalled
    [Tags]      Sanity
@@ -246,8 +250,202 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
    [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
 
+Verify Error Message In Logs When A RHODS Group Is Empty
+    [Tags]  Sanity
+    ...     Tier1
+    ...     ODS-1408
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when an empty group
+    ...                 is set as admin in "rhods-group-config" ConfigMap
+    [Setup]     Set Variables For Group Testing
+    Create Group    group_name=${CUSTOM_EMPTY_GROUP}
+    ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
+    Set RHODS Admins Group Empty Group
+    Logs Of Dashboard Pods Should Not Contain New Lines     lengths_dict=${lengths_dict_before}
+    Set Default Groups And Check Logs Do Not Change   delete_group=${FALSE}
+    Set RHODS Users Group Empty Group
+    Logs Of Dashboard Pods Should Not Contain New Lines    lengths_dict=${lengths_dict_before}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change     delete_group=${TRUE}
+
+Verify Error Message In Logs When A RHODS Group Does Not Exist
+    [Tags]  Sanity
+    ...     Tier1
+    ...     ODS-1494
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when an inexistent group
+    ...                 is set as admin in "rhods-group-config" ConfigMap
+    [Setup]     Set Variables For Group Testing
+    ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
+    Set RHODS Admins Group To Inexistent Group
+    ${lengths_dict_after}=  New Lines In Logs Of Dashboard Pods Should Contain
+    ...     exp_msg=${EXP_ERROR_INEXISTENT_GRP}
+    ...     prev_logs_lengths=${lengths_dict_before}
+    Set Default Groups And Check Logs Do Not Change
+    Set RHODS Users Group To Inexistent Group
+    Logs Of Dashboard Pods Should Not Contain New Lines    lengths_dict=${lengths_dict_after}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change
+
+Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admins
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when 'system:authenticated'
+    ...                 is set as admin in "rhods-group-config" ConfigMap
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-1500
+    [Setup]     Set Variables For Group Testing
+    ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
+    Set RHODS Admins Group To system:authenticated
+    ${lengths_dict_after}=    New Lines In Logs Of Dashboard Pods Should Contain
+    ...     exp_msg=${EXP_ERROR_SYS_AUTH}
+    ...     prev_logs_lengths=${lengths_dict_before}
+    [Teardown]      Set Default Groups And Check Logs Do Not Change
+
+Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when "rhods-groups-config"
+    ...                 ConfigMap does not exist
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-1495
+    [Setup]     Set Variables For Group Testing
+    ${groups_configmaps_dict}=     Get ConfigMaps For RHODS Groups Configuration
+    ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
+    Delete RHODS Config Map     name=${RHODS_GROUPS_CONFIG_CM}
+    ${lengths_dict_after}=      New Lines In Logs Of Dashboard Pods Should Contain
+    ...     exp_msg=${EXP_ERROR_MISSING_RGC}
+    ...     prev_logs_lengths=${lengths_dict_before}
+    [Teardown]      Restore Group ConfigMaps And Check Logs Do Not Change     cm_yamls=${groups_configmaps_dict}
+
 
 *** Keywords ***
+Set Variables For Group Testing
+    [Documentation]     Sets the suite variables used by the test cases for checking
+    ...                 Dashboard logs about rhods groups
+    Set Standard RHODS Groups Variables
+    Set Suite Variable      ${EXP_ERROR_INEXISTENT_GRP}      Error: Failed to retrieve Group ${CUSTOM_INEXISTENT_GROUP}, might not exist.
+    Set Suite Variable      ${EXP_ERROR_SYS_AUTH}      Error: It is not allowed to set system:authenticated or an empty string as admin group.
+    Set Suite Variable      ${EXP_ERROR_MISSING_RGC}      Error: Failed to retrieve ConfigMap ${RHODS_GROUPS_CONFIG_CM}, might be malformed or doesn't exist.
+    ${dash_pods_name}=   Get Dashboard Pods Names
+    Set Suite Variable    ${DASHBOARD_PODS_NAMES}  ${dash_pods_name}
+
+Restore Group ConfigMap And Check Logs Do Not Change
+    [Documentation]    Creates the given configmap and checks the logs of Dashboard
+    ...                pods do not show new lines
+    [Arguments]   ${cm_yaml}
+    ${clean_yaml}=    Clean Resource YAML Before Creating It    ${cm_yaml}
+    Log    ${clean_yaml}
+    OpenShiftLibrary.Oc Create    kind=ConfigMap    src=${clean_yaml}   namespace=redhat-ods-applications
+    ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
+    Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
+
+Restore Group ConfigMaps And Check Logs Do Not Change
+    [Documentation]    Creates the given configmaps and checks the logs of Dashboard
+    ...                pods do not show new lines after restoring each of the given CMs
+    [Arguments]    ${cm_yamls}
+    ${cm_dicts}=      Run Keyword And Continue On Failure    Get ConfigMaps For RHODS Groups Configuration
+    FOR    ${key}    IN   @{cm_dicts.keys()}
+        ${cm}=    Get From Dictionary    dictionary=${cm_dicts}    key=${key}
+        ${null}=    Run Keyword And Return Status   Should Be Equal     ${cm}   ${EMPTY}
+        IF   ${null} == ${TRUE}
+            Restore Group ConfigMap And Check Logs Do Not Change    cm_yaml=${cm_yamls}[${key}]
+        END
+    END
+
+Get Lengths Of Dashboard Pods Logs
+    [Documentation]     Computes the number of lines present in the logs of both the dashboard pods
+    ...                 and returns them as dictionary
+    ${lengths_dict}=    Create Dictionary
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
+        Log    ${pod_name}
+        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pod Logs     pod_name=${pod_name}
+        Set To Dictionary   ${lengths_dict}     ${pod_name}  ${n_lines}
+    END
+    [Return]    ${lengths_dict}
+
+New Lines In Logs Of Dashboard Pods Should Contain
+    [Documentation]     Verifies that newly generated lines in the logs contain the given message
+    [Arguments]     ${exp_msg}      ${prev_logs_lengths}
+    &{new_logs_lengths}=   Create Dictionary
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
+        Log    ${pod_name}
+        ${pod_log_lines_new}    ${n_lines_new}=   Wait Until New Log Lines Are Generated In A Dashboard Pod
+        ...     prev_length=${prev_logs_lengths}[${pod_name}]  pod_name=${pod_name}
+        Set To Dictionary   ${new_logs_lengths}     ${pod_name}    ${n_lines_new}
+        Log     ${pod_log_lines_new}
+        FOR    ${line_idx}    ${line}    IN ENUMERATE    @{pod_log_lines_new}
+            Run Keyword And Continue On Failure     Should Contain   container=${line}
+            ...     item=${exp_msg}
+        END
+    END
+    [Return]    ${new_logs_lengths}
+
+Wait Until New Log Lines Are Generated In A Dashboard Pod
+    [Documentation]     Waits until new messages in the logs are generated
+    [Arguments]     ${prev_length}  ${pod_name}  ${retries}=10    ${retries_interval}=3s
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pod Logs     pod_name=${pod_name}
+        Log     ${n_lines} vs ${prev_length}
+        ${equal_flag}=     Run Keyword And Return Status    Should Be True     "${n_lines}" > "${prev_length}"
+        Exit For Loop If    $equal_flag == True
+        Sleep    ${retries_interval}
+    END
+    IF    $equal_flag == False
+        Fail    Something got wrong. Check the logs
+    END
+    [Return]    ${pod_logs_lines}[${prev_length}:]     ${n_lines}
+
+Set RHODS Admins Group Empty Group
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
+    Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+
+Set RHODS Admins Group To system:authenticated    # robocop:disable
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
+    Set Access Groups Settings    admins_group=system:authenticated
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+
+Set RHODS Users Group Empty Group
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${CUSTOM_EMPTY_GROUP}   groups_modified_flag=true
+
+Set RHODS Admins Group To Inexistent Group
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given inexistent group
+    Set Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+
+Set RHODS Users Group To Inexistent Group
+    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    ...                 to the given inexistent group
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${CUSTOM_INEXISTENT_GROUP}   groups_modified_flag=true
+
+Set Default Groups And Check Logs Do Not Change
+    [Documentation]     Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "rhods-groups-config"
+    ...                 ConfigMap and checks if no new lines are generated in the logs after that.
+    [Arguments]     ${delete_group}=${FALSE}
+    ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+    Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
+    IF  "${delete_group}" == "${TRUE}"
+        Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
+    END
+
+Logs Of Dashboard Pods Should Not Contain New Lines
+    [Documentation]     Checks if no new lines are generated in the logs after that.
+    [Arguments]     ${lengths_dict}
+    FOR    ${index}    ${pod_name}    IN ENUMERATE    @{DASHBOARD_PODS_NAMES}
+        ${new_lines_flag}=  Run Keyword And Return Status
+        ...                 Wait Until New Log Lines Are Generated In A Dashboard Pod
+        ...                 prev_length=${lengths_dict}[${pod_name}]  pod_name=${pod_name}
+        Run Keyword And Continue On Failure     Should Be Equal     ${new_lines_flag}   ${FALSE}
+    END
+
 Favorite Items Should Be Listed First
     [Documentation]    Compares the ids and checks that favorite Items
     ...                are listed first
@@ -348,10 +546,12 @@ Check OpenShift Login Visible
     END
 
 Dashboard Test Setup
-    Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+
+Dashboard Suite Setup
+    Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
 
 Dashboard Test Teardown
     Close All Browsers

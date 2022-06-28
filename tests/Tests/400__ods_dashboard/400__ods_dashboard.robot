@@ -10,6 +10,7 @@ Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource        ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Test Setup      Dashboard Test Setup
 Test Teardown   Dashboard Test Teardown
 
@@ -184,7 +185,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
-    Verify Notifications After Build Is Complete  
+    Verify Notifications After Build Is Complete
     Verify RHODS Notification After Logging Out
     [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
 
@@ -233,7 +234,7 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     RHODS Notification Drawer Should Contain    message=Notebook images are building
     RHODS Notification Drawer Should Not Contain    message=CUDA
     [Teardown]   Wait Until Remaining Builds Are Complete And Close Browser
-    
+
 Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninstalled
    [Documentation]     Verify "Enabled" keeps being available after one of the ISV operators if uninstalled
    [Tags]      Sanity
@@ -250,20 +251,12 @@ Verify external links in Quick Starts are not broken
         [Tags]    Tier1
         ...       ODS-1305
         [Documentation]    Verify external links in Quick Starts are not broken
-        Click Link    Resources
+        Click Link                          Resources
         Wait Until Resource Page Is Loaded
-        Wait Until Element Is Visible   xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
-        ${qucickStartElements}=   Get WebElements    xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
-        Scroll Element Into View   xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
-        FOR    ${quickstartTile}    IN     @{qucickStartElements}
-            Click Element  ${quickstartTile}
-            Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
-            ${sideWindowButtons}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
-
-            Get Urls and validation of quickStrat Tiles
-            # Click Restrat Button
-            Click Element  //*[@class="pf-c-button pf-m-link pfext-quick-start-footer__restartbtn"]
-        END
+        ${qucickStartElements}=     Wait for QuickStart to Load
+        # Select Quick Start Checkbox
+        Select Checkbox                         xpath=//*[@id="quickstart--check-box"]
+        Verify Brokern Links in Quickstart      ${qucickStartElements}
 
 *** Keywords ***
 Favorite Items Should Be Listed First
@@ -536,19 +529,24 @@ Check And Uninstall Operator In Openshift
     Close All Browsers
 
 Validate URls
-    [Documentation]   validates  urls
-    [Arguments]  ${urls}
-    FOR  ${url}   IN   ${urls}
-        Log To Console  ${url}
-        ${status}=    Check HTTP Status Code    link_to_check=${url}
-        Log To Console     ${url}  gets status code ${status}
+    [Documentation]   Validates  urls
+    [Arguments]     ${urls}
+    FOR  ${url}   IN   @{urls}
+        ${status}=          Check HTTP Status Code    link_to_check=${url}
+        Log To Console     ${url} gets status code ${status}
     END
 
 Get Urls and validation of quickStrat Tiles
     [Documentation]     Clicks on the side window and  validate all Url
     ${sideWindowButtons}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
-    FOR    ${sideWindowButton}    IN     @{sideWindowButtons}
 
+    ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
+    @{href_list}=       Evaluate           [item.get_attribute('href') for item in $element_list]
+    IF  ${href_list}
+        Validate URls   ${href_list}
+    END
+    FOR    ${sideWindowButton}    IN     @{sideWindowButtons}
+            # Sometimes it's not able to click side window button so we are checking for false
             ${status}   Run Keyword And Return Status   Click Element  ${sideWindowButton}
             IF  ${status} == False
                 Click Button    Next
@@ -559,9 +557,29 @@ Get Urls and validation of quickStrat Tiles
             END
             Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
 
-            # get all urls from the  side windows
-            ${status}   ${urls}    Run Keyword And Ignore Error   Get Element Attribute    //div[@Class="pf-c-drawer__panel-main"]//a[@rel="noopener noreferrer"]    href
-            Run Keyword IF      '${status}'=='FAIL'   Continue For Loop
+            ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
+            @{href_list}=       Evaluate           [item.get_attribute('href') for item in $element_list]
 
-            Validate URls   ${urls}
+            IF  ${href_list}
+                Validate URls   ${href_list}
+            ELSE
+                Log To Console    No Link Found
+            END
+    END
+
+Verify Brokern Links in Quickstart
+    [Documentation]     Clicks on al the quick start and verify links
+    [Arguments]    ${qucickStartElements}
+    ${qucikStartCount}=   Get Length           ${qucickStartElements}
+    ${TitleElements}=     Get WebElements      //div[@class="pf-c-card__title odh-card__doc-title"]
+    FOR    ${counter}    IN RANGE     ${qucikStartCount}
+        Log To Console    "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        ${Titel}=   Get Text          ${TitleElements[${counter}]}
+        ${Titel}=   Split To Lines    ${Titel}
+        Log To Console                ${Titel[${0}]}
+        Click Element                 ${qucickStartElements[${counter}]}
+        Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
+        Get Urls and validation of quickStrat Tiles
+        # Click Restrat Button
+        Click Element  //*[@class="pf-c-button pf-m-link pfext-quick-start-footer__restartbtn"]
     END

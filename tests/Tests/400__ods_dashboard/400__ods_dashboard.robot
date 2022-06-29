@@ -247,16 +247,6 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
    [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
 
-Verify external links in Quick Starts are not broken
-        [Tags]    Tier1
-        ...       ODS-1305
-        [Documentation]    Verify external links in Quick Starts are not broken
-        Click Link                          Resources
-        Wait Until Resource Page Is Loaded
-        ${qucickStartElements}=     Wait for QuickStart to Load
-        # Select Quick Start Checkbox
-        Select Checkbox                         xpath=//*[@id="quickstart--check-box"]
-        Verify Brokern Links in Quickstart      ${qucickStartElements}
 
 *** Keywords ***
 Favorite Items Should Be Listed First
@@ -404,9 +394,6 @@ Verify The Resources Are Filtered
         List Should Contain Value    ${list_of_items}    ${texts}[${index_of_text}]
     END
 
-Wait Until Resource Page Is Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
-
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled
     Select Checkbox Using Id    enabled-filter-checkbox--check-box
@@ -527,59 +514,3 @@ Check And Uninstall Operator In Openshift
         END
     END
     Close All Browsers
-
-Validate URls
-    [Documentation]   Validates  urls
-    [Arguments]     ${urls}
-    FOR  ${url}   IN   @{urls}
-        ${status}=          Check HTTP Status Code    link_to_check=${url}
-        Log To Console     ${url} gets status code ${status}
-    END
-
-Get Urls and validation of quickStrat Tiles
-    [Documentation]     Clicks on the side window and  validate all Url
-    ${sideWindowButtons}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
-
-    ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-    @{href_list}=       Evaluate           [item.get_attribute('href') for item in $element_list]
-    IF  ${href_list}
-        Validate URls   ${href_list}
-    END
-    FOR    ${sideWindowButton}    IN     @{sideWindowButtons}
-            # Sometimes it's not able to click side window button so we are checking for false
-            ${status}   Run Keyword And Return Status   Click Element  ${sideWindowButton}
-            IF  ${status} == False
-                Click Button    Next
-            END
-
-            FOR    ${counter}    IN RANGE    5
-                Press Keys    NONE    TAB
-            END
-            Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
-
-            ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-            @{href_list}=       Evaluate           [item.get_attribute('href') for item in $element_list]
-
-            IF  ${href_list}
-                Validate URls   ${href_list}
-            ELSE
-                Log To Console    No Link Found
-            END
-    END
-
-Verify Brokern Links in Quickstart
-    [Documentation]     Clicks on al the quick start and verify links
-    [Arguments]    ${qucickStartElements}
-    ${qucikStartCount}=   Get Length           ${qucickStartElements}
-    ${TitleElements}=     Get WebElements      //div[@class="pf-c-card__title odh-card__doc-title"]
-    FOR    ${counter}    IN RANGE     ${qucikStartCount}
-        Log To Console    "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-        ${Titel}=   Get Text          ${TitleElements[${counter}]}
-        ${Titel}=   Split To Lines    ${Titel}
-        Log To Console                ${Titel[${0}]}
-        Click Element                 ${qucickStartElements[${counter}]}
-        Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
-        Get Urls and validation of quickStrat Tiles
-        # Click Restrat Button
-        Click Element  //*[@class="pf-c-button pf-m-link pfext-quick-start-footer__restartbtn"]
-    END

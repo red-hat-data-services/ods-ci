@@ -348,13 +348,3 @@ Reboot Cluster Node
     [Arguments]    ${node}
     Run    oc debug node/"${node}" -T -- sh -c "echo b > /proc/sysrq-trigger"
 
-Verify ODS Availability
-    [Documentation]    Verifies that there is no downtime in ODS
-    ...    Returns:
-    ...        None
-    ${expression}=    Set Variable    rhods_aggregate_availability[10m : 1m]
-    ${resp}=    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
-    @{values}=    Set Variable    ${resp.json()["data"]["result"][0]["values"]}
-    FOR    ${value}    IN    @{values}
-        Should Not Be Equal As Strings    ${value}[1]    0
-    END

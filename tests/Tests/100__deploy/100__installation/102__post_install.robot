@@ -220,7 +220,7 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
 Verify Node Failures Are Handled
     [Documentation]    Verifies if ODS is prepared to handle node failures
     [Tags]    Sanity
-    ...       Tier2
+    ...       Tier3
     ...       ODS-568
     ...       ProductBug
     @{cluster_nodes_info}=    Fetch Cluster Worker Nodes Info

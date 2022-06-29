@@ -179,6 +179,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     [Documentation]    Verifies that Notifications are shown when Notebook Builds are finished and atleast one fails
     [Tags]    Sanity
     ...       ODS-470  ODS-718
+    ...       FlakyTest
     Clear Dashboard Notifications
     ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
     Delete Build    namespace=redhat-ods-applications    build_name=${build_name}

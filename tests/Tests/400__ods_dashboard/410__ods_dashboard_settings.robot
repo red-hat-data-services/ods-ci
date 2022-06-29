@@ -39,6 +39,7 @@ Verify That "Usage Data Collection" Can Be Set In "Cluster Settings"
     [Tags]    Tier1
     ...       Sanity
     ...       ODS-1218
+    ...       FlakyTest
     Open ODS Dashboard With Admin User
     Verify Cluster Settings Is Available
     ODHDashboard.Enable "Usage Data Collection"

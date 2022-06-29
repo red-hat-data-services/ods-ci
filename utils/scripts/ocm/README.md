@@ -4,7 +4,7 @@ Script to provision Openshift Dedicated (OSD) cluster on AWS and with other func
 # Prerequisites
 - Python 3.x
 - [Install ocm cli](#Install%20OCM-CLI)
-- access_key and secret_access_key for the AWS account user *ocdCcsAdmin*
+- access_key and secret_access_key for the "osdCcsAdmin" AWS Identity and Access Management (IAM) user with the AdministratorAccess
 
 Follow the below instructions to install ocm cli, if already installed skip to [Instructions](#Instructions) section
 

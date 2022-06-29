@@ -48,6 +48,7 @@ OCM Suite Setup
 
 OCM Suite Teardown
   Close All Browsers
+  RHOSi Teardown
 
 OCM Test Setup
   [Documentation]   Setup for ODH in Openshift Installation Test Cases

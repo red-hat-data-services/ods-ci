@@ -558,19 +558,31 @@ Dashboard Test Teardown
     Close All Browsers
 
 Check GPU Resources
-    ${version-check}=    Is RHODS Version Greater Or Equal Than    1.9.0
-    IF    ${version-check}==True
-        ${elements}=    Get WebElements    //article
-        ${len}=    Get Length    ${elements}
-        Should Be Equal As Integers    ${len}    1
-        Page Should Contain Element    //article[@id="python-gpu-numba-tutorial"]
-        Page Should Contain Element    //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
+    [Documentation]   Check resource tiles for GPU is present
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.13.0
+    ${elements}=    Get WebElements    //article
+    @{gpu_re_id}=    Create List  'gpu-enabled-notebook-quickstart'   'python-gpu-numba-tutorial'
+    ...    'gpu-quickstart'     'nvidia-doc'
+    @{gpu_re_link}=   Create List   '#'  'https://github.com/ContinuumIO/gtc2018-numba'   '#'
+    ...   'https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/openshift/contents.html'
+    ${len}=    Get Length    ${elements}
+    IF    ${version_check}==True
+        Should Be Equal As Integers    ${len}    4
+        FOR    ${counter}    IN RANGE    ${len}
+           Page Should Contain Element    //article[@id=${gpu_re_id}[${counter}]]
+           IF    ${gpu_re_link}[${counter}] == '#'
+                 ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
+                 ${no_of_open_link}=    Get Length    ${counter}
+                 Run Keyword IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
+                 ...        ELSE    Fail     Mismatch on the number of GPU tile present with 'Open' link.Please check the RHODS dashboard.  #robocop disable
+           ELSE
+                 Page Should Contain Element    //a[@href=${gpu_re_link}[${counter}]]
+           END
+        END
     ELSE
-        ${elements}=    Get WebElements    //article
-        ${len}=    Get Length    ${elements}
-        Should Be Equal As Integers    ${len}    0
-        Page Should Not Contain Element    //article[@id="python-gpu-numba-tutorial"]
-        Page Should Not Contain Element    //a[@href="https://github.com/ContinuumIO/gtc2018-numba"]
+        Should Be Equal As Integers    ${len}    1
+        Page Should Contain Element    //article[@id=${gpu_re_id}[1]]
+        Page Should Contain Element    //a[@href=${gpu_re_link}[1]]
     END
 
 Select Checkbox Using Id

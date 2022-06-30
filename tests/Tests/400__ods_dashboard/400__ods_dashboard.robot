@@ -574,6 +574,7 @@ Check GPU Resources
                  ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
                  ${no_of_open_link}=    Get Length    ${counter}
                  Run Keyword IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
+                 ...        ELSE    Fail     Mismatch on the number of GPU tile present with 'Open' link.Please check the RHODS dashboard.  #robocop disable
            ELSE
                  Page Should Contain Element    //a[@href=${gpu_re_link}[${counter}]]
            END

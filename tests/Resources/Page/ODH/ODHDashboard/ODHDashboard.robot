@@ -378,13 +378,21 @@ Save Changes In Cluster Settings
 
 Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
-    Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
-    Save Changes In Cluster Settings
+    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
+    ...    ${USAGE_DATA_COLLECTION_XP}
+    IF    ${is_data_collection_enabled}==False
+        Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+        Save Changes In Cluster Settings
+    END
 
 Disable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
-    Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
-    Save Changes In Cluster Settings
+    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
+    ...    ${USAGE_DATA_COLLECTION_XP}
+    IF    ${is_data_collection_enabled}==True
+        Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
+        Save Changes In Cluster Settings
+    END
 
 Search Items In Resources Section
     [Arguments]     ${element}

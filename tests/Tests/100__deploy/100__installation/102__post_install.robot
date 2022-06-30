@@ -168,10 +168,9 @@ Verify RHODS Release Version Number
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 
 Verify Users Can Update Notification Email After Installing RHODS With The AddOn Flow
-    [Documentation]    Vrifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
+    [Documentation]    Verifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
     [Tags]    Tier2
     ...       ODS-673
-    ...       ProductBug
     ...       Deployment-AddOnFlow
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL

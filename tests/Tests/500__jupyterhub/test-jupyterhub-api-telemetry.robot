@@ -10,6 +10,7 @@ Test Setup    Test Suite For Web
 *** Test Cases ***
 Verify Telemetry Data Is Accessible
     [Tags]  Sanity
+    ...     Tier1
     ...     ODS-347
     Usage Data Collection Should Be Enabled
     Load JupyterHub API Page

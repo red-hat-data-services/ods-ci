@@ -30,8 +30,9 @@ TEST_USER_4:
   USERNAME: foo-user4
   PASSWORD: foo-passwd4
 SERVICE_ACCOUNT:
-  NAME: test-sa
-  FULL_NAME: "system:serviceaccount:<namespace>:<sa_name>"
+  NAME: <sa_name>
+  FULL_NAME: <sa_full_name>
+  # FULL_NAME in the format of "system:serviceaccount:<namespace>:<sa_name>"
 S3:
   AWS_ACCESS_KEY_ID: ID-value
   AWS_SECRET_ACCESS_KEY: Secret-Key

@@ -150,7 +150,7 @@ Go To RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.11.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.13.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE

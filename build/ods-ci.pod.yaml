@@ -23,7 +23,13 @@ spec:
     fsGroup: 0
   serviceAccountName: rhods-test-runner
   containers:
-
+    - resources:
+        limits:
+          cpu: 300m
+          memory: 500Mi
+        requests:
+          cpu: 150m
+          memory: 250Mi
     - image: <INSERT URL TO YOUR BUILT IMAGE>
       imagePullPolicy: Always
       name: ods-ci-testrun

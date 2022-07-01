@@ -38,6 +38,7 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    Go To RHODS Dashboard
    Verify Service Is Enabled          ${openvino_container_name}
    Verify JupyterHub Can Spawn Openvino Notebook
+   Image Should Be Pinned To A Numeric Version
    Verify Git Plugin
    [Teardown]   Remove Openvino Operator
 

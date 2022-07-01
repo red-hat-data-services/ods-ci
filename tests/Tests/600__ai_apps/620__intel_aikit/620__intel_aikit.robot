@@ -31,6 +31,7 @@ Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    ...      ODS-760
    ...      ODS-1237
    ...      ODS-715
+   ...      ODS-1247
    [Documentation]  This Test Case Installed Intel AIKIT operator in Openshift cluster
    ...              Check and Launch AIKIT notebook image from RHODS dashboard
    Check And Install Operator in Openshift    ${intel_aikit_container_name}    ${intel_aikit_appname}

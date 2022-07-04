@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation       Test suite testing ODS Metrics related to billing
 Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
@@ -9,7 +10,8 @@ Resource            ../../../Resources/OCP.resource
 Library             JupyterLibrary
 Library             SeleniumLibrary
 
-Suite Setup          Billing Metrics Suite Setup
+Suite Setup         Billing Metrics Suite Setup
+Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
@@ -22,7 +24,7 @@ ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:se
 Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
     [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries
     [Tags]    Smoke
-    ...       Sanity
+    ...       Tier1
     ...       ODS-173
     Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}    retry_attempts=1
     Metrics.Verify Query Results Dont Contain Data
@@ -31,7 +33,7 @@ Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
 Test Billing Metric (Notebook Cpu Usage) On OpenShift Monitoring
     [Documentation]     Run notebook for 5 min and checks CPU usage is greater than zero
     [Tags]    Smoke
-    ...       Sanity
+    ...       Tier1
     ...       ODS-175
     Run Jupyter Notebook For 5 Minutes
     Verify Previus CPU Usage Is Greater Than Zero

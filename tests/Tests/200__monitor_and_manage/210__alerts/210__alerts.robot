@@ -11,6 +11,7 @@ Library             JupyterLibrary
 Library             OpenShiftCLI
 
 Suite Setup         Alerts Suite Setup
+Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***

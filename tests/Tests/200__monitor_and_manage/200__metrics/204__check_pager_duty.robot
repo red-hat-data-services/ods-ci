@@ -16,7 +16,7 @@ Library        OpenShiftCLI
 Resource       ../../../Resources/RHOSi.resource
 
 Suite Setup     RHOSi Setup
-
+Suite Teardown  RHOSi Teardown
 
 
 *** Variables ***
@@ -36,10 +36,11 @@ PagerDuty Dummy Secret Verification
      ${secret_key}    Get PagerDuty Key From Secrets
      Should Be Equal As Strings    ${service_key}   ${secret_key}   foo-bar
 
+
 *** Keywords ***
 Get PagerDuty Key From Alertmanager ConfigMap
      [Documentation]    Get Service Key From Alertmanager ConfigMap
-     ${c_data}   OpenShiftCLI.Get  kind=ConfigMap  namespace=${NAMESPACE}   field_selector=metadata.name==${CONFIGMAP_NAME}
+     ${c_data}   OpenShiftCLI.Get  kind=ConfigMap  namespace=${NAMESPACE}   field_selector=metadata.name==${CONFIGMAP_NAME}    #robocop:disable
      ${a_data}    Set Variable     ${c_data[0]['data']['alertmanager.yml']}
      ${match_list}      Get Regexp Matches   ${a_data}     service_key(:).*
      ${key}       Split String    ${match_list[0]}
@@ -51,4 +52,3 @@ Get PagerDuty Key From Secrets
      ${body}    Set Variable    ${new[0]['data']['PAGERDUTY_KEY']}
      ${string}  Evaluate    base64.b64decode('${body}').decode('ascii')      modules=base64
      [Return]   ${string}
-

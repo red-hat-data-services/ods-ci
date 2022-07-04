@@ -3,10 +3,10 @@
         "anaconda-ce": {
              "badges": ["Partner managed"],
              "provider": "by Anaconda",
-             "title": "Anaconda Commercial Edition",
-             "description": "Anaconda Commercial Edition is a popular open source package distribution and management experience that is optimized for commercial use.",
+             "title": "Anaconda Professional",
+             "description": "Anaconda Professional is a popular open source package distribution and management experience that is optimized for commercial use.",
              "image": "/images/anaconda-ce.svg",
-             "sidebar_h1": "Anaconda Commercial Edition",
+             "sidebar_h1": "Anaconda Professional",
              "sidebar_links":  {
                   "0": {
                        "text": "Get started",
@@ -14,8 +14,8 @@
                        "matching": "partial"
                   },
                  "1": {
-                       "text": "https://www.anaconda.com/products/commercial-edition",
-                       "url": "https://www.anaconda.com/products/commercial-edition",
+                       "text": "https://www.anaconda.com/products/professional",
+                       "url": "https://www.anaconda.com/products/professional",
                        "matching": "full"
                   },
                  "2": {
@@ -24,7 +24,7 @@
                        "matching": "full"
                   }
              }
-   
+
         },
         "watson-studio": {
              "badges": ["Self-managed"],
@@ -59,7 +59,7 @@
              "image": "/images/oneapi.png",
              "sidebar_h1": "AI Kit",
              "sidebar_links":  {
-   
+
                    "0": {
                          "text": "Get started",
                          "url": "https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html",
@@ -100,7 +100,7 @@
              "image": "/images/jupyterhub.svg",
              "sidebar_h1": "JupyterHub",
              "sidebar_links": {
-   
+
                    "0": {
                          "text": "Get started",
                          "url": "https://jupyterhub.readthedocs.io/en/stable/getting-started/index.html",
@@ -166,7 +166,7 @@
              "image": "/images/red-hat.svg",
              "sidebar_h1": "Red Hat OpenShift API Management",
              "sidebar_links": {
-   
+
                    "0": {
                          "text": "Get started",
                          "url": "https://console.redhat.com/openshift/details/",
@@ -312,7 +312,7 @@
              "image": "/images/percepti-labs.svg",
              "sidebar_h1": "PerceptiLabs",
              "sidebar_links": {}
-   
+
         },
         "seldon-deploy": {
              "badges": ["Self-managed"],

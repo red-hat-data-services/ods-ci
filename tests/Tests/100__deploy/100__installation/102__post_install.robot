@@ -217,17 +217,6 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
-Verify Node Failures Are Handled
-    [Documentation]    Verifies if ODS is prepared to handle node failures
-    [Tags]    Sanity
-    ...       Tier3
-    ...       ODS-568
-    ...       ProductBug
-    @{cluster_nodes_info}=    Fetch Cluster Worker Nodes Info
-    &{cluster_node_info_dict}=    Set Variable    ${cluster_nodes_info}[0]
-    Reboot Cluster Node    ${cluster_node_info_dict.metadata.name}
-    Verify ODS Availability
-
 
 *** Keywords ***
 Verify Cuda Builds Are Completed
@@ -342,13 +331,4 @@ Verify Requests Contains Expected Values
     Should Be Equal As Strings    ${requests['cpu']}  ${cpu}
     Should Be Equal As Strings    ${requests['memory']}  ${memory}
 
-Fetch Cluster Worker Nodes Info
-    [Documentation]    Fetch information about the nodes of the cluster
-    ...    Args:
-    ...        None
-    ...    Returns:
-    ...        cluster_nodes_info(list(dict)): Cluster nodes information
-    @{cluster_nodes_info}=    Oc Get    kind=Node    api_version=v1
-    ...    label_selector=node-role.kubernetes.io/worker=,node-role.kubernetes.io!=master,node-role.kubernetes.io!=infra
-    [Return]    @{cluster_nodes_info}
 

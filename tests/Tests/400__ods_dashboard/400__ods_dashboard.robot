@@ -1,20 +1,22 @@
 *** Settings ***
-Library         OpenShiftCLI
-Library         OpenShiftLibrary
-Resource        ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
-Resource        ../../Resources/ODS.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
-Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
-Resource        ../../Resources/Page/LoginPage.robot
-Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
-Resource        ../../Resources/Common.robot
-Resource        ../../Resources/Page/OCPDashboard/Pods/Pods.robot
-Resource        ../../Resources/Page/OCPDashboard/Builds/Builds.robot
-Suite Setup     Dashboard Suite Setup
-Test Setup      Dashboard Test Setup
-Test Teardown   Dashboard Test Teardown
+Library           OpenShiftCLI
+Library           OpenShiftLibrary
+Resource          ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
+Resource          ../../Resources/RHOSi.resource
+Resource          ../../Resources/ODS.robot
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
+Resource          ../../Resources/Page/ODH/AiApps/Rhosak.resource
+Resource          ../../Resources/Page/ODH/AiApps/Anaconda.resource
+Resource          ../../Resources/Page/LoginPage.robot
+Resource          ../../Resources/Page/OCPLogin/OCPLogin.robot
+Resource          ../../Resources/Common.robot
+Resource          ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource          ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Suite Setup       Dashboard Suite Setup
+Suite Teardown    RHOSi Teardown
+Test Setup        Dashboard Test Setup
+Test Teardown     Dashboard Test Teardown
 
 
 *** Variables ***

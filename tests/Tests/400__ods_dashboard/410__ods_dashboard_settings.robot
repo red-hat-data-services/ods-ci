@@ -3,9 +3,11 @@ Documentation       Tests features in ODS Dashboard "Settings" section
 
 Library             SeleniumLibrary
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 
 Suite Setup         Dashboard Settings Suite Setup
+Suite Teardown      RHOSi Teardown
 
 
 *** Test Cases ***

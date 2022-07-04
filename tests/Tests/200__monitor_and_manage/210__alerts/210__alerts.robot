@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation       RHODS monitoring alerts test suite
 
+Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/OCPDashboard/Builds/Builds.robot

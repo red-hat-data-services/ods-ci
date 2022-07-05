@@ -22,6 +22,8 @@ Verify Quick Starts Work As Expected
     Verify Quick Starts Work As Expected When One Step Is Marked As No  openvino-inference-notebook
 
 Verify Resource Link HTTP Status Code
+    [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
+    ...                redirects users to working URLs (i.e., http status must be 200)
     [Tags]    Sanity
     ...       ODS-531    ODS-507
     Click Link    Resources

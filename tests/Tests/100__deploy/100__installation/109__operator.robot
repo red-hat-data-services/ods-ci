@@ -24,6 +24,19 @@ Verify Odh-deployer Checks Cluster Platform Type
     ${odhdeployer_logs}=    Fetch Odh-deployer Pod Logs
     Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
 
+Verify That The Operator Pod Does Not Get Stuck After Upgrade
+    [Documentation]    Verifies that the operator pod doesn't get stuck after an upgrade
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-818
+    ${operator_pod_info}=    Fetch operator Pod Info
+    ${length}=    Get length    ${operator_pod_info}
+    IF    ${length} == 2
+        ${crashloopbackoff}=    Verify Operator Pods Have CrashLoopBackOff Status After upgrade    ${operator_pod_info}
+        IF   ${crashloopbackoff}
+            Log Error And Fail Pods When Pods Were Terminated    ${operator_pod_info}    Opertator Pod Stuck
+        END
+    END
 
 *** Keywords ***
 Fetch Odh-deployer Pod Info
@@ -48,3 +61,45 @@ Fetch Odh-deployer Pod Logs
     ...                         namespace=redhat-ods-operator
     ...                         container=rhods-deployer
     [Return]    ${odhdeployer_pod_Logs}
+
+Fetch Operator Pod Info
+    [Documentation]  Fetches information about operator pod
+    ...    Args:
+    ...        None
+    ...    Returns:
+    ...        operator_pod_info(dict): Dictionary containing the information of the operator pod
+    @{operator_pod_info}=    Oc Get    kind=Pod    api_version=v1    label_selector=name=rhods-operator
+    [Return]    @{operator_pod_info}
+
+Verify Operator Pods Have CrashLoopBackOff Status After Upgrade
+    [Documentation]  Verifies operator pods have CrashLoopBackOff status after upgrade
+    ...    Args:
+    ...        operator_pod_info(dict): Dictionary containing the information of the operator pod 
+    ...    Returns:
+    ...        crashloopbackoff(bool): True when the status CrashLoopBackOff is present
+    [Arguments]    ${operator_pod_info}
+    ${crashloopbackoff}=    Run Keyword And Return Status   
+    ...    Wait Until Keyword Succeeds  60 seconds  1 seconds
+    ...    OpenShift Resource Field Value Should Be Equal As Strings    
+    ...    status.containerStatuses[0].state.waiting.reason
+    ...    CrashLoopBackOff
+    ...    @{operator_pod_info}
+    [Return]    ${crashloopbackoff}
+
+Log Error And Fail Pods When Pods Were Terminated
+    [Documentation]  Logs the error why the specified pods were terminated and fails the pod for the specified reason 
+    ...    Args:
+    ...        pods_info(list(dict)): List of Dictionaries containing the information of the pods
+    ...        fail_reason(str): Reason for failing the pods 
+    [Arguments]    ${pods_info}    ${fail_reason}
+    FOR    ${pod_info}    IN    @{pods_info}
+        &{operator_pod_info_dict}=    Set Variable    ${pod_info}
+        ${reason}=    Set Variable    ${operator_pod_info_dict.status.containerStatuses[0].lastState.terminated.reason}
+        ${exit_code}=    Set Variable    ${operator_pod_info_dict.status.containerStatuses[0].lastState.terminated.exitCode}
+        Log    ${fail_reason}. Reason: ${reason} Exit Code: ${exit_code}  
+        Fail   ${fail_reason}
+    END
+    
+
+
+    

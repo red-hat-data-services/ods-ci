@@ -36,6 +36,8 @@ ${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
 ${CUSTOM_IMAGE_REMOVE_BTN}=  button[@id="delete-package-software-button"]
 ${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//button
 ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
+${GROUPS_CONFIG_CM}=    groups-config
+${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 
 
 *** Keywords ***
@@ -148,7 +150,7 @@ Go To RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.11.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.13.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE
@@ -609,3 +611,41 @@ Clear Dashboard Notifications
         Click Element    xpath=//*[contains(@class,"odh-dashboard__notification-drawer__item-remove")]
     END
     Close Notification Drawer
+
+Get Dashboard Pods Names
+    [Documentation]     Retrieves the names of dashboard pods
+    ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
+    ...                        fields=['metadata.name']
+    ${names}=   Create List
+    FOR    ${pod_name}    IN    @{dash_pods}
+        Append To List      ${names}    ${pod_name}[metadata.name]
+    END
+    [Return]   ${names}
+
+Get Dashboard Pod Logs
+    [Documentation]     Fetches the logs from one dashboard pod
+    [Arguments]     ${pod_name}
+    ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
+    ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
+    ${n_lines}=     Get Length    ${pod_logs_lines}
+    Log     ${pod_logs_lines}[${n_lines-3}:]
+    IF   "${pod_logs_lines}[${n_lines-1}]" == "${EMPTY}"
+        Remove From List    ${pod_logs_lines}   ${n_lines-1}
+        ${n_lines}=     Get Length    ${pod_logs_lines}
+    END
+    [Return]    ${pod_logs_lines}   ${n_lines}
+
+Get ConfigMaps For RHODS Groups Configuration
+    [Documentation]     Returns a dictionary containing "rhods-group-config" and "groups-config"
+    ...                 ConfigMaps
+    ${rgc_status}   ${rgc_yaml}=     Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${RHODS_GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
+    ${gc_status}   ${gc_yaml}=      Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
+    IF   $rgc_status == 'FAIL'
+        ${rgc_yaml}=    Create List   ${EMPTY}
+    END
+    IF   $gc_status == 'FAIL'
+        ${gc_yaml}=    Create List    ${EMPTY}
+    END
+    ${group_config_maps}=   Create Dictionary     rgc=${rgc_yaml}[0]     gc=${gc_yaml}[0]
+    Log     ${group_config_maps}
+    [Return]    ${group_config_maps}

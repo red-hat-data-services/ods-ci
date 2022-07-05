@@ -13,7 +13,7 @@ dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path+"/../")
 from util import (clone_config_repo, read_yaml,
                   execute_command, write_data_in_json,
-                  read_data_from_json)
+                  read_data_from_json,compare_dicts)
 from logger import log
 
 """
@@ -56,6 +56,7 @@ class OpenshiftClusterManager():
         self.osd_minor_version_end = args.get("osd_minor_version_end")
         self.osd_major_version = args.get("osd_major_version")
         self.osd_latest_version_data = args.get("osd_latest_version_data")
+        self.new_run = args.get("new_run")
         ocm_env = glob.glob(dir_path+"/../../../ocm.json.*")
         if ocm_env != []:
             os.environ['OCM_CONFIG'] = ocm_env[0]
@@ -873,12 +874,13 @@ class OpenshiftClusterManager():
         """
         # Dict that will be converted into json file
         latest_osd_versions_data = {}
-        dic = {}
+        osd_versions_dict = {}
         for candidate_version in range(int(self.osd_minor_version_start), int(self.osd_minor_version_end)):
             version = (self.get_latest_osd_candidate_version(
                 self.osd_major_version, candidate_version)).split("-")[0]
-            dic[".".join(version.split(".")[:2])] = version
-            latest_osd_versions_data[str(self.osd_major_version)] = dic
+            if version:
+                osd_versions_dict[".".join(version.split(".")[:2])] = version
+                latest_osd_versions_data[str(self.osd_major_version)] = osd_versions_dict
         log.info(latest_osd_versions_data)
         return latest_osd_versions_data
 
@@ -900,25 +902,24 @@ class OpenshiftClusterManager():
             write_data_in_json(filename=self.osd_latest_version_data, data=old_data)
             return None
         else:
-            if self.osd_major_version not in old_data:
-                if self.osd_major_version in new_data:
-                    for version in new_data[self.osd_major_version].keys():
-                        if version != "":
-                            lst_to_trigger_job.append("{}-latest".format(version))
-                    old_data.update(new_data)
-                if self.osd_major_version not in new_data:
-                    return None
-            else:
-                for ods_version in old_data[self.osd_major_version].keys():
-                    if old_data[self.osd_major_version][ods_version] != new_data[self.osd_major_version][ods_version]:
-                        if old_data != "":
-                            lst_to_trigger_job.append("{}-latest".format(ods_version))
-                old_data.update(new_data)
 
-        old_data["RUN"] = list(filter(None, lst_to_trigger_job))
+            if self.osd_major_version not in old_data.keys() and self.osd_major_version in new_data.keys():
+                old_data[self.osd_major_version] = {"0": "0"}
+                log.info(old_data.keys())
+                lst_to_trigger_job = compare_dicts(new_data[self.osd_major_version],
+                                                        old_data[self.osd_major_version])
+            elif self.osd_major_version in old_data.keys():
+                lst_to_trigger_job = compare_dicts(new_data[self.osd_major_version],
+                                                        old_data[self.osd_major_version])
+
+        old_data.update(new_data)
+        if self.new_run == "True":
+            old_data["RUN"] = lst_to_trigger_job
+        else:
+            old_data["RUN"] = list(set(old_data["RUN"]) | set(lst_to_trigger_job))
+        # old_data["RUN"] = list(filter(None, lst_to_trigger_job))
         write_data_in_json(filename=self.osd_latest_version_data, data=old_data)
         log.info("File is updated to : {} ".format(old_data))
-
 
 if __name__ == "__main__":
 
@@ -958,6 +959,10 @@ if __name__ == "__main__":
                                                 help="osd-minor-version end range",
                                                 action="store", dest="osd_minor_version_end",
                                                 required=True)
+        get_latest_osd_candidate_json.add_argument("--new_run",
+                                                help="True if RUN key is new else False",
+                                                action="store", dest="new_run",
+                                                required=False)
         get_latest_osd_candidate_json.set_defaults(func=ocm_obj.compare_with_old_version_file)
 
         #Argument parsers for ocm_login

@@ -23,7 +23,6 @@ spec:
     fsGroup: 0
   serviceAccountName: rhods-test-runner
   containers:
-
     - image: <INSERT URL TO YOUR BUILT IMAGE>
       imagePullPolicy: Always
       name: ods-ci-testrun

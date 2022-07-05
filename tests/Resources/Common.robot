@@ -93,10 +93,22 @@ Wait Until HTTP Status Code Is
 
 Check HTTP Status Code
     [Documentation]     Verifies Status Code of URL Matches Expected Status Code
-    [Arguments]  ${link_to_check}  ${expected}=200
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
+    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20
+    ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
+
+URLs HTTP Status Code Should Be Equal To
+    [Documentation]    Given a list of link web elements, extracts the URLs and
+    ...                checks if the http status code expected one is equal to the
+    [Arguments]    ${link_elements}    ${expected_status}=200    ${timeout}=20
+    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
+        ${href}=    Get Element Attribute    ${ext_link}    href
+        ${status}=    Run Keyword And Continue On Failure    Check HTTP Status Code    link_to_check=${href}
+        ...                                                                            expected=${expected_status}
+        Log To Console    ${idx}. ${href} gets status code ${status}
+    END
 
 Get List Of Atrributes
     [Documentation]    Returns the list of attributes
@@ -122,3 +134,12 @@ Get Cluster Name From Console URL
     [Documentation]    Get the cluster name from the Openshift console URL
     ${name}=    Split String    ${OCP_CONSOLE_URL}        .
     [Return]    ${name}[2]
+
+Clean Resource YAML Before Creating It
+    [Documentation]    Removes from a yaml of an Openshift resource the metadata which prevent
+    ...                the yaml to be applied after being copied
+    [Arguments]    ${yaml_data}
+    ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
+    Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
+    [Return]   ${clean_yaml_data}
+

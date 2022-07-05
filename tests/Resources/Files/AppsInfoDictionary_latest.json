@@ -24,7 +24,7 @@
                        "matching": "full"
                   }
              }
-   
+
         },
         "watson-studio": {
              "badges": ["Self-managed"],
@@ -59,7 +59,7 @@
              "image": "/images/oneapi.png",
              "sidebar_h1": "AI Kit",
              "sidebar_links":  {
-   
+
                    "0": {
                          "text": "Get started",
                          "url": "https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html",
@@ -100,7 +100,7 @@
              "image": "/images/jupyterhub.svg",
              "sidebar_h1": "JupyterHub",
              "sidebar_links": {
-   
+
                    "0": {
                          "text": "Get started",
                          "url": "https://jupyterhub.readthedocs.io/en/stable/getting-started/index.html",
@@ -166,7 +166,7 @@
              "image": "/images/red-hat.svg",
              "sidebar_h1": "Red Hat OpenShift API Management",
              "sidebar_links": {
-   
+
                    "0": {
                          "text": "Get started",
                          "url": "https://console.redhat.com/openshift/details/",
@@ -312,7 +312,7 @@
              "image": "/images/percepti-labs.svg",
              "sidebar_h1": "PerceptiLabs",
              "sidebar_links": {}
-   
+
         },
         "seldon-deploy": {
              "badges": ["Self-managed"],
@@ -360,26 +360,48 @@
                }
         },
         "starburst": {
-             "badges": ["Partner managed"],
-             "provider": "by Starburst",
-             "title": "Starburst Galaxy",
-             "description": "Starburst Galaxy is a fully managed service to run high-performance queries across your various data sources using SQL.",
-             "image": "/images/starburst.svg",
-             "sidebar_h1": "Starburst Galaxy",
+            "badges": [
+                "Partner managed"
+            ],
+            "provider": "by Starburst",
+            "title": "Starburst Galaxy",
+            "description": "Starburst Galaxy is a fully managed service to run high-performance queries across your various data sources using SQL.",
+            "image": "/images/starburst.svg",
+            "sidebar_h1": "Starburst Galaxy",
+            "sidebar_links": {
+                "0": {
+                    "text": "Get started",
+                    "url": "https://www.starburst.io/platform/starburst-galaxy/",
+                    "matching": ""
+                },
+                "1": {
+                    "text": "Starburst Galaxy",
+                    "url": "https://docs.starburst.io/starburst-galaxy/",
+                    "matching": ""
+                },
+                "2": {
+                    "text": "here",
+                    "url": "https://www.starburst.io/platform/starburst-galaxy/",
+                    "matching": ""
+                }
+            }
+        },
+       "nvidia": {
+             "badges": ["Self-managed"],
+             "provider": "by NVIDIA",
+             "title": "NVIDIA GPU Add-on",
+             "description": "NVIDIA GPU Add-on prepares OpenShift to run GPU-accelerated workloads on a single node or on multiple nodes.",
+             "image": "/images/nvidia.svg",
+             "sidebar_h1": "NVIDIA GPU Add-on",
              "sidebar_links": {
                    "0": {
                          "text": "Get started",
-                         "url": "https://www.starburst.io/platform/starburst-galaxy/",
+                         "url": "https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science/1/html/managing_users_and_user_resources/enabling-gpu-support-in-openshift-data-science_user-mgmt",
                          "matching": ""
                    },
                    "1": {
-                         "text": "Starburst Galaxy",
-                         "url": "https://docs.starburst.io/starburst-galaxy/",
-                         "matching": ""
-                   },
-                   "2": {
-                         "text": "here",
-                         "url": "https://www.starburst.io/platform/starburst-galaxy/",
+                         "text": "Enabling GPU Support in Openshift Data Science",
+                         "url": "https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science/1/html/managing_users_and_user_resources/enabling-gpu-support-in-openshift-data-science_user-mgmt",
                          "matching": ""
                    }
                }

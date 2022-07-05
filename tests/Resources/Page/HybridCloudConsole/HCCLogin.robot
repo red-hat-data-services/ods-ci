@@ -82,3 +82,16 @@ Wait Until Page Contains HCC Generic Modal
 
 Wait Until Page Does Not Contains HCC Generic Modal
   Wait Until Page Does Not Contain Element    xpath=//div[contains(@id, 'pf-modal-part')]
+
+Open Cluster By Name
+  [Documentation]     Opens the cluster by name from the list of clusters.
+  ${cluster_id} =     Get Cluster ID
+  ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
+  Wait Until Page Contains Element  //input[@class="pf-c-form-control cluster-list-filter"]
+  Input Text    //input[@class="pf-c-form-control cluster-list-filter"]     ${cluster_name}
+  Wait Until Page Contains Element  //table[@class="pf-c-table pf-m-grid-md"]//a    10
+  Click Link    //table[@class="pf-c-table pf-m-grid-md"]//a
+
+Maybe Skip OCM Tour
+  ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id="pendo-guide-container"]
+  Run Keyword If  ${tour_modal}  Click Element  xpath=//button[@class="_pendo-close-guide"]

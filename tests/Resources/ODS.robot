@@ -90,6 +90,13 @@ Set Standard RHODS Groups Variables
 
 Apply Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
+    ...                and rolls out JH to make the changes effecting in Jupyter
+    [Arguments]     ${admins_group}   ${users_group}    ${groups_modified_flag}
+    Set Access Groups Settings    admins_group=${admins_group}   users_group=${users_group}    groups_modified_flag=${groups_modified_flag}
+    Rollout JupyterHub
+
+Set Access Groups Settings
+    [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}    ${groups_modified_flag}
     OpenShiftCLI.Patch    kind=ConfigMap
     ...                   src={"data":{"admin_groups": "${admins_group}","allowed_groups": "${users_group}"}}
@@ -97,7 +104,6 @@ Apply Access Groups Settings
     OpenShiftCLI.Patch    kind=ConfigMap
     ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${groups_modified_flag}"}}}
     ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
-    Rollout JupyterHub
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map
@@ -327,6 +333,21 @@ Fetch Cluster Infrastructure Info
     &{cluster_infrastructure_info}=    Set Variable    ${resources_info_list}[0]
     [Return]    &{cluster_infrastructure_info}
 
+Fetch ODS Cluster Environment
+    [Documentation]  Fetches the environment type of the cluster
+    ...        project: Project name
+    ...    Returns:
+    ...        Cluster Environment (str)
+   ${match} =    Fetch Cluster Platform Type
+   Run Keyword If    '${match}'!='AWS'    FAIL    msg=This keyword should be used only in OSD clusters
+   ${match}  ${status} =    Run Keyword And Ignore Error  Should Contain    ${OCP_CONSOLE_URL}    devshift.org
+   IF    "${match}" == "PASS"
+       ${cluster_type} =  Set Variable  stage
+   ELSE
+       ${cluster_type} =  Set Variable  production
+   END
+   [Return]    ${cluster_type}
+
 OpenShift Resource Component Field Should Not Be Empty
     [Documentation]    Checks if the specified OpenShift resource component field is not empty
     ...                the specified field
@@ -356,3 +377,11 @@ Fetch Cluster Worker Nodes Info
     @{cluster_nodes_info}=    Oc Get    kind=Node    api_version=v1
     ...    label_selector=node-role.kubernetes.io/worker=,node-role.kubernetes.io!=master,node-role.kubernetes.io!=infra
     [Return]    @{cluster_nodes_info}
+
+Delete RHODS Config Map
+    [Documentation]    Deletes the given config map. It assumes the namespace is
+    ...                redhat-ods-applications, but can be changed using the
+    ...                corresponding argument
+    [Arguments]     ${name}  ${namespace}=redhat-ods-applications
+    OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
+

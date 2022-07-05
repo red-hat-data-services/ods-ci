@@ -36,7 +36,7 @@ Log If Average Availability For Time Range Breached SLA
     IF    ${availability} < ${SLA_AVAILABILITY}
         #robocop:disable
         ${message}=    Set Variable
-        ...    ${message_prefix}ODS Availability didn't meet SLA: ${availability} < ${SLA_AVAILABILITY} (time-range:${time_range})
+        ...    ${message_prefix}ODS Availability is currently breaching SLA: ${availability} < ${SLA_AVAILABILITY} (time-range:${time_range})
         Log    message=${message}    level=WARN    console=False
     END
     [Return]    ${availability}
@@ -46,7 +46,7 @@ Fail If Average Availability For Time Range Breached SLA
     [Arguments]    ${pm_url}    ${pm_token}    ${time_range}=15m
     ${availability}=    Get Average Availability For Time Range    ${pm_url}    ${pm_token}    ${time_range}
     IF    ${availability} < ${SLA_AVAILABILITY}
-        Fail    ODS Availability didn't meet SLA: ${availability} < ${SLA_AVAILABILITY} (time-range:${time_range})
+        Fail    ODS Availability is currently breaching SLA: ${availability} < ${SLA_AVAILABILITY} (time-range:${time_range})
     END
 
 Log Availability Comparison    #robocop:disable:too-many-arguments
@@ -59,12 +59,12 @@ Log Availability Comparison    #robocop:disable:too-many-arguments
     IF    ${current_availability} < ${previous_value}
         #robocop:disable
         ${message}=    Set Variable
-        ...    ${message_prefix}ODS Availability was reduced since previous check: ${current_availability} < ${previous_value} (time_range:${time_range})
+        ...    ${message_prefix}ODS Availability is worse than previous value: ${current_availability} < ${previous_value} (time_range:${time_range})
         Log    message=${message}    level=WARN    console=False
     ELSE
         #robocop:disable
         ${message}=    Set Variable
-        ...    ${message_prefix}ODS Availability equal or better than previous check: ${current_availability} >= ${previous_value} (time_range:${time_range})
+        ...    ${message_prefix}ODS Availability is equal or better than previous value: ${current_availability} >= ${previous_value} (time_range:${time_range})
         Log    message=${message}    level=INFO    console=False
     END
 
@@ -94,14 +94,14 @@ Suite Availability Teardown
     ...    Logs a WARN message if the current values are lower
     [Arguments]    ${pm_url}    ${pm_token}
 
-    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}
+    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}:
     ...    previous_value=${SUITE_AVAILABILITY_2M}    pm_url=${pm_url}    pm_token=${pm_token}    time_range=2m
 
-    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}
+    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}:
     ...    previous_value=${SUITE_AVAILABILITY_15M}    pm_url=${pm_url}    pm_token=${pm_token}    time_range=15m
 
-    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}
+    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}:
     ...    previous_value=${SUITE_AVAILABILITY_1H}    pm_url=${pm_url}    pm_token=${pm_token}    time_range=1h
 
-    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}
+    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}:
     ...    previous_value=${SUITE_AVAILABILITY_3H}    pm_url=${pm_url}    pm_token=${pm_token}    time_range=3h

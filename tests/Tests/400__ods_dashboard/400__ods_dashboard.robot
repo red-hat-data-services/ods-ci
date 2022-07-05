@@ -69,7 +69,7 @@ Verify Resource Link HTTP Status Code
     Log To Console    ${len} Links found\n
     FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
         ${href}=    Get Element Attribute    ${ext_link}    href
-        ${status}=    Check HTTP Status Code    link_to_check=${href}
+        ${status}=    Run Keyword And Continue On Failure    Check HTTP Status Code    link_to_check=${href}
         Log To Console    ${idx}. ${href} gets status code ${status}
     END
 

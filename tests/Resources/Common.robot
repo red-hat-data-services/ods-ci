@@ -94,7 +94,8 @@ Wait Until HTTP Status Code Is
 Check HTTP Status Code
     [Documentation]     Verifies Status Code of URL Matches Expected Status Code
     [Arguments]  ${link_to_check}  ${expected}=200
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
+    ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=10
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 

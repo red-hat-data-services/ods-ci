@@ -67,11 +67,7 @@ Verify Resource Link HTTP Status Code
     ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
     ${len}=    Get Length    ${link_elements}
     Log To Console    ${len} Links found\n
-    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
-        ${href}=    Get Element Attribute    ${ext_link}    href
-        ${status}=    Run Keyword And Continue On Failure    Check HTTP Status Code    link_to_check=${href}
-        Log To Console    ${idx}. ${href} gets status code ${status}
-    END
+    URLs HTTP Status Code Should Be Equal     link_elements=${link_elements}    expected_status=200
 
 Verify Content In RHODS Explore Section
     [Documentation]    It verifies if the content present in Explore section of RHODS corresponds to expected one.

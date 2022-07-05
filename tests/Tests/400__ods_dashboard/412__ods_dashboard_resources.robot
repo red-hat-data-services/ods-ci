@@ -21,6 +21,14 @@ Verify Quick Starts Work As Expected
     Verify Quick Starts Work As Expected When At Least One Step Is Skipped      deploy-python-model
     Verify Quick Starts Work As Expected When One Step Is Marked As No  openvino-inference-notebook
 
+Verify Resource Link HTTP Status Code
+    [Tags]    Sanity
+    ...       ODS-531    ODS-507
+    Click Link    Resources
+    Sleep    5
+    ${link_elements}=     Get Link Web Elements From Resource Page
+    URLs HTTP Status Code Should Be Equal     link_elements=${link_elements}    expected_status=200
+
 
 *** Keywords ***
 Resources Test Setup

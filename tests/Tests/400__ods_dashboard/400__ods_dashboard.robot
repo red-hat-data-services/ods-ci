@@ -59,20 +59,6 @@ Verify That Login Page Is Shown When Reaching The RHODS Page
     RHODS Dahsboard Pod Should Contain OauthProxy Container
     Check OpenShift Login Visible
 
-Verify Resource Link HTTP Status Code
-    [Tags]    Sanity
-    ...       ODS-531    ODS-507
-    Click Link    Resources
-    Sleep    5
-    ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
-    ${len}=    Get Length    ${link_elements}
-    Log To Console    ${len} Links found\n
-    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
-        ${href}=    Get Element Attribute    ${ext_link}    href
-        ${status}=    Check HTTP Status Code    link_to_check=${href}
-        Log To Console    ${idx}. ${href} gets status code ${status}
-    END
-
 Verify Content In RHODS Explore Section
     [Documentation]    It verifies if the content present in Explore section of RHODS corresponds to expected one.
     ...    It compares the actual data with the one registered in a JSON file. The checks are about:

@@ -606,9 +606,6 @@ Verify The Resources Are Filtered
         List Should Contain Value    ${list_of_items}    ${texts}[${index_of_text}]
     END
 
-Wait Until Resource Page Is Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
-
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled
     Select Checkbox Using Id    enabled-filter-checkbox--check-box

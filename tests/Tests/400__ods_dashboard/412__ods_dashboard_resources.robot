@@ -29,7 +29,7 @@ Verify Resource Link HTTP Status Code
     Click Link    Resources
     Sleep    5
     ${link_elements}=     Get Link Web Elements From Resource Page
-    URLs HTTP Status Code Should Be Equal     link_elements=${link_elements}    expected_status=200
+    URLs HTTP Status Code Should Be Equal To     link_elements=${link_elements}    expected_status=200
 
 
 *** Keywords ***

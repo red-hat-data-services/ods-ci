@@ -99,7 +99,7 @@ Check HTTP Status Code
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 
-URLs HTTP Status Code Should Be Equal
+URLs HTTP Status Code Should Be Equal To
     [Documentation]    Given a list of link web elements, extracts the URLs and
     ...                checks if the http status code expected one is equal to the
     [Arguments]    ${link_elements}    ${expected_status}=200    ${timeout}=20

@@ -768,11 +768,11 @@ class OpenshiftClusterManager():
         time.sleep(300)
 
     def install_gpu_addon(self):
-        if not self.is_addon_installed(addon_name="gpu-operator-certified-addon"):
-            self.install_addon(addon_name="gpu-operator-certified-addon",
+        if not self.is_addon_installed(addon_name="nvidia-gpu-addon"):
+            self.install_addon(addon_name="nvidia-gpu-addon",
                                template_filename="install_addon_gpu.jinja",
                                output_filename="install_operator_gpu.json")
-            self.wait_for_addon_installation_to_complete(addon_name="gpu-operator-certified-addon")
+            self.wait_for_addon_installation_to_complete(addon_name="nvidia-gpu-addon")
         # Waiting 5 minutes to ensure all the services are up
         time.sleep(300)
 

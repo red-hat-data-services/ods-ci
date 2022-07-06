@@ -32,8 +32,10 @@ Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    ...      ODS-1237
    ...      ODS-715
    ...      ODS-1247
+   ...      ProductBug
    [Documentation]  This Test Case Installed Intel AIKIT operator in Openshift cluster
    ...              Check and Launch AIKIT notebook image from RHODS dashboard
+   ...              ProductBug: RHODS-2748
    Check And Install Operator in Openshift    ${intel_aikit_container_name}    ${intel_aikit_appname}
    Create Tabname Instance For Installed Operator        ${intel_aikit_operator_name}      AIKitContainer    redhat-ods-applications
    Go To RHODS Dashboard

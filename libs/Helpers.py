@@ -7,6 +7,7 @@ from robot.libraries.BuiltIn import BuiltIn
 
 class Helpers:
     """Custom keywords written in Python"""
+
     def __init__(self):
         self.BuiltIn = BuiltIn()
 
@@ -35,11 +36,11 @@ class Helpers:
         """ Returns True if the SemVer version >= target
             and otherwise False including if an exception is thrown """
         try:
-            version=VersionInfo.parse(version)
-            target=VersionInfo.parse(target)
+            version = VersionInfo.parse(version)
+            target = VersionInfo.parse(target)
             # version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
             # target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
-            return version>=target
+            return version >= target
         except ValueError:
             # Returning False on exception as a workaround for when an null (or invalid) semver version is passed
             return False
@@ -51,7 +52,6 @@ class Helpers:
         result = ocm_client.install_rhoam_addon(exit_on_failure=False)
         if not result:
             self.BuiltIn.fail("Something got wrong while installing RHOAM. Check the logs")
-
 
     @keyword
     def uninstall_rhoam_using_addon_flow(self, cluster_name):
@@ -72,7 +72,7 @@ class Helpers:
     def is_rhods_addon_installed(self, cluster_name):
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
-        install_flag= ocm_client.is_addon_installed(addon_name="managed-odh")
+        install_flag = ocm_client.is_addon_installed(addon_name="managed-odh")
         return install_flag
 
     @keyword
@@ -96,3 +96,14 @@ class Helpers:
         m, s = divmod(int(seconds), 60)
         h, m = divmod(m, 60)
         return h, m
+
+    @keyword
+    def install_isv_by_name(self, operator_name, channel, source="certified-operators"):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.install_openshift_isv(operator_name, channel, source, exit_on_failure=False)
+        if operator_name == "ovms":
+            status = ocm_client.wait_for_isv_installation_to_complete("openvino")
+        else:
+            status = ocm_client.wait_for_isv_installation_to_complete(operator_name)
+        if not status:
+            self.BuiltIn.fail("Unable to install the {} isv, Check if ISV subscription is created{}".format(operator_name, status))

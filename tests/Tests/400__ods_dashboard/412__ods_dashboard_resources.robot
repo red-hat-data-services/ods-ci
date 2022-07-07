@@ -28,6 +28,16 @@ Verify external links in Quick Starts are not broken
         Click Link                 Resources
         ${quickStartElements}=     Get QuickStart Items
         Verify Brokern Links in Quickstart      ${quickStartElements}
+Verify Resource Link HTTP Status Code
+    [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
+    ...                redirects users to working URLs (i.e., http status must be 200)
+    [Tags]    Sanity
+    ...       ODS-531    ODS-507
+    Click Link    Resources
+    Sleep    5
+    ${link_elements}=     Get Link Web Elements From Resource Page
+    URLs HTTP Status Code Should Be Equal To     link_elements=${link_elements}    expected_status=200
+
 
 *** Keywords ***
 Resources Test Setup

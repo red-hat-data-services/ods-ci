@@ -47,13 +47,13 @@ Verify GPU Operator Deployment  # robocop: disable
     # NS
     Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-nvidia-gpu-addon
     # Node-Feature-Discovery Operator
-    Verify Operator Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
-    ...    operator_name=nfd.v*
+    Verify Operator Status  label=operators.coreos.com/ose-nfd.redhat-nvidia-gpu-addon
+    ...    operator_name=ose-nfd.*
     # GPU Operator
     Verify Operator Status  label=operators.coreos.com/gpu-operator-certified.redhat-nvidia-gpu-addon
     ...    operator_name=gpu-operator-certified.v*
     # nfd-controller-manager
-    Verify Deployment Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
+    Verify Deployment Status  label=operators.coreos.com/ose-nfd.redhat-nvidia-gpu-addon
     ...    dname=nfd-controller-manager
     # nfd-master
     Verify DaemonSet Status  label=app=nfd-master  dsname=nfd-master
@@ -217,6 +217,7 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
+
 *** Keywords ***
 Verify Cuda Builds Are Completed
     [Documentation]    Verify All Cuda Builds have status as Complete
@@ -329,3 +330,5 @@ Verify Requests Contains Expected Values
     [Arguments]   ${cpu}  ${memory}  ${requests}
     Should Be Equal As Strings    ${requests['cpu']}  ${cpu}
     Should Be Equal As Strings    ${requests['memory']}  ${memory}
+
+

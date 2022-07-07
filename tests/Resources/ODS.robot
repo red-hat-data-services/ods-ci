@@ -359,9 +359,29 @@ OpenShift Resource Component Field Should Not Be Empty
     [Arguments]    ${resource_component_field}
     Run Keyword And Continue On Failure    Should Not Be Empty    ${resource_component_field}
 
+Force Reboot OpenShift Cluster Node
+    [Documentation]    Reboots the specified node of the cluster
+    ...    Args:
+    ...        node(str): Name of the node to reboot
+    ...    Returns:
+    ...        None
+    [Arguments]    ${node}
+    Run    oc debug node/"${node}" -T -- sh -c "echo b > /proc/sysrq-trigger"
+
+Fetch Cluster Worker Nodes Info
+    [Documentation]    Fetch information about the nodes of the cluster
+    ...    Args:
+    ...        None
+    ...    Returns:
+    ...        cluster_nodes_info(list(dict)): Cluster nodes information
+    @{cluster_nodes_info}=    Oc Get    kind=Node    api_version=v1
+    ...    label_selector=node-role.kubernetes.io/worker=,node-role.kubernetes.io!=master,node-role.kubernetes.io!=infra
+    [Return]    @{cluster_nodes_info}
+
 Delete RHODS Config Map
     [Documentation]    Deletes the given config map. It assumes the namespace is
     ...                redhat-ods-applications, but can be changed using the
     ...                corresponding argument
     [Arguments]     ${name}  ${namespace}=redhat-ods-applications
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
+

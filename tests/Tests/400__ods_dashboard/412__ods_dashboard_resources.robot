@@ -25,7 +25,7 @@ Verify external links in Quick Starts are not broken
         [Tags]    Tier1
         ...       ODS-1305
         [Documentation]    Verify external links in Quick Starts are not broken
-        Click Link                          Resources
+        Click Link                 Resources
         ${quickStartElements}=     Get QuickStart Items
         Verify Brokern Links in Quickstart      ${quickStartElements}
 

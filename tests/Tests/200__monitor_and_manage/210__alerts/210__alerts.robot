@@ -142,7 +142,7 @@ Verify Alerts Are Fired When JupyterHub Is Down    # robocop: disable:too-long-t
     [Documentation]    Verifies that alerts "RHODS JupyterHub Probe Success Burn Rate"
     ...    is fired when jupyterhub is not working
     [Tags]    Tier3
-    ...       ODS-1591
+    ...       ODS-1592
     ...       Execution-Time-Over-15m
 
     Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}

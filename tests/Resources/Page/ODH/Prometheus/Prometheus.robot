@@ -109,8 +109,8 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
         # Log To Console    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
         Fail    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
     ELSE
-        Log To Console    msg=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
-        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
+        Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
+        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
     END
 
 Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
@@ -150,8 +150,8 @@ Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
         # Log To Console    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
         Fail    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but severity != ${alert-severity}
     ELSE
-        Log To Console    msg=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
-        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
+        Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
+        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
     END
 
 Alerts Should Be Equal
@@ -172,12 +172,23 @@ Alert Should Not Be Firing
     ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
     Should Be True    not ${is_alert_firing}    msg=Alert ${alert} should not be firing
 
+Alert Should Not Be Firing In The Next Period    # robocop: disable:too-many-arguments
+    [Documentation]    Fails if a Prometheus alert is firing in the next ${period}
+    ...    ${period} should be 1m or bigger
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}
+    ...    ${alert-duration}=${EMPTY}    ${period}=10 min
+
+    ${passed}=    Run Keyword And Return Status    Wait Until Alert Is Firing
+    ...    pm_url=${pm_url}    pm_token=${pm_token}    rule_group=${rule_group}
+    ...    alert=${alert}    alert-duration=${alert-duration}    timeout=${period}
+    Run Keyword If    ${passed}    Fail    msg=Alert ${alert} should not be firing
+
 Wait Until Alert Is Firing    # robocop: disable:too-many-arguments
     [Documentation]    Waits until alert is firing or timeout is reached (failing in that case),
     ...    checking the alert state every minute
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=10 min
-    Wait Until Keyword Succeeds    ${timeout}    1 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Alert Should Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
@@ -185,7 +196,7 @@ Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
     ...    checking the alert state every minute
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=5 min
-    Wait Until Keyword Succeeds    ${timeout}    1 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Alert Should Not Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Get Target Endpoints

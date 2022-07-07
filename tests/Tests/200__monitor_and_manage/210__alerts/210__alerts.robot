@@ -4,6 +4,7 @@ Documentation       RHODS monitoring alerts test suite
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Library             OperatingSystem
 Library             SeleniumLibrary
 Library             JupyterLibrary
@@ -104,6 +105,73 @@ Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
 
     [Teardown]    Teardown PVC Alert Test
 
+Verify Alerts Are Not Fired After Multiple JupyterHub Rollouts
+    [Documentation]    Verifies that alert "RHODS JupyterHub Probe Success Burn Rate" is not fired
+    ...    after triggering multiple Jupyterhub rollouts in a short period of time.
+    [Tags]    Tier3
+    ...       ODS-1591
+    ...       Execution-Time-Over-15m
+
+    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+
+    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+
+    FOR    ${counter}    IN RANGE    15
+        Rollout JupyterHub
+        Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
+        ...    ${RHODS_PROMETHEUS_TOKEN}
+        ...    SLOs-probe_success
+        ...    RHODS JupyterHub Probe Success Burn Rate
+        ...    alert-duration=120
+    END
+
+    Prometheus.Alert Should Not Be Firing In The Next Period    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    period=5m
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alerts Are Fired When JupyterHub Is Down    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that alerts "RHODS JupyterHub Probe Success Burn Rate"
+    ...    is fired when jupyterhub is not working
+    [Tags]    Tier3
+    ...       ODS-1591
+    ...       Execution-Time-Over-15m
+
+    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+
+    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale DeploymentConfig    redhat-ods-applications    jupyterhub    replicas=0
+
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    timeout=20 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    timeout=5 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
 Verify Alerts Are Fired When Traefik Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alerts "RHODS JupyterHub Probe Success Burn Rate"
     ...    is fired when traefik-proxy is not working
@@ -137,7 +205,7 @@ Verify Alerts Are Fired When Traefik Is Down    # robocop: disable:too-long-test
 
     [Teardown]    ODS.Restore Default Deployment Sizes
 
-Verify Alerts are Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
+Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" and "RHODS Probe Success Burn Rate"
     ...    are fired when rhods-dashboard is not working
     [Tags]    Tier3

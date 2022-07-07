@@ -490,3 +490,28 @@ Get Current User
    ${url} =  Get Location
    ${current_user} =  Evaluate  '${url}'.split("/")[4]
    [Return]  ${current_user}
+
+Image Should Be Pinned To A Numeric Version
+    [Documentation]     Verifies if the Image Tag is (probably) pinned to a specific image version (e.g., 2.5.0-8).
+    ...                 Since each image provider could use different versioning format (e.g., x.y.z, 10May2021, etc),
+    ...                 the check may not be always reliable. The logic is that if numbers are present in the tag, the image
+    ...                 is likely pinned to a specific version rather than a generic tag (e.g., latest). After that it tries to
+    ...                 see if the numbers follow usual versioning pattern (raising a Warning in the negative case).
+    ${image_spec}=   Run Cell And Get Output  import os; os.environ['JUPYTER_IMAGE_SPEC']
+    ${image_tag}=    Fetch From Right    string=${image_spec}    marker=:
+    ${matches}=    Get Regexp Matches	  ${image_tag}    (main|latest|master|dev|prod)
+    IF   len(${matches}) == ${0}
+        Log    msg=Image Tag "${image_tag}" does not contain "latest", "main" or "master"
+    ELSE
+        Fail    msg=Image Tag "${image_tag}" refers to generic versions like "latest", "main" or "master"
+    END
+    ${matches} =	Get Regexp Matches	  ${image_tag}    [0-9]+
+    IF   len(${matches}) == ${0}
+        Fail    msg=Image Tag "${image_tag}" is not pinned to a specific version
+    ELSE
+        ${matches} =	Get Regexp Matches	  ${image_tag}    ([0-9]\.[0-9])(.[0-9]|-[0-9]|)
+        Log    Image Tag "${image_tag}" is (probably) pinned to a specific version
+        IF   len(${matches}) == ${0}
+           Log  level=WARN  message=Image Tag "${image_tag}" is not in the format x.y.z-n or x.y-n or x.y
+        END
+    END

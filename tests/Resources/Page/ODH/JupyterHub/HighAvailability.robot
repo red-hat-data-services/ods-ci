@@ -3,7 +3,6 @@ Resource    ../../OCPDashboard/DeploymentConfigs/DeploymentConfigs.robot
 Resource    ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 Resource    ../../../Common.robot
 Library     Collections
-Library     OpenShiftCLI
 Library     ../../../../libs/Helpers.py
 
 

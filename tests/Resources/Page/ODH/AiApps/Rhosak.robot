@@ -1,7 +1,7 @@
 *** Settings ***
 Library     SeleniumLibrary
 Library     ../../../../libs/Helpers.py
-Library     OpenShiftCLI
+
 Resource    ../JupyterHub/JupyterLabLauncher.robot
 Resource    ../../Components/Components.resource
 Resource    ../ODHDashboard/ODHDashboard.robot

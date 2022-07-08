@@ -120,13 +120,15 @@ Verify Alerts Are Not Fired After Multiple JupyterHub Rollouts
 
     ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
 
-    FOR    ${counter}    IN RANGE    15
+    FOR    ${counter}    IN RANGE    10
         Rollout JupyterHub
-        Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
+
+        Prometheus.Alert Should Not Be Firing In The Next Period    ${RHODS_PROMETHEUS_URL}
         ...    ${RHODS_PROMETHEUS_TOKEN}
         ...    SLOs-probe_success
         ...    RHODS JupyterHub Probe Success Burn Rate
         ...    alert-duration=120
+        ...    period=1m
     END
 
     Prometheus.Alert Should Not Be Firing In The Next Period    ${RHODS_PROMETHEUS_URL}

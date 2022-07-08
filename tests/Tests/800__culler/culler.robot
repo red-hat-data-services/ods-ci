@@ -101,6 +101,7 @@ Verify That "Stop Idle Notebook" Setting Is Not Overwrite With Restart Of Operat
     Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
     Oc Delete    kind=Pod     namespace=redhat-ods-operator    label_selector=name=rhods-operator
     sleep   5    msg=waiting time for the operator pod to be replaced with new one
+    Reload Page
     ${status}    Run Keyword And Return Status    Radio Button Should Not Be Selected  culler-unlimited-time
     IF    ${status}==False
         Fail    Restart of operator pod causing 'Stop Idle Notebook' setting to change in RHODS dashboard

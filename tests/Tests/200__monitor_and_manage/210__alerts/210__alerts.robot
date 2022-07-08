@@ -161,7 +161,7 @@ Verify Alerts Are Fired When JupyterHub Is Down    # robocop: disable:too-long-t
     ...    SLOs-probe_success
     ...    RHODS JupyterHub Probe Success Burn Rate
     ...    alert-duration=120
-    ...    timeout=20 min
+    ...    timeout=22 min
 
     ODS.Restore Default Deployment Sizes
 

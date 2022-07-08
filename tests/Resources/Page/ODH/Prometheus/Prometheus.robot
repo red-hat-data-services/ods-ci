@@ -185,7 +185,7 @@ Alert Should Not Be Firing In The Next Period    # robocop: disable:too-many-arg
 
 Wait Until Alert Is Firing    # robocop: disable:too-many-arguments
     [Documentation]    Waits until alert is firing or timeout is reached (failing in that case),
-    ...    checking the alert state every minute
+    ...    checking the alert state every 30 seconds
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=10 min
     Wait Until Keyword Succeeds    ${timeout}    30s
@@ -193,7 +193,7 @@ Wait Until Alert Is Firing    # robocop: disable:too-many-arguments
 
 Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
     [Documentation]    Waits until alert is not firing or timeout is reached (failing in that case),
-    ...    checking the alert state every minute
+    ...    checking the alert state every 30 seconds
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=5 min
     Wait Until Keyword Succeeds    ${timeout}    30s

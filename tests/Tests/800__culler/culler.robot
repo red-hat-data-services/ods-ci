@@ -91,6 +91,19 @@ Verify Do Not Stop Idle Notebooks
     ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
     OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
 
+Verify That "Stop Idle Notebook" Setting Is Not Overwrite With Restart Of Operator Pod
+    [Documentation]    Restart the operator pod and verify if "Stop Idle Notebook" setting
+    ...   is overwritten or not ProductBug:RHODS-4336
+    [Tags]    Tier2
+    ...       ProductBug
+    ...       polarian-id
+    Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
+    Oc Delete    kind=Pod     namespace=redhat-ods-operator    label_selector=name=rhods-operator
+    sleep   5    msg=waiting time for the operator pod to be replaced with new one
+    ${status}    Run Keyword And Return Status    Radio Button Should Not Be Selected  culler-unlimited-time
+    IF    ${status}==False
+        Fail    Restart of operator pod causing 'Stop Idle Notebook' setting to change in RHODS dashboard
+    END
 
 *** Keywords ***
 Spawn Minimal Image

@@ -93,7 +93,8 @@ Verify Do Not Stop Idle Notebooks
 
 Verify That "Stop Idle Notebook" Setting Is Not Overwrite With Restart Of Operator Pod
     [Documentation]    Restart the operator pod and verify if "Stop Idle Notebook" setting
-    ...   is overwritten or not ProductBug:RHODS-4336
+    ...   is overwritten or not.
+    ...   ProductBug:RHODS-4336
     [Tags]    Tier2
     ...       ProductBug
     ...       polarian-id

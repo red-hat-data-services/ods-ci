@@ -127,7 +127,6 @@ Verify Pytorch And Tensorflow Can Be Spawned
     ...       Tier1
     ...       ODS-480  ODS-481
     Wait Until All Builds Are Complete    namespace=redhat-ods-applications
-    Verify All Builds Are Complete    namespace=redhat-ods-applications
     Verify Image Can Be Spawned    image=pytorch  size=Default
     Verify Image Can Be Spawned    image=tensorflow  size=Default
 

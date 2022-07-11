@@ -18,6 +18,7 @@ Suite Setup         RHOSi Setup
 Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../Resources/Common.robot
 
+
 *** Test Cases ***
 Verify Traefik Deployment
     [Documentation]  Verifies RHODS Traefik deployment
@@ -123,7 +124,9 @@ Verify Oath-Proxy Image Is fetched From CPaaS
 Verify Pytorch And Tensorflow Can Be Spawned
     [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
     [Tags]    Sanity
+    ...       Tier1
     ...       ODS-480  ODS-481
+    Wait Until Cuda Builds Are Completed
     Verify Cuda Builds Are Completed
     Verify Image Can Be Spawned  image=pytorch  size=Default
     Verify Image Can Be Spawned  image=tensorflow  size=Default
@@ -218,20 +221,6 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
 
 
 *** Keywords ***
-Verify Cuda Builds Are Completed
-    [Documentation]    Verify All Cuda Builds have status as Complete
-    ${Pods} =    Run    oc get build -n redhat-ods-applications
-    @{builds} =    Split String    ${Pods}    \n
-    ${len} =    Get Length    ${builds}
-    FOR    ${ind}    IN RANGE    1    ${len}
-        @{pre} =    Split String    ${builds}[${ind}]
-        ${is_cuda_build} =   Run Keyword And Return Status   Should Contain    ${pre}[0]    cuda
-        IF    ${is_cuda_build} == True
-            Should Be Equal As Strings    ${pre}[3]    Complete
-        END
-        Should Be Equal As Strings    ${pre}[3]    Complete
-    END
-
 Verify Authentication Is Required To Access BlackboxExporter
     [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,
     ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target.

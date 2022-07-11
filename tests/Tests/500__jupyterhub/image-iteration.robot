@@ -32,12 +32,14 @@ Iterative Testing Classifiers
   END
 
 Iterative Testing Clustering
-  [Tags]  Sanity  POLARION-ID-Clustering
+  [Tags]  Tier2  POLARION-ID-Clustering
   ...     ODS-923  ODS-924
+  ...     Execution-Time-Over-15m
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[clustering]
     Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
   END
+
 
 *** Keywords ***
 Iterative Image Test

@@ -39,8 +39,9 @@ Verify Culler Timeout Can Be Updated
 Verify Culler Kills Inactive Server
     [Documentation]    Verifies that the culler kills an inactive
     ...    server after timeout has passed.
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1254
+    ...       Execution-Time-Over-15m
     ...       ProductBug
     Spawn Minimal Image
     Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
@@ -66,8 +67,9 @@ Verify Culler Kills Inactive Server
 Verify Culler Does Not Kill Active Server
     [Documentation]    Verifies that the culler does not kill an active
     ...    server even after timeout has passed.
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1253
+    ...       Execution-Time-Over-15m
     Spawn Minimal Image
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Active.ipynb
     Open With JupyterLab Menu    Run    Run All Cells
@@ -79,8 +81,9 @@ Verify Culler Does Not Kill Active Server
 
 Verify Do Not Stop Idle Notebooks
     [Documentation]    Disables the culler (default configuration) and verifies nb is not culled
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1230
+    ...       Execution-Time-Over-15m
     Disable Notebook Culler
     Close Browser
     Spawn Minimal Image
@@ -106,6 +109,7 @@ Verify That "Stop Idle Notebook" Setting Is Not Overwritten After Restart Of Ope
     IF    ${status}==False
         Fail    Restart of operator pod causing 'Stop Idle Notebook' setting to change in RHODS dashboard
     END
+
 
 *** Keywords ***
 Spawn Minimal Image

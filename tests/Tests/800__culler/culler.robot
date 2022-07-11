@@ -19,7 +19,7 @@ ${CUSTOM_CULLER_TIMEOUT} =     600
 *** Test Cases ***
 Verify Default Culler Timeout
     [Documentation]    Checks default culler timeout
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1255
     Disable Notebook Culler
     ${current_timeout} =  Get And Verify Notebook Culler Timeout
@@ -28,7 +28,7 @@ Verify Default Culler Timeout
 
 Verify Culler Timeout Can Be Updated
     [Documentation]    Verifies culler timeout can be updated
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1231
     Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
     ${current_timeout} =  Get And Verify Notebook Culler Timeout

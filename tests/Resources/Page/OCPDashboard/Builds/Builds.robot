@@ -80,11 +80,31 @@ Wait Until Build Status Is
     ...    Build Status Should Be    ${namespace}    ${build_name}    ${expected_status}
 
 Wait Until All Builds Are Complete
-    [Documentation]     Waits until all the builds are in Complete State
-    [Arguments]    ${namespace}
+    [Documentation]     Obtains the list of builds in ${namespace} and, for each of
+    ...    them,  fails if state is Failed or Error.  If not, waits until state
+    ...    is Complete or ${build_timeout} is reached
+    [Arguments]    ${namespace}    ${build_timeout}=20 min
     ${builds_data} =  Oc Get  kind=Build  namespace=${namespace}
     FOR    ${build_data}    IN    @{builds_data}
-        Wait Until Build Status Is    namespace=${namespace}    build_name=${build_data['metadata']['name']}  expected_status=Complete
+        ${build_name} =     Set Variable    ${build_data['metadata']['name']}
+        ${build_status} =    Set Variable    ${build_data['status']['phase']}
+        IF    "${build_status}" == "Failed" or "${build_status}" == "Error"
+            Fail    msg=Build ${build_name} is in ${build_status} state
+        ELSE
+            Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}
+            ...   expected_status=Complete    timeout=${build_timeout}
+        END
+    END
+
+Verify All Builds Are Complete
+    [Documentation]    Verify all Builds in a namespace have status as Complete
+    [Arguments]    ${namespace}
+    ${builds_data} =    Oc Get  kind=Build  namespace=${namespace}
+    FOR    ${build_data}    IN    @{builds_data}
+        ${build_name} =     Set Variable    ${build_data['metadata']['name']}
+        ${build_status} =    Set Variable    ${build_data['status']['phase']}
+        Should Be Equal As Strings  ${build_status}  Complete
+        ...    msg=Build ${build_name} is not in Complete status
     END
 
 Provoke Image Build Failure

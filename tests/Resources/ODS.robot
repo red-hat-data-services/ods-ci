@@ -399,31 +399,3 @@ Delete RHODS Config Map
     ...                corresponding argument
     [Arguments]     ${name}  ${namespace}=redhat-ods-applications
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
-
-Wait Until Cuda Builds Are Completed
-    [Documentation]    Waits until pytorch and tensorflow builds have Complete Status.
-    ...    The keyword waits 20 minutes for each build to be in that status, failing otherwise.
-
-    ${pytorch_build_name}=    Search Last Build    namespace=redhat-ods-applications
-    ...    build_name_includes=pytorch
-    Wait Until Build Status Is    namespace=redhat-ods-applications
-    ...    build_name=${pytorch_build_name}    expected_status=Complete
-
-    ${tensorflow_build_name}=    Search Last Build    namespace=redhat-ods-applications
-        ...    build_name_includes=tensorflow
-    Wait Until Build Status Is    namespace=redhat-ods-applications
-    ...    build_name=${tensorflow_build_name}    expected_status=Complete
-
-Verify Cuda Builds Are Completed
-    [Documentation]    Verify All Cuda Builds have status as Complete
-    ${Pods} =    Run    oc get build -n redhat-ods-applications
-    @{builds} =    Split String    ${Pods}    \n
-    ${len} =    Get Length    ${builds}
-    FOR    ${ind}    IN RANGE    1    ${len}
-        @{pre} =    Split String    ${builds}[${ind}]
-        ${is_cuda_build} =   Run Keyword And Return Status   Should Contain    ${pre}[0]    cuda
-        IF    ${is_cuda_build} == True
-            Should Be Equal As Strings    ${pre}[3]    Complete
-        END
-        Should Be Equal As Strings    ${pre}[3]    Complete
-    END

@@ -399,4 +399,3 @@ Delete RHODS Config Map
     ...                corresponding argument
     [Arguments]     ${name}  ${namespace}=redhat-ods-applications
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
-

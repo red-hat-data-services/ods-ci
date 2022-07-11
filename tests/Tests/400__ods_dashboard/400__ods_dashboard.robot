@@ -163,8 +163,9 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
 
 Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     [Documentation]    Verifies that Notifications are shown when Notebook Builds are finished and atleast one fails
-    [Tags]    Sanity
+    [Tags]    Tier2
     ...       ODS-470  ODS-718
+    ...       Execution-Time-Over-30m
     ...       FlakyTest
     Clear Dashboard Notifications
     ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch

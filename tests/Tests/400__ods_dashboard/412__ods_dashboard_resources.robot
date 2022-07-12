@@ -27,7 +27,7 @@ Verify External Links In Quick Starts Are Not Broken
         [Documentation]    Verify external links in Quick Starts are not broken
         Click Link                 Resources
         ${quickStartElements}=     Get QuickStart Items
-        Verify Brokern Links in Quickstart      ${quickStartElements}
+        Verify Links Are Not Broken For Each QuickStart      ${quickStartElements}
 
 Verify Resource Link HTTP Status Code
     [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
@@ -145,7 +145,7 @@ External URLs Should Not Be Broken
             END
     END
 
-Verify Brokern Links in Quickstart
+Verify Links Are Not Broken For Each QuickStart
     [Documentation]     Clicks on al the quick start and verify links
     [Arguments]    ${quickStartElements}
     ${quickStartCount}=   Get Length           ${quickStartElements}
@@ -166,7 +166,7 @@ Get QuickStart Items
         [Return]    ${quickStartElements}
 
 
-Click Next OR TAB Tab To Click Sidewindow Button
+Open QuickStart Step
     [Documentation]   Click next if next not found cick tab to find buttion
     [Arguments]  ${quick_start_step}
     ${status}   Run Keyword And Return Status   Click Element  ${quick_start_step}

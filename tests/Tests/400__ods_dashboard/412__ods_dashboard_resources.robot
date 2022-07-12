@@ -15,7 +15,7 @@ Verify Quick Starts Work As Expected
     ...     ODS-1166    ODS-1306
     ...     ODS-1307    ODS-1308
     ...     ODS-1402    ODS-1403
-    Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   create-jupyter-notebook-anaconda
+    Verify Quick Starts Work As E xpected When All Steps Are Marked As Yes   create-jupyter-notebook-anaconda
     Verify Quick Starts Work As Expected When Restarting The Previous One   create-jupyter-notebook-anaconda
     Verify Quick Starts Work As Expected When All Steps Are Skipped         create-jupyter-notebook
     Verify Quick Starts Work As Expected When At Least One Step Is Skipped      deploy-python-model
@@ -131,11 +131,8 @@ External URLs Should Not Be Broken
     [Documentation]     Go through a QuickStart and checks the status of all the external links
     ${sideWindowButtons}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
     ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-    @{href_list}=       Evaluate           [item.get_attribute('href') for item in $element_list]
+    URLs HTTP Status Code Should Be Equal To    ${element_list}
 
-    IF  ${href_list}
-        Validate URls   ${href_list}
-    END
     FOR    ${sideWindowButton}    IN     @{sideWindowButtons}
             ${status}   Run Keyword And Return Status   Click Element  ${sideWindowButton}
             IF  ${status} == False
@@ -147,15 +144,11 @@ External URLs Should Not Be Broken
             END
 
             ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-            @{href_list}=       Evaluate           [item.get_attribute('href') for item in $element_list]
+            URLs HTTP Status Code Should Be Equal To    ${element_list}
             ${Doc_Text}     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]
             ${Doc_links}     Get Regexp Matches   ${Doc_Text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
             IF  ${Doc_links}
                 Log To Console      ${Doc_links}
-            END
-
-            IF  ${href_list}
-                Validate URls   ${href_list}
             END
     END
 
@@ -178,11 +171,3 @@ Get QuickStart Items
         Wait Until Resource Page Is Loaded
         ${quickStartElements}=     Wait for QuickStart to Load
         [Return]    ${quickStartElements}
-
-Validate URls
-    [Documentation]   Validates  urls
-    [Arguments]     ${urls}
-    FOR  ${url}   IN   @{urls}
-            ${status}=          Check HTTP Status Code    link_to_check=${url}
-            Log To Console     ${url} gets status code ${status}
-    END

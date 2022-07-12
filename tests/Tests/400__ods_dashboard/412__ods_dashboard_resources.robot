@@ -134,15 +134,7 @@ External URLs Should Not Be Broken
     URLs HTTP Status Code Should Be Equal To    ${element_list}
 
     FOR    ${sideWindowButton}    IN     @{sideWindowButtons}
-            ${status}   Run Keyword And Return Status   Click Element  ${sideWindowButton}
-            IF  ${status} == False
-                Click Button    Next
-            END
-
-            FOR    ${counter}    IN RANGE    5
-                Press Keys    NONE    TAB
-            END
-
+            Click Next OR TAB tab to click Sidewindow Button  ${sideWindowButton}
             ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
             URLs HTTP Status Code Should Be Equal To    ${element_list}
             ${Doc_Text}     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]
@@ -171,3 +163,16 @@ Get QuickStart Items
         Wait Until Resource Page Is Loaded
         ${quickStartElements}=     Wait for QuickStart to Load
         [Return]    ${quickStartElements}
+
+
+Click Next OR TAB tab to click Sidewindow Button
+    [Documentation]   Click next if next not found cick tab to find buttion
+    [Arguments]  ${sideWindowButton}
+    ${status}   Run Keyword And Return Status   Click Element  ${sideWindowButton}
+    IF  ${status} == False
+        Click Button    Next
+    END
+
+    FOR    ${counter}    IN RANGE    5
+        Press Keys    NONE    TAB
+    END

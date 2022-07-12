@@ -166,7 +166,7 @@ Get QuickStart Items
         [Return]    ${quickStartElements}
 
 
-Click Next OR TAB tab to click Sidewindow Button
+Click Next OR TAB Tab To Click Sidewindow Button
     [Documentation]   Click next if next not found cick tab to find buttion
     [Arguments]  ${quick_start_step}
     ${status}   Run Keyword And Return Status   Click Element  ${quick_start_step}

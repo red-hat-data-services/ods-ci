@@ -21,13 +21,14 @@ Verify Quick Starts Work As Expected
     Verify Quick Starts Work As Expected When At Least One Step Is Skipped      deploy-python-model
     Verify Quick Starts Work As Expected When One Step Is Marked As No  openvino-inference-notebook
 
-Verify external links in Quick Starts are not broken
+Verify External Links In Quick Starts Are Not Broken
         [Tags]    Tier1
         ...       ODS-1305
         [Documentation]    Verify external links in Quick Starts are not broken
         Click Link                 Resources
         ${quickStartElements}=     Get QuickStart Items
         Verify Brokern Links in Quickstart      ${quickStartElements}
+
 Verify Resource Link HTTP Status Code
     [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
     ...                redirects users to working URLs (i.e., http status must be 200)
@@ -129,12 +130,12 @@ Verify Quick Starts Work As Expected When At Least One Step Is Skipped
 
 External URLs Should Not Be Broken
     [Documentation]     Go through a QuickStart and checks the status of all the external links
-    ${sideWindowButtons}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
+    ${quick_start_steps}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
     ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
     URLs HTTP Status Code Should Be Equal To    ${element_list}
 
-    FOR    ${sideWindowButton}    IN     @{sideWindowButtons}
-            Click Next OR TAB tab to click Sidewindow Button  ${sideWindowButton}
+    FOR    ${quick_start_step}    IN     @{quick_start_steps}
+            Click Next OR TAB tab to click Sidewindow Button  ${quick_start_step}
             ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
             URLs HTTP Status Code Should Be Equal To    ${element_list}
             ${Doc_Text}     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]
@@ -167,8 +168,8 @@ Get QuickStart Items
 
 Click Next OR TAB tab to click Sidewindow Button
     [Documentation]   Click next if next not found cick tab to find buttion
-    [Arguments]  ${sideWindowButton}
-    ${status}   Run Keyword And Return Status   Click Element  ${sideWindowButton}
+    [Arguments]  ${quick_start_step}
+    ${status}   Run Keyword And Return Status   Click Element  ${quick_start_step}
     IF  ${status} == False
         Click Button    Next
     END

@@ -39,7 +39,6 @@ Verify Resource Link HTTP Status Code
     ${link_elements}=     Get Link Web Elements From Resource Page
     URLs HTTP Status Code Should Be Equal To     link_elements=${link_elements}    expected_status=200
 
-
 *** Keywords ***
 Resources Test Setup
     Set Library Search Order    SeleniumLibrary
@@ -135,13 +134,13 @@ External URLs Should Not Be Broken
     URLs HTTP Status Code Should Be Equal To    ${element_list}
 
     FOR    ${quick_start_step}    IN     @{quick_start_steps}
-            Click Next OR TAB tab to click Sidewindow Button  ${quick_start_step}
+            Open QuickStart Step  ${quick_start_step}
             ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
             URLs HTTP Status Code Should Be Equal To    ${element_list}
             ${Doc_Text}     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]
             ${Doc_links}     Get Regexp Matches   ${Doc_Text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
             IF  ${Doc_links}
-                Log To Console      ${Doc_links}
+                Split Doc and Valiadte URLS     ${Doc_links}
             END
     END
 
@@ -151,7 +150,7 @@ Verify Links Are Not Broken For Each QuickStart
     ${quickStartCount}=   Get Length           ${quickStartElements}
     ${TitleElements}=     Get WebElements      //div[@class="pf-c-card__title odh-card__doc-title"]
     FOR    ${counter}    IN RANGE     ${quickStartCount}
-        Log To Console    "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        Log To Console    \n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         ${Title}=   Get Text          ${TitleElements[${counter}]}
         ${Title}=   Split To Lines    ${Title}
         Log To Console                ${Title[${0}]}
@@ -177,3 +176,27 @@ Open QuickStart Step
     FOR    ${counter}    IN RANGE    5
         Press Keys    NONE    TAB
     END
+
+
+Split Doc and Valiadte URLS
+    [Arguments]    ${doc_links}
+    @{valiadte_urls}  Create List
+    @{invalidLinks}   Create List
+    Append To List  ${invalidLinks}   http://s2i-python-service.my-project.svc.cluster.local:8080.  http://example.apps.organization.abc3.p4.openshiftapps.com/predictions  https://my-project-s2i-python-service-openapi-3scale-api.cluster.com/?user_key=USER_KEY     https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/?user_key=<API_KEY_GOES_HERE>     https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/status/?user_key=.
+
+    FOR    ${doc_link}    IN    @{doc_links}
+        Log To Console   ${doc_link}
+        ${status}=   Run Keyword And Return Status    List Should Contain Value    ${invalidLinks}    ${doc_link}
+        IF  ${status}
+            Log To Console  Skipped invalid link   ${doc_link}
+        ELSE
+            IF  "${doc_link[${-1}]}" != '.'
+                ${status}=  Check HTTP Status Code  ${doc_link}
+                Log To Console  ${doc_link}  ${status}
+            ELSE IF  "${doc_link[${-1}]}" == '.'
+                ${status}=  Check HTTP Status Code   ${doc_link[:${-1}]}
+                 Log To Console   ${doc_link[:${-1}]}   ${status}
+            END
+        END
+    END
+

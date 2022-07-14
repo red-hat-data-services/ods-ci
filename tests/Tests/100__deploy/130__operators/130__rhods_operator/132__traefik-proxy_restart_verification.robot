@@ -8,7 +8,7 @@ Documentation       132 - RHODS_TRAEFIK_PROXY_CONTAINER_RESTART_VERIFICATION
 ...                 | LABEL_SELECTOR    | Required |    Label selector for traefik proxy|
 
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-
+Suite Setup         RHOSi Setup
 
 *** Variables ***
 ${NAMESPACE}            redhat-ods-applications
@@ -20,6 +20,6 @@ Verify Traefik Proxy Containers Have Zero Restarts
     [Documentation]    Verify traefik proxy
     ...    container restart
     [Tags]    Sanity
-    ...       ODS-1163    KnownIssues
+    ...       ODS-1163    ProductBug
     ${pod_names}    Get POD Names    ${NAMESPACE}    ${LABEL_SELECTOR}
     Verify Containers Have Zero Restarts    ${pod_names}    ${NAMESPACE}

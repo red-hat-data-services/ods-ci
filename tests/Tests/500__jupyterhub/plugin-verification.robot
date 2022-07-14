@@ -6,6 +6,7 @@ Library         String
 Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource        ../../Resources/RHOSi.resource
 Suite Setup     Plugin Testing Suite Setup
 Suite Teardown   Plugin Testing Suite Teardown
 Force Tags       JupyterHub
@@ -23,7 +24,7 @@ Force Tags       JupyterHub
 Test User Notebook Plugin in JupyterLab
     [Tags]  Sanity
     ...     ODS-486
-    ...     KnownIssues
+    ...     ProductBug
     Gather Notebook data
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -38,7 +39,8 @@ Test User Notebook Plugin in JupyterLab
 
 *** Keywords ***
 Plugin Testing Suite Setup
-  Set Library Search Order  SeleniumLibrary
+   Set Library Search Order  SeleniumLibrary
+   RHOSi Setup
    ${notebook_pod_name}         Get User Notebook Pod Name         ${TEST_USER.USERNAME}
    Set Suite Variable     ${notebook_pod_name}
 

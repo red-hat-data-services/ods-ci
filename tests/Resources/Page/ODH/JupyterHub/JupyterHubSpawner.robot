@@ -6,9 +6,11 @@ Resource  ../../ODH/ODHDashboard/ODHDashboard.robot
 Resource  LoginJupyterHub.robot
 Resource  JupyterLabSidebar.robot
 Resource  ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
+Library   ../../../../libs/Helpers.py
 Library   String
 Library   Collections
 Library   JupyterLibrary
+Library   OpenShiftLibrary
 
 
 *** Variables ***
@@ -28,8 +30,8 @@ JupyterHub Spawner Is Visible
 
 Wait Until JupyterHub Spawner Is Ready
     [Documentation]  Waits for the spawner page to be ready using the server size dropdown
-    Wait Until Page Contains Element    xpath:${JUPYTERHUB_CONTAINER_SIZE_TITLE}
-    Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]
+    Wait Until Page Contains Element    xpath:${JUPYTERHUB_CONTAINER_SIZE_TITLE}    timeout=15s
+    Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]    timeout=15s
 
 Select Notebook Image
     [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
@@ -59,6 +61,18 @@ Set Number Of Required GPUs
     [Arguments]  ${gpus}
     Click Element  xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]
     Click Element  xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]/ul/li[.="${gpus}"]
+
+Fetch Max Number Of GPUs In Spawner Page
+    [Documentation]    Returns the maximum number of GPUs a user can request from the spawner
+    ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
+    IF  ${gpu_visible}==True
+       Click Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[2]
+       ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
+       ${maxGPUs} =    Convert To Integer    ${maxGPUs}
+    ELSE
+       ${maxGPUs} =    Set Variable    ${0}
+    END
+    [Return]    ${maxGPUs}
 
 Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
@@ -148,19 +162,12 @@ Spawn Notebook With Arguments  # robocop: disable
                Add Spawner Environment Variable  ${key}  ${value}
             END
          END
-         Spawn Notebook
+         Spawn Notebook    ${spawner_timeout}
          Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
          ...    id:progress-bar  ${spawner_timeout}
          Wait For JupyterLab Splash Screen  timeout=30
          Maybe Close Popup
-         ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
-         Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
-         Open With JupyterLab Menu  File  New  Notebook
-         Sleep  1
-         Maybe Close Popup
-         Close Other JupyterLab Tabs
-         Maybe Close Popup
-         Sleep  1
+         Open New Notebook In Jupyterlab Menu
          Spawned Image Check    ${image}
          ${spawn_fail} =  Has Spawn Failed
          Exit For Loop If  ${spawn_fail} == False
@@ -180,9 +187,10 @@ Spawned Image Check
 
 Launch JupyterHub Spawner From Dashboard
     [Documentation]  Launches JupyterHub from the RHODS Dashboard
+    [Arguments]    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}    ${auth}=${TEST_USER.AUTH_TYPE}
     Menu.Navigate To Page    Applications    Enabled
     Launch JupyterHub From RHODS Dashboard Link
-    Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Login To Jupyterhub  ${username}  ${password}  ${auth}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
@@ -332,6 +340,16 @@ Fetch Image Description Info
     ${text} =  Fetch From Left  ${text}  ,
     [Return]  ${text}
 
+Fetch Image Tooltip Description
+    [Documentation]  Fetches Description in image tooltip
+    [Arguments]  ${img}
+    ${xpath_img_tooltip} =  Set Variable  //input[contains(@id, "${img}")]/../label/span/*
+    ${xpath_tooltip_desc} =  Set Variable  //span[@class="jsp-spawner__image-options__packages-popover__title"]
+    Click Element  ${xpath_img_tooltip}
+    ${desc} =  Get Text  ${xpath_tooltip_desc}
+    Click Element  //div[@class='jsp-app__header__title']
+    [Return]  ${desc}
+
 Fetch Image Tooltip Info
     [Documentation]  Fetches libraries in image tooltip text
     [Arguments]  ${img}
@@ -348,6 +366,33 @@ Fetch Image Tooltip Info
     Click Element  //div[@class='jsp-app__header__title']
     [Return]  ${tmp_list}
 
+Spawn Notebooks And Set S3 Credentials
+    [Documentation]     Spawn a jupyter notebook server and set the env variables
+    ...                 to connect with AWS S3
+    [Arguments]     ${image}=s2i-generic-data-science-notebook
+    Set Log Level    NONE
+    &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
+    Spawn Notebook With Arguments  image=${image}  envs=&{S3-credentials}
+    Set Log Level    INFO
+
+Handle Bad Gateway Page
+    [Documentation]    It reloads the JH page until Bad Gateway error page
+    ...                disappears. It is possible to control how many
+    ...                times to try refreshing using 'retries' argument
+    [Arguments]   ${retries}=10     ${retry_interval}=1s
+    Capture Page Screenshot    jh_badgateway_kw.png
+    FOR    ${counter}    IN RANGE    0    ${retries}+1
+        ${bg_present} =    Run Keyword And Return Status    Page Should Contain    Bad Gateway
+        IF    $bg_present == True
+            Reload Page
+            Sleep    ${retry_interval}
+        END
+        Exit For Loop If    $bg_present == False
+    END
+    IF    $bg_present == True
+        Fail    Bad Gateway error page appears
+    END
+
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
     [Arguments]    ${retries}=1    ${image}=s2i-generic-data-science-notebook    ${size}=Small    ${spawner_timeout}=600 seconds
@@ -357,3 +402,78 @@ Verify Image Can Be Spawned
     Spawn Notebook With Arguments    ${retries}    ${image}    ${size}
     ...    ${spawner_timeout}    ${gpus}    ${refresh}    &{envs}
     End Web Test
+
+Verify Library Version Is Greater Than
+    [Arguments]     ${library}      ${target}
+    ${ver} =  Run Cell And Get Output   !pip show ${library} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
+    ${comparison} =  GTE  ${ver}  ${target}
+    IF  ${comparison}==False
+        Run Keyword And Continue On Failure     FAIL    Library Version Is Smaller Than Expected
+    END
+
+Get List Of All Available Container Size
+    [Documentation]  This keyword capture the available sizes from JH spawner page
+    Wait Until Page Contains    Container size    timeout=30
+    ...    error=Container size selector is not present in JupyterHub Spawner
+    ${size}    Create List
+    Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
+    ${link_elements}   Get WebElements  xpath://*[@class="pf-c-select__menu-item-main"]
+    FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
+          ${text}      Get Text    ${ext_link}
+          Append To List    ${size}     ${text}
+    END
+    [Return]    ${size}
+
+Get Previously Selected Notebook Image Details
+    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
+    ${user_name} =    Set Variable    jupyterhub-singleuser-profile-${safe_username}
+    ${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
+    ...    field_selector=metadata.name=${user_name}
+    @{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
+    [Return]    ${user_data}
+
+Open New Notebook In Jupyterlab Menu
+    [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu
+    ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
+    Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
+    Open With JupyterLab Menu  File  New  Notebook
+    Sleep  1
+    Maybe Close Popup
+    Close Other JupyterLab Tabs
+    Maybe Close Popup
+    Sleep  1
+
+Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
+    [Documentation]    Log in N users and run notebook for each of them
+    [Arguments]    ${list_of_usernames}
+    FOR    ${username}    IN    @{list_of_usernames}
+        Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
+        Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+        Wait for RHODS Dashboard to Load
+        Launch JupyterHub From RHODS Dashboard Link
+        Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+        Page Should Not Contain    403 : Forbidden
+        ${authorization_required} =    Is Service Account Authorization Required
+        Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+        Fix Spawner Status
+        Spawn Notebook With Arguments
+    END
+    [Teardown]    SeleniumLibrary.Close All Browsers
+
+CleanUp JupyterHub For N users
+    [Documentation]    Cleans JupyterHub for N users
+    [Arguments]    ${list_of_usernames}
+    SeleniumLibrary.Close All Browsers
+    FOR    ${username}    IN    @{list_of_usernames}
+        Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
+        Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+        Wait for RHODS Dashboard to Load
+        Launch JupyterHub From RHODS Dashboard Link
+        Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+        Page Should Not Contain    403 : Forbidden
+        ${authorization_required} =    Is Service Account Authorization Required
+        Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+        Stop JupyterLab Notebook Server
+    END
+    [Teardown]    SeleniumLibrary.Close All Browsers
+    

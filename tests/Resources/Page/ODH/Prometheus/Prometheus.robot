@@ -17,6 +17,28 @@ Run Query
     # Log To Console    ${resp.json()}
     [Return]    ${resp}
 
+Run Range Query
+    [Documentation]    Runs a prometheus range query, in order to obtain the result of a PromQL expression over a given time range. More info at:
+    ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
+    ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
+    [Arguments]    ${pm_query}    ${pm_url}    ${pm_token}    ${interval}=12h     ${steps}=172
+    ${time} =    Get Start Time And End Time  interval=${interval}
+    ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
+    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    ...    headers=${pm_headers}    verify=${False}
+    Status Should Be    200    ${resp}
+    [Return]    ${resp}
+
+Get Start Time And End Time
+    [Documentation]     Returns start and end time for Query range from current time
+    [Arguments]         ${interval}   # like 12h  7 days etc
+    ${end_time} =  Get Current Date
+    ${end_time} =  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${end_time}").timestamp()
+    ${start_time} =    Subtract Time From Date    ${end_time}    ${interval}
+    ${start_time} =  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${start_time}").timestamp()
+    @{time} =  Create List  ${start_time}  ${end_time}
+    [Return]    ${time}
+
 Get Rules
     [Documentation]    Gets Prometheus rules
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_type}
@@ -87,10 +109,9 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
         # Log To Console    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
         Fail    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
     ELSE
-        Log To Console    msg=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
-        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
+        Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
+        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
     END
-
 
 Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if a given Prometheus alert does not have the expected severity
@@ -129,11 +150,9 @@ Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
         # Log To Console    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
         Fail    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but severity != ${alert-severity}
     ELSE
-        Log To Console    msg=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
-        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
+        Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
+        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
     END
-
-
 
 Alerts Should Be Equal
     [Documentation]    Compares two alerts names and fails if they are different.
@@ -153,26 +172,56 @@ Alert Should Not Be Firing
     ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
     Should Be True    not ${is_alert_firing}    msg=Alert ${alert} should not be firing
 
+Alert Should Not Be Firing In The Next Period    # robocop: disable:too-many-arguments
+    [Documentation]    Fails if a Prometheus alert is firing in the next ${period}
+    ...    ${period} should be 1m or bigger
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}
+    ...    ${alert-duration}=${EMPTY}    ${period}=10 min
+
+    ${passed}=    Run Keyword And Return Status    Wait Until Alert Is Firing
+    ...    pm_url=${pm_url}    pm_token=${pm_token}    rule_group=${rule_group}
+    ...    alert=${alert}    alert-duration=${alert-duration}    timeout=${period}
+    Run Keyword If    ${passed}    Fail    msg=Alert ${alert} should not be firing
+
 Wait Until Alert Is Firing    # robocop: disable:too-many-arguments
     [Documentation]    Waits until alert is firing or timeout is reached (failing in that case),
-    ...    checking the alert state every minute
+    ...    checking the alert state every 30 seconds
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=10 min
-    Wait Until Keyword Succeeds    ${timeout}    1 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Alert Should Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
     [Documentation]    Waits until alert is not firing or timeout is reached (failing in that case),
-    ...    checking the alert state every minute
+    ...    checking the alert state every 30 seconds
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=5 min
-    Wait Until Keyword Succeeds    ${timeout}    1 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Alert Should Not Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Get Target Endpoints
     [Documentation]     Returns list of Endpoint URLs
-    [Arguments]         ${target_name}
-    ${links} =  Run  curl -X GET -H "Authorization:Bearer ${RHODS_PROMETHEUS_TOKEN}" -u ${OCP_ADMIN_USER.USERNAME}:${OCP_ADMIN_USER.PASSWORD} -k ${RHODS_PROMETHEUS_URL}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'
-    ${links}    Replace String    ${links}    "    ${EMPTY}
-    @{links} =  Split String  ${links}  \n
+    [Arguments]         ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${username}:${password} -k ${pm_url}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'
+    ${links}=    Replace String    ${links}    "    ${EMPTY}
+    @{links}=    Split String  ${links}  \n
     [Return]    ${links}
+
+Get Target Endpoints Which Have State Up
+    [Documentation]    Returns list of endpoints who have state is "UP"
+    [Arguments]        ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${pm_token}:${password} -k ${pm_token}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | select(.health == "up") | .globalUrl'
+    ${links}=    Replace String    ${links}    "    ${EMPTY}
+    @{links}=    Split String  ${links}  \n
+    [Return]    ${links}
+
+Verify ODS Availability
+    [Documentation]    Verifies that there is no downtime in ODS
+    ...    Returns:
+    ...        None
+    ${expression}=    Set Variable    rhods_aggregate_availability[10m : 1m]
+    ${resp}=    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
+    @{values}=    Set Variable    ${resp.json()["data"]["result"][0]["values"]}
+    FOR    ${value}    IN    @{values}
+        Should Not Be Equal As Strings    ${value}[1]    0
+    END

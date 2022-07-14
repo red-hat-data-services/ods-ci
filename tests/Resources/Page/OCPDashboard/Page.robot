@@ -26,6 +26,14 @@ Maybe Click Show Default Project Button
      END
   END
 
+Create Project
+    [Documentation]     Creates a project in OCP Console.
+    [Arguments]  ${project_name}
+    Menu.Navigate To Page   Home    Projects
+    Click Button    xpath://button[@id="yaml-create"]
+    Input Text      xpath://input[@id="input-name"]     ${project_name}
+    Click Button    xpath://button[@id="confirm-action"]
+
 Select Project By Name
   [Arguments]  ${project_name}
   Wait Until Page Contains Element    xpath://div[@data-test-id='namespace-bar-dropdown']/div/div/button
@@ -38,10 +46,29 @@ Search Last Item Instance By Title in OpenShift Table
   [Arguments]  ${search_term}  ${namespace}=All Projects
   Select Project By Name    ${namespace}
   Wait Until Page Contains Element    xpath://input[@data-test='name-filter-input']
-  Wait Until Page Contains Element    xpath://a[contains(., "${search_term}")]
   Clear Element Text    xpath://input[@data-test='name-filter-input']
   Input Text    xpath://input[@data-test='name-filter-input']    ${search_term}
   Sleep  2
+  Wait Until Page Contains Element    xpath://a[contains(., "${search_term}")]
   Click Button    xpath://*/th[@data-label='Created']/button  # asc order
   Click Button    xpath://*/th[@data-label='Created']/button  # desc order
 
+Delete Project By Name
+  [Documentation]       Deletes a project in OCP Console.
+  [Arguments]  ${project_name}
+  Menu.Navigate To Page   Home    Projects
+  Wait Until Page Contains Element      //input[@data-test-id="item-filter"]
+  Input Text    //input[@data-test-id="item-filter"]    ${project_name}
+  Sleep     5
+  Click Button      //button[@class="pf-c-dropdown__toggle pf-m-plain"]
+  Sleep     5
+  Click Button      //button[@data-test-action="Delete Project"]
+  Wait Until Page Contains Element      //div[@class="modal-header"]    10
+  Input Text    //input[@data-test="project-name-input"]    ${project_name}
+  Click Button  //button[@data-test="confirm-action"]
+
+Select Last Item Instance By Title In OpenShift Table
+    [Documentation]    Searches last item instance and clicks on it
+    [Arguments]    ${search_term}    ${namespace}=All Projects
+    Search Last Item Instance By Title In OpenShift Table    ${search_term}    ${namespace}
+    Click Link    xpath://a[contains(., "${search_term}")]

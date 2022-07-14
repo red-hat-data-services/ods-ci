@@ -2,6 +2,7 @@
 Library             SeleniumLibrary
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../../Resources/RHOSi.resource
 
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown
@@ -34,6 +35,7 @@ Check Beta Description
 
 Dashboard Test Setup
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}

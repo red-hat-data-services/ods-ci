@@ -1,6 +1,8 @@
 *** Settings ***
 Resource      ../../../Page/Components/Components.resource
+Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
 Resource       ../../../Common.robot
+Resource       ../JupyterHub/ODHJupyterhub.resource
 Library       JupyterLibrary
 
 
@@ -18,11 +20,24 @@ ${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class
 ${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
-${APPS_DICT_PATH}=  tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary.json
-${APPS_DICT_PATH_LATEST}=   tests/Resources/Page/ODH/ODHDashboard/AppsInfoDictionary_latest.json
+${APPS_DICT_PATH}=  tests/Resources/Files/AppsInfoDictionary.json
+${APPS_DICT_PATH_LATEST}=   tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-c-alert pf-m-success']
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
+${CUSTOM_IMAGE_SOFTWARE_TABLE}=  //caption[contains(., "the advertised software")]/../tbody
+${CUSTOM_IMAGE_PACKAGE_TABLE}=  //caption[contains(., "the advertised packages")]/../tbody
+${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}=  tr[last()]/td[last()]/button[@id="save-package-software-button"]  # Save button
+${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}=  tr[last()]/td[last()]/button[@id="edit-package-software-button"]  # Edit OR Save button of last row (depends on context)
+${CUSTOM_IMAGE_LAST_ROW_DELETE_BTN}=  tr[last()]/td[last()]/button[@id="delete-package-software-button"]  # Remove button of last row
+${CUSTOM_IMAGE_LAST_ROW_NAME}=  tr[last()]/td[1]
+${CUSTOM_IMAGE_LAST_ROW_VERSION}=  tr[last()]/td[2]
+${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
+${CUSTOM_IMAGE_REMOVE_BTN}=  button[@id="delete-package-software-button"]
+${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//button
+${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
+${GROUPS_CONFIG_CM}=    groups-config
+${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 
 
 *** Keywords ***
@@ -134,14 +149,8 @@ Go To RHODS Dashboard
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
 
-Check HTTP Status Code
-    [Arguments]  ${link_to_check}  ${expected}=200
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
-    Run Keyword And Continue On Failure  Status Should Be  ${expected}
-    [Return]  ${response.status_code}
-
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.8.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.13.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE
@@ -235,7 +244,7 @@ Check Sidebar Links
         ${link_idx}=  Convert To String    ${link_idx}
         ${link_text}=  Get Text    ${s_link}
         ${link_href}=  Get Element Attribute    ${s_link}    href
-        ${link_status}=  Check HTTP Status Code   link_to_check=${link_href}  expected=200
+        ${link_status}=  Run Keyword And Continue On Failure  Check HTTP Status Code   link_to_check=${link_href}  expected=200
         ${expected_link}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][url]
         ${expected_text}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][text]
         ${lt_json_list}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][matching]
@@ -360,13 +369,30 @@ Verify Cluster Settings Is Not Available
     ${cluster_settings_available}=    Run Keyword And Return Status    Verify Cluster Settings Is Available
     Should Not Be True    ${cluster_settings_available}    msg=Cluster Settings shoudn't be visible for this user
 
+Save Changes In Cluster Settings
+    [Documentation]    Clicks on the "Save changes" button in Cluster Settings and
+    ...    waits until "Settings changes saved." is shown
+    Click Button    Save changes
+    Wait Until Keyword Succeeds    30    1
+    ...    Wait Until Page Contains    Settings changes saved.
+
 Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
-    Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
+    ...    ${USAGE_DATA_COLLECTION_XP}
+    IF    ${is_data_collection_enabled}==False
+        Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+        Save Changes In Cluster Settings
+    END
 
 Disable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
-    Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
+    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
+    ...    ${USAGE_DATA_COLLECTION_XP}
+    IF    ${is_data_collection_enabled}==True
+        Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
+        Save Changes In Cluster Settings
+    END
 
 Search Items In Resources Section
     [Arguments]     ${element}
@@ -378,3 +404,256 @@ Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
     [Arguments]    ${user_name}
     Element Text Should Be    xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]    ${user_name}
+
+Set PVC Value In RHODS Dashboard
+    [Documentation]    Change the default value for PVC
+    ...    only whole number is selected
+    [Arguments]    ${size}
+    Menu.Navigate To Page    Settings    Cluster settings
+    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
+    Input Text    //input[@id="pvc-size-input"]    ${size}
+    Save Changes In Cluster Settings
+
+Restore PVC Value To Default Size
+    [Documentation]    Set the PVC value to default
+    ...    value i.e., 20Gi
+    Menu.Navigate To Page    Settings    Cluster settings
+    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
+    Click Button    Restore Default
+    Save Changes In Cluster Settings
+    Sleep    20s    msg=NOTE: This change will cause juypterhub to restart. It will take 30 seconds before juypterhub will be available. #robocop:disable
+    Wait Until JH Deployment Is Ready
+
+RHODS Notification Drawer Should Contain
+    [Documentation]    Verifies RHODS Notifications contains given Message
+    [Arguments]     ${message}
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Page Should Contain  text=${message}
+    Close Notification Drawer
+
+Open Notebook Images Page
+    [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
+    Page Should Contain    Settings
+    Menu.Navigate To Page    Settings    Notebook Images
+    Wait Until Page Contains    Notebook image settings
+    Page Should Contain    Notebook image settings
+
+Import New Custom Image
+    [Documentation]    Opens the Custom Image import view and imports an image
+    ...    Software and Packages should be passed as dictionaries
+    [Arguments]    ${repo}    ${name}    ${description}    ${software}    ${packages}
+    Sleep  1
+    Open Custom Image Import Popup
+    Input Text    xpath://input[@id="notebook-image-repository-input"]    ${repo}
+    Input Text    xpath://input[@id="notebook-image-name-input"]    ${name}
+    Input Text    xpath://input[@id="notebook-image-description-input"]    ${description}
+    Add Softwares To Custom Image    ${software}
+    Add Packages To Custom Image    ${packages}
+    Click Element    xpath://button[.="Import"]
+
+Open Custom Image Import Popup
+    [Documentation]    Opens the Custom Image import view, using the appropriate button
+    ${first_image} =  Run Keyword And Return Status  Page Should Contain Element  xpath://button[.="Import image"]
+    IF  ${first_image}==True
+        Click Element  xpath://button[.="Import image"]
+    ELSE
+        Click Element  xpath://button[.="Import new image"]
+    END
+    Wait Until Page Contains    Import Notebook images
+
+Add Softwares To Custom Image
+    [Documentation]    Loops through a dictionary to add software to the custom img metadata
+    [Arguments]    @{software}
+    Click Element  xpath://button/span[.="Software"]
+    FOR  ${sublist}  IN  @{software}
+        FOR  ${element}  IN  @{sublist}
+            Wait Until Element Is Visible    xpath://button[.="Add Software" or .="Add software"]
+            Click Element  xpath://button[.="Add Software" or .="Add software"]
+            Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}
+            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}/input[@id="software-package-input"]  ${element}
+            Input Text  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}/input[@id="version-input"]  ${sublist}[${element}]
+            Click Element  xpath:${CUSTOM_IMAGE_SOFTWARE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}
+        END
+    END
+
+Add Packages To Custom Image
+    [Documentation]    Loops through a dictionary to add packages to the custom img metadata
+    [Arguments]    @{packages}
+    Click Element  xpath://button/span[.="Packages"]
+    FOR  ${sublist}  IN  @{packages}
+        FOR  ${element}  IN  @{sublist}
+            Wait Until Element Is Visible    xpath://button[.="Add Package" or .="Add package"]
+            Click Element  xpath://button[.="Add Package" or .="Add package"]
+            Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_EDIT_BTN}
+            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_NAME}/input[@id="software-package-input"]  ${element}
+            Input Text  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_VERSION}/input[@id="version-input"]  ${sublist}[${element}]
+            Click Element  xpath:${CUSTOM_IMAGE_PACKAGE_TABLE}/${CUSTOM_IMAGE_LAST_ROW_SAVE_BTN}
+        END
+    END
+
+Remove Software From Custom Image
+    [Documentation]    Removes specific software from a custom image's metadata
+    ...    Assuming the edit view of said image is already open
+    [Arguments]    ${software_name}
+    Click Element  xpath://button/span[.="Software"]
+    Click Button  xpath://td[.="${software_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
+
+Remove Package From Custom Image
+    [Documentation]    Removes specific package from a custom image's metadata
+    ...    Assuming the edit view of said image is already open
+    [Arguments]    ${package_name}
+    Click Element  xpath://button/span[.="Packages"]
+    Click Button  xpath://td[.="${package_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
+
+Delete Custom Image
+# Need to check if image is REALLY deleted
+    [Documentation]    Deletes a custom image through the dashboard UI.
+    ...    Needs an additional check on removed ImageStream
+    [Arguments]    ${image_name}
+    Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
+    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-delete-button"]
+    Wait Until Page Contains  Do you wish to permanently delete ${image_name}?
+    Click Button  xpath://button[.="Delete"]
+
+Open Edit Menu For Custom Image
+    [Documentation]    Opens the edit view for a specific custom image
+    [Arguments]    ${image_name}
+    Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
+    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-edit-button"]
+    Wait Until Page Contains  Delete Notebook Image
+
+Expand Custom Image Details
+    [Documentation]    Expands a custom image's row in the dashboard UI
+    [Arguments]    ${image_name}
+    ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    IF  ${is_expanded}==False
+        Click Button  xpath://td[.="${image_name}"]/../td[1]//button
+    END
+
+Collapse Custom Image Details
+    [Documentation]    Collapses a custom image's row in the dashboard UI
+    [Arguments]    ${image_name}
+    ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    IF  ${is_expanded}==True
+        Click Button  xpath://td[.="${image_name}"]/../td[1]//button
+    END
+
+Verify Custom Image Description
+    [Documentation]    Verifies that the description shown in the dashboard UI
+    ...    matches the given one
+    [Arguments]    ${image_name}    ${expected_description}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="Description"][.="${expected_description}"]
+    IF  ${exists}==False
+        ${desc} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="Description"]
+        Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
+        FAIL
+    END
+    [Return]    ${exists}
+
+Verify Custom Image Is Listed
+    [Documentation]    Verifies that the custom image is displayed in the dashboard
+    ...    UI with the correct name
+    [Arguments]    ${image_name}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]
+    IF  ${exists}==False
+        Log  ${image_name} not visible in page
+        FAIL
+    END
+    [Return]    ${exists}
+
+Verify Custom Image Owner
+    [Documentation]    Verifies that the user listed for an image in the dahsboard
+    ...    UI matches the given one
+    [Arguments]    ${image_name}    ${expected_user}
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="User"][.="${expected_user}"]
+    IF  ${exists}==False
+        ${user} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="User"]
+        Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
+        FAIL
+    END
+    [Return]  ${exists}
+
+Enable Custom Image
+    [Documentation]    Enables a custom image (i.e. displayed in JH) [WIP]
+    [Arguments]    ${image_name}
+    ${is_enabled} =  # Need to find a check
+    IF  ${is_enabled}==False
+        Click Element  xpath://td[.="${image_name}"]/..//input
+    END
+
+Disable Custom Image
+    [Documentation]    Disables a custom image (i.e. not displayed in JH) [WIP]
+    [Arguments]    ${image_name}
+    ${is_enabled} =  # Need to find a check
+    IF  ${is_enabled}==True
+        Click Element  xpath://td[.="${image_name}"]/..//input
+    END
+
+Close Notification Drawer
+    [Documentation]    Closes the dashboard notification drawer, if it is open
+    ${closed}=  Run Keyword And Return Status  Page Should Contain Element  ${NOTIFICATION_DRAWER_CLOSED}
+    IF  ${closed}==False
+        Click Element  ${NOTIFICATION_DRAWER_CLOSE_BTN}
+    END
+
+RHODS Notification Drawer Should Not Contain
+    [Documentation]    Verifies RHODS Notifications does not contain given Message
+    [Arguments]     ${message}
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Page Should Not Contain  text=${message}
+    Close Notification Drawer
+
+Sort Resources By
+    [Documentation]    Changes the sort of items in resource page
+    [Arguments]    ${sort_type}
+    Click Element    //div[@class="pf-c-toolbar__content-section"]/div[2]/div/button
+    Click Button    //button[@data-key="${sort_type}"]
+    Sleep    1s
+
+Clear Dashboard Notifications
+    [Documentation]     Clears Notifications present in RHODS dashboard
+    Click Element    xpath=//*[contains(@class,'notification-badge')]
+    Sleep  2s  reason=To avoid Element Not Interactable Exception
+    ${notification_count} =  Get Element Count    class:odh-dashboard__notification-drawer__item-remove
+    FOR    ${index}    IN RANGE    ${notification_count}
+        Click Element    xpath=//*[contains(@class,"odh-dashboard__notification-drawer__item-remove")]
+    END
+    Close Notification Drawer
+
+Get Dashboard Pods Names
+    [Documentation]     Retrieves the names of dashboard pods
+    ${dash_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=rhods-dashboard
+    ...                        fields=['metadata.name']
+    ${names}=   Create List
+    FOR    ${pod_name}    IN    @{dash_pods}
+        Append To List      ${names}    ${pod_name}[metadata.name]
+    END
+    [Return]   ${names}
+
+Get Dashboard Pod Logs
+    [Documentation]     Fetches the logs from one dashboard pod
+    [Arguments]     ${pod_name}
+    ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=redhat-ods-applications  container=rhods-dashboard
+    ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
+    ${n_lines}=     Get Length    ${pod_logs_lines}
+    Log     ${pod_logs_lines}[${n_lines-3}:]
+    IF   "${pod_logs_lines}[${n_lines-1}]" == "${EMPTY}"
+        Remove From List    ${pod_logs_lines}   ${n_lines-1}
+        ${n_lines}=     Get Length    ${pod_logs_lines}
+    END
+    [Return]    ${pod_logs_lines}   ${n_lines}
+
+Get ConfigMaps For RHODS Groups Configuration
+    [Documentation]     Returns a dictionary containing "rhods-group-config" and "groups-config"
+    ...                 ConfigMaps
+    ${rgc_status}   ${rgc_yaml}=     Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${RHODS_GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
+    ${gc_status}   ${gc_yaml}=      Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${GROUPS_CONFIG_CM}   namespace=redhat-ods-applications
+    IF   $rgc_status == 'FAIL'
+        ${rgc_yaml}=    Create List   ${EMPTY}
+    END
+    IF   $gc_status == 'FAIL'
+        ${gc_yaml}=    Create List    ${EMPTY}
+    END
+    ${group_config_maps}=   Create Dictionary     rgc=${rgc_yaml}[0]     gc=${gc_yaml}[0]
+    Log     ${group_config_maps}
+    [Return]    ${group_config_maps}

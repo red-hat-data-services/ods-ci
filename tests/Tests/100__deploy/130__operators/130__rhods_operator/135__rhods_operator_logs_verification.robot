@@ -6,18 +6,25 @@ Documentation   135 - RHODS_OPERATOR_LOGS_VERIFICATION
 ...             | Namespace                | Required |        RHODS Namespace/Project for RHODS operator POD |
 ...             | REGEX_PATTERN            | Required |        Regular Expression Pattern to match the erro msg in capture log|
 
+Resource      ../../../../Resources/RHOSi.resource
+
 Library        Collections
 Library        OpenShiftCLI
 Library        OperatingSystem
 Library        String
 
+Suite Setup     RHOSi Setup
+
+
 *** Variables ***
 ${namespace}           redhat-ods-operator
-${regex_pattern}       level=([Ee]rror).*
+${regex_pattern}       level=([Ee]rror).*|([Ff]ailed) to list .*
 
 *** Test Cases ***
 Verify RHODS Operator log
-   [Tags]  ODS-1007   Sanity
+   [Tags]  Sanity
+   ...     ProductBug
+   ...     ODS-1007
    #Get the POD name
    ${data}       Run keyword   OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=name=rhods-operator
    #Capture the logs based on containers

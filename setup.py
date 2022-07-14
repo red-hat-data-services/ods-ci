@@ -21,6 +21,7 @@ setup(
         "robotframework-seleniumlibrary",
         "robotframework-jupyterlibrary>=0.3.1",
         "robotframework-OpenShiftCLI==1.0.1",
+        "robotframework-openshift==1.0.0",
         "ipython",
         "pytest",
         "pytest-logger",
@@ -29,7 +30,9 @@ setup(
         "requests",
         "robotframework-requests",
         "escapism",
-        "semver>=2,<3"
+        "semver>=2,<3",
+        "rpaframework>=12",
+        "yq"
     ],
     zip_safe=True,
     include_package_data=True,

@@ -4,7 +4,16 @@ Documentation       Resource file for openvino operator
 Library             SeleniumLibrary
 
 
+*** Variables ***
+${OPENVINO_IMAGE_XP}=   //input[contains(@name,"OpenVINO™ Toolkit")]
+
+
 *** Keywords ***
+Remove Openvino Operator
+    [Documentation]     Cleans up the server and uninstall the openvino operator.
+    Fix Spawner Status
+    Uninstall Openvino Operator
+
 Uninstall Openvino Operator
     [Documentation]    Uninstall openvino operator and it's realted component
     Go To    ${OCP_CONSOLE_URL}
@@ -20,8 +29,10 @@ Verify JupyterHub Can Spawn Openvino Notebook
     [Documentation]    Spawn openvino notebook and check if
     ...    current working path is matching
     Launch JupyterHub Spawner From Dashboard
-    Wait Until Page Contains Element    xpath://input[@name="OpenVINO™ Toolkit"]
-    Wait Until Element Is Enabled    xpath://input[@name="OpenVINO™ Toolkit"]    timeout=10
-    Spawn Notebook With Arguments    image=openvino-notebook
+    Wait Until Page Contains Element    xpath=${OPENVINO_IMAGE_XP}
+    Wait Until Element Is Enabled    xpath=${OPENVINO_IMAGE_XP}    timeout=10
+    ${image_id}=    Get Element Attribute    xpath=${OPENVINO_IMAGE_XP}  id
+    Spawn Notebook With Arguments    image=${image_id}
     Run Cell And Check Output    !pwd    /opt/app-root/src
-    Fix Spawner Status
+    Verify Library Version Is Greater Than  jupyterlab  3.1.4
+    Verify Library Version Is Greater Than  notebook    6.4.1

@@ -4,7 +4,7 @@ Library         RequestsLibrary
 Library         Collections
 Resource        ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource        ../../../../Resources/Common.robot
-Suite Setup     Set Library Search Order  SeleniumLibrary
+Suite Setup     RHODS Operator Suite Setup
 Suite Teardown  Close Browser
 
 *** Variables ***
@@ -14,7 +14,7 @@ ${commercial_url}              https://www.redhat.com/en/technologies/cloud-comp
 *** Test Cases ***
 Verify RHODS operator information
   [Documentation]  This TC verfiy if the text present in RHODS opeartor Details section
-  [Tags]  ODS-498   ODS-624   Sanity
+  [Tags]  ODS-498   ODS-624   Sanity    FlakyTest
   Open Installed Operators Page
   #Select All Projects
   Click On Searched Operator      Red Hat OpenShift Data Science
@@ -38,3 +38,7 @@ Get HTTP Status Code
     ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
     Run Keyword And Continue On Failure  Status Should Be  200
     Log To Console    HTTP status For The '${link_to_check}' is '${response.status_code}'
+
+RHODS Operator Suite Setup
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup

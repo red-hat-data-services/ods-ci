@@ -4,27 +4,28 @@ Documentation       Post install test cases that mainly verify OCP resources and
 Library             String
 Library             OperatingSystem
 Library             OpenShiftCLI
+Library             OpenShiftLibrary
+Library             ../../../../libs/Helpers.py
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Page/ODH/Grafana/Grafana.resource
+
+Suite Setup         RHOSi Setup
+
+Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
+Resource            ../../../Resources/Common.robot
 
 
 *** Test Cases ***
-Verify Dashboard Deployment
-    [Documentation]  Verifies RHODS Dashboard deployment
-    [Tags]    Sanity
-    ...       ODS-546
-    @{dashboard} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications
-    ...    label_selector=deployment = rhods-dashboard
-    ${containerNames} =  Create List  rhods-dashboard  oauth-proxy
-    Verify Deployment  ${dashboard}  2  2  ${containerNames}
-
 Verify Traefik Deployment
     [Documentation]  Verifies RHODS Traefik deployment
     [Tags]    Sanity
+    ...       Tier1
     ...       ODS-546
+    ...       ODS-552
     @{traefik} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=name = traefik-proxy
     ${containerNames} =  Create List  traefik-proxy  configmap-puller
     Verify Deployment  ${traefik}  3  2  ${containerNames}
@@ -32,7 +33,7 @@ Verify Traefik Deployment
 Verify JH Deployment
     [Documentation]  Verifies RHODS JH deployment
     [Tags]    Sanity
-    ...       ODS-546  ODS-294  ODS-1250
+    ...       ODS-546  ODS-294  ODS-1250  ODS-237
     @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
     ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
     Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
@@ -45,31 +46,32 @@ Verify GPU Operator Deployment  # robocop: disable
 
     # Before GPU Node is added to the cluster
     # NS
-    Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-gpu-operator
+    Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-nvidia-gpu-addon
     # Node-Feature-Discovery Operator
-    Verify Operator Status  label=operators.coreos.com/node-feature-discovery-operator.redhat-gpu-operator
-    ...    operator_name=node-feature-discovery-operator.v*
+    Verify Operator Status  label=operators.coreos.com/ose-nfd.redhat-nvidia-gpu-addon
+    ...    operator_name=ose-nfd.*
     # GPU Operator
-    Verify Operator Status  label=operators.coreos.com/gpu-operator-certified-addon.redhat-gpu-operator
-    ...    operator_name=gpu-operator-certified-addon.v*
+    Verify Operator Status  label=operators.coreos.com/gpu-operator-certified.redhat-nvidia-gpu-addon
+    ...    operator_name=gpu-operator-certified.v*
     # nfd-controller-manager
-    Verify Deployment Status  label=operators.coreos.com/node-feature-discovery-operator.redhat-gpu-operator
-    ...    DName=nfd-controller-manager
+    Verify Deployment Status  label=operators.coreos.com/ose-nfd.redhat-nvidia-gpu-addon
+    ...    dname=nfd-controller-manager
     # nfd-master
-    Verify DaemonSet Status  label=app=nfd-master  DSName=nfd-master
+    Verify DaemonSet Status  label=app=nfd-master  dsname=nfd-master
     # nfd-worker
-    Verify DaemonSet Status  label=app=nfd-worker  DSName=nfd-worker
+    Verify DaemonSet Status  label=app=nfd-worker  dsname=nfd-worker
 
     # After GPU Node is added to the cluster
-    # TODO: gpu-feature-discovery DS
-    # ...   nvidia-container-toolkit-daemonset DS
-    # ...   gpu-cluster-policy CP
-    # ...   nvidia-dcgm-exporter DS
-    # ...   nvidia-dcgm DS
-    # ...   nvidia-device-plugin-daemonset DS
-    # ...   nvidia-driver-daemonset-49.84.202201212103-0 DS
-    # ...   nvidia-node-status-exporter DS
-    # ...   nvidia-operator-validator DS
+    Verify DaemonSet Status  label=app=gpu-feature-discovery  dsname=gpu-feature-discovery
+    Verify DaemonSet Status  label=app=nvidia-container-toolkit-daemonset  dsname=nvidia-container-toolkit-daemonset
+    Verify DaemonSet Status  label=app=nvidia-dcgm-exporter  dsname=nvidia-dcgm-exporter
+    Verify DaemonSet Status  label=app=nvidia-dcgm  dsname=nvidia-dcgm
+    Verify DaemonSet Status  label=app=nvidia-device-plugin-daemonset  dsname=nvidia-device-plugin-daemonset
+    #app=nvidia-driver-daemonset-410.84.202205191234-0
+    #Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  dsname=nvidia-driver-daemonset-*
+    Verify DaemonSet Status  label=app=nvidia-node-status-exporter  dsname=nvidia-node-status-exporter
+    Verify DaemonSet Status  label=app=nvidia-operator-validator  dsname=nvidia-operator-validator
+    Verify CR Status  crd=NodeFeatureDiscovery  cr_name=ocp-gpu-addon
 
 Verify That Prometheus Image Is A CPaaS Built Image
     [Documentation]    Verifies the images used for prometheus
@@ -122,10 +124,11 @@ Verify Oath-Proxy Image Is fetched From CPaaS
 Verify Pytorch And Tensorflow Can Be Spawned
     [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
     [Tags]    Sanity
-    ...       ODS-480
-    Verify Cuda Builds Are Completed
-    Verify Image Can Be Spawned  image=pytorch  size=Default
-    Verify Image Can Be Spawned  image=tensorflow  size=Default
+    ...       Tier1
+    ...       ODS-480  ODS-481
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications
+    Verify Image Can Be Spawned    image=pytorch  size=Default
+    Verify Image Can Be Spawned    image=tensorflow  size=Default
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
@@ -162,35 +165,76 @@ Verify RHODS Release Version Number
     [Documentation]    Verify RHODS version matches x.y.z-build format
     [Tags]    Sanity
     ...       Tier1
-    ...       ODS-478
+    ...       ODS-478   ODS-472
     ${version} =  Get RHODS Version
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 
+Verify Users Can Update Notification Email After Installing RHODS With The AddOn Flow
+    [Documentation]    Verifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
+    [Tags]    Tier2
+    ...       ODS-673
+    ...       Deployment-AddOnFlow
+    ${email_to_change} =    Set Variable    dummyemail1@redhat.com
+    ${cluster_name} =    Common.Get Cluster Name From Console URL
+    ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
+    Update Notification Email Address    ${cluster_name}    ${email_to_change}
+    Wait Until Notification Email From Addon-Managed-Odh-Parameters Contains  email=${email_to_change}
+    Wait Until Notification Email In Alertmanager ConfigMap Is    ${email_to_change}
+    [Teardown]    Update Notification Email Address    ${cluster_name}    ${current_email}
+
+Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
+    [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
+    [Tags]    Tier2
+    ...       ODS-586
+    Verify Errors In Jupyterhub Logs
+
+Verify Grafana Is Connected To Prometheus Using TLS
+    [Documentation]    Verifies Grafana is connected to Prometheus using TLS
+    [Tags]    Tier2
+    ...       ODS-963
+    [Setup]  Set Library Search Order  Selenium Library
+    Verify Grafana Datasources Have TLS Enabled
+    Verify Grafana Can Obtain Data From Prometheus Datasource
+    [Teardown]  Close Browser
+
+Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In All ODS Projects
+    [Documentation]    Verifies that CPU and Memory requests and limits are defined
+    ...                for all containers in all pods for all ODS projects
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ProductBug
+    ...       ODS-385
+    ...       ODS-554
+    ...       ODS-556
+    ...       ODS-313
+    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-applications
+    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-monitoring
+    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-operator
+
+Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
+    [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
+    [Tags]    Tier2
+    ...       ODS-699
+    Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
+    Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
+
 
 *** Keywords ***
-Verify Cuda Builds Are Completed
-    [Documentation]    Verify All Cuda Builds have status as Complete
-    ${Pods} =    Run    oc get build -n redhat-ods-applications
-    @{builds} =    Split String    ${Pods}    \n
-    ${len} =    Get Length    ${builds}
-    FOR    ${ind}    IN RANGE    1    ${len}
-        @{pre} =    Split String    ${builds}[${ind}]
-        ${is_cuda_build} =   Run Keyword And Return Status   Should Contain    ${pre}[0]    cuda
-        IF    ${is_cuda_build} == True
-            Should Be Equal As Strings    ${pre}[3]    Complete
-        END
-        Should Be Equal As Strings    ${pre}[3]    Complete
-    END
-
 Verify Authentication Is Required To Access BlackboxExporter
     [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,
     ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target.
     ...                The test fails if the response is not a prompt to log in with OpenShift
-    @{links} =    Get Target Endpoints    target_name=user_facing_endpoints_status
+
+    @{links} =    Prometheus.Get Target Endpoints
+    ...    target_name=user_facing_endpoints_status
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    username=${OCP_ADMIN_USER.USERNAME}
+    ...    password=${OCP_ADMIN_USER.PASSWORD}
     Length Should Be    ${links}    2
     ${pod_name} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     FOR    ${link}    IN    @{links}
-        ${command} =    Set Variable    curl --insecure ${link}
+        ${command} =    Set Variable    curl --silent --insecure ${link}
         ${output} =    Run Command In Container    namespace=redhat-ods-monitoring    pod_name=${pod_name}
         ...    command=${command}    container_name=prometheus
         Should Contain    ${output}    Log in with OpenShift
@@ -204,3 +248,72 @@ Verify BlackboxExporter Includes Oauth Proxy
     @{containers} =    Get Containers    pod_name=${pod}    namespace=redhat-ods-monitoring
     List Should Contain Value    ${containers}    oauth-proxy
     List Should Contain Value    ${containers}    blackbox-exporter
+
+Verify Errors In Jupyterhub Logs
+    [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs
+    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications  label_selector=app=jupyterhub
+    FOR    ${pod}    IN    @{pods}
+        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=redhat-ods-applications
+        ...    container=${pod['spec']['containers'][0]['name']}
+        Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
+    END
+
+Verify Grafana Datasources Have TLS Enabled
+    [Documentation]    Verifies TLS Is Enabled in Grafana Datasources
+    ${secret} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=redhat-ods-monitoring
+    ${secret} =  Evaluate  base64.b64decode("${secret[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
+    ${secret} =  Evaluate  json.loads('''${secret}''')  json
+    Run Keyword If  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
+    ...  Should Be Equal As Strings  ${secret['datasources'][0]['jsonData']['tlsSkipVerify']}  False
+
+Verify Grafana Can Obtain Data From Prometheus Datasource
+    [Documentation]   Verifies Grafana Can Obtain Data From Prometheus Datasource
+    ${grafana_url} =  Get Grafana URL
+    Launch Grafana    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    grafana_url=https://${grafana_url}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    Select Explore
+    Select Data Source  datasource_name=Monitoring
+    Run Promql Query  query=traefik_backend_server_up
+    Page Should Contain  text=Graph
+
+Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods in Project
+    [Documentation]    Verifies that CPU and Memory requests and limits are defined
+    ...                for all containers in all pods for the specified project
+    ...    Args:
+    ...        project: Project name
+    ...    Returns:
+    ...        None
+    [Arguments]    ${project}
+    ${project_pods_info}=    Fetch Project Pods Info    ${project}
+    FOR    ${pod_info}    IN    @{project_pods_info}
+        Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
+        IF    "${project}" == "redhat-ods-applications"
+            Run Keyword If    "cuda-s2i" in "${pod_info['metadata']['name']}"
+            ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
+            Run Keyword If    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
+            ...    Verify Requests Contains Expected Values  cpu=4  memory=8Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
+        END
+    END
+
+Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
+    [Documentation]     wait and checks Operator have changed app grafana to prometheus
+    Sleep    10m    msg=wait to operator reverts the Changes
+    Wait Until Keyword Succeeds    5min    30s    Verify In Rhods-Monitor-Federation App Is    expected_app_name=prometheus
+
+Verify In Rhods-Monitor-Federation App Is
+    [Documentation]     Verifies in rhods-monitor-federation, app is showing ${expected_app_name}
+    [Arguments]         ${expected_app_name}
+    ${data} =    OpenShiftLibrary.Oc Get    kind=ServiceMonitor   namespace=redhat-ods-monitoring    field_selector=metadata.name==rhods-monitor-federation
+    ${app_name}    Set Variable    ${data[0]['spec']['selector']['matchLabels']['app']}
+    Should Be Equal    ${expected_app_name}    ${app_name}
+
+Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
+    [Documentation]     Replace app to "Prometheus" with "Grafana" in Rhods-Monirot-Federation
+    OpenShiftLibrary.Oc Patch    kind=ServiceMonitor
+    ...                   src={"spec":{"selector":{"matchLabels": {"app":"grafana"}}}}
+    ...                   name=rhods-monitor-federation   namespace=redhat-ods-monitoring  type=merge
+
+Verify Requests Contains Expected Values
+    [Documentation]     Verifies cpu and memory requests contain expected values
+    [Arguments]   ${cpu}  ${memory}  ${requests}
+    Should Be Equal As Strings    ${requests['cpu']}  ${cpu}
+    Should Be Equal As Strings    ${requests['memory']}  ${memory}

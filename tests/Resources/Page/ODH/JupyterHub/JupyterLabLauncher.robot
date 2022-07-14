@@ -5,6 +5,8 @@ Library  jupyter-helper.py
 Library  OperatingSystem
 Library  Screenshot
 Library  String
+Library  OpenShiftLibrary
+
 
 *** Variables ***
 ${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
@@ -18,6 +20,8 @@ ${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE DOC CELLS}    ${JLAB CSS ACTIVE DOC} .jp-Cell
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
 ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
+${REPO_URL}             https://github.com/sclorg/nodejs-ex.git
+${FILE_NAME}            nodejs-ex
 
 *** Keywords ***
 Get JupyterLab Selected Tab Label
@@ -47,6 +51,7 @@ Close Other JupyterLab Tabs
 
   FOR  ${tab}  IN  @{jl_tabs}
     #Select the tab we want to close
+    Maybe Close Popup
     Click Element  ${tab}
     #Click the close tab icon
     Open With JupyterLab Menu  File  Close Tab
@@ -123,6 +128,7 @@ Run Cell And Check Output
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     Should Match  ${output}  ${expected_output}
+    [Return]    ${output}
 
 Run Cell And Get Output
     [Documentation]    Runs a code cell and returns its output
@@ -149,7 +155,7 @@ Maybe Select Kernel
 
 Clean Up Server
     [Documentation]    Cleans up user server and checks that everything has been removed
-    [Arguments]    ${username}=${TEST_USER.USERNAME}
+    [Arguments]    ${username}=${TEST_USER.USERNAME}    ${admin_username}=${OCP_ADMIN_USER.USERNAME}
     Maybe Close Popup
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Run Keyword And Continue On Failure    Open With JupyterLab Menu    File    Close All Tabs
@@ -182,7 +188,7 @@ Clean Up User Notebook
 
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
-  IF    '${oc_whoami}' == '${admin_username}'
+  IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # We import the library here so it's loaded only when we are connected to the cluster
       # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
       # if there is not any connection opened
@@ -190,7 +196,7 @@ Clean Up User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
@@ -207,7 +213,7 @@ Delete Folder In User Notebook
 
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
-  IF    '${oc_whoami}' == '${admin_username}'
+  IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # We import the library here so it's loaded only when we are connected to the cluster
       # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
       # if there is not any connection opened
@@ -215,7 +221,7 @@ Delete Folder In User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
 
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
@@ -232,11 +238,24 @@ Wait Until JupyterLab Is Loaded
   Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=${timeout}
 
 Clone Git Repository
+  [Documentation]    Clones git repository and logs error message if fails to clone
   [Arguments]  ${REPO_URL}
-  Navigate Home (Root folder) In JupyterLab Sidebar File Browser
-  Open With JupyterLab Menu  Git  Clone a Repository
-  Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  ${REPO_URL}
-  Click Element  xpath://div[.="CLONE"]
+  ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
+    IF    "${status}" == "PASS"
+        ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
+        ${current_user} =    Get Current User
+        Delete Folder In User Notebook
+        ...    admin_username=${OCP_ADMIN_USER.USERNAME}
+        ...    username=${current_user}
+        ...    folder=${dir_name}
+        ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
+        IF    "${status}" == "PASS"
+            Log    Error Message : ${err_msg}
+            FAIL
+        END
+    ELSE
+        Wait Until Page Contains    Successfully cloned    timeout=200s
+    END
 
 Clone Git Repository And Open
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
@@ -258,6 +277,11 @@ Clone Git Repository And Run
   Wait Until JupyterLab Code Cell Is Not Active  timeout=${timeout}
   Sleep  1
   JupyterLab Code Cell Error Output Should Not Be Visible
+
+Verify File Present In The File Explorer
+  [Documentation]   It checks if the file presnt in the file explorer on sidebar of jupyterlab.
+  [Arguments]       ${filename}
+  Wait Until Page Contains Element      //div[contains(@class,"jp-FileBrowser-listing")]/ul/li[contains(@title,"Name: ${filename}")]    10
 
 Handle Kernel Restarts
   #This section has to be slightly reworked still. Sometimes the pop-up is not in div[8] but in div[7]
@@ -351,31 +375,38 @@ Verify Installed Library Version
     [Arguments]  ${lib}  ${ver}
     ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
     Run Keyword If  '${status}' == 'FAIL'  Log  "Expected ${lib} at version ${ver}, but ${value}"
-    [Return]    ${status}
+    [Return]    ${status}    ${value}
 
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
     ${return_status} =    Set Variable    PASS
+    @{packages} =    Create List    Python    Boto3    Kafka-Python    Matplotlib    Scikit-learn    Pandas    Scipy    Numpy
     FOR  ${libString}  IN  @{libraries-to-check}
         # libString = LibName vX.Y -> libDetail= [libName, X.Y]
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
         IF  "${libDetail}[0]" == "TensorFlow"
-            ${status} =  Verify Installed Library Version  tensorflow-gpu  ${libDetail}[1]
+            ${status}  ${value} =  Verify Installed Library Version  tensorflow-gpu  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
         ELSE IF  "${libDetail}[0]" == "PyTorch"
-            ${status} =  Verify Installed Library Version  torch  ${libDetail}[1]
+            ${status}  ${value} =  Verify Installed Library Version  torch  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
         ELSE IF  "${libDetail}[0]" == "Python"
             ${status} =  Python Version Check  ${libDetail}[1]
         ELSE
-            ${status} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
+            ${status}  ${value} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END
+        END
+        Continue For Loop If  "${libDetail}[0]" not in ${packages}
+        Run Keyword If    "${libDetail}[0]" not in ${package_versions}
+        ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
+        IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
+             ${return_status} =    Set Variable    FAIL
         END
     END
     [Return]  ${return_status}
@@ -397,3 +428,90 @@ Verify Package Is Not Installed In JupyterLab
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     ${output}   Split String     ${output}   \n\n
     Should Match  ${output[-1]}   ModuleNotFoundError: No module named '${package_name}'
+
+Get User Notebook PVC Name
+    [Documentation]   Returns notebook pod name for given username
+    ...    (e.g. for user ldap-admin10 it will be jupyterhub-nb-ldap-2dadmin10-pvc)
+    [Arguments]  ${username}
+    ${safe_username} =   Get Safe Username    ${username}
+    ${notebook_pod_name} =   Set Variable  jupyterhub-nb-${safe_username}-pvc
+    [Return]    ${notebook_pod_name}
+
+Open New Notebook
+    [Documentation]    Opens one new jupyter notebook
+    Open With JupyterLab Menu    File    New    Notebook
+    Sleep    1
+    Maybe Close Popup
+
+Clone Repo
+    [Documentation]    It is a private keyword used by other keyword to clone the git repo
+    [Tags]    Private Keyword
+    [Arguments]    ${repo_url}
+    Navigate Home (Root folder) In JupyterLab Sidebar File Browser
+    Open With JupyterLab Menu    Git    Clone a Repository
+    Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${repo_url}
+    Click Element    xpath://div[.="CLONE"]
+
+
+Clone Repo and Return Error Message
+    [Documentation]    Clones the github repository and returns the error
+    [Tags]    Private Keyword
+    [Arguments]    ${repo_url}
+    Clone Repo    ${repo_url}
+    Wait Until Page Contains    Cloning...    timeout=5s
+    ${err_msg} =    Get Git Clone Error Message
+    [RETURN]    ${err_msg}
+
+Get Directory Name From Git Repo URL
+    [Documentation]    Returns directory name from repo link
+    [Arguments]    ${repo_url}
+    @{ans} =    Split Path    ${repo_url}
+    ${ans} =    Remove String    ${ans}[1]    .git
+    [RETURN]    ${ans}
+
+Get Git Clone Error Message
+    [Documentation]    Returns expected error after a git clone operation. Fails if error didn't occur
+    ${err_msg} =    Set Variable    No error
+    Wait Until Page Contains    Failed to clone    timeout=3s
+    Click Button    //div[@class="MuiSnackbar-root MuiSnackbar-anchorOriginBottomRight"]/div/div/button    #click show
+    ${err_msg} =    Get Text    //div/div/span[@class="lm-Widget p-Widget jp-Dialog-body"]    #get error text
+    #dismiss button
+    Click Button
+    ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"]
+    [RETURN]    ${err_msg}
+
+Verify Git Plugin
+    [Documentation]     Checks if it can successfully clone a repository.
+    Clone Git Repository      ${REPO_URL}
+    Verify File Present In The File Explorer      ${FILE_NAME}
+
+Get Current User
+   [Documentation]    Returns the current user
+   ${url} =  Get Location
+   ${current_user} =  Evaluate  '${url}'.split("/")[4]
+   [Return]  ${current_user}
+
+Image Should Be Pinned To A Numeric Version
+    [Documentation]     Verifies if the Image Tag is (probably) pinned to a specific image version (e.g., 2.5.0-8).
+    ...                 Since each image provider could use different versioning format (e.g., x.y.z, 10May2021, etc),
+    ...                 the check may not be always reliable. The logic is that if numbers are present in the tag, the image
+    ...                 is likely pinned to a specific version rather than a generic tag (e.g., latest). After that it tries to
+    ...                 see if the numbers follow usual versioning pattern (raising a Warning in the negative case).
+    ${image_spec}=   Run Cell And Get Output  import os; os.environ['JUPYTER_IMAGE_SPEC']
+    ${image_tag}=    Fetch From Right    string=${image_spec}    marker=:
+    ${matches}=    Get Regexp Matches	  ${image_tag}    (main|latest|master|dev|prod)
+    IF   len(${matches}) == ${0}
+        Log    msg=Image Tag "${image_tag}" does not contain "latest", "main" or "master"
+    ELSE
+        Fail    msg=Image Tag "${image_tag}" refers to generic versions like "latest", "main" or "master"
+    END
+    ${matches} =	Get Regexp Matches	  ${image_tag}    [0-9]+
+    IF   len(${matches}) == ${0}
+        Fail    msg=Image Tag "${image_tag}" is not pinned to a specific version
+    ELSE
+        ${matches} =	Get Regexp Matches	  ${image_tag}    ([0-9]\.[0-9])(.[0-9]|-[0-9]|)
+        Log    Image Tag "${image_tag}" is (probably) pinned to a specific version
+        IF   len(${matches}) == ${0}
+           Log  level=WARN  message=Image Tag "${image_tag}" is not in the format x.y.z-n or x.y-n or x.y
+        END
+    END

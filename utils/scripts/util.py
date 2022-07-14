@@ -1,12 +1,14 @@
 
+import json
 import os
-import subprocess
-import shutil
-import yaml
 import re
+import shutil
+import subprocess
 import sys
 import time
+
 import jinja2
+import yaml
 
 def clone_config_repo(**kwargs):
     """
@@ -106,3 +108,48 @@ def render_template(search_path, template_file, output_file, replace_vars):
         print("Failed to render template and create json "
               "file {}".format(output_file))
         sys.exit(1)
+
+def read_data_from_json(filename):
+    """
+    Helper to read Json file
+    """
+    try:
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        return data
+    except:
+        return None
+
+
+def write_data_in_json(filename, data):
+    """
+    Helper to write JSON file
+    """
+    with open(filename, 'w') as convert_file:
+        convert_file.write(json.dumps(data))
+
+def compare_dicts(dict1, dict2, level=0):
+    """
+    Helper to compare Dictionary and returns Difference
+    """
+    lst_to_trigger_job = []
+    if not (isinstance(dict1, dict) or isinstance(dict2, dict)):
+        if dict1 == dict2:
+            return 'OK!'
+        else:
+            return 'MISMATCH!'
+
+    keys1 = set(dict1.keys())
+    keys2 = set(dict2.keys())
+    if len(keys1 | keys2) == 0:
+        return '' if level else None
+
+    max_len = max(tuple(map(len, keys1 | keys2))) + 2
+    for key in keys1 & keys2:
+        if compare_dicts(dict1[key], dict2[key], level=level + 1) == "MISMATCH!":
+            lst_to_trigger_job.append("{}-latest".format(key))
+    for key in keys1 - keys2:
+        lst_to_trigger_job.append("{}-latest".format(key))
+    for key in keys2 - keys1:
+        print(f'{key + ":":<{max_len}}' + 'presented only in old', end='')
+    return '' if level else lst_to_trigger_job

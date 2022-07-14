@@ -15,6 +15,7 @@ Library             Process
 Library             SeleniumLibrary
 Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../Resources/RHOSi.resource
 
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown
@@ -29,10 +30,13 @@ ${CUSTOME_SIZE}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","
 
 
 *** Test Cases ***
-Verify Spwaned Notebook Size
+Verify Spawned Notebook Size
     [Documentation]    Check the available container size spec
-    ...    with actual assign to spwaned notebook pod
-    [Tags]    Sanity    ODS-1072
+    ...    with actual assign to spawned notebook pod
+    [Tags]    Tier2
+    ...       Execution-Time-Over-15m
+    ...       FlakyTest
+    ...       ODS-1072
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook And Verify Size
 
@@ -52,6 +56,7 @@ Verify Custom Spwaned Notebook Size
 Dashboard Test Setup
     [Documentation]    Open browser and load RHODS dashboard
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load

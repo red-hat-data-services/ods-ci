@@ -5,6 +5,11 @@ Library             SeleniumLibrary
 
 
 *** Keywords ***
+Remove AIKIT Operator
+    [Documentation]     Cleans up the server and uninstall the aikit operator.
+    Fix Spawner Status
+    Uninstall AIKIT Operator
+
 Uninstall AIKIT Operator
     [Documentation]    Uninstall intel aikit operator and it's realted component
     Go To    ${OCP_CONSOLE_URL}
@@ -26,4 +31,5 @@ Verify JupyterHub Can Spawn AIKIT Notebook
     Wait Until Page Contains Element    xpath://input[@name="oneAPI AI Analytics Toolkit"]
     Wait Until Element Is Enabled    xpath://input[@name="oneAPI AI Analytics Toolkit"]    timeout=10
     Spawn Notebook With Arguments    image=oneapi-aikit
-    Fix Spawner Status
+    Verify Library Version Is Greater Than  jupyterlab  3.1.4
+    Verify Library Version Is Greater Than  notebook    6.4.1

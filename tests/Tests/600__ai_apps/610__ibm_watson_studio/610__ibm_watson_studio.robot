@@ -1,13 +1,15 @@
 *** Settings ***
 Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Suite Setup     IBM Watson Studio Suite Setup
 Suite Teardown  IBM Watson Studio Suite Teardown
 
 *** Test Cases ***
 Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page
-  [Tags]  ODS-267  Smoke  Sanity
+  [Tags]  Smoke
+  ...     ODS-267
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
@@ -17,6 +19,7 @@ Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page
 * Keywords ***
 IBM Watson Studio Suite Setup
   Set Library Search Order  SeleniumLibrary
+  RHOSi Setup
 
 IBM Watson Studio Suite Teardown
   Close All Browsers

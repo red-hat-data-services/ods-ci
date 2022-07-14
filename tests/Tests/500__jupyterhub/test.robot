@@ -41,7 +41,7 @@ Can Login to Jupyterhub
    Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']  timeout=30
 
 Can Spawn Notebook
-   [Tags]  Sanity
+   [Tags]  Sanity  Smoke
    Fix Spawner Status
    Select Notebook Image  s2i-generic-data-science-notebook
    Select Notebook Image  s2i-minimal-notebook
@@ -75,7 +75,32 @@ Can Launch Python3
    [Tags]  Sanity  TBC
    Launch Python3 JupyterHub
 
+Verify Message That Image Builds Are In Progress
+    [Documentation]     Verifies that Image Builds In Progress are Shown In RHODS Dashboard
+    [Tags]      Tier2
+    ...         ODS-460
+    ...         ODS-381
+    ...         ODS-1348
+    Delete Last Pytorch Build
+    ${new_buildname}=  Start New Pytorch Build
+    Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    RHODS Notification Drawer Should Contain  message=Notebook images are building
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
+    RHODS Notification Drawer Should Contain  message=All notebook image builds are complete
+
 
 *** Keywords ***
 JupyterHub Testing Suite Setup
-  Set Library Search Order  SeleniumLibrary
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
+
+Delete Last Pytorch Build
+    [Documentation]     Searches for last build which contains pytorch and deletes it
+    ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
+    Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
+
+Start New Pytorch Build
+    [Documentation]     Starts new Pytorch build and waits until status is running
+    ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
+    [Return]    ${new_buildname}

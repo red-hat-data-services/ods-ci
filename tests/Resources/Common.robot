@@ -1,8 +1,13 @@
 *** Settings ***
 Library   SeleniumLibrary
 Library   JupyterLibrary
+Library   OperatingSystem
+Library   RequestsLibrary
+Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource  RHOSi.resource
+
 
 *** Keywords ***
 Begin Web Test
@@ -11,11 +16,13 @@ Begin Web Test
     ...              handing control over to the test suites.
 
     Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
+
 
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.4.0
     IF  ${version-check}==True
       Launch JupyterHub From RHODS Dashboard Link
     ELSE
@@ -28,7 +35,7 @@ Begin Web Test
     Go To  ${ODH_DASHBOARD_URL}
 
 End Web Test
-    ${server} =  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
+    ${server}=  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
     IF  ${server}==True
         Clean Up Server
         Stop JupyterLab Notebook Server
@@ -38,15 +45,15 @@ End Web Test
 
 Load Json File
     [Arguments]   ${file_path}
-    ${j_file}    Get File    ${file_path}
-    ${obj}    Evaluate    json.loads('''${j_file}''')    json
+    ${j_file}=    Get File    ${file_path}
+    ${obj}=    Evaluate    json.loads('''${j_file}''')    json
     [Return]    ${obj}
 
 Get CSS Property Value
     [Documentation]    Get the CSS property value of a given element
     [Arguments]    ${locator}    ${property_name}
-    ${element} =       Get WebElement    ${locator}
-    ${css_prop} =    Call Method       ${element}    value_of_css_property    ${property_name}
+    ${element}=       Get WebElement    ${locator}
+    ${css_prop}=    Call Method       ${element}    value_of_css_property    ${property_name}
     [Return]     ${css_prop}
 
 CSS Property Value Should Be
@@ -60,3 +67,79 @@ CSS Property Value Should Be
     ELSE
         Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
     END
+
+Get Cluster ID
+    [Documentation]     Retrieves the ID of the currently connected cluster
+    ${cluster_id}=   Run    oc get clusterversion -o json | jq .items[].spec.clusterID
+    IF    not $cluster_id
+        Fail    Unable to retrieve cluster ID. Are you logged using `oc login` command?
+    END
+    [Return]    ${cluster_id}
+
+Get Cluster Name By Cluster ID
+    [Documentation]     Retrieves the name of the currently connected cluster given its ID
+    [Arguments]     ${cluster_id}
+    ${cluster_name}=    Get Cluster Name     cluster_identifier=${cluster_id}
+    IF    not $cluster_name
+        Fail    Unable to retrieve cluster name for cluster ID ${cluster_id}
+    END
+    [Return]    ${cluster_name}
+
+Wait Until HTTP Status Code Is
+    [Documentation]     Waits Until Status Code Of URl Matches expected Status Code
+    [Arguments]  ${url}   ${expected_status_code}=200  ${retry}=1m   ${retry_interval}=15s
+    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
+    ...    Check HTTP Status Code    ${url}    ${expected_status_code}
+
+Check HTTP Status Code
+    [Documentation]     Verifies Status Code of URL Matches Expected Status Code
+    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20
+    ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}
+    Run Keyword And Continue On Failure  Status Should Be  ${expected}
+    [Return]  ${response.status_code}
+
+URLs HTTP Status Code Should Be Equal To
+    [Documentation]    Given a list of link web elements, extracts the URLs and
+    ...                checks if the http status code expected one is equal to the
+    [Arguments]    ${link_elements}    ${expected_status}=200    ${timeout}=20
+    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
+        ${href}=    Get Element Attribute    ${ext_link}    href
+        ${status}=    Run Keyword And Continue On Failure    Check HTTP Status Code    link_to_check=${href}
+        ...                                                                            expected=${expected_status}
+        Log To Console    ${idx}. ${href} gets status code ${status}
+    END
+
+Get List Of Atrributes
+    [Documentation]    Returns the list of attributes
+    [Arguments]    ${xpath}    ${attribute}
+    ${xpath} =    Remove String    ${xpath}    ]
+    ${link_elements}=
+    ...    Get WebElements    ${xpath} and not(starts-with(@${attribute}, '#'))]
+    ${list_of_atrributes}=    Create List
+    FOR    ${ext_link}    IN    @{link_elements}
+        ${ids}=    Get Element Attribute    ${ext_link}    ${attribute}
+        Append To List    ${list_of_atrributes}    ${ids}
+    END
+    [Return]    ${list_of_atrributes}
+
+Verify NPM Version
+    [Documentation]  Verifies the installed version of an NPM library
+    ...    against an expected version in a given pod/container
+    [Arguments]  ${library}  ${expected_version}  ${pod}  ${namespace}  ${container}=""  ${prefix}=""  ${depth}=0
+    ${installed_version} =  Run  oc exec -n ${namespace} ${pod} -c ${container} -- npm list --prefix ${prefix} --depth=${depth} | awk -F@ '/${library}/ { print $2}'
+    Should Be Equal  ${installed_version}  ${expected_version}
+
+Get Cluster Name From Console URL
+    [Documentation]    Get the cluster name from the Openshift console URL
+    ${name}=    Split String    ${OCP_CONSOLE_URL}        .
+    [Return]    ${name}[2]
+
+Clean Resource YAML Before Creating It
+    [Documentation]    Removes from a yaml of an Openshift resource the metadata which prevent
+    ...                the yaml to be applied after being copied
+    [Arguments]    ${yaml_data}
+    ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
+    Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
+    [Return]   ${clean_yaml_data}
+

@@ -37,7 +37,6 @@ Verify That "Usage Data Collection" Can Be Set In "Cluster Settings"
     [Tags]    Tier1
     ...       Sanity
     ...       ODS-1218
-    ...       FlakyTest
     Open ODS Dashboard With Admin User
     Verify Cluster Settings Is Available
     ODHDashboard.Enable "Usage Data Collection"
@@ -62,12 +61,9 @@ Open ODS Dashboard With Non Admin User
 
 Restore Default Configuration For "Usage Data Collection" And TearDown
     [Documentation]    Restores "Usage Data Collection" default configuration and runs test teardown
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check}==True
-        Verify Cluster Settings Is Available
-        ODHDashboard.Enable "Usage Data Collection"
-        Capture Page Screenshot
-    END
+    Verify Cluster Settings Is Available
+    ODHDashboard.Enable "Usage Data Collection"
+    Capture Page Screenshot
     Dashboard Settings Test Teardown
 
 Dashboard Settings Suite Setup

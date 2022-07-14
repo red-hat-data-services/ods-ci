@@ -19,7 +19,7 @@ ${CUSTOM_CULLER_TIMEOUT} =     600
 *** Test Cases ***
 Verify Default Culler Timeout
     [Documentation]    Checks default culler timeout
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1255
     Disable Notebook Culler
     ${current_timeout} =  Get And Verify Notebook Culler Timeout
@@ -28,7 +28,7 @@ Verify Default Culler Timeout
 
 Verify Culler Timeout Can Be Updated
     [Documentation]    Verifies culler timeout can be updated
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1231
     Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
     ${current_timeout} =  Get And Verify Notebook Culler Timeout
@@ -39,8 +39,9 @@ Verify Culler Timeout Can Be Updated
 Verify Culler Kills Inactive Server
     [Documentation]    Verifies that the culler kills an inactive
     ...    server after timeout has passed.
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1254
+    ...       Execution-Time-Over-15m
     ...       ProductBug
     Spawn Minimal Image
     Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
@@ -66,8 +67,9 @@ Verify Culler Kills Inactive Server
 Verify Culler Does Not Kill Active Server
     [Documentation]    Verifies that the culler does not kill an active
     ...    server even after timeout has passed.
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1253
+    ...       Execution-Time-Over-15m
     Spawn Minimal Image
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Active.ipynb
     Open With JupyterLab Menu    Run    Run All Cells
@@ -79,8 +81,9 @@ Verify Culler Does Not Kill Active Server
 
 Verify Do Not Stop Idle Notebooks
     [Documentation]    Disables the culler (default configuration) and verifies nb is not culled
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier2
     ...       ODS-1230
+    ...       Execution-Time-Over-15m
     Disable Notebook Culler
     Close Browser
     Spawn Minimal Image
@@ -90,6 +93,22 @@ Verify Do Not Stop Idle Notebooks
     Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
     ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
     OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
+
+Verify That "Stop Idle Notebook" Setting Is Not Overwritten After Restart Of Operator Pod
+    [Documentation]    Restart the operator pod and verify if "Stop Idle Notebook" setting
+    ...   is overwritten or not.
+    ...   ProductBug:RHODS-4336
+    [Tags]    Tier2
+    ...       ProductBug
+    ...       ODS-1607
+    Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
+    Oc Delete    kind=Pod     namespace=redhat-ods-operator    label_selector=name=rhods-operator
+    sleep   5    msg=waiting time for the operator pod to be replaced with new one
+    Reload Page
+    ${status}    Run Keyword And Return Status    Radio Button Should Not Be Selected  culler-unlimited-time
+    IF    ${status}==False
+        Fail    Restart of operator pod causing 'Stop Idle Notebook' setting to change in RHODS dashboard
+    END
 
 
 *** Keywords ***

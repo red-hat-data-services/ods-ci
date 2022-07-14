@@ -41,6 +41,7 @@ Verify User Can Spawn Notebook After Changing PVC Size Using Backend
 Verify User Cannot Set An Unsupported PVC Size Using Backend
     [Documentation]   Verify if user should not able to
     ...    spawn notebook for supported PVC change
+    ...    ProductBug:RHODS-3258
     [Tags]    Tier2
     ...       ODS-1229
     ...       ProductBug

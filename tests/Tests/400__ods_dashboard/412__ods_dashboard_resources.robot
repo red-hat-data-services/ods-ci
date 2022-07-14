@@ -1,6 +1,7 @@
 *** Settings ***
 Library         OpenShiftCLI
 Resource        ../../Resources/ODS.robot
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource        ../../Resources/Page/LoginPage.robot
@@ -140,7 +141,7 @@ External URLs Should Not Be Broken
             ${Doc_Text}     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]
             ${Doc_links}     Get Regexp Matches   ${Doc_Text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
             IF  ${Doc_links}
-                Split Doc and Valiadte URLS     ${Doc_links}
+                Validate Links Extracted From Text     ${Doc_links}
             END
     END
 
@@ -178,7 +179,7 @@ Open QuickStart Step
     END
 
 
-Split Doc and Valiadte URLS
+Validate Links Extracted From Text
     [Arguments]    ${doc_links}
     @{valiadte_urls}  Create List
     @{invalidLinks}   Create List
@@ -192,10 +193,10 @@ Split Doc and Valiadte URLS
         ELSE
             IF  "${doc_link[${-1}]}" != '.'
                 ${status}=  Check HTTP Status Code  ${doc_link}
-                Log To Console  ${doc_link}  ${status}
+                Log To Console  ${doc_link}
             ELSE IF  "${doc_link[${-1}]}" == '.'
                 ${status}=  Check HTTP Status Code   ${doc_link[:${-1}]}
-                 Log To Console   ${doc_link[:${-1}]}   ${status}
+                 Log To Console   ${doc_link[:${-1}]}
             END
         END
     END

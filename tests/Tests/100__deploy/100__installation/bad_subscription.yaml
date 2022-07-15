@@ -1,0 +1,11 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata: 
+  name: bad-sub
+  namespace: default
+spec: 
+  channel: alpha
+  installPlanApproval: Manual
+  name: bad-sub
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace

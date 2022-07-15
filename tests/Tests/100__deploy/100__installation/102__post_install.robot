@@ -18,8 +18,19 @@ Suite Setup         RHOSi Setup
 Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../Resources/Common.robot
 
-
 *** Test Cases ***
+Verify Dashbord has no message with NO Component Found
+    [Tags]  Sanity
+    ...     Tier1
+    ...     ODS-1493
+    [Documentation]   Verify the service appears in Applications > Enabled
+    [Setup]   Test Setup For Rhods Dashboard
+    Oc Apply  kind=Subscription  src=tests/Tests/100__deploy/100__installation/bad_subscription.yaml
+    Menu.Navigate To Page    Applications    Enabled
+    Sleep    2s
+    Page Should Not Contain    No Component Found
+    [Teardown]  Close All Browsers
+
 Verify Traefik Deployment
     [Documentation]  Verifies RHODS Traefik deployment
     [Tags]    Sanity
@@ -220,6 +231,12 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
 
 
 *** Keywords ***
+Test Setup For Rhods Dashboard
+    [Documentation]    Test Setup for Rhods Dashboard
+    Set Library Search Order    SeleniumLibrary
+    Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}
+    ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+
 Verify Authentication Is Required To Access BlackboxExporter
     [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,
     ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target.

@@ -28,7 +28,7 @@ Verify Dashbord has no message with NO Component Found
     [Setup]   Test Setup For Rhods Dashboard
     Oc Apply  kind=Subscription  src=tests/Tests/100__deploy/100__installation/bad_subscription.yaml
     Oc Delete    kind=Pod     namespace=redhat-ods-applications    label_selector=app=rhods-dashboard
-    Sleep    5s  msg=Waiting for new dashboard pods to start
+    OpenShiftCLI.Wait For Pods Status    namespace=redhat-ods-applications  label_selector=app=rhods-dashboard  timeout=120
     Reload Page
     Menu.Navigate To Page    Applications    Enabled
     Page Should Not Contain    No Component Found

@@ -4,6 +4,7 @@ Library         OpenShiftLibrary
 Resource        ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource        ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource        ../../Resources/Page/LoginPage.robot
@@ -592,9 +593,6 @@ Verify The Resources Are Filtered
         @{texts}=    Split String    ${item.text}    \n
         List Should Contain Value    ${list_of_items}    ${texts}[${index_of_text}]
     END
-
-Wait Until Resource Page Is Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
 
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled

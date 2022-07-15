@@ -89,6 +89,16 @@ Current Step In QuickStart Should Be
     #     Element Text Should Be      //span[@class="pfext-quick-start-task-header__subtitle"]    ${n_steps-1} of ${n_steps}
     # END
 
+Wait for QuickStart to Load
+    [Documentation]   Waiting for quick start to visbible
+    Wait Until Element Is Visible       xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
+    Select Checkbox                         xpath=//*[@id="quickstart--check-box"]
+    ${quickStartElements}=   Get WebElements    xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
+    [Return]    ${quickStartElements}
+
+Wait Until Resource Page Is Loaded
+    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
+
 Get Link Web Elements From Resource Page
     [Documentation]    Returns the link web elements from Resources page which redirects users to
     ...                external websites. It excludes Quick Starts items

@@ -134,10 +134,10 @@ Has Spawn Failed
 
 Spawn Notebook With Arguments  # robocop: disable
    [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
-   ...              It will try again ${retries} times (Default: 1). Environment variables can be passed in as kwargs
-   ...              By creating a dictionary beforehand
+   ...              It will try again ${retries} times (Default: 1) after ${retries_delay} delay (Default: 0 seconds).
+   ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
    ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
-   [Arguments]  ${retries}=1  ${image}=s2i-generic-data-science-notebook  ${size}=Small
+   [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
    ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  &{envs}
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
@@ -173,8 +173,12 @@ Spawn Notebook With Arguments  # robocop: disable
          Exit For Loop If  ${spawn_fail} == False
          Click Element  xpath://span[@id='jupyterhub-logo']
       ELSE
+         Sleep  ${retries_delay}
          Click Element  xpath://span[@id='jupyterhub-logo']
       END
+   END
+   IF  ${spawn_fail} == True
+      Fail  msg= Spawner failed loading after ${retries} retries
    END
 
 Spawned Image Check

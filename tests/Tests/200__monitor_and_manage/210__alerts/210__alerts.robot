@@ -349,8 +349,9 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
         ${receiver} =         Set Variable    PagerDuty
     END
     Check Particular Text Is Present In Rhods-operator's Log  text_to_check=${text_to_check}
-    Verify Receiver Value In Configmap Alertmanager Is  receiver=${receiver}
+    Verify Alertmanager Receiver For Critical Alerts    receiver=${receiver}
     [Teardown]    Close All Browsers
+
 
 *** Keywords ***
 Alerts Suite Setup
@@ -557,9 +558,8 @@ Check Particular Text Is Present In Rhods-operator's Log
     List Should Contain Value    ${val_result}    ${text_to_check}
     Close Browser
 
-Verify Receiver Value In Configmap Alertmanager Is
+Verify Alertmanager Receiver For Critical Alerts
     [Documentation]     Receiver value should be equal to ${receiver}
     [Arguments]         ${receiver}
-    ${result} =    Run    oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.receiver'
-    Log  ${result}
-    Should Be Equal    "${receiver}"    ${result}
+    ${result} =    Run    oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.routes[] | select(.match.severity == "critical") | .receiver'
+    Should Be Equal    "${receiver}"    ${result}    msg=Alertmanager has an unexpected receiver for critical alerts

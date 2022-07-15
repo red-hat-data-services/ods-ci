@@ -23,11 +23,14 @@ Verify Dashbord has no message with NO Component Found
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1493
-    [Documentation]   Verify the service appears in Applications > Enabled
+    [Documentation]   Verify "NO Component Found" message dosen't display
+    ...     on Rhods Dashbord page with bad subscription present in openshift
     [Setup]   Test Setup For Rhods Dashboard
     Oc Apply  kind=Subscription  src=tests/Tests/100__deploy/100__installation/bad_subscription.yaml
+    Oc Delete    kind=Pod     namespace=redhat-ods-applications    label_selector=app=rhods-dashboard
+    Sleep    5s  msg=Waiting for new dashboard pods to start
+    Reload Page
     Menu.Navigate To Page    Applications    Enabled
-    Sleep    2s
     Page Should Not Contain    No Component Found
     [Teardown]  Close All Browsers
 

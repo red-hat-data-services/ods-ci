@@ -19,6 +19,7 @@ Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../Resources/Common.robot
 
 *** Test Cases ***
+
 Verify Dashbord has no message with NO Component Found
     [Tags]  Sanity
     ...     Tier1
@@ -27,6 +28,7 @@ Verify Dashbord has no message with NO Component Found
     ...     on Rhods Dashbord page with bad subscription present in openshift
     [Setup]   Test Setup For Rhods Dashboard
     Oc Apply  kind=Subscription  src=tests/Tests/100__deploy/100__installation/bad_subscription.yaml
+    Delete Dashboard Pods And Wait Them To Be Back
     Oc Delete    kind=Pod     namespace=redhat-ods-applications    label_selector=app=rhods-dashboard
     OpenShiftLibrary.Wait For Pods Status    namespace=redhat-ods-applications  label_selector=app=rhods-dashboard  timeout=120
     Reload Page
@@ -236,6 +238,11 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
 
 
 *** Keywords ***
+Delete Dashboard Pods And Wait Them To Be Back
+    [Documentation]    Delete Dashboard Pods And Wait Them To Be Back
+    Oc Delete    kind=Pod     namespace=redhat-ods-applications    label_selector=app=rhods-dashboard
+    OpenShiftLibrary.Wait For Pods Status    namespace=redhat-ods-applications  label_selector=app=rhods-dashboard  timeout=120
+
 Test Setup For Rhods Dashboard
     [Documentation]    Test Setup for Rhods Dashboard
     Set Library Search Order    SeleniumLibrary

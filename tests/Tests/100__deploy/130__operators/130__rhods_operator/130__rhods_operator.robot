@@ -4,12 +4,15 @@ Library         RequestsLibrary
 Library         Collections
 Resource        ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource        ../../../../Resources/Common.robot
+Resource        ../../../../Resources/RHOSi.resource
 Suite Setup     RHODS Operator Suite Setup
-Suite Teardown  Close Browser
+Suite Teardown  RHODS Operator Suite Teardown
+
 
 *** Variables ***
 #Commercial variable to verify if the URL pregent for RHODS is commercial or not
 ${commercial_url}              https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science
+
 
 *** Test Cases ***
 Verify RHODS operator information
@@ -31,8 +34,8 @@ Verify RHODS operator information
 
   Run Keyword IF     "mailto:undefined" not in $temp_list     FAIL    There shouldn't be reference to maintainers email
 
-*** Keywords ***
 
+*** Keywords ***
 Get HTTP Status Code
     [Arguments]  ${link_to_check}
     ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
@@ -40,5 +43,11 @@ Get HTTP Status Code
     Log To Console    HTTP status For The '${link_to_check}' is '${response.status_code}'
 
 RHODS Operator Suite Setup
+    [Documentation]    Suite setup
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup
+
+RHODS Operator Suite Teardown
+    [Documentation]    Suite teardown
+    Close Browser
+    RHOSi Teardown

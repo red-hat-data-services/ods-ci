@@ -3,6 +3,10 @@ Documentation       Post install test cases that verify OCP JupyterHub resources
 
 Library             OpenShiftLibrary
 Resource          ../../../Resources/ODS.robot
+Resource          ../../../Resources/RHOSi.resource
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
+
 
 *** Test Cases ***
 Verify JupyterHub DB Is Shipped And Enabled Within ODS

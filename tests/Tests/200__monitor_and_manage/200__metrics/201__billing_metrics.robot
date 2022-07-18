@@ -1,4 +1,5 @@
 *** Settings ***
+Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
@@ -8,8 +9,7 @@ Resource            ../../../Resources/OCP.resource
 Library             JupyterLibrary
 Library             SeleniumLibrary
 
-Test Setup          Begin Billing Metrics Web Test
-Test Teardown       End Web Billing Metrics Test
+Suite Setup          Billing Metrics Suite Setup
 
 
 *** Variables ***
@@ -20,11 +20,11 @@ ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:se
 
 *** Test Cases ***
 Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
-    [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries 
+    [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries
     [Tags]    Smoke
     ...       Sanity
     ...       ODS-173
-    Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}    retry-attempts=1
+    Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}    retry_attempts=1
     Metrics.Verify Query Results Dont Contain Data
     [Teardown]    SeleniumLibrary.Close All Browsers
 
@@ -35,6 +35,7 @@ Test Billing Metric (Notebook Cpu Usage) On OpenShift Monitoring
     ...       ODS-175
     Run Jupyter Notebook For 5 Minutes
     Verify Previus CPU Usage Is Greater Than Zero
+    [Teardown]    CleanUp JupyterHub And Close All Browsers
 
 Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     [Documentation]     Verifies the openshift metrics and rhods prometheus showing same rhods_total_users values
@@ -44,7 +45,7 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     ${value} =    Run OpenShift Metrics Query    query=rhods_total_users
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_total_users
     Should Be Equal    ${value_from_promothues}    ${value}
-    [Teardown]    Test Teardown For Matrics Web Test
+    [Teardown]    SeleniumLibrary.Close All Browsers
 
 Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     [Documentation]     Verifies the openshift metrics and rhods prometheus showing same rhods_aggregate_availability values
@@ -54,20 +55,34 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     ${value} =    Run OpenShift Metrics Query    query=rhods_aggregate_availability
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_aggregate_availability
     Should Be Equal    ${value_from_promothues}    ${value}
-    [Teardown]    Test Teardown For Matrics Web Test
+    [Teardown]    SeleniumLibrary.Close All Browsers
 
 Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometheus
     [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing N active users
     [Tags]    Sanity
     ...       ODS-1053
     ...       Tier1
-    Skip Test If Current Active Users Count Is Not Zero
+
+    ${active_users_before} =    Run OpenShift Metrics Query
+    ...    query=cluster:usage:consumption:rhods:active_users
+    ...    retry_attempts=1    return_zero_if_result_empty=True
+
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
+    ${expected_increase_active_users} =    Get Length   ${list_of_usernames}
+
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
-    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:active_users
-    Should Be Equal    ${value}    2    msg=Active Users are not equal to length of list or N users
-    [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+
+    ${active_users_after} =    Run OpenShift Metrics Query
+    ...    query=cluster:usage:consumption:rhods:active_users
+    ...    retry_attempts=1    return_zero_if_result_empty=True
+
+    ${increase_active_users} =    Evaluate    ${active_users_after}-${active_users_before}
+
+    Should Be Equal As Integers    ${expected_increase_active_users}    ${increase_active_users}
+    ...    msg=Unexpected active_users value
+
+    [Teardown]    CleanUp JupyterHub For N Users    list_of_usernames=${list_of_usernames}
 
 Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitoring Prometheus
     [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing number of running pods
@@ -78,16 +93,16 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
     ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:pod:up
-    Should Not Be Empty    ${value}    msg=Matrics does not contains value for pod:up query
-    [Teardown]    CleanUp JupyterHub For N users    list_of_usernames=${list_of_usernames}
+    Should Not Be Empty    ${value}    msg=Metrics does not contains value for pod:up query
+    [Teardown]    CleanUp JupyterHub For N Users    list_of_usernames=${list_of_usernames}
 
 
 *** Keywords ***
-Begin Billing Metrics Web Test
-  Set Library Search Order  SeleniumLibrary
-  RHOSi Setup
+Billing Metrics Suite Setup
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
 
-End Web Billing Metrics Test
+CleanUp JupyterHub And Close All Browsers
     CleanUp JupyterHub
     SeleniumLibrary.Close All Browsers
 
@@ -99,7 +114,7 @@ Test Setup For Matrics Web Test
     Wait Until OpenShift Console Is Loaded
     Click Button    Observe
     Click Link    Metrics
-    Wait Until Element is Visible    xpath://textarea[@class="pf-c-form-control query-browser__query-input"]
+    Wait Until Element Is Visible    xpath://textarea[@class="pf-c-form-control query-browser__query-input"]
 
 Test Teardown For Matrics Web Test
     [Documentation]     Closes all browsers
@@ -137,7 +152,7 @@ Run OpenShift Metrics Query
     ...    Note: in order to run this keyword OCP_ADMIN_USER.USERNAME needs to
     ...    belong to a group with "view" role in OpenShift
     ...    Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
-    [Arguments]    ${query}    ${retry-attempts}=10
+    [Arguments]    ${query}    ${retry_attempts}=10    ${return_zero_if_result_empty}=False
     Open Browser    ${OCP_CONSOLE_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     LoginPage.Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
     OCPMenu.Switch To Administrator Perspective
@@ -157,8 +172,8 @@ Run OpenShift Metrics Query
     END
 
     Metrics.Verify Page Loaded
-    Metrics.Run Query    ${query}    ${retry-attempts}
-    ${result} =    Metrics.Get Query Results
+    Metrics.Run Query    ${query}    ${retry_attempts}
+    ${result} =    Metrics.Get Query Results    return_zero_if_result_empty=${return_zero_if_result_empty}
     [Return]    ${result}
 
 Verify Previus CPU Usage Is Greater Than Zero
@@ -169,7 +184,6 @@ Verify Previus CPU Usage Is Greater Than Zero
     Should Be True    ${metrics_value} > 0
 
 ## TODO: Add this keyword with the other JupyterHub stuff
-
 Run Jupyter Notebook For 5 Minutes
     [Documentation]     Opens jupyter notebook and run for 5 min
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
@@ -181,7 +195,6 @@ Run Jupyter Notebook For 5 Minutes
     ...    minimal-nb-image-test/minimal-nb.ipynb
 
 ##TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob. We have to refactor the code not to duplicate this method
-
 Iterative Image Test
     [Documentation]     Launch the jupyterhub and clone from ${REPO_URL},clean jupyterlab after completing
     [Arguments]    ${image}    ${REPO_URL}    ${NOTEBOOK_TO_RUN}
@@ -213,14 +226,4 @@ CleanUp JupyterHub
     ${authorization_required} =    Is Service Account Authorization Required
     Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
     Common.End Web Test
-
-Skip Test If Current Active Users Count Is Not Zero
-    [Documentation]     Skips test if active users count is not zero
-    ${current_value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:active_users    retry-attempts=1
-    IF    "${current_value}" == "${EMPTY}"
-        ${current_value}    Set Variable    0
-    END
-    Skip if
-    ...    ${current_value} > 0
-    ...    The current active users count is not zero.Current Count:${current_value}.Skiping test
 

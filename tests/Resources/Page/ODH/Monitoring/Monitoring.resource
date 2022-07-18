@@ -27,6 +27,72 @@ Get Average Availability For Time Range
     ${value}=    Convert To Number    ${value}    ${precision}
     [Return]    ${value}
 
+Create Suite Availability Checkpoint
+    [Documentation]    Obtains and stores Average Availability for the last 2m, 15m, 1h and 3h
+    [Arguments]    ${pm_url}    ${pm_token}      ${message_prefix}=${EMPTY}
+
+    ${availability}=    Get Average Availability For Time Range    pm_url=${pm_url}
+    ...    pm_token=${pm_token}    time_range=2m
+    Set Global Variable    ${SUITE_AVAILABILITY_2M}    ${availability}
+
+    ${availability}=    Get Average Availability For Time Range    pm_url=${pm_url}
+    ...    pm_token=${pm_token}    time_range=15m
+    Set Global Variable    ${SUITE_AVAILABILITY_15M}    ${availability}
+
+    ${availability}=    Get Average Availability For Time Range    pm_url=${pm_url}
+    ...    pm_token=${pm_token}    time_range=1h
+    Set Global Variable    ${SUITE_AVAILABILITY_1H}    ${availability}
+
+    ${availability}=    Get Average Availability For Time Range    pm_url=${pm_url}
+    ...    pm_token=${pm_token}    time_range=3h
+    Set Global Variable    ${SUITE_AVAILABILITY_3H}    ${availability}
+
+#robocop:disable
+Log If Availability Decreased Since Suite Availability Checkpoint
+    [Documentation]    Obtains current Average Availability for the last 2m, 15m, 1h and 3h and
+    ...    Logs a WARN message in case it decreased, and an INFO message if it's the same or better
+    [Arguments]    ${pm_url}    ${pm_token}    ${message_prefix}=${EMPTY}
+
+    ${availability_decreased}=    Set Variable    False
+
+    ${current_availability}=    Get Average Availability For Time Range    pm_url=${pm_url}
+    ...    pm_token=${pm_token}    time_range=2m
+    IF    ${current_availability} < ${SUITE_AVAILABILITY_2M}
+        ${availability_decreased}=    Set Variable    True
+    END
+    ${availability_info}=    Set Variable    2m: ${current_availability} vs ${SUITE_AVAILABILITY_2M};
+
+    ${current_availability}=    Get Average Availability For Time Range    pm_url=${pm_url}
+    ...    pm_token=${pm_token}    time_range=15m
+    IF    ${current_availability} < ${SUITE_AVAILABILITY_15M}
+        ${availability_decreased}=    Set Variable    True
+    END
+    ${availability_info}=    Set Variable    ${availability_info} 15m: ${current_availability} vs ${SUITE_AVAILABILITY_15M};
+
+    ${current_availability}=    Get Average Availability For Time Range    pm_url=${pm_url}
+    ...    pm_token=${pm_token}    time_range=1h
+    IF    ${current_availability} < ${SUITE_AVAILABILITY_1H}
+        ${availability_decreased}=    Set Variable    True
+    END
+    ${availability_info}=    Set Variable    ${availability_info} 1h: ${current_availability} vs ${SUITE_AVAILABILITY_1H};
+
+    ${current_availability}=    Get Average Availability For Time Range    pm_url=${pm_url}
+    ...    pm_token=${pm_token}    time_range=3h
+    IF    ${current_availability} < ${SUITE_AVAILABILITY_3H}
+        ${availability_decreased}=    Set Variable    True
+    END
+    ${availability_info}=    Set Variable    ${availability_info} 3h: ${current_availability} vs ${SUITE_AVAILABILITY_3H}
+
+    IF    ${availability_decreased} == True
+        ${message}=    Set Variable
+        ...    ${message_prefix} Average Availability decreased since previous checkpoint: (${availability_info})
+        Log    message=${message}    level=WARN    console=False
+    ELSE
+        ${message}=    Set Variable
+        ...    ${message_prefix} Average Availability not decreased since previous checkpoint: (${availability_info})
+        Log    message=${message}    level=INFO    console=False
+    END
+
 Log If Average Availability For Time Range Breached SLA
     [Documentation]    Gets Average Availability for ${time_range} and Logs a WARN message
     ...    if the value is under 99.95
@@ -49,59 +115,16 @@ Fail If Average Availability For Time Range Breached SLA
         Fail    ODS Availability is currently breaching SLA: ${availability} < ${SLA_AVAILABILITY} (time-range:${time_range})
     END
 
-Log Availability Comparison    #robocop:disable:too-many-arguments
-    [Documentation]    Gets Average Availability for ${time_range}, compares with ${previous_value} and
-    ...    Logs a WARN message if current availability < ${previous_value}
-    [Arguments]    ${message_prefix}    ${previous_value}    ${pm_url}    ${pm_token}    ${time_range}=15m    ${precision}=2    #robocop:disable:line-too-long
-
-    ${current_availability}=    Get Average Availability For Time Range
-    ...    ${pm_url}    ${pm_token}    ${time_range}    ${precision}
-    IF    ${current_availability} < ${previous_value}
-        #robocop:disable
-        ${message}=    Set Variable
-        ...    ${message_prefix}ODS Availability is worse than previous value: ${current_availability} < ${previous_value} (time_range:${time_range})
-        Log    message=${message}    level=WARN    console=False
-    ELSE
-        #robocop:disable
-        ${message}=    Set Variable
-        ...    ${message_prefix}ODS Availability is equal or better than previous value: ${current_availability} >= ${previous_value} (time_range:${time_range})
-        Log    message=${message}    level=INFO    console=False
-    END
-
 Suite Availability Setup
     [Documentation]    Obtains and stores Average Availability for the last 2m, 15m, 1h and 3h
     ...    Log a WARN message if availability is under 99.95
     [Arguments]    ${pm_url}    ${pm_token}
-
-    ${availability}=    Log If Average Availability For Time Range Breached SLA    pm_url=${pm_url}
-    ...    pm_token=${pm_token}    time_range=2m    message_prefix=Suite Setup: ${SUITE NAME}:
-    Set Global Variable    ${SUITE_AVAILABILITY_2M}    ${availability}
-
-    ${availability}=    Log If Average Availability For Time Range Breached SLA    pm_url=${pm_url}
-    ...    pm_token=${pm_token}    time_range=15m    message_prefix=Suite Setup: ${SUITE NAME}:
-    Set Global Variable    ${SUITE_AVAILABILITY_15M}    ${availability}
-
-    ${availability}=    Log If Average Availability For Time Range Breached SLA    pm_url=${pm_url}
-    ...    pm_token=${pm_token}    time_range=1h    message_prefix=Suite Setup: ${SUITE NAME}:
-    Set Global Variable    ${SUITE_AVAILABILITY_1H}    ${availability}
-
-    ${availability}=    Log If Average Availability For Time Range Breached SLA    pm_url=${pm_url}
-    ...    pm_token=${pm_token}    time_range=3h    message_prefix=Suite Setup: ${SUITE NAME}:
-    Set Global Variable    ${SUITE_AVAILABILITY_3H}    ${availability}
+    Create Suite Availability Checkpoint    pm_url=${pm_url}    pm_token=${pm_token}
 
 Suite Availability Teardown
     [Documentation]    Compare current Average Availability with the values stored in Suite Availability.
     ...    Logs a WARN message if the current values are lower
     [Arguments]    ${pm_url}    ${pm_token}
 
-    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}:
-    ...    previous_value=${SUITE_AVAILABILITY_2M}    pm_url=${pm_url}    pm_token=${pm_token}    time_range=2m
-
-    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}:
-    ...    previous_value=${SUITE_AVAILABILITY_15M}    pm_url=${pm_url}    pm_token=${pm_token}    time_range=15m
-
-    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}:
-    ...    previous_value=${SUITE_AVAILABILITY_1H}    pm_url=${pm_url}    pm_token=${pm_token}    time_range=1h
-
-    Log Availability Comparison    message_prefix=Suite Teardown: ${SUITE NAME}:
-    ...    previous_value=${SUITE_AVAILABILITY_3H}    pm_url=${pm_url}    pm_token=${pm_token}    time_range=3h
+    Log If Availability Decreased Since Suite Availability Checkpoint     pm_url=${pm_url}    pm_token=${pm_token}
+    ...    message_prefix=Suite Teardown: ${SUITE NAME}:

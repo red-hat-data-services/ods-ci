@@ -215,6 +215,7 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
     [Tags]    Tier2
     ...       ODS-699
+    ...       Execution-Time-Over-15m
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
@@ -295,9 +296,10 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     END
 
 Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
-    [Documentation]     wait and checks Operator have changed app grafana to prometheus
-    Sleep    10m    msg=wait to operator reverts the Changes
-    Wait Until Keyword Succeeds    5min    30s    Verify In Rhods-Monitor-Federation App Is    expected_app_name=prometheus
+    [Documentation]     Waits until rhods-operator reverts the configuration of rhods-monitor-federation,
+    ...    verifiying it has the default value ("prometheus")
+    Sleep    10m    msg=Waits until rhods-operator reverts the configuration of rhods-monitor-federation
+    Wait Until Keyword Succeeds    15m    1m    Verify In Rhods-Monitor-Federation App Is    expected_app_name=prometheus
 
 Verify In Rhods-Monitor-Federation App Is
     [Documentation]     Verifies in rhods-monitor-federation, app is showing ${expected_app_name}

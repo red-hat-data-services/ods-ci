@@ -32,7 +32,8 @@ setup(
         "escapism",
         "semver>=2,<3",
         "rpaframework>=12",
-        "yq"
+        "yq",
+        "pexpect"
     ],
     zip_safe=True,
     include_package_data=True,

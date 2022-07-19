@@ -23,8 +23,9 @@ Verify Quick Starts Work As Expected
     Verify Quick Starts Work As Expected When One Step Is Marked As No  openvino-inference-notebook
 
 Verify External Links In Quick Starts Are Not Broken
-        [Tags]    Tier1
-        ...       ODS-1305
+        [Tags]  Sanity    
+        ...     Tier1
+        ...     ODS-1305
         [Documentation]    Verify external links in Quick Starts are not broken
         Click Link                 Resources
         ${quickStartElements}=     Get QuickStart Items

@@ -39,7 +39,7 @@ Verify RHOSAK Is Available In RHODS Dashboard Explore Page
 
 Verify User Can Enable RHOSAK from Dashboard Explore Page
     [Documentation]    Checks it is possible to enable RHOSAK from RHODS Dashboard > Explore Page
-    [Tags]    Sanity    Smoke
+    [Tags]    Tier2
     ...       ODS-392
     [Teardown]  Remove RHOSAK From Dashboard
     Enable RHOSAK

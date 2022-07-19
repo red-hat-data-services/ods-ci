@@ -15,7 +15,7 @@ ${SB_BETA_DESC}=    //*[@class="pf-c-drawer__panel-main"]//div[@class="pf-c-aler
 
 *** Test Cases ***
 Verify if the Starburst Beta text has been removed from Getting Started
-    [Tags]  Sanity
+    [Tags]  Tier2
     ...     ODS-1158    ODS-605
 
     Click Link    Explore

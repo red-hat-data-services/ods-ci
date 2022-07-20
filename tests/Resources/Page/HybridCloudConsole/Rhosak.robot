@@ -247,6 +247,8 @@ Clean Up RHOSAK
     Delete Kafka Stream Instance    stream_name=${stream_to_delete}
     Capture Page Screenshot    after deleting_stream.png
     Click Link    Service Accounts
+    Run Keyword And Ignore Error    Wait For HCC Splash Page
+    Maybe Skip RHOSAK Tour
     Delete Service Account By Client ID    client_id_delete=${sa_clientid_to_delete}
     Close All Browsers
     Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}

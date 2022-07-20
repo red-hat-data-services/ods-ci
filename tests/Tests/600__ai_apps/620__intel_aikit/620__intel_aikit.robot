@@ -41,8 +41,8 @@ Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    Go To RHODS Dashboard
    Verify Service Is Enabled          ${intel_aikit_container_name}
    Verify JupyterHub Can Spawn AIKIT Notebook
-   Image Should Be Pinned To A Numeric Version
    Verify Git Plugin
+   Image Should Be Pinned To A Numeric Version
    [Teardown]   Remove AIKIT Operator
 
 

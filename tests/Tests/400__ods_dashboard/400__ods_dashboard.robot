@@ -305,6 +305,14 @@ Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
     ...     prev_logs_lengths=${lengths_dict_before}
     [Teardown]      Restore Group ConfigMaps And Check Logs Do Not Change     cm_yamls=${groups_configmaps_dict}
 
+Verify Dashboard Pod Is Not Getting Restarted
+    [Documentation]    Verify Dashboard Pod container doesn't restarted
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-374
+    ${pod_names}    Get POD Names    redhat-ods-applications    app=rhods-dashboard
+    Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-applications
+
 
 *** Keywords ***
 Set Variables For Group Testing

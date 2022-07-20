@@ -235,7 +235,7 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
-Verify RHODS Dashboard Explore And Enabled Page Has No Message with NO Component Found
+Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
     [Tags]  Tier2
     ...     ODS-1556
     ...     ProductBug

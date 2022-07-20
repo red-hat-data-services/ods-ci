@@ -235,6 +235,26 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
+Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
+    [Tags]  Tier2
+    ...     ODS-1556
+    ...     ProductBug
+    [Documentation]   Verify "NO Component Found" message dosen't display
+    ...     on Rhods Dashbord page with data value empty for rhods-enabled-applications-config
+    ...     configmap in openshift
+    ...     ProductBug:RHODS-4308
+    [Setup]   Test Setup For Rhods Dashboard
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=rhods-enabled-applications-config    src={"data":null}   #robocop: disable
+    Delete Dashboard Pods And Wait Them To Be Back
+    Reload Page
+    Menu.Navigate To Page    Applications   Enabled
+    Sleep    5s    msg=Wait for page to load
+    Run Keyword And Continue On Failure   Page Should Not Contain    No Components Found
+    Menu.Navigate To Page    Applications   Explore
+    Sleep    5s    msg=Wait for page to load
+    Run Keyword And Continue On Failure   Page Should Not Contain    No Components Found
+    [Teardown]   Test Teardown For Configmap Changed On RHODS Dashboard
+
 
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back
@@ -247,6 +267,12 @@ Test Setup For Rhods Dashboard
     Set Library Search Order    SeleniumLibrary
     Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}
     ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+
+Test Teardown For Configmap Changed On RHODS Dashboard
+    [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=rhods-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
+    Delete Dashboard Pods And Wait Them To Be Back
+    Close All Browsers
 
 Verify Authentication Is Required To Access BlackboxExporter
     [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,

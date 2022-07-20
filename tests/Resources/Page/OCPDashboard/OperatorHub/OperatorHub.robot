@@ -14,9 +14,9 @@ Install Operator
 
 Search Operator
    [Arguments]    ${operator}
-   Wait Until Element is Visible    //input[contains(@aria-label,"Filter by keyword")]   timeout=150
-   Input text    //input[contains(@aria-label,"Filter by keyword")]   ${operator}
-   Press keys   //input[contains(@aria-label,"Filter by keyword")]   RETURN
+   Wait Until Element Is Visible    //input[contains(@aria-label,"Filter by keyword")]   timeout=150
+   Input Text    //input[contains(@aria-label,"Filter by keyword")]   ${operator}
+   Press Keys   //input[contains(@aria-label,"Filter by keyword")]   RETURN
 
 Select Operator with Catalog Name
     [Arguments]    ${operator}     ${catalog}

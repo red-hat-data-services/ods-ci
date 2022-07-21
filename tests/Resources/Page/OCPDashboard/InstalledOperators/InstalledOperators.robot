@@ -114,6 +114,7 @@ Move To Installed Operator Page Tab in Openshift
     Installed Operators Should Be Open
     Run Keyword If  "${namespace}" == "None"   Select Project By Name  All Projects
     ...         ELSE   Select Project By Name   ${namespace}
+    Sleep   1s
     Click On Searched Operator   ${operator_name}
     Switch To New Tab       ${tab_name}
     sleep    5

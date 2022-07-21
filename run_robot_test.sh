@@ -219,7 +219,7 @@ if ${SET_RHODS_URLS}
         rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
         api_server=$(oc whoami --show-server)
         prom_server="https://$(oc get route prometheus -n redhat-ods-monitoring -o jsonpath='{.spec.host}{"\n"}')"
-        prom_token="$(oc create token prometheus -n redhat-ods-monitoring)"
+        prom_token="$(oc serviceaccounts  new-token prometheus -n redhat-ods-monitoring)"
         TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard} --variable RHODS_PROMETHEUS_URL:${prom_server} --variable RHODS_PROMETHEUS_TOKEN:${prom_token}"
         echo "OCP Console URL set to: ${ocp_console}"
         echo "RHODS Dashboard URL set to: ${rhods_dashboard}"
@@ -252,7 +252,7 @@ if command -v yq &> /dev/null
                         oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
                     else
                         echo "Performing oc login using service account"
-                        sa_token=$(oc create token ${SERVICE_ACCOUNT} -n ${SA_NAMESPACE})
+                        sa_token=$(oc serviceaccounts  new-token ${SERVICE_ACCOUNT} -n ${SA_NAMESPACE})
                         oc login --token=$sa_token --server=${oc_host} --insecure-skip-tls-verify=true
                         sa_fullname=$(oc whoami)
                         TEST_VARIABLES="${TEST_VARIABLES} --variable SERVICE_ACCOUNT.NAME:${SERVICE_ACCOUNT} --variable SERVICE_ACCOUNT.FULL_NAME:${sa_fullname}"

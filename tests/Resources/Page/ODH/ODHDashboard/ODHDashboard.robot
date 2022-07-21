@@ -63,7 +63,9 @@ Login To RHODS Dashboard
    Run Keyword If  ${authorize_service_account}  Authorize rhods-dashboard service account
 
 Wait for RHODS Dashboard to Load
-  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
+  #[Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
+  # Temporary workaround to use ODH cluster
+  [Arguments]  ${dashboard_title}="Open Data Hub"
   Wait For Condition  return document.title == ${dashboard_title}  timeout=15
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
@@ -74,7 +76,7 @@ Wait Until RHODS Dashboard ${dashboard_app} Is Visible
 Launch ${dashboard_app} From RHODS Dashboard Link
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
-  Switch Window  NEW
+  #Switch Window  NEW
 
 Launch ${dashboard_app} From RHODS Dashboard Dropdown
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible

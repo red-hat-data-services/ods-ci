@@ -16,9 +16,11 @@ Library   OpenShiftLibrary
 *** Variables ***
 ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =
 ...   //div[contains(@class,"jsp-app__header__title") and .="Start a notebook server"]
-${JUPYTERHUB_DROPDOWN_XPATH} =
-...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
-${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
+#${JUPYTERHUB_DROPDOWN_XPATH} =
+#...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
+#${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
+${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container size"]
 
 
 *** Keywords ***
@@ -36,7 +38,8 @@ Wait Until JupyterHub Spawner Is Ready
 Select Notebook Image
     [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
     [Arguments]    ${notebook_image}
-    Wait Until Element Is Visible    xpath://div[@class="jsp-spawner__image-options"]
+    #Wait Until Element Is Visible    xpath://div[@class="jsp-spawner__image-options"]
+    Wait Until Element Is Visible    xpath://div[.="Notebook image"]/..
     Wait Until Element Is Visible    xpath://input[contains(@id, "${notebook_image}")]
     Element Should Be Enabled    xpath://input[contains(@id, "${notebook_image}")]
     Click Element    xpath://input[contains(@id, "${notebook_image}")]
@@ -122,7 +125,7 @@ Get Spawner Environment Variable Value
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
-    Click Button  Start Server
+    Click Button  Start server
     Wait Until Page Contains  Starting server
     Wait Until Element Is Visible  id:progress-bar
     Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
@@ -139,6 +142,7 @@ Spawn Notebook With Arguments  # robocop: disable
    ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
    ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  &{envs}
+   ${spawn_fail} =  Set Variable  True
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
       IF  ${spawner_ready}==True
@@ -171,10 +175,12 @@ Spawn Notebook With Arguments  # robocop: disable
          Spawned Image Check    ${image}
          ${spawn_fail} =  Has Spawn Failed
          Exit For Loop If  ${spawn_fail} == False
-         Click Element  xpath://span[@id='jupyterhub-logo']
+         #Click Element  xpath://span[@id='jupyterhub-logo']
+         Reload Page
       ELSE
          Sleep  ${retries_delay}
-         Click Element  xpath://span[@id='jupyterhub-logo']
+         #Click Element  xpath://span[@id='jupyterhub-logo']
+         Reload Page
       END
    END
    IF  ${spawn_fail} == True
@@ -193,12 +199,13 @@ Launch JupyterHub Spawner From Dashboard
     [Documentation]  Launches JupyterHub from the RHODS Dashboard
     [Arguments]    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}    ${auth}=${TEST_USER.AUTH_TYPE}
     Menu.Navigate To Page    Applications    Enabled
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${username}  ${password}  ${auth}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
-    Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+    #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+    Wait Until Page Contains  Start a Notebook server
     Wait Until JupyterHub Spawner Is Ready
 
 Get Spawner Progress Message
@@ -316,7 +323,8 @@ Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
    Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawne
-   Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+   #Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+   Click Element  //button[@aria-label="Options menu"]
    Wait Until Page Contains Element         xpath://span[.="${container_size}"]/../..  timeout=10
    ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
    ${l_data}   Convert To Lower Case    ${data}
@@ -420,7 +428,8 @@ Get List Of All Available Container Size
     Wait Until Page Contains    Container size    timeout=30
     ...    error=Container size selector is not present in JupyterHub Spawner
     ${size}    Create List
-    Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
+    #Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
+    Click Element  xpath://button[@aria-label="Options menu"][1]
     ${link_elements}   Get WebElements  xpath://*[@class="pf-c-select__menu-item-main"]
     FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
           ${text}      Get Text    ${ext_link}
@@ -454,7 +463,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Wait for RHODS Dashboard to Load
-        Launch JupyterHub From RHODS Dashboard Link
+        Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required
@@ -472,7 +481,7 @@ CleanUp JupyterHub For N users
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Wait for RHODS Dashboard to Load
-        Launch JupyterHub From RHODS Dashboard Link
+        Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required

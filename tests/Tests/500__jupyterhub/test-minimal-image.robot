@@ -21,18 +21,14 @@ Open RHODS Dashboard
     Wait for RHODS Dashboard to Load
 
 Can Launch Jupyterhub
-    ${version-check} =    Is RHODS Version Greater Or Equal Than    1.4.0
-    IF    ${version-check}==True
-        Launch JupyterHub From RHODS Dashboard Link
-    ELSE
-        Launch JupyterHub From RHODS Dashboard Dropdown
-    END
+    Launch Jupyter From RHODS Dashboard Link
 
 Can Login to Jupyterhub
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
     Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
-    Wait Until Page Contains Element    xpath://span[@id='jupyterhub-logo']
+    #Wait Until Page Contains Element    xpath://span[@id='jupyterhub-logo']
+    Wait Until Page Contains  Start a Notebook server
 
 Can Spawn Notebook
     [Tags]    ODS-901    ODS-903

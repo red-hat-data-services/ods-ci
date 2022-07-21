@@ -117,12 +117,7 @@ Run Jupyter Notebook For 5 Minutes
 
 Iterative Image Test
     [Arguments]    ${image}    ${REPO_URL}    ${NOTEBOOK_TO_RUN}
-    ${version-check} =    Is RHODS Version Greater Or Equal Than    1.4.0
-    IF    ${version-check}==True
-        Launch JupyterHub From RHODS Dashboard Link
-    ELSE
-        Launch JupyterHub From RHODS Dashboard Dropdown
-    END
+    Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required

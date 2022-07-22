@@ -35,15 +35,25 @@ Tensorflow Workload Test
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
 
+Tensorboard Workload Test
+    [Documentation]  Verifies that tensorboard is accessible
+    [Tags]  Sanity
+    ...     PLACEHOLDER
+    ...     ODS-1413
+    Close Previous Server
+    # For KFNBC the environment variable should TENSORBOARD_PROXY_URL=/notebook/<nb-namespace>/<nb-name>/proxy/6006/
+    &{tensorboard_proxy} =  Create Dictionary  TENSORBOARD_PROXY_URL=/user/${TEST_USER.USERNAME}/proxy/6006/
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  envs=&{tensorboard_proxy}
+    Run Keyword And Ignore Error  Clone Git Repository And Run  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main  
+    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/tensorboard/tensorflow/tensorboard_profiling_tensorflow.ipynb  10m
+    Page Should Contain Element    xpath://iframe[contains(@id, "tensorboard-frame")]
+
 Verify Tensorflow Image Can Be Spawned With GPU
     [Documentation]    Spawns PyTorch image with 1 GPU
     [Tags]  Sanity
     ...     Resources-GPU
     ...     ODS-1151
-    Clean Up Server
-    Stop JupyterLab Notebook Server
-    Fix Spawner Status
-    Wait Until JupyterHub Spawner Is Ready
+    Close Previous Server
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1
 
 Verify Tensorflow Image Includes Expected CUDA Version
@@ -75,3 +85,10 @@ Verify Tensorflow Image Suite Setup
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default
+
+Close Previous Server
+    [Documentation]  Closes previous server and goes back to Spawner
+    Clean Up Server
+    Stop JupyterLab Notebook Server
+    Fix Spawner Status
+    Wait Until JupyterHub Spawner Is Ready

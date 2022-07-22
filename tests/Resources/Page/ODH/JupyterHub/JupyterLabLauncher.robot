@@ -98,19 +98,21 @@ Open JupyterLab Control Panel
   Switch Window  JupyterHub
 
 Stop JupyterLab Notebook Server
-  Open JupyterLab Control Panel
-  Run Keyword And Ignore Error   Wait Until Page Contains  Stop My Server   timeout=30
-  # This is a dumb sleep to give the Stop button in the WebUI time to actually work when clicked
-  # TODO: Determine if there is any web element attribute that will allow signify when the Stop button will actually work
-  Sleep  2 seconds
-  Capture Page Screenshot
-  ${stop_enabled} =  Run Keyword And Return Status  Page Should Contain Element    //*[@id="stop"]
-  IF    ${stop_enabled} == True
-    Click Element  //*[@id="stop"]
-    Wait Until Element Is Not Visible   //*[@id="stop"]  3 minute
-    Wait Until Page Contains  Start My Server  timeout=120
-    Capture Page Screenshot
-  END
+  # Open JupyterLab Control Panel
+  # Run Keyword And Ignore Error   Wait Until Page Contains  Stop My Server   timeout=30
+  # # This is a dumb sleep to give the Stop button in the WebUI time to actually work when clicked
+  # # TODO: Determine if there is any web element attribute that will allow signify when the Stop button will actually work
+  # Sleep  2 seconds
+  # Capture Page Screenshot
+  # ${stop_enabled} =  Run Keyword And Return Status  Page Should Contain Element    //*[@id="stop"]
+  # IF    ${stop_enabled} == True
+  #   Click Element  //*[@id="stop"]
+  #   Wait Until Element Is Not Visible   //*[@id="stop"]  3 minute
+  #   Wait Until Page Contains  Start My Server  timeout=120
+  #   Capture Page Screenshot
+  # END
+  SeleniumLibrary.Switch Window  Open Data Hub
+  Click Button  Stop notebook server
 
 Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out
@@ -166,14 +168,16 @@ Clean Up Server
     Wait Until User Server Is Clean
     Maybe Close Popup
     ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-    ${ls_server} =  Run Command In Container    rhods-notebooks    ${notebook_pod_name}    ls
+    #${ls_server} =  Run Command In Container    rhods-notebooks    ${notebook_pod_name}    ls
+    ${ls_server} =  Run Command In Container    opendatahub    ${notebook_pod_name}    ls
     Should Match    "${ls_server}"    "${EMPTY}"
 
 Get User Notebook Pod Name
   [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyterhub-nb-ldap-2dadmin1)
   [Arguments]  ${username}
   ${safe_username}=  Get Safe Username    ${username}
-  ${notebook_pod_name}=   Set Variable  jupyterhub-nb-${safe_username}
+  #${notebook_pod_name}=   Set Variable  jupyterhub-nb-${safe_username}
+  ${notebook_pod_name}=   Set Variable  jupyter-nb-${safe_username}-0
   [Return]  ${notebook_pod_name}
 
 Wait Until User Server Is Clean

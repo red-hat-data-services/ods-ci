@@ -107,7 +107,8 @@ Remove Spawner Environment Variable
    [Arguments]  ${env_var}
    ${env_check} =  Spawner Environment Variable Exists   ${env_var}
    IF  ${env_check}==True
-      Click Element  xpath://input[@id="${env_var}"]/../../../../button
+      #Click Element  xpath://input[@id="${env_var}"]/../../../../button
+      Click Element  xpath://input[@id="${env_var}"]/../../../../div/button
    END
 
 Spawner Environment Variable Exists
@@ -126,9 +127,10 @@ Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
     Click Button  Start server
-    Wait Until Page Contains  Starting server
-    Wait Until Element Is Visible  id:progress-bar
-    Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
+    Wait Until Page Contains  Starting server  15s
+    #Wait Until Element Is Visible  id:progress-bar
+    #Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
+    Wait Until Page Contains  Server ready  ${spawner_timeout}
 
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed
@@ -167,9 +169,12 @@ Spawn Notebook With Arguments  # robocop: disable
             END
          END
          Spawn Notebook    ${spawner_timeout}
-         Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
-         ...    id:progress-bar  ${spawner_timeout}
-         Wait For JupyterLab Splash Screen  timeout=30
+         #Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
+         #...    id:progress-bar  ${spawner_timeout}
+         Click Button  Access server
+         SeleniumLibrary.Switch Window  NEW
+         Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+         Wait For JupyterLab Splash Screen  timeout=60
          Maybe Close Popup
          Open New Notebook In Jupyterlab Menu
          Spawned Image Check    ${image}
@@ -247,6 +252,15 @@ Handle Server Is Stopping
    Sleep  10
    Handle Server Not Running
 
+Control Panel Is Visible
+   [Documentation]  Checks if Control Panel page is open
+   ${control_panel_visible} =  Run Keyword And Return Status  Page Should Contain  Notebook server control panel
+   [Return]  ${control_panel_visible}
+
+Handle Control Panel
+   [Documentation]  Handles control panel page
+   Click Button  Stop notebook server
+
 Fix Spawner Status
    [Documentation]  This keyword handles spawner states that would prevent
    ...              test cases from passing. If a server is already running
@@ -254,15 +268,18 @@ Fix Spawner Status
    ...              this keyword will bring us back to the actual spawner.
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    IF  ${spawner_visible}!=True
-      ${SNR_visible} =  Server Not Running Is Visible
-      ${SMS_visible} =  Start My Server Is Visible
-      ${SIS_visible} =  Server Is Stopping Is Visible
-      IF  ${SIS_visible}==True
-         Handle Server Is Stopping
-      ELSE IF  ${SNR_visible}==True
-         Handle Server Not Running
-      ELSE IF  ${SMS_visible}==True
-         Handle Start My Server
+      # ${SNR_visible} =  Server Not Running Is Visible
+      # ${SMS_visible} =  Start My Server Is Visible
+      # ${SIS_visible} =  Server Is Stopping Is Visible
+      # IF  ${SIS_visible}==True
+      #    Handle Server Is Stopping
+      # ELSE IF  ${SNR_visible}==True
+      #    Handle Server Not Running
+      # ELSE IF  ${SMS_visible}==True
+      #    Handle Start My Server
+      ${control_panel_visible} =  Control Panel Is Visible
+      IF  ${control_panel_visible}==True
+         Handle Control Panel
       ELSE
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True

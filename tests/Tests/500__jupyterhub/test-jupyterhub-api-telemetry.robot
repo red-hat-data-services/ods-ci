@@ -72,7 +72,12 @@ JupyterHub API Should Exposes SegmentKey
 
 Switch To RHODS Dashboard
     [Documentation]     Switch tab to RHODS dashboard
-    Switch Window    title=Red Hat OpenShift Data Science Dashboard
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.15.0
+    IF  ${version-check}==True
+        Switch Window    title=Red Hat OpenShift Data Science
+    ELSE
+        Switch Window    title=Red Hat OpenShift Data Science Dashboard
+    END
     Sleep    1s    msg=Wait for to change tab
 
 Switch To JupyterHub API Tab

@@ -34,7 +34,7 @@ PyTorch Image Workload Test
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
 
-Tensorboard Workload Test
+Verify Tensorboard Is Accessible
     [Documentation]  Verifies that tensorboard is accessible
     [Tags]  Sanity
     ...     PLACEHOLDER
@@ -45,7 +45,7 @@ Tensorboard Workload Test
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  envs=&{tensorboard_proxy}
     Run Keyword And Ignore Error  Clone Git Repository And Run  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main  
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/tensorboard/pytorch/tensorboard_profiling_pytorch.ipynb  10m
-    Page Should Contain Element    xpath://iframe[contains(@id, "tensorboard-frame")]
+    Page Should Contain Element    xpath://html//mat-toolbar/span[.="TensorBoard"]
 
 Verify PyTorch Image Can Be Spawned With GPU
     [Documentation]    Spawns PyTorch image with 1 GPU

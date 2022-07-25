@@ -46,7 +46,9 @@ Verify Tensorboard Is Accessible
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  envs=&{tensorboard_proxy}
     Run Keyword And Ignore Error  Clone Git Repository And Run  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main  
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/tensorboard/tensorflow/tensorboard_profiling_tensorflow.ipynb  10m
+    Select Frame    xpath://iframe[contains(@id, "tensorboard-frame")]
     Page Should Contain Element    xpath://html//mat-toolbar/span[.="TensorBoard"]
+    Unselect Frame
 
 Verify Tensorflow Image Can Be Spawned With GPU
     [Documentation]    Spawns PyTorch image with 1 GPU

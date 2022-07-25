@@ -66,7 +66,7 @@ Wait for RHODS Dashboard to Load
     [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
     ${version-check}=  Is RHODS Version Greater Or Equal Than  1.15.0
     IF  ${version-check}==True
-        Wait For Condition  return document.title == Red Hat OpenShift Data Science  timeout=15
+        Wait For Condition  return document.title == "Red Hat OpenShift Data Science"  timeout=15
     ELSE
         Wait For Condition  return document.title == ${dashboard_title}  timeout=15
     END

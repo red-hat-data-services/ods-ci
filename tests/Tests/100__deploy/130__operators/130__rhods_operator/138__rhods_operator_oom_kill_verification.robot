@@ -14,6 +14,7 @@ Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resourc
 Resource            ../../../../Resources/Common.robot
 
 Suite Setup         RHOSi Setup
+Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***

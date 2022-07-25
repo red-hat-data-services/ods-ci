@@ -3,9 +3,11 @@ Documentation       Tests features in ODS Dashboard "Settings" section
 
 Library             SeleniumLibrary
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 
 Suite Setup         Dashboard Settings Suite Setup
+Suite Teardown      RHOSi Teardown
 
 
 *** Test Cases ***
@@ -37,6 +39,7 @@ Verify That "Usage Data Collection" Can Be Set In "Cluster Settings"
     [Tags]    Tier1
     ...       Sanity
     ...       ODS-1218
+    ...       FlakyTest
     Open ODS Dashboard With Admin User
     Verify Cluster Settings Is Available
     ODHDashboard.Enable "Usage Data Collection"

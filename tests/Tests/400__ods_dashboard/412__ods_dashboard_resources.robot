@@ -1,12 +1,15 @@
 *** Settings ***
-Library         OpenShiftCLI
-Resource        ../../Resources/ODS.robot
+Library           OpenShiftCLI
+Resource          ../../Resources/RHOSi.resource
+Resource          ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource        ../../Resources/Page/LoginPage.robot
-Test Setup      Resources Test Setup
-Test Teardown   Resources Test Teardown
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
+Resource          ../../Resources/Page/LoginPage.robot
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
+Test Setup        Resources Test Setup
+Test Teardown     Resources Test Teardown
 
 
 *** Test Cases ***
@@ -44,7 +47,6 @@ Verify Resource Link HTTP Status Code
 *** Keywords ***
 Resources Test Setup
     Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Click Link      Resources

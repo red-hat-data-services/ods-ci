@@ -2,10 +2,11 @@
 Library          OperatingSystem
 Library          Process
 Resource         ../../../Resources/Page/ODH/Grafana/Grafana.resource
+Resource         ../../../Resources/RHOSi.resource
 Resource         ../../../Resources/ODS.robot
 Resource         ../../../Resources/Common.robot
-Suite Setup      Set Library Search Order  SeleniumLibrary
-Suite Teardown   Close Browser
+Suite Setup      Post Install Monitoring Port Forwarding Suite Setup
+Suite Teardown   Post Install Monitoring Port Forwarding Suite Teardown
 
 
 *** Variables ***
@@ -62,3 +63,13 @@ Verify Access To Alert Manager Using Browser
     Wait Until Page Contains    text=Alertmanager
     Wait Until Page Contains    text=Silences
     Wait Until Page Contains    text=Status
+
+Post Install Monitoring Port Forwarding Suite Setup
+    [Documentation]    Suite Setup
+    RHOSi Setup
+    Set Library Search Order  SeleniumLibrary
+
+Post Install Monitoring Port Forwarding Suite Teardown
+    [Documentation]    Suite Teardown
+    Close Browser
+    RHOSi Teardown

@@ -8,7 +8,9 @@ Library             RequestsLibrary
 
 *** Keywords ***
 Run Query
-    [Documentation]    Runs a Prometheus query using the API
+    [Documentation]    Runs a prometheus query, obtaining the current value. More info at:
+    ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
+    ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
     [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
     ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query?query=${pm_query}
@@ -18,13 +20,14 @@ Run Query
     [Return]    ${resp}
 
 Run Range Query
-    [Documentation]    Runs a prometheus range query, in order to obtain the result of a PromQL expression over a given time range. More info at:
+    [Documentation]    Runs a prometheus range query, in order to obtain the result of a PromQL expression over a given
+    ...                time range. More info at:
     ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
     ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
     [Arguments]    ${pm_query}    ${pm_url}    ${pm_token}    ${interval}=12h     ${steps}=172
-    ${time} =    Get Start Time And End Time  interval=${interval}
+    ${time}=    Get Start Time And End Time  interval=${interval}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
-    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}    #robocop:disable
     ...    headers=${pm_headers}    verify=${False}
     Status Should Be    200    ${resp}
     [Return]    ${resp}
@@ -32,11 +35,11 @@ Run Range Query
 Get Start Time And End Time
     [Documentation]     Returns start and end time for Query range from current time
     [Arguments]         ${interval}   # like 12h  7 days etc
-    ${end_time} =  Get Current Date
-    ${end_time} =  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${end_time}").timestamp()
-    ${start_time} =    Subtract Time From Date    ${end_time}    ${interval}
-    ${start_time} =  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${start_time}").timestamp()
-    @{time} =  Create List  ${start_time}  ${end_time}
+    ${end_time}=  Get Current Date
+    ${end_time}=  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${end_time}").timestamp()
+    ${start_time}=    Subtract Time From Date    ${end_time}    ${interval}
+    ${start_time}=  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${start_time}").timestamp()
+    @{time}=  Create List  ${start_time}  ${end_time}
     [Return]    ${time}
 
 Get Rules
@@ -115,7 +118,7 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
 
 Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if a given Prometheus alert does not have the expected severity
-    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-severity}    ${alert-duration}=${EMPTY}
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-severity}    ${alert-duration}=${EMPTY}    #robocop:disable
     ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
     ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
     ${alert_found}=    Set Variable    False
@@ -202,7 +205,7 @@ Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
 Get Target Endpoints
     [Documentation]     Returns list of Endpoint URLs
     [Arguments]         ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
-    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${username}:${password} -k ${pm_url}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${username}:${password} -k ${pm_url}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'       #robocop:disable
     ${links}=    Replace String    ${links}    "    ${EMPTY}
     @{links}=    Split String  ${links}  \n
     [Return]    ${links}
@@ -210,7 +213,7 @@ Get Target Endpoints
 Get Target Endpoints Which Have State Up
     [Documentation]    Returns list of endpoints who have state is "UP"
     [Arguments]        ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
-    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${pm_token}:${password} -k ${pm_token}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | select(.health == "up") | .globalUrl'
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${pm_token}:${password} -k ${pm_token}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | select(.health == "up") | .globalUrl'    #robocop:disable
     ${links}=    Replace String    ${links}    "    ${EMPTY}
     @{links}=    Split String  ${links}  \n
     [Return]    ${links}

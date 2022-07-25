@@ -1,8 +1,9 @@
 *** Settings ***
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-
-Suite Setup         Set Library Search Order  SeleniumLibrary
+Resource            ../../../Resources/RHOSi.resource
+Suite Setup         Rbac Suite Setup
+Suite Teardown      Rbac Suite Teardown
 
 
 *** Test Cases ***
@@ -46,3 +47,12 @@ Set Default Access Groups And Close Browser
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
     Close Browser
+
+Rbac Suite Setup
+    [Documentation]    Suite setup
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
+
+Rbac Suite Teardown
+    [Documentation]    Suite teardown
+    RHOSi Teardown

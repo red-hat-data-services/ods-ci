@@ -11,12 +11,14 @@ Documentation       PVC_CHANGE_VERIFICATION
 #
 Library         SeleniumLibrary
 Library         JupyterLibrary
-Resource         ../../Resources/ODS.robot
+Resource        ../../Resources/RHOSi.resource
+Resource        ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Suite Setup     RHOSi Setup
 Suite Teardown  PVC Size Suite Teadrown
 Test Setup      PVC Size Test Setup
+
 
 *** Variables ***
 ${NAMESPACE}    redhat-ods-applications
@@ -114,6 +116,7 @@ PVC Size Suite Teadrown
     ${status}    ${pvc_name}    Run Keyword And Ignore Error
     ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
     May Be Delete PVC     ${pvc_name}
+    RHOSi Teardown
 
 Verify PVC change using UI
    [Documentation]   Basic PVC change verification

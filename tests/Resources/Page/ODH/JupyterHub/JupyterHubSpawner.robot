@@ -174,7 +174,10 @@ Spawn Notebook With Arguments  # robocop: disable
          Click Button  Access server
          SeleniumLibrary.Switch Window  NEW
          Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-         Wait For JupyterLab Splash Screen  timeout=60
+         ${authorization_required} =  Is Service Account Authorization Required
+         Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+         #Wait For JupyterLab Splash Screen  timeout=60
+         Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
          Maybe Close Popup
          Open New Notebook In Jupyterlab Menu
          Spawned Image Check    ${image}

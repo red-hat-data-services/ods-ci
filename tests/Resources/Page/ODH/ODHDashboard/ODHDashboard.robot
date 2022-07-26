@@ -65,7 +65,7 @@ Login To RHODS Dashboard
 Wait for RHODS Dashboard to Load
   #[Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
   # Temporary workaround to use ODH cluster
-  [Arguments]  ${dashboard_title}="Open Data Hub"
+  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
   Wait For Condition  return document.title == ${dashboard_title}  timeout=15
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible

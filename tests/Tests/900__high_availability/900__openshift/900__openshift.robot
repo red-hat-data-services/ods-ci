@@ -24,9 +24,9 @@ Verify ODS Availability After OpenShift Node Failure
     Verify ODS Availability
 
 Verify rhods_aggregated_availability Detects Downtime In Jupyterhub And Dashboard
+    [Documentation]    Verifies if rhods_aggregated_availability detects downtime in Jupyterhub and Dashboard.
     [Tags]    ODS-1608
-    ...       Tier3
-       
+    ...       Tier3  
     Verify rhods_aggregated_availability Detects Downtime In Component    jupyterhub
     Verify rhods_aggregated_availability Detects Downtime In Component    rhods-dashboard
     Verify rhods_aggregated_availability Detects Downtime In Component    combined

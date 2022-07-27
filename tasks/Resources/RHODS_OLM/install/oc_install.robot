@@ -3,9 +3,7 @@ Library    String
 *** Keywords ***
 Install RHODS
   [Arguments]  ${operator_version}    ${cluster_type}     ${operator_url}=${EMPTY}
-  IF   "${cluster_type}" == "OSD"
-      Install RHODS on OSD Cluster    ${operator_version}
-  ELSE IF   "${cluster_type}" == "PSI"
+  IF   "${cluster_type}" == "PSI" or "${cluster_type}" == "OSD"
       ${status}    Run Keyword And Return Status    Should Start With    ${operator_version}    v
       IF  ${status}==True
            Set Local Variable    ${operator_url}        quay.io/modh/qe-catalog-source:${operator_version}
@@ -76,13 +74,3 @@ Verify Builds Status
     Should Not Be Equal As Strings  ${build}[status][phase]  Error
   END
 
-Install RHODS on OSD Cluster
-  [Arguments]  ${operator_version}
-  New Project  redhat-ods-monitoring
-  New Project  redhat-ods-applications
-  New Project  redhat-ods-operator
-  Oc Apply  kind=Secret  src=${RHODS_BUILD.PULL_SECRET}  namespace=openshift-marketplace
-  Oc Apply  kind=Secret  src=${RHODS_BUILD.SECRET_FILE}
-  &{image}=  Create Dictionary  image=quay.io/modh/qe-catalog-source:${operator_version}
-  Oc Create  kind=List  src=tasks/Resources/RHODS_OLM/install/catalogsource.yaml
-  ...        template_data=${image}

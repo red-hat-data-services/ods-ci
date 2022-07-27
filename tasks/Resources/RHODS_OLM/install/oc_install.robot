@@ -16,8 +16,10 @@ Install RHODS
       ${data}     Split String    ${RHODS_INSTALL_REPO}     /
       ${filename}  Split String     ${data}[-1]            .
       Set Test Variable     ${filename}       ${filename}[0]
-      Run    git clone ${RHODS_INSTALL_REPO}
-      Run    cd ${EXECDIR}/${filename} && ./setup.sh ${operator_url} > ${EXECDIR}/olm.txt
+      ${return_code}	  Run And Return Rc    git clone ${RHODS_INSTALL_REPO}
+      Should Be Equal As Integers	${return_code}	 0
+      ${return_code}	  Run And Return Rc   cd ${EXECDIR}/${filename} && ./setup.sh ${operator_url} > ${EXECDIR}/olm.txt
+      Should Be Equal As Integers	${return_code}	 0
   ELSE
        FAIL   Provided cluster type is not supported, Kindly check and provide correct cluster type.
   END

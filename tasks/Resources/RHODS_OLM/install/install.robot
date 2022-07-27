@@ -4,7 +4,7 @@ Installing RHODS Operator ${operator_version}
   Run Keyword Unless  ${is_operator_installed}  Run Keywords
   ...  Log  Installing RHODS operator in ${cluster_type}  console=yes  AND
   ...  Set Suite Variable  ${operator_version}  AND
-  ...  Set Global Variable  ${RHODS_INSTALL_REPO}  AND
+  ...  Set Test Variable  ${RHODS_INSTALL_REPO}  AND
   ...  Install RHODS  ${operator_version}   ${cluster_type}
 
 RHODS Operator Should Be installed
@@ -16,4 +16,5 @@ RHODS Operator Should Be installed
 Install Teardown
   [Documentation]   Remove cloned git repository
   [Arguments]    ${folder_name}= ${filename}
-  Run   rm -rf ${EXECDIR}/${filename}
+  ${return_code}	  Run And Return Rc  rm -rf ${EXECDIR}/${filename}
+  Should Be Equal As Integers	  ${return_code}	 0

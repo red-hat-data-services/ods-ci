@@ -16,8 +16,9 @@ Install RHODS
       Set Test Variable     ${filename}       ${filename}[0]
       ${return_code}	  Run And Return Rc    git clone ${RHODS_INSTALL_REPO}
       Should Be Equal As Integers	${return_code}	 0
-      ${return_code}	  Run And Return Rc   cd ${EXECDIR}/${filename} && ./setup.sh ${operator_url} > ${EXECDIR}/olm.txt
+      ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh ${operator_url}   #robocop:disable
       Should Be Equal As Integers	${return_code}	 0
+      Log    ${output}
   ELSE
        FAIL   Provided cluster type is not supported, Kindly check and provide correct cluster type.
   END

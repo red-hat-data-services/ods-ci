@@ -1,33 +1,33 @@
 *** Keywords ***
-Install RHODS  
-  [Arguments]  ${operator_version}
-  New Project  redhat-ods-monitoring
-  New Project  redhat-ods-applications
-  New Project  redhat-ods-operator
-  Oc Apply  kind=Secret  src=${RHODS_BUILD.PULL_SECRET}  namespace=openshift-marketplace
-  Oc Apply  kind=Secret  src=${RHODS_BUILD.SECRET_FILE}
-  &{image}=  Create Dictionary  image=quay.io/modh/qe-catalog-source:${operator_version}
-  Oc Create  kind=List  src=tasks/Resources/RHODS_OLM/install/catalogsource.yaml  
-  ...        template_data=${image}
+Install RHODS
+  [Arguments]  ${operator_version}    ${cluster_type}
+  IF   "${cluster_type}" == "OSD"
+      Install RHODS on OSD Cluster    ${operator_version}
+  ELSE IF   "${cluster_type}" == "PSI"
+      Run    git clone ${RHODS_INSTALL_REPO}
+      Run    cd ${EXECDIR}/olminstall && ./setup.sh quay.io/modh/qe-catalog-source:${operator_version} >${EXECDIR}/olm.txt  #robocop:disable
+  ELSE
+       FAIL   Provided cluster type is not supported, Kindly check and provide correct cluster type.
+  END
 
 Verify RHODS Installation
   Log  Verifying RHODS installation  console=yes
   Wait For Pods Number  1
   ...                   namespace=redhat-ods-operator
-  ...                   label_selector=name=rhods-operator  
+  ...                   label_selector=name=rhods-operator
   ...                   timeout=2000
   Log  pod operator created
-  Wait For Pods Number  2  
+  Wait For Pods Number  2
   ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=rhods-dashboard  
-  ...                   timeout=1200 
+  ...                   label_selector=app=rhods-dashboard
+  ...                   timeout=1200
   Log  pods rhods-dashboard created
-  Wait For Pods Number  3  
+  Wait For Pods Number  3
   ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=jupyterhub  
-  ...                   timeout=1200 
-  Wait For Pods Number  4  
-  ...                   namespace=redhat-ods-monitoring 
+  ...                   label_selector=app=jupyterhub
+  ...                   timeout=1200
+  Wait For Pods Number  4
+  ...                   namespace=redhat-ods-monitoring
   ...                   timeout=1200
   Verify Builds In redhat-ods-applications
   Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
@@ -52,12 +52,23 @@ Verify Builds Number
   Should Be Equal As Integers  ${build_length}  ${expected_builds}
   [Return]  ${builds}
 
-Verify Builds Status 
+Verify Builds Status
   [Arguments]  ${build_status}
   @{builds}=  Oc Get  kind=Build  namespace=redhat-ods-applications
   FOR  ${build}  IN  @{builds}
-    Should Be Equal As Strings  ${build}[status][phase]  ${build_status}  
+    Should Be Equal As Strings  ${build}[status][phase]  ${build_status}
     Should Not Be Equal As Strings  ${build}[status][phase]  Cancelled
     Should Not Be Equal As Strings  ${build}[status][phase]  Failed
     Should Not Be Equal As Strings  ${build}[status][phase]  Error
   END
+
+Install RHODS on OSD Cluster
+  [Arguments]  ${operator_version}
+  New Project  redhat-ods-monitoring
+  New Project  redhat-ods-applications
+  New Project  redhat-ods-operator
+  Oc Apply  kind=Secret  src=${RHODS_BUILD.PULL_SECRET}  namespace=openshift-marketplace
+  Oc Apply  kind=Secret  src=${RHODS_BUILD.SECRET_FILE}
+  &{image}=  Create Dictionary  image=quay.io/modh/qe-catalog-source:${operator_version}
+  Oc Create  kind=List  src=tasks/Resources/RHODS_OLM/install/catalogsource.yaml
+  ...        template_data=${image}

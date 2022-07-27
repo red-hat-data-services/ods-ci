@@ -1,11 +1,23 @@
+*** Settings ***
+Library    String
 *** Keywords ***
 Install RHODS
-  [Arguments]  ${operator_version}    ${cluster_type}
+  [Arguments]  ${operator_version}    ${cluster_type}     ${operator_url}=${EMPTY}
   IF   "${cluster_type}" == "OSD"
       Install RHODS on OSD Cluster    ${operator_version}
   ELSE IF   "${cluster_type}" == "PSI"
+      ${status}    Run Keyword And Return Status    Should Start With    ${operator_version}    v
+      IF  ${status}==True
+           Set Local Variable    ${operator_url}        quay.io/modh/qe-catalog-source:${operator_version}
+      ELSE
+           Should Start With      ${operator_version}     quay.io     msg=you should provide the full build link
+           Set Local Variable    ${operator_url}        ${operator_version}
+      END
+      ${data}     Split String    ${RHODS_INSTALL_REPO}     /
+      ${filename}  Split String     ${data}[-1]            .
+      Set Test Variable     ${filename}       ${filename}[0]
       Run    git clone ${RHODS_INSTALL_REPO}
-      Run    cd ${EXECDIR}/olminstall && ./setup.sh quay.io/modh/qe-catalog-source:${operator_version} >${EXECDIR}/olm.txt  #robocop:disable
+      Run    cd ${EXECDIR}/${filename} && ./setup.sh ${operator_url} > ${EXECDIR}/olm.txt
   ELSE
        FAIL   Provided cluster type is not supported, Kindly check and provide correct cluster type.
   END

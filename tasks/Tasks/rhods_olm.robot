@@ -14,6 +14,7 @@ Can Install RHODS Operator
   Given Selected Cluster Type ${cluster_type}
   When Installing RHODS Operator ${operator_version}
   Then RHODS Operator Should Be Installed
+  [Teardown]   Install Teardonw
 
 Can Uninstall RHODS Operator
   [Tags]  uninstall

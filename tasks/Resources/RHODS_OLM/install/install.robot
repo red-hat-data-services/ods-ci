@@ -12,3 +12,8 @@ RHODS Operator Should Be installed
   ${version} =  Get RHODS Version
   Set Global Variable  ${RHODS_VERSION}  ${version}
   Log  RHODS has been installed  console=yes
+
+Install Teardonw
+  [Documentation]   Remove cloned git repository
+  [Arguments]    ${folder_name}= ${filename}
+  Run   rm -rf ${EXECDIR}/${filename}

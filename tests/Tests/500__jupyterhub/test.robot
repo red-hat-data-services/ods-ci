@@ -59,7 +59,13 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
    Spawn Notebook
-   Wait for JupyterLab Splash Screen  timeout=30
+   Click Button  Access server
+   SeleniumLibrary.Switch Window  NEW
+   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+   ${authorization_required} =  Is Service Account Authorization Required
+   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+   #Wait For JupyterLab Splash Screen  timeout=60
+   Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
    Sleep  3
    Maybe Close Popup
    ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected

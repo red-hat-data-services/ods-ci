@@ -47,9 +47,9 @@ Verify rhods_aggregated_availability Detects Downtime In Component
     ${count}=    Get Length    ${component_delete_result[0]['items']}
     Log    ${count}
     ${component_downtime_start_date}=    
-    ...    Wait Until Keyword Succeeds    1m    1s    Get Availability Value Change Date    0
+    ...    Wait Until Keyword Succeeds    1m    1s    Get Date When Availability Value Matches Expected Value    0
     ${component_downtime_end_date}=    
-    ...    Wait Until Keyword Succeeds    10m    1s    Get Availability Value Change Date    1
+    ...    Wait Until Keyword Succeeds    10m    1s    Get Date When Availability Value Matches Expected Value    1
     Run Keyword And Expect Error    There is a Downtime of * 
     ...    Verify ODS Availability Range   ${component_downtime_start_date}  ${component_downtime_end_date}
     ...    1s    ${component}   

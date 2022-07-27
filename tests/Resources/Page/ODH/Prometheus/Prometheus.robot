@@ -214,8 +214,8 @@ Get Target Endpoints Which Have State Up
     @{links}=    Split String  ${links}  \n
     [Return]    ${links}
     
-Get Availability Value Change Date 
-    [Documentation]    Returns date of last availability value change
+Get Date When Availability Value Matches Expected Value 
+    [Documentation]    Returns date when availability value matches expected value
     ...    Args:
     ...        expected_value: expected availability value
     [Arguments]    ${expected_value}
@@ -237,7 +237,7 @@ Verify ODS Availability
     END
 
 Verify ODS Availability Range
-    [Documentation]    Verifies that there is no downtime in ODS
+    [Documentation]   Verifies that there is no downtime in ODS between start and end dates
     ...    Returns:
     ...        None
     [Arguments]   ${start}   ${end}    ${step}=1s    ${component}=${EMPTY}

@@ -200,7 +200,7 @@ Run Jupyter Notebook For 5 Minutes
 Iterative Image Test
     [Documentation]     Launch the jupyterhub and clone from ${REPO_URL},clean jupyterlab after completing
     [Arguments]    ${image}    ${REPO_URL}    ${NOTEBOOK_TO_RUN}
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
@@ -222,7 +222,7 @@ CleanUp JupyterHub
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required

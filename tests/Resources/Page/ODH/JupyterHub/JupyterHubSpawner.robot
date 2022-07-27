@@ -16,9 +16,11 @@ Library   OpenShiftLibrary
 *** Variables ***
 ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =
 ...   //div[contains(@class,"jsp-app__header__title") and .="Start a notebook server"]
-${JUPYTERHUB_DROPDOWN_XPATH} =
-...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
-${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
+#${JUPYTERHUB_DROPDOWN_XPATH} =
+#...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
+#${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
+${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container size"]
 
 
 *** Keywords ***
@@ -36,7 +38,8 @@ Wait Until JupyterHub Spawner Is Ready
 Select Notebook Image
     [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
     [Arguments]    ${notebook_image}
-    Wait Until Element Is Visible    xpath://div[@class="jsp-spawner__image-options"]
+    #Wait Until Element Is Visible    xpath://div[@class="jsp-spawner__image-options"]
+    Wait Until Element Is Visible    xpath://div[.="Notebook image"]/..
     Wait Until Element Is Visible    xpath://input[contains(@id, "${notebook_image}")]
     Element Should Be Enabled    xpath://input[contains(@id, "${notebook_image}")]
     Click Element    xpath://input[contains(@id, "${notebook_image}")]
@@ -104,7 +107,8 @@ Remove Spawner Environment Variable
    [Arguments]  ${env_var}
    ${env_check} =  Spawner Environment Variable Exists   ${env_var}
    IF  ${env_check}==True
-      Click Element  xpath://input[@id="${env_var}"]/../../../../button
+      #Click Element  xpath://input[@id="${env_var}"]/../../../../button
+      Click Element  xpath://input[@id="${env_var}"]/../../../../div/button
    END
 
 Spawner Environment Variable Exists
@@ -122,10 +126,11 @@ Get Spawner Environment Variable Value
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
-    Click Button  Start Server
-    Wait Until Page Contains  Starting server
-    Wait Until Element Is Visible  id:progress-bar
-    Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
+    Click Button  Start server
+    Wait Until Page Contains  Starting server  15s
+    #Wait Until Element Is Visible  id:progress-bar
+    #Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
+    Wait Until Page Contains  Server ready  ${spawner_timeout}
 
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed
@@ -164,18 +169,26 @@ Spawn Notebook With Arguments  # robocop: disable
             END
          END
          Spawn Notebook    ${spawner_timeout}
-         Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
-         ...    id:progress-bar  ${spawner_timeout}
-         Wait For JupyterLab Splash Screen  timeout=30
+         #Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
+         #...    id:progress-bar  ${spawner_timeout}
+         Click Button  Access server
+         SeleniumLibrary.Switch Window  NEW
+         Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+         ${authorization_required} =  Is Service Account Authorization Required
+         Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+         #Wait For JupyterLab Splash Screen  timeout=60
+         Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
          Maybe Close Popup
          Open New Notebook In Jupyterlab Menu
          Spawned Image Check    ${image}
          ${spawn_fail} =  Has Spawn Failed
          Exit For Loop If  ${spawn_fail} == False
-         Click Element  xpath://span[@id='jupyterhub-logo']
+         #Click Element  xpath://span[@id='jupyterhub-logo']
+         Reload Page
       ELSE
          Sleep  ${retries_delay}
-         Click Element  xpath://span[@id='jupyterhub-logo']
+         #Click Element  xpath://span[@id='jupyterhub-logo']
+         Reload Page
       END
    END
    IF  ${spawn_fail} == True
@@ -194,12 +207,13 @@ Launch JupyterHub Spawner From Dashboard
     [Documentation]  Launches JupyterHub from the RHODS Dashboard
     [Arguments]    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}    ${auth}=${TEST_USER.AUTH_TYPE}
     Menu.Navigate To Page    Applications    Enabled
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${username}  ${password}  ${auth}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
-    Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+    #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
+    Wait Until Page Contains  Start a Notebook server
     Wait Until JupyterHub Spawner Is Ready
 
 Get Spawner Progress Message
@@ -241,6 +255,15 @@ Handle Server Is Stopping
    Sleep  10
    Handle Server Not Running
 
+Control Panel Is Visible
+   [Documentation]  Checks if Control Panel page is open
+   ${control_panel_visible} =  Run Keyword And Return Status  Page Should Contain  Notebook server control panel
+   [Return]  ${control_panel_visible}
+
+Handle Control Panel
+   [Documentation]  Handles control panel page
+   Click Button  Stop notebook server
+
 Fix Spawner Status
    [Documentation]  This keyword handles spawner states that would prevent
    ...              test cases from passing. If a server is already running
@@ -248,15 +271,18 @@ Fix Spawner Status
    ...              this keyword will bring us back to the actual spawner.
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    IF  ${spawner_visible}!=True
-      ${SNR_visible} =  Server Not Running Is Visible
-      ${SMS_visible} =  Start My Server Is Visible
-      ${SIS_visible} =  Server Is Stopping Is Visible
-      IF  ${SIS_visible}==True
-         Handle Server Is Stopping
-      ELSE IF  ${SNR_visible}==True
-         Handle Server Not Running
-      ELSE IF  ${SMS_visible}==True
-         Handle Start My Server
+      # ${SNR_visible} =  Server Not Running Is Visible
+      # ${SMS_visible} =  Start My Server Is Visible
+      # ${SIS_visible} =  Server Is Stopping Is Visible
+      # IF  ${SIS_visible}==True
+      #    Handle Server Is Stopping
+      # ELSE IF  ${SNR_visible}==True
+      #    Handle Server Not Running
+      # ELSE IF  ${SMS_visible}==True
+      #    Handle Start My Server
+      ${control_panel_visible} =  Control Panel Is Visible
+      IF  ${control_panel_visible}==True
+         Handle Control Panel
       ELSE
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
@@ -317,7 +343,8 @@ Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
    Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawne
-   Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+   #Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
+   Click Element  //button[@aria-label="Options menu"]
    Wait Until Page Contains Element         xpath://span[.="${container_size}"]/../..  timeout=10
    ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
    ${l_data}   Convert To Lower Case    ${data}
@@ -421,7 +448,8 @@ Get List Of All Available Container Size
     Wait Until Page Contains    Container size    timeout=30
     ...    error=Container size selector is not present in JupyterHub Spawner
     ${size}    Create List
-    Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
+    #Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
+    Click Element  xpath://button[@aria-label="Options menu"][1]
     ${link_elements}   Get WebElements  xpath://*[@class="pf-c-select__menu-item-main"]
     FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
           ${text}      Get Text    ${ext_link}
@@ -455,7 +483,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Wait for RHODS Dashboard to Load
-        Launch JupyterHub From RHODS Dashboard Link
+        Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required
@@ -473,7 +501,7 @@ CleanUp JupyterHub For N users
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Wait for RHODS Dashboard to Load
-        Launch JupyterHub From RHODS Dashboard Link
+        Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required

@@ -5,7 +5,6 @@ Library             Collections
 Library             Process
 Library             RequestsLibrary
 
-
 *** Keywords ***
 Run Query
     [Documentation]    Runs a prometheus query, obtaining the current value. More info at:
@@ -217,6 +216,17 @@ Get Target Endpoints Which Have State Up
     ${links}=    Replace String    ${links}    "    ${EMPTY}
     @{links}=    Split String  ${links}  \n
     [Return]    ${links}
+    
+Get Date When Availability Value Matches Expected Value 
+    [Documentation]    Returns date when availability value matches expected value
+    ...    Args:
+    ...        expected_value: expected availability value
+    [Arguments]    ${expected_value}
+    ${resp}=    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}   rhods_aggregate_availability
+    ${date}=    Convert Date    ${resp.json()["data"]["result"][0]["value"][0]}    epoch
+    ${value}=    Set Variable    ${resp.json()["data"]["result"][0]["value"][1]} 
+    Should Match    ${value}    ${expected_value}
+    [Return]    ${date}
 
 Verify ODS Availability
     [Documentation]    Verifies that there is no downtime in ODS
@@ -228,3 +238,55 @@ Verify ODS Availability
     FOR    ${value}    IN    @{values}
         Should Not Be Equal As Strings    ${value}[1]    0
     END
+
+Verify ODS Availability Range
+    [Documentation]   Verifies that there is no downtime in ODS between start and end dates
+    ...    Returns:
+    ...        None
+    [Arguments]   ${start}   ${end}    ${step}=1s    ${component}=${EMPTY}
+    IF    "${component}" == "${EMPTY}"
+        Log   Component Empty
+    ELSE IF    "${component}" == "jupyterhub"
+        Set Local Variable    ${component}   instance=~"jupyterhub.*"
+    ELSE IF    "${component}" == "rhods-dashboard"
+        Set Local Variable    ${component}   instance=~"rhods-dashboard.*"
+    ELSE IF    "${component}" == "combined"
+        Set Local Variable    ${component}   instance="combined"
+    ELSE
+        Fail   msg="Unknown component: ${component} (expected: jupyterhub, rhods-dashboard, combined)"
+    END  
+
+    &{expression}=    Create Dictionary    query=rhods_aggregate_availability{${component}}    start=${start}    end=${end}    step=${step}   
+    ${resp}=    Run Query Range        &{expression}
+    @{values}=    Set Variable    ${resp.json()["data"]["result"][0]["values"]}
+    @{downtime}=    Create List
+    FOR    ${value}    IN    @{values}
+        IF    ${value[1]} == 0
+            Append To List    ${downtime}    ${value[0]}
+        END
+    END
+    Log Many   @{downtime}
+    IF    "@{downtime}" != "${EMPTY}"
+        ${downtime_length} =    Get Length    ${downtime}
+        IF   ${downtime_length} == 0
+            Log    message=ODS is not down ${values}
+        ELSE IF   ${downtime_length} == 1
+            Fail  msg=There is a Downtime at ${downtime-duration}[0] in ODS
+        ELSE
+            ${downtime_lower_value} =    Convert Date    ${downtime}[0]       
+            ${downtime_upper_value} =    Convert Date    ${downtime}[-1]
+            ${downtime-duration} =  Subtract Date From Date    ${downtime_upper_value}    ${downtime_lower_value}    compact
+            Fail    msg=There is a Downtime of ${downtime-duration} in ODS
+        END
+    END
+    [Return]   ${values}
+
+
+Run Query Range
+    [Documentation]    Runs a Prometheus query using the API
+    [Arguments]   &{pm_query}
+    ${pm_headers}=    Create Dictionary    Authorization=Bearer ${RHODS_PROMETHEUS_TOKEN}
+    ${resp}=    RequestsLibrary.GET    url=${RHODS_PROMETHEUS_URL}/api/v1/query_range   params=&{pm_query}
+    ...    headers=${pm_headers}    verify=${False}
+    Request Should Be Successful
+    [Return]    ${resp}

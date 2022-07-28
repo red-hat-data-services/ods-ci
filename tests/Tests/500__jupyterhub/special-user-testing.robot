@@ -30,16 +30,14 @@ Test Special Usernames
 
 *** Keywords ***
 Special User Testing Suite Setup
-  Set Library Search Order  SeleniumLibrary
-  RHOSi Setup
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
 
 Login Verify Logout
     [Arguments]  ${username}  ${password}  ${auth}
-    Login To Jupyterhub  ${username}  ${password}  ${auth}
-    ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service Account
+    Logout From RHODS Dashboard
+    Login To RHODS Dashboard  ${username}  ${password}  ${auth}
     User Is Allowed
+    Page Should Contain  ${username}
     Capture Page Screenshot  special-user-login-{index}.png
-    Logout Via Button
-    Login Via Button
 

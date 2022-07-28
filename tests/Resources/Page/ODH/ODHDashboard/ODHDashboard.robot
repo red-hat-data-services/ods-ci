@@ -69,7 +69,7 @@ Logout From RHODS Dashboard
     # Another option for the logout button
     #${user} =  Get Text  xpath:/html/body/div/div/header/div[2]/div/div[3]/div/button/span[1]
     #Click Element  xpath://span[.="${user}"]/..
-    Click Button  xpath://div[@class="pf-c-page__header-tools"]/div/div[@class="pf-c-page__header-tools-item"][3]//button[@id="toggle-id"]
+    Click Button  xpath:(//button[@id="toggle-id"])[2]
     Wait Until Page Contains Element  xpath://a[.="Log out"]
     Click Element  xpath://a[.="Log out"]
     Wait Until Page Contains  Log in with OpenShift

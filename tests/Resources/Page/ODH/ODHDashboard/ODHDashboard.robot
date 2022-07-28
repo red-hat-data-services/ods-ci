@@ -62,6 +62,18 @@ Login To RHODS Dashboard
    ${authorize_service_account} =  Is rhods-dashboard Service Account Authorization Required
    Run Keyword If  ${authorize_service_account}  Authorize rhods-dashboard service account
 
+Logout From RHODS Dashboard
+    [Documentation]  Logs out from the current user in the RHODS dashboard
+    ...    This will reload the page and show the `Log in with OpenShift` page
+    ...    so you want to use `Login to RHODS Dashboard` after this
+    # Another option for the logout button
+    #${user} =  Get Text  xpath:/html/body/div/div/header/div[2]/div/div[3]/div/button/span[1]
+    #Click Element  xpath://span[.="${user}"]/..
+    Click Button  xpath:(//button[@id="toggle-id"])[2]
+    Wait Until Page Contains Element  xpath://a[.="Log out"]
+    Click Element  xpath://a[.="Log out"]
+    Wait Until Page Contains  Log in with OpenShift
+
 Wait for RHODS Dashboard to Load
   #[Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
   # Temporary workaround to use ODH cluster

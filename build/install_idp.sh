@@ -25,7 +25,7 @@ perform_ocm_login(){
 
 function generate_rand_string(){
   sleep 2
-  date +%s | sha256sum | base64 | head -c 32
+  date +%s | sha256sum | base64 | head -c 64
 }
 function generates_ldap_creds(){
   users_string_adm=""
@@ -151,8 +151,8 @@ install_identity_provider(){
   add_special_users_to_groups rhods-users  robot-special
 
   # wait for IdP to appear in the login page
-  echo "sleeping 90sec to wait for IDPs to appear in the OCP login page..."
-  sleep 90
+  echo "sleeping 120sec to wait for IDPs to appear in the OCP login page..."
+  sleep 120
 }
 
 function check_installation(){

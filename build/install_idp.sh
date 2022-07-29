@@ -24,6 +24,7 @@ perform_ocm_login(){
 }
 
 function generate_rand_string(){
+  sleep 2
   date +%s | sha256sum | base64 | head -c 32
 }
 function generates_ldap_creds(){

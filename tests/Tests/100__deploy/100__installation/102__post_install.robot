@@ -142,8 +142,8 @@ Verify Pytorch And Tensorflow Can Be Spawned
     ...       Tier1
     ...       ODS-480  ODS-481
     Wait Until All Builds Are Complete    namespace=redhat-ods-applications
-    Verify Image Can Be Spawned    image=pytorch  size=Default
-    Verify Image Can Be Spawned    image=tensorflow  size=Default
+    Verify Image Can Be Spawned    image=pytorch  size=Small
+    Verify Image Can Be Spawned    image=tensorflow  size=Small
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy

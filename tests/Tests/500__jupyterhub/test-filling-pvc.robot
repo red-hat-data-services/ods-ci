@@ -41,7 +41,7 @@ Server Setup
     [Documentation]    Suite Setup
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Default
+    Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Small
 
 
 Cell Error Message Should Be

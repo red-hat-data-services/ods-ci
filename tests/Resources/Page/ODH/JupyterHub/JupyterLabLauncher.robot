@@ -112,7 +112,7 @@ Stop JupyterLab Notebook Server
   #   Capture Page Screenshot
   # END
   SeleniumLibrary.Switch Window  Red Hat OpenShift Data Science
-  #Click Element  xpath://button[@aria-label="Close"]
+  Run Keyword And Ignore Error    Click Element  xpath://button[@aria-label="Close"]
   SeleniumLibrary.Wait Until Page Contains     Stop notebook server
   Click Button  Stop notebook server
 

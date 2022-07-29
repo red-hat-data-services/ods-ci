@@ -8,7 +8,7 @@ perform_oc_logic(){
 }
 
 perform_ocm_login(){
-  echo "----> Performing log in OCM\n"
+  echo "---> Performing log in OCM\n"
   if [ -n "${OCM_TOKEN}" ]
     then
         echo "ocm envirnment: ${OCM_ENV}"
@@ -100,7 +100,7 @@ function add_special_users_to_groups(){
 
 
 install_identity_provider(){
-  echo "----> Installing the necessary IDPs\n"
+  echo "---> Installing the required IDPs\n"
 
   generates_ldap_creds  robot
 
@@ -155,7 +155,7 @@ install_identity_provider(){
 }
 
 function check_installation(){
-  echo "Looking for LDAP and HTPASSWD already present in the cluster...\n"
+  echo "---> Looking for LDAP and HTPASSWD already present in the cluster...\n"
   ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
   echo $ocm_clusterid
   while read -r line; do

@@ -1,12 +1,14 @@
 #!/bin/bash
 perform_oc_logic(){
-  for i in {1..4}
+  echo "----> Performing log in the cluster using oc CLI command\n"
+  for i in {1..5}
     do
-      oc login $1 --username $2 --password $3 || (echo "Login failed $i times. Trying again in 30 seconds (max 3 times)." && sleep 30)
+      oc login $1 --username $2 --password $3 || (echo "Login failed $i times. Trying again in 30 seconds (max 5 times)." && sleep 30)
     done
 }
 
 perform_ocm_login(){
+  echo "----> Performing log in OCM\n"
   if [ -n "${OCM_TOKEN}" ]
     then
         echo "ocm envirnment: ${OCM_ENV}"
@@ -16,7 +18,7 @@ perform_ocm_login(){
                 ocm login --token=${OCM_TOKEN}
         fi
     else
-        echo -e "\033[0;33m OCM Token not set \033[0m"
+        echo -e "\033[0;33m OCM Token not set. Please run again and set the required token \033[0m"
         exit 0
   fi
 }
@@ -98,6 +100,7 @@ function add_special_users_to_groups(){
 
 
 install_identity_provider(){
+  echo "----> Installing the necessary IDPs\n"
 
   generates_ldap_creds  robot
 
@@ -152,7 +155,7 @@ install_identity_provider(){
 }
 
 function check_installation(){
-  echo Looking for LDAP and HTPASSWD already present in the cluster...
+  echo "Looking for LDAP and HTPASSWD already present in the cluster...\n"
   ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
   echo $ocm_clusterid
   while read -r line; do

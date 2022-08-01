@@ -103,7 +103,7 @@ function add_special_users_to_groups(){
 install_identity_provider(){
   echo "---> Installing the required IDPs"
 
-  generates_ldap_creds  robot
+  generates_ldap_creds  ldap
 
   # create htpasswd idp and user
   echo $OC_HOST
@@ -144,11 +144,11 @@ install_identity_provider(){
   oc adm groups new rhods-noaccess
   oc adm groups new dedicated-admins
 
-  add_users_to_groups rhods-admins robot-adm
-  add_users_to_groups dedicated-admins robot-adm
-  add_users_to_groups rhods-users robot-usr
-  add_users_to_groups rhods-noaccess robot-noaccess
-  add_special_users_to_groups rhods-users  robot-special
+  add_users_to_groups rhods-admins ldap-adm
+  add_users_to_groups dedicated-admins ldap-adm
+  add_users_to_groups rhods-users ldap-usr
+  add_users_to_groups rhods-noaccess ldap-noaccess
+  add_special_users_to_groups rhods-users  ldap-special
 
   # wait for IdP to appear in the login page
   echo "sleeping 120sec to wait for IDPs to appear in the OCP login page..."

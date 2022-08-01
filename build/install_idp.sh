@@ -34,6 +34,7 @@ function generates_ldap_creds(){
   users_string_special=""
   rand_string=""
   rand=$(generate_rand_string)
+  export RAND_LDAP=$rand
   echo Random pw: $rand
   # generate users and pw (admin, user, noaccess)
   for i in {1..20}
@@ -69,7 +70,6 @@ function generates_ldap_creds(){
 
   # update test-variables.yml file with the test users' creds
   export PREFIX=$1
-  export RAND_LDAP=$rand
   yq --inplace '.TEST_USER.AUTH_TYPE="ldap-provider-qe"' test-variables.yml
   yq --inplace '.TEST_USER.USERNAME=env(PREFIX)+"-adm1"' test-variables.yml
   yq --inplace '.TEST_USER.PASSWORD=env(RAND_LDAP)' test-variables.yml

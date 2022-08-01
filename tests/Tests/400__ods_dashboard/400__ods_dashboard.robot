@@ -315,6 +315,15 @@ Verify Dashboard Pod Is Not Getting Restarted
     ${pod_names}    Get POD Names    redhat-ods-applications    app=rhods-dashboard
     Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-applications
 
+Verify Switcher to Masterhead
+    [Tags]    ODS-771
+    ...       Tier2
+    [Documentation]    Checks the link in switcher and also check the link of OCM in staging
+    Go To RHODS Dashboard
+    Click Button    //button[@class="pf-c-app-launcher__toggle"]
+    Check Application Switcher Links To Openshift Console
+    Check Application Switcher Links To Openshift Cluster Manager
+
 
 *** Keywords ***
 Set Variables For Group Testing
@@ -724,3 +733,31 @@ Check And Uninstall Operator In Openshift
         END
     END
     Close All Browsers
+
+Check Application Switcher Links To Openshift Cluster Manager
+    [Documentation]    Checks for HTTP status of OCM link in application switcher
+    ${cluster_id}=    Get Cluster ID
+    ${cluster_id}=    Remove String    ${cluster_id}    "
+    ${ocm_staging_link}=    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
+    ${list_of_links}=    Get Links From Switcher
+    ${ocm_prod_link}=    Set Variable    ${list_of_links}[1]
+    ${cluster_env}=    Fetch ODS Cluster Environment
+    ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
+    IF    "${cluster_env}" == "stage"
+        Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
+        Go To    ${ocm_staging_link}
+        Login To OCM
+        Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
+    ELSE
+        Check HTTP Status Code    ${ocm_prod_link}
+        Go To    ${ocm_prod_link}
+        Login To OCM
+        Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
+    END
+
+Check Application Switcher Links To Openshift Console
+    [Documentation]    Checks the HTTP status of OpenShift Console
+    ${list_of_links}=    Get Links From Switcher
+    ${status}=    Check HTTP Status Code    ${list_of_links}[0]
+    Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
+    Should Be Equal    ${status}    ${200}

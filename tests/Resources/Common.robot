@@ -93,9 +93,9 @@ Wait Until HTTP Status Code Is
 
 Check HTTP Status Code
     [Documentation]     Verifies Status Code of URL Matches Expected Status Code
-    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20
+    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20   ${verify_ssl}=${True}
     ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}  verify=${verify_ssl}
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 
@@ -143,3 +143,16 @@ Clean Resource YAML Before Creating It
     Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
     [Return]   ${clean_yaml_data}
 
+Wait Until OCM Cluster Page Is Loaded
+    [Documentation]     wait until the OCM page loads for ${cluster_name}
+    [Arguments]    ${cluster_name}
+    Wait Until Element Is Visible    //div[@class="pf-l-split__item"]/h1
+    Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
+
+Login To OCM
+    [Documentation]    Login to the OpenShift Cluster Manager
+    Input Text    //div[@class="pf-c-form__group"]/input    ${SSO.USERNAME}
+    Click Button   //*[@id="login-show-step2"]
+    Sleep   1s
+    Input Text    //*[@id="password"]    ${SSO.PASSWORD}
+    Click Button    //*[@id="rh-password-verification-submit-button"]

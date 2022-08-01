@@ -1,9 +1,9 @@
 #!/bin/bash
 perform_oc_logic(){
   echo "----> Performing log in the cluster using oc CLI command"
-  for i in {1..5}
+  for i in {1..7}
     do
-      oc login $1 --username $2 --password $3 || (echo "Login failed $i times. Trying again in 30 seconds (max 5 times)." && sleep 30)
+      oc login $1 --username $2 --password $3 || (echo "Login failed $i times. Trying again in 30 seconds (max 7 times)." && sleep 30)
     done
 }
 

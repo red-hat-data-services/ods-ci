@@ -746,14 +746,12 @@ Check Application Switcher Links To Openshift Cluster Manager
     IF    "${cluster_env}" == "stage"
         Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
         Go To    ${ocm_staging_link}
-        Login To OCM
-        Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
     ELSE
         Check HTTP Status Code    ${ocm_prod_link}
         Go To    ${ocm_prod_link}
-        Login To OCM
-        Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
     END
+    Login To OCM
+    Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
 
 Check Application Switcher Links To Openshift Console
     [Documentation]    Checks the HTTP status of OpenShift Console

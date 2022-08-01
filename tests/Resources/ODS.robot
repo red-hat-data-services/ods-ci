@@ -398,3 +398,9 @@ Delete RHODS Config Map
     ...                corresponding argument
     [Arguments]     ${name}  ${namespace}=redhat-ods-applications
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
+
+Wait OCM Splash Page
+   [Documentation]  Waits until the splash page (spinner, loading symbol) finishes to run
+   Wait Until Page Contains Element    xpath://span[contains(@class, 'ins-c-spinner')]   timeout=15
+   Wait Until Page Does Not Contain Element    xpath://span[contains(@class, 'ins-c-spinner')]   timeout=20
+   Sleep    1

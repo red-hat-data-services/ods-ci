@@ -6,6 +6,7 @@ Library   RequestsLibrary
 Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource  ODS.robot
 Resource  RHOSi.resource
 
 
@@ -146,7 +147,7 @@ Clean Resource YAML Before Creating It
 Wait Until OCM Cluster Page Is Loaded
     [Documentation]     wait until the OCM page loads for ${cluster_name}
     [Arguments]    ${cluster_name}
-    Wait Until Element Is Visible    //div[@class="pf-l-split__item"]/h1
+    Wait OCM Splash Page
     Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
 
 Login To OCM

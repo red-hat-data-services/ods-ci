@@ -99,6 +99,12 @@ function add_special_users_to_groups(){
     done
   }
 
+function add_users_to_dedicated_admins(){
+  for i in {1..20}
+    do
+      ocm create user $1$i --cluster $CLUSTER_NAME --group=dedicated-admins
+    done
+}
 
 install_identity_provider(){
   echo "---> Installing the required IDPs"
@@ -145,7 +151,8 @@ install_identity_provider(){
   oc adm groups new dedicated-admins
 
   add_users_to_groups rhods-admins ldap-adm
-  add_users_to_groups dedicated-admins ldap-adm
+  # add_users_to_groups dedicated-admins ldap-adm
+  add_users_to_dedicated_admins  ldap-adm
   add_users_to_groups rhods-users ldap-usr
   add_users_to_groups rhods-noaccess ldap-noaccess
   add_special_users_to_groups rhods-users  ldap-special

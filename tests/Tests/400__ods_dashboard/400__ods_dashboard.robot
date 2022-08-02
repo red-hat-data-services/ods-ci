@@ -748,9 +748,13 @@ Check Application Switcher Links To Openshift Cluster Manager
         Go To    ${ocm_staging_link}
     ELSE
         Check HTTP Status Code    ${ocm_prod_link}
-        Go To    ${ocm_prod_link}
+        Open Application Switcher Menu
+        Click Link    xpath://a[span[text()="OpenShift Cluster Manager"]]
+        # Go To    ${ocm_prod_link}
     END
+    Sleep  1
     Login To OCM
+    Reload Page
     Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
 
 Check Application Switcher Links To Openshift Console

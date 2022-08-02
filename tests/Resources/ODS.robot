@@ -401,6 +401,6 @@ Delete RHODS Config Map
 
 Wait OCM Splash Page
    [Documentation]  Waits until the splash page (spinner, loading symbol) finishes to run
-   Wait Until Page Contains Element    xpath://div[contains(@class, 'ins-c-spinner')]   timeout=15
-   Wait Until Page Does Not Contain Element    xpath://div[contains(@class, 'ins-c-spinner')]   timeout=20
-   Sleep    1
+   Wait Until Page Contains Element    xpath://*[contains(@class, 'spinner')]   timeout=60
+   Wait Until Page Does Not Contain Element    xpath://*[contains(@class, 'spinner')]   timeout=60
+   Sleep    3

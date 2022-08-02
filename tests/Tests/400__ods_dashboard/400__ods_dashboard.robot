@@ -320,7 +320,7 @@ Verify Switcher to Masterhead
     ...       Tier2
     [Documentation]    Checks the link in switcher and also check the link of OCM in staging
     Go To RHODS Dashboard
-    Click Button    //button[@class="pf-c-app-launcher__toggle"]
+    Open Application Switcher Menu
     Check Application Switcher Links To Openshift Console
     Check Application Switcher Links To Openshift Cluster Manager
 
@@ -745,12 +745,11 @@ Check Application Switcher Links To Openshift Cluster Manager
     ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
     IF    "${cluster_env}" == "stage"
         Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
-        Go To    ${ocm_staging_link}
+        Go To ${ocm_staging_link}
     ELSE
         Check HTTP Status Code    ${ocm_prod_link}
-        Open Application Switcher Menu
-        Click Link    xpath://a[span[text()="OpenShift Cluster Manager"]]
-        # Go To    ${ocm_prod_link}
+        Click Link    xpath://a[*[text()="OpenShift Cluster Manager"]]
+        Switch Window   NEW
     END
     Sleep  1
     Login To OCM

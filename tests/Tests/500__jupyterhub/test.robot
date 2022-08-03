@@ -59,9 +59,9 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
    Spawn Notebook
-   Click Button  Access server
-   SeleniumLibrary.Switch Window  NEW
-   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+   #Click Button  Access server
+   #SeleniumLibrary.Switch Window  NEW
+   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
    #Wait For JupyterLab Splash Screen  timeout=60

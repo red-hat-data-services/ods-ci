@@ -171,9 +171,9 @@ Spawn Notebook With Arguments  # robocop: disable
          Spawn Notebook    ${spawner_timeout}
          #Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
          #...    id:progress-bar  ${spawner_timeout}
-         Click Button  Access server
-         SeleniumLibrary.Switch Window  NEW
-         Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+         #Click Button  Access server
+         #SeleniumLibrary.Switch Window  NEW
+         Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
          ${authorization_required} =  Is Service Account Authorization Required
          Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
          #Wait For JupyterLab Splash Screen  timeout=60

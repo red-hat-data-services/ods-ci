@@ -95,7 +95,7 @@ Start JupyterLab Notebook Server
 
 Open JupyterLab Control Panel
   Open With JupyterLab Menu  File  Hub Control Panel
-  Switch Window  JupyterHub
+  #Switch Window  JupyterHub
 
 Stop JupyterLab Notebook Server
   # Open JupyterLab Control Panel
@@ -111,8 +111,10 @@ Stop JupyterLab Notebook Server
   #   Wait Until Page Contains  Start My Server  timeout=120
   #   Capture Page Screenshot
   # END
-  SeleniumLibrary.Switch Window  Red Hat OpenShift Data Science
-  Run Keyword And Ignore Error    Click Element  xpath://button[@aria-label="Close"]
+  #SeleniumLibrary.Switch Window  Red Hat OpenShift Data Science
+  Open JupyterLab Control Panel
+  SeleniumLibrary.Switch Window    NEW
+  #Run Keyword And Ignore Error    Click Element  xpath://button[@aria-label="Close"]
   SeleniumLibrary.Wait Until Page Contains     Stop notebook server
   Click Button  Stop notebook server
 
@@ -171,8 +173,8 @@ Clean Up Server
     Maybe Close Popup
     ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
     ${container_name_nb} =  Get Substring  ${notebook_pod_name}  start=0  end=-2
-    #${ls_server} =  Run Command In Container    rhods-notebooks    ${notebook_pod_name}    ls
-    ${ls_server} =  Run Command In Container    redhat-ods-applications    ${notebook_pod_name}    ls    ${container_name_nb}
+    ${ls_server} =  Run Command In Container    rhods-notebooks    ${notebook_pod_name}    ls    ${container_name_nb}
+    #${ls_server} =  Run Command In Container    redhat-ods-applications    ${notebook_pod_name}    ls    ${container_name_nb}
     Should Match    "${ls_server}"    "${EMPTY}"
 
 Get User Notebook Pod Name
@@ -203,13 +205,13 @@ Clean Up User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
-      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
-      #${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
-      ${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
+      ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
+      #${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
@@ -230,11 +232,11 @@ Delete Folder In User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
-      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
 
-      #${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
-      ${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- rm -fr /opt/app-root/src/${folder}
+      ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
+      #${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)

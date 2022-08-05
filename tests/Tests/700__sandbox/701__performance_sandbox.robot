@@ -91,5 +91,5 @@ Performance Suite Setup
      FOR    ${isv}    IN    @{ISV_DATA.values()}
            Install ISV By Name    ${isv[0]}      ${isv[1]}
      END
-     Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
+    # Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
      Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git

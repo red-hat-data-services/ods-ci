@@ -19,7 +19,17 @@ Uninstall RHODS In OSD
   Trigger RHODS Uninstall 
     
 Uninstall RHODS In PSI
-  Fail  Not implemented yet
+      ${return_code}    ${output}	  Run And Return Rc And Output   git clone ${RHODS_INSTALL_REPO}
+      Log   ${output}    console=yes
+      Should Be Equal As Integers	${return_code}	 0
+      ${git_folder} =  Get Regexp Matches    ${output}	   Cloning into \'(.*?)\'    1
+      Log   ${git_folder}[0]
+      ${return_code}    ${output}    Run And Return Rc And Output   (cd ${git_folder}[0]; ./cleanup.sh); wait $!; sleep 60   #robocop:disable
+      Log    ${output}    console=yes
+      Should Be Equal As Integers	${return_code}	 0
+      ${return_code}	  ${output}    Run And Return Rc And Output   rm -rf ${git_folder}[0]
+      Log    ${output}    console=yes
+      Should Be Equal As Integers	  ${return_code}	 0
 
 RHODS Operator Should Be Uninstalled
   Verify RHODS Uninstallation

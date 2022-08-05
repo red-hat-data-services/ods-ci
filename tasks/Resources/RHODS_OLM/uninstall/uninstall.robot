@@ -20,14 +20,15 @@ Uninstall RHODS In OSD
     
 Uninstall RHODS In PSI
       ${return_code}    ${output}	  Run And Return Rc And Output   git clone ${RHODS_INSTALL_REPO}
-      Log   ${output}
+      Log   ${output}    console=yes
       Should Be Equal As Integers	${return_code}	 0
       ${git_folder} =  Get Regexp Matches    ${output}	   Cloning into \'(.*?)\'    1
       Log   ${git_folder}[0]
       ${return_code}    ${output}    Run And Return Rc And Output   (cd ${git_folder}[0]; ./cleanup.sh); wait $!; sleep 60   #robocop:disable
       Should Be Equal As Integers	${return_code}	 0
+      Log    ${output}    console=yes
       ${return_code}	  ${output}    Run And Return Rc And Output   rm -rf ${git_folder}[0]
-      Log    ${output}
+      Log    ${output}    console=yes
       Should Be Equal As Integers	  ${return_code}	 0
 
 RHODS Operator Should Be Uninstalled

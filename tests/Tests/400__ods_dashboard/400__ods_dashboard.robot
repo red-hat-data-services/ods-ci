@@ -730,6 +730,6 @@ Check And Uninstall Operator In Openshift
     Close All Browsers
 
 Documentation Links Should Be Equal To The Expected Ones
+    [Documentation]   Compare the fetched links from Dashboard with the expected ones
     [Arguments]     ${actual_links}     ${expected_links}
-
     Lists Should Be Equal   ${actual_links}    ${expected_links}    ignore_order=True

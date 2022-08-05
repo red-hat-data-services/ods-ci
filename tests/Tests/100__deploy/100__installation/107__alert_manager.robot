@@ -2,6 +2,10 @@
 Documentation     Post install test cases that verify OCP Alert Manager resources and objects
 Library           OpenShiftLibrary
 Resource          ../../../Resources/ODS.robot
+Resource          ../../../Resources/RHOSi.resource
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
+
 
 *** Test Cases ***
 Verify Alert Manager Is Shipped And Enabled Within ODS
@@ -21,8 +25,8 @@ Verify Alert Manager Is Shipped And Enabled Within ODS
     OpenShift Resource Field Value Should Be Equal As Strings    spec.to.name    alertmanager    @{alertmanager_routes_info}
     OpenShift Resource Field Value Should Match Regexp    spec.host    ^(alertmanager-redhat-ods-monitoring.*)    @{alertmanager_routes_info}
 
-*** Keywords ***
 
+*** Keywords ***
 Fetch Alert Manager Services Info
     [Documentation]    Fetch information from Alert Manager services
     ...    Args:

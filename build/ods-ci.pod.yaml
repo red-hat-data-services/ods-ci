@@ -25,11 +25,11 @@ spec:
   containers:
     - resources:
         limits:
-          cpu: 300m
-          memory: 500Mi
+          cpu: 2
+          memory: 2G
         requests:
-          cpu: 150m
-          memory: 250Mi
+          cpu: 1
+          memory: 800M
     - image: <INSERT URL TO YOUR BUILT IMAGE>
       imagePullPolicy: Always
       name: ods-ci-testrun

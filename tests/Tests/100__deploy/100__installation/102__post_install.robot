@@ -1,24 +1,40 @@
 *** Settings ***
 Documentation       Post install test cases that mainly verify OCP resources and objects
-
 Library             String
 Library             OperatingSystem
 Library             OpenShiftCLI
 Library             OpenShiftLibrary
 Library             ../../../../libs/Helpers.py
+Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Page/ODH/Grafana/Grafana.resource
-
-Suite Setup         RHOSi Setup
-
 Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../Resources/Common.robot
+Suite Setup         RHOSi Setup
+Suite Teardown      RHOSi Teardown
 
 *** Test Cases ***
+
+Verify Dashbord has no message with NO Component Found
+    [Tags]  Sanity
+    ...     Tier1
+    ...     ODS-1493
+    [Documentation]   Verify "NO Component Found" message dosen't display
+    ...     on Rhods Dashbord page with bad subscription present in openshift
+    [Setup]   Test Setup For Rhods Dashboard
+    Oc Apply  kind=Subscription  src=tests/Tests/100__deploy/100__installation/bad_subscription.yaml
+    Delete Dashboard Pods And Wait Them To Be Back
+    Reload Page
+    Menu.Navigate To Page    Applications    Explore
+    Sleep    10s
+    Page Should Not Contain    No Components Found
+    Capture Page Screenshot
+    [Teardown]  Close All Browsers
+
 Verify Traefik Deployment
     [Documentation]  Verifies RHODS Traefik deployment
     [Tags]    Sanity
@@ -47,13 +63,13 @@ Verify GPU Operator Deployment  # robocop: disable
     # NS
     Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-nvidia-gpu-addon
     # Node-Feature-Discovery Operator
-    Verify Operator Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
-    ...    operator_name=nfd.v*
+    Verify Operator Status  label=operators.coreos.com/ose-nfd.redhat-nvidia-gpu-addon
+    ...    operator_name=ose-nfd.*
     # GPU Operator
     Verify Operator Status  label=operators.coreos.com/gpu-operator-certified.redhat-nvidia-gpu-addon
     ...    operator_name=gpu-operator-certified.v*
     # nfd-controller-manager
-    Verify Deployment Status  label=operators.coreos.com/nfd.redhat-nvidia-gpu-addon
+    Verify Deployment Status  label=operators.coreos.com/ose-nfd.redhat-nvidia-gpu-addon
     ...    dname=nfd-controller-manager
     # nfd-master
     Verify DaemonSet Status  label=app=nfd-master  dsname=nfd-master
@@ -123,10 +139,11 @@ Verify Oath-Proxy Image Is fetched From CPaaS
 Verify Pytorch And Tensorflow Can Be Spawned
     [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
     [Tags]    Sanity
+    ...       Tier1
     ...       ODS-480  ODS-481
-    Verify Cuda Builds Are Completed
-    Verify Image Can Be Spawned  image=pytorch  size=Default
-    Verify Image Can Be Spawned  image=tensorflow  size=Default
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications
+    Verify Image Can Be Spawned    image=pytorch  size=Default
+    Verify Image Can Be Spawned    image=tensorflow  size=Default
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
@@ -168,10 +185,9 @@ Verify RHODS Release Version Number
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 
 Verify Users Can Update Notification Email After Installing RHODS With The AddOn Flow
-    [Documentation]    Vrifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
+    [Documentation]    Verifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
     [Tags]    Tier2
     ...       ODS-673
-    ...       ProductBug
     ...       Deployment-AddOnFlow
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL
@@ -214,23 +230,48 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
     [Tags]    Tier2
     ...       ODS-699
+    ...       Execution-Time-Over-15m
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
+Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
+    [Tags]  Tier2
+    ...     ODS-1556
+    ...     ProductBug
+    [Documentation]   Verify "NO Component Found" message dosen't display
+    ...     on Rhods Dashbord page with data value empty for rhods-enabled-applications-config
+    ...     configmap in openshift
+    ...     ProductBug:RHODS-4308
+    [Setup]   Test Setup For Rhods Dashboard
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=rhods-enabled-applications-config    src={"data":null}   #robocop: disable
+    Delete Dashboard Pods And Wait Them To Be Back
+    Reload Page
+    Menu.Navigate To Page    Applications   Enabled
+    Sleep    5s    msg=Wait for page to load
+    Run Keyword And Continue On Failure   Page Should Not Contain    No Components Found
+    Menu.Navigate To Page    Applications   Explore
+    Sleep    5s    msg=Wait for page to load
+    Run Keyword And Continue On Failure   Page Should Not Contain    No Components Found
+    [Teardown]   Test Teardown For Configmap Changed On RHODS Dashboard
+
+
 *** Keywords ***
-Verify Cuda Builds Are Completed
-    [Documentation]    Verify All Cuda Builds have status as Complete
-    ${Pods} =    Run    oc get build -n redhat-ods-applications
-    @{builds} =    Split String    ${Pods}    \n
-    ${len} =    Get Length    ${builds}
-    FOR    ${ind}    IN RANGE    1    ${len}
-        @{pre} =    Split String    ${builds}[${ind}]
-        ${is_cuda_build} =   Run Keyword And Return Status   Should Contain    ${pre}[0]    cuda
-        IF    ${is_cuda_build} == True
-            Should Be Equal As Strings    ${pre}[3]    Complete
-        END
-        Should Be Equal As Strings    ${pre}[3]    Complete
-    END
+Delete Dashboard Pods And Wait Them To Be Back
+    [Documentation]    Delete Dashboard Pods And Wait Them To Be Back
+    Oc Delete    kind=Pod     namespace=redhat-ods-applications    label_selector=app=rhods-dashboard
+    OpenShiftLibrary.Wait For Pods Status    namespace=redhat-ods-applications  label_selector=app=rhods-dashboard  timeout=120
+
+Test Setup For Rhods Dashboard
+    [Documentation]    Test Setup for Rhods Dashboard
+    Set Library Search Order    SeleniumLibrary
+    Launch Dashboard  ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}  ocp_user_auth_type=${TEST_USER.AUTH_TYPE}
+    ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+
+Test Teardown For Configmap Changed On RHODS Dashboard
+    [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=rhods-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
+    Delete Dashboard Pods And Wait Them To Be Back
+    Close All Browsers
 
 Verify Authentication Is Required To Access BlackboxExporter
     [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,
@@ -307,9 +348,10 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     END
 
 Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
-    [Documentation]     wait and checks Operator have changed app grafana to prometheus
-    Sleep    10m    msg=wait to operator reverts the Changes
-    Wait Until Keyword Succeeds    5min    30s    Verify In Rhods-Monitor-Federation App Is    expected_app_name=prometheus
+    [Documentation]     Waits until rhods-operator reverts the configuration of rhods-monitor-federation,
+    ...    verifiying it has the default value ("prometheus")
+    Sleep    10m    msg=Waits until rhods-operator reverts the configuration of rhods-monitor-federation
+    Wait Until Keyword Succeeds    15m    1m    Verify In Rhods-Monitor-Federation App Is    expected_app_name=prometheus
 
 Verify In Rhods-Monitor-Federation App Is
     [Documentation]     Verifies in rhods-monitor-federation, app is showing ${expected_app_name}

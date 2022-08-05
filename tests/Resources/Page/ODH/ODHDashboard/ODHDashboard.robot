@@ -112,7 +112,7 @@ Remove Disabled Application From Enabled Page
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
    ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
-   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=180
+   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=300
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
@@ -150,7 +150,7 @@ Go To RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.11.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.13.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE
@@ -378,13 +378,21 @@ Save Changes In Cluster Settings
 
 Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
-    Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
-    Save Changes In Cluster Settings
+    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
+    ...    ${USAGE_DATA_COLLECTION_XP}
+    IF    ${is_data_collection_enabled}==False
+        Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+        Save Changes In Cluster Settings
+    END
 
 Disable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
-    Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
-    Save Changes In Cluster Settings
+    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
+    ...    ${USAGE_DATA_COLLECTION_XP}
+    IF    ${is_data_collection_enabled}==True
+        Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
+        Save Changes In Cluster Settings
+    END
 
 Search Items In Resources Section
     [Arguments]     ${element}

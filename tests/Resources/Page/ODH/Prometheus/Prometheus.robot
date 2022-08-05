@@ -5,10 +5,11 @@ Library             Collections
 Library             Process
 Library             RequestsLibrary
 
-
 *** Keywords ***
 Run Query
-    [Documentation]    Runs a Prometheus query using the API
+    [Documentation]    Runs a prometheus query, obtaining the current value. More info at:
+    ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
+    ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
     [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
     ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query?query=${pm_query}
@@ -18,13 +19,14 @@ Run Query
     [Return]    ${resp}
 
 Run Range Query
-    [Documentation]    Runs a prometheus range query, in order to obtain the result of a PromQL expression over a given time range. More info at:
+    [Documentation]    Runs a prometheus range query, in order to obtain the result of a PromQL expression over a given
+    ...                time range. More info at:
     ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
     ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
     [Arguments]    ${pm_query}    ${pm_url}    ${pm_token}    ${interval}=12h     ${steps}=172
-    ${time} =    Get Start Time And End Time  interval=${interval}
+    ${time}=    Get Start Time And End Time  interval=${interval}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
-    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}
+    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}    #robocop:disable
     ...    headers=${pm_headers}    verify=${False}
     Status Should Be    200    ${resp}
     [Return]    ${resp}
@@ -32,11 +34,11 @@ Run Range Query
 Get Start Time And End Time
     [Documentation]     Returns start and end time for Query range from current time
     [Arguments]         ${interval}   # like 12h  7 days etc
-    ${end_time} =  Get Current Date
-    ${end_time} =  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${end_time}").timestamp()
-    ${start_time} =    Subtract Time From Date    ${end_time}    ${interval}
-    ${start_time} =  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${start_time}").timestamp()
-    @{time} =  Create List  ${start_time}  ${end_time}
+    ${end_time}=  Get Current Date
+    ${end_time}=  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${end_time}").timestamp()
+    ${start_time}=    Subtract Time From Date    ${end_time}    ${interval}
+    ${start_time}=  BuiltIn.Evaluate  datetime.datetime.fromisoformat("${start_time}").timestamp()
+    @{time}=  Create List  ${start_time}  ${end_time}
     [Return]    ${time}
 
 Get Rules
@@ -109,13 +111,13 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
         # Log To Console    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
         Fail    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
     ELSE
-        Log To Console    msg=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
-        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
+        Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
+        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
     END
 
 Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if a given Prometheus alert does not have the expected severity
-    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-severity}    ${alert-duration}=${EMPTY}
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-severity}    ${alert-duration}=${EMPTY}    #robocop:disable
     ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
     ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
     ${alert_found}=    Set Variable    False
@@ -150,8 +152,8 @@ Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
         # Log To Console    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
         Fail    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but severity != ${alert-severity}
     ELSE
-        Log To Console    msg=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
-        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus firing rules
+        Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
+        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
     END
 
 Alerts Should Be Equal
@@ -172,26 +174,37 @@ Alert Should Not Be Firing
     ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
     Should Be True    not ${is_alert_firing}    msg=Alert ${alert} should not be firing
 
+Alert Should Not Be Firing In The Next Period    # robocop: disable:too-many-arguments
+    [Documentation]    Fails if a Prometheus alert is firing in the next ${period}
+    ...    ${period} should be 1m or bigger
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}
+    ...    ${alert-duration}=${EMPTY}    ${period}=10 min
+
+    ${passed}=    Run Keyword And Return Status    Wait Until Alert Is Firing
+    ...    pm_url=${pm_url}    pm_token=${pm_token}    rule_group=${rule_group}
+    ...    alert=${alert}    alert-duration=${alert-duration}    timeout=${period}
+    Run Keyword If    ${passed}    Fail    msg=Alert ${alert} should not be firing
+
 Wait Until Alert Is Firing    # robocop: disable:too-many-arguments
     [Documentation]    Waits until alert is firing or timeout is reached (failing in that case),
-    ...    checking the alert state every minute
+    ...    checking the alert state every 30 seconds
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=10 min
-    Wait Until Keyword Succeeds    ${timeout}    1 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Alert Should Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
     [Documentation]    Waits until alert is not firing or timeout is reached (failing in that case),
-    ...    checking the alert state every minute
+    ...    checking the alert state every 30 seconds
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=5 min
-    Wait Until Keyword Succeeds    ${timeout}    1 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Alert Should Not Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Get Target Endpoints
     [Documentation]     Returns list of Endpoint URLs
     [Arguments]         ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
-    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${username}:${password} -k ${pm_url}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${username}:${password} -k ${pm_url}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | .globalUrl'       #robocop:disable
     ${links}=    Replace String    ${links}    "    ${EMPTY}
     @{links}=    Split String  ${links}  \n
     [Return]    ${links}
@@ -199,7 +212,81 @@ Get Target Endpoints
 Get Target Endpoints Which Have State Up
     [Documentation]    Returns list of endpoints who have state is "UP"
     [Arguments]        ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}
-    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${pm_token}:${password} -k ${pm_token}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | select(.health == "up") | .globalUrl'
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${pm_token}:${password} -k ${pm_token}/api/v1/targets | jq '.data.activeTargets[] | select(.scrapePool == "${target_name}") | select(.health == "up") | .globalUrl'    #robocop:disable
     ${links}=    Replace String    ${links}    "    ${EMPTY}
     @{links}=    Split String  ${links}  \n
     [Return]    ${links}
+    
+Get Date When Availability Value Matches Expected Value 
+    [Documentation]    Returns date when availability value matches expected value
+    ...    Args:
+    ...        expected_value: expected availability value
+    [Arguments]    ${expected_value}
+    ${resp}=    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}   rhods_aggregate_availability
+    ${date}=    Convert Date    ${resp.json()["data"]["result"][0]["value"][0]}    epoch
+    ${value}=    Set Variable    ${resp.json()["data"]["result"][0]["value"][1]} 
+    Should Match    ${value}    ${expected_value}
+    [Return]    ${date}
+
+Verify ODS Availability
+    [Documentation]    Verifies that there is no downtime in ODS
+    ...    Returns:
+    ...        None
+    ${expression}=    Set Variable    rhods_aggregate_availability[10m : 1m]
+    ${resp}=    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
+    @{values}=    Set Variable    ${resp.json()["data"]["result"][0]["values"]}
+    FOR    ${value}    IN    @{values}
+        Should Not Be Equal As Strings    ${value}[1]    0
+    END
+
+Verify ODS Availability Range
+    [Documentation]   Verifies that there is no downtime in ODS between start and end dates
+    ...    Returns:
+    ...        None
+    [Arguments]   ${start}   ${end}    ${step}=1s    ${component}=${EMPTY}
+    IF    "${component}" == "${EMPTY}"
+        Log   Component Empty
+    ELSE IF    "${component}" == "jupyterhub"
+        Set Local Variable    ${component}   instance=~"jupyterhub.*"
+    ELSE IF    "${component}" == "rhods-dashboard"
+        Set Local Variable    ${component}   instance=~"rhods-dashboard.*"
+    ELSE IF    "${component}" == "combined"
+        Set Local Variable    ${component}   instance="combined"
+    ELSE
+        Fail   msg="Unknown component: ${component} (expected: jupyterhub, rhods-dashboard, combined)"
+    END  
+
+    &{expression}=    Create Dictionary    query=rhods_aggregate_availability{${component}}    start=${start}    end=${end}    step=${step}   
+    ${resp}=    Run Query Range        &{expression}
+    @{values}=    Set Variable    ${resp.json()["data"]["result"][0]["values"]}
+    @{downtime}=    Create List
+    FOR    ${value}    IN    @{values}
+        IF    ${value[1]} == 0
+            Append To List    ${downtime}    ${value[0]}
+        END
+    END
+    Log Many   @{downtime}
+    IF    "@{downtime}" != "${EMPTY}"
+        ${downtime_length} =    Get Length    ${downtime}
+        IF   ${downtime_length} == 0
+            Log    message=ODS is not down ${values}
+        ELSE IF   ${downtime_length} == 1
+            Fail  msg=There is a Downtime at ${downtime-duration}[0] in ODS
+        ELSE
+            ${downtime_lower_value} =    Convert Date    ${downtime}[0]       
+            ${downtime_upper_value} =    Convert Date    ${downtime}[-1]
+            ${downtime-duration} =  Subtract Date From Date    ${downtime_upper_value}    ${downtime_lower_value}    compact
+            Fail    msg=There is a Downtime of ${downtime-duration} in ODS
+        END
+    END
+    [Return]   ${values}
+
+
+Run Query Range
+    [Documentation]    Runs a Prometheus query using the API
+    [Arguments]   &{pm_query}
+    ${pm_headers}=    Create Dictionary    Authorization=Bearer ${RHODS_PROMETHEUS_TOKEN}
+    ${resp}=    RequestsLibrary.GET    url=${RHODS_PROMETHEUS_URL}/api/v1/query_range   params=&{pm_query}
+    ...    headers=${pm_headers}    verify=${False}
+    Request Should Be Successful
+    [Return]    ${resp}

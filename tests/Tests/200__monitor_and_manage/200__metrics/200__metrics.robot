@@ -1,12 +1,13 @@
 *** Settings ***
-Resource        ../../../Resources/ODS.robot
+Documentation       Test suite testing ODS Metrics
+Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
+Library             DateTime
+Suite Setup         RHOSi Setup
+Suite Teardown      RHOSi Teardown
 Test Setup          Begin Metrics Web Test
 Test Teardown       End Metrics Web Test
 
-Suite Setup     RHOSi Setup
-Resource    ../../../Resources/ODS.robot
-Library     DateTime
 
 *** Variables ***
 @{RECORD_GROUPS}    Availability Metrics    SLOs - JupyterHub    SLOs - ODH Dashboard    SLOs - RHODS Operator    SLOs - Traefik Proxy    Usage Metrics
@@ -16,13 +17,13 @@ Library     DateTime
 *** Test Cases ***
 Test Existence of Prometheus Alerting Rules
     [Tags]    Smoke
-    ...       Sanity
+    ...       Tier1
     ...       ODS-509
     Check Prometheus Alerting Rules
 
 Test Existence of Prometheus Recording Rules
     [Tags]    Smoke
-    ...       Sanity
+    ...       Tier1
     ...       ODS-510
     Check Prometheus Recording Rules
 

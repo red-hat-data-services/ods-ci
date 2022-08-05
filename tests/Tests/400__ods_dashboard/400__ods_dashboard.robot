@@ -1,19 +1,22 @@
 *** Settings ***
-Library         OpenShiftCLI
-Library         OpenShiftLibrary
-Resource        ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
-Resource        ../../Resources/ODS.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource        ../../Resources/Page/ODH/AiApps/Rhosak.resource
-Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
-Resource        ../../Resources/Page/LoginPage.robot
-Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
-Resource        ../../Resources/Common.robot
-Resource        ../../Resources/Page/OCPDashboard/Pods/Pods.robot
-Resource        ../../Resources/Page/OCPDashboard/Builds/Builds.robot
-Suite Setup     Dashboard Suite Setup
-Test Setup      Dashboard Test Setup
-Test Teardown   Dashboard Test Teardown
+Library           OpenShiftCLI
+Library           OpenShiftLibrary
+Resource          ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
+Resource          ../../Resources/RHOSi.resource
+Resource          ../../Resources/ODS.robot
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
+Resource          ../../Resources/Page/ODH/AiApps/Rhosak.resource
+Resource          ../../Resources/Page/ODH/AiApps/Anaconda.resource
+Resource          ../../Resources/Page/LoginPage.robot
+Resource          ../../Resources/Page/OCPLogin/OCPLogin.robot
+Resource          ../../Resources/Common.robot
+Resource          ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource          ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Suite Setup       Dashboard Suite Setup
+Suite Teardown    RHOSi Teardown
+Test Setup        Dashboard Test Setup
+Test Teardown     Dashboard Test Teardown
 
 
 *** Variables ***
@@ -58,20 +61,6 @@ Verify That Login Page Is Shown When Reaching The RHODS Page
     [Setup]     Test Setup For Login Page
     RHODS Dahsboard Pod Should Contain OauthProxy Container
     Check OpenShift Login Visible
-
-Verify Resource Link HTTP Status Code
-    [Tags]    Sanity
-    ...       ODS-531    ODS-507
-    Click Link    Resources
-    Sleep    5
-    ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
-    ${len}=    Get Length    ${link_elements}
-    Log To Console    ${len} Links found\n
-    FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
-        ${href}=    Get Element Attribute    ${ext_link}    href
-        ${status}=    Check HTTP Status Code    link_to_check=${href}
-        Log To Console    ${idx}. ${href} gets status code ${status}
-    END
 
 Verify Content In RHODS Explore Section
     [Documentation]    It verifies if the content present in Explore section of RHODS corresponds to expected one.
@@ -177,8 +166,9 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
 
 Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     [Documentation]    Verifies that Notifications are shown when Notebook Builds are finished and atleast one fails
-    [Tags]    Sanity
+    [Tags]    Tier2
     ...       ODS-470  ODS-718
+    ...       Execution-Time-Over-30m
     ...       FlakyTest
     Clear Dashboard Notifications
     ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
@@ -316,6 +306,14 @@ Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
     ...     exp_msg=${EXP_ERROR_MISSING_RGC}
     ...     prev_logs_lengths=${lengths_dict_before}
     [Teardown]      Restore Group ConfigMaps And Check Logs Do Not Change     cm_yamls=${groups_configmaps_dict}
+
+Verify Dashboard Pod Is Not Getting Restarted
+    [Documentation]    Verify Dashboard Pod container doesn't restarted
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-374
+    ${pod_names}    Get POD Names    redhat-ods-applications    app=rhods-dashboard
+    Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-applications
 
 
 *** Keywords ***
@@ -605,9 +603,6 @@ Verify The Resources Are Filtered
         @{texts}=    Split String    ${item.text}    \n
         List Should Contain Value    ${list_of_items}    ${texts}[${index_of_text}]
     END
-
-Wait Until Resource Page Is Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
 
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled

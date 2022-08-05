@@ -3,9 +3,11 @@ Documentation       Tests features in ODS Dashboard "Settings" section
 
 Library             SeleniumLibrary
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 
 Suite Setup         Dashboard Settings Suite Setup
+Suite Teardown      RHOSi Teardown
 
 
 *** Test Cases ***
@@ -62,12 +64,9 @@ Open ODS Dashboard With Non Admin User
 
 Restore Default Configuration For "Usage Data Collection" And TearDown
     [Documentation]    Restores "Usage Data Collection" default configuration and runs test teardown
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check}==True
-        Verify Cluster Settings Is Available
-        ODHDashboard.Enable "Usage Data Collection"
-        Capture Page Screenshot
-    END
+    Verify Cluster Settings Is Available
+    ODHDashboard.Enable "Usage Data Collection"
+    Capture Page Screenshot
     Dashboard Settings Test Teardown
 
 Dashboard Settings Suite Setup

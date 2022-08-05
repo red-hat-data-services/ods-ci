@@ -3,6 +3,9 @@ Documentation       Post install test cases that verify OCP operator resources a
 
 Library             OpenShiftLibrary
 Resource            ../../../Resources/ODS.robot
+Resource          ../../../Resources/RHOSi.resource
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
 
 
 *** Test Cases ***
@@ -74,32 +77,31 @@ Fetch Operator Pod Info
 Verify Operator Pods Have CrashLoopBackOff Status After Upgrade
     [Documentation]  Verifies operator pods have CrashLoopBackOff status after upgrade
     ...    Args:
-    ...        operator_pod_info(dict): Dictionary containing the information of the operator pod 
+    ...        operator_pod_info(dict): Dictionary containing the information of the operator pod
     ...    Returns:
     ...        crashloopbackoff(bool): True when the status CrashLoopBackOff is present
     [Arguments]    ${operator_pod_info}
-    ${crashloopbackoff}=    Run Keyword And Return Status   
+    ${crashloopbackoff}=    Run Keyword And Return Status
     ...    Wait Until Keyword Succeeds  60 seconds  1 seconds
-    ...    OpenShift Resource Field Value Should Be Equal As Strings    
+    ...    OpenShift Resource Field Value Should Be Equal As Strings
     ...    status.containerStatuses[0].state.waiting.reason
     ...    CrashLoopBackOff
     ...    @{operator_pod_info}
     [Return]    ${crashloopbackoff}
 
 Log Error And Fail Pods When Pods Were Terminated
-    [Documentation]  Logs the error why the specified pods were terminated and fails the pod for the specified reason 
+    [Documentation]  Logs the error why the specified pods were terminated and fails the pod for the specified reason
     ...    Args:
     ...        pods_info(list(dict)): List of Dictionaries containing the information of the pods
-    ...        fail_reason(str): Reason for failing the pods 
+    ...        fail_reason(str): Reason for failing the pods
     [Arguments]    ${pods_info}    ${fail_reason}
     FOR    ${pod_info}    IN    @{pods_info}
         &{operator_pod_info_dict}=    Set Variable    ${pod_info}
         ${reason}=    Set Variable    ${operator_pod_info_dict.status.containerStatuses[0].lastState.terminated.reason}
         ${exit_code}=    Set Variable    ${operator_pod_info_dict.status.containerStatuses[0].lastState.terminated.exitCode}
-        Log    ${fail_reason}. Reason: ${reason} Exit Code: ${exit_code}  
+        Log    ${fail_reason}. Reason: ${reason} Exit Code: ${exit_code}
         Fail   ${fail_reason}
     END
-    
 
 
-    
+

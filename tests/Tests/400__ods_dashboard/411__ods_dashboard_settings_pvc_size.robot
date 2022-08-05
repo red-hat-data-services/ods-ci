@@ -11,12 +11,14 @@ Documentation       PVC_CHANGE_VERIFICATION
 #
 Library         SeleniumLibrary
 Library         JupyterLibrary
-Resource         ../../Resources/ODS.robot
+Resource        ../../Resources/RHOSi.resource
+Resource        ../../Resources/ODS.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Suite Setup     RHOSi Setup
 Suite Teardown  PVC Size Suite Teadrown
 Test Setup      PVC Size Test Setup
+
 
 *** Variables ***
 ${NAMESPACE}    redhat-ods-applications
@@ -30,9 +32,7 @@ ${SIZE_CODE}    import subprocess;
 Verify User Can Spawn Notebook After Changing PVC Size Using Backend
     [Documentation]   Verify if user can spawn notebook
     ...    for supported PVC size got changed
-    [Tags]    Smoke
-    ...       Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-1221
     Change And Apply PVC size    ${S_SIZE}Gi
     Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
@@ -43,6 +43,7 @@ Verify User Can Spawn Notebook After Changing PVC Size Using Backend
 Verify User Cannot Set An Unsupported PVC Size Using Backend
     [Documentation]   Verify if user should not able to
     ...    spawn notebook for supported PVC change
+    ...    ProductBug:RHODS-3258
     [Tags]    Tier2
     ...       ODS-1229
     ...       ProductBug
@@ -53,8 +54,7 @@ Verify User Can Spawn Notebook After Changing PVC Size Using UI
     [Documentation]   Verify if dedicated admin user able to chnage PVC
     ...    and RHODS user is able to spawn notebook for supported PVC
     ...    and verify PVC size
-    [Tags]    Smoke
-    ...       Sanity
+    [Tags]    Sanity
     ...       Tier1
     ...       ODS-1220    ODS-1222
     Verify PVC change using UI     ${S_SIZE}
@@ -116,6 +116,7 @@ PVC Size Suite Teadrown
     ${status}    ${pvc_name}    Run Keyword And Ignore Error
     ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
     May Be Delete PVC     ${pvc_name}
+    RHOSi Teardown
 
 Verify PVC change using UI
    [Documentation]   Basic PVC change verification

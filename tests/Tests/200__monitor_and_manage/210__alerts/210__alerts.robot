@@ -1,15 +1,18 @@
 *** Settings ***
 Documentation       RHODS monitoring alerts test suite
 
+Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Library             OperatingSystem
 Library             SeleniumLibrary
 Library             JupyterLibrary
 Library             OpenShiftCLI
 
 Suite Setup         Alerts Suite Setup
+Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
@@ -104,6 +107,75 @@ Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
 
     [Teardown]    Teardown PVC Alert Test
 
+Verify Alerts Are Not Fired After Multiple JupyterHub Rollouts
+    [Documentation]    Verifies that alert "RHODS JupyterHub Probe Success Burn Rate" is not fired
+    ...    after triggering multiple Jupyterhub rollouts in a short period of time.
+    [Tags]    Tier3
+    ...       ODS-1591
+    ...       Execution-Time-Over-15m
+
+    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+
+    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+
+    FOR    ${counter}    IN RANGE    10
+        Rollout JupyterHub
+
+        Prometheus.Alert Should Not Be Firing In The Next Period    ${RHODS_PROMETHEUS_URL}
+        ...    ${RHODS_PROMETHEUS_TOKEN}
+        ...    SLOs-probe_success
+        ...    RHODS JupyterHub Probe Success Burn Rate
+        ...    alert-duration=120
+        ...    period=1m
+    END
+
+    Prometheus.Alert Should Not Be Firing In The Next Period    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    period=5m
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alerts Are Fired When JupyterHub Is Down    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that alerts "RHODS JupyterHub Probe Success Burn Rate"
+    ...    is fired when jupyterhub is not working
+    [Tags]    Tier3
+    ...       ODS-1592
+    ...       Execution-Time-Over-15m
+
+    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+
+    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale DeploymentConfig    redhat-ods-applications    jupyterhub    replicas=0
+
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    timeout=22 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success
+    ...    RHODS JupyterHub Probe Success Burn Rate
+    ...    alert-duration=120
+    ...    timeout=5 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
 Verify Alerts Are Fired When Traefik Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alerts "RHODS JupyterHub Probe Success Burn Rate"
     ...    is fired when traefik-proxy is not working
@@ -137,7 +209,7 @@ Verify Alerts Are Fired When Traefik Is Down    # robocop: disable:too-long-test
 
     [Teardown]    ODS.Restore Default Deployment Sizes
 
-Verify Alerts are Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
+Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" and "RHODS Probe Success Burn Rate"
     ...    are fired when rhods-dashboard is not working
     [Tags]    Tier3
@@ -279,8 +351,9 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
         ${receiver} =         Set Variable    PagerDuty
     END
     Check Particular Text Is Present In Rhods-operator's Log  text_to_check=${text_to_check}
-    Verify Receiver Value In Configmap Alertmanager Is  receiver=${receiver}
+    Verify Alertmanager Receiver For Critical Alerts    receiver=${receiver}
     [Teardown]    Close All Browsers
+
 
 *** Keywords ***
 Alerts Suite Setup
@@ -487,9 +560,8 @@ Check Particular Text Is Present In Rhods-operator's Log
     List Should Contain Value    ${val_result}    ${text_to_check}
     Close Browser
 
-Verify Receiver Value In Configmap Alertmanager Is
+Verify Alertmanager Receiver For Critical Alerts
     [Documentation]     Receiver value should be equal to ${receiver}
     [Arguments]         ${receiver}
-    ${result} =    Run    oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.receiver'
-    Log  ${result}
-    Should Be Equal    "${receiver}"    ${result}
+    ${result} =    Run    oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.routes[] | select(.match.severity == "critical") | .receiver'
+    Should Be Equal    "${receiver}"    ${result}    msg=Alertmanager has an unexpected receiver for critical alerts

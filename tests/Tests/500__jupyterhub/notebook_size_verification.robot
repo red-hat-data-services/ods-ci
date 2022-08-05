@@ -30,10 +30,11 @@ ${CUSTOME_SIZE}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","
 
 
 *** Test Cases ***
-Verify Spwaned Notebook Size
+Verify Spawned Notebook Size
     [Documentation]    Check the available container size spec
-    ...    with actual assign to spwaned notebook pod
-    [Tags]    Sanity
+    ...    with actual assign to spawned notebook pod
+    [Tags]    Tier2
+    ...       Execution-Time-Over-15m
     ...       FlakyTest
     ...       ODS-1072
     Launch JupyterHub Spawner From Dashboard

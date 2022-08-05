@@ -42,6 +42,7 @@ COPY utils/scripts/ocm/ocm.py  utils/scripts/ocm/ocm.py
 COPY utils/scripts/logger.py  utils/scripts/logger.py
 COPY utils/scripts/util.py  utils/scripts/util.py
 COPY utils/scripts/SplitSuite.py  utils/scripts/SplitSuite.py
+COPY utils/scripts/testconfig/test-variables.yml test-variables.yml.model
 RUN  chmod +x run.sh
 COPY requirements.txt setup.py .
 RUN  python3 --version

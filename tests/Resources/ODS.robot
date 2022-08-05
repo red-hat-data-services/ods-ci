@@ -25,14 +25,29 @@ Scale Deployment
     Run    oc -n ${namespace} scale deployment ${deployment-name} --replicas=${replicas}
     Sleep    ${sleep-time}    reason=Wait until ${deployment-name} deployment is scaled to replicas=${replicas}
 
+Scale DeploymentConfig
+    [Documentation]    Sets the size (number of pods) for a deploymentconfig
+    [Arguments]    ${namespace}    ${deploymentconfig-name}    ${replicas}=1    ${sleep-time}=10s
+    Run    oc -n ${namespace} scale deploymentconfig ${deploymentconfig-name} --replicas=${replicas}
+    Sleep    ${sleep-time}    reason=Wait until ${deploymentconfig-name} deploymentconfig is scaled to replicas=${replicas}
+
 Restore Default Deployment Sizes
     [Documentation]    Restores the default sizes to all deployments in ODS
-    ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard    replicas=2
-    ODS.Scale Deployment    redhat-ods-applications    traefik-proxy    replicas=3
-    ODS.Scale Deployment    redhat-ods-monitoring    blackbox-exporter    replicas=1
-    ODS.Scale Deployment    redhat-ods-monitoring    grafana    replicas=2
-    ODS.Scale Deployment    redhat-ods-monitoring    prometheus    replicas=1
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=1    sleep-time=30s
+    [Arguments]    ${restore_deployments}=True    ${restore_deploymentconfigs}=True
+
+    IF  ${restore_deploymentconfigs}==True
+        ODS.Scale DeploymentConfig    redhat-ods-applications    jupyterhub    replicas=3
+        ODS.Scale DeploymentConfig    redhat-ods-applications    jupyterhub-idle-culler    replicas=1
+    END
+
+    IF  ${restore_deployments}==True
+        ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard    replicas=2
+        ODS.Scale Deployment    redhat-ods-applications    traefik-proxy    replicas=3
+        ODS.Scale Deployment    redhat-ods-monitoring    blackbox-exporter    replicas=1
+        ODS.Scale Deployment    redhat-ods-monitoring    grafana    replicas=2
+        ODS.Scale Deployment    redhat-ods-monitoring    prometheus    replicas=1
+        ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=1    sleep-time=30s
+    END
 
 Verify "Usage Data Collection" Key
     [Documentation]    Verifies that "Usage Data Collection" is using the expcected segment.io key
@@ -358,6 +373,25 @@ OpenShift Resource Component Field Should Not Be Empty
     ...        None
     [Arguments]    ${resource_component_field}
     Run Keyword And Continue On Failure    Should Not Be Empty    ${resource_component_field}
+
+Force Reboot OpenShift Cluster Node
+    [Documentation]    Reboots the specified node of the cluster
+    ...    Args:
+    ...        node(str): Name of the node to reboot
+    ...    Returns:
+    ...        None
+    [Arguments]    ${node}
+    Run    oc debug node/"${node}" -T -- sh -c "echo b > /proc/sysrq-trigger"
+
+Fetch Cluster Worker Nodes Info
+    [Documentation]    Fetch information about the nodes of the cluster
+    ...    Args:
+    ...        None
+    ...    Returns:
+    ...        cluster_nodes_info(list(dict)): Cluster nodes information
+    @{cluster_nodes_info}=    Oc Get    kind=Node    api_version=v1
+    ...    label_selector=node-role.kubernetes.io/worker=,node-role.kubernetes.io!=master,node-role.kubernetes.io!=infra
+    [Return]    @{cluster_nodes_info}
 
 Delete RHODS Config Map
     [Documentation]    Deletes the given config map. It assumes the namespace is

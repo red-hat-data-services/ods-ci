@@ -14,9 +14,11 @@ Install Operator
 
 Search Operator
    [Arguments]    ${operator}
-   Wait Until Element is Visible    //input[@data-test="search-operatorhub"]   timeout=150
-   Input text    //input[@data-test="search-operatorhub"]   ${operator}
-   Press keys    //input[@data-test="search-operatorhub"]   RETURN
+   Wait Until Element Is Visible    //input[contains(@aria-label,"Filter by keyword")]   timeout=150
+   Clear Element Text    //input[contains(@aria-label,"Filter by keyword")]
+   Sleep    0.5s
+   Input Text    //input[contains(@aria-label,"Filter by keyword")]   ${operator}
+   Press Keys   //input[contains(@aria-label,"Filter by keyword")]   RETURN
 
 Select Operator with Catalog Name
     [Arguments]    ${operator}     ${catalog}

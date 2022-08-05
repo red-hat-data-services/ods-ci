@@ -1,16 +1,18 @@
 *** Settings ***
-Documentation   139 - KFDEF_EVENT_VERIFICATION
-...             Verify kfdef event is streaming for redhat-ods-application namespace
+Documentation     139 - KFDEF_EVENT_VERIFICATION
+...               Verify kfdef event is streaming for redhat-ods-application namespace
 ...
-...             = Variables =
-...             | Namespace                | Required |        RHODS Namespace/Project |
-...             | Resource_kind            | Required |        Object resource kind |
+...               = Variables =
+...               | Namespace                | Required |        RHODS Namespace/Project |
+...               | Resource_kind            | Required |        Object resource kind |
 
-Library        Collections
-Resource       ../../../../Resources/Page/OCPDashboard/Events/Events.resource
-Resource       ../../../../Resources/RHOSi.resource
+Library           Collections
+Resource          ../../../../Resources/Page/OCPDashboard/Events/Events.resource
+Resource          ../../../../Resources/RHOSi.resource
 
-Suite Setup     RHOSi Setup
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
+
 
 *** Variables ***
 ${NAMESPACE}           redhat-ods-applications

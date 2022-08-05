@@ -75,8 +75,8 @@ PVC Size Test Setup
     ...     Get User Notebook PVC Name    ${TEST_USER.USERNAME}
     May Be Delete PVC     ${pvc_name}
     ${pod_name}    Get User Notebook Pod Name     ${TEST_USER.USERNAME}
-    #May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
-    May Be Delete Notebook POD    redhat-ods-applications    ${pod_name}
+    May Be Delete Notebook POD    rhods-notebooks    ${pod_name}
+    #May Be Delete Notebook POD    redhat-ods-applications    ${pod_name}
 
 PVC Size UI Test Teardown
     [Documentation]    Teardown for UI test

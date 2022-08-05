@@ -232,11 +232,11 @@ Delete Folder In User Notebook
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
-      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
+     # OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
 
-      ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
-      #${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- rm -fr /opt/app-root/src/${folder}
+      #${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
+      ${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)

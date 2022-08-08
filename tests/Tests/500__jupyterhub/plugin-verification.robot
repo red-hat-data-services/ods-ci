@@ -65,7 +65,6 @@ Get the List of Plugins from RHODS notebook images
       Log    ${temp_data}
       Set To Dictionary   ${temporary_data}      ${image}     ${temp_data}
       Stop JupyterLab Notebook Server
-      #Click Link  start
       Sleep  3
   END
 

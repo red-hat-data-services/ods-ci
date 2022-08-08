@@ -128,9 +128,9 @@ Spawn Notebook
     [Arguments]  ${spawner_timeout}=600 seconds
     Click Button  Start server
     Wait Until Page Contains  Starting server  15s
-    #Wait Until Element Is Visible  id:progress-bar
-    #Wait Until Page Does Not Contain Element  id:progress-bar  ${spawner_timeout}
-    Wait Until Page Contains  Server ready  ${spawner_timeout}
+    Wait Until Element Is Visible  xpath://div[@role="progressbar"]
+    Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
+    #Wait Until Page Contains  Success  ${spawner_timeout}
 
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed
@@ -263,6 +263,8 @@ Control Panel Is Visible
 Handle Control Panel
    [Documentation]  Handles control panel page
    Click Button  Stop notebook server
+   Wait Until Page Contains Element  xpath://button[.="Stop server"]
+   Click Button  xpath://button[.="Stop server"]
 
 Fix Spawner Status
    [Documentation]  This keyword handles spawner states that would prevent

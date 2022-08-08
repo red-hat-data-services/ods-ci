@@ -116,7 +116,9 @@ Stop JupyterLab Notebook Server
   SeleniumLibrary.Switch Window    NEW
   #Run Keyword And Ignore Error    Click Element  xpath://button[@aria-label="Close"]
   SeleniumLibrary.Wait Until Page Contains     Stop notebook server
-  Click Button  Stop notebook server
+  Click Button    Stop notebook server
+  Wait Until Page Contains Element    xpath://button[.="Stop server"]
+  Click Button    xpath://button[.="Stop server"]
 
 Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out
@@ -256,7 +258,7 @@ Clone Git Repository
   ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
     IF    "${status}" == "PASS"
         ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
-        ${current_user} =    Get Current User
+        ${current_user} =    Get Current User In JupyterLab
         Delete Folder In User Notebook
         ...    admin_username=${OCP_ADMIN_USER.USERNAME}
         ...    username=${current_user}
@@ -498,10 +500,11 @@ Verify Git Plugin
     Clone Git Repository      ${REPO_URL}
     Verify File Present In The File Explorer      ${FILE_NAME}
 
-Get Current User
-   [Documentation]    Returns the current user
-   ${url} =  Get Location
-   ${current_user} =  Evaluate  '${url}'.split("/")[4]
+Get Current User In JupyterLab
+   [Documentation]    Returns the current user while in the JupyterLab environment
+   ${current_user_escaped} =  Run Cell And Get Output
+   ...    import os; s=os.environ["HOSTNAME"]; username = s.split("-")[2:-1]; "-".join(username)
+   ${current_user} =  Get Unsafe Username  ${current_user_escaped}
    [Return]  ${current_user}
 
 Image Should Be Pinned To A Numeric Version

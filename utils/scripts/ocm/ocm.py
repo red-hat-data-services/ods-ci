@@ -26,7 +26,7 @@ Class for Openshift Cluster Manager
 """
 
 
-class OpenshiftClusterManager:
+class OpenshiftClusterManager():
     def __init__(self, args={}):
 
         # Initialize instance variables

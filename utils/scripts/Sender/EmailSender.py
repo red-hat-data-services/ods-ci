@@ -1,6 +1,7 @@
 from Sender import Sender
 from typing import Any, List, Optional
-import smtplib, ssl
+import smtplib
+import ssl
 from os.path import basename
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -9,7 +10,6 @@ from email.utils import COMMASPACE, formatdate
 
 
 class EmailSender(Sender):
-
     def __init__(self):
         self._sender_address = None
         self._receiver_addresses = None
@@ -22,24 +22,25 @@ class EmailSender(Sender):
         self._use_unsecure = False
         self._message = MIMEMultipart()
 
-    def prepare_payload(self, text: str = "",
-                        attachments: Optional[List[Any]] = None) -> None:
+    def prepare_payload(
+        self, text: str = "", attachments: Optional[List[Any]] = None
+    ) -> None:
         self._message.attach(MIMEText(text))
         if attachments is not None:
             for filepath in attachments:
                 with open(filepath, "rb") as file:
                     part = MIMEApplication(
-                        file.read(),
-                        Name=basename(filepath)
-                    )
-                    part['Content-Disposition'] = 'attachment; filename="%s"' % basename(filepath)
+                        file.read(), Name=basename(filepath))
+                    part[
+                        "Content-Disposition"
+                    ] = 'attachment; filename="%s"' % basename(filepath)
                     self._message.attach(part)
 
     def prepare_header(self):
-        self._message['From'] = self._sender_address
-        self._message['To'] = COMMASPACE.join(self._receiver_addresses)
-        self._message['Date'] = formatdate(localtime=True)
-        self._message['Subject'] = self._subject
+        self._message["From"] = self._sender_address
+        self._message["To"] = COMMASPACE.join(self._receiver_addresses)
+        self._message["Date"] = formatdate(localtime=True)
+        self._message["Subject"] = self._subject
 
     def send(self):
         context = ssl.create_default_context()
@@ -48,14 +49,18 @@ class EmailSender(Sender):
         if self._use_unsecure:
             smtp = smtplib.SMTP(host=self._server, port=self._port)
         elif self._use_ssl:
-            smtp = smtplib.SMTP_SSL(host=self._server, port=self._port, context=context)
+            smtp = smtplib.SMTP_SSL(
+                host=self._server, port=self._port, context=context)
         else:
             print("--> using SMTP with TLS")
             smtp = smtplib.SMTP(host=self._server, port=self._port)
             smtp.starttls(context=context)
         if self._server_usr and self._server_pw:
             smtp.login(self._server_usr, self._server_pw)
-        smtp.sendmail(self._sender_address, self._receiver_addresses, self._message.as_string())
+        smtp.sendmail(
+            self._sender_address, self._receiver_addresses,
+            self._message.as_string()
+        )
         smtp.close()
 
     def set_sender_address(self, sender_address: str) -> None:
@@ -76,7 +81,9 @@ class EmailSender(Sender):
     def get_subject(self) -> str:
         return self._subject
 
-    def set_server(self, server: str, use_ssl: bool = False, use_unsecure: bool = False) -> None:
+    def set_server(
+        self, server: str, use_ssl: bool = False, use_unsecure: bool = False
+    ) -> None:
         if ":" in server:
             server = server.split(":")
             self._server = server[0]

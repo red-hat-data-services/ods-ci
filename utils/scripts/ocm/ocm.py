@@ -1193,7 +1193,7 @@ if __name__ == "__main__":
     optional_machinepool_cluster_parser.add_argument("--instance-type",
                                                      help="Machine pool instance type",
                                                      action="store", dest="pool_instance_type", metavar="",
-                                                     default="g4dn.2xlarge")
+                                                     default="g4dn.xlarge")
     optional_machinepool_cluster_parser.add_argument("--worker-node-count",
                                                      help="Machine pool worker node count",
                                                      action="store", dest="pool_node_count", metavar="",

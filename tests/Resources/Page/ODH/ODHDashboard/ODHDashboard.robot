@@ -440,8 +440,8 @@ Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
     Page Should Contain    Settings
     Menu.Navigate To Page    Settings    Notebook Images
-    Wait Until Page Contains    Notebook image settings
-    Page Should Contain    Notebook image settings
+    Wait Until Page Contains    BYON image settings     timeout=30
+    Page Should Contain    BYON image settings
 
 Import New Custom Image
     [Documentation]    Opens the Custom Image import view and imports an image
@@ -449,9 +449,9 @@ Import New Custom Image
     [Arguments]    ${repo}    ${name}    ${description}    ${software}    ${packages}
     Sleep  1
     Open Custom Image Import Popup
-    Input Text    xpath://input[@id="notebook-image-repository-input"]    ${repo}
-    Input Text    xpath://input[@id="notebook-image-name-input"]    ${name}
-    Input Text    xpath://input[@id="notebook-image-description-input"]    ${description}
+    Input Text    xpath://input[@id="byon-image-repository-input"]    ${repo}
+    Input Text    xpath://input[@id="byon-image-name-input"]    ${name}
+    Input Text    xpath://input[@id="byon-image-description-input"]    ${description}
     Add Softwares To Custom Image    ${software}
     Add Packages To Custom Image    ${packages}
     Click Element    xpath://button[.="Import"]
@@ -464,7 +464,7 @@ Open Custom Image Import Popup
     ELSE
         Click Element  xpath://button[.="Import new image"]
     END
-    Wait Until Page Contains    Import Notebook images
+    Wait Until Page Contains    Import BYON images
 
 Add Softwares To Custom Image
     [Documentation]    Loops through a dictionary to add software to the custom img metadata

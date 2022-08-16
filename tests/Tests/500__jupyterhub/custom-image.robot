@@ -67,7 +67,7 @@ Test Duplicate Image
     Import New Custom Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
-    RHODS Notification Drawer Should Contain  Unable to add notebook image ${IMG_NAME}
+    RHODS Notification Drawer Should Contain  Unable to add BYON image ${IMG_NAME}
     Sleep  1
     Delete Custom Image  ${IMG_NAME}
     Reset Image Name
@@ -80,7 +80,7 @@ Test Bad Image URL
     ${IMG_URL}=  Set Variable  quay.io/RandomName/RandomImage:v1.2.3
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Create Custom Image
-    RHODS Notification Drawer Should Contain  Unable to add notebook image ${IMG_NAME}
+    RHODS Notification Drawer Should Contain  Unable to add BYON image ${IMG_NAME}
     ${IMG_URL}=  Set Variable  ${OG_URL}
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Reset Image Name

@@ -18,7 +18,7 @@ Force Tags          JupyterHub
 &{package_versions}      # robocop: disable
 ${JupyterLab_Version}         v3.2
 ${Notebook_Version}           v6.4
-${JupyterLab-git_Version}     v0.30
+${JupyterLab-git_Version}     v0.32
 
 
 *** Test Cases ***

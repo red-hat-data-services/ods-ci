@@ -68,10 +68,20 @@ Get Build Status From Oc
     [Return]    ${status}
 
 Build Status Should Be
-    [Documentation]    Get status and check with ${expected_status}
+    [Documentation]    Gets build status and fails if not equal to  ${expected_status}
     [Arguments]    ${namespace}    ${build_name}    ${expected_status}=Complete
     ${status} =    Get Build Status From Oc    namespace=${namespace}    build_name=${build_name}
-    Should Be Equal    ${status}    ${expected_status}
+    IF    "${status}" != "${expected_status}"
+       Fail    msg=Unexpected Build status for ${build_name} (expected_status: ${expected_status}, status: ${status})
+    END
+
+Build Status Should Not Be
+    [Documentation]    Gets build status and fails if equal to ${unexpected_status}
+    [Arguments]    ${namespace}    ${build_name}    ${unexpected_status}=Error
+    ${status} =    Get Build Status From Oc    namespace=${namespace}    build_name=${build_name}
+    IF    "${status}" == "${unexpected_status}"
+       Fail    msg=Build ${build_name} shoud not have build status ${unexpected_status}
+    END
 
 Wait Until Build Status Is
     [Documentation]    Check status build with ${expected_status} for every min until is succeed or timeout
@@ -80,17 +90,23 @@ Wait Until Build Status Is
     ...    Build Status Should Be    ${namespace}    ${build_name}    ${expected_status}
 
 Wait Until All Builds Are Complete
-    [Documentation]     Obtains the list of builds in ${namespace} and, for each of
-    ...    them,  fails if state is Failed or Error.  If not, waits until state
-    ...    is Complete or ${build_timeout} is reached
+    [Documentation]     Obtains the list of buildsconfigs in ${namespace} and, for each of
+    ...    them,  search the last build with similar name and fails if state is Failed or Error.
+    ...    If not, waits until state is Complete or ${build_timeout} is reached
     [Arguments]    ${namespace}    ${build_timeout}=20 min
-    ${builds_data} =  Oc Get  kind=Build  namespace=${namespace}
-    FOR    ${build_data}    IN    @{builds_data}
-        ${build_name} =     Set Variable    ${build_data['metadata']['name']}
-        ${build_status} =    Set Variable    ${build_data['status']['phase']}
-        IF    "${build_status}" == "Failed" or "${build_status}" == "Error"
-            Fail    msg=Build ${build_name} is in ${build_status} state
+
+    ${buildconfigs_data} =  Oc Get  kind=BuildConfig  namespace=${namespace}
+
+    FOR    ${buildconfig_data}    IN    @{buildconfigs_data}
+        ${buildconfig_name} =     Set Variable    ${buildconfig_data['metadata']['name']}
+        ${build_name} =    Search Last Build    namespace=${namespace}   build_name_includes=${buildconfig_name}
+        IF    "${build_name}" == "${EMPTY}"
+            Log    level=WARN    message=No builds found matching ${buildconfig_name} in ${namespace} namespace
         ELSE
+            Build Status Should Not Be    namespace=${namespace}    build_name=${build_name}
+            ...    unexpected_status=Error
+            Build Status Should Not Be    namespace=${namespace}    build_name=${build_name}
+            ...    unexpected_status=Failed
             Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}
             ...   expected_status=Complete    timeout=${build_timeout}
         END

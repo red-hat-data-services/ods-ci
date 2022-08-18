@@ -44,7 +44,10 @@ Check Image Build Status
 Search Last Build
     [Documentation]    Returns latest(sorted by creation time) build which match the ${build_name_includes}
     [Arguments]    ${namespace}    ${build_name_includes}
-    ${build} =    Run    oc get builds --sort-by=.metadata.creationTimestamp -n ${namespace} | grep ${build_name_includes} | awk '{print $1;}'
+    ${build} =    Run    oc get builds --sort-by=.metadata.creationTimestamp -n ${namespace} | grep ${build_name_includes} | tail -n 1 | awk '{print $1;}'
+    IF    "${build}" == "${EMPTY}"
+        Fail    msg=Could not find any build including ${build_name_includes} in ${namespace} namespace
+    END
     @{builds} =  Split String  ${build}  \n
     [Return]    ${builds}[-1]
 
@@ -84,6 +87,14 @@ Build Status Should Not Be
        Fail    msg=Build ${build_name} shoud not have build status ${unexpected_status}
     END
 
+Wait Until Build Exists
+    [Documentation]    Waits until a build exist with name including ${build_name_includes} or timeout exceeded
+    ...    Returns build name
+    [Arguments]    ${namespace}    ${build_name_includes}    ${timeout}=20 min
+    ${build_name} =    Wait Until Keyword Succeeds    ${timeout}    1 min
+    ...    Search Last Build    namespace=${namespace}   build_name_includes=${build_name_includes}
+    [Return]    ${build_name}
+
 Wait Until Build Status Is
     [Documentation]    Check status build with ${expected_status} for every min until is succeed or timeout
     [Arguments]    ${namespace}    ${build_name}    ${expected_status}=Complete    ${timeout}=20 min
@@ -100,17 +111,13 @@ Wait Until All Builds Are Complete
 
     FOR    ${buildconfig_data}    IN    @{buildconfigs_data}
         ${buildconfig_name} =     Set Variable    ${buildconfig_data['metadata']['name']}
-        ${build_name} =    Search Last Build    namespace=${namespace}   build_name_includes=${buildconfig_name}
-        IF    "${build_name}" == "${EMPTY}"
-            Log    level=WARN    message=No builds found matching ${buildconfig_name} in ${namespace} namespace
-        ELSE
-            Build Status Should Not Be    namespace=${namespace}    build_name=${build_name}
-            ...    unexpected_status=Error
-            Build Status Should Not Be    namespace=${namespace}    build_name=${build_name}
-            ...    unexpected_status=Failed
-            Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}
-            ...   expected_status=Complete    timeout=${build_timeout}
-        END
+        ${build_name} =    Wait Until Build Exists    namespace=${namespace}   build_name_includes=${buildconfig_name}
+        Build Status Should Not Be    namespace=${namespace}    build_name=${build_name}
+        ...    unexpected_status=Error
+        Build Status Should Not Be    namespace=${namespace}    build_name=${build_name}
+        ...    unexpected_status=Failed
+        Wait Until Build Status Is    namespace=${namespace}    build_name=${build_name}
+        ...   expected_status=Complete    timeout=${build_timeout}
     END
 
 Verify All Builds Are Complete

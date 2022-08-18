@@ -4,7 +4,7 @@ import sys
 import json
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path+"/../")
+sys.path.append(dir_path + "/../")
 
 from util import execute_command
 from logger import log
@@ -14,7 +14,7 @@ Class for Report portal operations
 """
 
 
-class ReportPortalOperations():
+class ReportPortalOperations:
     def __init__(self, args={}):
         # Initialize instance variables
         self.config_file = args.get("config_file")
@@ -43,9 +43,9 @@ class ReportPortalOperations():
     def upload_result(self):
         """Uploads test results to report portal"""
 
-        cmd = ("rp_preproc -c {} -d {} "
-               "--service {} -l {}".format(self.config_file,
-               self.payload_dir, self.service_url, self.log_path))
+        cmd = "rp_preproc -c {} -d {} " "--service {} -l {}".format(
+            self.config_file, self.payload_dir, self.service_url, self.log_path
+        )
         log.info("CMD: {}".format(cmd))
         rp_output = execute_command(cmd)
         rp_output_json = json.loads(rp_output)
@@ -54,49 +54,70 @@ class ReportPortalOperations():
 
 if __name__ == "__main__":
 
-        #Instance for ReportPortalOperations Class
-        rp_obj = ReportPortalOperations()
+    # Instance for ReportPortalOperations Class
+    rp_obj = ReportPortalOperations()
 
-        """Parse CLI arguments"""
+    """Parse CLI arguments"""
 
-        parser = argparse.ArgumentParser(
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            description='Script to upload results to report portal')
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Script to upload results to report portal",
+    )
 
-        subparsers = parser.add_subparsers(title='Available sub commands',
-                                           help='sub-command help')
+    subparsers = parser.add_subparsers(
+        title="Available sub commands",
+        help="sub-command help"
+    )
 
-        #Argument parsers for uploading test results to report portal
-        upload_result_parser = subparsers.add_parser(
-            'upload_result',
-            help=("Upload result to report portal"),
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    # Argument parsers for uploading test results to report portal
+    upload_result_parser = subparsers.add_parser(
+        "upload_result",
+        help="Upload result to report portal",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
 
-        required_upload_result_parser = upload_result_parser.add_argument_group('required arguments')
+    required_upload_result_parser = upload_result_parser.add_argument_group(
+        "required arguments"
+    )
 
-        required_upload_result_parser.add_argument("--config-file",
-            help="Report portal config json file",
-            action="store", dest="config_file",
-            required=True)
-        required_upload_result_parser.add_argument("--payload-dir",
-            help="Report portal payload directory",
-            action="store", dest="payload_dir",
-            required=True)
-        required_upload_result_parser.add_argument("--service-url",
-            help="Report portal Service url",
-            action="store", dest="service_url",
-            required=True)
-        required_upload_result_parser.add_argument("--output-file",
-            help="Output file to dump report portal output",
-            action="store", dest="output_file",
-            required=True)
-        required_upload_result_parser.add_argument("--log-path",
-            help="Report portal Log Path",
-            action="store", dest="log_path",
-            required=True)
+    required_upload_result_parser.add_argument(
+        "--config-file",
+        help="Report portal config json file",
+        action="store",
+        dest="config_file",
+        required=True,
+    )
+    required_upload_result_parser.add_argument(
+        "--payload-dir",
+        help="Report portal payload directory",
+        action="store",
+        dest="payload_dir",
+        required=True,
+    )
+    required_upload_result_parser.add_argument(
+        "--service-url",
+        help="Report portal Service url",
+        action="store",
+        dest="service_url",
+        required=True,
+    )
+    required_upload_result_parser.add_argument(
+        "--output-file",
+        help="Output file to dump report portal output",
+        action="store",
+        dest="output_file",
+        required=True,
+    )
+    required_upload_result_parser.add_argument(
+        "--log-path",
+        help="Report portal Log Path",
+        action="store",
+        dest="log_path",
+        required=True,
+    )
 
-        upload_result_parser.set_defaults(func=rp_obj.upload_result)
+    upload_result_parser.set_defaults(func=rp_obj.upload_result)
 
-        args = parser.parse_args(namespace=rp_obj)
-        if hasattr(args, 'func'):
-            args.func()
+    args = parser.parse_args(namespace=rp_obj)
+    if hasattr(args, "func"):
+        args.func()

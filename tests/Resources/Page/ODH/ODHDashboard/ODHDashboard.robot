@@ -63,8 +63,13 @@ Login To RHODS Dashboard
    Run Keyword If  ${authorize_service_account}  Authorize rhods-dashboard service account
 
 Wait for RHODS Dashboard to Load
-  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
-  Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"    ${dashboard_titles}="Red Hat OpenShift Data Science"
+   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.15.0
+   IF  ${version-check}==True
+       Wait For Condition  return document.title == ${dashboard_titles}  timeout=15
+   ELSE
+       Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+   END
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
@@ -112,7 +117,7 @@ Remove Disabled Application From Enabled Page
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
    ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
-   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=180
+   Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=300
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']

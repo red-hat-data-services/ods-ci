@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # vim: et
-# example: SplitSuite.py:3:1 => divide whole suite into 3 parts and execute 1st part
+# example: SplitSuite.py:3:1
+# => divide whole suite into 3 parts and execute 1st part
 # from parts.
-# Based on Splitter authored by: Akash Shende https://github.com/akash0x53/robot-parallel/blob/master/SplitSuite.py
+# Based on Splitter authored by: Akash Shende
+# https://github.com/akash0x53/robot-parallel/blob/master/SplitSuite.py
 
 from robot.api import SuiteVisitor
 from itertools import islice
@@ -25,7 +27,9 @@ def fetch_suites_names(suites_list):
 
 
 class SplitSuite(SuiteVisitor):
-    """Visitor that keeps only every Xth test in the visited suite structure."""
+    """
+    Visitor that keeps only every Xth test in the visited suite structure.
+    """
 
     def __init__(self, parts, which_part=1, max_suite_level=2):
         self.parts = float(parts)
@@ -41,7 +45,7 @@ class SplitSuite(SuiteVisitor):
             for suite_lev_1 in suite.suites:
                 print("> Suite Lev 1: ", suite_lev_1.name)
                 next_lev_suites = fetch_subsuites(suite_lev_1)
-                for lev in range(2, self.max_suite_level+1):
+                for lev in range(2, self.max_suite_level + 1):
                     print(">>> Extracting suites with level: ", lev)
                     current_lev_suites = next_lev_suites.copy()
                     if lev == self.max_suite_level:
@@ -51,7 +55,9 @@ class SplitSuite(SuiteVisitor):
                     for curr_lev_suite in current_lev_suites:
                         next_lev_suites_tmp = fetch_subsuites(curr_lev_suite)
                         if not next_lev_suites_tmp:
-                            # print("Fetching sub suites from previous level: ", str(lev-1))
+                            # print(
+                            # "Fetching sub suites from previous level: ", str(
+                            # lev-1))
                             sub_suites_list.append(curr_lev_suite)
                         else:
                             next_lev_suites += next_lev_suites_tmp
@@ -69,7 +75,9 @@ class SplitSuite(SuiteVisitor):
         suite_to_execute = chunked_suites[self.which_part - 1]
 
         try:
-            if len(chunked_suites[self.which_part]) < num_suite and int(self.which_part) == int(self.parts):
+            if len(chunked_suites[self.which_part]) < num_suite and int(
+                self.which_part
+            ) == int(self.parts):
                 suite_to_execute.extend(chunked_suites[self.which_part])
         except IndexError:
             pass

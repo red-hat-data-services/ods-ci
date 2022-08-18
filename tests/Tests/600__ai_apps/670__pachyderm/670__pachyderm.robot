@@ -47,6 +47,8 @@ Pachyderm Suite Setup
     Create Pachyderm AWS-Secret
     Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}
     Wait Until Status Is Running
+    Go To RHODS Dashboard
+    Verify Service Is Enabled    Pachyderm
 
 Pachyderm Suite Teardown
     Go To    ${OCP_CONSOLE_URL}

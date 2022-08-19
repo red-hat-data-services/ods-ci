@@ -304,16 +304,6 @@
                    }
                }
         },
-        "perceptiLabs": {
-             "badges": ["Coming soon"],
-             "provider": "by PercetiLabs",
-             "title": "PerceptiLabs",
-             "description": "PerceptiLabs is a visual modeling tool for editing, managing, and monitoring your machine learning models.",
-             "image": "/images/percepti-labs.svg",
-             "sidebar_h1": "PerceptiLabs",
-             "sidebar_links": {}
-
-        },
         "seldon-deploy": {
              "badges": ["Self-managed"],
              "provider": "by Seldon",

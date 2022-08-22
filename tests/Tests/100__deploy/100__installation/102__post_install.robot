@@ -141,7 +141,7 @@ Verify That CUDA Build Chain Succeeds
     ...    Pytorch and Tensorflow can be spawned successfully
     [Tags]    Smoke
     ...       Tier1
-    ...       ODS-316
+    ...       ODS-316    ODS-481
     Wait Until All Builds Are Complete    namespace=redhat-ods-applications
     Verify Image Can Be Spawned    image=minimal-gpu    size=Default
     Verify Image Can Be Spawned    image=pytorch        size=Default

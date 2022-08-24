@@ -52,6 +52,9 @@ ${openvino_operator_name}     OpenVINO Toolkit Operator
 ${openvino_dashboard_app_id}     openvino
 ${CUSTOM_EMPTY_GROUP}                   empty-group
 ${CUSTOM_INEXISTENT_GROUP}              inexistent-group
+@{DOC_LINKS_EXP}        https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science
+...                     https://access.redhat.com/support/cases/#/case/new/open-case?caseCreate=true
+...                     https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science
 
 
 *** Test Cases ***
@@ -128,6 +131,7 @@ Verify Documentation Link HTTP Status Code
     [Tags]    Sanity
     ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
+    Documentation Links Should Be Equal To The Expected Ones   actual_links=${links}  expected_links=${DOC_LINKS_EXP}
     Check External Links Status     links=${links}
 
 Verify Logged In Users Are Displayed In The Dashboard
@@ -729,3 +733,10 @@ Check And Uninstall Operator In Openshift
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
     Remove Disabled Application From Enabled Page    app_id=${dashboard_app_id}
+
+
+Documentation Links Should Be Equal To The Expected Ones
+    [Documentation]   Compare the fetched links from Dashboard with the expected ones
+    [Arguments]     ${actual_links}     ${expected_links}
+    Lists Should Be Equal   ${actual_links}    ${expected_links}    ignore_order=True
+

@@ -136,14 +136,16 @@ Verify Oath-Proxy Image Is fetched From CPaaS
     Verify Container Image      redhat-ods-applications     ${pod}      oauth-proxy
     ...     "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
-Verify Pytorch And Tensorflow Can Be Spawned
-    [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
-    [Tags]    Sanity
+Verify That CUDA Build Chain Succeeds
+    [Documentation]    Check Cuda builds are complete. Verify CUDA (minimal-gpu),
+    ...    Pytorch and Tensorflow can be spawned successfully
+    [Tags]    Smoke
     ...       Tier1
-    ...       ODS-480  ODS-481
+    ...       ODS-316    ODS-481
     Wait Until All Builds Are Complete    namespace=redhat-ods-applications
-    Verify Image Can Be Spawned    image=pytorch  size=Default
-    Verify Image Can Be Spawned    image=tensorflow  size=Default
+    Verify Image Can Be Spawned    image=minimal-gpu    size=Default
+    Verify Image Can Be Spawned    image=pytorch        size=Default
+    Verify Image Can Be Spawned    image=tensorflow     size=Default
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy

@@ -62,23 +62,14 @@ Login To RHODS Dashboard
    ${authorize_service_account} =  Is rhods-dashboard Service Account Authorization Required
    Run Keyword If  ${authorize_service_account}  Authorize rhods-dashboard service account
 
-Logout From RHODS Dashboard
-    [Documentation]  Logs out from the current user in the RHODS dashboard
-    ...    This will reload the page and show the `Log in with OpenShift` page
-    ...    so you want to use `Login to RHODS Dashboard` after this
-    # Another option for the logout button
-    #${user} =  Get Text  xpath:/html/body/div/div/header/div[2]/div/div[3]/div/button/span[1]
-    #Click Element  xpath://span[.="${user}"]/..
-    Click Button  xpath:(//button[@id="toggle-id"])[2]
-    Wait Until Page Contains Element  xpath://a[.="Log out"]
-    Click Element  xpath://a[.="Log out"]
-    Wait Until Page Contains  Log in with OpenShift
-
 Wait for RHODS Dashboard to Load
-  #[Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
-  # Temporary workaround to use ODH cluster
-  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
-  Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"    ${dashboard_titles}="Red Hat OpenShift Data Science"
+   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.15.0
+   IF  ${version-check}==True
+       Wait For Condition  return document.title == ${dashboard_titles}  timeout=15
+   ELSE
+       Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+   END
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
@@ -88,7 +79,7 @@ Wait Until RHODS Dashboard ${dashboard_app} Is Visible
 Launch ${dashboard_app} From RHODS Dashboard Link
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
-  #Switch Window  NEW
+  Switch Window  NEW
 
 Launch ${dashboard_app} From RHODS Dashboard Dropdown
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
@@ -132,7 +123,7 @@ Remove Disabled Application From Enabled Page
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[1]
    Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
-   Capture Page Screenshot  disabled_card_removed.png
+   Capture Page Screenshot  ${app_id}_removed.png
 
 
 Verify Service Provides "Enable" Button In The Explore Page

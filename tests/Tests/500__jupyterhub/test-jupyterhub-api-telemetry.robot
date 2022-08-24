@@ -72,7 +72,7 @@ JupyterHub API Should Exposes SegmentKey
 
 Switch To RHODS Dashboard
     [Documentation]     Switch tab to RHODS dashboard
-    Switch Window    title=Red Hat OpenShift Data Science Dashboard
+    Switch Window    title=Red Hat OpenShift Data Science
     Sleep    1s    msg=Wait for to change tab
 
 Switch To JupyterHub API Tab

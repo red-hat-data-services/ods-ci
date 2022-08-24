@@ -4,6 +4,8 @@ Metadata         RHODS OLM Version    1.0.0
 Resource         ../Resources/RHODS_OLM/RHODS_OLM.resource
 Library          OpenShiftLibrary
 Library          OperatingSystem
+Library          String
+
 ***Variables***
 ${cluster_type}          OSD
 ${operator_version}      latest

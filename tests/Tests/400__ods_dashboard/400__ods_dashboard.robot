@@ -51,6 +51,9 @@ ${openvino_container_name}    OpenVINO
 ${openvino_operator_name}     OpenVINO Toolkit Operator
 ${CUSTOM_EMPTY_GROUP}                   empty-group
 ${CUSTOM_INEXISTENT_GROUP}              inexistent-group
+@{DOC_LINKS_EXP}        https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science
+...                     https://access.redhat.com/support/cases/#/case/new/open-case?caseCreate=true
+...                     https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science
 
 
 *** Test Cases ***
@@ -127,6 +130,7 @@ Verify Documentation Link HTTP Status Code
     [Tags]    Sanity
     ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
+    Documentation Links Should Be Equal To The Expected Ones   actual_links=${links}  expected_links=${DOC_LINKS_EXP}
     Check External Links Status     links=${links}
 
 Verify Logged In Users Are Displayed In The Dashboard
@@ -762,3 +766,9 @@ Check Application Switcher Links To Openshift Console
     ${status}=    Check HTTP Status Code    ${list_of_links}[0]
     Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
     Should Be Equal    ${status}    ${200}
+
+Documentation Links Should Be Equal To The Expected Ones
+    [Documentation]   Compare the fetched links from Dashboard with the expected ones
+    [Arguments]     ${actual_links}     ${expected_links}
+    Lists Should Be Equal   ${actual_links}    ${expected_links}    ignore_order=True
+

@@ -63,8 +63,13 @@ Login To RHODS Dashboard
    Run Keyword If  ${authorize_service_account}  Authorize rhods-dashboard service account
 
 Wait for RHODS Dashboard to Load
-  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
-  Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"    ${dashboard_titles}="Red Hat OpenShift Data Science"
+   ${version-check} =  Is RHODS Version Greater Or Equal Than  1.15.0
+   IF  ${version-check}==True
+       Wait For Condition  return document.title == ${dashboard_titles}  timeout=15
+   ELSE
+       Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+   END
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments

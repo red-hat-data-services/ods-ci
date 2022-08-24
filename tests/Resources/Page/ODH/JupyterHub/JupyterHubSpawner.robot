@@ -257,11 +257,13 @@ Handle Server Is Stopping
 
 Control Panel Is Visible
    [Documentation]  Checks if Control Panel page is open
+   Sleep  2s
    ${control_panel_visible} =  Run Keyword And Return Status  Page Should Contain  Notebook server control panel
    [Return]  ${control_panel_visible}
 
 Handle Control Panel
    [Documentation]  Handles control panel page
+   Wait Until Page Contains     Stop notebook server    timeout=10s
    Click Button  Stop notebook server
    Wait Until Page Contains Element  xpath://button[.="Stop server"]
    Click Button  xpath://button[.="Stop server"]
@@ -273,15 +275,6 @@ Fix Spawner Status
    ...              this keyword will bring us back to the actual spawner.
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    IF  ${spawner_visible}!=True
-      # ${SNR_visible} =  Server Not Running Is Visible
-      # ${SMS_visible} =  Start My Server Is Visible
-      # ${SIS_visible} =  Server Is Stopping Is Visible
-      # IF  ${SIS_visible}==True
-      #    Handle Server Is Stopping
-      # ELSE IF  ${SNR_visible}==True
-      #    Handle Server Not Running
-      # ELSE IF  ${SMS_visible}==True
-      #    Handle Start My Server
       ${control_panel_visible} =  Control Panel Is Visible
       IF  ${control_panel_visible}==True
          Handle Control Panel
@@ -388,16 +381,17 @@ Fetch Image Tooltip Info
     [Documentation]  Fetches libraries in image tooltip text
     [Arguments]  ${img}
     ${xpath_img_tooltip} =  Set Variable  //input[contains(@id, "${img}")]/../label/span/*
-    ${xpath_tooltip_items} =  Set Variable  //span[@class='jsp-spawner__image-options__packages-popover__package']
+    ${xpath_tooltip_items} =  Set Variable  //div[@class='pf-c-popover__body']/p
     @{tmp_list} =  Create List
     Click Element  ${xpath_img_tooltip}
     ${libs} =  Get Element Count  ${xpath_tooltip_items}
-    FOR  ${index}  IN RANGE  1  1+${libs}
+    Log  ${libs}
+    FOR  ${index}  IN RANGE  3  1+${libs}
         Sleep  0.1s
         ${item} =  Get Text  ${xpath_tooltip_items}\[${index}]
         Append To List  ${tmp_list}  ${item}
     END
-    Click Element  //div[@class='jsp-app__header__title']
+    Click Element  xpath://div[.="Deployment size"]
     [Return]  ${tmp_list}
 
 Spawn Notebooks And Set S3 Credentials

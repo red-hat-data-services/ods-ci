@@ -93,6 +93,9 @@ Verify User Is Able to Activate Anaconda Professional
   Verify Anaconda Element Present Based On Version
   [Teardown]    Remove Anaconda Component
 
+Test kfdef
+    [Tags]  kfdef
+    Verify Anaconda In Kfdef
 
 *** Keywords ***
 Anaconda Suite Setup
@@ -107,4 +110,4 @@ Verify Anaconda In Kfdef
     FOR    ${application}    IN    @{res[0]['spec']['applications']}
         Append To List    ${applications_names}  ${application['name']}
     END
-    Run Keyword And Continue On Failure     Should Contain  ${applications_names}  rhods-anaconda
+    Run Keyword And Continue On Failure     Should Contain  ${applications_names}  anaconda-ce

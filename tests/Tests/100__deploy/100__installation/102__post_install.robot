@@ -143,6 +143,7 @@ Verify That CUDA Build Chain Succeeds
     ...       Tier1
     ...       ODS-316    ODS-481
     Wait Until All Builds Are Complete    namespace=redhat-ods-applications
+    ...    build_timeout=45m
     Verify Image Can Be Spawned    image=minimal-gpu    size=Default
     Verify Image Can Be Spawned    image=pytorch        size=Default
     Verify Image Can Be Spawned    image=tensorflow     size=Default

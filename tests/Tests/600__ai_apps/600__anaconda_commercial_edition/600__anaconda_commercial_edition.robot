@@ -72,7 +72,7 @@ Verify User Is Able to Activate Anaconda Professional
   ...                                   pod_search_term=anaconda-ce-periodic-validator-job-custom-run
   Log  ${val_result}
   Should Be Equal  ${val_result[0]}  ${VAL_SUCCESS_MSG}
-  Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete
+  Wait Until Keyword Succeeds    400  5s  Check Anaconda CE Image Build Status  Complete
   Go To  ${ODH_DASHBOARD_URL}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Launch JupyterHub Spawner From Dashboard

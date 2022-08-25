@@ -245,7 +245,7 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
     ...     configmap in openshift
     ...     ProductBug:RHODS-4308
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=rhods-enabled-applications-config    src={"data":null}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data":null}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications   Enabled

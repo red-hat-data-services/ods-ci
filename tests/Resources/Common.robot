@@ -75,6 +75,7 @@ Get Cluster ID
     IF    not $cluster_id
         Fail    Unable to retrieve cluster ID. Are you logged using `oc login` command?
     END
+    ${cluster_id}=    Remove String    ${cluster_id}    "
     [Return]    ${cluster_id}
 
 Get Cluster Name By Cluster ID

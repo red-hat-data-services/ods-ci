@@ -563,7 +563,7 @@ Dashboard Test Setup
 
 Dashboard Suite Setup
     Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
+    #RHOSi Setup
 
 Dashboard Test Teardown
     Close All Browsers
@@ -741,16 +741,16 @@ Check And Uninstall Operator In Openshift
 Check Application Switcher Links To Openshift Cluster Manager
     [Documentation]    Checks for HTTP status of OCM link in application switcher
     ${cluster_id}=    Get Cluster ID
-    ${cluster_id}=    Remove String    ${cluster_id}    "
-    ${ocm_staging_link}=    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
-    ${list_of_links}=    Get Links From Switcher
-    ${ocm_prod_link}=    Set Variable    ${list_of_links}[1]
+    ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
     ${cluster_env}=    Fetch ODS Cluster Environment
     ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
     IF    "${cluster_env}" == "stage"
+        ${ocm_staging_link}=    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
         Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
-        Go To ${ocm_staging_link}
+        Go To   ${ocm_staging_link}
     ELSE
+        ${list_of_links}=    Get Links From Switcher
+        ${ocm_prod_link}=    Set Variable    ${list_of_links}[1]
         Check HTTP Status Code    ${ocm_prod_link}
         Click Link    xpath://a[*[text()="OpenShift Cluster Manager"]]
         Switch Window   NEW

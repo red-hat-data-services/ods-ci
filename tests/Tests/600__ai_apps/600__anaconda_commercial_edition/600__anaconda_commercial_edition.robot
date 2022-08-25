@@ -93,9 +93,6 @@ Verify User Is Able to Activate Anaconda Professional
   Verify Anaconda Element Present Based On Version
   [Teardown]    Remove Anaconda Component
 
-Test kfdef
-    [Tags]  kfdef
-    Verify Anaconda In Kfdef
 
 *** Keywords ***
 Anaconda Suite Setup

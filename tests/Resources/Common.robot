@@ -144,17 +144,3 @@ Clean Resource YAML Before Creating It
     ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
     Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
     [Return]   ${clean_yaml_data}
-
-Wait Until OCM Cluster Page Is Loaded
-    [Documentation]     wait until the OCM page loads for ${cluster_name}
-    [Arguments]    ${cluster_name}
-    Wait OCM Splash Page
-    Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
-
-Login To OCM
-    [Documentation]    Login to the OpenShift Cluster Manager
-    Input Text    //div[@class="pf-c-form__group"]/input    ${SSO.USERNAME}
-    Click Button   //*[@id="login-show-step2"]
-    Sleep   1s
-    Input Text    //*[@id="password"]    ${SSO.PASSWORD}
-    Click Button    //*[@id="rh-password-verification-submit-button"]

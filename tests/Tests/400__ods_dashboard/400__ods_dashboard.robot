@@ -13,6 +13,7 @@ Resource          ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource          ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource          ../../Resources/Page/HybridCloudConsole/OCM.robot
 Suite Setup       Dashboard Suite Setup
 Suite Teardown    RHOSi Teardown
 Test Setup        Dashboard Test Setup

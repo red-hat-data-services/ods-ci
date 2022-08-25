@@ -564,7 +564,7 @@ Dashboard Test Setup
 
 Dashboard Suite Setup
     Set Library Search Order    SeleniumLibrary
-    #RHOSi Setup
+    RHOSi Setup
 
 Dashboard Test Teardown
     Close All Browsers

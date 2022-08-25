@@ -103,8 +103,10 @@ Anaconda Suite Setup
 Verify Anaconda In Kfdef
     [Documentation]  Verifies if Anaconda is present in Kfdef
     ${res}=  Oc Get  kind=KfDef  namespace=redhat-ods-applications
-    @{applications_names} =  Create List
-    FOR    ${application}    IN    @{res[0]['spec']['applications']}
-        Append To List    ${applications_names}  ${application['name']}
+    @{applications_names}=    Create List
+    FOR     ${kfdef}    IN    @{res}
+        FOR    ${application}    IN    @{kfdef['spec']['applications']}
+            Append To List    ${applications_names}  ${application['name']}
+        END
     END
     Run Keyword And Continue On Failure     Should Contain  ${applications_names}  anaconda-ce

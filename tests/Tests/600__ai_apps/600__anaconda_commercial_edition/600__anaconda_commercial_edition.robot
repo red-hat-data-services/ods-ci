@@ -107,4 +107,4 @@ Verify Anaconda In Kfdef
     FOR    ${application}    IN    @{res[0]['spec']['applications']}
         Append To List    ${applications_names}  ${application['name']}
     END
-    Should Contain  ${applications_names}  rhods-anaconda
+    Run Keyword And Continue On Failure     Should Contain  ${applications_names}  rhods-anaconda

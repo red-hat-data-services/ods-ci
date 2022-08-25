@@ -50,13 +50,10 @@ Restore Default Deployment Sizes
     END
 
 Verify "Usage Data Collection" Key
-    [Documentation]    Verifies that "Usage Data Collection" is using the expcected segment.io key
-    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check}==True
-        ${segment_key}=    ODS.Get "Usage Data Collection" Key
-        Should Be Equal As Strings    ${segment_key}    ${USAGE_DATA_COLLECTION_DEFAULT_SEGMENT_PUBLIC_KEY}
-        ...    msg=Unexpected "Usage Data Collection" Key
-    END
+    [Documentation]    Verifies that "Usage Data Collection" is using the expected segment.io key
+    ${segment_key}=    ODS.Get "Usage Data Collection" Key
+    Should Be Equal As Strings    ${segment_key}    ${USAGE_DATA_COLLECTION_DEFAULT_SEGMENT_PUBLIC_KEY}
+    ...    msg=Unexpected "Usage Data Collection" Key
 
 Get "Usage Data Collection" Key
     [Documentation]    Returns the segment.io key used for usage data collection

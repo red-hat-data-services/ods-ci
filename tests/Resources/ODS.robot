@@ -62,8 +62,8 @@ Get "Usage Data Collection" Key
     [Documentation]    Returns the segment.io key used for usage data collection
 
     ${rc}    ${usage_data_collection_key_base64}=    Run And Return Rc And Output
-    ...    oc get secret rhods-segment-key -n redhat-ods-applications -o jsonpath='{.data.segmentKey}'
-    Should Be Equal As Integers    ${rc}    0    msg=rhods-segment-key secret not found or not having the right format
+    ...    oc get secret odh-segment-key -n redhat-ods-applications -o jsonpath='{.data.segmentKey}'
+    Should Be Equal As Integers    ${rc}    0    msg=odh-segment-key secret not found or not having the right format
 
     ${usage_data_collection_key}=    Evaluate
     ...    base64.b64decode("${usage_data_collection_key_base64}").decode('utf-8')    modules=base64
@@ -71,10 +71,10 @@ Get "Usage Data Collection" Key
     [Return]    ${usage_data_collection_key}
 
 Is Usage Data Collection Enabled
-    [Documentation]    Returns a boolean with the value of configmap rhods-segment-key-config > segmentKeyEnabled
+    [Documentation]    Returns a boolean with the value of configmap odh-segment-key-config > segmentKeyEnabled
     ...    which can be seen also in ODS Dashboard > Cluster Settings > "Usage Data Collection"
     ${usage_data_collection_enabled}=    Run
-    ...    oc get configmap rhods-segment-key-config -n redhat-ods-applications -o jsonpath='{.data.segmentKeyEnabled}'
+    ...    oc get configmap odh-segment-key-config -n redhat-ods-applications -o jsonpath='{.data.segmentKeyEnabled}'
     ${usage_data_collection_enabled}=    Convert To Boolean    ${usage_data_collection_enabled}
     [Return]    ${usage_data_collection_enabled}
 

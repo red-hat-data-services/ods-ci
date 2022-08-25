@@ -6,7 +6,6 @@ Library   RequestsLibrary
 Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource  ODS.robot
 Resource  RHOSi.resource
 
 

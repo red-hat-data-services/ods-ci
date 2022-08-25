@@ -20,7 +20,7 @@ ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =
 #...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 #${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
-${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container size"]
+${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 
 
 *** Keywords ***
@@ -48,7 +48,7 @@ Select Container Size
     [Documentation]  Selects the container size based on the ${container_size} argument
     [Arguments]  ${container_size}
     # Expand List
-    Wait Until Page Contains    Container size    timeout=30
+    Wait Until Page Contains    Container Size    timeout=30
     ...    error=Container size selector is not present in JupyterHub Spawner
     Click Element  xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]
     Click Element  xpath://span[.="${container_size}"]/../..
@@ -511,4 +511,3 @@ CleanUp JupyterHub For N users
         Stop JupyterLab Notebook Server
     END
     [Teardown]    SeleniumLibrary.Close All Browsers
-    

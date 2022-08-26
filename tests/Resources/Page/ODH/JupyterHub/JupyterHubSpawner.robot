@@ -81,10 +81,14 @@ Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
    [Arguments]  ${env_var}  ${env_var_value}
    Click Button  Add more variables
-   Input Text  xpath://input[@id="---NO KEY---"]  ${env_var}
-   Element Attribute Value Should Be  xpath://input[@id="${env_var}"]  value  ${env_var}
-   Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
-   Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}
+   #Input Text  xpath://input[@id="---NO KEY---"]  ${env_var}
+   Input Text  xpath://input[contains(@id,"-NO KEY-")][1]  ${env_var}
+   #Element Attribute Value Should Be  xpath://input[@id="${env_var}"]  value  ${env_var}
+   Element Attribute Value Should Be  xpath://input[contains(@id,"-${env_var}")][1]  value  ${env_var}
+   #Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
+   Input Text  xpath://input[contains(@id, "-${env_var}-value")]  ${env_var_value}
+   #Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}
+   Element Attribute Value Should Be  xpath://input[contains(@id, "-${env_var}-value")]  value  ${env_var_value}
 
 Remove All Spawner Environment Variables
    [Documentation]  Removes all existing environment variables in the Spawner
@@ -107,20 +111,20 @@ Remove Spawner Environment Variable
    [Arguments]  ${env_var}
    ${env_check} =  Spawner Environment Variable Exists   ${env_var}
    IF  ${env_check}==True
-      #Click Element  xpath://input[@id="${env_var}"]/../../../../button
-      Click Element  xpath://input[@id="${env_var}"]/../../../../div/button
+      #Click Element  xpath://input[@id="${env_var}"]/../../../../div/button
+      Click Element  xpath://input[contains(@id, "-${env_var}")][1]/../../../../div/button
    END
 
 Spawner Environment Variable Exists
    [Documentation]  Checks if an environment variable is set based on the ${env_var} argument
    [Arguments]  ${env_var}
-   ${var_visible} =  Run Keyword And Return Status  Element Should Be Visible  id:${env_var}
+   ${var_visible} =  Run Keyword And Return Status  Element Should Be Visible  xpath://input[contains(@id, "-${env_var}")][1]
    [Return]  ${var_visible}
 
 Get Spawner Environment Variable Value
    [Documentation]  Get the value of an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
-   ${env_var_value} =  Get Value  id:${env_var}
+   ${env_var_value} =  Get Value  xpath://input[contains(@id, "-${env_var}")][1]
    [Return]  ${env_var_value}
 
 Spawn Notebook

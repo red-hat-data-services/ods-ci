@@ -13,6 +13,7 @@ Resource          ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource          ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource          ../../Resources/Page/HybridCloudConsole/OCM.robot
 Suite Setup       Dashboard Suite Setup
 Suite Teardown    RHOSi Teardown
 Test Setup        Dashboard Test Setup
@@ -49,8 +50,12 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ${openvino_appname}           ovms
 ${openvino_container_name}    OpenVINO
 ${openvino_operator_name}     OpenVINO Toolkit Operator
+${openvino_dashboard_app_id}     openvino
 ${CUSTOM_EMPTY_GROUP}                   empty-group
 ${CUSTOM_INEXISTENT_GROUP}              inexistent-group
+@{DOC_LINKS_EXP}        https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science
+...                     https://access.redhat.com/support/cases/#/case/new/open-case?caseCreate=true
+...                     https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science
 
 
 *** Test Cases ***
@@ -127,6 +132,7 @@ Verify Documentation Link HTTP Status Code
     [Tags]    Sanity
     ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
+    Documentation Links Should Be Equal To The Expected Ones   actual_links=${links}  expected_links=${DOC_LINKS_EXP}
     Check External Links Status     links=${links}
 
 Verify Logged In Users Are Displayed In The Dashboard
@@ -239,7 +245,7 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    Close All Browsers
    Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
    Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
-   [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
+   [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}    ${openvino_dashboard_app_id}
 
 Verify Error Message In Logs When A RHODS Group Is Empty
     [Tags]  Sanity
@@ -314,6 +320,15 @@ Verify Dashboard Pod Is Not Getting Restarted
     ...       ODS-374
     ${pod_names}    Get POD Names    redhat-ods-applications    app=rhods-dashboard
     Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-applications
+
+Verify Switcher to Masterhead
+    [Tags]    ODS-771
+    ...       Tier2
+    [Documentation]    Checks the link in switcher and also check the link of OCM in staging
+    Go To RHODS Dashboard
+    Open Application Switcher Menu
+    Check Application Switcher Links To Openshift Console
+    Check Application Switcher Links To Openshift Cluster Manager
 
 
 *** Keywords ***
@@ -711,7 +726,7 @@ Uninstall Operator And Check Enabled Page Is Rendering
 
 Check And Uninstall Operator In Openshift
     [Documentation]     it checks operator is uninstalled if not then uninstall it
-    [Arguments]       ${operator_name}    ${operator_appname}   ${expected_number_operator}=2
+    [Arguments]       ${operator_name}    ${operator_appname}   ${dashboard_app_id}   ${expected_number_operator}=2
     ${status}       Check If Operator Is Already Installed In Opneshift    ${operator_name}
     IF  ${status}
         Open OperatorHub
@@ -724,3 +739,42 @@ Check And Uninstall Operator In Openshift
         END
     END
     Close All Browsers
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    browser_options=${BROWSER.OPTIONS}
+    Remove Disabled Application From Enabled Page    app_id=${dashboard_app_id}
+
+
+Check Application Switcher Links To Openshift Cluster Manager
+    [Documentation]    Checks for HTTP status of OCM link in application switcher
+    ${cluster_id}=    Get Cluster ID
+    ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
+    ${cluster_env}=    Fetch ODS Cluster Environment
+    IF    "${cluster_env}" == "stage"
+        ${ocm_staging_link}=    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
+        Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
+        Go To   ${ocm_staging_link}
+    ELSE
+        ${list_of_links}=    Get Links From Switcher
+        ${ocm_prod_link}=    Set Variable    ${list_of_links}[1]
+        Check HTTP Status Code    ${ocm_prod_link}
+        Click Link    xpath://a[*[text()="OpenShift Cluster Manager"]]
+        Switch Window   NEW
+    END
+    Sleep  1
+    Login To OCM
+    Reload Page
+    Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
+
+Check Application Switcher Links To Openshift Console
+    [Documentation]    Checks the HTTP status of OpenShift Console
+    ${list_of_links}=    Get Links From Switcher
+    ${status}=    Check HTTP Status Code    ${list_of_links}[0]
+    Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
+    Should Be Equal    ${status}    ${200}
+
+Documentation Links Should Be Equal To The Expected Ones
+    [Documentation]   Compare the fetched links from Dashboard with the expected ones
+    [Arguments]     ${actual_links}     ${expected_links}
+    Lists Should Be Equal   ${actual_links}    ${expected_links}    ignore_order=True
+

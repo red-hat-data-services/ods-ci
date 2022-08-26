@@ -136,12 +136,13 @@ Verify Oath-Proxy Image Is fetched From CPaaS
     Verify Container Image      redhat-ods-applications     ${pod}      oauth-proxy
     ...     "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
 
-Verify Pytorch And Tensorflow Can Be Spawned
-    [Documentation]    Check Cuda builds are complete and  Verify Pytorch and Tensorflow can be spawned
-    [Tags]    Sanity
+Verify That CUDA Build Chain Succeeds
+    [Documentation]    Check Cuda builds are complete. Verify CUDA (minimal-gpu),
+    ...    Pytorch and Tensorflow can be spawned successfully
+    [Tags]    Smoke
     ...       Tier1
-    ...       ODS-480  ODS-481
-    Wait Until All Builds Are Complete    namespace=redhat-ods-applications
+    ...       ODS-316    ODS-481
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
     Verify Image Can Be Spawned    image=pytorch  size=Small
     Verify Image Can Be Spawned    image=tensorflow  size=Small
 

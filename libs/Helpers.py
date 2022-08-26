@@ -13,36 +13,42 @@ class Helpers:
 
     @keyword
     def text_to_list(self, text):
-        rows = text.split('\n')
+        rows = text.split("\n")
         print(rows)
         return rows
 
     @keyword
     def gt(self, version, target):
-        """ Returns True if the version > target
-            and otherwise False including if an exception is thrown """
+        """Returns True if the version > target
+        and otherwise False including if an exception is thrown"""
         try:
             version = VersionInfo.parse(version)
             target = VersionInfo.parse(target)
-            # version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
-            # target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
+            # version=tuple(
+            #   version.translate(str.maketrans('', '', string.punctuation)))
+            # target=tuple(
+            #   target.translate(str.maketrans('', '', string.punctuation)))
             return version > target
         except ValueError:
-            # Returning False on exception as a workaround for when an null (or invalid) semver version is passed
+            # Returning False on exception as a workaround for when an
+            # null (or invalid) semver version is passed
             return False
 
     @keyword
     def gte(self, version, target):
-        """ Returns True if the SemVer version >= target
-            and otherwise False including if an exception is thrown """
+        """Returns True if the SemVer version >= target
+        and otherwise False including if an exception is thrown"""
         try:
             version = VersionInfo.parse(version)
             target = VersionInfo.parse(target)
-            # version=tuple(version.translate(str.maketrans('', '', string.punctuation)))
-            # target=tuple(target.translate(str.maketrans('', '', string.punctuation)))
+            # version=tuple(
+            #   version.translate(str.maketrans('', '', string.punctuation)))
+            # target=tuple(target.translate(
+            #   str.maketrans('', '', string.punctuation)))
             return version >= target
         except ValueError:
-            # Returning False on exception as a workaround for when an null (or invalid) semver version is passed
+            # Returning False on exception as a workaround for when an
+            #   null (or invalid) semver version is passed
             return False
 
     @keyword
@@ -51,7 +57,9 @@ class Helpers:
         ocm_client.cluster_name = cluster_name
         result = ocm_client.install_rhoam_addon(exit_on_failure=False)
         if not result:
-            self.BuiltIn.fail("Something got wrong while installing RHOAM. Check the logs")
+            self.BuiltIn.fail(
+                "Something got wrong while installing RHOAM. Check the logs"
+            )
 
     @keyword
     def uninstall_rhoam_using_addon_flow(self, cluster_name):
@@ -82,28 +90,41 @@ class Helpers:
         ocm_client.uninstall_rhods()
 
     @keyword
-    def update_notification_email_address(self, cluster_name, email_address, addon_name='managed-odh'):
+    def update_notification_email_address(
+        self, cluster_name, email_address, addon_name="managed-odh"
+    ):
         """Update notification email for add-ons using OCM"""
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
-        status = ocm_client.update_notification_email_address(addon_name, email_address, exit_on_failure=False)
+        status = ocm_client.update_notification_email_address(
+            addon_name, email_address, exit_on_failure=False
+        )
         if not status:
-            self.BuiltIn.fail("Unable to update notification email, Check if operator is installed via Add-on")
+            self.BuiltIn.fail(
+                "Unable to update notification email,"
+                " Check if operator is installed via Add-on"
+            )
 
     @keyword
     def convert_to_hours_and_minutes(self, seconds):
-        """ Converts seconds in hours and minutes """
+        """Converts seconds in hours and minutes"""
         m, s = divmod(int(seconds), 60)
         h, m = divmod(m, 60)
         return h, m
 
     @keyword
-    def install_isv_by_name(self, operator_name, channel, source="certified-operators"):
+    def install_isv_by_name(
+        self, operator_name, channel, source="certified-operators"):
         ocm_client = OpenshiftClusterManager()
-        ocm_client.install_openshift_isv(operator_name, channel, source, exit_on_failure=False)
+        ocm_client.install_openshift_isv(
+            operator_name, channel, source, exit_on_failure=False
+        )
         if operator_name == "ovms":
             status = ocm_client.wait_for_isv_installation_to_complete("openvino")
         else:
             status = ocm_client.wait_for_isv_installation_to_complete(operator_name)
         if not status:
-            self.BuiltIn.fail("Unable to install the {} isv, Check if ISV subscription is created{}".format(operator_name, status))
+            self.BuiltIn.fail(
+                "Unable to install the {} isv, Check if ISV subscription is "
+                "created{}".format(operator_name, status)
+            )

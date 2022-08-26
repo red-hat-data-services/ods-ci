@@ -349,17 +349,16 @@ Fetch Cluster Infrastructure Info
     [Return]    &{cluster_infrastructure_info}
 
 Fetch ODS Cluster Environment
-    [Documentation]  Fetches the environment type of the cluster
-    ...        project: Project name
-    ...    Returns:
-    ...        Cluster Environment (str)
-   ${match} =    Fetch Cluster Platform Type
+   [Documentation]  Fetches the environment type of the cluster
+   ...        Returns:
+   ...        Cluster Environment (str)
+   ${match}=    Fetch Cluster Platform Type
    Run Keyword If    '${match}'!='AWS'    FAIL    msg=This keyword should be used only in OSD clusters
-   ${match}  ${status} =    Run Keyword And Ignore Error  Should Contain    ${OCP_CONSOLE_URL}    devshift.org
+   ${match}  ${status}=    Run Keyword And Ignore Error  Should Contain    ${OCP_CONSOLE_URL}    devshift.org
    IF    "${match}" == "PASS"
-       ${cluster_type} =  Set Variable  stage
+       ${cluster_type}=  Set Variable  stage
    ELSE
-       ${cluster_type} =  Set Variable  production
+       ${cluster_type}=  Set Variable  production
    END
    [Return]    ${cluster_type}
 
@@ -399,3 +398,4 @@ Delete RHODS Config Map
     ...                corresponding argument
     [Arguments]     ${name}  ${namespace}=redhat-ods-applications
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
+

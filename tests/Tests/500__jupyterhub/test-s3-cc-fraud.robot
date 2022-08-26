@@ -26,7 +26,7 @@ Can Login to Jupyterhub
   ${authorization_required} =  Is Service Account Authorization Required
   Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
   #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-  Wait Until Page Contains  Start a Notebook server
+  Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
   [Tags]  Sanity  ODS-902  ODS-904

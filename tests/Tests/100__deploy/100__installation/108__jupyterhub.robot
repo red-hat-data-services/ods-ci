@@ -48,7 +48,6 @@ Verify JupyterHub Receives Credentials And Creates Instance Of AWS RDS
     ...       ODS-337
     ...       ODS-338
     Skip  msg=JupyterHub Secret is removed after KFNBC migration
-    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
 
 *** Keywords ***
 Fetch JupyterHub DB Pods Info

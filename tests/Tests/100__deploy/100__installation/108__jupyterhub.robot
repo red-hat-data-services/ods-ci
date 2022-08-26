@@ -38,6 +38,9 @@ Verify PostgreSQL Is Not Deployed When AWS RDS Is Enabled
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-336
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
+    Skip if   ${version-check}==True
+    ...   PostgreSQL Pod is removed after KFNBC migration
     ${cluster_platform_type}=    Fetch Cluster Platform Type
     Skip if    "${cluster_platform_type}" != "AWS"
     ...    This test only applies to AWS clusters
@@ -51,6 +54,9 @@ Verify JupyterHub Receives Credentials And Creates Instance Of AWS RDS
     ...       Tier1
     ...       ODS-337
     ...       ODS-338
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
+    Skip if   ${version-check}==True
+    ...   JupyterHub Secret is removed after KFNBC migration
     ${cluster_platform_type}=    Fetch Cluster Platform Type
     Skip if    "${cluster_platform_type}" != "AWS"
     ...    This test only applies to AWS clusters

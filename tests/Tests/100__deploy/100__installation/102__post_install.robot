@@ -41,6 +41,9 @@ Verify Traefik Deployment
     ...       Tier1
     ...       ODS-546
     ...       ODS-552
+     ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
+    Skip if   ${version-check}==True
+    ...   Traefik proxy is removed after KFNBC migration
     @{traefik} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=name = traefik-proxy
     ${containerNames} =  Create List  traefik-proxy  configmap-puller
     Verify Deployment  ${traefik}  3  2  ${containerNames}
@@ -49,6 +52,9 @@ Verify JH Deployment
     [Documentation]  Verifies RHODS JH deployment
     [Tags]    Sanity
     ...       ODS-546  ODS-294  ODS-1250  ODS-237
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
+    Skip if   ${version-check}==True
+    ...   JupyterHub Deployment is removed after KFNBC migration
     @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
     ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
     Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
@@ -201,6 +207,9 @@ Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
     [Tags]    Tier2
     ...       ODS-586
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
+    Skip if   ${version-check}==True
+    ...   JupyterHub Pod is removed after KFNBC migration
     Verify Errors In Jupyterhub Logs
 
 Verify Grafana Is Connected To Prometheus Using TLS

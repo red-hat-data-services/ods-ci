@@ -271,7 +271,7 @@ Test Setup For Rhods Dashboard
 
 Test Teardown For Configmap Changed On RHODS Dashboard
     [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data": {"jupyter": "true"}}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
 

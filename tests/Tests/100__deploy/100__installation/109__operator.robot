@@ -19,13 +19,20 @@ Verify Odh-deployer Checks Cluster Platform Type
         ${odhdeployer_logs_content}=    Set Variable    INFO: Deploying on PSI. Creating local database
     ELSE IF    "${cluster_platform_type}" == "AWS"
         ${odhdeployer_logs_content}=     Set Variable
-        ...    INFO: Deploying on AWS. Creating CRO for deployment of RDS Instance
+        ...    INFO: Fresh Installation, proceeding normally
     ELSE
         ${odhdeployer_logs_content}=     Set Variable
         ...    ERROR: Deploying on ${cluster_platform_type}, which is not supported. Failing Installation
     END
     ${odhdeployer_logs}=    Fetch Odh-deployer Pod Logs
-    Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
+    ${status}=   Run Keyword And Return Status     Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
+    IF     ${status}==False
+            ${upgrade odhdeployer_logs_content}=     Set Variable
+            ...   INFO: Migrating from JupyterHub to NBC, deleting old JupyterHub artifacts
+            Should Contain    ${odhdeployer_logs}    ${upgrade odhdeployer_logs_content}
+    ELSE
+         Fail    Deploy or Upgrade INFO is not present in the operator logs
+    END
 
 Verify That The Operator Pod Does Not Get Stuck After Upgrade
     [Documentation]    Verifies that the operator pod doesn't get stuck after an upgrade

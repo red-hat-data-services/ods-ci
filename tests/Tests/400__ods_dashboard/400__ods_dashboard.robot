@@ -49,6 +49,7 @@ ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 ${openvino_appname}           ovms
 ${openvino_container_name}    OpenVINO
 ${openvino_operator_name}     OpenVINO Toolkit Operator
+${openvino_dashboard_app_id}     openvino
 ${CUSTOM_EMPTY_GROUP}                   empty-group
 ${CUSTOM_INEXISTENT_GROUP}              inexistent-group
 @{DOC_LINKS_EXP}        https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science
@@ -243,7 +244,7 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    Close All Browsers
    Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
    Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
-   [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
+   [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}    ${openvino_dashboard_app_id}
 
 Verify Error Message In Logs When A RHODS Group Is Empty
     [Tags]  Sanity
@@ -715,7 +716,7 @@ Uninstall Operator And Check Enabled Page Is Rendering
 
 Check And Uninstall Operator In Openshift
     [Documentation]     it checks operator is uninstalled if not then uninstall it
-    [Arguments]       ${operator_name}    ${operator_appname}   ${expected_number_operator}=2
+    [Arguments]       ${operator_name}    ${operator_appname}   ${dashboard_app_id}   ${expected_number_operator}=2
     ${status}       Check If Operator Is Already Installed In Opneshift    ${operator_name}
     IF  ${status}
         Open OperatorHub
@@ -728,8 +729,14 @@ Check And Uninstall Operator In Openshift
         END
     END
     Close All Browsers
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    browser_options=${BROWSER.OPTIONS}
+    Remove Disabled Application From Enabled Page    app_id=${dashboard_app_id}
+
 
 Documentation Links Should Be Equal To The Expected Ones
     [Documentation]   Compare the fetched links from Dashboard with the expected ones
     [Arguments]     ${actual_links}     ${expected_links}
     Lists Should Be Equal   ${actual_links}    ${expected_links}    ignore_order=True
+

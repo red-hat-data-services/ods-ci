@@ -38,14 +38,7 @@ Verify PostgreSQL Is Not Deployed When AWS RDS Is Enabled
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-336
-    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
-    Skip if   ${version-check}==True
-    ...   PostgreSQL Pod is removed after KFNBC migration
-    ${cluster_platform_type}=    Fetch Cluster Platform Type
-    Skip if    "${cluster_platform_type}" != "AWS"
-    ...    This test only applies to AWS clusters
-    Run Keyword And Expect Error    ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Fetch JupyterHub DB Pods Info
+    Skip      msg=PostgreSQL Pod is removed after KFNBC migration
 
 Verify JupyterHub Receives Credentials And Creates Instance Of AWS RDS
     [Documentation]    Verifies if JupyterHub receives the credentials for AWS RDS
@@ -54,19 +47,8 @@ Verify JupyterHub Receives Credentials And Creates Instance Of AWS RDS
     ...       Tier1
     ...       ODS-337
     ...       ODS-338
+    Skip  msg=JupyterHub Secret is removed after KFNBC migration
     ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
-    Skip if   ${version-check}==True
-    ...   JupyterHub Secret is removed after KFNBC migration
-    ${cluster_platform_type}=    Fetch Cluster Platform Type
-    Skip if    "${cluster_platform_type}" != "AWS"
-    ...    This test only applies to AWS clusters
-    &{jupyterhub_rds_secret_info}=    Fetch JupyterHub RDS Secret Info
-    ${username}=    Evaluate  base64.b64decode("${jupyterhub_rds_secret_info.data.username}").decode('utf-8')  modules=base64
-    ${password}=    Evaluate  base64.b64decode("${jupyterhub_rds_secret_info.data.password}").decode('utf-8')  modules=base64
-    ${host}=    Evaluate  base64.b64decode("${jupyterhub_rds_secret_info.data.host}").decode('utf-8')  modules=base64
-    OpenShift Resource Component Field Should Not Be Empty    ${host}
-    OpenShift Resource Component Field Should Not Be Empty    ${username}
-    OpenShift Resource Component Field Should Not Be Empty    ${password}
 
 *** Keywords ***
 Fetch JupyterHub DB Pods Info

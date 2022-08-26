@@ -41,17 +41,17 @@ Verify Traefik Deployment
     ...       Tier1
     ...       ODS-546
     ...       ODS-552
-    @{traefik} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=name = traefik-proxy
-    ${containerNames} =  Create List  traefik-proxy  configmap-puller
-    Verify Deployment  ${traefik}  3  2  ${containerNames}
+    Skip      msg=Traefik proxy is removed after KFNBC migration
 
-Verify JH Deployment
-    [Documentation]  Verifies RHODS JH deployment
+Verify Notebook Controller Deployment
+    [Documentation]  Verifies RHODS Notebook Controller deployment
     [Tags]    Sanity
     ...       ODS-546  ODS-294  ODS-1250  ODS-237
-    @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
-    ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
-    Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
+     @{NBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=notebook-controller
+     @{ONBC}=  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=odh-notebook-controller
+     ${containerNames} =  Create List  manager
+     Verify Deployment  ${NBC}  1  1  ${containerNames}
+     Verify Deployment  ${ONBC}  1  1  ${containerNames}
 
 Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed
@@ -201,7 +201,7 @@ Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
     [Tags]    Tier2
     ...       ODS-586
-    Verify Errors In Jupyterhub Logs
+    Skip      msg=JupyterHub Pod is removed after KFNBC migration
 
 Verify Grafana Is Connected To Prometheus Using TLS
     [Documentation]    Verifies Grafana is connected to Prometheus using TLS

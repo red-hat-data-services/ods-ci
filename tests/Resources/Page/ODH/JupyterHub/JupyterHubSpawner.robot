@@ -213,7 +213,7 @@ Launch JupyterHub Spawner From Dashboard
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
     #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-    Wait Until Page Contains  Start a Notebook server
+    Wait Until Page Contains   Start server
     Wait Until JupyterHub Spawner Is Ready
 
 Get Spawner Progress Message

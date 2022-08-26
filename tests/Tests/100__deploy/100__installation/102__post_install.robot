@@ -48,16 +48,22 @@ Verify Traefik Deployment
     ${containerNames} =  Create List  traefik-proxy  configmap-puller
     Verify Deployment  ${traefik}  3  2  ${containerNames}
 
-Verify JH Deployment
+Verify JH or Notebook Controller Deployment
     [Documentation]  Verifies RHODS JH deployment
     [Tags]    Sanity
     ...       ODS-546  ODS-294  ODS-1250  ODS-237
     ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
-    Skip if   ${version-check}==True
-    ...   JupyterHub Deployment is removed after KFNBC migration
-    @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
-    ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
-    Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
+    IF    ${version-check}==True
+            @{NBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=notebook-controller
+            @{ONBC}=  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=odh-notebook-controller
+            ${containerNames} =  Create List  manager
+            Verify Deployment  ${NBC}  1  1  ${containerNames}
+            Verify Deployment  ${ONBC}  1  1  ${containerNames}
+    ELSE
+            @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
+            ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
+            Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
+    END
 
 Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed

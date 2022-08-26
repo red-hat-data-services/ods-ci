@@ -74,6 +74,7 @@ Get Cluster ID
     IF    not $cluster_id
         Fail    Unable to retrieve cluster ID. Are you logged using `oc login` command?
     END
+    ${cluster_id}=    Remove String    ${cluster_id}    "
     [Return]    ${cluster_id}
 
 Get Cluster Name By Cluster ID
@@ -93,9 +94,9 @@ Wait Until HTTP Status Code Is
 
 Check HTTP Status Code
     [Documentation]     Verifies Status Code of URL Matches Expected Status Code
-    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20
+    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20   ${verify_ssl}=${True}
     ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}  verify=${verify_ssl}
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
     [Return]  ${response.status_code}
 
@@ -142,4 +143,3 @@ Clean Resource YAML Before Creating It
     ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
     Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
     [Return]   ${clean_yaml_data}
-

@@ -662,3 +662,17 @@ Get ConfigMaps For RHODS Groups Configuration
     ${group_config_maps}=   Create Dictionary     rgc=${rgc_yaml}[0]     gc=${gc_yaml}[0]
     Log     ${group_config_maps}
     [Return]    ${group_config_maps}
+
+Get Links From Switcher
+    [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link
+    ${list_of_links} =    Create List
+    ${link_elements}=    Get WebElements    //a[@class="pf-m-external pf-c-app-launcher__menu-item" and not(starts-with(@href, '#'))]
+    FOR    ${ext_link}    IN    @{link_elements}
+        ${href}=    Get Element Attribute    ${ext_link}    href
+        Append To List    ${list_of_links}    ${href}
+    END
+    [Return]    ${list_of_links}
+
+Open Application Switcher Menu
+    [Documentation]     Clicks on the App Switcher in the top navigation bar of RHODS Dashboard
+    Click Button    //button[@class="pf-c-app-launcher__toggle"]

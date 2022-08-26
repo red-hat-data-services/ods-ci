@@ -13,6 +13,7 @@ Resource          ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource          ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource          ../../Resources/Page/HybridCloudConsole/OCM.robot
 Suite Setup       Dashboard Suite Setup
 Suite Teardown    RHOSi Teardown
 Test Setup        Dashboard Test Setup
@@ -319,6 +320,15 @@ Verify Dashboard Pod Is Not Getting Restarted
     ...       ODS-374
     ${pod_names}    Get POD Names    redhat-ods-applications    app=rhods-dashboard
     Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-applications
+
+Verify Switcher to Masterhead
+    [Tags]    ODS-771
+    ...       Tier2
+    [Documentation]    Checks the link in switcher and also check the link of OCM in staging
+    Go To RHODS Dashboard
+    Open Application Switcher Menu
+    Check Application Switcher Links To Openshift Console
+    Check Application Switcher Links To Openshift Cluster Manager
 
 
 *** Keywords ***
@@ -734,6 +744,34 @@ Check And Uninstall Operator In Openshift
     ...    browser_options=${BROWSER.OPTIONS}
     Remove Disabled Application From Enabled Page    app_id=${dashboard_app_id}
 
+
+Check Application Switcher Links To Openshift Cluster Manager
+    [Documentation]    Checks for HTTP status of OCM link in application switcher
+    ${cluster_id}=    Get Cluster ID
+    ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
+    ${cluster_env}=    Fetch ODS Cluster Environment
+    IF    "${cluster_env}" == "stage"
+        ${ocm_staging_link}=    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
+        Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
+        Go To   ${ocm_staging_link}
+    ELSE
+        ${list_of_links}=    Get Links From Switcher
+        ${ocm_prod_link}=    Set Variable    ${list_of_links}[1]
+        Check HTTP Status Code    ${ocm_prod_link}
+        Click Link    xpath://a[*[text()="OpenShift Cluster Manager"]]
+        Switch Window   NEW
+    END
+    Sleep  1
+    Login To OCM
+    Reload Page
+    Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
+
+Check Application Switcher Links To Openshift Console
+    [Documentation]    Checks the HTTP status of OpenShift Console
+    ${list_of_links}=    Get Links From Switcher
+    ${status}=    Check HTTP Status Code    ${list_of_links}[0]
+    Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
+    Should Be Equal    ${status}    ${200}
 
 Documentation Links Should Be Equal To The Expected Ones
     [Documentation]   Compare the fetched links from Dashboard with the expected ones

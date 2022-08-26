@@ -88,7 +88,9 @@ Wait Until RHODS Dashboard ${dashboard_app} Is Visible
 Launch ${dashboard_app} From RHODS Dashboard Link
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
-  # Switch Window  NEW
+  IF    ${dashboard_app} != "Jupyter"
+       Switch Window  NEW
+  END
 
 Launch ${dashboard_app} From RHODS Dashboard Dropdown
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible

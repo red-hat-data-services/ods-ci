@@ -9,6 +9,7 @@ Library          OperatingSystem
 Library          DebugLibrary
 Library          JupyterLibrary
 Library          OpenShiftCLI
+Library          OpenShiftLibrary
 Suite Setup      Special User Testing Suite Setup
 Suite Teardown   Close All Browsers
 Force Tags       JupyterHub
@@ -29,8 +30,6 @@ Verify User Can Set Custom RHODS Groups
     [Tags]  Sanity
     ...     ODS-293    ODS-503
     [Setup]      Set Standard RHODS Groups Variables
-    Open OCP Console
-    Login To OCP
     Create Custom Groups
     Add Test Users To Custom Groups
     Remove Test Users From RHODS Standard Groups
@@ -50,21 +49,15 @@ Create Custom Groups
     IF    $user_created == False
         FAIL    Creation of ${CUSTOM_USERS_GROUP} group failed. Check the logs
     END
-    Navigate To Page    User Management    Groups
-    Wait Until Page Contains  Create Group
-    Capture Page Screenshot    user_groups.png
-    Page Should Contain    ${CUSTOM_ADMINS_GROUP}
-    Page Should Contain    ${CUSTOM_USERS_GROUP}
+    OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_ADMINS_GROUP}
+    OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_USERS_GROUP}
 
 Delete Custom Groups
     [Documentation]    Deletes two user groups: custom-admins and customer-users
     Delete Group  group_name=${CUSTOM_ADMINS_GROUP}
     Delete Group  group_name=${CUSTOM_USERS_GROUP}
-    Navigate To Page    User Management    Groups
-    Wait Until Page Contains  Create Group
-    Capture Page Screenshot    user_groups_deletion.png
-    Page Should Not Contain    ${CUSTOM_ADMINS_GROUP}
-    Page Should Not Contain    ${CUSTOM_USERS_GROUP}
+    Run Keyword And Expect Error    EQUALS:ResourceOperationFailed: Get failed\nReason: Not Found    OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_ADMINS_GROUP}
+    Run Keyword And Expect Error    EQUALS:ResourceOperationFailed: Get failed\nReason: Not Found    OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_USERS_GROUP}
 
 Add Test Users To Custom Groups
     [Documentation]    Adds two tests users to custom-admins and customer-users groups
@@ -105,51 +98,51 @@ Remove Test Users From Custom Groups
 Set Custom Access Groups
     [Documentation]    Set custom rhods groups to access JH
     Apply Access Groups Settings    admins_group=${CUSTOM_ADMINS_GROUP}
-    ...     users_group=${CUSTOM_USERS_GROUP}   groups_modified_flag=true
+    ...     users_group=${CUSTOM_USERS_GROUP}
 
 Check New Access Configuration Works As Expected
     [Documentation]    Checks if the new access configuration (using two custom groups)
     ...                works as expected in JH
-    Go To RHODS Dashboard
+    Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
     Launch Jupyter From RHODS Dashboard Link
-    Handle Bad Gateway Page
-    Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER.USERNAME}
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level  ${TEST_USER.USERNAME}
     ...                                   ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    none
-    Capture Page Screenshot    perm_denied.png
-    Go To RHODS Dashboard
-    Launch Jupyter From RHODS Dashboard Link
-    Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_2.USERNAME}
+    Capture Page Screenshot    perm_denied_custom.png
+    Logout From RHODS Dashboard
+    Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER_2.PASSWORD}  ${TEST_USER_2.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level    ${TEST_USER_2.USERNAME}
     ...                                   ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}    admin
-    Capture Page Screenshot    perm_admin.png
-    Logout Via Button
-    Go To RHODS Dashboard
-    Launch Jupyter From RHODS Dashboard Link
-    Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_3.USERNAME}
+    Capture Page Screenshot    perm_admin_custom.png
+    Logout From RHODS Dashboard
+    Login To RHODS Dashboard  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level    ${TEST_USER_3.USERNAME}
     ...                                   ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}    user
-    Capture Page Screenshot    perm_user.png
-    Logout Via Button
+    Capture Page Screenshot    perm_user_custom.png
+    Logout From RHODS Dashboard
 
 Check Standard Access Configuration Works As Expected
     [Documentation]    Checks if the standard access configuration
     ...                works as expected in JH
-    Go To RHODS Dashboard
+    Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
     Launch Jupyter From RHODS Dashboard Link
-    Handle Bad Gateway Page
-    Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER_2.USERNAME}
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level  ${TEST_USER_2.USERNAME}
     ...                                   ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}    admin
     Capture Page Screenshot    perm_admin_std.png
-    Logout Via Button
-    Go To RHODS Dashboard
-    Launch Jupyter From RHODS Dashboard Link
-    Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_4.USERNAME}
+    Logout From RHODS Dashboard
+    Login To RHODS Dashboard  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level    ${TEST_USER_4.USERNAME}
     ...                                   ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}    user
     Capture Page Screenshot    perm_user_std.png
-    Logout Via Button
+    Logout From RHODS Dashboard
 
 Restore Standard RHODS Groups Configuration
     [Documentation]    Restores the standard RHODS access configuration
     Set Default Access Groups Settings
-    Go To    ${OCP_CONSOLE_URL}
     Add Test Users Back To RHODS Standard Groups
     Remove Test Users From Custom Groups
     Delete Custom Groups

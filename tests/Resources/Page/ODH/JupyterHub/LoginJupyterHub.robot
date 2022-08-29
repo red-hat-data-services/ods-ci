@@ -23,11 +23,8 @@ Authorize jupyterhub service account
   Checkbox Should Be Selected  user:info
   Click Element  approve
 
-Login Verify Access Level
+Verify Jupyter Access Level
    [Arguments]  ${username}  ${password}  ${auth}  ${expected_result}
-   Login To Jupyterhub  ${username}  ${password}  ${auth}
-   ${authorization_required} =  Is Service Account Authorization Required
-   Run Keyword If  ${authorization_required}  Authorize jupyterhub service Account
    IF  '${expected_result}'=='none'
      User Is Not Allowed
    ELSE IF  '${expected_result}'=='admin'

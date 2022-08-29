@@ -36,10 +36,11 @@ Verify That Not Admin Users Can Not Access "Cluster Settings"
 
 Verify That "Usage Data Collection" Can Be Set In "Cluster Settings"
     [Documentation]    Verifies that a user can set the "Usage Data Collection" flag in "Cluster Settings"
+    ...    ProductBug: RHODS-4923
     [Tags]    Tier1
     ...       Sanity
     ...       ODS-1218
-    ...       FlakyTest
+    ...       ProductBug
     Open ODS Dashboard With Admin User
     Verify Cluster Settings Is Available
     ODHDashboard.Enable "Usage Data Collection"

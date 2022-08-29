@@ -100,10 +100,7 @@ Open JupyterLab Control Panel
 Stop JupyterLab Notebook Server
   Open JupyterLab Control Panel
   SeleniumLibrary.Switch Window    NEW
-  SeleniumLibrary.Wait Until Page Contains     Stop notebook server    timeout=10s
-  Click Button    Stop notebook server
-  Wait Until Page Contains Element    xpath://button[.="Stop server"]    timeout=10s
-  Click Button    xpath://button[.="Stop server"]
+  Handle Control Panel
 
 Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out

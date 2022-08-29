@@ -288,8 +288,6 @@ Fix Spawner Status
             Maybe Close Popup
             Clean Up Server
             Stop JupyterLab Notebook Server
-            Handle Start My Server
-            Maybe Handle Server Not Running Page
          END
       END
    END

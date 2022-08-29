@@ -44,7 +44,7 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
   Anaconda Activation Should Have Failed
   Click Button    Cancel
   Menu.Navigate To Page    Applications    Enabled
-  Wait Until RHODS Dashboard JupyterHub Is Visible
+  Wait Until RHODS Dashboard Jupyter Is Visible
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
   Verify Anaconda Card Not Present Based On Version
 
@@ -62,7 +62,7 @@ Verify User Is Able to Activate Anaconda Professional
   Enable Anaconda  ${ANACONDA_CE.ACTIVATION_KEY}
   Capture Page Screenshot  anaconda_success_activation.png
   Menu.Navigate To Page    Applications    Enabled
-  Wait Until RHODS Dashboard JupyterHub Is Visible
+  Wait Until RHODS Dashboard Jupyter Is Visible
   Capture Page Screenshot  enabletab_anaconda_present.png
   Verify Anaconda Card Present Based On Version
   Go To  ${OCP_CONSOLE_URL}
@@ -72,7 +72,7 @@ Verify User Is Able to Activate Anaconda Professional
   ...                                   pod_search_term=anaconda-ce-periodic-validator-job-custom-run
   Log  ${val_result}
   Should Be Equal  ${val_result[0]}  ${VAL_SUCCESS_MSG}
-  Wait Until Keyword Succeeds    1200  1  Check Anaconda CE Image Build Status  Complete
+  Wait Until Keyword Succeeds    400 times  5s  Check Anaconda CE Image Build Status  Complete
   Go To  ${ODH_DASHBOARD_URL}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Launch JupyterHub Spawner From Dashboard
@@ -103,8 +103,10 @@ Anaconda Suite Setup
 Verify Anaconda In Kfdef
     [Documentation]  Verifies if Anaconda is present in Kfdef
     ${res}=  Oc Get  kind=KfDef  namespace=redhat-ods-applications
-    @{applications_names} =  Create List
-    FOR    ${application}    IN    @{res[0]['spec']['applications']}
-        Append To List    ${applications_names}  ${application['name']}
+    @{applications_names}=    Create List
+    FOR     ${kfdef}    IN    @{res}
+        FOR    ${application}    IN    @{kfdef['spec']['applications']}
+            Append To List    ${applications_names}  ${application['name']}
+        END
     END
-    Should Contain  ${applications_names}  anaconda-ce
+    Run Keyword And Continue On Failure     Should Contain  ${applications_names}  anaconda-ce

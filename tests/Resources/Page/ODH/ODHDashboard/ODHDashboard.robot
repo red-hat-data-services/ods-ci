@@ -88,7 +88,9 @@ Wait Until RHODS Dashboard ${dashboard_app} Is Visible
 Launch ${dashboard_app} From RHODS Dashboard Link
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
-  #Switch Window  NEW
+  IF    "${dashboard_app}" != "Jupyter"
+       Switch Window  NEW
+  END
 
 Launch ${dashboard_app} From RHODS Dashboard Dropdown
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
@@ -100,7 +102,7 @@ Verify Service Is Enabled
   [Documentation]   Verify the service appears in Applications > Enabled
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Enabled
-  Wait Until Page Contains    JupyterHub  timeout=30
+  Wait Until Page Contains    Jupyter  timeout=30
   Wait Until Page Contains    ${app_name}  timeout=180
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
   Page Should Not Contain Element    xpath://article//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
@@ -132,7 +134,7 @@ Remove Disabled Application From Enabled Page
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[1]
    Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
-   Capture Page Screenshot  disabled_card_removed.png
+   Capture Page Screenshot  ${app_id}_removed.png
 
 
 Verify Service Provides "Enable" Button In The Explore Page

@@ -498,7 +498,7 @@ Image Should Be Pinned To A Numeric Version
     ...                 the check may not be always reliable. The logic is that if numbers are present in the tag, the image
     ...                 is likely pinned to a specific version rather than a generic tag (e.g., latest). After that it tries to
     ...                 see if the numbers follow usual versioning pattern (raising a Warning in the negative case).
-    ${image_spec}=   Run Cell And Get Output  import os; os.environ['JUPYTER_IMAGE_SPEC']
+    ${image_spec}=   Run Cell And Get Output  import os; os.environ['JUPYTER_IMAGE']
     ${image_tag}=    Fetch From Right    string=${image_spec}    marker=:
     ${matches}=    Get Regexp Matches	  ${image_tag}    (main|latest|master|dev|prod)
     IF   len(${matches}) == ${0}

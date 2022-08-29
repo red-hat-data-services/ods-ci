@@ -101,7 +101,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     ...       FlakyTest
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
-    Wait Until RHODS Dashboard JupyterHub Is Visible
+    Wait Until RHODS Dashboard Jupyter Is Visible
     Verify Anaconda Service Is Enabled Based On Version
     Close All Browsers
     Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result

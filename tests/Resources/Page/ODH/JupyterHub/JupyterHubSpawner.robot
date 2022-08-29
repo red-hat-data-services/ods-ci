@@ -311,12 +311,12 @@ User Is Not Allowed
 User Is JupyterHub Admin
    [Documentation]  Checks if the user is an admin
    JupyterHub Spawner Is Visible
-   Page Should Contain  Admin
+   Page Should Contain  Administration
 
 User Is Not JupyterHub Admin
    [Documentation]  Checks if the user is not an admin
    JupyterHub Spawner Is Visible
-   Page Should Not Contain  Admin
+   Page Should Not Contain  Administration
 
 Logout Via Button
    [Documentation]  Logs out from JupyterHub

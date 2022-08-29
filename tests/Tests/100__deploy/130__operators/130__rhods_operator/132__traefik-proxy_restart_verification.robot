@@ -24,5 +24,8 @@ Verify Traefik Proxy Containers Have Zero Restarts
     ...    container restart
     [Tags]    Sanity
     ...       ODS-1163    ProductBug
+    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
+    Skip if   ${version-check}==True
+    ...   Traefik proxy is removed after KFNBC migration
     ${pod_names}    Get POD Names    ${NAMESPACE}    ${LABEL_SELECTOR}
     Verify Containers Have Zero Restarts    ${pod_names}    ${NAMESPACE}

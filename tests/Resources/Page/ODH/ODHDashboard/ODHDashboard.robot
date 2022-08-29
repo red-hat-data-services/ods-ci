@@ -92,7 +92,7 @@ Verify Service Is Enabled
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Enabled
   Wait Until Page Contains    JupyterHub  timeout=30
-  Wait Until Page Contains    ${app_name}  timeout=180
+  Wait Until Page Contains    ${app_name}  timeout=240
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
   Page Should Not Contain Element    xpath://article//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
 
@@ -123,7 +123,7 @@ Remove Disabled Application From Enabled Page
    ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
    Click Element  ${buttons_here}[1]
    Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
-   Capture Page Screenshot  disabled_card_removed.png
+   Capture Page Screenshot  ${app_id}_removed.png
 
 
 Verify Service Provides "Enable" Button In The Explore Page

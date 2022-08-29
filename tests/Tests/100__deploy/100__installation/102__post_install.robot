@@ -242,11 +242,11 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
     ...     ODS-1556
     ...     ProductBug
     [Documentation]   Verify "NO Component Found" message dosen't display
-    ...     on Rhods Dashbord page with data value empty for rhods-enabled-applications-config
+    ...     on Rhods Dashbord page with data value empty for odh-enabled-applications-config
     ...     configmap in openshift
     ...     ProductBug:RHODS-4308
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=rhods-enabled-applications-config    src={"data":null}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data":null}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications   Enabled
@@ -272,7 +272,7 @@ Test Setup For Rhods Dashboard
 
 Test Teardown For Configmap Changed On RHODS Dashboard
     [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=rhods-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data": {"jupyter": "true"}}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
 

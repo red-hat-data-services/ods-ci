@@ -119,12 +119,12 @@ Suite Availability Setup
     [Documentation]    Obtains and stores Average Availability for the last 2m, 15m, 1h and 3h
     ...    Log a WARN message if availability is under 99.95
     [Arguments]    ${pm_url}    ${pm_token}
-    Create Suite Availability Checkpoint    pm_url=${pm_url}    pm_token=${pm_token}
+    Run Keyword And Warn On Failure    Create Suite Availability Checkpoint    pm_url=${pm_url}    pm_token=${pm_token}
 
 Suite Availability Teardown
     [Documentation]    Compare current Average Availability with the values stored in Suite Availability.
     ...    Logs a WARN message if the current values are lower
     [Arguments]    ${pm_url}    ${pm_token}
 
-    Log If Availability Decreased Since Suite Availability Checkpoint     pm_url=${pm_url}    pm_token=${pm_token}
+    Run Keyword And Warn On Failure    Log If Availability Decreased Since Suite Availability Checkpoint     pm_url=${pm_url}    pm_token=${pm_token}
     ...    message_prefix=Suite Teardown: ${SUITE NAME}:

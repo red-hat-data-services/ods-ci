@@ -106,24 +106,21 @@ Set Standard RHODS Groups Variables
 Apply Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     ...                and rolls out JH to make the changes effecting in Jupyter
-    [Arguments]     ${admins_group}   ${users_group}    ${groups_modified_flag}
-    Set Access Groups Settings    admins_group=${admins_group}   users_group=${users_group}    groups_modified_flag=${groups_modified_flag}
-    Rollout JupyterHub
+    [Arguments]     ${admins_group}   ${users_group}
+    Set Access Groups Settings    admins_group=${admins_group}   users_group=${users_group}
+    Sleep    40     reason=Wait for Dashboard to get the updated configuration...
 
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
-    [Arguments]     ${admins_group}   ${users_group}    ${groups_modified_flag}
-    OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"data":{"admin_groups": "${admins_group}","allowed_groups": "${users_group}"}}
-    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
-    OpenShiftCLI.Patch    kind=ConfigMap
-    ...                   src={"metadata":{"labels": {"opendatahub.io/modified": "${groups_modified_flag}"}}}
-    ...                   name=rhods-groups-config   namespace=redhat-ods-applications  type=merge
+    [Arguments]     ${admins_group}   ${users_group}
+    OpenShiftCLI.Patch    kind=OdhDashboardConfig
+    ...                   src={"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}
+    ...                   name=odh-dashboard-config   namespace=redhat-ods-applications  type=merge
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map
     Apply Access Groups Settings     admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=${STANDARD_GROUPS_MODIFIED}
+    ...     users_group=${STANDARD_USERS_GROUP}
 
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation

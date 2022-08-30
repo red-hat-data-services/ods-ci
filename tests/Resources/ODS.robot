@@ -105,7 +105,7 @@ Apply Access Groups Settings
     ...                and rolls out JH to make the changes effecting in Jupyter
     [Arguments]     ${admins_group}   ${users_group}
     Set Access Groups Settings    admins_group=${admins_group}   users_group=${users_group}
-    Sleep    90     reason=Wait for Dashboard to get the updated configuration...
+    Sleep    120     reason=Wait for Dashboard to get the updated configuration...
 
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration

@@ -485,7 +485,7 @@ Verify Git Plugin
 Get Current User In JupyterLab
    [Documentation]    Returns the current user while in the JupyterLab environment
    ${current_user_escaped} =  Run Cell And Get Output
-   ...    import os; s=os.environ["HOSTNAME"]; username = s.split("-")[2:-1]; "-".join(username)
+   ...    import os; s=os.environ["HOSTNAME"]; username = s.split("-")[2:-1]; print("-".join(username))
    ${current_user} =  Get Unsafe Username  ${current_user_escaped}
    [Return]  ${current_user}
 

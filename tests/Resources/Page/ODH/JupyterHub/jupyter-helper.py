@@ -13,4 +13,4 @@ def get_safe_username(username):
 
 def get_unsafe_username(username):
     safe_chars = set(string.ascii_lowercase + string.digits)
-    return escapism.unescape(username, safe=safe_chars, escape_char='-').lower()
+    return escapism.unescape(username, escape_char='-').lower()

@@ -35,6 +35,7 @@ Verify User Can Set Custom RHODS Groups
     Remove Test Users From RHODS Standard Groups
     Set Custom Access Groups
     Check New Access Configuration Works As Expected
+    # add notebook spawning check
     [Teardown]   Restore Standard RHODS Groups Configuration
 
 
@@ -106,20 +107,17 @@ Check New Access Configuration Works As Expected
     Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
     Launch Jupyter From RHODS Dashboard Link
-    Run Keyword And Continue On Failure   Verify Jupyter Access Level  ${TEST_USER.USERNAME}
-    ...                                   ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    none
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=none
     Capture Page Screenshot    perm_denied_custom.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER_2.PASSWORD}  ${TEST_USER_2.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Run Keyword And Continue On Failure   Verify Jupyter Access Level    ${TEST_USER_2.USERNAME}
-    ...                                   ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}    admin
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level    expected_result=admin
     Capture Page Screenshot    perm_admin_custom.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Run Keyword And Continue On Failure   Verify Jupyter Access Level    ${TEST_USER_3.USERNAME}
-    ...                                   ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}    user
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level     expected_result=user
     Capture Page Screenshot    perm_user_custom.png
     Logout From RHODS Dashboard
 
@@ -129,14 +127,12 @@ Check Standard Access Configuration Works As Expected
     Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
     Launch Jupyter From RHODS Dashboard Link
-    Run Keyword And Continue On Failure   Verify Jupyter Access Level  ${TEST_USER_2.USERNAME}
-    ...                                   ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}    admin
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level  expected_result=admin
     Capture Page Screenshot    perm_admin_std.png
     Logout From RHODS Dashboard
-    Login To RHODS Dashboard  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
+    Login To RHODS Dashboard  ${TEST_USER_4.USERNAME}  ${TEST_USER_4.PASSWORD}  ${TEST_USER_4.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    Run Keyword And Continue On Failure   Verify Jupyter Access Level    ${TEST_USER_4.USERNAME}
-    ...                                   ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}    user
+    Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=user
     Capture Page Screenshot    perm_user_std.png
     Logout From RHODS Dashboard
 

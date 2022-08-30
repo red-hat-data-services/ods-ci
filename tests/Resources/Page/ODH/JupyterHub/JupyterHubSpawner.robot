@@ -177,7 +177,7 @@ Spawn Notebook With Arguments  # robocop: disable
          #...    id:progress-bar  ${spawner_timeout}
          #Click Button  Access server
          #SeleniumLibrary.Switch Window  NEW
-         Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+         Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
          ${authorization_required} =  Is Service Account Authorization Required
          Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
          #Wait For JupyterLab Splash Screen  timeout=60

@@ -40,7 +40,7 @@ Verify User Is Unable To Spawn Notebook
     [Documentation]    Verifies User is unable to access notebooks in jupyterhub
     Launch Dashboard    ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}  ${ODH_DASHBOARD_URL}  ${BROWSER.NAME}  ${BROWSER.OPTIONS}
     Launch Jupyter From RHODS Dashboard Link
-    Verify Jupyter Access Level    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    none
+    Verify Jupyter Access Level    expected_result=none
 
 Set Default Access Groups And Close Browser
     [Documentation]  Sets values of RHODS Groups to Default Values and closes browser

@@ -24,7 +24,7 @@ Authorize jupyterhub service account
   Click Element  approve
 
 Verify Jupyter Access Level
-   [Arguments]  ${username}  ${password}  ${auth}  ${expected_result}
+   [Arguments]    ${expected_result}
    IF  '${expected_result}'=='none'
      User Is Not Allowed
    ELSE IF  '${expected_result}'=='admin'
@@ -32,4 +32,3 @@ Verify Jupyter Access Level
    ELSE IF  '${expected_result}'=='user'
      User Is Not JupyterHub Admin
    END
-   Capture Page Screenshot  verify-access-level-{$expected_result}.png

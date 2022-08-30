@@ -17,12 +17,12 @@ Verify Default Access Groups Settings And JupyterLab Notebook Access
     [Teardown]  End Web Test
 
 Verify Empty Group Doesnt Allow Users To Spawn Notebooks
-    [Documentation]   Verifies that User is unable to Access Jupyterhub after setting Access Groups in rhods-groups-config to Empty
+    [Documentation]   Verifies that User is unable to Access Jupyterhub after setting Access Groups OdhDashboardConfig CRD to Empty
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-572
     ...       FlakyTest
-    Apply Access Groups Settings    admins_group=    users_group=    groups_modified_flag=true
+    Apply Access Groups Settings    admins_group=    users_group=
     Verify User Is Unable To Spawn Notebook
     [Teardown]   Set Default Access Groups And Close Browser
 

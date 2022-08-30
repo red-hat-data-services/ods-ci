@@ -44,7 +44,7 @@ Verify Anaconda Professional Fails Activation When Key Is Invalid
   Anaconda Activation Should Have Failed
   Click Button    Cancel
   Menu.Navigate To Page    Applications    Enabled
-  Wait Until RHODS Dashboard JupyterHub Is Visible
+  Wait Until RHODS Dashboard Jupyter Is Visible
   Capture Page Screenshot  enabletab_anaconda_notpresent.png
   Verify Anaconda Card Not Present Based On Version
 
@@ -62,7 +62,7 @@ Verify User Is Able to Activate Anaconda Professional
   Enable Anaconda  ${ANACONDA_CE.ACTIVATION_KEY}
   Capture Page Screenshot  anaconda_success_activation.png
   Menu.Navigate To Page    Applications    Enabled
-  Wait Until RHODS Dashboard JupyterHub Is Visible
+  Wait Until RHODS Dashboard Jupyter Is Visible
   Capture Page Screenshot  enabletab_anaconda_present.png
   Verify Anaconda Card Present Based On Version
   Go To  ${OCP_CONSOLE_URL}

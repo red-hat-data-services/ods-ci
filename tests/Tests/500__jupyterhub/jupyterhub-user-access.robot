@@ -111,19 +111,19 @@ Check New Access Configuration Works As Expected
     [Documentation]    Checks if the new access configuration (using two custom groups)
     ...                works as expected in JH
     Go To RHODS Dashboard
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Handle Bad Gateway Page
     Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER.USERNAME}
     ...                                   ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    none
     Capture Page Screenshot    perm_denied.png
     Go To RHODS Dashboard
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_2.USERNAME}
     ...                                   ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}    admin
     Capture Page Screenshot    perm_admin.png
     Logout Via Button
     Go To RHODS Dashboard
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_3.USERNAME}
     ...                                   ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}    user
     Capture Page Screenshot    perm_user.png
@@ -133,14 +133,14 @@ Check Standard Access Configuration Works As Expected
     [Documentation]    Checks if the standard access configuration
     ...                works as expected in JH
     Go To RHODS Dashboard
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Handle Bad Gateway Page
     Run Keyword And Continue On Failure   Login Verify Access Level  ${TEST_USER_2.USERNAME}
     ...                                   ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}    admin
     Capture Page Screenshot    perm_admin_std.png
     Logout Via Button
     Go To RHODS Dashboard
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Run Keyword And Continue On Failure   Login Verify Access Level    ${TEST_USER_4.USERNAME}
     ...                                   ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}    user
     Capture Page Screenshot    perm_user_std.png

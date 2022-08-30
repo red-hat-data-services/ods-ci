@@ -32,7 +32,11 @@ Verify Libraries in Minimal Image
     [Documentation]    Verifies libraries in Minimal Python image
     [Tags]    Sanity
     Verify List Of Libraries In Image    s2i-minimal-notebook    JupyterLab-git ${JupyterLab-git_Version}
-#
+
+Verify Libraries in Cuda Image
+    [Documentation]    Verifies libraries in Minimal Python image
+    [Tags]    Sanity
+    Verify List Of Libraries In Image    minimal-gpu    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in SDS Image
     [Documentation]    Verifies libraries in Standard Data Science image
@@ -58,7 +62,7 @@ Verify All Images And Spawner
     ...       ODS-340    ODS-452    ODS-468
     List Should Not Contain Value    ${status_list}    FAIL
     ${length} =    Get Length    ${status_list}
-    Should Be Equal As Integers    ${length}    4
+    Should Be Equal As Integers    ${length}    5
     Log To Console    ${status_list}
 
 
@@ -80,7 +84,7 @@ Verify Libraries In Base Image    # robocop: disable
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
     Wait For RHODS Dashboard To Load
-    Launch JupyterHub From RHODS Dashboard Link
+    Launch Jupyter From RHODS Dashboard Link
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
     [Return]    ${status}

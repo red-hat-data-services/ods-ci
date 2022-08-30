@@ -47,7 +47,7 @@ Verify Custom Spwaned Notebook Size
     ...       ODS-1071
     Launch JupyterHub Spawner From Dashboard
     Modify Default Container Size
-    Sleep    30s    msg=Wait for the size to get reflect
+    Sleep    60s    msg=Wait for the size to get reflect
     ${d_container_size}    Create List    Small
     Spawn Notebook And Verify Size    size=${CUSTOME_SIZE}    NOTEBOOK_SIZE=${d_container_size}
     Restore Default Container Size

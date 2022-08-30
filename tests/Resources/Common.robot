@@ -16,7 +16,7 @@ Begin Web Test
     ...              handing control over to the test suites.
 
     Set Library Search Order  SeleniumLibrary
-    #RHOSi Setup
+    RHOSi Setup
 
 
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

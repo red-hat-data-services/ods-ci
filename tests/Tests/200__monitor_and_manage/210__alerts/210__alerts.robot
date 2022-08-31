@@ -30,22 +30,18 @@ ${TEST_ALERT_PVC100_NOTEBOOK_PATH}      SEPARATOR=
 *** Test Cases ***
 Verify All Alerts Severity
     [Documentation]    Verifies that all alerts have the expected severity
-    [Tags]    Sanity
+    [Tags]    Smoke
     ...       Tier1
     ...       ODS-1227
 
-    Verify "JupyterHub Image Builds Are Failing" Alerts Severity And Continue On Failure
+    Verify "Jupyter Image Builds Are Failing" Alerts Severity And Continue On Failure
     Verify "DeadManSnitch" Alerts Severity And Continue On Failure
+    Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
+    Verify "ODH Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     Verify "User Notebook PVC Usage" Alerts Severity And Continue On Failure
-
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.12.1
-    IF    ${version_check}==True
-        Verify "RHODS JupyterHub Probe Success Burn Rate" Alerts Severity And Continue On Failure
-        Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
-    ELSE
-        Verify "RHODS Route Error Burn Rate" Alerts Severity And Continue On Failure
-    END
-    Verify "RHODS Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
+    Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Severity And Continue On Failure
 
 Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that, in a regular situation, only the DeadManSnitch alert is firing
@@ -54,26 +50,22 @@ Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-l
     ...       ODS-540
 
     Verify Alert Is Not Firing And Continue On Failure
-    ...    Builds    JupyterHub image builds are failing    alert-duration=120
+    ...    Builds    Jupyter image builds are failing    alert-duration=120
 
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
 
+    Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Are Not Firing And Continue On Failure
+    Verify "ODH Notebook Controller Pod Is Not Running" Alerts Are Not Firing And Continue On Failure
+
     Verify Alert Is Not Firing And Continue On Failure
     ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    alert-duration=120
-
     Verify Alert Is Not Firing And Continue On Failure
     ...    RHODS-PVC-Usage    User notebook pvc usage at 100%    alert-duration=120
 
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.12.1
-    IF    ${version_check}==True
-        Verify "RHODS JupyterHub Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-        Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
-    ELSE
-        Verify "RHODS Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
-    END
-
-    Verify "RHODS Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
 
 Verify Alert RHODS-PVC-Usage-Above-90 Is Fired When User PVC Is Above 90 Percent
     [Documentation]    Runs a jupyter notebook to fill the user PVC over 90% and
@@ -114,7 +106,9 @@ Verify Alerts Are Not Fired After Multiple JupyterHub Rollouts
     ...       ODS-1591
     ...       Execution-Time-Over-15m
 
-    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
+
+    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    SLOs-probe_success
     ...    RHODS JupyterHub Probe Success Burn Rate
@@ -149,7 +143,9 @@ Verify Alerts Are Fired When JupyterHub Is Down    # robocop: disable:too-long-t
     ...       ODS-1592
     ...       Execution-Time-Over-15m
 
-    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
+
+    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    SLOs-probe_success
     ...    RHODS JupyterHub Probe Success Burn Rate
@@ -182,7 +178,9 @@ Verify Alerts Are Fired When Traefik Is Down    # robocop: disable:too-long-test
     [Tags]    Tier3
     ...       ODS-738
 
-    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
+
+    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    SLOs-probe_success
     ...    RHODS JupyterHub Probe Success Burn Rate
@@ -215,7 +213,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     [Tags]    Tier3
     ...       ODS-739
 
-    Skip Test If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    SLOs-haproxy_backend_http_responses_total
     ...    RHODS Dashboard Route Error Burn Rate
@@ -233,7 +231,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    SLOs-probe_success
-    ...    RHODS Probe Success Burn Rate
+    ...    RHODS Dashboard Probe Success Burn Rate
     ...    alert-duration=120
     ...    timeout=60 min
 
@@ -249,13 +247,13 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    SLOs-probe_success
-    ...    RHODS Probe Success Burn Rate
+    ...    RHODS Dashboard Probe Success Burn Rate
     ...    alert-duration=120
     ...    timeout=5 min
 
     [Teardown]    ODS.Restore Default Deployment Sizes
 
-Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image Build Error    # robocop: disable:too-long-test-case
+Verify Alert "Jupyter image builds are failing" Fires When There Is An Image Build Error    # robocop: disable:too-long-test-case
     [Documentation]     Verify the "JupyterHub image builds are failing" alert when there is a image build failed
     [Tags]    Tier2
     ...       ODS-717
@@ -268,7 +266,7 @@ Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
 
     ${build_name} =    Start New Build    namespace=redhat-ods-applications
     ...    buildconfig=s2i-tensorflow-gpu-cuda-11.4.2-notebook
@@ -276,7 +274,7 @@ Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image 
     Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
 
     Wait Until Build Status Is    namespace=redhat-ods-applications
     ...    build_name=${build_name}    expected_status=Complete
@@ -284,29 +282,29 @@ Verify Alert "JupyterHub image builds are failing" Fires When There Is An Image 
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
 
     Sleep    10m    reason=Waiting for the alert to keep not firing
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
 
     Sleep    10m    reason=Waiting for the alert to keep not firing
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
 
     Sleep    10m    reason=Waiting for the alert to keep not firing
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
 
     [Teardown]    Delete Build    namespace=redhat-ods-applications    build_name=${failed_build_name}
 
-Verify Alert "JupyterHub Image Builds Are Failing" Fires At Least 20 Minutes When There Is An Image Build Error     # robocop: disable:too-long-test-case
+Verify Alert "Jupyter Image Builds Are Failing" Fires At Least 20 Minutes When There Is An Image Build Error     # robocop: disable:too-long-test-case
     [Documentation]    Verify that build alert fires at least 20 minutes when there is an image
     ...                build error and then it resolves automatically
     [Tags]    Tier2
@@ -320,18 +318,18 @@ Verify Alert "JupyterHub Image Builds Are Failing" Fires At Least 20 Minutes Whe
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
 
     Sleep    20m    reason=Waiting for the alert to keep firing
     Prometheus.Alert Should Be Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
 
     Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    Builds
-    ...    JupyterHub image builds are failing
+    ...    Jupyter image builds are failing
     ...    timeout=15min
 
     [Teardown]    Delete Failed Build And Start New One    namespace=redhat-ods-applications
@@ -342,6 +340,7 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
     [Tags]              Sanity
     ...                 ODS-1058
     ...                 Tier1
+
     ${res} =    Check Cluster Name Contain "Aisrhods" Or Not
     IF    ${res}
         ${text_to_check} =    Set Variable    Cluster is for RHODS engineering or test purposes. Disabling SRE alerting.
@@ -410,8 +409,21 @@ Verify Alert Is Not Firing And Continue On Failure
     ...    ${alert}
     ...    ${alert-duration}
 
+Verify "Kubeflow notebook controller pod is not running" Alerts Are Not Firing And Continue On Failure
+    [Documentation]    Verifies that alert "Kubeflow notebook controller pod is not running" is not firing
+    ...    for all alert durations
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    RHODS Notebook controllers    Kubeflow notebook controller pod is not running    alert-duration=300
+
+Verify "ODH notebook controller pod is not running" Alerts Are Not Firing And Continue On Failure
+    [Documentation]    Verifies that alert "ODH notebook controller pod is not running" is not firing
+    ...    for all alert durations
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    RHODS Notebook controllers    ODH notebook controller pod is not running    alert-duration=300
+
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" is not firing for all alert durations
+    [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" is not firing
+    ...    for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
     ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
@@ -421,57 +433,51 @@ Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continu
     Verify Alert Is Not Firing And Continue On Failure
     ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate    alert-duration=10800
 
-Verify "RHODS Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" is not firing for all alert durations
+Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS Dashboard Probe Success Burn Rate" is not firing
+    ...    for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=120
+    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=900
+    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    alert-duration=900
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=3600
+    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    alert-duration=10800
+    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    alert-duration=10800
 
-Verify "RHODS JupyterHub Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS JupyterHub Probe Success Burn Rate" is not firing for all alert durations
+Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS JupyterHub Probe Success Burn Rate" is not firing
+    ...     for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS JupyterHub Probe Success Burn Rate    alert-duration=120
+    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS JupyterHub Probe Success Burn Rate    alert-duration=900
+    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    alert-duration=900
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS JupyterHub Probe Success Burn Rate    alert-duration=3600
+    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS JupyterHub Probe Success Burn Rate    alert-duration=10800
+    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    alert-duration=10800
 
-Verify "RHODS Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.12.1
-    IF    ${version_check}==True
-        Verify Alert Has A Given Severity And Continue On Failure
-        ...    SLOs-probe_success    RHODS Probe Success Burn Rate    warning    alert-duration=120
-        Verify Alert Has A Given Severity And Continue On Failure
-        ...    SLOs-probe_success    RHODS Probe Success Burn Rate    warning    alert-duration=900
-    ELSE
-        Verify Alert Has A Given Severity And Continue On Failure
-        ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=120
-        Verify Alert Has A Given Severity And Continue On Failure
-        ...    SLOs-probe_success    RHODS Probe Success Burn Rate    critical    alert-duration=900
-    END
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    warning    alert-duration=3600
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Probe Success Burn Rate    warning    alert-duration=10800
-
-Verify "RHODS JupyterHub Probe Success Burn Rate" Alerts Severity And Continue On Failure
+Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS JupyterHub Probe Success Burn Rate    critical    alert-duration=120
+    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS JupyterHub Probe Success Burn Rate    critical    alert-duration=900
+    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS JupyterHub Probe Success Burn Rate    warning    alert-duration=3600
+    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS JupyterHub Probe Success Burn Rate    warning    alert-duration=10800
+    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    warning    alert-duration=10800
+
+Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    critical    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    warning    alert-duration=3600
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    warning    alert-duration=10800
 
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" severity
@@ -506,6 +512,18 @@ Verify "RHODS Route Error Burn Rate" Alerts Severity And Continue On Failure
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    warning    alert-duration=10800
 
+Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies alert severity for different alert durations
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    RHODS Notebook controllers    Kubeflow notebook controller pod is not running
+    ...    alert-severity=warning    alert-duration=300
+
+Verify "ODH Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies alert severity for different alert durations
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    RHODS Notebook controllers    ODH notebook controller pod is not running
+    ...    alert-severity=warning    alert-duration=300
+
 Verify "User Notebook PVC Usage" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "User notebook pvc usage" is warning
     Verify Alert Has A Given Severity And Continue On Failure
@@ -518,10 +536,10 @@ Verify "DeadManSnitch" Alerts Severity And Continue On Failure
     Verify Alert Has A Given Severity And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch    critical
 
-Verify "JupyterHub Image Builds Are Failing" Alerts Severity And Continue On Failure
+Verify "Jupyter Image Builds Are Failing" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "JupyterHub image builds are failing" is warning
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    Builds    JupyterHub image builds are failing    warning    alert-duration=120
+    ...    Builds    Jupyter image builds are failing    warning    alert-duration=120
 
 Verify Alert Has A Given Severity And Continue On Failure
     [Documentation]    Verifies that alert has a certain severity, failing otherwhise but continuing the execution
@@ -534,7 +552,7 @@ Verify Alert Has A Given Severity And Continue On Failure
     ...    ${alert-severity}
     ...    ${alert-duration}
 
-Skip Test If Alert Is Already Firing
+Skip If Alert Is Already Firing
     [Documentation]    Skips tests if ${alert} is already firing
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
     ${alert_is_firing} =    Run Keyword And Return Status    Alert Should Be Firing

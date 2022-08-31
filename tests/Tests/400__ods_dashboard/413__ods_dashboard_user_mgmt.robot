@@ -36,7 +36,7 @@ Verify If Unauthorized User Can Not Change The Permission
     Save Changes In User Management Setting
     Page Should Contain  Unable to load User and group settings
     Switch Browser  2
-    [Teardown]  customized Teardown Admin UI
+    [Teardown]  Customized Teardown Admin UI
 
 Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     [Documentation]    Verify unauthorized User Is Not Able To Spawn Jupyter
@@ -54,7 +54,7 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     Reload Page
     Run Keyword And Expect Error  *  Launch Jupyter From RHODS Dashboard Link
     Wait Until Page Contains    Page Not Found   timeout=15s
-    [Teardown]  customized Teardown Admin UI
+    [Teardown]  Customized Teardown Admin UI
 
 Verify Automatically Detects a Group Selected Is Removed and Notify the User
    [Documentation]  Verify if the group is deleted the user should get the
@@ -77,6 +77,6 @@ Customized Teardown Admin UI
     Set Default Access Groups Settings
 
 Customized Suite Setup Admin UI
-    [Documentation]  customized Steup for admin UI
+    [Documentation]  Customized Steup for admin UI
     RHOSi Setup
     Set Library Search Order  SeleniumLibrary

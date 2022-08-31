@@ -40,7 +40,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     SeleniumLibrary.Wait Until Element Is Visible   //*[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"]  timeout=20
 
 Remove OpenShift Groups From Data Science User Groups
-    [Documentation]     Remove OpenShift Groups From Data Science User Groups
+    [Documentation]   Remove OpenShift Groups From Data Science User Groups
     [Arguments]   @{user_groups}
     FOR    ${user_group}    IN    @{user_groups}
             Click Element     (//*[@class="pf-c-form__group-control"])[${2}]//*[@class="pf-c-chip__text" and contains(text(),"${user_groups}")]//following-sibling::button[${1}]
@@ -48,7 +48,7 @@ Remove OpenShift Groups From Data Science User Groups
     Press Keys    None    ESC
 
 Remove OpenShift Groups From Data Science Administrator Groups
-    [Documentation]  RRemove OpenShift Groups From Data Science Administrator Groups
+    [Documentation]  Remove OpenShift Groups From Data Science Administrator Groups
     [Arguments]     @{admin_groups}
     FOR    ${admin_group}    IN    @{admin_groups}
             Click Button    (//*[@class="pf-c-form__group-control"])[${1}]//*[@class="pf-c-chip__text" and contains(text(),"${admin_group}")]//following-sibling::button[${1}]
@@ -82,4 +82,3 @@ Clear User Management Settings
     FOR  ${user}   IN   @{remove_users_list}
         Click Button  (//*[@class="pf-c-form__group-control"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
     END
-

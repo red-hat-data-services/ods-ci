@@ -31,6 +31,8 @@ Add OpenShift Groups To Data Science User Groups
     Press Keys    None    ESC
 
 Launch Dashboard And Check User Management Option Is Available For The User
+    [Documentation]  Launch Dashboard And Check User Management Option Is
+     ...    Available For The User
     [Arguments]   ${username}  ${password}  ${auth_type}
     Launch Dashboard  ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${auth_type}
     ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
@@ -82,3 +84,4 @@ Clear User Management Settings
     FOR  ${user}   IN   @{remove_users_list}
         Click Button  (//*[@class="pf-c-form__group-control"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
     END
+

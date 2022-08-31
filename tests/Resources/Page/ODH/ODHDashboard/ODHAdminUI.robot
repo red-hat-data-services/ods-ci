@@ -84,4 +84,3 @@ Clear User Management Settings
     FOR  ${user}   IN   @{remove_users_list}
         Click Button  (//*[@class="pf-c-form__group-control"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
     END
-

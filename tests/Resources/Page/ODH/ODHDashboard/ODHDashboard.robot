@@ -75,7 +75,6 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-  #[Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"   # Temporary workaround to use ODH cluster
   [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
   Wait For Condition  return document.title == ${dashboard_title}  timeout=15
 

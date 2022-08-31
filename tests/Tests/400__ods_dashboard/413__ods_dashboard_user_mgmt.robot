@@ -2,7 +2,7 @@
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
 Resource        ../../Resources/ODS.robot
-Suite Setup     customized Suite Setup Admin UI
+Suite Setup     Customized Suite Setup Admin UI
 
 *** Test Cases ***
 Verify The CRD Gets Updated After Applying Changes In Admin UI

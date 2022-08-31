@@ -2,7 +2,7 @@
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
 Resource        ../../Resources/ODS.robot
-Suite Setup     Customized Suite Setup Admin UI
+Suite Setup     customized Suite Setup Admin UI
 
 *** Test Cases ***
 Verify The CRD Gets Updated After Applying Changes In Admin UI
@@ -78,4 +78,5 @@ Customized Teardown Admin UI
 
 Customized Suite Setup Admin UI
     [Documentation]  customized Steup for admin UI
+    RHOSi Setup
     Set Library Search Order  SeleniumLibrary

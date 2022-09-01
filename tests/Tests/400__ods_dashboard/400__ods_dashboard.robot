@@ -122,7 +122,7 @@ Verify CSS Style Of Getting Started Descriptions
     ...       ODS-1165
     Click Link    Explore
     Wait Until Cards Are Loaded
-    Open Get Started Sidebar And Return Status    card_locator=${JH_CARDS_XP}
+    Open Get Started Sidebar And Return Status    card_locator=${JUPYTER_CARD_XP}
     Capture Page Screenshot    get_started_sidebar.png
     Verify JupyterHub Card CSS Style
 

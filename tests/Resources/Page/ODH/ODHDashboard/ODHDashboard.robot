@@ -139,7 +139,7 @@ Verify Service Provides "Enable" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is an "Enable" button
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    JupyterHub  timeout=30
+  Wait Until Page Contains    Jupyter  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
   Click Element     xpath://article//*[.='${app_name}']/../..
   Capture Page Screenshot
@@ -150,7 +150,7 @@ Verify Service Provides "Get Started" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is a "Get Started" button
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    JupyterHub  timeout=30
+  Wait Until Page Contains    Jupyter  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
   Click Element     xpath://article//*[.='${app_name}']/../..
   Capture Page Screenshot

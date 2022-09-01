@@ -4,7 +4,7 @@ Resource        ../../LoginPage.robot
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
-    [Documentation]  Add OpenShift groups to Data Science administrators
+    [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
     Click Button   (//button[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"])[${1}]
     FOR    ${admin_group}    IN    @{admin_groups}
@@ -16,10 +16,9 @@ Add OpenShift Groups To Data Science Administrators
     Press Keys    None    ESC
 
 Add OpenShift Groups To Data Science User Groups
-    [Documentation]  Add OpenShift Groups To Data Science User Groups
+    [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
     Click Button    (//button[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"])[${2}]
-
     FOR    ${user_group}    IN    @{user_groups}
             ${present}=  Run Keyword And Return Status
                ...  Element Should Be Visible   //*[@class="pf-c-select__menu-item pf-m-selected" and contains(text(), "${user_group}")]
@@ -31,7 +30,7 @@ Add OpenShift Groups To Data Science User Groups
 
 Launch Dashboard And Check User Management Option Is Available For The User
     [Documentation]  Launch Dashboard And Check User Management Option Is
-     ...    Available For The User
+     ...    Available For The User logged in
     [Arguments]   ${username}  ${password}  ${auth_type}
     Launch Dashboard  ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${auth_type}
     ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
@@ -41,7 +40,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     SeleniumLibrary.Wait Until Element Is Visible   //*[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"]  timeout=20
 
 Remove OpenShift Groups From Data Science User Groups
-    [Documentation]   Remove OpenShift Groups From Data Science User Groups
+    [Documentation]   Remove OpenShift Groups From Data Science User Groups From Dashboard
     [Arguments]   @{user_groups}
     FOR    ${user_group}    IN    @{user_groups}
             Click Element     (//*[@class="pf-c-form__group-control"])[${2}]//*[@class="pf-c-chip__text" and contains(text(),"${user_groups}")]//following-sibling::button[${1}]
@@ -49,7 +48,7 @@ Remove OpenShift Groups From Data Science User Groups
     Press Keys    None    ESC
 
 Remove OpenShift Groups From Data Science Administrator Groups
-    [Documentation]  Remove OpenShift Groups From Data Science Administrator Groups
+    [Documentation]  Remove OpenShift Groups From Data Science Administrator Groups From Dashboard
     [Arguments]     @{admin_groups}
     FOR    ${admin_group}    IN    @{admin_groups}
             Click Button    (//*[@class="pf-c-form__group-control"])[${1}]//*[@class="pf-c-chip__text" and contains(text(),"${admin_group}")]//following-sibling::button[${1}]
@@ -57,7 +56,7 @@ Remove OpenShift Groups From Data Science Administrator Groups
     Press Keys    None    ESC
 
 Save Changes In User Management Setting
-    [Documentation]  Save User management Settings
+    [Documentation]  Save User Management Settings In Dashboard
     Click Button    Save changes
     Sleep  60s
 
@@ -78,7 +77,7 @@ AllowedGroups In OdhDashboardConfig CRD Should Be
     Lists Should Be Equal      ${UIallowedGroupList}  ${allowedGroupsList}
 
 Clear User Management Settings
-    [Documentation]  Clear User Management Settings
+    [Documentation]  Clear all groups from User Management Settings
     @{remove_users_list}  Get Webelements  (//*[@class="pf-c-form__group-control"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
     FOR  ${user}   IN   @{remove_users_list}
         Click Button  (//*[@class="pf-c-form__group-control"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]

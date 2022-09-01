@@ -92,69 +92,24 @@
                    }
                }
         },
-        "jupyterhub": {
+        "jupyter": {
              "badges": ["Red Hat managed"],
              "provider": "by Jupyter",
-             "title": "JupyterHub",
-             "description": "JupyterHub is a multi-user version of the notebook designed for companies, classrooms, and research labs.",
-             "image": "/images/jupyterhub.svg",
-             "sidebar_h1": "JupyterHub",
+             "title": "Jupyter",
+             "description": "A multi-user version of the notebook designed for companies, classrooms and research labs.",
+             "image": "/images/jupyter.svg",
+             "sidebar_h1": "Jupyter",
              "sidebar_links": {
 
                    "0": {
                          "text": "Get started",
-                         "url": "https://jupyterhub.readthedocs.io/en/stable/getting-started/index.html",
+                         "url": "https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html",
                          "matching": "full"
                    },
                    "1": {
-                         "text": "Python",
-                         "url": "https://www.python.org/downloads/",
-                         "matching": ""
-                   },
-                   "2": {
-                         "text": "pip",
-                         "url": "https://pip.pypa.io/en/stable/",
-                         "matching": ""
-                   },
-                   "3": {
-                         "text": "conda",
-                         "url": "https://conda.io/docs/get-started.html",
-                         "matching": ""
-                   },
-                   "4": {
-                         "text": "nodejs/npm",
-                         "url": "https://www.npmjs.com/",
-                         "matching": ""
-                   },
-                   "5": {
-                         "text": "Install nodejs/npm",
-                         "url": "https://docs.npmjs.com/getting-started/installing-node",
-                         "matching": ""
-                   },
-                   "6": {
-                         "text": "nodejs/npm",
-                         "url": "https://docs.npmjs.com/getting-started/installing-node",
-                         "matching": ""
-                   },
-                   "7": {
-                         "text": "pluggable authentication module (PAM)",
-                         "url": "https://en.wikipedia.org/wiki/Pluggable_authentication_module",
-                         "matching": ""
-                   },
-                   "8": {
-                         "text": "default Authenticator",
-                         "url": "getting-started/authenticators-users-basics.md",
-                         "matching": "partial"
-                   },
-                   "9": {
-                         "text": "Jupyter Notebook",
-                         "url": "https://jupyter.readthedocs.io/en/latest/install.html",
-                         "matching": ""
-                   },
-                   "10": {
-                         "text": "wiki",
-                         "url": "https://github.com/jupyterhub/jupyterhub/wiki/Using-sudo-to-run-JupyterHub-without-root-privileges",
-                         "matching": ""
+                         "text": "Adding users for OpenShift Data Science",
+                         "url": "https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science/1/html/managing_users_and_user_resources/adding-users-for-openshift-data-science_useradd",
+                         "matching": "full"
                    }
              }
         },
@@ -303,16 +258,6 @@
                          "matching": ""
                    }
                }
-        },
-        "perceptiLabs": {
-             "badges": ["Coming soon"],
-             "provider": "by PercetiLabs",
-             "title": "PerceptiLabs",
-             "description": "PerceptiLabs is a visual modeling tool for editing, managing, and monitoring your machine learning models.",
-             "image": "/images/percepti-labs.svg",
-             "sidebar_h1": "PerceptiLabs",
-             "sidebar_links": {}
-
         },
         "seldon-deploy": {
              "badges": ["Self-managed"],

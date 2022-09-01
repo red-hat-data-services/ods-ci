@@ -75,8 +75,6 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-  #[Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science Dashboard"
-  # Temporary workaround to use ODH cluster
   [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
   Wait For Condition  return document.title == ${dashboard_title}  timeout=15
 
@@ -166,7 +164,7 @@ Go To RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.13.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.16.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE

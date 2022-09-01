@@ -44,20 +44,30 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
     Should Not Be Equal    ${cpu_usage_before}    ${cpu_usage_after}
 
 Test Metric "Rhods_Total_Users" On ODS Prometheus
-    [Documentation]    Verifies that metrics rhods_total_users and jupyterhub_total_users have the same value in Prometheus
+    [Documentation]    Verifies that metric value for rhods_total_users
+    ...    matches the value of its corresponding expression
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-628
-    ${expression} =    Set Variable    rhods_total_users&step=1  #step = 1 beacuase it will return value of current second
-    ${rhods_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
-    Log    rhods_total_users: ${rhods_total_users.json()["data"]["result"][0]["value"][-1]}
-    ${expression} =    Set Variable    jupyterhub_total_users&step=1  #step = 1 beacuase it will return value of current second
-    ${jupyterhub_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+
+    # Note: the expression ends with "step=1" to obtain the value for current second
+    ${expression} =    Set Variable    rhods_total_users&step=1
+    ${rhods_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    ...   ${expression}
+    ${rhods_total_users} =    Set Variable    ${rhods_total_users.json()["data"]["result"][0]["value"][-1]}
+    Log    rhods_total_users:${rhods_total_users}
+
+    # Note: the expression ends with "step=1" to obtain the value cor current second
+    ${expression} =    Set Variable
+    ...    count(kube_statefulset_replicas{namespace=~"rhods-notebooks", statefulset=~"jupyter-nb-.*"})&step=1
+    ${total_users_using_expression} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
     ...    ${expression}
-    Log    jupyterhub_total_users: ${jupyterhub_total_users.json()["data"]["result"][0]["value"][-1]}
-    Should Be Equal    ${rhods_total_users.json()["data"]["result"][0]["value"][-1]}
-    ...    ${jupyterhub_total_users.json()["data"]["result"][0]["value"][-1]}
-    ...    msg=metrics rhods_total_users and jupyterhub_total_users don't have the same value
+    ${total_users_using_expression} =    Set Variable
+    ...    ${total_users_using_expression.json()["data"]["result"][0]["value"][-1]}
+    Log    total_users_using_expression: ${total_users_using_expression}
+
+    Should Be Equal    ${rhods_total_users}    ${total_users_using_expression}
+    ...    msg=metric value for rhods_total_users does not match the value of is corresponding expression
 
 Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     [Documentation]    Verifies the rhods aggregate availability on rhods prometheus

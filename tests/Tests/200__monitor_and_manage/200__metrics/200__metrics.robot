@@ -2,6 +2,7 @@
 Documentation       Test suite testing ODS Metrics
 Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Common.robot
 Library             DateTime
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
@@ -10,18 +11,23 @@ Test Teardown       End Metrics Web Test
 
 
 *** Variables ***
-@{RECORD_GROUPS}    Availability Metrics    SLOs - JupyterHub    SLOs - ODH Dashboard    SLOs - RHODS Operator    SLOs - Traefik Proxy    Usage Metrics
-@{ALERT_GROUPS}     Builds                  DeadManSnitch    RHODS-PVC-Usage    SLOs-haproxy_backend_http_responses_total    SLOs-probe_success
+@{RECORD_GROUPS}    Availability Metrics    SLOs - ODH Dashboard
+...    SLOs - RHODS Operator    Usage Metrics
+
+@{ALERT_GROUPS}     Builds    DeadManSnitch    RHODS Notebook controllers
+...    RHODS-PVC-Usage    SLOs-haproxy_backend_http_responses_total    SLOs-probe_success
 
 
 *** Test Cases ***
 Test Existence of Prometheus Alerting Rules
+    [Documentation]    Verifies the prometheus alerting rules
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-509
     Check Prometheus Alerting Rules
 
 Test Existence of Prometheus Recording Rules
+    [Documentation]    Verifies the prometheus recording rules
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-510
@@ -69,6 +75,9 @@ Verify JupyterHub Leader Monitoring Using ODS Prometheus
     [Tags]    Sanity
     ...       ODS-689
     ...       Tier1
+
+    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
+
     @{endpoints} =    Prometheus.Get Target Endpoints Which Have State Up
     ...    target_name=JupyterHub Metrics
     ...    pm_url=${RHODS_PROMETHEUS_URL}

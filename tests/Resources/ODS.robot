@@ -33,21 +33,13 @@ Scale DeploymentConfig
 
 Restore Default Deployment Sizes
     [Documentation]    Restores the default sizes to all deployments in ODS
-    [Arguments]    ${restore_deployments}=True    ${restore_deploymentconfigs}=True
-
-    IF  ${restore_deploymentconfigs}==True
-        ODS.Scale DeploymentConfig    redhat-ods-applications    jupyterhub    replicas=3
-        ODS.Scale DeploymentConfig    redhat-ods-applications    jupyterhub-idle-culler    replicas=1
-    END
-
-    IF  ${restore_deployments}==True
-        ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard    replicas=2
-        ODS.Scale Deployment    redhat-ods-applications    traefik-proxy    replicas=3
-        ODS.Scale Deployment    redhat-ods-monitoring    blackbox-exporter    replicas=1
-        ODS.Scale Deployment    redhat-ods-monitoring    grafana    replicas=2
-        ODS.Scale Deployment    redhat-ods-monitoring    prometheus    replicas=1
-        ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=1    sleep-time=30s
-    END
+    ODS.Scale Deployment    redhat-ods-applications    notebook-controller-deployment     replicas=1
+    ODS.Scale Deployment    redhat-ods-applications    odh-notebook-controller-manager    replicas=1
+    ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard                    replicas=2
+    ODS.Scale Deployment    redhat-ods-monitoring      blackbox-exporter                  replicas=1
+    ODS.Scale Deployment    redhat-ods-monitoring      grafana                            replicas=2
+    ODS.Scale Deployment    redhat-ods-monitoring      prometheus                         replicas=1
+    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                     replicas=1    sleep-time=30s
 
 Verify "Usage Data Collection" Key
     [Documentation]    Verifies that "Usage Data Collection" is using the expected segment.io key

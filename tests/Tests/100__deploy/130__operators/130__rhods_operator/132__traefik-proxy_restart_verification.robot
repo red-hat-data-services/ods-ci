@@ -9,6 +9,8 @@ Documentation       132 - RHODS_TRAEFIK_PROXY_CONTAINER_RESTART_VERIFICATION
 
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../../Resources/RHOSi.resource
+Resource            ../../../../Resources/Common.robot
+
 Suite Setup         RHOSi Setup
 Suite Teardown         RHOSi Teardown
 
@@ -24,8 +26,7 @@ Verify Traefik Proxy Containers Have Zero Restarts
     ...    container restart
     [Tags]    Sanity
     ...       ODS-1163    ProductBug
-    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.16.0
-    Skip if   ${version-check}==True
-    ...   Traefik proxy is removed after KFNBC migration
+    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
+    ...    msg=Traefik proxy is removed after KFNBC migration
     ${pod_names}    Get POD Names    ${NAMESPACE}    ${LABEL_SELECTOR}
     Verify Containers Have Zero Restarts    ${pod_names}    ${NAMESPACE}

@@ -138,3 +138,18 @@ Clean Resource YAML Before Creating It
     ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
     Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
     [Return]   ${clean_yaml_data}
+
+Skip If RHODS Version Greater Or Equal Than
+    [Documentation]    Skips test if RHODS version is greater or equal than ${version}
+    [Arguments]    ${version}    ${msg}=${EMPTY}
+
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  ${version}
+
+    IF    "${msg}" != "${EMPTY}"
+       Skip If    condition=${version-check}==True    msg=${msg}
+    ELSE
+       Skip If    condition=${version-check}==True    msg=This test is skipped for RHODS ${version} or greater
+    END
+
+
+

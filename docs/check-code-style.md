@@ -75,3 +75,51 @@ Robocop is a tool that performs static code analysis of Robot Framework code.
   robotidy --config /dev/null --transform RenameKeywords  tests/Resources/Page/ODH/ODHDashboard/ODHDashboard.robot --diff --no-overwrite
   robotidy --config /dev/null --transform RenameKeywords  tests/Resources/Page/ODH/ODHDashboard/ODHDashboard.robot --diff --overwrite
   ```
+
+# Analyze the code using Black
+
+Black is the uncompromising Python code formatter. By using it, you agree to cede control over the minutiae of hand-formatting
+
+- Install the required libraries:
+
+  ```
+  pip install black
+
+  # It requires Python 3.6.0+ to run. Once Black is installed, you will have a new command-line tool called black available to you in your shell, and you’re ready to start!
+  ```
+
+- Analyze one file or folder:
+  ```
+  # Run the command from the root folder in order to
+  cd ods-ci
+
+  # Check single file
+  black --check --diff utils/scripts/SplitSuite.py
+
+  # Check a folder
+  black --check --diff utils/
+
+  #This shows what needs to be done to the file but doesn’t modify the file
+  ```
+
+- Excluding black formatting
+
+  - You can ignore a rule for a particular line of code adding a comment like this.
+     ```
+      python statement # fmt: skip
+     ```
+
+# Automatically format the code using Black
+  - Format one file or folder:
+  ```
+  # Run the command from the root folder in order to
+  cd ods-ci
+
+  # format single file
+  black utils/scripts/SplitSuite.py
+
+  # format a folder
+  black  utils/
+
+  #This shows what needs to be done to the file but doesn’t modify the file
+  ```

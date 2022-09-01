@@ -2,8 +2,8 @@
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
 Resource        ../../Resources/ODS.robot
-Suite Setup     Customized Suite Setup Admin UI
-Suite Teardown  Customized Teardown Admin UI
+Suite Setup     Setup Admin UI
+Suite Teardown  Teardown Admin UI
 
 *** Test Cases ***
 Verify The CRD Gets Updated After Applying Changes In Admin UI
@@ -37,7 +37,7 @@ Verify If Unauthorized User Can Not Change The Permission
     Save Changes In User Management Setting
     Page Should Contain  Unable to load User and group settings
     Switch Browser  2
-    [Teardown]  Customized Teardown Admin UI
+    [Teardown]  Teardown Admin UI
 
 Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     [Documentation]    Verify unauthorized User Is Not Able To Spawn Jupyter
@@ -55,7 +55,7 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     Reload Page
     Run Keyword And Expect Error  *  Launch Jupyter From RHODS Dashboard Link
     Wait Until Page Contains    Page Not Found   timeout=15s
-    [Teardown]  Customized Teardown Admin UI
+    [Teardown]  Teardown Admin UI
 
 Verify Automatically Detects a Group Selected Is Removed and Notify the User
    [Documentation]  Verify if the group is deleted the user should get the
@@ -73,12 +73,12 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
 
 
 *** Keywords ***
-Customized Teardown Admin UI
+Teardown Admin UI
     [Documentation]  Setup Default Values In User Management Settings
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
 
-Customized Suite Setup Admin UI
+Setup Admin UI
     [Documentation]  Customized Steup for admin UI
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup

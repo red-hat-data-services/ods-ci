@@ -3,6 +3,7 @@ Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
 Resource        ../../Resources/ODS.robot
 Suite Setup     Customized Suite Setup Admin UI
+Suite Teardown  Customized Teardown Admin UI
 
 *** Test Cases ***
 Verify The CRD Gets Updated After Applying Changes In Admin UI
@@ -41,13 +42,13 @@ Verify If Unauthorized User Can Not Change The Permission
 Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     [Documentation]    Verify unauthorized User Is Not Able To Spawn Jupyter
     ...     Notebook , user should not see a spawner if the user is not in allowed Groups
-    [Tags]   ODS-1680
+    [Tags]  ODS-1680
     ...     Tier1
     ...     Sanity
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
-    Add OpenShift Groups To Data Science Administrators         rhods-users
-    Add OpenShift Groups To Data Science User Groups            rhods-users
+    Add OpenShift Groups To Data Science Administrators    rhods-users
+    Add OpenShift Groups To Data Science User Groups       rhods-users
     Save Changes In User Management Setting
     AdminGroups In OdhDashboardConfig CRD Should Be        rhods-users
     AllowedGroups In OdhDashboardConfig CRD Should Be      rhods-users
@@ -70,6 +71,7 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
     Reload Page
     Wait Until Page Contains    Group no longer exist   timeout=20s
 
+
 *** Keywords ***
 Customized Teardown Admin UI
     [Documentation]  Setup Default Values In User Management Settings
@@ -78,5 +80,7 @@ Customized Teardown Admin UI
 
 Customized Suite Setup Admin UI
     [Documentation]  Customized Steup for admin UI
-    RHOSi Setup
     Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
+    Set Standard RHODS Groups Variables
+    Set Default Access Groups Settings

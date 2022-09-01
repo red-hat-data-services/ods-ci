@@ -1,0 +1,12 @@
+name: Lint
+on: [push, pull_request]
+
+jobs:
+  run_lint:
+    name: black formatter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: rickstaa/action-black@v1
+        with:
+          black_args: "--check --diff ."

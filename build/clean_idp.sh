@@ -101,6 +101,7 @@ function check_uninstallation(){
         echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
         exit 0
     fi
+    echo -e "\033[0;33m LDAP and/or htpasswd Identity providers have been deleted from the cluster \033[0m"
   done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
 }
 

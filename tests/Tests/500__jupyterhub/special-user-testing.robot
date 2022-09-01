@@ -23,28 +23,21 @@ Test Special Usernames
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
-    ${version-check} =  Is RHODS Version Greater Or Equal Than  1.4.0
-    IF  ${version-check}==True
-      Launch JupyterHub From RHODS Dashboard Link
-    ELSE
-      Launch JupyterHub From RHODS Dashboard Dropdown
-    END
+    Launch Jupyter From RHODS Dashboard Link
     FOR  ${char}  IN  @{CHARS}
         Login Verify Logout  ldap-special${char}  ${TEST_USER.PASSWORD}  ldap-provider-qe
     END
 
 *** Keywords ***
 Special User Testing Suite Setup
-  Set Library Search Order  SeleniumLibrary
-  RHOSi Setup
+    Set Library Search Order  SeleniumLibrary
+    RHOSi Setup
 
 Login Verify Logout
     [Arguments]  ${username}  ${password}  ${auth}
-    Login To Jupyterhub  ${username}  ${password}  ${auth}
-    ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service Account
+    Logout From RHODS Dashboard
+    Login To RHODS Dashboard  ${username}  ${password}  ${auth}
     User Is Allowed
+    Page Should Contain  ${username}
     Capture Page Screenshot  special-user-login-{index}.png
-    Logout Via Button
-    Login Via Button
 

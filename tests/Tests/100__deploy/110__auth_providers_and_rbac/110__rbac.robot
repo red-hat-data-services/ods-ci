@@ -17,12 +17,12 @@ Verify Default Access Groups Settings And JupyterLab Notebook Access
     [Teardown]  End Web Test
 
 Verify Empty Group Doesnt Allow Users To Spawn Notebooks
-    [Documentation]   Verifies that User is unable to Access Jupyterhub after setting Access Groups in rhods-groups-config to Empty
+    [Documentation]   Verifies that User is unable to Access Jupyterhub after setting Access Groups OdhDashboardConfig CRD to Empty
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-572
     ...       FlakyTest
-    Apply Access Groups Settings    admins_group=    users_group=    groups_modified_flag=true
+    Apply Access Groups Settings    admins_group=    users_group=
     Verify User Is Unable To Spawn Notebook
     [Teardown]   Set Default Access Groups And Close Browser
 
@@ -34,13 +34,13 @@ Verify User Can Spawn A Notebook
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Default
+    Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Small
 
 Verify User Is Unable To Spawn Notebook
     [Documentation]    Verifies User is unable to access notebooks in jupyterhub
     Launch Dashboard    ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}  ${ODH_DASHBOARD_URL}  ${BROWSER.NAME}  ${BROWSER.OPTIONS}
-    Launch JupyterHub From RHODS Dashboard Link
-    Login Verify Access Level    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}    none
+    Launch Jupyter From RHODS Dashboard Link
+    Verify Jupyter Access Level    expected_result=none
 
 Set Default Access Groups And Close Browser
     [Documentation]  Sets values of RHODS Groups to Default Values and closes browser

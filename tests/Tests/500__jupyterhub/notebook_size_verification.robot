@@ -24,8 +24,8 @@ Force Tags          JupyterHub
 
 *** Variables ***
 ${NAMESPACE}        rhods-notebooks
-@{NOTEBOOK_SIZE}    Default    Small    Medium
-${DEFAULT_SIZE}     {"limits":{"cpu":"2","memory":"8gi"},"requests":{"cpu":"1","memory":"4gi"}}
+@{NOTEBOOK_SIZE}    Small    Medium
+${DEFAULT_SIZE}     {"limits":{"cpu":"2","memory":"8gi"},"requests":{"cpu":"1","memory":"8gi"}}
 ${CUSTOME_SIZE}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","memory":"6gi"}}
 
 
@@ -47,7 +47,8 @@ Verify Custom Spwaned Notebook Size
     ...       ODS-1071
     Launch JupyterHub Spawner From Dashboard
     Modify Default Container Size
-    ${d_container_size}    Create List    Default
+    Sleep    60s    msg=Wait for the size to get reflect
+    ${d_container_size}    Create List    Small
     Spawn Notebook And Verify Size    size=${CUSTOME_SIZE}    NOTEBOOK_SIZE=${d_container_size}
     Restore Default Container Size
 
@@ -56,13 +57,14 @@ Verify Custom Spwaned Notebook Size
 Dashboard Test Setup
     [Documentation]    Open browser and load RHODS dashboard
     Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
+    #RHOSi Setup
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
 
 Dashboard Test Teardown
     [Documentation]    Close all the open browser
+    Run Keyword And Ignore Error    Click Button    Close
     Close All Browsers
 
 Spawn Notebook And Verify Size
@@ -70,12 +72,13 @@ Spawn Notebook And Verify Size
     ...    between JH and notebook pod
     [Arguments]    ${size}=${DEFAULT_SIZE}    ${NOTEBOOK_SIZE}=${NOTEBOOK_SIZE}
     FOR    ${container_size}    IN    @{NOTEBOOK_SIZE}
-        IF    $container_size == 'Default'
+        Reload Page
+        IF    $container_size == 'Small'
             ${jh_container_size}    Evaluate    json.loads('''${size}''')    json
         ELSE
             ${jh_container_size}    Get Container Size    ${container_size}
         END
-        Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=${container_size}    refresh=${True}
+        Spawn Notebook With Arguments    image=minimal-gpu    size=${container_size}
         ${notebook_pod_name}    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
         ${status}    Run
         ...    oc get pods -n ${NAMESPACE} ${notebook_pod_name} -o jsonpath='{.spec.containers[0].resources}'

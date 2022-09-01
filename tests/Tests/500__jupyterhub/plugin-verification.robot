@@ -12,7 +12,7 @@ Suite Teardown   Plugin Testing Suite Teardown
 Force Tags       JupyterHub
 
 *** Variables ***
-@{notebook_images}             s2i-minimal-notebook   s2i-generic-data-science-notebook    tensorflow   pytorch
+@{notebook_images}             s2i-minimal-notebook    s2i-generic-data-science-notebook    tensorflow   pytorch
 @{s2i-minimal-notebook}      @jupyterlab/git      nbdime-jupyterlab     Python 3.8
 @{s2i-generic-data-science-notebook}   @jupyterlab/git      @jupyter-widgets/jupyterlab-manager    jupyterlab_requirements   nbdime-jupyterlab   jupyterlab-plotly   jupyterlab-s3-browser   @bokeh/jupyter_bokeh   @jupyter-server/resource-usage  @krassowski/jupyterlab-lsp   @elyra/metadata-extension  @elyra/python-editor-extension  @elyra/theme-extension   Python 3.8
 @{tensorflow}   @jupyterlab/git   @jupyter-widgets/jupyterlab-manager   jupyterlab-s3-browser   nbdime-jupyterlab  jupyterlab-plotly  @jupyter-server/resource-usage   @krassowski/jupyterlab-lsp   @bokeh/jupyter_bokeh   @elyra/metadata-extension   @elyra/python-editor-extension   @elyra/theme-extension    Python 3.8
@@ -56,7 +56,7 @@ Gather Notebook data
 
 Get the List of Plugins from RHODS notebook images
   FOR  ${image}  IN  @{notebook_images}
-      Spawn Notebook With Arguments  image=${image}   size=Default
+      Spawn Notebook With Arguments  image=${image}   size=Small
       #${notebook_pod_name}         Get User Notebook Pod Name         ${TEST_USER.USERNAME}
       ${temp_data}      Get Install Plugin list from JupyterLab
       ${py_version}    Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- python --version
@@ -65,7 +65,6 @@ Get the List of Plugins from RHODS notebook images
       Log    ${temp_data}
       Set To Dictionary   ${temporary_data}      ${image}     ${temp_data}
       Stop JupyterLab Notebook Server
-      Click Link  start
       Sleep  3
   END
 

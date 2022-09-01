@@ -41,17 +41,17 @@ Verify Traefik Deployment
     ...       Tier1
     ...       ODS-546
     ...       ODS-552
-    @{traefik} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=name = traefik-proxy
-    ${containerNames} =  Create List  traefik-proxy  configmap-puller
-    Verify Deployment  ${traefik}  3  2  ${containerNames}
+    Skip      msg=Traefik proxy is removed after KFNBC migration
 
-Verify JH Deployment
-    [Documentation]  Verifies RHODS JH deployment
+Verify Notebook Controller Deployment
+    [Documentation]  Verifies RHODS Notebook Controller deployment
     [Tags]    Sanity
     ...       ODS-546  ODS-294  ODS-1250  ODS-237
-    @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
-    ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
-    Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
+     @{NBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=notebook-controller
+     @{ONBC}=  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=odh-notebook-controller
+     ${containerNames} =  Create List  manager
+     Verify Deployment  ${NBC}  1  1  ${containerNames}
+     Verify Deployment  ${ONBC}  1  1  ${containerNames}
 
 Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed
@@ -142,11 +142,9 @@ Verify That CUDA Build Chain Succeeds
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-316    ODS-481
-    Wait Until All Builds Are Complete    namespace=redhat-ods-applications
-    ...    build_timeout=45m
-    Verify Image Can Be Spawned    image=minimal-gpu    size=Default
-    Verify Image Can Be Spawned    image=pytorch        size=Default
-    Verify Image Can Be Spawned    image=tensorflow     size=Default
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    Verify Image Can Be Spawned    image=pytorch  size=Small
+    Verify Image Can Be Spawned    image=tensorflow  size=Small
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
@@ -204,7 +202,7 @@ Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
     [Tags]    Tier2
     ...       ODS-586
-    Verify Errors In Jupyterhub Logs
+    Skip      msg=JupyterHub Pod is removed after KFNBC migration
 
 Verify Grafana Is Connected To Prometheus Using TLS
     [Documentation]    Verifies Grafana is connected to Prometheus using TLS
@@ -272,7 +270,7 @@ Test Setup For Rhods Dashboard
 
 Test Teardown For Configmap Changed On RHODS Dashboard
     [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data": {"jupyter": "true"}}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
 

@@ -253,7 +253,7 @@ Verify Error Message In Logs When A RHODS Group Is Empty
     ...     ODS-1408
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an empty group
-    ...                 is set as admin in "rhods-group-config" ConfigMap
+    ...                 is set as admin in OdhDashboardConfig CRD
     [Setup]     Set Variables For Group Testing
     Create Group    group_name=${CUSTOM_EMPTY_GROUP}
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
@@ -270,7 +270,7 @@ Verify Error Message In Logs When A RHODS Group Does Not Exist
     ...     ODS-1494
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an inexistent group
-    ...                 is set as admin in "rhods-group-config" ConfigMap
+    ...                 is set as admin in OdhDashboardConfig CRD
     [Setup]     Set Variables For Group Testing
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
     Set RHODS Admins Group To Inexistent Group
@@ -285,7 +285,7 @@ Verify Error Message In Logs When A RHODS Group Does Not Exist
 Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admins
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when 'system:authenticated'
-    ...                 is set as admin in "rhods-group-config" ConfigMap
+    ...                 is set as admin in OdhDashboardConfig CRD
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1500
@@ -412,31 +412,31 @@ Set RHODS Admins Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
     Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+    ...     users_group=${STANDARD_USERS_GROUP}
 
 Set RHODS Admins Group To system:authenticated    # robocop:disable
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
     Set Access Groups Settings    admins_group=system:authenticated
-    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+    ...     users_group=${STANDARD_USERS_GROUP}
 
 Set RHODS Users Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${CUSTOM_EMPTY_GROUP}   groups_modified_flag=true
+    ...     users_group=${CUSTOM_EMPTY_GROUP}
 
 Set RHODS Admins Group To Inexistent Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given inexistent group
     Set Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+    ...     users_group=${STANDARD_USERS_GROUP}
 
 Set RHODS Users Group To Inexistent Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
     ...                 to the given inexistent group
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${CUSTOM_INEXISTENT_GROUP}   groups_modified_flag=true
+    ...     users_group=${CUSTOM_INEXISTENT_GROUP}
 
 Set Default Groups And Check Logs Do Not Change
     [Documentation]     Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "rhods-groups-config"
@@ -444,7 +444,7 @@ Set Default Groups And Check Logs Do Not Change
     [Arguments]     ${delete_group}=${FALSE}
     ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}   groups_modified_flag=true
+    ...     users_group=${STANDARD_USERS_GROUP}
     Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
     IF  "${delete_group}" == "${TRUE}"
         Delete Group    group_name=${CUSTOM_EMPTY_GROUP}

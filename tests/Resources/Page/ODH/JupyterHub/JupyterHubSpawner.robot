@@ -294,27 +294,26 @@ Fix Spawner Status
 
 User Is Allowed
    [Documentation]  Checks if the user is allowed
-   JupyterHub Spawner Is Visible
-   Page Should Not Contain  403 : Forbidden
    ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
    IF  ${spawner_ready}==False
       Fail    Spawner page was not ready
    END
+   Page Should Not Contain  Page Not Found
 
 User Is Not Allowed
    [Documentation]  Checks if the user is not allowed
-   JupyterHub Spawner Is Visible
-   Page Should Contain  403 : Forbidden
+   Wait Until Page Contains  Page Not Found     timeout=10
+   # Page Should Contain  403 : Forbidden
 
 User Is JupyterHub Admin
    [Documentation]  Checks if the user is an admin
-   JupyterHub Spawner Is Visible
-   Page Should Contain  Admin
+   Wait Until JupyterHub Spawner Is Ready
+   Page Should Contain  Administration
 
 User Is Not JupyterHub Admin
    [Documentation]  Checks if the user is not an admin
-   JupyterHub Spawner Is Visible
-   Page Should Not Contain  Admin
+   Wait Until JupyterHub Spawner Is Ready
+   Page Should Not Contain  Administration
 
 Logout Via Button
    [Documentation]  Logs out from JupyterHub

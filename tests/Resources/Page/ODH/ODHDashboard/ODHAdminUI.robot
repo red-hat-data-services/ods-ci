@@ -60,7 +60,7 @@ Remove OpenShift Groups From Data Science Administrator Groups
 Save Changes In User Management Setting
     [Documentation]  Save User management Settings
     Click Button    Save changes
-    Sleep  60s
+    Sleep  70s
 
 AdminGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD

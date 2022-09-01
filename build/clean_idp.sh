@@ -43,7 +43,7 @@ function remove_user_from_dedicated_admins(){
 }
 
 uninstall_identity_provider(){
-  echo "---> Installing the required IDPs"
+  echo "---> Uninstalling the IDPs previously installed by ODS-CI"
 
   echo $OC_HOST
   CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')

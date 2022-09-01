@@ -1,10 +1,9 @@
 *** Settings ***
-Library         OpenShiftCLI
 Library         OpenShiftLibrary
 Resource        ../../LoginPage.robot
 
 *** Keywords ***
-Add OpenShift groups To Data Science Administrators
+Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift groups to Data Science administrators
     [Arguments]     @{admin_groups}
     Click Button   (//button[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"])[${1}]

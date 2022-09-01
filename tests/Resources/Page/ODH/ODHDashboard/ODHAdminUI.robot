@@ -13,11 +13,13 @@ Add OpenShift Groups To Data Science Administrators
                 Click Button    //*[@class="pf-c-select__menu-item"and contains(text(), "${admin_group}")]
             END
     END
+    Press Keys    None    ESC
 
 Add OpenShift Groups To Data Science User Groups
     [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
     Click Button    (//button[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"])[${2}]
+
     FOR    ${user_group}    IN    @{user_groups}
             ${present}=  Run Keyword And Return Status
                ...  Element Should Be Visible   //*[@class="pf-c-select__menu-item pf-m-selected" and contains(text(), "${user_group}")]
@@ -25,6 +27,7 @@ Add OpenShift Groups To Data Science User Groups
                 Click Element    //*[@class="pf-c-select__menu-item"and contains(text(), "${user_group}")]
              END
     END
+    Press Keys    None    ESC
 
 Launch Dashboard And Check User Management Option Is Available For The User
     [Documentation]  Launch Dashboard And Check User Management Option Is
@@ -43,6 +46,7 @@ Remove OpenShift Groups From Data Science User Groups
     FOR    ${user_group}    IN    @{user_groups}
             Click Element     (//*[@class="pf-c-form__group-control"])[${2}]//*[@class="pf-c-chip__text" and contains(text(),"${user_groups}")]//following-sibling::button[${1}]
     END
+    Press Keys    None    ESC
 
 Remove OpenShift Groups From Data Science Administrator Groups
     [Documentation]  Remove OpenShift Groups From Data Science Administrator Groups From Dashboard

@@ -81,9 +81,11 @@ Robocop is a tool that performs static code analysis of Robot Framework code.
 [Black](https://black.readthedocs.io/en/stable/usage_and_configuration/index.html) is the uncompromising Python code formatter. By using it, you agree to cede control over the minutiae of hand-formatting
 
 - Install the required libraries:
-
   ```
-  pip install black
+  pip install -r requirements-dev.txt
+
+  # If you had them already but want to force upgrade to the latest version:
+  pip install --upgrade --force-reinstall -r requirements-dev.txt
 
   # It requires Python 3.6.0+ to run. Once Black is installed, you will have a new command-line tool called black available to you in your shell, and you’re ready to start!
   ```

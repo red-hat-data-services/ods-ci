@@ -95,11 +95,9 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     Run Keyword Unless    ${res}    Fail
     [Teardown]    Clean Up Server
 
-Verify Jupyterlab Server Pods Are Spawned An a Custom Namespace
+Verify Jupyterlab Server Pods Are Spawned In A Custom Namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)
     [Tags]    ODS-320
     ${pod_name} =    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
-    ${name} =    Remove String    ${pod_name}    jupyterhub-nb-
-    Verify Operator Pod Status    namespace=rhods-notebooks    label_selector=jupyterhub.opendatahub.io/user=${name}
+    Verify Operator Pod Status    namespace=rhods-notebooks    label_selector=statefulset.kubernetes.io/pod-name=${pod_name}
     ...    expected_status=Running
-

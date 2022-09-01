@@ -122,9 +122,9 @@ Verify CSS Style Of Getting Started Descriptions
     ...       ODS-1165
     Click Link    Explore
     Wait Until Cards Are Loaded
-    Open Get Started Sidebar And Return Status    card_locator=${JH_CARDS_XP}
+    Open Get Started Sidebar And Return Status    card_locator=${SAMPLE_APP_CARD_XP}
     Capture Page Screenshot    get_started_sidebar.png
-    Verify JupyterHub Card CSS Style
+    Verify Jupyter Card CSS Style
 
 Verify Documentation Link HTTP Status Code
     [Documentation]    It verifies the documentation link present in question mark and
@@ -535,7 +535,7 @@ RHODS Dahsboard Pod Should Contain OauthProxy Container
         List Should Contain Value    ${container_name}    oauth-proxy
     END
 
-Verify JupyterHub Card CSS Style
+Verify Jupyter Card CSS Style
     [Documentation]    Compare the some CSS properties of the Explore page
     ...    with the expected ones. The expected values change based
     ...    on the RHODS version

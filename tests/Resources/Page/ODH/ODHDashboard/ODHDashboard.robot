@@ -11,7 +11,7 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}=                //*[@class="pf-c-drawer__p
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
-${JH_CARDS_XP}=   //article[@id="jupyterhub"]
+${SAMPLE_APP_CARD_XP}=   //article[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
 ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
@@ -116,7 +116,7 @@ Verify Service Is Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    JupyterHub  timeout=30
+  Wait Until Page Contains    Jupyter  timeout=30
   Capture Page Screenshot
   Page Should Contain Element    //article//*[.='${app_name}']
 
@@ -139,7 +139,7 @@ Verify Service Provides "Enable" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is an "Enable" button
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    JupyterHub  timeout=30
+  Wait Until Page Contains    Jupyter  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
   Click Element     xpath://article//*[.='${app_name}']/../..
   Capture Page Screenshot
@@ -150,7 +150,7 @@ Verify Service Provides "Get Started" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is a "Get Started" button
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    JupyterHub  timeout=30
+  Wait Until Page Contains    Jupyter  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
   Click Element     xpath://article//*[.='${app_name}']/../..
   Capture Page Screenshot

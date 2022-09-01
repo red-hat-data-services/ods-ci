@@ -78,7 +78,7 @@ Robocop is a tool that performs static code analysis of Robot Framework code.
 
 # Analyze the code using Black
 
-[Black] (https://black.readthedocs.io/en/stable/usage_and_configuration/index.html) is the uncompromising Python code formatter. By using it, you agree to cede control over the minutiae of hand-formatting
+[Black](https://black.readthedocs.io/en/stable/usage_and_configuration/index.html) is the uncompromising Python code formatter. By using it, you agree to cede control over the minutiae of hand-formatting
 
 - Install the required libraries:
 

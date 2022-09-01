@@ -130,6 +130,12 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
 
+    --cluster-admin-password)
+      shift
+      ADMIN_PASS=$1
+      shift
+      ;;
+
     *)
       echo "Unknown command line switch: $1"
       exit 1
@@ -139,8 +145,8 @@ done
 
 
 
-printf "Insert cluster admin user's password:"
-read -s ADMIN_PASS
+# printf "Insert cluster admin user's password:"
+# read -s ADMIN_PASS
 perform_ocm_login
 check_installation
 uninstall_identity_provider

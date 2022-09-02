@@ -56,7 +56,6 @@ uninstall_identity_provider(){
   # delete ldap deployment and idp
   # oc wait --for=delete $(oc get namespace openldap)
   oc delete -f configs/templates/ldap/ldap.yaml
-  oc wait --for=delete $(oc get namespace openldap)
   ocm delete idp -c "${CLUSTER_NAME}" ldap-provider-qe
 
   # add users to RHODS groups

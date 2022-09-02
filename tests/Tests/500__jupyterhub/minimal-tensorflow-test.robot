@@ -56,7 +56,7 @@ Verify Tensorflow Image Can Be Spawned With GPU
     ...     Resources-GPU
     ...     ODS-1151
     Close Previous Server
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
 
 Verify Tensorflow Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version

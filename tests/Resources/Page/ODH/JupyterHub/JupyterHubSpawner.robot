@@ -21,6 +21,7 @@ ${JUPYTERHUB_SPAWNER_HEADER_XPATH} =
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 #${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
 ${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
+${JUPYTER_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-numbers")]
 
 
 *** Keywords ***
@@ -57,20 +58,20 @@ Wait Until GPU Dropdown Exists
     [Documentation]    Verifies that the dropdown to select the no. of GPUs exists
     Wait Until Page Contains    Number of GPUs
     Page Should Not Contain    All GPUs are currently in use, try again later.
-    Wait Until Page Contains Element    xpath://button[contains(@aria-labelledby, "gpu-numbers")]
+    Wait Until Page Contains Element    xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
     ...    error=GPU selector is not present in JupyterHub Spawner
 
 Set Number Of Required GPUs
     [Documentation]  Sets the gpu count based on the ${gpus} argument
     [Arguments]  ${gpus}
-    Click Element  xpath://button[contains(@aria-labelledby, "gpu-numbers")]
-    Click Element  xpath://button[contains(@aria-labelledby, "gpu-numbers")]/../..//button[.="${gpus}"]
+    Click Element  xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
+    Click Element  xpath:${JUPYTER_GPU_DROPDOWN_XPATH}/../..//button[.="${gpus}"]
 
 Fetch Max Number Of GPUs In Spawner Page
     [Documentation]    Returns the maximum number of GPUs a user can request from the spawner
     ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
     IF  ${gpu_visible}==True
-       Click Element    xpath://button[contains(@aria-labelledby, "gpu-numbers")]
+       Click Element    xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
        ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
        ${maxGPUs} =    Convert To Integer    ${maxGPUs}
     ELSE

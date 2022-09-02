@@ -58,7 +58,7 @@ Verify PyTorch Image Can Be Spawned With GPU
     Stop JupyterLab Notebook Server
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
 
 Verify PyTorch Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version

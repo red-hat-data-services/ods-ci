@@ -64,7 +64,7 @@ Verify CUDA Image Suite Setup
     Close All Browsers
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Default  gpus=1
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
     # Verifies that now there are no GPUs available for selection
     @{old_browser} =  Get Browser Ids
     Sleep  30s  msg=Give time to spawner to update GPU count

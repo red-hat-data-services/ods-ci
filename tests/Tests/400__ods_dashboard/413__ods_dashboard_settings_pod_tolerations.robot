@@ -1,5 +1,7 @@
 *** Settings ***
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource         ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Library          ../../../../libs/Helpers.py
 Suite Setup      Begin Web Test
 Suite Teardown   Teardown
 
@@ -20,7 +22,7 @@ Verify Toleration Is Applied To Pod
     ...     ODS-1685
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=s2i-minimal-notebook
-    Verify Pod Toleration    TestToleration
+    Verify Server Pod Has The Expected Toleration    TestToleration
 
 
 *** Keywords ***
@@ -33,32 +35,15 @@ Set Pod Toleration Via UI
     Wait Until Element Is Enabled    xpath://input[@id="toleration-key-input"]
     Input Text    xpath://input[@id="toleration-key-input"]    ${toleration}
 
-Verify Pod Toleration
+Verify Server Pod Has The Expected Toleration
     [Documentation]    Verifies Pod contains toleration
     [Arguments]    ${toleration}
-    ${expected} =    Set Variable    Tolerations    ${toleration}:NoSchedule op=Exists
+    ${expected} =    Set Variable    ${toleration}:NoSchedule op=Exists
     ${current_user} =    Get Current User In JupyterLab
     ${notebook_pod_name} =   Get User Notebook Pod Name  ${current_user}
     ${received} =  Get Pod Tolerations    ${notebook_pod_name}
-    Lists Should Be Equal    ${received}    ${expected}
+    List Should Contain Value  ${received}  ${expected}
     ...    msg=Unexpected Pod Toleration
-    Log    ${received}
-    Log    ${expected}
-
-Get Pod Tolerations
-    [Documentation]    Returns the list of pod tolerations
-    [Arguments]    ${notebook_pod_name}
-    OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
-    # TODO: This only returns the first toleration. Write keyword to parse whole pod spec and
-    # return list of all tolerations
-    ${output} =    Run   oc describe pod ${notebook_pod_name} -n rhods-notebooks | grep -i tolerations:
-    @{received} =    Split String    ${output}    separator=:${SPACE}
-    FOR    ${idx}    IN RANGE    2
-        ${el} =  Remove From List  ${received}  0
-        ${el} =  Strip String  ${el}
-        Append To List  ${received}  ${el}
-    END
-    [Return]  ${received}
 
 Teardown
     [Documentation]    Removes tolerations and cleans up

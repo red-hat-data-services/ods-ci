@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+#Resource         ../400__ods_dashboard/410__ods_dashboard_settings.robot
 Library          ../../../libs/Helpers.py
 Library          OpenShiftLibrary
 Suite Teardown   Teardown
@@ -170,7 +171,7 @@ Open Dashboard Cluster Settings
     Set Library Search Order    SeleniumLibrary
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-    Sleep  5
+    Sleep  1s
     ${settings_hidden} =  Run Keyword And Return Status  Page Should Contain Element
     ...    xpath://section[@aria-labelledby="settings"][@hidden=""]
     IF  ${settings_hidden}==True

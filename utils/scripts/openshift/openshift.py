@@ -35,7 +35,8 @@ class OpenshiftOps:
         Generates ssh key required for OpenShift Installation
         """
         cmd = "ssh-keygen -t rsa -b 4096 -N '' -f {}/id_rsa".format(
-            self.work_dir)
+            self.work_dir
+        )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
@@ -43,7 +44,8 @@ class OpenshiftOps:
             return None
 
         cmd = 'eval "$(ssh-agent -s)";' + "ssh-add {}/id_rsa".format(
-            self.work_dir)
+            self.work_dir
+        )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
@@ -121,7 +123,8 @@ class OpenshiftOps:
         ret = execute_command(cmd)
         if ret is None:
             log.error(
-                "Failed to cd to directory where install config is present")
+                "Failed to cd to directory where install config is present"
+            )
             return None
 
         process = subprocess.Popen(
@@ -142,7 +145,7 @@ class OpenshiftOps:
 
         output = process.stdout.read().decode("utf-8")
         match = re.search(
-            '.*Access the OpenShift web-console here: (\S+)'
+            ".*Access the OpenShift web-console here: (\S+)"
             '.*Login to the console with user: "(\S+)".*password: "(\S+)".*',
             output,
             re.S,
@@ -156,7 +159,9 @@ class OpenshiftOps:
 
         log.info(
             "OpenShift Cluster {} created successfully !".format(
-                self.cluster_name))
+                self.cluster_name
+            )
+        )
 
         cluster_info = {}
         cluster_info["CLUSTER_NAME"] = self.cluster_name
@@ -182,7 +187,8 @@ class OpenshiftOps:
         ret = execute_command(cmd)
         if ret is None:
             log.error(
-                "Failed to cd to directory where install config is present")
+                "Failed to cd to directory where install config is present"
+            )
             sys.exit(1)
 
         cmd = "openshift-install destroy cluster"
@@ -217,12 +223,14 @@ if __name__ == "__main__":
     )
 
     optional_openshift_install_parser = (
-        openshift_install_parser._action_groups.pop())
+        openshift_install_parser._action_groups.pop()
+    )
     required_openshift_install_parser = (
         openshift_install_parser.add_argument_group("required arguments")
     )
     openshift_install_parser._action_groups.append(
-        optional_openshift_install_parser)
+        optional_openshift_install_parser
+    )
 
     required_openshift_install_parser.add_argument(
         "--aws-accesskey-id",
@@ -243,7 +251,7 @@ if __name__ == "__main__":
     required_openshift_install_parser.add_argument(
         "--install-config-file",
         help="Install config file. Note: "
-             "Place this file from where you are running this for now",
+        "Place this file from where you are running this for now",
         action="store",
         dest="install_config_file",
         required=True,

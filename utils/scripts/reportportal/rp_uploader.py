@@ -65,8 +65,7 @@ if __name__ == "__main__":
     )
 
     subparsers = parser.add_subparsers(
-        title="Available sub commands",
-        help="sub-command help"
+        title="Available sub commands", help="sub-command help"
     )
 
     # Argument parsers for uploading test results to report portal

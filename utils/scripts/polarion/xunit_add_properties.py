@@ -131,7 +131,9 @@ def add_testcase_properties(xml_obj, tcconfig=None):
             if index < len(multile_test_ids[testcase.get("name")]):
                 tcproperties = et.Element("properties")
                 test_id = ""
-                test_id = test_id.join(multile_test_ids[testcase.get("name")][index])
+                test_id = test_id.join(
+                    multile_test_ids[testcase.get("name")][index]
+                )
                 attribs = {"name": "polarion-testcase-id", "value": test_id}
                 element = et.Element("property", attrib=attribs)
                 tcproperties.append(element)
@@ -156,7 +158,9 @@ def get_polarion_id(xml_obj):
 def write_xml(xml_obj, filename):
     """write propertified XML to a file"""
     new_xml = ""
-    xml_lines = et.tostring(xml_obj, method="xml", encoding="unicode").split("\n")
+    xml_lines = et.tostring(xml_obj, method="xml", encoding="unicode").split(
+        "\n"
+    )
     for line in xml_lines:
         new_xml += line.strip()
     xmlstr = minidom.parseString(new_xml).toprettyxml(indent="   ")

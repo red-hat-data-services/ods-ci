@@ -8,6 +8,7 @@ import yaml
 import sys
 import uuid
 import subprocess
+
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 
@@ -100,8 +101,9 @@ def generate_polarion_config(config_template, config_data, testrun_title):
     data["testrun_info"]["polarion-testrun-id"] = testrun_title
 
     with open(config_file, "w") as yaml_file:
-        yaml_file.write(yaml.dump(
-            data, default_flow_style=False, sort_keys=False))
+        yaml_file.write(
+            yaml.dump(data, default_flow_style=False, sort_keys=False)
+        )
 
 
 def main():
@@ -111,7 +113,8 @@ def main():
 
     # Clone pylero repo
     ret = clone_config_repo(
-        git_repo=PYLERO_REPO, git_branch="main", repo_dir="pylero")
+        git_repo=PYLERO_REPO, git_branch="main", repo_dir="pylero"
+    )
     if not ret:
         sys.exit(1)
 
@@ -165,7 +168,7 @@ def main():
         args.polarion_username,
         args.polarion_password,
         output_report_file,
-        POLARION_URL
+        POLARION_URL,
     )
     ret = subprocess.call(cmd, shell=True)
     if ret:

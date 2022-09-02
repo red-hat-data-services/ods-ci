@@ -114,15 +114,20 @@ class Helpers:
 
     @keyword
     def install_isv_by_name(
-        self, operator_name, channel, source="certified-operators"):
+        self, operator_name, channel, source="certified-operators"
+    ):
         ocm_client = OpenshiftClusterManager()
         ocm_client.install_openshift_isv(
             operator_name, channel, source, exit_on_failure=False
         )
         if operator_name == "ovms":
-            status = ocm_client.wait_for_isv_installation_to_complete("openvino")
+            status = ocm_client.wait_for_isv_installation_to_complete(
+                "openvino"
+            )
         else:
-            status = ocm_client.wait_for_isv_installation_to_complete(operator_name)
+            status = ocm_client.wait_for_isv_installation_to_complete(
+                operator_name
+            )
         if not status:
             self.BuiltIn.fail(
                 "Unable to install the {} isv, Check if ISV subscription is "

@@ -43,26 +43,9 @@ Verify Culler Kills Inactive Server
     [Tags]    Tier2
     ...       ODS-1254
     ...       Execution-Time-Over-15m
-    Spawn Minimal Image
-    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
-    Open With JupyterLab Menu    File    Save Notebook
-    Close Browser
-    Sleep    ${CUSTOM_CULLER_TIMEOUT}
-    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    ${culled} =  Set Variable  False
-    ${drift} =  Set Variable  ${0}
-    # Wait for maximum 10 minutes over timeout
-    FOR  ${index}  IN RANGE  20
-        ${culled} =  Run Keyword And Return Status  Run Keyword And Expect Error
-        ...    Pods not found in search  OpenShiftLibrary.Search Pods
-        ...    ${notebook_pod_name}  namespace=rhods-notebooks
-        Exit For Loop If  ${culled}==True
-        Sleep  30s
-        ${drift} =  Evaluate  ${drift}+${30}
-    END
-    IF  ${drift}>${120}
-        Fail    Drift was over 2 minutes, it was ${drift} seconds
-    END
+    Spawn Server And Run Notebook Which Will Not Keep Server Active
+    Wait Until Culler Timeout
+    Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
 
 Verify Culler Does Not Kill Active Server
     [Documentation]    Verifies that the culler does not kill an active
@@ -71,20 +54,9 @@ Verify Culler Does Not Kill Active Server
     ...       ODS-1253
     ...       Execution-Time-Over-15m
     ...       AutomationBug
-    ${NOTEBOOK_TO_RUN} =  Set Variable  ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Active.ipynb
-    Spawn Minimal Image
-    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ${NOTEBOOK_TO_RUN}
-    Wait Until ${{"${NOTEBOOK_TO_RUN}".split("/")[-1] if "${NOTEBOOK_TO_RUN}"[-1]!="/" else "${NOTEBOOK_TO_RUN}".split("/")[-2]}} JupyterLab Tab Is Selected
-    Close Other JupyterLab Tabs
-    Sleep  0.5s
-    Open With JupyterLab Menu  Run  Run All Cells
-    Sleep  0.5s
-    Open With JupyterLab Menu    File    Save Notebook
-    Sleep  0.5s
-    Close Browser
-    Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
-    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
+    Spawn Server And Run Notebook To Keep Server Active For More Than 10 Minutes
+    Wait Until Culler Timeout Plus A Drift Window Which By Default Equals 12 Minutes
+    Check If Server Pod Still Exists
 
 Verify Do Not Stop Idle Notebooks
     [Documentation]    Disables the culler (default configuration) and verifies nb is not culled
@@ -93,13 +65,9 @@ Verify Do Not Stop Idle Notebooks
     ...       Execution-Time-Over-15m
     Disable Notebook Culler
     Close Browser
-    Spawn Minimal Image
-    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
-    Open With JupyterLab Menu    File    Save Notebook
-    Close Browser
-    Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
-    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
+    Spawn Server And Run Notebook Which Will Not Keep Server Active
+    Wait Until Culler Timeout Plus A Drift Window Which By Default Equals 12 Minutes
+    Check If Server Pod Still Exists
 
 Verify That "Stop Idle Notebook" Setting Is Not Overwritten After Restart Of Operator Pod
     [Documentation]    Restart the operator pod and verify if "Stop Idle Notebook" setting
@@ -215,3 +183,67 @@ Teardown
     Disable Notebook Culler
     Launch JupyterHub Spawner From Dashboard
     End Web Test
+
+Spawn Server And Run Notebook To Keep Server Active For More Than 10 Minutes
+    [Documentation]    This keyword spawns a server, then clones a Git Repo and runs a notebook
+    ...    which will keep the server's kernel active for ~15 minutes (enough time to be seen as active)
+    ...    after the culler timeout, which is by default set at 10 minutes. It then closes the browser
+    ...    to validate that kernel activity is seen also while no user is actively on the server page.
+    ${NOTEBOOK_TO_RUN} =  Set Variable  ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Active.ipynb
+    Spawn Minimal Image
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ${NOTEBOOK_TO_RUN}
+    Wait Until ${{"${NOTEBOOK_TO_RUN}".split("/")[-1] if "${NOTEBOOK_TO_RUN}"[-1]!="/" else "${NOTEBOOK_TO_RUN}".split("/")[-2]}} JupyterLab Tab Is Selected
+    Close Other JupyterLab Tabs
+    Sleep  0.5s
+    Open With JupyterLab Menu  Run  Run All Cells
+    Sleep  0.5s
+    Open With JupyterLab Menu    File    Save Notebook
+    Sleep  0.5s
+    Close Browser
+
+Wait Until Culler Timeout Plus A Drift Window Which By Default Equals 12 Minutes
+    [Documentation]    This keyword will sleep for 12 minutes by default.
+    ...    It is used to wait for the culler timeout (10 minutes by default)
+    ...    plus a configurable drift window (120 seconds or 2 minutes by default).
+    [Arguments]    ${drift}=120
+    Sleep    ${${CUSTOM_CULLER_TIMEOUT}+${drift}}
+
+Check If Server Pod Still Exists
+    [Documentation]    This keyword simply looks for the server pod
+    ...    in order to confirm that it still exists and wasn't deleted
+    ...    by the notebook culler.
+
+Spawn Server And Run Notebook Which Will Not Keep Server Active
+    [Documentation]    This keyword spawns a server, then clones a Git Repo and runs a notebook
+    ...    which won't keep the server's kernel active. It then closes the browser.
+    Spawn Minimal Image
+    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
+    Open With JupyterLab Menu    File    Save Notebook
+    Close Browser
+
+Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
+    [Documentation]    This keyword checks that an inactive server gets culled
+    ...    within an acceptable window of time. There are two arguments that can be set:
+    ...    acceptable_drift: control the threshold after which the test fails, in seconds
+    ...    loop_control: controls for how long the test should keep checking for the presence
+    ...        inactive server. Integer that gets multiplied by 30s.
+    [Arguments]    ${acceptable_drift}=120    ${loop_control}=20
+    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
+    ${culled} =  Set Variable  False
+    ${drift} =  Set Variable  ${0}
+    # Wait for maximum 10 minutes over timeout
+    FOR  ${index}  IN RANGE  ${loop_control}
+        ${culled} =  Run Keyword And Return Status  Run Keyword And Expect Error
+        ...    Pods not found in search  OpenShiftLibrary.Search Pods
+        ...    ${notebook_pod_name}  namespace=rhods-notebooks
+        Exit For Loop If  ${culled}==True
+        Sleep  30s
+        ${drift} =  Evaluate  ${drift}+${30}
+    END
+    IF  ${drift}>${acceptable_drift}
+        Fail    Drift was over ${acceptable_drift} seconds, it was ${drift} seconds
+    END
+
+Wait Until Culler Timeout
+    [Documentation]    Sleeps for the length of the culler's timeout
+    Sleep    ${CUSTOM_CULLER_TIMEOUT}

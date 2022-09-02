@@ -5,7 +5,6 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-#Resource         ../400__ods_dashboard/410__ods_dashboard_settings.robot
 Library          ../../../libs/Helpers.py
 Library          OpenShiftLibrary
 Suite Teardown   Teardown
@@ -212,6 +211,8 @@ Check If Server Pod Still Exists
     [Documentation]    This keyword simply looks for the server pod
     ...    in order to confirm that it still exists and wasn't deleted
     ...    by the notebook culler.
+    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
+    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
 
 Spawn Server And Run Notebook Which Will Not Keep Server Active
     [Documentation]    This keyword spawns a server, then clones a Git Repo and runs a notebook

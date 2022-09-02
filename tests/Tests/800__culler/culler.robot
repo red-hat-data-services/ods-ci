@@ -12,20 +12,20 @@ Force Tags       JupyterHub
 
 
 *** Variables ***
-#${DEFAULT_CULLER_TIMEOUT} =    31536000
 ${CUSTOM_CULLER_TIMEOUT} =     600
 ${CUSTOM_CULLER_TIMEOUT_MINUTES} =     ${{${CUSTOM_CULLER_TIMEOUT}//60}}
 
 
 *** Test Cases ***
-# Verify Default Culler Timeout
-#     [Documentation]    Checks default culler timeout
-#     [Tags]    Tier2
-#     ...       ODS-1255
-#     Disable Notebook Culler
-#     ${current_timeout} =  Get And Verify Notebook Culler Timeout
-#     Should Be Equal  ${DEFAULT_CULLER_TIMEOUT}  ${current_timeout}
-#     Close Browser
+Verify Default Culler Timeout
+    [Documentation]    Checks default culler timeout
+    [Tags]    Tier2
+    ...       ODS-1255
+    Disable Notebook Culler
+    # When disabled the cm doesn't exist, expect error
+    ${configmap} =  Run Keyword And Expect Error  STARTS: ResourceOperationFailed: Get failed
+    ...    OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config    namespace=redhat-ods-applications
+    Close Browser
 
 Verify Culler Timeout Can Be Updated
     [Documentation]    Verifies culler timeout can be updated
@@ -33,7 +33,6 @@ Verify Culler Timeout Can Be Updated
     ...       ODS-1231
     Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
     ${current_timeout} =  Get And Verify Notebook Culler Timeout
-    #Should Not Be Equal  ${current_timeout}  ${DEFAULT_CULLER_TIMEOUT}
     Should Be Equal As Integers   ${current_timeout}  ${CUSTOM_CULLER_TIMEOUT_MINUTES}
     Close Browser
 
@@ -77,13 +76,10 @@ Verify Culler Does Not Kill Active Server
     Wait Until ${{"${NOTEBOOK_TO_RUN}".split("/")[-1] if "${NOTEBOOK_TO_RUN}"[-1]!="/" else "${NOTEBOOK_TO_RUN}".split("/")[-2]}} JupyterLab Tab Is Selected
     Close Other JupyterLab Tabs
     Sleep  0.5s
-    Capture Page Screenshot
     Open With JupyterLab Menu  Run  Run All Cells
     Sleep  0.5s
-    Capture Page Screenshot
     Open With JupyterLab Menu    File    Save Notebook
     Sleep  0.5s
-    Capture Page Screenshot
     Close Browser
     Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
     ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
@@ -134,15 +130,7 @@ Get Notebook Culler Pod Name
     [Documentation]    Finds the current culler pod and returns the name
     ${culler_pod} =  OpenShiftLibrary.Oc Get  kind=Pod
     ...    label_selector=component.opendatahub.io/name=kf-notebook-controller  namespace=redhat-ods-applications
-    # ${length} =  Get Length  ${culler_pod}
-    # Only 1 culler pod, correct one
-    #IF  ${length}==1
     ${culler_pod_name} =  Set Variable  ${culler_pod[0]}[metadata][name]
-    #ELSE
-        # There can be more than one during rollout
-    #    Sleep  10s
-    #    ${culler_pod_name} =  Get Notebook Culler Pod Name
-    #END
     Log  ${culler_pod}
     Log  ${culler_pod_name}
     [Return]  ${culler_pod_name}

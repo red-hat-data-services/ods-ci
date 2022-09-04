@@ -2,7 +2,7 @@
 
 Code contributed to this repo must follow the _[ODS-CI RobotFramework Style Guide](https://docs.google.com/document/d/11ZJOPI1uq-0Wl6a2V8fkAv_TQhfzp9t_IjXAheaJxmQ/edit?usp=sharing)_
 
-This document explains how to verify the code using the [robocop](https://robocop.readthedocs.io) code analyzer and how to automatically format some issues using the [robotidy](https://robotidy.readthedocs.io) code formatter.
+This document explains how to verify the Robot Framework code using the [robocop](https://robocop.readthedocs.io)  and Python code using [Black](https://black.readthedocs.io/en/stable/usage_and_configuration/index.html) code analyzer. Also, how to automatically format some Robot Framework issues using the [robotidy](https://robotidy.readthedocs.io) and Python code issue using [Black](https://black.readthedocs.io/en/stable/usage_and_configuration/index.html) code formatter.
 
 
 # Analyze the code using Robocop

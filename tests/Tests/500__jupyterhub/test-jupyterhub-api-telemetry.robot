@@ -1,5 +1,6 @@
 *** Settings ***
 Resource    ../../Resources/ODS.robot
+Resource    ../../Resources/Common.robot
 Resource    ../../Resources/Page/ODH/JupyterHub/LaunchJupyterHub.robot
 Resource    ../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource    ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -7,11 +8,14 @@ Resource    ../../Resources/Page/OCPDashboard/OCPMenu.robot
 Library     SeleniumLibrary
 Test Setup    Test Suite For Web
 
+
 *** Test Cases ***
 Verify Telemetry Data Is Accessible
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-347
+
+    Skip If RHODS Version Greater Or Equal Than    1.16.0
     Usage Data Collection Should Be Enabled
     Load JupyterHub API Page
     JupyterHub API Should Exposes SegmentKey
@@ -22,6 +26,7 @@ Verify Telemetry Data Is Accessible
     Reload Page
     JupyterHub API Should Not Exposes SegmentKey
     [Teardown]    Teardown For Checks SegmentKey Is Exposes In Jupyterhub API TestCase
+
 
 *** Keywords ***
 Test Suite For Web

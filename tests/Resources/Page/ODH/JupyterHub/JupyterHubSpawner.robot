@@ -14,8 +14,7 @@ Library   OpenShiftLibrary
 
 
 *** Variables ***
-${KFNBC_SPAWNER_HEADER_XPATH}=
-... //h1[.="Start a notebook server"]
+${KFNBC_SPAWNER_HEADER_XPATH} =    //h1[.="Start a notebook server"]
 #${JUPYTERHUB_DROPDOWN_XPATH} =
 #...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]

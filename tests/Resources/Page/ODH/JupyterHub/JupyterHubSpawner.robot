@@ -14,20 +14,22 @@ Library   OpenShiftLibrary
 
 
 *** Variables ***
-${JUPYTERHUB_SPAWNER_HEADER_XPATH} =
-...   //div[contains(@class,"jsp-app__header__title") and .="Start a notebook server"]
+${KFNBC_SPAWNER_HEADER_XPATH}=
+... //h1[.="Start a notebook server"]
 #${JUPYTERHUB_DROPDOWN_XPATH} =
 #...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 #${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
 ${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
+${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
+${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 
 
 *** Keywords ***
 JupyterHub Spawner Is Visible
     [Documentation]  Checks if spawner is visibile and returns the status
     ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain Element
-    ...    xpath:${JUPYTERHUB_SPAWNER_HEADER_XPATH}
+    ...    xpath:${KFNBC_SPAWNER_HEADER_XPATH}
     [Return]  ${spawner_visible}
 
 Wait Until JupyterHub Spawner Is Ready
@@ -132,7 +134,7 @@ Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
     Click Button  Start server
-    Wait Until Page Contains  Starting server  15s
+    Wait Until Page Contains  Starting server  60s
     Wait Until Element Is Visible  xpath://div[@role="progressbar"]
     Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
     #Wait Until Page Contains  Success  ${spawner_timeout}
@@ -273,6 +275,15 @@ Handle Control Panel
    Wait Until Page Contains Element  xpath://button[.="Stop server"]
    Click Button  xpath://button[.="Stop server"]
 
+Spawner Modal Is Visible
+   [Documentation]  Checks if the spawner modal is present in the spawner page
+   ${modal_visible} =  Run Keyword And Return Status  Page Should Contain Element  ${KFNBC_MODAL_HEADER_XPATH}
+   [Return]  ${modal_visible}
+
+Handle Spawner Modal
+   [Documentation]  Closes the spawner modal
+   Click Button    ${KFNBC_MODAL_CANCEL_XPATH}
+
 Fix Spawner Status
    [Documentation]  This keyword handles spawner states that would prevent
    ...              test cases from passing. If a server is already running
@@ -291,6 +302,13 @@ Fix Spawner Status
             Stop JupyterLab Notebook Server
          END
       END
+   ELSE
+      # We are in the spawner page. Is the modal visible?
+      ${modal_visible} =  Spawner Modal Is Visible
+      IF  ${modal_visible}==True
+         # If the modal is visible at this point in time, it might be stuck
+         # or a spawn might've failed. Let's close it and clean up the spawner.
+         Handle Spawner Modal
    END
 
 User Is Allowed

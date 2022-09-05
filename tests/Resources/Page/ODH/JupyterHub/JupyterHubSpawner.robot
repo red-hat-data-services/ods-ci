@@ -134,7 +134,7 @@ Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
     Click Button  Start server
-    Wait Until Page Contains  Starting server  15s
+    Wait Until Page Contains  Starting server  60s
     Wait Until Element Is Visible  xpath://div[@role="progressbar"]
     Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
     #Wait Until Page Contains  Success  ${spawner_timeout}

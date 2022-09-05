@@ -14,8 +14,6 @@ Library   OpenShiftLibrary
 
 
 *** Variables ***
-${JUPYTERHUB_SPAWNER_HEADER_XPATH} =
-...   //div[contains(@class,"jsp-app__header__title") and .="Start a notebook server"]
 ${KFNBC_SPAWNER_HEADER_XPATH}=
 ... //h1[.="Start a notebook server"]
 #${JUPYTERHUB_DROPDOWN_XPATH} =

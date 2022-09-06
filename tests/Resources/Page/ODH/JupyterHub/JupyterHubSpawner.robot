@@ -15,10 +15,7 @@ Library   OpenShiftLibrary
 
 *** Variables ***
 ${KFNBC_SPAWNER_HEADER_XPATH} =    //h1[.="Start a notebook server"]
-#${JUPYTERHUB_DROPDOWN_XPATH} =
-#...   //div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
-#${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[@id="container-size"]
 ${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
@@ -308,6 +305,7 @@ Fix Spawner Status
          # If the modal is visible at this point in time, it might be stuck
          # or a spawn might've failed. Let's close it and clean up the spawner.
          Handle Spawner Modal
+      END
    END
 
 User Is Allowed

@@ -159,7 +159,7 @@ install_identity_provider(){
 
   # wait for IdP to appear in the login page
   echo "sleeping 120sec to wait for IDPs to appear in the OCP login page..."
-  sleep 120
+  sleep 200
 }
 
 function check_installation(){

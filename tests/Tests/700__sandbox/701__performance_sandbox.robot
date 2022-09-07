@@ -13,7 +13,7 @@ Suite Setup     Performance Suite Setup
 ${NAMESPACE}     openshift-kube-apiserver
 ${LABEL_SELECTOR}     app=openshift-kube-apiserver
 ${MEMORY_THRESHOLD}    102400
-${PERF_CODE}    go run setup/main.go --users 250 --default 250  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
+${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
 ${ISV_DATA}    ${{ {'openvino':['ovms','alpha'],'aikit':['aikit','alpha'],'pachyderm':['pachyderm','stable']} }}
 
 *** Test Cases ***
@@ -91,5 +91,5 @@ Performance Suite Setup
      FOR    ${isv}    IN    @{ISV_DATA.values()}
            Install ISV By Name    ${isv[0]}      ${isv[1]}
      END
-    # Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
+     Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
      Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git

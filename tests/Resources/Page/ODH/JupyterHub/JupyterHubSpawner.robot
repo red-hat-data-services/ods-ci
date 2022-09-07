@@ -507,7 +507,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     END
     [Teardown]    SeleniumLibrary.Close All Browsers
 
-CleanUp JupyterHub For N users
+CleanUp JupyterHub For N Users
     [Documentation]    Cleans JupyterHub for N users
     [Arguments]    ${list_of_usernames}
     SeleniumLibrary.Close All Browsers
@@ -520,6 +520,7 @@ CleanUp JupyterHub For N users
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required
         Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
-        Stop JupyterLab Notebook Server
+        #Fix Spawner Status stops the current notebook, handling the different possible states
+        Fix Spawner Status
     END
     [Teardown]    SeleniumLibrary.Close All Browsers

@@ -1,14 +1,16 @@
 *** Settings ***
 Library  SeleniumLibrary
 
+
 *** Variables ***
 ${METRICS_QUERY_TEXTAREA}                           xpath=//*[@aria-label='Expression (press Shift+Enter for newlines)']
 ${METRICS_QUERY_RESULTS_TABLE_ROW1_VALUE_ELEMENT}   xpath=//td[@data-label='Value']
 
+
 *** Keywords ***
 Verify Page Loaded
-  Wait Until Page Contains    No query entered  timeout=20
-  Wait Until Page Contains Element  ${METRICS_QUERY_TEXTAREA}  timeout=20
+  Wait Until Page Contains    No query entered  timeout=45
+  Wait Until Page Contains Element  ${METRICS_QUERY_TEXTAREA}  timeout=45
 
 Verify Query Results Contain Data
   Wait Until Page Contains Element  ${METRICS_QUERY_RESULTS_TABLE_ROW1_VALUE_ELEMENT}  timeout=20  error="Query results don't contain data"

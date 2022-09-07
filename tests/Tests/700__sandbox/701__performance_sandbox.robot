@@ -6,6 +6,7 @@ Library         Process
 Library         String
 Library         OpenShiftLibrary
 Library         ../../../libs/Helpers.py
+Resource        ../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Suite Setup     Performance Suite Setup
 
 *** Variables ***
@@ -40,6 +41,8 @@ Capture And Validate Memory Utilization Of Openshift API Server POD
                Append To List    ${memory_value}    ${m_value}
         END
         Run Keyword And Continue On Failure   RHODS Performance Result Validation     ${memory_value}
+        ${pod_names}    Get POD Names    redhat-ods-operator    name=rhods-operator
+        Run Keyword And Continue On Failure    Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-operator  #robocop: disable
     END
 
 RHODS Performance Result Validation

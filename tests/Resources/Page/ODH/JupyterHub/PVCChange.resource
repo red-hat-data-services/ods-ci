@@ -18,8 +18,9 @@ Check If PVC Change Is Permanent
 
 Verify Notebook Size
     [Arguments]    ${timeout}     ${size}
-    [Documentation]   Launch JH spawner and compare size
+    [Documentation]   Launch Jupyter spawner and compare size
     Launch JupyterHub Spawner From Dashboard
+    Run Keyword And Return Status    Click Element    //*[@id="pf-modal-part-1"]/div/button
     Spawn Notebook With Arguments    image=s2i-minimal-notebook    spawner_timeout=${timeout}
     Run Keyword And Warn On Failure    Run Cell And Check Output
     ...   ${SIZE_CODE}   ${size}
@@ -34,14 +35,7 @@ PVC Size Test Teardown
     [Documentation]    PVC change teardown
     SeleniumLibrary.Close All Browsers
     Change PVC Size From ConfigMap     20Gi
-    Roll Out Jupyter Deployment Config
-
-Roll Out Jupyter Deployment Config
-    [Documentation]    Rollout deployment config for JH
-    ${rollout_result}    Run Keyword And Return Status
-    ...    Run    oc rollout latest dc/jupyterhub -n ${NAMESPACE}
-    Should Be Equal    "${rollout_result}"    "True"
-    Sleep    120s
+    Run Keyword And Ignore Error     Delete Pods Using Label Selector    redhat-ods-applications    app=notebook-controller
 
 May Be Delete PVC
     [Documentation]    Delete PVC from openshift

@@ -3,7 +3,7 @@ Documentation       Applies RHOSi settings to run the test suites
 
 Library             RPA.RobotLogListener
 Resource            Page/ODH/Monitoring/Monitoring.resource
-
+Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
 
 *** Variables ***
 @{PROTECTED_KEYWORDS}=      Login To RHODS Dashboard
@@ -27,6 +27,7 @@ RHOSi Setup
     ...                Do Not extend this keyword for high-level setup, e.g., don't open browser
     Protect Sensitive Variables In Keywords
     Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    Initialize Global Variables
     # TO DO: oc login
 
 RHOSi Teardown
@@ -40,3 +41,8 @@ Protect Sensitive Variables In Keywords
     [Documentation]    Register keywords which use sensitive data as "Protected"
     ...                to turn their log level to NONE using RobotLogListener by Robocorp
     Register Protected Keywords    names=@{PROTECTED_KEYWORDS}
+
+Initialize Global Variables
+    [Documentation]   Set varibled globally
+    ${RHODS_VERSION}    Get RHODS Version
+    Set Global Variable   ${RHODS_VERSION}

@@ -18,6 +18,7 @@ Resource            Page/ODH/Monitoring/Monitoring.resource
 ...                         Commit Changes
 ...                         Push Some Changes To Repo
 ...                         Decide OCM URL And Open Link
+...                         Get Bearer Token
 
 
 *** Keywords ***

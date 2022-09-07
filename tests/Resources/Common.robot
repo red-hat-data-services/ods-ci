@@ -44,6 +44,11 @@ Load Json File
     ${obj}=    Evaluate    json.loads('''${j_file}''')    json
     [Return]    ${obj}
 
+Load Json String
+    [Arguments]     ${json_string}
+    ${obj}=     Evaluate  json.loads("""${json_string}""")
+    [Return]    ${obj}
+
 Get CSS Property Value
     [Documentation]    Get the CSS property value of a given element
     [Arguments]    ${locator}    ${property_name}
@@ -151,5 +156,11 @@ Skip If RHODS Version Greater Or Equal Than
        Skip If    condition=${version-check}==True    msg=This test is skipped for RHODS ${version} or greater
     END
 
+Get Bearer Token
+    [Documentation]     It returns the bearer token of the current user
+    ...                 which is logged into a cluster. So it assumes you have performed
+    ...                 the login to a Openshift cluster before calling this keyword
+    ${token}=      Run     oc whoami --show-token
+    [Return]    ${token}
 
 

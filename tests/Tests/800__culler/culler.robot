@@ -12,8 +12,8 @@ Force Tags       JupyterHub
 
 
 *** Variables ***
-${DEFAULT_CULLER_TIMEOUT} =    31536000
 ${CUSTOM_CULLER_TIMEOUT} =     600
+${CUSTOM_CULLER_TIMEOUT_MINUTES} =     ${{${CUSTOM_CULLER_TIMEOUT}//60}}
 
 
 *** Test Cases ***
@@ -22,8 +22,9 @@ Verify Default Culler Timeout
     [Tags]    Tier2
     ...       ODS-1255
     Disable Notebook Culler
-    ${current_timeout} =  Get And Verify Notebook Culler Timeout
-    Should Be Equal  ${DEFAULT_CULLER_TIMEOUT}  ${current_timeout}
+    # When disabled the cm doesn't exist, expect error
+    ${configmap} =  Run Keyword And Expect Error  STARTS: ResourceOperationFailed: Get failed
+    ...    OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config    namespace=redhat-ods-applications
     Close Browser
 
 Verify Culler Timeout Can Be Updated
@@ -32,8 +33,7 @@ Verify Culler Timeout Can Be Updated
     ...       ODS-1231
     Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
     ${current_timeout} =  Get And Verify Notebook Culler Timeout
-    Should Not Be Equal  ${current_timeout}  ${DEFAULT_CULLER_TIMEOUT}
-    Should Be Equal   ${current_timeout}  ${CUSTOM_CULLER_TIMEOUT}
+    Should Be Equal As Integers   ${current_timeout}  ${CUSTOM_CULLER_TIMEOUT_MINUTES}
     Close Browser
 
 Verify Culler Kills Inactive Server
@@ -42,27 +42,9 @@ Verify Culler Kills Inactive Server
     [Tags]    Tier2
     ...       ODS-1254
     ...       Execution-Time-Over-15m
-    ...       ProductBug
-    Spawn Minimal Image
-    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
-    Open With JupyterLab Menu    File    Save Notebook
-    Close Browser
-    Sleep    ${CUSTOM_CULLER_TIMEOUT}
-    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    ${culled} =  Set Variable  False
-    ${drift} =  Set Variable  ${0}
-    # Wait for maximum 10 minutes over timeout
-    FOR  ${index}  IN RANGE  20
-        ${culled} =  Run Keyword And Return Status  Run Keyword And Expect Error
-        ...    Pods not found in search  OpenShiftLibrary.Search Pods
-        ...    ${notebook_pod_name}  namespace=rhods-notebooks
-        Exit For Loop If  ${culled}==True
-        Sleep  30s
-        ${drift} =  Evaluate  ${drift}+${30}
-    END
-    IF  ${drift}>${120}
-        Fail    Drift was over 2 minutes, it was ${drift} seconds
-    END
+    Spawn Server And Run Notebook Which Will Not Keep Server Active
+    Wait Until Culler Timeout
+    Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
 
 Verify Culler Does Not Kill Active Server
     [Documentation]    Verifies that the culler does not kill an active
@@ -70,14 +52,10 @@ Verify Culler Does Not Kill Active Server
     [Tags]    Tier2
     ...       ODS-1253
     ...       Execution-Time-Over-15m
-    Spawn Minimal Image
-    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Active.ipynb
-    Open With JupyterLab Menu    Run    Run All Cells
-    Open With JupyterLab Menu    File    Save Notebook
-    Close Browser
-    Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
-    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
+    ...       AutomationBug
+    Spawn Server And Run Notebook To Keep Server Active For More Than 10 Minutes
+    Wait Until Culler Timeout Plus A Drift Window Which By Default Equals 12 Minutes
+    Check If Server Pod Still Exists
 
 Verify Do Not Stop Idle Notebooks
     [Documentation]    Disables the culler (default configuration) and verifies nb is not culled
@@ -86,13 +64,9 @@ Verify Do Not Stop Idle Notebooks
     ...       Execution-Time-Over-15m
     Disable Notebook Culler
     Close Browser
-    Spawn Minimal Image
-    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
-    Open With JupyterLab Menu    File    Save Notebook
-    Close Browser
-    Sleep    ${${CUSTOM_CULLER_TIMEOUT}+120}
-    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
+    Spawn Server And Run Notebook Which Will Not Keep Server Active
+    Wait Until Culler Timeout Plus A Drift Window Which By Default Equals 12 Minutes
+    Check If Server Pod Still Exists
 
 Verify That "Stop Idle Notebook" Setting Is Not Overwritten After Restart Of Operator Pod
     [Documentation]    Restart the operator pod and verify if "Stop Idle Notebook" setting
@@ -105,8 +79,10 @@ Verify That "Stop Idle Notebook" Setting Is Not Overwritten After Restart Of Ope
     Oc Delete    kind=Pod     namespace=redhat-ods-operator    label_selector=name=rhods-operator
     sleep   5    msg=waiting time for the operator pod to be replaced with new one
     Reload Page
-    ${status}    Run Keyword And Return Status    Radio Button Should Not Be Selected  culler-unlimited-time
-    IF    ${status}==False
+    Wait Until Page Contains Element    xpath://input[@id="culler-timeout-unlimited"]
+    ${status} =    Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath://input[@id="hour-input"][@disabled=""]
+    IF    ${status}==True
         Fail    Restart of operator pod causing 'Stop Idle Notebook' setting to change in RHODS dashboard
     END
 
@@ -116,21 +92,13 @@ Spawn Minimal Image
     [Documentation]    Spawn a minimal image
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=s2i-minimal-notebook  size=Default
+    Spawn Notebook With Arguments  image=s2i-minimal-notebook  size=Small
 
 Get Notebook Culler Pod Name
     [Documentation]    Finds the current culler pod and returns the name
     ${culler_pod} =  OpenShiftLibrary.Oc Get  kind=Pod
-    ...    label_selector=app=jupyterhub-idle-culler  namespace=redhat-ods-applications
-    ${length} =  Get Length  ${culler_pod}
-    # Only 1 culler pod, correct one
-    IF  ${length}==1
-        ${culler_pod_name} =  Set Variable  ${culler_pod[0]}[metadata][name]
-    ELSE
-        # There can be more than one during rollout
-        Sleep  10s
-        ${culler_pod_name} =  Get Notebook Culler Pod Name
-    END
+    ...    label_selector=component.opendatahub.io/name=kf-notebook-controller  namespace=redhat-ods-applications
+    ${culler_pod_name} =  Set Variable  ${culler_pod[0]}[metadata][name]
     Log  ${culler_pod}
     Log  ${culler_pod_name}
     [Return]  ${culler_pod_name}
@@ -147,15 +115,15 @@ Get And Verify Notebook Culler Timeout
 
 Get Notebook Culler Timeout From Configmap
     [Documentation]    Gets the current culler timeout from configmap
-    ${current_timeout} =  OpenShiftLibrary.Oc Get  kind=ConfigMap  name=jupyterhub-cfg
-    ...    namespace=redhat-ods-applications  fields=['data.culler_timeout']
-    ${current_timeout} =  Set Variable  ${current_timeout[0]['data.culler_timeout']}
+    ${current_timeout} =  OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config
+    ...    namespace=redhat-ods-applications  fields=['data.CULL_IDLE_TIME']
+    ${current_timeout} =  Set Variable  ${current_timeout[0]['data.CULL_IDLE_TIME']}
     [Return]  ${current_timeout}
 
 Get Notebook Culler Timeout From Culler Pod
     [Documentation]    Gets the current culler timeout from culler pod
     ${CULLER_POD} =  Get Notebook Culler Pod Name
-    ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -c jupyterhub-idle-culler -n redhat-ods-applications -- printenv CULLER_TIMEOUT  # robocop: disable
+    ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -n redhat-ods-applications -- printenv CULL_IDLE_TIME  # robocop: disable
     [Return]  ${culler_env_timeout}
 
 Modify Notebook Culler Timeout
@@ -163,14 +131,14 @@ Modify Notebook Culler Timeout
     [Arguments]    ${new_timeout}
     Open Dashboard Cluster Settings
     Set Notebook Culler Timeout  ${new_timeout}
-    Sleep  30s  msg=Give time for rollout
+    Sleep  10s  msg=Give time for rollout
 
 Open Dashboard Cluster Settings
     [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
     Set Library Search Order    SeleniumLibrary
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-    Sleep  5
+    Sleep  1s
     ${settings_hidden} =  Run Keyword And Return Status  Page Should Contain Element
     ...    xpath://section[@aria-labelledby="settings"][@hidden=""]
     IF  ${settings_hidden}==True
@@ -183,14 +151,19 @@ Set Notebook Culler Timeout
     [Arguments]    ${new_timeout}
     ${hours}  ${minutes} =  Convert To Hours And Minutes  ${new_timeout}
     Sleep  5
-    ${disabled_field} =  Run Keyword And Return Status  Page Should Contain Element
+    ${disabled_field} =  Run Keyword And Return Status    Page Should Contain Element
     ...    xpath://input[@id="hour-input"][@disabled=""]
     IF  ${disabled_field}==True
         Click Element  xpath://input[@id="culler-timeout-limited"]
     END
     Input Text  //input[@id="hour-input"]  ${hours}
     Input Text  //input[@id="minute-input"]  ${minutes}
-    Save Changes In Cluster Settings
+    Sleep  0.5s
+    ${changed_setting} =  Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath://button[.="Save changes"][@aria-disabled="false"]
+    IF  ${changed_setting}==True
+        Save Changes In Cluster Settings
+    END
 
 Disable Notebook Culler
     [Documentation]    Disables the culler (i.e. sets the default timeout of 1 year)
@@ -209,3 +182,69 @@ Teardown
     Disable Notebook Culler
     Launch JupyterHub Spawner From Dashboard
     End Web Test
+
+Spawn Server And Run Notebook To Keep Server Active For More Than 10 Minutes
+    [Documentation]    This keyword spawns a server, then clones a Git Repo and runs a notebook
+    ...    which will keep the server's kernel active for ~15 minutes (enough time to be seen as active)
+    ...    after the culler timeout, which is by default set at 10 minutes. It then closes the browser
+    ...    to validate that kernel activity is seen also while no user is actively on the server page.
+    ${NOTEBOOK_TO_RUN} =  Set Variable  ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Active.ipynb
+    Spawn Minimal Image
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ${NOTEBOOK_TO_RUN}
+    Wait Until ${{"${NOTEBOOK_TO_RUN}".split("/")[-1] if "${NOTEBOOK_TO_RUN}"[-1]!="/" else "${NOTEBOOK_TO_RUN}".split("/")[-2]}} JupyterLab Tab Is Selected
+    Close Other JupyterLab Tabs
+    Sleep  0.5s
+    Open With JupyterLab Menu  Run  Run All Cells
+    Sleep  0.5s
+    Open With JupyterLab Menu    File    Save Notebook
+    Sleep  0.5s
+    Close Browser
+
+Wait Until Culler Timeout Plus A Drift Window Which By Default Equals 12 Minutes
+    [Documentation]    This keyword will sleep for 12 minutes by default.
+    ...    It is used to wait for the culler timeout (10 minutes by default)
+    ...    plus a configurable drift window (120 seconds or 2 minutes by default).
+    [Arguments]    ${drift}=120
+    Sleep    ${${CUSTOM_CULLER_TIMEOUT}+${drift}}
+
+Check If Server Pod Still Exists
+    [Documentation]    This keyword simply looks for the server pod
+    ...    in order to confirm that it still exists and wasn't deleted
+    ...    by the notebook culler.
+    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
+    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
+
+Spawn Server And Run Notebook Which Will Not Keep Server Active
+    [Documentation]    This keyword spawns a server, then clones a Git Repo and runs a notebook
+    ...    which won't keep the server's kernel active. It then closes the browser.
+    Spawn Minimal Image
+    Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/notebook-culler/Inactive.ipynb
+    Open With JupyterLab Menu    File    Save Notebook
+    Close Browser
+
+Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
+    [Documentation]    This keyword checks that an inactive server gets culled
+    ...    within an acceptable window of time. There are two arguments that can be set:
+    ...    acceptable_drift: control the threshold after which the test fails, in seconds
+    ...    loop_control: controls for how long the test should keep checking for the presence
+    ...        inactive server. Integer that gets multiplied by 30s.
+    [Arguments]    ${acceptable_drift}=120    ${loop_control}=20
+    ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
+    ${culled} =  Set Variable  False
+    ${drift} =  Set Variable  ${0}
+    # Wait for maximum 10 minutes over timeout
+    FOR  ${index}  IN RANGE  ${loop_control}
+        ${culled} =  Run Keyword And Return Status  Run Keyword And Expect Error
+        ...    Pods not found in search  OpenShiftLibrary.Search Pods
+        ...    ${notebook_pod_name}  namespace=rhods-notebooks
+        Exit For Loop If  ${culled}==True
+        Sleep  30s
+        ${drift} =  Evaluate  ${drift}+${30}
+    END
+    IF  ${drift}>${acceptable_drift}
+        Fail    Drift was over ${acceptable_drift} seconds, it was ${drift} seconds
+    END
+
+Wait Until Culler Timeout
+    [Documentation]    Sleeps for the length of the culler's timeout
+    Sleep    ${CUSTOM_CULLER_TIMEOUT}

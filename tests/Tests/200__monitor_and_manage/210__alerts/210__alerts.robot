@@ -136,7 +136,7 @@ Verify Alerts Are Not Fired After Multiple JupyterHub Rollouts
 
     [Teardown]    ODS.Restore Default Deployment Sizes
 
-Verify Alerts Are Fired When JupyterHub Is Down    # robocop: disable:too-long-test-case
+Verify Alerts Are Fired When Jupyter Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alerts "RHODS JupyterHub Probe Success Burn Rate"
     ...    is fired when jupyterhub is not working
     [Tags]    Tier3
@@ -249,6 +249,70 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     ...    SLOs-probe_success
     ...    RHODS Dashboard Probe Success Burn Rate
     ...    alert-duration=120
+    ...    timeout=5 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alert "Kubeflow notebook controller pod is not running" Is Fired When Kubeflow Controller Is Down    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that alert "Kubeflow notebook controller pod is not running"  is fired
+    ...    when notebook-controller-deployment-xxx pod is not running
+    [Tags]    Tier3
+    ...       ODS-1700
+
+    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    RHODS Notebook controllers
+    ...    Kubeflow notebook controller pod is not running
+
+    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                    replicas=0
+    ODS.Scale Deployment    redhat-ods-applications    notebook-controller-deployment    replicas=0
+
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    RHODS Notebook controllers
+    ...    Kubeflow notebook controller pod is not running
+    ...    alert-duration=300
+    ...    timeout=10 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    RHODS Notebook controllers
+    ...    Kubeflow notebook controller pod is not running
+    ...    alert-duration=300
+    ...    timeout=5 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alert "ODH notebook controller pod is not running" Is Fired When ODH Controller Manager Is Down    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that alert "ODH notebook controller pod is not running"  is fired
+    ...    when odh-notebook-controller-manager-xxx pod is not running
+    [Tags]    Tier3
+    ...       ODS-1701
+
+    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    RHODS Notebook controllers
+    ...    ODH notebook controller pod is not running
+
+    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                     replicas=0
+    ODS.Scale Deployment    redhat-ods-applications    odh-notebook-controller-manager    replicas=0
+
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    RHODS Notebook controllers
+    ...    ODH notebook controller pod is not running
+    ...    alert-duration=300
+    ...    timeout=10 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    RHODS Notebook controllers
+    ...    ODH notebook controller pod is not running
+    ...    alert-duration=300
     ...    timeout=5 min
 
     [Teardown]    ODS.Restore Default Deployment Sizes

@@ -6,6 +6,7 @@ Resource          ../../Resources/Common.robot
 Suite Setup       Endpoint Testing Setup
 Suite Teardown    Endpoint Testing Teardown
 
+
 *** Variables ***
 ${CLUSTER_SETTINGS_ENDPOINT}=        api/cluster-settings
 ${CLUSTER_SETTINGS_ENDPOINT_BODY}=   {"userTrackingEnabled":true}
@@ -53,7 +54,7 @@ Verify Access To builds API Endpoint
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${BUILDS_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${BUILDS_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
 
@@ -168,21 +169,27 @@ Log In As RHODS Basic User
     [Return]    ${oauth_proxy_cookie}
 
 Perform Dashboard API Endpoint GET Call
+    [Documentation]     Runs a GET call to the given API endpoint. Result may change based
+    ...                 on the given token (i.e., user)
     [Arguments]     ${endpoint}     ${token}
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
     ${response}=    RequestsLibrary.GET  ${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
 
 Perform Dashboard API Endpoint PUT Call
+    [Documentation]     Runs a PUT call to the given API endpoint. Result may change based
+    ...                 on the given token (i.e., user)
     [Arguments]     ${endpoint}     ${token}    ${json_body}
-    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
+    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}   Content-type=application/json
     ${payload}=      Load Json String    json_string=${json_body}
     ${response}=    RequestsLibrary.Put  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
     ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
 
 Perform Dashboard API Endpoint PATCH Call
+    [Documentation]     Runs a PATCH call to the given API endpoint. Result may change based
+    ...                 on the given token (i.e., user)
     [Arguments]     ${endpoint}     ${token}    ${json_body}
-    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
+    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}   Content-type=application/json
     ${payload}=     Load Json String    json_string=${json_body}
     ${response}=    RequestsLibrary.Patch  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
     ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
@@ -205,8 +212,8 @@ Operation Should Be Allowed
     Run Keyword And Continue On Failure  Status Should Be  200
 
 Operation Should Be Forbidden
-    [Documentation]     Checks if the API call returns an HTTP code 403 (FORBIDDEN)
-    Run Keyword And Continue On Failure  Status Should Be  403
+    [Documentation]     Checks if the API call returns an HTTP code 401 (FORBIDDEN)
+    Run Keyword And Continue On Failure  Status Should Be  401
 
 Operation Should Be Unavailable
     [Documentation]     Checks if the API call returns an HTTP code 404 (NOT FOUND)

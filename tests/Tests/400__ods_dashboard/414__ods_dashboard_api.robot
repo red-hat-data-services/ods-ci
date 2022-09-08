@@ -2,7 +2,7 @@
 Library         RequestsLibrary
 Library         OpenShiftLibrary
 Resource        ../../Resources/Common.robot
-Suite Setup     Endpoint Testing Setup
+# Suite Setup     Endpoint Testing Setup
 
 
 *** Variables ***
@@ -52,9 +52,6 @@ Verify Access To builds API Endpoint
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${BUILDS_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    Perform Dashboard API Endpoint PUT Call    endpoint=${BUILDS_ENDPOINT}    token=${ADMIN_TOKEN}
-    ...                                        json_body=${BUILDS_ENDPOINT_BODY}
-    Operation Should Be Unavailable
 
 Verify Access To config API Endpoint
     [Documentation]     Verifies the endpoint "config" works as expected
@@ -85,9 +82,6 @@ Verify Access To console-links API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${CONSOLE_LINKS_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    # Perform Dashboard API Endpoint PUT Call    endpoint=${CONSOLE_LINKS_ENDPOINT}    token=${ADMIN_TOKEN}
-    # ...                                        json_body=${CONSOLE_LINKS_ENDPOINT_BODY}
-    # Operation Should Be Unavailable
 
 Verify Access To docs API Endpoint
     [Documentation]     Verifies the endpoint "docs" works as expected
@@ -180,13 +174,21 @@ Perform Dashboard API Endpoint PATCH Call
     ...             headers=${headers}   timeout=5  verify=${False}
 
 Endpoint Testing Setup
-    [Documentation]     Fetch a bearer token for both a RHODS admin and basic user
+    [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
+    # RHOSi Setup
+    ${ORIGINAL_CONTEXT}=    Get Current OC Context      rename=original-context
+    Set Suite Variable    ${ORIGINAL_CONTEXT}
     Log In As RHODS Admin
     ${ADMIN_TOKEN}=      Get Bearer Token
     Set Suite Variable    ${ADMIN_TOKEN}
     Log In As RHODS Basic User
     ${BASIC_USER_TOKEN}=      Get Bearer Token
     Set Suite Variable    ${BASIC_USER_TOKEN}
+
+Endpoint Testing Teardown
+    [Documentation]     Switches to original OC context
+    Switch OC COntext   target_context=${ORIGINAL_CONTEXT}
+    # RHOSi Teardown
 
 Operation Should Be Allowed
     [Documentation]     Checks if the API call returns an HTTP code 200 (SUCCESS)

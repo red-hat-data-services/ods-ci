@@ -163,4 +163,16 @@ Get Bearer Token
     ${token}=      Run     oc whoami --show-token
     [Return]    ${token}
 
+Get Current OC Context
+    [Documentation]     Retrieves the current oc login context
+    [Arguments]     ${rename}=${EMPTY}
+    ${context}=     Run     oc config current-context
+    IF    "${rename}" != "${EMPTY}"
+        ${context}=     Run     oc config rename-context ${context} ${rename}
+    END
+    [Return]    ${context}
 
+Switch OC COntext
+    [Documentation]     Switches from the current oc login context to a given one
+    [Arguments]     ${target_context}
+    Run     oc config use-context ${target_context}

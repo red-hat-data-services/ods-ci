@@ -2,7 +2,7 @@
 Library         RequestsLibrary
 Library         OpenShiftLibrary
 Resource        ../../Resources/Common.robot
-# Suite Setup     Endpoint Testing Setup
+Suite Setup     Endpoint Testing Setup
 
 
 *** Variables ***
@@ -147,31 +147,33 @@ Verify Access To gpu API Endpoint
 *** Keywords ***
 Log In As RHODS Admin
     [Documentation]     Perfom OC login using a RHODS admin user
-    OpenshiftLibrary.Oc Login    ${OCP_API_URL}    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
+    Run     oc login -u ${TEST_USER.USERNAME} -p ${TEST_USER.PASSWORD} ${OCP_API_URL}
+    # OpenshiftLibrary.Oc Login    ${OCP_API_URL}    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
 
 Log In As RHODS Basic User
     [Documentation]     Perfom OC login using a RHODS basic user
-    OpenshiftLibrary.Oc Login    ${OCP_API_URL}    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}
+    Run     oc login -u ${TEST_USER_3.USERNAME} -p ${TEST_USER_3.PASSWORD} ${OCP_API_URL}
+    # OpenshiftLibrary.Oc Login    ${OCP_API_URL}    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}
 
 Perform Dashboard API Endpoint GET Call
     [Arguments]     ${endpoint}     ${token}
     ${headers}=    Create Dictionary     Authorization=Bearer ${token}
-    ${response}=    RequestsLibrary.GET  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
+    ${response}=    RequestsLibrary.GET  ${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
 
 Perform Dashboard API Endpoint PUT Call
     [Arguments]     ${endpoint}     ${token}    ${json_body}
-    ${headers}=    Create Dictionary     Authorization=Bearer ${token}
-    Load Json String    json_string=${json_body}
+    ${headers}=    Create Dictionary     Authorization=Bearer ${token}    Content-type=application/json
+    ${payload}=      Load Json String    json_string=${json_body}
     ${response}=    RequestsLibrary.Put  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
-    ...             headers=${headers}   timeout=5  verify=${False}
+    ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
 
 Perform Dashboard API Endpoint PATCH Call
     [Arguments]     ${endpoint}     ${token}    ${json_body}
-    ${headers}=    Create Dictionary     Authorization=Bearer ${token}
-    Load Json String    json_string=${json_body}
+    ${headers}=    Create Dictionary     Authorization=Bearer ${token}    Content-type=application/json
+    ${payload}=     Load Json String    json_string=${json_body}
     ${response}=    RequestsLibrary.Patch  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
-    ...             headers=${headers}   timeout=5  verify=${False}
+    ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
 
 Endpoint Testing Setup
     [Documentation]     Fetches a bearer token for both a RHODS admin and basic user

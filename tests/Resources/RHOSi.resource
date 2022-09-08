@@ -26,8 +26,8 @@ RHOSi Setup
     ...                The suggested usage of this keyword is to call it inside all the Suite Setup keywords.
     ...                Do Not extend this keyword for high-level setup, e.g., don't open browser
     Protect Sensitive Variables In Keywords
-    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
     Initialize Global Variables
+    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
     # TO DO: oc login
 
 RHOSi Teardown
@@ -43,6 +43,6 @@ Protect Sensitive Variables In Keywords
     Register Protected Keywords    names=@{PROTECTED_KEYWORDS}
 
 Initialize Global Variables
-    [Documentation]   Set varibled globally
-    ${RHODS_VERSION}    Get RHODS Version
+    [Documentation]   Sets global variables
+    ${RHODS_VERSION}=    Get RHODS Version
     Set Global Variable   ${RHODS_VERSION}

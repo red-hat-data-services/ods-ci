@@ -16,8 +16,9 @@ Library   OpenShiftLibrary
 *** Variables ***
 ${KFNBC_SPAWNER_HEADER_XPATH} =    //h1[.="Start a notebook server"]
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
-${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
-${JUPYTER_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-numbers")]
+${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
+${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //button[contains(@aria-labelledby, "container-size")]
+${KFNBC_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-numbers")]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 
@@ -31,7 +32,7 @@ JupyterHub Spawner Is Visible
 
 Wait Until JupyterHub Spawner Is Ready
     [Documentation]  Waits for the spawner page to be ready using the server size dropdown
-    Wait Until Page Contains Element    xpath:${JUPYTERHUB_CONTAINER_SIZE_TITLE}    timeout=15s
+    Wait Until Page Contains Element    xpath:${KFNBC_CONTAINER_SIZE_TITLE}    timeout=15s
     Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]    timeout=15s
 
 Select Notebook Image
@@ -56,20 +57,20 @@ Wait Until GPU Dropdown Exists
     [Documentation]    Verifies that the dropdown to select the no. of GPUs exists
     Wait Until Page Contains    Number of GPUs
     Page Should Not Contain    All GPUs are currently in use, try again later.
-    Wait Until Page Contains Element    xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
+    Wait Until Page Contains Element    xpath:${KFNBC_GPU_DROPDOWN_XPATH}
     ...    error=GPU selector is not present in JupyterHub Spawner
 
 Set Number Of Required GPUs
     [Documentation]  Sets the gpu count based on the ${gpus} argument
     [Arguments]  ${gpus}
-    Click Element  xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
-    Click Element  xpath:${JUPYTER_GPU_DROPDOWN_XPATH}/../..//button[.="${gpus}"]
+    Click Element  xpath:${KFNBC_GPU_DROPDOWN_XPATH}
+    Click Element  xpath:${KFNBC_GPU_DROPDOWN_XPATH}/../..//button[.="${gpus}"]
 
 Fetch Max Number Of GPUs In Spawner Page
     [Documentation]    Returns the maximum number of GPUs a user can request from the spawner
     ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
     IF  ${gpu_visible}==True
-       Click Element    xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
+       Click Element    xpath:${KFNBC_GPU_DROPDOWN_XPATH}
        ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
        ${maxGPUs} =    Convert To Integer    ${maxGPUs}
     ELSE
@@ -155,7 +156,7 @@ Spawn Notebook With Arguments  # robocop: disable
          Select Notebook Image  ${image}
          Select Container Size  ${size}
          ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
-         IF  ${gpu_visible}==True
+         IF  ${gpu_visible}==True and ${gpus}>0
             Set Number Of Required GPUs  ${gpus}
          ELSE IF  ${gpu_visible}==False and ${gpus}>0
             Fail  GPUs required but not available
@@ -351,14 +352,13 @@ Maybe Handle Server Not Running Page
         Handle Server Not Running
     END
 
-
 Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
-   Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawne
-   #Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
-   Click Element  //button[@aria-label="Options menu"]
-   Wait Until Page Contains Element         xpath://span[.="${container_size}"]/../..  timeout=10
+   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}   
+   ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
+   Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
+   Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10
    ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
    ${l_data}   Convert To Lower Case    ${data}
    ${data}    Get Formated Container Size To Dictionary     ${l_data}

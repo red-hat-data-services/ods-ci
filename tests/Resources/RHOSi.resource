@@ -19,6 +19,8 @@ Resource            Page/ODH/Monitoring/Monitoring.resource
 ...                         Push Some Changes To Repo
 ...                         Decide OCM URL And Open Link
 ...                         Get Bearer Token
+...                         Log In As RHODS Admin
+...                         Log In As RHODS Basic User
 
 
 *** Keywords ***

@@ -156,23 +156,9 @@ Skip If RHODS Version Greater Or Equal Than
        Skip If    condition=${version-check}==True    msg=This test is skipped for RHODS ${version} or greater
     END
 
-Get Bearer Token
-    [Documentation]     It returns the bearer token of the current user
-    ...                 which is logged into a cluster. So it assumes you have performed
-    ...                 the login to a Openshift cluster before calling this keyword
-    ${token}=      Run     oc whoami --show-token
-    [Return]    ${token}
-
-Get Current OC Context
-    [Documentation]     Retrieves the current oc login context
-    [Arguments]     ${rename}=${EMPTY}
-    ${context}=     Run     oc config current-context
-    IF    "${rename}" != "${EMPTY}"
-        ${context}=     Run     oc config rename-context ${context} ${rename}
-    END
-    [Return]    ${context}
-
-Switch OC COntext
-    [Documentation]     Switches from the current oc login context to a given one
-    [Arguments]     ${target_context}
-    Run     oc config use-context ${target_context}
+Get OAuth Cookie
+    [Documentation]     Fetches the "_oauth_proxy" cookie from Dashboard page.
+    ...                 You can use the value from this cookie to perform login in API calls.
+    ...                 It assumes Dashboard UI has been launched and login performed using UI.
+    ${cookie}=     Get Cookie  _oauth_proxy
+    [Return]    ${cookie.value}

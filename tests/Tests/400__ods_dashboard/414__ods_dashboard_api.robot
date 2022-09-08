@@ -1,9 +1,10 @@
 *** Settings ***
-Library         RequestsLibrary
-Library         OpenShiftLibrary
-Resource        ../../Resources/Common.robot
-Suite Setup     Endpoint Testing Setup
-
+Library           RequestsLibrary
+Library           OpenShiftLibrary
+Library           SeleniumLibrary
+Resource          ../../Resources/Common.robot
+Suite Setup       Endpoint Testing Setup
+Suite Teardown    Endpoint Testing Teardown
 
 *** Variables ***
 ${CLUSTER_SETTINGS_ENDPOINT}=        api/cluster-settings
@@ -21,6 +22,9 @@ ${GETTING_STARTED_ENDPOINT}=        api/getting-started
 ${QUICKSTARTS_ENDPOINT}=        api/quickstarts
 ${SEGMENT_KEY_ENDPOINT}=        api/segment-key
 ${GPU_ENDPOINT}=        api/gpu
+
+${GROUPS_CONFIG_ENDPOINT}=        api/groups-config
+${GROUPS_CONFIG_ENDPOINT_BODY}=   {"allowedGroups":[{"name":"system:authenticated","enabled":true}]}
 
 
 *** Test Cases ***
@@ -147,50 +151,54 @@ Verify Access To gpu API Endpoint
 *** Keywords ***
 Log In As RHODS Admin
     [Documentation]     Perfom OC login using a RHODS admin user
-    Run     oc login -u ${TEST_USER.USERNAME} -p ${TEST_USER.PASSWORD} ${OCP_API_URL}
-    # OpenshiftLibrary.Oc Login    ${OCP_API_URL}    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    browser_options=${BROWSER.OPTIONS}
+    ${oauth_proxy_cookie}=     Get OAuth Cookie
+    Close Browser
+    [Return]    ${oauth_proxy_cookie}
 
 Log In As RHODS Basic User
     [Documentation]     Perfom OC login using a RHODS basic user
-    Run     oc login -u ${TEST_USER_3.USERNAME} -p ${TEST_USER_3.PASSWORD} ${OCP_API_URL}
-    # OpenshiftLibrary.Oc Login    ${OCP_API_URL}    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}
+    Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    browser_options=${BROWSER.OPTIONS}
+    ${oauth_proxy_cookie}=     Get OAuth Cookie
+    Close Browser
+    [Return]    ${oauth_proxy_cookie}
 
 Perform Dashboard API Endpoint GET Call
     [Arguments]     ${endpoint}     ${token}
-    ${headers}=    Create Dictionary     Authorization=Bearer ${token}
+    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
     ${response}=    RequestsLibrary.GET  ${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
 
 Perform Dashboard API Endpoint PUT Call
     [Arguments]     ${endpoint}     ${token}    ${json_body}
-    ${headers}=    Create Dictionary     Authorization=Bearer ${token}    Content-type=application/json
+    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
     ${payload}=      Load Json String    json_string=${json_body}
     ${response}=    RequestsLibrary.Put  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
     ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
 
 Perform Dashboard API Endpoint PATCH Call
     [Arguments]     ${endpoint}     ${token}    ${json_body}
-    ${headers}=    Create Dictionary     Authorization=Bearer ${token}    Content-type=application/json
+    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
     ${payload}=     Load Json String    json_string=${json_body}
     ${response}=    RequestsLibrary.Patch  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
     ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
 
 Endpoint Testing Setup
     [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
-    # RHOSi Setup
-    ${ORIGINAL_CONTEXT}=    Get Current OC Context      rename=original-context
-    Set Suite Variable    ${ORIGINAL_CONTEXT}
-    Log In As RHODS Admin
-    ${ADMIN_TOKEN}=      Get Bearer Token
+    Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
+    ${ADMIN_TOKEN}=   Log In As RHODS Admin
     Set Suite Variable    ${ADMIN_TOKEN}
-    Log In As RHODS Basic User
-    ${BASIC_USER_TOKEN}=      Get Bearer Token
+    ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
     Set Suite Variable    ${BASIC_USER_TOKEN}
 
 Endpoint Testing Teardown
     [Documentation]     Switches to original OC context
-    Switch OC COntext   target_context=${ORIGINAL_CONTEXT}
-    # RHOSi Teardown
+    RHOSi Teardown
 
 Operation Should Be Allowed
     [Documentation]     Checks if the API call returns an HTTP code 200 (SUCCESS)

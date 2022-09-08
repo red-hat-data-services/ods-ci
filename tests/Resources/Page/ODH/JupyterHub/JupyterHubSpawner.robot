@@ -19,6 +19,7 @@ ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 ${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
+${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 
 
 *** Keywords ***
@@ -140,6 +141,9 @@ Spawn Notebook
         IF  ${control_panel_visible}==True
          # If the user has been redirected to the control panel, move to the server and continue execution
             Click Button    Return to server
+            # If route annotation is empty redirect won't work, fail here
+            Wait Until Page Does Not Contain Element    xpath:${KFNBC_CONTROL_PANEL_HEADER_XPATH}
+            ...    timeout=15s    error=Redirect hasn't happened, check route annotation (opendatahub.io/link) in Notebook CR
             Return From Keyword
         ELSE
             Reload Page

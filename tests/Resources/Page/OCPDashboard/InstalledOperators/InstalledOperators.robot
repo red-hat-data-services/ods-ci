@@ -92,10 +92,8 @@ Check IF URL On The Page Is Commercial
      END
 
 Get RHODS version
-    #@{list} =  OpenShiftCLI.Get  kind=ClusterServiceVersion  label_selector=olm.copiedFrom=redhat-ods-operator
-    #&{dict} =  Set Variable  ${list}[0]
-    #Log  ${dict.spec.version}
-    IF  "${RHODS_VERSION}" == "${None}"
+    [Arguments]    ${force_fetch}=False
+    IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
          ${RHODS_VERSION} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
     END
     Log  ${RHODS_VERSION}

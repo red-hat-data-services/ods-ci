@@ -169,7 +169,6 @@ Verify Access To Notebook configmaps API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
-    ...       jupyter
     Spawn MinimalPython Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
     ${CM_ENDPOINT_BASIC_USER}=     Set Variable    ${CM_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER}${CM_ENDPOINT_PT2}
@@ -199,7 +198,6 @@ Verify Access To Notebook secrets API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
-    ...       jupyter
     Spawn MinimalPython Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
     ${SECRET_ENDPOINT_BASIC_USER}=     Set Variable    ${SECRET_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER}${SECRET_ENDPOINT_PT2}
@@ -228,7 +226,6 @@ Verify Access To Dashboard configmaps and secrets API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
-    ...       dash-cms
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}

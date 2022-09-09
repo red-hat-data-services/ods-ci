@@ -26,14 +26,18 @@ ${GPU_ENDPOINT}=        api/gpu
 
 ${NOTEBOOK_NS}=          rhods-notebooks
 ${NOTEBOOK_USERNAME}=    ""
-${CM_ENDPOINT_PT1}=         api/configmaps/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
+${CM_ENDPOINT_PT0}=         api/configmaps
+${CM_ENDPOINT_PT1}=         ${CM_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${CM_ENDPOINT_PT2}=         -envs
+${CM_ENDPOINT_BODY}=            {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"}}
 
 ${CM_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-applications/odh-enabled-applications-config
 ${DUMMY_SECRET_NAME}=           test-dummy-secret
 ${SECRET_DASHBOARD_ENDPOINT}=         api/secrets/redhat-ods-applications/${DUMMY_SECRET_NAME}
-${SECRET_ENDPOINT_PT1}=         api/secrets/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
+${SECRET_ENDPOINT_PT0}=         api/secrets
+${SECRET_ENDPOINT_PT1}=         ${SECRET_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${SECRET_ENDPOINT_PT2}=         -envs
+${SECRET_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"},"type":"Opaque"}
 
 ${GROUPS_CONFIG_ENDPOINT}=        api/groups-config
 ${GROUPS_CONFIG_ENDPOINT_BODY}=   {"allowedGroups":[{"name":"system:authenticated","enabled":true}]}
@@ -176,16 +180,37 @@ Verify Access To Notebook configmaps API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
+    ${cm_basic_user_body}=     Set Username In ConfigMap Payload    notebook_username=${NOTEBOOK_BASIC_USER}
+    Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${cm_basic_user_body}
+    Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
-    # Not clear if it should be allowed or not for a basic user
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${cm_basic_user_body}
     Operation Should Be Allowed
     Spawn MinimalPython Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${CM_ENDPOINT_BASIC_USER_2}=     Set Variable    ${CM_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER_2}${CM_ENDPOINT_PT2}
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
+    ${cm_basic_user_2_body}=     Set Username In Secret Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
+    Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${cm_basic_user_2_body}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${cm_basic_user_2_body}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${cm_basic_user_2_body}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${cm_basic_user_2_body}
+    Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
     [Teardown]     Close All Notebooks
 
 Verify Access To Notebook secrets API Endpoint
@@ -205,16 +230,37 @@ Verify Access To Notebook secrets API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
+    ${secret_basic_user_body}=     Set Username In Secret Payload    notebook_username=${NOTEBOOK_BASIC_USER}
+    Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${secret_basic_user_body}
+    Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
-    # Not clear if it should be allowed or not for a basic user
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${secret_basic_user_body}
     Operation Should Be Allowed
     Spawn MinimalPython Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${SECRET_ENDPOINT_BASIC_USER_2}=     Set Variable    ${SECRET_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER_2}${SECRET_ENDPOINT_PT2}
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
+    ${secret_basic_user_2_body}=     Set Username In Secret Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
+    Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${secret_basic_user_2_body}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${secret_basic_user_2_body}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${secret_basic_user_2_body}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${secret_basic_user_2_body}
+    Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
     [Teardown]     Close All Notebooks
 
 Verify Access To Dashboard configmaps and secrets API Endpoint
@@ -241,6 +287,18 @@ Verify Access To Dashboard configmaps and secrets API Endpoint
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Forbidden
     [Teardown]      Delete Dummy Secret
+
+Verify Access To groups-config API Endpoint
+    [Documentation]     Verifies the endpoint "groups-config" works as expected
+    ...                 based on the permissions of the user who query the endpoint
+
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
 
 
 *** Keywords ***
@@ -303,4 +361,14 @@ Close All Notebooks
         Capture Page Screenshot     notebook-${browser_id}.png
     END
     Close All Browsers
+
+Set Username In Secret Payload
+    [Arguments]     ${notebook_username}
+    ${complete_secret}=     Replace String    ${SECRET_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
+    [Return]    ${complete_secret}
+
+Set Username In ConfigMap Payload
+    [Arguments]     ${notebook_username}
+    ${complete_cm}=     Replace String    ${CM_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
+    [Return]    ${complete_cm}
 

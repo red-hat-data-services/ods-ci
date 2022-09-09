@@ -22,6 +22,15 @@ Perform Dashboard API Endpoint PUT Call
     ${response}=    RequestsLibrary.Put  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
     ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
 
+Perform Dashboard API Endpoint POST Call
+    [Documentation]     Runs a PUT call to the given API endpoint. Result may change based
+    ...                 on the given token (i.e., user)
+    [Arguments]     ${endpoint}     ${token}    ${json_body}
+    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}   Content-type=application/json
+    ${payload}=      Load Json String    json_string=${json_body}
+    ${response}=    RequestsLibrary.Post  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
+    ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
+
 Perform Dashboard API Endpoint PATCH Call
     [Documentation]     Runs a PATCH call to the given API endpoint. Result may change based
     ...                 on the given token (i.e., user)

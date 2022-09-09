@@ -16,7 +16,7 @@ Install RHODS
       Set Test Variable     ${filename}       ${filename}[0]
       ${return_code}	  Run And Return Rc    git clone ${RHODS_INSTALL_REPO}
       Should Be Equal As Integers	${return_code}	 0
-      ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh ${operator_url}   #robocop:disable
+      ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./rhods install    #robocop:disable
       Should Be Equal As Integers	${return_code}	 0
       Log    ${output}
   ELSE

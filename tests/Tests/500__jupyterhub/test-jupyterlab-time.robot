@@ -68,7 +68,11 @@ Spawn and Stop Server
     Spawn Notebook
     Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
          ...    id:progress-bar    timeout=600s
-    Wait For JupyterLab Splash Screen    timeout=30
+    #Wait For JupyterLab Splash Screen    timeout=30
+    Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ${authorization_required} =  Is Service Account Authorization Required
+    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     ${time2} =    Get Time
     ${time} =    Subtract Date From Date    ${time2}    ${time1}
     Stop JupyterLab Notebook Server

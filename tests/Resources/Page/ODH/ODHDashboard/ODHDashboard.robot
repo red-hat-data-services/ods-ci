@@ -442,7 +442,7 @@ RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message
     [Arguments]     ${message}
     Click Element    xpath=//*[contains(@class,'notification-badge')]
-    Page Should Contain  text=${message}
+    Wait Until Page Contains  text=${message}  timeout=300s
     Close Notification Drawer
 
 Open Notebook Images Page

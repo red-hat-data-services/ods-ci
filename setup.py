@@ -16,7 +16,7 @@ setup(
     install_requires=[
         "reportportal-client",
         "robotframework==4.*",
-        "robotframework-debuglibrary",
+        "robotframework-debuglibrary>=2.0.0",
         "robotframework-requests",
         "robotframework-seleniumlibrary",
         "robotframework-jupyterlibrary>=0.3.1",

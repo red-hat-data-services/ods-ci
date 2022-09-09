@@ -7,6 +7,7 @@ Library  ../../../../libs/Helpers.py
 
 *** Variables ***
 @{verification_list}           beta   preview   stage
+${RHODS_VERSION}              None
 
 *** Keywords ***
 Uninstall Operator
@@ -91,12 +92,12 @@ Check IF URL On The Page Is Commercial
      END
 
 Get RHODS version
-    #@{list} =  OpenShiftCLI.Get  kind=ClusterServiceVersion  label_selector=olm.copiedFrom=redhat-ods-operator
-    #&{dict} =  Set Variable  ${list}[0]
-    #Log  ${dict.spec.version}
-    ${ver} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
-    Log  ${ver}
-    [Return]  ${ver}
+    [Arguments]    ${force_fetch}=False
+    IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
+         ${RHODS_VERSION} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
+    END
+    Log  ${RHODS_VERSION}
+    [Return]  ${RHODS_VERSION}
 
 Is RHODS Version Greater Or Equal Than
     [Arguments]  ${target}

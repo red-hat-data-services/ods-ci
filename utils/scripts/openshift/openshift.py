@@ -34,16 +34,14 @@ class OpenshiftOps:
         """
         Generates ssh key required for OpenShift Installation
         """
-        cmd = "ssh-keygen -t rsa -b 4096 -N '' -f {}/id_rsa".format(
-            self.work_dir)
+        cmd = "ssh-keygen -t rsa -b 4096 -N '' -f {}/id_rsa".format(self.work_dir)
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
             log.error("Failed to generate ssh key")
             return None
 
-        cmd = 'eval "$(ssh-agent -s)";' + "ssh-add {}/id_rsa".format(
-            self.work_dir)
+        cmd = 'eval "$(ssh-agent -s)";' + "ssh-add {}/id_rsa".format(self.work_dir)
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
@@ -77,7 +75,8 @@ class OpenshiftOps:
         """
         Runs aws configure and set the configuration required
         for OpenShift Installation
-        """
+
+        === Code using pexpect ===
         configure_cmd = pexpect.spawn("aws configure")
         configure_cmd.expect("AWS Access Key ID .*: ")
         configure_cmd.sendline(self.aws_access_key_id)
@@ -88,6 +87,23 @@ class OpenshiftOps:
         configure_cmd.expect("Default output format .*: ")
         configure_cmd.sendline("yaml")
         configure_cmd.interact()
+        """
+
+        contents = "aws configure << EOF \n{}\n{}\n{}\n{}\nEOF".format(
+            self.aws_access_key_id,
+            self.aws_secret_access_key,
+            self.aws_region,
+            "yaml",
+        )
+
+        with open("aws.sh", "w") as f:
+            f.write(contents)
+
+        cmd = "sh aws.sh"
+        ret = execute_command(cmd)
+        if ret is None:
+            log.error("Failed to configure aws")
+            return None
 
         return True
 
@@ -120,8 +136,7 @@ class OpenshiftOps:
         cmd = "cd {}".format(install_config_dir)
         ret = execute_command(cmd)
         if ret is None:
-            log.error(
-                "Failed to cd to directory where install config is present")
+            log.error("Failed to cd to directory where install config is present")
             return None
 
         process = subprocess.Popen(
@@ -142,21 +157,20 @@ class OpenshiftOps:
 
         output = process.stdout.read().decode("utf-8")
         match = re.search(
-            '.*Access the OpenShift web-console here: (\S+)'
+            ".*Access the OpenShift web-console here: (\S+)"
             '.*Login to the console with user: "(\S+)".*password: "(\S+)".*',
             output,
             re.S,
         )
         if match is None:
             log.error(
-                "Unexpected console logs in openshift-install "
-                "create cluster output"
+                "Unexpected console logs in openshift-install create cluster output"
             )
             sys.exit(1)
 
         log.info(
-            "OpenShift Cluster {} created successfully !".format(
-                self.cluster_name))
+            "OpenShift Cluster {} created successfully !".format(self.cluster_name)
+        )
 
         cluster_info = {}
         cluster_info["CLUSTER_NAME"] = self.cluster_name
@@ -169,10 +183,6 @@ class OpenshiftOps:
         with open(config_file, "w") as file:
             yaml.dump(cluster_info, file)
 
-        log.info("OpenShift Cluster {} details !".format(self.cluster_name))
-        cmd = "cat {}".format(config_file)
-        print(execute_command(cmd))
-
     def openshift_destroy(self):
         """Delete openshift cluster using openshift-installer"""
 
@@ -181,8 +191,7 @@ class OpenshiftOps:
 
         ret = execute_command(cmd)
         if ret is None:
-            log.error(
-                "Failed to cd to directory where install config is present")
+            log.error("Failed to cd to directory where install config is present")
             sys.exit(1)
 
         cmd = "openshift-install destroy cluster"
@@ -216,13 +225,11 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    optional_openshift_install_parser = (
-        openshift_install_parser._action_groups.pop())
-    required_openshift_install_parser = (
-        openshift_install_parser.add_argument_group("required arguments")
+    optional_openshift_install_parser = openshift_install_parser._action_groups.pop()
+    required_openshift_install_parser = openshift_install_parser.add_argument_group(
+        "required arguments"
     )
-    openshift_install_parser._action_groups.append(
-        optional_openshift_install_parser)
+    openshift_install_parser._action_groups.append(optional_openshift_install_parser)
 
     required_openshift_install_parser.add_argument(
         "--aws-accesskey-id",
@@ -243,7 +250,7 @@ if __name__ == "__main__":
     required_openshift_install_parser.add_argument(
         "--install-config-file",
         help="Install config file. Note: "
-             "Place this file from where you are running this for now",
+        "Place this file from where you are running this for now",
         action="store",
         dest="install_config_file",
         required=True,

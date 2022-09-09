@@ -21,6 +21,7 @@ ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //button[contains(@aria-labelledby, "c
 ${KFNBC_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-numbers")]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
+${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 
 
 *** Keywords ***
@@ -280,7 +281,13 @@ Spawner Modal Is Visible
 
 Handle Spawner Modal
    [Documentation]  Closes the spawner modal
-   Click Button    ${KFNBC_MODAL_CANCEL_XPATH}
+   # If there's a "Close" button instead of "Cancel" in the modal, spawn has failed
+   ${spawn_failed} =  Run Keyword And Return Status  Page Should Contain Element  ${KFNBC_MODAL_CLOSE_XPATH}
+   IF  ${spawn_failed}==True
+       Click Button    ${KFNBC_MODAL_CLOSE_XPATH}
+   ELSE
+       Click Button    ${KFNBC_MODAL_CANCEL_XPATH}
+   END
 
 Fix Spawner Status
    [Documentation]  This keyword handles spawner states that would prevent

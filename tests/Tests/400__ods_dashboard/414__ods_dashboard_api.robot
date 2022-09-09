@@ -1,8 +1,8 @@
 *** Settings ***
-Library           RequestsLibrary
 Library           OpenShiftLibrary
 Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Suite Setup       Endpoint Testing Setup
 Suite Teardown    Endpoint Testing Teardown
 
@@ -244,6 +244,19 @@ Verify Access To Dashboard configmaps and secrets API Endpoint
 
 
 *** Keywords ***
+Endpoint Testing Setup
+    [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
+    Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
+    ${ADMIN_TOKEN}=   Log In As RHODS Admin
+    Set Suite Variable    ${ADMIN_TOKEN}
+    ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
+    Set Suite Variable    ${BASIC_USER_TOKEN}
+
+Endpoint Testing Teardown
+    [Documentation]     Switches to original OC context
+    RHOSi Teardown
+
 Log In As RHODS Admin
     [Documentation]     Perfom OC login using a RHODS admin user
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
@@ -261,69 +274,6 @@ Log In As RHODS Basic User
     ${oauth_proxy_cookie}=     Get OAuth Cookie
     Close Browser
     [Return]    ${oauth_proxy_cookie}
-
-Perform Dashboard API Endpoint GET Call
-    [Documentation]     Runs a GET call to the given API endpoint. Result may change based
-    ...                 on the given token (i.e., user)
-    [Arguments]     ${endpoint}     ${token}
-    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
-    ${response}=    RequestsLibrary.GET  ${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
-    ...             headers=${headers}   timeout=5  verify=${False}
-
-Perform Dashboard API Endpoint PUT Call
-    [Documentation]     Runs a PUT call to the given API endpoint. Result may change based
-    ...                 on the given token (i.e., user)
-    [Arguments]     ${endpoint}     ${token}    ${json_body}
-    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}   Content-type=application/json
-    ${payload}=      Load Json String    json_string=${json_body}
-    ${response}=    RequestsLibrary.Put  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
-    ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
-
-Perform Dashboard API Endpoint PATCH Call
-    [Documentation]     Runs a PATCH call to the given API endpoint. Result may change based
-    ...                 on the given token (i.e., user)
-    [Arguments]     ${endpoint}     ${token}    ${json_body}
-    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}   Content-type=application/json
-    ${payload}=     Load Json String    json_string=${json_body}
-    ${response}=    RequestsLibrary.Patch  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
-    ...             headers=${headers}    data=${json_body}   timeout=5  verify=${False}
-
-Perform Dashboard API Endpoint DELETE Call
-    [Documentation]     Runs a GET call to the given API endpoint. Result may change based
-    ...                 on the given token (i.e., user)
-    [Arguments]     ${endpoint}     ${token}
-    ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
-    ${response}=    RequestsLibrary.DELETE  ${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
-    ...             headers=${headers}   timeout=5  verify=${False}
-
-Endpoint Testing Setup
-    [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
-    Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
-    ${ADMIN_TOKEN}=   Log In As RHODS Admin
-    Set Suite Variable    ${ADMIN_TOKEN}
-    ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
-    Set Suite Variable    ${BASIC_USER_TOKEN}
-
-Endpoint Testing Teardown
-    [Documentation]     Switches to original OC context
-    RHOSi Teardown
-
-Operation Should Be Allowed
-    [Documentation]     Checks if the API call returns an HTTP code 200 (SUCCESS)
-    Run Keyword And Continue On Failure  Status Should Be  200
-
-Operation Should Be Unauthorized
-    [Documentation]     Checks if the API call returns an HTTP code 401 (Unauthorized)
-    Run Keyword And Continue On Failure  Status Should Be  401
-
-Operation Should Be Forbidden
-    [Documentation]     Checks if the API call returns an HTTP code 403 (FORBIDDEN)
-    Run Keyword And Continue On Failure  Status Should Be  403
-
-Operation Should Be Unavailable
-    [Documentation]     Checks if the API call returns an HTTP code 404 (NOT FOUND)
-    Run Keyword And Continue On Failure  Status Should Be  404
 
 Spawn MinimalPython Notebook Server
     [Documentation]    Suite Setup

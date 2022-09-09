@@ -128,3 +128,24 @@ class Helpers:
                 "Unable to install the {} isv, Check if ISV subscription is "
                 "created{}".format(operator_name, status)
             )
+
+    @keyword
+    def parse_file_for_tolerations(self,filename):
+        tolerations = []
+        with open(filename,"r") as f:
+            content =  f.readlines()
+        saving=False
+        for line in content:
+            if line.startswith("Tolerations:"):
+                saving=True
+                tolerations.append(line.split(": ")[1].strip())
+                print(line)
+                print(tolerations)
+            elif line.startswith("Events:"): break
+            else:
+                if saving==True: 
+                    tolerations.append(line.strip())
+                    print(line)
+                    print(tolerations)
+                else: continue
+        return tolerations

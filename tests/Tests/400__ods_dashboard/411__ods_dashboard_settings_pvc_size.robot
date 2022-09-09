@@ -102,11 +102,13 @@ Verify Multiple Unsupported Size
     END
 
 Change And Apply PVC size
-    [Documentation]    Make PVC change to configmap
-    ...    and rollout deployment config
+    [Documentation]    Make PVC change to OdhDashboardConfig CR
+    ...    and restart the Notebook controller POD
     [Arguments]     ${size}
     Check If PVC Change Is Permanent    ${size}
-    Roll Out Jupyter Deployment Config
+    Run Keyword And Ignore Error    Delete Pods Using Label Selector    redhat-ods-applications    app=notebook-controller
+    Wait Until Keyword Succeeds    15 times    1 sec   Verify Operator Pod Status    redhat-ods-applications    app=notebook-controller
+    Sleep    20
     Launch RHODS Dashboard
 
 PVC Size Suite Teadrown

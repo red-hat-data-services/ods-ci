@@ -22,6 +22,7 @@ ${KFNBC_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-number
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
+${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 
 
 *** Keywords ***
@@ -133,10 +134,60 @@ Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
     Click Button  Start server
-    Wait Until Page Contains  Starting server  60s
+    # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
+    # if the spawn was successful
+    ${modal} =    Run Keyword And Return Status    Wait Until Page Contains
+    ...    Starting server    60s
+    IF  ${modal}==False
+        Log    message=Starting server modal didn't appear after 60s    level=ERROR
+        ${control_panel_visible} =  Control Panel Is Visible
+        IF  ${control_panel_visible}==True
+         # If the user has been redirected to the control panel, move to the server and continue execution
+            Click Button    Return to server
+            # If route annotation is empty redirect won't work, fail here
+            Wait Until Page Does Not Contain Element    xpath:${KFNBC_CONTROL_PANEL_HEADER_XPATH}
+            ...    timeout=15s    error=Redirect hasn't happened, check route annotation (opendatahub.io/link) in Notebook CR
+            Return From Keyword
+        ELSE
+            Reload Page
+            Sleep  5s
+            # Unsure what would happen at this point
+            ${spawner_visible} =  JupyterHub Spawner Is Visible
+            ${control_panel_visible} =  Control Panel Is Visible
+            ${JL_visible} =  JupyterLab Is Visible
+            IF  ${spawner_visible}==True
+                ${modal_visible} =  Spawner Modal Is Visible
+                IF  ${modal_visible}==True
+                    ${spawn_fail} =  Has Spawn Failed
+                    IF  ${spawn_fail}==True
+                        # If the modal is now visible, and spawn has failed
+                        # return and let `Spawn Notebook With Arguments` deal with it
+                        Return From Keyword
+                    ELSE
+                        # If modal is visible and spawn hasn't failed, continue
+                        # execution and let rest of keyword deal with the timeout
+                        Sleep 1s
+                        Capture Page Screenshot
+                    END
+                END
+            ELIF  ${control_panel_visible}==True
+                # If the user has been redirected to the control panel, 
+                # move to the server and continue execution
+                Click Button    Return to server
+                Return From Keyword
+            ELIF  ${JL_Visible}==True
+                # We are in JL, return and let `Spawn Notebook With Arguments`
+                # deal with it
+                Return From Keyword
+            ELSE
+                # No idea where we are
+                Capture Page Screenshot
+                Fail  msg=Unknown scenario while spawning server
+            END
+        END
+    END
     Wait Until Element Is Visible  xpath://div[@role="progressbar"]
     Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
-    #Wait Until Page Contains  Success  ${spawner_timeout}
 
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed
@@ -175,14 +226,9 @@ Spawn Notebook With Arguments  # robocop: disable
             END
          END
          Spawn Notebook    ${spawner_timeout}
-         #Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
-         #...    id:progress-bar  ${spawner_timeout}
-         #Click Button  Access server
-         #SeleniumLibrary.Switch Window  NEW
          Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
          ${authorization_required} =  Is Service Account Authorization Required
          Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-         #Wait For JupyterLab Splash Screen  timeout=60
          Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
          Maybe Close Popup
          Open New Notebook In Jupyterlab Menu

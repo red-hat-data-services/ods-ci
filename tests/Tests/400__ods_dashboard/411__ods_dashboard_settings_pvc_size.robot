@@ -108,6 +108,7 @@ Change And Apply PVC size
     Check If PVC Change Is Permanent    ${size}
     Run Keyword And Ignore Error    Delete Pods Using Label Selector    redhat-ods-applications    app=notebook-controller
     Wait Until Keyword Succeeds    15 times    1 sec   Verify Operator Pod Status    redhat-ods-applications    app=notebook-controller
+    Sleep    20
     Launch RHODS Dashboard
 
 PVC Size Suite Teadrown

@@ -47,7 +47,15 @@ ${SECRET_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","me
 ${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"redhat-ods-monitoring"},"type":"Opaque"}
 
 ${GROUPS_CONFIG_ENDPOINT}=        api/groups-config
-${GROUPS_CONFIG_ENDPOINT_BODY}=   {"allowedGroups":[{"name":"system:authenticated","enabled":true}]}
+
+${IMG_NAME} =            custom-test-image
+${IMG_URL} =             quay.io/thoth-station/s2i-lab-elyra:v0.1.1
+${IMG_DESCRIPTION}=     Testing Only This image is only for illustration purposes, and comes with no support. Do not use.
+&{IMG_SOFTWARE}=        Software1=x.y.z
+&{IMG_PACKAGES}=        elyra=2.2.4    foo-pkg=a.b.c
+${IMG_ENDPOINT_PT0}=        api/images
+${IMG_ENDPOINT_PT1}=        byon
+${IMG_ENDPOINT_BODY}=        {"name":"Test-Byon-Image","description":"","packages":[],"software":[],"url":"test-url"}
 
 
 *** Test Cases ***
@@ -62,10 +70,10 @@ Verify Access To cluster-settings API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${CLUSTER_SETTINGS_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PUT Call   endpoint=${CLUSTER_SETTINGS_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${CLUSTER_SETTINGS_ENDPOINT_BODY}
+    ...                                       body=${CLUSTER_SETTINGS_ENDPOINT_BODY}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint PUT Call   endpoint=${CLUSTER_SETTINGS_ENDPOINT}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${CLUSTER_SETTINGS_ENDPOINT_BODY}
+    ...                                       body=${CLUSTER_SETTINGS_ENDPOINT_BODY}
     Operation Should Be Allowed
 
 Verify Access To builds API Endpoint
@@ -92,10 +100,10 @@ Verify Access To config API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PATCH Call    endpoint=${CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    ...                                          json_body=${CONFIG_ENDPOINT_BODY}
+    ...                                          body=${CONFIG_ENDPOINT_BODY}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint PATCH Call    endpoint=${CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
-    ...                                          json_body=${CONFIG_ENDPOINT_BODY}
+    ...                                          body=${CONFIG_ENDPOINT_BODY}
     Operation Should Be Allowed
 
 Verify Access To console-links API Endpoint
@@ -189,12 +197,12 @@ Verify Access To Notebook configmaps API Endpoint
     Operation Should Be Allowed
     ${cm_basic_user_body}=     Set Username In ConfigMap Payload    notebook_username=${NOTEBOOK_BASIC_USER}
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${cm_basic_user_body}
+    ...                                       body=${cm_basic_user_body}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${cm_basic_user_body}
+    ...                                       body=${cm_basic_user_body}
     Operation Should Be Allowed
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
@@ -203,20 +211,20 @@ Verify Access To Notebook configmaps API Endpoint
     Operation Should Be Forbidden
     ${cm_basic_user_2_body}=     Set Username In ConfigMap Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${cm_basic_user_2_body}
+    ...                                       body=${cm_basic_user_2_body}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${cm_basic_user_2_body}
+    ...                                       body=${cm_basic_user_2_body}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${cm_basic_user_2_body}
+    ...                                       body=${cm_basic_user_2_body}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${cm_basic_user_2_body}
+    ...                                       body=${cm_basic_user_2_body}
     Operation Should Be Allowed
     [Teardown]     Close All Notebooks
 
@@ -239,12 +247,12 @@ Verify Access To Notebook secrets API Endpoint
     Operation Should Be Allowed
     ${secret_basic_user_body}=     Set Username In Secret Payload    notebook_username=${NOTEBOOK_BASIC_USER}
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${secret_basic_user_body}
+    ...                                       body=${secret_basic_user_body}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${secret_basic_user_body}
+    ...                                       body=${secret_basic_user_body}
     Operation Should Be Allowed
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
@@ -253,20 +261,20 @@ Verify Access To Notebook secrets API Endpoint
     Operation Should Be Forbidden
     ${secret_basic_user_2_body}=     Set Username In Secret Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${secret_basic_user_2_body}
+    ...                                       body=${secret_basic_user_2_body}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${secret_basic_user_2_body}
+    ...                                       body=${secret_basic_user_2_body}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${secret_basic_user_2_body}
+    ...                                       body=${secret_basic_user_2_body}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${secret_basic_user_2_body}
+    ...                                       body=${secret_basic_user_2_body}
     Operation Should Be Allowed
     [Teardown]     Close All Notebooks
 
@@ -285,20 +293,20 @@ Verify Access To Dashboard configmaps API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${CM_DASHBOARD_ENDPOINT_BODY}
+    ...                                       body=${CM_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${CM_DASHBOARD_ENDPOINT_BODY}
+    ...                                       body=${CM_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                        json_body=${CM_DASHBOARD_ENDPOINT_BODY}
+    ...                                        body=${CM_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                        json_body=${CM_DASHBOARD_ENDPOINT_BODY}
+    ...                                        body=${CM_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Allowed
     Create A Dummy ConfigMap Outside Dashboard Namespace
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -306,20 +314,20 @@ Verify Access To Dashboard configmaps API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    ...                                       body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    ...                                       body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                        json_body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    ...                                        body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                        json_body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    ...                                        body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     [Teardown]      Delete Dummy ConfigMaps
 
@@ -338,20 +346,20 @@ Verify Access To Dashboard secrets API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${SECRET_DASHBOARD_ENDPOINT_BODY}
+    ...                                       body=${SECRET_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${SECRET_DASHBOARD_ENDPOINT_BODY}
+    ...                                       body=${SECRET_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                        json_body=${SECRET_DASHBOARD_ENDPOINT_BODY}
+    ...                                        body=${SECRET_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                        json_body=${SECRET_DASHBOARD_ENDPOINT_BODY}
+    ...                                        body=${SECRET_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Allowed
 
     Create A Dummy Secret Outside Dashboard Namespace
@@ -360,20 +368,20 @@ Verify Access To Dashboard secrets API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    ...                                       body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    ...                                       body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                        json_body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    ...                                        body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                        json_body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    ...                                        body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
 
     [Teardown]      Delete Dummy Secrets
@@ -391,10 +399,40 @@ Verify Access To groups-config API Endpoint
     ${current_config}=    Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PUT Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${current_config.text}
+    ...                                       body=${current_config.text}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint PUT Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${current_config.text}
+    ...                                       body=${current_config.text}
+    Operation Should Be Allowed
+
+Verify Access To images API Endpoint
+    [Documentation]     Verifies the endpoint "groups-config" works as expected
+    ...                 based on the permissions of the user who query the endpoint
+
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    ...       images
+    Perform Dashboard API Endpoint POST Call   endpoint=${IMG_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       body=${IMG_ENDPOINT_BODY}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint POST Call   endpoint=${IMG_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       body=${IMG_ENDPOINT_BODY}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${IMG_ENDPOINT_PT0}/${IMG_ENDPOINT_PT1}   token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    ${current_images}=    Perform Dashboard API Endpoint GET Call   endpoint=${IMG_ENDPOINT_PT0}/${IMG_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+    Log         ${current_images.json()}
+    ${image_id}=    Set Variable         ${current_images.json()[0]['id']}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint PUT Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${BASIC_USER_TOKEN}
+    ...                                       body=${current_images.json()[0]}  str_to_json=${FALSE}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint PUT Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${ADMIN_TOKEN}
+    ...                                       body=${current_images.json()[0]}  str_to_json=${FALSE}
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
 
 

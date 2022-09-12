@@ -15,9 +15,7 @@ Verify Odh-deployer Checks Cluster Platform Type
     ...       Tier1
     ...       ODS-1316
     ${cluster_platform_type}=    Fetch Cluster Platform Type
-    IF    "${cluster_platform_type}" == "OpenStack"
-        ${odhdeployer_logs_content}=    Set Variable    INFO: Fresh Installation, proceeding normally
-    ELSE IF    "${cluster_platform_type}" == "AWS"
+    IF    "${cluster_platform_type}" == "AWS" or "${cluster_platform_type}" == "OpenStack"
         ${odhdeployer_logs_content}=     Set Variable
         ...    INFO: Fresh Installation, proceeding normally
     ELSE

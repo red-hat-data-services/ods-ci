@@ -537,8 +537,7 @@ Get Previously Selected Notebook Image Details
     #@{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
 
     ${user_data} =  Run  oc get notebook ${user_name} -o yaml | /usr/bin/yq '.spec.template.spec.containers[0].image' | xargs basename
-    ${substr} =  Get Substring  ${user_data}  0  28
-    ${notfound} =  Run Keyword And Return Status  Should Be Equal As Strings  ${substr}  Error from server (NotFound)
+    ${notfound} =  Run Keyword And Return Status  Should Be Equal As Strings  ${user_data}  null
     IF  ${notfound}==True
       ${user_data} =  Set Variable  minimal-gpu:default
     END

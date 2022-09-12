@@ -57,6 +57,14 @@ ${IMG_ENDPOINT_PT0}=        api/images
 ${IMG_ENDPOINT_PT1}=        byon
 ${IMG_ENDPOINT_BODY}=        {"name":"Test-Byon-Image","description":"","packages":[],"software":[],"url":"test-url"}
 
+${NB_EVENTS_ENDPOINT_PT0}=      api/nb-events
+${NB_EVENTS_ENDPOINT_PT1}=      ${NB_EVENTS_ENDPOINT_PT0}/${NOTEBOOK_NS}/
+
+${STATUS_ENDPOINT}=      api/status
+
+${VALIDATE_ISV_ENDPOINT}=       api/validate-isv?appName=anaconda-ce&values={"Anaconda_ce_key":"wrong-key"}
+${VALIDATE_ISV_RESULT_ENDPOINT}=         api/validate-isv/results?appName=anaconda-ce
+
 
 *** Test Cases ***
 Verify Access To cluster-settings API Endpoint
@@ -406,7 +414,7 @@ Verify Access To groups-config API Endpoint
     Operation Should Be Allowed
 
 Verify Access To images API Endpoint
-    [Documentation]     Verifies the endpoint "groups-config" works as expected
+    [Documentation]     Verifies the endpoint "images" works as expected
     ...                 based on the permissions of the user who query the endpoint
 
     [Tags]    ODS-XYZ
@@ -433,6 +441,61 @@ Verify Access To images API Endpoint
     Perform Dashboard API Endpoint DELETE Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${BASIC_USER_TOKEN}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint DELETE Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+
+Verify Access To nb-events API Endpoint
+    [Documentation]     Verifies the endpoint "nb-events" works as expected
+    ...                 based on the permissions of the user who query the endpoint to get
+    ...                 the user configmap map of a notebook server.
+    ...                 The syntax to reach this endpoint is:
+    ...                 `nb-events/<notebook_namespace>/jupyter-nb-<username_nb>-0`
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    ...       notebooks
+    Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    ${NB_PODNAME_BASIC_USER}=   Get User Notebook Pod Name    ${TEST_USER_3.USERNAME}
+    ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
+    ${NB_PODNAME_BASIC_USER_2}=   Get User Notebook Pod Name    ${TEST_USER_4.USERNAME}
+    ${NB_EVENTS_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER_2}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    [Teardown]     Close All Notebooks
+
+Verify Access To status API Endpoint
+    [Documentation]     Verifies the endpoint "status" works as expected
+    ...                 based on the permissions of the user
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    # POST call not clear..TBD
+
+Verify Access To validate-isv API Endpoint
+    [Documentation]     Verifies the endpoint "status" works as expected
+    ...                 based on the permissions of the user
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_RESULT_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_RESULT_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
 
 

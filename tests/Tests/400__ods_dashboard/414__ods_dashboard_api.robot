@@ -4,7 +4,7 @@ Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Suite Setup       Endpoint Testing Setup
-Suite Teardown    Endpoint Testing Teardown
+#Suite Teardown    Endpoint Testing Teardown
 
 
 *** Variables ***
@@ -30,14 +30,21 @@ ${CM_ENDPOINT_PT0}=         api/configmaps
 ${CM_ENDPOINT_PT1}=         ${CM_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${CM_ENDPOINT_PT2}=         -envs
 ${CM_ENDPOINT_BODY}=            {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"}}
-
-${CM_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-applications/odh-enabled-applications-config
+${DUMMY_CM_NAME}=           test-dummy-configmap
+${CM_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-applications/${DUMMY_CM_NAME}
+# ${CM_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-applications/odh-enabled-applications-config
+${CM_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"redhat-ods-applications"},"data":{"key":"newvalue"}}
+${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"redhat-ods-monitoring"},"data":{"key":"newvalue"}}
+${CM_OUTSIDE_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-monitoring/prometheus
 ${DUMMY_SECRET_NAME}=           test-dummy-secret
 ${SECRET_DASHBOARD_ENDPOINT}=         api/secrets/redhat-ods-applications/${DUMMY_SECRET_NAME}
+${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}=         api/secrets/redhat-ods-monitoring/${DUMMY_SECRET_NAME}
 ${SECRET_ENDPOINT_PT0}=         api/secrets
 ${SECRET_ENDPOINT_PT1}=         ${SECRET_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${SECRET_ENDPOINT_PT2}=         -envs
 ${SECRET_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"},"type":"Opaque"}
+${SECRET_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"redhat-ods-applications"},"type":"Opaque"}
+${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"redhat-ods-monitoring"},"type":"Opaque"}
 
 ${GROUPS_CONFIG_ENDPOINT}=        api/groups-config
 ${GROUPS_CONFIG_ENDPOINT_BODY}=   {"allowedGroups":[{"name":"system:authenticated","enabled":true}]}
@@ -194,22 +201,22 @@ Verify Access To Notebook configmaps API Endpoint
     ${CM_ENDPOINT_BASIC_USER_2}=     Set Variable    ${CM_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER_2}${CM_ENDPOINT_PT2}
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
-    ${cm_basic_user_2_body}=     Set Username In Secret Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
+    ${cm_basic_user_2_body}=     Set Username In ConfigMap Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${cm_basic_user_2_body}
-    Operation Should Be Forbidden
-    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       json_body=${cm_basic_user_2_body}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       json_body=${cm_basic_user_2_body}
-    Operation Should Be Forbidden
-    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${cm_basic_user_2_body}
-    Operation Should Be Forbidden
+    Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${cm_basic_user_2_body}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${cm_basic_user_2_body}
     Operation Should Be Allowed
     [Teardown]     Close All Notebooks
 
@@ -248,22 +255,22 @@ Verify Access To Notebook secrets API Endpoint
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       json_body=${secret_basic_user_2_body}
     Operation Should Be Forbidden
-    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                       json_body=${secret_basic_user_2_body}
-    Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       json_body=${secret_basic_user_2_body}
-    Operation Should Be Forbidden
-    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                       json_body=${secret_basic_user_2_body}
-    Operation Should Be Forbidden
+    Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${secret_basic_user_2_body}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${secret_basic_user_2_body}
+    Operation Should Be Allowed
     [Teardown]     Close All Notebooks
 
-Verify Access To Dashboard configmaps and secrets API Endpoint
+Verify Access To Dashboard configmaps API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
     ...                 based on the permissions of the user who query the endpoint
     ...                 to get a configmap from the Dashboard namespace.
@@ -272,21 +279,104 @@ Verify Access To Dashboard configmaps and secrets API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
+    Create A Dummy ConfigMap In Dashboard Namespace
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
-    # not clear if it should be Allowed or Forbidden..
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${CM_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
+    Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${CM_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        json_body=${CM_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        json_body=${CM_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Allowed
+    Create A Dummy ConfigMap Outside Dashboard Namespace
+    Perform Dashboard API Endpoint GET Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        json_body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        json_body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    [Teardown]      Delete Dummy ConfigMaps
+
+Verify Access To Dashboard secrets API Endpoint
+    [Documentation]     Verifies the endpoint "secrets" works as expected
+    ...                 based on the permissions of the user who query the endpoint
+    ...                 to get a configmap from the Dashboard namespace.
+    ...                 The syntax to reach this endpoint is:
+    ...                 `secrets/<namespace>/<secret_name>`
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
     Create A Dummy Secret In Dashboard Namespace
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${SECRET_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
+    Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${SECRET_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Allowed
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        json_body=${SECRET_DASHBOARD_ENDPOINT_BODY}
     Operation Should Be Forbidden
-    [Teardown]      Delete Dummy Secret
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        json_body=${SECRET_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Allowed
+
+    Create A Dummy Secret Outside Dashboard Namespace
+    Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        json_body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        json_body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+
+    [Teardown]      Delete Dummy Secrets
 
 Verify Access To groups-config API Endpoint
     [Documentation]     Verifies the endpoint "groups-config" works as expected
@@ -296,7 +386,7 @@ Verify Access To groups-config API Endpoint
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unauthorized
     Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
 
@@ -305,7 +395,7 @@ Verify Access To groups-config API Endpoint
 Endpoint Testing Setup
     [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
     Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
+    #RHOSi Setup
     ${ADMIN_TOKEN}=   Log In As RHODS Admin
     Set Suite Variable    ${ADMIN_TOKEN}
     ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
@@ -347,9 +437,30 @@ Create A Dummy Secret In Dashboard Namespace
     # OpenshiftLibrary.Oc Create      kind=Secret    namespace=redhat-ods-applications   src={"data": {"secret_key": "super_dummy_secret"}}
     Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n redhat-ods-applications
 
-Delete Dummy Secret
+Create A Dummy Secret Outside Dashboard Namespace
+    [Documentation]     Creates a dummy secret ouside dashboard namespace to use in tests to avoid getting sensitive secrets
+    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=redhat-ods-applications   src={"data": {"secret_key": "super_dummy_secret"}}
+    Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n redhat-ods-monitoring
+
+Create A Dummy ConfigMap In Dashboard Namespace
+    [Documentation]     Creates a dummy secret to use in tests to avoid getting sensitive secrets
+    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=redhat-ods-applications   src={"data": {"secret_key": "super_dummy_secret"}}
+    Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n redhat-ods-applications
+
+Create A Dummy ConfigMap Outside Dashboard Namespace
+    [Documentation]     Creates a dummy secret ouside dashboard namespace to use in tests to avoid getting sensitive secrets
+    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=redhat-ods-applications   src={"data": {"secret_key": "super_dummy_secret"}}
+    Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n redhat-ods-monitoring
+
+Delete Dummy Secrets
     [Documentation]     Deletes the dummy secret created during tests
-    OpenshiftLibrary.Oc Delete    kind=secret  namespace=redhat-ods-applications  name=${DUMMY_SECRET_NAME}
+    OpenshiftLibrary.Oc Delete    kind=Secret  namespace=redhat-ods-applications  name=${DUMMY_SECRET_NAME}
+    OpenshiftLibrary.Oc Delete    kind=Secret  namespace=redhat-ods-monitoring  name=${DUMMY_SECRET_NAME}
+
+Delete Dummy ConfigMaps
+    [Documentation]     Deletes the dummy secret created during tests
+    OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-applications  name=${DUMMY_CM_NAME}
+    OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-monitoring  name=${DUMMY_CM_NAME}
 
 Close All Notebooks
     [Documentation]     Stops all the notebook servers spanwed during a test.

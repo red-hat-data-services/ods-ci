@@ -4,7 +4,7 @@ Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Suite Setup       Endpoint Testing Setup
-#Suite Teardown    Endpoint Testing Teardown
+Suite Teardown    Endpoint Testing Teardown
 
 
 *** Variables ***
@@ -180,7 +180,7 @@ Verify Access To Notebook configmaps API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
-    Spawn MinimalPython Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
     ${CM_ENDPOINT_BASIC_USER}=     Set Variable    ${CM_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER}${CM_ENDPOINT_PT2}
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
@@ -196,7 +196,7 @@ Verify Access To Notebook configmaps API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       json_body=${cm_basic_user_body}
     Operation Should Be Allowed
-    Spawn MinimalPython Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
+    Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${CM_ENDPOINT_BASIC_USER_2}=     Set Variable    ${CM_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER_2}${CM_ENDPOINT_PT2}
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
@@ -230,7 +230,7 @@ Verify Access To Notebook secrets API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
-    Spawn MinimalPython Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
     ${SECRET_ENDPOINT_BASIC_USER}=     Set Variable    ${SECRET_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER}${SECRET_ENDPOINT_PT2}
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
@@ -246,7 +246,7 @@ Verify Access To Notebook secrets API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       json_body=${secret_basic_user_body}
     Operation Should Be Allowed
-    Spawn MinimalPython Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
+    Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${SECRET_ENDPOINT_BASIC_USER_2}=     Set Variable    ${SECRET_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER_2}${SECRET_ENDPOINT_PT2}
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
@@ -395,7 +395,7 @@ Verify Access To groups-config API Endpoint
 Endpoint Testing Setup
     [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
     Set Library Search Order    SeleniumLibrary
-    #RHOSi Setup
+    RHOSi Setup
     ${ADMIN_TOKEN}=   Log In As RHODS Admin
     Set Suite Variable    ${ADMIN_TOKEN}
     ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
@@ -423,7 +423,7 @@ Log In As RHODS Basic User
     Close Browser
     [Return]    ${oauth_proxy_cookie}
 
-Spawn MinimalPython Notebook Server
+Spawn Minimal Python Notebook Server
     [Documentation]    Suite Setup
     [Arguments]       ${username}    ${password}
     Launch Dashboard    ocp_user_name=${username}    ocp_user_pw=${password}

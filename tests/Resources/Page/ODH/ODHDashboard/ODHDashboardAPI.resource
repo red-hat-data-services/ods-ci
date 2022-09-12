@@ -12,6 +12,7 @@ Perform Dashboard API Endpoint GET Call
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
     ${response}=    RequestsLibrary.GET  ${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
+    [Return]    ${response}
 
 Perform Dashboard API Endpoint PUT Call
     [Documentation]     Runs a PUT call to the given API endpoint. Result may change based

@@ -4,7 +4,7 @@ Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Suite Setup       Endpoint Testing Setup
-Suite Teardown    Endpoint Testing Teardown
+# Suite Teardown    Endpoint Testing Teardown
 
 
 *** Variables ***
@@ -159,7 +159,7 @@ Verify Access To segment-key API Endpoint
     Operation Should Be Allowed
 
 Verify Access To gpu API Endpoint
-    [Documentation]     Verifies the endpoint "segment-key" works as expected
+    [Documentation]     Verifies the endpoint "gpu" works as expected
     ...                 based on the permissions of the user who query the endpoint
 
     [Tags]    ODS-XYZ
@@ -223,7 +223,7 @@ Verify Access To Notebook configmaps API Endpoint
 Verify Access To Notebook secrets API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
     ...                 based on the permissions of the user who query the endpoint to get
-    ...                 the user configmap map of a notebook server.
+    ...                 the user secret of a notebook server.
     ...                 The syntax to reach this endpoint is:
     ...                 `secrets/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
 
@@ -326,7 +326,7 @@ Verify Access To Dashboard configmaps API Endpoint
 Verify Access To Dashboard secrets API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
     ...                 based on the permissions of the user who query the endpoint
-    ...                 to get a configmap from the Dashboard namespace.
+    ...                 to get a secret from the Dashboard namespace.
     ...                 The syntax to reach this endpoint is:
     ...                 `secrets/<namespace>/<secret_name>`
     [Tags]    ODS-XYZ
@@ -385,9 +385,16 @@ Verify Access To groups-config API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
+    ...       groups
     Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Unauthorized
-    Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
+    ${current_config}=    Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint PUT Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    ...                                       json_body=${current_config.text}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint PUT Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
+    ...                                       json_body=${current_config.text}
     Operation Should Be Allowed
 
 
@@ -395,7 +402,7 @@ Verify Access To groups-config API Endpoint
 Endpoint Testing Setup
     [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
     Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
+    # RHOSi Setup
     ${ADMIN_TOKEN}=   Log In As RHODS Admin
     Set Suite Variable    ${ADMIN_TOKEN}
     ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User

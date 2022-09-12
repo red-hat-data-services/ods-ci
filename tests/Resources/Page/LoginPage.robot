@@ -34,7 +34,9 @@ Select Login Authentication Type
 Login To Openshift
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
     # Give the login prompt time to render after browser opens
-    Wait Until Element is Visible  xpath://div[@class="pf-c-login"]  timeout=15seconds
+    # FIXME: this wastes $timeout seconds every time it's called if 
+    # no login screen appears
+    Wait Until Element is Visible  xpath://div[@class="pf-c-login"]  timeout=10s
     ${select_auth_type} =  Does Login Require Authentication Type
     Run Keyword If  ${select_auth_type}  Select Login Authentication Type  ${ocp_user_auth_type}
     Wait Until Page Contains  Log in to your account
@@ -43,7 +45,7 @@ Login To Openshift
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
     # FIXME: replace this sleep for something more efficient, considering that this method is used for
     # authentication in OpenShift Console, but also RHODS dashboard and other places
-    Sleep  10
+    Sleep  2s
     # FIXME: this only applies to login to OpenShift Console, but this method is used
     # for authentication in RHODS dashboard and other places
     Maybe Skip Tour

@@ -16,7 +16,7 @@ Verify Odh-deployer Checks Cluster Platform Type
     ...       ODS-1316
     ${cluster_platform_type}=    Fetch Cluster Platform Type
     IF    "${cluster_platform_type}" == "OpenStack"
-        ${odhdeployer_logs_content}=    Set Variable    INFO: Deploying on PSI. Creating local database
+        ${odhdeployer_logs_content}=    Set Variable    INFO: Fresh Installation, proceeding normally
     ELSE IF    "${cluster_platform_type}" == "AWS"
         ${odhdeployer_logs_content}=     Set Variable
         ...    INFO: Fresh Installation, proceeding normally

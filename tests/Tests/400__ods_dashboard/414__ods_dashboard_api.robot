@@ -1,11 +1,13 @@
 *** Settings ***
+Documentation     Suite for a basic security test of Dashboard APIs. The tests verifies that user
+...               reach endpoints based on their user permissions
 Library           OpenShiftLibrary
 Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Resource          ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Suite Setup       Endpoint Testing Setup
-# Suite Teardown    Endpoint Testing Teardown
+Suite Teardown    Endpoint Testing Teardown
 
 
 *** Variables ***
@@ -34,7 +36,6 @@ ${CM_ENDPOINT_PT2}=         -envs
 ${CM_ENDPOINT_BODY}=            {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"}}
 ${DUMMY_CM_NAME}=           test-dummy-configmap
 ${CM_DASHBOARD_ENDPOINT}=         api/configmaps/${DASHBOARD_NS}/${DUMMY_CM_NAME}
-# ${CM_DASHBOARD_ENDPOINT}=         api/configmaps/${DASHBOARD_NS}/odh-enabled-applications-config
 ${CM_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"${DASHBOARD_NS}"},"data":{"key":"newvalue"}}
 ${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"redhat-ods-monitoring"},"data":{"key":"newvalue"}}
 ${CM_OUTSIDE_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-monitoring/prometheus
@@ -50,8 +51,8 @@ ${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":
 
 ${GROUPS_CONFIG_ENDPOINT}=        api/groups-config
 
-${IMG_NAME} =            custom-test-image
-${IMG_URL} =             quay.io/thoth-station/s2i-lab-elyra:v0.1.1
+${IMG_NAME}=            custom-test-image
+${IMG_URL}=             quay.io/thoth-station/s2i-lab-elyra:v0.1.1
 ${IMG_DESCRIPTION}=     Testing Only This image is only for illustration purposes, and comes with no support. Do not use.
 &{IMG_SOFTWARE}=        Software1=x.y.z
 &{IMG_PACKAGES}=        elyra=2.2.4    foo-pkg=a.b.c
@@ -84,6 +85,7 @@ ${ROLE_BIND_ENDPOINT_BODY}=      {"kind":"RoleBinding","apiVersion":"rbac.author
 ${APP_TO_REMOVE}=                rhosak
 ${COMPONENTS_ENDPOINT_PT0}=      api/components
 ${COMPONENTS_ENDPOINT_PT1}=      ${COMPONENTS_ENDPOINT_PT0}/remove?appName=${APP_TO_REMOVE}
+
 
 *** Test Cases ***
 Verify Access To cluster-settings API Endpoint
@@ -473,7 +475,6 @@ Verify Access To nb-events API Endpoint
     ...       Security
     ...       test
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
-    # ${NB_PODNAME_BASIC_USER}=   Get User Notebook Pod Name    ${TEST_USER_3.USERNAME}
     ${NB_PODNAME_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER}
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
@@ -481,7 +482,6 @@ Verify Access To nb-events API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
-    # ${NB_PODNAME_BASIC_USER_2}=   Get User Notebook Pod Name    ${TEST_USER_4.USERNAME}
     ${NB_PODNAME_BASIC_USER_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
     ${NB_EVENTS_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER_2}
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
@@ -571,22 +571,7 @@ Verify Access to notebooks API Endpoint
     ...       Tier1
     ...       Security
     ...       test-now
-    # creo pvc per test user 3
-    ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
-    ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
-    ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
-    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                        body=${create_pvc_body}
-    Operation Should Be Allowed
-    # creo NB CR per test user 3
-    ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
-    ${NB_ENDPOINT_BASIC_USER_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER}
-    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
-    ...                                        body=${NB_ENDPOINT_BASIC_USER_BODY}
-    # Operation Should Be Allowed
-    Check Notebook Exist    username=${TEST_USER_3.USERNAME}
-
-    # test GET per test user 3 nb
+    Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER}
     ${NB_ENDPOINT_BASIC_USER_STATUS}=     Set Variable    ${NB_ENDPOINT_BASIC_USER}${NB_ENDPOINT_PT2}
@@ -598,16 +583,7 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_STATUS}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-
-    # creao nb per test user 4 e testo GET
-    ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
-    ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
-    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
-    ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
-    Operation Should Be Forbidden
-    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
-    ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
-    Check Notebook Exist    username=${TEST_USER_4.USERNAME}
+    Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NB_BASIC_USER_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
     ${NB_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER_2}
     ${NB_ENDPOINT_BASIC_USER_2_STATUS}=     Set Variable    ${NB_ENDPOINT_BASIC_USER_2}${NB_ENDPOINT_PT2}
@@ -619,7 +595,15 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    #[Teardown]    Clean Test Notebooks    username=${TEST_USER.USERNAME}
+    ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
+    ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
+    ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
+    Operation Should Be Allowed     accept_code_500=${TRUE}
+    [Teardown]    Close All Notebooks From UI
 
 Verify Access to rolebindings API Endpoint
     [Documentation]     Verifies the endpoint "rolebindings" works as expected
@@ -672,7 +656,7 @@ Verify Access To components API Endpoint
 Endpoint Testing Setup
     [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
     Set Library Search Order    SeleniumLibrary
-    # RHOSi Setup
+    RHOSi Setup
     ${ADMIN_TOKEN}=   Log In As RHODS Admin
     Set Suite Variable    ${ADMIN_TOKEN}
     ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
@@ -775,21 +759,3 @@ Delete Test PVCs
     FOR   ${pvc}    IN  ${pvc_names}
         OpenshiftLibrary.Oc Delete    kind=Pvc    namespace=${NOTEBOOK_NS}    name=${pvc}
     END
-
-Check Notebook Exist
-    [Arguments]     ${username}
-    ${nb_cr_name}=       Get User CR Notebook Name   username=${username}
-    ${nb_pod_name}=      Get User Notebook Pod Name   username=${username}
-    OpenshiftLibrary.Oc Get    kind=Notebook  name=${nb_cr_name}  namespace=rhods-notebooks
-    OpenshiftLibrary.Oc Get    kind=Pod  name=${nb_pod_name}  namespace=rhods-notebooks
-
-Clean Test Notebooks
-    [Arguments]     ${username}
-    Close All Notebooks From UI
-    ${nb_cr_name}=       Get User CR Notebook Name   username=${username}
-    ${nb_pod_name}=      Get User Notebook Pod Name   username=${username}
-    ${PVC_BASIC_USER}=   Get User Notebook PVC Name    username=${username}
-    ${pvcs}=    Create List   ${PVC_BASIC_USER}
-    OpenshiftLibrary.Oc Delete    kind=Notebook  name=${nb_cr_name}  namespace=rhods-notebooks
-    OpenshiftLibrary.Oc Delete    kind=Pod  name=${nb_pod_name}  namespace=rhods-notebooks
-    Delete Test PVCs    pvc_names=${pvcs}

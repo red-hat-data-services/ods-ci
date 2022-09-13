@@ -4,6 +4,12 @@ Library           RequestsLibrary
 Resource          ../../../Common.robot
 
 
+*** Variables ***
+${WARN_MSG_500}=    Accepting HTTP code 500 as "allowed". If the user wouldn't have permissions,
+...                 the expected HTTP code is either 401 or 403. If users gets 500 it might mean
+...                 something is wrong with the payload
+
+
 *** Keywords ***
 Perform Dashboard API Endpoint GET Call
     [Documentation]     Runs a GET call to the given API endpoint. Result may change based
@@ -51,7 +57,14 @@ Perform Dashboard API Endpoint DELETE Call
 
 Operation Should Be Allowed
     [Documentation]     Checks if the API call returns an HTTP code 200 (SUCCESS)
-    Run Keyword And Continue On Failure  Status Should Be  200
+    [Arguments]     ${accept_code_500}=${FALSE}
+    IF  "${accept_code_500}" == "${FALSE}"
+        Run Keyword And Continue On Failure  Status Should Be  200
+    ELSE
+        Run Keyword And Ignore Error           Status Should Be  200
+        Run Keyword And Continue On Failure    Status Should Be  500
+        Log     message=${WARN_MSG_500}   level=WARN
+    END
 
 Operation Should Be Unauthorized
     [Documentation]     Checks if the API call returns an HTTP code 401 (Unauthorized)

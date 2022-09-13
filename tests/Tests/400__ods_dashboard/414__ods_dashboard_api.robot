@@ -60,10 +60,20 @@ ${IMG_ENDPOINT_BODY}=        {"name":"Test-Byon-Image","description":"","package
 ${NB_EVENTS_ENDPOINT_PT0}=      api/nb-events
 ${NB_EVENTS_ENDPOINT_PT1}=      ${NB_EVENTS_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 
-${STATUS_ENDPOINT}=      api/status
+${STATUS_ENDPOINT_PT0}=      api/status
+${STATUS_ENDPOINT_PT1}=      ${STATUS_ENDPOINT_PT0}/redhat-ods-applications/allowedUsers
 
 ${VALIDATE_ISV_ENDPOINT}=       api/validate-isv?appName=anaconda-ce&values={"Anaconda_ce_key":"wrong-key"}
 ${VALIDATE_ISV_RESULT_ENDPOINT}=         api/validate-isv/results?appName=anaconda-ce
+
+${NB_ENDPOINT_PT0}=      api/notebooks
+${NB_ENDPOINT_PT1}=      ${NB_ENDPOINT_PT0}/${NOTEBOOK_NS}/
+${NB_ENDPOINT_PT2}=      /status
+${NB_ENDPOINT_BODY}=      {"apiVersion":"kubeflow.org/v1","kind":"Notebook","metadata":{"labels":{"app":"jupyter-nb-<NB_USERNAME>","opendatahub.io/odh-managed":"true","opendatahub.io/user":"<NB_USERNAME>"},"name":"jupyter-nb-<NB_USERNAME>","namespace":"rhods-notebooks"},"spec":{"template":{"spec":{"enableServiceLinks":false,"containers":[{"image":"image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07","imagePullPolicy":"Always","workingDir":"/opt/app-root/src","name":"jupyter-nb-<NB_USERNAME>","env":[{"name":"JUPYTER_IMAGE","value":"image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07"}],"resources":{"limits":{"cpu":"2","memory":"8Gi"},"requests":{"cpu":"1","memory":"8Gi"}},"volumeMounts":[{"mountPath":"/opt/app-root/src","name":"jupyterhub-nb-<NB_USERNAME>-pvc"}],"ports":[{"name":"notebook-port","containerPort":8888,"protocol":"TCP"}]}],"volumes":[{"name":"jupyterhub-nb-<NB_USERNAME>-pvc","persistentVolumeClaim":{"claimName":"jupyterhub-nb-<NB_USERNAME>-pvc"}}]}}}}
+
+${PVC_ENDPOINT_PT0}=      api/pvc
+${PVC_ENDPOINT_PT1}=      ${PVC_ENDPOINT_PT0}/${NOTEBOOK_NS}/
+${PVC_ENDPOINT_BODY}=     {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"name":"<PVC_NAME>","namespace":"rhods-notebooks"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}},"volumeMode":"Filesystem"},"status":{"phase":"Pending"}}
 
 
 *** Test Cases ***
@@ -234,7 +244,7 @@ Verify Access To Notebook configmaps API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${cm_basic_user_2_body}
     Operation Should Be Allowed
-    [Teardown]     Close All Notebooks
+    [Teardown]     Close All Notebooks From UI
 
 Verify Access To Notebook secrets API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
@@ -284,7 +294,7 @@ Verify Access To Notebook secrets API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${secret_basic_user_2_body}
     Operation Should Be Allowed
-    [Teardown]     Close All Notebooks
+    [Teardown]     Close All Notebooks From UI
 
 Verify Access To Dashboard configmaps API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
@@ -446,30 +456,32 @@ Verify Access To images API Endpoint
 Verify Access To nb-events API Endpoint
     [Documentation]     Verifies the endpoint "nb-events" works as expected
     ...                 based on the permissions of the user who query the endpoint to get
-    ...                 the user configmap map of a notebook server.
+    ...                 the events from user notebook
     ...                 The syntax to reach this endpoint is:
-    ...                 `nb-events/<notebook_namespace>/jupyter-nb-<username_nb>-0`
+    ...                 `nb-events/<notebook_namespace>/jupyter-nb-<username_nb>`
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
-    ...       notebooks
+    ...       test
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
-    ${NB_PODNAME_BASIC_USER}=   Get User Notebook Pod Name    ${TEST_USER_3.USERNAME}
+    # ${NB_PODNAME_BASIC_USER}=   Get User Notebook Pod Name    ${TEST_USER_3.USERNAME}
+    ${NB_PODNAME_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER}
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
-    ${NB_PODNAME_BASIC_USER_2}=   Get User Notebook Pod Name    ${TEST_USER_4.USERNAME}
+    # ${NB_PODNAME_BASIC_USER_2}=   Get User Notebook Pod Name    ${TEST_USER_4.USERNAME}
+    ${NB_PODNAME_BASIC_USER_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
     ${NB_EVENTS_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER_2}
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unauthorized
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    [Teardown]     Close All Notebooks
+    [Teardown]     Close All Notebooks From UI
 
 Verify Access To status API Endpoint
     [Documentation]     Verifies the endpoint "status" works as expected
@@ -477,11 +489,17 @@ Verify Access To status API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
-    Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    ...       test
+    Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
-    Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT}    token=${ADMIN_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    # POST call not clear..TBD
+    Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${EMPTY}    str_to_json=${FALSE}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+    ...                                        body=${EMPTY}    str_to_json=${FALSE}
+    Operation Should Be Allowed
 
 Verify Access To validate-isv API Endpoint
     [Documentation]     Verifies the endpoint "status" works as expected
@@ -489,6 +507,7 @@ Verify Access To validate-isv API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1
     ...       Security
+    ...       test
     Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_RESULT_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -497,6 +516,104 @@ Verify Access To validate-isv API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_RESULT_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
+
+Verify Access To pvc API Endpoint
+    [Documentation]     Verifies the endpoint "pvc" works as expected
+    ...                 based on the permissions of the user who query the endpoint to get/create PVCs
+    ...                 The syntax to reach this endpoint is:
+    ...                 `pvc/<notebook_namespace>/jupyter-nb-<username_nb>`
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    ...       test
+    ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
+    ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
+    ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
+    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${create_pvc_body}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    ${PVC_BASIC_USER_2}=   Get User Notebook PVC Name    ${TEST_USER_4.USERNAME}
+    ${PVC_ENDPOINT_BASIC_USER_2}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER_2}
+    ${create_pvc_body_2}=     Set Username In PVC Payload     username=${PVC_BASIC_USER_2}
+    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${create_pvc_body_2}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        body=${create_pvc_body_2}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
+    [Teardown]    Delete Test PVCs     pvc_names=${test_pvcs}
+
+Verify Access to notebooks API Endpoint
+    [Documentation]     Verifies the endpoint "notebooks" works as expected
+    ...                 based on the permissions of the user who query the endpoint to get
+    ...                 the user notebook CR.
+    ...                 The syntax to reach this endpoint is:
+    ...                 `notebooks/<notebook_namespace>/jupyter-nb-<username_nb>`
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    ...       test-now
+    # creo pvc per test user 3
+    ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
+    ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
+    ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
+    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        body=${create_pvc_body}
+    Operation Should Be Allowed
+    # creo NB CR per test user 3
+    ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER}
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
+    ...                                        body=${NB_ENDPOINT_BASIC_USER_BODY}
+    # Operation Should Be Allowed
+    Check Notebook Exist    username=${TEST_USER_3.USERNAME}
+
+    # test GET per test user 3 nb
+    ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER}
+    ${NB_ENDPOINT_BASIC_USER_STATUS}=     Set Variable    ${NB_ENDPOINT_BASIC_USER}${NB_ENDPOINT_PT2}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_STATUS}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_STATUS}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+
+    # creao nb per test user 4 e testo GET
+    ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
+    ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
+    ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
+    Check Notebook Exist    username=${TEST_USER_4.USERNAME}
+    ${NB_BASIC_USER_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER_2}
+    ${NB_ENDPOINT_BASIC_USER_2_STATUS}=     Set Variable    ${NB_ENDPOINT_BASIC_USER_2}${NB_ENDPOINT_PT2}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_2_STATUS}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    #[Teardown]    Clean Test Notebooks    username=${TEST_USER.USERNAME}
+
+
+
 
 
 *** Keywords ***
@@ -570,7 +687,7 @@ Delete Dummy ConfigMaps
     OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-applications  name=${DUMMY_CM_NAME}
     OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-monitoring  name=${DUMMY_CM_NAME}
 
-Close All Notebooks
+Close All Notebooks From UI
     [Documentation]     Stops all the notebook servers spanwed during a test.
     ...                 It assumes every server has been opened in a new browser
     ${browsers}=    Get Browser Ids
@@ -591,3 +708,36 @@ Set Username In ConfigMap Payload
     ${complete_cm}=     Replace String    ${CM_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
     [Return]    ${complete_cm}
 
+Set Username In PVC Payload
+    [Arguments]     ${username}
+    ${complete_pvc}=     Replace String    ${PVC_ENDPOINT_BODY}    <PVC_NAME>    ${username}
+    [Return]    ${complete_pvc}
+
+Set Username In Notebook Payload
+    [Arguments]     ${notebook_username}
+    ${complete_pvc}=     Replace String    ${NB_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
+    [Return]    ${complete_pvc}
+
+Delete Test PVCs
+    [Arguments]     ${pvc_names}
+    FOR   ${pvc}    IN  ${pvc_names}
+        OpenshiftLibrary.Oc Delete    kind=Pvc    namespace=${NOTEBOOK_NS}    name=${pvc}
+    END
+
+Check Notebook Exist
+    [Arguments]     ${username}
+    ${nb_cr_name}=       Get User CR Notebook Name   username=${username}
+    ${nb_pod_name}=      Get User Notebook Pod Name   username=${username}
+    OpenshiftLibrary.Oc Get    kind=Notebook  name=${nb_cr_name}  namespace=rhods-notebooks
+    OpenshiftLibrary.Oc Get    kind=Pod  name=${nb_pod_name}  namespace=rhods-notebooks
+
+Clean Test Notebooks
+    [Arguments]     ${username}
+    Close All Notebooks From UI
+    ${nb_cr_name}=       Get User CR Notebook Name   username=${username}
+    ${nb_pod_name}=      Get User Notebook Pod Name   username=${username}
+    ${PVC_BASIC_USER}=   Get User Notebook PVC Name    username=${username}
+    ${pvcs}=    Create List   ${PVC_BASIC_USER}
+    OpenshiftLibrary.Oc Delete    kind=Notebook  name=${nb_cr_name}  namespace=rhods-notebooks
+    OpenshiftLibrary.Oc Delete    kind=Pod  name=${nb_pod_name}  namespace=rhods-notebooks
+    Delete Test PVCs    pvc_names=${pvcs}

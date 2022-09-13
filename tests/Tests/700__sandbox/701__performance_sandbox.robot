@@ -32,7 +32,7 @@ Capture And Validate Memory Utilization Of Openshift API Server POD
     [Documentation]  Capture and compare the realtime memory utilization
     ${memory_usage}     Run    kubectl top pod -n ${NAMESPACE} -l ${LABEL_SELECTOR} | awk '{if(NR>1)print $3}'
     ${memory}    Split String    ${memory_usage}   \n
-    IF   len(${memory}) < ${3} or len(${memory}) < ${2}
+    IF   len(${memory}) < ${2}
          FAIL     One or more pods may not be available. Check your cluster
     ELSE
         @{memory_value}    Create List

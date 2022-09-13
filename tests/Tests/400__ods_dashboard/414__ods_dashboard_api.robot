@@ -664,10 +664,17 @@ Verify Access To components API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
 
+test delete
+    [tags]  delete
+    ${PVC_BASIC_USER}=      Set Variable     jupyterhub-nb-ldap-2duser2-pvc
+    ${PVC_BASIC_USER_2}=    Set Variable     jupyterhub-nb-ldap-2duser9-pvc
+    ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
+    Delete Test PVCs     pvc_names=${test_pvcs}
+
 
 *** Keywords ***
 Endpoint Testing Setup
-    [Documentation]     Fetches a bearer token for both a RHODS admin and basic user
+    [Documentation]     Fetches an access token for both a RHODS admin and basic user
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     ${ADMIN_TOKEN}=   Log In As RHODS Admin
@@ -769,6 +776,6 @@ Set Username In Notebook Payload
 
 Delete Test PVCs
     [Arguments]     ${pvc_names}
-    FOR   ${pvc}    IN  ${pvc_names}
-        OpenshiftLibrary.Oc Delete    kind=Pvc    namespace=${NOTEBOOK_NS}    name=${pvc}
+    FOR   ${pvc}    IN  @{pvc_names}
+        OpenshiftLibrary.Oc Delete    kind=PersistentVolumeClaim    namespace=${NOTEBOOK_NS}    name=${pvc}
     END

@@ -81,3 +81,17 @@ Verify Notebook Name And Image Tag
     ${notebook_name} =    Strip String    ${notebook_details}[0]
     Spawned Image Check    image=${notebook_name}
     Should Not Be Equal As Strings    ${notebook_details}[1]    latest    strip_spaces=True
+
+Get Previously Selected Notebook Image Details
+    [Documentation]  Returns image:tag information from the Notebook CR for a user
+    ...    or minimal-gpu:default if the CR doesn't exist (default pre selected image in spawner)
+    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
+    ${user_name} =    Set Variable    jupyter-nb-${safe_username}
+    # The TC using this kw only cares about the image:tag information, let's get that
+    # directly
+    ${user_data} =  Run  oc get notebook ${user_name} -o yaml | yq '.spec.template.spec.containers[0].image' | xargs basename
+    ${notfound} =  Run Keyword And Return Status  Should Be Equal As Strings  ${user_data}  null
+    IF  ${notfound}==True
+      ${user_data} =  Set Variable  minimal-gpu:default
+    END
+    [Return]    ${user_data}

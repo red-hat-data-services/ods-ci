@@ -524,25 +524,6 @@ Get List Of All Available Container Size
     END
     [Return]    ${size}
 
-Get Previously Selected Notebook Image Details
-    [Documentation]  Returns image:tag information from the Notebook CR for a user
-    ...    or minimal-gpu:default if the CR doesn't exist
-    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
-    ${user_name} =    Set Variable    jupyter-nb-${safe_username}
-    # The TC using this kw only cares about the image:tag information, let's get that
-    # directly
-
-    #${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
-    #...    field_selector=metadata.name=${user_name}
-    #@{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
-
-    ${user_data} =  Run  oc get notebook ${user_name} -o yaml | /usr/bin/yq '.spec.template.spec.containers[0].image' | xargs basename
-    ${notfound} =  Run Keyword And Return Status  Should Be Equal As Strings  ${user_data}  null
-    IF  ${notfound}==True
-      ${user_data} =  Set Variable  minimal-gpu:default
-    END
-    [Return]    ${user_data}
-
 Open New Notebook In Jupyterlab Menu
     [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected

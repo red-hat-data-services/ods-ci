@@ -3,6 +3,7 @@ Library           OpenShiftLibrary
 Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
+Resource          ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Suite Setup       Endpoint Testing Setup
 # Suite Teardown    Endpoint Testing Teardown
 
@@ -80,6 +81,9 @@ ${ROLE_BIND_ENDPOINT_PT0}=      api/rolebindings
 ${ROLE_BIND_ENDPOINT_PT1}=      ${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/${NOTEBOOK_NS}-image-pullers
 ${ROLE_BIND_ENDPOINT_BODY}=      {"kind":"RoleBinding","apiVersion":"rbac.authorization.k8s.io/v1","metadata":{"name":"rhods-notebooks-image-pullers-test","namespace":"${DASHBOARD_NS}"},"subjects":[{"kind":"Group","apiGroup":"rbac.authorization.k8s.io","name":"system:serviceaccounts:rhods-notebooks"}],"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"system:image-puller"}}
 
+${APP_TO_REMOVE}=                rhosak
+${COMPONENTS_ENDPOINT_PT0}=      api/components
+${COMPONENTS_ENDPOINT_PT1}=      ${COMPONENTS_ENDPOINT_PT0}/remove?appName=${APP_TO_REMOVE}
 
 *** Test Cases ***
 Verify Access To cluster-settings API Endpoint
@@ -618,7 +622,7 @@ Verify Access to notebooks API Endpoint
     #[Teardown]    Clean Test Notebooks    username=${TEST_USER.USERNAME}
 
 Verify Access to rolebindings API Endpoint
-    [Documentation]     Verifies the endpoint "rolebinding" works as expected
+    [Documentation]     Verifies the endpoint "rolebindings" works as expected
     ...                 based on the permissions of the user who query the endpoint
     ...                 The syntax to reach this endpoint is:
     ...                 `rolebindings/<dashboard_namespace>/<notebook_namespace>-image-pullers`
@@ -644,6 +648,24 @@ Verify Access to rolebindings API Endpoint
     ...                                        body=${ROLE_BIND_ENDPOINT_BODY}
     Operation Should Be Allowed
     [Teardown]   OpenshiftLibrary.Oc Delete    kind=RoleBinding  namespace=${DASHBOARD_NS}  name=rhods-notebooks-image-pullers-test
+
+Verify Access To components API Endpoint
+    [Documentation]     Verifies the endpoint "components" works as expected
+    ...                 based on the permissions of the user who query the endpoint
+    ...                 The syntaxes to reach this endpoint are:
+    ...                 `components/` and `components/remove?appName=<app_to_remove>`
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    ...       remove
+    Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
 
 
 *** Keywords ***

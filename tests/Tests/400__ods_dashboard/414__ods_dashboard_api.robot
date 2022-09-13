@@ -583,6 +583,11 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_STATUS}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
+    ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER}
+    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${NB_ENDPOINT_BASIC_USER_BODY}
+    Operation Should Be Allowed
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NB_BASIC_USER_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
     ${NB_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER_2}
@@ -595,13 +600,21 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER.USERNAME}
-    ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
-    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
+    ${NB_BASIC_USER_2_SAFENAME}=   Get Safe Username    ${TEST_USER_4.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Set Username In Notebook Payload    notebook_username=${NB_BASIC_USER_2_SAFENAME}
+    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
     Operation Should Be Forbidden
-    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
+    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
+    Operation Should Be Allowed
+    ${NOTEBOOK_BASIC_USER_3}=   Get Safe Username    ${TEST_USER.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_3_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER_3}
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
+    ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
+    ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}
     Operation Should Be Allowed     accept_code_500=${TRUE}
     [Teardown]    Close All Notebooks From UI
 

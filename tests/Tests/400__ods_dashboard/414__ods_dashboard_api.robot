@@ -25,25 +25,26 @@ ${SEGMENT_KEY_ENDPOINT}=        api/segment-key
 ${GPU_ENDPOINT}=        api/gpu
 
 ${NOTEBOOK_NS}=          rhods-notebooks
+${DASHBOARD_NS}=         redhat-ods-applications
 ${NOTEBOOK_USERNAME}=    ""
 ${CM_ENDPOINT_PT0}=         api/configmaps
 ${CM_ENDPOINT_PT1}=         ${CM_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${CM_ENDPOINT_PT2}=         -envs
 ${CM_ENDPOINT_BODY}=            {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"}}
 ${DUMMY_CM_NAME}=           test-dummy-configmap
-${CM_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-applications/${DUMMY_CM_NAME}
-# ${CM_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-applications/odh-enabled-applications-config
-${CM_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"redhat-ods-applications"},"data":{"key":"newvalue"}}
+${CM_DASHBOARD_ENDPOINT}=         api/configmaps/${DASHBOARD_NS}/${DUMMY_CM_NAME}
+# ${CM_DASHBOARD_ENDPOINT}=         api/configmaps/${DASHBOARD_NS}/odh-enabled-applications-config
+${CM_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"${DASHBOARD_NS}"},"data":{"key":"newvalue"}}
 ${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"redhat-ods-monitoring"},"data":{"key":"newvalue"}}
 ${CM_OUTSIDE_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-monitoring/prometheus
 ${DUMMY_SECRET_NAME}=           test-dummy-secret
-${SECRET_DASHBOARD_ENDPOINT}=         api/secrets/redhat-ods-applications/${DUMMY_SECRET_NAME}
+${SECRET_DASHBOARD_ENDPOINT}=         api/secrets/${DASHBOARD_NS}/${DUMMY_SECRET_NAME}
 ${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}=         api/secrets/redhat-ods-monitoring/${DUMMY_SECRET_NAME}
 ${SECRET_ENDPOINT_PT0}=         api/secrets
 ${SECRET_ENDPOINT_PT1}=         ${SECRET_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${SECRET_ENDPOINT_PT2}=         -envs
 ${SECRET_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"},"type":"Opaque"}
-${SECRET_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"redhat-ods-applications"},"type":"Opaque"}
+${SECRET_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"${DASHBOARD_NS}"},"type":"Opaque"}
 ${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"redhat-ods-monitoring"},"type":"Opaque"}
 
 ${GROUPS_CONFIG_ENDPOINT}=        api/groups-config
@@ -61,7 +62,7 @@ ${NB_EVENTS_ENDPOINT_PT0}=      api/nb-events
 ${NB_EVENTS_ENDPOINT_PT1}=      ${NB_EVENTS_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 
 ${STATUS_ENDPOINT_PT0}=      api/status
-${STATUS_ENDPOINT_PT1}=      ${STATUS_ENDPOINT_PT0}/redhat-ods-applications/allowedUsers
+${STATUS_ENDPOINT_PT1}=      ${STATUS_ENDPOINT_PT0}/${DASHBOARD_NS}/allowedUsers
 
 ${VALIDATE_ISV_ENDPOINT}=       api/validate-isv?appName=anaconda-ce&values={"Anaconda_ce_key":"wrong-key"}
 ${VALIDATE_ISV_RESULT_ENDPOINT}=         api/validate-isv/results?appName=anaconda-ce
@@ -69,11 +70,15 @@ ${VALIDATE_ISV_RESULT_ENDPOINT}=         api/validate-isv/results?appName=anacon
 ${NB_ENDPOINT_PT0}=      api/notebooks
 ${NB_ENDPOINT_PT1}=      ${NB_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 ${NB_ENDPOINT_PT2}=      /status
-${NB_ENDPOINT_BODY}=      {"apiVersion":"kubeflow.org/v1","kind":"Notebook","metadata":{"labels":{"app":"jupyter-nb-<NB_USERNAME>","opendatahub.io/odh-managed":"true","opendatahub.io/user":"<NB_USERNAME>"},"name":"jupyter-nb-<NB_USERNAME>","namespace":"rhods-notebooks"},"spec":{"template":{"spec":{"enableServiceLinks":false,"containers":[{"image":"image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07","imagePullPolicy":"Always","workingDir":"/opt/app-root/src","name":"jupyter-nb-<NB_USERNAME>","env":[{"name":"JUPYTER_IMAGE","value":"image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07"}],"resources":{"limits":{"cpu":"2","memory":"8Gi"},"requests":{"cpu":"1","memory":"8Gi"}},"volumeMounts":[{"mountPath":"/opt/app-root/src","name":"jupyterhub-nb-<NB_USERNAME>-pvc"}],"ports":[{"name":"notebook-port","containerPort":8888,"protocol":"TCP"}]}],"volumes":[{"name":"jupyterhub-nb-<NB_USERNAME>-pvc","persistentVolumeClaim":{"claimName":"jupyterhub-nb-<NB_USERNAME>-pvc"}}]}}}}
+${NB_ENDPOINT_BODY}=      {"apiVersion":"kubeflow.org/v1","kind":"Notebook","metadata":{"labels":{"app":"jupyter-nb-<NB_USERNAME>","opendatahub.io/odh-managed":"true","opendatahub.io/user":"<NB_USERNAME>"},"name":"jupyter-nb-<NB_USERNAME>","namespace":"rhods-notebooks"},"spec":{"template":{"spec":{"enableServiceLinks":false,"containers":[{"image":"image-registry.openshift-image-registry.svc:5000/${DASHBOARD_NS}/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07","imagePullPolicy":"Always","workingDir":"/opt/app-root/src","name":"jupyter-nb-<NB_USERNAME>","env":[{"name":"JUPYTER_IMAGE","value":"image-registry.openshift-image-registry.svc:5000/${DASHBOARD_NS}/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07"}],"resources":{"limits":{"cpu":"2","memory":"8Gi"},"requests":{"cpu":"1","memory":"8Gi"}},"volumeMounts":[{"mountPath":"/opt/app-root/src","name":"jupyterhub-nb-<NB_USERNAME>-pvc"}],"ports":[{"name":"notebook-port","containerPort":8888,"protocol":"TCP"}]}],"volumes":[{"name":"jupyterhub-nb-<NB_USERNAME>-pvc","persistentVolumeClaim":{"claimName":"jupyterhub-nb-<NB_USERNAME>-pvc"}}]}}}}
 
 ${PVC_ENDPOINT_PT0}=      api/pvc
 ${PVC_ENDPOINT_PT1}=      ${PVC_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 ${PVC_ENDPOINT_BODY}=     {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"name":"<PVC_NAME>","namespace":"rhods-notebooks"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}},"volumeMode":"Filesystem"},"status":{"phase":"Pending"}}
+
+${ROLE_BIND_ENDPOINT_PT0}=      api/rolebindings
+${ROLE_BIND_ENDPOINT_PT1}=      ${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/${NOTEBOOK_NS}-image-pullers
+${ROLE_BIND_ENDPOINT_BODY}=      {"kind":"RoleBinding","apiVersion":"rbac.authorization.k8s.io/v1","metadata":{"name":"rhods-notebooks-image-pullers-test","namespace":"${DASHBOARD_NS}"},"subjects":[{"kind":"Group","apiGroup":"rbac.authorization.k8s.io","name":"system:serviceaccounts:rhods-notebooks"}],"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"system:image-puller"}}
 
 
 *** Test Cases ***
@@ -612,8 +617,33 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Allowed
     #[Teardown]    Clean Test Notebooks    username=${TEST_USER.USERNAME}
 
-
-
+Verify Access to rolebindings API Endpoint
+    [Documentation]     Verifies the endpoint "rolebinding" works as expected
+    ...                 based on the permissions of the user who query the endpoint
+    ...                 The syntax to reach this endpoint is:
+    ...                 `rolebindings/<dashboard_namespace>/<notebook_namespace>-image-pullers`
+    [Tags]    ODS-XYZ
+    ...       Tier1
+    ...       Security
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${NOTEBOOK_NS}/    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${NOTEBOOK_NS}/    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint POST Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${ROLE_BIND_ENDPOINT_BODY}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        body=${ROLE_BIND_ENDPOINT_BODY}
+    Operation Should Be Allowed
+    [Teardown]   OpenshiftLibrary.Oc Delete    kind=RoleBinding  namespace=${DASHBOARD_NS}  name=rhods-notebooks-image-pullers-test
 
 
 *** Keywords ***
@@ -659,32 +689,32 @@ Spawn Minimal Python Notebook Server
 
 Create A Dummy Secret In Dashboard Namespace
     [Documentation]     Creates a dummy secret to use in tests to avoid getting sensitive secrets
-    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=redhat-ods-applications   src={"data": {"secret_key": "super_dummy_secret"}}
-    Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n redhat-ods-applications
+    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=${DASHBOARD_NS}   src={"data": {"secret_key": "super_dummy_secret"}}
+    Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n ${DASHBOARD_NS}
 
 Create A Dummy Secret Outside Dashboard Namespace
     [Documentation]     Creates a dummy secret ouside dashboard namespace to use in tests to avoid getting sensitive secrets
-    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=redhat-ods-applications   src={"data": {"secret_key": "super_dummy_secret"}}
+    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=${DASHBOARD_NS}   src={"data": {"secret_key": "super_dummy_secret"}}
     Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n redhat-ods-monitoring
 
 Create A Dummy ConfigMap In Dashboard Namespace
     [Documentation]     Creates a dummy secret to use in tests to avoid getting sensitive secrets
-    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=redhat-ods-applications   src={"data": {"secret_key": "super_dummy_secret"}}
-    Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n redhat-ods-applications
+    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=${DASHBOARD_NS}   src={"data": {"secret_key": "super_dummy_secret"}}
+    Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n ${DASHBOARD_NS}
 
 Create A Dummy ConfigMap Outside Dashboard Namespace
     [Documentation]     Creates a dummy secret ouside dashboard namespace to use in tests to avoid getting sensitive secrets
-    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=redhat-ods-applications   src={"data": {"secret_key": "super_dummy_secret"}}
+    # OpenshiftLibrary.Oc Create      kind=Secret    namespace=${DASHBOARD_NS}   src={"data": {"secret_key": "super_dummy_secret"}}
     Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n redhat-ods-monitoring
 
 Delete Dummy Secrets
     [Documentation]     Deletes the dummy secret created during tests
-    OpenshiftLibrary.Oc Delete    kind=Secret  namespace=redhat-ods-applications  name=${DUMMY_SECRET_NAME}
+    OpenshiftLibrary.Oc Delete    kind=Secret  namespace=${DASHBOARD_NS}  name=${DUMMY_SECRET_NAME}
     OpenshiftLibrary.Oc Delete    kind=Secret  namespace=redhat-ods-monitoring  name=${DUMMY_SECRET_NAME}
 
 Delete Dummy ConfigMaps
     [Documentation]     Deletes the dummy secret created during tests
-    OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-applications  name=${DUMMY_CM_NAME}
+    OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=${DASHBOARD_NS}  name=${DUMMY_CM_NAME}
     OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-monitoring  name=${DUMMY_CM_NAME}
 
 Close All Notebooks From UI

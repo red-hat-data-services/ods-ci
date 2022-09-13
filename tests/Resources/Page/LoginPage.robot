@@ -33,9 +33,15 @@ Select Login Authentication Type
 
 Login To Openshift
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-    # Give the login prompt time to render after browser opens
-    # FIXME: this wastes $timeout seconds every time it's called if 
-    # no login screen appears
+    # Check if we are in the Openshift auth page
+    ${current_url} =  Get Location
+    ${domain} =  Fetch From Left  string=${current_url}  marker=.
+    ${should_login} =  Run Keyword And Return Status  Should Be Equal As Strings
+    ...    ${domain}    https://oauth-openshift
+    IF ${should_login}==False
+        Return From Keyword
+    END
+    # If here we need to login
     Wait Until Element is Visible  xpath://div[@class="pf-c-login"]  timeout=10s
     ${select_auth_type} =  Does Login Require Authentication Type
     Run Keyword If  ${select_auth_type}  Select Login Authentication Type  ${ocp_user_auth_type}

@@ -8,7 +8,7 @@ Library          String
 
 ***Variables***
 ${cluster_type}          OSD
-${operator_version}      latest
+${operator_version}      ${EMPTY}
 ${RHODS_INSTALL_REPO}    None
 *** Tasks ***
 Can Install RHODS Operator

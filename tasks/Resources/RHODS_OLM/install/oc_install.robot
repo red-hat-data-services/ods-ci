@@ -27,8 +27,8 @@ Install RHODS
               Should Be Equal As Integers	${return_code}	 0
       END
       ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./rhods install   #robocop:disable
-      Should Be Equal As Integers	${return_code}	 0
       Log    ${output}
+      Should Be Equal As Integers	${return_code}	 0  msg=Error detected while installing RHODS
   ELSE
        FAIL   Provided cluster type is not supported, Kindly check and provide correct cluster type.
   END

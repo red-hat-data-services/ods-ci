@@ -54,18 +54,10 @@ RHODS Performance Result Validation
 
 Run Performance Test On RHODS Operator
     [Documentation]    Perform toolchain-e2e sandbox performance test on rhods-operator component
-    ${PROC} =  Start Process   cd ${EXECDIR}/toolchain-e2e/ && ${PERF_Code} >${EXECDIR}/log.txt  shell=True   alias=perf  #robocop:disable
-    FOR    ${counter}    IN RANGE    21000
-           ${result}   Wait For Process   perf     timeout=10 secs
-           ${status}   Is Process Running    perf
-           IF    ${status} == True
-                Run Keyword And Warn On Failure    Should Be Equal  ${result}  ${NONE}
-                Capture And Validate Memory Utilization Of Openshift API Server POD
-                Sleep  120s
-           ELSE
-                Exit For Loop
-           END
-    END
+    ${return_code}    ${output}    Run And Return Rc And Output    cd ${EXECDIR}/toolchain-e2e/ && ${PERF_Code}    #robocop:disable
+    Should Be Equal As Integers	 ${return_code}	 0
+    Create File    ${EXECDIR}/log.txt        ${output}
+    Capture And Validate Memory Utilization Of Openshift API Server POD
 
 Verify Sandbox Toolchain Data
     [Documentation]    Compare the memory utilization of kube api server pod

@@ -6,6 +6,7 @@ Run AWS Configuration In Hive
     [Arguments]    &{infrastructure_configurations}
     Oc Apply    kind=List    src=tasks/Resources/Provisioning/Hive/AWS/aws-cluster.yaml
     ...    template_data=${infrastructure_configurations}
+    Sleep    60
     ${namespace} =    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations}[hive_cluster_name]
     Log    ${namespace[0]['metadata']['name']}    console=True
     ${pod} =    Oc Get    kind=Pod    namespace=${namespace[0]['metadata']['name']}
@@ -15,8 +16,6 @@ Run AWS Configuration In Hive
 
 Wait Until Cluster Is Provisioned
     [Arguments]    ${pod_name}    ${namespace}
-    Log    ${pod_name}    console=True
-    Log    ${namespace}    console=True
     ${installation_log} =    Oc Get Pod Logs    name=${pod_name}    container=hive    namespace=${namespace}
     Should Contain    ${installation_log}    install completed successfully
 

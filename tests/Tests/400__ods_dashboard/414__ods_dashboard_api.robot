@@ -207,6 +207,40 @@ Verify Access To gpu API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${GPU_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
 
+Verify Access To pvc API Endpoint
+    [Documentation]     Verifies the endpoint "pvc" works as expected
+    ...                 based on the permissions of the users who query the endpoint to get/create PVCs
+    ...                 The syntax to reach this endpoint is:
+    ...                 `pvc/<notebook_namespace>/jupyter-nb-<username_nb>`
+    [Tags]    ODS-1728
+    ...       Tier1
+    ...       Security
+    ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
+    ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
+    ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
+    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${create_pvc_body}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    ${PVC_BASIC_USER_2}=   Get User Notebook PVC Name    ${TEST_USER_4.USERNAME}
+    ${PVC_ENDPOINT_BASIC_USER_2}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER_2}
+    ${create_pvc_body_2}=     Set Username In PVC Payload     username=${PVC_BASIC_USER_2}
+    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${create_pvc_body_2}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        body=${create_pvc_body_2}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
+    [Teardown]    Delete Test PVCs     pvc_names=${test_pvcs}
+
 Verify Access To Notebook configmaps API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
     ...                 based on the permissions of the users who query the endpoint to get
@@ -520,40 +554,6 @@ Verify Access To validate-isv API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_RESULT_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
-
-Verify Access To pvc API Endpoint
-    [Documentation]     Verifies the endpoint "pvc" works as expected
-    ...                 based on the permissions of the users who query the endpoint to get/create PVCs
-    ...                 The syntax to reach this endpoint is:
-    ...                 `pvc/<notebook_namespace>/jupyter-nb-<username_nb>`
-    [Tags]    ODS-1728
-    ...       Tier1
-    ...       Security
-    ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
-    ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
-    ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
-    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                        body=${create_pvc_body}
-    Operation Should Be Allowed
-    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Allowed
-    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
-    ${PVC_BASIC_USER_2}=   Get User Notebook PVC Name    ${TEST_USER_4.USERNAME}
-    ${PVC_ENDPOINT_BASIC_USER_2}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER_2}
-    ${create_pvc_body_2}=     Set Username In PVC Payload     username=${PVC_BASIC_USER_2}
-    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                        body=${create_pvc_body_2}
-    Operation Should Be Forbidden
-    Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                        body=${create_pvc_body_2}
-    Operation Should Be Allowed
-    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
-    Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
-    ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
-    [Teardown]    Delete Test PVCs     pvc_names=${test_pvcs}
 
 Verify Access to notebooks API Endpoint
     [Documentation]     Verifies the endpoint "notebooks" works as expected

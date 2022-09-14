@@ -609,7 +609,7 @@ Verify Access to notebooks API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}
     Operation Should Be Allowed     accept_code_500=${TRUE}
-    [Teardown]    Close All Notebooks From UI
+    [Teardown]    Delete Test Notebooks CRs From CLI
 
 Verify Access to rolebindings API Endpoint
     [Documentation]     Verifies the endpoint "rolebindings" works as expected
@@ -736,6 +736,18 @@ Close All Notebooks From UI
         Switch Browser    ${browser_id}
         Stop JupyterLab Notebook Server
         Capture Page Screenshot     notebook-${browser_id}.png
+    END
+    Close All Browsers
+
+Delete Test Notebooks CRs From CLI
+    [Documentation]     Stops all the notebook servers spanwed during a test by
+    ...                 deleting their CRs. At the end it closes any opened browsers
+    ${CR_1}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
+    ${CR_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
+    ${CR_3}=   Get User CR Notebook Name    ${TEST_USER.USERNAME}
+    ${test_crs}=   Create List     ${CR_1}   ${CR_2}    ${CR_3}
+    FOR   ${nb_cr}    IN  @{test_crs}
+        OpenshiftLibrary.Oc Delete    kind=Notebook    namespace=${NOTEBOOK_NS}    name=${nb_cr}
     END
     Close All Browsers
 

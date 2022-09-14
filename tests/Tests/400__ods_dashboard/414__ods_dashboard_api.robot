@@ -90,8 +90,8 @@ ${COMPONENTS_ENDPOINT_PT1}=      ${COMPONENTS_ENDPOINT_PT0}/remove?appName=${APP
 *** Test Cases ***
 Verify Access To cluster-settings API Endpoint
     [Documentation]     Verifies the endpoint "cluster-settings" works as expected
-    ...                 based on the permissions of the user who query the endpoint
-    [Tags]    ODS-XYZ
+    ...                 based on the permissions of the users who query the endpoint
+    [Tags]    ODS-1709
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${CLUSTER_SETTINGS_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -107,9 +107,9 @@ Verify Access To cluster-settings API Endpoint
 
 Verify Access To builds API Endpoint
     [Documentation]     Verifies the endpoint "builds" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1711
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${BUILDS_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -119,9 +119,9 @@ Verify Access To builds API Endpoint
 
 Verify Access To config API Endpoint
     [Documentation]     Verifies the endpoint "config" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1712
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -137,9 +137,9 @@ Verify Access To config API Endpoint
 
 Verify Access To console-links API Endpoint
     [Documentation]     Verifies the endpoint "console-links" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1713
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${CONSOLE_LINKS_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -151,7 +151,7 @@ Verify Access To docs API Endpoint
     [Documentation]     Verifies the endpoint "docs" works as expected
     ...                 based on the permissions of the user who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1714
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${DOCS_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -161,9 +161,9 @@ Verify Access To docs API Endpoint
 
 Verify Access To getting-started API Endpoint
     [Documentation]     Verifies the endpoint "getting_started" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1715
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${GETTING_STARTED_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -173,9 +173,9 @@ Verify Access To getting-started API Endpoint
 
 Verify Access To quickstarts API Endpoint
     [Documentation]     Verifies the endpoint "quickstarts" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1716
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${QUICKSTARTS_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -185,9 +185,9 @@ Verify Access To quickstarts API Endpoint
 
 Verify Access To segment-key API Endpoint
     [Documentation]     Verifies the endpoint "segment-key" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1717
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${SEGMENT_KEY_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -197,9 +197,9 @@ Verify Access To segment-key API Endpoint
 
 Verify Access To gpu API Endpoint
     [Documentation]     Verifies the endpoint "gpu" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1718
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${GPU_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -209,12 +209,12 @@ Verify Access To gpu API Endpoint
 
 Verify Access To Notebook configmaps API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
-    ...                 based on the permissions of the user who query the endpoint to get
+    ...                 based on the permissions of the users who query the endpoint to get
     ...                 the user configmap map of a notebook server.
     ...                 The syntax to reach this endpoint is:
     ...                 `configmaps/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1719
     ...       Tier1
     ...       Security
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
@@ -259,12 +259,12 @@ Verify Access To Notebook configmaps API Endpoint
 
 Verify Access To Notebook secrets API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
-    ...                 based on the permissions of the user who query the endpoint to get
+    ...                 based on the permissions of the users who query the endpoint to get
     ...                 the user secret of a notebook server.
     ...                 The syntax to reach this endpoint is:
     ...                 `secrets/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1720
     ...       Tier1
     ...       Security
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
@@ -309,11 +309,11 @@ Verify Access To Notebook secrets API Endpoint
 
 Verify Access To Dashboard configmaps API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
     ...                 to get a configmap from the Dashboard namespace.
     ...                 The syntax to reach this endpoint is:
     ...                 `configmaps/<dashboard_namespace>/<configmap_name>`
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1722
     ...       Tier1
     ...       Security
     Create A Dummy ConfigMap In Dashboard Namespace
@@ -362,11 +362,11 @@ Verify Access To Dashboard configmaps API Endpoint
 
 Verify Access To Dashboard secrets API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
     ...                 to get a secret from the Dashboard namespace.
     ...                 The syntax to reach this endpoint is:
     ...                 `secrets/<namespace>/<secret_name>`
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1721
     ...       Tier1
     ...       Security
     Create A Dummy Secret In Dashboard Namespace
@@ -417,12 +417,11 @@ Verify Access To Dashboard secrets API Endpoint
 
 Verify Access To groups-config API Endpoint
     [Documentation]     Verifies the endpoint "groups-config" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1723
     ...       Tier1
     ...       Security
-    ...       groups
     Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Unauthorized
     ${current_config}=    Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
@@ -436,12 +435,11 @@ Verify Access To groups-config API Endpoint
 
 Verify Access To images API Endpoint
     [Documentation]     Verifies the endpoint "images" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
 
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1724
     ...       Tier1
     ...       Security
-    ...       images
     Perform Dashboard API Endpoint POST Call   endpoint=${IMG_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${IMG_ENDPOINT_BODY}
     Operation Should Be Unauthorized
@@ -466,14 +464,13 @@ Verify Access To images API Endpoint
 
 Verify Access To nb-events API Endpoint
     [Documentation]     Verifies the endpoint "nb-events" works as expected
-    ...                 based on the permissions of the user who query the endpoint to get
+    ...                 based on the permissions of the users who query the endpoint to get
     ...                 the events from user notebook
     ...                 The syntax to reach this endpoint is:
     ...                 `nb-events/<notebook_namespace>/jupyter-nb-<username_nb>`
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1725
     ...       Tier1
     ...       Security
-    ...       test
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_PODNAME_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER}
@@ -494,11 +491,10 @@ Verify Access To nb-events API Endpoint
 
 Verify Access To status API Endpoint
     [Documentation]     Verifies the endpoint "status" works as expected
-    ...                 based on the permissions of the user
-    [Tags]    ODS-XYZ
+    ...                 based on the permissions of the users
+    [Tags]    ODS-1726
     ...       Tier1
     ...       Security
-    ...       test
     Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
@@ -511,12 +507,11 @@ Verify Access To status API Endpoint
     Operation Should Be Allowed
 
 Verify Access To validate-isv API Endpoint
-    [Documentation]     Verifies the endpoint "status" works as expected
-    ...                 based on the permissions of the user
-    [Tags]    ODS-XYZ
+    [Documentation]     Verifies the endpoint "validate-isv" works as expected
+    ...                 based on the permissions of the users
+    [Tags]    ODS-1727
     ...       Tier1
     ...       Security
-    ...       test
     Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${VALIDATE_ISV_RESULT_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -528,13 +523,12 @@ Verify Access To validate-isv API Endpoint
 
 Verify Access To pvc API Endpoint
     [Documentation]     Verifies the endpoint "pvc" works as expected
-    ...                 based on the permissions of the user who query the endpoint to get/create PVCs
+    ...                 based on the permissions of the users who query the endpoint to get/create PVCs
     ...                 The syntax to reach this endpoint is:
     ...                 `pvc/<notebook_namespace>/jupyter-nb-<username_nb>`
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1728
     ...       Tier1
     ...       Security
-    ...       test
     ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
     ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
     ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
@@ -563,14 +557,13 @@ Verify Access To pvc API Endpoint
 
 Verify Access to notebooks API Endpoint
     [Documentation]     Verifies the endpoint "notebooks" works as expected
-    ...                 based on the permissions of the user who query the endpoint to get
+    ...                 based on the permissions of the users who query the endpoint to get
     ...                 the user notebook CR.
     ...                 The syntax to reach this endpoint is:
     ...                 `notebooks/<notebook_namespace>/jupyter-nb-<username_nb>`
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1729
     ...       Tier1
     ...       Security
-    ...       test-now
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER}
@@ -620,10 +613,10 @@ Verify Access to notebooks API Endpoint
 
 Verify Access to rolebindings API Endpoint
     [Documentation]     Verifies the endpoint "rolebindings" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
     ...                 The syntax to reach this endpoint is:
     ...                 `rolebindings/<dashboard_namespace>/<notebook_namespace>-image-pullers`
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1730
     ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
@@ -648,13 +641,12 @@ Verify Access to rolebindings API Endpoint
 
 Verify Access To components API Endpoint
     [Documentation]     Verifies the endpoint "components" works as expected
-    ...                 based on the permissions of the user who query the endpoint
+    ...                 based on the permissions of the users who query the endpoint
     ...                 The syntaxes to reach this endpoint are:
     ...                 `components/` and `components/remove?appName=<app_to_remove>`
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1731
     ...       Tier1
     ...       Security
-    ...       remove
     Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
@@ -663,13 +655,6 @@ Verify Access To components API Endpoint
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-
-test delete
-    [tags]  delete
-    ${PVC_BASIC_USER}=      Set Variable     jupyterhub-nb-ldap-2duser2-pvc
-    ${PVC_BASIC_USER_2}=    Set Variable     jupyterhub-nb-ldap-2duser9-pvc
-    ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
-    Delete Test PVCs     pvc_names=${test_pvcs}
 
 
 *** Keywords ***
@@ -755,26 +740,31 @@ Close All Notebooks From UI
     Close All Browsers
 
 Set Username In Secret Payload
+    [Documentation]     Fill in the json body for creating/updating a Secrets with the username
     [Arguments]     ${notebook_username}
     ${complete_secret}=     Replace String    ${SECRET_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
     [Return]    ${complete_secret}
 
 Set Username In ConfigMap Payload
+    [Documentation]     Fill in the json body for creating/updating a ConfigMaps with the username
     [Arguments]     ${notebook_username}
     ${complete_cm}=     Replace String    ${CM_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
     [Return]    ${complete_cm}
 
 Set Username In PVC Payload
+    [Documentation]     Fill in the json body for creating/updating a PVCs with the username
     [Arguments]     ${username}
     ${complete_pvc}=     Replace String    ${PVC_ENDPOINT_BODY}    <PVC_NAME>    ${username}
     [Return]    ${complete_pvc}
 
 Set Username In Notebook Payload
+    [Documentation]     Fill in the json body for creating/updating a Notebook with the username
     [Arguments]     ${notebook_username}
     ${complete_pvc}=     Replace String    ${NB_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
     [Return]    ${complete_pvc}
 
 Delete Test PVCs
+    [Documentation]     Delets the PVCs received as arguments
     [Arguments]     ${pvc_names}
     FOR   ${pvc}    IN  @{pvc_names}
         OpenshiftLibrary.Oc Delete    kind=PersistentVolumeClaim    namespace=${NOTEBOOK_NS}    name=${pvc}

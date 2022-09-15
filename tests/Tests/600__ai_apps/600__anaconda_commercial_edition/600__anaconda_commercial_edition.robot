@@ -82,7 +82,7 @@ Verify User Is Able to Activate Anaconda Professional
   Verify Git Plugin
   Run Cell And Check Output    !conda token set ${ANACONDA_CE.ACTIVATION_KEY}    ${TOKEN_VAL_SUCCESS_MSG}
   Capture Page Screenshot  anaconda_token_val_cell.png
-  Add And Run JupyterLab Code Cell  !conda install -y numpy
+  Add and Run JupyterLab Code Cell in Active Notebook      !conda install -y numpy
   Wait Until JupyterLab Code Cell Is Not Active
   Run Cell And Check For Errors  import numpy as np
   Capture Page Screenshot  conda_lib_install_result.png

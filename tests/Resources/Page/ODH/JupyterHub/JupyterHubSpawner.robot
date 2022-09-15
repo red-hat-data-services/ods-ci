@@ -166,16 +166,16 @@ Spawn Notebook
                     ELSE
                         # If modal is visible and spawn hasn't failed, continue
                         # execution and let rest of keyword deal with the timeout
-                        Sleep 1s
+                        Sleep  1s
                         Capture Page Screenshot
                     END
                 END
-            ELIF  ${control_panel_visible}==True
+            ELSE IF  ${control_panel_visible}==True
                 # If the user has been redirected to the control panel, 
                 # move to the server and continue execution
                 Click Button    Return to server
                 Return From Keyword
-            ELIF  ${JL_Visible}==True
+            ELSE IF  ${JL_Visible}==True
                 # We are in JL, return and let `Spawn Notebook With Arguments`
                 # deal with it
                 Return From Keyword

@@ -60,10 +60,13 @@ Verify A Default Image Is Provided And Starts Successfully
     Clean Up Server
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
-    @{user_data} =    Get Previously Selected Notebook Image Details
+    ${user_data} =    Get Previously Selected Notebook Image Details
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook
-    Wait For JupyterLab Splash Screen  timeout=30
+    Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    ${authorization_required} =  Is Service Account Authorization Required
+    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    Run Keyword And Continue On Failure  Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Open New Notebook In Jupyterlab Menu
     Verify Notebook Name And Image Tag  user_data=${user_data}
     ${has_spawn_failed} =    Has Spawn Failed
@@ -74,7 +77,21 @@ Verify A Default Image Is Provided And Starts Successfully
 Verify Notebook Name And Image Tag
     [Documentation]    Verifies that expected notebook is spawned and image tag is not latest
     [Arguments]    ${user_data}
-    @{notebook_details} =    Split String    ${userdata}[1]    :
-    ${notebook_name} =    Strip String    ${notebook_details}[1]
+    @{notebook_details} =    Split String    ${userdata}    :
+    ${notebook_name} =    Strip String    ${notebook_details}[0]
     Spawned Image Check    image=${notebook_name}
-    Should Not Be Equal As Strings    ${notebook_details}[2]    latest    strip_spaces=True
+    Should Not Be Equal As Strings    ${notebook_details}[1]    latest    strip_spaces=True
+
+Get Previously Selected Notebook Image Details
+    [Documentation]  Returns image:tag information from the Notebook CR for a user
+    ...    or minimal-gpu:default if the CR doesn't exist (default pre selected image in spawner)
+    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
+    ${user_name} =    Set Variable    jupyter-nb-${safe_username}
+    # The TC using this kw only cares about the image:tag information, let's get that
+    # directly
+    ${user_data} =  Run  oc get notebook ${user_name} -o yaml | yq '.spec.template.spec.containers[0].image' | xargs basename
+    ${notfound} =  Run Keyword And Return Status  Should Be Equal As Strings  ${user_data}  null
+    IF  ${notfound}==True
+      ${user_data} =  Set Variable  minimal-gpu:default
+    END
+    [Return]    ${user_data}

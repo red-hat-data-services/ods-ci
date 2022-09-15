@@ -152,7 +152,9 @@ Skip If RHODS Version Greater Or Equal Than
     END
 
 Get Domain From Current URL
-    [Documentation]    Gets the lowest level domain from the current URL
+    [Documentation]    Gets the lowest level domain from the current URL (i.e. everything before the first dot in the URL)
+    ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console
+    ...    e.g. https://rhods-dashboard-redhat-ods-applications.apps.<cluster>.rhods.ccitredhat.com/ -> https://rhods-dashboard-redhat-ods-applications
     ${current_url} =    Get Location
     ${domain} =    Fetch From Left    string=${current_url}    marker=.
     [Return]    ${domain}

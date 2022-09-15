@@ -609,7 +609,7 @@ Verify Access to notebooks API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}
     Operation Should Be Allowed     accept_code_500=${TRUE}
-    [Teardown]    Delete Test Notebooks CRs From CLI
+    [Teardown]    Delete Test Notebooks CRs And PVCs From CLI
 
 Verify Access to rolebindings API Endpoint
     [Documentation]     Verifies the endpoint "rolebindings" works as expected
@@ -739,7 +739,7 @@ Close All Notebooks From UI
     END
     Close All Browsers
 
-Delete Test Notebooks CRs From CLI
+Delete Test Notebooks CRs And PVCs From CLI
     [Documentation]     Stops all the notebook servers spanwed during a test by
     ...                 deleting their CRs. At the end it closes any opened browsers
     ${CR_1}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
@@ -750,6 +750,10 @@ Delete Test Notebooks CRs From CLI
         OpenshiftLibrary.Oc Delete    kind=Notebook    namespace=${NOTEBOOK_NS}    name=${nb_cr}
     END
     Close All Browsers
+    ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
+    ${PVC_BASIC_USER_2}=   Get User Notebook PVC Name    ${TEST_USER_4.USERNAME}
+    ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
+    Delete Test PVCs     pvc_names=${test_pvcs}
 
 Set Username In Secret Payload
     [Documentation]     Fill in the json body for creating/updating a Secrets with the username

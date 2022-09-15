@@ -1,5 +1,6 @@
 *** Settings ***
 Resource  OCPDashboard/OCPDashboard.resource
+Resource  ../Common.robot
 Library   DebugLibrary
 Library   JupyterLibrary
 
@@ -34,11 +35,8 @@ Select Login Authentication Type
 Login To Openshift
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
     # Check if we are in the Openshift auth page
-    ${current_url} =  Get Location
-    ${domain} =  Fetch From Left  string=${current_url}  marker=.
-    ${should_login} =  Run Keyword And Return Status  Should Be Equal As Strings
-    ...    ${domain}    https://oauth-openshift
-    IF ${should_login}==False
+    ${should_login} =    Is Current Domain Equal To    https://oauth-openshift
+    IF  ${should_login}==False
         Return From Keyword
     END
     # If here we need to login
@@ -51,7 +49,5 @@ Login To Openshift
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
     # FIXME: replace this sleep for something more efficient, considering that this method is used for
     # authentication in OpenShift Console, but also RHODS dashboard and other places
-    Sleep  2s
-    # FIXME: this only applies to login to OpenShift Console, but this method is used
-    # for authentication in RHODS dashboard and other places
+    Sleep  0.5s
     Maybe Skip Tour

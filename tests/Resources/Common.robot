@@ -151,5 +151,17 @@ Skip If RHODS Version Greater Or Equal Than
        Skip If    condition=${version-check}==True    msg=This test is skipped for RHODS ${version} or greater
     END
 
+Get Domain From Current URL
+    [Documentation]    Gets the lowest level domain from the current URL
+    ${current_url} =    Get Location
+    ${domain} =    Fetch From Left    string=${current_url}    marker=.
+    [Return]    ${domain}
 
-
+Is Current Domain Equal To
+    [Documentation]    Compare the lowest level domain to a given string
+    ...   and returns True/False
+    [Arguments]    ${url}
+    ${domain} =    Get Domain From Current URL
+    ${comparison} =    Run Keyword And Return Status    Should Be Equal As Strings
+    ...    ${domain}    ${url}
+    [Return]    ${comparison}

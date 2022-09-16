@@ -50,5 +50,5 @@ Maybe Skip Tour
     IF  ${should_cont}==False
         Return From Keyword
     END
-    ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id='guided-tour-modal']
+    ${tour_modal} =  Run Keyword And Return Status  Wait Until Page Contains Element  xpath=//div[@id='guided-tour-modal']  timeout=5s
     Run Keyword If  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button

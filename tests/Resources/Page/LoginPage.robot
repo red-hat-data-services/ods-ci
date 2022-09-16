@@ -47,7 +47,4 @@ Login To Openshift
     Input Text  id=inputUsername  ${ocp_user_name}
     Input Text  id=inputPassword  ${ocp_user_pw}
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
-    # FIXME: replace this sleep for something more efficient, considering that this method is used for
-    # authentication in OpenShift Console, but also RHODS dashboard and other places
-    Sleep  0.5s
     Maybe Skip Tour

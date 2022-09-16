@@ -290,7 +290,7 @@ Verify Access To Notebook configmaps API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${cm_basic_user_2_body}
     Operation Should Be Allowed
-    [Teardown]     Close All Notebooks From UI
+    [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
 Verify Access To Notebook secrets API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
@@ -340,7 +340,7 @@ Verify Access To Notebook secrets API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${secret_basic_user_2_body}
     Operation Should Be Allowed
-    [Teardown]     Close All Notebooks From UI
+    [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
 Verify Access To Dashboard configmaps API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
@@ -522,7 +522,7 @@ Verify Access To nb-events API Endpoint
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    [Teardown]     Close All Notebooks From UI
+    [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
 Verify Access To status API Endpoint
     [Documentation]     Verifies the endpoint "status" works as expected
@@ -742,24 +742,12 @@ Delete Dummy ConfigMaps
     OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=${DASHBOARD_NS}  name=${DUMMY_CM_NAME}
     OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-monitoring  name=${DUMMY_CM_NAME}
 
-Close All Notebooks From UI
-    [Documentation]     Stops all the notebook servers spanwed during a test.
-    ...                 It assumes every server has been opened in a new browser
-    ${browsers}=    Get Browser Ids
-    FOR   ${browser_id}    IN   @{browsers}
-        Switch Browser    ${browser_id}
-        Stop JupyterLab Notebook Server
-        Capture Page Screenshot     notebook-${browser_id}.png
-    END
-    Close All Browsers
-
 Delete Test Notebooks CRs And PVCs From CLI
     [Documentation]     Stops all the notebook servers spanwed during a test by
     ...                 deleting their CRs. At the end it closes any opened browsers
     ${CR_1}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${CR_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
-    ${CR_3}=   Get User CR Notebook Name    ${TEST_USER.USERNAME}
-    ${test_crs}=   Create List     ${CR_1}   ${CR_2}    ${CR_3}
+    ${test_crs}=   Create List     ${CR_1}   ${CR_2}
     FOR   ${nb_cr}    IN  @{test_crs}
         OpenshiftLibrary.Oc Delete    kind=Notebook    namespace=${NOTEBOOK_NS}    name=${nb_cr}
     END

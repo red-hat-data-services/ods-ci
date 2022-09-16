@@ -21,6 +21,7 @@ Add GPU Node To Self-Managed AWS Cluster
     [Tags]    gpu_node_aws_self_managed_provision
     Login To AWS Cluster With Hive
     Create GPU Node In Self Managed AWS Cluster
+    Install GPU Operator on Self Managed Cluster
 
 Delete GPU Node From Self-Managed AWS Cluster
     [Tags]    gpu_node_aws_self_managed_deprovision

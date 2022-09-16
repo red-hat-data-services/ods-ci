@@ -86,6 +86,7 @@ ${APP_TO_REMOVE}=                rhosak
 ${COMPONENTS_ENDPOINT_PT0}=      api/components
 ${COMPONENTS_ENDPOINT_PT1}=      ${COMPONENTS_ENDPOINT_PT0}/remove?appName=${APP_TO_REMOVE}
 
+${HEALTH_ENDPOINT}=     api/health
 
 *** Test Cases ***
 Verify Access To cluster-settings API Endpoint
@@ -654,6 +655,19 @@ Verify Access To components API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint GET Call   endpoint=${COMPONENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+
+Verify Access To health API Endpoint
+    [Documentation]     Verifies the endpoint "health" works as expected
+    ...                 based on the permissions of the users who query the endpoint
+    ...                 The syntaxes to reach this endpoint is:
+    ...                 `health/`
+    [Tags]    ODS-1752
+    ...       Tier1    Sanity
+    ...       Security
+    Perform Dashboard API Endpoint GET Call   endpoint=${HEALTH_ENDPOINT}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${HEALTH_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
 
 

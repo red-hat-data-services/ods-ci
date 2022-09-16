@@ -54,3 +54,9 @@ Unclaim Hive Cluster
     [Arguments]    ${unclaimname}
     Oc Delete    kind=ClusterClaim    name=${unclaimname}    namespace=rhods
     ${status} =    Oc Get    kind=ClusterClaim    name=${unclaimname}    namespace=rhods<
+
+Install GPU Operator on Self Managed Cluster
+   [Documentation]  Install GPU operator on Self Managed cluster
+   ${gpu_install} =    Run Process    sh    tasks/Resources/Provisioning/GPU/gpu_deploy.sh   shell=yes
+   Should Not Contain    ${gpu_install.stdout}    FAIL
+   Wait For Pods Status   namespace=nvidia-gpu-operator   timeout=600

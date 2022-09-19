@@ -15,6 +15,9 @@ Test Setting Pod Toleration Via UI
     Wait Until Page Contains    Notebook pod tolerations
     Set Pod Toleration Via UI    TestToleration
     Save Changes In Cluster Settings
+    # New setting applies after ~5-10s. Sleep here to make
+    # sure it is applied for the next TC.
+    Sleep  10s
 
 Verify Toleration Is Applied To Pod
     [Documentation]    Verifies Pod spawns with toleration

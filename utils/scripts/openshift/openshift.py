@@ -128,7 +128,7 @@ class OpenshiftOps:
         if ret is None:
             sys.exit(1)
 
-    def openshift_install(self, config_file="ocp_config_file.yaml"):
+    def openshift_install(self, config_file="cluster_config.yaml"):
         """Installs ocm cli if not installed"""
 
         self.install_prerequisites()

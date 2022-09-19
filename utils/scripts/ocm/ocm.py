@@ -273,7 +273,7 @@ class OpenshiftClusterManager:
             sys.exit(1)
         return cluster_console_url.strip("\n")
 
-    def get_osd_cluster_info(self, config_file="osd_config_file.yaml"):
+    def get_osd_cluster_info(self, config_file="cluster_config.yaml"):
         """Gets osd cluster information and stores in config file"""
 
         cluster_info = {}
@@ -299,7 +299,7 @@ class OpenshiftClusterManager:
         with open(config_file, "w") as file:
             yaml.dump(osd_cluster_info, file)
 
-    def update_osd_cluster_info(self, config_file="osd_config_file.yaml"):
+    def update_osd_cluster_info(self, config_file="cluster_config.yaml"):
         """Updates osd cluster information and stores in config file"""
 
         with open(config_file, "r") as file:

@@ -503,6 +503,7 @@ Verify Access To nb-events API Endpoint
     ...                 the events from user notebook
     ...                 The syntax to reach this endpoint is:
     ...                 `nb-events/<notebook_namespace>/jupyter-nb-<username_nb>`
+    ...                 ProductBug: RHODS-5204
     [Tags]    ODS-1725
     ...       Tier1    Sanity
     ...       Security
@@ -563,6 +564,7 @@ Verify Access to notebooks API Endpoint
     ...                 the user notebook CR.
     ...                 The syntax to reach this endpoint is:
     ...                 `notebooks/<notebook_namespace>/jupyter-nb-<username_nb>`
+    ...                 ProductBug: RHODS-5204
     [Tags]    ODS-1729
     ...       Tier1    Sanity
     ...       Security
@@ -619,6 +621,7 @@ Verify Access to rolebindings API Endpoint
     ...                 based on the permissions of the users who query the endpoint
     ...                 The syntax to reach this endpoint is:
     ...                 `rolebindings/<dashboard_namespace>/<notebook_namespace>-image-pullers`
+    ...                 ProductBug: RHODS-5204
     [Tags]    ODS-1730
     ...       Tier1    Sanity
     ...       Security

@@ -506,6 +506,7 @@ Verify Access To nb-events API Endpoint
     [Tags]    ODS-1725
     ...       Tier1    Sanity
     ...       Security
+    ...       ProductBug
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_PODNAME_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER}
@@ -565,6 +566,7 @@ Verify Access to notebooks API Endpoint
     [Tags]    ODS-1729
     ...       Tier1    Sanity
     ...       Security
+    ...       ProductBug
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER}
@@ -620,6 +622,7 @@ Verify Access to rolebindings API Endpoint
     [Tags]    ODS-1730
     ...       Tier1    Sanity
     ...       Security
+    ...       ProductBug
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${ADMIN_TOKEN}

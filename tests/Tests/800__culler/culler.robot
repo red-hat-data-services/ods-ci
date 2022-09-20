@@ -175,7 +175,6 @@ Disable Notebook Culler
         Click Element  xpath://input[@id="culler-timeout-unlimited"]
         Save Changes In Cluster Settings
     END
-    Sleep  30s  msg=Give time for rollout
 
 Teardown
     [Documentation]    Teardown for the test

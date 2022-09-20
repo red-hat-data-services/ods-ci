@@ -154,6 +154,7 @@ Verify Filters Are Working On Resources Page
     [Tags]    Sanity
     ...       ODS-489
     ...       Tier1
+    ...       AutomationBug
     Click Link    Resources
     Wait Until Resource Page Is Loaded
     Filter Resources By Status "Enabled" And Check Output
@@ -304,6 +305,7 @@ Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1495
+    ...       AutomationBug
     [Setup]     Set Variables For Group Testing
     ${groups_configmaps_dict}=     Get ConfigMaps For RHODS Groups Configuration
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs

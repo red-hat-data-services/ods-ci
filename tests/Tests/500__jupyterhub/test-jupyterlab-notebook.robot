@@ -89,7 +89,7 @@ Get Previously Selected Notebook Image Details
     ${user_name} =    Set Variable    jupyter-nb-${safe_username}
     # The TC using this kw only cares about the image:tag information, let's get that
     # directly
-    ${user_data} =  Run  oc get notebook ${user_name} -o yaml | yq '.spec.template.spec.containers[0].image' | xargs basename
+    ${user_data} =  Run  oc get notebook ${user_name} -o yaml -n rhods-notebooks | yq '.spec.template.spec.containers[0].image' | xargs basename
     ${notfound} =  Run Keyword And Return Status  Should Be Equal As Strings  ${user_data}  null
     IF  ${notfound}==True
       ${user_data} =  Set Variable  minimal-gpu:default

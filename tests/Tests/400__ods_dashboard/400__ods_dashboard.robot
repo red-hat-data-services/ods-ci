@@ -757,7 +757,7 @@ Check Application Switcher Links To Openshift Cluster Manager
     ${cluster_env}=    Fetch ODS Cluster Environment
     IF    "${cluster_env}" == "stage"
         ${ocm_staging_link}=    Set Variable    https://qaprodauth.cloud.redhat.com/openshift/details/${cluster_id}
-        Check HTTP Status Code    ${ocm_staging_link}    verify_ssl=${False}
+        Check HTTP Status Code    link_to_check=${ocm_staging_link}    verify_ssl=${False}
         Go To   ${ocm_staging_link}
     ELSE
         ${list_of_links}=    Get Links From Switcher
@@ -774,7 +774,7 @@ Check Application Switcher Links To Openshift Cluster Manager
 Check Application Switcher Links To Openshift Console
     [Documentation]    Checks the HTTP status of OpenShift Console
     ${list_of_links}=    Get Links From Switcher
-    ${status}=    Check HTTP Status Code    ${list_of_links}[0]
+    ${status}=    Check HTTP Status Code    link_to_check=${list_of_links}[0]     verify_ssl=${False}
     Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
     Should Be Equal    ${status}    ${200}
 

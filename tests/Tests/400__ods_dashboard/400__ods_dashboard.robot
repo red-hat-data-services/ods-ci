@@ -154,6 +154,7 @@ Verify Filters Are Working On Resources Page
     [Tags]    Sanity
     ...       ODS-489
     ...       Tier1
+    ...       AutomationBug
     Click Link    Resources
     Wait Until Resource Page Is Loaded
     Filter Resources By Status "Enabled" And Check Output
@@ -224,6 +225,8 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     [Tags]    Tier3
     ...       ODS-1347  ODS-444
     ...       Execution-Time-Over-30m
+    ...       AutomationBug
+    ...       FlackyTest
     Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
     Verify Notification Saying Notebook Builds Not Started
@@ -304,6 +307,7 @@ Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1495
+    ...       AutomationBug
     [Setup]     Set Variables For Group Testing
     ${groups_configmaps_dict}=     Get ConfigMaps For RHODS Groups Configuration
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
@@ -324,6 +328,7 @@ Verify Dashboard Pod Is Not Getting Restarted
 Verify Switcher to Masterhead
     [Tags]    ODS-771
     ...       Tier2
+    ...       AutomationBug
     [Documentation]    Checks the link in switcher and also check the link of OCM in staging
     Go To RHODS Dashboard
     Open Application Switcher Menu

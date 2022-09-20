@@ -12,6 +12,7 @@ Verify Default Access Groups Settings And JupyterLab Notebook Access
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1164
+    ...       AutomationBug
     Verify Default Access Groups Settings
     Verify User Can Spawn A Notebook
     [Teardown]  End Web Test

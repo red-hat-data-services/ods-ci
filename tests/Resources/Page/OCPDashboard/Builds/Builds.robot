@@ -18,6 +18,7 @@ Delete BuildConfig using Name
     ${status}      Check If BuildConfig Exists    ${namespace}      ${name}
     Run Keyword If          '${status}'=='PASS'   OpenShiftCLI.Delete  kind=BuildConfig   name=${name}   namespace=${namespace}
     ...        ELSE          FAIL        No BuildConfig present with name '${name}' in '${namespace}' namespace, Check the BuildConfig name and namespace provide is correct and try again
+    Sleep   5s
     Dependent Build should not Present     ${name}
     ${status}      Check If BuildConfig Exists    ${namespace}      ${name}
     Run Keyword IF          '${status}'!='FAIL'     FAIL       BuildConfig with name '${name}' is not deleted in '${namespace}'

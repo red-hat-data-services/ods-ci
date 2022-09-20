@@ -166,16 +166,16 @@ Spawn Notebook
                     ELSE
                         # If modal is visible and spawn hasn't failed, continue
                         # execution and let rest of keyword deal with the timeout
-                        Sleep 1s
+                        Sleep  1s
                         Capture Page Screenshot
                     END
                 END
-            ELIF  ${control_panel_visible}==True
+            ELSE IF  ${control_panel_visible}==True
                 # If the user has been redirected to the control panel, 
                 # move to the server and continue execution
                 Click Button    Return to server
                 Return From Keyword
-            ELIF  ${JL_Visible}==True
+            ELSE IF  ${JL_Visible}==True
                 # We are in JL, return and let `Spawn Notebook With Arguments`
                 # deal with it
                 Return From Keyword
@@ -523,14 +523,6 @@ Get List Of All Available Container Size
           Append To List    ${size}     ${text}
     END
     [Return]    ${size}
-
-Get Previously Selected Notebook Image Details
-    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
-    ${user_name} =    Set Variable    jupyterhub-singleuser-profile-${safe_username}
-    ${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
-    ...    field_selector=metadata.name=${user_name}
-    @{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
-    [Return]    ${user_data}
 
 Open New Notebook In Jupyterlab Menu
     [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu

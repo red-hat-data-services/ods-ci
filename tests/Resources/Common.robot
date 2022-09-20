@@ -44,6 +44,11 @@ Load Json File
     ${obj}=    Evaluate    json.loads('''${j_file}''')    json
     [Return]    ${obj}
 
+Load Json String
+    [Arguments]     ${json_string}
+    ${obj}=     Evaluate  json.loads("""${json_string}""")
+    [Return]    ${obj}
+
 Get CSS Property Value
     [Documentation]    Get the CSS property value of a given element
     [Arguments]    ${locator}    ${property_name}
@@ -167,3 +172,10 @@ Is Current Domain Equal To
     ${comparison} =    Run Keyword And Return Status    Should Be Equal As Strings
     ...    ${domain}    ${url}
     [Return]    ${comparison}
+
+Get OAuth Cookie
+    [Documentation]     Fetches the "_oauth_proxy" cookie from Dashboard page.
+    ...                 You can use the value from this cookie to perform login in API calls.
+    ...                 It assumes Dashboard UI has been launched and login performed using UI.
+    ${cookie}=     Get Cookie  _oauth_proxy
+    [Return]    ${cookie.value}

@@ -225,6 +225,8 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     [Tags]    Tier3
     ...       ODS-1347  ODS-444
     ...       Execution-Time-Over-30m
+    ...       AutomationBug
+    ...       FlackyTest
     Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
     Verify Notification Saying Notebook Builds Not Started
@@ -326,6 +328,7 @@ Verify Dashboard Pod Is Not Getting Restarted
 Verify Switcher to Masterhead
     [Tags]    ODS-771
     ...       Tier2
+    ...       AutomationBug
     [Documentation]    Checks the link in switcher and also check the link of OCM in staging
     Go To RHODS Dashboard
     Open Application Switcher Menu

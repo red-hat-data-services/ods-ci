@@ -16,11 +16,11 @@ ${ERROR_MSG}=                   error\nValidation failed\nError attempting to va
 ${VAL_SUCCESS_MSG}=             Validation result: 200
 ${TOKEN_VAL_SUCCESS_MSG}=       Success! Your token was validated and Conda has been configured.
 ${PKG_INSTALL_ERROR_MSG}=   Collecting package metadata (current_repodata.json): failed
-...  ${\n}UnavailableInvalidChannel: HTTP 403 FORBIDDEN for channel repo/main <https://repo.anaconda.cloud/repo/main>
-...  ${\n}The channel is not accessible or is invalid.
-...  ${\n}You will need to adjust your conda configuration to proceed.
-...  ${\n}Use `conda config --show channels` to view your configuration's current state,
-...  ${\n}and use `conda config --show-sources` to view config file locations.
+...  UnavailableInvalidChannel: HTTP 403 FORBIDDEN for channel repo/main <https://repo.anaconda.cloud/repo/main>
+...  The channel is not accessible or is invalid.
+...  You will need to adjust your conda configuration to proceed.
+...  Use `conda config --show channels` to view your configuration's current state,
+...  and use `conda config --show-sources` to view config file locations.
 ${CONDARC_CAT_RESULT}=  restore_free_channel: false
 ...  default_channels:
 ...  - https://repo.anaconda.cloud/repo/main

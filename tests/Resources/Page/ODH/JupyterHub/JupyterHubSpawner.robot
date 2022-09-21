@@ -133,11 +133,12 @@ Get Spawner Environment Variable Value
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
-    # Make sure server spawns in same tab in 1.17+
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
-    IF  ${version-check}==True
-        Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
-    END
+    # TODO: Make sure server spawns in same tab in 1.17+
+    # Currently no way to know if option already selected or not
+    #${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
+    #IF  ${version-check}==True
+    #    Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
+    #END
     Click Button  Start server
     # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
     # if the spawn was successful
@@ -192,7 +193,13 @@ Spawn Notebook
         END
     END
     Wait Until Element Is Visible  xpath://div[@role="progressbar"]
-    Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
+    IF  ${version-check}==True
+        Wait Until Page Contains  The notebook server is up and running.  ${spawner_timeout}
+        Click Button  Open in current tab
+    ELSE
+        Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
+    END
 
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed

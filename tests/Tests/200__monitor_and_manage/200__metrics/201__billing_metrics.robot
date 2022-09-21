@@ -110,7 +110,6 @@ CleanUp JupyterHub And Close All Browsers
 Test Setup For Matrics Web Test
     [Documentation]     Opens openshift console metrics for metrics test
     Set Library Search Order    SeleniumLibrary
-    #Open Browser    ${OCP_CONSOLE_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Open OCP Console
     Login To OCP
     Wait Until OpenShift Console Is Loaded
@@ -155,7 +154,6 @@ Run OpenShift Metrics Query
     ...    belong to a group with "view" role in OpenShift
     ...    Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
     [Arguments]    ${query}    ${retry_attempts}=10    ${return_zero_if_result_empty}=False
-    #Open Browser    ${OCP_CONSOLE_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Open OCP Console
     LoginPage.Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
     OCPMenu.Switch To Administrator Perspective

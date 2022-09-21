@@ -39,7 +39,6 @@ Verify Pachyderm Pipeline Can Be Created
 Pachyderm Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    #Open Browser    ${OCP_CONSOLE_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Open OCP Console
     Login to OCP
     Wait Until OpenShift Console Is Loaded

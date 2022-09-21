@@ -632,7 +632,6 @@ Check Cluster Name Contain "Aisrhods" Or Not
 Check Particular Text Is Present In Rhods-operator's Log
     [Documentation]     Check if text is present in log
     [Arguments]         ${text_to_check}
-    #Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Open OCP Console
     Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
     Maybe Skip Tour

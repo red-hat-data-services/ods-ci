@@ -156,6 +156,23 @@ Skip If RHODS Version Greater Or Equal Than
        Skip If    condition=${version-check}==True    msg=This test is skipped for RHODS ${version} or greater
     END
 
+Get Domain From Current URL
+    [Documentation]    Gets the lowest level domain from the current URL (i.e. everything before the first dot in the URL)
+    ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console
+    ...    e.g. https://rhods-dashboard-redhat-ods-applications.apps.<cluster>.rhods.ccitredhat.com/ -> https://rhods-dashboard-redhat-ods-applications
+    ${current_url} =    Get Location
+    ${domain} =    Fetch From Left    string=${current_url}    marker=.
+    [Return]    ${domain}
+
+Is Current Domain Equal To
+    [Documentation]    Compare the lowest level domain to a given string
+    ...   and returns True/False
+    [Arguments]    ${url}
+    ${domain} =    Get Domain From Current URL
+    ${comparison} =    Run Keyword And Return Status    Should Be Equal As Strings
+    ...    ${domain}    ${url}
+    [Return]    ${comparison}
+
 Get OAuth Cookie
     [Documentation]     Fetches the "_oauth_proxy" cookie from Dashboard page.
     ...                 You can use the value from this cookie to perform login in API calls.

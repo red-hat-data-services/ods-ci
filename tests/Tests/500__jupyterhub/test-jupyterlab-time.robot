@@ -66,15 +66,15 @@ Spawn and Stop Server
     Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
     ${time1} =    Get Time    format=%H:%M:%S.%f
     Spawn Notebook
-    Run Keyword And Continue On Failure  Wait Until Page Does Not Contain Element
-         ...    id:progress-bar    timeout=600s
-    #Wait For JupyterLab Splash Screen    timeout=30
     Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-    Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+    # If this fails we waited for 60s. Avg. time will be thrown off, might be acceptable
+    # given that we weren't able to spawn?
+    Run Keyword And Continue On Failure  Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     ${time2} =    Get Time
     ${time} =    Subtract Date From Date    ${time2}    ${time1}
+    Sleep  0.5s
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
     Wait For RHODS Dashboard To Load

@@ -38,6 +38,7 @@ ${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//b
 ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
+${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo"]
 
 
 *** Keywords ***
@@ -75,8 +76,9 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
-  Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
+    Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
+    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=15s
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments

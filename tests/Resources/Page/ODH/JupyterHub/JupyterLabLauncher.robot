@@ -314,6 +314,11 @@ Maybe Close Popup
     # Check if the last button is always the confirmation one
     # Server unavailable or unreachable modal has "Dismiss" as last button
 
+    # When first loading the JL interface, the popup might take some time to appear (1/2s)
+    # Given the speed up in PR #559 this has become a problem for this keyword, with some popups
+    # slipping through. Let's add a small sleep here to try and catch all popups.
+    Sleep  0.5s
+
     # Sometimes there are multiple tabs already open when loggin into the server and each one might
     # Open a pop-up. Closing all tabs at once also might create a pop-up for each tab. Let's get the
     # Number of open tabs and try closing popups for each one.

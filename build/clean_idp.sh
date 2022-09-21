@@ -66,10 +66,12 @@ uninstall_identity_provider(){
 
   remove_user_from_dedicated_admins  ldap-adm
   delete_users  ldap-adm
-  delete_users  ldap-adm
   delete_users  ldap-usr
   delete_users  ldap-noaccess
   delete_special_users  ldap-special
+
+  # delete user identities from OCP cluster
+  oc get identity -oname | xargs oc delete
 
   # delete htpasswd idp
   ocm delete user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins

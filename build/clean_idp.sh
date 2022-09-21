@@ -65,7 +65,6 @@ uninstall_identity_provider(){
 
   remove_user_from_dedicated_admins  ldap-adm
   delete_users  ldap-adm
-  delete_users  ldap-adm
   delete_users  ldap-usr
   delete_users  ldap-noaccess
   delete_special_users  ldap-special

@@ -133,8 +133,11 @@ Get Spawner Environment Variable Value
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
-    # Make sure server spawns in same tab
-    Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
+    # Make sure server spawns in same tab in 1.17+
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
+    IF  ${version-check}==True
+        Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
+    END
     Click Button  Start server
     # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
     # if the spawn was successful

@@ -15,7 +15,8 @@ Force Tags       JupyterHub
 *** Test Cases ***
 Logged into OpenShift
    [Tags]  Sanity  Smoke  ODS-127
-   Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+   #Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+   Open OCP Console
    Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    Wait Until OpenShift Console Is Loaded
 

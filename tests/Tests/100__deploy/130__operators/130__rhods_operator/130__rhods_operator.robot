@@ -16,11 +16,12 @@ ${commercial_url}              https://www.redhat.com/en/technologies/cloud-comp
 
 *** Test Cases ***
 Verify RHODS operator information
-  [Documentation]  This TC verfiy if the text present in RHODS opeartor Details section
-  [Tags]  ODS-498   ODS-624   Sanity    FlakyTest
+  [Documentation]  This TC verfiy if the text present in
+  ...   RHODS opeartor Details section.ProductBug:RHODS-4993
+  [Tags]  ODS-498   ODS-624   Sanity   ProductBug
   Open Installed Operators Page
   #Select All Projects
-  Click On Searched Operator      Red Hat OpenShift Data Science
+  Wait Until Keyword Succeeds    10 times  5s    Click On Searched Operator      Red Hat OpenShift Data Science   #robocp: disable
   ${link_elements}=  Get WebElements    xpath=//*[@class="co-clusterserviceversion-details__field"]//a
   #Temporary List to hold the url for the verification
   ${temp_list}        Create List

@@ -73,6 +73,39 @@ Verify A Default Image Is Provided And Starts Successfully
     Should Be Equal As Strings    ${has_spawn_failed}    False
 
 
+Refine Notebook Controller Routes
+    [Documentation]   When JL Loses its Pods,
+    ...   Restart link should takes you to the Spawner Page.
+    [Tags]   ODS-XXX
+    ...      Tier2
+    ...      test-t
+    Launch JupyterHub Spawner From Dashboard
+    Run Keyword And Ignore Error   Spawn Notebook With Arguments
+    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
+    ${user_name} =    Set Variable    jupyter-nb-${safe_username}
+    Run  oc delete notebook ${user_name} -n rhods-notebooks
+    Wait Until Page Contains    Server unavailable or unreachable       timeout=120
+    ${ele}    Get WebElement   //button[.="Restart"]
+    Execute Javascript    arguments[0].click();     ARGUMENTS    ${ele}
+    Switch Window  locator=NEW
+    Wait Until Page Contains    Start a notebook server   timeout=60s
+
+Spawn Jupyter Notebook When Notebook CR Is Deleted
+    [Documentation]   When you have a Notebook, and you delete that Notebook CR,
+    ...   then try to create another one notebook sucesfully
+    [Tags]   ODS-XXX
+    ...      Tier2
+    ...      test-t
+    Launch JupyterHub Spawner From Dashboard
+    Run Keyword And Ignore Error    Spawn Notebook With Arguments
+    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
+    ${user_name} =    Set Variable    jupyter-nb-${safe_username}
+    Run  oc delete notebook ${user_name} -n rhods-notebooks
+    Close Browser
+    Begin Web Test
+    Launch JupyterHub Spawner From Dashboard
+    Spawn Notebook
+
 *** Keywords ***
 Verify Notebook Name And Image Tag
     [Documentation]    Verifies that expected notebook is spawned and image tag is not latest

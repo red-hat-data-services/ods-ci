@@ -55,15 +55,15 @@ Verify User Is Able to Activate Anaconda Professional
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner
   Verify Anaconda In Kfdef
-  Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait For RHODS Dashboard To Load
+  Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+  ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+  ...    browser_options=${BROWSER.OPTIONS}
   Enable Anaconda  ${ANACONDA_CE.ACTIVATION_KEY}
   Capture Page Screenshot  anaconda_success_activation.png
   Menu.Navigate To Page    Applications    Enabled
   Wait Until RHODS Dashboard Jupyter Is Visible
   Verify Anaconda Card Present Based On Version
-  Go To  ${OCP_CONSOLE_URL}
+  Open OCP Console
   Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
   Maybe Skip Tour
   ${val_result}=  Get Pod Logs From UI  namespace=redhat-ods-applications
@@ -71,8 +71,9 @@ Verify User Is Able to Activate Anaconda Professional
   Log  ${val_result}
   Should Be Equal  ${val_result[0]}  ${VAL_SUCCESS_MSG}
   Wait Until Keyword Succeeds    400 times  5s  Check Anaconda CE Image Build Status  Complete
-  Go To  ${ODH_DASHBOARD_URL}
-  Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+  Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+  ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+  ...    browser_options=${BROWSER.OPTIONS}
   Launch JupyterHub Spawner From Dashboard
   Run Keyword And Continue On Failure  Verify Anaconda Element Present Based On Version
   Run Keyword And Continue On Failure  Verify Anaconda Element Enabled Based On Version

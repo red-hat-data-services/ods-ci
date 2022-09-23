@@ -76,9 +76,8 @@ Verify A Default Image Is Provided And Starts Successfully
 Refine Notebook Controller Routes
     [Documentation]   When JL Loses its Pods,
     ...   Restart link should takes you to the Spawner Page.
-    [Tags]   ODS-XXX
+    [Tags]   ODS-1765
     ...      Tier2
-    ...      test-t
     Launch JupyterHub Spawner From Dashboard
     Run Keyword And Ignore Error   Spawn Notebook With Arguments
     ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
@@ -93,9 +92,8 @@ Refine Notebook Controller Routes
 Spawn Jupyter Notebook When Notebook CR Is Deleted
     [Documentation]   When you have a Notebook, and you delete that Notebook CR,
     ...   then try to create another one notebook sucesfully
-    [Tags]   ODS-XXX
+    [Tags]   ODS-1764
     ...      Tier2
-    ...      test-t
     Launch JupyterHub Spawner From Dashboard
     Run Keyword And Ignore Error    Spawn Notebook With Arguments
     ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}

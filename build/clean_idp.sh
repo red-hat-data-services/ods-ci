@@ -43,7 +43,7 @@ function remove_user_from_dedicated_admins(){
 }
 
 uninstall_identity_provider(){
-  echo "---> Installing the required IDPs"
+  echo "---> Uninstalling the IDPs previously installed by ODS-CI"
 
   echo $OC_HOST
   CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')
@@ -56,7 +56,6 @@ uninstall_identity_provider(){
   # delete ldap deployment and idp
   # oc wait --for=delete $(oc get namespace openldap)
   oc delete -f configs/templates/ldap/ldap.yaml
-  oc wait --for=delete $(oc get namespace openldap)
   ocm delete idp -c "${CLUSTER_NAME}" ldap-provider-qe
 
   # add users to RHODS groups
@@ -103,6 +102,7 @@ function check_uninstallation(){
         echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
         exit 0
     fi
+    echo -e "\033[0;33m LDAP and/or htpasswd Identity providers have been deleted from the cluster \033[0m"
   done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
 }
 
@@ -132,6 +132,12 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
 
+    --cluster-admin-password)
+      shift
+      ADMIN_PASS=$1
+      shift
+      ;;
+
     *)
       echo "Unknown command line switch: $1"
       exit 1
@@ -141,8 +147,8 @@ done
 
 
 
-printf "Insert cluster admin user's password:"
-read -s ADMIN_PASS
+# printf "Insert cluster admin user's password:"
+# read -s ADMIN_PASS
 perform_ocm_login
 check_installation
 uninstall_identity_provider

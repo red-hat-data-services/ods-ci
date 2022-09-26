@@ -216,7 +216,7 @@ Verify Access To pvc API Endpoint
     [Tags]    ODS-1728
     ...       Tier1    Sanity
     ...       Security
-    [Setup]    Delete Test Notebooks CRs And PVCs From CLI
+    [Setup]    Run Keyword And Continue On Failure    Delete Test Notebooks CRs And PVCs From CLI
     ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
     ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
     ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
@@ -632,13 +632,13 @@ Verify Access to rolebindings API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${NOTEBOOK_NS}/    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${NOTEBOOK_NS}/    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${ROLE_BIND_ENDPOINT_BODY}
     Operation Should Be Forbidden

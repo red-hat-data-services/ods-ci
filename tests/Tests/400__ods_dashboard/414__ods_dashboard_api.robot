@@ -216,7 +216,7 @@ Verify Access To pvc API Endpoint
     [Tags]    ODS-1728
     ...       Tier1    Sanity
     ...       Security
-    [Setup]    Run Keyword And Continue On Failure    Delete Test Notebooks CRs And PVCs From CLI
+    Run Keyword And Warn On Failure    Delete Test Notebooks CRs And PVCs From CLI
     ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
     ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
     ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}

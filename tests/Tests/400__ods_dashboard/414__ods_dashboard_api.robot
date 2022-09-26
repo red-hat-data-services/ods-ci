@@ -216,6 +216,7 @@ Verify Access To pvc API Endpoint
     [Tags]    ODS-1728
     ...       Tier1    Sanity
     ...       Security
+    [Setup]    Delete Test Notebooks CRs And PVCs From CLI
     ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
     ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
     ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
@@ -521,9 +522,9 @@ Verify Access To nb-events API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Unauthorized
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
 Verify Access To status API Endpoint
@@ -595,9 +596,9 @@ Verify Access to notebooks API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_2_STATUS}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Unauthorized
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     ${NB_BASIC_USER_2_SAFENAME}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Set Username In Notebook Payload    notebook_username=${NB_BASIC_USER_2_SAFENAME}
     Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}

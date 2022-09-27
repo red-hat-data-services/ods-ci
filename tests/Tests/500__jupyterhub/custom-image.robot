@@ -54,7 +54,7 @@ Verify Custom Image Can Be Added
     #Should Match  ${spawner_software}  ${IMG_SOFTWARE}
     #Should Match  ${spawner_packages}  ${IMG_PACKAGES}
 
-    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Default
+    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Small
     [Teardown]  Custom Image Teardown
 
 Test Duplicate Image

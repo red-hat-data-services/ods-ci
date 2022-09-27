@@ -15,7 +15,7 @@ Force Tags       JupyterHub
 *** Test Cases ***
 Logged into OpenShift
    [Tags]  Sanity  Smoke  ODS-127
-   Open Browser  ${OCP_CONSOLE_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+   Open OCP Console
    Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    Wait Until OpenShift Console Is Loaded
 
@@ -83,6 +83,7 @@ Verify Message That Image Builds Are In Progress
     ...         ODS-460
     ...         ODS-381
     ...         ODS-1348
+    ...         AutomationBug
     Delete Last Pytorch Build
     ${new_buildname}=  Start New Pytorch Build
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}

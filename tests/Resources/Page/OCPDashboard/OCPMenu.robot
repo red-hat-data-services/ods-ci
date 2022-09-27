@@ -1,4 +1,5 @@
 *** Settings ***
+Resource  ../../Common.robot
 Library  JupyterLibrary
 Library  String
 
@@ -43,6 +44,11 @@ Switch To Developer Perspective
   END
 
 Maybe Skip Tour
-   ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id='guided-tour-modal']
-   Run Keyword If  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button
-  
+    [Documentation]    If we are in the openshift web console, maybe skip the first time
+    ...    tour popup given to users, otherwise return from keyword.
+    ${should_cont} =    Is Current Domain Equal To    https://console-openshift-console
+    IF  ${should_cont}==False
+        Return From Keyword
+    END
+    ${tour_modal} =  Run Keyword And Return Status  Wait Until Page Contains Element  xpath=//div[@id='guided-tour-modal']  timeout=5s
+    Run Keyword If  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button

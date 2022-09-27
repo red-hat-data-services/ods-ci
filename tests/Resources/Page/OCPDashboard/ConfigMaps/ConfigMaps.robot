@@ -20,17 +20,17 @@ Check If ConfigMap Exists
     [Return]   ${status}
 
 Get PVC Size
-    [Documentation]    Get configure PVC size from configmap
-    [Arguments]   ${namespace}   ${configmap_name}=jupyterhub-cfg
-    ${data}    OpenShiftCLI.Get  kind=ConfigMap  namespace=${namespace}
+    [Documentation]    Get configure PVC size from OdhDashboardConfig CR
+    [Arguments]   ${namespace}   ${configmap_name}=odh-dashboard-config
+    ${data}    OpenShiftCLI.Get  kind=OdhDashboardConfig  namespace=${namespace}
     ...    field_selector=metadata.name==${configmap_name}
-    ${size}    Set Variable      ${data[0]['data']['singleuser_pvc_size']}
+    ${size}    Set Variable      ${data[0]['spec']['notebookController']['pvcSize']}
     [Return]   ${size}[:-2]
 
 Change PVC Size From ConfigMap
-    [Documentation]    Configure PVC size for JH
+    [Documentation]    Configure PVC size for Notebook controller
     ...    Supported size are whole number(ex: 120Gi,10Gi etc)
     ...    Decimal,alphabet charcter and number below 1 is not supported
-    [Arguments]   ${size}    ${configmap_name}=jupyterhub-cfg
-    OpenShiftCLI.Patch   kind=ConfigMap  name=${configmap_name}  namespace=${NAMESPACE}
-    ...    src={"data":{"singleuser_pvc_size": "${size}"}}
+    [Arguments]   ${size}    ${configmap_name}=odh-dashboard-config
+    OpenShiftCLI.Patch   kind=OdhDashboardConfig  name=${configmap_name}  namespace=${NAMESPACE}
+    ...    src={"spec": {"notebookController": {"pvcSize": "${size}"}}}   type=merge

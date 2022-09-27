@@ -14,6 +14,7 @@ Verify JupyterHub DB Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-236
+    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
     ${cluster_platform_type}=    Fetch Cluster Platform Type
     Skip if    "${cluster_platform_type}" != "OpenStack"
     ...    This test only applies to PSI clusters

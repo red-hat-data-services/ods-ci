@@ -16,10 +16,12 @@ Library   OpenShiftLibrary
 *** Variables ***
 ${KFNBC_SPAWNER_HEADER_XPATH} =    //h1[.="Start a notebook server"]
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
-${JUPYTERHUB_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
-${JUPYTER_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-numbers")]
+${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
+${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //button[contains(@aria-labelledby, "container-size")]
+${KFNBC_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-numbers")]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
+${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 
 
@@ -32,7 +34,7 @@ JupyterHub Spawner Is Visible
 
 Wait Until JupyterHub Spawner Is Ready
     [Documentation]  Waits for the spawner page to be ready using the server size dropdown
-    Wait Until Page Contains Element    xpath:${JUPYTERHUB_CONTAINER_SIZE_TITLE}    timeout=15s
+    Wait Until Page Contains Element    xpath:${KFNBC_CONTAINER_SIZE_TITLE}    timeout=15s
     Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]    timeout=15s
 
 Select Notebook Image
@@ -57,20 +59,20 @@ Wait Until GPU Dropdown Exists
     [Documentation]    Verifies that the dropdown to select the no. of GPUs exists
     Wait Until Page Contains    Number of GPUs
     Page Should Not Contain    All GPUs are currently in use, try again later.
-    Wait Until Page Contains Element    xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
+    Wait Until Page Contains Element    xpath:${KFNBC_GPU_DROPDOWN_XPATH}
     ...    error=GPU selector is not present in JupyterHub Spawner
 
 Set Number Of Required GPUs
     [Documentation]  Sets the gpu count based on the ${gpus} argument
     [Arguments]  ${gpus}
-    Click Element  xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
-    Click Element  xpath:${JUPYTER_GPU_DROPDOWN_XPATH}/../..//button[.="${gpus}"]
+    Click Element  xpath:${KFNBC_GPU_DROPDOWN_XPATH}
+    Click Element  xpath:${KFNBC_GPU_DROPDOWN_XPATH}/../..//button[.="${gpus}"]
 
 Fetch Max Number Of GPUs In Spawner Page
     [Documentation]    Returns the maximum number of GPUs a user can request from the spawner
     ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
     IF  ${gpu_visible}==True
-       Click Element    xpath:${JUPYTER_GPU_DROPDOWN_XPATH}
+       Click Element    xpath:${KFNBC_GPU_DROPDOWN_XPATH}
        ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
        ${maxGPUs} =    Convert To Integer    ${maxGPUs}
     ELSE
@@ -131,6 +133,12 @@ Get Spawner Environment Variable Value
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
     [Arguments]  ${spawner_timeout}=600 seconds
+    # TODO: Make sure server spawns in same tab in 1.17+
+    # Currently no way to know if option already selected or not
+    #${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
+    #IF  ${version-check}==True
+    #    Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
+    #END
     Click Button  Start server
     # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
     # if the spawn was successful
@@ -164,16 +172,16 @@ Spawn Notebook
                     ELSE
                         # If modal is visible and spawn hasn't failed, continue
                         # execution and let rest of keyword deal with the timeout
-                        Sleep 1s
+                        Sleep  1s
                         Capture Page Screenshot
                     END
                 END
-            ELIF  ${control_panel_visible}==True
+            ELSE IF  ${control_panel_visible}==True
                 # If the user has been redirected to the control panel, 
                 # move to the server and continue execution
                 Click Button    Return to server
                 Return From Keyword
-            ELIF  ${JL_Visible}==True
+            ELSE IF  ${JL_Visible}==True
                 # We are in JL, return and let `Spawn Notebook With Arguments`
                 # deal with it
                 Return From Keyword
@@ -185,7 +193,13 @@ Spawn Notebook
         END
     END
     Wait Until Element Is Visible  xpath://div[@role="progressbar"]
-    Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
+    IF  ${version-check}==True
+        Wait Until Page Contains  The notebook server is up and running.  ${spawner_timeout}
+        Click Button  Open in current tab
+    ELSE
+        Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
+    END
 
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed
@@ -206,7 +220,7 @@ Spawn Notebook With Arguments  # robocop: disable
          Select Notebook Image  ${image}
          Select Container Size  ${size}
          ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
-         IF  ${gpu_visible}==True
+         IF  ${gpu_visible}==True and ${gpus}>0
             Set Number Of Required GPUs  ${gpus}
          ELSE IF  ${gpu_visible}==False and ${gpus}>0
             Fail  GPUs required but not available
@@ -325,7 +339,13 @@ Spawner Modal Is Visible
 
 Handle Spawner Modal
    [Documentation]  Closes the spawner modal
-   Click Button    ${KFNBC_MODAL_CANCEL_XPATH}
+   # If there's a "Close" button instead of "Cancel" in the modal, spawn has failed
+   ${spawn_failed} =  Run Keyword And Return Status  Page Should Contain Element  ${KFNBC_MODAL_CLOSE_XPATH}
+   IF  ${spawn_failed}==True
+       Click Button    ${KFNBC_MODAL_CLOSE_XPATH}
+   ELSE
+       Click Button    ${KFNBC_MODAL_CANCEL_XPATH}
+   END
 
 Fix Spawner Status
    [Documentation]  This keyword handles spawner states that would prevent
@@ -397,14 +417,13 @@ Maybe Handle Server Not Running Page
         Handle Server Not Running
     END
 
-
 Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
-   Wait Until Page Contains    Container size   timeout=30   error=Container size selector is not present in JupyterHub Spawne
-   #Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]
-   Click Element  //button[@aria-label="Options menu"]
-   Wait Until Page Contains Element         xpath://span[.="${container_size}"]/../..  timeout=10
+   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}   
+   ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
+   Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
+   Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10
    ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
    ${l_data}   Convert To Lower Case    ${data}
    ${data}    Get Formated Container Size To Dictionary     ${l_data}
@@ -516,14 +535,6 @@ Get List Of All Available Container Size
           Append To List    ${size}     ${text}
     END
     [Return]    ${size}
-
-Get Previously Selected Notebook Image Details
-    ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
-    ${user_name} =    Set Variable    jupyterhub-singleuser-profile-${safe_username}
-    ${user_configmap} =    Oc Get    kind=ConfigMap    namespace=redhat-ods-applications
-    ...    field_selector=metadata.name=${user_name}
-    @{user_data} =    Split String    ${user_configmap[0]['data']['profile']}    \n
-    [Return]    ${user_data}
 
 Open New Notebook In Jupyterlab Menu
     [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu

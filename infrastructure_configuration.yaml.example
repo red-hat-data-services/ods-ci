@@ -1,0 +1,3 @@
+infrastructure_configurations:
+    hive_cluster_name: rhodsawstest
+    hive_claim_name: rhodsawstestclaim

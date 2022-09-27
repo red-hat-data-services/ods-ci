@@ -9,7 +9,7 @@ Library             ../../../../libs/Helpers.py
 *** Keywords ***
 Get Pod Logs From UI
     [Documentation]    Get pod logs text from OCP UI ${container_button_id} is button id on log page
-    [Arguments]    ${namespace}    ${pod_search_term}   ${container_button_id}=${EMPTY} 
+    [Arguments]    ${namespace}    ${pod_search_term}   ${container_button_id}=${EMPTY}
     Navigate To Page    Workloads    Pods
     Search Last Item Instance By Title In OpenShift Table    search_term=${pod_search_term}
     ...    namespace=${namespace}
@@ -62,8 +62,7 @@ Verify Operator Pod Status
     [Documentation]    Verify Pod status
     [Arguments]  ${namespace}   ${label_selector}  ${expected_status}=Running
     ${status}    Get Pod Status    ${namespace}    ${label_selector}
-    Run Keyword IF   $status != $expected_status     Fail     RHODS operator status is
-    ...    not matching with the expected state
+    Run Keyword IF   $status != $expected_status     Fail    Unexpected operator status (found: ${status}, expected:${expected_status})   #robocop:disable
 
 Get Pod Name
     [Documentation]    Get the POD name based on namespace and label selector
@@ -78,7 +77,6 @@ Get Pod Status
     ${data}       Run Keyword   OpenShiftCLI.Get   kind=Pod
     ...    namespace=${namespace}   label_selector=${label_selector}
     [Return]      ${data[0]['status']['phase']}
-
 
 Get POD Names
     [Documentation]    Get the name of list based on
@@ -130,7 +128,7 @@ Verify Containers Have Zero Restarts
     END
 
 Verify Container Image
-    [Documentation]  Checks if the container image matches  $expected-image-url 
+    [Documentation]  Checks if the container image matches  $expected-image-url
     [Arguments]   ${namespace}  ${pod}  ${container}  ${expected-image-url}
     ${image} =  Run  oc get pod ${pod} -n ${namespace} -o json | jq '.spec.containers[] | select(.name == "${container}") | .image'
     Should Be Equal  ${image}  ${expected-image-url}

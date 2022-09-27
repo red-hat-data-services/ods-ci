@@ -15,6 +15,7 @@ spec:
   support: third party support
   csvName: ods-ci
   getStartedLink: https://github.com/red-hat-data-services/ods-ci
+  docsLink: https://github.com/red-hat-data-services/ods-ci
   getStartedMarkDown: >-
     # ODS-CI
 

@@ -55,8 +55,8 @@ RHODS Performance Result Validation
 Run Performance Test On RHODS Operator
     [Documentation]    Perform toolchain-e2e sandbox performance test on rhods-operator component
     ${return_code}    ${output}    Run And Return Rc And Output    cd ${EXECDIR}/toolchain-e2e/ && ${PERF_Code}    #robocop:disable
-    Should Be Equal As Integers	 ${return_code}	 0
     Create File    ${EXECDIR}/log.txt        ${output}
+    Should Be Equal As Integers	 ${return_code}	 0
     Capture And Validate Memory Utilization Of Openshift API Server POD
 
 Verify Sandbox Toolchain Data

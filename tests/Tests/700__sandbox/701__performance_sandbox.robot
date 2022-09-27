@@ -13,7 +13,7 @@ Suite Setup     Performance Suite Setup
 ${NAMESPACE}     openshift-kube-apiserver
 ${LABEL_SELECTOR}     app=openshift-kube-apiserver
 ${MEMORY_THRESHOLD}    102400
-${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-applications:notebook-controller-deployment --workloads redhat-ods-applications:odh-notebook-controller-manager --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
+${PERF_CODE}    go run setup/main.go --users 100 --default 100  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-applications:notebook-controller-deployment --workloads redhat-ods-applications:odh-notebook-controller-manager --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
 ${ISV_DATA}    ${{ {'openvino':['ovms','alpha'],'aikit':['aikit','alpha'],'pachyderm':['pachyderm','stable']} }}
 
 *** Test Cases ***

@@ -15,9 +15,11 @@ Suite Setup      OCM Suite Setup
 Suite Teardown   OCM Suite Teardown
 Test Setup       OCM Test Setup
 
+
 *** Variables ***
-${Stage_URL}    https://qaprodauth.cloud.redhat.com/openshift
+${Stage_URL}    https://qaprodauth.console.redhat.com/openshift
 ${Prod_URL}     https://console.redhat.com/openshift
+
 
 *** Test Cases ***
 Can Install ODH Operator

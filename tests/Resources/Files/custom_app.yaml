@@ -1,0 +1,26 @@
+apiVersion: dashboard.opendatahub.io/v1
+kind: OdhApplication
+metadata:
+  name: custom-odsci-app
+  labels:
+      app: ods-ci
+spec:
+  img: images/red-hat.svg
+  displayName: TEST - Custom ODS-CI Application
+  provider: ods-ci
+  description: |-
+    Custom Application is a test item created by ODS-CI to test creation of custom doc resources
+  kfdefApplications: []
+  category: Red Hat managed
+  support: third party support
+  csvName: ods-ci
+  getStartedLink: https://github.com/red-hat-data-services/ods-ci
+  getStartedMarkDown: >-
+    # ODS-CI
+
+    ## Your RHODS Tester...Robotic!
+    Develop automated tests for verifying functioning of RHODS
+
+    ODS-CI is available on GitHub
+    ### Subscribe to the operator on Marketplace
+    - [https://github.com/red-hat-data-services/ods-ci](https://github.com/red-hat-data-services/ods-ci)

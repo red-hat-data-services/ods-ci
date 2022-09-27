@@ -1,0 +1,20 @@
+apiVersion: dashboard.opendatahub.io/v1
+kind: OdhDocument
+metadata:
+  annotations:
+    opendatahub.io/categories: 'Package management,Notebook environments,Getting started,Testing'
+  resourceVersion: '46181594'
+  name: custom-doc-tutorial-test
+  namespace: redhat-ods-applications
+  labels:
+    app: ods-ci
+    app.kubernetes.io/part-of: odh-dashboard
+spec:
+  img: images/red-hat.svg
+  appName: ods-ci
+  description: Custom Tutorial is a test item created by ODS-CI suite in order to test creation of custom how-to document resources.
+  displayName: TEST - Custom Tutorial Documentation
+  durationMinutes: 15
+  type: tutorial
+  url: >-
+    https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science/1/html-single/how_to_install_python_packages_on_your_notebook_server/index

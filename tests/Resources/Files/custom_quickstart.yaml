@@ -7,10 +7,11 @@ metadata:
   labels:
     app: ods-ci
 spec:
-  displayName: TEST -  Custom Quick Start
+  displayName: TEST - Custom Quick Start
   appName: ods-ci
   durationMinutes: 8
-  icon: 'images/jupyterhub.svg'
+  icon: 'images/red-hat.svg'
+  # icon: 'images/jupyterhub.svg'
   description: This quick start is a TEST!!!
   introduction: |-
     ### This quick start shows that it is possible to have a Custom Quick Start on RHODS!.

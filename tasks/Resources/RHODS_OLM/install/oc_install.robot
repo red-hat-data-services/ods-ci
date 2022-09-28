@@ -3,7 +3,7 @@ Library    String
 *** Keywords ***
 Install RHODS
   [Arguments]  ${operator_version}    ${cluster_type}     ${operator_url}=${EMPTY}
-  IF   "${cluster_type}" == "PSI" or "${cluster_type}" == "OSD"
+  IF   "${cluster_type}" == "PSI" or "${cluster_type}" == "OSD" or "${cluster_type}" == "AWS"
       ${status}    Run Keyword And Return Status    Should Start With    ${operator_version}    v
       IF  ${status}==True
            Set Local Variable    ${operator_url}        quay.io/modh/qe-catalog-source:${operator_version}

@@ -48,8 +48,10 @@ Verify That The Operator Pod Does Not Get Stuck After Upgrade
         END
     END
 Verify Clean Up ODS Deployer Post-Migration
+    [Documentation]    Verifies that resources unused are cleaned up after migration
     [Tags]    Tier1
     ...       ODS-1767
+    ...       Sanity
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.17.0
     IF    ${version_check} == False
         Log    Skipping test case as RHODS version is less than 1.17.0

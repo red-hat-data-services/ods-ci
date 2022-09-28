@@ -6,7 +6,7 @@ metadata:
   name: custom-doc-howto-test
   namespace: redhat-ods-applications
   labels:
-    app: dashboard
+    app: ods-ci
     app.kubernetes.io/part-of: odh-dashboard
 spec:
   img: images/red-hat.svg

@@ -36,7 +36,7 @@ Install Custom Application
     [Documentation]     Tests if it is possible to create custom application resource item in Dashboard.
     ...                 It works by  creating the corresponding CustomResource in the cluster
     [Tags]  Sanity    Tier2
-    ...     ODS-XYZ
+    ...     ODS-1768
     Create Custom Application
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["application"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=Documentation
@@ -46,6 +46,28 @@ Install Custom Application
     Check Number Of Displayed Cards Is Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
     Check Cards Details Are Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
     [Teardown]     Delete Custom Application
+
+Install Custom How-To
+    [Documentation]     Tests if it is possible to create custom How-To resource item in Dashboard.
+    ...                 It works by  creating the corresponding CustomResource in the cluster
+    [Tags]  Sanity    Tier2
+    ...     ODS-1769
+    Create Custom How-To
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["howto"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=HowTo
+    ...                                                   expected_titles=${exp_titles}
+    [Teardown]     Delete Custom How-To
+
+Install Custom Tutorial
+    [Documentation]     Tests if it is possible to create custom tutorial resource item in Dashboard.
+    ...                 It works by  creating the corresponding CustomResource in the cluster
+    [Tags]  Sanity    Tier2
+    ...     ODS-1770
+    Create Custom Tutorial
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["tutorial"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=Tutorial
+    ...                                                   expected_titles=${exp_titles}
+    [Teardown]     Delete Custom Tutorial
 
 
 *** Keywords ***
@@ -66,21 +88,43 @@ Create Custom QuickStart
     Oc Get      kind=OdhQuickStart    label_selector=app=ods-ci  namespace=redhat-ods-applications
 
 Delete Custom Quick Start
-    [Documentation]     Deletes the previously created CRD instance
+    [Documentation]     Deletes the previously created CRD instance for custom Quickstart resource
     Oc Delete   kind=OdhQuickStart    label_selector=app=ods-ci  namespace=redhat-ods-applications
     Close All Browsers
 
+Create Custom How-To
+    [Documentation]     Creates a CRD instance of OdhDocument with type "how-to" using a custom yaml
+    Oc Apply    kind=OdhDocument    src=${HOWTO_YAML}     namespace=redhat-ods-applications
+    Oc Get      kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
+
+Delete Custom How-To
+    [Documentation]     Deletes the previously created CRD instance for custom How To resource
+    Oc Delete   kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Close All Browsers
+
+Create Custom Tutorial
+    [Documentation]     Creates a CRD instance of OdhDocument with type "how-to" using a custom yaml
+    Oc Apply    kind=OdhDocument    src=${TUTORIAL_YAML}     namespace=redhat-ods-applications
+    Oc Get      kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
+
+Delete Custom Tutorial
+    [Documentation]     Deletes the previously created CRD instance for custom How To resource
+    Oc Delete   kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Close All Browsers
+
 Create Custom Application
-    [Documentation]     Creates a CRD instance of OdhQuickStarts using a custom yaml
+    [Documentation]     Creates a CRD instance of OdhApplication using a custom yaml
     Oc Apply    kind=OdhApplication    src=${APP_YAML}     namespace=redhat-ods-applications
     Oc Get      kind=OdhApplication    label_selector=app=ods-ci  namespace=redhat-ods-applications
 
 Delete Custom Application
-    [Documentation]     Deletes the previously created OdhApplication CRD instance
+    [Documentation]     Deletes the previously created OdhApplication CRD instance for custom Applciation resource
     Oc Delete   kind=OdhApplication    label_selector=app=ods-ci  namespace=redhat-ods-applications
     Close All Browsers
 
 Load Expected Test Data
+    [Documentation]     Loads the json with expected data in Explore page and extend it
+    ...                 with expected information of the custom Application
     ${custom_app_dict}=  Load Json File  ${CUSTOM_APP_DICT_PATH}
     ${exp_data_dict}=    Load Expected Data Of RHODS Explore Section
     Set To Dictionary   ${exp_data_dict}    custom-odsci-app=${custom_app_dict["custom-odsci-app"]}

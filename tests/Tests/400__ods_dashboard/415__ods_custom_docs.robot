@@ -97,3 +97,4 @@ Check Items Have Been Displayed In Resources Page
     ...                            Resource Page Should Contain     filter=${resource_filter}
     ...                                                             search_term=${expected_titles[0]}
     ...                                                             expected_items=${expected_titles}
+    Capture Page Screenshot     ${expected_titles[0]}.png

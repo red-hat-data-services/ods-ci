@@ -3,22 +3,32 @@ Library    String
 *** Keywords ***
 Install RHODS
   [Arguments]  ${operator_version}    ${cluster_type}     ${operator_url}=${EMPTY}
-  IF   "${cluster_type}" == "PSI" or "${cluster_type}" == "OSD"
+  IF   "${cluster_type}" == "PSI" or "${cluster_type}" == "OSD" or "${cluster_type}" == "AWS"
       ${status}    Run Keyword And Return Status    Should Start With    ${operator_version}    v
       IF  ${status}==True
            Set Local Variable    ${operator_url}        quay.io/modh/qe-catalog-source:${operator_version}
+
       ELSE
-           Should Start With      ${operator_version}     quay.io     msg=you should provide the full build link
-           Set Local Variable    ${operator_url}        ${operator_version}
+           IF     "${operator_version}" == "${EMPTY}"
+                   Log   Do not modify catalog file
+           ELSE
+                   Should Start With      ${operator_version}     quay.io     msg=you should provide the full build link
+                   Set Local Variable    ${operator_url}        ${operator_version}
+           END
+
       END
       ${data}     Split String    ${RHODS_INSTALL_REPO}     /
       ${filename}  Split String     ${data}[-1]            .
       Set Test Variable     ${filename}       ${filename}[0]
       ${return_code}	  Run And Return Rc    git clone ${RHODS_INSTALL_REPO}
       Should Be Equal As Integers	${return_code}	 0
-      ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh ${operator_url}   #robocop:disable
-      Should Be Equal As Integers	${return_code}	 0
+      IF    "${operator_url}" != "${EMPTY}"
+              ${return_code}   Run And Return Rc   sed -i "s@quay.io/modh/self-managed-rhods-index:beta@${operator_url}@g" ${EXECDIR}/${filename}/manifests/catalogsource.yaml  #robocop:disable
+              Should Be Equal As Integers	${return_code}	 0
+      END
+      ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./rhods install   #robocop:disable
       Log    ${output}
+      Should Be Equal As Integers	${return_code}	 0  msg=Error detected while installing RHODS
   ELSE
        FAIL   Provided cluster type is not supported, Kindly check and provide correct cluster type.
   END
@@ -35,10 +45,16 @@ Verify RHODS Installation
   ...                   label_selector=app=rhods-dashboard
   ...                   timeout=1200
   Log  pods rhods-dashboard created
-  Wait For Pods Number  3
+  Wait For Pods Number  1
   ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=jupyterhub
+  ...                   label_selector=app=notebook-controller
   ...                   timeout=1200
+  Log  pods notebook-controller created
+  Wait For Pods Number  1
+  ...                   namespace=redhat-ods-applications
+  ...                   label_selector=app=odh-notebook-controller
+  ...                   timeout=1200
+  Log  pods odh-notebook-controller created
   Wait For Pods Number  4
   ...                   namespace=redhat-ods-monitoring
   ...                   timeout=1200

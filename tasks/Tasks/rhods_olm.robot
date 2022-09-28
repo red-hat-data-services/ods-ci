@@ -8,8 +8,8 @@ Library          String
 
 ***Variables***
 ${cluster_type}          OSD
-${operator_version}      latest
-${RHODS_INSTALL_REPO}    None
+${operator_version}      ${EMPTY}
+${RHODS_INSTALL_REPO}    https://${GITHUB_USER.TOKEN}@github.com/red-hat-data-services/self-managed-installer.git
 *** Tasks ***
 Can Install RHODS Operator
   [Tags]  install

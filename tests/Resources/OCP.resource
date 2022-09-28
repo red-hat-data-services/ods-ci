@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation  Set of Keywords for OCP checks
 Library    OpenShiftLibrary
+Library    ../../venv_ods/lib64/python3.8/site-packages/robot/libraries/OperatingSystem.py
 
 
 *** Keywords ***
@@ -48,3 +49,14 @@ Verify CR Status
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Available
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True
+
+Is OpenShift Dedicated
+    [Documentation]     Returns ${TRUE} if OpenShift cluster is "dedicated" (e.g., OSD, ROSA).
+    ...                 If returns ${FALSE} then the cluster is self-managed
+    ${_}  ${brand} =      Run And Return Rc And Output    oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.customization.brand}'
+    IF    "${brand}" == "dedicated"
+        ${is_dedicated} =    Set Variable   ${TRUE}
+    ELSE
+        ${is_dedicated} =    Set Variable   ${FALSE}
+    END
+    [Return]    ${is_dedicated}

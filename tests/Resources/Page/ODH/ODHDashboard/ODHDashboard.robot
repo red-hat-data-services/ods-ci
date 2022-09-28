@@ -311,8 +311,7 @@ Get Image Name
 Check Card Image
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
     ${src}  ${image_name}=  Get Image Name  card_locator=${card_locator}
-    ${expected_image}=  Set Variable  ${expected_data}[${app_id}][image]
-    Run Keyword And Continue On Failure    Should Be Equal    ${image_name}    ${expected_image}
+    Run Keyword And Continue On Failure    Should Be Equal    ${image_name}   ${expected_data}[${app_id}][image]
     Run Keyword And Continue On Failure    Page Should Not Contain Element    xpath:${card_locator}/${FALLBK_IMAGE_XP}
 
 Check Cards Details Are Correct

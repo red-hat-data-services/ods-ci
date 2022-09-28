@@ -9,7 +9,7 @@ spec:
   displayName: TEST - Custom ODS-CI Application
   provider: ods-ci
   description: |-
-    Custom Application is a test item created by ODS-CI to test creation of custom doc resources
+    Custom Application is a test item created by ODS-CI to test creation of custom doc resources.
   kfdefApplications: []
   category: Red Hat managed
   support: third party support

@@ -1,9 +1,10 @@
 *** Settings ***
-Library         OpenShiftLibrary
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource        ../../Resources/Page/LoginPage.robot
-Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ResourcesPage.resource
+Library          OpenShiftLibrary
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource         ../../Resources/Page/LoginPage.robot
+Resource         ../../Resources/Page/OCPLogin/OCPLogin.robot
+Resource         ../../Resources/Page/ODH/ODHDashboard/ResourcesPage.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Suite Setup      Custom Doc Suite Setup
 Suite Teardown   Custom Doc Suite Taerdown
 
@@ -18,6 +19,7 @@ ${TUTORIAL_YAML}=            tests/Resources/Files/custom_doc_tutorial.yaml
 ...                          howto=TEST - Custom How-To Documentation
 ...                          tutorial=TEST - Custom Tutorial Documentation
 ${CUSTOM_APP_DICT_PATH}=     tests/Resources/Files/CustomAppInfoDictionary.json
+${QS_EXP_HREF}=              ${OCP_CONSOLE_URL}/resources?keyword=TEST+-+Custom+Quick+Start#
 
 
 *** Test Cases ***
@@ -110,11 +112,30 @@ Check Items Have Been Displayed In Resources Page
     ...                                              expected_items=${expected_titles}
     Capture Page Screenshot     ${expected_titles[0]}.png
 
+External Link Should Be
+    [Documentation]     Checks that the link displayed by the documentation item in Resources page
+    ...                 corresponds to the expected one
+    [Arguments]     ${expected_url}     ${item_type}
+    IF  "${item_type}" == "documentation"
+        ${href}=    Get Element Attribute    //a[text()="View documentation"]    href
+    ELSE IF   "${item_type}" == "howto"
+        ${href}=    Get Element Attribute    //a[text()="Read how-to article"]    href
+    ELSE IF     "${item_type}" == "tutorial"
+        ${href}=    Get Element Attribute    //a[text()="Access tutorial"]    href
+    ELSE IF     "${item_type}" == "quickstart"
+        ${href}=    Get Element Attribute    //a[text()="Open"]    href
+    ELSE
+        Log     "${item_type}" not recognized. Trying getting the footer link...    level=WARN
+    END
+    Run Keyword And Continue On Failure   Should Be Equal     ${expected_url}      ${href}
+
 Check Custom QuickStart Item Has Been Successfully Created
     [Documentation]     Checks if RHODS Dashboard > Resources shows the custom QuickStart item
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["quickstart"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=QuickStart
     ...                                                   expected_titles=${exp_titles}
+    Run Keyword And Continue On Failure     External Link Should Be     expected_url=${QS_EXP_HREF}   item_type=quickstart
+    Run Keyword And Continue On Failure     Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   custom-quick-start-test
 
 Check Custom Application Item Has Been Successfully Created
     [Documentation]     Checks if RHODS Dashboard shows the custom Application item.
@@ -124,6 +145,8 @@ Check Custom Application Item Has Been Successfully Created
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["application"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=Documentation
     ...                                                     expected_titles=${exp_titles}
+    Run Keyword And Continue On Failure     External Link Should Be     expected_url=${DASH_EXPLORE_EXP_DATA["custom-odsci-app"]["sidebar_links"]["0"]["url"]}
+    ...                         item_type=documentation
     Click Link      Explore
     Wait Until Cards Are Loaded
     Check Number Of Displayed Cards Is Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
@@ -134,9 +157,13 @@ Check Custom How-To Item Has Been Successfully Created
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["howto"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=HowTo
     ...                                                   expected_titles=${exp_titles}
+    Run Keyword And Continue On Failure     External Link Should Be     expected_url=${DASH_EXPLORE_EXP_DATA["custom-odsci-app"]["sidebar_links"]["0"]["url"]}
+    ...                         item_type=howto
 
 Check Custom Tutorial Item Has Been Successfully Created
     [Documentation]     Checks if RHODS Dashboard > Resources  shows the custom QuickStart item
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["tutorial"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=Tutorial
     ...                                                   expected_titles=${exp_titles}
+    Run Keyword And Continue On Failure     External Link Should Be     expected_url=${DASH_EXPLORE_EXP_DATA["custom-odsci-app"]["sidebar_links"]["0"]["url"]}
+    ...                         item_type=tutorial

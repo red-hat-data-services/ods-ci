@@ -13,7 +13,7 @@ Suite Setup     Performance Suite Setup
 ${NAMESPACE}     openshift-kube-apiserver
 ${LABEL_SELECTOR}     app=openshift-kube-apiserver
 ${MEMORY_THRESHOLD}    102400
-${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-operator:cloud-resource-operator --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
+${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-applications:notebook-controller-deployment --workloads redhat-ods-applications:odh-notebook-controller-manager --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:grafana --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
 ${ISV_DATA}    ${{ {'openvino':['ovms','alpha'],'aikit':['aikit','alpha'],'pachyderm':['pachyderm','stable']} }}
 
 *** Test Cases ***
@@ -32,7 +32,7 @@ Capture And Validate Memory Utilization Of Openshift API Server POD
     [Documentation]  Capture and compare the realtime memory utilization
     ${memory_usage}     Run    kubectl top pod -n ${NAMESPACE} -l ${LABEL_SELECTOR} | awk '{if(NR>1)print $3}'
     ${memory}    Split String    ${memory_usage}   \n
-    IF   len(${memory}) < ${3}
+    IF   len(${memory}) < ${2}
          FAIL     One or more pods may not be available. Check your cluster
     ELSE
         @{memory_value}    Create List
@@ -54,18 +54,10 @@ RHODS Performance Result Validation
 
 Run Performance Test On RHODS Operator
     [Documentation]    Perform toolchain-e2e sandbox performance test on rhods-operator component
-    ${PROC} =  Start Process   cd ${EXECDIR}/toolchain-e2e/ && ${PERF_Code} >${EXECDIR}/log.txt  shell=True   alias=perf  #robocop:disable
-    FOR    ${counter}    IN RANGE    21000
-           ${result}   Wait For Process   perf     timeout=10 secs
-           ${status}   Is Process Running    perf
-           IF    ${status} == True
-                Run Keyword And Warn On Failure    Should Be Equal  ${result}  ${NONE}
-                Capture And Validate Memory Utilization Of Openshift API Server POD
-                Sleep  30s
-           ELSE
-                Exit For Loop
-           END
-    END
+    ${return_code}    ${output}    Run And Return Rc And Output    cd ${EXECDIR}/toolchain-e2e/ && ${PERF_Code}    #robocop:disable
+    Create File    ${EXECDIR}/log.txt        ${output}
+    Should Be Equal As Integers	 ${return_code}	 0
+    Capture And Validate Memory Utilization Of Openshift API Server POD
 
 Verify Sandbox Toolchain Data
     [Documentation]    Compare the memory utilization of kube api server pod

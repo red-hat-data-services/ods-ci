@@ -3,6 +3,11 @@ Resource   ../../Components/Components.resource
 Resource   ../../LoginPage.robot
 Library    JupyterLibrary
 
+
+*** Variables ***
+${OCP_LOADING_ANIMATION_XPATH}=    //div[contains(@class, "cos-status-box--loading")]
+
+
 *** Keywords ***
 Open OperatorHub
     Open OCP Console
@@ -16,6 +21,8 @@ Install ODH Operator
 
 Open OCP Console
     Open Page    ${OCP_CONSOLE_URL}
+    Wait Until Page Contains Element    xpath:${OCP_LOADING_ANIMATION_XPATH}    timeout=5s
+    Wait Until Page Does Not Contain Element    xpath:${OCP_LOADING_ANIMATION_XPATH}    timeout=10s
 
 Navigate to OperatorHub
     Menu.Navigate To Page   Operators  OperatorHub
@@ -25,4 +32,3 @@ OperatorHub Should Be Open
 
 ODH Operator Should Be Installed
     Operator Should Be Installed    Open Data Hub Operator
-

@@ -38,6 +38,7 @@ ${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//b
 ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
+${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo"]
 
 
 *** Keywords ***
@@ -75,8 +76,9 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-  [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
-  Wait For Condition  return document.title == ${dashboard_title}  timeout=15
+    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
+    Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
+    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=15s
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
@@ -390,6 +392,9 @@ Save Changes In Cluster Settings
     Click Button    Save changes
     Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Settings changes saved.
+    # New setting applies after ~5-10s. Sleep here to make
+    # sure it is applied.
+    Sleep  10s
 
 Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
@@ -436,14 +441,12 @@ Restore PVC Value To Default Size
     Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
     Click Button    Restore Default
     Save Changes In Cluster Settings
-    Sleep    20s    msg=NOTE: This change will cause juypterhub to restart. It will take 30 seconds before juypterhub will be available. #robocop:disable
-    Wait Until JH Deployment Is Ready
 
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message
     [Arguments]     ${message}
     Click Element    xpath=//*[contains(@class,'notification-badge')]
-    Page Should Contain  text=${message}
+    Wait Until Page Contains  text=${message}  timeout=300s
     Close Notification Drawer
 
 Open Notebook Images Page

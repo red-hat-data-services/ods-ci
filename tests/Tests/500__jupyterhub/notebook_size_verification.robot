@@ -40,17 +40,18 @@ Verify Spawned Notebook Size
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook And Verify Size
 
-Verify Custom Spwaned Notebook Size
-    [Documentation]    Modify and verify the default notebook conatiner size spec
-    ...    with spwaned notebook pod and set back to default size
-    [Tags]    Sanity    ODS-318
-    ...       ODS-1071
-    Launch JupyterHub Spawner From Dashboard
-    Modify Default Container Size
-    Sleep    60s    msg=Wait for the size to get reflect
-    ${d_container_size}    Create List    Small
-    Spawn Notebook And Verify Size    size=${CUSTOME_SIZE}    NOTEBOOK_SIZE=${d_container_size}
-    Restore Default Container Size
+# I think this TC is not valid anymore
+# Verify Custom Spwaned Notebook Size
+#     [Documentation]    Modify and verify the default notebook conatiner size spec
+#     ...    with spwaned notebook pod and set back to default size
+#     [Tags]    Sanity    ODS-318
+#     ...       ODS-1071
+#     Launch JupyterHub Spawner From Dashboard
+#     Modify Default Container Size
+#     Sleep    60s    msg=Wait for the size to get reflect
+#     ${d_container_size}    Create List    Small
+#     Spawn Notebook And Verify Size    size=${CUSTOME_SIZE}    NOTEBOOK_SIZE=${d_container_size}
+#     Restore Default Container Size
 
 
 *** Keywords ***
@@ -73,11 +74,7 @@ Spawn Notebook And Verify Size
     [Arguments]    ${size}=${DEFAULT_SIZE}    ${NOTEBOOK_SIZE}=${NOTEBOOK_SIZE}
     FOR    ${container_size}    IN    @{NOTEBOOK_SIZE}
         Reload Page
-        IF    $container_size == 'Small'
-            ${jh_container_size}    Evaluate    json.loads('''${size}''')    json
-        ELSE
-            ${jh_container_size}    Get Container Size    ${container_size}
-        END
+        ${jh_container_size}    Get Container Size    ${container_size}
         Spawn Notebook With Arguments    image=minimal-gpu    size=${container_size}
         ${notebook_pod_name}    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
         ${status}    Run

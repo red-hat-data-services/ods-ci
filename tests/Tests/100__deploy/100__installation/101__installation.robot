@@ -15,9 +15,11 @@ Suite Setup      OCM Suite Setup
 Suite Teardown   OCM Suite Teardown
 Test Setup       OCM Test Setup
 
+
 *** Variables ***
-${Stage_URL}    https://qaprodauth.cloud.redhat.com/openshift
+${Stage_URL}    https://qaprodauth.console.redhat.com/openshift
 ${Prod_URL}     https://console.redhat.com/openshift
+
 
 *** Test Cases ***
 Can Install ODH Operator
@@ -30,6 +32,7 @@ Verify User Can Access RHODS Documentation From OCM Console
   [Documentation]   Checks user can access RHODS documentation from addon on OCM Console
   [Tags]  ODS-1303
   ...     Tier2
+  ...     AutomationBug
   Decide OCM URL And Open Link
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip OCM Tour

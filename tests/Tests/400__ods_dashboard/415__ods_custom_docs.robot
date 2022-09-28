@@ -4,109 +4,54 @@ Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource        ../../Resources/Page/LoginPage.robot
 Resource        ../../Resources/Page/OCPLogin/OCPLogin.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ResourcesPage.resource
-Suite Setup      Custom Doc Test Setup
-# Suite Teardown   Resources Page Suite Teardown
+Suite Setup      Custom Doc Suite Setup
+Suite Teardown   Custom Doc Suite Taerdown
 
 
 *** Variables ***
-${QS_YAML}=    tests/Resources/Files/custom_quickstart.yaml
-${APP_YAML}=    tests/Resources/Files/custom_app.yaml
-${HOWTO_YAML}=    tests/Resources/Files/custom_doc_howto.yaml
-${TUTORIAL_YAML}=    tests/Resources/Files/custom_doc_tutorial.yaml
+${QS_YAML}=                  tests/Resources/Files/custom_quickstart.yaml
+${APP_YAML}=                 tests/Resources/Files/custom_app.yaml
+${HOWTO_YAML}=               tests/Resources/Files/custom_doc_howto.yaml
+${TUTORIAL_YAML}=            tests/Resources/Files/custom_doc_tutorial.yaml
 &{EXPECTED_ITEMS_TITLES}=    quickstart=TEST - Custom Quick Start
 ...                          application=TEST - Custom ODS-CI Application
 ...                          howto=TEST - Custom How-To Documentation
 ...                          tutorial=TEST - Custom Tutorial Documentation
-${CUSTOM_APP_DICT_PATH}=   tests/Resources/Files/CustomAppInfoDictionary.json
+${CUSTOM_APP_DICT_PATH}=     tests/Resources/Files/CustomAppInfoDictionary.json
 
 
 *** Test Cases ***
-Install Custom Document Items
-    [tags]  cumulative
+Verify Documentation Items Can Be Added Using Odh CRDs
+    [Documentation]     Verified it is possible to create QuickStarts,Tutorials,How-to and Application
+    ...                 by using Dashboard CRDs: OdhQuickStart, OdhDocument (for both how-to and tutorial)
+    ...                 and OdhApplication.
+    [Tags]    Tier2
+    ...       ODS-697    ODS-1768    ODS-1769    ODS-1770
     Create Custom QuickStart
     Create Custom Application
     Create Custom How-To
     Create Custom Tutorial
-    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["quickstart"]}
-    Check Items Have Been Displayed In Resources Page     resource_filter=QuickStart
-    ...                                                     expected_titles=${exp_titles}
-    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["howto"]}
-    Check Items Have Been Displayed In Resources Page     resource_filter=HowTo
-    ...                                                   expected_titles=${exp_titles}
-    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["tutorial"]}
-    Check Items Have Been Displayed In Resources Page     resource_filter=Tutorial
-    ...                                                   expected_titles=${exp_titles}
-    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["application"]}
-    Check Items Have Been Displayed In Resources Page     resource_filter=Documentation
-    ...                                                     expected_titles=${exp_titles}
-    Click Link      Explore
-    Wait Until Cards Are Loaded
-    Check Number Of Displayed Cards Is Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
-    Check Cards Details Are Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
+    Check Custom QuickStart Item Has Been Successfully Created
+    Check Custom How-To Item Has Been Successfully Created
+    Check Custom Tutorial Item Has Been Successfully Created
+    Check Custom Application Item Has Been Successfully Created
     [Teardown]     Run Keywords     Delete Custom Quick Start
     ...                             Delete Custom Application
-    ...                             Delete Custom How-To
-
-Install Custom QuickStart
-    [Documentation]     Tests if it is possible to create custom quick start resource item in Dashboard.
-    ...                 It works by  creating the corresponding CustomResource in the cluster
-    [Tags]  Sanity    Tier2
-    ...     ODS-697
-    Create Custom QuickStart
-    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["quickstart"]}
-    Check Items Have Been Displayed In Resources Page     resource_filter=QuickStart
-    ...                                                     expected_titles=${exp_titles}
-    [Teardown]     Delete Custom Quick Start
-
-Install Custom Application
-    [Documentation]     Tests if it is possible to create custom application resource item in Dashboard.
-    ...                 It works by  creating the corresponding CustomResource in the cluster
-    [Tags]  Sanity    Tier2
-    ...     ODS-1768
-    Create Custom Application
-    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["application"]}
-    Check Items Have Been Displayed In Resources Page     resource_filter=Documentation
-    ...                                                     expected_titles=${exp_titles}
-    Click Link      Explore
-    Wait Until Cards Are Loaded
-    Check Number Of Displayed Cards Is Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
-    Check Cards Details Are Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
-    [Teardown]     Delete Custom Application
-
-Install Custom How-To
-    [Documentation]     Tests if it is possible to create custom How-To resource item in Dashboard.
-    ...                 It works by  creating the corresponding CustomResource in the cluster
-    [Tags]  Sanity    Tier2
-    ...     ODS-1769
-    Create Custom How-To
-    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["howto"]}
-    Check Items Have Been Displayed In Resources Page     resource_filter=HowTo
-    ...                                                   expected_titles=${exp_titles}
-    [Teardown]     Delete Custom How-To
-
-Install Custom Tutorial
-    [Documentation]     Tests if it is possible to create custom tutorial resource item in Dashboard.
-    ...                 It works by  creating the corresponding CustomResource in the cluster
-    [Tags]  Sanity    Tier2
-    ...     ODS-1770
-    Create Custom Tutorial
-    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["tutorial"]}
-    Check Items Have Been Displayed In Resources Page     resource_filter=Tutorial
-    ...                                                   expected_titles=${exp_titles}
-    [Teardown]     Delete Custom Tutorial
+    ...                             Delete Custom How-To And Tutorial
 
 
 *** Keywords ***
-Custom Doc Test Setup
-    [Documentation]     Open RHODS Dashboard page and move to Resources page
+Custom Doc Suite Setup
+    [Documentation]     Open RHODS Dashboard page and load expected data for custom application
     Set Library Search Order    SeleniumLibrary
-    # RHOSi Setup
+    RHOSi Setup
     ${dashboard_explore_exp_data}=   Load Expected Test Data
     Set Suite Variable      ${DASH_EXPLORE_EXP_DATA}   ${dashboard_explore_exp_data}
 
-Resources Page Suite Teardown
+Custom Doc Suite Taerdown
+    [Documentation]     Closes all the browsers instances and run RHOSi Teardown
     Close All Browsers
-    # RHOSi Teardown
+    RHOSi Teardown
 
 Create Custom QuickStart
     [Documentation]     Creates a CRD instance of OdhQuickStarts using a custom yaml
@@ -123,18 +68,13 @@ Create Custom How-To
     Oc Apply    kind=OdhDocument    src=${HOWTO_YAML}     namespace=redhat-ods-applications
     Oc Get      kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
 
-Delete Custom How-To
-    [Documentation]     Deletes the previously created CRD instance for custom How To resource
-    Oc Delete   kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
-    Close All Browsers
-
 Create Custom Tutorial
     [Documentation]     Creates a CRD instance of OdhDocument with type "how-to" using a custom yaml
     Oc Apply    kind=OdhDocument    src=${TUTORIAL_YAML}     namespace=redhat-ods-applications
     Oc Get      kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
 
-Delete Custom Tutorial
-    [Documentation]     Deletes the previously created CRD instance for custom How To resource
+Delete Custom How-To And Tutorial
+    [Documentation]     Deletes the previously created CRD instance for custom How To and Tutorial resources
     Oc Delete   kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
     Close All Browsers
 
@@ -165,7 +105,38 @@ Check Items Have Been Displayed In Resources Page
     Click Link      Resources
     Run Keyword And Continue On Failure
     ...               Wait Until Keyword Succeeds    ${timeout}    ${retry_interval}
-    ...                            Resource Page Should Contain     filter=${resource_filter}
-    ...                                                             search_term=${expected_titles[0]}
-    ...                                                             expected_items=${expected_titles}
+    ...               Resource Page Should Contain   filter=${resource_filter}
+    ...                                              search_term=${expected_titles[0]}
+    ...                                              expected_items=${expected_titles}
     Capture Page Screenshot     ${expected_titles[0]}.png
+
+Check Custom QuickStart Item Has Been Successfully Created
+    [Documentation]     Checks if RHODS Dashboard > Resources shows the custom QuickStart item
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["quickstart"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=QuickStart
+    ...                                                   expected_titles=${exp_titles}
+
+Check Custom Application Item Has Been Successfully Created
+    [Documentation]     Checks if RHODS Dashboard shows the custom Application item.
+    ...                 Explore page should report a tile for the custom application;
+    ...                 the Resources page should display a "Documentation" item
+    ...                 for the corresponding custom application
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["application"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=Documentation
+    ...                                                     expected_titles=${exp_titles}
+    Click Link      Explore
+    Wait Until Cards Are Loaded
+    Check Number Of Displayed Cards Is Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
+    Check Cards Details Are Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
+
+Check Custom How-To Item Has Been Successfully Created
+    [Documentation]     Checks if RHODS Dashboard > Resources  shows the custom QuickStart item
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["howto"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=HowTo
+    ...                                                   expected_titles=${exp_titles}
+
+Check Custom Tutorial Item Has Been Successfully Created
+    [Documentation]     Checks if RHODS Dashboard > Resources  shows the custom QuickStart item
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["tutorial"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=Tutorial
+    ...                                                   expected_titles=${exp_titles}

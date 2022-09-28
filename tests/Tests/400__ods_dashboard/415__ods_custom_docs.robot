@@ -21,6 +21,32 @@ ${CUSTOM_APP_DICT_PATH}=   tests/Resources/Files/CustomAppInfoDictionary.json
 
 
 *** Test Cases ***
+Install Custom Document Items
+    [tags]  cumulative
+    Create Custom QuickStart
+    Create Custom Application
+    Create Custom How-To
+    Create Custom Tutorial
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["quickstart"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=QuickStart
+    ...                                                     expected_titles=${exp_titles}
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["howto"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=HowTo
+    ...                                                   expected_titles=${exp_titles}
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["tutorial"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=Tutorial
+    ...                                                   expected_titles=${exp_titles}
+    ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["application"]}
+    Check Items Have Been Displayed In Resources Page     resource_filter=Documentation
+    ...                                                     expected_titles=${exp_titles}
+    Click Link      Explore
+    Wait Until Cards Are Loaded
+    Check Number Of Displayed Cards Is Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
+    Check Cards Details Are Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
+    [Teardown]     Run Keywords     Delete Custom Quick Start
+    ...                             Delete Custom Application
+    ...                             Delete Custom How-To
+
 Install Custom QuickStart
     [Documentation]     Tests if it is possible to create custom quick start resource item in Dashboard.
     ...                 It works by  creating the corresponding CustomResource in the cluster
@@ -137,7 +163,8 @@ Check Items Have Been Displayed In Resources Page
     ...                ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}
     ...                browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     Click Link      Resources
-    Wait Until Keyword Succeeds    ${timeout}    ${retry_interval}
+    Run Keyword And Continue On Failure
+    ...               Wait Until Keyword Succeeds    ${timeout}    ${retry_interval}
     ...                            Resource Page Should Contain     filter=${resource_filter}
     ...                                                             search_term=${expected_titles[0]}
     ...                                                             expected_items=${expected_titles}

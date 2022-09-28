@@ -3,7 +3,6 @@ kind: OdhDocument
 metadata:
   annotations:
     opendatahub.io/categories: 'Package management,Notebook environments,Getting started,Testing'
-  resourceVersion: '46181594'
   name: custom-doc-tutorial-test
   namespace: redhat-ods-applications
   labels:

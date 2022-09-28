@@ -47,6 +47,62 @@ Verify That The Operator Pod Does Not Get Stuck After Upgrade
             Log Error And Fail Pods When Pods Were Terminated    ${operator_pod_info}    Opertator Pod Stuck
         END
     END
+Verify Clean Up ODS Deployer Post-Migration
+    [Documentation]    Verifies that resources unused are cleaned up after migration
+    [Tags]    Tier1
+    ...       ODS-1767
+    ...       Sanity
+    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.17.0
+    IF    ${version_check} == False
+        Log    Skipping test case as RHODS version is less than 1.17.0
+        Skip
+    END
+    ${cro_pod}=    Run Keyword And Return Status
+    ...    Oc Get    kind=Pod    api_version=v1    label_selector=name=cloud-resource-operator
+    IF    ${cro_pod} == True
+        Fail    CRO pod found after migration
+    END
+    ${odhdeployer_logs}=    Fetch Odh-deployer Pod Logs
+    ${odhdeployer_logs_content}=    Set Variable
+    ...    INFO: No CRO resources found, proceeding normally
+    ${status}=   Run Keyword And Return Status     Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
+    IF    ${status} == False
+        ${odhdeployer_logs_content}=    Set Variable
+        ...    INFO: Migrating from JupyterHub to NBC, deleting old JupyterHub artifacts
+        Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
+    END
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found   
+    ...    Oc Get    kind=CustomResourceDefinition    name=blobstorages.integreatly.org     namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found   
+    ...    Oc Get    kind=CustomResourceDefinition    name=postgres.integreatly.org    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=CustomResourceDefinition    name=redis.integreatly.org    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=CustomResourceDefinition    name=postgressnapshots.integreatly.org    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=CustomResourceDefinition    name=redisnapshots.integreatly.org    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=ClusterRole    name=cloud-resource-operator-cluster-role    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=ClusterRoleBinding    name=cloud-resource-operator-cluster-rolebinding    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=Role    name=cloud-resource-operator-role    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=RoleBinding    name=cloud-resource-operator-rolebinding    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=Role    name=cloud-resource-operator-rds-role    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=RoleBinding    name=cloud-resource-operator-rds-rolebinding    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=Deployment    name=cloud-resource-operator    namespace=redhat-ods-applications
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Oc Get    kind=ServiceAccount    name=cloud-resource-operator    namespace=redhat-ods-applications
+
+    ${dashboardConfig} =   Oc Get   kind=OdhDashboardConfig   namespace=redhat-ods-applications  name=odh-dashboard-config
+    Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["adminGroups"]}    dedicated-admins 	
+    Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["allowedGroups"]}    system:authenticated
+    Should Be True    ${dashboardConfig[0]["spec"]["notebookController"]["enabled"]}
+    Should Be Equal   ${dashboardConfig[0]["spec"]["notebookController"]["pvcSize"]}    20Gi
 
 *** Keywords ***
 Fetch Odh-deployer Pod Info

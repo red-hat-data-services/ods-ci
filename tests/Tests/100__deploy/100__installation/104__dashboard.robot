@@ -29,8 +29,8 @@ Verify Dashboard Is Shipped And Enabled Within ODS
     OpenShift Resource Field Value Should Be Equal As Strings    spec.ports[0].targetPort    8443    @{dashboard_services_info}
     OpenShift Resource Field Value Should Match Regexp    spec.clusterIP    ^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$
     ...    @{dashboard_services_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas    2    @{dashboard_replicasets_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    2    @{dashboard_replicasets_info}
+    OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas    5    @{dashboard_replicasets_info}
+    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    5    @{dashboard_replicasets_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.port.targetPort    8443    @{dashboard_routes_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.to.name    rhods-dashboard    @{dashboard_routes_info}
     OpenShift Resource Field Value Should Match Regexp    spec.host    dashboard-redhat-ods-applications.*    @{dashboard_routes_info}

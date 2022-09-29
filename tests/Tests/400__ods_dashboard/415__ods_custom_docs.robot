@@ -19,7 +19,6 @@ ${TUTORIAL_YAML}=            tests/Resources/Files/custom_doc_tutorial.yaml
 ...                          howto=TEST - Custom How-To Documentation
 ...                          tutorial=TEST - Custom Tutorial Documentation
 ${CUSTOM_APP_DICT_PATH}=     tests/Resources/Files/CustomAppInfoDictionary.json
-${QS_EXP_HREF}=              ${OCP_CONSOLE_URL}/resources?keyword=TEST+-+Custom+Quick+Start#
 
 
 *** Test Cases ***
@@ -58,36 +57,36 @@ Custom Doc Suite Taerdown
 Create Custom QuickStart
     [Documentation]     Creates a CRD instance of OdhQuickStarts using a custom yaml
     Oc Apply    kind=OdhQuickStart    src=${QS_YAML}     namespace=redhat-ods-applications
-    Oc Get      kind=OdhQuickStart    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Oc Get      kind=OdhQuickStart    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
 
 Delete Custom Quick Start
     [Documentation]     Deletes the previously created CRD instance for custom Quickstart resource
-    Oc Delete   kind=OdhQuickStart    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Oc Delete   kind=OdhQuickStart    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
     Close All Browsers
 
 Create Custom How-To
     [Documentation]     Creates a CRD instance of OdhDocument with type "how-to" using a custom yaml
     Oc Apply    kind=OdhDocument    src=${HOWTO_YAML}     namespace=redhat-ods-applications
-    Oc Get      kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Oc Get      kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
 
 Create Custom Tutorial
     [Documentation]     Creates a CRD instance of OdhDocument with type "how-to" using a custom yaml
     Oc Apply    kind=OdhDocument    src=${TUTORIAL_YAML}     namespace=redhat-ods-applications
-    Oc Get      kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Oc Get      kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
 
 Delete Custom How-To And Tutorial
     [Documentation]     Deletes the previously created CRD instance for custom How To and Tutorial resources
-    Oc Delete   kind=OdhDocument    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Oc Delete   kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
     Close All Browsers
 
 Create Custom Application
     [Documentation]     Creates a CRD instance of OdhApplication using a custom yaml
     Oc Apply    kind=OdhApplication    src=${APP_YAML}     namespace=redhat-ods-applications
-    Oc Get      kind=OdhApplication    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Oc Get      kind=OdhApplication    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
 
 Delete Custom Application
     [Documentation]     Deletes the previously created OdhApplication CRD instance for custom Applciation resource
-    Oc Delete   kind=OdhApplication    label_selector=app=ods-ci  namespace=redhat-ods-applications
+    Oc Delete   kind=OdhApplication    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
     Close All Browsers
 
 Load Expected Test Data
@@ -134,7 +133,6 @@ Check Custom QuickStart Item Has Been Successfully Created
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["quickstart"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=QuickStart
     ...                                                   expected_titles=${exp_titles}
-    Run Keyword And Continue On Failure     External Link Should Be     expected_url=${QS_EXP_HREF}   item_type=quickstart
     Run Keyword And Continue On Failure     Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   custom-quick-start-test
 
 Check Custom Application Item Has Been Successfully Created

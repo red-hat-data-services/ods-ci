@@ -5,10 +5,10 @@ metadata:
   annotations:
     opendatahub.io/categories: 'Getting started,Jupyter notebook'
   labels:
-    app: ods-ci
+    app: custom-odsci-app
 spec:
   displayName: TEST - Custom Quick Start
-  appName: ods-ci
+  appName: custom-odsci-app
   durationMinutes: 8
   icon: 'images/red-hat.svg'
   # icon: 'images/jupyterhub.svg'

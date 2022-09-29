@@ -6,15 +6,14 @@ metadata:
   name: custom-doc-howto-test
   namespace: redhat-ods-applications
   labels:
-    app: ods-ci
-    app.kubernetes.io/part-of: odh-dashboard
+    app: custom-odsci-app
 spec:
   img: images/red-hat.svg
-  appName: ods-ci
+  appName: custom-odsci-app
   provider: ods-ci
   description: Custom How-To is a test item created by ODS-CI suite in order to test creation of custom how-to document resources.
   displayName: TEST - Custom How-To Documentation
   durationMinutes: 15
   type: how-to
   url: >-
-    https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science/1/html-single/how_to_install_python_packages_on_your_notebook_server/index
+    https://github.com/red-hat-data-services/ods-ci

@@ -15,7 +15,6 @@ Verify Dashboard Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-233
-    ...       ODS-546
     @{dashboard_pods_info} =    Fetch Dashboard Pods
     @{dashboard_deployments_info} =    Fetch Dashboard Deployments
     @{dashboard_services_info} =    Fetch Dashboard Services

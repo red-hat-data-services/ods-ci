@@ -15,7 +15,7 @@ Verify Dashboard Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-233
-    ...       ODS-546
+    [Setup]     Set Expected Replicas Based On Version
     @{dashboard_pods_info} =    Fetch Dashboard Pods
     @{dashboard_deployments_info} =    Fetch Dashboard Deployments
     @{dashboard_services_info} =    Fetch Dashboard Services
@@ -29,8 +29,8 @@ Verify Dashboard Is Shipped And Enabled Within ODS
     OpenShift Resource Field Value Should Be Equal As Strings    spec.ports[0].targetPort    8443    @{dashboard_services_info}
     OpenShift Resource Field Value Should Match Regexp    spec.clusterIP    ^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$
     ...    @{dashboard_services_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas    2    @{dashboard_replicasets_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    2    @{dashboard_replicasets_info}
+    OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas    ${EXP_DASHBOARD_REPLICAS}    @{dashboard_replicasets_info}
+    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    ${EXP_DASHBOARD_REPLICAS}    @{dashboard_replicasets_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.port.targetPort    8443    @{dashboard_routes_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.to.name    rhods-dashboard    @{dashboard_routes_info}
     OpenShift Resource Field Value Should Match Regexp    spec.host    dashboard-redhat-ods-applications.*    @{dashboard_routes_info}
@@ -109,6 +109,15 @@ Verify rhods-dashboard ClusterRole Rules
     Verify rhods-dashboard ClusterRole Rule    ${rule_13}    ${rule_13_expected_verbs}    ${rule_13_expected_apigroups}    ${rule_13_expected_resources}
 
 *** Keywords ***
+Set Expected Replicas Based On Version
+    [Documentation]     Set the expected number of dashboard replicas changes based on RHODS version
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.17.0
+    IF    ${version_check} == True
+        Set Suite Variable    ${EXP_DASHBOARD_REPLICAS}       5
+    ELSE
+        Set Suite Variable    ${EXP_DASHBOARD_REPLICAS}       2
+    END
+
 Fetch Dashboard Pods
     [Documentation]    Fetch information from Dashboard pods
     ...    Args:
@@ -162,7 +171,7 @@ Verify Dashboard Deployment
     @{dashboard} =  Oc Get    kind=Pod    namespace=redhat-ods-applications    api_version=v1
     ...    label_selector=deployment = rhods-dashboard
     ${containerNames} =    Create List    rhods-dashboard    oauth-proxy
-    Verify Deployment    ${dashboard}    2    2    ${containerNames}
+    Verify Deployment    ${dashboard}    ${EXP_DASHBOARD_REPLICAS}    2    ${containerNames}
 
 Verify rhods-dashboard ClusterRole Rule
     [Documentation]    Verifies rhods-dashboard ClusterRole rules matches expected values

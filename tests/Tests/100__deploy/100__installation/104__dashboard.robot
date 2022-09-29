@@ -161,7 +161,7 @@ Verify Dashboard Deployment
     @{dashboard} =  Oc Get    kind=Pod    namespace=redhat-ods-applications    api_version=v1
     ...    label_selector=deployment = rhods-dashboard
     ${containerNames} =    Create List    rhods-dashboard    oauth-proxy
-    Verify Deployment    ${dashboard}    2    2    ${containerNames}
+    Verify Deployment    ${dashboard}    5    2    ${containerNames}
 
 Verify rhods-dashboard ClusterRole Rule
     [Documentation]    Verifies rhods-dashboard ClusterRole rules matches expected values

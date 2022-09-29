@@ -60,3 +60,14 @@ Is OpenShift Dedicated
         ${is_dedicated} =    Set Variable   ${FALSE}
     END
     [Return]    ${is_dedicated}
+
+Is OpenShift Dedicated v2
+    [Documentation]     Returns ${TRUE} if OpenShift cluster is "dedicated" (e.g., OSD, ROSA).
+    ...                 If returns ${FALSE} then the cluster is self-managed
+    ${platform} =    OpenshiftLibrary.Oc Get    kind=ConfigMap  name=odh-platform-config  namespace=redhat-ods-operator  fields=['.data.platform']
+    IF    "${platform}" == "dedicated"
+        ${is_dedicated} =    Set Variable   ${TRUE}
+    ELSE
+        ${is_dedicated} =    Set Variable   ${FALSE}
+    END
+    [Return]    ${is_dedicated}

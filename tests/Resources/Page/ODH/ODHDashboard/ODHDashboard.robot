@@ -175,9 +175,10 @@ Load Expected Data Of RHODS Explore Section
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
     END
     ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
-    ${is_dedicated}=    Is OpenShift Dedicated
-    IF    ${is_dedicated} == ${TRUE}
-        Remove From Dictionary   dictionary=${apps_dict_obj}   @{ISV_TO_REMOVE_SELF_MANAGED}
+    ${is_dedicated}=    Is OpenShift Dedicated v2
+    # ${is_dedicated}=    Is OpenShift Dedicated
+    IF    ${is_dedicated} == ${FALSE}
+        Remove From Dictionary   ${apps_dict_obj}   @{ISV_TO_REMOVE_SELF_MANAGED}
     END
     [Return]  ${apps_dict_obj}
 

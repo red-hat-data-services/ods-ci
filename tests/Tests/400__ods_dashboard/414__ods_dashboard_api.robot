@@ -216,6 +216,7 @@ Verify Access To pvc API Endpoint
     [Tags]    ODS-1728
     ...       Tier1    Sanity
     ...       Security
+    Run Keyword And Warn On Failure    Delete Test Notebooks CRs And PVCs From CLI
     ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
     ${PVC_ENDPOINT_BASIC_USER}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER}
     ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
@@ -503,11 +504,9 @@ Verify Access To nb-events API Endpoint
     ...                 the events from user notebook
     ...                 The syntax to reach this endpoint is:
     ...                 `nb-events/<notebook_namespace>/jupyter-nb-<username_nb>`
-    ...                 ProductBug: RHODS-5204
     [Tags]    ODS-1725
     ...       Tier1    Sanity
     ...       Security
-    ...       ProductBug
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_PODNAME_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER}
@@ -521,9 +520,9 @@ Verify Access To nb-events API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Unauthorized
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
 Verify Access To status API Endpoint
@@ -564,11 +563,9 @@ Verify Access to notebooks API Endpoint
     ...                 the user notebook CR.
     ...                 The syntax to reach this endpoint is:
     ...                 `notebooks/<notebook_namespace>/jupyter-nb-<username_nb>`
-    ...                 ProductBug: RHODS-5204
     [Tags]    ODS-1729
     ...       Tier1    Sanity
     ...       Security
-    ...       ProductBug
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER}
@@ -595,9 +592,9 @@ Verify Access to notebooks API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_2_STATUS}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Unauthorized
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     ${NB_BASIC_USER_2_SAFENAME}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Set Username In Notebook Payload    notebook_username=${NB_BASIC_USER_2_SAFENAME}
     Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
@@ -621,23 +618,21 @@ Verify Access to rolebindings API Endpoint
     ...                 based on the permissions of the users who query the endpoint
     ...                 The syntax to reach this endpoint is:
     ...                 `rolebindings/<dashboard_namespace>/<notebook_namespace>-image-pullers`
-    ...                 ProductBug: RHODS-5204
     [Tags]    ODS-1730
     ...       Tier1    Sanity
     ...       Security
-    ...       ProductBug
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${NOTEBOOK_NS}/    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${NOTEBOOK_NS}/    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${ROLE_BIND_ENDPOINT_BODY}
     Operation Should Be Forbidden

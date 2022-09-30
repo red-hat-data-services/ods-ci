@@ -50,7 +50,8 @@ Verify CR Status
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Available
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True
 
-Is OpenShift Dedicated
+# to be removed as soon as the final solution is implemented
+Is OpenShift Dedicated v1
     [Documentation]     Returns ${TRUE} if OpenShift cluster is "dedicated" (e.g., OSD, ROSA).
     ...                 If returns ${FALSE} then the cluster is self-managed
     ${_}  ${brand} =      Run And Return Rc And Output    oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.customization.brand}'
@@ -61,11 +62,23 @@ Is OpenShift Dedicated
     END
     [Return]    ${is_dedicated}
 
+# to be removed as soon as the final solution is implemented
 Is OpenShift Dedicated v2
     [Documentation]     Returns ${TRUE} if OpenShift cluster is "dedicated" (e.g., OSD, ROSA).
     ...                 If returns ${FALSE} then the cluster is self-managed
     ${platform} =    OpenshiftLibrary.Oc Get    kind=ConfigMap  name=odh-platform-config  namespace=redhat-ods-operator  fields=['.data.platform']
     IF    "${platform}" == "dedicated"
+        ${is_dedicated} =    Set Variable   ${TRUE}
+    ELSE
+        ${is_dedicated} =    Set Variable   ${FALSE}
+    END
+    [Return]    ${is_dedicated}
+
+Is OpenShift Dedicated
+    [Documentation]     Returns ${TRUE} if OpenShift cluster is "dedicated" (e.g., OSD, ROSA).
+    ...                 If returns ${FALSE} then the cluster is self-managed
+    ${self_managed_cs} =    OpenshiftLibrary.Oc Get    kind=CatalogSource  name=self-managed-rhods  namespace=openshift-marketplace
+    IF    ${self_managed_cs} == ${NONE}
         ${is_dedicated} =    Set Variable   ${TRUE}
     ELSE
         ${is_dedicated} =    Set Variable   ${FALSE}

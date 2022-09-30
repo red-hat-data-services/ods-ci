@@ -168,15 +168,14 @@ Go To RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.16.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.18.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
     END
     ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
-    ${is_dedicated}=    Is OpenShift Dedicated v2
-    # ${is_dedicated}=    Is OpenShift Dedicated
+    ${is_dedicated}=    Is OpenShift Dedicated
     IF    ${is_dedicated} == ${FALSE}
         Remove From Dictionary   ${apps_dict_obj}   @{ISV_TO_REMOVE_SELF_MANAGED}
     END

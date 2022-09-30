@@ -42,6 +42,7 @@ Delete Data Science Project
     Project Should Be Listed    project_title=${project_title}
     Open Actions Menu Of Project    project_title=${project_title}
     Click Delete From Action Menu   project_title=${project_title}
+    # check NS deleted
 
 Open Actions Menu Of Project
     [Arguments]     ${project_title}
@@ -52,18 +53,19 @@ Click Delete From Action Menu
     [Arguments]     ${project_title}
     Wait Until Page Contains Element    ${DELETE_ACTION_BTN_XP}
     Click Element    ${DELETE_ACTION_BTN_XP}
+    # Add confirmation click
 
 Wait Until Project Is Open
     [Arguments]     ${project_title}
-    Wait Until Page Contains Element    xpath=//h1[text()=${project_title}]    timeout=30
+    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
 
 Project Should Be Listed
     [Arguments]     ${project_title}
-    Page Should Contain Element    xpath=//td/a[text()=${project_title}]
+    Page Should Contain Element    xpath=//td/a[text()="${project_title}"]
 
 Project's Owner Should Be
     [Arguments]     ${project_title}    ${expected_username}
-    Page Should Contain Element    xpath=//td[a[text()=${project_title}]]/small[text()=${expected_username}]
+    Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Arguments]    ${title}    ${description}
@@ -75,5 +77,6 @@ Create Data Science Project
     Wait Until Element Is Enabled    ${CREATE_BTN_XP}
     Click Button    ${CREATE_BTN_XP}
     Wait Until Modal Disappear
+    # check NS created
 
 

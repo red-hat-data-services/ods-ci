@@ -16,15 +16,18 @@ Uninstall RHODS
 
 Uninstall RHODS In OSD
   Delete RHODS CatalogSource
-  Trigger RHODS Uninstall 
-    
+  Trigger RHODS Uninstall
+
 Uninstall RHODS In PSI
       ${return_code}    ${output}	  Run And Return Rc And Output   git clone ${RHODS_INSTALL_REPO}
       Log   ${output}    console=yes
       Should Be Equal As Integers	${return_code}	 0
       ${git_folder} =  Get Regexp Matches    ${output}	   Cloning into \'(.*?)\'    1
       Log   ${git_folder}[0]
-      ${return_code}    ${output}    Run And Return Rc And Output   (cd ${git_folder}[0]; ./cleanup.sh); wait $!; sleep 60   #robocop:disable
+      ${return_code}    ${output}    Run And Return Rc And Output   (cd ${git_folder}[0]; ./rhods uninstall <<< Y); wait $!; sleep 60   #robocop:disable
+      Log    ${output}    console=yes
+      Should Be Equal As Integers	${return_code}	 0
+      ${return_code}    ${output}    Run And Return Rc And Output   (cd ${git_folder}[0]; ./rhods cleanup <<< Y); wait $!; sleep 60   #robocop:disable
       Log    ${output}    console=yes
       Should Be Equal As Integers	${return_code}	 0
       ${return_code}	  ${output}    Run And Return Rc And Output   rm -rf ${git_folder}[0]

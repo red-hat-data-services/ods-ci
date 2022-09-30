@@ -189,3 +189,31 @@ Get OAuth Cookie
     ...                 It assumes Dashboard UI has been launched and login performed using UI.
     ${cookie}=     Get Cookie  _oauth_proxy
     [Return]    ${cookie.value}
+
+Is Generic Modal Displayed
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    IF    ${partial_match} == ${TRUE}
+        ${is_displayed}=    Run Keyword And Return Status
+        ...                 Page Should Contain Element    xpath=//*[contains(id,"${id}")]    timeout=${timeout}
+    ELSE
+        ${is_displayed}=    Run Keyword And Return Status
+        ...                 Page Should Contain Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+    END
+    [Return]    ${is_displayed}
+
+Wait Until Modal Disappear
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    IF    ${partial_match} == ${TRUE}
+        Wait Until Page Contains Element    xpath=//*[contains(id,"${id}")]    timeout=${timeout}
+        Wait Until Page Does Not Contain Element    xpath=//*[contains(id,"${id}")]    timeout=${timeout}
+    ELSE
+        Wait Until Page Contains Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+        Wait Until Page Does Not Contain Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+    END
+
+Close Generic Modal If Present
+    ${is_modal}=    Is Generic Modal Displayed
+    IF    ${is_modal} == ${TRUE}
+        Click Element    xpath=//button[@aria-label="Close"]
+        Wait Until Modal Disappear
+    END

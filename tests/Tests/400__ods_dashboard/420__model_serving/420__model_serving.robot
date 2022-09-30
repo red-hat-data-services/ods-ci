@@ -22,6 +22,10 @@ Validate Model Serving quickstart
 Verify Model Serving Installation
     [Documentation]    Verifies Model Serving resources
     [Tags]    Resources
+    # Needed for now in RHODS, temporary until included in RHODS
+    ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
+    Log    ${label}
+    Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Triton Deployment
     Wait Until Keyword Succeeds  5 min  10 sec  Verify odh-model-controller Deployment
     Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
@@ -29,18 +33,13 @@ Verify Model Serving Installation
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Etcd Pod
 
-    # Needed for now in RHODS, temporary until included in RHODS
-    ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
-    Log    ${label}
-    Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
-
 Test Inference
     [Documentation]    Test the inference result
     [Tags]    Inference
     # make sure model is being served
     # TODO: find better way to understand when model is being served
     # One option is Triton pods being both 5/5 Ready
-    Sleep  1m
+    #Sleep  1m
     ${MS_ROUTE} =    Run    oc get routes -n ${MODEL_MESH_NAMESPACE} example-onnx-mnist --template={{.spec.host}}{{.spec.path}}
     ${AUTH_TOKEN} =    Run    oc sa new-token user-one -n ${MODEL_MESH_NAMESPACE}
     ${inference_output} =    Run    curl -ks https://${MS_ROUTE}/infer -d @modelmesh-serving/quickstart/input.json -H "Authorization: Bearer ${AUTH_TOKEN}"
@@ -77,7 +76,8 @@ Verify Triton Deployment
     @{triton} =  Oc Get    kind=Pod    namespace=${MODEL_MESH_NAMESPACE}    label_selector=name=modelmesh-serving-triton-2.x
     ${containerNames} =  Create List  rest-proxy  oauth-proxy  triton  triton-adapter  mm
     Verify Deployment    ${triton}  2  5  ${containerNames}
-    Log  ${triton}
+    ${all_ready} =    Run    oc get deployment -l name=modelmesh-serving-triton-2.x | grep 2/2 -o
+    Should Be Equal As Strings    ${all_ready}    2/2
 
 Delete Model Serving Resources
     [Documentation]    wrapper keyword that runs oc commands to delete model serving stuff

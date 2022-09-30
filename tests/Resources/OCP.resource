@@ -74,13 +74,13 @@ Is OpenShift Dedicated v2
     END
     [Return]    ${is_dedicated}
 
-Is OpenShift Dedicated
-    [Documentation]     Returns ${TRUE} if OpenShift cluster is "dedicated" (e.g., OSD, ROSA).
-    ...                 If returns ${FALSE} then the cluster is self-managed
+Is RHODS Self-Managed
+    [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed in the cluster (e.g., usually on OSD, ROSA).
+    ...                 Returns ${TRUE} if RHODS Self-Managed is installed (e.g., usually on PSI or baremetal)
     ${self_managed_cs} =    OpenshiftLibrary.Oc Get    kind=CatalogSource  name=self-managed-rhods  namespace=openshift-marketplace
     IF    ${self_managed_cs} == ${NONE}
-        ${is_dedicated} =    Set Variable   ${TRUE}
+        ${is_self_managed} =    Set Variable   ${FALSE}
     ELSE
-        ${is_dedicated} =    Set Variable   ${FALSE}
+        ${is_self_managed} =    Set Variable   ${TRUE}
     END
-    [Return]    ${is_dedicated}
+    [Return]    ${is_self_managed}

@@ -50,32 +50,9 @@ Verify CR Status
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Available
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True
 
-# to be removed as soon as the final solution is implemented
-Is OpenShift Dedicated v1
-    [Documentation]     Returns ${TRUE} if OpenShift cluster is "dedicated" (e.g., OSD, ROSA).
-    ...                 If returns ${FALSE} then the cluster is self-managed
-    ${_}  ${brand} =      Run And Return Rc And Output    oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.customization.brand}'
-    IF    "${brand}" == "dedicated"
-        ${is_dedicated} =    Set Variable   ${TRUE}
-    ELSE
-        ${is_dedicated} =    Set Variable   ${FALSE}
-    END
-    [Return]    ${is_dedicated}
-
-# to be removed as soon as the final solution is implemented
-Is OpenShift Dedicated v2
-    [Documentation]     Returns ${TRUE} if OpenShift cluster is "dedicated" (e.g., OSD, ROSA).
-    ...                 If returns ${FALSE} then the cluster is self-managed
-    ${platform} =    OpenshiftLibrary.Oc Get    kind=ConfigMap  name=odh-platform-config  namespace=redhat-ods-operator  fields=['.data.platform']
-    IF    "${platform}" == "dedicated"
-        ${is_dedicated} =    Set Variable   ${TRUE}
-    ELSE
-        ${is_dedicated} =    Set Variable   ${FALSE}
-    END
-    [Return]    ${is_dedicated}
-
 Is RHODS Self-Managed
-    [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed in the cluster (e.g., usually on OSD, ROSA).
+    [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
+    ...                 in the cluster (e.g., usually on OSD, ROSA).
     ...                 Returns ${TRUE} if RHODS Self-Managed is installed (e.g., usually on PSI or baremetal)
     ${self_managed_cs} =    OpenshiftLibrary.Oc Get    kind=CatalogSource  name=self-managed-rhods  namespace=openshift-marketplace
     IF    ${self_managed_cs} == ${NONE}

@@ -24,6 +24,7 @@ jobs:
       - name: Execute ods-ci dryrun
         run: |
           touch test-variables.yml
+          mkdir ~/.kube
           touch ~/.kube/config
           ./run_robot_test.sh --extra-robot-args '--dryrun' --skip-oclogin
 

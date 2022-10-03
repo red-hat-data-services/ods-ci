@@ -191,9 +191,11 @@ case "$(uname -s)" in
              echo $PATH
         ;;
         "Ubuntu")
-             echo "Not yet supported, but shouldn't be hard for you to fix :) "
-             echo "Please add the driver, test and submit PR"
-             exit 1
+             echo "Ubuntu"
+             echo "setting driver  to $currentpath/drivers/ubuntu"
+             PATH=$PATH:$currentpath/drivers/ubuntu
+             export PATH=$PATH
+             echo $PATH
         ;;
         "openSUSE project"|"SUSE LINUX"|"openSUSE")
              echo "Not yet supported, but shouldn't be hard for you to fix :) "

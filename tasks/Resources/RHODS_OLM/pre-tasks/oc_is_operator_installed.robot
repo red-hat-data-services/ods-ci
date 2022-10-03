@@ -6,5 +6,5 @@ Is RHODS Installed
   ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
   ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
   ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-  ...          field_selector=metadata.name=addon-managed-odh-catalog
+  ...          field_selector=metadata.name=self-managed-rhods
   [Return]  ${result}

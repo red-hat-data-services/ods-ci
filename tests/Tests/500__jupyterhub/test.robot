@@ -38,6 +38,7 @@ Can Login to Jupyterhub
 
 Can Spawn Notebook
    [Tags]  Sanity  Smoke
+   ...     ODS-1789
    Fix Spawner Status
    Select Notebook Image  s2i-generic-data-science-notebook
    Select Notebook Image  s2i-minimal-notebook

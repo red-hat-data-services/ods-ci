@@ -752,6 +752,7 @@ Check And Uninstall Operator In Openshift
 
 Check Application Switcher Links To Openshift Cluster Manager
     [Documentation]    Checks for HTTP status of OCM link in application switcher
+    Skip If RHODS Is Self-managed
     ${cluster_id}=    Get Cluster ID
     ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
     ${cluster_env}=    Fetch ODS Cluster Environment

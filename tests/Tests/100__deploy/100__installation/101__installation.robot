@@ -32,6 +32,8 @@ Verify User Can Access RHODS Documentation From OCM Console
   [Documentation]   Checks user can access RHODS documentation from addon on OCM Console
   [Tags]  ODS-1303
   ...     Tier2
+  ...     AutomationBug
+  Skip If RHODS Is Self-managed
   Decide OCM URL And Open Link
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip OCM Tour
@@ -42,6 +44,7 @@ Verify User Can Access RHODS Documentation From OCM Console
   Click Element     //article[@data-ouia-component-id="card-addon-managed-odh"]
   Page Should Contain Element       //div[@class="pf-l-flex pf-m-space-items-lg pf-m-column"]//a
   Verify Documentation Is Accessible
+
 
 *** Keywords ***
 OCM Suite Setup

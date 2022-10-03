@@ -132,7 +132,7 @@ Get Spawner Environment Variable Value
 
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
-    [Arguments]  ${spawner_timeout}=600 seconds
+    [Arguments]  ${spawner_timeout}=600 seconds  ${same_tab}=${True}
     # TODO: Make sure server spawns in same tab in 1.17+
     # Currently no way to know if option already selected or not
     #${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
@@ -195,8 +195,13 @@ Spawn Notebook
     Wait Until Element Is Visible  xpath://div[@role="progressbar"]
     ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
     IF  ${version-check}==True
-        Wait Until Page Contains  The notebook server is up and running.  ${spawner_timeout}
-        Click Button  Open in current tab
+        Wait Until Page Contains    The notebook server is up and running.    ${spawner_timeout}
+        IF  ${same_tab}
+            Click Button    Open in current tab
+        ELSE
+            Click Button    Open in new tab
+            Switch Window    NEW
+        END
     ELSE
         Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
     END
@@ -212,7 +217,7 @@ Spawn Notebook With Arguments  # robocop: disable
    ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
    ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
-   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  &{envs}
+   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}  &{envs}
    ${spawn_fail} =  Set Variable  True
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
@@ -237,7 +242,7 @@ Spawn Notebook With Arguments  # robocop: disable
                Add Spawner Environment Variable  ${key}  ${value}
             END
          END
-         Spawn Notebook    ${spawner_timeout}
+         Spawn Notebook    ${spawner_timeout}    ${same_tab}
          Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
          ${authorization_required} =  Is Service Account Authorization Required
          Run Keyword If  ${authorization_required}  Authorize jupyterhub service account

@@ -33,7 +33,6 @@ Can Login to Jupyterhub
    Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-   #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']  timeout=30
    Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
@@ -51,20 +50,16 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_two
    Add Spawner Environment Variable  env_three  three
    Remove Spawner Environment Variable  env_three
-
    Add Spawner Environment Variable  env_four  four
    Add Spawner Environment Variable  env_five  five
    Add Spawner Environment Variable  env_six  six
    Remove Spawner Environment Variable  env_four
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
-   Spawn Notebook
-   #Click Button  Access server
-   #SeleniumLibrary.Switch Window  NEW
+   Spawn Notebook  same_tab=${False}
    Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-   #Wait For JupyterLab Splash Screen  timeout=60
    Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
    Sleep  3
    Maybe Close Popup

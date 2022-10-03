@@ -42,29 +42,23 @@ Can Spawn Notebook
    Select Notebook Image  s2i-generic-data-science-notebook
    Select Notebook Image  s2i-minimal-notebook
    Select Container Size  Small
-   # Cannot set number of required GPUs on clusters without GPUs anymore
-   #Set Number of required GPUs  9
-   #Set Number of required GPUs  0
    Add Spawner Environment Variable  env_one  one
    Remove Spawner Environment Variable  env_one
    Add Spawner Environment Variable  env_two  two
    Remove Spawner Environment Variable  env_two
    Add Spawner Environment Variable  env_three  three
    Remove Spawner Environment Variable  env_three
-
    Add Spawner Environment Variable  env_four  four
    Add Spawner Environment Variable  env_five  five
    Add Spawner Environment Variable  env_six  six
    Remove Spawner Environment Variable  env_four
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
+   Verify Modal Does Not Get Stuck
    Spawn Notebook
-   #Click Button  Access server
-   #SeleniumLibrary.Switch Window  NEW
    Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-   #Wait For JupyterLab Splash Screen  timeout=60
    Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
    Sleep  3
    Maybe Close Popup
@@ -72,10 +66,6 @@ Can Spawn Notebook
    Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
    Launch a new JupyterLab Document
    Close Other JupyterLab Tabs
-
-Can Launch Python3
-   [Tags]  Sanity  TBC
-   Launch Python3 JupyterHub
 
 Verify Message That Image Builds Are In Progress
     [Documentation]     Verifies that Image Builds In Progress are Shown In RHODS Dashboard
@@ -107,3 +97,13 @@ Start New Pytorch Build
     ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
     [Return]    ${new_buildname}
+
+Verify Modal Does Not Get Stuck
+   [Documentation]    Try spawning a server size for which there's not enough resources
+   ...    spawner modal should show an error instead of being stuck waiting for resources
+   Select Container Size    X Large
+   Click Button    Start server
+   Wait Until Page Contains    Insufficient resources to start    timeout=1min
+   ...    error=Modal did not fail within 1 minute
+   Click Button    Cancel
+   Select Container Size    Small

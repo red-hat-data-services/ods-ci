@@ -8,6 +8,7 @@ Suite Teardown   Teardown
 
 *** Variables ***
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
+@{UNSUPPORTED_TOLERATIONS}=    --UNSUPPORTED--    Unsupported-    -Unsupported    Unsupported!    1-_.a@    L@5t0n3!
 
 
 *** Test Cases ***
@@ -17,9 +18,9 @@ Test Setting Unsupported Pod Toleration Via UI
     ...     ODS-1788
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains    Notebook pod tolerations
-    Set Pod Toleration Via UI    --UNSUPPORTED--
-    Page Should Contain    Toleration key must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character.
-    Element Should Be Disabled    xpath://button[.="Save changes"]
+    FOR    ${toleration}    IN    @{UNSUPPORTED_TOLERATIONS}
+        Verify Unsupported Toleration Is Not Allowed    ${toleration}
+    END
 
 Test Setting Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
@@ -69,3 +70,11 @@ Teardown
     Click Element    xpath://input[@id="tolerations-enabled-checkbox"]
     Save Changes In Cluster Settings
     Close Browser
+
+Verify Unsupported Toleration Is Not Allowed
+    [Documentation]    Test an unsupported pod toleration and expect it
+    ...    to not be allowed.
+    [Arguments]    ${toleration}
+    Set Pod Toleration Via UI    ${toleration}
+    Page Should Contain    Toleration key must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character.
+    Element Should Be Disabled    xpath://button[.="Save changes"]

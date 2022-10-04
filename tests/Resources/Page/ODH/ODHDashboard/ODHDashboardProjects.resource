@@ -1,5 +1,5 @@
 *** Settings ***
-Resource      ../../../Page/Components/Components.resource
+Resource       ../../../Page/Components/Components.resource
 Resource       ../../../Common.robot
 
 
@@ -30,42 +30,43 @@ Is Data Science Projects Page Open
 
 Open Data Science Project
     [Documentation]    Verifies submenu Settings > Cluster settings" is visible
-    [Arguments]     ${project_title}
-    Click Link    ${project_title}
+    [Arguments]     ${project_displayed_name}
+    Click Link    ${project_displayed_name}
 
 Delete Data Science Project
-    [Arguments]     ${project_title}
+    [Arguments]     ${project_displayed_name}
     ${is_open}=    Is Data Science Projects Page Open
     IF    ${is_open} == ${FALSE}
         Open Data Science Projects Page
     END
-    Project Should Be Listed    project_title=${project_title}
-    Open Actions Menu Of Project    project_title=${project_title}
-    Click Delete From Action Menu   project_title=${project_title}
+    Project Should Be Listed    project_displayed_name=${project_displayed_name}
+    Open Actions Menu Of Project    project_displayed_name=${project_displayed_name}
+    Click Delete From Action Menu   project_displayed_name=${project_displayed_name}
     # check NS deleted
 
 Open Actions Menu Of Project
-    [Arguments]     ${project_title}
-    Project Should Be Listed    project_title=${project_title}
+    [Arguments]     ${project_displayed_name}
+    Project Should Be Listed    project_displayed_name=${project_displayed_name}
     Click Element    ${ACTIONS_BTN_XP}
 
 Click Delete From Action Menu
-    [Arguments]     ${project_title}
+    [Arguments]     ${project_displayed_name}
     Wait Until Page Contains Element    ${DELETE_ACTION_BTN_XP}
     Click Element    ${DELETE_ACTION_BTN_XP}
     # Add confirmation click
 
 Wait Until Project Is Open
-    [Arguments]     ${project_title}
-    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
+    [Arguments]     ${project_displayed_name}
+    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_displayed_name}")]    timeout=30
 
 Project Should Be Listed
-    [Arguments]     ${project_title}
-    Page Should Contain Element    xpath=//td/a[text()="${project_title}"]
+    [Arguments]     ${project_displayed_name}
+    Page Should Contain Element    xpath=//td/a[text()="${project_displayed_name}"]
 
 Project's Owner Should Be
-    [Arguments]     ${project_title}    ${expected_username}
-    Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]/small[text()="${expected_username}"]
+    [Arguments]     ${project_displayed_name}    ${expected_username}
+    Page Should Contain Element    xpath=//td[a[text()="${project_displayed_name}"]]
+    Page Should Contain Element    xpath=//td[a[text()="${project_displayed_name}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Arguments]    ${title}    ${description}
@@ -77,6 +78,10 @@ Create Data Science Project
     Wait Until Element Is Enabled    ${CREATE_BTN_XP}
     Click Button    ${CREATE_BTN_XP}
     Wait Until Modal Disappear
-    # check NS created
 
+Get Openshift Namespace From Data Science Project
+    [Arguments]     ${project_displayed_name}
+    ${project_link}=    Get Element Attribute    xpath=//td/a[text()="${project_displayed_name}"]    href
+    ${ns_name}=     Split String From Right     separator=/     max_split=1     string=${project_link}
+    [Return]    ${ns_name[1]}
 

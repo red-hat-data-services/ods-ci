@@ -12,13 +12,13 @@ ${PRJ_DESCRIPTION}=   ODS-CI DS Project is a test for validating DSG feature
 
 *** Test Cases ***
 Verify User Cannot Create Project Without Title
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1783
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}  ocp_user_pw=${TEST_USER_3.PASSWORD}  browser_options=${BROWSER.OPTIONS}
     Open Data Science Projects Page
     Create Project With Empty Title And Expect Error
 
 Verify User Can Create A Data Science Project
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1775  ODS-1784
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}  ocp_user_pw=${TEST_USER_3.PASSWORD}  browser_options=${BROWSER.OPTIONS}
     Open Data Science Projects Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}

@@ -156,7 +156,7 @@ Skip If RHODS Version Greater Or Equal Than
        Skip If    condition=${version-check}==True    msg=This test is skipped for RHODS ${version} or greater
     END
 
-Skip If RHODS Is Self-managed
+Skip If RHODS Is Self-Managed
     [Documentation]    Skips test if RHODS is installed as Self-managed
     [Arguments]    ${msg}=${EMPTY}
     ${is_self_managed}=    Is RHODS Self-Managed

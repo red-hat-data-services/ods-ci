@@ -1,7 +1,6 @@
 *** Settings ***
 Documentation  Set of Keywords for OCP checks
 Library    OpenShiftLibrary
-Library    ../../venv_ods/lib64/python3.8/site-packages/robot/libraries/OperatingSystem.py
 
 
 *** Keywords ***

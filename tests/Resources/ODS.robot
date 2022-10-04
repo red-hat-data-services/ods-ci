@@ -81,16 +81,14 @@ Usage Data Collection Should Not Be Enabled
 
 Set Standard RHODS Groups Variables
     [Documentation]     Sets the RHODS groups name based on RHODS version
-    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check} == True
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == False
         Set Suite Variable    ${STANDARD_ADMINS_GROUP}      dedicated-admins
-        Set Suite Variable    ${STANDARD_USERS_GROUP}       system:authenticated
-        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       true
     ELSE
         Set Suite Variable    ${STANDARD_ADMINS_GROUP}      rhods-admins
-        Set Suite Variable    ${STANDARD_USERS_GROUP}       rhods-users
-        Set Suite Variable    ${STANDARD_GROUPS_MODIFIED}       false
     END
+    Set Suite Variable    ${STANDARD_USERS_GROUP}       system:authenticated
+
 
 Apply Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration

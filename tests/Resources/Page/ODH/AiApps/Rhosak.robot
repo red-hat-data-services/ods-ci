@@ -46,7 +46,8 @@ Enable RHOSAK
 
 Remove RHOSAK From Dashboard
     [Documentation]    Uninstall RHOSAK from RHODS Dashboard
-    Delete Configmap    name=rhosak-validation-result    namespace=redhat-ods-applications
+    Delete RHODS Config Map    name=rhosak-validation-result    namespace=redhat-ods-applications
+    #Delete Configmap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Close All Browsers
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}

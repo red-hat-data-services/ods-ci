@@ -102,7 +102,7 @@ Apply Access Groups Settings
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}
-    OpenShiftCLI.Patch    kind=OdhDashboardConfig
+    Oc Patch    kind=OdhDashboardConfig
     ...                   src={"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}
     ...                   name=odh-dashboard-config   namespace=redhat-ods-applications  type=merge
 

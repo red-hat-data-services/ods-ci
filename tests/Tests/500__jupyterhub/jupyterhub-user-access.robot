@@ -142,5 +142,3 @@ Restore Standard RHODS Groups Configuration
     Remove Test Users From Custom Groups
     Delete Custom Groups
     Check Standard Access Configuration Works As Expected
-
-

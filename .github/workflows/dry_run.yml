@@ -22,7 +22,7 @@ jobs:
 
       - name: Execute ods-ci dryrun
         run: |
-          touch test-variables.yml
+          mv test-variables.yml.example test-variables.yml
           ./run_robot_test.sh --extra-robot-args '--dryrun' --skip-oclogin
 
       # Runs a set of commands using the runners shell

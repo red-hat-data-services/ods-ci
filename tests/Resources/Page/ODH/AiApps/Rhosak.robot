@@ -4,6 +4,7 @@ Library     ../../../../libs/Helpers.py
 Resource    ../JupyterHub/JupyterLabLauncher.robot
 Resource    ../../Components/Components.resource
 Resource    ../ODHDashboard/ODHDashboard.robot
+Resource    ../../../ODS.robot
 
 
 *** Keywords ***

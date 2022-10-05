@@ -30,3 +30,4 @@ jobs:
         uses: joonvena/robotframework-reporter-action@v2.1
         with:
           report_path: test-output
+          gh_access_token: ${{ secrets.GITHUB_TOKEN }}

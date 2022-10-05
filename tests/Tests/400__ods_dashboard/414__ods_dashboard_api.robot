@@ -30,22 +30,22 @@ ${GPU_ENDPOINT}=        api/gpu
 ${NOTEBOOK_NS}=          rhods-notebooks
 ${DASHBOARD_NS}=         redhat-ods-applications
 ${NOTEBOOK_USERNAME}=    ""
-${CM_ENDPOINT_PT0}=         api/configmaps
+${CM_ENDPOINT_PT0}=         api/configmap
 ${CM_ENDPOINT_PT1}=         ${CM_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${CM_ENDPOINT_PT2}=         -envs
-${CM_ENDPOINT_BODY}=            {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"}}
+${CM_ENDPOINT_BODY}=            {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"${NOTEBOOK_NS}"}}
 ${DUMMY_CM_NAME}=           test-dummy-configmap
-${CM_DASHBOARD_ENDPOINT}=         api/configmaps/${DASHBOARD_NS}/${DUMMY_CM_NAME}
+${CM_DASHBOARD_ENDPOINT}=         api/configmap/${DASHBOARD_NS}/${DUMMY_CM_NAME}
 ${CM_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"${DASHBOARD_NS}"},"data":{"key":"newvalue"}}
 ${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"redhat-ods-monitoring"},"data":{"key":"newvalue"}}
-${CM_OUTSIDE_DASHBOARD_ENDPOINT}=         api/configmaps/redhat-ods-monitoring/prometheus
+${CM_OUTSIDE_DASHBOARD_ENDPOINT}=         api/configmap/redhat-ods-monitoring/prometheus
 ${DUMMY_SECRET_NAME}=           test-dummy-secret
-${SECRET_DASHBOARD_ENDPOINT}=         api/secrets/${DASHBOARD_NS}/${DUMMY_SECRET_NAME}
-${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}=         api/secrets/redhat-ods-monitoring/${DUMMY_SECRET_NAME}
-${SECRET_ENDPOINT_PT0}=         api/secrets
+${SECRET_DASHBOARD_ENDPOINT}=         api/secret/${DASHBOARD_NS}/${DUMMY_SECRET_NAME}
+${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}=         api/secret/redhat-ods-monitoring/${DUMMY_SECRET_NAME}
+${SECRET_ENDPOINT_PT0}=         api/secret
 ${SECRET_ENDPOINT_PT1}=         ${SECRET_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${SECRET_ENDPOINT_PT2}=         -envs
-${SECRET_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"rhods-notebooks"},"type":"Opaque"}
+${SECRET_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"${NOTEBOOK_NS}"},"type":"Opaque"}
 ${SECRET_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"${DASHBOARD_NS}"},"type":"Opaque"}
 ${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"redhat-ods-monitoring"},"type":"Opaque"}
 
@@ -72,21 +72,23 @@ ${VALIDATE_ISV_RESULT_ENDPOINT}=         api/validate-isv/results?appName=anacon
 ${NB_ENDPOINT_PT0}=      api/notebooks
 ${NB_ENDPOINT_PT1}=      ${NB_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 ${NB_ENDPOINT_PT2}=      /status
-${NB_ENDPOINT_BODY}=      {"apiVersion":"kubeflow.org/v1","kind":"Notebook","metadata":{"labels":{"app":"jupyter-nb-<NB_USERNAME>","opendatahub.io/odh-managed":"true","opendatahub.io/user":"<NB_USERNAME>"},"name":"jupyter-nb-<NB_USERNAME>","namespace":"rhods-notebooks"},"spec":{"template":{"spec":{"enableServiceLinks":false,"containers":[{"image":"image-registry.openshift-image-registry.svc:5000/${DASHBOARD_NS}/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07","imagePullPolicy":"Always","workingDir":"/opt/app-root/src","name":"jupyter-nb-<NB_USERNAME>","env":[{"name":"JUPYTER_IMAGE","value":"image-registry.openshift-image-registry.svc:5000/${DASHBOARD_NS}/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07"}],"resources":{"limits":{"cpu":"2","memory":"8Gi"},"requests":{"cpu":"1","memory":"8Gi"}},"volumeMounts":[{"mountPath":"/opt/app-root/src","name":"jupyterhub-nb-<NB_USERNAME>-pvc"}],"ports":[{"name":"notebook-port","containerPort":8888,"protocol":"TCP"}]}],"volumes":[{"name":"jupyterhub-nb-<NB_USERNAME>-pvc","persistentVolumeClaim":{"claimName":"jupyterhub-nb-<NB_USERNAME>-pvc"}}]}}}}
+${NB_ENDPOINT_BODY}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":null,"state":"started","username":"<USERNAME>}
+# ${NB_ENDPOINT_BODY}=      {"apiVersion":"kubeflow.org/v1","kind":"Notebook","metadata":{"labels":{"app":"jupyter-nb-<NB_USERNAME>","opendatahub.io/odh-managed":"true","opendatahub.io/user":"<NB_USERNAME>"},"name":"jupyter-nb-<NB_USERNAME>","namespace":"${NOTEBOOK_NS}"},"spec":{"template":{"spec":{"enableServiceLinks":false,"containers":[{"image":"image-registry.openshift-image-registry.svc:5000/${DASHBOARD_NS}/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07","imagePullPolicy":"Always","workingDir":"/opt/app-root/src","name":"jupyter-nb-<NB_USERNAME>","env":[{"name":"JUPYTER_IMAGE","value":"image-registry.openshift-image-registry.svc:5000/${DASHBOARD_NS}/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07"}],"resources":{"limits":{"cpu":"2","memory":"8Gi"},"requests":{"cpu":"1","memory":"8Gi"}},"volumeMounts":[{"mountPath":"/opt/app-root/src","name":"jupyterhub-nb-<NB_USERNAME>-pvc"}],"ports":[{"name":"notebook-port","containerPort":8888,"protocol":"TCP"}]}],"volumes":[{"name":"jupyterhub-nb-<NB_USERNAME>-pvc","persistentVolumeClaim":{"claimName":"jupyterhub-nb-<NB_USERNAME>-pvc"}}]}}}}
 
 ${PVC_ENDPOINT_PT0}=      api/pvc
 ${PVC_ENDPOINT_PT1}=      ${PVC_ENDPOINT_PT0}/${NOTEBOOK_NS}/
-${PVC_ENDPOINT_BODY}=     {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"name":"<PVC_NAME>","namespace":"rhods-notebooks"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}},"volumeMode":"Filesystem"},"status":{"phase":"Pending"}}
+${PVC_ENDPOINT_BODY}=     {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"name":"<PVC_NAME>","namespace":"${NOTEBOOK_NS}"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}},"volumeMode":"Filesystem"},"status":{"phase":"Pending"}}
 
 ${ROLE_BIND_ENDPOINT_PT0}=      api/rolebindings
 ${ROLE_BIND_ENDPOINT_PT1}=      ${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/${NOTEBOOK_NS}-image-pullers
-${ROLE_BIND_ENDPOINT_BODY}=      {"kind":"RoleBinding","apiVersion":"rbac.authorization.k8s.io/v1","metadata":{"name":"rhods-notebooks-image-pullers-test","namespace":"${DASHBOARD_NS}"},"subjects":[{"kind":"Group","apiGroup":"rbac.authorization.k8s.io","name":"system:serviceaccounts:rhods-notebooks"}],"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"system:image-puller"}}
+${ROLE_BIND_ENDPOINT_BODY}=      {"kind":"RoleBinding","apiVersion":"rbac.authorization.k8s.io/v1","metadata":{"name":"${NOTEBOOK_NS}-image-pullers-test","namespace":"${DASHBOARD_NS}"},"subjects":[{"kind":"Group","apiGroup":"rbac.authorization.k8s.io","name":"system:serviceaccounts:${NOTEBOOK_NS}"}],"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"system:image-puller"}}
 
 ${APP_TO_REMOVE}=                rhosak
 ${COMPONENTS_ENDPOINT_PT0}=      api/components
 ${COMPONENTS_ENDPOINT_PT1}=      ${COMPONENTS_ENDPOINT_PT0}/remove?appName=${APP_TO_REMOVE}
 
 ${HEALTH_ENDPOINT}=     api/health
+
 
 *** Test Cases ***
 Verify Access To cluster-settings API Endpoint
@@ -222,33 +224,33 @@ Verify Access To pvc API Endpoint
     ${create_pvc_body}=     Set Username In PVC Payload     username=${PVC_BASIC_USER}
     Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${create_pvc_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     ${PVC_BASIC_USER_2}=   Get User Notebook PVC Name    ${TEST_USER_4.USERNAME}
     ${PVC_ENDPOINT_BASIC_USER_2}=     Set Variable    ${PVC_ENDPOINT_PT1}${PVC_BASIC_USER_2}
     ${create_pvc_body_2}=     Set Username In PVC Payload     username=${PVC_BASIC_USER_2}
     Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${create_pvc_body_2}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${PVC_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                        body=${create_pvc_body_2}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${PVC_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
     [Teardown]    Delete Test PVCs     pvc_names=${test_pvcs}
 
-Verify Access To Notebook configmaps API Endpoint
+Verify Access To Notebook configmap API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
     ...                 based on the permissions of the users who query the endpoint to get
     ...                 the user configmap map of a notebook server.
     ...                 The syntax to reach this endpoint is:
-    ...                 `configmaps/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
+    ...                 `configmap/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
 
     [Tags]    ODS-1719
     ...       Tier1    Sanity
@@ -263,12 +265,12 @@ Verify Access To Notebook configmaps API Endpoint
     ${cm_basic_user_body}=     Set Username In ConfigMap Payload    notebook_username=${NOTEBOOK_BASIC_USER}
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${cm_basic_user_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${cm_basic_user_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${CM_ENDPOINT_BASIC_USER_2}=     Set Variable    ${CM_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER_2}${CM_ENDPOINT_PT2}
@@ -277,28 +279,28 @@ Verify Access To Notebook configmaps API Endpoint
     ${cm_basic_user_2_body}=     Set Username In ConfigMap Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${cm_basic_user_2_body}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${cm_basic_user_2_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${cm_basic_user_2_body}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${cm_basic_user_2_body}
     Operation Should Be Allowed
     [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
-Verify Access To Notebook secrets API Endpoint
+Verify Access To Notebook secret API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
     ...                 based on the permissions of the users who query the endpoint to get
     ...                 the user secret of a notebook server.
     ...                 The syntax to reach this endpoint is:
-    ...                 `secrets/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
+    ...                 `secret/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
 
     [Tags]    ODS-1720
     ...       Tier1    Sanity
@@ -313,12 +315,12 @@ Verify Access To Notebook secrets API Endpoint
     ${secret_basic_user_body}=     Set Username In Secret Payload    notebook_username=${NOTEBOOK_BASIC_USER}
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${secret_basic_user_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${secret_basic_user_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NOTEBOOK_BASIC_USER_2}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${SECRET_ENDPOINT_BASIC_USER_2}=     Set Variable    ${SECRET_ENDPOINT_PT1}${NOTEBOOK_BASIC_USER_2}${SECRET_ENDPOINT_PT2}
@@ -327,28 +329,28 @@ Verify Access To Notebook secrets API Endpoint
     ${secret_basic_user_2_body}=     Set Username In Secret Payload    notebook_username=${NOTEBOOK_BASIC_USER_2}
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${secret_basic_user_2_body}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${secret_basic_user_2_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${secret_basic_user_2_body}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${secret_basic_user_2_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
-Verify Access To Dashboard configmaps API Endpoint
+Verify Access To Dashboard configmap API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
     ...                 based on the permissions of the users who query the endpoint
     ...                 to get a configmap from the Dashboard namespace.
     ...                 The syntax to reach this endpoint is:
-    ...                 `configmaps/<dashboard_namespace>/<configmap_name>`
+    ...                 `configmap/<dashboard_namespace>/<configmap_name>`
     [Tags]    ODS-1722
     ...       Tier1    Sanity
     ...       Security
@@ -359,20 +361,20 @@ Verify Access To Dashboard configmaps API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${CM_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${CM_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${CM_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                        body=${CM_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Create A Dummy ConfigMap Outside Dashboard Namespace
     Perform Dashboard API Endpoint GET Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
@@ -380,28 +382,28 @@ Verify Access To Dashboard configmaps API Endpoint
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint PUT Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${CM_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                        body=${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     [Teardown]      Delete Dummy ConfigMaps
 
-Verify Access To Dashboard secrets API Endpoint
+Verify Access To Dashboard secret API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
     ...                 based on the permissions of the users who query the endpoint
     ...                 to get a secret from the Dashboard namespace.
     ...                 The syntax to reach this endpoint is:
-    ...                 `secrets/<namespace>/<secret_name>`
+    ...                 `secret/<namespace>/<secret_name>`
     [Tags]    ODS-1721
     ...       Tier1    Sanity
     ...       Security
@@ -412,20 +414,20 @@ Verify Access To Dashboard secrets API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${SECRET_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${SECRET_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${SECRET_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                        body=${SECRET_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
 
     Create A Dummy Secret Outside Dashboard Namespace
     Perform Dashboard API Endpoint GET Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
@@ -434,21 +436,20 @@ Verify Access To Dashboard secrets API Endpoint
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint PUT Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint DELETE Call   endpoint=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}    token=${ADMIN_TOKEN}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${SECRET_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                        body=${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}
-    Operation Should Be Forbidden
-
+    Operation Should Be Unavailable
     [Teardown]      Delete Dummy Secrets
 
 Verify Access To groups-config API Endpoint
@@ -566,7 +567,7 @@ Verify Access to notebooks API Endpoint
     [Tags]    ODS-1729
     ...       Tier1    Sanity
     ...       Security
-    Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    ${NOTEBOOK_BASIC_USER}  ${IMAGE_TAG_NAME}=    Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
     ${NB_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER}
     ${NB_ENDPOINT_BASIC_USER_STATUS}=     Set Variable    ${NB_ENDPOINT_BASIC_USER}${NB_ENDPOINT_PT2}
@@ -578,12 +579,13 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_STATUS}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
     ${NB_ENDPOINT_BASIC_USER_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER}
-    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
+    ...                                   imagetagname=${IMAGE_TAG_NAME}
+    # POST call for update
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_BODY}
     Operation Should Be Allowed
-    Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
+    ${NB_BASIC_USER_2_SAFENAME}  ${IMAGE_TAG_NAME}=      Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NB_BASIC_USER_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
     ${NB_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_ENDPOINT_PT1}${NB_BASIC_USER_2}
     ${NB_ENDPOINT_BASIC_USER_2_STATUS}=     Set Variable    ${NB_ENDPOINT_BASIC_USER_2}${NB_ENDPOINT_PT2}
@@ -595,16 +597,19 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Unavailable
-    ${NB_BASIC_USER_2_SAFENAME}=   Get Safe Username    ${TEST_USER_4.USERNAME}
     ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Set Username In Notebook Payload    notebook_username=${NB_BASIC_USER_2_SAFENAME}
-    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
+    ...                                     imagetagname=${IMAGE_TAG_NAME}
+    # POST call for update
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
     Operation Should Be Forbidden
-    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
+    # POST call for update
+    Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_BASIC_USER_2}    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}
     Operation Should Be Allowed
     ${NOTEBOOK_BASIC_USER_3}=   Get Safe Username    ${TEST_USER.USERNAME}
     ${NB_ENDPOINT_BASIC_USER_3_BODY}=       Set Username In Notebook Payload    notebook_username=${NOTEBOOK_BASIC_USER_3}
+    ...                                     imagetagname=${IMAGE_TAG_NAME}
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}
     Operation Should Be Forbidden
@@ -639,7 +644,7 @@ Verify Access to rolebindings API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${ROLE_BIND_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                        body=${ROLE_BIND_ENDPOINT_BODY}
     Operation Should Be Allowed
-    [Teardown]   OpenshiftLibrary.Oc Delete    kind=RoleBinding  namespace=${DASHBOARD_NS}  name=rhods-notebooks-image-pullers-test
+    [Teardown]   OpenshiftLibrary.Oc Delete    kind=RoleBinding  namespace=${DASHBOARD_NS}  name=${NOTEBOOK_NS}-image-pullers-test
 
 Verify Access To components API Endpoint
     [Documentation]     Verifies the endpoint "components" works as expected
@@ -676,15 +681,15 @@ Verify Access To health API Endpoint
 Endpoint Testing Setup
     [Documentation]     Fetches an access token for both a RHODS admin and basic user
     Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
-    ${ADMIN_TOKEN}=   Log In As RHODS Admin
-    Set Suite Variable    ${ADMIN_TOKEN}
-    ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
-    Set Suite Variable    ${BASIC_USER_TOKEN}
+    #RHOSi Setup
+    # # ${ADMIN_TOKEN}=   Log In As RHODS Admin
+    # # Set Suite Variable    ${ADMIN_TOKEN}
+    # # ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
+    # # Set Suite Variable    ${BASIC_USER_TOKEN}
 
 Endpoint Testing Teardown
     [Documentation]     Switches to original OC context
-    RHOSi Teardown
+    #RHOSi Teardown
 
 Log In As RHODS Admin
     [Documentation]     Perfom OC login using a RHODS admin user
@@ -712,6 +717,10 @@ Spawn Minimal Python Notebook Server
     ...    browser_options=${BROWSER.OPTIONS}
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=s2i-minimal-notebook
+    ${safe_username}=   Get Safe Username    ${username}
+    ${status}   ${image_tag_name}=     Run And Return Rc And Output
+    ...     oc get Notebook --field-selector=metadata.name=${safe_username} -n ${NOTEBOOK_NS} -o=jsonpath='{.items[0].metadata.annotations.notebooks\\.opendatahub\\.io/last-image-selection}'
+    [Return]    ${safe_username}    ${image_tag_name}
 
 Create A Dummy Secret In Dashboard Namespace
     [Documentation]     Creates a dummy secret to use in tests to avoid getting sensitive secrets
@@ -778,9 +787,10 @@ Set Username In PVC Payload
 
 Set Username In Notebook Payload
     [Documentation]     Fill in the json body for creating/updating a Notebook with the username
-    [Arguments]     ${notebook_username}
-    ${complete_pvc}=     Replace String    ${NB_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
-    [Return]    ${complete_pvc}
+    [Arguments]     ${notebook_username}    ${imagetagname}
+    ${complete_body}=     Replace String    ${NB_ENDPOINT_BODY}    <USERNAME>    ${notebook_username}
+    ${complete_body}=     Replace String    ${complete_body}    <IMAGETAGNAME>    ${imagetagname}
+    [Return]    ${complete_body}
 
 Delete Test PVCs
     [Documentation]     Delets the PVCs received as arguments

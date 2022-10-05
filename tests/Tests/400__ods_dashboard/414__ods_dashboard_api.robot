@@ -89,6 +89,12 @@ ${COMPONENTS_ENDPOINT_PT1}=      ${COMPONENTS_ENDPOINT_PT0}/remove?appName=${APP
 
 ${HEALTH_ENDPOINT}=     api/health
 
+${ROUTE_ENDPOINT_PT0}=      api/route
+${ROUTE_ENDPOINT_PT1}=      ${ROUTE_ENDPOINT_PT0}/${NOTEBOOK_NS}
+${ROUTE_ENDPOINT_PT1B}=     ${ROUTE_ENDPOINT_PT0}/${DASHBOARD_NS}
+${ROUTE_ENDPOINT_PT2B}=     ${ROUTE_ENDPOINT_PT1B}/rhods-dashboard
+
+
 
 *** Test Cases ***
 Verify Access To cluster-settings API Endpoint
@@ -676,16 +682,46 @@ Verify Access To health API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${HEALTH_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
 
+Verify Access To route API Endpoint
+    [Documentation]     Verifies the endpoint "route" works as expected
+    ...                 based on the permissions of the users who query the endpoint
+    ...                 The syntaxes to reach this endpoint is:
+    ...                 `route/<namespace>/<route_name>`
+    [Tags]    ODS-1806
+    ...       Tier1    Sanity
+    ...       Security
+    ${NOTEBOOK_BASIC_USER}  ${IMAGE_TAG_NAME}=    Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/${NB_BASIC_USER}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/${NB_BASIC_USER}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    ${NOTEBOOK_BASIC_USER}  ${IMAGE_TAG_NAME}=    Spawn Minimal Python Notebook Server     username=${TEST_USER_2.USERNAME}    password=${TEST_USER_2.PASSWORD}
+    ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_2.USERNAME}
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/${NB_BASIC_USER}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}/    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}/    token=${ADMIN_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT2B}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT2B}    token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    [Teardown]    Delete Test Notebooks CRs And PVCs From CLI
+
 
 *** Keywords ***
 Endpoint Testing Setup
     [Documentation]     Fetches an access token for both a RHODS admin and basic user
     Set Library Search Order    SeleniumLibrary
     #RHOSi Setup
-    # # ${ADMIN_TOKEN}=   Log In As RHODS Admin
-    # # Set Suite Variable    ${ADMIN_TOKEN}
-    # # ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
-    # # Set Suite Variable    ${BASIC_USER_TOKEN}
+    ${ADMIN_TOKEN}=   Log In As RHODS Admin
+    Set Suite Variable    ${ADMIN_TOKEN}
+    ${BASIC_USER_TOKEN}=   Log In As RHODS Basic User
+    Set Suite Variable    ${BASIC_USER_TOKEN}
 
 Endpoint Testing Teardown
     [Documentation]     Switches to original OC context
@@ -703,7 +739,7 @@ Log In As RHODS Admin
 Log In As RHODS Basic User
     [Documentation]     Perfom OC login using a RHODS basic user
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
     ${oauth_proxy_cookie}=     Get OAuth Cookie
     Close Browser

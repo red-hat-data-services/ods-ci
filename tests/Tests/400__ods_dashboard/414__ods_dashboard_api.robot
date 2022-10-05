@@ -702,9 +702,19 @@ Verify Access To route API Endpoint
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/    token=${BASIC_USER_TOKEN}
     Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/    token=${ADMIN_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}/    token=${BASIC_USER_TOKEN}
     Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}/    token=${ADMIN_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}    token=${}
     Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT2B}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden

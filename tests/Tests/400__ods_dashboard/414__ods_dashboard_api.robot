@@ -7,7 +7,7 @@ Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Resource          ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Suite Setup       Endpoint Testing Setup
-Suite Teardown    Endpoint Testing Teardown
+#Suite Teardown    Endpoint Testing Teardown
 
 
 *** Variables ***
@@ -30,22 +30,22 @@ ${GPU_ENDPOINT}=        api/gpu
 ${NOTEBOOK_NS}=          rhods-notebooks
 ${DASHBOARD_NS}=         redhat-ods-applications
 ${NOTEBOOK_USERNAME}=    ""
-${CM_ENDPOINT_PT0}=         api/configmap
+${CM_ENDPOINT_PT0}=         api/envs/configmap
 ${CM_ENDPOINT_PT1}=         ${CM_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${CM_ENDPOINT_PT2}=         -envs
 ${CM_ENDPOINT_BODY}=            {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"${NOTEBOOK_NS}"}}
 ${DUMMY_CM_NAME}=           test-dummy-configmap
-${CM_DASHBOARD_ENDPOINT}=         api/configmap/${DASHBOARD_NS}/${DUMMY_CM_NAME}
+${CM_DASHBOARD_ENDPOINT}=         ${CM_ENDPOINT_PT0}/${DASHBOARD_NS}/${DUMMY_CM_NAME}
 ${CM_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"${DASHBOARD_NS}"},"data":{"key":"newvalue"}}
 ${CM_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=         {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"${DUMMY_CM_NAME}","namespace":"redhat-ods-monitoring"},"data":{"key":"newvalue"}}
-${CM_OUTSIDE_DASHBOARD_ENDPOINT}=         api/configmap/redhat-ods-monitoring/prometheus
+${CM_OUTSIDE_DASHBOARD_ENDPOINT}=         ${CM_ENDPOINT_PT0}/redhat-ods-monitoring/prometheus
 ${DUMMY_SECRET_NAME}=           test-dummy-secret
-${SECRET_DASHBOARD_ENDPOINT}=         api/secret/${DASHBOARD_NS}/${DUMMY_SECRET_NAME}
-${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}=         api/secret/redhat-ods-monitoring/${DUMMY_SECRET_NAME}
-${SECRET_ENDPOINT_PT0}=         api/secret
+${SECRET_ENDPOINT_PT0}=         api/envs/secret
 ${SECRET_ENDPOINT_PT1}=         ${SECRET_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
 ${SECRET_ENDPOINT_PT2}=         -envs
 ${SECRET_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"jupyterhub-singleuser-profile-<NB_USERNAME>-envs","namespace":"${NOTEBOOK_NS}"},"type":"Opaque"}
+${SECRET_DASHBOARD_ENDPOINT}=         ${SECRET_ENDPOINT_PT0}/${DASHBOARD_NS}/${DUMMY_SECRET_NAME}
+${SECRET_OUTSIDE_DASHBOARD_ENDPOINT}=         ${SECRET_ENDPOINT_PT0}/redhat-ods-monitoring/${DUMMY_SECRET_NAME}
 ${SECRET_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"${DASHBOARD_NS}"},"type":"Opaque"}
 ${SECRET_OUTSIDE_DASHBOARD_ENDPOINT_BODY}=        {"kind":"Secret","apiVersion":"v1","metadata":{"name":"${DUMMY_SECRET_NAME}","namespace":"redhat-ods-monitoring"},"type":"Opaque"}
 
@@ -72,7 +72,7 @@ ${VALIDATE_ISV_RESULT_ENDPOINT}=         api/validate-isv/results?appName=anacon
 ${NB_ENDPOINT_PT0}=      api/notebooks
 ${NB_ENDPOINT_PT1}=      ${NB_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 ${NB_ENDPOINT_PT2}=      /status
-${NB_ENDPOINT_BODY}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":null,"state":"started","username":"<USERNAME>}
+${NB_ENDPOINT_BODY}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":null,"state":"started","username":"<USERNAME>"}
 # ${NB_ENDPOINT_BODY}=      {"apiVersion":"kubeflow.org/v1","kind":"Notebook","metadata":{"labels":{"app":"jupyter-nb-<NB_USERNAME>","opendatahub.io/odh-managed":"true","opendatahub.io/user":"<NB_USERNAME>"},"name":"jupyter-nb-<NB_USERNAME>","namespace":"${NOTEBOOK_NS}"},"spec":{"template":{"spec":{"enableServiceLinks":false,"containers":[{"image":"image-registry.openshift-image-registry.svc:5000/${DASHBOARD_NS}/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07","imagePullPolicy":"Always","workingDir":"/opt/app-root/src","name":"jupyter-nb-<NB_USERNAME>","env":[{"name":"JUPYTER_IMAGE","value":"image-registry.openshift-image-registry.svc:5000/${DASHBOARD_NS}/s2i-minimal-notebook:py3.8-1.16.0-hotfix-2fada07"}],"resources":{"limits":{"cpu":"2","memory":"8Gi"},"requests":{"cpu":"1","memory":"8Gi"}},"volumeMounts":[{"mountPath":"/opt/app-root/src","name":"jupyterhub-nb-<NB_USERNAME>-pvc"}],"ports":[{"name":"notebook-port","containerPort":8888,"protocol":"TCP"}]}],"volumes":[{"name":"jupyterhub-nb-<NB_USERNAME>-pvc","persistentVolumeClaim":{"claimName":"jupyterhub-nb-<NB_USERNAME>-pvc"}}]}}}}
 
 ${PVC_ENDPOINT_PT0}=      api/pvc
@@ -298,7 +298,7 @@ Verify Access To Notebook configmap API Endpoint
     Operation Should Be Unavailable
     Perform Dashboard API Endpoint POST Call   endpoint=${CM_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                       body=${cm_basic_user_2_body}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
 Verify Access To Notebook secret API Endpoint
@@ -696,8 +696,8 @@ Verify Access To route API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/${NB_BASIC_USER}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    ${NOTEBOOK_BASIC_USER}  ${IMAGE_TAG_NAME}=    Spawn Minimal Python Notebook Server     username=${TEST_USER_2.USERNAME}    password=${TEST_USER_2.PASSWORD}
-    ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_2.USERNAME}
+    ${NOTEBOOK_BASIC_USER}  ${IMAGE_TAG_NAME}=    Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
+    ${NB_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/${NB_BASIC_USER}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1}/    token=${BASIC_USER_TOKEN}
@@ -714,7 +714,7 @@ Verify Access To route API Endpoint
     Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}    token=${BASIC_USER_TOKEN}
     Operation Should Be Unavailable
-    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}    token=${}
+    Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT1B}    token=${ADMIN_TOKEN}
     Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${ROUTE_ENDPOINT_PT2B}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
@@ -735,7 +735,7 @@ Endpoint Testing Setup
 
 Endpoint Testing Teardown
     [Documentation]     Switches to original OC context
-    #RHOSi Teardown
+    RHOSi Teardown
 
 Log In As RHODS Admin
     [Documentation]     Perfom OC login using a RHODS admin user
@@ -842,5 +842,10 @@ Delete Test PVCs
     [Documentation]     Delets the PVCs received as arguments
     [Arguments]     ${pvc_names}
     FOR   ${pvc}    IN  @{pvc_names}
-        OpenshiftLibrary.Oc Delete    kind=PersistentVolumeClaim    namespace=${NOTEBOOK_NS}    name=${pvc}
+        ${present}=     OpenshiftLibrary.Oc Get    kind=PersistentVolumeClaim  namespace=${NOTEBOOK_NS}  name=${pvc}
+        IF    ${present} == ${NONE}
+            Continue For Loop
+        ELSE
+            OpenshiftLibrary.Oc Delete    kind=PersistentVolumeClaim    namespace=${NOTEBOOK_NS}    name=${pvc}
+        END
     END

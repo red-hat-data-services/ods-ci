@@ -20,6 +20,7 @@ EMAIL_SERVER_USER="None"
 EMAIL_SERVER_PW="None"
 EMAIL_SERVER_SSL=false
 EMAIL_SERVER_UNSECURE=false
+DRYRUN_ACTION=false
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -146,6 +147,12 @@ while [ "$#" -gt 0 ]; do
     --email-server-unsecure)
       shift
       EMAIL_SERVER_UNSECURE=$1
+      shift
+      ;;
+
+    --dryrun_action)
+      shift
+      DRYRUN_ACTION=$1
       shift
       ;;
 
@@ -278,8 +285,6 @@ if command -v yq &> /dev/null
         echo "we did not find yq, so not trying the oc login"
 fi
 
-
-
 VENV_ROOT=${currentpath}/venv
 if [[ ! -d "${VENV_ROOT}" ]]; then
   python3 -m venv ${VENV_ROOT}
@@ -295,14 +300,18 @@ fi
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then
   mkdir ${TEST_ARTIFACT_DIR}
 fi
-case "$(uname -s)" in
+if ! ${DRYRUN_ACTION}; then
+  case "$(uname -s)" in
     Darwin)
         TEST_ARTIFACT_DIR=$(mktemp -d  ${TEST_ARTIFACT_DIR} -t ${TEST_ARTIFACT_DIR}/ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
          ;;
     Linux)
+        echo "NOT DRY RUN"
         TEST_ARTIFACT_DIR=$(mktemp -d -p ${TEST_ARTIFACT_DIR} -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
         ;;
-esac
+  esac
+fi
+
 
 ./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
 exit_status=$(echo $?)

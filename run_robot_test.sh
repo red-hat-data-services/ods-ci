@@ -287,7 +287,7 @@ fi
 
 VENV_ROOT=${currentpath}/venv
 if [[ ! -d "${VENV_ROOT}" ]]; then
-  python3 -m venv ${VENV_ROOT}
+  python3 -m venv "${VENV_ROOT}"
 fi
 # shellcheck disable=SC1091
 source ${VENV_ROOT}/bin/activate
@@ -314,6 +314,7 @@ fi
 
 
 ./venv/bin/robot "${TEST_EXCLUDE_TAG}" "${TEST_INCLUDE_TAG}" -d "${TEST_ARTIFACT_DIR}" -x xunit_test_result.xml -r test_report.html "${TEST_VARIABLES}" --variablefile "${TEST_VARIABLES_FILE}" --exclude TBC "${EXTRA_ROBOT_ARGS}" "${TEST_CASE_FILE}"
+# shellcheck disable=SC2116
 exit_status=$(echo $?)
 echo "${exit_status}"
 

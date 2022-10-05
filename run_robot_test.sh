@@ -173,7 +173,7 @@ if ${EMAIL_REPORT}
       fi
       echo "Test Execution results will be sent to ${EMAIL_TO} from ${EMAIL_FROM}"
 fi
-echo ${TEST_VARIABLES_FILE}
+echo "${TEST_VARIABLES_FILE}"
 if [[ ! -f "${TEST_VARIABLES_FILE}" ]]; then
   echo "Robot Framework test variable file (test-variables.yml) is missing"
   exit 1
@@ -195,14 +195,14 @@ case "$(uname -s)" in
              echo "setting driver  to $currentpath/Drivers/fedora"
              PATH=$PATH:$currentpath/drivers/fedora
              export PATH=$PATH
-             echo $PATH
+             echo "$PATH"
         ;;
         "Ubuntu")
              echo "Ubuntu"
              echo "setting driver  to $currentpath/drivers/ubuntu"
              PATH=$PATH:$currentpath/drivers/ubuntu
              export PATH=$PATH
-             echo $PATH
+             echo "$PATH"
         ;;
         "openSUSE project"|"SUSE LINUX"|"openSUSE")
              echo "Not yet supported, but shouldn't be hard for you to fix :) "
@@ -314,7 +314,7 @@ fi
 
 ./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
 exit_status=$(echo $?)
-echo ${exit_status}
+echo "${exit_status}"
 
 # send test artifacts by email
 if ${EMAIL_REPORT}

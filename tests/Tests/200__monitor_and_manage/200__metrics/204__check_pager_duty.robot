@@ -11,7 +11,8 @@ Documentation   RHODS_Pager_duty_key__VERIFICATION
 Library        Collections
 Library        OperatingSystem
 Library        String
-Library        OpenShiftCLI
+#Library        OpenShiftCLI
+Library        OpenShiftLibrary
 
 Resource       ../../../Resources/RHOSi.resource
 
@@ -40,7 +41,7 @@ PagerDuty Dummy Secret Verification
 *** Keywords ***
 Get PagerDuty Key From Alertmanager ConfigMap
      [Documentation]    Get Service Key From Alertmanager ConfigMap
-     ${c_data}   OpenShiftCLI.Get  kind=ConfigMap  namespace=${NAMESPACE}   field_selector=metadata.name==${CONFIGMAP_NAME}    #robocop:disable
+     ${c_data}   Oc Get  kind=ConfigMap  namespace=${NAMESPACE}   field_selector=metadata.name==${CONFIGMAP_NAME}    #robocop:disable
      ${a_data}    Set Variable     ${c_data[0]['data']['alertmanager.yml']}
      ${match_list}      Get Regexp Matches   ${a_data}     service_key(:).*
      ${key}       Split String    ${match_list[0]}
@@ -48,7 +49,7 @@ Get PagerDuty Key From Alertmanager ConfigMap
 
 Get PagerDuty Key From Secrets
      [Documentation]    Get Secert Key From Secrets
-     ${new}     OpenShiftCLI.Get  kind=Secret  namespace=${namespace}   field_selector=metadata.name==${SECRET_NAME}
+     ${new}     Oc Get  kind=Secret  namespace=${namespace}   field_selector=metadata.name==${SECRET_NAME}
      ${body}    Set Variable    ${new[0]['data']['PAGERDUTY_KEY']}
      ${string}  Evaluate    base64.b64decode('${body}').decode('ascii')      modules=base64
      [Return]   ${string}

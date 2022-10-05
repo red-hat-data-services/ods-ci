@@ -192,7 +192,7 @@ Clean Up User Notebook
       # We import the library here so it's loaded only when we are connected to the cluster
       # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
       # if there is not any connection opened
-      Import Library    OpenShiftCLI
+      #Import Library    OpenShiftCLI
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
@@ -219,7 +219,7 @@ Delete Folder In User Notebook
       # We import the library here so it's loaded only when we are connected to the cluster
       # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
       # if there is not any connection opened
-      Import Library    OpenShiftCLI
+      #Import Library    OpenShiftCLI
 
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}

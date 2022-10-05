@@ -2,7 +2,6 @@
 Documentation       Post install test cases that mainly verify OCP resources and objects
 Library             String
 Library             OperatingSystem
-Library             OpenShiftCLI
 Library             OpenShiftLibrary
 Library             ../../../../libs/Helpers.py
 Resource            ../../../Resources/RHOSi.resource

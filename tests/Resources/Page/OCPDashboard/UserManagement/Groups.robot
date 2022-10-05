@@ -1,5 +1,6 @@
 *** Settings ***
-Library       OpenShiftCLI
+#Library       OpenShiftCLI
+Library       OpenShiftLibrary
 Library       OperatingSystem
 Resource      ../../../Page/Components/Components.resource
 
@@ -15,12 +16,12 @@ Go To ${group_name} Group Page
 Create Group
     [Documentation]     Creates a user group in OCP
     [Arguments]   ${group_name}
-    OpenShiftCLI.Create  kind=Group   src={"metadata": {"name": "${group_name}"}, "users": null}
+    Oc Create  kind=Group   src={"metadata": {"name": "${group_name}"}, "users": null}
 
 Delete Group
     [Documentation]     Deletes a user group in OCP
     [Arguments]   ${group_name}
-    OpenShiftCLI.Delete  kind=Group   name=${group_name}
+    Oc Delete  kind=Group   name=${group_name}
 
 Add User To Group
     [Documentation]     Add a user to a given OCP user group

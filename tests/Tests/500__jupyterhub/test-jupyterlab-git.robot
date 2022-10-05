@@ -4,10 +4,7 @@ Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../Resources/RHOSi.resource
-
-Library             OpenShiftCLI
 Library             DebugLibrary
-
 Test Teardown       Clean Up Server
 Suite Setup         Server Setup
 Suite Teardown      End Web Test

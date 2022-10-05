@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation       Collection of keywords to work with Pods
-Library             OpenShiftCLI
+#Library             OpenShiftCLI
+Library             OpenShiftLibrary
 Resource            ../../OCPDashboard/Page.robot
 Resource            ../../ODH/ODHDashboard/ODHDashboard.robot
 Library             ../../../../libs/Helpers.py
@@ -43,7 +44,7 @@ Delete Pods Using Label Selector
     [Documentation]    Deletes an openshift pod by label selector
     [Arguments]    ${namespace}    ${label_selector}
     ${status}=    Check If POD Exists    ${namespace}    ${label_selector}
-    Run Keyword IF    '${status}'=='PASS'    OpenShiftCLI.Delete    kind=Pod    namespace=${namespace}
+    Run Keyword IF    '${status}'=='PASS'    Oc Delete    kind=Pod    namespace=${namespace}
     ...    label_selector=${label_selector}    ELSE    FAIL
     ...    No PODS present with Label '${label_selector}' in '${namespace}' namespace, Check the label selector and namespace provide is correct and try again
     Sleep    2
@@ -54,7 +55,7 @@ Delete Pods Using Label Selector
 Check If POD Exists
     [Documentation]    Check existence of an openshift pod by label selector
     [Arguments]    ${namespace}    ${label_selector}
-    ${status}    ${val}=    Run Keyword And Ignore Error    OpenShiftCLI.Get    kind=Pod    namespace=${namespace}
+    ${status}    ${val}=    Run Keyword And Ignore Error    Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=${label_selector}
     [Return]    ${status}
 
@@ -67,14 +68,14 @@ Verify Operator Pod Status
 Get Pod Name
     [Documentation]    Get the POD name based on namespace and label selector
     [Arguments]   ${namespace}   ${label_selector}
-    ${data}       Run Keyword   OpenShiftCLI.Get   kind=Pod
+    ${data}       Run Keyword   Oc Get   kind=Pod
     ...    namespace=${namespace}   label_selector=${label_selector}
     [Return]      ${data[0]['metadata']['name']}
 
 Get Pod Status
     [Documentation]    Get the Pod status based on namespace and label selector
     [Arguments]   ${namespace}   ${label_selector}
-    ${data}       Run Keyword   OpenShiftCLI.Get   kind=Pod
+    ${data}       Run Keyword   Oc Get   kind=Pod
     ...    namespace=${namespace}   label_selector=${label_selector}
     [Return]      ${data[0]['status']['phase']}
 
@@ -86,7 +87,7 @@ Get POD Names
     ${pod_name}    Create List
     ${status}      Check If POD Exists       ${namespace}        ${label_selector}
     IF    '${status}'=='PASS'
-         ${data}        OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=${label_selector}
+         ${data}        Oc Get   kind=Pod     namespace=${namespace}   label_selector=${label_selector}
          FOR    ${index}    ${element}    IN ENUMERATE    @{data}
                 Append To List    ${pod_name}     ${data[${index}]['metadata']['name']}
          END
@@ -102,7 +103,7 @@ Get Containers With Non Zero Restart Counts
     ${pod_restarts}      Create Dictionary
     FOR    ${pod_name}    IN    @{pod_names}
         ${container_restarts}    Create Dictionary
-        ${data}    OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   field_selector=metadata.name==${pod_name}
+        ${data}    Oc Get   kind=Pod     namespace=${namespace}   field_selector=metadata.name==${pod_name}
         FOR    ${index}    ${container}    IN ENUMERATE    @{data[0]['status']['containerStatuses']}
                ${value}    Convert To Integer    ${container['restartCount']}
                IF    ${value} > ${0}

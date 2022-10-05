@@ -1,6 +1,5 @@
 *** Settings ***
 Library  SeleniumLibrary
-Library  OpenShiftCLI
 Library  OperatingSystem
 Library  String
 Library  ../../../../libs/Helpers.py

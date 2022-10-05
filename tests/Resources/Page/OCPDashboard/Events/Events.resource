@@ -2,7 +2,9 @@
 Documentation       Keyword Suites to work with Openshift Events
 
 Library             Collections
-Library             OpenShiftCLI
+#Library             OpenShiftCLI
+Library             OpenShiftLibrary
+
 
 
 *** Keywords ***
@@ -10,7 +12,7 @@ Get Openshift Event
     [Documentation]    Capture openshift event based on namespace
     ...    and return filtered data, fail if no events are captured
     [Arguments]    ${namespace}    ${object_kind}    ${expected-events-count}=1
-    ${data}    Run Keyword    OpenShiftCLI.Get    kind=Event    namespace=${namespace}
+    ${data}    Run Keyword    Oc Get    kind=Event    namespace=${namespace}
     IF    len(${data}) >= ${expected-events-count}
         ${res_data}    Get Data Based On Object Kind    ${data}    ${object_kind}
     ELSE

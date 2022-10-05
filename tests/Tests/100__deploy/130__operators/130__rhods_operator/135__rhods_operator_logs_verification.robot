@@ -9,7 +9,7 @@ Documentation     135 - RHODS_OPERATOR_LOGS_VERIFICATION
 Resource          ../../../../Resources/RHOSi.resource
 
 Library           Collections
-Library           OpenShiftCLI
+Library           OpenShiftLibrary
 Library           OperatingSystem
 Library           String
 
@@ -28,7 +28,7 @@ Verify RHODS Operator log
    ...     ProductBug
    ...     ODS-1007
    #Get the POD name
-   ${data}       Run keyword   OpenShiftCLI.Get   kind=Pod     namespace=${namespace}   label_selector=name=rhods-operator
+   ${data}       Run keyword   Oc Get   kind=Pod     namespace=${namespace}   label_selector=name=rhods-operator
    #Capture the logs based on containers
    ${val}        Run   oc logs --tail=1000000 ${data[0]['metadata']['name']} -n ${namespace} -c rhods-operator
    #To check if command has been suessfully executed and the logs has been captured

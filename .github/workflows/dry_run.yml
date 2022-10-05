@@ -19,12 +19,6 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-      
-      - name: create kubeconfig file
-        run: |
-          mkdir ~/.kube
-          cp kubeconfig-test ~/.kube/config
-          cat ~/.kube/config
 
       - name: Execute ods-ci dryrun
         run: |

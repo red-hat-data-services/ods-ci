@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 SKIP_OC_LOGIN=false
 SERVICE_ACCOUNT=""
@@ -179,7 +179,7 @@ if [[ ! -f "${TEST_VARIABLES_FILE}" ]]; then
   exit 1
 fi
 
-currentpath=`pwd`
+currentpath=$(pwd)
 case "$(uname -s)" in
     Darwin)
          echo "MACOS"
@@ -249,20 +249,20 @@ if command -v yq &> /dev/null
                     then
                         oc_host=${api_server}
                     else
-                        oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
+                        oc_host=$(yq  e '.OCP_API_URL' "${TEST_VARIABLES_FILE}")
                 fi
 
 
                 if [ -z "${SERVICE_ACCOUNT}" ]
                     then
                         echo "Performing oc login using username and password"
-                        oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})
-                        oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ${TEST_VARIABLES_FILE})
+                        oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}")
+                        oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' "${TEST_VARIABLES_FILE}")
                         oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
                     else
                         echo "Performing oc login using service account"
-                        sa_token=$(oc serviceaccounts  new-token ${SERVICE_ACCOUNT} -n ${SA_NAMESPACE})
-                        oc login --token=$sa_token --server=${oc_host} --insecure-skip-tls-verify=true
+                        sa_token=$(oc serviceaccounts  new-token "${SERVICE_ACCOUNT}" -n "${SA_NAMESPACE}")
+                        oc login --token="$sa_token" --server="${oc_host}" --insecure-skip-tls-verify=true
                         sa_fullname=$(oc whoami)
                         TEST_VARIABLES="${TEST_VARIABLES} --variable SERVICE_ACCOUNT.NAME:${SERVICE_ACCOUNT} --variable SERVICE_ACCOUNT.FULL_NAME:${sa_fullname}"
 
@@ -276,7 +276,7 @@ if command -v yq &> /dev/null
                     exit $retVal
                 fi
                 oc cluster-info
-                printf "\nconnected as openshift user ' $(oc whoami) '\n"
+                printf "\nconnected as openshift user ' %s '\n" "$(oc whoami)"
                 echo "since the oc login was successful, continuing."
             else
                 echo "skipping OC login as per parameter --skip-oclogin"
@@ -289,6 +289,7 @@ VENV_ROOT=${currentpath}/venv
 if [[ ! -d "${VENV_ROOT}" ]]; then
   python3 -m venv ${VENV_ROOT}
 fi
+# shellcheck disable=SC1091
 source ${VENV_ROOT}/bin/activate
 
 if [[ ${SKIP_PIP_INSTALL} -eq 0 ]]; then
@@ -298,21 +299,21 @@ fi
 
 #Create a unique directory to store the output for current test run
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then
-  mkdir ${TEST_ARTIFACT_DIR}
+  mkdir "${TEST_ARTIFACT_DIR}"
 fi
 if ! ${DRYRUN_ACTION}; then
   case "$(uname -s)" in
     Darwin)
-        TEST_ARTIFACT_DIR=$(mktemp -d  ${TEST_ARTIFACT_DIR} -t ${TEST_ARTIFACT_DIR}/ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
+        TEST_ARTIFACT_DIR=$(mktemp -d  "${TEST_ARTIFACT_DIR}" -t "${TEST_ARTIFACT_DIR}"/ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
          ;;
     Linux)
-        TEST_ARTIFACT_DIR=$(mktemp -d -p ${TEST_ARTIFACT_DIR} -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
+        TEST_ARTIFACT_DIR=$(mktemp -d -p "${TEST_ARTIFACT_DIR}" -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
         ;;
   esac
 fi
 
 
-./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+./venv/bin/robot "${TEST_EXCLUDE_TAG}" "${TEST_INCLUDE_TAG}" -d "${TEST_ARTIFACT_DIR}" -x xunit_test_result.xml -r test_report.html "${TEST_VARIABLES}" --variablefile "${TEST_VARIABLES_FILE}" --exclude TBC "${EXTRA_ROBOT_ARGS}" "${TEST_CASE_FILE}"
 exit_status=$(echo $?)
 echo "${exit_status}"
 

@@ -14,14 +14,14 @@ ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"example-onnx-mnist__isvc-82e2bf7
 *** Test Cases ***
 Validate Model Serving quickstart
     [Documentation]    Test the quickstart of the model serving repo, Temporary until included in RHODS
-    [Tags]    Install
+    [Tags]    ModelMesh_Serving
     # TODO: Replace with http://robotframework.org/robotframework/latest/libraries/Process.html#Run%20Process
     Run    git clone ${MS_REPO}
     Run    cd modelmesh-serving/quickstart && ./quickstart.sh ${ODH_NAMESPACE} ${MODEL_MESH_NAMESPACE}
 
 Verify Model Serving Installation
     [Documentation]    Verifies Model Serving resources
-    [Tags]    Resources
+    [Tags]    ModelMesh_Serving
     # Needed for now in RHODS, temporary until included in RHODS
     ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
     Log    ${label}
@@ -35,11 +35,11 @@ Verify Model Serving Installation
 
 Test Inference
     [Documentation]    Test the inference result
-    [Tags]    Inference
+    [Tags]    ModelMesh_Serving
     # make sure model is being served
     # TODO: find better way to understand when model is being served
     # One option is Triton pods being both 5/5 Ready
-    #Sleep  1m
+    # Sleep  1m
     ${MS_ROUTE} =    Run    oc get routes -n ${MODEL_MESH_NAMESPACE} example-onnx-mnist --template={{.spec.host}}{{.spec.path}}
     ${AUTH_TOKEN} =    Run    oc sa new-token user-one -n ${MODEL_MESH_NAMESPACE}
     ${inference_output} =    Run    curl -ks https://${MS_ROUTE}/infer -d @modelmesh-serving/quickstart/input.json -H "Authorization: Bearer ${AUTH_TOKEN}"

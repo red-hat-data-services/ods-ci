@@ -831,8 +831,8 @@ Delete Test PVCs
     [Documentation]     Delets the PVCs received as arguments
     [Arguments]     ${pvc_names}
     FOR   ${pvc}    IN  @{pvc_names}
-        ${present}=     OpenshiftLibrary.Oc Get    kind=PersistentVolumeClaim  namespace=${NOTEBOOK_NS}  name=${pvc}
-        IF    ${present} == ${NONE}
+        ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=PersistentVolumeClaim  namespace=${NOTEBOOK_NS}  name=${pvc}
+        IF    ${present} == ${FALSE}
             Continue For Loop
         ELSE
             OpenshiftLibrary.Oc Delete    kind=PersistentVolumeClaim    namespace=${NOTEBOOK_NS}    name=${pvc}

@@ -19,6 +19,7 @@ Verify That MT-SRE Can Connect To Grafana Using Port Forwarding
     [Documentation]    Verifies that Grafana is accessible by MT-SRE when using oc port-forwarding
     [Tags]   Tier2
     ...      ODS-754
+    ...      AutomationBug
     ${grafana_port_forwarding_process} =  Enable Access To Grafana Using OpenShift Port Forwarding
     Wait Until HTTP Status Code Is  url=http://localhost:3001/api/health  retry=7x  expected_status_code=200
     Open Browser  http://localhost:3001  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

@@ -17,6 +17,7 @@ Verify pip Changes not permenant
 
     [Tags]  Sanity
     ...     ODS-909
+    ...     ProductBug
     Install And Import Package In JupyterLab  paramiko
     Stop JupyterLab Notebook Server
     Capture Page Screenshot

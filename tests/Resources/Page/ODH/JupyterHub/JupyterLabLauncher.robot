@@ -137,7 +137,9 @@ Python Version Check
   #start is inclusive, end exclusive, get x.y from Python x.y.z string
   ${output} =  Fetch From Right  ${output}  ${SPACE}
   ${vers} =  Get Substring  ${output}  0  3
-  Should Match  ${vers}  ${expected_version}
+  ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
+  Run Keyword If  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"
+  
 
 Maybe Select Kernel
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
@@ -383,7 +385,7 @@ Select ${filename} Tab
 Verify Installed Library Version
     [Arguments]  ${lib}  ${ver}
     ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
-    Run Keyword If  '${status}' == 'FAIL'  Log  "Expected ${lib} at version ${ver}, but ${value}"
+    Run Keyword If  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected ${lib} at version ${ver}, but ${value}"
     [Return]    ${status}    ${value}
 
 Check Versions In JupyterLab
@@ -416,6 +418,7 @@ Check Versions In JupyterLab
         ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
         IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
              ${return_status} =    Set Variable    FAIL
+             Run Keyword And Continue On Failure  FAIL  "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
         END
     END
     [Return]  ${return_status}

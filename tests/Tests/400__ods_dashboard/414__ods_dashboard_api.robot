@@ -242,7 +242,7 @@ Verify Access To pvc API Endpoint
     ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
     [Teardown]    Delete Test PVCs     pvc_names=${test_pvcs}
 
-Verify Access To Notebook configmap API Endpoint
+Verify Access To Notebook envs/configmap API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
     ...                 based on the permissions of the users who query the endpoint to get
     ...                 the user configmap map of a notebook server.
@@ -292,7 +292,7 @@ Verify Access To Notebook configmap API Endpoint
     Operation Should Be Unavailable
     [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
-Verify Access To Notebook secret API Endpoint
+Verify Access To Notebook envs/secret API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
     ...                 based on the permissions of the users who query the endpoint to get
     ...                 the user secret of a notebook server.
@@ -341,7 +341,7 @@ Verify Access To Notebook secret API Endpoint
     Operation Should Be Unavailable
     [Teardown]     Delete Test Notebooks CRs And PVCs From CLI
 
-Verify Access To Dashboard configmap API Endpoint
+Verify Access To Dashboard envs/configmap API Endpoint
     [Documentation]     Verifies the endpoint "configmaps" works as expected
     ...                 based on the permissions of the users who query the endpoint
     ...                 to get a configmap from the Dashboard namespace.
@@ -394,7 +394,7 @@ Verify Access To Dashboard configmap API Endpoint
     Operation Should Be Unavailable
     [Teardown]      Delete Dummy ConfigMaps
 
-Verify Access To Dashboard secret API Endpoint
+Verify Access To Dashboard envs/secret API Endpoint
     [Documentation]     Verifies the endpoint "secrets" works as expected
     ...                 based on the permissions of the users who query the endpoint
     ...                 to get a secret from the Dashboard namespace.

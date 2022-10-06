@@ -43,7 +43,7 @@ Test Inference
     ${MS_ROUTE} =    Run    oc get routes -n ${MODEL_MESH_NAMESPACE} example-onnx-mnist --template={{.spec.host}}{{.spec.path}}
     ${AUTH_TOKEN} =    Run    oc sa new-token user-one -n ${MODEL_MESH_NAMESPACE}
     ${inference_output} =    Run    curl -ks https://${MS_ROUTE}/infer -d @modelmesh-serving/quickstart/input.json -H "Authorization: Bearer ${AUTH_TOKEN}"
-    Should Be Equal As Strings    ${inference_output}    ${expected_inference_output}
+    Should Be Equal As Strings    ${inference_output}    ${EXPECTED_INFERENCE_OUTPUT}
 
 
 *** Keywords ***

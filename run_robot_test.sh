@@ -289,7 +289,7 @@ VENV_ROOT=${currentpath}/venv
 if [[ ! -d "${VENV_ROOT}" ]]; then
   python3 -m venv "${VENV_ROOT}"
 fi
-# shellcheck disable=SC1091
+# shellcheck disable=SC1091,SC2086
 source ${VENV_ROOT}/bin/activate
 
 if [[ ${SKIP_PIP_INSTALL} -eq 0 ]]; then
@@ -304,9 +304,11 @@ fi
 if ! ${DRYRUN_ACTION}; then
   case "$(uname -s)" in
     Darwin)
+        # shellcheck disable=SC2046
         TEST_ARTIFACT_DIR=$(mktemp -d  "${TEST_ARTIFACT_DIR}" -t "${TEST_ARTIFACT_DIR}"/ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
          ;;
     Linux)
+        # shellcheck disable=SC2046
         TEST_ARTIFACT_DIR=$(mktemp -d -p "${TEST_ARTIFACT_DIR}" -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
         ;;
   esac

@@ -74,7 +74,6 @@ Verify Content In RHODS Explore Section
     ...    - Sidebar (titles, links text, links status)
     [Tags]    Sanity
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
-    ...       ProductBug
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait Until Cards Are Loaded
@@ -243,7 +242,6 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    [Tags]      Sanity
    ...         ODS-1491
    ...         Tier1
-   ...         ProductBug
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
    Close All Browsers
    Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
@@ -331,7 +329,6 @@ Verify Dashboard Pod Is Not Getting Restarted
 Verify Switcher to Masterhead
     [Tags]    ODS-771
     ...       Tier2
-    ...       AutomationBug
     [Documentation]    Checks the link in switcher and also check the link of OCM in staging
     Go To RHODS Dashboard
     Open Application Switcher Menu

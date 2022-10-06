@@ -83,7 +83,7 @@ Verify Message That Image Builds Are In Progress
     ...         ODS-460
     ...         ODS-381
     ...         ODS-1348
-    ...         AutomationBug
+    ...         FlakyTest
     Delete Last Pytorch Build
     ${new_buildname}=  Start New Pytorch Build
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}

@@ -8,6 +8,7 @@ Resource            ../../../Resources/RHOSi.resource
 Suite Setup         Pachyderm Suite Setup
 Suite Teardown      Pachyderm Suite Teardown
 
+
 *** Variables ***
 ${pachyderm_container_name}     Pachyderm
 ${pachyderm_operator_name}      Pachyderm
@@ -34,6 +35,7 @@ Verify Pachyderm Pipeline Can Be Created
     Create Pachyderm Pipeline Using JupyterLab     ${pachctl_version}
     Verify Pipeline Pod Creation
     [Teardown]  Delete Pipeline And Stop JupyterLab Server
+
 
 *** Keywords ***
 Pachyderm Suite Setup
@@ -82,10 +84,6 @@ Get Pachd Version
 Create Pachyderm AWS-Secret
     [Documentation]     Creates a Pachyderm AWS Secret.
     Run     oc create secret generic pachyderm-aws-secret -n pachyderm --from-literal=access-id=${S3.AWS_ACCESS_KEY_ID} --from-literal=access-secret=${S3.AWS_SECRET_ACCESS_KEY} --from-literal=region=us-east-1 --from-literal=bucket=ods-ci-pachyderm
-    Menu.Navigate To Page       Workloads   Secrets
-    Wait Until Page Contains Element        //input[@data-test-id="item-filter"]            10
-    Input Text      //input[@data-test-id="item-filter"]    pachyderm-aws-secret
-    Wait Until Page Contains Element        //a[@data-test-id="pachyderm-aws-secret"]       10
 
 Verify Pipeline Pod Creation
     [Documentation]     Checks pipeline pod has been created in workloads.

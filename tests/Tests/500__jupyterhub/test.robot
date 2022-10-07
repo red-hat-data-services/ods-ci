@@ -10,6 +10,7 @@ Suite Teardown   End Web Test
 Force Tags       JupyterHub
 
 *** Variables ***
+@{UNSUPPORTED_VAR_NAMES}=    1    invalid!    my_v@r_name    with space    L45t_0n3?!
 
 
 *** Test Cases ***
@@ -56,6 +57,9 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_four
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
+   FOR    ${env_var}    IN    @{UNSUPPORTED_VAR_NAMES}
+       Verify Unsupported Environment Variable Is Not Allowed    ${env_var}
+   END
    Spawn Notebook  same_tab=${False}
    Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
@@ -102,3 +106,12 @@ Start New Pytorch Build
     ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
     [Return]    ${new_buildname}
+
+Verify Unsupported Environment Variable Is Not Allowed
+    [Documentation]    Test an unsupported environment variable name
+    ...     and expect it to not be allowed.
+    [Arguments]    ${env_var}
+    Add Spawner Environment Variable    ${env_var}    ${env_var}
+    Page Should Contain    Invalid variable name. The name must consist of alphabetic characters, digits, '_', '-', or '.', and must not start with a digit.
+    #Element Should Be Disabled    xpath://button[.="Start server"]
+    Remove Spawner Environment Variable    ${env_var}

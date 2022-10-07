@@ -170,9 +170,9 @@ Verify Access To getting-started API Endpoint
     ...       Tier1    Sanity
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${GETTING_STARTED_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${GETTING_STARTED_ENDPOINT}    token=${ADMIN_TOKEN}
-    Operation Should Be Allowed
+    Operation Should Be Unavailable
 
 Verify Access To quickstarts API Endpoint
     [Documentation]     Verifies the endpoint "quickstarts" works as expected

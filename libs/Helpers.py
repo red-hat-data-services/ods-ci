@@ -24,10 +24,6 @@ class Helpers:
         try:
             version = VersionInfo.parse(version)
             target = VersionInfo.parse(target)
-            # version=tuple(
-            #   version.translate(str.maketrans('', '', string.punctuation)))
-            # target=tuple(
-            #   target.translate(str.maketrans('', '', string.punctuation)))
             return version > target
         except ValueError:
             # Returning False on exception as a workaround for when an
@@ -41,10 +37,6 @@ class Helpers:
         try:
             version = VersionInfo.parse(version)
             target = VersionInfo.parse(target)
-            # version=tuple(
-            #   version.translate(str.maketrans('', '', string.punctuation)))
-            # target=tuple(target.translate(
-            #   str.maketrans('', '', string.punctuation)))
             return version >= target
         except ValueError:
             # Returning False on exception as a workaround for when an

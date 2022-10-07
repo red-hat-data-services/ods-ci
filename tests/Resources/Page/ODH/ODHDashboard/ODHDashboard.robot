@@ -418,7 +418,12 @@ Search Items In Resources Section
     [Arguments]     ${element}
     Click Link      Resources
     Sleep   5
-    Input Text  xpath://input[@class="pf-c-search-input__text-input"]       ${element}
+    ${version-check}=  Is RHODS Version Greater Or Equal Than    1.18.0
+    IF    ${version_check} == True
+        Input Text  xpath://input[@class="pf-c-text-input-group__text-input"]       ${element}
+    ELSE
+        Input Text  xpath://input[@class="pf-c-search-input__text-input"]       ${element}
+    END
 
 Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard

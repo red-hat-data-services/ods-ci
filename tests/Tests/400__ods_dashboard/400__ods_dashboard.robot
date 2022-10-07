@@ -74,7 +74,6 @@ Verify Content In RHODS Explore Section
     ...    - Sidebar (titles, links text, links status)
     [Tags]    Sanity
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
-    ...       ProductBug
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait Until Cards Are Loaded
@@ -226,7 +225,7 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     ...       ODS-1347  ODS-444
     ...       Execution-Time-Over-30m
     ...       AutomationBug
-    ...       FlackyTest
+    ...       FlakyTest
     Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
     ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
     Verify Notification Saying Notebook Builds Not Started
@@ -243,7 +242,6 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    [Tags]      Sanity
    ...         ODS-1491
    ...         Tier1
-   ...         ProductBug
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
    Close All Browsers
    Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
@@ -254,6 +252,7 @@ Verify Error Message In Logs When A RHODS Group Is Empty
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1408
+    ...     ProductBug
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an empty group
     ...                 is set as admin in OdhDashboardConfig CRD
@@ -271,6 +270,7 @@ Verify Error Message In Logs When A RHODS Group Does Not Exist
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1494
+    ...     AutomationBug
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an inexistent group
     ...                 is set as admin in OdhDashboardConfig CRD
@@ -292,6 +292,7 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1500
+    ...       ProductBug
     [Setup]     Set Variables For Group Testing
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
     Set RHODS Admins Group To system:authenticated
@@ -328,7 +329,6 @@ Verify Dashboard Pod Is Not Getting Restarted
 Verify Switcher to Masterhead
     [Tags]    ODS-771
     ...       Tier2
-    ...       AutomationBug
     [Documentation]    Checks the link in switcher and also check the link of OCM in staging
     Go To RHODS Dashboard
     Open Application Switcher Menu

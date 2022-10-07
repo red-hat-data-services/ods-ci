@@ -27,8 +27,10 @@ Verify User Can Create A Data Science Project
     Open Data Science Projects Page
     Project Should Be Listed    project_displayed_name=${PRJ_TITLE}
     Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_displayed_name=${PRJ_TITLE}
-    Check Corresponding Namespace Exists    project_displayed_name=${PRJ_TITLE}
-    [Teardown]    Delete Data Science Project   project_displayed_name=${PRJ_TITLE}
+    ${ns_name}=    Check Corresponding Namespace Exists    project_displayed_name=${PRJ_TITLE}
+    Delete Data Science Project   project_displayed_name=${PRJ_TITLE}
+    ${ns_to_delete}=    Create List     ${ns_name}
+    [Teardown]    Delete Data Science Projects From CLI     ${ns_to_delete}
 
 
 *** Keywords ***
@@ -47,3 +49,4 @@ Check Corresponding Namespace Exists
     [Arguments]     ${project_displayed_name}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_displayed_name=${project_displayed_name}
     Oc Get      kind=Project    name=${ns_name}
+    [Return]    ${ns_name}

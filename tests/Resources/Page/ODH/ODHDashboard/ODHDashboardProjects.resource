@@ -42,7 +42,23 @@ Delete Data Science Project
     Project Should Be Listed    project_displayed_name=${project_displayed_name}
     Open Actions Menu Of Project    project_displayed_name=${project_displayed_name}
     Click Delete From Action Menu   project_displayed_name=${project_displayed_name}
-    # check NS deleted
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_displayed_name=${project_displayed_name}
+    ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${ns_name}
+    IF    ${present} == ${TRUE}
+        Fail   msg=The namespace for ${project_displayed_name} project was not deleted using UI actions..
+    END
+
+Delete Data Science Projects From CLI
+    [Documentation]     Deletets the Openshift Projects using OpenshiftLibrary
+    [Arguments]     ${ocp_projects}
+    FOR   ${project}    IN  @{ocp_projects}
+        ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${project}
+        IF    ${present} == ${FALSE}
+            Continue For Loop
+        ELSE
+            OpenshiftLibrary.Oc Delete    kind=Project   name=${project}
+        END
+    END
 
 Open Actions Menu Of Project
     [Arguments]     ${project_displayed_name}
@@ -53,7 +69,7 @@ Click Delete From Action Menu
     [Arguments]     ${project_displayed_name}
     Wait Until Page Contains Element    ${DELETE_ACTION_BTN_XP}
     Click Element    ${DELETE_ACTION_BTN_XP}
-    # Add confirmation click
+    Click Button       Delete
 
 Wait Until Project Is Open
     [Arguments]     ${project_displayed_name}

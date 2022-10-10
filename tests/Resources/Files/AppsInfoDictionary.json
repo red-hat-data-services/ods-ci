@@ -149,7 +149,7 @@
              "sidebar_links": {
                    "0": {
                          "text": "Get started",
-                         "url": "https://cloud.redhat.com/beta/application-services/streams/kafkas",
+                         "url": "https://console.redhat.com/application-services/streams/kafkas",
                          "matching": ""
                    },
                    "1": {
@@ -158,8 +158,8 @@
                          "matching": ""
                    },
                    "2": {
-                         "text": "https://cloud.redhat.com/application-services/streams/kafkas",
-                         "url": "https://cloud.redhat.com/beta/application-services/streams/kafkas",
+                         "text": "https://console.redhat.com/application-services/streams/kafkas",
+                         "url": "https://console.redhat.com/application-services/streams/kafkas",
                          "matching": ""
                    }
                }

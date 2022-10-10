@@ -11,9 +11,8 @@ Resource         ../../../Resources/ODS.robot
 Library          ../../../../utils/scripts/ocm/ocm.py
 Library          ../../../../libs/Helpers.py
 Library         SeleniumLibrary
-Suite Setup      OCM Suite Setup
-Suite Teardown   OCM Suite Teardown
-Test Setup       OCM Test Setup
+Suite Setup      Installation Suite Setup
+Suite Teardown   Installation Suite Teardown
 
 
 *** Variables ***
@@ -32,7 +31,7 @@ Verify User Can Access RHODS Documentation From OCM Console
   [Documentation]   Checks user can access RHODS documentation from addon on OCM Console
   [Tags]  ODS-1303
   ...     Tier2
-  Skip If RHODS Is Self-Managed
+  [Setup]   OCM Test Setup
   Decide OCM URL And Open Link
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip OCM Tour
@@ -46,16 +45,17 @@ Verify User Can Access RHODS Documentation From OCM Console
 
 
 *** Keywords ***
-OCM Suite Setup
+Installation Suite Setup
   Set Library Search Order    SeleniumLibrary
   RHOSi Setup
 
-OCM Suite Teardown
+Installation Suite Teardown
   Close All Browsers
   RHOSi Teardown
 
 OCM Test Setup
   [Documentation]   Setup for ODH in Openshift Installation Test Cases
+  Skip If RHODS Is Self-Managed
   Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
   ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
 

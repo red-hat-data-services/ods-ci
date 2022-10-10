@@ -611,7 +611,7 @@ Verify Access to notebooks API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}    str_to_json=${TRUE}
     Operation Should Be Allowed
-    ${NB_STOP_ENDPOINT_BASIC_USER_4_BODY}=       Fill In Notebook Payload For Stopping    username=${TEST_USER_4.USERNAME}
+    ${NB_STOP_ENDPOINT_BASIC_USER_4_BODY}=       Fill In Notebook Payload For Stopping    notebook_username=${TEST_USER_4.USERNAME}
     Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_4_BODY}    str_to_json=${TRUE}
     Operation Should Be Unauthorized

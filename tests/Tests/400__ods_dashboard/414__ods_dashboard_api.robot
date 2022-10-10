@@ -804,7 +804,12 @@ Delete Test Notebooks CRs And PVCs From CLI
     ${CR_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
     ${test_crs}=   Create List     ${CR_1}   ${CR_2}
     FOR   ${nb_cr}    IN  @{test_crs}
-        OpenshiftLibrary.Oc Delete    kind=Notebook    namespace=${NOTEBOOK_NS}    name=${nb_cr}
+        ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Notebook  namespace=${NOTEBOOK_NS}  name=${nb_cr}
+        IF    ${present} == ${FALSE}
+            Continue For Loop
+        ELSE
+            OpenshiftLibrary.Oc Delete    kind=Notebook    namespace=${NOTEBOOK_NS}    name=${nb_cr}
+        END
     END
     Close All Browsers
     ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}

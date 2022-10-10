@@ -74,6 +74,8 @@ ${NB_ENDPOINT_PT1}=      ${NB_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 ${NB_ENDPOINT_PT2}=      /status
 ${NB_ENDPOINT_BODY_A}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":{"configMap":{},"secrets":{"super-secre":"my new secret 20!"}},"state":"started"}
 ${NB_ENDPOINT_BODY_B}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":{"configMap":{},"secrets":{"super-secre":"my new secret 20!"}},"state":"started","username":"<USERNAME>"}
+${NB_STOP_ENDPOINT_BODY_A}=    {"state":"stopped"}
+${NB_STOP_ENDPOINT_BODY_B}=    {"state":"stopped","username": "ldap-admin17"}
 
 ${PVC_ENDPOINT_PT0}=      api/pvc
 ${PVC_ENDPOINT_PT1}=      ${PVC_ENDPOINT_PT0}/${NOTEBOOK_NS}/
@@ -573,10 +575,14 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_BASIC_USER_STATUS}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    ${NB_ENDPOINT_BASIC_USER_BODY}=       Fill In Notebook Payload   imagetagname=${IMAGE_TAG_NAME}
+    ${NB_ENDPOINT_BASIC_USER_BODY}=       Fill In Notebook Payload For Creation/Update   imagetagname=${IMAGE_TAG_NAME}
     # POST call for update
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_BODY}  str_to_json=${TRUE}
+    Operation Should Be Allowed
+    ${NB_STOP_ENDPOINT_BASIC_USER_BODY}=       Fill In Notebook Payload For Stopping
+    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_BODY}    str_to_json=${TRUE}
     Operation Should Be Allowed
     ${NOTEBOOK_CR_NAME_USER2}  ${IMAGE_TAG_NAME}=      Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NB_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_ENDPOINT_PT1}${NOTEBOOK_CR_NAME_USER2}
@@ -589,7 +595,7 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
     Operation Should Be Unavailable
-    ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Fill In Notebook Payload    notebook_username=${TEST_USER_4.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Fill In Notebook Payload For Creation/Update    notebook_username=${TEST_USER_4.USERNAME}
     ...                                     imagetagname=${IMAGE_TAG_NAME}
     # POST call for update
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
@@ -599,13 +605,21 @@ Verify Access to notebooks API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}    str_to_json=${TRUE}
     Operation Should Be Allowed
-    ${NB_ENDPOINT_BASIC_USER_3_BODY}=       Fill In Notebook Payload    notebook_username=${TEST_USER.USERNAME}
+    ${NB_ENDPOINT_BASIC_USER_3_BODY}=       Fill In Notebook Payload For Creation/Update    notebook_username=${TEST_USER.USERNAME}
     ...                                     imagetagname=${IMAGE_TAG_NAME}
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${BASIC_USER_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}    str_to_json=${TRUE}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}    str_to_json=${TRUE}
+    Operation Should Be Allowed
+    # pATCH with normal user - 403
+    ${NB_STOP_ENDPOINT_BASIC_USER_3_BODY}=       Fill In Notebook Payload For Stopping    username=${TEST_USER.USERNAME}
+    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_BODY}    str_to_json=${TRUE}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_BODY}    str_to_json=${TRUE}
     Operation Should Be Allowed
     [Teardown]    Delete Test Notebooks CRs And PVCs From CLI
 
@@ -816,7 +830,7 @@ Set Username In PVC Payload
     ${complete_pvc}=     Replace String    ${PVC_ENDPOINT_BODY}    <PVC_NAME>    ${username}
     [Return]    ${complete_pvc}
 
-Fill In Notebook Payload
+Fill In Notebook Payload For Creation/Update
     [Documentation]     Fill in the json body for creating/updating a Notebook with the username
     [Arguments]     ${imagetagname}     ${notebook_username}=${NONE}
     IF    "${notebook_username}" == "${NONE}"
@@ -825,6 +839,16 @@ Fill In Notebook Payload
         ${body}=       Replace String    ${NB_ENDPOINT_BODY_B}    <USERNAME>    ${notebook_username}
     END
     ${complete_body}=     Replace String    ${body}    <IMAGETAGNAME>    ${imagetagname}
+    [Return]    ${complete_body}
+
+Fill In Notebook Payload For Stopping
+    [Documentation]     Fill in the json body for creating/updating a Notebook with the username
+    [Arguments]     ${notebook_username}=${NONE}
+    IF    "${notebook_username}" == "${NONE}"
+        ${complete_body}=       Set Variable      ${NB_STOP_ENDPOINT_BODY_A}
+    ELSE
+        ${complete_body}=       Replace String    ${NB_STOP_ENDPOINT_BODY_B}    <USERNAME>    ${notebook_username}
+    END
     [Return]    ${complete_body}
 
 Delete Test PVCs

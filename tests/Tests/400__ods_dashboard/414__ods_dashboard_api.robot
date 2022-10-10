@@ -75,7 +75,7 @@ ${NB_ENDPOINT_PT2}=      /status
 ${NB_ENDPOINT_BODY_A}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":{"configMap":{},"secrets":{"super-secre":"my new secret 20!"}},"state":"started"}
 ${NB_ENDPOINT_BODY_B}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":{"configMap":{},"secrets":{"super-secre":"my new secret 20!"}},"state":"started","username":"<USERNAME>"}
 ${NB_STOP_ENDPOINT_BODY_A}=    {"state":"stopped"}
-${NB_STOP_ENDPOINT_BODY_B}=    {"state":"stopped","username": "ldap-admin17"}
+${NB_STOP_ENDPOINT_BODY_B}=    {"state":"stopped","username": "<USERNAME>"}
 
 ${PVC_ENDPOINT_PT0}=      api/pvc
 ${PVC_ENDPOINT_PT1}=      ${PVC_ENDPOINT_PT0}/${NOTEBOOK_NS}/

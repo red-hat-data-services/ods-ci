@@ -419,7 +419,7 @@ Search Items In Resources Section
     Click Link      Resources
     Sleep   5
     ${version-check}=  Is RHODS Version Greater Or Equal Than    1.18.0
-    IF    ${version_check} == True
+    IF    ${version-check} == True
         Input Text  xpath://input[@class="pf-c-text-input-group__text-input"]       ${element}
     ELSE
         Input Text  xpath://input[@class="pf-c-search-input__text-input"]       ${element}

@@ -83,7 +83,7 @@ Verify Quick Starts Work As Expected When Restarting The Previous One
     ${count}=   Get The Count Of QuickStart Steps
     Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Close
     ${version-check}=  Is RHODS Version Greater Or Equal Than    1.18.0
-    IF    ${version_check} == True
+    IF    ${version-check} == True
         Star QuickStart Tour
     ELSE
         Continue QuickStart

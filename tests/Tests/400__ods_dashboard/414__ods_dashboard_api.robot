@@ -616,10 +616,10 @@ Verify Access to notebooks API Endpoint
     # pATCH with normal user - 403
     ${NB_STOP_ENDPOINT_BASIC_USER_3_BODY}=       Fill In Notebook Payload For Stopping    username=${TEST_USER.USERNAME}
     Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_BODY}    str_to_json=${TRUE}
+    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_3_BODY}    str_to_json=${TRUE}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_BODY}    str_to_json=${TRUE}
+    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_3_BODY}    str_to_json=${TRUE}
     Operation Should Be Allowed
     [Teardown]    Delete Test Notebooks CRs And PVCs From CLI
 

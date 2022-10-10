@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Verify PyTorch Image Suite Setup
@@ -84,6 +85,7 @@ Verify PyTorch Image GPU Workload
 *** Keywords ***
 Verify PyTorch Image Suite Setup
     [Documentation]    Suite Setup, spawns pytorch image
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small

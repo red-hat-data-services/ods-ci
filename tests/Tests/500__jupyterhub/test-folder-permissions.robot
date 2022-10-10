@@ -4,17 +4,20 @@ Documentation       Test Suite to check the folder permissions
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 
 Library             JupyterLibrary
 
 Suite Setup         Load Spawner Page
 Suite Teardown      End Web Test
 
+
 *** Variables ***
 @{LIST_OF_IMAGES} =    s2i-minimal-notebook    s2i-generic-data-science-notebook
 ...                    pytorch    tensorflow    minimal-gpu
 @{EXPECTED_PERMISSIONS} =       0775    0    1001
 @{FOLDER_TO_CHECK} =            /opt/app-root/lib    /opt/app-root/share
+
 
 *** Test Cases ***
 Verify Folder Permissions
@@ -28,6 +31,7 @@ Verify Folder Permissions
 *** Keywords ***
 Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
 

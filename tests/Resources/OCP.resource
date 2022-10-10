@@ -53,10 +53,8 @@ Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
     ...                 in the cluster (e.g., usually on OSD, ROSA).
     ...                 Returns ${TRUE} if RHODS Self-Managed is installed (e.g., usually on PSI or baremetal)
-    ${self_managed_cs} =    OpenshiftLibrary.Oc Get    kind=CatalogSource  name=self-managed-rhods  namespace=openshift-marketplace
-    IF    ${self_managed_cs} == ${NONE}
-        ${is_self_managed} =    Set Variable   ${FALSE}
-    ELSE
-        ${is_self_managed} =    Set Variable   ${TRUE}
-    END
+    ${is_self_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
+    ...                                                      kind=CatalogSource
+    ...                                                      name=self-managed-rhods
+    ...                                                      namespace=openshift-marketplace
     [Return]    ${is_self_managed}

@@ -597,11 +597,9 @@ Verify Access to notebooks API Endpoint
     Operation Should Be Unavailable
     ${NB_ENDPOINT_BASIC_USER_2_BODY}=       Fill In Notebook Payload For Creation/Update    notebook_username=${TEST_USER_4.USERNAME}
     ...                                     imagetagname=${IMAGE_TAG_NAME}
-    # POST call for update
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}    str_to_json=${TRUE}
     Operation Should Be Unauthorized
-    # POST call for update
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_2_BODY}    str_to_json=${TRUE}
     Operation Should Be Allowed
@@ -613,13 +611,12 @@ Verify Access to notebooks API Endpoint
     Perform Dashboard API Endpoint POST Call   endpoint=${NB_ENDPOINT_PT0}/    token=${ADMIN_TOKEN}
     ...                                        body=${NB_ENDPOINT_BASIC_USER_3_BODY}    str_to_json=${TRUE}
     Operation Should Be Allowed
-    # pATCH with normal user - 403
-    ${NB_STOP_ENDPOINT_BASIC_USER_3_BODY}=       Fill In Notebook Payload For Stopping    username=${TEST_USER.USERNAME}
+    ${NB_STOP_ENDPOINT_BASIC_USER_4_BODY}=       Fill In Notebook Payload For Stopping    username=${TEST_USER_4.USERNAME}
     Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
-    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_3_BODY}    str_to_json=${TRUE}
+    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_4_BODY}    str_to_json=${TRUE}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint PATCH Call   endpoint=${NB_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
-    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_3_BODY}    str_to_json=${TRUE}
+    ...                                        body=${NB_STOP_ENDPOINT_BASIC_USER_4_BODY}    str_to_json=${TRUE}
     Operation Should Be Allowed
     [Teardown]    Delete Test Notebooks CRs And PVCs From CLI
 

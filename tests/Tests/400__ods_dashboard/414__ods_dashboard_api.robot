@@ -461,10 +461,10 @@ Verify Access To groups-config API Endpoint
     ${current_config}=    Perform Dashboard API Endpoint GET Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PUT Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${BASIC_USER_TOKEN}
-    ...                                       body=${current_config.text}
+    ...                                       body=${current_config}    str_to_json=${FALSE}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint PUT Call   endpoint=${GROUPS_CONFIG_ENDPOINT}    token=${ADMIN_TOKEN}
-    ...                                       body=${current_config.text}
+    ...                                       body=${current_config}    str_to_json=${FALSE}
     Operation Should Be Allowed
 
 Verify Access To images API Endpoint
@@ -482,14 +482,13 @@ Verify Access To images API Endpoint
     Perform Dashboard API Endpoint GET Call   endpoint=${IMG_ENDPOINT_PT0}/${IMG_ENDPOINT_PT1}   token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     ${current_images}=    Perform Dashboard API Endpoint GET Call   endpoint=${IMG_ENDPOINT_PT0}/${IMG_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
-    Log         ${current_images.json()}
-    ${image_id}=    Set Variable         ${current_images.json()[0]['id']}
+    ${image_id}=    Set Variable         ${current_images[0]['id']}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint PUT Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${BASIC_USER_TOKEN}
-    ...                                       body=${current_images.json()[0]}  str_to_json=${FALSE}
+    ...                                       body=${current_images[0]}  str_to_json=${FALSE}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint PUT Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${ADMIN_TOKEN}
-    ...                                       body=${current_images.json()[0]}  str_to_json=${FALSE}
+    ...                                       body=${current_images[0]}  str_to_json=${FALSE}
     Perform Dashboard API Endpoint DELETE Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${BASIC_USER_TOKEN}
     Operation Should Be Unauthorized
     Perform Dashboard API Endpoint DELETE Call   endpoint=${IMG_ENDPOINT_PT0}/${image_id}    token=${ADMIN_TOKEN}

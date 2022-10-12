@@ -11,13 +11,32 @@ ${WARN_MSG_500}=    Accepting HTTP code 500 as "allowed". If the user wouldn't h
 
 
 *** Keywords ***
+Perform Request
+    [Documentation]    Generic keyword to perform API call. It implements the log security by
+    ...                hiding the oauth proxy data from logs and producing a custom log string.
+    [Arguments]     ${request_type}   &{request_args}
+    Set Log Level    NONE
+    ${response}=    Run Keyword     RequestsLibrary.${request_type}   &{request_args}
+    Remove OAuth Token From Header   headers=${response.request.headers}    token=${request_args}[headers][Cookie]
+    Remove OAuth Token From Header   headers=${response.headers}    token=${request_args}[headers][Cookie]
+    Set Log Level    INFO
+    &{LOG_DICT}=    Create Dictionary   url=${response.request.url}   headers=${response.request.headers}
+    ...                                 body=${response.request.headers}    status_code=${response.status_code}
+    Log     ${request_type} Request: ${LOG_DICT}
+    &{LOG_RESP_DICT}=    Create Dictionary   url=${response.url}   headers=${response.headers}   body=${response.text}
+    ...                                      status_code=${response.status_code}   reason=${response.reason}
+    Set To Dictionary    dictionary=&{LOG_DICT}     url=${response.url}   headers=${response.headers}   body=${response.text}
+    Log     ${request_type} Response: ${LOG_RESP_DICT}
+    [Return]    ${response.json()}
+
 Perform Dashboard API Endpoint GET Call
     [Documentation]     Runs a GET call to the given API endpoint. Result may change based
     ...                 on the given token (i.e., user)
     [Arguments]     ${endpoint}     ${token}
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
-    ${response}=    RequestsLibrary.GET  ${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
+    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
+    ${response}=    Perform Request     GET     &{args}
     [Return]    ${response}
 
 Perform Dashboard API Endpoint PUT Call
@@ -26,8 +45,9 @@ Perform Dashboard API Endpoint PUT Call
     [Arguments]     ${endpoint}     ${token}    ${body}     ${str_to_json}=${TRUE}
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}   Content-type=application/json
     ${payload}=     Prepare Payload     body=${body}    str_to_json=${str_to_json}
-    ${response}=    RequestsLibrary.Put  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
-    ...             headers=${headers}    json=${payload}   timeout=5  verify=${False}
+    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
+    ...             headers=${headers}   json=${payload}    timeout=5  verify=${False}
+    ${response}=    Perform Request     PUT     &{args}
 
 Perform Dashboard API Endpoint POST Call
     [Documentation]     Runs a PUT call to the given API endpoint. Result may change based
@@ -35,8 +55,9 @@ Perform Dashboard API Endpoint POST Call
     [Arguments]     ${endpoint}     ${token}    ${body}    ${str_to_json}=${TRUE}
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}   Content-type=application/json
     ${payload}=     Prepare Payload     body=${body}    str_to_json=${str_to_json}
-    ${response}=    RequestsLibrary.Post  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
-    ...             headers=${headers}    json=${payload}   timeout=5  verify=${False}
+    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
+    ...             headers=${headers}   json=${payload}    timeout=5  verify=${False}
+    ${response}=    Perform Request     POST     &{args}
 
 Perform Dashboard API Endpoint PATCH Call
     [Documentation]     Runs a PATCH call to the given API endpoint. Result may change based
@@ -44,16 +65,18 @@ Perform Dashboard API Endpoint PATCH Call
     [Arguments]     ${endpoint}     ${token}    ${body}     ${str_to_json}=${TRUE}
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}   Content-type=application/json
     ${payload}=     Prepare Payload     body=${body}    str_to_json=${str_to_json}
-    ${response}=    RequestsLibrary.Patch  ${ODH_DASHBOARD_URL}/${endpoint}    expected_status=any
-    ...             headers=${headers}    json=${payload}   timeout=5  verify=${False}
+    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
+    ...             headers=${headers}   json=${payload}    timeout=5  verify=${False}
+    ${response}=    Perform Request     PATCH     &{args}
 
 Perform Dashboard API Endpoint DELETE Call
     [Documentation]     Runs a GET call to the given API endpoint. Result may change based
     ...                 on the given token (i.e., user)
     [Arguments]     ${endpoint}     ${token}
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
-    ${response}=    RequestsLibrary.DELETE  ${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
+    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
+    ${response}=    Perform Request     DELETE     &{args}
 
 Operation Should Be Allowed
     [Documentation]     Checks if the API call returns an HTTP code 200 (SUCCESS)
@@ -86,3 +109,14 @@ Prepare Payload
         ${payload}=     Set Variable    ${body}
     END
     [Return]    ${payload}
+
+Remove OAuth Token From Header
+    [Documentation]     Hides oauth proxy from header
+    [Arguments]     ${headers}   ${token}
+    ${oauth_present}=       Run Keyword And Return Status    Dictionary Should Contain Key
+    ...                                                      dictionary=${headers}    key=Cookie
+    ${token}=    Replace String    string=${token}    search_for=_oauth_proxy=    replace_with=${EMPTY}
+    IF    ${oauth_present} == ${TRUE}
+         ${cookies}=    Replace String    string=${headers}[Cookie]     search_for=${token}     replace_with=***hidden***
+         Set To Dictionary    dictionary=${headers}   Cookie=${cookies}
+    END

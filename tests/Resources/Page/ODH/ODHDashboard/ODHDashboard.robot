@@ -392,9 +392,9 @@ Save Changes In Cluster Settings
     Click Button    Save changes
     Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Settings changes saved
-    # New setting applies after ~5-10s. Sleep here to make
-    # sure it is applied.
-    Sleep  10s
+    # New setting applies after a few seconds, empirically >15s.
+    # Sleep here to make sure it is applied.
+    Sleep  30s
 
 Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"

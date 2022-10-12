@@ -15,6 +15,7 @@ Verify Dashboard Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-233
+    ...       AutomationBug
     [Setup]     Set Expected Replicas Based On Version
     @{dashboard_pods_info} =    Fetch Dashboard Pods
     @{dashboard_deployments_info} =    Fetch Dashboard Deployments

@@ -8,10 +8,7 @@ Suite Teardown   Teardown
 
 *** Variables ***
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
-<<<<<<< HEAD
 @{UNSUPPORTED_TOLERATIONS}=    --UNSUPPORTED--    Unsupported-    -Unsupported    Unsupported!    1-_.a@    L@5t0n3!
-=======
->>>>>>> b3aed3a (Rename file, test unsupported toleration, fix test by increasing sleep)
 
 
 *** Test Cases ***

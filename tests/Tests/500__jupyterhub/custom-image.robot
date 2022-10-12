@@ -39,6 +39,7 @@ Verify Custom Image Can Be Added
     ...                Then loads the spawner and tries using the custom img
     [Tags]    Sanity    Tier1
     ...       ODS-1208    ODS-1365
+    ...       ProductBug
     Create Custom Image
     Get ImageStream Metadata And Check Name
     Verify Custom Image Is Listed  ${IMG_NAME}
@@ -61,6 +62,7 @@ Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
     [Tags]    Sanity    Tier1
     ...       ODS-1368
+    ...       ProductBug
     Sleep  1
     Create Custom Image
     Sleep  1
@@ -76,6 +78,7 @@ Test Bad Image URL
     [Documentation]  Test adding an image with a bad repo URL (should fail)
     [Tags]    Sanity    Tier1
     ...       ODS-1367
+    ...       ProductBug
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  quay.io/RandomName/RandomImage:v1.2.3
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
@@ -90,6 +93,7 @@ Test Bad Image Import
     ...    in the JH spawner page
     [Tags]    Sanity    Tier1
     ...       ODS-1364
+    ...       ProductBug
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  randomstring
     Set Global Variable  ${IMG_URL}  ${IMG_URL}

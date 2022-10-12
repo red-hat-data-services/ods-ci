@@ -10,13 +10,14 @@ Force Tags       JupyterHub
 
 
 *** Test Cases ***
-Verify pip Changes not permenant
+Verify pip Changes not permanent
     [Documentation]
-    ...   Verify if installed pip changes are permenant
+    ...   Verify if installed pip changes are permanent
     ...   after stopping and starting notebook
 
     [Tags]  Sanity
     ...     ODS-909
+    ...     ProductBug
     Install And Import Package In JupyterLab  paramiko
     Stop JupyterLab Notebook Server
     Capture Page Screenshot

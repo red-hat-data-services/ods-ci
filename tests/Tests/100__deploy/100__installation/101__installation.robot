@@ -32,7 +32,6 @@ Verify User Can Access RHODS Documentation From OCM Console
   [Documentation]   Checks user can access RHODS documentation from addon on OCM Console
   [Tags]  ODS-1303
   ...     Tier2
-  ...     AutomationBug
   Decide OCM URL And Open Link
   Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
   Maybe Skip OCM Tour

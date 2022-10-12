@@ -14,6 +14,7 @@ Verify Odh-deployer Checks Cluster Platform Type
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1316
+    ...       AutomationBug
     ${cluster_platform_type}=    Fetch Cluster Platform Type
     IF    "${cluster_platform_type}" == "AWS" or "${cluster_platform_type}" == "OpenStack"
         ${odhdeployer_logs_content}=     Set Variable
@@ -71,9 +72,9 @@ Verify Clean Up ODS Deployer Post-Migration
         ...    INFO: Migrating from JupyterHub to NBC, deleting old JupyterHub artifacts
         Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
     END
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found   
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
     ...    Oc Get    kind=CustomResourceDefinition    name=blobstorages.integreatly.org     namespace=redhat-ods-applications
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found   
+    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
     ...    Oc Get    kind=CustomResourceDefinition    name=postgres.integreatly.org    namespace=redhat-ods-applications
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
     ...    Oc Get    kind=CustomResourceDefinition    name=redis.integreatly.org    namespace=redhat-ods-applications
@@ -99,7 +100,7 @@ Verify Clean Up ODS Deployer Post-Migration
     ...    Oc Get    kind=ServiceAccount    name=cloud-resource-operator    namespace=redhat-ods-applications
 
     ${dashboardConfig} =   Oc Get   kind=OdhDashboardConfig   namespace=redhat-ods-applications  name=odh-dashboard-config
-    Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["adminGroups"]}    dedicated-admins 	
+    Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["adminGroups"]}    dedicated-admins
     Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["allowedGroups"]}    system:authenticated
     Should Be True    ${dashboardConfig[0]["spec"]["notebookController"]["enabled"]}
     Should Be Equal   ${dashboardConfig[0]["spec"]["notebookController"]["pvcSize"]}    20Gi

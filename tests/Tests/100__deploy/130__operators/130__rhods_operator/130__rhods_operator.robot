@@ -2,6 +2,7 @@
 Library         SeleniumLibrary
 Library         RequestsLibrary
 Library         Collections
+Library         OpenShiftLibrary
 Resource        ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource        ../../../../Resources/Common.robot
 Resource        ../../../../Resources/RHOSi.resource
@@ -35,6 +36,14 @@ Verify RHODS operator information
 
   Run Keyword IF     "mailto:undefined" not in $temp_list     FAIL    There shouldn't be reference to maintainers email
 
+Upgrade And Verify RHODS Via Addon
+    [Documentation]  This TC verfiy if the user is able to upgrade RHODS
+    ...   Via Addon withought monitoring 
+    [Tags]  ODS-1766
+    Upgrade RHODS From Installed Operator
+    ${podStatus}  Get Pod Status    redhat-ods-operator      name=rhods-operator
+    Should Not Be Equal    ${podStatus}   Running
+    OpenShiftLibrary.Wait For Pods Status  namespace=redhat-ods-operator  timeout=300
 
 *** Keywords ***
 Get HTTP Status Code
@@ -52,3 +61,16 @@ RHODS Operator Suite Teardown
     [Documentation]    Suite teardown
     Close Browser
     RHOSi Teardown
+
+Upgrade RHODS From Installed Operator
+    [Documentation]    Upgrade Rhods Via Addon
+    Open Installed Operators Page
+    Click On Searched Operator      Red Hat OpenShift Data Science
+    Switch To New Tab               Subscription
+    Wait Until Page Contains        Upgrade available    timeout=60s
+    Click Element                   //*[text()='Upgrade available']
+    Wait Until Page Contains        Preview InstallPlan  timeout=60s
+    Click Button                Preview InstallPlan
+    Wait Until Page Contains  Approve   timeout=60s
+    Click Button              Approve
+    Wait Until Page Contains  Complete   timeout=20s

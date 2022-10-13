@@ -16,16 +16,19 @@ Perform Request
     ...                hiding the oauth proxy data from logs and producing a custom log string.
     [Arguments]     ${request_type}   &{request_args}
     Set Log Level    NONE
+    &{LOG_DICT}=    Create Dictionary   url=${EMPTY}   headers=${EMPTY}
+    ...                                 body=${EMPTY}    status_code=${EMPTY}
+    &{LOG_RESP_DICT}=    Create Dictionary   url=${EMPTY}   headers=${EMPTY}   body=${EMPTY}
+    ...                                      status_code=${EMPTY}   reason=${EMPTY}
     ${response}=   Run Keyword And Continue On Failure     RequestsLibrary.${request_type}   &{request_args}
     Remove OAuth Token From Header   headers=${response.request.headers}    token=${request_args}[headers][Cookie]
     Remove OAuth Token From Header   headers=${response.headers}    token=${request_args}[headers][Cookie]
     Set Log Level    INFO
-    &{LOG_DICT}=    Create Dictionary   url=${response.request.url}   headers=${response.request.headers}
+    Set To Dictionary    ${LOG_DICT}     url=${response.request.url}   headers=${response.request.headers}
     ...                                 body=${response.request.headers}    status_code=${response.status_code}
     Log     ${request_type} Request: ${LOG_DICT}
-    &{LOG_RESP_DICT}=    Create Dictionary   url=${response.url}   headers=${response.headers}   body=${response.text}
+    Set To Dictionary    ${LOG_RESP_DICT}      url=${response.url}   headers=${response.headers}   body=${response.text}
     ...                                      status_code=${response.status_code}   reason=${response.reason}
-    Set To Dictionary    dictionary=&{LOG_DICT}     url=${response.url}   headers=${response.headers}   body=${response.text}
     Log     ${request_type} Response: ${LOG_RESP_DICT}
     [Return]    ${response.json()}
 

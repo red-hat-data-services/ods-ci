@@ -15,7 +15,6 @@ Perform Request
     [Documentation]    Generic keyword to perform API call. It implements the log security by
     ...                hiding the oauth proxy data from logs and producing a custom log string.
     [Arguments]     ${request_type}   &{request_args}
-    Set Log Level    NONE
     &{LOG_DICT}=    Create Dictionary   url=${EMPTY}   headers=${EMPTY}
     ...                                 body=${EMPTY}    status_code=${EMPTY}
     &{LOG_RESP_DICT}=    Create Dictionary   url=${EMPTY}   headers=${EMPTY}   body=${EMPTY}
@@ -37,9 +36,12 @@ Perform Dashboard API Endpoint GET Call
     ...                 on the given token (i.e., user)
     [Arguments]     ${endpoint}     ${token}
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
-    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
+    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}-wrt/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
-    ${response}=    Perform Request     GET     &{args}
+    ${response}=    Run Keyword And Continue On Failure     Perform Request     GET     &{args}
+    IF    ${response} == ${NONE}
+        Log    msg=HTTP response is empty. The request may have failed to be performed  level=ERROR
+    END
     [Return]    ${response}
 
 Perform Dashboard API Endpoint PUT Call
@@ -50,7 +52,10 @@ Perform Dashboard API Endpoint PUT Call
     ${payload}=     Prepare Payload     body=${body}    str_to_json=${str_to_json}
     &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   json=${payload}    timeout=5  verify=${False}
-    ${response}=    Perform Request     PUT     &{args}
+    ${response}=    Run Keyword And Continue On Failure     Perform Request     PUT     &{args}
+    IF    ${response} == ${NONE}
+        Log    msg=HTTP response is empty. The request may have failed to be performed  level=ERROR
+    END
 
 Perform Dashboard API Endpoint POST Call
     [Documentation]     Runs a PUT call to the given API endpoint. Result may change based
@@ -60,7 +65,10 @@ Perform Dashboard API Endpoint POST Call
     ${payload}=     Prepare Payload     body=${body}    str_to_json=${str_to_json}
     &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   json=${payload}    timeout=5  verify=${False}
-    ${response}=    Perform Request     POST     &{args}
+    ${response}=    Run Keyword And Continue On Failure     Perform Request     POST     &{args}
+    IF    ${response} == ${NONE}
+        Log    msg=HTTP response is empty. The request may have failed to be performed  level=ERROR
+    END
 
 Perform Dashboard API Endpoint PATCH Call
     [Documentation]     Runs a PATCH call to the given API endpoint. Result may change based
@@ -70,7 +78,10 @@ Perform Dashboard API Endpoint PATCH Call
     ${payload}=     Prepare Payload     body=${body}    str_to_json=${str_to_json}
     &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   json=${payload}    timeout=5  verify=${False}
-    ${response}=    Perform Request     PATCH     &{args}
+    ${response}=    Run Keyword And Continue On Failure     Perform Request     PATCH     &{args}
+    IF    ${response} == ${NONE}
+        Log    msg=HTTP response is empty. The request may have failed to be performed  level=ERROR
+    END
 
 Perform Dashboard API Endpoint DELETE Call
     [Documentation]     Runs a GET call to the given API endpoint. Result may change based
@@ -79,7 +90,10 @@ Perform Dashboard API Endpoint DELETE Call
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
     &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
-    ${response}=    Perform Request     DELETE     &{args}
+    ${response}=    Run Keyword And Continue On Failure     Perform Request     DELETE     &{args}
+    IF    ${response} == ${NONE}
+        Log    msg=HTTP response is empty. The request may have failed to be performed  level=ERROR
+    END
 
 Operation Should Be Allowed
     [Documentation]     Checks if the API call returns an HTTP code 200 (SUCCESS)

@@ -32,8 +32,8 @@ items:
               iops: 100
               size: 160
               type: gp2
-            type: m5.2xlarge
-        replicas: 2
+            type: {{ worker_node_instance_type|default("m5.2xlarge") }}
+        replicas: {{ worker_node_replicas|default("2") }}
       controlPlane:
         name: master
         platform:
@@ -42,8 +42,8 @@ items:
               iops: 100
               size: 160
               type: gp2
-            type: m5.2xlarge
-        replicas: 3
+            type: {{ master_node_instance_type|default("m5.2xlarge") }}
+        replicas: {{ master_node_replicas|default("2") }}
       metadata:
         creationTimestamp: null
         name: aws-sno
@@ -58,8 +58,9 @@ items:
         - 172.30.0.0/16
       platform:
         aws:
-          region: us-east-1
+          region: {{ aws_region|default("us-east-1") }}
       pullSecret: ""
+      sshKey: {{ ssh_key|default(" ") }}
   metadata:
     name: aws-sno-install-config
     namespace: rhods

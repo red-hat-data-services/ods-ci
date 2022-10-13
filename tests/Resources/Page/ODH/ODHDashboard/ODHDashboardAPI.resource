@@ -16,7 +16,7 @@ Perform Request
     ...                hiding the oauth proxy data from logs and producing a custom log string.
     [Arguments]     ${request_type}   &{request_args}
     Set Log Level    NONE
-    ${response}=    Run Keyword     RequestsLibrary.${request_type}   &{request_args}
+    ${response}=   Run Keyword And Continue On Failure     RequestsLibrary.${request_type}   &{request_args}
     Remove OAuth Token From Header   headers=${response.request.headers}    token=${request_args}[headers][Cookie]
     Remove OAuth Token From Header   headers=${response.headers}    token=${request_args}[headers][Cookie]
     Set Log Level    INFO

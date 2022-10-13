@@ -1,20 +1,21 @@
 *** Settings ***
-Resource       ../../../Page/Components/Components.resource
-Resource       ../../../Common.robot
+Resource       ../../../../Page/Components/Components.resource
+Resource       ../../../../Common.robot
 
 
 *** Variables ***
-${DS_PROJECT_XP}=   //h1[text()="Data science projects"]
-${TITLE_INPUT_XP}=  xpath=//input[@aria-label="Project name"]
-${DESCR_INPUT_XP}=  xpath=//textarea[@aria-label="Project description"]
-${CREATE_BTN_XP}=  xpath=//button[text()="Create"]
-${ACTIONS_BTN_XP}=  xpath=//div/button[@aria-label="Actions"]
+${DS_PROJECT_XP}=     //h1[text()="Data science projects"]
+${TITLE_INPUT_XP}=    xpath=//input[@aria-label="Project name"]
+${DESCR_INPUT_XP}=    xpath=//textarea[@aria-label="Project description"]
+${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
+${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
+${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
-${EDIT_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Edit project"]
+${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
 
 
 *** Keywords ***
-Open Data Science Projects Page
+Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > Cluster settings" is visible
     Page Should Contain    Data Science Projects
     Click Link      Data Science Projects
@@ -28,7 +29,7 @@ Is Data Science Projects Page Open
     ${page_open}=   Run Keyword And Return Status   Page Should Contain     ${DS_PROJECT_XP}
     [Return]    ${page_open}
 
-Open Data Science Project
+Open Data Science Project Details Page
     [Documentation]    Verifies submenu Settings > Cluster settings" is visible
     [Arguments]     ${project_displayed_name}
     Click Link    ${project_displayed_name}
@@ -37,7 +38,7 @@ Delete Data Science Project
     [Arguments]     ${project_displayed_name}
     ${is_open}=    Is Data Science Projects Page Open
     IF    ${is_open} == ${FALSE}
-        Open Data Science Projects Page
+        Open Data Science Projects Home Page
     END
     Project Should Be Listed    project_displayed_name=${project_displayed_name}
     Open Actions Menu Of Project    project_displayed_name=${project_displayed_name}
@@ -46,18 +47,6 @@ Delete Data Science Project
     ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${ns_name}
     IF    ${present} == ${TRUE}
         Fail   msg=The namespace for ${project_displayed_name} project was not deleted using UI actions..
-    END
-
-Delete Data Science Projects From CLI
-    [Documentation]     Deletets the Openshift Projects using OpenshiftLibrary
-    [Arguments]     ${ocp_projects}
-    FOR   ${project}    IN  @{ocp_projects}
-        ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${project}
-        IF    ${present} == ${FALSE}
-            Continue For Loop
-        ELSE
-            OpenshiftLibrary.Oc Delete    kind=Project   name=${project}
-        END
     END
 
 Open Actions Menu Of Project
@@ -86,13 +75,14 @@ Project's Owner Should Be
 
 Create Data Science Project
     [Arguments]    ${title}    ${description}
-    Click Button    Create data science project
+    Click Button    ${PROJECT_CREATE_BTN_XP}
+    # Click Button    Create data science project
     Wait Until Page Contains Element    ${TITLE_INPUT_XP}
-    Run Keyword And Warn On Failure     Element Should Be Disabled    ${CREATE_BTN_XP}
+    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
     Input Text    ${TITLE_INPUT_XP}    ${title}
     Input Text    ${DESCR_INPUT_XP}    ${description}
-    Wait Until Element Is Enabled    ${CREATE_BTN_XP}
-    Click Button    ${CREATE_BTN_XP}
+    Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
+    Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Modal Disappear
 
 Get Openshift Namespace From Data Science Project
@@ -101,3 +91,25 @@ Get Openshift Namespace From Data Science Project
     ${ns_name}=     Split String From Right     separator=/     max_split=1     string=${project_link}
     [Return]    ${ns_name[1]}
 
+Delete Data Science Projects From CLI
+    [Documentation]     Deletets the Openshift Projects using OpenshiftLibrary
+    [Arguments]     ${ocp_projects}
+    FOR   ${project}    IN  @{ocp_projects}
+        ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${project}
+        IF    ${present} == ${FALSE}
+            Continue For Loop
+        ELSE
+            OpenshiftLibrary.Oc Delete    kind=Project   name=${project}
+        END
+    END
+
+Delete All Data Science Projects From CLI
+    [Documentation]    Deletes all the Openshift Projects which have been created
+    ...                via DataScienceProjects feature, using OpenshiftLibrary
+    @{projects}=     Oc Get    kind=Project  label_selector=opendatahub.io/user=htpasswd-2dcluster-2dadmin-2duser
+    @{to_delete}=   Create List
+    FOR    ${project}    IN    @{projects}
+        Log    ${project['metadata']['name']}
+        Append To List    ${to_delete}     ${project['metadata']['name']}
+    END
+    Delete Data Science Projects From CLI   ocp_projects=${to_delete}

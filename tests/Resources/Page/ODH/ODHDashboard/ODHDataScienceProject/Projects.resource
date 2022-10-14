@@ -31,47 +31,47 @@ Is Data Science Projects Page Open
 
 Open Data Science Project Details Page
     [Documentation]    Verifies submenu Settings > Cluster settings" is visible
-    [Arguments]     ${project_displayed_name}
-    Click Link    ${project_displayed_name}
+    [Arguments]     ${project_title}
+    Click Link    ${project_title}
 
 Delete Data Science Project
-    [Arguments]     ${project_displayed_name}
+    [Arguments]     ${project_title}
     ${is_open}=    Is Data Science Projects Page Open
     IF    ${is_open} == ${FALSE}
         Open Data Science Projects Home Page
     END
-    Project Should Be Listed    project_displayed_name=${project_displayed_name}
-    Open Actions Menu Of Project    project_displayed_name=${project_displayed_name}
-    Click Delete From Action Menu   project_displayed_name=${project_displayed_name}
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_displayed_name=${project_displayed_name}
+    Project Should Be Listed    project_title=${project_title}
+    Open Actions Menu Of Project    project_title=${project_title}
+    Click Delete From Action Menu   project_title=${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${ns_name}
     IF    ${present} == ${TRUE}
-        Fail   msg=The namespace for ${project_displayed_name} project was not deleted using UI actions..
+        Fail   msg=The namespace for ${project_title} project was not deleted using UI actions..
     END
 
 Open Actions Menu Of Project
-    [Arguments]     ${project_displayed_name}
-    Project Should Be Listed    project_displayed_name=${project_displayed_name}
+    [Arguments]     ${project_title}
+    Project Should Be Listed    project_title=${project_title}
     Click Element    ${ACTIONS_BTN_XP}
 
 Click Delete From Action Menu
-    [Arguments]     ${project_displayed_name}
+    [Arguments]     ${project_title}
     Wait Until Page Contains Element    ${DELETE_ACTION_BTN_XP}
     Click Element    ${DELETE_ACTION_BTN_XP}
     Click Button       Delete
 
 Wait Until Project Is Open
-    [Arguments]     ${project_displayed_name}
-    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_displayed_name}")]    timeout=30
+    [Arguments]     ${project_title}
+    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
 
 Project Should Be Listed
-    [Arguments]     ${project_displayed_name}
-    Page Should Contain Element    xpath=//td/a[text()="${project_displayed_name}"]
+    [Arguments]     ${project_title}
+    Page Should Contain Element    xpath=//td/a[text()="${project_title}"]
 
 Project's Owner Should Be
-    [Arguments]     ${project_displayed_name}    ${expected_username}
-    Page Should Contain Element    xpath=//td[a[text()="${project_displayed_name}"]]
-    Page Should Contain Element    xpath=//td[a[text()="${project_displayed_name}"]]/small[text()="${expected_username}"]
+    [Arguments]     ${project_title}    ${expected_username}
+    Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]
+    Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Arguments]    ${title}    ${description}
@@ -86,8 +86,8 @@ Create Data Science Project
     Wait Until Modal Disappear
 
 Get Openshift Namespace From Data Science Project
-    [Arguments]     ${project_displayed_name}
-    ${project_link}=    Get Element Attribute    xpath=//td/a[text()="${project_displayed_name}"]    href
+    [Arguments]     ${project_title}
+    ${project_link}=    Get Element Attribute    xpath=//td/a[text()="${project_title}"]    href
     ${ns_name}=     Split String From Right     separator=/     max_split=1     string=${project_link}
     [Return]    ${ns_name[1]}
 

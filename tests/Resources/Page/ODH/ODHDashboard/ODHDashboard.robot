@@ -700,3 +700,11 @@ Get Links From Switcher
 Open Application Switcher Menu
     [Documentation]     Clicks on the App Switcher in the top navigation bar of RHODS Dashboard
     Click Button    //button[@class="pf-c-app-launcher__toggle"]
+
+Maybe Wait For Dashboard Loading Spinner Page
+    [Documentation]     Detecs the loading symbol (spinner) and wait for it to disappear.
+    ...                 If the spinner does not appear, the keyword ignores the error.
+    Run Keyword And Ignore Error    Run Keywords
+    ...                                 Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=10
+    ...                                 AND
+    ...                                 Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=10

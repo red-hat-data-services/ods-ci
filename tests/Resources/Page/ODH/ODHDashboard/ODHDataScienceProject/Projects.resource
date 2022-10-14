@@ -8,7 +8,7 @@ ${DS_PROJECT_XP}=     //h1[text()="Data science projects"]
 ${TITLE_INPUT_XP}=    xpath=//input[@aria-label="Project name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@aria-label="Project description"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
-${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
+${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project"]
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
@@ -21,8 +21,9 @@ Open Data Science Projects Home Page
     Click Link      Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Wait Until Page Contains Element    ${DS_PROJECT_XP}    timeout=30
-    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=10
-    Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=10
+    # Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=10
+    # Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=10
+    Maybe Wait For Dashboard Loading Spinner Page
 
 Is Data Science Projects Page Open
     Close Generic Modal If Present
@@ -33,6 +34,7 @@ Open Data Science Project Details Page
     [Documentation]    Verifies submenu Settings > Cluster settings" is visible
     [Arguments]     ${project_title}
     Click Link    ${project_title}
+    Wait Until Project Is Open    project_title=${project_title}
 
 Delete Data Science Project
     [Arguments]     ${project_title}
@@ -66,12 +68,11 @@ Wait Until Project Is Open
 
 Project Should Be Listed
     [Arguments]     ${project_title}
-    Page Should Contain Element    xpath=//td/a[text()="${project_title}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/a[text()="${project_title}"]
 
 Project's Owner Should Be
     [Arguments]     ${project_title}    ${expected_username}
-    Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]
-    Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]/small[text()="${expected_username}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Arguments]    ${title}    ${description}
@@ -106,10 +107,14 @@ Delete Data Science Projects From CLI
 Delete All Data Science Projects From CLI
     [Documentation]    Deletes all the Openshift Projects which have been created
     ...                via DataScienceProjects feature, using OpenshiftLibrary
-    @{projects}=     Oc Get    kind=Project  label_selector=opendatahub.io/user=htpasswd-2dcluster-2dadmin-2duser
-    @{to_delete}=   Create List
-    FOR    ${project}    IN    @{projects}
-        Log    ${project['metadata']['name']}
-        Append To List    ${to_delete}     ${project['metadata']['name']}
+    ${res}  ${projects}=     Run Keyword And Ignore Error     Oc Get    kind=Project  label_selector=opendatahub.io/user=htpasswd-2dcluster-2dadmin-2duser
+    IF    "${res}" == "FAIL"
+        Log    msg=There are probably no DS Projects to delete in teardown.
+    ELSE
+        @{to_delete}=   Create List
+        FOR    ${project}    IN    @{projects}
+            Log    ${project['metadata']['name']}
+            Append To List    ${to_delete}     ${project['metadata']['name']}
+        END
+        Delete Data Science Projects From CLI   ocp_projects=${to_delete}
     END
-    Delete Data Science Projects From CLI   ocp_projects=${to_delete}

@@ -1,10 +1,10 @@
 *** Settings ***
 Library            SeleniumLibrary
 Library            OpenShiftLibrary
-Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workspaces.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workspaces.resource
 Suite Setup        Project Suite Setup
-Suite Teardown     Project Suite Teardown
+# Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
 
 
@@ -18,28 +18,36 @@ ${WRKSP_DESCRIPTION}=   ODS-CI Workspace 1 is a test workspace using Minimal Pyt
 *** Test Cases ***
 Verify User Cannot Create Project Without Title
     [Tags]    ODS-1783
-    # Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}  ocp_user_pw=${TEST_USER_3.PASSWORD}  browser_options=${BROWSER.OPTIONS}
-    # Open Data Science Projects Home Page
     Create Project With Empty Title And Expect Error
 
 Verify User Can Create A Data Science Project
     [Tags]    ODS-1775
-    # Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}  ocp_user_pw=${TEST_USER_3.PASSWORD}  browser_options=${BROWSER.OPTIONS}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Open Data Science Projects Home Page
     Project Should Be Listed    project_title=${PRJ_TITLE}
-    Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
+    Project's Owner Should Be   expected_username=${OCP_ADMIN_USER.USERNAME}   project_title=${PRJ_TITLE}
+    # Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create A Workspace In A Data Science Project
     [Tags]    ODS-XYZ   workspace
-    # Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}  ocp_user_pw=${TEST_USER_3.PASSWORD}  browser_options=${BROWSER.OPTIONS}
-    # Open Data Science Projects Home Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Create Workspace    name=${WRKSP_TITLE}
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    # Add wait for workspace section to load rows
+    Workspace Should Be Listed      workspace_title=${WRKSP_TITLE}
+    Workspace Status Should Be      workspace_title=${WRKSP_TITLE}      status=${WRKSP_STATUS_STOPPED}
+    [Teardown]   Close All Browsers
+
+Verify User Can Launch A Workspace
+    [Tags]    ODS-XYZ   workspace
+    Open Data Science Projects Home Page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Start Workspace     workspace_title=${WRKSP_TITLE}
+    Launch Workspace    workspace_title=${WRKSP_TITLE}
+    Check Launched Workspace Is The Correct One     workspace_title=${WRKSP_TITLE}     image=Minimal Python
 
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784

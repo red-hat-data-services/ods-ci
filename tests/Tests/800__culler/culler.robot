@@ -73,7 +73,6 @@ Verify That "Stop Idle Notebook" Setting Is Not Overwritten After Restart Of Ope
     ...   is overwritten or not.
     ...   ProductBug:RHODS-4336
     [Tags]    Tier2
-    ...       ProductBug
     ...       ODS-1607
     Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
     Oc Delete    kind=Pod     namespace=redhat-ods-operator    label_selector=name=rhods-operator

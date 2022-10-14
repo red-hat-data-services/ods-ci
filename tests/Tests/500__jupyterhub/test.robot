@@ -33,7 +33,6 @@ Can Login to Jupyterhub
    Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-   #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']  timeout=30
    Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
@@ -56,7 +55,7 @@ Can Spawn Notebook
    Remove Spawner Environment Variable  env_five
    Remove Spawner Environment Variable  env_six
    Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
-   Spawn Notebook
+   Spawn Notebook  same_tab=${False}
    Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
    ${authorization_required} =  Is Service Account Authorization Required
    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
@@ -74,7 +73,7 @@ Verify Message That Image Builds Are In Progress
     ...         ODS-460
     ...         ODS-381
     ...         ODS-1348
-    ...         AutomationBug
+    ...         FlakyTest
     Delete Last Pytorch Build
     ${new_buildname}=  Start New Pytorch Build
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}

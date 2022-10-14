@@ -12,12 +12,11 @@ Resource         ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 
 *** Test Cases ***
 Verify ODS Availability After OpenShift Node Failure
-    [Documentation]    Verifies if ODS is prepared to handle node failures. RHODS-4364
+    [Documentation]    Verifies if ODS is prepared to handle node failures
     [Tags]
     ...       Tier3
     ...       ODS-568
-    ...       Execution-Time-Over-7min
-    ...       ProductBug
+    ...       Execution-Time-Over-5min
     @{cluster_nodes_info}=    Fetch Cluster Worker Nodes Info
     &{cluster_node_info_dict}=    Set Variable    ${cluster_nodes_info}[0]
     Force Reboot OpenShift Cluster Node    ${cluster_node_info_dict.metadata.name}
@@ -26,14 +25,14 @@ Verify ODS Availability After OpenShift Node Failure
 Verify rhods_aggregated_availability Detects Downtime In Jupyterhub And Dashboard
     [Documentation]    Verifies if rhods_aggregated_availability detects downtime in Jupyterhub and Dashboard.
     [Tags]    ODS-1608
-    ...       Tier3  
+    ...       Tier3
     Verify rhods_aggregated_availability Detects Downtime In Component    jupyterhub
     Verify rhods_aggregated_availability Detects Downtime In Component    rhods-dashboard
     Verify rhods_aggregated_availability Detects Downtime In Component    combined
-    
+
 *** Keywords ***
 Verify rhods_aggregated_availability Detects Downtime In Component
-    [Documentation]  Verifies if rhods_aggregated_availability detects downtime 
+    [Documentation]  Verifies if rhods_aggregated_availability detects downtime
     ...    in the component specified.
     ...    Args:
     ...        component: Component to be checked.
@@ -46,11 +45,10 @@ Verify rhods_aggregated_availability Detects Downtime In Component
     ...    label_selector=${label_selector}    namespace=redhat-ods-applications
     ${count}=    Get Length    ${component_delete_result[0]['items']}
     Log    ${count}
-    ${component_downtime_start_date}=    
+    ${component_downtime_start_date}=
     ...    Wait Until Keyword Succeeds    1m    1s    Get Date When Availability Value Matches Expected Value    0
-    ${component_downtime_end_date}=    
+    ${component_downtime_end_date}=
     ...    Wait Until Keyword Succeeds    10m    1s    Get Date When Availability Value Matches Expected Value    1
-    Run Keyword And Expect Error    There is a Downtime of * 
+    Run Keyword And Expect Error    There is a Downtime of *
     ...    Verify ODS Availability Range   ${component_downtime_start_date}  ${component_downtime_end_date}
-    ...    1s    ${component}   
-    
+    ...    1s    ${component}

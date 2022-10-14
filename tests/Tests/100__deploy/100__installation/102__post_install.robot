@@ -208,6 +208,7 @@ Verify Grafana Is Connected To Prometheus Using TLS
     [Documentation]    Verifies Grafana is connected to Prometheus using TLS
     [Tags]    Tier2
     ...       ODS-963
+    ...       AutomationBug
     [Setup]  Set Library Search Order  Selenium Library
     Verify Grafana Datasources Have TLS Enabled
     Verify Grafana Can Obtain Data From Prometheus Datasource
@@ -238,7 +239,6 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
 Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
     [Tags]  Tier2
     ...     ODS-1556
-    ...     ProductBug
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with data value empty for odh-enabled-applications-config
     ...     configmap in openshift

@@ -38,6 +38,7 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-178
+    ...       FlakyTest
     ${cpu_usage_before} =    Read Current CPU Usage
     Run Jupyter Notebook For 5 Minutes
     ${cpu_usage_after} =    Read Current CPU Usage

@@ -387,14 +387,14 @@ Verify Cluster Settings Is Not Available
 
 Save Changes In Cluster Settings
     [Documentation]    Clicks on the "Save changes" button in Cluster Settings and
-    ...    waits until "Settings changes saved." is shown
+    ...    waits until "Settings changes saved" is shown
     Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="false"]    timeout=15s
     Click Button    Save changes
     Wait Until Keyword Succeeds    30    1
-    ...    Wait Until Page Contains    Settings changes saved.
-    # New setting applies after ~5-10s. Sleep here to make
-    # sure it is applied.
-    Sleep  10s
+    ...    Wait Until Page Contains    Settings changes saved
+    # New setting applies after a few seconds, empirically >15s.
+    # Sleep here to make sure it is applied.
+    Sleep  30s
 
 Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"

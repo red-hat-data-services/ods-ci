@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library          Screenshot
 Library          DebugLibrary
 Library          JupyterLibrary
@@ -82,6 +83,7 @@ Verify Tensorflow Image GPU Workload
 *** Keywords ***
 Verify Tensorflow Image Suite Setup
     [Documentation]    Suite Setup, spawns tensorflow image
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small

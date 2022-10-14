@@ -5,6 +5,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library             JupyterLibrary
 
 Suite Setup         Load Spawner Page
@@ -36,6 +37,7 @@ Verify Libraries in Minimal Image
 Verify Libraries in Cuda Image
     [Documentation]    Verifies libraries in Minimal Python image
     [Tags]    Sanity
+    ...       ProductBug
     Verify List Of Libraries In Image    minimal-gpu    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in SDS Image
@@ -48,18 +50,21 @@ Verify Libraries in PyTorch Image
     [Documentation]    Verifies libraries in PyTorch image
     [Tags]    Sanity
     ...       ODS-215    ODS-216    ODS-217    ODS-218    ODS-466
+    ...       ProductBug
     Verify List Of Libraries In Image    pytorch    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in Tensorflow Image
     [Documentation]    Verifies libraries in Tensorflow image
     [Tags]    Sanity
     ...       ODS-204    ODS-205    ODS-206    ODS-207  ODS-474
+    ...       ProductBug
     Verify List Of Libraries In Image    tensorflow    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify All Images And Spawner
     [Documentation]    Verifies that all images have the correct libraries with same versions
     [Tags]    Sanity
     ...       ODS-340    ODS-452    ODS-468
+    ...       ProductBug
     List Should Not Contain Value    ${status_list}    FAIL
     ${length} =    Get Length    ${status_list}
     Should Be Equal As Integers    ${length}    5
@@ -91,6 +96,7 @@ Verify Libraries In Base Image    # robocop: disable
 
 Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
 

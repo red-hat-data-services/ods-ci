@@ -26,6 +26,7 @@ Verify If Unauthorized User Can Not Change The Permission
     ...     ODS-1555
     ...     Tier1
     ...     Sanity
+    ...     AutomationBug
     Launch Dashboard And Check User Management Option Is Available For The User     ${TEST_USER_3.USERNAME}   ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
     Remove OpenShift Groups From Data Science Administrator Groups     rhods-admins
     Save Changes In User Management Setting

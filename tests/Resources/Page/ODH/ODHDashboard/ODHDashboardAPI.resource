@@ -36,7 +36,7 @@ Perform Dashboard API Endpoint GET Call
     ...                 on the given token (i.e., user)
     [Arguments]     ${endpoint}     ${token}
     ${headers}=    Create Dictionary     Cookie=_oauth_proxy=${token}
-    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}-wrt/${endpoint}   expected_status=any
+    &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   timeout=5  verify=${False}
     ${response}=    Run Keyword And Continue On Failure     Perform Request     GET     &{args}
     IF    ${response} == ${NONE}

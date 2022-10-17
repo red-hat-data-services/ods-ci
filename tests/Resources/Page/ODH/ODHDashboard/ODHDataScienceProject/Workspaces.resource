@@ -21,7 +21,7 @@ ${WRKSP_STATUS_STARTING}=                 Starting
 Create Workspace
     [Documentation]     Creates a new workspace in a Data Science project. It assumes
     ...                 the DS Project details page is open
-    [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python
+    [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python    ${size}=Small
     Click Element    ${WORKSPACE_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WRKSP_NAME_INPUT_XP}
     Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
@@ -30,6 +30,47 @@ Create Workspace
     Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
     Select Workspace Jupyter Image    image_name=${image_name}
     ## Select Workspace Container Size # to fix, by default Small is already select
+    Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
+    Click Button    ${GENERIC_CREATE_BTN_XP}
+    Wait Until Modal Disappear
+
+Create Workspace v2
+    [Documentation]     Creates a new workspace in a Data Science project. It assumes
+    ...                 the DS Project deta
+    # [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python    ${size}=Small
+    [Arguments]     ${wrksp_title}  ${wrksp_description}  ${prj_title}   ${image_name}   ${deployment_size}
+    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}
+    Click Element    ${WORKSPACE_CREATE_BTN_XP}
+    Wait Until Page Contains Element    ${WRKSP_NAME_INPUT_XP}
+    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
+    Input Text    ${WRKSP_NAME_INPUT_XP}    ${wrksp_title}
+    Input Text    ${WRKSP_DESCR_TXT_XP}    ${wrksp_description}
+    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
+    Select Workspace Jupyter Image    image_name=${image_name}
+    ## Select Workspace Container Size # to fix, by default Small is already select
+    IF    "${storage}" == "Persistent"
+        Click Element   xpath=//input[@name="persistent-storage-type-radio"]
+        IF    ${pv_existent} == ${TRUE}
+            Click Element    xpath=//input[@name="add-existing-storage-checkbox"]
+            Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//button[@aria-label="Options menu"]
+            Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//button[@aria-label="Options menu"]
+            Wait Until Page Contains Element    xpath=//ul/li/button[text()="${prj_title}"]
+            Click Element   xpath=//ul/li/button[text()="${prj_title}"]
+            # select PV - function not available yet in the product
+        ELSE IF   ${pv_existent} == ${FALSE}
+            Click Element   xpath=//input[@name="create-new-storage-checkbox"]
+            Wait Until Page Contains Element    xpath=//div[input[@name="create-new-storage-checkbox"]]//input[@name="create-new-storage-name"]
+            Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//input[@name="create-new-storage-name"]   ${pv_name}
+            Wait Until Page Contains Element    xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]
+            Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]   ${pv_name}
+            Clear Element Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]
+            Input Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]   ${pv_size}
+        ELSE
+            Fail    msg="pv_existent" argument is required when selected storage type is "Persistent"
+        END
+    ELSE
+        Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
+    END
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Modal Disappear

@@ -36,7 +36,7 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create A Workspace With Ephimeral Storage
-    [Tags]    ODS-XYZ   workspace
+    [Tags]    ODS-1812
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workspace    wrksp_title=${WRKSP_TITLE}  wrksp_description=${WRKSP_DESCRIPTION}  prj_title=${PRJ_TITLE}   image_name=${NB_IMAGE}   deployment_size=Small
     ...                    storage=Ephemeral  pv_existent=${NONE}   pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
@@ -46,15 +46,16 @@ Verify User Can Create A Workspace With Ephimeral Storage
     Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
 
 Verify User Can Create A Workspace With Existent PV Storage
-    [Tags]    ODS-XYZ   workspace-pv
+    [Tags]    ODS-1814
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workspace    wrksp_title=${WRKSP_TITLE}  wrksp_description=${WRKSP_DESCRIPTION}  prj_title=${PRJ_TITLE}   image_name=${NB_IMAGE}   deployment_size=Small
     ...                    storage=Persistent  pv_existent=${TRUE}   pv_name=${PV_NAME}  pv_description=${NONE}  pv_size=${NONE}
-    # Workspace Should Be Listed      workspace_title=${WRKSP_TITLE}
-    # Workspace Status Should Be      workspace_title=${WRKSP_TITLE}      status=${WRKSP_STATUS_STOPPED}
-    # ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    # Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
+    Workspace Should Be Listed      workspace_title=${WRKSP_TITLE}
+    Workspace Status Should Be      workspace_title=${WRKSP_TITLE}      status=${WRKSP_STATUS_STOPPED}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
     [Teardown]   Close All Browsers
+
 
 Verify User Can Launch A Workspace
     [Tags]    ODS-XYZ   workspace-launch

@@ -13,6 +13,7 @@ Run AWS Configuration In Hive
     Log    ${pod[0]['metadata']['name']}    console=True
     Wait Until Keyword Succeeds    40 min    10 s
     ...    Wait Until Cluster Is Provisioned    ${pod[0]['metadata']['name']}    ${namespace[0]['metadata']['name']}
+    Save AWS Cluster Details
 
 Wait Until Cluster Is Provisioned
     [Arguments]    ${pod_name}    ${namespace}
@@ -28,6 +29,16 @@ Claim Cluster
 Wait Until Cluster to be claimed
     ${status} =    Oc Get    kind=ClusterClaim    name=${infrastructure_configurations}[hive_claim_name]    namespace=rhods
     Should Be Equal As Strings    ${status[0]['status']['conditions'][0]['reason']}    ClusterClaimed
+
+Save AWS Cluster Details
+    Set Log Level    None
+    ${ns} =    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations}[hive_cluster_name]
+    ${consoleURL} =    Run and Return Rc And Output    oc -n ${ns[0]['metadata']['name']} get cd ${ns[0]['metadata']['name']} -o jsonpath='{ .status.webConsoleURL }'
+    Create File  cluster_details.txt  consoleUrl=${consoleURL}\n
+    ${credentials} =    Run and Return Rc And Output    oc extract -n ${ns[0]['metadata']['name']} secret/$(oc -n ${ns[0]['metadata']['name']} get cd ${ns[0]['metadata']['name']} -o jsonpath='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to=-
+    ${credentials_splited} =    Split To Lines    ${credentials[1]}
+    Append to File  cluster_details.txt  username=${credentials_splited[3]}\n
+    Append to File  cluster_details.txt  password=${credentials_splited[1]}\n
 
 Login To AWS Cluster With Hive
     Set Log Level    None

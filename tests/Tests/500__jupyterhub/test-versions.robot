@@ -5,6 +5,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library             JupyterLibrary
 
 Suite Setup         Load Spawner Page
@@ -95,6 +96,7 @@ Verify Libraries In Base Image    # robocop: disable
 
 Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
+    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
 

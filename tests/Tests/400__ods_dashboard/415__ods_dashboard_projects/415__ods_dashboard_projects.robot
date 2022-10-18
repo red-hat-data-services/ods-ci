@@ -12,7 +12,12 @@ Test Setup         Launch Data Science Project Main Page
 ${PRJ_TITLE}=   ODS-CI DS Project
 ${PRJ_DESCRIPTION}=   ODS-CI DS Project is a test for validating DSG feature
 ${WRKSP_TITLE}=   ODS-CI Workspace 1
-${WRKSP_DESCRIPTION}=   ODS-CI Workspace 1 is a test workspace using Minimal Python image to test DS Projects feature
+${NB_IMAGE}=        Minimal Python
+${WRKSP_DESCRIPTION}=   ODS-CI Workspace 1 is a test workspace using ${NB_IMAGE} image to test DS Projects feature
+${PV_NAME}=         ods-ci-pv
+${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
+# PV size are in GB
+${PV_SIZE}=         1
 
 
 *** Test Cases ***
@@ -31,23 +36,36 @@ Verify User Can Create A Data Science Project
     # Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
-Verify User Can Create A Workspace In A Data Science Project
+Verify User Can Create A Workspace With Ephimeral Storage
     [Tags]    ODS-XYZ   workspace
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create Workspace    name=${WRKSP_TITLE}
+    Create Workspace    wrksp_title=${WRKSP_TITLE}  wrksp_description=${WRKSP_DESCRIPTION}  prj_title=${PRJ_TITLE}   image_name=${NB_IMAGE}   deployment_size=Small
+    ...                    storage=Ephemeral  pv_existent=${NONE}   pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
-    # Add wait for workspace section to load rows
     Workspace Should Be Listed      workspace_title=${WRKSP_TITLE}
     Workspace Status Should Be      workspace_title=${WRKSP_TITLE}      status=${WRKSP_STATUS_STOPPED}
-    [Teardown]   Close All Browsers
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
+
+Verify User Can Create A Workspace With Existent PV Storage
+    [Tags]    ODS-XYZ   workspace
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workspace    wrksp_title=${WRKSP_TITLE}  wrksp_description=${WRKSP_DESCRIPTION}  prj_title=${PRJ_TITLE}   image_name=${NB_IMAGE}   deployment_size=Small
+    ...                    storage=Persistent  pv_existent=${TRUE}   pv_name=${PV_NAME}  pv_description=${NONE}  pv_size=${NONE}
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Workspace Should Be Listed      workspace_title=${WRKSP_TITLE}
+    Workspace Status Should Be      workspace_title=${WRKSP_TITLE}      status=${WRKSP_STATUS_STOPPED}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
 
 Verify User Can Launch A Workspace
-    [Tags]    ODS-XYZ   workspace
+    [Tags]    ODS-XYZ   workspace-launch
     Open Data Science Projects Home Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Start Workspace     workspace_title=${WRKSP_TITLE}
     Launch Workspace    workspace_title=${WRKSP_TITLE}
-    Check Launched Workspace Is The Correct One     workspace_title=${WRKSP_TITLE}     image=Minimal Python
+    Check Launched Workspace Is The Correct One     workspace_title=${WRKSP_TITLE}     image=${NB_IMAGE}
+    [Teardown]   Close All Browsers
 
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784
@@ -78,3 +96,10 @@ Check Corresponding Namespace Exists
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     Oc Get      kind=Project    name=${ns_name}
     [Return]    ${ns_name}
+
+Check Corresponding Notebook CR Exists
+    [Arguments]     ${workspace_title}  ${namespace}
+    ${res}  ${_}=    Get Openshift Notebook CR From Workspace   workspace_title=${workspace_title}  namespace=${namespace}
+    IF    "${res}" == "FAIL"
+        Run Keyword And Continue On Failure    Fail    msg=Notebook CR not found for ${workspace_title} in ${namespace} NS
+    END

@@ -36,6 +36,7 @@ Open Data Science Project Details Page
     [Arguments]     ${project_title}
     Click Link    ${project_title}
     Wait Until Project Is Open    project_title=${project_title}
+    Maybe Wait For Dashboard Loading Spinner Page
 
 Delete Data Science Project
     [Arguments]     ${project_title}

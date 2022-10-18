@@ -15,10 +15,11 @@ ${WRKSP_SIZE_ITEM_BTN_XP}=           xpath=//ul[@id="container-size"]/li/button
 ${WRKSP_STATUS_STOPPED}=                  Stopped
 ${WRKSP_STATUS_RUNNING}=                  Started
 ${WRKSP_STATUS_STARTING}=                 Starting
-
+&{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
+...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
 
 *** Keywords ***
-Create Workspace
+Create Workspace v1
     [Documentation]     Creates a new workspace in a Data Science project. It assumes
     ...                 the DS Project details page is open
     [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python    ${size}=Small
@@ -34,7 +35,7 @@ Create Workspace
     Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Modal Disappear
 
-Create Workspace v2
+Create Workspace
     [Documentation]     Creates a new workspace in a Data Science project. It assumes
     ...                 the DS Project deta
     # [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python    ${size}=Small
@@ -66,7 +67,7 @@ Create Workspace v2
             Clear Element Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]
             Input Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]   ${pv_size}
         ELSE
-            Fail    msg="pv_existent" argument is required when selected storage type is "Persistent"
+            Log    msg="pv_existent" argument is required when selected storage type is "Persistent"   level=ERROR
         END
     ELSE
         Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
@@ -105,7 +106,7 @@ Start Workspace
     [Arguments]     ${workspace_title}
     ${is_stopped}=      Run Keyword And Return Status   Workspace Status Should Be      workspace_title=${workspace_title}   status=${WRKSP_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
-        Click Element       xpath=//tr[td/h4[text()="${workspace_title}"]]/td/label/input
+        Click Element       xpath=//tr[td/h4[text()="${workspace_title}"]]/td/label/span[@class="pf-c-switch__toggle"]
     ELSE
         Log     msg=Cannot start ${workspace_title} workspace because it is not stopped.
     END
@@ -116,11 +117,12 @@ Launch Workspace
     ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
         Click Link       xpath=//tr[td/h4[text()="${workspace_title}"]]/td/a[text()="Open"]
-            Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-     ${authorization_required} =  Is Service Account Authorization Required
-     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-     Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
-     Maybe Close Popup
+        Switch Window   NEW
+        Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+        ${authorization_required} =  Is Service Account Authorization Required
+        Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Maybe Close Popup
     ELSE
         Log   msg=Cannot launch workspace ${workspace_title} because it is not running..   level=ERROR
     END
@@ -128,7 +130,17 @@ Launch Workspace
 Check Launched Workspace Is The Correct One
     [Arguments]     ${workspace_title}      ${image}
     # check notebook id from URL..
+    ${current_url}=     Get Location
+    Location Should Contain    expected
     Open New Notebook In Jupyterlab Menu
-    Spawned Image Check    ${image}
+    Spawned Image Check    ${IMAGE_ID_MAPPING}[${image}]
     # ${spawn_fail} =  Has Spawn Failed
+
+Get Openshift Notebook CR From Workspace
+    [Arguments]     ${workspace_title}      ${namespace}
+    ${res}  ${cr_name}=     Run Keyword And Ignore Error     Oc Get    kind=Project
+    ...                                                 field_selector=metadata.annotations.openshift.io/display-name=${workspace_title},metadata.namespace=${namespace}
+    ...                                                 fields=[metadata.name]
+    [Return]    ${res}    ${cr_name}
+
 

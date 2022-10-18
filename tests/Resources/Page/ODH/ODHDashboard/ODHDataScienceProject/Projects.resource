@@ -22,8 +22,6 @@ Open Data Science Projects Home Page
     Click Link      Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Wait Until Page Contains Element    ${DS_PROJECT_XP}    timeout=30
-    # Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=10
-    # Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=10
     Maybe Wait For Dashboard Loading Spinner Page
 
 Is Data Science Projects Page Open
@@ -87,9 +85,15 @@ Create Data Science Project
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Modal Disappear
+    Wait Until Project Is Open    project_title=${title}
+
 
 Get Openshift Namespace From Data Science Project
     [Arguments]     ${project_title}
+    ${is_open}=    Is Data Science Projects Page Open
+    IF    ${is_open} == ${FALSE}
+        Open Data Science Projects Home Page
+    END
     ${project_link}=    Get Element Attribute    xpath=//td/a[text()="${project_title}"]    href
     ${ns_name}=     Split String From Right     separator=/     max_split=1     string=${project_link}
     [Return]    ${ns_name[1]}

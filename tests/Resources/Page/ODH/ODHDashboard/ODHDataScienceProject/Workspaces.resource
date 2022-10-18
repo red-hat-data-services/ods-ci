@@ -54,7 +54,8 @@ Create Workspace
         IF    ${pv_existent} == ${TRUE}
             Click Element    xpath=//input[@name="add-existing-storage-checkbox"]
             Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//button[@aria-label="Options menu"]
-            Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//button[@aria-label="Options menu"]
+            Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group-label"]//button[@aria-label="Options menu"]
+            # Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//button[@aria-label="Options menu"]
             Wait Until Page Contains Element    xpath=//ul/li/button[text()="${prj_title}"]
             Click Element   xpath=//ul/li/button[text()="${prj_title}"]
             # select PV - function not available yet in the product
@@ -75,6 +76,7 @@ Create Workspace
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Modal Disappear
+    Wait Until Project Is Open    project_title=${prj_title}
 
 Select Workspace Jupyter Image
     [Arguments]     ${image_name}

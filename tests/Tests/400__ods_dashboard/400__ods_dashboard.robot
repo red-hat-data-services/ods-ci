@@ -737,9 +737,9 @@ Check And Uninstall Operator In Openshift
     ...    browser_options=${BROWSER.OPTIONS}
     Remove Disabled Application From Enabled Page    app_id=${dashboard_app_id}
 
-
 Check Application Switcher Links To Openshift Cluster Manager
     [Documentation]    Checks for HTTP status of OCM link in application switcher
+    Skip If RHODS Is Self-Managed
     ${cluster_id}=    Get Cluster ID
     ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
     ${cluster_env}=    Fetch ODS Cluster Environment

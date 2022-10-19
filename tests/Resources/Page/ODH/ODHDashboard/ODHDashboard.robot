@@ -3,6 +3,7 @@ Resource      ../../../Page/Components/Components.resource
 Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
 Resource       ../../../Common.robot
 Resource       ../JupyterHub/ODHJupyterhub.resource
+Resource    ../../../OCP.resource
 Library       JupyterLibrary
 
 
@@ -39,6 +40,7 @@ ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 ${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo"]
+@{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
 
 
 *** Keywords ***
@@ -166,13 +168,17 @@ Go To RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.16.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.18.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
     END
     ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == ${TRUE}
+        Remove From Dictionary   ${apps_dict_obj}   @{ISV_TO_REMOVE_SELF_MANAGED}
+    END
     [Return]  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded

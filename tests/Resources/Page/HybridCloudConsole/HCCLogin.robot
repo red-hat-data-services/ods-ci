@@ -89,6 +89,7 @@ Open Cluster By Name
   ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
   Wait Until Page Contains Element  //input[@class="pf-c-form-control cluster-list-filter"]
   Input Text    //input[@class="pf-c-form-control cluster-list-filter"]     ${cluster_name}
+  Sleep    1s
   Wait Until Page Contains Element  //table[@class="pf-c-table pf-m-grid-md"]//a    10
   Click Link    //table[@class="pf-c-table pf-m-grid-md"]//a
 

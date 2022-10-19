@@ -55,9 +55,6 @@ Create Workspace
         Click Element   xpath=//input[@name="persistent-storage-type-radio"]
         IF    ${pv_existent} == ${TRUE}
             Click Element    xpath=//input[@name="add-existing-storage-checkbox"]
-            #Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group-control"]
-            #Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//button[@aria-label="Options menu"]
-            #Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
             Wait Until Element Is Enabled    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
             Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
             Wait Until Page Contains Element    xpath=//ul/li/button[text()="${prj_title}"]

@@ -24,10 +24,6 @@ class Helpers:
         try:
             version = VersionInfo.parse(version)
             target = VersionInfo.parse(target)
-            # version=tuple(
-            #   version.translate(str.maketrans('', '', string.punctuation)))
-            # target=tuple(
-            #   target.translate(str.maketrans('', '', string.punctuation)))
             return version > target
         except ValueError:
             # Returning False on exception as a workaround for when an
@@ -41,10 +37,6 @@ class Helpers:
         try:
             version = VersionInfo.parse(version)
             target = VersionInfo.parse(target)
-            # version=tuple(
-            #   version.translate(str.maketrans('', '', string.punctuation)))
-            # target=tuple(target.translate(
-            #   str.maketrans('', '', string.punctuation)))
             return version >= target
         except ValueError:
             # Returning False on exception as a workaround for when an
@@ -113,8 +105,7 @@ class Helpers:
         return h, m
 
     @keyword
-    def install_isv_by_name(
-        self, operator_name, channel, source="certified-operators"):
+    def install_isv_by_name(self, operator_name, channel, source="certified-operators"):
         ocm_client = OpenshiftClusterManager()
         ocm_client.install_openshift_isv(
             operator_name, channel, source, exit_on_failure=False
@@ -130,22 +121,24 @@ class Helpers:
             )
 
     @keyword
-    def parse_file_for_tolerations(self,filename):
+    def parse_file_for_tolerations(self, filename):
         tolerations = []
-        with open(filename,"r") as f:
-            content =  f.readlines()
-        saving=False
+        with open(filename, "r") as f:
+            content = f.readlines()
+        saving = False
         for line in content:
             if line.startswith("Tolerations:"):
-                saving=True
+                saving = True
                 tolerations.append(line.split(": ")[1].strip())
                 print(line)
                 print(tolerations)
-            elif line.startswith("Events:"): break
+            elif line.startswith("Events:"):
+                break
             else:
-                if saving==True: 
+                if saving == True:
                     tolerations.append(line.strip())
                     print(line)
                     print(tolerations)
-                else: continue
+                else:
+                    continue
         return tolerations

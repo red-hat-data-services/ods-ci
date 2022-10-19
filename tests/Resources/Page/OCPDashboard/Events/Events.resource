@@ -2,7 +2,6 @@
 Documentation       Keyword Suites to work with Openshift Events
 
 Library             Collections
-#Library             OpenShiftCLI
 Library             OpenShiftLibrary
 
 

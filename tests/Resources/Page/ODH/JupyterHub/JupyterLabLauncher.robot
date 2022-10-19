@@ -191,20 +191,13 @@ Clean Up User Notebook
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
   IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
-      # We import the library here so it's loaded only when we are connected to the cluster
-      # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
-      # if there is not any connection opened
-      #Import Library    OpenShiftCLI
-
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
       OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
-      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
-      #${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
@@ -218,18 +211,11 @@ Delete Folder In User Notebook
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
   IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
-      # We import the library here so it's loaded only when we are connected to the cluster
-      # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
-      # if there is not any connection opened
-      #Import Library    OpenShiftCLI
-
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
       OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
-      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
 
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
-      #${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)

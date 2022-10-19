@@ -1,6 +1,5 @@
 *** Settings ***
 Documentation       Collection of keywords to work with Pods
-#Library             OpenShiftCLI
 Library             OpenShiftLibrary
 Resource            ../../OCPDashboard/Page.robot
 Resource            ../../ODH/ODHDashboard/ODHDashboard.robot

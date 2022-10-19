@@ -1,5 +1,4 @@
 *** Settings ***
-#Library    OpenShiftCLI
 Library    OpenShiftLibrary
 Resource   ../../OCPDashboard/Page.robot
 Resource   ../../ODH/ODHDashboard/ODHDashboard.robot

@@ -11,7 +11,6 @@ Documentation   RHODS_Pager_duty_key__VERIFICATION
 Library        Collections
 Library        OperatingSystem
 Library        String
-#Library        OpenShiftCLI
 Library        OpenShiftLibrary
 
 Resource       ../../../Resources/RHOSi.resource

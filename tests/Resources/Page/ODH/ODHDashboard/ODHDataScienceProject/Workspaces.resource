@@ -65,7 +65,7 @@ Create Workspace
             Wait Until Page Contains Element    xpath=//div[input[@name="create-new-storage-checkbox"]]//input[@name="create-new-storage-name"]
             Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//input[@name="create-new-storage-name"]   ${pv_name}
             Wait Until Page Contains Element    xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]
-            Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]   ${pv_name}
+            Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]   ${pv_description}
             Clear Element Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]
             Input Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]   ${pv_size}
         ELSE
@@ -146,9 +146,10 @@ Check Launched Workspace Is The Correct One
 
 Get Openshift Notebook CR From Workspace
     [Arguments]     ${workspace_title}      ${namespace}
-    ${res}  ${cr_name}=     Run Keyword And Ignore Error     Oc Get    kind=Project
-    ...                                                 field_selector=metadata.annotations.openshift.io/display-name=${workspace_title},metadata.namespace=${namespace}
-    ...                                                 fields=[metadata.name]
-    [Return]    ${res}    ${cr_name}
+    # ${res}  ${cr_name}=     Run Keyword And Ignore Error     Oc Get    kind=Notebook
+    # ...                                                 field_selector=metadata.annotations.openshift.io/display-name=${workspace_title},metadata.namespace=${namespace}
+    # ...                                                 fields=[metadata.name]
+    ${rc}  ${cr_name}=    Run And Return Rc And Output   oc get notebook -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${workspace_title}")].metadata.name}'
+    [Return]    ${rc}    ${cr_name}
 
 

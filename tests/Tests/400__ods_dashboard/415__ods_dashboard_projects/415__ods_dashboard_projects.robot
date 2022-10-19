@@ -3,6 +3,7 @@ Library            SeleniumLibrary
 Library            OpenShiftLibrary
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workspaces.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storage.resource
 Suite Setup        Project Suite Setup
 # Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
@@ -56,6 +57,18 @@ Verify User Can Create A Workspace With Existent PV Storage
     Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
     [Teardown]   Close All Browsers
 
+Verify User Can Create A Workspace Adding A New PV Storage
+    [Tags]    ODS-1816
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workspace    wrksp_title=${WRKSP_TITLE}  wrksp_description=${WRKSP_DESCRIPTION}  prj_title=${PRJ_TITLE}   image_name=${NB_IMAGE}   deployment_size=Small
+    ...                    storage=Persistent  pv_existent=${FALSE}   pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
+    Workspace Should Be Listed      workspace_title=${WRKSP_TITLE}
+    Workspace Status Should Be      workspace_title=${WRKSP_TITLE}      status=${WRKSP_STATUS_STOPPED}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Storage Size Should Be    title=${PV_NAME}    namespace=${ns_name}  size=${PV_SIZE}
+    [Teardown]   Close All Browsers
 
 Verify User Can Launch A Workspace
     [Tags]    ODS-XYZ   workspace-launch

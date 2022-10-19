@@ -65,6 +65,7 @@ Click Delete From Action Menu
 Wait Until Project Is Open
     [Arguments]     ${project_title}
     Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
+    Maybe Wait For Dashboard Loading Spinner Page
 
 Project Should Be Listed
     [Arguments]     ${project_title}

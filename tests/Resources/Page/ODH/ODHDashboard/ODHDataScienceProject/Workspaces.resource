@@ -17,6 +17,8 @@ ${WRKSP_STATUS_RUNNING}=                  Started
 ${WRKSP_STATUS_STARTING}=                 Starting
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
+${WRKSP_CREATE_LAUNCH_BTN_XP}=     xpath=//button[text()="Create and launch"]
+
 
 *** Keywords ***
 Create Workspace v1
@@ -40,7 +42,7 @@ Create Workspace
     ...                 the DS Project deta
     # [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python    ${size}=Small
     [Arguments]     ${wrksp_title}  ${wrksp_description}  ${prj_title}   ${image_name}   ${deployment_size}
-    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}
+    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}  ${launch}=${FALSE}
     Click Element    ${WORKSPACE_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WRKSP_NAME_INPUT_XP}
     Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
@@ -53,9 +55,11 @@ Create Workspace
         Click Element   xpath=//input[@name="persistent-storage-type-radio"]
         IF    ${pv_existent} == ${TRUE}
             Click Element    xpath=//input[@name="add-existing-storage-checkbox"]
-            Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group-control"]
-            # Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//button[@aria-label="Options menu"]
-            Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group-control"]
+            #Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group-control"]
+            #Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//button[@aria-label="Options menu"]
+            #Wait Until Page Contains Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
+            Wait Until Element Is Enabled    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
+            Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
             Wait Until Page Contains Element    xpath=//ul/li/button[text()="${prj_title}"]
             Click Element   xpath=//ul/li/button[text()="${prj_title}"]
             # select PV - function not available yet in the product
@@ -73,8 +77,13 @@ Create Workspace
     ELSE
         Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
     END
-    Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
-    Click Button    ${GENERIC_CREATE_BTN_XP}
+    IF    ${launch} == ${TRUE}
+        Wait Until Element Is Enabled    ${WRKSP_CREATE_LAUNCH_BTN_XP}
+        Click Button    ${WRKSP_CREATE_LAUNCH_BTN_XP}
+    ELSE
+        Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
+        Click Button    ${GENERIC_CREATE_BTN_XP}
+    END
     Wait Until Modal Disappear
     Wait Until Project Is Open    project_title=${prj_title}
 

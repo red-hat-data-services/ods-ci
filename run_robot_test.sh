@@ -20,7 +20,7 @@ EMAIL_SERVER_USER="None"
 EMAIL_SERVER_PW="None"
 EMAIL_SERVER_SSL=false
 EMAIL_SERVER_UNSECURE=false
-DRYRUN_ACTION=false
+SUBFOLDER=false
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -150,9 +150,11 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
 
-    --dryrun_action)
+    # place test results in a timestamped subfolder or not
+    # true: no subfolder, false: subfolder
+    --no-output-subfolder)
       shift
-      DRYRUN_ACTION=$1
+      SUBFOLDER=$1
       shift
       ;;
 
@@ -301,7 +303,7 @@ fi
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then
   mkdir "${TEST_ARTIFACT_DIR}"
 fi
-if ! ${DRYRUN_ACTION}; then
+if ! ${SUBFOLDER}; then
   case "$(uname -s)" in
     Darwin)
         # shellcheck disable=SC2046

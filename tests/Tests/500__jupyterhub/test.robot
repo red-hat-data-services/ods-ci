@@ -63,6 +63,7 @@ Can Spawn Notebook
             Verify Unsupported Environment Variable Is Not Allowed    ${env_var}
         END
     END
+    Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
     Spawn Notebook  same_tab=${False}
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
@@ -106,6 +107,17 @@ Start New Pytorch Build
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
     [Return]    ${new_buildname}
 
+Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
+   [Documentation]    Try spawning a server size for which there's not enough resources
+   ...    spawner modal should show an error instead of being stuck waiting for resources
+   Select Container Size    X Large
+   Click Button    Start server
+   # This could fail because of https://bugzilla.redhat.com/show_bug.cgi?id=2132043
+   Wait Until Page Contains    Insufficient resources to start    timeout=1min
+   ...    error=Modal did not fail within 1 minute
+   Click Button    Cancel
+   Select Container Size    Small
+   
 Verify Unsupported Environment Variable Is Not Allowed
     [Documentation]    Test an unsupported environment variable name
     ...     and expect it to not be allowed.

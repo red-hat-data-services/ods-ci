@@ -66,8 +66,8 @@ Create Workspace
             Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//input[@name="create-new-storage-name"]   ${pv_name}
             Wait Until Page Contains Element    xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]
             Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]   ${pv_description}
-            Clear Element Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]
-            Input Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]   ${pv_size}
+            # Clear Element Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]
+            # Input Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]   ${pv_size}
         ELSE
             Log    msg="pv_existent" argument is required when selected storage type is "Persistent"   level=ERROR
         END

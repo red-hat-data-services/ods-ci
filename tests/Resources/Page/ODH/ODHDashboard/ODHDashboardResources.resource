@@ -56,7 +56,6 @@ Close QuickStart From Top
 Page Should Not Contain QuickStart Sidebar
     Wait Until Page Does Not Contain ELement    //div[@class="pf-c-drawer__panel-main"]     5
 
-
 Close QuickStart From Button
     Click Button    //button[@data-testid="qs-drawer-close"]
 
@@ -220,7 +219,6 @@ Get QuickStart Items
         ${quickStartElements}=     Wait for QuickStart to Load
         [Return]    ${quickStartElements}
 
-
 Open QuickStart Step
     [Documentation]   Click next if next not found cick tab to find buttion
     [Arguments]  ${quick_start_step}
@@ -232,7 +230,6 @@ Open QuickStart Step
     FOR    ${counter}    IN RANGE    5
         Press Keys    NONE    TAB
     END
-
 
 Validate Links Extracted From Text
     [Arguments]    ${doc_links}

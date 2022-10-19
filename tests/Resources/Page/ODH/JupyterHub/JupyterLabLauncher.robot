@@ -137,7 +137,9 @@ Python Version Check
   #start is inclusive, end exclusive, get x.y from Python x.y.z string
   ${output} =  Fetch From Right  ${output}  ${SPACE}
   ${vers} =  Get Substring  ${output}  0  3
-  Should Match  ${vers}  ${expected_version}
+  ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
+  Run Keyword If  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"
+  
 
 Maybe Select Kernel
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
@@ -189,20 +191,13 @@ Clean Up User Notebook
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
   IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
-      # We import the library here so it's loaded only when we are connected to the cluster
-      # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
-      # if there is not any connection opened
-      Import Library    OpenShiftCLI
-
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
       OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
-      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
-      #${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
@@ -216,18 +211,11 @@ Delete Folder In User Notebook
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
   IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
-      # We import the library here so it's loaded only when we are connected to the cluster
-      # Having the usual "Library OpenShiftCLI" in the header raises an error when loading the file
-      # if there is not any connection opened
-      Import Library    OpenShiftCLI
-
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
       OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
-      #OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=redhat-ods-applications
 
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
-      #${output} =  Run   oc exec ${notebook_pod_name} -n redhat-ods-applications -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
@@ -383,7 +371,7 @@ Select ${filename} Tab
 Verify Installed Library Version
     [Arguments]  ${lib}  ${ver}
     ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
-    Run Keyword If  '${status}' == 'FAIL'  Log  "Expected ${lib} at version ${ver}, but ${value}"
+    Run Keyword If  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected ${lib} at version ${ver}, but ${value}"
     [Return]    ${status}    ${value}
 
 Check Versions In JupyterLab
@@ -416,6 +404,7 @@ Check Versions In JupyterLab
         ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
         IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
              ${return_status} =    Set Variable    FAIL
+             Run Keyword And Continue On Failure  FAIL  "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
         END
     END
     [Return]  ${return_status}

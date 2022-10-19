@@ -1,8 +1,7 @@
 *** Settings ***
-Library           OpenShiftCLI
 Resource          ../../Resources/RHOSi.resource
 Resource          ../../Resources/ODS.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource          ../../Resources/Page/LoginPage.robot

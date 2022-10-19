@@ -5,7 +5,6 @@ Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library             DateTime
-Library             OpenShiftCLI
 Library             DebugLibrary
 
 Suite Setup         Load Spawner Page

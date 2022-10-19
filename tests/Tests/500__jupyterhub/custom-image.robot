@@ -7,7 +7,6 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
 Resource         ../../Resources/RHOSi.resource
 Library          JupyterLibrary
-Library          OpenShiftCLI
 Library          OpenShiftLibrary
 Suite Setup      Custom Notebook Settings Suite Setup
 Suite Teardown   End Web Test

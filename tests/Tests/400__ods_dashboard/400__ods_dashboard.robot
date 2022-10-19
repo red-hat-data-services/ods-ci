@@ -1,5 +1,4 @@
 *** Settings ***
-Library           OpenShiftCLI
 Library           OpenShiftLibrary
 Resource          ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource          ../../Resources/RHOSi.resource

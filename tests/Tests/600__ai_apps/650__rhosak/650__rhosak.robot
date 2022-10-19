@@ -2,9 +2,8 @@
 Documentation       Test integration with RHOSAK isv
 
 Library             SeleniumLibrary
-Library             OpenShiftCLI
 Resource            ../../../Resources/Page/ODH/AiApps/Rhosak.resource
-Resource        ../../../Resources/RHOSi.resource
+Resource            ../../../Resources/RHOSi.resource
 
 Suite Setup         Kafka Suite Setup
 Suite Teardown      Kafka Suite Teardown

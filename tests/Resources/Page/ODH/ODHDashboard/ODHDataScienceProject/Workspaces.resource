@@ -15,6 +15,7 @@ ${WRKSP_SIZE_ITEM_BTN_XP}=           xpath=//ul[@id="container-size"]/li/button
 ${WRKSP_STATUS_STOPPED}=                  Stopped
 ${WRKSP_STATUS_RUNNING}=                  Started
 ${WRKSP_STATUS_STARTING}=                 Starting
+${WRKSP_STOP_BTN_XP}=                 xpath=//button[text()="Stop workspace"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
 ${WRKSP_CREATE_LAUNCH_BTN_XP}=     xpath=//button[text()="Create and launch"]
@@ -35,7 +36,7 @@ Create Workspace v1
     ## Select Workspace Container Size # to fix, by default Small is already select
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
-    Wait Until Modal Disappear
+    Wait Until Modal Disappears
 
 Create Workspace
     [Documentation]     Creates a new workspace in a Data Science project. It assumes
@@ -81,7 +82,7 @@ Create Workspace
         Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
         Click Button    ${GENERIC_CREATE_BTN_XP}
     END
-    Wait Until Modal Disappear
+    Wait Until Modal Disappears
     Wait Until Project Is Open    project_title=${prj_title}
 
 Select Workspace Jupyter Image
@@ -135,11 +136,36 @@ Launch Workspace
         Log   msg=Cannot launch workspace ${workspace_title} because it is not running..   level=ERROR
     END
 
+Stop Workspace
+    [Arguments]     ${workspace_title}    ${press_cancel}=${FALSE}
+    ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}
+    IF    ${is_started} == ${TRUE}
+        Click Element       xpath=//tr[td/h4[text()="${workspace_title}"]]/td/label/span[@class="pf-c-switch__toggle"]
+        Wait Until Modal Appears
+        Run Keyword And Continue On Failure    Page Should Contain    Stop workspace?
+        Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to stop the workspace? Any changes without saving will be erased.
+        Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your workspace
+        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
+        Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
+        Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
+        IF    ${press_cancel} == ${TRUE}
+            Click Button    ${GENERIC_CANCEL_BTN_XP}
+        ELSE
+            Click Button    ${WRKSP_STOP_BTN_XP}
+        END
+        
+
+    ELSE
+        Fail   msg=Cannot stop workspace ${workspace_title} because it is not running...
+    END
+
 Check Launched Workspace Is The Correct One
-    [Arguments]     ${workspace_title}      ${image}
+    [Arguments]     ${workspace_title}      ${image}    ${namespace}
+    ${_}  ${cr_name}=    Get Openshift Notebook CR From Workspace    workspace_title=${workspace_title}  namespace=${namespace}
     # check notebook id from URL..
     ${current_url}=     Get Location
-    Location Should Contain    expected
+    Location Should Contain    ${cr_name}
+    Location Should Contain    ${namespace}
     Open New Notebook In Jupyterlab Menu
     Spawned Image Check    ${IMAGE_ID_MAPPING}[${image}]
     # ${spawn_fail} =  Has Spawn Failed

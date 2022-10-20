@@ -194,14 +194,14 @@ Is Generic Modal Displayed
     [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
     IF    ${partial_match} == ${TRUE}
         ${is_displayed}=    Run Keyword And Return Status
-        ...                 Page Should Contain Element    xpath=//*[contains(id,"${id}")]    timeout=${timeout}
+        ...                 Page Should Contain Element    xpath=//*[contains(id,"${id}")]
     ELSE
         ${is_displayed}=    Run Keyword And Return Status
-        ...                 Page Should Contain Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+        ...                 Page Should Contain Element    xpath=//*[@id="${id}")]
     END
     [Return]    ${is_displayed}
 
-Wait Until Modal Disappear
+Wait Until Modal Disappears
     [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
     ${is_modal}=    Is Generic Modal Displayed
     IF    ${is_modal} == ${TRUE}
@@ -214,9 +214,22 @@ Wait Until Modal Disappear
         Log     No Modals on the screen right now..     level=WARN
     END
 
+Wait Until Modal Appears
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    ${is_modal}=    Is Generic Modal Displayed
+    IF    ${is_modal} == ${FALSE}
+        IF    ${partial_match} == ${TRUE}
+            Wait Until Page Contains Element    xpath=//*[contains(@id,"${id}")]    timeout=${timeout}
+        ELSE
+            Wait Until Page Contains Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+        END
+    ELSE
+        Log     No Modals on the screen right now..     level=WARN
+    END
+
 Close Generic Modal If Present
     ${is_modal}=    Is Generic Modal Displayed
     IF    ${is_modal} == ${TRUE}
         Click Element    xpath=//button[@aria-label="Close"]
-        Wait Until Modal Disappear
+        Wait Until Modal Disappears
     END

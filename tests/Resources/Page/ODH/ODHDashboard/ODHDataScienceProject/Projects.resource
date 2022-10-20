@@ -32,6 +32,10 @@ Is Data Science Projects Page Open
 Open Data Science Project Details Page
     [Documentation]    Verifies submenu Settings > Cluster settings" is visible
     [Arguments]     ${project_title}
+    ${is_open}=    Is Data Science Projects Page Open
+    IF    ${is_open} == ${FALSE}
+        Open Data Science Projects Home Page
+    END
     Click Link    ${project_title}
     Wait Until Project Is Open    project_title=${project_title}
     Maybe Wait For Dashboard Loading Spinner Page
@@ -85,7 +89,7 @@ Create Data Science Project
     Input Text    ${DESCR_INPUT_XP}    ${description}
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
-    Wait Until Modal Disappear
+    Wait Until Modal Disappears
     Wait Until Project Is Open    project_title=${title}
 
 

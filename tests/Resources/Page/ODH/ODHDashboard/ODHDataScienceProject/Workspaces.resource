@@ -16,6 +16,7 @@ ${WRKSP_STATUS_STOPPED}=                  Stopped
 ${WRKSP_STATUS_RUNNING}=                  Started
 ${WRKSP_STATUS_STARTING}=                 Starting
 ${WRKSP_STOP_BTN_XP}=                 xpath=//button[text()="Stop workspace"]
+${WRKSP_DELETE_BTN_XP}=                 xpath=//button[text()="Delete notebook"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
 ${WRKSP_CREATE_LAUNCH_BTN_XP}=     xpath=//button[text()="Create and launch"]
@@ -121,17 +122,21 @@ Start Workspace
     END
     Wait Until Workspace Is Started     workspace_title=${workspace_title}
 
+Access To Workspace  
+    [Arguments]    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
+    Switch Window   NEW
+    Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
+    ${authorization_required} =  Is Service Account Authorization Required
+    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+    Maybe Close Popup
+
 Launch Workspace
     [Arguments]     ${workspace_title}
     ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
         Click Link       xpath=//tr[td/h4[text()="${workspace_title}"]]/td/a[text()="Open"]
-        Switch Window   NEW
-        Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-        ${authorization_required} =  Is Service Account Authorization Required
-        Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
-        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
-        Maybe Close Popup
+        Access To Workspace
     ELSE
         Log   msg=Cannot launch workspace ${workspace_title} because it is not running..   level=ERROR
     END
@@ -158,6 +163,21 @@ Stop Workspace
     ELSE
         Fail   msg=Cannot stop workspace ${workspace_title} because it is not running...
     END
+
+Delete Workspace
+    [Arguments]     ${workspace_title}    ${press_cancel}=${FALSE}
+    Click Element       xpath=//tr[td/h4[text()="${workspace_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
+    Wait Until Page Contains Element       xpath=//tr[td/h4[text()="${workspace_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete workspace"]
+    Click Element       xpath=//tr[td/h4[text()="${workspace_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete workspace"]
+    Wait Until Modal Appears
+    Run Keyword And Continue On Failure    Page Should Contain    Confirm notebook delete
+    Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${workspace_title}?
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+    ELSE
+        Click Button    ${WRKSP_DELETE_BTN_XP}
+    END
+
 
 Check Launched Workspace Is The Correct One
     [Arguments]     ${workspace_title}      ${image}    ${namespace}

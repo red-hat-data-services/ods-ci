@@ -101,8 +101,14 @@ Verify User Can Stop A Workspace
     [Teardown]   Close All Browsers
     
 
-# Verify User Can Delete A Workspace
-#     [Tags]    ODS-XYZ
+Verify User Can Delete A Workspace
+    [Tags]    ODS-XYZWX
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Delete Workspace    workspace_title=${WRKSP_TITLE}    press_cancel=${TRUE}
+    Delete Workspace    workspace_title=${WRKSP_TITLE}
+    Check Workspace Resources Are Deleted    workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
+    [Teardown]   Close All Browsers
 
 
 Verify User Can Delete A Data Science Project
@@ -137,7 +143,15 @@ Check Corresponding Namespace Exists
 
 Check Corresponding Notebook CR Exists
     [Arguments]     ${workspace_title}  ${namespace}
-    ${res}  ${_}=    Get Openshift Notebook CR From Workspace   workspace_title=${workspace_title}  namespace=${namespace}
-    IF    "${res}" == "FAIL"
+    ${res}  ${response}=    Get Openshift Notebook CR From Workspace   workspace_title=${workspace_title}  namespace=${namespace}
+    IF    "${response}" == "${EMPTY}"
         Run Keyword And Continue On Failure    Fail    msg=Notebook CR not found for ${workspace_title} in ${namespace} NS
     END
+
+Check Workspace Resources Are Deleted
+    [Arguments]    ${workspace_title}   ${namespace}
+    ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists   workspace_title=${workspace_title}   namespace=${namespace}
+    IF    ${status} == ${TRUE}
+        Fail    msg=The notebook CR for ${workspace_title} is still present, while it should have been deleted.        
+    END
+

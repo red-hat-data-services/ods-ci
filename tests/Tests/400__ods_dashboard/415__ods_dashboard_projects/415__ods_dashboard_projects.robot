@@ -45,35 +45,42 @@ Verify User Can Create A Data Science Project
     # Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
-Verify User Can Create A Workspace With Ephimeral Storage
+Verify User Can Create And Start A Workspace With Ephimeral Storage
     [Tags]    ODS-1812
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workspace    wrksp_title=${EMPTY}  wrksp_description=${EMPTY}  prj_title=${PRJ_TITLE}
+    ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  start=${FALSE}  press_cancel=${TRUE}
     Create Workspace    wrksp_title=${WRKSP_TITLE}  wrksp_description=${WRKSP_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
-    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  launch=${FALSE}
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  start=${FALSE}
     Workspace Should Be Listed      workspace_title=${WRKSP_TITLE}
     Workspace Status Should Be      workspace_title=${WRKSP_TITLE}      status=${WRKSP_STATUS_STOPPED}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
+    Start Workspace     workspace_title=${WRKSP_TITLE}
+    Workspace Status Should Be      workspace_title=${WRKSP_TITLE}      status=${WRKSP_STATUS_RUNNING}
 
-Verify User Can Create A Workspace With Existent PV Storage
+Verify User Can Create And Start A Workspace With Existent PV Storage
     [Tags]    ODS-1814
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workspace    wrksp_title=${WRKSP_2_TITLE}  wrksp_description=${WRKSP_2_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${TRUE}   
-    ...                 pv_name=${PV_NAME}  pv_description=${NONE}  pv_size=${NONE}  launch=${FALSE}
+    ...                 pv_name=${PV_NAME}  pv_description=${NONE}  pv_size=${NONE}  start=${TRUE}
     Workspace Should Be Listed      workspace_title=${WRKSP_2_TITLE}
-    Workspace Status Should Be      workspace_title=${WRKSP_2_TITLE}      status=${WRKSP_STATUS_STOPPED}
+    Workspace Status Should Be      workspace_title=${WRKSP_2_TITLE}      status=${WRKSP_STATUS_STARTING}
+    Wait Until Workspace Is Started     workspace_title=${WRKSP_2_TITLE}
+    # Workspace Status Should Be      workspace_title=${WRKSP_2_TITLE}      status=${WRKSP_STATUS_STOPPED}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_2_TITLE}   namespace=${ns_name}
     [Teardown]   Close All Browsers
 
-Verify User Can Create A Workspace Adding A New PV Storage
+Verify User Can Create And Start A Workspace Adding A New PV Storage
     [Tags]    ODS-1816
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workspace    wrksp_title=${WRKSP_3_TITLE}  wrksp_description=${WRKSP_3_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${FALSE}
-    ...                 pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}  launch=${TRUE}
+    ...                 pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}  start=${FALSE}
     Workspace Should Be Listed      workspace_title=${WRKSP_3_TITLE}
     Workspace Status Should Be      workspace_title=${WRKSP_3_TITLE}      status=${WRKSP_STATUS_STOPPED}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -83,7 +90,7 @@ Verify User Can Create A Workspace Adding A New PV Storage
     [Teardown]   Close All Browsers
 
 Verify User Can Launch A Workspace
-    [Tags]    ODS-XYZ   workspace-launch
+    [Tags]    ODS-1815
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -94,15 +101,16 @@ Verify User Can Launch A Workspace
     [Teardown]   Close All Browsers
 
 Verify User Can Stop A Workspace
-    [Tags]    ODS-XYZW
+    [Tags]    ODS-1817
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Stop Workspace    workspace_title=${WRKSP_TITLE}    press_cancel=${TRUE}
     Stop Workspace    workspace_title=${WRKSP_TITLE}
+    # add checks on notebook pod is terminated
     [Teardown]   Close All Browsers
     
 
 Verify User Can Delete A Workspace
-    [Tags]    ODS-XYZWX
+    [Tags]    ODS-1813
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Delete Workspace    workspace_title=${WRKSP_TITLE}    press_cancel=${TRUE}

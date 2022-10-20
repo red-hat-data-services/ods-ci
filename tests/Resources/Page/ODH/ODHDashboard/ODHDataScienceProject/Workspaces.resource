@@ -19,7 +19,7 @@ ${WRKSP_STOP_BTN_XP}=                 xpath=//button[text()="Stop workspace"]
 ${WRKSP_DELETE_BTN_XP}=                 xpath=//button[text()="Delete notebook"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
-${WRKSP_CREATE_LAUNCH_BTN_XP}=     xpath=//button[text()="Create and launch"]
+${WRKSP_CREATE_START_BTN_XP}=     xpath=//button[text()="Create and launch"]
 
 
 *** Keywords ***
@@ -44,7 +44,8 @@ Create Workspace
     ...                 the DS Project deta
     # [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python    ${size}=Small
     [Arguments]     ${wrksp_title}  ${wrksp_description}  ${prj_title}   ${image_name}   ${deployment_size}
-    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}  ${launch}=${FALSE}
+    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}  ${start}=${FALSE}
+    ...             ${press_cancel}=${FALSE}
     Click Element    ${WORKSPACE_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WRKSP_NAME_INPUT_XP}
     Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
@@ -76,12 +77,16 @@ Create Workspace
     ELSE
         Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
     END
-    IF    ${launch} == ${TRUE}
-        Wait Until Element Is Enabled    ${WRKSP_CREATE_LAUNCH_BTN_XP}
-        Click Button    ${WRKSP_CREATE_LAUNCH_BTN_XP}
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
-        Click Button    ${GENERIC_CREATE_BTN_XP}
+        IF    ${start} == ${TRUE}
+            Wait Until Element Is Enabled    ${WRKSP_CREATE_START_BTN_XP}
+            Click Button    ${WRKSP_CREATE_START_BTN_XP}
+        ELSE
+            Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
+            Click Button    ${GENERIC_CREATE_BTN_XP}
+        END
     END
     Wait Until Modal Disappears
     Wait Until Project Is Open    project_title=${prj_title}

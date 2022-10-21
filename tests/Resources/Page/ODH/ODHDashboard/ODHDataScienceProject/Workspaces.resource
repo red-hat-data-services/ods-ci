@@ -143,7 +143,7 @@ Launch Workspace
         Click Link       xpath=//tr[td/h4[text()="${workspace_title}"]]/td/a[text()="Open"]
         Access To Workspace
     ELSE
-        Log   msg=Cannot launch workspace ${workspace_title} because it is not running..   level=ERROR
+        Fail   msg=Cannot launch workspace ${workspace_title} because it is not running...
     END
 
 Stop Workspace

@@ -1,7 +1,7 @@
 *** Settings ***
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
-
+Resource       ./Workspaces.resource
 
 *** Variables ***
 ${DS_PROJECT_XP}=     //h1[text()="Data science projects"]
@@ -128,4 +128,45 @@ Delete All Data Science Projects From CLI
             Append To List    ${to_delete}     ${project['metadata']['name']}
         END
         Delete Data Science Projects From CLI   ocp_projects=${to_delete}
+    END
+
+Workspace Status Should Be From Projects Home Page
+    [Arguments]     ${workspace_title}      ${status}    ${project_title}
+    ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
+    ${_}  ${workspace_cr_name}=       Get Openshift Notebook CR From Workspace    workspace_title=${workspace_title}    namespace=${namespace}
+    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workspace_cr_name}"]/span[text()="${status}"]
+
+Start Workspace From Projects Home Page
+    [Documentation]    Trigger the workspace "start" process from DS Projects home page.
+    ...                It needs ${workspace_title} and ${project_title} at least. If ${namespace} and/or
+    ...                ${workspace_cr_name} are given too, the kw spares one or two calls to openshift API server
+    [Arguments]     ${workspace_title}    ${project_title}   ${namespace}=${EMPTY}    ${workspace_cr_name}=${EMPTY}
+    ${is_stopped}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workspace_title=${workspace_title}   status=${WRKSP_STATUS_STOPPED}    project_title=${project_title}
+    IF    ${is_stopped} == ${TRUE}
+        IF    "${workspace_cr_name}" == "${EMPTY}"
+            IF    "${namespace}" == "${EMPTY}"
+                ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
+            END
+                ${_}    ${workspace_cr_name}=       Get Openshift Notebook CR From Workspace    workspace_title=${workspace_title}    namespace=${namespace}
+        END
+        # Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workspace_cr_name}"]/input[@id="${workspace_cr_name}"]
+        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workspace_cr_name}"]/span[@class="pf-c-switch__toggle"]
+    ELSE
+        Log     msg=Cannot start ${workspace_title} workspace because it is not stopped.
+    END
+    Wait Until Workspace Is Started From Projects Home Page     workspace_title=${workspace_title}   project_title=${project_title}
+
+Wait Until Workspace Is Started From Projects Home Page
+    [Arguments]     ${workspace_title}   ${project_title}   ${timeout}=25s
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workspace Status Should Be From Projects Home Page      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}   project_title=${project_title}
+
+Launch Workspace From Projects Home Page
+    [Arguments]     ${workspace_title}    ${project_title}
+    Open Data Science Projects Home Page
+    ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}    project_title=${project_title}
+    IF    ${is_started} == ${TRUE}
+        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workspace_title}"]
+        Access To Workspace
+    ELSE
+        Fail   msg=Cannot launch workspace ${workspace_title} because it is not running...
     END

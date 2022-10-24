@@ -18,13 +18,13 @@ ${NB_IMAGE}=        Minimal Python
 ${WRKSP_TITLE}=   ODS-CI Workspace 1
 ${WRKSP_DESCRIPTION}=   ODS-CI Workspace 1 is a test workspace using ${NB_IMAGE} image to test DS Projects feature
 ${WRKSP_2_TITLE}=   ODS-CI Workspace 2
-${WRKSP_2_DESCRIPTION}=   ODS-CI Workspace 3 is a test workspace using ${NB_IMAGE} image to test DS Projects feature
+${WRKSP_2_DESCRIPTION}=   ODS-CI Workspace 2 is a test workspace using ${NB_IMAGE} image to test DS Projects feature
 ${WRKSP_3_TITLE}=   ODS-CI Workspace 2
 ${WRKSP_3_DESCRIPTION}=   ODS-CI Workspace 3 is a test workspace using ${NB_IMAGE} image to test DS Projects feature
 ${PV_NAME}=         ods-ci-pv
 ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
 # PV size are in GB
-${PV_SIZE}=         20
+${PV_SIZE}=         1
 
 
 *** Test Cases ***
@@ -79,17 +79,23 @@ Verify User Can Create And Start A Workspace With Existent PV Storage
 
 Verify User Can Create And Start A Workspace Adding A New PV Storage
     [Tags]    ODS-1816
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workspace    wrksp_title=${WRKSP_3_TITLE}  wrksp_description=${WRKSP_3_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}  start=${TRUE}
     Workspace Should Be Listed      workspace_title=${WRKSP_3_TITLE}
-    # Workspace Status Should Be      workspace_title=${WRKSP_3_TITLE}      status=${WRKSP_STATUS_STOPPED}
-    Workspace Status Should Be      workspace_title=${WRKSP_2_TITLE}      status=${WRKSP_STATUS_STARTING}
-    Wait Until Workspace Is Started     workspace_title=${WRKSP_2_TITLE}
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Reload Page
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Workspace Status Should Be      workspace_title=${WRKSP_3_TITLE}      status=${WRKSP_STATUS_STARTING}
+    # the continue on failure should be temporary
+    Run Keyword And Continue On Failure    Wait Until Workspace Is Started     workspace_title=${WRKSP_3_TITLE}
     Check Corresponding Notebook CR Exists      workspace_title=${WRKSP_3_TITLE}   namespace=${ns_name}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Reload Page
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    ${connected_woksps}=    Create List    ${WRKSP_3_TITLE}
+    Storage Should Be Listed    storage_title=${PV_NAME}    storage_description=${PV_DESCRIPTION}
+    ...                         storage_type=Persistent storage    connected_wrksp=${connected_woksps}
     Storage Size Should Be    title=${PV_NAME}    namespace=${ns_name}  size=${PV_SIZE}
     [Teardown]   Close All Browsers
 

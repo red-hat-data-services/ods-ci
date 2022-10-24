@@ -5,8 +5,10 @@ Resource       ./Workspaces.resource
 
 *** Variables ***
 ${DS_PROJECT_XP}=     //h1[text()="Data science projects"]
-${TITLE_INPUT_XP}=    xpath=//input[@aria-label="Project name"]
-${DESCR_INPUT_XP}=    xpath=//textarea[@aria-label="Project description"]
+${TITLE_INPUT_XP}=    xpath=//input[@id="test"]
+${DESCR_INPUT_XP}=    xpath=//textarea[@id="test"]
+# ${TITLE_INPUT_XP}=    xpath=//input[@aria-label="Project name"]
+# ${DESCR_INPUT_XP}=    xpath=//textarea[@aria-label="Project description"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
 ${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project"]
@@ -157,7 +159,7 @@ Start Workspace From Projects Home Page
     Wait Until Workspace Is Started From Projects Home Page     workspace_title=${workspace_title}   project_title=${project_title}
 
 Wait Until Workspace Is Started From Projects Home Page
-    [Arguments]     ${workspace_title}   ${project_title}   ${timeout}=25s
+    [Arguments]     ${workspace_title}   ${project_title}   ${timeout}=30s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workspace Status Should Be From Projects Home Page      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}   project_title=${project_title}
 
 Launch Workspace From Projects Home Page

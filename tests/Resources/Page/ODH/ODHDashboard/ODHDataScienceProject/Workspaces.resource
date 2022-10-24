@@ -5,7 +5,8 @@ Resource       Projects.resource
 
 
 *** Variables ***
-${WORKSPACE_CREATE_BTN_XP}=           xpath=//a[text()="Create data science workspace"]
+${WORKSPACE_CREATE_BTN_XP}=           xpath=//button[text()="Create data science workspace"]
+# ${WORKSPACE_CREATE_BTN_XP}=           xpath=//a[text()="Create data science workspace"]
 ${WRKSP_NAME_INPUT_XP}=               xpath=//input[@name="workspace-name"]
 ${WRKSP_DESCR_TXT_XP}=                xpath=//textarea[@name="workspace-description"]
 ${WRKSP_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//button[@aria-label="Options menu"]
@@ -13,13 +14,13 @@ ${WRKSP_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workspace-image-stream-sel
 ${WRKSP_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
 ${WRKSP_SIZE_ITEM_BTN_XP}=           xpath=//ul[@id="container-size"]/li/button
 ${WRKSP_STATUS_STOPPED}=                  Stopped
-${WRKSP_STATUS_RUNNING}=                  Started
-${WRKSP_STATUS_STARTING}=                 Starting
+${WRKSP_STATUS_RUNNING}=                  Running
+${WRKSP_STATUS_STARTING}=                 Starting...
 ${WRKSP_STOP_BTN_XP}=                 xpath=//button[text()="Stop workspace"]
 ${WRKSP_DELETE_BTN_XP}=                 xpath=//button[text()="Delete notebook"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
-${WRKSP_CREATE_START_BTN_XP}=     xpath=//button[text()="Create and launch"]
+${WRKSP_CREATE_START_BTN_XP}=     xpath=//button[text()="Create and start"]
 
 
 *** Keywords ***
@@ -55,21 +56,23 @@ Create Workspace
     Select Workspace Jupyter Image    image_name=${image_name}
     ## Select Workspace Container Size # to fix, by default Small is already select
     IF    "${storage}" == "Persistent"
-        Click Element   xpath=//input[@name="persistent-storage-type-radio"]
+        # Click Element   xpath=//input[@name="persistent-storage-type-radio"]
         IF    ${pv_existent} == ${TRUE}
-            Click Element    xpath=//input[@name="add-existing-storage-checkbox"]
-            Wait Until Element Is Enabled    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
-            Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
-            Wait Until Page Contains Element    xpath=//ul/li/button[text()="${prj_title}"]
-            Click Element   xpath=//ul/li/button[text()="${prj_title}"]
+            # Click Element    xpath=//input[@name="add-existing-storage-checkbox"]
+            Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
+            # Wait Until Element Is Enabled    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
+            # Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
+            # Wait Until Page Contains Element    xpath=//ul/li/button[text()="${prj_title}"]
+            # Click Element   xpath=//ul/li/button[text()="${prj_title}"]
             # select PV - function not available yet in the product
         ELSE IF   ${pv_existent} == ${FALSE}
-            Click Element   xpath=//input[@name="create-new-storage-checkbox"]
-            Wait Until Page Contains Element    xpath=//div[input[@name="create-new-storage-checkbox"]]//input[@name="create-new-storage-name"]
-            Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//input[@name="create-new-storage-name"]   ${pv_name}
-            Wait Until Page Contains Element    xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]
-            Input Text   xpath=//div[input[@name="create-new-storage-checkbox"]]//textarea[@name="create-new-storage-description"]   ${pv_description}
-            # Clear Element Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]
+            # Click Element   xpath=//input[@name="create-new-storage-checkbox"]
+            Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
+            Wait Until Page Contains Element    xpath=//div[input[@name="persistent-new-storage-type-radio"]]//input[@name="create-new-storage-name"]
+            Input Text   xpath=//div[input[@name="persistent-new-storage-type-radio"]]//input[@name="create-new-storage-name"]   ${pv_name}
+            Wait Until Page Contains Element    xpath=//div[input[@name="persistent-new-storage-type-radio"]]//textarea[@name="create-new-storage-description"]
+            Input Text   xpath=//div[input[@name="persistent-new-storage-type-radio"]]//textarea[@name="create-new-storage-description"]   ${pv_description}
+            Clear Element Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]
             # Input Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]   ${pv_size}
         ELSE
             Log    msg="pv_existent" argument is required when selected storage type is "Persistent"   level=ERROR
@@ -114,7 +117,7 @@ Workspace Status Should Be
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/h4[text()="${workspace_title}"]]/td/label/span[text()="${status}"]
 
 Wait Until Workspace Is Started
-    [Arguments]     ${workspace_title}      ${timeout}=25s
+    [Arguments]     ${workspace_title}      ${timeout}=40s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workspace Status Should Be      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}
 
 Start Workspace

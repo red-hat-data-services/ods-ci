@@ -25,7 +25,7 @@ ${WRKSP_3_DESCRIPTION}=   ODS-CI Workspace 3 is a test workspace using ${NB_IMAG
 ${PV_BASENAME}=         ods-ci-pv
 ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
 # PV size are in GB
-${PV_SIZE}=         1
+${PV_SIZE}=         2
 
 
 *** Test Cases ***

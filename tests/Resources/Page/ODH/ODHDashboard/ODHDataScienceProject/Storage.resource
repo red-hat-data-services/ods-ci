@@ -8,6 +8,7 @@ Resource       Projects.resource
 ${STORAGE_NAME_INPUT_XP}=          xpath=//input[@name="create-new-storage-name"]
 ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-description"]
 ${STORAGE_SIZE_INPUT_XP}=         xpath=//div/input[@aria-label="Input"]
+${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@aria-label="mount-path-folder-value"]
 ${STORAGE_WRKSP_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
 ${STORAGE_ADD_BTN_1_XP}=           xpath=//div[div/h4[@id="storages"]]/div/button[text()="Add storage"]
@@ -61,6 +62,11 @@ Fill In New PV Data
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
     Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
     Clear Element Text    ${STORAGE_SIZE_INPUT_XP}
+    IF    ${size} > 1
+        FOR    ${counter}    IN RANGE    1    ${size}
+            Click Element    ${STORAGE_SIZE_PLUS_BTN_XP}
+        END        
+    END
     IF    "${connected_wrksp}" == "${NONE}"
         Log    msg=you are not connecting any workspaces to ${name} PV
     ELSE

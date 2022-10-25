@@ -7,7 +7,7 @@ Suite Teardown    Teardown Model Serving
 *** Variables ***
 ${MODEL_MESH_NAMESPACE}=    mesh-test
 ${ODH_NAMESPACE}=    redhat-ods-applications
-${MS_REPO}=    https://github.com/opendatahub-io/modelmesh-serving
+${MS_REPO}=    https://github.com/lugi0/modelmesh-serving
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"example-onnx-mnist__isvc-82e2bf7ea4","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233052,-7.749704,-3.4236808,12.363028,-12.079106,17.26659,-10.570972,0.7130786,3.3217115,1.3621225]}]}
 
 
@@ -26,7 +26,7 @@ Verify Model Serving Installation
     ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
     Log    ${label}
     Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
-    Wait Until Keyword Succeeds  5 min  10 sec  Verify Triton Deployment
+    Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
     Wait Until Keyword Succeeds  5 min  10 sec  Verify odh-model-controller Deployment
     Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Minio Deployment
@@ -72,11 +72,18 @@ Verify odh-model-controller Deployment
     ${containerNames} =  Create List  manager
     Verify Deployment    ${odh_model_controller}  3  1  ${containerNames}
 
-Verify Triton Deployment
-    @{triton} =  Oc Get    kind=Pod    namespace=${MODEL_MESH_NAMESPACE}    label_selector=name=modelmesh-serving-triton-2.x
-    ${containerNames} =  Create List  rest-proxy  oauth-proxy  triton  triton-adapter  mm
+# Verify Triton Deployment
+#     @{triton} =  Oc Get    kind=Pod    namespace=${MODEL_MESH_NAMESPACE}    label_selector=name=modelmesh-serving-triton-2.x
+#     ${containerNames} =  Create List  rest-proxy  oauth-proxy  triton  triton-adapter  mm
+#     Verify Deployment    ${triton}  2  5  ${containerNames}
+#     ${all_ready} =    Run    oc get deployment -l name=modelmesh-serving-triton-2.x | grep 2/2 -o
+#     Should Be Equal As Strings    ${all_ready}    2/2
+
+Verify Openvino Deployment
+    @{triton} =  Oc Get    kind=Pod    namespace=${MODEL_MESH_NAMESPACE}    label_selector=name=modelmesh-serving-ovms-1.x
+    ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
     Verify Deployment    ${triton}  2  5  ${containerNames}
-    ${all_ready} =    Run    oc get deployment -l name=modelmesh-serving-triton-2.x | grep 2/2 -o
+    ${all_ready} =    Run    oc get deployment -l name=modelmesh-serving-ovms-1.x | grep 2/2 -o
     Should Be Equal As Strings    ${all_ready}    2/2
 
 Delete Model Serving Resources

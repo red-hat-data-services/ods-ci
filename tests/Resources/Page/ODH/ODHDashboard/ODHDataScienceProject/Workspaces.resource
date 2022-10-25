@@ -24,26 +24,9 @@ ${WRKSP_CREATE_START_BTN_XP}=     xpath=//button[text()="Create and start"]
 
 
 *** Keywords ***
-Create Workspace v1
-    [Documentation]     Creates a new workspace in a Data Science project. It assumes
-    ...                 the DS Project details page is open
-    [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python    ${size}=Small
-    Click Element    ${WORKSPACE_CREATE_BTN_XP}
-    Wait Until Page Contains Element    ${WRKSP_NAME_INPUT_XP}
-    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
-    Input Text    ${WRKSP_NAME_INPUT_XP}    ${name}
-    Input Text    ${WRKSP_DESCR_TXT_XP}    ${description}
-    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
-    Select Workspace Jupyter Image    image_name=${image_name}
-    ## Select Workspace Container Size # to fix, by default Small is already select
-    Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
-    Click Button    ${GENERIC_CREATE_BTN_XP}
-    Wait Until Modal Disappears
-
 Create Workspace
     [Documentation]     Creates a new workspace in a Data Science project. It assumes
     ...                 the DS Project deta
-    # [Arguments]     ${name}   ${description}=${EMPTY}   ${image_name}=Minimal Python    ${size}=Small
     [Arguments]     ${wrksp_title}  ${wrksp_description}  ${prj_title}   ${image_name}   ${deployment_size}
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}  ${start}=${FALSE}
     ...             ${press_cancel}=${FALSE}
@@ -56,24 +39,12 @@ Create Workspace
     Select Workspace Jupyter Image    image_name=${image_name}
     ## Select Workspace Container Size # to fix, by default Small is already select
     IF    "${storage}" == "Persistent"
-        # Click Element   xpath=//input[@name="persistent-storage-type-radio"]
         IF    ${pv_existent} == ${TRUE}
-            # Click Element    xpath=//input[@name="add-existing-storage-checkbox"]
             Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
-            # Wait Until Element Is Enabled    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
-            # Click Element    xpath=//div[input[@name="add-existing-storage-checkbox"]]//div[@class="pf-c-form__group"]/div[@class="pf-c-form__group-control"]/div/div/div/input
-            # Wait Until Page Contains Element    xpath=//ul/li/button[text()="${prj_title}"]
-            # Click Element   xpath=//ul/li/button[text()="${prj_title}"]
-            # select PV - function not available yet in the product
+            Select An Existent PV   name=${pv_name}
         ELSE IF   ${pv_existent} == ${FALSE}
-            # Click Element   xpath=//input[@name="create-new-storage-checkbox"]
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
-            Wait Until Page Contains Element    xpath=//div[input[@name="persistent-new-storage-type-radio"]]//input[@name="create-new-storage-name"]
-            Input Text   xpath=//div[input[@name="persistent-new-storage-type-radio"]]//input[@name="create-new-storage-name"]   ${pv_name}
-            Wait Until Page Contains Element    xpath=//div[input[@name="persistent-new-storage-type-radio"]]//textarea[@name="create-new-storage-description"]
-            Input Text   xpath=//div[input[@name="persistent-new-storage-type-radio"]]//textarea[@name="create-new-storage-description"]   ${pv_description}
-            Clear Element Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]
-            # Input Text    xpath=//div[@name="create-new-storage-size"]/div/input[@aria-label="Input"]   ${pv_size}
+            Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
         ELSE
             Log    msg="pv_existent" argument is required when selected storage type is "Persistent"   level=ERROR
         END
@@ -93,6 +64,14 @@ Create Workspace
     END
     Wait Until Modal Disappears
     Wait Until Project Is Open    project_title=${prj_title}
+
+Select An Existent PV
+    [Arguments]    ${name}
+    Run Keyword And Continue On Failure    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
+    Click Element    xpath=//input[@placeholder="Select a persistent storage"]
+    Wait Until Page Contains Element    xpath=//ul/li/button[text()="${name}"]
+    Wait Until Page Contains Element    xpath=//div[contains(@class,"pf-c-select")]/ul/li/button[text()="${name}"]
+    Click Element   xpath=//ul/li/button[text()="${name}"]
 
 Select Workspace Jupyter Image
     [Arguments]     ${image_name}

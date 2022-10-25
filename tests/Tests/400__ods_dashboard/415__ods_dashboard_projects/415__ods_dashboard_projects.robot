@@ -3,7 +3,7 @@ Library            SeleniumLibrary
 Library            OpenShiftLibrary
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workspaces.resource
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storage.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
 Suite Setup        Project Suite Setup
 # Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
@@ -69,9 +69,9 @@ Verify User Can Create A PV Storage
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workspaces}=    Create Dictionary    ${WRKSP_TITLE}=mount-data
     Create PersistenVolume Storage    name=${PV_BASENAME}-A    description=${PV_DESCRIPTION}
-    ...                               size=${PV_SIZE}    connected_wrksp=${NONE}     press_cancel=${TRUE}
+    ...                               size=${PV_SIZE}    connected_wrksp=${NONE}     press_cancel=${TRUE}    project_title=${PRJ_TITLE}
     Create PersistenVolume Storage    name=${PV_BASENAME}-A    description=${PV_DESCRIPTION}
-    ...                               size=${PV_SIZE}    connected_wrksp=${workspaces}
+    ...                               size=${PV_SIZE}    connected_wrksp=${workspaces}   project_title=${PRJ_TITLE}
     Storage Should Be Listed    name=${PV_BASENAME}-A    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_wrksp=${workspaces}
     Storage Size Should Be    name=${PV_BASENAME}-A    namespace=${ns_name}  size=${PV_SIZE}
@@ -82,7 +82,7 @@ Verify User Can Create And Start A Workspace With Existent PV Storage
     [Tags]    ODS-1814
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create PersistenVolume Storage    name=${PV_BASENAME}-existent    description=${PV_DESCRIPTION}
-    ...                               size=${PV_SIZE}    connected_wrksp=${NONE}
+    ...                               size=${PV_SIZE}    connected_wrksp=${NONE}    project_title=${PRJ_TITLE}
     Create Workspace    wrksp_title=${WRKSP_2_TITLE}  wrksp_description=${WRKSP_2_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${TRUE}   
     ...                 pv_name=${PV_BASENAME}-existent  pv_description=${NONE}  pv_size=${NONE}  start=${TRUE}
@@ -149,6 +149,10 @@ Verify User Can Start And Launch A Workspace From Projects Home Page
     Delete Workspace    workspace_title=${WRKSP_TITLE}
     Check Workspace CR Is Deleted    workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
 
+Verify User Cand Add A S3 Data Connection
+    [Tags]    ODS-Z 
+    # Create S3 Data Connection
+    # check secret creation
 
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784

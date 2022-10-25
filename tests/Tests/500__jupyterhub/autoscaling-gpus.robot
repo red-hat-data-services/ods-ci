@@ -23,7 +23,7 @@ Verify Number Of Available GPUs Is Correct With Machine Autoscalers
     ...    number of GPUs available in a single node, also taking into account
     ...    nodes that can be autoscaled.
     [Tags]    Tier2    Resources-GPU-Autoscaling
-    ...       ODS-XXXX
+    ...       ODS-1820
     ${maxNo} =    Find Max Number Of GPUs In One MachineSet
     ${maxSpawner} =    Fetch Max Number Of GPUs In Spawner Page
     Should Be Equal    ${maxSpawner}    ${maxNo}
@@ -32,7 +32,7 @@ Verify Autoscale Can Be Triggered
     [Documentation]    Tries spawning a server requesting 1 GPU, which should
     ...    trigger a node autoscale.
     [Tags]    Tier2    Resources-GPU-Autoscaling
-    ...       ODS-XXXX
+    ...       ODS-1821
     Spawn Notebook And Trigger Autoscale
     ${serial} =    Get GPU Serial Number
     ${pod_node} =    Get User Server Node
@@ -45,7 +45,7 @@ Verify Node Is Scaled Down
     [Documentation]    After closing down all servers using gpus the node
     ...    should be scaled down in a reasonable amount of time
     [Tags]    Tier2    Resources-GPU-Autoscaling
-    ...       ODS-XXXX
+    ...       ODS-1822
     ${machine_name} =  Run  oc get Node ${NODE} -o json | jq '.metadata.annotations["machine.openshift.io/machine"]' | awk '{split($0, a, "/"); print a[2]}' | sed 's/"//'
     ${machineset_name} =  Run  oc get machine ${machine_name} -n openshift-machine-api -o json | jq '.metadata.ownerReferences[0].name' | sed 's/"//g'
     Wait Until Keyword Succeeds  20 min  30 sec  Verify MachineSet Has Zero Replicas  ${machineset_name}

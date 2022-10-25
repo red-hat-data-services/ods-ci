@@ -154,7 +154,7 @@ Start Workspace From Projects Home Page
         # Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workspace_cr_name}"]/input[@id="${workspace_cr_name}"]
         Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workspace_cr_name}"]/span[@class="pf-c-switch__toggle"]
     ELSE
-        Log     msg=Cannot start ${workspace_title} workspace because it is not stopped.
+        Fail     msg=Cannot start ${workspace_title} workspace because it is not stopped.
     END
     Wait Until Workspace Is Started From Projects Home Page     workspace_title=${workspace_title}   project_title=${project_title}
 

@@ -33,7 +33,8 @@ Verify User Cannot Create Project Without Title
     [Setup]   Launch Data Science Project Main Page
     Create Project With Empty Title And Expect Error
     # add close modal
-
+    [Teardown]    Close All Browsers
+    
 Verify User Can Create A Data Science Project
     [Tags]    ODS-1775
     [Setup]   Launch Data Science Project Main Page
@@ -44,6 +45,7 @@ Verify User Can Create A Data Science Project
     Project's Owner Should Be   expected_username=${OCP_ADMIN_USER.USERNAME}   project_title=${PRJ_TITLE}
     # Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
+    [Teardown]    Close All Browsers
 
 Verify User Can Create And Start A Workspace With Ephimeral Storage
     [Tags]    ODS-1812
@@ -110,6 +112,14 @@ Verify User Can Launch A Workspace
     Switch Window      Open Data Hub
     [Teardown]   Close All Browsers
 
+Verify User Can Stop A Workspace
+    [Tags]    ODS-1817
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Stop Workspace    workspace_title=${WRKSP_TITLE}    press_cancel=${TRUE}
+    Stop Workspace    workspace_title=${WRKSP_TITLE}
+    # add checks on notebook pod is terminated
+    [Teardown]   Close All Browsers
+
 Verify User Can Start And Launch A Workspace From Projects Home Page
     [Tags]    ODS-1818
     Open Data Science Projects Home Page
@@ -121,23 +131,13 @@ Verify User Can Start And Launch A Workspace From Projects Home Page
     Switch Window      Open Data Hub
     [Teardown]   Close All Browsers
 
-
-Verify User Can Stop A Workspace
-    [Tags]    ODS-1817
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Stop Workspace    workspace_title=${WRKSP_TITLE}    press_cancel=${TRUE}
-    Stop Workspace    workspace_title=${WRKSP_TITLE}
-    # add checks on notebook pod is terminated
-    [Teardown]   Close All Browsers
-    
-
-Verify User Can Delete A Workspace
+ Verify User Can Delete A Workspace
     [Tags]    ODS-1813
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Delete Workspace    workspace_title=${WRKSP_TITLE}    press_cancel=${TRUE}
     Delete Workspace    workspace_title=${WRKSP_TITLE}
-    Check Workspace Resources Are Deleted    workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
+    Check Workspace CR Is Deleted    workspace_title=${WRKSP_TITLE}   namespace=${ns_name}
     [Teardown]   Close All Browsers
 
 
@@ -178,10 +178,11 @@ Check Corresponding Notebook CR Exists
         Run Keyword And Continue On Failure    Fail    msg=Notebook CR not found for ${workspace_title} in ${namespace} NS
     END
 
-Check Workspace Resources Are Deleted
-    [Arguments]    ${workspace_title}   ${namespace}
-    ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists   workspace_title=${workspace_title}   namespace=${namespace}
-    IF    ${status} == ${TRUE}
-        Fail    msg=The notebook CR for ${workspace_title} is still present, while it should have been deleted.        
-    END
+Check Workspace CR Is Deleted
+    [Arguments]    ${workspace_title}   ${namespace}    ${timeout}=10s
+    Wait Until Keyword Succeeds    ${timeout}    2s    Check Corresponding Notebook CR Exists   workspace_title=${workspace_title}   namespace=${namespace}
+    # ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists   workspace_title=${workspace_title}   namespace=${namespace}
+    # IF    ${status} == ${TRUE}
+    #     Fail    msg=The notebook CR for ${workspace_title} is still present, while it should have been deleted.        
+    # END
 

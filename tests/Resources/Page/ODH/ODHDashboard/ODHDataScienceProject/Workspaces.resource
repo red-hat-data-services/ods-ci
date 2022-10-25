@@ -117,7 +117,7 @@ Workspace Status Should Be
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/h4[text()="${workspace_title}"]]/td/label/span[text()="${status}"]
 
 Wait Until Workspace Is Started
-    [Arguments]     ${workspace_title}      ${timeout}=40s
+    [Arguments]     ${workspace_title}      ${timeout}=30s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workspace Status Should Be      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}
 
 Start Workspace

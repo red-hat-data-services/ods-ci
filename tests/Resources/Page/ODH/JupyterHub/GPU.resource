@@ -85,7 +85,6 @@ Is GPU Autoscaling Enabled
             ${autoscaler_status} =  Run Keyword And Return Status  Should Not Be Equal As Strings  ${autoscaler}  null
             IF  ${autoscaler_status}
                 ${autoscaling_enabled} =  Set Variable  ${True}
-                BREAK
             END
         END
     END

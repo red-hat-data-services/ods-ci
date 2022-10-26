@@ -5,6 +5,7 @@ Library             RPA.RobotLogListener
 Resource            Page/ODH/Monitoring/Monitoring.resource
 Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
 
+
 *** Variables ***
 @{PROTECTED_KEYWORDS}=      Login To RHODS Dashboard
 ...                         Launch Dashboard
@@ -21,6 +22,11 @@ Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robo
 ...                         Get Bearer Token
 ...                         Log In As RHODS Admin
 ...                         Log In As RHODS Basic User
+...                         Perform Dashboard API Endpoint GET Call
+...                         Perform Dashboard API Endpoint PUT Call
+...                         Perform Dashboard API Endpoint PATCH Call
+...                         Perform Dashboard API Endpoint POST Call
+...                         Perform Dashboard API Endpoint DELETE Call
 
 
 *** Keywords ***

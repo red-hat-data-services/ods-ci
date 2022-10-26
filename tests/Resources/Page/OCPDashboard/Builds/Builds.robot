@@ -1,5 +1,4 @@
 *** Settings ***
-Library    OpenShiftCLI
 Library    OpenShiftLibrary
 Resource   ../../OCPDashboard/Page.robot
 Resource   ../../ODH/ODHDashboard/ODHDashboard.robot
@@ -16,7 +15,7 @@ Get Build Status
 Delete BuildConfig using Name
     [Arguments]    ${namespace}                    ${name}
     ${status}      Check If BuildConfig Exists    ${namespace}      ${name}
-    Run Keyword If          '${status}'=='PASS'   OpenShiftCLI.Delete  kind=BuildConfig   name=${name}   namespace=${namespace}
+    Run Keyword If          '${status}'=='PASS'   Oc Delete  kind=BuildConfig   name=${name}   namespace=${namespace}
     ...        ELSE          FAIL        No BuildConfig present with name '${name}' in '${namespace}' namespace, Check the BuildConfig name and namespace provide is correct and try again
     Wait Until Keyword Succeeds     10s  2s
     ...         Dependent Build should not Present     ${name}
@@ -25,12 +24,12 @@ Delete BuildConfig using Name
 
 Check If BuildConfig Exists
     [Arguments]    ${namespace}      ${name}
-    ${status}   ${val}  Run keyword and Ignore Error   OpenShiftCLI.Get  kind=BuildConfig  namespace=${namespace}     field_selector=metadata.name==${name}
+    ${status}   ${val}  Run keyword and Ignore Error   Oc Get  kind=BuildConfig  namespace=${namespace}     field_selector=metadata.name==${name}
     [Return]   ${status}
 
 Dependent Build should not Present
      [Arguments]     ${selector}
-     ${isExist}      Run Keyword and Return Status          OpenShiftCLI.Get     kind=Build    label_selector=buildconfig=${selector}
+     ${isExist}      Run Keyword and Return Status          OC Get     kind=Build    label_selector=buildconfig=${selector}
      Run Keyword IF     not ${isExist}        Log    Build attached to Build config has been deleted
      ...        ELSE    FAIL       Attached Build to Build config is not deleted
 
@@ -55,7 +54,7 @@ Search Last Build
 Delete Build
     [Documentation]    Deletes the build ${build_name} in ${namespace}
     [Arguments]    ${namespace}    ${build_name}
-    OpenShiftCLI.Delete    kind=Build    namespace=${namespace}    field_selector=metadata.name==${build_name}
+    Oc Delete    kind=Build    namespace=${namespace}    field_selector=metadata.name==${build_name}
 
 Start New Build
     [Documentation]    Starts new build using ${buildconfig}

@@ -1,5 +1,4 @@
 *** Settings ***
-Library           OpenShiftCLI
 Library           OpenShiftLibrary
 Resource          ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource          ../../Resources/RHOSi.resource
@@ -83,6 +82,7 @@ Verify Content In RHODS Explore Section
 Verify Disabled Cards Can Be Removed
     [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
     ...                 It uses RHOSAK as example to test the feature
+    ...                 ProductBug: RHODS-2902
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
     ...       ProductBug
@@ -239,9 +239,11 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
 
 Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninstalled
    [Documentation]     Verify "Enabled" keeps being available after one of the ISV operators if uninstalled
+   ...                 ProductBug: RHODS-3985
    [Tags]      Sanity
    ...         ODS-1491
    ...         Tier1
+   ...         ProductBug
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
    Close All Browsers
    Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
@@ -249,13 +251,14 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}    ${openvino_dashboard_app_id}
 
 Verify Error Message In Logs When A RHODS Group Is Empty
+    [Documentation]     Verifies the messages printed out in the logs of
+    ...                 dashboard pods are the ones expected when an empty group
+    ...                 is set as admin in OdhDashboardConfig CRD
+    ...                 ProductBug: RHODS-5420
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1408
     ...     ProductBug
-    [Documentation]     Verifies the messages printed out in the logs of
-    ...                 dashboard pods are the ones expected when an empty group
-    ...                 is set as admin in OdhDashboardConfig CRD
     [Setup]     Set Variables For Group Testing
     Create Group    group_name=${CUSTOM_EMPTY_GROUP}
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
@@ -267,13 +270,14 @@ Verify Error Message In Logs When A RHODS Group Is Empty
     [Teardown]      Set Default Groups And Check Logs Do Not Change     delete_group=${TRUE}
 
 Verify Error Message In Logs When A RHODS Group Does Not Exist
-    [Tags]  Sanity
-    ...     Tier1
-    ...     ODS-1494
-    ...     AutomationBug
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an inexistent group
     ...                 is set as admin in OdhDashboardConfig CRD
+    ...                 ProductBug:  RHODS-5088
+    [Tags]  Sanity
+    ...     Tier1
+    ...     ODS-1494
+    ...     ProductBug
     [Setup]     Set Variables For Group Testing
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
     Set RHODS Admins Group To Inexistent Group
@@ -289,6 +293,7 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when 'system:authenticated'
     ...                 is set as admin in OdhDashboardConfig CRD
+    ...                 ProductBug:  RHODS-5088
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1500
@@ -300,23 +305,6 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     ...     exp_msg=${EXP_ERROR_SYS_AUTH}
     ...     prev_logs_lengths=${lengths_dict_before}
     [Teardown]      Set Default Groups And Check Logs Do Not Change
-
-Verify Error Message In Logs When rhods-groups-config ConfigMap Does Not Exist
-    [Documentation]     Verifies the messages printed out in the logs of
-    ...                 dashboard pods are the ones expected when "rhods-groups-config"
-    ...                 ConfigMap does not exist
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-1495
-    ...       AutomationBug
-    [Setup]     Set Variables For Group Testing
-    ${groups_configmaps_dict}=     Get ConfigMaps For RHODS Groups Configuration
-    ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
-    Delete RHODS Config Map     name=${RHODS_GROUPS_CONFIG_CM}
-    ${lengths_dict_after}=      New Lines In Logs Of Dashboard Pods Should Contain
-    ...     exp_msg=${EXP_ERROR_MISSING_RGC}
-    ...     prev_logs_lengths=${lengths_dict_before}
-    [Teardown]      Restore Group ConfigMaps And Check Logs Do Not Change     cm_yamls=${groups_configmaps_dict}
 
 Verify Dashboard Pod Is Not Getting Restarted
     [Documentation]    Verify Dashboard Pod container doesn't restarted
@@ -603,26 +591,8 @@ Check GPU Resources
         Page Should Contain Element    //a[@href=${gpu_re_link}[1]]
     END
 
-Select Checkbox Using Id
-    [Documentation]    Select check-box
-    [Arguments]    ${id}
-    Select Checkbox    id=${id}
-    sleep    1s
-
-Deselect Checkbox Using Id
-    [Documentation]    Deselect check-box
-    [Arguments]    ${id}
-    Unselect Checkbox    id=${id}
-    sleep    1s
-
-Verify The Resources Are Filtered
-    [Documentation]    verified the items, ${index_of_text} is index text appear on resource 0 = title,1=provider,2=tag(like documentation,tutorial)
-    [Arguments]    ${selector}    ${list_of_items}    ${index_of_text}=0
-    @{items}=    Get WebElements    //div[@class="${selector}"]
-    FOR    ${item}    IN    @{items}
-        @{texts}=    Split String    ${item.text}    \n
-        List Should Contain Value    ${list_of_items}    ${texts}[${index_of_text}]
-    END
+Wait Until Resource Page Is Loaded
+    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
 
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled
@@ -749,9 +719,9 @@ Check And Uninstall Operator In Openshift
     ...    browser_options=${BROWSER.OPTIONS}
     Remove Disabled Application From Enabled Page    app_id=${dashboard_app_id}
 
-
 Check Application Switcher Links To Openshift Cluster Manager
     [Documentation]    Checks for HTTP status of OCM link in application switcher
+    Skip If RHODS Is Self-Managed
     ${cluster_id}=    Get Cluster ID
     ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
     ${cluster_env}=    Fetch ODS Cluster Environment
@@ -782,4 +752,3 @@ Documentation Links Should Be Equal To The Expected Ones
     [Documentation]   Compare the fetched links from Dashboard with the expected ones
     [Arguments]     ${actual_links}     ${expected_links}
     Lists Should Be Equal   ${actual_links}    ${expected_links}    ignore_order=True
-

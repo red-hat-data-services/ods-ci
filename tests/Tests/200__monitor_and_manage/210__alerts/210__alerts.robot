@@ -9,7 +9,6 @@ Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robo
 Library             OperatingSystem
 Library             SeleniumLibrary
 Library             JupyterLibrary
-Library             OpenShiftCLI
 
 Suite Setup         Alerts Suite Setup
 Suite Teardown      RHOSi Teardown

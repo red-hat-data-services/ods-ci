@@ -2,6 +2,7 @@
 Documentation       Resource file for aikit operator
 
 Library             SeleniumLibrary
+Library             OpenShiftLibrary
 
 
 *** Keywords ***
@@ -17,7 +18,7 @@ Uninstall AIKIT Operator
     Delete Tabname Instance For Installed Operator    ${intel_aikit_operator_name}    AIKitContainer
     ...    redhat-ods-applications
     Uninstall Operator    ${intel_aikit_operator_name}
-    OpenShiftCLI.Delete    kind=ImageStream    namespace=redhat-ods-applications
+    Oc Delete    kind=ImageStream    namespace=redhat-ods-applications
     ...    label_selector=opendatahub.io/notebook-image=true    field_selector=metadata.name==oneapi-aikit
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}

@@ -3,6 +3,8 @@ Resource      ../../../Page/Components/Components.resource
 Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
 Resource       ../../../Common.robot
 Resource       ../JupyterHub/ODHJupyterhub.resource
+Resource      ../../../Page/ODH/ODHDashboard/ResourcesPage.resource
+Resource    ../../../OCP.resource
 Library       JupyterLibrary
 
 
@@ -39,6 +41,7 @@ ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 ${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo"]
+@{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
 
 
 *** Keywords ***
@@ -166,13 +169,17 @@ Go To RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.16.0
+    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.18.0
     IF  ${version-check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
     END
     ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == ${TRUE}
+        Remove From Dictionary   ${apps_dict_obj}   @{ISV_TO_REMOVE_SELF_MANAGED}
+    END
     [Return]  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded
@@ -304,8 +311,7 @@ Get Image Name
 Check Card Image
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
     ${src}  ${image_name}=  Get Image Name  card_locator=${card_locator}
-    ${expected_image}=  Set Variable  ${expected_data}[${app_id}][image]
-    Run Keyword And Continue On Failure    Should Be Equal    ${image_name}    ${expected_image}
+    Run Keyword And Continue On Failure    Should Be Equal    ${image_name}   ${expected_data}[${app_id}][image]
     Run Keyword And Continue On Failure    Page Should Not Contain Element    xpath:${card_locator}/${FALLBK_IMAGE_XP}
 
 Check Cards Details Are Correct
@@ -418,7 +424,12 @@ Search Items In Resources Section
     [Arguments]     ${element}
     Click Link      Resources
     Sleep   5
-    Input Text  xpath://input[@class="pf-c-search-input__text-input"]       ${element}
+    ${version-check}=  Is RHODS Version Greater Or Equal Than    1.18.0
+    IF    ${version-check} == True
+        Input Text  xpath://input[@class="pf-c-text-input-group__text-input"]       ${element}
+    ELSE
+        Input Text  xpath://input[@class="pf-c-search-input__text-input"]       ${element}
+    END
 
 Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard

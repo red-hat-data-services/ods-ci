@@ -8,7 +8,6 @@ Resource         ../../Resources/ODS.robot
 Library          OperatingSystem
 Library          DebugLibrary
 Library          JupyterLibrary
-Library          OpenShiftCLI
 Library          OpenShiftLibrary
 Suite Setup      Special User Testing Suite Setup
 Suite Teardown   Close All Browsers
@@ -144,5 +143,3 @@ Restore Standard RHODS Groups Configuration
     Remove Test Users From Custom Groups
     Delete Custom Groups
     Check Standard Access Configuration Works As Expected
-
-

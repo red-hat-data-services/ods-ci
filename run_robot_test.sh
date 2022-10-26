@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 SKIP_OC_LOGIN=false
 SERVICE_ACCOUNT=""
@@ -20,6 +20,7 @@ EMAIL_SERVER_USER="None"
 EMAIL_SERVER_PW="None"
 EMAIL_SERVER_SSL=false
 EMAIL_SERVER_UNSECURE=false
+SUBFOLDER=false
 
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -149,6 +150,14 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
 
+    # place test results in a timestamped subfolder or not
+    # true: no subfolder, false: subfolder
+    --no-output-subfolder)
+      shift
+      SUBFOLDER=$1
+      shift
+      ;;
+
     *)
       echo "Unknown command line switch: $1"
       exit 1
@@ -166,13 +175,13 @@ if ${EMAIL_REPORT}
       fi
       echo "Test Execution results will be sent to ${EMAIL_TO} from ${EMAIL_FROM}"
 fi
-echo ${TEST_VARIABLES_FILE}
+echo "${TEST_VARIABLES_FILE}"
 if [[ ! -f "${TEST_VARIABLES_FILE}" ]]; then
   echo "Robot Framework test variable file (test-variables.yml) is missing"
   exit 1
 fi
 
-currentpath=`pwd`
+currentpath=$(pwd)
 case "$(uname -s)" in
     Darwin)
          echo "MACOS"
@@ -188,12 +197,14 @@ case "$(uname -s)" in
              echo "setting driver  to $currentpath/Drivers/fedora"
              PATH=$PATH:$currentpath/drivers/fedora
              export PATH=$PATH
-             echo $PATH
+             echo "$PATH"
         ;;
         "Ubuntu")
-             echo "Not yet supported, but shouldn't be hard for you to fix :) "
-             echo "Please add the driver, test and submit PR"
-             exit 1
+             echo "Ubuntu"
+             echo "setting driver  to $currentpath/drivers/ubuntu"
+             PATH=$PATH:$currentpath/drivers/ubuntu
+             export PATH=$PATH
+             echo "$PATH"
         ;;
         "openSUSE project"|"SUSE LINUX"|"openSUSE")
              echo "Not yet supported, but shouldn't be hard for you to fix :) "
@@ -240,20 +251,20 @@ if command -v yq &> /dev/null
                     then
                         oc_host=${api_server}
                     else
-                        oc_host=$(yq  e '.OCP_API_URL' ${TEST_VARIABLES_FILE})
+                        oc_host=$(yq  e '.OCP_API_URL' "${TEST_VARIABLES_FILE}")
                 fi
 
 
                 if [ -z "${SERVICE_ACCOUNT}" ]
                     then
                         echo "Performing oc login using username and password"
-                        oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' ${TEST_VARIABLES_FILE})
-                        oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' ${TEST_VARIABLES_FILE})
+                        oc_user=$(yq  e '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}")
+                        oc_pass=$(yq  e '.OCP_ADMIN_USER.PASSWORD' "${TEST_VARIABLES_FILE}")
                         oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
                     else
                         echo "Performing oc login using service account"
-                        sa_token=$(oc serviceaccounts  new-token ${SERVICE_ACCOUNT} -n ${SA_NAMESPACE})
-                        oc login --token=$sa_token --server=${oc_host} --insecure-skip-tls-verify=true
+                        sa_token=$(oc serviceaccounts  new-token "${SERVICE_ACCOUNT}" -n "${SA_NAMESPACE}")
+                        oc login --token="$sa_token" --server="${oc_host}" --insecure-skip-tls-verify=true
                         sa_fullname=$(oc whoami)
                         TEST_VARIABLES="${TEST_VARIABLES} --variable SERVICE_ACCOUNT.NAME:${SERVICE_ACCOUNT} --variable SERVICE_ACCOUNT.FULL_NAME:${sa_fullname}"
 
@@ -267,7 +278,7 @@ if command -v yq &> /dev/null
                     exit $retVal
                 fi
                 oc cluster-info
-                printf "\nconnected as openshift user ' $(oc whoami) '\n"
+                printf "\nconnected as openshift user ' %s '\n" "$(oc whoami)"
                 echo "since the oc login was successful, continuing."
             else
                 echo "skipping OC login as per parameter --skip-oclogin"
@@ -276,12 +287,11 @@ if command -v yq &> /dev/null
         echo "we did not find yq, so not trying the oc login"
 fi
 
-
-
 VENV_ROOT=${currentpath}/venv
 if [[ ! -d "${VENV_ROOT}" ]]; then
-  python3 -m venv ${VENV_ROOT}
+  python3 -m venv "${VENV_ROOT}"
 fi
+# shellcheck disable=SC1091,SC2086
 source ${VENV_ROOT}/bin/activate
 
 if [[ ${SKIP_PIP_INSTALL} -eq 0 ]]; then
@@ -291,20 +301,26 @@ fi
 
 #Create a unique directory to store the output for current test run
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then
-  mkdir ${TEST_ARTIFACT_DIR}
+  mkdir "${TEST_ARTIFACT_DIR}"
 fi
-case "$(uname -s)" in
+if ! ${SUBFOLDER}; then
+  case "$(uname -s)" in
     Darwin)
-        TEST_ARTIFACT_DIR=$(mktemp -d  ${TEST_ARTIFACT_DIR} -t ${TEST_ARTIFACT_DIR}/ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
+        # shellcheck disable=SC2046
+        TEST_ARTIFACT_DIR=$(mktemp -d  "${TEST_ARTIFACT_DIR}" -t "${TEST_ARTIFACT_DIR}"/ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
          ;;
     Linux)
-        TEST_ARTIFACT_DIR=$(mktemp -d -p ${TEST_ARTIFACT_DIR} -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
+        # shellcheck disable=SC2046
+        TEST_ARTIFACT_DIR=$(mktemp -d -p "${TEST_ARTIFACT_DIR}" -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
         ;;
-esac
+  esac
+fi
+
 
 ./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+# shellcheck disable=SC2116
 exit_status=$(echo $?)
-echo ${exit_status}
+echo "${exit_status}"
 
 # send test artifacts by email
 if ${EMAIL_REPORT}

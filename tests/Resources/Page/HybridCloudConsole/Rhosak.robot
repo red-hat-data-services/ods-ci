@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation   Collection of keywords to interact with RHOSAK
 Library         SeleniumLibrary
-Library         OpenShiftCLI
+Library         OpenShiftLibrary
 Resource        HCCLogin.robot
 Resource        ../Components/Menu.robot
 Resource        ../ODH/ODHDashboard/ODHDashboard.robot
@@ -235,7 +235,7 @@ Clean Up RHOSAK
            END
         END
     END
-    OpenShiftCLI.Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
+    Oc Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Switch Window    title:Red Hat OpenShift Streams for Apache Kafka
     Menu.Navigate To Page    Streams for Apache Kafka    Kafka Instances
     Enter Stream    stream_name=${stream_to_delete}

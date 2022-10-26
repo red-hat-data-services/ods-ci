@@ -3,7 +3,7 @@ Resource    ../../OCPDashboard/DeploymentConfigs/DeploymentConfigs.robot
 Resource    ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 Resource    ../../../Common.robot
 Library     Collections
-Library     OpenShiftCLI
+Library     OpenShiftLibrary
 Library     ../../../../libs/Helpers.py
 
 
@@ -86,7 +86,7 @@ Wait Until JH Deployment Is Ready
     [Documentation]     Wait Until jupyterhub deployment is completed
     [Arguments]   ${retries}=50
     FOR  ${index}  IN RANGE  0  1+${retries}
-        @{JH} =  OpenShiftCLI.Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
+        @{JH} =  Oc Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
         ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
         ${jh_status}=    Run Keyword And Return Status    Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
         Exit For Loop If    $jh_status == True
@@ -105,6 +105,3 @@ Rollout JupyterHub
     Wait Until Rollout Is Started     previous_pods=${current_pods}     namespace=redhat-ods-applications
     ...                               label_selector=app=jupyterhub
     Wait Until JH Deployment Is Ready
-
-
-

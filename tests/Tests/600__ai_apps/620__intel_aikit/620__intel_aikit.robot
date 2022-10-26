@@ -6,7 +6,6 @@ Resource        ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource        ../../../Resources/Page/ODH/AiApps/AiApps.resource
 Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
-Library         OpenShiftCLI
 Suite Setup     Intel_Aikit Suite Setup
 Suite Teardown  Intel_Aikit Suite Teardown
 

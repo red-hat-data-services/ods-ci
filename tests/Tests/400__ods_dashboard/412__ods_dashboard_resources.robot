@@ -1,8 +1,7 @@
 *** Settings ***
-Library           OpenShiftCLI
 Resource          ../../Resources/RHOSi.resource
 Resource          ../../Resources/ODS.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource          ../../Resources/Page/LoginPage.robot
@@ -82,7 +81,12 @@ Verify Quick Starts Work As Expected When Restarting The Previous One
     Open QuickStart Element in Resource Section By Name     ${element}
     ${count}=   Get The Count Of QuickStart Steps
     Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Close
-    Continue QuickStart
+    ${version-check}=  Is RHODS Version Greater Or Equal Than    1.18.0
+    IF    ${version-check} == True
+        Star QuickStart Tour
+    ELSE
+        Continue QuickStart
+    END
     Run Keyword And Continue On Failure     Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
     Close QuickStart From Top     decision=cancel
     Run Keyword And Continue On Failure     Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1

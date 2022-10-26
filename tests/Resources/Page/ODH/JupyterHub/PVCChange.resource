@@ -1,5 +1,6 @@
 *** Settings ***
 Documentation   Set of Keywords for PVC change support
+Library         OpenShiftLibrary
 
 
 *** Keywords ***
@@ -40,14 +41,14 @@ PVC Size Test Teardown
 May Be Delete PVC
     [Documentation]    Delete PVC from openshift
     [Arguments]    ${pvc_name}
-    Run Keyword And Return Status    OpenShiftCLI.Delete    kind=PersistentVolumeClaim
+    Run Keyword And Return Status    Oc Delete    kind=PersistentVolumeClaim
     ...   field_selector=metadata.name==${pvc_name}    namespace=rhods-notebooks
 
 Get Notebook PVC Size
     [Documentation]    Return Notebook PVC size
     [Arguments]  ${username}    ${namespace}
     ${pvc_name}   Get User Notebook PVC Name    ${username}
-    ${data}    OpenShiftCLI.Get  kind=PersistentVolumeClaim  namespace=${namespace}
+    ${data}    Oc Get  kind=PersistentVolumeClaim  namespace=${namespace}
     ...     field_selector=metadata.name==${pvc_name}
     ${size}    Set Variable    ${data[0]['status']['capacity']['storage']}
     ${int_size}   Convert To Integer    ${size}[:-2]
@@ -56,7 +57,7 @@ Get Notebook PVC Size
 May Be Delete Notebook POD
     [Documentation]   Delete Notebook Pod Name based on Name
     [Arguments]     ${namespace}    ${pod_name}
-    Run Keyword And Return Status    OpenShiftCLI.Delete    kind=Pod    namespace=${namespace}
+    Run Keyword And Return Status    Oc Delete    kind=Pod    namespace=${namespace}
     ...    field_selector=metadata.name==${pod_name}
 
 Add User To Dedicated Admin Group

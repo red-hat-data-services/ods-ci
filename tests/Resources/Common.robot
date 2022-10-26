@@ -156,6 +156,16 @@ Skip If RHODS Version Greater Or Equal Than
        Skip If    condition=${version-check}==True    msg=This test is skipped for RHODS ${version} or greater
     END
 
+Skip If RHODS Is Self-Managed
+    [Documentation]    Skips test if RHODS is installed as Self-managed
+    [Arguments]    ${msg}=${EMPTY}
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    "${msg}" != "${EMPTY}"
+       Skip If    condition=${is_self_managed}==True    msg=${msg}
+    ELSE
+       Skip If    condition=${is_self_managed}==True    msg=This test is skipped for Self-managed RHODS
+    END
+
 Get Domain From Current URL
     [Documentation]    Gets the lowest level domain from the current URL (i.e. everything before the first dot in the URL)
     ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console

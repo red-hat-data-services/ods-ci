@@ -1,17 +1,7 @@
 name: dryrun
 
 # Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
-  # push:
-  #   branches: [ "master" ]
-  # pull_request:
-  #   branches: [ "master" ]
-  pull_request_target:
-  # opened: pull request is created
-  # synchronize: commit(s) pushed to the pull request
-  # reopened: closed pull request is reopened
-    types: [opened, synchronize, reopened]
+on: [push, pull_request]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:

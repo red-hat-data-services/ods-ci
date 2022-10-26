@@ -7,6 +7,11 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  pull_request_target:
+  # opened: pull request is created
+  # synchronize: commit(s) pushed to the pull request
+  # reopened: closed pull request is reopened
+    types: [opened, synchronize, reopened]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:

@@ -22,10 +22,6 @@ Validate Model Serving quickstart
 Verify Model Serving Installation
     [Documentation]    Verifies Model Serving resources
     [Tags]    ModelMesh_Serving
-    # Needed for now in RHODS, temporary until included in RHODS
-    # ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
-    # Log    ${label}
-    # Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify odh-model-controller Deployment
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
@@ -78,7 +74,7 @@ Temporary Label MM Namespace
     Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
 
 Verify Openvino Deployment
-    Temporary Label MM Namespace
+    Run Keyword And Continue On Failure  Temporary Label MM Namespace
     @{ovms} =  Oc Get    kind=Pod    namespace=${MODEL_MESH_NAMESPACE}    label_selector=name=modelmesh-serving-ovms-1.x
     ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
     Verify Deployment    ${ovms}  2  5  ${containerNames}
@@ -96,5 +92,5 @@ Delete Model Serving Resources
 Teardown Model Serving
     [Documentation]  delete modelmesh stuff, Temporary until included in RHODS
     # Seems like it's taking 10 minutes to stop reconciling deployments
-    Wait Until Keyword Succeeds  15 min  1 min  Delete Model Serving Resources
+    Wait Until Keyword Succeeds  15 min  15s  Delete Model Serving Resources
     Run    rm -rf modelmesh-serving

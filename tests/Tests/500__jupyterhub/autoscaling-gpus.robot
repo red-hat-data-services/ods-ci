@@ -22,33 +22,28 @@ Verify Number Of Available GPUs Is Correct With Machine Autoscalers
     ...    spawner dropdown is correct; i.e., it should show the maximum
     ...    number of GPUs available in a single node, also taking into account
     ...    nodes that can be autoscaled.
-    [Tags]    Tier2    Resources-GPU-Autoscaling
+    [Tags]    Tier2
     ...       ODS-1820
+    ${autoscale} =  Is GPU Autoscaling Enabled
+    Skip If  not ${autoscale}
     ${maxNo} =    Find Max Number Of GPUs In One MachineSet
     ${maxSpawner} =    Fetch Max Number Of GPUs In Spawner Page
-    Should Be Equal    ${maxSpawner}    ${maxNo}
+    Should Be Equal    ${maxSpawner}    ${maxNo}    msg=Number of GPUs in spawner does not match maximum available in MachineSets
 
-Verify Autoscale Can Be Triggered
+Verify Node Autoscales And Then Scales Down
     [Documentation]    Tries spawning a server requesting 1 GPU, which should
     ...    trigger a node autoscale.
-    [Tags]    Tier2    Resources-GPU-Autoscaling
-    ...       ODS-1821
+    [Tags]    Tier2
+    ...       ODS-1821    ODS-1822
+    ${autoscale} =  Is GPU Autoscaling Enabled
+    Skip If  not ${autoscale}
     Spawn Notebook And Trigger Autoscale
     ${serial} =    Get GPU Serial Number
     ${pod_node} =    Get User Server Node
     Log    ${serial}
     Log    ${pod_node}
-    Set Suite Variable    $NODE    ${pod_node}
     End Web Test
-
-Verify Node Is Scaled Down
-    [Documentation]    After closing down all servers using gpus the node
-    ...    should be scaled down in a reasonable amount of time
-    [Tags]    Tier2    Resources-GPU-Autoscaling
-    ...       ODS-1822
-    ${machine_name} =  Run  oc get Node ${NODE} -o json | jq '.metadata.annotations["machine.openshift.io/machine"]' | awk '{split($0, a, "/"); print a[2]}' | sed 's/"//'
-    ${machineset_name} =  Run  oc get machine ${machine_name} -n openshift-machine-api -o json | jq '.metadata.ownerReferences[0].name' | sed 's/"//g'
-    Wait Until Keyword Succeeds  20 min  30 sec  Verify MachineSet Has Zero Replicas  ${machineset_name}
+    Verify Node Is Scaled Down    ${pod_node}
 
 
 *** Keywords ***
@@ -63,7 +58,7 @@ Spawn Notebook And Trigger Autoscale
     Select Notebook Image    ${NOTEBOOK_IMAGE}
     Select Container Size    Small
     Set Number Of Required GPUs    1
-    Spawn Notebook    spawner_timeout=20 minutes  autoscale=${True}
+    Spawn Notebook    spawner_timeout=20 minutes  expect_autoscaling=${True}
     Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
@@ -78,6 +73,14 @@ Verify MachineSet Has Zero Replicas
     [Arguments]    ${machineset_name}
     ${current_replicas} =  Run  oc get MachineSet ${machineset_name} -n openshift-machine-api -o json | jq '.spec.replicas'
     Should Be Equal As Integers  ${current_replicas}  0
+
+Verify Node Is Scaled Down
+    [Documentation]    After closing down all servers using gpus the node
+    ...    should be scaled down in a reasonable amount of time
+    [Arguments]    ${node}
+    ${machine_name} =  Run  oc get Node ${node} -o json | jq '.metadata.annotations["machine.openshift.io/machine"]' | awk '{split($0, a, "/"); print a[2]}' | sed 's/"//'
+    ${machineset_name} =  Run  oc get machine ${machine_name} -n openshift-machine-api -o json | jq '.metadata.ownerReferences[0].name' | sed 's/"//g'
+    Wait Until Keyword Succeeds  20 min  30 sec  Verify MachineSet Has Zero Replicas  ${machineset_name}
 
 # Autoscaler useful oc commands
 # ALWAYS USE -n openshift-machine-api

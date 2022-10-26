@@ -132,7 +132,9 @@ Get Spawner Environment Variable Value
 
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
-    [Arguments]  ${spawner_timeout}=600 seconds  ${same_tab}=${True}  ${autoscale}=${False}
+    ...    If ${expect_autoscaling} is set to ${True} also expects a "TriggeredScaleUp" message in the
+    ...    spawn modal.
+    [Arguments]  ${spawner_timeout}=600 seconds  ${same_tab}=${True}  ${expect_autoscaling}=${False}
     # TODO: Make sure server spawns in same tab in 1.17+
     # Currently no way to know if option already selected or not
     #${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
@@ -193,7 +195,7 @@ Spawn Notebook
         END
     END
     Wait Until Element Is Visible  xpath://div[@role="progressbar"]
-    IF    ${autoscale}
+    IF    ${expect_autoscaling}
         Wait Until Page Contains    TriggeredScaleUp    timeout=120s
     END
     ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0

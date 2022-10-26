@@ -4,6 +4,7 @@ Library            OpenShiftLibrary
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workspaces.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
+Resource    ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Suite Setup        Project Suite Setup
 # Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
@@ -152,7 +153,12 @@ Verify User Can Start And Launch A Workspace From Projects Home Page
 Verify User Cand Add A S3 Data Connection
     [Tags]    ODS-Z 
     # Create S3 Data Connection
-    # check secret creation
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=S3-test    aws_access_key=access-key-test
+    ...                          aws_secret_access=secret-access    aws_s3_endpoint=s3-endpoint-test    aws_region=us-test-region
+    Data Connection Should Be Listed    name=S3-test    type=Object storage    connected_wrksp=${NONE}
+    Check Corresponding Data Connection Secret Exists    dc_name=S3-test    namespace=${ns_name}
 
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784
@@ -199,3 +205,9 @@ Check Workspace CR Is Deleted
     #     Fail    msg=The notebook CR for ${workspace_title} is still present, while it should have been deleted.        
     # END
 
+Check Corresponding Data Connection Secret Exists
+    [Arguments]     ${dc_name}  ${namespace}
+    ${res}  ${response}=    Get Openshift Secret From Data Connection   dc_name=${dc_name}  namespace=${namespace}
+    IF    "${response}" == "${EMPTY}"
+        Run Keyword And Continue On Failure    Fail    msg=Secret not found for ${dc_name} in ${namespace} NS
+    END

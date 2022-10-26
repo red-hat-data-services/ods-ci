@@ -164,7 +164,7 @@ Delete Workspace
     ELSE
         Click Button    ${WRKSP_DELETE_BTN_XP}
     END
-
+    Wait Until Modal Disappears
 
 Check Launched Workspace Is The Correct One
     [Arguments]     ${workspace_title}      ${image}    ${namespace}

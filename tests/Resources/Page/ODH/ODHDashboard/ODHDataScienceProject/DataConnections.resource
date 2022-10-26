@@ -13,6 +13,7 @@ ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_DEFA
 ${DC_SECTION_XP}=             xpath=//div[div//h4[@id="data-connections"]]
 ${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}/div/button[text()="Add data connection"]
 ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[text()="Add data connection"]
+${DC_DELETE_BTN_XP}=                 xpath=//button[text()="Delete data connection"]
 
 
 *** Keywords ***
@@ -51,3 +52,18 @@ Get Openshift Secret From Data Connection
     [Arguments]     ${dc_name}      ${namespace}
     ${rc}  ${secret_name}=    Run And Return Rc And Output   oc get secret -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${dc_name}")].metadata.name}'
     [Return]    ${rc}    ${secret_name}
+
+Delete Data Connection
+    [Arguments]     ${name}    ${press_cancel}=${FALSE}
+    Click Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
+    Wait Until Page Contains Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete data connection"]
+    Click Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete data connection"]
+    Wait Until Modal Appears
+    Run Keyword And Continue On Failure    Page Should Contain    Confirm data connection delete
+    Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+    ELSE
+        Click Button    ${DC_DELETE_BTN_XP}
+    END
+    Wait Until Modal Disappears

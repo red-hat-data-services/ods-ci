@@ -14,8 +14,6 @@ Test Teardown      Close All Browsers
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project
 ${PRJ_DESCRIPTION}=   ODS-CI DS Project is a test for validating DSG feature
-# ${PRJ_TITLE_2}=   ODS-CI DS Project 2
-# ${PRJ_DESCRIPTION_2}=   ODS-CI DS Project 2 is a test for validating DSG feature
 ${NB_IMAGE}=        Minimal Python
 ${WRKSP_TITLE}=   ODS-CI Workspace 1
 ${WRKSP_DESCRIPTION}=   ODS-CI Workspace 1 is a test workspace using ${NB_IMAGE} image to test DS Projects feature
@@ -27,6 +25,10 @@ ${PV_BASENAME}=         ods-ci-pv
 ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
 # PV size are in GB
 ${PV_SIZE}=         2
+${DC_S3_NAME}=    ods-ci-s3
+${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
+${DC_S3_REGION}=    ods-ci-region
+${DC_S3_TYPE}=    Object storage
 
 
 *** Test Cases ***
@@ -152,13 +154,20 @@ Verify User Can Start And Launch A Workspace From Projects Home Page
 
 Verify User Cand Add A S3 Data Connection
     [Tags]    ODS-Z 
-    # Create S3 Data Connection
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=S3-test    aws_access_key=access-key-test
-    ...                          aws_secret_access=secret-access    aws_s3_endpoint=s3-endpoint-test    aws_region=us-test-region
-    Data Connection Should Be Listed    name=S3-test    type=Object storage    connected_wrksp=${NONE}
-    Check Corresponding Data Connection Secret Exists    dc_name=S3-test    namespace=${ns_name}
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}    aws_access_key=${AWS_ACCESS_KEY_ID}
+    ...                          aws_secret_access=${AWS_SECRET_ACCESS_KEY}    aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
+    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_wrksp=${NONE}
+    Check Corresponding Data Connection Secret Exists    dc_name=${DC_S3_NAME}    namespace=${ns_name}
+
+Verify User Can Delete A Data Connection
+    [Tags]    ODS-ZY
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Delete Data Connection    name=${DC_S3_NAME}   press_cancel=${True}
+    Delete Data Connection    name=${DC_S3_NAME}
+    Check Data Connection Secret Is Deleted    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784
@@ -200,14 +209,21 @@ Check Corresponding Notebook CR Exists
 Check Workspace CR Is Deleted
     [Arguments]    ${workspace_title}   ${namespace}    ${timeout}=10s
     Wait Until Keyword Succeeds    ${timeout}    2s    Check Corresponding Notebook CR Exists   workspace_title=${workspace_title}   namespace=${namespace}
-    # ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists   workspace_title=${workspace_title}   namespace=${namespace}
-    # IF    ${status} == ${TRUE}
-    #     Fail    msg=The notebook CR for ${workspace_title} is still present, while it should have been deleted.        
-    # END
+    ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists   workspace_title=${workspace_title}   namespace=${namespace}
+    IF    ${status} == ${TRUE}
+        Fail    msg=The notebook CR for ${workspace_title} is still present, while it should have been deleted.        
+    END
 
 Check Corresponding Data Connection Secret Exists
     [Arguments]     ${dc_name}  ${namespace}
     ${res}  ${response}=    Get Openshift Secret From Data Connection   dc_name=${dc_name}  namespace=${namespace}
     IF    "${response}" == "${EMPTY}"
         Run Keyword And Continue On Failure    Fail    msg=Secret not found for ${dc_name} in ${namespace} NS
+    END
+
+Check Data Connection Secret Is Deleted
+    [Arguments]    ${dc_name}   ${namespace}    ${timeout}=10s
+    ${status}=      Run Keyword And Return Status    Check Corresponding Data Connection Secret Exists    dc_name=${dc_name}    namespace=${namespace}
+    IF    ${status} == ${TRUE}
+        Fail    msg=The secret for ${dc_name} data connection is still present, while it should have been deleted.        
     END

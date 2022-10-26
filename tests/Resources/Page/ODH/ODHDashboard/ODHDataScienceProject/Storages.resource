@@ -85,3 +85,18 @@ Set Connection Between PV And Workspace
     Click Element                       ${STORAGE_WRKSP_SELECTOR_XP}/button[text()="${wrksp_title}"]
     Wait Until Page Contains Element    ${STORAGE_MOUNT_DIR_INPUT_XP}
     Input Text    ${STORAGE_MOUNT_DIR_INPUT_XP}    ${mount_dir}
+
+Delete Storage
+    [Arguments]     ${name}    ${press_cancel}=${FALSE}
+    Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
+    Wait Until Page Contains Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete workspace"]
+    Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete workspace"]
+    Wait Until Modal Appears
+    Run Keyword And Continue On Failure    Page Should Contain    Confirm storage delete
+    Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+    ELSE
+        Click Button    ${WRKSP_DELETE_BTN_XP}
+    END
+    Wait Until Modal Disappears

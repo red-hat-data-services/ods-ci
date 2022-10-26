@@ -7,7 +7,7 @@ Suite Teardown    Teardown Model Serving
 *** Variables ***
 ${MODEL_MESH_NAMESPACE}=    mesh-test
 ${ODH_NAMESPACE}=    redhat-ods-applications
-${MS_REPO}=    https://github.com/lugi0/modelmesh-serving
+${MS_REPO}=    https://github.com/opendatahub-io/modelmesh-serving
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"example-onnx-mnist__isvc-82e2bf7ea4","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233052,-7.749704,-3.4236808,12.363028,-12.079106,17.26659,-10.570972,0.7130786,3.3217115,1.3621225]}]}
 
 
@@ -23,15 +23,15 @@ Verify Model Serving Installation
     [Documentation]    Verifies Model Serving resources
     [Tags]    ModelMesh_Serving
     # Needed for now in RHODS, temporary until included in RHODS
-    ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
-    Log    ${label}
-    Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
-    Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
-    Wait Until Keyword Succeeds  5 min  10 sec  Verify odh-model-controller Deployment
-    Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
-    Wait Until Keyword Succeeds  5 min  10 sec  Verify Minio Deployment
-    Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
-    Wait Until Keyword Succeeds  5 min  10 sec  Verify Etcd Pod
+    # ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
+    # Log    ${label}
+    # Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify odh-model-controller Deployment
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Minio Deployment
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Etcd Pod
 
 Test Inference
     [Documentation]    Test the inference result
@@ -39,7 +39,7 @@ Test Inference
     # make sure model is being served
     # TODO: find better way to understand when model is being served
     # One option is Triton pods being both 5/5 Ready
-    # Sleep  1m
+    Sleep  10s
     ${MS_ROUTE} =    Run    oc get routes -n ${MODEL_MESH_NAMESPACE} example-onnx-mnist --template={{.spec.host}}{{.spec.path}}
     ${AUTH_TOKEN} =    Run    oc sa new-token user-one -n ${MODEL_MESH_NAMESPACE}
     ${inference_output} =    Run    curl -ks https://${MS_ROUTE}/infer -d @modelmesh-serving/quickstart/input.json -H "Authorization: Bearer ${AUTH_TOKEN}"
@@ -72,17 +72,16 @@ Verify odh-model-controller Deployment
     ${containerNames} =  Create List  manager
     Verify Deployment    ${odh_model_controller}  3  1  ${containerNames}
 
-# Verify Triton Deployment
-#     @{triton} =  Oc Get    kind=Pod    namespace=${MODEL_MESH_NAMESPACE}    label_selector=name=modelmesh-serving-triton-2.x
-#     ${containerNames} =  Create List  rest-proxy  oauth-proxy  triton  triton-adapter  mm
-#     Verify Deployment    ${triton}  2  5  ${containerNames}
-#     ${all_ready} =    Run    oc get deployment -l name=modelmesh-serving-triton-2.x | grep 2/2 -o
-#     Should Be Equal As Strings    ${all_ready}    2/2
+Temporary Label MM Namespace
+    ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
+    Log    ${label}
+    Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
 
 Verify Openvino Deployment
-    @{triton} =  Oc Get    kind=Pod    namespace=${MODEL_MESH_NAMESPACE}    label_selector=name=modelmesh-serving-ovms-1.x
+    Temporary Label MM Namespace
+    @{ovms} =  Oc Get    kind=Pod    namespace=${MODEL_MESH_NAMESPACE}    label_selector=name=modelmesh-serving-ovms-1.x
     ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
-    Verify Deployment    ${triton}  2  5  ${containerNames}
+    Verify Deployment    ${ovms}  2  5  ${containerNames}
     ${all_ready} =    Run    oc get deployment -l name=modelmesh-serving-ovms-1.x | grep 2/2 -o
     Should Be Equal As Strings    ${all_ready}    2/2
 

@@ -7,11 +7,6 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-  pull_request_target:
-  # opened: pull request is created
-  # synchronize: commit(s) pushed to the pull request
-  # reopened: closed pull request is reopened
-    types: [opened, synchronize, reopened]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -20,7 +15,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    permissions: write-all
+    permissions: read-all|write-all
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

@@ -1,10 +1,10 @@
 *** Settings ***
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
-Resource       ./Workspaces.resource
+Resource       ./Workbenches.resource
 
 *** Variables ***
-${DS_PROJECT_XP}=     //h1[text()="Data science projects"]
+${DS_PROJECT_XP}=     xpath=//h1[text()="Data science projects"]
 ${TITLE_INPUT_XP}=    xpath=//input[@id="test"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="test"]
 # ${TITLE_INPUT_XP}=    xpath=//input[@aria-label="Project name"]
@@ -28,7 +28,7 @@ Open Data Science Projects Home Page
 
 Is Data Science Projects Page Open
     Close Generic Modal If Present
-    ${page_open}=   Run Keyword And Return Status   Page Should Contain     ${DS_PROJECT_XP}
+    ${page_open}=   Run Keyword And Return Status   Page Should Contain Element     ${DS_PROJECT_XP}
     [Return]    ${page_open}
 
 Open Data Science Project Details Page
@@ -161,7 +161,7 @@ Stop Workspace From Projects Home Page
     [Documentation]    Trigger the workbench "stop" process from DS Projects home page.
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
     ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
-    [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}
+    [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}    ${press_cancel}=${FALSE}
     ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
@@ -171,6 +171,7 @@ Stop Workspace From Projects Home Page
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workspace    workbench_title=${workbench_title}    namespace=${namespace}
         END
         Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
+        Handle Stop Workspace Confirmation Modal    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is not running.
     END

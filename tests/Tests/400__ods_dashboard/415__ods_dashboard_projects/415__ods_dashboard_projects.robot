@@ -19,7 +19,7 @@ ${WORKBENCH_TITLE}=   ODS-CI Workspace 1
 ${WORKBENCH_DESCRIPTION}=   ODS-CI Workspace 1 is a test workbench using ${NB_IMAGE} image to test DS Projects feature
 ${WORKBENCH_2_TITLE}=   ODS-CI Workspace 2
 ${WORKBENCH_2_DESCRIPTION}=   ODS-CI Workspace 2 is a test workbench using ${NB_IMAGE} image to test DS Projects feature
-${WORKBENCH_3_TITLE}=   ODS-CI Workspace 2
+${WORKBENCH_3_TITLE}=   ODS-CI Workspace 3
 ${WORKBENCH_3_DESCRIPTION}=   ODS-CI Workspace 3 is a test workbench using ${NB_IMAGE} image to test DS Projects feature
 ${PV_BASENAME}=         ods-ci-pv
 ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
@@ -173,18 +173,17 @@ Verify User Can Delete A Persistent Storage
     Storage Should Not Be Listed    name=${pv_name}
     Check Storage PersistentVolumeClaim Is Deleted    storage_name=${pv_name}    namespace=${ns_name}
 
-
 Verify User Cand Add A S3 Data Connection
-    [Tags]    ODS-Z 
+    [Tags]    ODS-1825
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}    aws_access_key=${AWS_ACCESS_KEY_ID}
-    ...                          aws_secret_access=${AWS_SECRET_ACCESS_KEY}    aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}    aws_access_key=${S3.AWS_ACCESS_KEY_ID}
+    ...                          aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}    aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${NONE}
     Check Corresponding Data Connection Secret Exists    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
 Verify User Can Delete A Data Connection
-    [Tags]    ODS-ZY
+    [Tags]    ODS-1826
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Delete Data Connection    name=${DC_S3_NAME}   press_cancel=${True}

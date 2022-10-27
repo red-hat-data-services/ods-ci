@@ -6,6 +6,7 @@ Resource       Projects.resource
 
 *** Variables ***
 ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
+# ${WORKBENCH_CREATE_BTN_2_XP}=           xpath=//footer/button[text()="Create workbench"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
 ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//button[@aria-label="Options menu"]
@@ -16,7 +17,7 @@ ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting...
 ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"]
-${WORKBENCH_DELETE_BTN_XP}=                 xpath=//button[text()="Delete notebook"]
+${WORKBENCH_DELETE_BTN_XP}=                 xpath=//button[text()="Delete workbench"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
 
@@ -29,10 +30,10 @@ Create Workspace
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}   ${press_cancel}=${FALSE}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
-    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
+    Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_XP}
     Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}
     Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
-    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
+    Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_XP}
     Select Workspace Jupyter Image    image_name=${image_name}
     ## Select Workspace Container Size # to fix, by default Small is already select
     IF    "${storage}" == "Persistent"
@@ -51,8 +52,8 @@ Create Workspace
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
-        Click Button    ${GENERIC_CREATE_BTN_XP}
+        Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_XP}
+        Click Button    ${WORKBENCH_CREATE_BTN_XP}
     END
     Wait Until Modal Disappears
     Wait Until Project Is Open    project_title=${prj_title}
@@ -126,21 +127,34 @@ Stop Workspace
     IF    ${is_started} == ${TRUE}
         Click Element       xpath=//tr[td/h4[text()="${workbench_title}"]]/td/label/span[@class="pf-c-switch__toggle"]
         Wait Until Modal Appears
-        Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
-        Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
-        Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your workbench
-        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
-        Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
-        Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
-        IF    ${press_cancel} == ${TRUE}
-            Click Button    ${GENERIC_CANCEL_BTN_XP}
-        ELSE
-            Click Button    ${WORKBENCH_STOP_BTN_XP}
-        END
-        
-
+        Hanlde Stop Workspace Confirmation Modal    press_cancel=${press_cancel} 
+        # Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
+        # Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
+        # Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your workbench
+        # Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
+        # Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
+        # Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
+        # IF    ${press_cancel} == ${TRUE}
+        #     Click Button    ${GENERIC_CANCEL_BTN_XP}
+        # ELSE
+        #     Click Button    ${WORKBENCH_STOP_BTN_XP}
+        # END
     ELSE
         Fail   msg=Cannot stop workbench ${workbench_title} because it is not running...
+    END
+
+Handle Stop Workspace Confirmation Modal
+    [Arguments]    ${press_cancel}=${FALSE}
+    Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
+    Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
+    Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your workbench
+    Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
+    Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
+    Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+    ELSE
+        Click Button    ${WORKBENCH_STOP_BTN_XP}
     END
 
 Delete Workspace

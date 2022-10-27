@@ -4,7 +4,7 @@ Library            OpenShiftLibrary
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
-Resource    ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Suite Setup        Project Suite Setup
 # Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
@@ -55,16 +55,15 @@ Verify User Can Create And Start A Workspace With Ephimeral Storage
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workspace    workbench_title=${EMPTY}  workbench_description=${EMPTY}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
-    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  start=${FALSE}  press_cancel=${TRUE}
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  press_cancel=${TRUE}
     Create Workspace    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
-    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  start=${FALSE}
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Workspace Should Be Listed      workbench_title=${WORKBENCH_TITLE}
-    Workspace Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
-    
+    Workspace Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
+    # the continue on failure should be temporary
+    Run Keyword And Continue On Failure    Wait Until Workspace Is Started     workbench_title=${WORKBENCH_3_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
-    Start Workspace     workbench_title=${WORKBENCH_TITLE}
-    Workspace Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_RUNNING}
 
 Verify User Can Create A PV Storage
     [Tags]    ODS-1819
@@ -79,8 +78,6 @@ Verify User Can Create A PV Storage
     ...                         type=Persistent storage    connected_workbench=${workbenchs}
     Storage Size Should Be    name=${PV_BASENAME}-A    namespace=${ns_name}  size=${PV_SIZE}
 
-
-
 Verify User Can Create And Start A Workspace With Existent PV Storage
     [Tags]    ODS-1814
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -88,11 +85,10 @@ Verify User Can Create And Start A Workspace With Existent PV Storage
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}    project_title=${PRJ_TITLE}
     Create Workspace    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${TRUE}   
-    ...                 pv_name=${PV_BASENAME}-existent  pv_description=${NONE}  pv_size=${NONE}  start=${TRUE}
+    ...                 pv_name=${PV_BASENAME}-existent  pv_description=${NONE}  pv_size=${NONE}
     Workspace Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     Workspace Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Wait Until Workspace Is Started     workbench_title=${WORKBENCH_2_TITLE}
-    # Workspace Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_2_TITLE}   namespace=${ns_name}
 
@@ -102,7 +98,7 @@ Verify User Can Create And Start A Workspace Adding A New PV Storage
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workspace    workbench_title=${WORKBENCH_3_TITLE}  workbench_description=${WORKBENCH_3_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${FALSE}
-    ...                 pv_name=${PV_BASENAME}-new  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}  start=${TRUE}
+    ...                 pv_name=${PV_BASENAME}-new  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workspace Should Be Listed      workbench_title=${WORKBENCH_3_TITLE}
     Reload Page
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
@@ -117,6 +113,13 @@ Verify User Can Create And Start A Workspace Adding A New PV Storage
     ...                         type=Persistent storage    connected_workbench=${connected_woksps}
     Storage Size Should Be    name=${PV_BASENAME}-new    namespace=${ns_name}  size=${PV_SIZE}
 
+Verify User Can Stop A Workspace
+    [Tags]    ODS-1817
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Stop Workspace    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
+    Stop Workspace    workbench_title=${WORKBENCH_TITLE}
+    # add checks on notebook pod is terminated
+
 Verify User Can Launch A Workspace
     [Tags]    ODS-1815
     Open Data Science Projects Home Page
@@ -126,13 +129,6 @@ Verify User Can Launch A Workspace
     Launch Workspace    workbench_title=${WORKBENCH_TITLE}
     Check Launched Workspace Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
     Switch Window      Open Data Hub
-
-Verify User Can Stop A Workspace
-    [Tags]    ODS-1817
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Stop Workspace    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
-    Stop Workspace    workbench_title=${WORKBENCH_TITLE}
-    # add checks on notebook pod is terminated
 
 Verify User Can Start And Launch A Workspace From Projects Home Page
     [Tags]    ODS-1818

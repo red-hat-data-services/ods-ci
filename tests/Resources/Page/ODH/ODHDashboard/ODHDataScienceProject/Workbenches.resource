@@ -19,7 +19,6 @@ ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"
 ${WORKBENCH_DELETE_BTN_XP}=                 xpath=//button[text()="Delete notebook"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
-${WORKBENCH_CREATE_START_BTN_XP}=     xpath=//button[text()="Create and start"]
 
 
 *** Keywords ***
@@ -27,8 +26,7 @@ Create Workspace
     [Documentation]     Creates a new workbench in a Data Science project. It assumes
     ...                 the DS Project deta
     [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
-    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}  ${start}=${FALSE}
-    ...             ${press_cancel}=${FALSE}
+    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}   ${press_cancel}=${FALSE}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
@@ -53,13 +51,8 @@ Create Workspace
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        IF    ${start} == ${TRUE}
-            Wait Until Element Is Enabled    ${WORKBENCH_CREATE_START_BTN_XP}
-            Click Button    ${WORKBENCH_CREATE_START_BTN_XP}
-        ELSE
-            Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
-            Click Button    ${GENERIC_CREATE_BTN_XP}
-        END
+        Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
+        Click Button    ${GENERIC_CREATE_BTN_XP}
     END
     Wait Until Modal Disappears
     Wait Until Project Is Open    project_title=${prj_title}

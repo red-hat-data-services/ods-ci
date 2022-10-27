@@ -58,3 +58,34 @@ Get GPU Serial Number
     [Documentation]    Returns GPU Serial Number attached to server
     ${serial_no} =    Run Cell And Get Output    !nvidia-smi -q | grep "Serial Number" | awk '{split($0,a,": "); print a[2]}'
     [Return]    ${serial_no}
+
+Find Max Number Of GPUs In One MachineSet
+    [Documentation]    Returns the max number of GPUs present in a single MachineSet
+    ${max_gpus} =    Set Variable    ${0}
+    @{machinesets} =    Get MachineSets
+    FOR    ${ms}    IN    @{machinesets}
+        ${ms_gpu_num} =    Run    oc get MachineSet ${ms} -n openshift-machine-api -o json | jq '.metadata.annotations["machine.openshift.io/GPU"]' | sed 's/"//g'
+        ${ms_gpu_num} =    Convert To Integer    ${ms_gpu_num}
+        IF  ${ms_gpu_num} > ${max_gpus}
+            ${max_gpus} =    Set Variable    ${ms_gpu_num}
+        END
+    END
+    [Return]    ${max_gpus}
+
+Is GPU Autoscaling Enabled
+    [Documentation]    Returns ${True} if a machine autoscaler with gpu nodes is found
+    ${autoscaling_enabled} =  Set Variable  ${False}
+    @{machinesets} =    Get MachineSets
+    FOR    ${ms}    IN    @{machinesets}
+        ${ms_gpu_num} =    Run    oc get MachineSet ${ms} -n openshift-machine-api -o json | jq '.metadata.annotations["machine.openshift.io/GPU"]' | sed 's/"//g'
+        ${ms_gpu_num} =    Convert To Integer    ${ms_gpu_num}
+        IF  ${ms_gpu_num} > 0
+            ${autoscaler} =  Run    oc get MachineSet ${ms} -n openshift-machine-api -o json | jq '.metadata.annotations["autoscaling.openshift.io/machineautoscaler"]'
+            # Cannot compare directly since one of the values could be `null`
+            ${autoscaler_status} =  Run Keyword And Return Status  Should Not Be Equal As Strings  ${autoscaler}  null
+            IF  ${autoscaler_status}
+                ${autoscaling_enabled} =  Set Variable  ${True}
+            END
+        END
+    END
+    [Return]    ${autoscaling_enabled}

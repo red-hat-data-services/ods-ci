@@ -67,25 +67,28 @@ Verify User Can Create And Start A Workspace With Ephimeral Storage
 
 Verify User Can Create A PV Storage
     [Tags]    ODS-1819
+    ${pv_name}=    Set Variable    ${PV_BASENAME}-A
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenchs}=    Create Dictionary    ${WORKBENCH_TITLE}=mount-data
-    Create PersistenVolume Storage    name=${PV_BASENAME}-A    description=${PV_DESCRIPTION}
+    Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}     press_cancel=${TRUE}    project_title=${PRJ_TITLE}
-    Create PersistenVolume Storage    name=${PV_BASENAME}-A    description=${PV_DESCRIPTION}
+    Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${workbenchs}   project_title=${PRJ_TITLE}
-    Storage Should Be Listed    name=${PV_BASENAME}-A    description=${PV_DESCRIPTION}
+    Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${workbenchs}
-    Storage Size Should Be    name=${PV_BASENAME}-A    namespace=${ns_name}  size=${PV_SIZE}
+    Check Corresponding PersistentVolumeClaim Exists    storage_name=${pv_name}    namespace=${ns_name}
+    Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Create And Start A Workspace With Existent PV Storage
     [Tags]    ODS-1814
+    ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create PersistenVolume Storage    name=${PV_BASENAME}-existent    description=${PV_DESCRIPTION}
+    Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}    project_title=${PRJ_TITLE}
     Create Workspace    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${TRUE}   
-    ...                 pv_name=${PV_BASENAME}-existent  pv_description=${NONE}  pv_size=${NONE}
+    ...                 pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
     Workspace Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     Workspace Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Wait Until Workspace Is Started     workbench_title=${WORKBENCH_2_TITLE}
@@ -94,11 +97,12 @@ Verify User Can Create And Start A Workspace With Existent PV Storage
 
 Verify User Can Create And Start A Workspace Adding A New PV Storage
     [Tags]    ODS-1816
+    ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workspace    workbench_title=${WORKBENCH_3_TITLE}  workbench_description=${WORKBENCH_3_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${FALSE}
-    ...                 pv_name=${PV_BASENAME}-new  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
+    ...                 pv_name=${pv_name}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workspace Should Be Listed      workbench_title=${WORKBENCH_3_TITLE}
     Reload Page
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
@@ -109,16 +113,16 @@ Verify User Can Create And Start A Workspace Adding A New PV Storage
     Reload Page
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     ${connected_woksps}=    Create List    ${WORKBENCH_3_TITLE}
-    Storage Should Be Listed    name=${PV_BASENAME}-new    description=${PV_DESCRIPTION}
+    Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${connected_woksps}
-    Storage Size Should Be    name=${PV_BASENAME}-new    namespace=${ns_name}  size=${PV_SIZE}
+    Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Stop A Workspace
     [Tags]    ODS-1817
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Stop Workspace    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
     Stop Workspace    workbench_title=${WORKBENCH_TITLE}
-    # add checks on notebook pod is terminated
+    # add checks on notebook pod is terminated but CR is present
 
 Verify User Can Launch A Workspace
     [Tags]    ODS-1815
@@ -129,6 +133,15 @@ Verify User Can Launch A Workspace
     Launch Workspace    workbench_title=${WORKBENCH_TITLE}
     Check Launched Workspace Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
     Switch Window      Open Data Hub
+
+Verify User Can Stop A Workspace From Projects Home Page
+    [Tags]    ODS-1823
+    Open Data Science Projects Home Page
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workspace    workbench_title=${WORKBENCH_TITLE}    namespace=${ns_name}
+    Stop Workspace From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}  workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
+    Workbench Launch Link Should Be Disabled    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
+    # add checks on notebook pod is terminated but CR is present
 
 Verify User Can Start And Launch A Workspace From Projects Home Page
     [Tags]    ODS-1818
@@ -147,6 +160,19 @@ Verify User Can Start And Launch A Workspace From Projects Home Page
     Delete Workspace    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
     Delete Workspace    workbench_title=${WORKBENCH_TITLE}
     Check Workspace CR Is Deleted    workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
+
+Verify User Can Delete A Persistent Storage
+    [Tags]    ODS-1824
+    ${pv_name}=    Set Variable    ${PV_BASENAME}-TO-DELETE
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
+    ...                               size=${PV_SIZE}    connected_workbench=${NONE}   project_title=${PRJ_TITLE}
+    Delete Storage    name=${pv_name}    press_cancel=${TRUE}
+    Delete Storage    name=${pv_name}    press_cancel=${FALSE}
+    Storage Should Not Be Listed    name=${pv_name}
+    Check Storage PersistentVolumeClaim Is Deleted    storage_name=${pv_name}    namespace=${ns_name}
+
 
 Verify User Cand Add A S3 Data Connection
     [Tags]    ODS-Z 
@@ -222,4 +248,18 @@ Check Data Connection Secret Is Deleted
     ${status}=      Run Keyword And Return Status    Check Corresponding Data Connection Secret Exists    dc_name=${dc_name}    namespace=${namespace}
     IF    ${status} == ${TRUE}
         Fail    msg=The secret for ${dc_name} data connection is still present, while it should have been deleted.        
+    END
+
+Check Corresponding PersistentVolumeClaim Exists
+    [Arguments]     ${storage_name}  ${namespace}
+    ${res}  ${response}=    Get Openshift PVC From Storage   name=${storage_name}  namespace=${namespace}
+    IF    "${response}" == "${EMPTY}"
+        Run Keyword And Continue On Failure    Fail    msg=PVC not found for ${storage_name} in ${namespace} NS
+    END
+
+Check Storage PersistentVolumeClaim Is Deleted
+    [Arguments]    ${storage_name}   ${namespace}    ${timeout}=10s
+    ${status}=      Run Keyword And Return Status    Check Corresponding PersistentVolumeClaim Exists    storage_name=${storage_name}    namespace=${namespace}
+    IF    ${status} == ${TRUE}
+        Fail    msg=The PVC for ${storage_name} storage is still present, while it should have been deleted.        
     END

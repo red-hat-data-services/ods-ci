@@ -29,6 +29,17 @@ Storage Should Be Listed
         END
     END
 
+Storage Should Not Be Listed
+    [Arguments]     ${name}   ${connected_workbench}=${NONE}
+    Run keyword And Continue On Failure     Page Should Not Contain Element    xpath=//tr[td/h4[text()="${name}"]]
+    IF    "${connected_workbench}" == "${NONE}"
+        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td[text()="No connections"]
+    ELSE
+        FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
+            Log    ${index}: ${workbench_title}
+            Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td/ul/li[text()="${workbench_title}"]
+        END
+    END
 Storage Size Should Be
     [Documentation]        https://kubernetes.io/docs/reference/kubectl/jsonpath/
     [Arguments]     ${name}      ${size}    ${namespace}
@@ -100,3 +111,8 @@ Delete Storage
         Click Button    ${WORKBENCH_DELETE_BTN_XP}
     END
     Wait Until Modal Disappears
+
+Get Openshift PVC From Storage 
+    [Arguments]     ${name}      ${namespace}
+    ${rc}  ${pvc_name}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].metadata.name}'
+    [Return]    ${rc}    ${pvc_name}

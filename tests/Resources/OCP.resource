@@ -58,3 +58,11 @@ Is RHODS Self-Managed
     ...                                                      name=self-managed-rhods
     ...                                                      namespace=openshift-marketplace
     [Return]    ${is_self_managed}
+
+Get MachineSets
+    [Documentation]    Returns a list of machinesets names
+    ${machine_sets_oc} =    Run    oc get machinesets -n openshift-machine-api | awk '{split($0,a); print a[1]}'
+    @{machinesets} =    Split To Lines    ${machine_sets_oc}
+    ${tmp} =    Remove From List    ${machinesets}    0
+    Should Be Equal As Strings    ${tmp}    NAME
+    [Return]    @{machinesets}

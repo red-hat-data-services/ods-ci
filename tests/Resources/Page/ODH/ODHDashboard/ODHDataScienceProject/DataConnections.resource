@@ -18,7 +18,7 @@ ${DC_DELETE_BTN_XP}=                 xpath=//button[text()="Delete data connecti
 
 *** Keywords ***
 Create S3 Data Connection
-    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    ${aws_s3_endpoint}    ${aws_region}    ${connected_wrksp}=${NONE}    ${press_cancel}=${FALSE}    
+    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    ${aws_s3_endpoint}    ${aws_region}    ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    
     Click Button    ${DC_ADD_BTN_1_XP} 
     Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
     Input Text    ${S3_NAME_DC_INPUT_XP}    ${dc_name}
@@ -36,15 +36,15 @@ Create S3 Data Connection
     Wait Until Project Is Open    project_title=${project_title}
 
 Data Connection Should Be Listed
-    [Arguments]     ${name}   ${type}   ${connected_wrksp}
+    [Arguments]     ${name}   ${type}   ${connected_workbench}
     Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//td/h4[text()="${name}"]
     Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[text()=" ${type}"]
-    IF    "${connected_wrksp}" == "${NONE}"
+    IF    "${connected_workbench}" == "${NONE}"
         Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[text()="No connections"]
     ELSE
-        FOR    ${index}    ${wrksp_title}    IN ENUMERATE    @{connected_wrksp}
-            Log    ${index}: ${wrksp_title}
-            Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td/ul/li[text()="${wrksp_title}"]
+        FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
+            Log    ${index}: ${workbench_title}
+            Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td/ul/li[text()="${workbench_title}"]
         END
     END
 

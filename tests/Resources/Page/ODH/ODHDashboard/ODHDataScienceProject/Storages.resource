@@ -10,22 +10,22 @@ ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-de
 ${STORAGE_SIZE_INPUT_XP}=         xpath=//div/input[@aria-label="Input"]
 ${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@aria-label="mount-path-folder-value"]
-${STORAGE_WRKSP_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
+${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
 ${STORAGE_ADD_BTN_1_XP}=           xpath=//div[div/h4[@id="storages"]]/div/button[text()="Add storage"]
 ${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[contains(text(), "Add")]
 
 *** Keywords ***
 Storage Should Be Listed
-    [Arguments]     ${name}   ${description}   ${type}   ${connected_wrksp}
+    [Arguments]     ${name}   ${description}   ${type}   ${connected_workbench}
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/h4[text()="${name}"]
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/p[text()="${description}"]
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td/p[text()=" ${type}"]
-    IF    "${connected_wrksp}" == "${NONE}"
+    IF    "${connected_workbench}" == "${NONE}"
         Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td[text()="No connections"]
     ELSE
-        FOR    ${index}    ${wrksp_title}    IN ENUMERATE    @{connected_wrksp}
-            Log    ${index}: ${wrksp_title}
-            Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td/ul/li[text()="${wrksp_title}"]
+        FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
+            Log    ${index}: ${workbench_title}
+            Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td/ul/li[text()="${workbench_title}"]
         END
     END
 
@@ -43,9 +43,9 @@ Storage Size Should Be
     Run keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
 
 Create PersistenVolume Storage
-    [Arguments]    ${project_title}    ${name}    ${description}    ${size}    ${connected_wrksp}=${NONE}    ${press_cancel}=${FALSE}
+    [Arguments]    ${project_title}    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}
     Click Button    ${STORAGE_ADD_BTN_1_XP}
-    Fill In New PV Data    ${name}    ${description}    ${size}    ${connected_wrksp}
+    Fill In New PV Data    ${name}    ${description}    ${size}    ${connected_workbench}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE    
@@ -56,7 +56,7 @@ Create PersistenVolume Storage
     Wait Until Project Is Open    project_title=${project_title}
 
 Fill In New PV Data
-    [Arguments]    ${name}    ${description}    ${size}    ${connected_wrksp}=${NONE}
+    [Arguments]    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
@@ -67,36 +67,36 @@ Fill In New PV Data
             Click Element    ${STORAGE_SIZE_PLUS_BTN_XP}
         END        
     END
-    IF    "${connected_wrksp}" == "${NONE}"
-        Log    msg=you are not connecting any workspaces to ${name} PV
+    IF    "${connected_workbench}" == "${NONE}"
+        Log    msg=you are not connecting any workbenchs to ${name} PV
     ELSE
         Run Keyword And Continue On Failure    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
-        FOR    ${wrksp_title}    IN    @{connected_wrksp}
-            ${mount_dir}=    Set Variable    ${connected_wrksp}[${wrksp_title}]
-            Set Connection Between PV And Workspace    ${wrksp_title}    ${mount_dir}
+        FOR    ${workbench_title}    IN    @{connected_workbench}
+            ${mount_dir}=    Set Variable    ${connected_workbench}[${workbench_title}]
+            Set Connection Between PV And Workspace    ${workbench_title}    ${mount_dir}
         END
     END
     
 Set Connection Between PV And Workspace
-    [Arguments]    ${wrksp_title}    ${mount_dir}
+    [Arguments]    ${workbench_title}    ${mount_dir}
     Wait Until Element Is Enabled    xpath=//button[@aria-label="Options menu"]
     Click Element    xpath=//button[@aria-label="Options menu"]
-    Wait Until Page Contains Element    ${STORAGE_WRKSP_SELECTOR_XP}/button[text()="${wrksp_title}"]
-    Click Element                       ${STORAGE_WRKSP_SELECTOR_XP}/button[text()="${wrksp_title}"]
+    Wait Until Page Contains Element    ${STORAGE_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
+    Click Element                       ${STORAGE_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
     Wait Until Page Contains Element    ${STORAGE_MOUNT_DIR_INPUT_XP}
     Input Text    ${STORAGE_MOUNT_DIR_INPUT_XP}    ${mount_dir}
 
 Delete Storage
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
     Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete workspace"]
-    Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete workspace"]
+    Wait Until Page Contains Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete storage"]
+    Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete storage"]
     Wait Until Modal Appears
     Run Keyword And Continue On Failure    Page Should Contain    Confirm storage delete
     Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Click Button    ${WRKSP_DELETE_BTN_XP}
+        Click Button    ${WORKBENCH_DELETE_BTN_XP}
     END
     Wait Until Modal Disappears

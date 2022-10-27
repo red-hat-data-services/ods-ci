@@ -133,42 +133,42 @@ Delete All Data Science Projects From CLI
     END
 
 Workspace Status Should Be From Projects Home Page
-    [Arguments]     ${workspace_title}      ${status}    ${project_title}
+    [Arguments]     ${workbench_title}      ${status}    ${project_title}
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
-    ${_}  ${workspace_cr_name}=       Get Openshift Notebook CR From Workspace    workspace_title=${workspace_title}    namespace=${namespace}
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workspace_cr_name}"]/span[text()="${status}"]
+    ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workspace    workbench_title=${workbench_title}    namespace=${namespace}
+    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[text()="${status}"]
 
 Start Workspace From Projects Home Page
-    [Documentation]    Trigger the workspace "start" process from DS Projects home page.
-    ...                It needs ${workspace_title} and ${project_title} at least. If ${namespace} and/or
-    ...                ${workspace_cr_name} are given too, the kw spares one or two calls to openshift API server
-    [Arguments]     ${workspace_title}    ${project_title}   ${namespace}=${EMPTY}    ${workspace_cr_name}=${EMPTY}
-    ${is_stopped}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workspace_title=${workspace_title}   status=${WRKSP_STATUS_STOPPED}    project_title=${project_title}
+    [Documentation]    Trigger the workbench "start" process from DS Projects home page.
+    ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
+    ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
+    [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}
+    ${is_stopped}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}    project_title=${project_title}
     IF    ${is_stopped} == ${TRUE}
-        IF    "${workspace_cr_name}" == "${EMPTY}"
+        IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
                 ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
             END
-                ${_}    ${workspace_cr_name}=       Get Openshift Notebook CR From Workspace    workspace_title=${workspace_title}    namespace=${namespace}
+                ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workspace    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        # Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workspace_cr_name}"]/input[@id="${workspace_cr_name}"]
-        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workspace_cr_name}"]/span[@class="pf-c-switch__toggle"]
+        # Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/input[@id="${workbench_cr_name}"]
+        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
     ELSE
-        Fail     msg=Cannot start ${workspace_title} workspace because it is not stopped.
+        Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
-    Wait Until Workspace Is Started From Projects Home Page     workspace_title=${workspace_title}   project_title=${project_title}
+    Wait Until Workspace Is Started From Projects Home Page     workbench_title=${workbench_title}   project_title=${project_title}
 
 Wait Until Workspace Is Started From Projects Home Page
-    [Arguments]     ${workspace_title}   ${project_title}   ${timeout}=30s
-    Wait Until Keyword Succeeds    ${timeout}    5s      Workspace Status Should Be From Projects Home Page      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}   project_title=${project_title}
+    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
 
 Launch Workspace From Projects Home Page
-    [Arguments]     ${workspace_title}    ${project_title}
+    [Arguments]     ${workbench_title}    ${project_title}
     Open Data Science Projects Home Page
-    ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workspace_title=${workspace_title}   status=${WRKSP_STATUS_RUNNING}    project_title=${project_title}
+    ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workspace_title}"]
+        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
         Access To Workspace
     ELSE
-        Fail   msg=Cannot launch workspace ${workspace_title} because it is not running...
+        Fail   msg=Cannot launch workbench ${workbench_title} because it is not running...
     END

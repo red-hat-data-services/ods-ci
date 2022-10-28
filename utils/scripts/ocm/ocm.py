@@ -74,6 +74,8 @@ class OpenshiftClusterManager:
         self.osd_major_version = args.get("osd_major_version")
         self.osd_latest_version_data = args.get("osd_latest_version_data")
         self.new_run = args.get("new_run")
+        self.upadte_ocm_channel_json = args.get("upadte_ocm_channel_json")
+        self.update_policies_json = args.get("update_policies_json")
         self.service_account_file = "create_gcp_sa_json.json"
         ocm_env = glob.glob(dir_path + "/../../../ocm.json.*")
         if ocm_env != []:
@@ -1166,6 +1168,31 @@ class OpenshiftClusterManager:
         log.info("File is updated to : {} ".format(old_data))
 
 
+    def change_cluster_channel_group(self):
+        """update the channel using ocm cmd"""
+        cluster_id = self.get_osd_cluster_id()
+        run_change_channel_cmd = (
+            "ocm patch /api/clusters_mgmt/v1/clusters/{}"
+            " --body {}".format(cluster_id, self.upadte_ocm_channel_json))
+        log.info(run_change_channel_cmd)
+        ret = execute_command(run_change_channel_cmd)
+        if ret is None:
+            log.info("Failed  to Update the channel")
+            return ret
+
+    def update_ocm_policy(self):
+        """upadte cluster policy to schedule for upgrade osd"""
+        cluster_id = self.get_osd_cluster_id()
+        log.info(self.get_osd_cluster_id())
+        schedule_cluster_upgrade = (
+            "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"
+            " --body {}".format(cluster_id, self.update_policies_json))
+        ret = execute_command(schedule_cluster_upgrade)
+        if ret is None:
+            log.info("Failed  to Update the Upgrade Policy")
+            return ret
+
+
 if __name__ == "__main__":
 
     # Instance for OpenshiftClusterManager Class
@@ -1185,6 +1212,55 @@ if __name__ == "__main__":
 
     subparsers = parser.add_subparsers(
         title="Available sub commands", help="Available sub commands"
+    )
+    # Argument of update_ocm_channel
+    update_ocm_policy = subparsers.add_parser(
+        "update_ocm_policy",
+        help="Parser to get osd chnages in json file",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    update_ocm_policy.add_argument(
+        "--update-policies-json",
+        help="pass the json file to update ocm policy",
+        action="store",
+        dest="update_policies_json",
+        required=True,
+    )
+    update_ocm_policy.add_argument(
+        "--cluster-name",
+        help="osd cluster name",
+        action="store",
+        dest="cluster_name",
+        metavar="",
+        default="osd-qe-1",
+    )
+    update_ocm_policy.set_defaults(
+        func=ocm_obj.update_ocm_policy
+    )
+
+    # Argument of update_ocm_channel
+    update_ocm_channel = subparsers.add_parser(
+        "update_ocm_channel",
+        help="Parser to get osd chnages in json file",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    update_ocm_channel.add_argument(
+        "--update-ocm-channel-json",
+        help="pass json file to update ocm channel",
+        action="store",
+        dest="upadte_ocm_channel_json",
+        required=True,
+    )
+    update_ocm_channel.add_argument(
+        "--cluster-name",
+        help="osd cluster name",
+        action="store",
+        dest="cluster_name",
+        metavar="",
+        default="osd-qe-1",
+    )
+    update_ocm_channel.set_defaults(
+        func=ocm_obj.change_cluster_channel_group
     )
 
     # Argument parsers for get ods_latest version

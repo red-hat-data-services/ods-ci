@@ -1,6 +1,7 @@
 import os
 import argparse
 import re
+import ast
 import subprocess
 import shutil
 import yaml
@@ -1180,10 +1181,33 @@ class OpenshiftClusterManager:
             log.info("Failed  to Update the channel")
             return ret
 
+
     def update_ocm_policy(self):
         """upadte cluster policy to schedule for upgrade osd"""
         cluster_id = self.get_osd_cluster_id()
-        log.info(self.get_osd_cluster_id())
+        utc_time_cmd = (
+            ''' oc debug node/"$(oc get nodes | awk 'FNR == 2 {print $1}')"\
+         -- chroot /host date -d '+7 min' -u '+%Y-%m-%dT%H:%M:%SZ' ''')
+
+        utc_time = execute_command(utc_time_cmd)
+        data = read_data_from_json(self.update_policies_json)
+        data["next_run"] = utc_time.replace("\n", "")
+
+        if data["version"] == "latest":
+            get_latest_upgradte_version = (
+                "ocm get cluster {} |"
+                " jq -r '.version.available_upgrades | values'".format(
+                    cluster_id))
+            latest_upgrade_version = execute_command(
+                get_latest_upgradte_version)
+            log.info("Version Available to Upgrade are ...{}".format(
+                latest_upgrade_version))
+            latest_upgrade_version = (
+                ast.literal_eval(latest_upgrade_version)[-1])
+
+            data["version"] = latest_upgrade_version
+
+        write_data_in_json(self.update_policies_json, data)
         schedule_cluster_upgrade = (
             "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"
             " --body {}".format(cluster_id, self.update_policies_json))

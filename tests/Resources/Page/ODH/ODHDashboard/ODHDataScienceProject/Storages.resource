@@ -5,6 +5,7 @@ Resource       Projects.resource
 
 
 *** Variables ***
+${STORAGE_SECTION_XP}=             xpath=//div[div//h4[@id="storages"]]
 ${STORAGE_NAME_INPUT_XP}=          xpath=//input[@name="create-new-storage-name"]
 ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-description"]
 ${STORAGE_SIZE_INPUT_XP}=         xpath=//div/input[@aria-label="Input"]
@@ -17,36 +18,28 @@ ${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[contains(text(), "Add")
 *** Keywords ***
 Storage Should Be Listed
     [Arguments]     ${name}   ${description}   ${type}   ${connected_workbench}
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/h4[text()="${name}"]
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/p[text()="${description}"]
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td/p[text()=" ${type}"]
+    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/h4[text()="${name}"]
+    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/p[text()="${description}"]
+    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[@data-label="Type"]/p[text()=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td[text()="No connections"]
+        Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
-            Log    ${index}: ${workbench_title}
-            Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td/ul/li[text()="${workbench_title}"]
+            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
         END
     END
 
 Storage Should Not Be Listed
-    [Arguments]     ${name}   ${connected_workbench}=${NONE}
-    Run keyword And Continue On Failure     Page Should Not Contain Element    xpath=//tr[td/h4[text()="${name}"]]
-    IF    "${connected_workbench}" == "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td[text()="No connections"]
-    ELSE
-        FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
-            Log    ${index}: ${workbench_title}
-            Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//tr[td/h4[text()="${name}"]]/td/ul/li[text()="${workbench_title}"]
-        END
-    END
+    [Arguments]     ${name}
+    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]
+
 Storage Size Should Be
     [Documentation]        https://kubernetes.io/docs/reference/kubectl/jsonpath/
     [Arguments]     ${name}      ${size}    ${namespace}
-    Click Element    xpath=//tr[td/h4[text()="${name}"]]/td/button[contains(@id,"expand-toggle")]
-    Wait Until Element Is Visible    xpath=//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
-    Wait Until Page Contains Element    xpath=//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
-    ${displayed_size}=      Get Text    xpath=//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
+    Click Element    ${STORAGE_SECTION_XP}//tr[td/h4[text()="${name}"]]/td/button[contains(@id,"expand-toggle")]
+    Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
+    Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
+    ${displayed_size}=      Get Text    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
     Run keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
     ${rc}  ${oc_object_size}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].spec.resources.requests.storage}'
     Run keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
@@ -84,11 +77,11 @@ Fill In New PV Data
         Run Keyword And Continue On Failure    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
         FOR    ${workbench_title}    IN    @{connected_workbench}
             ${mount_dir}=    Set Variable    ${connected_workbench}[${workbench_title}]
-            Set Connection Between PV And Workspace    ${workbench_title}    ${mount_dir}
+            Set Connection Between PV And Workbench    ${workbench_title}    ${mount_dir}
         END
     END
     
-Set Connection Between PV And Workspace
+Set Connection Between PV And Workbench
     [Arguments]    ${workbench_title}    ${mount_dir}
     Wait Until Element Is Enabled    xpath=//button[@aria-label="Options menu"]
     Click Element    xpath=//button[@aria-label="Options menu"]
@@ -99,18 +92,19 @@ Set Connection Between PV And Workspace
 
 Delete Storage
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete storage"]
-    Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete storage"]
-    Wait Until Modal Appears
-    Run Keyword And Continue On Failure    Page Should Contain    Confirm storage delete
-    Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
-    IF    ${press_cancel} == ${TRUE}
-        Click Button    ${GENERIC_CANCEL_BTN_XP}
-    ELSE
-        Click Button    ${WORKBENCH_DELETE_BTN_XP}
-    END
-    Wait Until Modal Disappears
+    # Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
+    # Wait Until Page Contains Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete storage"]
+    # Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete storage"]
+    # Wait Until Modal Appears
+    # Run Keyword And Continue On Failure    Page Should Contain    Confirm storage delete
+    # Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
+    # IF    ${press_cancel} == ${TRUE}
+    #     Click Button    ${GENERIC_CANCEL_BTN_XP}
+    # ELSE
+    #     Click Button    ${WORKBENCH_DELETE_BTN_XP}
+    # END
+    # Wait Until Modal Disappears
+    Handle Deletion Confirmation Modal    item_title=${name}    item_type=storage    press_cancel=${press_cancel}
 
 Get Openshift PVC From Storage 
     [Arguments]     ${name}      ${namespace}

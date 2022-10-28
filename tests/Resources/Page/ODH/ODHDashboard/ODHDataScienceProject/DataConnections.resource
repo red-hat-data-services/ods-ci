@@ -13,7 +13,7 @@ ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_DEFA
 ${DC_SECTION_XP}=             xpath=//div[div//h4[@id="data-connections"]]
 ${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}/div/button[text()="Add data connection"]
 ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[text()="Add data connection"]
-${DC_DELETE_BTN_XP}=                 xpath=//button[text()="Delete data connection"]
+# ${DC_DELETE_BTN_XP}=                 xpath=//button[text()="Delete data connection"]
 
 
 *** Keywords ***
@@ -37,16 +37,20 @@ Create S3 Data Connection
 
 Data Connection Should Be Listed
     [Arguments]     ${name}   ${type}   ${connected_workbench}
-    Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//td/h4[text()="${name}"]
-    Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[text()=" ${type}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//td[@data-label="Name"]/h4[text()="${name}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[text()=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[text()="No connections"]
+        Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
             Log    ${index}: ${workbench_title}
-            Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td/ul/li[text()="${workbench_title}"]
+            Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
         END
     END
+
+Data Connection Should Not Be Listed
+    [Arguments]     ${name}
+    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]
 
 Get Openshift Secret From Data Connection
     [Arguments]     ${dc_name}      ${namespace}
@@ -55,15 +59,16 @@ Get Openshift Secret From Data Connection
 
 Delete Data Connection
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    Click Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete data connection"]
-    Click Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete data connection"]
-    Wait Until Modal Appears
-    Run Keyword And Continue On Failure    Page Should Contain    Confirm data connection delete
-    Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
-    IF    ${press_cancel} == ${TRUE}
-        Click Button    ${GENERIC_CANCEL_BTN_XP}
-    ELSE
-        Click Button    ${DC_DELETE_BTN_XP}
-    END
-    Wait Until Modal Disappears
+    # Click Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
+    # Wait Until Page Contains Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete data connection"]
+    # Click Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete data connection"]
+    # Wait Until Modal Appears
+    # Run Keyword And Continue On Failure    Page Should Contain    Confirm data connection delete
+    # Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
+    # IF    ${press_cancel} == ${TRUE}
+    #     Click Button    ${GENERIC_CANCEL_BTN_XP}
+    # ELSE
+    #     Click Button    ${DC_DELETE_BTN_XP}
+    # END
+    # Wait Until Modal Disappears
+    Handle Deletion Confirmation Modal    item_title=${name}    item_type=data connection    press_cancel=${press_cancel}

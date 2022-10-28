@@ -5,8 +5,9 @@ Resource       ./Workbenches.resource
 
 *** Variables ***
 ${DS_PROJECT_XP}=     xpath=//h1[text()="Data science projects"]
-${TITLE_INPUT_XP}=    xpath=//input[@id="test"]
-${DESCR_INPUT_XP}=    xpath=//textarea[@id="test"]
+${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
+${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
+${RESOURCE_INPUT_XP}=    xpath=//input[@id="resource-manage-project-modal-name"]
 # ${TITLE_INPUT_XP}=    xpath=//input[@aria-label="Project name"]
 # ${DESCR_INPUT_XP}=    xpath=//textarea[@aria-label="Project description"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
@@ -82,18 +83,29 @@ Project's Owner Should Be
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
-    [Arguments]    ${title}    ${description}
+    [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}
     Click Button    ${PROJECT_CREATE_BTN_XP}
-    # Click Button    Create data science project
     Wait Until Page Contains Element    ${TITLE_INPUT_XP}
     Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
     Input Text    ${TITLE_INPUT_XP}    ${title}
     Input Text    ${DESCR_INPUT_XP}    ${description}
+    Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
+    IF    "${resource_name}" == "${NONE}"
+        Clear Element Text    ${RESOURCE_INPUT_XP}
+        Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
+    END
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Modal Disappears
     Wait Until Project Is Open    project_title=${title}
 
+Validate Generated Resource Name
+    [Arguments]    ${project_title}
+    ${generated_res_name}=    Get Element Attribute    ${RESOURCE_INPUT_XP}    value
+    ${lower}=    Convert To Lower Case    ${project_title}
+    ${no_spec_chars}=    Replace String Using Regexp    ${lower}    [^A-Za-z0-9-\\s]+    ${EMPTY}
+    ${expected}=    Replace String Using Regexp    ${no_spec_chars}    ${SPACE}    -
+    Should Be Equal As Strings    ${generated_res_name}    ${expected}
 
 Get Openshift Namespace From Data Science Project
     [Arguments]     ${project_title}
@@ -132,70 +144,72 @@ Delete All Data Science Projects From CLI
         Delete Data Science Projects From CLI   ocp_projects=${to_delete}
     END
 
-Workspace Status Should Be From Projects Home Page
+Workbench Status Should Be From Projects Home Page
     [Arguments]     ${workbench_title}      ${status}    ${project_title}
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
-    ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workspace    workbench_title=${workbench_title}    namespace=${namespace}
+    ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[text()="${status}"]
 
-Start Workspace From Projects Home Page
+Start Workbench From Projects Home Page
     [Documentation]    Trigger the workbench "start" process from DS Projects home page.
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
     ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
     [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}
-    ${is_stopped}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}    project_title=${project_title}
+    ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}    project_title=${project_title}
     IF    ${is_stopped} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
                 ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
             END
-                ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workspace    workbench_title=${workbench_title}    namespace=${namespace}
+                ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
         Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
-    Wait Until Workspace Is Started From Projects Home Page     workbench_title=${workbench_title}   project_title=${project_title}
+    Wait Until Workbench Is Started From Projects Home Page     workbench_title=${workbench_title}   project_title=${project_title}
 
-Stop Workspace From Projects Home Page
+Stop Workbench From Projects Home Page
     [Documentation]    Trigger the workbench "stop" process from DS Projects home page.
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
     ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
     [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}    ${press_cancel}=${FALSE}
-    ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
+    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
                 ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
             END
-                ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workspace    workbench_title=${workbench_title}    namespace=${namespace}
+                ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
         Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
-        Handle Stop Workspace Confirmation Modal    press_cancel=${press_cancel}
+        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is not running.
     END
-    Wait Until Workspace Is Stopped From Projects Home Page     workbench_title=${workbench_title}   project_title=${project_title}
+    Wait Until Workbench Is Stopped From Projects Home Page     workbench_title=${workbench_title}   project_title=${project_title}
 
-Wait Until Workspace Is Started From Projects Home Page
+Wait Until Workbench Is Started From Projects Home Page
     [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
-    Wait Until Keyword Succeeds    ${timeout}    5s      Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
 
-Wait Until Workspace Is Stopped From Projects Home Page
+Wait Until Workbench Is Stopped From Projects Home Page
     [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
-    Wait Until Keyword Succeeds    ${timeout}    5s      Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}   project_title=${project_title}
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}   project_title=${project_title}
 
-Launch Workspace From Projects Home Page
+Launch Workbench From Projects Home Page
     [Arguments]     ${workbench_title}    ${project_title}
     # Open Data Science Projects Home Page
-    ${is_started}=      Run Keyword And Return Status   Workspace Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
+    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
         Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
-        Access To Workspace
+        Access To Workbench
     ELSE
         Fail   msg=Cannot launch workbench ${workbench_title} because it is not running...
     END
 
 Workbench Launch Link Should Be Disabled
     [Arguments]     ${workbench_title}    ${project_title}
-    Element Should Be Disabled       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
+    # Element Should Be Disabled       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
+    ${link_status}=    Get Element Attribute    xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
+    Should Be Equal As Strings    ${link_status}    true

@@ -59,16 +59,5 @@ Get Openshift Secret From Data Connection
 
 Delete Data Connection
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    # Click Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    # Wait Until Page Contains Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete data connection"]
-    # Click Element       ${DC_SECTION_XP}//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete data connection"]
-    # Wait Until Modal Appears
-    # Run Keyword And Continue On Failure    Page Should Contain    Confirm data connection delete
-    # Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
-    # IF    ${press_cancel} == ${TRUE}
-    #     Click Button    ${GENERIC_CANCEL_BTN_XP}
-    # ELSE
-    #     Click Button    ${DC_DELETE_BTN_XP}
-    # END
-    # Wait Until Modal Disappears
+    Click Action From Actions Menu    item_title=${name}    item_type=data connection    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=data connection    press_cancel=${press_cancel}

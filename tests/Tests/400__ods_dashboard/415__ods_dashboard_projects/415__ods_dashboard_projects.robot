@@ -1,6 +1,7 @@
 *** Settings ***
 Library            SeleniumLibrary
 Library            OpenShiftLibrary
+Resource           ../../../Resources/OCP.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
@@ -96,7 +97,8 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     ...                 pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STARTING}
-    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
+    # continue on failure is temporary
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_2_TITLE}   namespace=${ns_name}
 
@@ -197,15 +199,19 @@ Verify User Can Delete A Data Connection
     Data Connection Should Not Be Listed    name=${DC_S3_NAME}
     Check Data Connection Secret Is Deleted    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
-Verify User Can Delete A Data Science Project
-    [Tags]    ODS-1784
-    Delete Data Science Project   project_title=${PRJ_TITLE}
-    # check workbenchs and resources get deleted too
-
 Test
     [Tags]    should
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Workbench Should Be Listed    workbench_title=${WORKBENCH_3_TITLE}
+    Storage Should Be Listed    name=ods-ci-pv-A    description=${PV_DESCRIPTION}
+    ...                         type=Persistent storage    connected_workbench=${NONE}
+
+Verify User Can Delete A Data Science Project
+    [Tags]    ODS-1784
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Delete Data Science Project   project_title=${PRJ_TITLE}
+    Check Project Is Deleted    namespace=${ns_name}
+    # check workbenchs and resources get deleted too
+
 
 *** Keywords ***
 Project Suite Setup
@@ -276,3 +282,8 @@ Check Storage PersistentVolumeClaim Is Deleted
     IF    ${status} == ${TRUE}
         Fail    msg=The PVC for ${storage_name} storage is still present, while it should have been deleted.        
     END
+
+Check Project Is Deleted
+    [Arguments]    ${namespace}
+    Wait Until Keyword Succeeds    10s    2s    Namespace Should Not Exist    namespace=${namespace}
+    

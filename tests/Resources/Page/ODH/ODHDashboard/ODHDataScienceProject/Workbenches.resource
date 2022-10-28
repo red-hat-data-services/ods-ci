@@ -150,14 +150,21 @@ Handle Stop Workbench Confirmation Modal
         Click Button    ${WORKBENCH_STOP_BTN_XP}
     END
 
+Click Action From Actions Menu
+    [Arguments]    ${item_title}    ${item_type}    ${action}    
+    Click Element       xpath=//tr[td[@data-label="Name"]/*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
+    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]/*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
+    Click Element       xpath=//tr[td[@data-label="Name"]/*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
+
+
 Handle Deletion Confirmation Modal
-    [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}
-    Click Element       xpath=//tr[td[@data-label="Name"]/h4[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]/h4[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
-    Click Element       xpath=//tr[td[@data-label="Name"]/h4[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
+    [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
     Wait Until Modal Appears
     Run Keyword And Continue On Failure    Page Should Contain    Delete ${item_type}?
     Run Keyword And Continue On Failure    Page Should Contain    This action cannot be undone.
+    IF    "${additional_msg}" != "${NONE}"
+        Run Keyword And Continue On Failure    Page Should Contain    ${additional_msg}
+    END
     Run Keyword And Continue On Failure    Page Should Contain    Confirm deletion by typing ${item_title} below:
     Run Keyword And Continue On Failure    Element Should Be Disabled    xpath=//button[text()="Delete ${item_type}"]
     Input Text    xpath=//input[@id="delete-modal-input"]    ${item_title}
@@ -172,6 +179,7 @@ Handle Deletion Confirmation Modal
     
 Delete Workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
+    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
     Handle Deletion Confirmation Modal    item_title=${workbench_title}    item_type=workbench    press_cancel=${press_cancel}
 
 Check Launched Workbench Is The Correct One

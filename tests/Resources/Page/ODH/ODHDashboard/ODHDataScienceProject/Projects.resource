@@ -44,30 +44,15 @@ Open Data Science Project Details Page
     Maybe Wait For Dashboard Loading Spinner Page
 
 Delete Data Science Project
-    [Arguments]     ${project_title}
+    [Arguments]     ${project_title}    ${press_cancel}=${FALSE}
     ${is_open}=    Is Data Science Projects Page Open
     IF    ${is_open} == ${FALSE}
         Open Data Science Projects Home Page
     END
     Project Should Be Listed    project_title=${project_title}
-    Open Actions Menu Of Project    project_title=${project_title}
-    Click Delete From Action Menu   project_title=${project_title}
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
-    ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${ns_name}
-    IF    ${present} == ${TRUE}
-        Fail   msg=The namespace for ${project_title} project was not deleted using UI actions..
-    END
-
-Open Actions Menu Of Project
-    [Arguments]     ${project_title}
-    Project Should Be Listed    project_title=${project_title}
-    Click Element    ${ACTIONS_BTN_XP}
-
-Click Delete From Action Menu
-    [Arguments]     ${project_title}
-    Wait Until Page Contains Element    ${DELETE_ACTION_BTN_XP}
-    Click Element    ${DELETE_ACTION_BTN_XP}
-    Click Button       Delete
+    Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
+    Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project    press_cancel=${press_cancel}
+    ...          additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
 
 Wait Until Project Is Open
     [Arguments]     ${project_title}

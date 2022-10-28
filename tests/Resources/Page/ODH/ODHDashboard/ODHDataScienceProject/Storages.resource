@@ -5,7 +5,7 @@ Resource       Projects.resource
 
 
 *** Variables ***
-${STORAGE_SECTION_XP}=             xpath=//div[div//h4[@id="storages"]]
+${STORAGE_SECTION_XP}=             xpath=//div[div//h4[@id="cluster-storages"]]
 ${STORAGE_NAME_INPUT_XP}=          xpath=//input[@name="create-new-storage-name"]
 ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-description"]
 ${STORAGE_SIZE_INPUT_XP}=         xpath=//div/input[@aria-label="Input"]
@@ -92,18 +92,7 @@ Set Connection Between PV And Workbench
 
 Delete Storage
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    # Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    # Wait Until Page Contains Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete storage"]
-    # Click Element       xpath=//tr[td/h4[text()="${name}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete storage"]
-    # Wait Until Modal Appears
-    # Run Keyword And Continue On Failure    Page Should Contain    Confirm storage delete
-    # Run Keyword And Continue On Failure    Page Should Contain    Are you sure you want to delete ${name}?
-    # IF    ${press_cancel} == ${TRUE}
-    #     Click Button    ${GENERIC_CANCEL_BTN_XP}
-    # ELSE
-    #     Click Button    ${WORKBENCH_DELETE_BTN_XP}
-    # END
-    # Wait Until Modal Disappears
+    Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=storage    press_cancel=${press_cancel}
 
 Get Openshift PVC From Storage 

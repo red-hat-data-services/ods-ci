@@ -1,6 +1,6 @@
 name: dryrun-unprivileged
 
-on: [pull_request_target]
+on: [pull_request]
 
 jobs:
   dryrun:

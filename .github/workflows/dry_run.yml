@@ -1,6 +1,6 @@
 name: dryrun-unprivileged
 
-on: [pull_request]
+on: [pull_request_target]
 
 jobs:
   dryrun:
@@ -14,18 +14,18 @@ jobs:
           mv test-variables.yml.example test-variables.yml
           ./run_robot_test.sh --extra-robot-args '--dryrun' --skip-oclogin true --no-output-subfolder true
 
-      - name: Save PR number and artifacts
-        run: |
-          mkdir -p ./pr
-          cp -r test-output ./pr/test-output
-          echo ${{ github.event.number }} > ./pr/NR
-      - uses: actions/upload-artifact@v2
-        with:
-          name: pr
-          path: pr/
-      # - name: Parse output
-      #   uses: joonvena/robotframework-reporter-action@v2.1
+      # - name: Save PR number and artifacts
+      #   run: |
+      #     mkdir -p ./pr
+      #     cp -r test-output ./pr/test-output
+      #     echo ${{ github.event.number }} > ./pr/NR
+      # - uses: actions/upload-artifact@v2
       #   with:
-      #     report_path: test-output
-      #     gh_access_token: ${{ secrets.GITHUB_TOKEN }}
-      #     show_passed_tests: false
+      #     name: pr
+      #     path: pr/
+      - name: Parse output
+        uses: joonvena/robotframework-reporter-action@v2.1
+        with:
+          report_path: test-output
+          gh_access_token: ${{ secrets.GITHUB_TOKEN }}
+          show_passed_tests: false

@@ -7,8 +7,7 @@ on:
     workflows: ["dryrun-unprivileged", "dryrun"]
     types:
       - completed
-      - succeeded
-      - Success
+      - success
 
 jobs:
   upload:
@@ -45,15 +44,3 @@ jobs:
           report_path: test-output
           gh_access_token: ${{ secrets.GITHUB_TOKEN }}
           show_passed_tests: false
-        # uses: actions/github-script@v3
-        # with:
-        #   github-token: ${{ secrets.GITHUB_TOKEN }}
-        #   script: |
-        #     var fs = require('fs');
-        #     var issue_number = Number(fs.readFileSync('./NR'));
-        #     await github.issues.createComment({
-        #       owner: context.repo.owner,
-        #       repo: context.repo.repo,
-        #       issue_number: issue_number,
-        #       body: 'Everything is OK. Thank you for the PR!'
-        #     });

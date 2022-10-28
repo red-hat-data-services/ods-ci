@@ -4,10 +4,9 @@ name: Comment on the pull request
 # access to secrets
 on:
   workflow_run:
-    workflows: ["dryrun-unprivileged", "dryrun"]
+    workflows: ["dryrun"]
     types:
       - completed
-      - success
 
 jobs:
   upload:

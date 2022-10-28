@@ -1,4 +1,4 @@
-name: dryrun-unprivileged
+name: dryrun
 
 on: [pull_request]
 

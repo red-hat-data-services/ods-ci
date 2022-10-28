@@ -2,7 +2,6 @@ name: Comment on the pull request
 
 # read-write repo token
 # access to secrets
-# tmp
 on:
   workflow_run:
     workflows: [dryrun]

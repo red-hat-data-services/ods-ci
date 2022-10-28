@@ -5,7 +5,7 @@ name: Comment on the pull request
 # tmp
 on:
   workflow_run:
-    workflows: ["dryrun"]
+    workflows: [dryrun]
     types:
       - completed
 

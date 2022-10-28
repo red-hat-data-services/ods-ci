@@ -35,9 +35,20 @@ jobs:
             fs.writeFileSync('${{github.workspace}}/pr.zip', Buffer.from(download.data));
       - run: unzip pr.zip
 
+      - name: 'Get PR Number'
+        id: fetch_pr
+        uses: actions/github-script@v6
+        with:
+          script: |
+            var fs = require('fs');
+            var issue_number = Number(fs.readFileSync('./NR'));
+            return issue_number
+
       - name: 'Parse output and comment on PR'
         uses: joonvena/robotframework-reporter-action@v2.1
         with:
           report_path: test-output
           gh_access_token: ${{ secrets.GITHUB_TOKEN }}
           show_passed_tests: false
+          pull_request_id: ${{steps.fetch_pr.outputs.result}}
+      - run: echo "${{steps.fetch_pr.outputs.result}}"

@@ -1178,15 +1178,14 @@ class OpenshiftClusterManager:
         log.info(run_change_channel_cmd)
         ret = execute_command(run_change_channel_cmd)
         if ret is None:
-            log.info(
-                "Failed to update the channel to {}".format(self.cluster_name))
+            log.info("Failed to update the channel to {}".format(self.cluster_name))
             return ret
 
     def update_ocm_policy(self):
         """update cluster policy to schedule for upgrade osd"""
         cluster_id = self.get_osd_cluster_id()
-        utc_time_cmd = ''' oc debug node/"$(oc get nodes | awk 'FNR == 2 {print $1}')"\
-         -- chroot /host date -d '+7 min' -u '+%Y-%m-%dT%H:%M:%SZ' '''
+        utc_time_cmd = """ oc debug node/"$(oc get nodes | awk 'FNR == 2 {print $1}')"\
+         -- chroot /host date -d '+7 min' -u '+%Y-%m-%dT%H:%M:%SZ' """
 
         utc_time = execute_command(utc_time_cmd)
         data = read_data_from_json(self.update_policies_json)
@@ -1195,16 +1194,17 @@ class OpenshiftClusterManager:
         if data["version"] == "latest":
             get_latest_upgrade_version = "ocm get cluster {} | jq -r '.version.available_upgrades | values'".format(
                 cluster_id)
-            latest_upgrade_version = execute_command(
-                get_latest_upgrade_version)
+            latest_upgrade_version = execute_command(get_latest_upgrade_version)
             log.info(
                 "Version Available to Upgrade are ...{}".format(latest_upgrade_version)
                 )
             latest_upgrade_version = ast.literal_eval(latest_upgrade_version)[-1]
             data["version"] = latest_upgrade_version
         write_data_in_json(self.update_policies_json, data)
-        schedule_cluster_upgrade = "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"\
+        schedule_cluster_upgrade = (
+            "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"\
             " --body {}".format(cluster_id, self.update_policies_json)
+        )
         ret = execute_command(schedule_cluster_upgrade)
         if ret is None:
             log.info("Failed  to Update the Upgrade Policy")

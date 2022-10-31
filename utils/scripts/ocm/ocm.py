@@ -1202,6 +1202,7 @@ class OpenshiftClusterManager:
             latest_upgrade_version = ast.literal_eval(latest_upgrade_version)[-1]
             data["version"] = latest_upgrade_version
         write_data_in_json(self.update_policies_json, data)
+        # fmt: off
         schedule_cluster_upgrade = (
             "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"\
             " --body {}".format(cluster_id, self.update_policies_json)

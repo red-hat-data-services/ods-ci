@@ -1193,7 +1193,8 @@ class OpenshiftClusterManager:
 
         if data["version"] == "latest":
             get_latest_upgrade_version = "ocm get cluster {} | jq -r '.version.available_upgrades | values'".format(
-                cluster_id)
+                cluster_id
+            )
             latest_upgrade_version = execute_command(get_latest_upgrade_version)
             log.info(
                 "Version Available to Upgrade are ...{}".format(latest_upgrade_version)

@@ -1239,10 +1239,10 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(
         title="Available sub commands", help="Available sub commands"
     )
-    # Argument of update_ocm_channel
+    # Argument of update_ocm_policy
     update_ocm_policy = subparsers.add_parser(
         "update_ocm_policy",
-        help="Parser to get osd changes in json file",
+        help="Parser to update_ocm_channel",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     update_ocm_policy.add_argument(
@@ -1267,7 +1267,7 @@ if __name__ == "__main__":
     # Argument of update_ocm_channel
     update_ocm_channel = subparsers.add_parser(
         "update_ocm_channel",
-        help="Parser to get osd changes in json file",
+        help="Parser to update_ocm_channel",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     update_ocm_channel.add_argument(

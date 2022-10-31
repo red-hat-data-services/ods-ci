@@ -1204,7 +1204,7 @@ class OpenshiftClusterManager:
         write_data_in_json(self.update_policies_json, data)
         # fmt: off
         schedule_cluster_upgrade = (
-            "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"\
+            "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"
             " --body {}".format(cluster_id, self.update_policies_json)
         )
         ret = execute_command(schedule_cluster_upgrade)

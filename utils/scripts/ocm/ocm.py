@@ -1198,7 +1198,7 @@ class OpenshiftClusterManager:
             latest_upgrade_version = execute_command(get_latest_upgrade_version)
             log.info(
                 "Version Available to Upgrade are ...{}".format(latest_upgrade_version)
-                )
+            )
             latest_upgrade_version = ast.literal_eval(latest_upgrade_version)[-1]
             data["version"] = latest_upgrade_version
         write_data_in_json(self.update_policies_json, data)

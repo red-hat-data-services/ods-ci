@@ -23,7 +23,7 @@ variable "vm_private_key" {
 variable "image_name" {
   type = string
   description = "value"
-  default = "CentOS-8-x86_64-GenericCloud-released-latest"
+  default = "CentOS-Stream-8-x86_64-GenericCloud"
 }
 
 variable "flavor_name" {

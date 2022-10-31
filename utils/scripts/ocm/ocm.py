@@ -75,7 +75,7 @@ class OpenshiftClusterManager:
         self.osd_major_version = args.get("osd_major_version")
         self.osd_latest_version_data = args.get("osd_latest_version_data")
         self.new_run = args.get("new_run")
-        self.upadte_ocm_channel_json = args.get("upadte_ocm_channel_json")
+        self.update_ocm_channel_json = args.get("update_ocm_channel_json")
         self.update_policies_json = args.get("update_policies_json")
         self.service_account_file = "create_gcp_sa_json.json"
         ocm_env = glob.glob(dir_path + "/../../../ocm.json.*")
@@ -1174,7 +1174,7 @@ class OpenshiftClusterManager:
         cluster_id = self.get_osd_cluster_id()
         run_change_channel_cmd = (
             "ocm patch /api/clusters_mgmt/v1/clusters/{}"
-            " --body {}".format(cluster_id, self.upadte_ocm_channel_json))
+            " --body {}".format(cluster_id, self.update_ocm_channel_json))
         log.info(run_change_channel_cmd)
         ret = execute_command(run_change_channel_cmd)
         if ret is None:
@@ -1183,7 +1183,7 @@ class OpenshiftClusterManager:
 
 
     def update_ocm_policy(self):
-        """upadte cluster policy to schedule for upgrade osd"""
+        """update cluster policy to schedule for upgrade osd"""
         cluster_id = self.get_osd_cluster_id()
         utc_time_cmd = (
             ''' oc debug node/"$(oc get nodes | awk 'FNR == 2 {print $1}')"\
@@ -1194,12 +1194,12 @@ class OpenshiftClusterManager:
         data["next_run"] = utc_time.replace("\n", "")
 
         if data["version"] == "latest":
-            get_latest_upgradte_version = (
+            get_latest_upgrade_version = (
                 "ocm get cluster {} |"
                 " jq -r '.version.available_upgrades | values'".format(
                     cluster_id))
             latest_upgrade_version = execute_command(
-                get_latest_upgradte_version)
+                get_latest_upgrade_version)
             log.info("Version Available to Upgrade are ...{}".format(
                 latest_upgrade_version))
             latest_upgrade_version = (
@@ -1240,7 +1240,7 @@ if __name__ == "__main__":
     # Argument of update_ocm_channel
     update_ocm_policy = subparsers.add_parser(
         "update_ocm_policy",
-        help="Parser to get osd chnages in json file",
+        help="Parser to get osd changes in json file",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     update_ocm_policy.add_argument(
@@ -1256,7 +1256,7 @@ if __name__ == "__main__":
         action="store",
         dest="cluster_name",
         metavar="",
-        default="osd-qe-1",
+        default="qeaisrhods-xyz",
     )
     update_ocm_policy.set_defaults(
         func=ocm_obj.update_ocm_policy
@@ -1265,14 +1265,14 @@ if __name__ == "__main__":
     # Argument of update_ocm_channel
     update_ocm_channel = subparsers.add_parser(
         "update_ocm_channel",
-        help="Parser to get osd chnages in json file",
+        help="Parser to get osd changes in json file",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     update_ocm_channel.add_argument(
         "--update-ocm-channel-json",
         help="pass json file to update ocm channel",
         action="store",
-        dest="upadte_ocm_channel_json",
+        dest="update_ocm_channel_json",
         required=True,
     )
     update_ocm_channel.add_argument(
@@ -1281,7 +1281,7 @@ if __name__ == "__main__":
         action="store",
         dest="cluster_name",
         metavar="",
-        default="osd-qe-1",
+        default="qeaisrhods-xyz",
     )
     update_ocm_channel.set_defaults(
         func=ocm_obj.change_cluster_channel_group
@@ -1290,7 +1290,7 @@ if __name__ == "__main__":
     # Argument parsers for get ods_latest version
     get_latest_osd_candidate_json = subparsers.add_parser(
         "get_latest_osd_candidate_json",
-        help="Parser to get osd chnages in json file",
+        help="Parser to get osd changes in json file",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     get_latest_osd_candidate_json.add_argument(
@@ -1654,7 +1654,7 @@ if __name__ == "__main__":
         action="store",
         dest="cluster_name",
         metavar="",
-        default="osd-qe-1",
+        default="qeaisrhods-xyz",
     )
     delete_cluster_parser.set_defaults(func=ocm_obj.delete_cluster)
 
@@ -1683,7 +1683,7 @@ if __name__ == "__main__":
         action="store",
         dest="cluster_name",
         metavar="",
-        default="osd-qe-1",
+        default="qeaisrhods-xyz",
     )
     delete_idp_parser.set_defaults(func=ocm_obj.delete_idp)
 
@@ -1703,7 +1703,7 @@ if __name__ == "__main__":
         action="store",
         dest="cluster_name",
         metavar="",
-        default="osd-qe-1",
+        default="qeaisrhods-xyz",
     )
     info_parser.set_defaults(func=ocm_obj.get_osd_cluster_info)
 
@@ -1725,7 +1725,7 @@ if __name__ == "__main__":
         action="store",
         dest="cluster_name",
         metavar="",
-        default="osd-qe-1",
+        default="qeaisrhods-xyz",
     )
     optional_update_info_parser.add_argument(
         "--htpasswd-cluster-password",

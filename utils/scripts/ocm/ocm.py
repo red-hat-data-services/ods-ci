@@ -1178,7 +1178,9 @@ class OpenshiftClusterManager:
         log.info(run_change_channel_cmd)
         ret = execute_command(run_change_channel_cmd)
         if ret is None:
-            log.info("Failed  to Update the channel")
+            log.info(
+                "Failed to update the channel to {}".format(
+                    self.cluster_name))
             return ret
 
 

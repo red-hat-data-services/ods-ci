@@ -1168,51 +1168,43 @@ class OpenshiftClusterManager:
         write_data_in_json(filename=self.osd_latest_version_data, data=old_data)
         log.info("File is updated to : {} ".format(old_data))
 
-
     def change_cluster_channel_group(self):
         """update the channel using ocm cmd"""
         cluster_id = self.get_osd_cluster_id()
         run_change_channel_cmd = (
             "ocm patch /api/clusters_mgmt/v1/clusters/{}"
-            " --body {}".format(cluster_id, self.update_ocm_channel_json))
+            " --body {}".format(cluster_id, self.update_ocm_channel_json)
+        )
         log.info(run_change_channel_cmd)
         ret = execute_command(run_change_channel_cmd)
         if ret is None:
             log.info(
-                "Failed to update the channel to {}".format(
-                    self.cluster_name))
+                "Failed to update the channel to {}".format(self.cluster_name))
             return ret
-
 
     def update_ocm_policy(self):
         """update cluster policy to schedule for upgrade osd"""
         cluster_id = self.get_osd_cluster_id()
-        utc_time_cmd = (
-            ''' oc debug node/"$(oc get nodes | awk 'FNR == 2 {print $1}')"\
-         -- chroot /host date -d '+7 min' -u '+%Y-%m-%dT%H:%M:%SZ' ''')
+        utc_time_cmd = ''' oc debug node/"$(oc get nodes | awk 'FNR == 2 {print $1}')"\
+         -- chroot /host date -d '+7 min' -u '+%Y-%m-%dT%H:%M:%SZ' '''
 
         utc_time = execute_command(utc_time_cmd)
         data = read_data_from_json(self.update_policies_json)
         data["next_run"] = utc_time.replace("\n", "")
 
         if data["version"] == "latest":
-            get_latest_upgrade_version = (
-                "ocm get cluster {} |"
-                " jq -r '.version.available_upgrades | values'".format(
-                    cluster_id))
+            get_latest_upgrade_version = "ocm get cluster {} | jq -r '.version.available_upgrades | values'".format(
+                cluster_id)
             latest_upgrade_version = execute_command(
                 get_latest_upgrade_version)
-            log.info("Version Available to Upgrade are ...{}".format(
-                latest_upgrade_version))
-            latest_upgrade_version = (
-                ast.literal_eval(latest_upgrade_version)[-1])
-
+            log.info(
+                "Version Available to Upgrade are ...{}".format(latest_upgrade_version)
+                )
+            latest_upgrade_version = ast.literal_eval(latest_upgrade_version)[-1]
             data["version"] = latest_upgrade_version
-
         write_data_in_json(self.update_policies_json, data)
-        schedule_cluster_upgrade = (
-            "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"
-            " --body {}".format(cluster_id, self.update_policies_json))
+        schedule_cluster_upgrade = "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"\
+            " --body {}".format(cluster_id, self.update_policies_json)
         ret = execute_command(schedule_cluster_upgrade)
         if ret is None:
             log.info("Failed  to Update the Upgrade Policy")
@@ -1260,9 +1252,7 @@ if __name__ == "__main__":
         metavar="",
         default="qeaisrhods-xyz",
     )
-    update_ocm_policy.set_defaults(
-        func=ocm_obj.update_ocm_policy
-    )
+    update_ocm_policy.set_defaults(func=ocm_obj.update_ocm_policy)
 
     # Argument of update_ocm_channel
     update_ocm_channel = subparsers.add_parser(
@@ -1285,9 +1275,7 @@ if __name__ == "__main__":
         metavar="",
         default="qeaisrhods-xyz",
     )
-    update_ocm_channel.set_defaults(
-        func=ocm_obj.change_cluster_channel_group
-    )
+    update_ocm_channel.set_defaults(func=ocm_obj.change_cluster_channel_group)
 
     # Argument parsers for get ods_latest version
     get_latest_osd_candidate_json = subparsers.add_parser(

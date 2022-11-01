@@ -8,7 +8,7 @@ items:
   spec:
     baseDomain: rhods.ccitredhat.com
     imageSetRef:
-      name: rhods-openshift
+      name: {{ image_set|default("rhods-openshift") }}
     platform:
       aws:
         region: {{ aws_region|default("us-east-1") }}
@@ -60,7 +60,7 @@ items:
         aws:
           region: {{ aws_region|default("us-east-1") }}
       pullSecret: ""
-      sshKey: {{ ssh_key|default(" ") }}
+      sshKey: {{ ssh_key|default("") }}
   metadata:
     name: aws-sno-install-config
     namespace: rhods
@@ -77,7 +77,7 @@ items:
 - apiVersion: hive.openshift.io/v1
   kind: ClusterImageSet
   metadata:
-    name: rhods-openshift
+    name: {{ image_set|default("rhods-openshift") }}
     namespace: rhods
   spec:
     releaseImage: {{ openshift_image|default("quay.io/openshift-release-dev/ocp-release:4.10.18-x86_64") }}

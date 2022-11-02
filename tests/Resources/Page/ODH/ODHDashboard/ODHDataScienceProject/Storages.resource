@@ -62,8 +62,10 @@ Create PersistenVolume Storage
 Fill In New PV Data
     [Arguments]    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
+    Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
+    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
     Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
     Clear Element Text    ${STORAGE_SIZE_INPUT_XP}
     IF    ${size} > 1
@@ -78,6 +80,7 @@ Fill In New PV Data
         FOR    ${workbench_title}    IN    @{connected_workbench}
             ${mount_dir}=    Set Variable    ${connected_workbench}[${workbench_title}]
             Set Connection Between PV And Workbench    ${workbench_title}    ${mount_dir}
+            Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
         END
     END
     
@@ -88,6 +91,7 @@ Set Connection Between PV And Workbench
     Wait Until Page Contains Element    ${STORAGE_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
     Click Element                       ${STORAGE_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
     Wait Until Page Contains Element    ${STORAGE_MOUNT_DIR_INPUT_XP}
+    Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
     Input Text    ${STORAGE_MOUNT_DIR_INPUT_XP}    ${mount_dir}
 
 Delete Storage

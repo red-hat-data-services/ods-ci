@@ -199,12 +199,6 @@ Verify User Can Delete A Data Connection
     Data Connection Should Not Be Listed    name=${DC_S3_NAME}
     Check Data Connection Secret Is Deleted    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
-Test
-    [Tags]    should
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Storage Should Be Listed    name=ods-ci-pv-A    description=${PV_DESCRIPTION}
-    ...                         type=Persistent storage    connected_workbench=${NONE}
-
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}

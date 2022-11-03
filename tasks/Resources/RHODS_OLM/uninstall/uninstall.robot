@@ -5,11 +5,11 @@ Uninstalling RHODS Operator
   ...  Log  Uninstalling RHODS operator in ${cluster_type}  console=yes  AND
   ...  Uninstall RHODS
 
-Uninstall RHODS  
+Uninstall RHODS
   IF  '${cluster_type}'=='OSD'
     Uninstall RHODS In OSD
-  ELSE IF  '${cluster_type}'=='PSI'
-    Uninstall RHODS In PSI
+  ELSE IF  '${cluster_type}'=='PSI' or "${cluster_type}" == "AWS" or "${cluster_type}" == "GCP"
+    Uninstall RHODS In Self Managed Cluster
   ELSE
     Fail  Only PSI and OSD are cluster types available
   END
@@ -18,7 +18,7 @@ Uninstall RHODS In OSD
   Delete RHODS CatalogSource
   Trigger RHODS Uninstall
 
-Uninstall RHODS In PSI
+Uninstall RHODS In Self Managed Cluster
       ${return_code}    ${output}	  Run And Return Rc And Output   git clone ${RHODS_INSTALL_REPO}
       Log   ${output}    console=yes
       Should Be Equal As Integers	${return_code}	 0

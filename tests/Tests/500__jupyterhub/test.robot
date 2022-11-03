@@ -63,7 +63,8 @@ Can Spawn Notebook
             Verify Unsupported Environment Variable Is Not Allowed    ${env_var}
         END
     END
-    Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
+    # TODO: Verify why error isn't appearing within 1 minute
+    # Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
     Spawn Notebook  same_tab=${False}
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required

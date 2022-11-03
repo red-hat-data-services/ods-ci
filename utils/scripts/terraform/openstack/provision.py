@@ -131,14 +131,11 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    optional_create_instance_parser = (
-        create_instance_parser._action_groups.pop())
-    required_create_instance_parser = (
-        create_instance_parser.add_argument_group(
-        "required arguments")
+    optional_create_instance_parser = create_instance_parser._action_groups.pop()
+    required_create_instance_parser = create_instance_parser.add_argument_group(
+        "required arguments"
     )
-    create_instance_parser._action_groups.append(
-        optional_create_instance_parser)
+    create_instance_parser._action_groups.append(optional_create_instance_parser)
     required_create_instance_parser.add_argument(
         "--cloud_name",
         help="Cloud provider name",
@@ -166,7 +163,7 @@ if __name__ == "__main__":
     required_create_instance_parser.add_argument(
         "--key_pair",
         help="The public key of an OpenSSH key"
-             " pair to be used for access to created instances",
+        " pair to be used for access to created instances",
         action="store",
         dest="key_pair",
         required=True,
@@ -192,7 +189,7 @@ if __name__ == "__main__":
         action="store",
         dest="image_name",
         metavar="",
-        default="CentOS-8-x86_64-GenericCloud-released-latest",
+        default="CentOS-Stream-8-x86_64-GenericCloud",
     )
     create_instance_parser.set_defaults(func=prov_obj.create_instance)
 
@@ -203,10 +200,9 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    optional_delete_instance_parser = (
-        delete_instance_parser._action_groups.pop())
-    required_delete_instance_parser = (
-        delete_instance_parser.add_argument_group("required arguments")
+    optional_delete_instance_parser = delete_instance_parser._action_groups.pop()
+    required_delete_instance_parser = delete_instance_parser.add_argument_group(
+        "required arguments"
     )
     delete_instance_parser._action_groups.append(optional_delete_instance_parser)
     required_delete_instance_parser.add_argument(
@@ -217,16 +213,12 @@ if __name__ == "__main__":
         required=True,
     )
     required_delete_instance_parser.add_argument(
-        "--vm_name",
-        help="vm name",
-        action="store",
-        dest="vm_name",
-        required=True
+        "--vm_name", help="vm name", action="store", dest="vm_name", required=True
     )
     required_delete_instance_parser.add_argument(
         "--key_pair",
         help="The public key of an OpenSSH key"
-             " pair to be used for access to created instances",
+        " pair to be used for access to created instances",
         action="store",
         dest="key_pair",
         required=True,
@@ -252,7 +244,7 @@ if __name__ == "__main__":
         action="store",
         dest="image_name",
         metavar="",
-        default="CentOS-8-x86_64-GenericCloud-released-latest",
+        default="CentOS-Stream-8-x86_64-GenericCloud",
     )
     delete_instance_parser.set_defaults(func=prov_obj.delete_instance)
 

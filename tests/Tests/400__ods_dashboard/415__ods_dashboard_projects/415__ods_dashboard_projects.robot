@@ -206,6 +206,15 @@ Verify User Can Delete A Data Science Project
     Check Project Is Deleted    namespace=${ns_name}
     # check workbenchs and resources get deleted too
 
+Verify env variables
+    [Tags]    ODS-XYZ
+    ${envs_var}=    Create Dictionary    env_nameA=TestVarA   env_nameB=TestVarB  k8s_type=Secret  input_type=${KEYVALUE_TYPE}
+    ${envs_list}=    Create List   ${envs_var} 
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${EMPTY}  workbench_description=${EMPTY}  prj_title=${PRJ_TITLE}
+    ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  press_cancel=${FALSE}    envs=${envs_list}
+
 
 *** Keywords ***
 Project Suite Setup

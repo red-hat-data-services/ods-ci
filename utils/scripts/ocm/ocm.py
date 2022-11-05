@@ -1179,6 +1179,7 @@ class OpenshiftClusterManager:
         ret = execute_command(run_change_channel_cmd)
         if ret is None:
             log.info("Failed to update the channel to {}".format(self.cluster_name))
+            sys.exit(1)
             return ret
 
     def update_ocm_policy(self):
@@ -1210,6 +1211,7 @@ class OpenshiftClusterManager:
         ret = execute_command(schedule_cluster_upgrade)
         if ret is None:
             log.info("Failed  to Update the Upgrade Policy")
+            sys.exit(1)
             return ret
 
 

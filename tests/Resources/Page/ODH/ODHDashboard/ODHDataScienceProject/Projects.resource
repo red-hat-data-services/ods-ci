@@ -61,11 +61,11 @@ Wait Until Project Is Open
 
 Project Should Be Listed
     [Arguments]     ${project_title}
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/a[text()="${project_title}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/div/a[text()="${project_title}"]
 
 Project's Owner Should Be
     [Arguments]     ${project_title}    ${expected_username}
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td[a[text()="${project_title}"]]/small[text()="${expected_username}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td[div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}
@@ -75,7 +75,7 @@ Create Data Science Project
     Input Text    ${TITLE_INPUT_XP}    ${title}
     Input Text    ${DESCR_INPUT_XP}    ${description}
     Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
-    IF    "${resource_name}" == "${NONE}"
+    IF    "${resource_name}" != "${NONE}"
         Clear Element Text    ${RESOURCE_INPUT_XP}
         Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
     END
@@ -98,7 +98,7 @@ Get Openshift Namespace From Data Science Project
     IF    ${is_open} == ${FALSE}
         Open Data Science Projects Home Page
     END
-    ${project_link}=    Get Element Attribute    xpath=//td/a[text()="${project_title}"]    href
+    ${project_link}=    Get Element Attribute    xpath=//td/div/a[text()="${project_title}"]    href
     ${ns_name}=     Split String From Right     separator=/     max_split=1     string=${project_link}
     [Return]    ${ns_name[1]}
 

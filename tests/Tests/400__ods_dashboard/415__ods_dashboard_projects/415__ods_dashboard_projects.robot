@@ -226,8 +226,8 @@ Project Suite Teardown
     Delete All Data Science Projects From CLI
 
 Launch Data Science Project Main Page
-    [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}
-    Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${TEST_USER_3.PASSWORD}  browser_options=${BROWSER.OPTIONS}
+    [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}    ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}
+    Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${ocp_user_auth_type}   browser_options=${BROWSER.OPTIONS}
     Open Data Science Projects Home Page
 
 Create Project With Empty Title And Expect Error

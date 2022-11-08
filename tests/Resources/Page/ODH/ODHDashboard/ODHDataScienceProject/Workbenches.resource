@@ -127,15 +127,15 @@ Select Workbench Container Size
 
 Workbench Should Be Listed
     [Arguments]     ${workbench_title}
-    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/h4[text()="${workbench_title}"]
+    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]
 
 Workbench Should Not Be Listed
     [Arguments]     ${workbench_title}
-    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/h4[text()="${workbench_title}"]
+    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]
 
 Workbench Status Should Be
     [Arguments]     ${workbench_title}      ${status}
-    Run keyword And Continue On Failure     Page Should Contain Element    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${workbench_title}"]]/td[@data-label="Status"]/label/span[text()="${status}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
 
 Wait Until Workbench Is Started
     [Arguments]     ${workbench_title}      ${timeout}=30s
@@ -145,7 +145,7 @@ Start Workbench
     [Arguments]     ${workbench_title}
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${workbench_title}"]]/td[@data-label="Status"]/label/span[@class="pf-c-switch__toggle"]
+        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -164,7 +164,7 @@ Launch Workbench
     [Arguments]     ${workbench_title}
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
-        Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${workbench_title}"]]/td/a[text()="Open"]
+        Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td/a[text()="Open"]
         Access To Workbench
     ELSE
         Fail   msg=Cannot launch workbench ${workbench_title} because it is not running...
@@ -174,7 +174,7 @@ Stop Workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${workbench_title}"]]/td[@data-label="Status"]/label/span[@class="pf-c-switch__toggle"]
+        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
         Wait Until Modal Appears
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel} 
     ELSE

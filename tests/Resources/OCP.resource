@@ -51,7 +51,7 @@ Verify CR Status
 
 Namespace Should Not Exist
     [Arguments]    ${namespace}
-    ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${namespace}
+    ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  label_selector=metadata.name=${namespace}
     IF    ${present} == ${TRUE}
         Fail   msg=The namespace ${namespace} exists!
     END

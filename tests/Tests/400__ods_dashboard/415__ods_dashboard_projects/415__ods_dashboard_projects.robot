@@ -139,7 +139,7 @@ Verify User Can Launch A Workbench
     Start Workbench     workbench_title=${WORKBENCH_TITLE}
     Launch Workbench    workbench_title=${WORKBENCH_TITLE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
-    Switch Window      Open Data Hub
+    # Switch Window      Open Data Hub
 
 Verify User Can Stop A Workbench From Projects Home Page
     [Tags]    ODS-1823
@@ -158,7 +158,7 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}  workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
     Launch Workbench From Projects Home Page    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
-    Switch Window      Open Data Hub
+    # Switch Window      Open Data Hub
 
  Verify User Can Delete A Workbench
     [Tags]    ODS-1813
@@ -199,6 +199,20 @@ Verify User Can Delete A Data Connection
     Data Connection Should Not Be Listed    name=${DC_S3_NAME}
     Check Data Connection Secret Is Deleted    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
+Verify User Can Create A Workbench With Environment Variables
+    [Tags]    ODS-XYZ
+    ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB  k8s_type=Secret  input_type=${KEYVALUE_TYPE}
+    ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM  k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
+    ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}  prj_title=${PRJ_TITLE}
+    ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  press_cancel=${FALSE}    envs=${envs_list}
+    Wait Until Workbench Is Started     workbench_title=${workbench_title}
+    Launch Workbench    workbench_title=${WORKBENCH_TITLE}
+    Check Environment Variables Exist    env_variables=${envs_list}
+
+
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -206,15 +220,11 @@ Verify User Can Delete A Data Science Project
     Check Project Is Deleted    namespace=${ns_name}
     # check workbenchs and resources get deleted too
 
-Verify env variables
-    [Tags]    ODS-XYZ
-    ${envs_var}=    Create Dictionary    env_nameA=TestVarA   env_nameB=TestVarB  k8s_type=Secret  input_type=${KEYVALUE_TYPE}
-    ${envs_list}=    Create List   ${envs_var} 
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create Workbench    workbench_title=${EMPTY}  workbench_description=${EMPTY}  prj_title=${PRJ_TITLE}
-    ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
-    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  press_cancel=${FALSE}    envs=${envs_list}
-
+Verify oc get
+    [Tags]    project-get
+    #OpenshiftLibrary.Oc Get    kind=Namespace  name=ods-ci-no-existent
+    OpenshiftLibrary.Oc Get    kind=Project  label_selector=metadata.name=ods-ci
+    # OpenshiftLibrary.Oc Get    kind=Project  label_selector=metadata.name=ods-ci-no-existent
 
 *** Keywords ***
 Project Suite Setup
@@ -288,5 +298,23 @@ Check Storage PersistentVolumeClaim Is Deleted
 
 Check Project Is Deleted
     [Arguments]    ${namespace}
-    Wait Until Keyword Succeeds    10s    2s    Namespace Should Not Exist    namespace=${namespace}
-    
+    Wait Until Keyword Succeeds    10s    1s    Namespace Should Not Exist    namespace=${namespace}
+
+Check Environment Variables Exist
+    [Arguments]    ${env_variables}
+    Add and Run JupyterLab Code Cell in Active Notebook    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])
+    FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}
+        ${k8s__type}=    Set Variable    ${env_variable}[k8s_type]
+        ${input_type}=    Set Variable    ${env_variable}[input_type]
+        Remove From Dictionary    ${env_variable}     k8s_type    input_type
+        Select Environment Variable Types    k8s_type=${k8s__type}    input_type=${input_type}
+        # IF    "${input_type}" == "${KEYVALUE_TYPE}"
+        ${n_pairs}=    Get Length    ${env_variable.keys()}
+        FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable}
+            Log   ${pair_idx}-${key}-${value}
+            Run Keyword And Continue On Failure     Run Cell And Check Output    print(os.environ["${key}"])    ${value}
+        END            
+        # END
+    END
+    Open With JupyterLab Menu    Edit    Select All Cells
+    Open With JupyterLab Menu    Edit    Delete Cells

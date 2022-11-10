@@ -133,7 +133,7 @@ Workbench Status Should Be From Projects Home Page
     [Arguments]     ${workbench_title}      ${status}    ${project_title}
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[text()="${status}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[div//label[@for="${workbench_cr_name}"]]//p[text()="${status}"]
 
 Start Workbench From Projects Home Page
     [Documentation]    Trigger the workbench "start" process from DS Projects home page.
@@ -148,7 +148,7 @@ Start Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
+        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -167,7 +167,7 @@ Stop Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
+        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is not running.
@@ -187,7 +187,7 @@ Launch Workbench From Projects Home Page
     # Open Data Science Projects Home Page
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
+        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
         Access To Workbench
     ELSE
         Fail   msg=Cannot launch workbench ${workbench_title} because it is not running...
@@ -196,5 +196,5 @@ Launch Workbench From Projects Home Page
 Workbench Launch Link Should Be Disabled
     [Arguments]     ${workbench_title}    ${project_title}
     # Element Should Be Disabled       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
-    ${link_status}=    Get Element Attribute    xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
+    ${link_status}=    Get Element Attribute    xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true

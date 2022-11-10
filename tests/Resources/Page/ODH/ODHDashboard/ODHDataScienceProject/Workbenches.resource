@@ -197,9 +197,9 @@ Handle Stop Workbench Confirmation Modal
 
 Click Action From Actions Menu
     [Arguments]    ${item_title}    ${item_type}    ${action}    
-    Click Element       xpath=//tr[td[@data-label="Name"]/*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]/*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
-    Click Element       xpath=//tr[td[@data-label="Name"]/*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
+    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
+    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
+    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
 
 
 Handle Deletion Confirmation Modal

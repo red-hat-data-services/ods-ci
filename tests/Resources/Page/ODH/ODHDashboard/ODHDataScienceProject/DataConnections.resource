@@ -37,20 +37,20 @@ Create S3 Data Connection
 
 Data Connection Should Be Listed
     [Arguments]     ${name}   ${type}   ${connected_workbench}
-    Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//td[@data-label="Name"]/h4[text()="${name}"]
-    Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[text()=" ${type}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//td[@data-label="Name"]/h4/div[text()="${name}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[text()=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[text()="No connections"]
+        Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
             Log    ${index}: ${workbench_title}
-            Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
+            Run Keyword And Continue On Failure    Page Should Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
         END
     END
 
 Data Connection Should Not Be Listed
     [Arguments]     ${name}
-    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]
+    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
 
 Get Openshift Secret From Data Connection
     [Arguments]     ${dc_name}      ${namespace}

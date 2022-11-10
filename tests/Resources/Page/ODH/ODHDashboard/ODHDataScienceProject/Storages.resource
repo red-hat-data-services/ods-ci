@@ -18,25 +18,25 @@ ${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[contains(text(), "Add")
 *** Keywords ***
 Storage Should Be Listed
     [Arguments]     ${name}   ${description}   ${type}   ${connected_workbench}
-    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/h4[text()="${name}"]
+    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/h4/div[text()="${name}"]
     Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/p[text()="${description}"]
-    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[@data-label="Type"]/p[text()=" ${type}"]
+    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[@data-label="Type"]/p[text()=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[text()="No connections"]
+        Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
-            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
+            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
         END
     END
 
 Storage Should Not Be Listed
     [Arguments]     ${name}
-    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4[text()="${name}"]]
+    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
 
 Storage Size Should Be
     [Documentation]        https://kubernetes.io/docs/reference/kubectl/jsonpath/
     [Arguments]     ${name}      ${size}    ${namespace}
-    Click Element    ${STORAGE_SECTION_XP}//tr[td/h4[text()="${name}"]]/td/button[contains(@id,"expand-toggle")]
+    Click Element    ${STORAGE_SECTION_XP}//tr[td/h4/div[text()="${name}"]]/td/button[contains(@id,"expand-toggle")]
     Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
     ${displayed_size}=      Get Text    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
@@ -61,11 +61,12 @@ Create PersistenVolume Storage
 
 Fill In New PV Data
     [Arguments]    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
+    ${is_storage_modal}=     Run Keyword And Return Status    Page Should Contain Element     ${STORAGE_ADD_BTN_2_XP}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
-    Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
+    Run Keyword If   ${is_storage_modal} == ${TRUE}     Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
-    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
+    Run Keyword If   ${is_storage_modal} == ${TRUE}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
     Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
     Clear Element Text    ${STORAGE_SIZE_INPUT_XP}
     IF    ${size} > 1

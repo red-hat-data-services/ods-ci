@@ -257,7 +257,7 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
 Verify RHODS Display Name and Version
     [Documentation]   Verify consistent rhods display name and version using
     ...    ClusterServiceVersion CR
-    [Tags]    Smoke
+    [Tags]    Smoke     ver-122
     ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    namespace=redhat-ods-operator
     ${rhods_csv_name}     Set Variable     ${rhods_csv_detail[0]['metadata']['name']}
     ${rhods_version}      Set Variable       ${rhods_csv_detail[0]['spec']['version']}

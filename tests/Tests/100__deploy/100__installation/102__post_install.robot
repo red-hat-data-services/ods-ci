@@ -257,14 +257,15 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
 Verify RHODS Display Name and Version
     [Documentation]   Verify consistent rhods display name and version using
     ...    ClusterServiceVersion CR
-    [Tags]    Smoke     ver-122
+    [Tags]    Smoke
+    ...       ODS-1862
     ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    namespace=redhat-ods-operator
     ${rhods_csv_name}     Set Variable     ${rhods_csv_detail[0]['metadata']['name']}
     ${rhods_version}      Set Variable       ${rhods_csv_detail[0]['spec']['version']}
     ${rhods_displayname}  Set Variable       ${rhods_csv_detail[0]['spec']['displayName']}
     ${rhods_version_t}    Split String   ${rhods_csv_name}    .    1
-    Should Be Equal       ${rhods_version_t[1]}   ${rhods_version}
-    Should Be Equal       ${rhods_displayname}   Red Hat OpenShift Data Science
+    Should Be Equal       ${rhods_version_t[1]}   ${rhods_version}   msg=RHODS vesrion and label is not consistent
+    Should Be Equal       ${rhods_displayname}   Red Hat OpenShift Data Science  msg=Dieplay name doesn't match
 
 
 *** Keywords ***

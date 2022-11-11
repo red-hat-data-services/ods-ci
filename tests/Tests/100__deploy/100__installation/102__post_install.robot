@@ -254,6 +254,18 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
     Run Keyword And Continue On Failure   Page Should Not Contain    No Components Found
     [Teardown]   Test Teardown For Configmap Changed On RHODS Dashboard
 
+Verify RHODS Display Name and Version
+    [Documentation]   Verify consistent rhods display name and version using
+    ...    ClusterServiceVersion CR
+    [Tags]    Smoke
+    ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    namespace=redhat-ods-operator
+    ${rhods_csv_name}     Set Variable     ${rhods_csv_detail[0]['metadata']['name']}
+    ${rhods_version}      Set Variable       ${rhods_csv_detail[0]['spec']['version']}
+    ${rhods_displayname}  Set Variable       ${rhods_csv_detail[0]['spec']['displayName']}
+    ${rhods_version_t}    Split String   ${rhods_csv_name}    .    1
+    Should Be Equal       ${rhods_version_t[1]}   ${rhods_version}
+    Should Be Equal       ${rhods_displayname}   Red Hat OpenShift Data Science
+
 
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back

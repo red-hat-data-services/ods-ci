@@ -6,9 +6,9 @@ Uninstalling RHODS Operator
   ...  Uninstall RHODS
 
 Uninstall RHODS
-  IF  '${cluster_type}'=='OSD'
+  IF  '${cluster_type}'=='OSD' or "${cluster_type}" == 'managed'
     Uninstall RHODS In OSD
-  ELSE IF  '${cluster_type}'=='PSI' or "${cluster_type}" == "AWS" or "${cluster_type}" == "GCP"
+  ELSE IF  '${cluster_type}'=='PSI' or "${cluster_type}" == "AWS" or "${cluster_type}" == "GCP" or "${cluster_type}" == "selfmanaged"
     Uninstall RHODS In Self Managed Cluster
   ELSE
     Fail  Only PSI and OSD are cluster types available

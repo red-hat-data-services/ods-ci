@@ -51,8 +51,8 @@ Verify User Can Create A Data Science Project
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    resource_name=${PRJ_RESOURCE_NAME}
     Open Data Science Projects Home Page
     Project Should Be Listed    project_title=${PRJ_TITLE}
-    Project's Owner Should Be   expected_username=${OCP_ADMIN_USER.USERNAME}   project_title=${PRJ_TITLE}
-    # Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
+    # Project's Owner Should Be   expected_username=${OCP_ADMIN_USER.USERNAME}   project_title=${PRJ_TITLE}
+    Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench With Ephimeral Storage
@@ -200,7 +200,7 @@ Verify User Can Delete A Data Connection
     Check Data Connection Secret Is Deleted    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
 Verify User Can Create A Workbench With Environment Variables
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-1864
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB  k8s_type=Secret  input_type=${KEYVALUE_TYPE}
     ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM  k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}

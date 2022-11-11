@@ -259,7 +259,7 @@ Verify RHODS Display Name and Version
     ...    ClusterServiceVersion CR
     [Tags]    Smoke
     ...       ODS-1862
-    ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    namespace=redhat-ods-operator
+    ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    label_selector=olm.copiedFrom=redhat-ods-operator
     ${rhods_csv_name}     Set Variable     ${rhods_csv_detail[0]['metadata']['name']}
     ${rhods_version}      Set Variable       ${rhods_csv_detail[0]['spec']['version']}
     ${rhods_displayname}  Set Variable       ${rhods_csv_detail[0]['spec']['displayName']}

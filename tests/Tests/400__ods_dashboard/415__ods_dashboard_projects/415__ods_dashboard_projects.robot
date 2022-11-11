@@ -220,11 +220,6 @@ Verify User Can Delete A Data Science Project
     Check Project Is Deleted    namespace=${ns_name}
     # check workbenchs and resources get deleted too
 
-Verify oc get
-    [Tags]    project-get
-    #OpenshiftLibrary.Oc Get    kind=Namespace  name=ods-ci-no-existent
-    OpenshiftLibrary.Oc Get    kind=Project  label_selector=metadata.name=ods-ci
-    # OpenshiftLibrary.Oc Get    kind=Project  label_selector=metadata.name=ods-ci-no-existent
 
 *** Keywords ***
 Project Suite Setup

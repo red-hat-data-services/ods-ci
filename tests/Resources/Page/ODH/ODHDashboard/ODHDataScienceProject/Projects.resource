@@ -63,6 +63,10 @@ Project Should Be Listed
     [Arguments]     ${project_title}
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/div/a[text()="${project_title}"]
 
+Project Should Not Be Listed
+    [Arguments]     ${project_title}
+    Run keyword And Continue On Failure     Page Should Not Contain Element    xpath=//td/div/a[text()="${project_title}"]
+
 Project's Owner Should Be
     [Arguments]     ${project_title}    ${expected_username}
     Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td[div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
@@ -198,3 +202,18 @@ Workbench Launch Link Should Be Disabled
     # Element Should Be Disabled       xpath=//tr[td/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
     ${link_status}=    Get Element Attribute    xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
+
+Get All Displayed Projects
+    ${projects_names}=    Create List
+    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]/div/a
+    FOR    ${element}    IN    @{elements}
+        ${name}=    Get Text    ${element}
+        Append To List    ${projects_names}    ${name}
+    END
+    [Return]   ${projects_names}
+
+Number Of Displayed Projects Should Be
+    [Arguments]    ${expected_number}
+    ${listed}=    Get All Displayed Projects
+    ${n_listed}=    Get Length    ${listed}
+    Run Keyword And Continue On Failure    Should Be Equal As Integers    ${n_listed}    ${expected_number}

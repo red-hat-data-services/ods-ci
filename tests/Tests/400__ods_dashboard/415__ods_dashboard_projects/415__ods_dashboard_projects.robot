@@ -43,7 +43,47 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     [Tags]    ODS-1783
     Create Project With Special Chars In Resource Name And Expect Error
     # add close modal
-    
+
+Verify User Can Access Only Itw Owned Projects
+    [Tags]    ODS-1868
+    [Setup]    Set Variables For User Access Test
+    Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_1_USER3}    description=${EMPTY}
+    Open Data Science Projects Home Page
+    Project Should Be Listed    project_title=${PRJ_1_USER3}
+    Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_1_USER3}
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_2_USER3}    description=${EMPTY}
+    Open Data Science Projects Home Page
+    Project Should Be Listed    project_title=${PRJ_2_USER3}
+    Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_2_USER3}
+    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
+    Create Data Science Project    title=${PRJ_A_USER4}    description=${EMPTY}
+    Open Data Science Projects Home Page
+    Number Of Displayed Projects Should Be    expected_number=1
+    Project Should Be Listed    project_title=${PRJ_A_USER4}
+    Project's Owner Should Be   expected_username=${TEST_USER_4.USERNAME}   project_title=${PRJ_A_USER4}
+    Project Should Not Be Listed    project_title=${PRJ_1_USER3}
+    Project Should Not Be Listed    project_title=${PRJ_2_USER3}
+    Switch Browser    1
+    Number Of Displayed Projects Should Be    expected_number=2
+    Project Should Not Be Listed    project_title=${PRJ_A_USER4}
+    Project Should Be Listed    project_title=${PRJ_1_USER3}
+    Project Should Be Listed    project_title=${PRJ_2_USER3}
+    Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
+    Capture Page Screenshot
+    Number Of Displayed Projects Should Be    expected_number=3
+    Project Should Be Listed    project_title=${PRJ_1_USER3}
+    Project Should Be Listed    project_title=${PRJ_2_USER3}
+    Project Should Be Listed    project_title=${PRJ_A_USER4}
+    Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
+    Capture Page Screenshot
+    Number Of Displayed Projects Should Be    expected_number=1
+    Project Should Be Listed    project_title=${PRJ_1_USER3}
+    Project Should Be Listed    project_title=${PRJ_2_USER3}
+    Project Should Be Listed    project_title=${PRJ_A_USER4}
+
 Verify User Can Create A Data Science Project
     [Tags]    ODS-1775
     [Setup]   Launch Data Science Project Main Page
@@ -220,6 +260,45 @@ Verify User Can Delete A Data Science Project
     Check Project Is Deleted    namespace=${ns_name}
     # check workbenchs and resources get deleted too
 
+Verify User Can Access Only Its Owned Projects
+    [Tags]    ODS-1868
+    [Setup]    Set Variables For User Access Test
+    Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_1_USER3}    description=${EMPTY}
+    Open Data Science Projects Home Page
+    Project Should Be Listed    project_title=${PRJ_1_USER3}
+    Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_1_USER3}
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_2_USER3}    description=${EMPTY}
+    Open Data Science Projects Home Page
+    Project Should Be Listed    project_title=${PRJ_2_USER3}
+    Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_2_USER3}
+    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
+    Create Data Science Project    title=${PRJ_A_USER4}    description=${EMPTY}
+    Open Data Science Projects Home Page
+    Number Of Displayed Projects Should Be    expected_number=1
+    Project Should Be Listed    project_title=${PRJ_A_USER4}
+    Project's Owner Should Be   expected_username=${TEST_USER_4.USERNAME}   project_title=${PRJ_A_USER4}
+    Project Should Not Be Listed    project_title=${PRJ_1_USER3}
+    Project Should Not Be Listed    project_title=${PRJ_2_USER3}
+    Switch Browser    1
+    Number Of Displayed Projects Should Be    expected_number=2
+    Project Should Not Be Listed    project_title=${PRJ_A_USER4}
+    Project Should Be Listed    project_title=${PRJ_1_USER3}
+    Project Should Be Listed    project_title=${PRJ_2_USER3}
+    Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
+    Capture Page Screenshot
+    Number Of Displayed Projects Should Be    expected_number=3
+    Project Should Be Listed    project_title=${PRJ_1_USER3}
+    Project Should Be Listed    project_title=${PRJ_2_USER3}
+    Project Should Be Listed    project_title=${PRJ_A_USER4}
+    Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
+    Capture Page Screenshot
+    Number Of Displayed Projects Should Be    expected_number=1
+    Project Should Be Listed    project_title=${PRJ_1_USER3}
+    Project Should Be Listed    project_title=${PRJ_2_USER3}
+    Project Should Be Listed    project_title=${PRJ_A_USER4}
 
 *** Keywords ***
 Project Suite Setup
@@ -229,6 +308,11 @@ Project Suite Setup
 Project Suite Teardown
     Close All Browsers
     Delete All Data Science Projects From CLI
+
+Set Variables For User Access Test
+    Set Suite Variable    ${PRJ_1_USER3}    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}-#1
+    Set Suite Variable    ${PRJ_2_USER3}    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}-#2
+    Set Suite Variable    ${PRJ_A_USER4}    ${PRJ_TITLE}-${TEST_USER_4.USERNAME}-#A
 
 Launch Data Science Project Main Page
     [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}    ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}

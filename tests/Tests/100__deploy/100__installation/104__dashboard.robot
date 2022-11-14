@@ -44,70 +44,80 @@ Verify rhods-dashboard ClusterRole Rules
     &{rhodsdashboard_clusterrole_info}=    Fetch rhods-dashboard ClusterRole Info
     @{rhodsdashboard_clusterrole_rules}=    Set Variable    ${rhodsdashboard_clusterrole_info.rules}
     &{rule_1} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[0]
-    @{rule_1_expected_verbs}=    Create List    get    watch    list
-    @{rule_1_expected_apigroups}=    Create List    ${EMPTY}    config.openshift.io
-    @{rule_1_expected_resources}=    Create List    clusterversions
+    @{rule_1_expected_verbs}=    Create List    get    list
+    @{rule_1_expected_apigroups}=    Create List    machine.openshift.io    autoscaling.openshift.io
+    @{rule_1_expected_resources}=    Create List    machineautoscalers    machinesets
     Verify rhods-dashboard ClusterRole Rule    ${rule_1}    ${rule_1_expected_verbs}    ${rule_1_expected_apigroups}    ${rule_1_expected_resources}
     &{rule_2} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[1]
-    @{rule_2_expected_verbs}=    Create List    get    list    watch
-    @{rule_2_expected_apigroups}=    Create List    operators.coreos.com
-    @{rule_2_expected_resources}=    Create List    clusterserviceversions    subscriptions
+    @{rule_2_expected_verbs}=    Create List    get    watch    list
+    @{rule_2_expected_apigroups}=    Create List    ${EMPTY}    config.openshift.io
+    @{rule_2_expected_resources}=    Create List    clusterversions
     Verify rhods-dashboard ClusterRole Rule    ${rule_2}    ${rule_2_expected_verbs}    ${rule_2_expected_apigroups}    ${rule_2_expected_resources}
     &{rule_3} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[2]
-    @{rule_3_expected_verbs}=    Create List    get
-    @{rule_3_expected_apigroups}=    Create List    ${EMPTY}    image.openshift.io
-    @{rule_3_expected_resources}=    Create List    imagestreams/layers
+    @{rule_3_expected_verbs}=    Create List    get    list    watch
+    @{rule_3_expected_apigroups}=    Create List    operators.coreos.com
+    @{rule_3_expected_resources}=    Create List    clusterserviceversions    subscriptions
     Verify rhods-dashboard ClusterRole Rule    ${rule_3}    ${rule_3_expected_verbs}    ${rule_3_expected_apigroups}    ${rule_3_expected_resources}
     &{rule_4} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[3]
-    @{rule_4_expected_verbs}=    Create List    create    delete    get    list    patch    update    watch
-    @{rule_4_expected_apigroups}=    Create List    ${EMPTY}
-    @{rule_4_expected_resources}=    Create List    configmaps    persistentvolumeclaims    secrets
+    @{rule_4_expected_verbs}=    Create List    get
+    @{rule_4_expected_apigroups}=    Create List    ${EMPTY}    image.openshift.io
+    @{rule_4_expected_resources}=    Create List    imagestreams/layers
     Verify rhods-dashboard ClusterRole Rule    ${rule_4}    ${rule_4_expected_verbs}    ${rule_4_expected_apigroups}    ${rule_4_expected_resources}
     &{rule_5} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[4]
-    @{rule_5_expected_verbs}=    Create List    get    list    watch
-    @{rule_5_expected_apigroups}=    Create List    route.openshift.io
-    @{rule_5_expected_resources}=    Create List    routes
+    @{rule_5_expected_verbs}=    Create List    create    delete    get    list    patch    update    watch
+    @{rule_5_expected_apigroups}=    Create List    ${EMPTY}
+    @{rule_5_expected_resources}=    Create List    configmaps    persistentvolumeclaims    secrets
     Verify rhods-dashboard ClusterRole Rule    ${rule_5}    ${rule_5_expected_verbs}    ${rule_5_expected_apigroups}    ${rule_5_expected_resources}
     &{rule_6} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[5]
     @{rule_6_expected_verbs}=    Create List    get    list    watch
-    @{rule_6_expected_apigroups}=    Create List    console.openshift.io
-    @{rule_6_expected_resources}=    Create List    consolelinks
+    @{rule_6_expected_apigroups}=    Create List    route.openshift.io
+    @{rule_6_expected_resources}=    Create List    routes
     Verify rhods-dashboard ClusterRole Rule    ${rule_6}    ${rule_6_expected_verbs}    ${rule_6_expected_apigroups}    ${rule_6_expected_resources}
     &{rule_7} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[6]
     @{rule_7_expected_verbs}=    Create List    get    list    watch
-    @{rule_7_expected_apigroups}=    Create List    operator.openshift.io
-    @{rule_7_expected_resources}=    Create List    consoles
+    @{rule_7_expected_apigroups}=    Create List    console.openshift.io
+    @{rule_7_expected_resources}=    Create List    consolelinks
     Verify rhods-dashboard ClusterRole Rule    ${rule_7}    ${rule_7_expected_verbs}    ${rule_7_expected_apigroups}    ${rule_7_expected_resources}
     &{rule_8} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[7]
-    @{rule_8_expected_verbs}=    Create List    get    watch    list
-    @{rule_8_expected_apigroups}=    Create List    ${EMPTY}    integreatly.org
-    @{rule_8_expected_resources}=    Create List    rhmis
-    Verify rhods-dashboard ClusterRole Rule    ${rule_8}    ${rule_8_expected_verbs}   ${rule_8_expected_apigroups}    ${rule_8_expected_resources}
+    @{rule_8_expected_verbs}=    Create List    get    list    watch
+    @{rule_8_expected_apigroups}=    Create List    operator.openshift.io
+    @{rule_8_expected_resources}=    Create List    consoles
+    Verify rhods-dashboard ClusterRole Rule    ${rule_8}    ${rule_8_expected_verbs}    ${rule_8_expected_apigroups}    ${rule_8_expected_resources}
     &{rule_9} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[8]
-    @{rule_9_expected_verbs}=    Create List    get    list    watch
-    @{rule_9_expected_apigroups}=    Create List    user.openshift.io
-    @{rule_9_expected_resources}=    Create List    groups
+    @{rule_9_expected_verbs}=    Create List    get    watch    list
+    @{rule_9_expected_apigroups}=    Create List    ${EMPTY}    integreatly.org
+    @{rule_9_expected_resources}=    Create List    rhmis
     Verify rhods-dashboard ClusterRole Rule    ${rule_9}    ${rule_9_expected_verbs}   ${rule_9_expected_apigroups}    ${rule_9_expected_resources}
     &{rule_10} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[9]
     @{rule_10_expected_verbs}=    Create List    get    list    watch
-    @{rule_10_expected_apigroups}=    Create List    ${EMPTY}
-    @{rule_10_expected_resources}=    Create List    pods    serviceaccounts    services    namespaces
-    Verify rhods-dashboard ClusterRole Rule    ${rule_10}    ${rule_10_expected_verbs}    ${rule_10_expected_apigroups}    ${rule_10_expected_resources}
+    @{rule_10_expected_apigroups}=    Create List    user.openshift.io
+    @{rule_10_expected_resources}=    Create List    groups
+    Verify rhods-dashboard ClusterRole Rule    ${rule_10}    ${rule_10_expected_verbs}   ${rule_10_expected_apigroups}    ${rule_10_expected_resources}
     &{rule_11} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[10]
-    @{rule_11_expected_verbs}=    Create List    get    list    watch    create    update    patch    delete
-    @{rule_11_expected_apigroups}=    Create List    rbac.authorization.k8s.io
-    @{rule_11_expected_resources}=    Create List    rolebindings    clusterrolebindings    roles
-    Verify rhods-dashboard ClusterRole Rule    ${rule_11}    ${rule_11_expected_verbs}    ${rule_11_expected_apigroups}    ${rule_11_expected_resources}
+    @{rule_11_expected_verbs}=    Create List    get    list    watch
+    @{rule_11_expected_apigroups}=    Create List    user.openshift.io
+    @{rule_11_expected_resources}=    Create List    users
+    Verify rhods-dashboard ClusterRole Rule    ${rule_11}    ${rule_11_expected_verbs}   ${rule_11_expected_apigroups}    ${rule_11_expected_resources}
     &{rule_12} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[11]
     @{rule_12_expected_verbs}=    Create List    get    list    watch
-    @{rule_12_expected_apigroups}=    Create List    ${EMPTY}    events.k8s.io
-    @{rule_12_expected_resources}=    Create List    events
+    @{rule_12_expected_apigroups}=    Create List    ${EMPTY}
+    @{rule_12_expected_resources}=    Create List    pods    serviceaccounts    services    namespaces
     Verify rhods-dashboard ClusterRole Rule    ${rule_12}    ${rule_12_expected_verbs}    ${rule_12_expected_apigroups}    ${rule_12_expected_resources}
     &{rule_13} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[12]
     @{rule_13_expected_verbs}=    Create List    get    list    watch    create    update    patch    delete
-    @{rule_13_expected_apigroups}=    Create List    kubeflow.org
-    @{rule_13_expected_resources}=    Create List    notebooks
+    @{rule_13_expected_apigroups}=    Create List    rbac.authorization.k8s.io
+    @{rule_13_expected_resources}=    Create List    rolebindings    clusterrolebindings    roles
     Verify rhods-dashboard ClusterRole Rule    ${rule_13}    ${rule_13_expected_verbs}    ${rule_13_expected_apigroups}    ${rule_13_expected_resources}
+    &{rule_14} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[13]
+    @{rule_14_expected_verbs}=    Create List    get    list    watch
+    @{rule_14_expected_apigroups}=    Create List    ${EMPTY}    events.k8s.io
+    @{rule_14_expected_resources}=    Create List    events
+    Verify rhods-dashboard ClusterRole Rule    ${rule_14}    ${rule_14_expected_verbs}    ${rule_14_expected_apigroups}    ${rule_14_expected_resources}
+    &{rule_15} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[14]
+    @{rule_15_expected_verbs}=    Create List    get    list    watch    create    update    patch    delete
+    @{rule_15_expected_apigroups}=    Create List    kubeflow.org
+    @{rule_15_expected_resources}=    Create List    notebooks
+    Verify rhods-dashboard ClusterRole Rule    ${rule_15}    ${rule_15_expected_verbs}    ${rule_15_expected_apigroups}    ${rule_15_expected_resources}
 
 *** Keywords ***
 Set Expected Replicas Based On Version

@@ -8,7 +8,7 @@ Suite Teardown    Teardown Model Serving
 ${MODEL_MESH_NAMESPACE}=    mesh-test
 ${ODH_NAMESPACE}=    redhat-ods-applications
 ${MS_REPO}=    https://github.com/opendatahub-io/modelmesh-serving
-${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"example-onnx-mnist__isvc-82e2bf7ea4","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233052,-7.749704,-3.4236808,12.363028,-12.079106,17.26659,-10.570972,0.7130786,3.3217115,1.3621225]}]}
+${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"example-onnx-mnist__isvc-b29c3d91f3","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
 
 
 *** Test Cases ***
@@ -31,7 +31,7 @@ Verify Model Serving Installation
 
 Test Inference
     [Documentation]    Test the inference result
-    [Tags]    ModelMesh_Serving
+    [Tags]    ModelMesh_Serving_Inference
     # make sure model is being served
     # TODO: find better way to understand when model is being served
     # One option is Triton pods being both 5/5 Ready
@@ -61,7 +61,7 @@ Verify Minio Deployment
 Verify ModelMesh Deployment
     @{modelmesh_controller} =  Oc Get    kind=Pod    namespace=${ODH_NAMESPACE}    label_selector=control-plane=modelmesh-controller
     ${containerNames} =  Create List  manager
-    Verify Deployment    ${modelmesh_controller}  1  1  ${containerNames}
+    Verify Deployment    ${modelmesh_controller}  3  1  ${containerNames}
 
 Verify odh-model-controller Deployment
     @{odh_model_controller} =  Oc Get    kind=Pod    namespace=${ODH_NAMESPACE}    label_selector=control-plane=odh-model-controller
@@ -69,9 +69,10 @@ Verify odh-model-controller Deployment
     Verify Deployment    ${odh_model_controller}  3  1  ${containerNames}
 
 Temporary Label MM Namespace
-    ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true
+    ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true --overwrite=true
     Log    ${label}
-    Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} labeled
+    Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} not labeled
+    #Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    "'opendatahub.io/generated-namespace' already has a value (true), and --overwrite is false"
 
 Verify Openvino Deployment
     Run Keyword And Continue On Failure  Temporary Label MM Namespace

@@ -121,23 +121,21 @@ Delete Data Science Projects From CLI
 Delete All Data Science Projects From CLI
     [Documentation]    Deletes all the Openshift Projects which have been created
     ...                via DataScienceProjects feature, using OpenshiftLibrary
-    ${res}  ${projects}=     Run Keyword And Ignore Error     Oc Get    kind=Project  label_selector=opendatahub.io/user=htpasswd-2dcluster-2dadmin-2duser
-    IF    "${res}" == "FAIL"
+    ${res}  ${projects_names}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name" | endswith("[DSP]"))) | .metadata.name'
+    IF    ${res} == ${EMPTY}
         Log    msg=There are probably no DS Projects to delete in teardown.
     ELSE
-        @{to_delete}=   Create List
-        FOR    ${project}    IN    @{projects}
-            Log    ${project['metadata']['name']}
-            Append To List    ${to_delete}     ${project['metadata']['name']}
-        END
-        Delete Data Science Projects From CLI   ocp_projects=${to_delete}
+        ${projects_names}=    Replace String    ${projects_names}    "    ${EMPTY}
+        ${projects_names}=    Text To List    ${projects_names}
+        Delete Data Science Projects From CLI   ocp_projects=${projects_names}
     END
 
 Workbench Status Should Be From Projects Home Page
     [Arguments]     ${workbench_title}      ${status}    ${project_title}
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[div//label[@for="${workbench_cr_name}"]]//p[text()="${status}"]
+    # Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[div//label[@for="${workbench_cr_name}"]]//p[text()="${status}"]
+    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[@for="${workbench_cr_name}"]]/div/p[text()="${status}"]
 
 Start Workbench From Projects Home Page
     [Documentation]    Trigger the workbench "start" process from DS Projects home page.

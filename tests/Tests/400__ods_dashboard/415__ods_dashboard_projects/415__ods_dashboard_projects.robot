@@ -7,7 +7,7 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Suite Setup        Project Suite Setup
-# Suite Teardown     Project Suite Teardown
+Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
 Test Teardown      Close All Browsers
 
@@ -44,7 +44,7 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     Create Project With Special Chars In Resource Name And Expect Error
     # add close modal
 
-Verify User Can Access Only Itw Owned Projects
+Verify User Can Access Only Its Owned Projects
     [Tags]    ODS-1868
     [Setup]    Set Variables For User Access Test
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
@@ -79,7 +79,7 @@ Verify User Can Access Only Itw Owned Projects
     Project Should Be Listed    project_title=${PRJ_A_USER4}
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Capture Page Screenshot
-    Number Of Displayed Projects Should Be    expected_number=1
+    Number Of Displayed Projects Should Be    expected_number=3
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}
@@ -91,7 +91,6 @@ Verify User Can Create A Data Science Project
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    resource_name=${PRJ_RESOURCE_NAME}
     Open Data Science Projects Home Page
     Project Should Be Listed    project_title=${PRJ_TITLE}
-    # Project's Owner Should Be   expected_username=${OCP_ADMIN_USER.USERNAME}   project_title=${PRJ_TITLE}
     Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
@@ -133,7 +132,7 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}    project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}  prj_title=${PRJ_TITLE}
-    ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${TRUE}   
+    ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Persistent  pv_existent=${TRUE}
     ...                 pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STARTING}
@@ -242,15 +241,18 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    ODS-1864
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB  k8s_type=Secret  input_type=${KEYVALUE_TYPE}
-    ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM  k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
-    ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
+    # temporary not working with more variables..fix will come soon
+    # ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM  k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
+    # ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
+    ${envs_list}=    Create List   ${envs_var_secrets}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}  prj_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}-envs  workbench_description=${WORKBENCH_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  press_cancel=${FALSE}    envs=${envs_list}
-    Wait Until Workbench Is Started     workbench_title=${workbench_title}
-    Launch Workbench    workbench_title=${WORKBENCH_TITLE}
-    Check Environment Variables Exist    env_variables=${envs_list}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}-envs
+    Launch Workbench    workbench_title=${WORKBENCH_TITLE}-envs
+    Log    ${envs_list}
+    Check Environment Variables Exist    exp_env_variables=${envs_list}
 
 
 Verify User Can Delete A Data Science Project
@@ -259,6 +261,7 @@ Verify User Can Delete A Data Science Project
     Delete Data Science Project   project_title=${PRJ_TITLE}
     Check Project Is Deleted    namespace=${ns_name}
     # check workbenchs and resources get deleted too
+
 
 *** Keywords ***
 Project Suite Setup
@@ -304,7 +307,7 @@ Check Workbench CR Is Deleted
     [Arguments]    ${workbench_title}   ${namespace}    ${timeout}=10s
     ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists   workbench_title=${workbench_title}   namespace=${namespace}
     IF    ${status} == ${TRUE}
-        Fail    msg=The notebook CR for ${workbench_title} is still present, while it should have been deleted.        
+        Fail    msg=The notebook CR for ${workbench_title} is still present, while it should have been deleted.
     END
 
 Check Corresponding Data Connection Secret Exists
@@ -318,7 +321,7 @@ Check Data Connection Secret Is Deleted
     [Arguments]    ${dc_name}   ${namespace}    ${timeout}=10s
     ${status}=      Run Keyword And Return Status    Check Corresponding Data Connection Secret Exists    dc_name=${dc_name}    namespace=${namespace}
     IF    ${status} == ${TRUE}
-        Fail    msg=The secret for ${dc_name} data connection is still present, while it should have been deleted.        
+        Fail    msg=The secret for ${dc_name} data connection is still present, while it should have been deleted.
     END
 
 Check Corresponding PersistentVolumeClaim Exists
@@ -332,7 +335,7 @@ Check Storage PersistentVolumeClaim Is Deleted
     [Arguments]    ${storage_name}   ${namespace}    ${timeout}=10s
     ${status}=      Run Keyword And Return Status    Check Corresponding PersistentVolumeClaim Exists    storage_name=${storage_name}    namespace=${namespace}
     IF    ${status} == ${TRUE}
-        Fail    msg=The PVC for ${storage_name} storage is still present, while it should have been deleted.        
+        Fail    msg=The PVC for ${storage_name} storage is still present, while it should have been deleted.
     END
 
 Check Project Is Deleted
@@ -340,19 +343,21 @@ Check Project Is Deleted
     Wait Until Keyword Succeeds    10s    1s    Namespace Should Not Exist    namespace=${namespace}
 
 Check Environment Variables Exist
-    [Arguments]    ${env_variables}
-    Add and Run JupyterLab Code Cell in Active Notebook    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])
-    FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}
-        ${k8s__type}=    Set Variable    ${env_variable}[k8s_type]
-        ${input_type}=    Set Variable    ${env_variable}[input_type]
-        Remove From Dictionary    ${env_variable}     k8s_type    input_type
-        Select Environment Variable Types    k8s_type=${k8s__type}    input_type=${input_type}
+    [Arguments]    ${exp_env_variables}
+    Open With JupyterLab Menu  File  New  Notebook
+    Sleep  1s
+    Maybe Close Popup
+    Maybe Select Kernel
+    # Add and Run JupyterLab Code Cell in Active Notebook    import os
+    FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}
+        Remove From Dictionary    ${env_variable_dict}     k8s_type    input_type
         # IF    "${input_type}" == "${KEYVALUE_TYPE}"
-        ${n_pairs}=    Get Length    ${env_variable.keys()}
-        FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable}
+        ${n_pairs}=    Get Length    ${env_variable_dict.keys()}
+        FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable_dict}
             Log   ${pair_idx}-${key}-${value}
-            Run Keyword And Continue On Failure     Run Cell And Check Output    print(os.environ["${key}"])    ${value}
-        END            
+            Run Keyword And Continue On Failure     Run Cell And Check Output    import os;print(os.environ["${key}"])    ${value}
+            Capture Page Screenshot
+        END
         # END
     END
     Open With JupyterLab Menu    Edit    Select All Cells

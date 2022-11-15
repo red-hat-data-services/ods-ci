@@ -39,7 +39,8 @@ Create Workbench
     Select Workbench Jupyter Image    image_name=${image_name}
     ## Select Workbench Container Size # to fix, by default Small is already select
     IF    "${envs}" != "${NONE}"
-        Add Environment Variables In Workbench    env_variables=${envs}
+        ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
+        Add Environment Variables In Workbench    env_variables=${envs_copy}
     END
     IF    "${storage}" == "Persistent"
         IF    ${pv_existent} == ${TRUE}
@@ -66,6 +67,7 @@ Create Workbench
 Add Environment Variables In Workbench
     [Arguments]    ${env_variables}
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
+    ${n_objects}=    Get Length    ${env_variables}
     FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}
         ${k8s__type}=    Set Variable    ${env_variable}[k8s_type]
         ${input_type}=    Set Variable    ${env_variable}[input_type]
@@ -82,7 +84,12 @@ Add Environment Variables In Workbench
                 IF    ${n_pairs}-${pair_idx} > 1
                     Click Button    Add another variable
                 END
-            END            
+            END      
+        END
+        Sleep  5s
+        Capture Page Screenshot
+        IF    ${n_objects}-${idx} > 1
+                Click Button    Add more variables
         END
     END
 

@@ -72,7 +72,6 @@ Temporary Label MM Namespace
     ${label} =    Run    oc label namespace ${MODEL_MESH_NAMESPACE} opendatahub.io/generated-namespace=true --overwrite=true
     Log    ${label}
     Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    namespace/${MODEL_MESH_NAMESPACE} not labeled
-    #Run Keyword And Continue On Failure  Should Be Equal As Strings    ${label}    "'opendatahub.io/generated-namespace' already has a value (true), and --overwrite is false"
 
 Verify Openvino Deployment
     Run Keyword And Continue On Failure  Temporary Label MM Namespace

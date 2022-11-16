@@ -251,7 +251,6 @@ Verify User Can Create A Workbench With Environment Variables
     Launch Workbench    workbench_title=${WORKBENCH_TITLE}-envs
     Check Environment Variables Exist    exp_env_variables=${envs_list}
 
-
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}

@@ -107,12 +107,15 @@ Get Openshift Namespace From Data Science Project
 Delete Data Science Projects From CLI
     [Documentation]     Deletets the Openshift Projects using OpenshiftLibrary
     [Arguments]     ${ocp_projects}
-    FOR   ${project}    IN  @{ocp_projects}
-        ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  name=${project}
-        IF    ${present} == ${FALSE}
+    FOR   ${displayed_name}    IN  @{ocp_projects}
+        ${dp_with_suffix}=    Set Variable    ${displayed_name}\[DSP]
+        ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${dp_with_suffix}")) | .metadata.name'
+        ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
+        IF    "${project_k8s_name}" == "${EMPTY}"
+            Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}
             Continue For Loop
         ELSE
-            OpenshiftLibrary.Oc Delete    kind=Project   name=${project}
+            OpenshiftLibrary.Oc Delete    kind=Project   name=${project_k8s_name}
         END
     END
 

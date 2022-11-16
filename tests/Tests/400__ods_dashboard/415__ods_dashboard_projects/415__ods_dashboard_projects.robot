@@ -241,17 +241,14 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    ODS-1864
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB  k8s_type=Secret  input_type=${KEYVALUE_TYPE}
-    # temporary not working with more variables..fix will come soon
-    # ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM  k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
-    # ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
-    ${envs_list}=    Create List   ${envs_var_secrets}
+    ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM  k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
+    ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_TITLE}-envs  workbench_description=${WORKBENCH_DESCRIPTION}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  press_cancel=${FALSE}    envs=${envs_list}
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}-envs
     Launch Workbench    workbench_title=${WORKBENCH_TITLE}-envs
-    Log    ${envs_list}
     Check Environment Variables Exist    exp_env_variables=${envs_list}
 
 
@@ -348,6 +345,7 @@ Check Environment Variables Exist
     Sleep  1s
     Maybe Close Popup
     Maybe Select Kernel
+    Sleep   3s
     # Add and Run JupyterLab Code Cell in Active Notebook    import os
     FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}
         Remove From Dictionary    ${env_variable_dict}     k8s_type    input_type

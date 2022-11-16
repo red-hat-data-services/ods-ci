@@ -8,8 +8,6 @@ ${DS_PROJECT_XP}=     xpath=//h1[text()="Data science projects"]
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
 ${RESOURCE_INPUT_XP}=    xpath=//input[@id="resource-manage-project-modal-name"]
-# ${TITLE_INPUT_XP}=    xpath=//input[@aria-label="Project name"]
-# ${DESCR_INPUT_XP}=    xpath=//textarea[@aria-label="Project description"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
 ${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project"]
@@ -122,7 +120,7 @@ Delete All Data Science Projects From CLI
     [Documentation]    Deletes all the Openshift Projects which have been created
     ...                via DataScienceProjects feature, using OpenshiftLibrary
     ${res}  ${projects_names}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name" | endswith("[DSP]"))) | .metadata.name'
-    IF    ${res} == ${EMPTY}
+    IF    "${res}" == "${EMPTY}"
         Log    msg=There are probably no DS Projects to delete in teardown.
     ELSE
         ${projects_names}=    Replace String    ${projects_names}    "    ${EMPTY}

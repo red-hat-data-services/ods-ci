@@ -68,39 +68,36 @@ Add Environment Variables In Workbench
     [Arguments]    ${env_variables}
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
     ${n_objects}=    Get Length    ${env_variables}
-    FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}
+    FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}    start=1
         ${k8s__type}=    Set Variable    ${env_variable}[k8s_type]
         ${input_type}=    Set Variable    ${env_variable}[input_type]
         Remove From Dictionary    ${env_variable}     k8s_type    input_type
-        Select Environment Variable Types    k8s_type=${k8s__type}    input_type=${input_type}
+        Select Environment Variable Types    k8s_type=${k8s__type}    input_type=${input_type}    variable_index=${idx}
         IF    "${input_type}" == "${KEYVALUE_TYPE}"
             ${n_pairs}=    Get Length    ${env_variable.keys()}
             FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable}
                 Log   ${pair_idx}-${key}-${value}
                 Run Keyword And Continue On Failure    Wait Until Page Contains Element    xpath=//input[@aria-label="key of item ${pair_idx}"]
-                Input Text    xpath=//input[@aria-label="key of item ${pair_idx}"]    ${key}
-                Input Text    xpath=//input[@aria-label="value of item ${pair_idx}"]    ${value}
-                # Add Environment Variable    key=${key}    value=${value}    type=${env_type}
+                Input Text    xpath=//section[@aria-label="Environment variables"]/div[@class="pf-l-split"][${idx}]//input[@aria-label="key of item ${pair_idx}"]    ${key}
+                Input Text    xpath=//section[@aria-label="Environment variables"]/div[@class="pf-l-split"][${idx}]//input[@aria-label="value of item ${pair_idx}"]    ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
-                    Click Button    Add another variable
+                    Click Element    xpath=//section[@aria-label="Environment variables"]/div[@class="pf-l-split"][${idx}]//button[text()="Add another variable"]
                 END
             END      
         END
-        Sleep  5s
-        Capture Page Screenshot
-        IF    ${n_objects}-${idx} > 1
-                Click Button    Add more variables
+        IF    ${n_objects}-${idx} > 0
+            Click Button    Add more variables
         END
     END
 
 Select Environment Variable Types
-    [Arguments]    ${k8s_type}    ${input_type}
-    Run Keyword And Continue On Failure    Wait Until Page Contains Element    xpath=//section[@aria-label="Environment variables"]//div[@class="pf-l-stack__item"]/div[contains(@class,"pf-c-select")]/button
-    Click Element    xpath=//section[@aria-label="Environment variables"]//div[contains(@class,"pf-c-select")]/button
+    [Arguments]    ${k8s_type}    ${input_type}    ${variable_index}
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element    xpath=//section[@aria-label="Environment variables"]/div[@class="pf-l-split"][${variable_index}]//div[@class="pf-l-stack__item"]/div[contains(@class,"pf-c-select")]/button
+    Click Element    xpath=//section[@aria-label="Environment variables"]/div[@class="pf-l-split"][${variable_index}]//div[contains(@class,"pf-c-select")]/button
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
     Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    xpath=//section[@aria-label="Environment variables"]//button[div/span[text()="Select one"]]
-    Click Element    xpath=//section[@aria-label="Environment variables"]//button[div/span[text()="Select one"]]
+    Click Element    xpath=//section[@aria-label="Environment variables"]/div[@class="pf-l-split"][${variable_index}]//button[div/span[text()="Select one"]]
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
     Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
 

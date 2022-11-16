@@ -263,16 +263,20 @@ Verify User Can Delete A Data Science Project
 *** Keywords ***
 Project Suite Setup
     Set Library Search Order    SeleniumLibrary
+    ${to_delete}=    Create List    ${PRJ_TITLE}
+    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     # RHOSi Setup
 
 Project Suite Teardown
     Close All Browsers
-    Delete All Data Science Projects From CLI
+    # Delete All Data Science Projects From CLI
+    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
 
 Set Variables For User Access Test
     Set Suite Variable    ${PRJ_1_USER3}    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}-#1
     Set Suite Variable    ${PRJ_2_USER3}    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}-#2
     Set Suite Variable    ${PRJ_A_USER4}    ${PRJ_TITLE}-${TEST_USER_4.USERNAME}-#A
+    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_1_USER3}    ${PRJ_2_USER3}    ${PRJ_A_USER4}
 
 Launch Data Science Project Main Page
     [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}    ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}

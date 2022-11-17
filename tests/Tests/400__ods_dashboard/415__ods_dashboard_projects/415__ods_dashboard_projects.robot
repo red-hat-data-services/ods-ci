@@ -243,7 +243,7 @@ Verify User Can Delete A Persistent Storage
     Storage Should Not Be Listed    name=${pv_name}
     Check Storage PersistentVolumeClaim Is Deleted    storage_name=${pv_name}    namespace=${ns_name}
 
-Verify User Cand Add A S3 Data Connection
+Verify User Can Add A S3 Data Connection
     [Tags]    Sanity    ODS-1825
     [Documentation]    Verifies users can add a Data connection to AWS S3
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}

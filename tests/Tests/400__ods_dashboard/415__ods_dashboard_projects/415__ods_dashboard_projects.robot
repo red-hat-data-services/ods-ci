@@ -36,16 +36,21 @@ ${DC_S3_TYPE}=    Object storage
 *** Test Cases ***
 Verify User Cannot Create Project With Empty Fields
     [Tags]    ODS-1783
+    [Documentation]    Verifies users is not allowed to create a project with Empty title
     Create Project With Empty Title And Expect Error
     Close Generic Modal If Present
 
 Verify User Cannot Create Project Using Special Chars In Resource Name
-    [Tags]    ODS-1783
+    [Tags]    ODS-1875
+    [Documentation]    Verifies users is not allowed to create a project with a custom resource name 
+    ...                containing special characters like "@" or "!"
     Create Project With Special Chars In Resource Name And Expect Error
     Close Generic Modal If Present
 
 Verify User Can Access Only Its Owned Projects
     [Tags]    ODS-1868
+    [Documentation]    Verifies each user can access only thei owned projects. Except for
+    ...                cluster and dedicated admins which should be able to fetch all the DS Projects
     [Setup]    Set Variables For User Access Test
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     Open Data Science Projects Home Page
@@ -86,6 +91,7 @@ Verify User Can Access Only Its Owned Projects
 
 Verify User Can Create A Data Science Project
     [Tags]    ODS-1775
+    [Documentation]    Verifies users can create a DS project
     [Setup]   Launch Data Science Project Main Page
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    resource_name=${PRJ_RESOURCE_NAME}
@@ -96,6 +102,7 @@ Verify User Can Create A Data Science Project
 
 Verify User Can Create And Start A Workbench With Ephimeral Storage
     [Tags]    ODS-1812
+    [Documentation]    Verifies users can create workbench using Ephemeral storage
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${EMPTY}  workbench_description=${EMPTY}  prj_title=${PRJ_TITLE}
@@ -106,12 +113,12 @@ Verify User Can Create And Start A Workbench With Ephimeral Storage
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
-    # the continue on failure should be temporary
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
 
 Verify User Can Create A PV Storage
     [Tags]    ODS-1819
+    [Documentation]    Verifies users can create PersistenVolume storage
     ${pv_name}=    Set Variable    ${PV_BASENAME}-A
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -127,6 +134,7 @@ Verify User Can Create A PV Storage
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
     [Tags]    ODS-1814
+    [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
@@ -136,13 +144,13 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     ...                 pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STARTING}
-    # continue on failure is temporary
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_2_TITLE}   namespace=${ns_name}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
     [Tags]    ODS-1816
+    [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -153,7 +161,6 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     Reload Page
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_3_TITLE}      status=${WORKBENCH_STATUS_STARTING}
-    # the continue on failure should be temporary
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_3_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_3_TITLE}   namespace=${ns_name}
     Reload Page
@@ -165,6 +172,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
 
 Verify User Can Stop A Workbench
     [Tags]    ODS-1817
+    [Documentation]    Verifies users can stop a running workbench from project details page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Stop Workbench    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
     Stop Workbench    workbench_title=${WORKBENCH_TITLE}
@@ -172,16 +180,17 @@ Verify User Can Stop A Workbench
 
 Verify User Can Launch A Workbench
     [Tags]    ODS-1815
+    [Documentation]    Verifies users can launch/open a running workbench from project details page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Start Workbench     workbench_title=${WORKBENCH_TITLE}
     Launch Workbench    workbench_title=${WORKBENCH_TITLE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
-    # Switch Window      Open Data Hub
 
 Verify User Can Stop A Workbench From Projects Home Page
     [Tags]    ODS-1823
+    [Documentation]    Verifies users can stop a running workbench from Data Science Projects home page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}    namespace=${ns_name}
@@ -191,16 +200,17 @@ Verify User Can Stop A Workbench From Projects Home Page
 
 Verify User Can Start And Launch A Workbench From Projects Home Page
     [Tags]    ODS-1818
+    [Documentation]    Verifies users can launch/open a running workbench from Data Science Projects home page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}    namespace=${ns_name}
     Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}  workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
     Launch Workbench From Projects Home Page    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
-    # Switch Window      Open Data Hub
 
  Verify User Can Delete A Workbench
     [Tags]    ODS-1813
+    [Documentation]    Verifies users can delete a workbench
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Delete Workbench    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
@@ -210,6 +220,7 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
 
 Verify User Can Delete A Persistent Storage
     [Tags]    ODS-1824
+    [Documentation]    Verifies users can delete a PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-TO-DELETE
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -222,6 +233,7 @@ Verify User Can Delete A Persistent Storage
 
 Verify User Cand Add A S3 Data Connection
     [Tags]    ODS-1825
+    [Documentation]    Verifies users can add a Data connection to AWS S3
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}    aws_access_key=${S3.AWS_ACCESS_KEY_ID}
@@ -231,6 +243,7 @@ Verify User Cand Add A S3 Data Connection
 
 Verify User Can Delete A Data Connection
     [Tags]    ODS-1826
+    [Documentation]    Verifies users can delete a Data connection
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Delete Data Connection    name=${DC_S3_NAME}   press_cancel=${True}
@@ -240,6 +253,7 @@ Verify User Can Delete A Data Connection
 
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    ODS-1864
+    [Documentation]    Verifies users can create a workbench and inject environment variables during creation
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB  k8s_type=Secret  input_type=${KEYVALUE_TYPE}
     ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM  k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
@@ -253,6 +267,7 @@ Verify User Can Create A Workbench With Environment Variables
 
 Verify User Can Delete A Data Science Project
     [Tags]    ODS-1784
+    [Documentation]    Verifies users can delete a Data Science project
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Delete Data Science Project   project_title=${PRJ_TITLE}
     Check Project Is Deleted    namespace=${ns_name}
@@ -289,7 +304,7 @@ Create Project With Empty Title And Expect Error
 
 Create Project With Special Chars In Resource Name And Expect Error
     ${error_rgx}=   Set Variable    Element[ a-zA-Z=\(\)\[\]"'\/\s]+was not enabled[ a-zA-Z=\(\)\[\]"'\/\s0-9.]+
-    Run Keyword And Expect Error    Element*was not enabled*   Create Data Science Project    title=${EMPTY}  description=${EMPTY}    resource_name=ods-ci-@-project#name
+    Run Keyword And Expect Error    Element*was not enabled*   Create Data Science Project    title=${PRJ_TITLE}-spec-chars  description=${EMPTY}    resource_name=ods-ci-@-project#name
 
 Check Corresponding Namespace Exists
     [Arguments]     ${project_title}

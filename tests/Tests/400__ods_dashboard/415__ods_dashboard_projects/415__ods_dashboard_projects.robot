@@ -279,12 +279,13 @@ Project Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
-    # RHOSi Setup
+    RHOSi Setup
 
 Project Suite Teardown
     Close All Browsers
     # Delete All Data Science Projects From CLI
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    RHOSi Teardown
 
 Set Variables For User Access Test
     Set Suite Variable    ${PRJ_1_USER3}    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}-#1

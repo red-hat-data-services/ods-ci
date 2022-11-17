@@ -32,7 +32,7 @@ ${DC_S3_AWS_SECRET_ACCESS_KEY}=    custom dummy secret access key
 ${DC_S3_AWS_ACCESS_KEY}=    custom dummy access key id
 ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
-${DC_S3_TYPE}=    Object storage[Tags]    Sanity    ODS
+${DC_S3_TYPE}=    Object storage
 
 
 *** Test Cases ***

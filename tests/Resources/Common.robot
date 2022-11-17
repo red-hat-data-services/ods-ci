@@ -194,7 +194,7 @@ Is Generic Modal Displayed
     [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
     IF    ${partial_match} == ${TRUE}
         ${is_displayed}=    Run Keyword And Return Status
-        ...                 Page Should Contain Element    xpath=//*[contains(id,"${id}")]
+        ...                 Page Should Contain Element    xpath=//*[contains(@id,"${id}")]
     ELSE
         ${is_displayed}=    Run Keyword And Return Status
         ...                 Page Should Contain Element    xpath=//*[@id="${id}")]

@@ -37,12 +37,12 @@ ${DC_S3_TYPE}=    Object storage
 Verify User Cannot Create Project With Empty Fields
     [Tags]    ODS-1783
     Create Project With Empty Title And Expect Error
-    # add close modal
+    Close Generic Modal If Present
 
 Verify User Cannot Create Project Using Special Chars In Resource Name
     [Tags]    ODS-1783
     Create Project With Special Chars In Resource Name And Expect Error
-    # add close modal
+    Close Generic Modal If Present
 
 Verify User Can Access Only Its Owned Projects
     [Tags]    ODS-1868

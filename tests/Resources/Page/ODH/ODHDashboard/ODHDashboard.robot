@@ -704,7 +704,7 @@ Open Application Switcher Menu
 Maybe Wait For Dashboard Loading Spinner Page
     [Documentation]     Detecs the loading symbol (spinner) and wait for it to disappear.
     ...                 If the spinner does not appear, the keyword ignores the error.
-    [Arguments]    ${timeout}=10s
+    [Arguments]    ${timeout}=5s
     Run Keyword And Ignore Error    Run Keywords
     ...                                 Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
     ...                                 AND

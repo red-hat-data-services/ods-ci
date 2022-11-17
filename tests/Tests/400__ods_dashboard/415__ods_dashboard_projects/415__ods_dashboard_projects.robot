@@ -28,6 +28,8 @@ ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
 # PV size are in GB
 ${PV_SIZE}=         2
 ${DC_S3_NAME}=    ods-ci-s3
+${DC_S3_AWS_SECRET_ACCESS_KEY}=    custom dummy secret access key
+${DC_S3_AWS_ACCESS_KEY}=    custom dummy access key id
 ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
 ${DC_S3_TYPE}=    Object storage[Tags]    Sanity    ODS
@@ -248,8 +250,8 @@ Verify User Can Add A S3 Data Connection
     [Documentation]    Verifies users can add a Data connection to AWS S3
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}    aws_access_key=${S3.AWS_ACCESS_KEY_ID}
-    ...                          aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}    aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}    aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}    aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${NONE}
     Check Corresponding Data Connection Secret Exists    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 

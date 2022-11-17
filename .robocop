@@ -1,27 +1,35 @@
 #########################################################
 # Robocop configuration for ods-ci coding style guide   #
 #########################################################
-
-#########################################################
-# Excluded rules                                        #
-#########################################################
---exclude could-be-forced-tags
+--exclude could-be-test-tags
 --exclude if-can-be-used
 --exclude todo-in-comment
-#--exclude missing-doc-suite
-#--exclude missing-doc-test-case
-#--exclude missing-doc-keyword
-
-#########################################################
-# Code quality gates                                    #
-#########################################################
-#--configure return_status:quality_gate:E=0:W=769:I=79
-
-#########################################################
-# Rule configuration                                    #
-#########################################################
-# too-many-calls-in-keyword  (default = 10)
-#--configure too-many-calls-in-keyword:max_calls:12
 
 # line-too-long:line_length (default = 120)
-#--configure line-too-long:line_length:130
+--configure line-too-long:line_length:130
+--configure line-too-long:severity_threshold:warning=130:error=180
+
+# too-long-keyword:max_len (default: max_len=40, ignore_docs=false)
+--configure too-long-keyword:max_len:40
+--configure too-long-keyword:severity_threshold:warning=40:error=50
+--configure too-long-keyword:ignore_docs:true
+
+# too-long-test-case:max_len (default: max_len=20, ignore_docs=false)
+--configure too-long-test-case:max_len:20
+--configure too-long-test-case:severity_threshold:warning=20:error=30
+--configure too-long-test-case:ignore_docs:true
+
+# too-many-calls-in-keyword  (default: max_calls=10)
+--configure too-many-calls-in-keyword:max_calls:10
+--configure too-many-calls-in-keyword:severity_threshold:warning=10:error=18
+
+# too-many-calls-in-test-case  (default: max_calls=10)
+--configure too-many-calls-in-test-case:max_calls:10
+--configure too-many-calls-in-test-case:severity_threshold:warning=10:error=18
+
+# file-too-long  (default: max_lines=400)
+--configure file-too-long:max_lines:400
+--configure file-too-long:severity_threshold:warning=400:error=600
+
+# Configure return status depending on number of issues by type
+#--configure return_status:quality_gate:E=0:W=769:I=79

@@ -17,6 +17,7 @@ ${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[contains(text(), "Add")
 
 *** Keywords ***
 Storage Should Be Listed
+    [Documentation]    Checks storage is listed in DS Project details page
     [Arguments]     ${name}   ${description}   ${type}   ${connected_workbench}
     Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/h4/div[text()="${name}"]
     Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/p[text()="${description}"]
@@ -30,11 +31,13 @@ Storage Should Be Listed
     END
 
 Storage Should Not Be Listed
+    [Documentation]    Checks storage is not listed in DS Project details page
     [Arguments]     ${name}
     Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
 
 Storage Size Should Be
-    [Documentation]        https://kubernetes.io/docs/reference/kubectl/jsonpath/
+    [Documentation]    Checks displayed PV size corresponds to PV size in Openshift.
+    ...                Query on Openshift annotation based on this syntax: https://kubernetes.io/docs/reference/kubectl/jsonpath/
     [Arguments]     ${name}      ${size}    ${namespace}
     Click Element    ${STORAGE_SECTION_XP}//tr[td/h4/div[text()="${name}"]]/td/button[contains(@id,"expand-toggle")]
     Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
@@ -47,6 +50,7 @@ Storage Size Should Be
     Run keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
 
 Create PersistenVolume Storage
+    [Documentation]    Create a PersistenVolume storage in DS Project details page
     [Arguments]    ${project_title}    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}
     Click Button    ${STORAGE_ADD_BTN_1_XP}
     Fill In New PV Data    ${name}    ${description}    ${size}    ${connected_workbench}
@@ -60,6 +64,7 @@ Create PersistenVolume Storage
     Wait Until Project Is Open    project_title=${project_title}
 
 Fill In New PV Data
+    [Documentation]    Compiles the modal for creating a new PersistenVolume storage in DS Project details page
     [Arguments]    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
     ${is_storage_modal}=     Run Keyword And Return Status    Page Should Contain Element     ${STORAGE_ADD_BTN_2_XP}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
@@ -86,6 +91,7 @@ Fill In New PV Data
     END
     
 Set Connection Between PV And Workbench
+    [Documentation]    Connects a PV to an existent workbench
     [Arguments]    ${workbench_title}    ${mount_dir}
     Wait Until Element Is Enabled    xpath=//button[@aria-label="Options menu"]
     Click Element    xpath=//button[@aria-label="Options menu"]
@@ -96,11 +102,13 @@ Set Connection Between PV And Workbench
     Input Text    ${STORAGE_MOUNT_DIR_INPUT_XP}    ${mount_dir}
 
 Delete Storage
+    [Documentation]    Deletes a cluster storage from DS Project details page
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
     Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=storage    press_cancel=${press_cancel}
 
 Get Openshift PVC From Storage 
+    [Documentation]    Retrieves the PVC resource name from Openshift given the Displayed Name in DS Project details page
     [Arguments]     ${name}      ${namespace}
     ${rc}  ${pvc_name}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].metadata.name}'
     [Return]    ${rc}    ${pvc_name}

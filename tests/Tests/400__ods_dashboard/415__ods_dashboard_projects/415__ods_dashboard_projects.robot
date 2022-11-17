@@ -276,44 +276,55 @@ Verify User Can Delete A Data Science Project
 
 *** Keywords ***
 Project Suite Setup
+    [Documentation]    Suite setup steps for testing DSG. It creates some test variables
+    ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     RHOSi Setup
 
 Project Suite Teardown
+    [Documentation]    Suite teardown steps after testing DSG. It Deletes
+    ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
     # Delete All Data Science Projects From CLI
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Set Variables For User Access Test
+    [Documentation]    Creates titles for testing projects used in basic access testing
     Set Suite Variable    ${PRJ_1_USER3}    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}-#1
     Set Suite Variable    ${PRJ_2_USER3}    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}-#2
     Set Suite Variable    ${PRJ_A_USER4}    ${PRJ_TITLE}-${TEST_USER_4.USERNAME}-#A
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_1_USER3}    ${PRJ_2_USER3}    ${PRJ_A_USER4}
 
 Launch Data Science Project Main Page
+    [Documentation]    Launch DS Projects page in RHODS Dashboard using a given user
     [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}    ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}
     Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${ocp_user_auth_type} 
     ...                    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     Open Data Science Projects Home Page
 
 Create Project With Empty Title And Expect Error
+    [Documentation]    Tries to create a DS project with emtpy title and checks the Selenium error
     ${error_rgx}=   Set Variable    Element[ a-zA-Z=\(\)\[\]"'\/\s]+was not enabled[ a-zA-Z=\(\)\[\]"'\/\s0-9.]+
     Run Keyword And Expect Error    Element*was not enabled*   Create Data Science Project    title=${EMPTY}  description=${EMPTY}
 
 Create Project With Special Chars In Resource Name And Expect Error
+    [Documentation]    Tries to create a DS project by overwriting the resource name
+    ...                with a custom one containing special characters, and checks the Selenium error
     ${error_rgx}=   Set Variable    Element[ a-zA-Z=\(\)\[\]"'\/\s]+was not enabled[ a-zA-Z=\(\)\[\]"'\/\s0-9.]+
     Run Keyword And Expect Error    Element*was not enabled*   Create Data Science Project    title=${PRJ_TITLE}-spec-chars  description=${EMPTY}    resource_name=ods-ci-@-project#name
 
 Check Corresponding Namespace Exists
+    [Documentation]    Checks if a DS Project has its own corresponding Openshift namespace
     [Arguments]     ${project_title}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     Oc Get      kind=Project    name=${ns_name}
     [Return]    ${ns_name}
 
 Check Corresponding Notebook CR Exists
+    [Documentation]    Checks if a workbench has its own Notebook CustomResource
     [Arguments]     ${workbench_title}  ${namespace}
     ${res}  ${response}=    Get Openshift Notebook CR From Workbench   workbench_title=${workbench_title}  namespace=${namespace}
     IF    "${response}" == "${EMPTY}"
@@ -321,6 +332,7 @@ Check Corresponding Notebook CR Exists
     END
 
 Check Workbench CR Is Deleted
+    [Documentation]    Checks if when a workbench is deleted its Notebook CustomResource gets deleted too
     [Arguments]    ${workbench_title}   ${namespace}    ${timeout}=10s
     ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists   workbench_title=${workbench_title}   namespace=${namespace}
     IF    ${status} == ${TRUE}
@@ -328,6 +340,7 @@ Check Workbench CR Is Deleted
     END
 
 Check Corresponding Data Connection Secret Exists
+    [Documentation]    Checks if a S3 Data Connection has its corresponding Openshift Secret
     [Arguments]     ${dc_name}  ${namespace}
     ${res}  ${response}=    Get Openshift Secret From Data Connection   dc_name=${dc_name}  namespace=${namespace}
     IF    "${response}" == "${EMPTY}"
@@ -335,6 +348,7 @@ Check Corresponding Data Connection Secret Exists
     END
 
 Check Data Connection Secret Is Deleted
+    [Documentation]    Checks if when a S3 Data Connection is deleted its Openshift Secret gets deleted too
     [Arguments]    ${dc_name}   ${namespace}    ${timeout}=10s
     ${status}=      Run Keyword And Return Status    Check Corresponding Data Connection Secret Exists    dc_name=${dc_name}    namespace=${namespace}
     IF    ${status} == ${TRUE}
@@ -342,6 +356,7 @@ Check Data Connection Secret Is Deleted
     END
 
 Check Corresponding PersistentVolumeClaim Exists
+    [Documentation]    Checks if a PV cluster storage has its corresponding Openshift PersistentVolumeClaim
     [Arguments]     ${storage_name}  ${namespace}
     ${res}  ${response}=    Get Openshift PVC From Storage   name=${storage_name}  namespace=${namespace}
     IF    "${response}" == "${EMPTY}"
@@ -349,6 +364,7 @@ Check Corresponding PersistentVolumeClaim Exists
     END
 
 Check Storage PersistentVolumeClaim Is Deleted
+    [Documentation]    Checks if when a PV cluster storage is deleted its Openshift PersistentVolumeClaim gets deleted too
     [Arguments]    ${storage_name}   ${namespace}    ${timeout}=10s
     ${status}=      Run Keyword And Return Status    Check Corresponding PersistentVolumeClaim Exists    storage_name=${storage_name}    namespace=${namespace}
     IF    ${status} == ${TRUE}
@@ -356,10 +372,12 @@ Check Storage PersistentVolumeClaim Is Deleted
     END
 
 Check Project Is Deleted
+    [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
     [Arguments]    ${namespace}
     Wait Until Keyword Succeeds    10s    1s    Namespace Should Not Exist    namespace=${namespace}
 
 Check Environment Variables Exist
+    [Documentation]    Runs code in JupyterLab to check if the expected environment variables are available
     [Arguments]    ${exp_env_variables}
     Open With JupyterLab Menu  File  New  Notebook
     Sleep  1s

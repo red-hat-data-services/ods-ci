@@ -1,7 +1,9 @@
 *** Settings ***
+Documentation    Collection of keywords to interact with Data Science Projects
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
 Resource       ./Workbenches.resource
+
 
 *** Variables ***
 ${DS_PROJECT_XP}=     xpath=//h1[text()="Data science projects"]
@@ -27,6 +29,7 @@ Open Data Science Projects Home Page
     Maybe Wait For Dashboard Loading Spinner Page
 
 Is Data Science Projects Page Open
+    [Documentation]    Checks if Data Science Projects home page is open. Returns TRUE or FALSE
     Close Generic Modal If Present
     ${page_open}=   Run Keyword And Return Status   Page Should Contain Element     ${DS_PROJECT_XP}
     [Return]    ${page_open}
@@ -52,8 +55,9 @@ Delete Data Science Project
     END
     Project Should Be Listed    project_title=${project_title}
     Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
-    Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project    press_cancel=${press_cancel}
-    ...          additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
+    Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project    
+    ...                                   press_cancel=${press_cancel}
+    ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
@@ -64,17 +68,18 @@ Wait Until Project Is Open
 Project Should Be Listed
     [Documentation]    Checks a Project is available in DS Project home page
     [Arguments]     ${project_title}
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td/div/a[text()="${project_title}"]
+    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//td/div/a[text()="${project_title}"]
 
 Project Should Not Be Listed
     [Documentation]    Checks a Project is not available in DS Project home page
     [Arguments]     ${project_title}
-    Run keyword And Continue On Failure     Page Should Not Contain Element    xpath=//td/div/a[text()="${project_title}"]
+    Run Keyword And Continue On Failure     Page Should Not Contain Element    xpath=//td/div/a[text()="${project_title}"]
 
 Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one
     [Arguments]     ${project_title}    ${expected_username}
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//td[div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
+    Run Keyword And Continue On Failure     
+    ...    Page Should Contain Element    xpath=//td[div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}
@@ -145,35 +150,45 @@ Workbench Status Should Be From Projects Home Page
     [Documentation]    Checks the workbench status is the expected one, from the DS Project home page
     [Arguments]     ${workbench_title}      ${status}    ${project_title}
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
-    ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
-    # Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[div//label[@for="${workbench_cr_name}"]]//p[text()="${status}"]
-    Run keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[@for="${workbench_cr_name}"]]/div/p[text()="${status}"]
+    ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
+    ...                                                                           namespace=${namespace}
+    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[@for="${workbench_cr_name}"]]/div/p[text()="${status}"]
 
 Start Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "start" process from DS Projects home page.
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
     ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
     [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}
-    ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}    project_title=${project_title}
+    ${is_stopped}=      Run Keyword And Return Status   
+    ...                    Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}
+    ...                                                                            status=${WORKBENCH_STATUS_STOPPED}   
+    ...                                                                            project_title=${project_title}
     IF    ${is_stopped} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
                 ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
             END
-                ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
+                ${_}    ${workbench_cr_name}=       
+                ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    
+                ...                                                        namespace=${namespace}
         END
         Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
-    Wait Until Workbench Is Started From Projects Home Page     workbench_title=${workbench_title}   project_title=${project_title}
+    Wait Until Workbench Is Started From Projects Home Page     workbench_title=${workbench_title}
+    ...                                                         project_title=${project_title}
 
 Stop Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "stop" process from DS Projects home page.
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
     ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
-    [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}    ${press_cancel}=${FALSE}
-    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
+    [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}
+    ...             ${workbench_cr_name}=${EMPTY}    ${press_cancel}=${FALSE}
+    ${is_started}=      Run Keyword And Return Status
+    ...                        Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}
+    ...                                                                                status=${WORKBENCH_STATUS_RUNNING}
+    ...                                                                                project_title=${project_title}
     IF    ${is_started} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
@@ -186,22 +201,26 @@ Stop Workbench From Projects Home Page
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is not running.
     END
-    Wait Until Workbench Is Stopped From Projects Home Page     workbench_title=${workbench_title}   project_title=${project_title}
+    Wait Until Workbench Is Stopped From Projects Home Page     workbench_title=${workbench_title}
+    ...                                                         project_title=${project_title}
 
 Wait Until Workbench Is Started From Projects Home Page
     [Documentation]    Waits until the workbench status is "RUNNING", from the DS Project home page
     [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
-    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
+    ...     workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
 
 Wait Until Workbench Is Stopped From Projects Home Page
     [Documentation]    Waits until the workbench status is "STOPPED", from the DS Project home page
     [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
-    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}   project_title=${project_title}
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
+    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}   project_title=${project_title}
 
 Launch Workbench From Projects Home Page
     [Documentation]    Launches a running workbench from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
-    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
+    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
+    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
         Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
         Access To Workbench

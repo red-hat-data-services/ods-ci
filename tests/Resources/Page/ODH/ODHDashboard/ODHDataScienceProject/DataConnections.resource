@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation    Collection of keywords to interact with Data Connections
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
 Resource       Projects.resource

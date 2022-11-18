@@ -83,7 +83,10 @@ Verify Tensorflow Image GPU Workload
 *** Keywords ***
 Verify Tensorflow Image Suite Setup
     [Documentation]    Suite Setup, spawns tensorflow image
-    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF    ${version_check}==False
+       Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    END
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small

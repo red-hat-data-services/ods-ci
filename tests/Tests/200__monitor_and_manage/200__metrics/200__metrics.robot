@@ -17,6 +17,9 @@ Test Teardown       End Metrics Web Test
 @{ALERT_GROUPS}     Builds    DeadManSnitch    RHODS Notebook controllers
 ...    RHODS-PVC-Usage    SLOs-haproxy_backend_http_responses_total    SLOs-probe_success
 
+@{ALERT_GROUPS_120}    DeadManSnitch    RHODS Notebook controllers
+...    RHODS-PVC-Usage    SLOs-haproxy_backend_http_responses_total    SLOs-probe_success
+
 
 *** Test Cases ***
 Test Existence of Prometheus Alerting Rules
@@ -112,7 +115,12 @@ Check Prometheus Recording Rules
     Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    record    @{RECORD_GROUPS}
 
 Check Prometheus Alerting Rules
-    Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF    ${version_check}==False
+        Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS}
+    ELSE
+        Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS_120}
+    END
 
 Read Current CPU Usage
     [Documentation]    Returns list of current cpu usage

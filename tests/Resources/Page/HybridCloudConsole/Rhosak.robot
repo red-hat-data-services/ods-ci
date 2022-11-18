@@ -36,6 +36,7 @@ Create Kafka Stream Instance
     Click Element    xpath=//div[text()='${cloud_provider}']
     Click Element    id:form-cloud-region-option
     Click Element    xpath=//li/*[text()="${stream_region}"]
+    Sleep  2s
     Click Button    Create instance
     Capture Page Screenshot    form.png
     Wait Until Page Does Not Contain Element    xpath=//div[@id='modalCreateKafka']    timeout=20

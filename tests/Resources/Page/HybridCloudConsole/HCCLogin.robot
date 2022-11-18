@@ -18,6 +18,7 @@ Login to HCC
   ${login-required} =  Is SSO Login Page Visible
   IF    ${login-required} == True
     Wait Until Element is Visible  xpath://input[@id="username-verification"]  timeout=5
+    Maybe Accept Cookie Policy
     Input Text  id=username-verification  ${username}
     Click Button    Next
     Wait Until Element is Visible  xpath://input[@id="password"]  timeout=5

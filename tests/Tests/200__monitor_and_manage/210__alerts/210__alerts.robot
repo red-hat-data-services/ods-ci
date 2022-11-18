@@ -33,7 +33,7 @@ Verify All Alerts Severity
     ...       Tier1
     ...       ODS-1227
 
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
     IF    ${version_check}==False
         Verify "Jupyter Image Builds Are Failing" Alerts Severity And Continue On Failure
     END
@@ -51,7 +51,7 @@ Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-l
     ...       Tier1
     ...       ODS-540
 
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
     IF    ${version_check}==False
         Verify Alert Is Not Firing And Continue On Failure
         ...    Builds    Jupyter image builds are failing    alert-duration=120

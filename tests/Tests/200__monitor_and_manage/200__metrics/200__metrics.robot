@@ -115,7 +115,7 @@ Check Prometheus Recording Rules
     Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    record    @{RECORD_GROUPS}
 
 Check Prometheus Alerting Rules
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
     IF    ${version_check}==False
         Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS}
     ELSE

@@ -50,11 +50,14 @@ Verify CR Status
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True
 
 Namespace Should Not Exist
+    [Documentation]    Checks a given Project is not present in openshift
     [Arguments]    ${namespace}
-    ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Project  label_selector=metadata.name=${namespace}
+    ${present} =     Run Keyword And Return Status   
+    ...    OpenshiftLibrary.Oc Get    kind=Project  label_selector=metadata.name=${namespace}
     IF    ${present} == ${TRUE}
         Fail   msg=The namespace ${namespace} exists!
     END
+
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
     ...                 in the cluster (e.g., usually on OSD, ROSA).

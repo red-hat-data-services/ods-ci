@@ -706,6 +706,6 @@ Maybe Wait For Dashboard Loading Spinner Page
     ...                 If the spinner does not appear, the keyword ignores the error.
     [Arguments]    ${timeout}=5s
     Run Keyword And Ignore Error    Run Keywords
-    ...                                 Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
-    ...                                 AND
-    ...                                 Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
+    ...    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
+    ...    AND
+    ...    Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}

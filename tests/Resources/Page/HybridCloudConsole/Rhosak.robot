@@ -54,7 +54,7 @@ Check Stream Creation
 Delete Kafka Stream Instance
     [Documentation]    Deletes a kafka stream from RHOSAK UI
     [Arguments]    ${stream_name}
-    Click From Actions Menu    search_col=Name    search_value=${stream_name}    action=Delete
+    Click From Actions Menu    search_col=Name    search_value=${stream_name}    action=Delete instance
     Wait Until Page Contains HCC Generic Modal
     Capture Page Screenshot    1.png
     Input Text    id:name__input    ${stream_name}
@@ -233,10 +233,11 @@ Clean Up RHOSAK
            IF    ${confirm_exists}==${TRUE}
                 Click Button   xpath=${CONFIRM_WARNING_FIRST_BUTTON_XP}
            END
+        ELSE
+            Switch Window    title:Streams for Apache Kafka | Red Hat OpenShift Application Services
         END
     END
     Oc Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
-    Switch Window    title:Red Hat OpenShift Streams for Apache Kafka
     Menu.Navigate To Page    Streams for Apache Kafka    Kafka Instances
     Enter Stream    stream_name=${stream_to_delete}
     Enter Stream Topics Section

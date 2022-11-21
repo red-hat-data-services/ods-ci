@@ -227,6 +227,7 @@ Clean Up RHOSAK
     [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}  ${rhosak_app_id}
     ${window_title}=    Get Title
     IF    $window_title == "Streams for Apache Kafka | Red Hat OpenShift Application Services"
+        Maybe Skip RHOSAK Tour
         ${modal_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=//*[contains(@class, "modal")]
         IF    ${modal_exists}==${TRUE}
            Click Button    xpath=//button[@aria-label="Close"]

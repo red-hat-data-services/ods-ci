@@ -235,9 +235,9 @@ Clean Up RHOSAK
            IF    ${confirm_exists}==${TRUE}
                 Click Button   xpath=${CONFIRM_WARNING_FIRST_BUTTON_XP}
            END
-        ELSE
-            Switch Window    title:Streams for Apache Kafka | Red Hat OpenShift Application Services
         END
+    ELSE
+        Switch Window    title:Streams for Apache Kafka | Red Hat OpenShift Application Services
     END
     Oc Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Menu.Navigate To Page    Streams for Apache Kafka    Kafka Instances

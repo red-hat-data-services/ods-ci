@@ -76,6 +76,7 @@ Verify User Is Able to Produce and Consume Events
   ${KAFKA_CLIENT_SECRET}=  Set Variable  ${kafka_sa_creds}[KAFKA_CLIENT_SECRET]
   ## Create topic
   Enter Stream  stream_name=${STREAM_NAME_TEST}
+  Maybe Skip RHOSAK Tour
   Enter Stream Topics Section
   # Wait For HCC Splash Page
   Create Topic  topic_name_to_create=${TOPIC_NAME_TEST}

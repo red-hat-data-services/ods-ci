@@ -12,7 +12,7 @@ Wait For HCC Splash Page
    Wait Until Page Does Not Contain Element    xpath://span[contains(@class, 'pf-c-spinner')]   timeout=20
    Sleep    3
 
-Login to HCC
+Login To HCC
   [Arguments]  ${username}  ${password}
   Sleep  5
   ${login-required} =  Is SSO Login Page Visible

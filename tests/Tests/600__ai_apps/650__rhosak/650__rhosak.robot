@@ -64,29 +64,27 @@ Verify User Is Able to Produce and Consume Events
   Maybe Skip RHOSAK Tour
   Sleep  5
   Wait Until Page Contains    Create Kafka instance
-  ## Create kafka stream
+  # Create kafka stream
   Create Kafka Stream Instance  stream_name=${STREAM_NAME_TEST}  stream_region=${STREAM_REGION_TEST}  cloud_provider=${CLOUD_PROVIDER_TEST}
   Wait Until Keyword Succeeds    450  1  Check Stream Status  target_status=Ready  target_stream=${STREAM_NAME_TEST}
-  ## Create service account
+  # Create service account
   Click From Actions Menu  search_col=Name  search_value=${STREAM_NAME_TEST}  action=Connection
   Wait Until Page Contains Element  xpath=//input[@aria-label="Bootstrap server"]
   ${bootstrap_server}=  Get Element Attribute    xpath=//input[@aria-label="Bootstrap server"]  value
   ${kafka_sa_creds}=  Create Service Account From Connection Menu  sa_description=${SERVICE_ACCOUNT_TEST}
   ${KAFKA_CLIENT_ID}=  Set Variable  ${kafka_sa_creds}[KAFKA_CLIENT_ID]
   ${KAFKA_CLIENT_SECRET}=  Set Variable  ${kafka_sa_creds}[KAFKA_CLIENT_SECRET]
-  ## Create topic
+  # Create topic
   Enter Stream  stream_name=${STREAM_NAME_TEST}
   Maybe Skip RHOSAK Tour
   Enter Stream Topics Section
-  # Wait For HCC Splash Page
   Create Topic  topic_name_to_create=${TOPIC_NAME_TEST}
   Page Should Contain Element    xpath=//a[text()='${TOPIC_NAME_TEST}']
-  ## Assign permissions to SA
+  # Assign permissions to SA
   Enter Stream Access Section
   Assign Permissions To ServiceAccount in RHOSAK  sa_client_id=${KAFKA_CLIENT_ID}  sa_to_assign=${SERVICE_ACCOUNT_TEST}
   ...                                             topic_to_assign=${TOPIC_NAME_TEST}  cg_to_assign=${CONSUMER_GROUP_TEST}
-
-  ## Spawn a notebook with env variables
+  # Spawn a notebook with env variables
   Switch Window  title:Red Hat OpenShift Data Science
   Wait for RHODS Dashboard to Load
   Launch JupyterHub Spawner From Dashboard
@@ -95,7 +93,7 @@ Verify User Is Able to Produce and Consume Events
   ...                                   KAFKA_PASSWORD=${KAFKA_CLIENT_SECRET}  KAFKA_TOPIC=${TOPIC_NAME_TEST}
   ...                                   KAFKA_CONSUMER_GROUP=${CONSUMER_GROUP_TEST}
   Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook  envs=&{notebook_envs}
-  ## clone JL notebooks from git and run
+  # clone JL notebooks from git and run
   Clone Git Repository  REPO_URL=${GIT_REPO_NOTEBOOKS}
   Open Consumer Notebook  dir_path=${NOTEBOOK_DIR_PATH}  filename=${NOTEBOOK_CONS_FILENAME}
   ${cons_tab_id} =    Get Selected Tab ID

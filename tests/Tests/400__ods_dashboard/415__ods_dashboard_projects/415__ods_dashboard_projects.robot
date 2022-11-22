@@ -56,14 +56,14 @@ Verify User Cannot Create Project With Empty Fields
     Close Generic Modal If Present
 
 Verify User Cannot Create Project Using Special Chars In Resource Name
-    [Tags]    Sanity    ODS-1875
+    [Tags]    Sanity    Tier1    ODS-1875
     [Documentation]    Verifies users is not allowed to create a project with a custom resource name 
     ...                containing special characters like "@" or "!"
     Create Project With Special Chars In Resource Name And Expect Error
     Close Generic Modal If Present
 
 Verify User Can Access Only Its Owned Projects
-    [Tags]    Sanity    ODS-1868
+    [Tags]    Sanity    Tier1    ODS-1868
     [Documentation]    Verifies each user can access only thei owned projects. Except for
     ...                cluster and dedicated admins which should be able to fetch all the DS Projects
     [Setup]    Set Variables For User Access Test
@@ -106,7 +106,7 @@ Verify User Can Access Only Its Owned Projects
     Project Should Be Listed    project_title=${PRJ_A_USER4}
 
 Verify User Can Create A Data Science Project
-    [Tags]    Sanity    ODS-1775
+    [Tags]    Sanity    Tier1    ODS-1775
     [Documentation]    Verifies users can create a DS project
     [Setup]   Launch Data Science Project Main Page
     Open Data Science Projects Home Page
@@ -118,7 +118,7 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench With Ephimeral Storage
-    [Tags]    Sanity    ODS-1812
+    [Tags]    Sanity    Tier1    ODS-1812
     [Documentation]    Verifies users can create workbench using Ephemeral storage
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -135,16 +135,16 @@ Verify User Can Create And Start A Workbench With Ephimeral Storage
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
 
 Verify User Can Create A PV Storage
-    [Tags]    Sanity    ODS-1819
-    [Documentation]    Verifies users can create PersistenVolume storage
+    [Tags]    Sanity    Tier1    ODS-1819
+    [Documentation]    Verifies users can Create PersistentVolume Storage
     ${pv_name}=    Set Variable    ${PV_BASENAME}-A
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenchs}=    Create Dictionary    ${WORKBENCH_TITLE}=mount-data
-    Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
+    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}     press_cancel=${TRUE}    
     ...                               project_title=${PRJ_TITLE}
-    Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
+    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${workbenchs}   project_title=${PRJ_TITLE}
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${workbenchs}
@@ -152,11 +152,11 @@ Verify User Can Create A PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Sanity    ODS-1814
+    [Tags]    Sanity    Tier1    ODS-1814
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
+    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}    project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
@@ -168,7 +168,7 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_2_TITLE}   namespace=${ns_name}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Sanity    ODS-1816
+    [Tags]    Sanity    Tier1    ODS-1816
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -191,7 +191,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Stop A Workbench
-    [Tags]    Sanity    ODS-1817
+    [Tags]    Sanity    Tier1    ODS-1817
     [Documentation]    Verifies users can stop a running workbench from project details page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Stop Workbench    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
@@ -199,7 +199,7 @@ Verify User Can Stop A Workbench
     # add checks on notebook pod is terminated but CR is present
 
 Verify User Can Launch A Workbench
-    [Tags]    Sanity    ODS-1815
+    [Tags]    Sanity    Tier1    ODS-1815
     [Documentation]    Verifies users can launch/open a running workbench from project details page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -210,7 +210,7 @@ Verify User Can Launch A Workbench
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
 Verify User Can Stop A Workbench From Projects Home Page
-    [Tags]    Sanity    ODS-1823
+    [Tags]    Sanity    Tier1    ODS-1823
     [Documentation]    Verifies users can stop a running workbench from Data Science Projects home page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -222,7 +222,7 @@ Verify User Can Stop A Workbench From Projects Home Page
     # add checks on notebook pod is terminated but CR is present
 
 Verify User Can Start And Launch A Workbench From Projects Home Page
-    [Tags]    Sanity    ODS-1818
+    [Tags]    Sanity    Tier1    ODS-1818
     [Documentation]    Verifies users can launch/open a running workbench from Data Science Projects home page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -234,7 +234,7 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
 
  Verify User Can Delete A Workbench
-    [Tags]    Sanity    ODS-1813
+    [Tags]    Sanity    Tier1    ODS-1813
     [Documentation]    Verifies users can delete a workbench
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -244,12 +244,12 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     Check Workbench CR Is Deleted    workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
 
 Verify User Can Delete A Persistent Storage
-    [Tags]    Sanity    ODS-1824
+    [Tags]    Sanity    Tier1    ODS-1824
     [Documentation]    Verifies users can delete a PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-TO-DELETE
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create PersistenVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
+    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}   project_title=${PRJ_TITLE}
     Delete Storage    name=${pv_name}    press_cancel=${TRUE}
     Delete Storage    name=${pv_name}    press_cancel=${FALSE}
@@ -257,7 +257,7 @@ Verify User Can Delete A Persistent Storage
     Check Storage PersistentVolumeClaim Is Deleted    storage_name=${pv_name}    namespace=${ns_name}
 
 Verify User Can Add A S3 Data Connection
-    [Tags]    Sanity    ODS-1825
+    [Tags]    Sanity    Tier1    ODS-1825
     [Documentation]    Verifies users can add a Data connection to AWS S3
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -269,7 +269,7 @@ Verify User Can Add A S3 Data Connection
     Check Corresponding Data Connection Secret Exists    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
 Verify User Can Delete A Data Connection
-    [Tags]    Sanity    ODS-1826
+    [Tags]    Sanity    Tier1    ODS-1826
     [Documentation]    Verifies users can delete a Data connection
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -279,7 +279,7 @@ Verify User Can Delete A Data Connection
     Check Data Connection Secret Is Deleted    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
 Verify User Can Create A Workbench With Environment Variables
-    [Tags]    Sanity    ODS-1864
+    [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB  
     ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
@@ -297,7 +297,7 @@ Verify User Can Create A Workbench With Environment Variables
     Check Environment Variables Exist    exp_env_variables=${envs_list}
 
 Verify User Can Delete A Data Science Project
-    [Tags]    Sanity    ODS-1784
+    [Tags]    Sanity    Tier1    ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Delete Data Science Project   project_title=${PRJ_TITLE}

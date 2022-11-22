@@ -21,7 +21,7 @@ ${SPAWNER_LINK}=        xpath=//a[text()="Launch Jupyter"]
 
 *** Keywords ***
 Open Data Science Projects Home Page
-    [Documentation]    Verifies submenu Settings > Cluster settings" is visible
+    [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     Page Should Contain    Data Science Projects
     Click Link      Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
@@ -35,7 +35,7 @@ Is Data Science Projects Page Open
     [Return]    ${page_open}
 
 Open Data Science Project Details Page
-    [Documentation]    Verifies submenu Settings > Cluster settings" is visible
+    [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     [Arguments]     ${project_title}
     ${is_open}=    Is Data Science Projects Page Open
     IF    ${is_open} == ${FALSE}
@@ -120,7 +120,8 @@ Get Openshift Namespace From Data Science Project
     [Return]    ${ns_name[1]}
 
 Delete Data Science Projects From CLI
-    [Documentation]     Deletets the Openshift Projects using OpenshiftLibrary
+    [Documentation]     Deletes the Openshift Projects using OpenshiftLibrary.
+    ...                 It expects to receive a list of project (i.e,${ocp_projects}) as argument
     [Arguments]     ${ocp_projects}
     FOR   ${displayed_name}    IN  @{ocp_projects}
         ${dp_with_suffix}=    Set Variable    ${displayed_name}\[DSP]
@@ -231,8 +232,10 @@ Launch Workbench From Projects Home Page
 Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
-    ${link_status}=    Get Element Attribute    xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
+    ${link_status}=    Get Element Attribute
+    ...    xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
+    ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 
 Get All Displayed Projects
     [Documentation]    Gets all the DS projects visible in the DS Projects home page

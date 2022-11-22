@@ -50,7 +50,7 @@ Storage Size Should Be
     ${rc}  ${oc_object_size}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.capacity.storage}'
     Run keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
 
-Create PersistenVolume Storage
+Create PersistentVolume Storage
     [Documentation]    Create a PersistenVolume storage in DS Project details page
     [Arguments]    ${project_title}    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}
     Click Button    ${STORAGE_ADD_BTN_1_XP}

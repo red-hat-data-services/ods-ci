@@ -29,7 +29,7 @@ ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment var
 *** Keywords ***
 Create Workbench
     [Documentation]     Creates a new workbench in a Data Science project. It assumes
-    ...                 the DS Project deta. It allows to add new or existent PV storage,
+    ...                 the DS Project data. It allows to add new or existent PV storage,
     ...                 add Environment variables and select Jupyter image
     [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}   

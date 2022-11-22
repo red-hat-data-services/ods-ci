@@ -13,6 +13,7 @@ Wait For HCC Splash Page
    Sleep    3
 
 Login To HCC
+  [Documentation]    Performs log in to Hybrid Cloud Console web page
   [Arguments]  ${username}  ${password}
   Sleep  5
   ${login-required} =  Is SSO Login Page Visible

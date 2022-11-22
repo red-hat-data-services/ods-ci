@@ -82,9 +82,9 @@ Verify User Is Able to Produce and Consume Events
   Page Should Contain Element    xpath=//a[text()='${TOPIC_NAME_TEST}']
   # Assign permissions to SA
   Enter Stream Access Section
-  Assign Permissions To ServiceAccount in RHOSAK  sa_client_id=${KAFKA_CLIENT_ID}  
+  Assign Permissions To ServiceAccount In RHOSAK  sa_client_id=${KAFKA_CLIENT_ID}
   ...          sa_to_assign=${SERVICE_ACCOUNT_TEST}
-  ...          topic_to_assign=${TOPIC_NAME_TEST}  
+  ...          topic_to_assign=${TOPIC_NAME_TEST}
   ...          cg_to_assign=${CONSUMER_GROUP_TEST}
   # Spawn a notebook with env variables
   Switch Window  title:Red Hat OpenShift Data Science

@@ -233,7 +233,7 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     Launch Workbench From Projects Home Page    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
 
- Verify User Can Delete A Workbench
+Verify User Can Delete A Workbench
     [Tags]    Sanity    Tier1    ODS-1813
     [Documentation]    Verifies users can delete a workbench
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}

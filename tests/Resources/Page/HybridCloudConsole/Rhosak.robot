@@ -237,7 +237,7 @@ Clean Up RHOSAK
            END
         END
     ELSE
-        Switch Window    title:Streams for Apache Kafka | Red Hat OpenShift Application Services
+        Switch Window    title:Red Hat OpenShift Streams for Apache Kafka
     END
     Oc Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
     Menu.Navigate To Page    Streams for Apache Kafka    Kafka Instances

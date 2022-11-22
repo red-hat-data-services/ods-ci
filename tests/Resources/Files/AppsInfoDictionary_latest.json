@@ -159,7 +159,7 @@
                   },
                   "2": {
                         "text": "https://console.redhat.com/application-services/streams/kafkas",
-                        "url": "https://console.redhat.com/beta/application-services/streams/kafkas",
+                        "url": "https://console.redhat.com/application-services/streams/kafkas",
                         "matching": ""
                   }
                }

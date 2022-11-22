@@ -192,7 +192,7 @@ Get OAuth Cookie
 
 Is Generic Modal Displayed
     [Documentation]    Checks if a modal window is displayed on the page.
-    ...                It assumes the html "id" contains "pf-modal", but it can be
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
     ...                piloted with ${id} and ${partial_match} arguments
     [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
     IF    ${partial_match} == ${TRUE}
@@ -204,9 +204,9 @@ Is Generic Modal Displayed
     END
     [Return]    ${is_displayed}
 
-Wait Until Modal Disappears
+Wait Until Generic Modal Disappears
     [Documentation]    Waits until a modal window disappears from the page.
-    ...                It assumes the html "id" contains "pf-modal", but it can be
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
     ...                piloted with ${id} and ${partial_match} arguments
     [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
     ${is_modal}=    Is Generic Modal Displayed
@@ -220,9 +220,9 @@ Wait Until Modal Disappears
         Log     No Modals on the screen right now..     level=WARN
     END
 
-Wait Until Modal Appears
+Wait Until Generic Modal Appears
     [Documentation]    Waits until a modal window appears on the page.
-    ...                It assumes the html "id" contains "pf-modal", but it can be
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
     ...                piloted with ${id} and ${partial_match} arguments
     [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
     ${is_modal}=    Is Generic Modal Displayed
@@ -241,5 +241,5 @@ Close Generic Modal If Present
     ${is_modal}=    Is Generic Modal Displayed
     IF    ${is_modal} == ${TRUE}
         Click Element    xpath=//button[@aria-label="Close"]
-        Wait Until Modal Disappears
+        Wait Until Generic Modal Disappears
     END

@@ -34,7 +34,7 @@ Create S3 Data Connection
         Wait Until Element Is Enabled    ${STORAGE_ADD_BTN_2_XP}
         Click Button    ${STORAGE_ADD_BTN_2_XP}
     END
-    Wait Until Modal Disappears
+    Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
 
 Data Connection Should Be Listed

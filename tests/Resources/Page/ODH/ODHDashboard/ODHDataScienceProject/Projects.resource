@@ -96,7 +96,7 @@ Create Data Science Project
     END
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
-    Wait Until Modal Disappears
+    Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${title}
 
 Validate Generated Resource Name

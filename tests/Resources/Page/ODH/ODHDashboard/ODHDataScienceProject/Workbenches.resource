@@ -65,7 +65,7 @@ Create Workbench
         Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
         Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
-    Wait Until Modal Disappears
+    Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${prj_title}
 
 Add Environment Variables In Workbench
@@ -213,7 +213,7 @@ Stop Workbench
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
         Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
-        Wait Until Modal Appears
+        Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel} 
     ELSE
         Fail   msg=Cannot stop workbench ${workbench_title} because it is not running...
@@ -246,7 +246,7 @@ Click Action From Actions Menu
 Handle Deletion Confirmation Modal
     [Documentation]    Handles confirmation modal on item deletion
     [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
-    Wait Until Modal Appears
+    Wait Until Generic Modal Appears
     Run Keyword And Continue On Failure    Page Should Contain    Delete ${item_type}?
     Run Keyword And Continue On Failure    Page Should Contain    This action cannot be undone.
     IF    "${additional_msg}" != "${NONE}"
@@ -261,7 +261,7 @@ Handle Deletion Confirmation Modal
     ELSE
         Click Button    xpath=//button[text()="Delete ${item_type}"]
     END
-    Wait Until Modal Disappears
+    Wait Until Generic Modal Disappears
 
     
 Delete Workbench

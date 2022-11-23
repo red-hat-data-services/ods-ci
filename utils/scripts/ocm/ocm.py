@@ -556,7 +556,6 @@ class OpenshiftClusterManager:
             return False
         else:
             return True
-    
 
     def hide_values_in_op_json(self, fields, json_str):
         json_dict = json.loads(json_str)
@@ -566,7 +565,7 @@ class OpenshiftClusterManager:
                 if p["id"] == field:
                     p["value"] = "##hidden##"
         return json.dumps(json_dict)
-        
+
 
     def install_addon(
         self,

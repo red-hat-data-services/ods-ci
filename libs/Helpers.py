@@ -154,7 +154,7 @@ class Helpers:
             self.BuiltIn.fail(
                 "Something got wrong while installing Managed Starburst. Check the logs"
             )
-    
+
     @keyword
     def uninstall_managed_starburst_using_addon_flow(self, cluster_name):
         ocm_client = OpenshiftClusterManager()

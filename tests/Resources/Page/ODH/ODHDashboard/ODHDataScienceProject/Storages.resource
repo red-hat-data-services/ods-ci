@@ -16,13 +16,14 @@ ${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]/
 ${STORAGE_ADD_BTN_1_XP}=           xpath=//div[div/h4[@id="cluster-storages"]]/div/button[text()="Add cluster storage"]
 ${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[contains(text(), "Add")]
 
+
 *** Keywords ***
 Storage Should Be Listed
     [Documentation]    Checks storage is listed in DS Project details page
     [Arguments]     ${name}   ${description}   ${type}   ${connected_workbench}
-    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/h4/div[text()="${name}"]
-    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/p[text()="${description}"]
-    Run keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[@data-label="Type"]/p[text()=" ${type}"]
+    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/h4/div[text()="${name}"]
+    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/p[text()="${description}"]
+    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[@data-label="Type"]/p[text()=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
         Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
@@ -34,7 +35,7 @@ Storage Should Be Listed
 Storage Should Not Be Listed
     [Documentation]    Checks storage is not listed in DS Project details page
     [Arguments]     ${name}
-    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    Run Keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
 
 Storage Size Should Be
     [Documentation]    Checks displayed PV size corresponds to PV size in Openshift.
@@ -44,11 +45,11 @@ Storage Size Should Be
     Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
     ${displayed_size}=      Get Text    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
-    Run keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
+    Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
     ${rc}  ${oc_object_size}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].spec.resources.requests.storage}'
-    Run keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
+    Run Keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
     ${rc}  ${oc_object_size}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.capacity.storage}'
-    Run keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
+    Run Keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
 
 Create PersistentVolume Storage
     [Documentation]    Create a PersistenVolume storage in DS Project details page
@@ -57,7 +58,7 @@ Create PersistentVolume Storage
     Fill In New PV Data    ${name}    ${description}    ${size}    ${connected_workbench}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
-    ELSE    
+    ELSE
         Wait Until Element Is Enabled    ${STORAGE_ADD_BTN_2_XP}
         Click Button    ${STORAGE_ADD_BTN_2_XP}
     END
@@ -78,7 +79,7 @@ Fill In New PV Data
     IF    ${size} > 1
         FOR    ${counter}    IN RANGE    1    ${size}
             Click Element    ${STORAGE_SIZE_PLUS_BTN_XP}
-        END        
+        END
     END
     IF    "${connected_workbench}" == "${NONE}"
         Log    msg=you are not connecting any workbenchs to ${name} PV
@@ -90,7 +91,7 @@ Fill In New PV Data
             Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
         END
     END
-    
+
 Set Connection Between PV And Workbench
     [Documentation]    Connects a PV to an existent workbench
     [Arguments]    ${workbench_title}    ${mount_dir}
@@ -108,7 +109,7 @@ Delete Storage
     Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=storage    press_cancel=${press_cancel}
 
-Get Openshift PVC From Storage 
+Get Openshift PVC From Storage
     [Documentation]    Retrieves the PVC resource name from Openshift given the Displayed Name in DS Project details page
     [Arguments]     ${name}      ${namespace}
     ${rc}  ${pvc_name}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].metadata.name}'

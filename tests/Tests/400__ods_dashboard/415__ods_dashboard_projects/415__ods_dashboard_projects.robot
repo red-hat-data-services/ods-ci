@@ -37,12 +37,16 @@ ${DC_S3_TYPE}=    Object storage
 
 
 *** Test Cases ***
-Verify Data Science Project Page Is Accessible
+Verify Data Science Projects Page Is Accessible
+    [Documentation]    Verifies "Data Science Projects" page is accessible from
+    ...                the navigation menu on the left
     [Tags]    Smoke    ODS-1876
     Open Data Science Projects Home Page
     Page Should Contain Element     ${PROJECT_CREATE_BTN_XP}
 
 Verify User Can Access Jupyter Launcher From DS Project Page
+    [Documentation]    Verifies Data Science Projects home page contains
+    ...                a link to Jupyter Spawner and it is working
     [Tags]    Smoke    ODS-1877
     Open Data Science Projects Home Page
     Page Should Contain Element     ${SPAWNER_LINK}
@@ -57,7 +61,7 @@ Verify User Cannot Create Project With Empty Fields
 
 Verify User Cannot Create Project Using Special Chars In Resource Name
     [Tags]    Sanity    Tier1    ODS-1875
-    [Documentation]    Verifies users is not allowed to create a project with a custom resource name 
+    [Documentation]    Verifies users is not allowed to create a project with a custom resource name
     ...                containing special characters like "@" or "!"
     Create Project With Special Chars In Resource Name And Expect Error
     Close Generic Modal If Present
@@ -110,7 +114,7 @@ Verify User Can Create A Data Science Project
     [Documentation]    Verifies users can create a DS project
     [Setup]   Launch Data Science Project Main Page
     Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
     Open Data Science Projects Home Page
     Project Should Be Listed    project_title=${PRJ_TITLE}
@@ -125,8 +129,8 @@ Verify User Can Create And Start A Workbench With Ephimeral Storage
     Create Workbench    workbench_title=${EMPTY}  workbench_description=${EMPTY}  prj_title=${PRJ_TITLE}
     ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  press_cancel=${TRUE}
-    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}  
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small  
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Ephemeral  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
@@ -142,7 +146,7 @@ Verify User Can Create A PV Storage
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenchs}=    Create Dictionary    ${WORKBENCH_TITLE}=mount-data
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
-    ...                               size=${PV_SIZE}    connected_workbench=${NONE}     press_cancel=${TRUE}    
+    ...                               size=${PV_SIZE}    connected_workbench=${NONE}     press_cancel=${TRUE}
     ...                               project_title=${PRJ_TITLE}
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${workbenchs}   project_title=${PRJ_TITLE}
@@ -160,7 +164,7 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}    project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                storage=Persistent  pv_existent=${TRUE}    pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
+    ...                 storage=Persistent  pv_existent=${TRUE}    pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
@@ -174,7 +178,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_3_TITLE}  workbench_description=${WORKBENCH_3_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small  
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${pv_name}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_3_TITLE}
@@ -206,7 +210,7 @@ Verify User Can Launch A Workbench
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Start Workbench     workbench_title=${WORKBENCH_TITLE}
     Launch Workbench    workbench_title=${WORKBENCH_TITLE}
-    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}     
+    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
 Verify User Can Stop A Workbench From Projects Home Page
@@ -214,9 +218,9 @@ Verify User Can Stop A Workbench From Projects Home Page
     [Documentation]    Verifies users can stop a running workbench from Data Science Projects home page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}    
+    ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    namespace=${ns_name}
-    Stop Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}  
+    Stop Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
     ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
     Workbench Launch Link Should Be Disabled    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
     # add checks on notebook pod is terminated but CR is present
@@ -226,9 +230,9 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     [Documentation]    Verifies users can launch/open a running workbench from Data Science Projects home page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}    
+    ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    namespace=${ns_name}
-    Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}  
+    Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
     ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
     Launch Workbench From Projects Home Page    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
@@ -261,9 +265,9 @@ Verify User Can Add A S3 Data Connection
     [Documentation]    Verifies users can add a Data connection to AWS S3
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}   
-    ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}   
-    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}  
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME} 
+    ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${NONE}
     Check Corresponding Data Connection Secret Exists    dc_name=${DC_S3_NAME}    namespace=${ns_name}
@@ -281,16 +285,16 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
-    ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB  
+    ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB
     ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
-    ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM  
+    ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM
     ...    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create Workbench    workbench_title=${WORKBENCH_TITLE}-envs  workbench_description=${WORKBENCH_DESCRIPTION}  
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small  
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}-envs  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Ephemeral  pv_existent=${NONE}
-    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     ...                 press_cancel=${FALSE}    envs=${envs_list}
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}-envs
     Launch Workbench    workbench_title=${WORKBENCH_TITLE}-envs
@@ -331,9 +335,9 @@ Set Variables For User Access Test
 
 Launch Data Science Project Main Page
     [Documentation]    Launch DS Projects page in RHODS Dashboard using a given user
-    [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD} 
+    [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}
     ...             ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}
-    Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${ocp_user_auth_type} 
+    Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${ocp_user_auth_type}
     ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     Open Data Science Projects Home Page
 

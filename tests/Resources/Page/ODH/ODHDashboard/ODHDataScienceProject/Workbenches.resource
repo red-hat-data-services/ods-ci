@@ -91,7 +91,7 @@ Add Environment Variables In Workbench
                 IF    ${n_pairs}-${pair_idx} > 1
                     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="Add another variable"]
                 END
-            END      
+            END
         END
         IF    ${n_objects}-${idx} > 0
             Click Button    Add more variables
@@ -184,13 +184,13 @@ Start Workbench
     END
     Wait Until Workbench Is Started     workbench_title=${workbench_title}
 
-Access To Workbench  
+Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched
     [Arguments]    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
     Switch Window   NEW
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
-    ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    ${authorization_required}=  Is Service Account Authorization Required
+    Run Keyword If  ${authorization_required}  Authorize Jupyterhub Service Account
     Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Maybe Close Popup
 
@@ -214,7 +214,7 @@ Stop Workbench
     IF    ${is_started} == ${TRUE}
         Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
         Wait Until Generic Modal Appears
-        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel} 
+        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
         Fail   msg=Cannot stop workbench ${workbench_title} because it is not running...
     END
@@ -237,11 +237,10 @@ Handle Stop Workbench Confirmation Modal
 
 Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
-    [Arguments]    ${item_title}    ${item_type}    ${action}    
+    [Arguments]    ${item_title}    ${item_type}    ${action}
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
     Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
-
 
 Handle Deletion Confirmation Modal
     [Documentation]    Handles confirmation modal on item deletion
@@ -263,7 +262,6 @@ Handle Deletion Confirmation Modal
     END
     Wait Until Generic Modal Disappears
 
-    
 Delete Workbench
     [Documentation]    Deletes a workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}

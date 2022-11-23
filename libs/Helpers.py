@@ -142,3 +142,13 @@ class Helpers:
                 else:
                     continue
         return tolerations
+
+    @keyword
+    def install_managed_starburst_addon(self, license, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        result = ocm_client.install_starburst_addon(license=license, exit_on_failure=False)
+        if not result:
+            self.BuiltIn.fail(
+                "Something got wrong while installing RHOAM. Check the logs"
+            )

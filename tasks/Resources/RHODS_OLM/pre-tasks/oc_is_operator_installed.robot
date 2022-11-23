@@ -8,3 +8,11 @@ Is RHODS Installed
   ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
   ...          field_selector=metadata.name=self-managed-rhods
   [Return]  ${result}
+
+Is Managed Starburst Installed
+  ${result}=  Run Keyword And Return Status
+  ...  Run Keywords
+  ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-managed-starburst  AND
+  ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
+  ...          field_selector=metadata.name=managed-starburst
+  [Return]  ${result}

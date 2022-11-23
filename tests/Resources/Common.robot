@@ -189,3 +189,57 @@ Get OAuth Cookie
     ...                 It assumes Dashboard UI has been launched and login performed using UI.
     ${cookie}=     Get Cookie  _oauth_proxy
     [Return]    ${cookie.value}
+
+Is Generic Modal Displayed
+    [Documentation]    Checks if a modal window is displayed on the page.
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
+    ...                piloted with ${id} and ${partial_match} arguments
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    IF    ${partial_match} == ${TRUE}
+        ${is_displayed}=    Run Keyword And Return Status
+        ...                 Page Should Contain Element    xpath=//*[contains(@id,"${id}")]
+    ELSE
+        ${is_displayed}=    Run Keyword And Return Status
+        ...                 Page Should Contain Element    xpath=//*[@id="${id}")]
+    END
+    [Return]    ${is_displayed}
+
+Wait Until Generic Modal Disappears
+    [Documentation]    Waits until a modal window disappears from the page.
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
+    ...                piloted with ${id} and ${partial_match} arguments
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    ${is_modal}=    Is Generic Modal Displayed
+    IF    ${is_modal} == ${TRUE}
+        IF    ${partial_match} == ${TRUE}
+            Wait Until Page Does Not Contain Element    xpath=//*[contains(id,"${id}")]    timeout=${timeout}
+        ELSE
+            Wait Until Page Does Not Contain Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+        END
+    ELSE
+        Log     No Modals on the screen right now..     level=WARN
+    END
+
+Wait Until Generic Modal Appears
+    [Documentation]    Waits until a modal window appears on the page.
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
+    ...                piloted with ${id} and ${partial_match} arguments
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    ${is_modal}=    Is Generic Modal Displayed
+    IF    ${is_modal} == ${FALSE}
+        IF    ${partial_match} == ${TRUE}
+            Wait Until Page Contains Element    xpath=//*[contains(@id,"${id}")]    timeout=${timeout}
+        ELSE
+            Wait Until Page Contains Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+        END
+    ELSE
+        Log     No Modals on the screen right now..     level=WARN
+    END
+
+Close Generic Modal If Present
+    [Documentation]    Close a modal window from the page and waits for it to disappear
+    ${is_modal}=    Is Generic Modal Displayed
+    IF    ${is_modal} == ${TRUE}
+        Click Element    xpath=//button[@aria-label="Close"]
+        Wait Until Generic Modal Disappears
+    END

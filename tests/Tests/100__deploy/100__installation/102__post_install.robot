@@ -208,8 +208,10 @@ Verify Grafana Is Connected To Prometheus Using TLS
     [Documentation]    Verifies Grafana is connected to Prometheus using TLS
     [Tags]    Tier2
     ...       ODS-963
-    ...       AutomationBug
+    ...       ProductBug
     [Setup]  Set Library Search Order  Selenium Library
+    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
+    ...    msg=Grafana was removed in RHODS 1.20
     Verify Grafana Datasources Have TLS Enabled
     Verify Grafana Can Obtain Data From Prometheus Datasource
     [Teardown]  Close Browser

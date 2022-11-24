@@ -19,12 +19,12 @@ Verify That MT-SRE Can Connect To Grafana Using Port Forwarding
     [Documentation]    Verifies that Grafana is accessible by MT-SRE when using oc port-forwarding
     [Tags]   Tier2
     ...      ODS-754
-    ...      AutomationBug
+    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
+    ...    msg=Grafana was removed in RHODS 1.20
     ${grafana_port_forwarding_process} =  Enable Access To Grafana Using OpenShift Port Forwarding
     Wait Until HTTP Status Code Is  url=http://localhost:3001/api/health  retry=7x  expected_status_code=200
     Open Browser  http://localhost:3001  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Go To Grafana Dashboard Search
-    Verify If Jupyterhub Sli Is Present
     [Teardown]  Terminate Process  ${grafana_port_forwarding_process}
 
 Verify MT-SRE Can Connect To Prometheus Using Port-Forwarding
@@ -49,10 +49,6 @@ Verify MT-SRE Can Connect To Alert Manager Using Port-forwarding
 
 
 *** Keywords ***
-Verify If Jupyterhub Sli Is Present
-    [Documentation]    Verifies Jupyterhub SLI element is present
-    Wait Until Element Is Visible    ${JUPYTERHB_SLI}   error="Jupyterhub SLIs Not Found"
-
 Verify Access To Prometheus Using Browser
     [Documentation]  Verifies if we are able to access Prometheus without asking to login
     Wait Until Page Contains    text=Prometheus

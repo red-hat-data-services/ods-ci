@@ -38,11 +38,10 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-178
-    ...       FlakyTest
     ${cpu_usage_before} =    Read Current CPU Usage
     Run Jupyter Notebook For 5 Minutes
-    ${cpu_usage_after} =    Read Current CPU Usage
-    Should Not Be Equal    ${cpu_usage_before}    ${cpu_usage_after}
+    Wait Until Keyword Succeeds    10 times   30s
+    ...    CPU Usage Should Have Increased    ${cpu_usage_before}
 
 Test Metric "Rhods_Total_Users" On ODS Prometheus
     [Documentation]    Verifies that metric value for rhods_total_users
@@ -117,24 +116,30 @@ Check Prometheus Alerting Rules
 Read Current CPU Usage
     [Documentation]    Returns list of current cpu usage
     ${Expression} =    Set Variable
-    ...    sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0", container="",pod=~"jupyter-nb.*",namespace="rhods-notebooks"}[1h]))
+    ...    sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0", container="",pod=~"jupyter-nb.*",namespace="rhods-notebooks"}[1h]))    # robocop:disable
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${Expression}
     IF    ${resp.json()["data"]["result"]} == []
-        ${cpu_usage}    Set Variable    0
+        ${cpu_usage} =    Set Variable    0
     ELSE
-        ${cpu_usage}    Set Variable    ${resp.json()["data"]["result"][0]["value"][-1]}
+        ${cpu_usage} =    Set Variable    ${resp.json()["data"]["result"][0]["value"][-1]}
     END
     [Return]    ${cpu_usage}
-## TODO: Add this keyword with the other JupyterHub stuff
 
+CPU Usage Should Have Increased
+     [Documentation]   Verifies that CPU usage for notebook pods has increased since previous value
+     [Arguments]    ${cpu_usage_before}
+     ${cpu_usage_current} =    Read Current CPU Usage
+     Should Be True    ${cpu_usage_current}>${cpu_usage_before}
+
+# TODO: Add this keyword with the other JupyterHub stuff
 Run Jupyter Notebook For 5 Minutes
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Iterative Image Test    s2i-generic-data-science-notebook    https://github.com/lugi0/minimal-nb-image-test
     ...    minimal-nb-image-test/minimal-nb.ipynb
 
-##TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob. We have to refactor the code not to duplicate this method
+# TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob. We have to refactor the code not to duplicate this method
 
 Iterative Image Test
     [Arguments]    ${image}    ${REPO_URL}    ${NOTEBOOK_TO_RUN}
@@ -148,7 +153,7 @@ Iterative Image Test
     Run Cell And Check Output    print("Hello World!")    Hello World!
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
-    #This ensures all workloads are run even if one (or more) fails
+    # This ensures all workloads are run even if one (or more) fails
     Run Keyword And Continue On Failure    Clone Git Repository And Run    ${REPO_URL}    ${NOTEBOOK_TO_RUN}
     Clean Up Server
     Stop JupyterLab Notebook Server
@@ -160,7 +165,7 @@ Verify That There Was Only 1 Jupyterhub Server Available At A Time
     [Arguments]        ${query_result}
     @{data} =  BuiltIn.Evaluate   list(${query_result.json()["data"]["result"]})
     Log  ${data}
-    @{list_to_check}  Create List
+    @{list_to_check} =    Create List
     FOR  ${time_value}  IN  @{data}
         @{values} =  BuiltIn.Evaluate   list(${time_value["values"]})
         FOR  ${v}  IN  @{values}

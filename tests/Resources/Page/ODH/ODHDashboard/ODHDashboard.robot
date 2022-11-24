@@ -169,8 +169,8 @@ Go To RHODS Dashboard
   Wait for RHODS Dashboard to Load
 
 Load Expected Data Of RHODS Explore Section
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.18.0
-    IF  ${version-check}==True
+    ${version_check}=   Is RHODS Version Greater Or Equal Than  1.19.0
+    IF  ${version_check}==True
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
     ELSE
         ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH}
@@ -295,11 +295,11 @@ Check Sidebar Header Text
 Check Get Started Sidebar
     [Arguments]  ${card_locator}  ${card_badges}  ${app_id}  ${expected_data}
     ${sidebar_exists}=  Open Get Started Sidebar And Return Status  card_locator=${card_locator}
-    Check Get Started Sidebar Status   sidebar_status=${sidebar_exists}   badges_titles=${card_badges}
+    Run Keyword And Continue On Failure    Check Get Started Sidebar Status   sidebar_status=${sidebar_exists}   badges_titles=${card_badges}
     IF    ${sidebar_exists} == ${TRUE}
-        Check Sidebar Links  app_id=${app_id}  expected_data=${expected_data}
-        Check Sidebar Header Text  app_id=${app_id}  expected_data=${expected_data}
-        Close Get Started Sidebar
+        Run Keyword And Continue On Failure    Check Sidebar Links  app_id=${app_id}  expected_data=${expected_data}
+        Run Keyword And Continue On Failure    Check Sidebar Header Text  app_id=${app_id}  expected_data=${expected_data}
+        Run Keyword And Continue On Failure    Close Get Started Sidebar
     END
 
 Get Image Name
@@ -325,6 +325,17 @@ Check Cards Details Are Correct
         ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
+    END
+
+Check Dashboard Diplayes Expected ISVs
+   [Arguments]  ${expected_data}
+   ${card_n}=  Get Number Of Cards
+   FOR    ${idx}    IN RANGE    1    ${card_n}+1
+        ${card_xp}=  Set Variable  (${CARDS_XP})[${idx}]
+        ${application_id}=  Get App ID From Card  card_locator=${card_xp}
+        Log    ${application_id}
+        Run Keyword And Continue On Failure    Dictionary Should Contain Key    ${expected_data}    ${application_id}
+        ...                              msg=${application_id} is not among the expected ISVs
     END
 
 Success Message Should Contain
@@ -700,3 +711,12 @@ Get Links From Switcher
 Open Application Switcher Menu
     [Documentation]     Clicks on the App Switcher in the top navigation bar of RHODS Dashboard
     Click Button    //button[@class="pf-c-app-launcher__toggle"]
+
+Maybe Wait For Dashboard Loading Spinner Page
+    [Documentation]     Detecs the loading symbol (spinner) and wait for it to disappear.
+    ...                 If the spinner does not appear, the keyword ignores the error.
+    [Arguments]    ${timeout}=5s
+    Run Keyword And Ignore Error    Run Keywords
+    ...    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
+    ...    AND
+    ...    Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}

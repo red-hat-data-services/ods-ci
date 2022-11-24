@@ -725,7 +725,7 @@ class OpenshiftClusterManager:
         )
         self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
 
-    def install_starburst_addon(self, license, exit_on_failure=True):
+    def install_managed_starburst_addon(self, license, exit_on_failure=True):
         if not self.is_addon_installed(addon_name="managed-starburst"):
             add_vars = {"NOTIFICATION_EMAIL": self.notification_email, "STARBURST_LICENSE": license}
             failure_flags = []
@@ -739,20 +739,26 @@ class OpenshiftClusterManager:
             failure_flags.append(failure)
             if True in failure_flags:
                 log.info(
-                    "Something got wrong while installing RHOAM: "
+                    "Something got wrong while installing Starburst: "
                     "thus system is not waiting for installation status."
                     "\nPlease check the cluster and try again..."
                 )
                 return False
-            # return True
-            else:
-               self.wait_for_addon_installation_to_complete(addon_name="managed-starburst")
+            return True
+            # else:
+            #    self.wait_for_addon_installation_to_complete(addon_name="managed-starburst")
         else:
             log.info(
                 "managed-api-service is already installed on {}".format(
                     self.cluster_name
                 )
             )
+    def uninstall_managed_starburst_addon(self, exit_on_failure=True):
+        """Uninstalls RHOAM addon"""
+        self.uninstall_addon(
+            addon_name="managed-starburst", exit_on_failure=exit_on_failure
+        )
+        self.wait_for_addon_uninstallation_to_complete(addon_name="managed-starburst")
 
     def create_idp(self):
         """Creates Identity Provider"""

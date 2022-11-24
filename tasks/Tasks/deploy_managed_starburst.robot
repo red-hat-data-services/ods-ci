@@ -1,29 +1,28 @@
 *** Settings ***
-Documentation    Perform and verify Managed Starburst OLM tasks
+Documentation    Perform and verify Managed Starburst,
+...              a.k.a Starburst Enterprise for Red Hat (SERH), OLM tasks
 Metadata         Managed Starburst OLM Version    1.0.0
-Resource         ../Resources/RHODS_OLM/RHODS_OLM.resource
+Resource         ../Resources/SERH_OLM/install.robot
+Resource         ../../tests/Resources/Common.robot
 Library          OpenShiftLibrary
 Library          OperatingSystem
 Library          String
 Library          ../../libs/Helpers.py
 
-***Variables***
-${cluster_type}          ROSA
-${operator_version}      ${EMPTY}
-
 
 *** Tasks ***
-Install Managed Starburst
-  [Tags]  install
+Install Managed Starburst Addon
+  [Tags]  install-starburst
   Check Managed Starburst Addon Is Not Installed
-  Install Managed Starburst Addon    license=""    cluster_name=""
-  RHODS Operator Should Be Installed
-  [Teardown]   Install Teardown
+  ${cluster_id}=   Get Cluster ID
+  ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
+  ${license_escaped}=    Replace String    ${STARBURST.LICENSE}   "    \\"
+  Install Managed Starburst Addon    license=${license_escaped}    cluster_name=${CLUSTER_NAME}
+  Wait Until Managed Starburst Installation Is Completed
 
-
-*** Keywords ***
-Check Managed Starburst Addon Is Not Installed
-    ${is_operator_installed} =  Is Managed Starburst Installed
-    IF    ${is_operator_installed}
-        Fail    msg=Managed Starburst Addon is already installed        
-    END
+Uninstall Managed Starburst
+    [Tags]    uninstall-starburst
+    ${cluster_id}=   Get Cluster ID
+    ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
+    Delete Managed Starburst CRs    starburst_enterprise_cr=starburstenterprise
+    Uninstall Managed Starburst Using Addon Flow    ${CLUSTER_NAME}

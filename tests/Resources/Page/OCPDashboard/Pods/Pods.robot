@@ -127,16 +127,18 @@ Verify Containers Have Zero Restarts
         END
     END
 
-Verify Container Image
-    [Documentation]  Checks if the container image matches  $expected-image-url
-    [Arguments]   ${namespace}  ${pod}  ${container}  ${expected-image-url}
-    ${image} =  Run  oc get pod ${pod} -n ${namespace} -o json | jq '.spec.containers[] | select(.name == "${container}") | .image'
-    Should Be Equal  ${image}  ${expected-image-url}
+Container Image Url Should Contain
+    [Documentation]  From a running container, verifies that image url contains $expected_image_url_substring
+    ...   We use "Should Contain" instead of "Should Be Equal" because now image urls contain @sha256 at the end
+    [Arguments]   ${namespace}  ${pod}  ${container}  ${expected_image_url_substring}
+    ${image} =  Run  oc get pod ${pod} -n ${namespace} -o json | jq '.spec.containers[] | select(.name == "${container}") | .image'    #robocop:disable
+    Should Contain    container=${image}    item=${expected_image_url_substring}
+    ...    msg=Unexpected container image url
 
 Search Pod
     [Documentation]   Returns list pod  ${pod_start_with} = here ypu have to provide starting of pod name
     [Arguments]   ${namespace}  ${pod_start_with}
-    ${pod} =  Run  oc get pods -n ${namespace} -o json | jq '.items[] | select(.metadata.name | startswith("${pod_start_with}")) | .metadata.name'
+    ${pod} =  Run  oc get pods -n ${namespace} -o json | jq '.items[] | select(.metadata.name | startswith("${pod_start_with}")) | .metadata.name'    #robocop:disable
     @{list_pods} =  Split String  ${pod}  \n
     [Return]  ${list_pods}
 

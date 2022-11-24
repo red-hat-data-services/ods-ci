@@ -10,6 +10,7 @@ Library          String
 ${cluster_type}          selfmanaged
 ${operator_version}      ${EMPTY}
 ${RHODS_INSTALL_REPO}    https://${GITHUB_USER.TOKEN}@github.com/red-hat-data-services/self-managed-installer.git
+${RHODS_OSD_INSTALL_REPO}     NONE
 @{SUPPORTED_TEST_ENV}    AWS   GCP   PSI
 ${TEST_ENV}              AWS
 ${INSTALL_TYPE}          CLi

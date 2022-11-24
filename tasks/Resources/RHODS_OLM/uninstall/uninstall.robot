@@ -15,7 +15,7 @@ Uninstall RHODS
   END
 
 Uninstall RHODS In OSD
-  ${return_code}	  Run And Return Rc    git clone https://gitlab.cee.redhat.com/data-hub/olminstall.git rhodsolm
+  ${return_code}	  Run And Return Rc    git clone ${RHODS_OSD_INSTALL_REPO} rhodsolm
   Should Be Equal As Integers	${return_code}	 0
   Set Test Variable     ${filename}    rhodsolm
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./cleanup.sh   #robocop:disable

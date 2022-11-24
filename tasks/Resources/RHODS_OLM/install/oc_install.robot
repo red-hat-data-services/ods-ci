@@ -94,7 +94,7 @@ Install RHODS In Self Managed Cluster Using CLI
 Install RHODS In Managed Cluster Using CLI
    [Documentation]   Install rhods on sself managed cluster using cli
    [Arguments]     ${cluster_type}     ${operator_version}
-   ${return_code}	  Run And Return Rc    git clone https://gitlab.cee.redhat.com/data-hub/olminstall.git rhodsolm
+   ${return_code}	  Run And Return Rc    git clone ${RHODS_OSD_INSTALL_REPO} rhodsolm
    Should Be Equal As Integers	${return_code}	 0
    Set Test Variable     ${filename}    rhodsolm
    ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh ${operator_version}   #robocop:disable

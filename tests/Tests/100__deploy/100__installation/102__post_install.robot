@@ -268,6 +268,7 @@ Verify RHODS Display Name and Version
     Should Be Equal       ${rhods_version_t[1]}   ${rhods_version}   msg=RHODS vesrion and label is not consistent
     Should Be Equal       ${rhods_displayname}   Red Hat OpenShift Data Science  msg=Dieplay name doesn't match
 
+
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back
     [Documentation]    Delete Dashboard Pods And Wait Them To Be Back
@@ -297,7 +298,7 @@ Verify Authentication Is Required To Access BlackboxExporter
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
     ...    username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}
-    Length Should Be    ${links}    2
+    Length Should Be    ${links}    3    msg=Unexpected number of target endpoints in blackbox-exporter
     ${pod_name} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     FOR    ${link}    IN    @{links}
         ${command} =    Set Variable    curl --silent --insecure ${link}

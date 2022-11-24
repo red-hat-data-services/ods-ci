@@ -7,9 +7,12 @@ Library          OperatingSystem
 Library          String
 
 ***Variables***
-${cluster_type}          OSD
+${cluster_type}          selfmanaged
 ${operator_version}      ${EMPTY}
 ${RHODS_INSTALL_REPO}    https://${GITHUB_USER.TOKEN}@github.com/red-hat-data-services/self-managed-installer.git
+@{SUPPORTED_TEST_ENV}    AWS   GCP   PSI
+${TEST_ENV}              AWS
+${INSTALL_TYPE}          CLi
 *** Tasks ***
 Can Install RHODS Operator
   [Tags]  install

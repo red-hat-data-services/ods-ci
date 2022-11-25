@@ -46,6 +46,7 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     [Tags]  ODS-1680
     ...     Tier1
     ...     Sanity
+    ...     AutomationBug
     Skip If RHODS Is Self-Managed    msg=Test skiped on Self-Managed due to disruptive automation error to be fixed
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings

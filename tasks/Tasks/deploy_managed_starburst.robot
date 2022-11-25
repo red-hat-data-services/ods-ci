@@ -15,7 +15,7 @@ Suite Teardown    RHOSi Teardown
 
 *** Tasks ***
 Install Managed Starburst Addon
-  [Tags]  install-starburst
+  [Tags]  MISV-79
   Check Managed Starburst Addon Is Not Installed
   ${cluster_id}=   Get Cluster ID
   ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
@@ -24,8 +24,9 @@ Install Managed Starburst Addon
   Wait Until Managed Starburst Installation Is Completed
 
 Uninstall Managed Starburst
-    [Tags]    uninstall-starburst
+    [Tags]    MISV-82
     ${cluster_id}=   Get Cluster ID
     ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
     Delete Managed Starburst CRs    starburst_enterprise_cr=starburstenterprise
     Uninstall Managed Starburst Using Addon Flow    ${CLUSTER_NAME}
+    Check Managed Staburst Is Not Installed

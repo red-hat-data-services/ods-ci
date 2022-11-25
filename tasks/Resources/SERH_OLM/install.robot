@@ -7,10 +7,16 @@ Resource         ../../../tests/Resources/Common.robot
 ${STARBURST_CR_DEFAULT_NAMESPACE}=    redhat-starburst-operator
 
 *** Keywords ***
+Check Managed Staburst Is Not Installed
+    ${installed}=    Is Managed Starburst Installed
+    IF    ${installed} == ${TRUE}
+        Fail    msg=Managed Starburst is still installed or not fully Uninstalled        
+    END
+
 Is Managed Starburst Installed
   ${result}=  Run Keyword And Return Status
   ...  Run Keywords
-  ...  Oc Get  kind=Namespace  field_selector=metadata.name=${STARBURST_CR_DEFAULT_NAMESPACE}  AND
+  ...  Oc Get  kind=Project  field_selector=metadata.name=${STARBURST_CR_DEFAULT_NAMESPACE}  AND
   ...  Oc Get  kind=CatalogSource  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}
   ...          field_selector=metadata.name=addon-managed-starburst-catalog
   [Return]  ${result}

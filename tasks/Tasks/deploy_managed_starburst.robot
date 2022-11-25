@@ -1,13 +1,16 @@
 *** Settings ***
-Documentation    Perform and verify Managed Starburst,
-...              a.k.a Starburst Enterprise for Red Hat (SERH), OLM tasks
-Metadata         Managed Starburst OLM Version    1.0.0
-Resource         ../Resources/SERH_OLM/install.robot
-Resource         ../../tests/Resources/Common.robot
-Library          OpenShiftLibrary
-Library          OperatingSystem
-Library          String
-Library          ../../libs/Helpers.py
+Documentation     Perform and verify Managed Starburst,
+...               a.k.a Starburst Enterprise for Red Hat (SERH), OLM tasks
+Metadata          Managed Starburst OLM Version    1.0.0
+Resource          ../Resources/SERH_OLM/install.robot
+Resource          ../../tests/Resources/Common.robot
+Resource          ../../tests/Resources/RHOSi.resource
+Library           OpenShiftLibrary
+Library           OperatingSystem
+Library           String
+Library           ../../libs/Helpers.py
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
 
 
 *** Tasks ***
@@ -16,8 +19,8 @@ Install Managed Starburst Addon
   Check Managed Starburst Addon Is Not Installed
   ${cluster_id}=   Get Cluster ID
   ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
-  ${license_escaped}=    Replace String    ${STARBURST.LICENSE}   "    \\"
-  Install Managed Starburst Addon    license=${license_escaped}    cluster_name=${CLUSTER_NAME}
+  Install Managed Starburst Addon    email_address=${DEFAULT_NOTIFICATION_EMAIL}
+  ...    license=${STARBURST.LICENSE}    cluster_name=${CLUSTER_NAME}
   Wait Until Managed Starburst Installation Is Completed
 
 Uninstall Managed Starburst

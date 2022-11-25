@@ -54,6 +54,7 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     AdminGroups In OdhDashboardConfig CRD Should Be        rhods-users
     AllowedGroups In OdhDashboardConfig CRD Should Be      rhods-users
     Reload Page
+    Menu.Navigate To Page    Applications    Enabled
     Run Keyword And Expect Error  *  Launch Jupyter From RHODS Dashboard Link
     Wait Until Page Contains    Page Not Found   timeout=15s
     [Teardown]  Teardown Admin UI

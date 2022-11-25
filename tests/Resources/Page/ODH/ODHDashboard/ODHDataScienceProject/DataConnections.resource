@@ -14,13 +14,17 @@ ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_DEFA
 ${DC_SECTION_XP}=             xpath=//div[div//h4[@id="data-connections"]]
 ${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}/div/button[text()="Add data connection"]
 ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[text()="Add data connection"]
+${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
+${S3_DEFAULT_ENDPOINT}=    https://s3.amazonaws.com/
+${S3_DEFAULT_REGION}=    us-east-1
 
 
 *** Keywords ***
 Create S3 Data Connection
     [Documentation]    Creates a S3 Data Connection from DS Project details page
-    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    
-    ...            ${aws_s3_endpoint}    ${aws_region}    ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}
+    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
+    ...            ${aws_s3_endpoint}=${S3_DEFAULT_ENDPOINT}    ${aws_region}=${S3_DEFAULT_REGION}
+    ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     Click Button    ${DC_ADD_BTN_1_XP} 
     Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
     Input Text    ${S3_NAME_DC_INPUT_XP}    ${dc_name}
@@ -28,6 +32,7 @@ Create S3 Data Connection
     Input Text    ${S3_SECRET_DC_INPUT_XP}    ${aws_secret_access}
     Input Text    ${S3_ENDPOINT_DC_INPUT_XP}    ${aws_s3_endpoint}
     Input Text    ${S3_REGION_DC_INPUT_XP}    ${aws_region}
+    Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE

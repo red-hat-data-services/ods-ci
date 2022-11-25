@@ -15,7 +15,7 @@ Suite Teardown    RHOSi Teardown
 
 *** Tasks ***
 Install Managed Starburst Addon
-  [Tags]  MISV-79
+  [Tags]  MISV-79    MISV-84
   Check Managed Starburst Addon Is Not Installed
   ${cluster_id}=   Get Cluster ID
   ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}

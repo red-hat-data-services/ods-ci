@@ -10,6 +10,7 @@ import jinja2
 import time
 import glob
 import io
+import json
 from contextlib import redirect_stdout, redirect_stderr
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -555,6 +556,17 @@ class OpenshiftClusterManager:
             return False
         else:
             return True
+    
+
+    def hide_values_in_op_json(self, fields, json_str):
+        json_dict = json.loads(json_str)
+        params = json_dict["parameters"]["items"]
+        for field in fields:
+            for p in params:
+                if p["id"] == field:
+                    p["value"] = "##hidden##"
+        return json.dumps(json_dict)
+        
 
     def install_addon(
         self,
@@ -563,6 +575,7 @@ class OpenshiftClusterManager:
         output_filename="install_operator.json",
         add_replace_vars=None,
         exit_on_failure=True,
+        fields_to_hide=[]
     ):
         """Installs addon"""
         replace_vars = {
@@ -571,7 +584,7 @@ class OpenshiftClusterManager:
         }
         if add_replace_vars:
             replace_vars.update(add_replace_vars)
-            print(replace_vars)
+            # print(replace_vars)
         template_file = template_filename
         output_file = output_filename
         self._render_template(template_file, output_file, replace_vars)
@@ -581,6 +594,8 @@ class OpenshiftClusterManager:
         )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
+        if len(fields_to_hide) > 0:
+            ret = self.hide_values_in_op_json(fields_to_hide, ret)
         log.info("\nRET: {}".format(ret))
         failure_flag = False
         if ret is None:
@@ -735,6 +750,7 @@ class OpenshiftClusterManager:
                 output_filename="install_starburst_operator.json",
                 add_replace_vars=add_vars,
                 exit_on_failure=exit_on_failure,
+                fields_to_hide=["starburst-license"]
             )
             failure_flags.append(failure)
             if True in failure_flags:

@@ -57,6 +57,9 @@ Verify Prometheus Deployment
     @{prometheus}=  Oc Get    kind=Pod  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  field_selector=metadata.name==prometheus-starburst-0
     ${prom_containerNames}=  Create List  prometheus    config-reloader
     Run Keyword And Continue On Failure    Verify Deployment  component=${prometheus}      nPods=1  nContainers=2  containerNames=${prom_containerNames}
+    @{prometheus_operator}=  Oc Get    kind=Pod  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  label_selector=k8s-app=prometheus-operator
+    ${prom_op_containerNames}=  Create List  prometheus-operator
+    Run Keyword And Continue On Failure    Verify Deployment  component=${prometheus_operator}      nPods=1  nContainers=1  containerNames=${prom_op_containerNames}
 
 Managed Starburst Pods Should Be Deployed
     [Documentation]     Get the installation stage by reading the "RHOAM installation object" YAML

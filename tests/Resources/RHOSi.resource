@@ -29,6 +29,7 @@ Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robo
 ...                         Perform Dashboard API Endpoint DELETE Call
 ...                         Check Managed Starburst Addon Is Not Installed
 ...                         Delete Managed Starburst CRs
+...                         Create RedHat Marketplace Secret
 
 
 *** Keywords ***

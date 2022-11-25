@@ -91,6 +91,7 @@ Verify User Can Access Only Its Owned Projects
     Project Should Not Be Listed    project_title=${PRJ_1_USER3}
     Project Should Not Be Listed    project_title=${PRJ_2_USER3}
     Switch Browser    1
+    Open Data Science Projects Home Page
     Number Of Displayed Projects Should Be    expected_number=2
     Project Should Not Be Listed    project_title=${PRJ_A_USER4}
     Project Should Be Listed    project_title=${PRJ_1_USER3}
@@ -265,7 +266,7 @@ Verify User Can Add A S3 Data Connection
     [Documentation]    Verifies users can add a Data connection to AWS S3
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME} 
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
     ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
@@ -344,15 +345,15 @@ Launch Data Science Project Main Page
 Create Project With Empty Title And Expect Error
     [Documentation]    Tries to create a DS project with emtpy title and checks the Selenium error
     ${error_rgx}=   Set Variable    Element[ a-zA-Z=\(\)\[\]"'\/\s]+was not enabled[ a-zA-Z=\(\)\[\]"'\/\s0-9.]+
-    Run Keyword And Expect Error    Element*was not enabled*   
+    Run Keyword And Expect Error    Element*was not enabled*
     ...    Create Data Science Project    title=${EMPTY}  description=${EMPTY}
 
 Create Project With Special Chars In Resource Name And Expect Error
     [Documentation]    Tries to create a DS project by overwriting the resource name
     ...                with a custom one containing special characters, and checks the Selenium error
     ${error_rgx}=   Set Variable    Element[ a-zA-Z=\(\)\[\]"'\/\s]+was not enabled[ a-zA-Z=\(\)\[\]"'\/\s0-9.]+
-    Run Keyword And Expect Error    Element*was not enabled*   
-    ...    Create Data Science Project    title=${PRJ_TITLE}-spec-chars  
+    Run Keyword And Expect Error    Element*was not enabled*
+    ...    Create Data Science Project    title=${PRJ_TITLE}-spec-chars
     ...    description=${EMPTY}    resource_name=ods-ci-@-project#name
 
 Check Corresponding Namespace Exists
@@ -365,7 +366,7 @@ Check Corresponding Namespace Exists
 Check Corresponding Notebook CR Exists
     [Documentation]    Checks if a workbench has its own Notebook CustomResource
     [Arguments]     ${workbench_title}  ${namespace}
-    ${res}  ${response}=    Get Openshift Notebook CR From Workbench   workbench_title=${workbench_title}  
+    ${res}  ${response}=    Get Openshift Notebook CR From Workbench   workbench_title=${workbench_title}
     ...    namespace=${namespace}
     IF    "${response}" == "${EMPTY}"
         Run Keyword And Continue On Failure    Fail    msg=Notebook CR not found for ${workbench_title} in ${namespace} NS
@@ -374,7 +375,7 @@ Check Corresponding Notebook CR Exists
 Check Workbench CR Is Deleted
     [Documentation]    Checks if when a workbench is deleted its Notebook CustomResource gets deleted too
     [Arguments]    ${workbench_title}   ${namespace}    ${timeout}=10s
-    ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists   
+    ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists
     ...    workbench_title=${workbench_title}   namespace=${namespace}
     IF    ${status} == ${TRUE}
         Fail    msg=The notebook CR for ${workbench_title} is still present, while it should have been deleted.
@@ -391,7 +392,7 @@ Check Corresponding Data Connection Secret Exists
 Check Data Connection Secret Is Deleted
     [Documentation]    Checks if when a S3 Data Connection is deleted its Openshift Secret gets deleted too
     [Arguments]    ${dc_name}   ${namespace}    ${timeout}=10s
-    ${status}=      Run Keyword And Return Status    Check Corresponding Data Connection Secret Exists    
+    ${status}=      Run Keyword And Return Status    Check Corresponding Data Connection Secret Exists
     ...    dc_name=${dc_name}    namespace=${namespace}
     IF    ${status} == ${TRUE}
         Fail    msg=The secret for ${dc_name} data connection is still present, while it should have been deleted.
@@ -408,7 +409,7 @@ Check Corresponding PersistentVolumeClaim Exists
 Check Storage PersistentVolumeClaim Is Deleted
     [Documentation]    Checks if when a PV cluster storage is deleted its Openshift PersistentVolumeClaim gets deleted too
     [Arguments]    ${storage_name}   ${namespace}    ${timeout}=10s
-    ${status}=      Run Keyword And Return Status    Check Corresponding PersistentVolumeClaim Exists    
+    ${status}=      Run Keyword And Return Status    Check Corresponding PersistentVolumeClaim Exists
     ...    storage_name=${storage_name}    namespace=${namespace}
     IF    ${status} == ${TRUE}
         Fail    msg=The PVC for ${storage_name} storage is still present, while it should have been deleted.

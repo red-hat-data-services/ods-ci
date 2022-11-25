@@ -128,6 +128,28 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
         Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
     END
 
+Alerts Should Not Be Firing
+    [Documentation]    Fails if any Prometheus alert is firing, excluding alert
+    ...    with name = ${expected-firing-alert}
+    [Arguments]    ${pm_url}    ${pm_token}    ${expected-firing-alert}=${EMPTY}
+
+    ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
+    ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
+    FOR    ${rule}    IN    @{all_rules}
+        ${rule_name}=    Get From Dictionary    ${rule}    name
+        ${rules_list}=    Get From Dictionary    ${rule}    rules
+        FOR    ${sub_rule}    IN    @{rules_list}
+            ${state}=    Get From Dictionary    ${sub_rule}    state
+            ${name}=    Get From Dictionary    ${sub_rule}    name
+            ${duration}=    Get From Dictionary    ${sub_rule}    duration
+            IF    '${state}' == 'firing'
+                    IF    '${name}' != '${expected-firing-alert}'
+                        Fail    msg=Alert ${name} (for=${duration}) should not be firing
+                    END
+            END
+        END
+    END
+
 Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if a given Prometheus alert does not have the expected severity
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-severity}    ${alert-duration}=${EMPTY}    #robocop:disable

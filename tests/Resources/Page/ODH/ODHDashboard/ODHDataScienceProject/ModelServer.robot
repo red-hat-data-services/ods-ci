@@ -22,7 +22,7 @@ ${S3_DEFAULT_REGION}=    us-east-1
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}    ${server_size}    ${ext_route}=${TRUE}    ${token}=${TRUE}
+    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}    ${token}=${TRUE}
     Click Button    Configure server
     Wait Until Page Contains    //span[.="Configure model server"]
     Set Replicas Number With Buttons    ${no_replicas}
@@ -46,6 +46,7 @@ Set Replicas Number With Buttons
     IF    ${difference}<${0}
         ${difference}=    Evaluate    abs(${difference})
         ${op}=    Set Variable    minus
+    END
     FOR  ${idx}  IN RANGE  ${difference}
         IF ${op}==plus
             Click Plus Button
@@ -69,6 +70,9 @@ Set Server Size
 
 Enable External Serving Route
     [Documentation]    Enables the serving route to be accessed externally
+    Select Checkbox    xpath://input[@id="alt-form-checkbox-route"]
 
 Enable Token Authentication
     [Documentation]    Enables Token authentication to serving route
+    Select Checkbox    xpath://input[@id="alt-form-checkbox-auth"]
+    #TODO: change service account name

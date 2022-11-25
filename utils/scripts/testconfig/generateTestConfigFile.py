@@ -180,8 +180,9 @@ def generate_test_config_file(
     data["GITHUB_USER"]["USERNAME"] = config_data["GITHUB_USER"]["USERNAME"]
     data["GITHUB_USER"]["TOKEN"] = config_data["GITHUB_USER"]["TOKEN"]
     data["SERVICE_ACCOUNT"]["NAME"] = config_data["SERVICE_ACCOUNT"]["NAME"]
-    data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data[
-        "SERVICE_ACCOUNT"]["FULL_NAME"]
+    data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data["SERVICE_ACCOUNT"]["FULL_NAME"]
+    data["STARBURST"]["LICENSE"] = config_data["STARBURST"]["LICENSE"]
+    data["DEFAULT_NOTIFICATION_EMAIL"] = config_data["DEFAULT_NOTIFICATION_EMAIL"]
 
     # Login to test cluster using oc command
     oc_login(

@@ -49,7 +49,6 @@ Test Metric "Rhods_Total_Users" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-628
-
     # Note: the expression ends with "step=1" to obtain the value for current second
     ${expression} =    Set Variable    rhods_total_users&step=1
     ${rhods_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
@@ -96,21 +95,26 @@ Verify JupyterHub Leader Monitoring Using ODS Prometheus
     ...    password=${OCP_ADMIN_USER.PASSWORD}
     ${Length} =    Get Length    ${endpoints}
     Should Be Equal As Integers    ${Length}    1
-    ${query_result} =    Prometheus.Run Range Query    pm_query=up{job="JupyterHub Metrics"}    pm_url=${RHODS_PROMETHEUS_URL}    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ${query_result} =    Prometheus.Run Range Query
+    ...    pm_query=up{job="JupyterHub Metrics"}    pm_url=${RHODS_PROMETHEUS_URL}    pm_token=${RHODS_PROMETHEUS_TOKEN}
     Verify That There Was Only 1 Jupyterhub Server Available At A Time  query_result=${query_result}
 
 
 *** Keywords ***
 Begin Metrics Web Test
+    [Documentation]    Test Setup
     Set Library Search Order    SeleniumLibrary
 
 End Metrics Web Test
+    [Documentation]    Test Teardown
     Close All Browsers
 
 Check Prometheus Recording Rules
+    [Documentation]    Verifies recording rules in prometheus
     Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    record    @{RECORD_GROUPS}
 
 Check Prometheus Alerting Rules
+    [Documentation]    Verifies alerting rules in prometheus
     Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS}
 
 Read Current CPU Usage
@@ -131,17 +135,19 @@ CPU Usage Should Have Increased
      ${cpu_usage_current} =    Read Current CPU Usage
      Should Be True    ${cpu_usage_current}>${cpu_usage_before}
 
-# TODO: Add this keyword with the other JupyterHub stuff
 Run Jupyter Notebook For 5 Minutes
+    [Documentation]    Runs a notebook for a few minutes
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
     Iterative Image Test    s2i-generic-data-science-notebook    https://github.com/lugi0/minimal-nb-image-test
     ...    minimal-nb-image-test/minimal-nb.ipynb
 
-# TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob. We have to refactor the code not to duplicate this method
-
+#robocop: disable:too-many-calls-in-keyword
 Iterative Image Test
+    [Documentation]    Launches a jupyter notebook by repo and path.
+    ...    TODO: This is a copy of "Iterative Image Test" keyword from image-iteration.robob.
+    ...    We have to refactor the code not to duplicate this method
     [Arguments]    ${image}    ${REPO_URL}    ${NOTEBOOK_TO_RUN}
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}

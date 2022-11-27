@@ -17,7 +17,6 @@ Verify Prometheus Is Shipped And Enabled Within ODS
     @{prometheus_deployment_info} =    Fetch Prometheus Deployments Info
     @{prometheus_services_info} =    Fetch Prometheus Services Info
     @{prometheus_routes_info} =    Fetch Prometheus Routes Info
-    @{prometheus_replicasets_info} =    Fetch Prometheus ReplicaSets Info
     OpenShift Resource Field Value Should Be Equal As Strings    status.phase    Running    @{prometheus_pods_info}
     OpenShift Resource Field Value Should Be Equal As Strings    status.containerStatuses[0].name    alertmanager    @{prometheus_pods_info}
     OpenShift Resource Field Value Should Be Equal As Strings    status.containerStatuses[1].name    alertmanager-proxy    @{prometheus_pods_info}
@@ -32,11 +31,11 @@ Verify Prometheus Is Shipped And Enabled Within ODS
     OpenShift Resource Field Value Should Be Equal As Strings    spec.ports[0].targetPort    https    @{prometheus_services_info}
     OpenShift Resource Field Value Should Match Regexp    spec.clusterIP    ^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$
     ...    @{prometheus_services_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas    1    @{prometheus_replicasets_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    1    @{prometheus_replicasets_info}
+    Wait Until Keyword Succeeds    10 times  5s    Verify Prometheus ReplicaSets Info
     OpenShift Resource Field Value Should Be Equal As Strings    spec.port.targetPort    https    @{prometheus_routes_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.to.name    prometheus    @{prometheus_routes_info}
     OpenShift Resource Field Value Should Match Regexp    spec.host    ^(prometheus-redhat-ods-monitoring.*)    @{prometheus_routes_info}
+
 
 *** Keywords ***
 Fetch Prometheus Pods Info
@@ -77,12 +76,10 @@ Fetch Prometheus Routes Info
     ...    namespace=redhat-ods-monitoring
     [Return]    @{prometheus_routes_info}
 
-Fetch Prometheus ReplicaSets Info
-    [Documentation]    Fetch information from Prometheus replicasets
-    ...    Args:
-    ...        None
-    ...    Returns:
-    ...        prometheus_replicasets_info(list(dict)): Prometheus replicasets selected by label and namespace
+Verify Prometheus ReplicaSets Info
+    [Documentation]    Fetches and verifies information from Prometheus replicasets
     @{prometheus_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=redhat-ods-monitoring
     ...    label_selector=deployment=prometheus
-    [Return]    @{prometheus_replicasets_info}
+    OpenShift Resource Field Value Should Be Equal As Strings
+    ...    status.readyReplicas    1    @{prometheus_replicasets_info}
+    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    1    @{prometheus_replicasets_info}

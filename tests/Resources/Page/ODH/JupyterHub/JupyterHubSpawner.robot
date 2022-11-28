@@ -179,7 +179,7 @@ Spawn Notebook
                     END
                 END
             ELSE IF  ${control_panel_visible}==True
-                # If the user has been redirected to the control panel, 
+                # If the user has been redirected to the control panel,
                 # move to the server and continue execution
                 Click Button    Return to server
                 Return From Keyword
@@ -252,6 +252,7 @@ Spawn Notebook With Arguments  # robocop: disable
          ${authorization_required} =  Is Service Account Authorization Required
          Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
          Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+         Sleep    2s    reason=Wait for a possible popup
          Maybe Close Popup
          Open New Notebook In Jupyterlab Menu
          Spawned Image Check    ${image}
@@ -430,7 +431,7 @@ Maybe Handle Server Not Running Page
 Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
-   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}   
+   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}
    ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
    Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
    Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10

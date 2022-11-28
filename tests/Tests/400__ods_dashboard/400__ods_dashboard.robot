@@ -79,6 +79,16 @@ Verify Content In RHODS Explore Section
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Cards Details Are Correct    expected_data=${EXP_DATA_DICT}
 
+Verify RHODS Explore Section Contains Only Expected ISVs
+    [Documentation]    It verifies if the ISV reported in Explore section of RHODS corresponds to expected ones
+    [Tags]    Smoke
+    ...       ODS-1890
+    ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
+    Click Link    Explore
+    Wait Until Cards Are Loaded
+    Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
+    Check Dashboard Diplayes Expected ISVs    expected_data=${EXP_DATA_DICT}
+
 Verify Disabled Cards Can Be Removed
     [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
     ...                 It uses RHOSAK as example to test the feature

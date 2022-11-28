@@ -18,9 +18,16 @@ Is Cluster Registered
     [Return]  ${result}
 
 Check Cluster Is Not Already Registered
+    [Arguments]    ${warn_on_failure}=${FALSE}
     ${registered}=    Is Cluster Registered
     IF    ${registered} == ${TRUE}
-        Fail    msg=Cluster may be already registered to RHM. Check the cluster...       
+        IF    ${warn_on_failure} == ${TRUE}
+            Log    message=Cluster may be already registered to RHM. Check the cluster...
+            ...    console=yes
+            ...    level=WARN
+        ELSE
+            Fail    msg=Cluster may be already registered to RHM. Check the cluster...
+        END
     END
 
 Install RedHat Marketplace Operator

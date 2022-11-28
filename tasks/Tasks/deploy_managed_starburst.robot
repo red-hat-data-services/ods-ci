@@ -3,13 +3,14 @@ Documentation     Perform and verify Managed Starburst,
 ...               a.k.a Starburst Enterprise for Red Hat (SERH), OLM tasks
 Metadata          Managed Starburst OLM Version    1.0.0
 Resource          ../Resources/SERH_OLM/install.robot
+Resource          ../Resources/RedHatMarketplace.resource
 Resource          ../../tests/Resources/Common.robot
 Resource          ../../tests/Resources/RHOSi.resource
 Library           OpenShiftLibrary
 Library           OperatingSystem
 Library           String
 Library           ../../libs/Helpers.py
-Suite Setup       RHOSi Setup
+Suite Setup       Managed Starburst Installation Setup
 Suite Teardown    RHOSi Teardown
 
 
@@ -30,3 +31,11 @@ Uninstall Managed Starburst
     Delete Managed Starburst CRs    starburst_enterprise_cr=starburstenterprise
     Uninstall Managed Starburst Using Addon Flow    ${CLUSTER_NAME}
     Check Managed Staburst Is Not Installed
+
+
+*** Keywords ***
+Managed Starburst Installation Setup
+    Check Cluster Is Not Already Registered    warn_on_failure=${TRUE}
+    Install RedHat Marketplace Operator
+    Create RedHat Marketplace Secret    token=${RHM_TOKEN}
+    RHOSi Setup

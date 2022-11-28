@@ -183,6 +183,7 @@ def generate_test_config_file(
     data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data["SERVICE_ACCOUNT"]["FULL_NAME"]
     data["STARBURST"]["LICENSE"] = config_data["STARBURST"]["LICENSE"]
     data["DEFAULT_NOTIFICATION_EMAIL"] = config_data["DEFAULT_NOTIFICATION_EMAIL"]
+    data["RHM_TOKEN"] = config_data["RHM_TOKEN"]
 
     # Login to test cluster using oc command
     oc_login(

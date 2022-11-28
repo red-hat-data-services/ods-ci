@@ -3,16 +3,22 @@ Resource    ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
 
 
 *** Test Cases ***
+Test route
+    [Tags]    sep-route
+    ${route}=    Oc Get    kind=Route  name=web-ui  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  fields=['spec.host']
+    Run Keyword And Continue On Failure    Log  ${route[0]['spec.host']}
+
+
 Verify User Can Access Trino Web console
-    [Tags]    trino-ui
+    [Tags]    MISV-86
     Create Starburst Route If Not Exists    name=${STARBURST_ROUTE}
     Open Trino Web UI    user=${TEST_USER_3.USERNAME}
-    Page Should Contain     CLUSTER OVERVIEW
-    Page Should Contain     ACTIVE WORKERS
-    Page Should Contain Element     xpath=//a[text=()="Log Out"]
+    Page Should Contain     Cluster Overview
+    Page Should Contain     Active workers
+    Page Should Contain Element     xpath=//a[text()="Log Out"]
 
 Verify User Can Access Managed Starburst Web console
-    [Tags]    sep-ui
+    [Tags]    MISV-85
     Create Starburst Route If Not Exists    name=${STARBURST_ROUTE}
     Open Managed Staburst Web UI    user=${TEST_USER_3.USERNAME}
 

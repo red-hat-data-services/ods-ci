@@ -19,8 +19,8 @@ Create Starburst Route
 
 Get Starburst Route
     [Arguments]    ${name}=${STARBURST_ROUTE}
-    ${route}=    Get Starburst Route
-    [Return]    ${route}
+    ${route}=    Oc Get    kind=Route  name=${name}  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  fields=['spec.host']
+    [Return]    ${route[0]['spec.host']}
 
 Create Starburst Route If Not Exists
     [Arguments]    ${name}
@@ -51,7 +51,7 @@ Open Trino Web UI
         Log    message=Fetching Starburst Route...
         ${url}=    Get Starburst Route
     END
-    Open Browser      url=${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
+    Open Browser      url=http://${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Perform Log In    username=${user}    
 
 Open Managed Staburst Web UI
@@ -61,5 +61,5 @@ Open Managed Staburst Web UI
         ${trino_url}=    Get Starburst Route
         ${url}=     Set Variable    ${trino_url}/ui/insights
     END
-    Open Browser      url=${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
+    Open Browser      url=http://${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Perform Log In    username=${user}    

@@ -13,7 +13,7 @@ ${STARBURST_ROUTE}=    web-ui
 *** Keywords ***
 Create Starburst Route
     [Arguments]    ${name}
-    ${rc}=    Run And Return Rc    oc expose svc starburst --name ${name} -n ${STARBURST_CR_DEFAULT_NAMESPACE}
+    ${rc}=    Run And Return Rc    oc create route edge ${name} --service=starburst --insecure-policy="Redirect" -n ${STARBURST_CR_DEFAULT_NAMESPACE}
     ${route}=    Get Starburst Route
     [Return]    ${rc}    ${route}
 

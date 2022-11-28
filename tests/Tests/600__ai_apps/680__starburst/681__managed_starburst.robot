@@ -3,12 +3,6 @@ Resource    ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
 
 
 *** Test Cases ***
-Test route
-    [Tags]    sep-route
-    ${route}=    Oc Get    kind=Route  name=web-ui  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  fields=['spec.host']
-    Run Keyword And Continue On Failure    Log  ${route[0]['spec.host']}
-
-
 Verify User Can Access Trino Web console
     [Tags]    MISV-86
     Create Starburst Route If Not Exists    name=${STARBURST_ROUTE}

@@ -102,4 +102,3 @@ Check Managed Starburst Web UI Is Loaded
     Page Should Contain     Documentation
     Page Should Contain     Web UI
     Wait Until Page Contains Element    xpath=//canvas[@class="chartjs-render-monitor"]
-    

@@ -13,7 +13,8 @@ ${STARBURST_ROUTE}=    web-ui
 *** Keywords ***
 Create Starburst Route
     [Arguments]    ${name}
-    ${rc}=    Run And Return Rc    oc create route edge ${name} --service=starburst --insecure-policy="Redirect" -n ${STARBURST_CR_DEFAULT_NAMESPACE}
+    ${rc}=    Run And Return Rc    oc expose svc starburst --name ${name} -n ${STARBURST_CR_DEFAULT_NAMESPACE}
+    # ${rc}=    Run And Return Rc    oc create route edge ${name} --service=starburst --insecure-policy="Redirect" -n ${STARBURST_CR_DEFAULT_NAMESPACE}
     ${route}=    Get Starburst Route
     [Return]    ${rc}    ${route}
 
@@ -52,7 +53,13 @@ Open Trino Web UI
         ${url}=    Get Starburst Route
     END
     Open Browser      url=http://${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
-    Perform Log In    username=${user}    
+    Perform Log In    username=${user}
+    Wait Until Page Contains     Cluster Overview
+
+Check Trino Web UI Is Loaded
+    Page Should Contain     Active workers
+    Page Should Contain     Query Details
+    Page Should Contain Element     xpath=//a[text()="Log Out"]
 
 Open Managed Staburst Web UI
     [Arguments]    ${url}=${NONE}    ${user}=dummy-user
@@ -62,4 +69,26 @@ Open Managed Staburst Web UI
         ${url}=     Set Variable    ${trino_url}/ui/insights
     END
     Open Browser      url=http://${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
-    Perform Log In    username=${user}    
+    Perform Log In    username=${user}
+    Wait Until Page Contains     Cluster overview
+
+Check Worksheet Tool Is Accessible
+    Click Element    xpath=//div[text()="Worksheet"]
+    Wait Until Page Contains Element    xpath=//div[text()="loading"]
+    Wait Until Page Does Not Contain Element    xpath=//div[text()="loading"]   timeout=15s
+    Wait Until Page Contains Element     xpath=//span[text()="system"]
+    Wait Until Page Contains Element     xpath=//span[text()="tpch"]
+
+Check Managed Starburst Web UI Is Loaded
+    Page Should Contain     Overview
+    Page Should Contain     CPU usage
+    Page Should Contain     Workers
+    Page Should Contain     Query history
+    Page Should Contain     Cluster history
+    Page Should Contain     Insights
+    Page Should Contain     Worksheet
+    Page Should Contain     Documentation
+    Page Should Contain     Web UI
+    Wait Until Page Contains Element    xpath=//canvas[@class="chartjs-render-monitor"]
+
+    

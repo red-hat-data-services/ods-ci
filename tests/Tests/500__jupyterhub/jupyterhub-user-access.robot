@@ -28,7 +28,6 @@ Verify User Can Set Custom RHODS Groups
     ...                different from rhods-admins and rhods-users
     [Tags]  Sanity
     ...     ODS-293    ODS-503
-    ...     ProductBug
     [Setup]      Set Standard RHODS Groups Variables
     Create Custom Groups
     Add Test Users To Custom Groups

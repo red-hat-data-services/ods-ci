@@ -48,7 +48,7 @@ Set Replicas Number With Buttons
         ${op}=    Set Variable    minus
     END
     FOR  ${idx}  IN RANGE  ${difference}
-        IF ${op}==plus
+        IF  ${op}==plus
             Click Plus Button
         ELSE
             Click Minus Button
@@ -76,3 +76,20 @@ Enable Token Authentication
     [Documentation]    Enables Token authentication to serving route
     Select Checkbox    xpath://input[@id="alt-form-checkbox-auth"]
     #TODO: change service account name
+
+Get Model Serving Access Token via UI
+    [Documentation]
+    [Arguments]    ${service_account_name}=default-name
+    Click Element    //td[@data-label="Tokens"]/button
+    ${token}=    Get Element Attribute    //div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+    [Return]    ${token}
+
+Click Plus Button
+    [Documentation]
+    [Arguments]
+    Log    TODO
+
+Click Minus Button
+    [Documentation]
+    [Arguments]
+    Log    TODO

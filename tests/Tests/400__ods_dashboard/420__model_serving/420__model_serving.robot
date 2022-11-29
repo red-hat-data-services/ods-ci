@@ -4,8 +4,9 @@ Resource          ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Suite Setup       Model Serving Suite Setup
-# Suite Teardown    Teardown Model Serving
+Suite Teardown    Model Serving Suite Teardown
 
 
 *** Variables ***
@@ -43,13 +44,15 @@ Verify Model Can Be Deployed Via UI
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=test-model    framework=onnx    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
 
-Verify Served Model Status
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
+# Verify Served Model Status
+#     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
+#     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     # Verify Status In Model Serving Page
 
 
@@ -60,22 +63,29 @@ Test Inference
     # TODO: find better way to understand when model is being served
     # One option is Triton pods being both 5/5 Ready
     #Sleep  10s
-    # Get Route via UI
-    # Get Token via UI
+    Verify Model Status    test-model    success
+    # //div[.="test-model-no-token "]/../../td[@data-label="Project"] (.= project name)
+    # //div[.="test-model-no-token "]/../../td[@data-label="Inference endpoint"]//div[@class="pf-c-clipboard-copy__group"]/input (value=url)
+    # //div[.="test-model-no-token "]/../../td[@data-label="Status"]//span[contains(@class,"pf-c-icon__content")] (class=status?) (pf-m-danger > failed)  (pf-m-danger) (pf-m-success)
+    # //div[.="test-model-no-token "]/../../td[@data-label="Status"]//span[contains(@class,"pf-c-icon__content")]
+    # //div[.="test-model-no-token "]/../../td[@class="pf-c-table__action"]//button
+    # //div[.="test-model-no-token "]/../../td[@class="pf-c-table__action"]//button/..//button[.="Edit"]
+    # //div[.="test-model-no-token "]/../../td[@class="pf-c-table__action"]//button/..//button[.="Delete"]
+    ${url}=    Get Model Route via UI    test-model
+    ${token}=    Get Access Token via UI    ${PRJ_TITLE}
     #${MS_ROUTE} =    Run    oc get routes -n ${MODEL_MESH_NAMESPACE} example-onnx-mnist --template={{.spec.host}}{{.spec.path}}
     #${AUTH_TOKEN} =    Run    oc sa new-token user-one -n ${MODEL_MESH_NAMESPACE}
-    ${inference_output} =    Run    curl -ks https://${MS_ROUTE}/infer -d @modelmesh-serving/quickstart/input.json -H "Authorization: Bearer ${AUTH_TOKEN}"
+    ${inference_output} =    Run    curl -ks ${url} -d @tests/Resources/Files/modelmesh-mnist-input.json -H "Authorization: Bearer ${token}"
     Should Be Equal As Strings    ${inference_output}    ${EXPECTED_INFERENCE_OUTPUT}
-
 
 *** Keywords ***
 Model Serving Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    #${to_delete}=    Create List    ${PRJ_TITLE}
-    #Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     RHOSi Setup
+    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
 
 Verify Etcd Pod
     # TODO: need unique label for etcd deployment
@@ -128,3 +138,22 @@ Verify Openvino Deployment
 #     # Seems like it's taking 10 minutes to stop reconciling deployments
 #     Wait Until Keyword Succeeds  15 min  15s  Delete Model Serving Resources
 #     Run    rm -rf modelmesh-serving
+
+Get Access Token via UI
+    [Documentation]
+    [Arguments]    ${project_name}    ${service_account_name}=default-name
+    Open Data Science Projects Home Page
+    Project Should Be Listed    ${project_name}
+    Open Data Science Project Details Page    ${project_name}
+    ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
+    Open Model Serving Home Page
+    [Return]    ${token}
+
+Model Serving Suite Teardown
+    [Documentation]    Suite teardown steps after testing DSG. It Deletes
+    ...                all the DS projects created by the tests and run RHOSi teardown
+    Delete Model Via UI    test-model
+    Close All Browsers
+    # Delete All Data Science Projects From CLI
+    Delete Data Science Projects From CLI   ocp_projects=${PRJ_TITLE}
+    RHOSi Teardown

@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation    Collections of keywords to register a cluster to RHM
 Library    OpenShiftLibrary
 Library    ../../venv/lib64/python3.8/site-packages/robot/libraries/OperatingSystem.py
 
@@ -6,18 +7,22 @@ Library    ../../venv/lib64/python3.8/site-packages/robot/libraries/OperatingSys
 *** Variables ***
 ${RH_MARKETPLACE_NS}=    openshift-redhat-marketplace
 
+
 *** Keywords ***
 Is Cluster Registered
+    [Documentation]    Returns TRUE if the cluster contains resources created by
+    ...                the registration process to RedHat Marketplace
     ${result}=  Run Keyword And Return Status
     ...  Run Keywords
     ...  Oc Get  kind=Project  field_selector=metadata.name=${RH_MARKETPLACE_NS}  AND
     ...  Oc Get  kind=Secret  namespace=${RH_MARKETPLACE_NS}
-    ...          field_selector=metadata.name=redhat-marketplace-pull-secret  AND
+    ...    field_selector=metadata.name=redhat-marketplace-pull-secret  AND
     ...  Oc Get  kind=Subscription  namespace=${RH_MARKETPLACE_NS}
-    ...          field_selector=metadata.name=redhat-marketplace-operator
+    ...    field_selector=metadata.name=redhat-marketplace-operator
     [Return]  ${result}
 
 Check Cluster Is Not Already Registered
+    [Documentation]    Checks the cluster is not registered. Fails if it is registered
     [Arguments]    ${warn_on_failure}=${FALSE}
     ${registered}=    Is Cluster Registered
     IF    ${registered} == ${TRUE}
@@ -31,9 +36,11 @@ Check Cluster Is Not Already Registered
     END
 
 Install RedHat Marketplace Operator
+    [Documentation]    Installs the RHM operator
     Run    oc apply -f "https://marketplace.redhat.com/provisioning/v1/rhm-operator/rhm-operator-subscription?approvalStrategy=Automatic"
 
 Create RedHat Marketplace Secret
+    [Documentation]    Creates pull secret for fetching operators from RHM
     [Arguments]    ${token}
     Run    oc create secret generic redhat-marketplace-pull-secret -n openshift-redhat-marketplace --from-literal=PULL_SECRET=${token}
     Run And Return Rc And Output    curl -sL https://marketplace.redhat.com/provisioning/v1/scripts/update-global-pull-secret | bash -s ${token}

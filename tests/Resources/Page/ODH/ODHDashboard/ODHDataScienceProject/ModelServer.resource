@@ -24,7 +24,7 @@ Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}    ${token}=${TRUE}
     Click Button    Configure server
-    Wait Until Page Contains    //span[.="Configure model server"]
+    Wait Until Page Contains Element    //span[.="Configure model server"]
     Set Replicas Number With Buttons    ${no_replicas}
     Set Server Size    ${server_size}
     IF    ${ext_route}==${TRUE}

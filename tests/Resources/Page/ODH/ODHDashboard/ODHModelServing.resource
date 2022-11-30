@@ -33,17 +33,19 @@ Serve Model
     [Documentation]
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}
+    Wait Until Page Contains    Serve model
     Click Button    Serve model
-    Wait Until Page Contains    xpath://h1[.="Deploy model"]
+    Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Framework    ${framework}
     IF    ${existing_data_connection}==${TRUE} 
-        Select Radio Button    group_name=model-location    value=existing-data-connection-radio
+        #Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
+        #Selected by default, let's skip for now
         Select Existing Data Connection    ${data_connection_name}
         Set Folder Path    ${model_path}
     ELSE
-        Select Radio Button    group_name=model-location    value=new-data-connection-radio
+        Select Radio Button    group_name=radiogroup    value=new-data-connection-radio
         Set Up New Data Connection    dc_name=${data_connection_name}
         Set Folder Path    ${model_path}
     END
@@ -53,8 +55,14 @@ Serve Model
 Select Project
     [Documentation]
     [Arguments]    ${project_name}
-    Click Element    xpath://span[.="Project"]/../../..//button[@aria-label="Options menu"]
-    Click Element    xpath://li/button[.="${project_name}"]
+    # If there's only one project for the user, no need to do anything - let's check it has the correct name though
+    Wait Until Page Contains Element    xpath://span[.="Project"]
+    ${choice}=    Run Keyword And Return Status    Page Should Not Contain Element    xpath://span[.="Project"]/../../..//p[.="${project_name}"]
+    IF    ${choice}==${TRUE}
+        Click Element    xpath://span[.="Project"]/../../..//button[@aria-label="Options menu"]
+        Click Element    xpath://li/button[.="${project_name}"]
+        Sleep    1s  # After selecting the project the modal refreshes and can cause issues to Selenium
+    END
 
 Set Model Name
     [Documentation]
@@ -77,7 +85,7 @@ Select Existing Data Connection
 Set Folder Path
     [Documentation]
     [Arguments]    ${model_path}
-    Input Text    xpath://input[@id="inference-service-name-input"]    ${model_path}
+    Input Text    xpath://input[@id="storage-path"]    ${model_path}
 
 Set Up New Data Connection
     [Documentation]
@@ -95,7 +103,7 @@ Set Up New Data Connection
 Verify Model Status
     [Documentation]
     [Arguments]    ${model_name}    ${expected_status}=success
-    IF    ${expected_status}==success
+    IF    "${expected_status}"=="success"
         Wait Until Keyword Succeeds    30s    5s    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}//span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-success")]
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}//span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-danger")]
     ELSE

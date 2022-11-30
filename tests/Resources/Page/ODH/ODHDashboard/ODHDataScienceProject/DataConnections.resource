@@ -17,6 +17,7 @@ ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[text()="Add data connection"
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
 ${S3_DEFAULT_ENDPOINT}=    https://s3.amazonaws.com/
 ${S3_DEFAULT_REGION}=    us-east-1
+${S3_DC_ADD_BTN}=    //footer/button[.="Add data connection"]
 
 
 *** Keywords ***
@@ -36,8 +37,10 @@ Create S3 Data Connection
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Wait Until Element Is Enabled    ${STORAGE_ADD_BTN_2_XP}
-        Click Button    ${STORAGE_ADD_BTN_2_XP}
+        # Wait Until Element Is Enabled    ${STORAGE_ADD_BTN_2_XP}
+        # Click Button    ${STORAGE_ADD_BTN_2_XP}
+        Wait Until Element Is Enabled    ${S3_DC_ADD_BTN}
+        Click Button    ${S3_DC_ADD_BTN}
     END
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}

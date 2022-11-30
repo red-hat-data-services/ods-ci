@@ -33,7 +33,10 @@ Verify All Alerts Severity
     ...       Tier1
     ...       ODS-1227
 
-    Verify "Jupyter Image Builds Are Failing" Alerts Severity And Continue On Failure
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF    ${version_check}==False
+        Verify "Jupyter Image Builds Are Failing" Alerts Severity And Continue On Failure
+    END
     Verify "DeadManSnitch" Alerts Severity And Continue On Failure
     Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     Verify "ODH Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
@@ -48,8 +51,11 @@ Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-l
     ...       Tier1
     ...       ODS-540
 
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    Builds    Jupyter image builds are failing    alert-duration=120
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF    ${version_check}==False
+        Verify Alert Is Not Firing And Continue On Failure
+        ...    Builds    Jupyter image builds are failing    alert-duration=120
+    END
 
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
@@ -322,6 +328,8 @@ Verify Alert "Jupyter image builds are failing" Fires When There Is An Image Bui
     ...       ODS-717
     ...       Execution-Time-Over-30m
 
+    Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
+
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
@@ -373,6 +381,8 @@ Verify Alert "Jupyter Image Builds Are Failing" Fires At Least 20 Minutes When T
     [Tags]    Tier2
     ...       ODS-790
     ...       Execution-Time-Over-30m
+
+    Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
 
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook

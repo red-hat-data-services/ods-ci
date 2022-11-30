@@ -177,6 +177,7 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     [Tags]    Sanity
     ...       ODS-307
     ...       Tier1
+    Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
     Wait Until All Builds Are Complete  namespace=redhat-ods-applications
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 

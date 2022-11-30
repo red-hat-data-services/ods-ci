@@ -142,6 +142,7 @@ Verify That CUDA Build Chain Succeeds
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-316    ODS-481
+    Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
     Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
     Verify Image Can Be Spawned    image=pytorch  size=Small
     Verify Image Can Be Spawned    image=tensorflow  size=Small

@@ -28,31 +28,12 @@ Is Managed Starburst Installed
     ...    field_selector=metadata.name=addon-managed-starburst-catalog
     [Return]  ${result}
 
-Get Managed Starburst CR Status
+Status Of Managed Starburst CR Should Be
     [Documentation]     Get the installation stage by reading the "RHOAM installation object" YAML
+    [Arguments]    ${expected_status}
     ${status}=     Run    oc get starburstenterprise -n ${STARBURST_CR_DEFAULT_NAMESPACE} -o json | jq '.items[].status.conditions[] | .reason,.type' | sed 's/"//g'   # robocop: disable
     ${status_list}=    Text To List    ${status}
-    # Run Keyword And Continue On Failure    List Should Contain Value    ${status_list}    Initialized
-    # Run Keyword And Continue On Failure    List Should Contain Value    ${status_list}    InstallSuccessful
-    # Run Keyword And Continue On Failure    List Should Contain Value    ${status_list}    Deployed
-    [Return]    ${status_list[-1]}
-
-Wait Until Managed Starburst CR Is Deployed
-    [Documentation]    Keeps checking for Starburst CustomResource status until
-    ...                it gets "Deployed"
-    [Arguments]    ${retries}=10   ${retries_interval}=30s
-    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-        Log    Checking Managed Starburst status: retry ${retry_idx}    console=yes
-        ${current_status}=   Get Managed Starburst CR Status
-        Log    Last status of Managed Starburst CR installation: ${current_status}    console=yes
-        ${completed_flag}=     Run Keyword And Return Status    Should Be Equal    ${current_status}    Deployed
-        Exit For Loop If    $completed_flag == True
-        Sleep    ${retries_interval}
-    END
-    IF    $completed_flag == False
-        Fail    Managed Starburst CR didn't get deployed after ${retries} retries.
-        ...     (time between retries: ${retries_interval}). Check the cluster...
-    END
+    Run Keyword And Continue On Failure   Should Be Equal   ${status_list[-1]}   ${expected_status}
 
 Verify Coordinator And Workers Deployment
     [Documentation]    Verifies the Starburst coordinator and workers have the expected
@@ -84,30 +65,16 @@ Managed Starburst Pods Should Be Deployed
     Run Keyword And Continue On Failure    Length Should Be    ${completed_pods_list}    2
     Verify Coordinator And Workers Deployment
     Verify Prometheus Deployment
-  
-Wait Until Managed Starburst Pods Are Deployed
-    [Documentation]    Keeps checking for status of Starburst pods until
-    ...                they gets deployed
-    [Arguments]    ${retries}=10   ${retries_interval}=30s
-    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-        Log    Checking Managed Starburst pods are successfully deployed: retry ${retry_idx}    console=yes
-        ${current_status}=   Run Keyword And Return Status    Managed Starburst Pods Should Be Deployed
-        Log    Last status of Managed Starburst CR installation: ${current_status}    console=yes
-        Exit For Loop If    $current_status == True
-        Sleep    ${retries_interval}
-    END
-    IF    $current_status == False
-        Fail    Managed Starburst Pods didn't get deployed after ${retries} retries.
-        ...     (time between retries: ${retries_interval}). Check the cluster...
-    END
 
 Wait Until Managed Starburst Installation Is Completed
     [Documentation]    Keeps checking for Starburst resources until
     ...                all of them get the expected status
     [Arguments]    ${cr_chk_retries}=30   ${cr_chk_retries_interval}=30s
     ...            ${pods_chk_retries}=30   ${pods_chk_retries_interval}=30s
-    Wait Until Managed Starburst CR Is Deployed      retries=${cr_chk_retries}      retries_interval=${cr_chk_retries_interval}
-    Wait Until Managed Starburst Pods Are Deployed    retries=${pods_chk_retries}    retries_interval=${pods_chk_retries_interval}
+    Wait Until Keyword Succeeds    ${cr_chk_retries}    ${cr_chk_retries_interval}
+    ...    Status Of Managed Starburst CR Should Be    Deployed    
+    Wait Until Keyword Succeeds    ${pods_chk_retries}    ${pods_chk_retries_interval}
+    ...    Managed Starburst Pods Should Be Deployed
 
 Delete Managed Starburst CRs
     [Documentation]    Delets the Staburst CRs

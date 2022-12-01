@@ -43,4 +43,6 @@ Create RedHat Marketplace Secret
     [Documentation]    Creates pull secret for fetching operators from RHM
     [Arguments]    ${token}
     Run    oc create secret generic redhat-marketplace-pull-secret -n openshift-redhat-marketplace --from-literal=PULL_SECRET=${token}
-    Run And Return Rc And Output    curl -sL https://marketplace.redhat.com/provisioning/v1/scripts/update-global-pull-secret | bash -s ${token}
+    ${rc}  ${output}=    Run And Return Rc And Output    curl -sL https://marketplace.redhat.com/provisioning/v1/scripts/update-global-pull-secret | bash -s ${token}    # robocop: disable
+    Run Keyword And Continue On Failure    Should Contain    ${output}    pull-secret data updated
+    Run Keyword And Continue On Failure    Should Not Contain    ${output}    pull-secret was not changed

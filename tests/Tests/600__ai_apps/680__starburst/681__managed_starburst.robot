@@ -6,11 +6,11 @@ Resource         ../../../../tasks/Resources/SERH_OLM/install.resource
 Suite Setup      Starburst Setup Suite
 
 *** Variables ***
-${GET_SQL_FUNC}=        import pandas\ndef get_sql(sql, connector):\n\tcur = connector.cursor()\n\tcur.execute(sql)\n\treturn pandas.DataFrame(cur.fetchall(), columns=[c[0] for c in cur.description])\nprint("get_sql function defined")    # robocop: disable
-${INIT_CELL_CODE}=      import os\nimport trino\nTRINO_USERNAME="dummy-user"\nTRINO_HOSTNAME = os.environ.get('TRINO_HOSTNAME')\nTRINO_PORT= 80\nconn = trino.dbapi.connect(\nhost=TRINO_HOSTNAME,\nport=TRINO_PORT,\nuser=TRINO_USERNAME\n)\nprint("connection to trino set")    # robocop: disable
-${QUERY_CATALOGS}=       SHOW CATALOGS
-${QUERY_SCHEMAS}=        SHOW SCHEMAS from tpch
-${QUERY_TABLES}=        SHOW TABLES from tpch.sf1
+${GET_SQL_FUNC}=           import pandas\ndef get_sql(sql, connector):\n\tcur = connector.cursor()\n\tcur.execute(sql)\n\treturn pandas.DataFrame(cur.fetchall(), columns=[c[0] for c in cur.description])\nprint("get_sql function defined")    # robocop: disable
+${INIT_CELL_CODE}=         import os\nimport trino\nTRINO_USERNAME="dummy-user"\nTRINO_HOSTNAME = os.environ.get('TRINO_HOSTNAME')\nTRINO_PORT= 80\nconn = trino.dbapi.connect(\nhost=TRINO_HOSTNAME,\nport=TRINO_PORT,\nuser=TRINO_USERNAME\n)\nprint("connection to trino set")    # robocop: disable
+${QUERY_CATALOGS}=         SHOW CATALOGS
+${QUERY_SCHEMAS}=          SHOW SCHEMAS from tpch
+${QUERY_TABLES}=           SHOW TABLES from tpch.sf1
 ${QUERY_CUSTOMERS}=        SELECT name FROM tpch.sf1.customer limit 3
 ${QUERY_CATALOGS_PY}=      sql = '${QUERY_CATALOGS}'\ndf = get_sql(sql, conn)\nprint(df['Catalog'].values)\n
 ${QUERY_SCHEMAS_PY}=       sql = '${QUERY_SCHEMAS}'\ndf = get_sql(sql, conn)\nprint(df['Schema'].values)\n

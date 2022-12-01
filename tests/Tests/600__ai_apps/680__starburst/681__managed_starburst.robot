@@ -1,8 +1,9 @@
 *** Settings ***
 Documentation    Suite to test Managed Starburst integration
-Resource        ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
-Resource        ../../../Resources/Page/LoginPage.robot
-Suite Setup    Starburst Setup Suite
+Resource         ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
+Resource         ../../../Resources/Page/LoginPage.robot
+Resource         ../../../../tasks/Resources/SERH_OLM/install.resource
+Suite Setup      Starburst Setup Suite
 
 *** Variables ***
 ${GET_SQL_FUNC}=        import pandas\ndef get_sql(sql, connector):\n\tcur = connector.cursor()\n\tcur.execute(sql)\n\treturn pandas.DataFrame(cur.fetchall(), columns=[c[0] for c in cur.description])\nprint("get_sql function defined")    # robocop: disable
@@ -18,6 +19,15 @@ ${QUERY_CUSTOMERS_PY}=     sql = '${QUERY_CUSTOMERS}'\ndf = get_sql(sql, conn)\n
 
 
 *** Test Cases ***
+Verify Managed Starburst Is Deployed
+    [Documentation]    Checks that Managed Starburst is deployed in the cluster
+    [Tags]    MISV-79    MISV-84
+    ${installed}=    Is Managed Starburst Installed
+    Should Be Equal    ${installed}    ${TRUE}
+    ${cr_current_status}=   Get Managed Starburst CR Status
+    Should Be Equal    ${cr_current_status}    Deployed
+    Managed Starburst Pods Should Be Deployed
+
 Verify User Can Access Trino Web console
     [Documentation]    Checks Trino Web UI can be accessed
     [Tags]    MISV-86

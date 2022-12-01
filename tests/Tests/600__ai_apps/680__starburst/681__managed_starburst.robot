@@ -24,8 +24,7 @@ Verify Managed Starburst Is Deployed
     [Tags]    MISV-79    MISV-84
     ${installed}=    Is Managed Starburst Installed
     Should Be Equal    ${installed}    ${TRUE}
-    ${cr_current_status}=   Get Managed Starburst CR Status
-    Should Be Equal    ${cr_current_status}    Deployed
+    Status Of Managed Starburst CR Should Be    Deployed
     Managed Starburst Pods Should Be Deployed
 
 Verify User Can Access Trino Web console

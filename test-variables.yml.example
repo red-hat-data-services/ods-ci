@@ -36,6 +36,8 @@ SERVICE_ACCOUNT:
 S3:
   AWS_ACCESS_KEY_ID: ID-value
   AWS_SECRET_ACCESS_KEY: Secret-Key
+  AWS_DEFAULT_ENDPOINT:    https://s3.amazonaws.com/
+  AWS_DEFAULT_REGION:    us-east-1
 ANACONDA_CE:
   ACTIVATION_KEY: license-key
 SSO:

@@ -17,6 +17,7 @@ ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","mo
 ${PRJ_TITLE}=    model-serving-project
 ${PRJ_DESCRIPTION}=    project used for model serving tests
 
+
 *** Test Cases ***
 Verify Model Serving Installation
     [Documentation]    Verifies Model Serving resources

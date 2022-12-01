@@ -15,8 +15,8 @@ ${DC_SECTION_XP}=             xpath=//div[div//h4[@id="data-connections"]]
 ${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}/div/button[text()="Add data connection"]
 ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[text()="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
-${S3_DEFAULT_ENDPOINT}=    https://s3.amazonaws.com/
-${S3_DEFAULT_REGION}=    us-east-1
+${REPLICAS_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
+${REPLICAS_MIN_BTN_XP}=         xpath=//div/button[@aria-label="Minus"]
 
 
 *** Keywords ***
@@ -63,10 +63,10 @@ Set Server Size
     ...    If "Custom", need CPU request/limit and Memory request/limit
     [Arguments]    ${size}
     Click Element    xpath://button[@aria-label="Options menu"]
-    #Does Not Work for "Custom"
-    #//li/button[.="Custom"]
+    # Does Not Work for "Custom"
+    # //li/button[.="Custom"]
     Click Element    xpath://li//span[.="${size}"]/../../button
-    #TODO: Implement Custom
+    # TODO: Implement Custom
 
 Enable External Serving Route
     [Documentation]    Enables the serving route to be accessed externally
@@ -75,21 +75,20 @@ Enable External Serving Route
 Enable Token Authentication
     [Documentation]    Enables Token authentication to serving route
     Select Checkbox    xpath://input[@id="alt-form-checkbox-auth"]
-    #TODO: change service account name
+    # TODO: change service account name
 
 Get Model Serving Access Token via UI
-    [Documentation]
+    [Documentation]    Returns the token used for authentication to the serving route
+    ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
     [Arguments]    ${service_account_name}=default-name
     Click Element    //td[@data-label="Tokens"]/button
     ${token}=    Get Element Attribute    //div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     [Return]    ${token}
 
 Click Plus Button
-    [Documentation]
-    [Arguments]
-    Log    TODO
+    [Documentation]    Clicks the plus button of the model server replica counter
+    Click Element    ${REPLICAS_PLUS_BTN_XP}
 
 Click Minus Button
-    [Documentation]
-    [Arguments]
-    Log    TODO
+    [Documentation]    Clicks the minus button of the model server replica counter
+    Click Element    ${REPLICAS_MIN_BTN_XP}

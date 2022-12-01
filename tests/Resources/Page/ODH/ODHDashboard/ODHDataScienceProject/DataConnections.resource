@@ -15,8 +15,6 @@ ${DC_SECTION_XP}=             xpath=//div[div//h4[@id="data-connections"]]
 ${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}/div/button[text()="Add data connection"]
 ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[text()="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
-${S3_DEFAULT_ENDPOINT}=    https://s3.amazonaws.com/
-${S3_DEFAULT_REGION}=    us-east-1
 ${S3_DC_ADD_BTN}=    //footer/button[.="Add data connection"]
 
 
@@ -24,7 +22,7 @@ ${S3_DC_ADD_BTN}=    //footer/button[.="Add data connection"]
 Create S3 Data Connection
     [Documentation]    Creates a S3 Data Connection from DS Project details page
     [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
-    ...            ${aws_s3_endpoint}=${S3_DEFAULT_ENDPOINT}    ${aws_region}=${S3_DEFAULT_REGION}
+    ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     Click Button    ${DC_ADD_BTN_1_XP} 
     Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
@@ -37,8 +35,6 @@ Create S3 Data Connection
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        # Wait Until Element Is Enabled    ${STORAGE_ADD_BTN_2_XP}
-        # Click Button    ${STORAGE_ADD_BTN_2_XP}
         Wait Until Element Is Enabled    ${S3_DC_ADD_BTN}
         Click Button    ${S3_DC_ADD_BTN}
     END

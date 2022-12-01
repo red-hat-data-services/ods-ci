@@ -65,9 +65,9 @@ Open Trino Web UI
 
 Check Trino Web UI Is Loaded
     [Documentation]    Checks Trino Web UI is rendered
-    Page Should Contain     Active workers
-    Page Should Contain     Query Details
-    Page Should Contain Element     xpath=//a[text()="Log Out"]
+    Wait Until Page Contains     Active workers
+    Wait Until Page Contains     Query Details
+    Wait Until Page Contains Element     xpath=//a[text()="Log Out"]
 
 Open Managed Staburst Web UI
     [Documentation]    Launches Starburst Web UI
@@ -92,15 +92,15 @@ Check Worksheet Tool Is Accessible
 
 Check Managed Starburst Web UI Is Loaded
     [Documentation]    Checks Starburst Web UI is rendered
-    Page Should Contain     Overview
-    Page Should Contain     CPU usage
-    Page Should Contain     Workers
-    Page Should Contain     Query history
-    Page Should Contain     Cluster history
-    Page Should Contain     Insights
-    Page Should Contain     Worksheet
-    Page Should Contain     Documentation
-    Page Should Contain     Web UI
+    Wait Until Page Contains     Overview
+    Wait Until Page Contains     CPU usage
+    Wait Until Page Contains     Workers
+    Wait Until Page Contains     Query history
+    Wait Until Page Contains     Cluster history
+    Wait Until Page Contains     Insights
+    Wait Until Page Contains     Worksheet
+    Wait Until Page Contains     Documentation
+    Wait Until Page Contains     Web UI
     Wait Until Page Contains Element    xpath=//canvas[@class="chartjs-render-monitor"]
 
 Run Query And Check Output

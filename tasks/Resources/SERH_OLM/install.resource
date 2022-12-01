@@ -71,9 +71,9 @@ Wait Until Managed Starburst Installation Is Completed
     ...                all of them get the expected status
     [Arguments]    ${cr_chk_retries}=30   ${cr_chk_retries_interval}=30s
     ...            ${pods_chk_retries}=30   ${pods_chk_retries_interval}=30s
-    Wait Until Keyword Succeeds    ${cr_chk_retries}    ${cr_chk_retries_interval}
+    Wait Until Keyword Succeeds    ${cr_chk_retries} times    ${cr_chk_retries_interval}
     ...    Status Of Managed Starburst CR Should Be    Deployed    
-    Wait Until Keyword Succeeds    ${pods_chk_retries}    ${pods_chk_retries_interval}
+    Wait Until Keyword Succeeds    ${pods_chk_retries} times    ${pods_chk_retries_interval}
     ...    Managed Starburst Pods Should Be Deployed
 
 Delete Managed Starburst CRs

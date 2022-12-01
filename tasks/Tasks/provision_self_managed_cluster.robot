@@ -17,7 +17,7 @@ Provision Self-Managed Cluster
     Wait For Cluster To Be Ready
     Claim Cluster
     Login To Cluster
-    # [Teardown]  Clean Failed Cluster
+    [Teardown]  Clean Failed Cluster
 
 Deprovision Self-Managed Cluster
     [Documentation]    Deprovision a self-managed cluster

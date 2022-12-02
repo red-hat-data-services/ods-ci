@@ -2,6 +2,7 @@
 Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
 Resource       ../../../Common.robot
+Resource       ODHDataScienceProject/ModelServer.resource
 
 *** Variables ***
 ${MS_HEADER_XP}=     xpath=//h1[text()="Deployed models"]
@@ -11,8 +12,6 @@ ${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_SECR
 ${S3_ENDPOINT_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_S3_ENDPOINT"]
 ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_DEFAULT_REGION"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
-${S3_DEFAULT_ENDPOINT}=    https://s3.amazonaws.com/
-${S3_DEFAULT_REGION}=    us-east-1
 ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
 ${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
@@ -70,6 +69,8 @@ Select Project
         Open Project Options Menu
         Click Element    xpath://li/button[.="${project_name}"]
         Wait Until Page Contains Element    //span[.="Project"]/../../..//span[.="${project_name}"]
+        # modal refresh is unreliable
+        Sleep    0.5s
     END
 
 Set Model Name
@@ -131,12 +132,13 @@ Verify Model Status
 Delete Model Via UI
     [Documentation]    Deletes a deployed model from the Model Serving page in the dashboard.
     [Arguments]    ${model_name}
-    Click Element    //div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}
-    Click Element    //div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Delete"]
+    Page Should Contain Element    xpath://div[.="${model_name} "]
+    Click Element    xpath://div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}
+    Click Element    xpath://div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Delete"]
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
     Input Text    xpath://input[@id="delete-modal-input"]    ${model_name}
     Click Button    Delete deployed model
-    Wait Until Page Does Not Contain Element    //div[.="${model_name} "]
+    Wait Until Page Does Not Contain Element    xpath://div[.="${model_name} "]
 
 Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
@@ -148,7 +150,9 @@ Open Model Edit Modal
 Get Model Route via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
-    ${url}=    Get Element Attribute    //div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
+    # TODO: Open model serving home page if needed?
+    Page Should Contain Element    xpath://div[.="${model_name} "]
+    ${url}=    Get Element Attribute    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
     [Return]    ${url}
 
 Open ${section} Options Menu
@@ -156,10 +160,40 @@ Open ${section} Options Menu
     ...    Valid sections are: "Name", "Model framework", "Project"
     Click Element    xpath://span[.="${section}"]/../../..//button[@aria-label="Options menu"]
 
-    # //div[.="test-model-no-token "]/../../td[@data-label="Project"] (.= project name)
-    # //div[.="test-model-no-token "]/../../td[@data-label="Inference endpoint"]//div[@class="pf-c-clipboard-copy__group"]/input (value=url)
-    # //div[.="test-model-no-token "]/../../td[@data-label="Status"]//span[contains(@class,"pf-c-icon__content")] (class=status?) (pf-m-danger > failed)  (pf-m-danger) (pf-m-success)
-    # //div[.="test-model-no-token "]/../../td[@data-label="Status"]//span[contains(@class,"pf-c-icon__content")]
-    # //div[.="test-model-no-token "]/../../td[@class="pf-c-table__action"]//button
-    # //div[.="test-model-no-token "]/../../td[@class="pf-c-table__action"]//button/..//button[.="Edit"]
-    # //div[.="test-model-no-token "]/../../td[@class="pf-c-table__action"]//button/..//button[.="Delete"]
+Get Access Token via UI
+    [Documentation]    Returns the access token for models deployed in a specific project
+    ...    by using the UI of DSP
+    [Arguments]    ${project_name}    ${service_account_name}=default-name
+    Open Data Science Projects Home Page
+    Project Should Be Listed    ${project_name}
+    Open Data Science Project Details Page    ${project_name}
+    ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
+    [Return]    ${token}
+
+Get Model Project
+    [Documentation]    Returns the project under which a model has been deployed
+    [Arguments]    ${model_name}
+    Page Should Contain Element    //div[.="${model_name} "]
+    ${project_name}=    Get Text    xpath://div[.="${model_name} "]${MS_TABLE_PROJECT}
+    [Return]    ${project_name}
+
+Get Model Inference
+    [Documentation]    Returns the inference result after sending a POST request to a deployed
+    ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
+    ...    set to ${TRUE}.
+    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
+    ${url}=    Get Model Route via UI    ${model_name}
+    IF    ${token_auth}
+        ${project_title}=    Get Model Project    ${model_name}
+        ${token}=    Get Access Token via UI    ${project_title}
+        ${inference_output} =    Run    curl -ks ${url} -d ${INFERENCE_INPUT} -H "Authorization: Bearer ${token}"
+    ELSE
+        ${inference_output} =    Run    curl -ks ${url} -d ${INFERENCE_INPUT}
+    END
+    [Return]    ${inference_output}
+
+Verify Model Inference
+    [Documentation]    Verifies that the inference result of a model is equal to an expected output
+    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
+    ${inference_output} =    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
+    Should Be Equal As Strings    ${inference_output}    ${expected_inference_output}

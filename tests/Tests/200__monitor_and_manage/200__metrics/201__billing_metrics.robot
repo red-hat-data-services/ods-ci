@@ -5,6 +5,7 @@ Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
 Resource            ../../../Resources/OCP.resource
 Library             JupyterLibrary
@@ -226,5 +227,9 @@ CleanUp JupyterHub
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
     Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    # Close running server if still open here
+    ${control_panel_visible} =  Control Panel Is Visible
+    IF  ${control_panel_visible}==True
+        Handle Control Panel
+    END
     Common.End Web Test
-

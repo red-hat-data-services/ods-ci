@@ -13,10 +13,12 @@ ${QUERY_CATALOGS}=         SHOW CATALOGS
 ${QUERY_SCHEMAS}=          SHOW SCHEMAS from tpch
 ${QUERY_TABLES}=           SHOW TABLES from tpch.sf1
 ${QUERY_CUSTOMERS}=        SELECT name FROM tpch.sf1.customer limit 3
+${QUERY_JOIN}=             SELECT c.name FROM tpch.sf1.customer c JOIN tpch.sf1.orders o ON c.custkey = o.custkey ORDER BY o.orderdate DESC limit 3    # robocop: disable
 ${QUERY_CATALOGS_PY}=      sql = '${QUERY_CATALOGS}'\ndf = get_sql(sql, conn)\nprint(df['Catalog'].values)\n
 ${QUERY_SCHEMAS_PY}=       sql = '${QUERY_SCHEMAS}'\ndf = get_sql(sql, conn)\nprint(df['Schema'].values)\n
 ${QUERY_TABLES_PY}=        sql = '${QUERY_TABLES}'\ndf = get_sql(sql, conn)\nprint(df['Table'].values)\n
 ${QUERY_CUSTOMERS_PY}=     sql = '${QUERY_CUSTOMERS}'\ndf = get_sql(sql, conn)\nprint(df['name'].values)\n    # robocop: disable
+${QUERY_JOIN_PY}=     sql = '${QUERY_JOIN}'\ndf = get_sql(sql, conn)\nprint(df['name'].values)\n    # robocop: disable
 
 
 *** Test Cases ***
@@ -58,6 +60,9 @@ Verify User Can Query Starburst Using CLI
     Run Query And Check Output    query_code=${QUERY_CUSTOMERS}
     ...    expected_output=('Customer#[0-9]+'\s?)+
     ...    use_regex=${TRUE}    cli=${TRUE}    host=${host}
+    Run Query And Check Output    query_code=${QUERY_JOIN}
+    ...    expected_output=('Customer#[0-9]+'\s?)+
+    ...    use_regex=${TRUE}    cli=${TRUE}    host=${host}
 
 Verify User Can Query Starburst Using JupyterLab
     [Tags]    MISV-89
@@ -82,6 +87,9 @@ Verify User Can Query Starburst Using JupyterLab
     Run Query And Check Output    query_code=${QUERY_TABLES_PY}
     ...    expected_output=['customer' 'lineitem' 'nation' 'orders' 'part' 'partsupp' 'region' 'supplier']
     Run Query And Check Output    query_code=${QUERY_CUSTOMERS_PY}
+    ...    expected_output=('Customer#[0-9]+'\s?)+
+    ...    use_regex=${TRUE}
+    Run Query And Check Output    query_code=${QUERY_JOIN_PY}
     ...    expected_output=('Customer#[0-9]+'\s?)+
     ...    use_regex=${TRUE}
     Capture Page Screenshot 

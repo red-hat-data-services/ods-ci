@@ -524,7 +524,7 @@ Verify Image Can Be Spawned
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    retries=${retries}   retries_delay=${retries_delay}    image=${image}    size=${size}
     ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}    envs=&{envs}
-    End Web Test
+    End Web Test    username=${username}
 
 Verify Library Version Is Greater Than
     [Arguments]     ${library}      ${target}

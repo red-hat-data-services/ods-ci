@@ -142,10 +142,16 @@ Verify That CUDA Build Chain Succeeds
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-316    ODS-481
-    Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
-    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==False
+        Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    END
     Verify Image Can Be Spawned    image=pytorch  size=Small
+    ...    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Verify Image Can Be Spawned    image=tensorflow  size=Small
+    ...    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
+    ...    auth_type=${TEST_USER.AUTH_TYPE}
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy

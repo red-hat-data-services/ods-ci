@@ -517,7 +517,7 @@ Handle Bad Gateway Page
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
     [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=s2i-generic-data-science-notebook    ${size}=Small
-    ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}    
+    ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}
     ...    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
     ...    ${auth_type}=${TEST_USER.AUTH_TYPE}    &{envs}
     Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}

@@ -4,6 +4,7 @@ Resource         ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
 Resource         ../../../Resources/Page/LoginPage.robot
 Resource         ../../../../tasks/Resources/SERH_OLM/install.resource
 Suite Setup      Starburst Setup Suite
+Suite Teardown    RHOSi Teardown
 
 *** Variables ***
 ${GET_SQL_FUNC}=           import pandas\ndef get_sql(sql, connector):\n\tcur = connector.cursor()\n\tcur.execute(sql)\n\treturn pandas.DataFrame(cur.fetchall(), columns=[c[0] for c in cur.description])\nprint("get_sql function defined")    # robocop: disable
@@ -85,9 +86,53 @@ Verify User Can Query Starburst Using JupyterLab
     ...    use_regex=${TRUE}
     Capture Page Screenshot 
 
+Verify User Cannot Access Web UI With Invalid License
+    [Tags]    MISV-87
+    [Setup]    Get Original License Secret
+    Apply Fake Starburst License
+    Restart Coordinator And Workers Pods
+    Starburst Deployment Should Not Be Successful
+    [Teardown]    Restore Starburst Original License And Verify Deployment
+
+
 
 *** Keywords ***
 Starburst Setup Suite
     [Documentation]    Setup for Managed Staburst Test Suite
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+
+Get Original License Secret
+    ${current_secret}=    Oc Get    kind=Secret  name=starburst-license  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}
+    Set Suite Variable    ${ORIGINAL_SECRET}    ${current_secret[0]} 
+
+Apply Fake Starburst License
+    ${new_secret}=    Copy Dictionary    ${ORIGINAL_SECRET}    deepcopy=${TRUE}
+    Remove From Dictionary    ${new_secret}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
+    Set To Dictionary    ${new_secret}[data]    starburstdata.license=ZmFrZSBsaWNlbnNlIQo=
+    Oc Apply    kind=Secret    src=${new_secret}
+
+Restart Coordinator And Workers Pods
+    Oc Delete    kind=Pod   namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  label_selector=role=worker 
+    Oc Delete    kind=Pod   namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  label_selector=role=coordinator
+
+Starburst Deployment Should Not Be Successful
+    ${status}=    Run Keyword And Return Status    Wait Until Managed Starburst Installation Is Completed
+    ...    cr_chk_retries=1 times    cr_chk_retries_interval=10s
+    ...    pods_chk_retries=10 times    pods_chk_retries_interval=10s
+    IF    ${status} == ${TRUE}
+        Fail    msg=Coordinator and workers pod should be in error if license is not valid        
+    END
+
+Restore Starburst Original License And Verify Deployment
+    ${new_secret}=    Copy Dictionary    ${ORIGINAL_SECRET}    deepcopy=${TRUE}
+    Remove From Dictionary    ${new_secret}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
+    Oc Apply        kind=Secret    src=${new_secret}
+    Restart Coordinator And Workers Pods
+    ${status}=    Run Keyword And Return Status    Wait Until Managed Starburst Installation Is Completed
+    ...    cr_chk_retries=1 times    cr_chk_retries_interval=10s
+    ...    pods_chk_retries=10 times    pods_chk_retries_interval=10s
+    IF    ${status} == ${FALSE}
+        Fail    msg=Coordinator and workers pod should be successfully running
+    END
+

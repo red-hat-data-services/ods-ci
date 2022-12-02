@@ -31,6 +31,9 @@ Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robo
 ...                         Delete Managed Starburst CRs
 ...                         Create RedHat Marketplace Secret
 ...                         Get Observatorium Token
+...                         Get Original License Secret
+...                         Apply Fake Starburst License
+...                         Restore Starburst Original License And Verify Deployment
 
 
 *** Keywords ***

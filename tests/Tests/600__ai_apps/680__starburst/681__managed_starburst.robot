@@ -6,6 +6,7 @@ Resource         ../../../../tasks/Resources/SERH_OLM/install.resource
 Suite Setup      Starburst Setup Suite
 Suite Teardown    RHOSi Teardown
 
+
 *** Variables ***
 ${GET_SQL_FUNC}=           import pandas\ndef get_sql(sql, connector):\n\tcur = connector.cursor()\n\tcur.execute(sql)\n\treturn pandas.DataFrame(cur.fetchall(), columns=[c[0] for c in cur.description])\nprint("get_sql function defined")    # robocop: disable
 ${INIT_CELL_CODE}=         import os\nimport trino\nTRINO_USERNAME="dummy-user"\nTRINO_HOSTNAME = os.environ.get('TRINO_HOSTNAME')\nTRINO_PORT= 80\nconn = trino.dbapi.connect(\nhost=TRINO_HOSTNAME,\nport=TRINO_PORT,\nuser=TRINO_USERNAME\n)\nprint("connection to trino set")    # robocop: disable
@@ -46,13 +47,14 @@ Verify User Can Access Managed Starburst Web console
     Check Worksheet Tool Is Accessible
 
 Verify User Can Query Starburst Using CLI
+    [Documentation]    Runs some sample queries against Staburst using trino CLI
     [Tags]    MISV-88
     ${host}=    Get Starburst Route
     Run Query And Check Output    query_code=${QUERY_CATALOGS}
     ...    expected_output=['system' 'tpch']    cli=${TRUE}
     ...    host=${host}
     Run Query And Check Output    query_code=${QUERY_SCHEMAS}
-    ...    expected_output=['information_schema' 'sf1' 'sf100' 'sf1000' 'sf10000' 'sf100000' 'sf300' 'sf3000' 'sf30000' 'tiny']
+    ...    expected_output=['information_schema' 'sf1' 'sf100' 'sf1000' 'sf10000' 'sf100000' 'sf300' 'sf3000' 'sf30000' 'tiny']    # robocop: disable
     ...    cli=${TRUE}    host=${host}
     Run Query And Check Output    query_code=${QUERY_TABLES}
     ...    expected_output=['customer' 'lineitem' 'nation' 'orders' 'part' 'partsupp' 'region' 'supplier']
@@ -64,7 +66,9 @@ Verify User Can Query Starburst Using CLI
     ...    expected_output=('Customer#[0-9]+'\s?)+
     ...    use_regex=${TRUE}    cli=${TRUE}    host=${host}
 
-Verify User Can Query Starburst Using JupyterLab
+Verify User Can Query Starburst Using JupyterLab    # robocop: disable
+    [Documentation]    Runs some sample queries against Staburst using
+    ...                a Jupyter notebook created by a RHODS user by mean Spawner
     [Tags]    MISV-89
     [Teardown]    Fix Spawner Status
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
@@ -83,7 +87,7 @@ Verify User Can Query Starburst Using JupyterLab
     Run Query And Check Output    query_code=${QUERY_CATALOGS_PY}
     ...    expected_output=['system' 'tpch']
     Run Query And Check Output    query_code=${QUERY_SCHEMAS_PY}
-    ...    expected_output=['information_schema' 'sf1' 'sf100' 'sf1000' 'sf10000' 'sf100000' 'sf300' 'sf3000' 'sf30000' 'tiny']
+    ...    expected_output=['information_schema' 'sf1' 'sf100' 'sf1000' 'sf10000' 'sf100000' 'sf300' 'sf3000' 'sf30000' 'tiny']    # robocop: disable
     Run Query And Check Output    query_code=${QUERY_TABLES_PY}
     ...    expected_output=['customer' 'lineitem' 'nation' 'orders' 'part' 'partsupp' 'region' 'supplier']
     Run Query And Check Output    query_code=${QUERY_CUSTOMERS_PY}
@@ -101,7 +105,6 @@ Verify User Cannot Access Web UI With Invalid License
     Restart Coordinator And Workers Pods
     Starburst Deployment Should Not Be Successful
     [Teardown]    Restore Starburst Original License And Verify Deployment
-
 
 
 *** Keywords ***

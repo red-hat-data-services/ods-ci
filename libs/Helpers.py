@@ -142,3 +142,21 @@ class Helpers:
                 else:
                     continue
         return tolerations
+
+    @keyword
+    def install_managed_starburst_addon(self, email_address, license, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.notification_email = email_address
+        license_escaped = license.replace('"', '\\"')
+        result = ocm_client.install_managed_starburst_addon(license=license_escaped, exit_on_failure=False)
+        if not result:
+            self.BuiltIn.fail(
+                "Something got wrong while installing Managed Starburst. Check the logs"
+            )
+    
+    @keyword
+    def uninstall_managed_starburst_using_addon_flow(self, cluster_name):
+        ocm_client = OpenshiftClusterManager()
+        ocm_client.cluster_name = cluster_name
+        ocm_client.uninstall_managed_starburst_addon(exit_on_failure=False)

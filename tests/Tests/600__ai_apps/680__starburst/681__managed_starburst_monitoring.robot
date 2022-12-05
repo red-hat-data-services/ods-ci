@@ -17,7 +17,14 @@ Resource            ../../../Resources/Common.robot
                 ...  container_network_receive_packets_total  container_network_transmit_packets_total  container_network_transmit_packets_total  container_network_transmit_packets_total
                 ...  container_cpu_usage_seconds_total  kube_pod_container_status_restarts_total  kube_pod_status_phase  cluster:namespace:pod_memory:active:kube_pod_container_resource_requests
                 ...  jmx_config_reload_success_total  jmx_scrape_duration_seconds  jmx_scrape_cached_beans  jmx_scrape_error  jmx_exporter_build_info  jmx_config_reload_failure_total
-                ...  jmx_config_reload_failure_created  jmx_config_reload_success_created
+                ...  jmx_config_reload_failure_created  jmx_config_reload_success_created  jvm_threads_current  jvm_threads_daemon  jvm_threads_peak
+                ...  jvm_threads_started_total  jvm_threads_deadlocked  jvm_threads_deadlocked_monitor  jvm_threads_state  jvm_buffer_pool_used_bytes
+                ...  jvm_buffer_pool_capacity_bytes  jvm_buffer_pool_used_buffers  jvm_info  jvm_heap_memory_used  jvm_heap_memory_commited
+                ...  jvm_memory_pool_allocated_bytes_total  jvm_memory_bytes_used  jvm_memory_bytes_committed  jvm_memory_bytes_max  jvm_memory_bytes_init
+                ...  jvm_memory_pool_bytes_used  jvm_memory_pool_bytes_committed  jvm_memory_pool_bytes_max  jvm_memory_pool_bytes_init  jvm_classes_loaded
+                ...  jvm_classes_loaded_total  jvm_classes_unloaded_total  jvm_gc_collection_seconds_count  jvm_gc_collection_seconds_sum
+                ...  jvm_memory_pool_allocated_bytes_created
+
 
 *** Test Cases ***
 Verify STARBURST Query For Observatorium
@@ -38,4 +45,4 @@ Verify STARBURST Query For Observatorium
         END
     END
     ${count}    Get Length    ${value}
-    Should Be Equal   ${count}   ${394}
+    Should Be Equal   ${count}   ${622}

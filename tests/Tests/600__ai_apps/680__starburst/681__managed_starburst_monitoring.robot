@@ -48,7 +48,7 @@ Run STARBURST Query And Check Values Are Not Empty
             Append To List  ${value}    ${data['value']}
         END
     END
-    Verify Values Count Shpuld Be Constant  @{value}
+    Verify Values Count Should Be Constant  @{value}
 *** Keywords ***
 
 Verify Values Count Should Be Constant

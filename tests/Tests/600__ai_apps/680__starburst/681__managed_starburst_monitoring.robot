@@ -31,7 +31,7 @@ Resource            ../../../Resources/Common.robot
 
 
 *** Test Cases ***
-Verify STARBURST Query For Observatorium
+Run STARBURST Query And Check Values Are Not Empty
     [Documentation]    Verifies the Observatorium metrics values are not none
     [Tags]    MISV-94
     ${SSO_TOKEN}    Prometheus.Get Observatorium Token
@@ -40,13 +40,19 @@ Verify STARBURST Query For Observatorium
         ${obs_query_op}=    Prometheus.Run Query    ${STARBURST.OBS_URL}    ${SSO_TOKEN}
         ...   ${query}{namespace="redhat-starburst-operator"}   project=SERH
         Should Be Equal    ${obs_query_op.json()['status']}    success
+
         FOR  ${data}    IN   @{obs_query_op.json()['data']['result']}
             Should Not Be Empty    ${data['value']}
             Length Should Be   ${data['value']}   ${2}
-
             Log  ${data['metric']['__name__']} |${data['metric']['pod']}| ${data['value']}
             Append To List  ${value}    ${data['value']}
         END
     END
+    Verify Values Count Shpuld Be Constant  @{value}
+*** Keywords ***
+
+Verify Values Count Shpuld Be Constant
+    [Documentation]    Check if count of list of values returned by Observatorium should be Constant=1239
+    [Arguments]    @{value}
     ${count}    Get Length    ${value}
     Should Be Equal   ${count}   ${1239}

@@ -11,10 +11,10 @@ Resource            ../../../Resources/Common.robot
                 ...  kube_namespace_status_phase  node_namespace_pod:kube_pod_info  kube_pod_container_status_last_terminated_reason    kube_pod_container_status_waiting
                 ...  kube_service_info   cluster:namespace:pod_memory:active:kube_pod_container_resource_limits  container_cpu_cfs_throttled_seconds_total
                 ...  container_fs_usage_bytes  container_network_transmit_bytes_total  kube_pod_container_resource_requests    container_memory_usage_bytes
-                ...  container_network_receive_bytes_total  kube_deployment_status_replicas_available  kube_node_status_capacity   container_memory_working_set_bytes
+                ...  container_network_receive_bytes_total  kube_deployment_status_replicas_available  kube_node_status_capacity
                 ...  kube_deployment_status_replicas_unavailable  kube_persistentvolumeclaim_status_phase  kube_pod_container_resource_limits
                 ...  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate  cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits
-                ...  container_network_receive_packets_total  container_network_transmit_packets_total  container_network_transmit_packets_total  container_network_transmit_packets_total
+                ...  container_network_receive_packets_total  container_network_transmit_packets_total  kube_running_pod_ready
                 ...  container_cpu_usage_seconds_total  kube_pod_container_status_restarts_total  kube_pod_status_phase  cluster:namespace:pod_memory:active:kube_pod_container_resource_requests
                 ...  jmx_config_reload_success_total  jmx_scrape_duration_seconds  jmx_scrape_cached_beans  jmx_scrape_error
                 ...  jmx_exporter_build_info  jmx_config_reload_failure_total
@@ -33,7 +33,7 @@ Resource            ../../../Resources/Common.robot
 *** Test Cases ***
 Verify STARBURST Query For Observatorium
     [Documentation]    Verifies the Observatorium metrics values are not none
-    [Tags]    MISV-96
+    [Tags]    MISV-94
     ${SSO_TOKEN}    Prometheus.Get Observatorium Token
     @{value}=    Create List
     FOR  ${query}   IN   @{serh_querys}
@@ -49,4 +49,4 @@ Verify STARBURST Query For Observatorium
         END
     END
     ${count}    Get Length    ${value}
-    Should Be Equal   ${count}   ${1295}
+    Should Be Equal   ${count}   ${1239}

@@ -31,7 +31,7 @@ Resource            ../../../Resources/Common.robot
 Verify Query And Check Values Are Not Empty
     [Documentation]    Verifies the Observatorium metrics values are not none
     [Tags]    MISV-94
-    ${SSO_TOKEN}    Prometheus.Get Observatorium Token
+    ${SSO_TOKEN}    Get Observatorium Token
     Run Query And Check Values Are Not Empty   ${SSO_TOKEN}
 
 
@@ -44,7 +44,6 @@ Run Query And Check Values Are Not Empty
         ${obs_query_op}=    Prometheus.Run Query    ${STARBURST.OBS_URL}    ${SSO_TOKEN}
         ...   ${query}{namespace="redhat-starburst-operator"}   project=SERH
         Should Be Equal    ${obs_query_op.json()['status']}    success
-        Log To Console    ${query}
         FOR  ${data}    IN   @{obs_query_op.json()['data']['result']}
             Should Not Be Empty    ${data['value']}
             Length Should Be   ${data['value']}   ${2}
@@ -52,10 +51,3 @@ Run Query And Check Values Are Not Empty
             Append To List  ${value}    ${data['value']}
         END
     END
-    Verify Values Count Should Be Constant  @{value}
-
-Verify Values Count Should Be Constant
-    [Documentation]    Check if count of list of values returned by Observatorium should be Constant=1239
-    [Arguments]    @{value}
-    ${count}    Get Length    ${value}
-    Should Be Equal   ${count}   ${1872}

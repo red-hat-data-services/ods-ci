@@ -6,16 +6,29 @@ Library             Process
 Library             RequestsLibrary
 
 *** Keywords ***
+Get Observatorium Token
+    [Documentation]  Returns the token to access observatorium
+    ${data}=    Create Dictionary     grant_type=client_credentials  client_id=${STARBURST.OBS_CLIENT_ID}  client_secret=${STARBURST.OBS_CLIENT_SECRET}
+    ${resp}=     RequestsLibrary.POST  ${STARBURST.OBS_TOKEN_URL}   data=${data}
+    [Return]    ${resp.json()['access_token']}
+
 Run Query
     [Documentation]    Runs a prometheus query, obtaining the current value. More info at:
     ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
     ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
-    [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}
+    [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}  ${project}=RHODS
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
-    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query?query=${pm_query}
-    ...    headers=${pm_headers}    verify=${False}
-    Status Should Be    200    ${resp}
-    # Log To Console    ${resp.json()}
+
+    IF  "${project}" == "SERH"
+        ${resp}=    RequestsLibrary.GET    url=${pm_url}?query=${pm_query}
+        ...    headers=${pm_headers}    verify=${False}
+        Status Should Be    200    ${resp}
+
+    ELSE
+        ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query?query=${pm_query}
+        ...    headers=${pm_headers}    verify=${False}
+        Status Should Be    200    ${resp}
+    END
     [Return]    ${resp}
 
 Run Range Query
@@ -216,15 +229,15 @@ Get Target Endpoints Which Have State Up
     ${links}=    Replace String    ${links}    "    ${EMPTY}
     @{links}=    Split String  ${links}  \n
     [Return]    ${links}
-    
-Get Date When Availability Value Matches Expected Value 
+
+Get Date When Availability Value Matches Expected Value
     [Documentation]    Returns date when availability value matches expected value
     ...    Args:
     ...        expected_value: expected availability value
     [Arguments]    ${expected_value}
     ${resp}=    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}   rhods_aggregate_availability
     ${date}=    Convert Date    ${resp.json()["data"]["result"][0]["value"][0]}    epoch
-    ${value}=    Set Variable    ${resp.json()["data"]["result"][0]["value"][1]} 
+    ${value}=    Set Variable    ${resp.json()["data"]["result"][0]["value"][1]}
     Should Match    ${value}    ${expected_value}
     [Return]    ${date}
 
@@ -254,9 +267,9 @@ Verify ODS Availability Range
         Set Local Variable    ${component}   instance="combined"
     ELSE
         Fail   msg="Unknown component: ${component} (expected: jupyterhub, rhods-dashboard, combined)"
-    END  
+    END
 
-    &{expression}=    Create Dictionary    query=rhods_aggregate_availability{${component}}    start=${start}    end=${end}    step=${step}   
+    &{expression}=    Create Dictionary    query=rhods_aggregate_availability{${component}}    start=${start}    end=${end}    step=${step}
     ${resp}=    Run Query Range        &{expression}
     @{values}=    Set Variable    ${resp.json()["data"]["result"][0]["values"]}
     @{downtime}=    Create List
@@ -273,7 +286,7 @@ Verify ODS Availability Range
         ELSE IF   ${downtime_length} == 1
             Fail  msg=There is a Downtime at ${downtime-duration}[0] in ODS
         ELSE
-            ${downtime_lower_value} =    Convert Date    ${downtime}[0]       
+            ${downtime_lower_value} =    Convert Date    ${downtime}[0]
             ${downtime_upper_value} =    Convert Date    ${downtime}[-1]
             ${downtime-duration} =  Subtract Date From Date    ${downtime_upper_value}    ${downtime_lower_value}    compact
             Fail    msg=There is a Downtime of ${downtime-duration} in ODS

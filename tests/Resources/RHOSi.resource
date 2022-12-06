@@ -30,6 +30,7 @@ Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robo
 ...                         Check Managed Starburst Addon Is Not Installed
 ...                         Delete Managed Starburst CRs
 ...                         Create RedHat Marketplace Secret
+...                         Get Observatorium Token
 
 
 *** Keywords ***

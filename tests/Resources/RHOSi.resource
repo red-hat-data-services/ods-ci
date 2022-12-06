@@ -30,6 +30,7 @@ Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robo
 ...                         Check Managed Starburst Addon Is Not Installed
 ...                         Delete Managed Starburst CRs
 ...                         Create RedHat Marketplace Secret
+...                         Get Observatorium Token
 
 
 *** Keywords ***
@@ -41,12 +42,6 @@ RHOSi Setup
     Initialize Global Variables
     Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
     # TO DO: oc login
-
-Get Observatorium Token
-    [Documentation]  Returns the token to access observatorium
-    ${data}=    Create Dictionary     grant_type=client_credentials  client_id=${STARBURST.OBS_CLIENT_ID}  client_secret=${STARBURST.OBS_CLIENT_SECRET}
-    ${resp}=     RequestsLibrary.POST  ${STARBURST.OBS_TOKEN_URL}   data=${data}
-    [Return]    ${resp.json()['access_token']}
 
 RHOSi Teardown
     [Documentation]    Gets current availability metrics and compares them with the ones

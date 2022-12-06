@@ -49,8 +49,8 @@ Run STARBURST Query And Check Values Are Not Empty
         END
     END
     Verify Values Count Should Be Constant  @{value}
-*** Keywords ***
 
+*** Keywords ***
 Verify Values Count Should Be Constant
     [Documentation]    Check if count of list of values returned by Observatorium should be Constant=1239
     [Arguments]    @{value}

@@ -70,7 +70,7 @@ Verify User Can Query Starburst Using JupyterLab    # robocop: disable
     [Documentation]    Runs some sample queries against Staburst using
     ...                a Jupyter notebook created by a RHODS user by mean Spawner
     [Tags]    MISV-89
-    [Teardown]    Fix Spawner Status
+    [Teardown]    Fix Spawner Status    username=${TEST_USER_3.USERNAME}
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
@@ -129,8 +129,8 @@ Restart Coordinator And Workers Pods
 
 Starburst Deployment Should Not Be Successful
     ${status}=    Run Keyword And Return Status    Wait Until Managed Starburst Installation Is Completed
-    ...    cr_chk_retries=1 times    cr_chk_retries_interval=10s
-    ...    pods_chk_retries=10 times    pods_chk_retries_interval=10s
+    ...    cr_chk_retries=1    cr_chk_retries_interval=10s
+    ...    pods_chk_retries=10    pods_chk_retries_interval=10s
     IF    ${status} == ${TRUE}
         Fail    msg=Coordinator and workers pod should be in error if license is not valid        
     END
@@ -141,8 +141,8 @@ Restore Starburst Original License And Verify Deployment
     Oc Apply        kind=Secret    src=${new_secret}
     Restart Coordinator And Workers Pods
     ${status}=    Run Keyword And Return Status    Wait Until Managed Starburst Installation Is Completed
-    ...    cr_chk_retries=1 times    cr_chk_retries_interval=10s
-    ...    pods_chk_retries=10 times    pods_chk_retries_interval=10s
+    ...    cr_chk_retries=1    cr_chk_retries_interval=10s
+    ...    pods_chk_retries=10    pods_chk_retries_interval=10s
     IF    ${status} == ${FALSE}
         Fail    msg=Coordinator and workers pod should be successfully running
     END

@@ -44,7 +44,7 @@ Verify Coordinator And Workers Deployment
     ${work_containerNames}=  Create List  worker
     Run Keyword And Continue On Failure    Verify Deployment  component=${coordinator}  nPods=1  nContainers=2  containerNames=${coo_containerNames}
     Run Keyword And Continue On Failure    Verify Deployment  component=${workers}      nPods=2  nContainers=1  containerNames=${work_containerNames}
-  
+
 Verify Prometheus Deployment
     [Documentation]    Verifies the Starburst prometheus instance has the expected
     ...                pods and containers
@@ -72,7 +72,7 @@ Wait Until Managed Starburst Installation Is Completed
     [Arguments]    ${cr_chk_retries}=30   ${cr_chk_retries_interval}=30s
     ...            ${pods_chk_retries}=30   ${pods_chk_retries_interval}=30s
     Wait Until Keyword Succeeds    ${cr_chk_retries} times    ${cr_chk_retries_interval}
-    ...    Status Of Managed Starburst CR Should Be    Deployed    
+    ...    Status Of Managed Starburst CR Should Be    Deployed
     Wait Until Keyword Succeeds    ${pods_chk_retries} times    ${pods_chk_retries_interval}
     ...    Managed Starburst Pods Should Be Deployed
 
@@ -83,7 +83,7 @@ Delete Managed Starburst CRs
     IF    ${cr} == ${NONE}
         Log    msg=There is probably no Starburst Enterprise CR named ${starburst_enterprise_cr}
     ELSE
-        ${status}=    Run Keyword And Return Status    
+        ${status}=    Run Keyword And Return Status
         ...    Oc Delete    kind=StarburstEnterprise   name=${starburst_enterprise_cr}
         ...                 namespace=${STARBURST_CR_DEFAULT_NAMESPACE}
         IF    ${status} == ${FALSE}
@@ -109,4 +109,3 @@ Delete Managed Starburst CRs
             END
         END
     END
-    

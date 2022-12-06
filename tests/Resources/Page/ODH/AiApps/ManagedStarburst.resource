@@ -65,9 +65,9 @@ Open Trino Web UI
 
 Check Trino Web UI Is Loaded
     [Documentation]    Checks Trino Web UI is rendered
-    Page Should Contain     Active workers
-    Page Should Contain     Query Details
-    Page Should Contain Element     xpath=//a[text()="Log Out"]
+    Wait Until Page Contains     Active workers
+    Wait Until Page Contains     Query Details
+    Wait Until Page Contains Element     xpath=//a[text()="Log Out"]
 
 Open Managed Staburst Web UI
     [Documentation]    Launches Starburst Web UI
@@ -92,14 +92,37 @@ Check Worksheet Tool Is Accessible
 
 Check Managed Starburst Web UI Is Loaded
     [Documentation]    Checks Starburst Web UI is rendered
-    Page Should Contain     Overview
-    Page Should Contain     CPU usage
-    Page Should Contain     Workers
-    Page Should Contain     Query history
-    Page Should Contain     Cluster history
-    Page Should Contain     Insights
-    Page Should Contain     Worksheet
-    Page Should Contain     Documentation
-    Page Should Contain     Web UI
+    Wait Until Page Contains     Overview
+    Wait Until Page Contains     CPU usage
+    Wait Until Page Contains     Workers
+    Wait Until Page Contains     Query history
+    Wait Until Page Contains     Cluster history
+    Wait Until Page Contains     Insights
+    Wait Until Page Contains     Worksheet
+    Wait Until Page Contains     Documentation
+    Wait Until Page Contains     Web UI
     Wait Until Page Contains Element    xpath=//canvas[@class="chartjs-render-monitor"]
-    
+
+Run Query And Check Output
+    [Documentation]    Runs a query against Starburst and checks the output matches
+    ...                the expected values. If ${cli} is set to ${FALSE}, the keyword
+    ...                expects a JupyterLab notebook to be open before running.
+    ...                If If ${cli} is set to ${TRUE} the keyword expects to receive a ${host}
+    [Arguments]    ${query_code}    ${expected_output}    ${use_regex}=${FALSE}    ${cli}=${FALSE}    ${host}=${NONE}
+    IF    ${cli} == ${FALSE}
+        ${output}=    Run Cell And Get Output    ${query_code}
+        ${output}=    Replace String    ${output}    \n    ${EMPTY}
+    ELSE
+        ${rc}  ${output}=    Run And Return Rc And Output    echo "${query_code}" | trino --server http://${host}
+        ${output}=    Replace String Using Regexp    ${output}    .+\nWARNING:.+\n    ${EMPTY}
+        ${output}=    Replace String    ${output}    "    '
+        ${output}=    Replace String    ${output}    \n    ${SPACE}
+        ${output}=    Set Variable    [${output}]
+    END
+    IF    ${use_regex} == ${FALSE}
+        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${output}
+        ...    ${expected_output}
+    ELSE
+        Run Keyword And Continue On Failure    Should Match Regexp    ${output}    ${expected_output}
+    END
+

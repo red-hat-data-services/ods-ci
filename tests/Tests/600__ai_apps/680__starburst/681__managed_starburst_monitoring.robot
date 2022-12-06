@@ -47,7 +47,6 @@ Run Query And Check Values Are Not Empty
         Should Be Equal    ${obs_query_op.json()['status']}    success
         FOR  ${data}    IN   @{obs_query_op.json()['data']['result']}
             Should Not Be Empty    ${data['value']}
-            Length Should Be   ${data['value']}   ${2}
             Log    ${data['metric']['__name__']} |${data['metric']['pod']}| ${data['value']}
             Append To List  ${value}    ${data['value']}
         END

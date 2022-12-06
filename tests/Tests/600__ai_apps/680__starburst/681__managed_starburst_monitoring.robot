@@ -3,6 +3,8 @@ Documentation       Test suite testing SERH Metrics
 Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
+Suite Setup         RHOSi Setup
+Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***

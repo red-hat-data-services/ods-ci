@@ -364,6 +364,7 @@ Fix Spawner Status
    ...              test cases from passing. If a server is already running
    ...              or if we are redirected to an alternative spawner page,
    ...              this keyword will bring us back to the actual spawner.
+   [Arguments]    ${username}=${TEST_USER.USERNAME}
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    IF  ${spawner_visible}!=True
       ${control_panel_visible} =  Control Panel Is Visible
@@ -373,7 +374,7 @@ Fix Spawner Status
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
             Maybe Close Popup
-            Clean Up Server
+            Clean Up Server    username=${username}
             Stop JupyterLab Notebook Server
          END
       END
@@ -525,7 +526,9 @@ Verify Image Can Be Spawned
     Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    retries=${retries}   retries_delay=${retries_delay}    image=${image}    size=${size}
-    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}    envs=&{envs}
+    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}
+    ...    username=${username}    password=${password}
+    ...    auth_type=${auth_type}  envs=&{envs}
     End Web Test    username=${username}
 
 Verify Library Version Is Greater Than

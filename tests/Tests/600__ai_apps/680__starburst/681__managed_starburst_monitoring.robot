@@ -39,7 +39,6 @@ Verify Query And Check Values Are Not Empty
 Run Query And Check Values Are Not Empty
     [Documentation]  Run query and and check if Values Are Not Empty
     [Arguments]     ${SSO_TOKEN}
-    @{value}    Create List
     FOR  ${query}   IN   @{serh_querys}
         ${obs_query_op}=    Prometheus.Run Query    ${STARBURST.OBS_URL}    ${SSO_TOKEN}
         ...   ${query}{namespace="redhat-starburst-operator"}   project=SERH

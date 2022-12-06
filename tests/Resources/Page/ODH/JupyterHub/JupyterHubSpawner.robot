@@ -222,9 +222,9 @@ Spawn Notebook With Arguments  # robocop: disable
    ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
    ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
-   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}
-   ...    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
-   ...    &{envs}
+   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}  
+   ...    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
+   ...    ${auth_type}=${TEST_USER.AUTH_TYPE}  &{envs}
    ${spawn_fail} =  Set Variable  True
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
@@ -526,7 +526,7 @@ Verify Image Can Be Spawned
     Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    retries=${retries}   retries_delay=${retries_delay}    image=${image}    size=${size}
-    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}
+    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}    
     ...    username=${username}    password=${password}
     ...    auth_type=${auth_type}  envs=&{envs}
     End Web Test    username=${username}

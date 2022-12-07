@@ -34,8 +34,8 @@ items:
         name: master
         platform:
           gcp:
-            type: custom-8-32768
-        replicas: 3
+            type: {{ master_node_instance_type|default("custom-8-32768") }}
+        replicas: {{ master_node_replicas|default("3") }}
       metadata:
         name: gcp-sno
       networking:

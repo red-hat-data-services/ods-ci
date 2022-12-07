@@ -26,7 +26,6 @@ Get Clusters
     END
 
 Get Cluster Credentials
-    Set Log Level    None
     ${ns} =    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations}[hive_cluster_name]
     ${consoleURL} =    Run and Return Rc And Output    oc -n ${ns[0]['metadata']['name']} get cd ${ns[0]['metadata']['name']} -o jsonpath='{ .status.webConsoleURL }'
     Create File  cluster_details.txt  consoleUrl=${consoleURL}\n
@@ -36,7 +35,6 @@ Get Cluster Credentials
     Append to File  cluster_details.txt  password=${credentials_splited[1]}\n
 
 Login To Cluster
-    Set Log Level    None
     ${ns} =    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations['hive_cluster_name']}
     ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[0]['metadata']['name']}    
     ...    namespace=${ns[0]['metadata']['name']}    api_version=hive.openshift.io/v1

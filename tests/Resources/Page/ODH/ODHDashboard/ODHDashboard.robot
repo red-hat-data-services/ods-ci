@@ -15,11 +15,13 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__
 ${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
 ${SAMPLE_APP_CARD_XP}=   //article[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
-${TITLE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
+${TITLE_XP}=  div[@class='pf-c-card__title']//div/div[1]
+${TITLE_XP_OLD}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
 ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
 ${DESCR_XP}=  div[@class='pf-c-card__body']
 ${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
-${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]
+${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//img[contains(@class, 'supported-image')]
+${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Files/AppsInfoDictionary.json
@@ -130,7 +132,7 @@ Remove Disabled Application From Enabled Page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
-   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
+   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/div/span[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=300
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
@@ -202,7 +204,13 @@ Check Number Of Displayed Cards Is Correct
 
 Get Card Texts
     [Arguments]  ${card_locator}
-    ${title}=  Get Text    xpath:${card_locator}/${TITLE_XP}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        ${versioned_title_xp}=    Set Variable    ${TITLE_XP}
+    ELSE
+        ${versioned_title_xp}=    Set Variable    ${TITLE_XP_OLD}
+    END
+    ${title}=  Get Text    xpath:${card_locator}/${versioned_title_xp}
     ${provider}=  Get Text    xpath:${card_locator}/${PROVIDER_XP}
     ${desc}=  Get Text    xpath:${card_locator}/${DESCR_XP}
     [Return]  ${title}  ${provider}  ${desc}
@@ -226,10 +234,16 @@ Get Card Badges Titles
 
 Check Card Badges And Return Titles
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        ${versioned_official_badge_xp}=    Set Variable    ${OFFICIAL_BADGE_XP}
+    ELSE
+        ${versioned_official_badge_xp}=    Set Variable    ${OFFICIAL_BADGE_XP_OLD}
+    END
     ${card_badges_titles}=  Get Card Badges Titles  card_locator=${card_locator}
     Run Keyword And Continue On Failure  Lists Should Be Equal  ${card_badges_titles}  ${expected_data}[${app_id}][badges]
     Run Keyword If    $RH_BADGE_TITLE in $card_badges_titles
-    ...    Run Keyword And Continue On Failure  Page Should Contain Element    xpath:${card_locator}/${OFFICIAL_BADGE_XP}
+    ...    Run Keyword And Continue On Failure  Page Should Contain Element    xpath:${card_locator}/${versioned_official_badge_xp}
     [Return]  ${card_badges_titles}
 
 Open Get Started Sidebar And Return Status

@@ -21,7 +21,7 @@ ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider
 ${DESCR_XP}=  div[@class='pf-c-card__body']
 ${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
 ${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//img[contains(@class, 'supported-image')]
-${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]
+${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]    # robocop: disable
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Files/AppsInfoDictionary.json
@@ -243,7 +243,8 @@ Check Card Badges And Return Titles
     ${card_badges_titles}=  Get Card Badges Titles  card_locator=${card_locator}
     Run Keyword And Continue On Failure  Lists Should Be Equal  ${card_badges_titles}  ${expected_data}[${app_id}][badges]
     Run Keyword If    $RH_BADGE_TITLE in $card_badges_titles
-    ...    Run Keyword And Continue On Failure  Page Should Contain Element    xpath:${card_locator}/${versioned_official_badge_xp}
+    ...    Run Keyword And Continue On Failure  Page Should Contain Element
+    ...    xpath:${card_locator}/${versioned_official_badge_xp}
     [Return]  ${card_badges_titles}
 
 Open Get Started Sidebar And Return Status

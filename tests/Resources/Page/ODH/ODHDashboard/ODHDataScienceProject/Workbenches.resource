@@ -46,6 +46,11 @@ Create Workbench
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
     END
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        Run Keyword And Continue On Failure    Page Should Not Contain Element
+        ...    xpath=//input[contains(@name="ephemeral")]
+    END
     IF    "${storage}" == "Persistent"
         IF    ${pv_existent} == ${TRUE}
             Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]

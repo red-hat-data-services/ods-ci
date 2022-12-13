@@ -125,6 +125,10 @@ Verify User Can Create A Data Science Project
 Verify User Can Create And Start A Workbench With Ephimeral Storage
     [Tags]    Sanity    Tier1    ODS-1812
     [Documentation]    Verifies users can create workbench using Ephemeral storage
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        Skip     msg=Skipping because ODS-1812 is not applicable to version >= 1.20.0
+    END
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${EMPTY}  workbench_description=${EMPTY}  prj_title=${PRJ_TITLE}

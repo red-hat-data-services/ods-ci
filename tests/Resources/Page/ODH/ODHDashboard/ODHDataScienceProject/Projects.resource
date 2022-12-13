@@ -158,7 +158,7 @@ Workbench Status Should Be From Projects Home Page
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...                                                                           namespace=${namespace}
-    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[@for="${workbench_cr_name}"]]/div/p[text()="${status}"]
+    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[contains(@for,"${workbench_cr_name}")]]/div//p[text()="${status}"]
 
 Start Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "start" process from DS Projects home page.
@@ -178,7 +178,7 @@ Start Workbench From Projects Home Page
                 ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    
                 ...                                                        namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
+        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -202,7 +202,7 @@ Stop Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[@for="${workbench_cr_name}"]/span[@class="pf-c-switch__toggle"]
+        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is not running.

@@ -248,7 +248,8 @@ Wait Until Workbench Is Restarting
 
 Start Workbench
     [Documentation]    Starts a workbench from the DS Project details page
-    [Arguments]     ${workbench_title}
+    [Arguments]     ${workbench_title}      ${timeout}=30s
+
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
@@ -256,7 +257,7 @@ Start Workbench
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
-    Wait Until Workbench Is Started     workbench_title=${workbench_title}
+    Wait Until Workbench Is Started     workbench_title=${workbench_title}   timeout=${timeout}
 
 Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched

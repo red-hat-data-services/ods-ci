@@ -49,7 +49,7 @@ Create Workbench
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
     IF  ${version_check}==True
         Run Keyword And Continue On Failure    Page Should Not Contain Element
-        ...    xpath=//input[contains(@name="ephemeral")]
+        ...    xpath=//input[contains(@name,"ephemeral")]
     END
     IF    "${storage}" == "Persistent"
         IF    ${pv_existent} == ${TRUE}
@@ -205,7 +205,7 @@ Launch Workbench
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be      
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
-        Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td/a[text()="Open"]
+        Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
         Access To Workbench
     ELSE
         Fail   msg=Cannot launch workbench ${workbench_title} because it is not running...

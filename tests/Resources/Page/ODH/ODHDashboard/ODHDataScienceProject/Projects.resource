@@ -111,13 +111,20 @@ Validate Generated Resource Name
 Get Openshift Namespace From Data Science Project
     [Documentation]    Gets the resource name of a DS Project starting from the Displayed Name
     [Arguments]     ${project_title}
-    ${is_open}=    Is Data Science Projects Page Open
-    IF    ${is_open} == ${FALSE}
-        Open Data Science Projects Home Page
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        ${k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name'    # robocop: disable
+        ${k8s_name}=    Replace String    ${k8s_name}    "    ${EMPTY}
+    ELSE
+        ${is_open}=    Is Data Science Projects Page Open
+        IF    ${is_open} == ${FALSE}
+            Open Data Science Projects Home Page
+        END
+        ${project_link}=    Get Element Attribute    xpath=//td/div/a[text()="${project_title}"]    href
+        ${ns_name}=     Split String From Right     separator=/     max_split=1     string=${project_link}
+        ${k8s_name}=    Set Variable    ${ns_name[1]}
     END
-    ${project_link}=    Get Element Attribute    xpath=//td/div/a[text()="${project_title}"]    href
-    ${ns_name}=     Split String From Right     separator=/     max_split=1     string=${project_link}
-    [Return]    ${ns_name[1]}
+    [Return]    ${k8s_name}
 
 Delete Data Science Projects From CLI
     [Documentation]     Deletes the Openshift Projects using OpenshiftLibrary.

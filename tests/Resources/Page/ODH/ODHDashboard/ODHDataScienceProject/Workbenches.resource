@@ -59,7 +59,7 @@ Create Workbench
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
         ELSE
-            Log    msg="pv_existent" argument is required when selected storage type is "Persistent"   level=ERROR
+            Log    msg="pv_existent" argument not set, using default PV settings"   level=WARN
         END
     ELSE
         Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]

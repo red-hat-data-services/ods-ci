@@ -292,6 +292,7 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
+    ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB
     ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
     ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM
@@ -300,8 +301,8 @@ Verify User Can Create A Workbench With Environment Variables
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Ephemeral  pv_existent=${NONE}
-    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
+    ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...                 pv_description=${NONE}  pv_size=${NONE}
     ...                 press_cancel=${FALSE}    envs=${envs_list}
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
     Launch Workbench    workbench_title=${WORKBENCH_4_TITLE}
@@ -424,7 +425,7 @@ Check Storage PersistentVolumeClaim Is Deleted
 Check Project Is Deleted
     [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
     [Arguments]    ${namespace}
-    Wait Until Keyword Succeeds    10s    1s    Namespace Should Not Exist    namespace=${namespace}
+    Wait Until Keyword Succeeds    10 times    1s    Project Should Not Exist    namespace=${namespace}
 
 Check Environment Variables Exist
     [Documentation]    Runs code in JupyterLab to check if the expected environment variables are available

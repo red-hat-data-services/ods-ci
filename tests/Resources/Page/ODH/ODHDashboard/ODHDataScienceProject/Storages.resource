@@ -35,7 +35,10 @@ Storage Should Be Listed
 Storage Should Not Be Listed
     [Documentation]    Checks storage is not listed in DS Project details page
     [Arguments]     ${name}
-    Run Keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Does Not Contain Element
+    ...    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    ...    timeout=10s
 
 Storage Size Should Be
     [Documentation]    Checks displayed PV size corresponds to PV size in Openshift.

@@ -16,6 +16,7 @@ ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","mo
 ${PRJ_TITLE}=    model-serving-project
 ${PRJ_DESCRIPTION}=    project used for model serving tests
 ${MODEL_NAME}=    test-model
+${MODEL_CREATED}=    False
 
 
 *** Test Cases ***
@@ -49,6 +50,7 @@ Verify Model Can Be Deployed Via UI
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
+    Set Suite Variable    ${MODEL_CREATED}    True
 
 Test Inference With Token Authentication
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
@@ -107,8 +109,12 @@ Model Serving Suite Teardown
     ...                all the DS projects created by the tests and run RHOSi teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
-    Run Keyword And Continue On Failure    Delete Model Via UI    test-model
+    IF    ${MODEL_CREATED}
+        Run Keyword And Continue On Failure    Delete Model Via UI    test-model
+        ${projects}=    Create List    ${PRJ_TITLE}
+        Delete Data Science Projects From CLI   ocp_projects=${projects}
+    ELSE
+        Log    Model not deployed, skipping deletion step during teardown    console=true
+    END
     Close All Browsers
-    ${projects}=    Create List    ${PRJ_TITLE}
-    Delete Data Science Projects From CLI   ocp_projects=${projects}
     RHOSi Teardown

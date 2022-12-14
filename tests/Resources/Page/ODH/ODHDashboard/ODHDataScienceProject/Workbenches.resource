@@ -76,6 +76,12 @@ Create Workbench
 Add Environment Variables In Workbench
     [Documentation]    Adds the environment variables through the workbench creation page
     [Arguments]    ${env_variables}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        ${add_key_value_text}=    Set Variable    Add another key / value pair
+    ELSE
+        ${add_key_value_text}=    Set Variable    Add another variable
+    END
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
     ${n_objects}=    Get Length    ${env_variables}
     FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}    start=1
@@ -94,7 +100,7 @@ Add Environment Variables In Workbench
                 Input Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//input[@aria-label="value of item ${pair_idx}"]
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
-                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="Add another variable"]
+                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
                 END
             END
         END

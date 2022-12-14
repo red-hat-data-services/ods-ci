@@ -55,7 +55,7 @@ Delete Data Science Project
     END
     Project Should Be Listed    project_title=${project_title}
     Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
-    Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project    
+    Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project
     ...                                   press_cancel=${press_cancel}
     ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
 
@@ -78,7 +78,7 @@ Project Should Not Be Listed
 Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one
     [Arguments]     ${project_title}    ${expected_username}
-    Run Keyword And Continue On Failure     
+    Run Keyword And Continue On Failure
     ...    Page Should Contain Element    xpath=//td[div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
@@ -124,32 +124,20 @@ Delete Data Science Projects From CLI
     ...                 It expects to receive a list of project (i.e,${ocp_projects}) as argument
     [Arguments]     ${ocp_projects}
     FOR   ${displayed_name}    IN  @{ocp_projects}
-        ${version_check}=    Is RHODS Version Greater Or Equal Than    1.20.0
-        IF    ${version_check} == False
-            ${dp_with_suffix}=    Set Variable    ${displayed_name}\[DSP]
-            ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${dp_with_suffix}")) | .metadata.name'
+        ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+        IF  ${version_check}==True
+            ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
         ELSE
-            ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'
+            ${dp_with_suffix}=    Set Variable    ${displayed_name}\[DSP]
+            ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${dp_with_suffix}")) | .metadata.name'    # robocop: disable
         END
         ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
         IF    "${project_k8s_name}" == "${EMPTY}"
             Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}
             Continue For Loop
         ELSE
-            OpenshiftLibrary.Oc Delete    kind=Project   name=${project_k8s_name}
+            Oc Delete    kind=Project   name=${project_k8s_name}
         END
-    END
-
-Delete All Data Science Projects From CLI
-    [Documentation]    Deletes all the Openshift Projects which have been created
-    ...                via DataScienceProjects feature, using OpenshiftLibrary
-    ${res}  ${projects_names}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name" | endswith("[DSP]"))) | .metadata.name'
-    IF    "${res}" == "${EMPTY}"
-        Log    msg=There are probably no DS Projects to delete in teardown.
-    ELSE
-        ${projects_names}=    Replace String    ${projects_names}    "    ${EMPTY}
-        ${projects_names}=    Text To List    ${projects_names}
-        Delete Data Science Projects From CLI   ocp_projects=${projects_names}
     END
 
 Workbench Status Should Be From Projects Home Page
@@ -165,17 +153,17 @@ Start Workbench From Projects Home Page
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
     ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
     [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}
-    ${is_stopped}=      Run Keyword And Return Status   
+    ${is_stopped}=      Run Keyword And Return Status
     ...                    Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}
-    ...                                                                            status=${WORKBENCH_STATUS_STOPPED}   
+    ...                                                                            status=${WORKBENCH_STATUS_STOPPED}
     ...                                                                            project_title=${project_title}
     IF    ${is_stopped} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
                 ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
             END
-                ${_}    ${workbench_cr_name}=       
-                ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    
+                ${_}    ${workbench_cr_name}=
+                ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
                 ...                                                        namespace=${namespace}
         END
         Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]

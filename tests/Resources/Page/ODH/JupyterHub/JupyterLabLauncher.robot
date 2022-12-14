@@ -35,6 +35,7 @@ JupyterLab Launcher Tab Is Selected
   Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[.="Launcher"]
 
 Open JupyterLab Launcher
+  Maybe Select Kernel
   Open With JupyterLab Menu  File  New Launcher
   JupyterLab Launcher Tab Is Visible
   JupyterLab Launcher Tab Is Selected

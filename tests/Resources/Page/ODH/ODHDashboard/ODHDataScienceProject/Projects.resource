@@ -173,7 +173,7 @@ Start Workbench From Projects Home Page
                 ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
                 ...                                                        namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]
+        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -197,7 +197,7 @@ Stop Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]
+        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is not running.

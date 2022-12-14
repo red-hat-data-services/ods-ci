@@ -25,7 +25,8 @@ ${WORKBENCH_2_DESCRIPTION}=   ODS-CI Workbench 2 is a test workbench using ${NB_
 ${WORKBENCH_3_TITLE}=   ODS-CI Workbench 3
 ${WORKBENCH_3_DESCRIPTION}=   ODS-CI Workbench 3 is a test workbench using ${NB_IMAGE} image to test DS Projects feature
 ${WORKBENCH_4_TITLE}=   ODS-CI Workbench 4 - envs
-${WORKBENCH_4_DESCRIPTION}=   ODS-CI Workbench 4 - envs is a test workbench using ${NB_IMAGE} image to test DS Projects feature
+${WORKBENCH_4_DESCRIPTION}=   ODS-CI Workbench 4 - envs is a test workbench
+...    using ${NB_IMAGE} image to test DS Projects feature
 ${PV_BASENAME}=         ods-ci-pv
 ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
 # PV size are in GB
@@ -242,7 +243,8 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_2_TITLE}   project_title=${PRJ_TITLE}
     ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
     Launch Workbench From Projects Home Page    workbench_title=${WORKBENCH_2_TITLE}  project_title=${PRJ_TITLE}
-    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_2_TITLE}     image=${NB_IMAGE}    namespace=${ns_name}
+    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_2_TITLE}
+    ...    image=${NB_IMAGE}    namespace=${ns_name}
 
 Verify User Can Delete A Workbench
     [Tags]    Sanity    Tier1    ODS-1813

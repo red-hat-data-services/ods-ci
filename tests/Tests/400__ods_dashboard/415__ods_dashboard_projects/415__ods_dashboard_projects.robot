@@ -424,7 +424,7 @@ Check Storage PersistentVolumeClaim Is Deleted
 Check Project Is Deleted
     [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
     [Arguments]    ${project_title}
-    Wait Until Keyword Succeeds    10 times    1s
+    Wait Until Keyword Succeeds    15 times    2s
     ...    Project Should Not Exist In Openshift    project_title=${project_title}
 
 Project Should Not Exist In Openshift

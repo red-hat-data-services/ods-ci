@@ -13,6 +13,7 @@ Verify Grafana Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-231
+    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
     @{grafana_pods_info} =    Fetch Grafana Pods Info
     @{grafana_deployment_info} =    Fetch Grafana Deployments Info
     @{grafana_services_info} =    Fetch Grafana Services Info

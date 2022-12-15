@@ -130,10 +130,10 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
     END
 
 Alerts Should Not Be Firing    #robocop: disable:too-many-calls-in-keyword
-    [Documentation]    Fails if any Prometheus alert is firing, excluding alert
-    ...    with name = ${expected-firing-alert}
+    [Documentation]    Fails if any Prometheus alert is in pending or firing state,
+    ...  excluding alert with name = ${expected-firing-alert}
     [Arguments]    ${pm_url}    ${pm_token}    ${expected-firing-alert}=${EMPTY}     ${message_prefix}=${EMPTY}
-
+    
     ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
     ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
     @{alerts_firing}=    Create List
@@ -145,9 +145,9 @@ Alerts Should Not Be Firing    #robocop: disable:too-many-calls-in-keyword
             ${state}=    Get From Dictionary    ${sub_rule}    state
             ${name}=    Get From Dictionary    ${sub_rule}    name
             ${duration}=    Get From Dictionary    ${sub_rule}    duration
-            IF    '${state}' == 'firing'
+            IF    '${state}' in ['firing','pending']
                 IF    '${name}' != '${expected-firing-alert}'
-                    ${alert_info}=    Set Variable    ${name} (for:${duration})
+                    ${alert_info}=    Set Variable    ${name} (for:${duration}, state:${state})
                     Append To List    ${alerts_firing}    ${alert_info}
                 END
             END

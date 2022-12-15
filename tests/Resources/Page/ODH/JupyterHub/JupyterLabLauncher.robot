@@ -110,7 +110,7 @@ Run Cell And Check For Errors
     Add and Run JupyterLab Code Cell in Active Notebook  ${input}
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-    Should Not Match  ${output}  ERROR*
+    Should Not Match  ${output}  *ERROR*    ignore_case=${TRUE}
 
 Run Cell And Check Output
     [Arguments]  ${input}  ${expected_output}

@@ -179,7 +179,7 @@ Spawn Notebook
                     END
                 END
             ELSE IF  ${control_panel_visible}==True
-                # If the user has been redirected to the control panel, 
+                # If the user has been redirected to the control panel,
                 # move to the server and continue execution
                 Click Button    Return to server
                 Return From Keyword
@@ -222,7 +222,9 @@ Spawn Notebook With Arguments  # robocop: disable
    ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
    ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
-   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}  &{envs}
+   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}
+   ...    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
+   ...    &{envs}
    ${spawn_fail} =  Set Variable  True
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
@@ -248,10 +250,11 @@ Spawn Notebook With Arguments  # robocop: disable
             END
          END
          Spawn Notebook    ${spawner_timeout}    ${same_tab}
-         Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+         Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
          ${authorization_required} =  Is Service Account Authorization Required
          Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
          Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+         Sleep    2s    reason=Wait for a possible popup
          Maybe Close Popup
          Open New Notebook In Jupyterlab Menu
          Spawned Image Check    ${image}
@@ -362,6 +365,7 @@ Fix Spawner Status
    ...              test cases from passing. If a server is already running
    ...              or if we are redirected to an alternative spawner page,
    ...              this keyword will bring us back to the actual spawner.
+   [Arguments]    ${username}=${TEST_USER.USERNAME}
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    IF  ${spawner_visible}!=True
       ${control_panel_visible} =  Control Panel Is Visible
@@ -371,7 +375,7 @@ Fix Spawner Status
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
             Maybe Close Popup
-            Clean Up Server
+            Clean Up Server    username=${username}
             Stop JupyterLab Notebook Server
          END
       END
@@ -430,7 +434,7 @@ Maybe Handle Server Not Running Page
 Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
-   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}   
+   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}
    ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
    Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
    Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10
@@ -517,12 +521,16 @@ Handle Bad Gateway Page
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
     [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=s2i-generic-data-science-notebook    ${size}=Small
-    ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}    &{envs}
-    Begin Web Test
+    ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}
+    ...    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
+    ...    ${auth_type}=${TEST_USER.AUTH_TYPE}    &{envs}
+    Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    retries=${retries}   retries_delay=${retries_delay}    image=${image}    size=${size}
-    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}    envs=&{envs}
-    End Web Test
+    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}
+    ...    username=${username}    password=${password}
+    ...    auth_type=${auth_type}  envs=&{envs}
+    End Web Test    username=${username}
 
 Verify Library Version Is Greater Than
     [Arguments]     ${library}      ${target}
@@ -549,6 +557,7 @@ Get List Of All Available Container Size
 Open New Notebook In Jupyterlab Menu
     [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
+    Maybe Select Kernel
     Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
     Open With JupyterLab Menu  File  New  Notebook
     Sleep  1

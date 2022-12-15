@@ -5,7 +5,7 @@ Installing RHODS Operator ${operator_version}
   ...  Log  Installing RHODS operator in ${cluster_type}  console=yes  AND
   ...  Set Suite Variable  ${operator_version}  AND
   ...  Set Test Variable  ${RHODS_INSTALL_REPO}  AND
-  ...  Install RHODS  ${operator_version}   ${cluster_type}
+  ...  Install RHODS   ${cluster_type}    ${operator_version}
 
 RHODS Operator Should Be installed
   Verify RHODS Installation

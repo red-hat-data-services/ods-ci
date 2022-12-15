@@ -124,8 +124,13 @@ Delete Data Science Projects From CLI
     ...                 It expects to receive a list of project (i.e,${ocp_projects}) as argument
     [Arguments]     ${ocp_projects}
     FOR   ${displayed_name}    IN  @{ocp_projects}
-        ${dp_with_suffix}=    Set Variable    ${displayed_name}\[DSP]
-        ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${dp_with_suffix}")) | .metadata.name'
+        ${version_check}=    Is RHODS Version Greater Or Equal Than    1.20.0
+        IF    ${version_check} == False
+            ${dp_with_suffix}=    Set Variable    ${displayed_name}\[DSP]
+            ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${dp_with_suffix}")) | .metadata.name'
+        ELSE
+            ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'
+        END
         ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
         IF    "${project_k8s_name}" == "${EMPTY}"
             Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}

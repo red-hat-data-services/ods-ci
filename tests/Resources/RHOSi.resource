@@ -27,6 +27,13 @@ Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robo
 ...                         Perform Dashboard API Endpoint PATCH Call
 ...                         Perform Dashboard API Endpoint POST Call
 ...                         Perform Dashboard API Endpoint DELETE Call
+...                         Check Managed Starburst Addon Is Not Installed
+...                         Delete Managed Starburst CRs
+...                         Create RedHat Marketplace Secret
+...                         Get Observatorium Token
+...                         Get Original License Secret
+...                         Apply Fake Starburst License
+...                         Restore Starburst Original License And Verify Deployment
 
 
 *** Keywords ***

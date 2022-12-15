@@ -11,9 +11,15 @@ Trigger RHODS Uninstall
   Log  Triggered RHODS uninstallation
 
 Verify RHODS Uninstallation
-  Run Keyword And Expect Error  *Not Found*
-  ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-  ...       field_selector=metadata.name=self-managed-rhods
+  IF  "${cluster_type}" == "managed"
+        Run Keyword And Expect Error  *Not Found*
+        ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
+        ...       field_selector=metadata.name=addon-managed-odh-catalog
+  ELSE IF  "${cluster_type}" == "selfmanaged"
+        Run Keyword And Expect Error  *Not Found*
+        ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
+        ...       field_selector=metadata.name=self-managed-rhods
+  END
   Verify Project Does Not Exists  redhat-ods-monitoring
   Verify Project Does Not Exists  redhat-ods-applications
   Verify Project Does Not Exists  redhat-ods-operator

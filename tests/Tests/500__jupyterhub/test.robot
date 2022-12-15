@@ -9,12 +9,13 @@ Suite Setup      JupyterHub Testing Suite Setup
 Suite Teardown   End Web Test
 Force Tags       JupyterHub
 
+
 *** Variables ***
 @{UNSUPPORTED_VAR_NAMES}=    1    invalid!    my_v@r_name    with space    L45t_0n3?!
 
 
 *** Test Cases ***
-Logged into OpenShift
+Logged Into OpenShift
     [Tags]  Sanity  Smoke  ODS-127
     Open OCP Console
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -28,7 +29,7 @@ Can Launch Jupyterhub
     Wait for RHODS Dashboard to Load
     Launch Jupyter From RHODS Dashboard Link
 
-Can Login to Jupyterhub
+Can Login To Jupyterhub
     [Tags]  Sanity  Smoke  ODS-936
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
@@ -42,6 +43,7 @@ Can Spawn Notebook
     Select Notebook Image  s2i-generic-data-science-notebook
     Select Notebook Image  s2i-minimal-notebook
     Select Container Size  Small
+    Remove All Spawner Environment Variables
     # Cannot set number of required GPUs on clusters without GPUs anymore
     #Set Number of required GPUs  9
     #Set Number of required GPUs  0
@@ -118,7 +120,7 @@ Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resour
    ...    error=Modal did not fail within 1 minute
    Click Button    Cancel
    Select Container Size    Small
-   
+
 Verify Unsupported Environment Variable Is Not Allowed
     [Documentation]    Test an unsupported environment variable name
     ...     and expect it to not be allowed.

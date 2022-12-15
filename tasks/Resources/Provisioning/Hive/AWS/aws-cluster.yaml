@@ -28,24 +28,15 @@ items:
       - name: worker
         platform:
           aws:
-            rootVolume:
-              iops: 100
-              size: 160
-              type: gp2
             type: {{ worker_node_instance_type|default("m5.2xlarge") }}
         replicas: {{ worker_node_replicas|default("2") }}
       controlPlane:
         name: master
         platform:
           aws:
-            rootVolume:
-              iops: 100
-              size: 160
-              type: gp2
             type: {{ master_node_instance_type|default("m5.2xlarge") }}
-        replicas: {{ master_node_replicas|default("2") }}
+        replicas: {{ master_node_replicas|default("3") }}
       metadata:
-        creationTimestamp: null
         name: aws-sno
       networking:
         clusterNetwork:
@@ -59,7 +50,7 @@ items:
       platform:
         aws:
           region: {{ aws_region|default("us-east-1") }}
-      pullSecret: ""
+      pullSecret: {{ pull_secret|default("") }}
       sshKey: {{ ssh_key|default("") }}
   metadata:
     name: aws-sno-install-config
@@ -80,6 +71,6 @@ items:
     name: {{ image_set|default("rhods-openshift") }}
     namespace: rhods
   spec:
-    releaseImage: {{ openshift_image|default("quay.io/openshift-release-dev/ocp-release:4.10.18-x86_64") }}
+    releaseImage: {{ openshift_image|default("quay.io/openshift-release-dev/ocp-release:4.10.42-x86_64") }}
 kind: List
 metadata: {}

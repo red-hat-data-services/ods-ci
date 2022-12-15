@@ -32,7 +32,10 @@ Verify Average Spawn Time Is Less Than 40 Seconds
 *** Keywords ***
 Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
-    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF    ${version_check}==False
+       Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    END
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
 

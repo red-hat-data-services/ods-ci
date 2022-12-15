@@ -17,7 +17,6 @@ Verify Grafana Is Shipped And Enabled Within ODS
     @{grafana_deployment_info} =    Fetch Grafana Deployments Info
     @{grafana_services_info} =    Fetch Grafana Services Info
     @{grafana_routes_info} =    Fetch Grafana Routes Info
-    @{grafana_replicasets_info} =    Fetch Grafana ReplicaSets Info
     OpenShift Resource Field Value Should Be Equal As Strings    status.phase    Running    @{grafana_pods_info}
     OpenShift Resource Field Value Should Be Equal As Strings    status.containerStatuses[0].name    auth-proxy    @{grafana_pods_info}
     OpenShift Resource Field Value Should Be Equal As Strings    status.containerStatuses[1].name    grafana    @{grafana_pods_info}
@@ -30,11 +29,11 @@ Verify Grafana Is Shipped And Enabled Within ODS
     OpenShift Resource Field Value Should Be Equal As Strings    spec.ports[0].targetPort    8443    @{grafana_services_info}
     OpenShift Resource Field Value Should Match Regexp    spec.clusterIP    ^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$
     ...    @{grafana_services_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas    2    @{grafana_replicasets_info}
-    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    2    @{grafana_replicasets_info}
+    Wait Until Keyword Succeeds    10 times  5s    Verify Grafana ReplicaSets Info
     OpenShift Resource Field Value Should Be Equal As Strings    spec.port.targetPort    https    @{grafana_routes_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.to.name    grafana    @{grafana_routes_info}
     OpenShift Resource Field Value Should Match Regexp    spec.host    ^(grafana-redhat-ods-monitoring.*)    @{grafana_routes_info}
+
 
 *** Keywords ***
 Fetch Grafana Pods Info
@@ -75,12 +74,11 @@ Fetch Grafana Routes Info
     ...    namespace=redhat-ods-monitoring
     [Return]    @{grafana_routes_info}
 
-Fetch Grafana ReplicaSets Info
-    [Documentation]    Fetch information from Grafana replicasets
-    ...    Args:
-    ...        None
-    ...    Returns:
-    ...        grafana_replicasets_info(list(dict)): Grafana replicasets selected by label and namespace
+Verify Grafana ReplicaSets Info
+    [Documentation]    Fetchs and verifies information for Grafana replicasets
     @{grafana_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=redhat-ods-monitoring
     ...    label_selector=app=grafana
-    [Return]    @{grafana_replicasets_info}
+    OpenShift Resource Field Value Should Be Equal As Strings
+    ...     status.readyReplicas    2    @{grafana_replicasets_info}
+    OpenShift Resource Field Value Should Be Equal As Strings    status.replicas    2    @{grafana_replicasets_info}
+

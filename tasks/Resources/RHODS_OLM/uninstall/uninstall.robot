@@ -6,17 +6,21 @@ Uninstalling RHODS Operator
   ...  Uninstall RHODS
 
 Uninstall RHODS
-  IF  '${cluster_type}'=='OSD'
+  IF  "${cluster_type}" == "managed"
     Uninstall RHODS In OSD
-  ELSE IF  '${cluster_type}'=='PSI' or "${cluster_type}" == "AWS" or "${cluster_type}" == "GCP"
+  ELSE IF  "${cluster_type}" == "selfmanaged"
     Uninstall RHODS In Self Managed Cluster
   ELSE
-    Fail  Only PSI and OSD are cluster types available
+    Fail  Kindly provide supported cluster type
   END
 
 Uninstall RHODS In OSD
-  Delete RHODS CatalogSource
-  Trigger RHODS Uninstall
+  ${return_code}	  Run And Return Rc    git clone ${RHODS_OSD_INSTALL_REPO} rhodsolm
+  Should Be Equal As Integers	${return_code}	 0
+  Set Test Variable     ${filename}    rhodsolm
+  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./cleanup.sh   #robocop:disable
+  Should Be Equal As Integers	${return_code}	 0
+  Log To Console   ${output}
 
 Uninstall RHODS In Self Managed Cluster
       ${return_code}    ${output}	  Run And Return Rc And Output   git clone ${RHODS_INSTALL_REPO}

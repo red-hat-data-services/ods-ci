@@ -103,6 +103,7 @@ Verify That Grafana Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-736
+    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=grafana-
     Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    grafana
     ...    registry.redhat.io/rhel8/grafana

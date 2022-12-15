@@ -123,6 +123,7 @@ Suite Availability Setup
     ...    Create Suite Availability Checkpoint    pm_url=${pm_url}    pm_token=${pm_token}
     Run Keyword And Warn On Failure    Alerts Should Not Be Firing
     ...    pm_url=${pm_url}    pm_token=${pm_token}    expected-firing-alert=DeadManSnitch
+    ...    message_prefix=Suite Setup: ${SUITE NAME}:
 
 Suite Availability Teardown
     [Documentation]    Compare current Average Availability with the values stored in Suite Availability.
@@ -130,6 +131,7 @@ Suite Availability Teardown
     [Arguments]    ${pm_url}    ${pm_token}
     Run Keyword And Warn On Failure
     ...    Log If Availability Decreased Since Suite Availability Checkpoint     pm_url=${pm_url}    pm_token=${pm_token}
-    ...    message_prefix=Suite Teardown: ${SUITE NAME}:
+    ...    message_prefix=Suite Trdwn: ${SUITE NAME}:
     Run Keyword And Warn On Failure    Alerts Should Not Be Firing
     ...    pm_url=${pm_url}    pm_token=${pm_token}    expected-firing-alert=DeadManSnitch
+    ...    message_prefix=Suite Trdwn: ${SUITE NAME}:

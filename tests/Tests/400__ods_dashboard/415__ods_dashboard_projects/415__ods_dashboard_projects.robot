@@ -314,7 +314,7 @@ Verify User Can Delete A Data Science Project
     [Tags]    Sanity    Tier1    ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
     Delete Data Science Project   project_title=${PRJ_TITLE}
-    Check Project Is Deleted    project_title=${PRJ_TITLE}
+    Wait Until Data Science Project Is Deleted    project_title=${PRJ_TITLE}
     # check workbenches and resources get deleted too
 
 
@@ -423,7 +423,7 @@ Check Storage PersistentVolumeClaim Is Deleted
         Fail    msg=The PVC for ${storage_name} storage is still present, while it should have been deleted.
     END
 
-Check Project Is Deleted
+Wait Until Data Science Project Is Deleted
     [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
     [Arguments]    ${project_title}
     Wait Until Keyword Succeeds    15 times    2s

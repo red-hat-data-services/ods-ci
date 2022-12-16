@@ -5,6 +5,7 @@ Library             Collections
 Library             Process
 Library             RequestsLibrary
 
+
 *** Keywords ***
 Get Observatorium Token
     [Documentation]  Returns the token to access observatorium
@@ -126,6 +127,35 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
     ELSE
         Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
         Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
+    END
+
+Alerts Should Not Be Firing    #robocop: disable:too-many-calls-in-keyword
+    [Documentation]    Fails if any Prometheus alert is in pending or firing state,
+    ...  excluding alert with name = ${expected-firing-alert}
+    [Arguments]    ${pm_url}    ${pm_token}    ${expected-firing-alert}=${EMPTY}     ${message_prefix}=${EMPTY}
+    
+    ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
+    ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
+    @{alerts_firing}=    Create List
+
+    FOR    ${rule}    IN    @{all_rules}
+        ${rule_name}=    Get From Dictionary    ${rule}    name
+        ${rules_list}=    Get From Dictionary    ${rule}    rules
+        FOR    ${sub_rule}    IN    @{rules_list}
+            ${state}=    Get From Dictionary    ${sub_rule}    state
+            ${name}=    Get From Dictionary    ${sub_rule}    name
+            ${duration}=    Get From Dictionary    ${sub_rule}    duration
+            IF    '${state}' in ['firing','pending']
+                IF    '${name}' != '${expected-firing-alert}'
+                    ${alert_info}=    Set Variable    ${name} (for:${duration}, state:${state})
+                    Append To List    ${alerts_firing}    ${alert_info}
+                END
+            END
+        END
+    END
+    ${alerts_firing_count}=    Get Length     ${alerts_firing}
+    IF    ${alerts_firing_count} > 0
+        Fail    msg=${message_prefix} Alerts should not be firing: ${alerts_firing}
     END
 
 Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
@@ -280,20 +310,19 @@ Verify ODS Availability Range
     END
     Log Many   @{downtime}
     IF    "@{downtime}" != "${EMPTY}"
-        ${downtime_length} =    Get Length    ${downtime}
+        ${downtime_length}=    Get Length    ${downtime}
         IF   ${downtime_length} == 0
             Log    message=ODS is not down ${values}
         ELSE IF   ${downtime_length} == 1
             Fail  msg=There is a Downtime at ${downtime-duration}[0] in ODS
         ELSE
-            ${downtime_lower_value} =    Convert Date    ${downtime}[0]
-            ${downtime_upper_value} =    Convert Date    ${downtime}[-1]
-            ${downtime-duration} =  Subtract Date From Date    ${downtime_upper_value}    ${downtime_lower_value}    compact
+            ${downtime_lower_value}=    Convert Date    ${downtime}[0]
+            ${downtime_upper_value}=    Convert Date    ${downtime}[-1]
+            ${downtime-duration}=  Subtract Date From Date    ${downtime_upper_value}    ${downtime_lower_value}    compact
             Fail    msg=There is a Downtime of ${downtime-duration} in ODS
         END
     END
     [Return]   ${values}
-
 
 Run Query Range
     [Documentation]    Runs a Prometheus query using the API

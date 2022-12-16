@@ -22,7 +22,7 @@ Verify Empty Group Doesnt Allow Users To Spawn Notebooks
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-572
-    ...       FlakyTest
+    ...       AutomationBug
     Apply Access Groups Settings    admins_group=    users_group=
     Verify User Is Unable To Spawn Notebook
     [Teardown]   Set Default Access Groups And Close Browser

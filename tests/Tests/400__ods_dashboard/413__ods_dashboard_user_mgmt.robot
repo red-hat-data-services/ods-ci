@@ -5,6 +5,7 @@ Resource        ../../Resources/ODS.robot
 Suite Setup     Setup Admin UI
 Suite Teardown  Teardown Admin UI
 
+
 *** Test Cases ***
 Verify The CRD Gets Updated After Applying Changes In Admin UI
     [Documentation]  Verify The CRD Gets Updated After Applying Changes In Admin UI
@@ -62,11 +63,12 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     [Teardown]  Teardown Admin UI
 
 Verify Automatically Detects a Group Selected Is Removed and Notify the User
-   [Documentation]  Verify if the group is deleted the user should get the
-     ...    message / notification
+    [Documentation]  Verify if the group is deleted the user should get the
+    ...    message / notification
     [Tags]  ODS-1686
     ...     Tier1
     ...     Sanity
+    ...     AutomationBug
     Create Group  new-group-test
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Add OpenShift Groups To Data Science Administrators     new-group-test

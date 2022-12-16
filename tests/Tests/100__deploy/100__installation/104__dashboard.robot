@@ -38,6 +38,7 @@ Verify rhods-dashboard ClusterRole Rules
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-644
+    ...       AutomationBug
     &{rhodsdashboard_clusterrole_info}=    Fetch rhods-dashboard ClusterRole Info
     @{rhodsdashboard_clusterrole_rules}=    Set Variable    ${rhodsdashboard_clusterrole_info.rules}
     &{rule_1} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[0]

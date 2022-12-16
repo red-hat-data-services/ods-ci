@@ -79,7 +79,8 @@ Spawn and Stop Server
     Run Keyword And Continue On Failure  Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     ${time2} =    Get Time
     ${time} =    Subtract Date From Date    ${time2}    ${time1}
-    Sleep  0.5s
+    Sleep  1s
+    Maybe Close Popup
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
     Wait For RHODS Dashboard To Load

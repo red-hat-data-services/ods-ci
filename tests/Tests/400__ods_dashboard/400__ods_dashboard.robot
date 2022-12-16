@@ -187,6 +187,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...       ODS-470  ODS-718
     ...       Execution-Time-Over-30m
     ...       FlakyTest
+    Skip If RHODS Version Greater Or Equal Than    1.20.0    CUDA build chain removed in v1.20
     Clear Dashboard Notifications
     ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
     Delete Build    namespace=redhat-ods-applications    build_name=${build_name}

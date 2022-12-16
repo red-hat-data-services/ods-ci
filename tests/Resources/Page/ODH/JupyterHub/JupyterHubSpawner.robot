@@ -489,7 +489,6 @@ Fetch Image Tooltip Info
         Append To List    ${tmp_list}    ${item}
     END
     Click Element    xpath://div[@class='pf-c-popover__content']/button[@aria-label="Close"]
-    Click Element    xpath://div[.="Deployment size"]
     [Return]    ${tmp_list}
 
 Spawn Notebooks And Set S3 Credentials

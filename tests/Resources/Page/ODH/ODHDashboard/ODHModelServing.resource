@@ -3,6 +3,7 @@ Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
 Resource       ../../../Common.robot
 Resource       ODHDataScienceProject/ModelServer.resource
+Library        ../../../../../libs/Helpers.py
 
 *** Variables ***
 ${MS_HEADER_XP}=     xpath=//h1[text()="Deployed models"]
@@ -196,4 +197,9 @@ Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ${inference_output} =    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
-    Should Be Equal As Strings    ${inference_output}    ${expected_inference_output}
+    ${result}    ${list} =    Inference Comparison    ${expected_inference_output}    ${inference_output}
+    Log    ${result}
+    Log    ${list}
+    IF    ${result}==False
+        Fail    msg=comparison between expected and actual failed, ${list}
+    END

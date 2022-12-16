@@ -127,9 +127,9 @@ Check Prometheus Alerting Rules
 
 Read Current CPU Usage
     [Documentation]    Returns list of current cpu usage
-    ${Expression} =    Set Variable
-    ...    sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0", container="",pod=~"jupyter-nb.*",namespace="rhods-notebooks"}[1h]))    # robocop:disable
-    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${Expression}
+    ${expression} =    Set Variable
+    ...    sum(rate(container_cpu_usage_seconds_total{container="",pod=~"jupyter-nb.*",namespace="rhods-notebooks"}[1h]))    # robocop:disable
+    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     IF    ${resp.json()["data"]["result"]} == []
         ${cpu_usage} =    Set Variable    0
     ELSE

@@ -531,12 +531,7 @@ Verify Access To status API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
-    ...                                        body=${EMPTY}    str_to_json=${FALSE}
-    Operation Should Be Unauthorized
-    Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
-    ...                                        body=${EMPTY}    str_to_json=${FALSE}
-    Operation Should Be Allowed
+    Perform AllowedUsers API Call Based On RHODS Version
 
 Verify Access To validate-isv API Endpoint
     [Documentation]     Verifies the endpoint "validate-isv" works as expected
@@ -863,3 +858,23 @@ Delete Test PVCs
             OpenshiftLibrary.Oc Delete    kind=PersistentVolumeClaim    namespace=${NOTEBOOK_NS}    name=${pvc}
         END
     END
+
+Perform AllowedUsers API Call Based On RHODS Version
+    [Documentation]     Verifies the endpoint "status/allowedUsers" works as expected
+    ...                 based on the permissions of the users. The Type of request changes
+    ...                 based on the RHODS version
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+        Operation Should Be Unauthorized
+        Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+        Operation Should Be Allowed
+    ELSE
+        Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+        ...                                        body=${EMPTY}    str_to_json=${FALSE}
+        Operation Should Be Unauthorized
+        Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+        ...                                        body=${EMPTY}    str_to_json=${FALSE}
+        Operation Should Be Allowed
+    END
+    

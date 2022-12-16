@@ -20,7 +20,7 @@ Suite Teardown      RHOSi Teardown
 *** Test Cases ***
 Verify Dashbord has no message with NO Component Found
     [Tags]  Sanity
-    ...     Tier1
+    ...     Tier3
     ...     ODS-1493
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with bad subscription present in openshift
@@ -247,7 +247,7 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
 Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
-    [Tags]  Tier2
+    [Tags]  Tier3
     ...     ODS-1556
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with data value empty for odh-enabled-applications-config

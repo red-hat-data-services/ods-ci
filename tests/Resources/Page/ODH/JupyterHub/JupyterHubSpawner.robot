@@ -475,21 +475,22 @@ Fetch Image Tooltip Description
     [Return]  ${desc}
 
 Fetch Image Tooltip Info
-    [Documentation]  Fetches libraries in image tooltip text
-    [Arguments]  ${img}
-    ${xpath_img_tooltip} =  Set Variable  //input[contains(@id, "${img}")]/../label/span/*
-    ${xpath_tooltip_items} =  Set Variable  //div[@class='pf-c-popover__body']/p
-    @{tmp_list} =  Create List
-    Click Element  ${xpath_img_tooltip}
-    ${libs} =  Get Element Count  ${xpath_tooltip_items}
-    Log  ${libs}
-    FOR  ${index}  IN RANGE  3  1+${libs}
-        Sleep  0.1s
-        ${item} =  Get Text  ${xpath_tooltip_items}\[${index}]
-        Append To List  ${tmp_list}  ${item}
+    [Documentation]    Fetches libraries in image tooltip text
+    [Arguments]    ${img}
+    ${xpath_img_tooltip} =    Set Variable    //input[contains(@id, "${img}")]/../label//div[@class=""][.=""]
+    ${xpath_tooltip_items} =    Set Variable    //div[@class='pf-c-popover__body']/p
+    @{tmp_list} =    Create List
+    Click Element    ${xpath_img_tooltip}
+    ${libs} =    Get Element Count    ${xpath_tooltip_items}
+    Log    ${libs}
+    FOR    ${index}    IN RANGE    3    1+${libs}
+        Sleep    0.1s
+        ${item} =    Get Text    ${xpath_tooltip_items}\[${index}]
+        Append To List    ${tmp_list}    ${item}
     END
-    Click Element  xpath://div[.="Deployment size"]
-    [Return]  ${tmp_list}
+    Click Element    xpath://div[@class='pf-c-popover__content']/button[@aria-label="Close"]
+    Click Element    xpath://div[.="Deployment size"]
+    [Return]    ${tmp_list}
 
 Spawn Notebooks And Set S3 Credentials
     [Documentation]     Spawn a jupyter notebook server and set the env variables

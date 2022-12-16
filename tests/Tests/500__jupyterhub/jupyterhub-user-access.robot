@@ -105,10 +105,16 @@ Check New Access Configuration Works As Expected
     ...                works as expected in JH
     Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    ${status}=    Run Keyword And Return Status     Launch Jupyter From RHODS Dashboard Link
-    Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${FALSE}
-    Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
-    Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
+    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.20.0
+    IF    ${version_check} == True
+        ${status}=    Run Keyword And Return Status     Launch Jupyter From RHODS Dashboard Link
+        Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${FALSE}
+        Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
+        Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
+    ELSE
+        Launch Jupyter From RHODS Dashboard Link
+        Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=none
+    END
     Capture Page Screenshot    perm_denied_custom.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER_2.PASSWORD}  ${TEST_USER_2.AUTH_TYPE}

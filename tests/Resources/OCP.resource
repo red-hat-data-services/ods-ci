@@ -47,16 +47,7 @@ Verify CR Status
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Available
-    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True
-
-Namespace Should Not Exist
-    [Documentation]    Checks a given Project is not present in openshift
-    [Arguments]    ${namespace}
-    ${present} =     Run Keyword And Return Status   
-    ...    OpenshiftLibrary.Oc Get    kind=Project  label_selector=metadata.name=${namespace}
-    IF    ${present} == ${TRUE}
-        Fail   msg=The namespace ${namespace} exists!
-    END
+    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True  
 
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed

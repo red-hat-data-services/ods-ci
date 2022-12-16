@@ -31,7 +31,10 @@ Create S3 Data Connection
     Input Text    ${S3_SECRET_DC_INPUT_XP}    ${aws_secret_access}
     Input Text    ${S3_ENDPOINT_DC_INPUT_XP}    ${aws_s3_endpoint}
     Input Text    ${S3_REGION_DC_INPUT_XP}    ${aws_region}
-    Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
+    END
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE

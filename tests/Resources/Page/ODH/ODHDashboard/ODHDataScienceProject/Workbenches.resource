@@ -46,6 +46,11 @@ Create Workbench
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
     END
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        Run Keyword And Continue On Failure    Page Should Not Contain Element
+        ...    xpath=//input[contains(@name,"ephemeral")]
+    END
     IF    "${storage}" == "Persistent"
         IF    ${pv_existent} == ${TRUE}
             Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
@@ -54,7 +59,7 @@ Create Workbench
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
         ELSE
-            Log    msg="pv_existent" argument is required when selected storage type is "Persistent"   level=ERROR
+            Log    msg="pv_existent" argument not set, using default PV settings"   level=WARN
         END
     ELSE
         Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
@@ -71,6 +76,12 @@ Create Workbench
 Add Environment Variables In Workbench
     [Documentation]    Adds the environment variables through the workbench creation page
     [Arguments]    ${env_variables}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        ${add_key_value_text}=    Set Variable    Add another key / value pair
+    ELSE
+        ${add_key_value_text}=    Set Variable    Add another variable
+    END
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
     ${n_objects}=    Get Length    ${env_variables}
     FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}    start=1
@@ -89,7 +100,7 @@ Add Environment Variables In Workbench
                 Input Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//input[@aria-label="value of item ${pair_idx}"]
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
-                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="Add another variable"]
+                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
                 END
             END
         END
@@ -200,7 +211,7 @@ Launch Workbench
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be      
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
-        Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td/a[text()="Open"]
+        Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
         Access To Workbench
     ELSE
         Fail   msg=Cannot launch workbench ${workbench_title} because it is not running...

@@ -35,7 +35,10 @@ Storage Should Be Listed
 Storage Should Not Be Listed
     [Documentation]    Checks storage is not listed in DS Project details page
     [Arguments]     ${name}
-    Run Keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Does Not Contain Element
+    ...    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    ...    timeout=10s
 
 Storage Size Should Be
     [Documentation]    Checks displayed PV size corresponds to PV size in Openshift.
@@ -71,6 +74,7 @@ Fill In New PV Data
     ${is_storage_modal}=     Run Keyword And Return Status    Page Should Contain Element     ${STORAGE_ADD_BTN_2_XP}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
     Run Keyword If   ${is_storage_modal} == ${TRUE}     Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
+    Clear Element Text    ${STORAGE_NAME_INPUT_XP}
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
     Run Keyword If   ${is_storage_modal} == ${TRUE}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}

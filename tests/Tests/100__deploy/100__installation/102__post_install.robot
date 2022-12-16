@@ -19,8 +19,7 @@ Suite Teardown      RHOSi Teardown
 
 *** Test Cases ***
 Verify Dashbord has no message with NO Component Found
-    [Tags]  Sanity
-    ...     Tier3
+    [Tags]  Tier3
     ...     ODS-1493
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with bad subscription present in openshift

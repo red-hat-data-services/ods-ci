@@ -337,7 +337,7 @@ Fetch ODS Cluster Environment
    ...        Returns:
    ...        Cluster Environment (str)
    ${match}=    Fetch Cluster Platform Type
-   Run Keyword If    '${match}'!='AWS' or '${match}'!='GCP'    FAIL    msg=This keyword should be used only in OSD clusters
+   Run Keyword If    '${match}'!='AWS' and '${match}'!='GCP'    FAIL    msg=This keyword should be used only in OSD clusters
    ${match}  ${status}=    Run Keyword And Ignore Error  Should Contain    ${OCP_CONSOLE_URL}    devshift.org
    IF    "${match}" == "PASS"
        ${cluster_type}=  Set Variable  stage

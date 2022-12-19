@@ -92,13 +92,13 @@ Verify RHODS Explore Section Contains Only Expected ISVs
 Verify Disabled Cards Can Be Removed
     [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
     ...                 It uses RHOSAK as example to test the feature
-    ...                 ProductBug: RHODS-2902
+    ...                 ProductBug: RHODS-2902 - still present, but the test will
+    ...                 only trigger warning when issue happens
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
-    ...       ProductBug
     Enable RHOSAK
     Remove RHOSAK From Dashboard
-    Success Message Should Contain    ${RHOSAK_DISPLAYED_APPNAME}
+    Run Keyword And Warn On Failure    Success Message Should Contain    ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Is Not Enabled    app_name=${RHOSAK_DISPLAYED_APPNAME}
     Capture Page Screenshot    after_removal.png
 

@@ -103,9 +103,10 @@ Set Custom Access Groups
 Check New Access Configuration Works As Expected
     [Documentation]    Checks if the new access configuration (using two custom groups)
     ...                works as expected in JH
-    Launch Dashboard   ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    ...   ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    ...   ${expected_page}=${NONE}
+    Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    ...    browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    ...    expected_page=${NONE}
     ${version_check}=    Is RHODS Version Greater Or Equal Than    1.20.0
     IF    ${version_check} == True
         ${status}=    Run Keyword And Return Status     Launch Jupyter From RHODS Dashboard Link
@@ -126,6 +127,7 @@ Check New Access Configuration Works As Expected
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
     Wait for RHODS Dashboard to Load    expected_page=Start a notebook server
+    ...    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure   Verify Jupyter Access Level     expected_result=user
     Capture Page Screenshot    perm_user_custom.png
     Logout From RHODS Dashboard
@@ -140,7 +142,8 @@ Check Standard Access Configuration Works As Expected
     Capture Page Screenshot    perm_admin_std.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_4.USERNAME}  ${TEST_USER_4.PASSWORD}  ${TEST_USER_4.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait for RHODS Dashboard to Load    expected_page=Start a notebook server
+    ...    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=user
     Capture Page Screenshot    perm_user_std.png
     Logout From RHODS Dashboard

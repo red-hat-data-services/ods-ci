@@ -82,8 +82,10 @@ Logout From RHODS Dashboard
 
 Wait for RHODS Dashboard to Load
     [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"    ${wait_for_cards}=${TRUE}
+    ...          ${expected_page}=Enabled
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=15s
+    Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Cards Are Loaded
     END

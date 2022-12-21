@@ -106,7 +106,7 @@ Check New Access Configuration Works As Expected
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    ...    expected_page=${NONE}
+    ...    expected_page=${NONE}    wait_for_cards=${FALSE}
     ${version_check}=    Is RHODS Version Greater Or Equal Than    1.20.0
     IF    ${version_check} == True
         ${status}=    Run Keyword And Return Status     Launch Jupyter From RHODS Dashboard Link

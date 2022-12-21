@@ -47,16 +47,21 @@ Verify CR Status
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Available
-    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True  
+    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True
 
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
     ...                 in the cluster (e.g., usually on OSD, ROSA).
     ...                 Returns ${TRUE} if RHODS Self-Managed is installed (e.g., usually on PSI or baremetal)
-    ${is_self_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
+    ${is_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
     ...                                                      kind=CatalogSource
-    ...                                                      name=self-managed-rhods
-    ...                                                      namespace=openshift-marketplace
+    ...                                                      name=addon-managed-odh-catalog
+    ...                                                      namespace=redhat-ods-operator
+    IF    ${is_managed} == ${TRUE}
+        ${is_self_managed}=    Set Variable    ${FALSE}
+    ELSE
+        ${is_self_managed}=    Set Variable    ${TRUE}
+    END
     [Return]    ${is_self_managed}
 
 Get MachineSets

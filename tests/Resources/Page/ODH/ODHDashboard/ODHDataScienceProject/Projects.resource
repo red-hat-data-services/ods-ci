@@ -22,10 +22,11 @@ ${SPAWNER_LINK}=        xpath=//a[text()="Launch Jupyter"]
 *** Keywords ***
 Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
-    Page Should Contain    Data Science Projects
+    # Page Should Contain    Data Science Projects
     Click Link      Data Science Projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
-    Wait Until Page Contains Element    ${DS_PROJECT_XP}    timeout=30
+    # Wait Until Page Contains Element    ${DS_PROJECT_XP}    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Is Data Science Projects Page Open

@@ -81,9 +81,13 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
+    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"    ${wait_for_cards}=${TRUE}
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=15s
+    IF    ${wait_for_cards} == ${TRUE}
+        Wait Until Cards Are Loaded
+    END
+    
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
@@ -185,7 +189,8 @@ Load Expected Data Of RHODS Explore Section
     [Return]  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-explore-apps__gallery')]
+    Wait Until Page Contains Element    xpath://div[contains(@class,'-apps__gallery')]
+    
 
 Get App ID From Card
     [Arguments]  ${card_locator}

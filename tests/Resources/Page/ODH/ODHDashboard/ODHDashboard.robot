@@ -49,9 +49,10 @@ ${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo"]
 *** Keywords ***
 Launch Dashboard
   [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}  ${dashboard_url}  ${browser}  ${browser_options}
+  ...          ${expected_page}=Enabled
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-  Wait for RHODS Dashboard to Load
+  Wait for RHODS Dashboard to Load    expected_page=${expected_page}
 
 Authorize rhods-dashboard service account
   Wait Until Page Contains  Authorize Access
@@ -85,7 +86,9 @@ Wait for RHODS Dashboard to Load
     ...          ${expected_page}=Enabled
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=15s
-    Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]
+    IF    "${expected_page}" != "${NONE}"
+        Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]        
+    END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Cards Are Loaded
     END

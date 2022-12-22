@@ -14,8 +14,7 @@ Verify RHOAM Is Available In RHODS Dashboard Explore Page
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait for RHODS Dashboard to Load
-  Verify Service Is Available In The Explore Page    OpenShift API Management
-  Verify Service Provides "Get Started" Button In The Explore Page    OpenShift API Management
+  Verify RHOAM Availability Based On RHODS Installation Type
 
 
 *** Keywords ***
@@ -25,6 +24,15 @@ RHOAM Suite Setup
 
 RHOAM Suite Teardown
   Close All Browsers
+
+Verify RHOAM Availability Based On RHODS Installation Type
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == ${TRUE}
+        Verify Service Is Not Available In The Explore Page    OpenShift API Management
+    ELSE
+        Verify Service Is Available In The Explore Page    OpenShift API Management
+        Verify Service Provides "Get Started" Button In The Explore Page    OpenShift API Management
+    END
 
 
 

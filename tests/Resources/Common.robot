@@ -106,6 +106,7 @@ URLs HTTP Status Code Should Be Equal To
     [Arguments]    ${link_elements}    ${expected_status}=200    ${timeout}=20
     FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
         ${href}=    Get Element Attribute    ${ext_link}    href
+        ${text}=    Get Text    ${ext_link}
         ${status}=    Run Keyword And Continue On Failure    Check HTTP Status Code    link_to_check=${href}
         ...                                                                            expected=${expected_status}
         Log To Console    ${idx}. ${href} gets status code ${status}
@@ -256,3 +257,9 @@ Extract Value From JSON Path
         ${value}=    Set Variable    ${value["${split}"]}
     END
     [Return]    ${value}
+
+Extract URLs From Text
+    [Documentation]    
+    [Arguments]    ${text}
+    ${urls}=     Get Regexp Matches   ${text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
+    [Return]    ${urls}

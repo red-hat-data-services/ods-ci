@@ -152,6 +152,8 @@ Verify Logged In Users Are Displayed In The Dashboard
     Verify Username Displayed On RHODS Dashboard   ${TEST_USER.USERNAME}
 
 Search and Verify GPU Items Appears In Resources Page
+    [Documentation]    Verifies if all the expected learning items for GPU are listed
+    ...                in RHODS Dashboard > Resources page
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1226
@@ -575,32 +577,38 @@ Dashboard Suite Setup
 Dashboard Test Teardown
     Close All Browsers
 
+Set GPU Expected Resources
+    [Documentation]    Sets the expected items in Resources section for GPUs.
+    ...                Those changes based on RHODS installation type (i.e., Self-Managed vs Cloud Service)
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == ${TRUE}
+        ${gpu_re_id}=    Create List  'python-gpu-numba-tutorial'
+        ${gpu_re_link}=   Create List   'https://github.com/ContinuumIO/gtc2018-numba'
+    ELSE
+        ${gpu_re_id}=    Create List  'gpu-enabled-notebook-quickstart'   'python-gpu-numba-tutorial'
+        ...    'gpu-quickstart'     'nvidia-doc'
+        ${gpu_re_link}=   Create List   '#'  'https://github.com/ContinuumIO/gtc2018-numba'   '#'
+        ...   'https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/openshift/contents.html'
+    END
+    ${gpu_re_exp}=    Get Length    ${gpu_re_id}
+    [Return]    ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}
+
 Check GPU Resources
     [Documentation]   Check resource tiles for GPU is present
-    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.13.0
+    ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}=    Set GPU Expected Resources
     ${elements}=    Get WebElements    //article
-    @{gpu_re_id}=    Create List  'gpu-enabled-notebook-quickstart'   'python-gpu-numba-tutorial'
-    ...    'gpu-quickstart'     'nvidia-doc'
-    @{gpu_re_link}=   Create List   '#'  'https://github.com/ContinuumIO/gtc2018-numba'   '#'
-    ...   'https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/openshift/contents.html'
     ${len}=    Get Length    ${elements}
-    IF    ${version_check}==True
-        Should Be Equal As Integers    ${len}    4
-        FOR    ${counter}    IN RANGE    ${len}
-           Page Should Contain Element    //article[@id=${gpu_re_id}[${counter}]]
-           IF    ${gpu_re_link}[${counter}] == '#'
-                 ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
-                 ${no_of_open_link}=    Get Length    ${counter}
-                 Run Keyword IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
-                 ...        ELSE    Fail     Mismatch on the number of GPU tile present with 'Open' link.Please check the RHODS dashboard.  #robocop disable
-           ELSE
-                 Page Should Contain Element    //a[@href=${gpu_re_link}[${counter}]]
-           END
+    Should Be Equal As Integers    ${len}    ${gpu_re_exp}
+    FOR    ${counter}    IN RANGE    ${len}
+        Page Should Contain Element    //article[@id=${gpu_re_id}[${counter}]]
+        IF    ${gpu_re_link}[${counter}] == '#'
+                ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
+                ${no_of_open_link}=    Get Length    ${counter}
+                Run Keyword IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
+                ...        ELSE    Fail     Mismatch on the number of GPU tile present with 'Open' link.Please check the RHODS dashboard.  #robocop disable
+        ELSE
+                Page Should Contain Element    //a[@href=${gpu_re_link}[${counter}]]
         END
-    ELSE
-        Should Be Equal As Integers    ${len}    1
-        Page Should Contain Element    //article[@id=${gpu_re_id}[1]]
-        Page Should Contain Element    //a[@href=${gpu_re_link}[1]]
     END
 
 Wait Until Resource Page Is Loaded

@@ -61,7 +61,6 @@ Average Spawning Time Should Be Less Than
     [Documentation]    Checks than average time is less than ${time}
     [Arguments]    ${avg_time}    ${time}
     ${result} =    Evaluate    float(${avg_time}) < float(${time})
-#    Run Keyword Unless    ${result}    Fail
     Run Keyword If    not ${result}    Fail
 
 

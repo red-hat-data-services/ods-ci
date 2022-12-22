@@ -70,7 +70,6 @@ Verify Sandbox Toolchain Data
            FOR    ${data}    IN    @{k_mem_data}
                   ${km_data}    Split String    ${data}       :
                   ${m_value}    Convert To Number    ${km_data[1]}[:-3]
-#                  Run Keyword And Continue On Failure    Run Keyword Unless     ${m_value} <= ${MEMORY_THRESHOLD}
                   Run Keyword And Continue On Failure    Run Keyword If     not ${m_value} <= ${MEMORY_THRESHOLD}
                   ...   FAIL    Kube-API server value is higher than,
                   ...   expected in toolchain result=> ${km_data[0]} : ${m_value}

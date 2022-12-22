@@ -8,14 +8,12 @@ Suite Teardown      Rbac Suite Teardown
 
 *** Test Cases ***
 Verify Default Access Groups Settings And JupyterLab Notebook Access
-    [Documentation]    Verify that ODS Contains Expected Groups and User Can Spawn Notebook
+    [Documentation]    Verify that RHODS is installed with the expected default user groups configuration
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1164
-    ...       AutomationBug
+    [Setup]    Set Standard RHODS Groups Variables
     Verify Default Access Groups Settings
-    Verify User Can Spawn A Notebook
-    [Teardown]  End Web Test
 
 Verify Empty Group Doesnt Allow Users To Spawn Notebooks
     [Documentation]   Verifies that User is unable to Access Jupyterhub after setting Access Groups OdhDashboardConfig CRD to Empty

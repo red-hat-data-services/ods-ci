@@ -243,3 +243,16 @@ Close Generic Modal If Present
         Click Element    xpath=//button[@aria-label="Close"]
         Wait Until Generic Modal Disappears
     END
+
+Extract Value From JSON Path
+    [Documentation]    Given a Python JSON Object (i.e., a dictionary) and
+    ...                a desired path (e.g., spec.resources.limits.cpu), it retrieves
+    ...                the value by looping into the dictionary.
+    [Arguments]    ${json_dict}    ${path}
+    ${path_splits}=    Split String    string=${path}    separator=.
+    ${value}=    Set Variable    ${json_dict}
+    FOR    ${idx}    ${split}    IN ENUMERATE    @{path_splits}  start=1
+        Log    ${idx} - ${split}
+        ${value}=    Set Variable    ${value["${split}"]}
+    END
+    [Return]    ${value}

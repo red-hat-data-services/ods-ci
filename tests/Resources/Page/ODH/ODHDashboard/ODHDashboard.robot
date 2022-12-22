@@ -49,9 +49,11 @@ ${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo"]
 *** Keywords ***
 Launch Dashboard
   [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}  ${dashboard_url}  ${browser}  ${browser_options}
+  ...          ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-  Wait for RHODS Dashboard to Load
+  Wait for RHODS Dashboard to Load    expected_page=${expected_page}
+  ...    wait_for_cards=${wait_for_cards}
 
 Authorize rhods-dashboard service account
   Wait Until Page Contains  Authorize Access
@@ -81,9 +83,17 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
+    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"    ${wait_for_cards}=${TRUE}
+    ...          ${expected_page}=Enabled
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=15s
+    IF    "${expected_page}" != "${NONE}"
+        Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]        
+    END
+    IF    ${wait_for_cards} == ${TRUE}
+        Wait Until Cards Are Loaded
+    END
+    
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
@@ -123,7 +133,7 @@ Verify Service Is Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Cards Are Loaded
+  Wait for RHODS Dashboard to Load    expected_page=Explore
   Capture Page Screenshot
   Page Should Contain Element    //article//*[.='${app_name}']
 
@@ -193,7 +203,8 @@ Load Expected Data Of RHODS Explore Section
     [Return]  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-explore-apps__gallery')]
+    Wait Until Page Contains Element    xpath://div[contains(@class,'-apps__gallery')]
+    
 
 Get App ID From Card
     [Arguments]  ${card_locator}

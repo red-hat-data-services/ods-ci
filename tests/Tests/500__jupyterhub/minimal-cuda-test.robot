@@ -13,7 +13,7 @@ Force Tags       JupyterHub
 
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         minimal-gpu
-${EXPECTED_CUDA_VERSION} =  11.7
+${EXPECTED_CUDA_VERSION} =  12.0
 
 
 *** Test Cases ***

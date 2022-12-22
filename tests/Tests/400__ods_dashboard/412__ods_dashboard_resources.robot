@@ -54,7 +54,7 @@ Verify Filters Are Working On Resources Page
     ...       ODS-489
     ...       Tier1
     Click Link    Resources
-    Wait Until Resource Page Is Loaded
+    Wait for RHODS Dashboard to Load    expected_page=Resources
     Set Expected Items Based On RHODS Type
     Number Of Items Should Be    expected_number=${EXPECTED_RESOURCE_ITEMS}
     Filter Resources By Status "Enabled" And Check Output

@@ -203,7 +203,7 @@ Load Expected Data Of RHODS Explore Section
     RETURN  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'-apps__gallery')]
+    Wait Until Page Contains Element    xpath://div[contains(@class,'__gallery')]
     
 
 Get App ID From Card

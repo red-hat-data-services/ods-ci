@@ -127,6 +127,14 @@ Verify Service Is Available In The Explore Page
   Capture Page Screenshot
   Page Should Contain Element    //article//*[.='${app_name}']
 
+Verify Service Is Not Available In The Explore Page
+  [Documentation]   Verify the service appears in Applications > Explore
+  [Arguments]  ${app_name}
+  Menu.Navigate To Page    Applications    Explore
+  Wait Until Page Contains    Jupyter  timeout=30
+  Capture Page Screenshot
+  Page Should Not Contain Element    //article//*[.='${app_name}']
+
 Remove Disabled Application From Enabled Page
    [Documentation]  The keyword let you re-enable or remove the card from Enabled page
    ...              for those application whose license is expired. You can control the action type

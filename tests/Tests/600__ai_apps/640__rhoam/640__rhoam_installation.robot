@@ -46,6 +46,7 @@ RHOAM Install Suite Setup
 
 RHOAM Suite Teardown
     [Documentation]    RHOAM Suite teardown. It triggers RHOAM Uninstallation
+    Skip If RHODS Is Self-Managed
     Log To Console    Starting uninstallation of RHOAM Addon...
     Uninstall Rhoam Using Addon Flow    cluster_name=${CLUSTER_NAME}
     Log To Console    RHOAM Addon has been uninstalled!

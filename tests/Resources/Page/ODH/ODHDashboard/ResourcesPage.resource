@@ -34,18 +34,41 @@ Search Resources
     Wait Until Page Contains Element    xpath=${XP_SEARCH_BAR}
     Input Text    xpath=${XP_SEARCH_BAR}   text=${search_term}
 
+Number Of Items Should Be
+    [Arguments]    ${expected_number}
+    @{items}=    Get WebElements    //div[@class="pf-c-card__title odh-card__doc-title"]
+    ${actual_n_results}=    Get Length     ${items}
+    Run Keyword And Continue On Failure    Should Be Equal As Integers     ${actual_n_results}     ${expected_number}
+    [Return]    ${items}    ${actual_n_results}
 
 Verify The Resources Are Filtered
     [Documentation]    verified the items, ${index_of_text} is index text appear on resource 0 = title,1=provider,2=tag(like documentation,tutorial)
-    [Arguments]    ${selector}    ${list_of_items}    ${index_of_text}=0
-    @{items}=    Get WebElements    //div[@class="${selector}"]
-    ${actual_n_results}=    Get Length     ${items}
-    ${exp_n_results}=       Get Length     ${list_of_items}
-    Should Be Equal     ${actual_n_results}     ${exp_n_results}
+    [Arguments]    ${list_of_items}=${NONE}
+    ...            ${expected_types}=${NONE}    ${expected_providers}=${NONE}
+    ...            ${expected_number}=${NONE}
+    IF    "${list_of_items}" != "${NONE}"
+        ${exp_n_results}=       Get Length     ${list_of_items}
+    ELSE
+        ${exp_n_results}=    Set Variable    ${expected_number}
+    END
+    ${items}   ${_}=    Number Of Items Should Be    expected_number=${exp_n_results}
     FOR    ${item}    IN    @{items}
         @{texts}=    Split String    ${item.text}    \n
-        List Should Contain Value    ${list_of_items}    ${texts}[${index_of_text}]
+        IF    "${list_of_items}" != "${NONE}"
+            Run Keyword And Continue On Failure
+            ...    List Should Contain Value    ${list_of_items}    ${texts}[0]    # item title
+        END
+        IF    "${expected_types}" != "${NONE}"
+            Run Keyword And Continue On Failure
+            ...    List Should Contain Value    ${expected_types}    ${texts}[2]    # item type
+        END
+        IF    "${expected_providers}" != "${NONE}"
+            Run Keyword And Continue On Failure
+            ...    List Should Contain Value    ${expected_providers}    ${texts}[1]    # item provider
+        END
     END
+
+
 
 Resource Page Should Contain
     [Arguments]     ${search_term}   ${expected_items}    ${filter}=${NONE}

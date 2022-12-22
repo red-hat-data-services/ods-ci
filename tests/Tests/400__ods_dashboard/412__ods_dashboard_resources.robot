@@ -11,6 +11,10 @@ Test Setup        Resources Test Setup
 Test Teardown     Resources Test Teardown
 
 
+*** Variables ***
+@{LIST_OF_IDS_FOR_COMBINATIONS}         documentation--check-box    Red Hat managed--check-box
+
+
 *** Test Cases ***
 Verify Quick Starts Work As Expected
     [Tags]  Sanity
@@ -43,6 +47,21 @@ Verify Resource Link HTTP Status Code
     Sleep    5
     ${link_elements}=     Get Link Web Elements From Resource Page
     URLs HTTP Status Code Should Be Equal To     link_elements=${link_elements}    expected_status=200
+
+Verify Filters Are Working On Resources Page
+    [Documentation]    check if it is possible to filter items by enabling various filters like status,provider
+    [Tags]    Sanity
+    ...       ODS-489
+    ...       Tier1
+    Click Link    Resources
+    Wait Until Resource Page Is Loaded
+    Set Expected Items Based On RHODS Type
+    Number Of Items Should Be    expected_number=${EXPECTED_RESOURCE_ITEMS}
+    Filter Resources By Status "Enabled" And Check Output
+    Filter By Resource Type And Check Output
+    Filter By Provider Type And Check Output
+    Filter By Application (Aka Povider) And Check Output
+    Filter By Using More Than One Filter And Check Output
 
 *** Keywords ***
 Resources Test Setup
@@ -208,4 +227,88 @@ Validate Links Extracted From Text
             END
         END
     END
+
+Wait Until Resource Page Is Loaded
+    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
+
+Filter Resources By Status "Enabled" And Check Output
+    [Documentation]    Filters the resources By Status Enabled
+    Select Checkbox Using Id    enabled-filter-checkbox--check-box
+    Run Keyword And Continue On Failure
+    ...    Verify The Resources Are Filtered
+    ...    list_of_items=${EXPECTED_ITEMS_FOR_ENABLE}
+    Deselect Checkbox Using Id    enabled-filter-checkbox--check-box
+
+Filter By Application (Aka Povider) And Check Output
+    [Documentation]    Filter by application (aka provider)
+    ${id_name} =  Set Variable    Anaconda Professional--check-box
+    Select Checkbox Using Id    ${id_name}
+    Verify The Resources Are Filtered
+    ...    expected_providers=${EXPECTED_ITEM_PROVIDERS}    expected_number=10
+    Deselect Checkbox Using Id    id=${id_name}
+
+Filter By Resource Type And Check Output
+    [Documentation]    Filter by resource type
+    Select Checkbox Using Id    id=tutorial--check-box
+    Verify The Resources Are Filtered
+    ...    expected_types=${EXPECTED_ITEM_RESOURCE_TYPE}    expected_number=14
+    Deselect Checkbox Using Id    id=tutorial--check-box
+
+Filter By Provider Type And Check Output
+    [Documentation]    Filter by provider type
+    Select Checkbox Using Id    id=Red Hat managed--check-box
+    Verify The Resources Are Filtered
+    ...    list_of_items=${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
+    Deselect Checkbox Using Id    id=Red Hat managed--check-box
+
+Filter By Using More Than One Filter And Check Output
+    [Documentation]    Filter resouces using more than one filter ${list_of_ids} = list of check-box ids
+    FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
+        Select Checkbox Using Id    id=${id}
+    END
+    Verify The Resources Are Filtered
+    ...    list_of_items=${EXPECTED_ITEMS_FOR_COMBINATIONS}
+    FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
+        Deselect Checkbox Using Id    id=${id}
+    END
+
+Set Expected Items Based On RHODS Type
+    [Documentation]    Sets some required variables depending on if RHODS is
+    ...                installed as Self-Managed or Cloud Service
+    ${is_self_managed}=    Is RHODS Self-Managed
+    ${n_items}=    Set Variable    55
+    ${EXPECTED_ITEMS_FOR_ENABLE}=    Create List    Creating a Jupyter notebook
+    ...    Deploying a sample Python application using Flask and OpenShift.
+    ...    How to install Python packages on your notebook server
+    ...    How to update notebook server settings
+    ...    How to use data from Amazon S3 buckets
+    ...    How to view installed packages on your notebook server
+    ...    Jupyter
+    ${EXPECTED_ITEM_PROVIDERS}=    Create List       by Anaconda Professional
+    ${EXPECTED_ITEM_RESOURCE_TYPE}=    Create List     Tutorial
+    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}=    Create List     
+    ...    Connecting to Red Hat OpenShift Streams for Apache Kafka
+    ...    Creating a Jupyter notebook
+    ...    How to install Python packages on your notebook server
+    ...    How to update notebook server settings
+    ...    How to use data from Amazon S3 buckets
+    ...    How to view installed packages on your notebook server
+    ...    Deploying a sample Python application using Flask and OpenShift.
+    ...    Jupyter    OpenShift Streams for Apache Kafka
+    ...    OpenShift API Management
+    ...    Securing a deployed model using Red Hat OpenShift API Management
+    @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List
+    ...    Jupyter    OpenShift Streams for Apache Kafka    OpenShift API Management
+    IF    ${is_self_managed} == ${TRUE}
+        Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
+        Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
+        Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
+        ${n_items}=    Set Variable    43
+    END
+    Set Suite Variable    ${EXPECTED_RESOURCE_ITEMS}    ${n_items}
+    Set Suite Variable    ${EXPECTED_ITEMS_FOR_ENABLE}    ${EXPECTED_ITEMS_FOR_ENABLE}
+    Set Suite Variable    ${EXPECTED_ITEM_PROVIDERS}    ${EXPECTED_ITEM_PROVIDERS}
+    Set Suite Variable    ${EXPECTED_ITEM_RESOURCE_TYPE}    ${EXPECTED_ITEM_RESOURCE_TYPE}
+    Set Suite Variable    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
+    Set Suite Variable    ${EXPECTED_ITEMS_FOR_COMBINATIONS}    ${EXPECTED_ITEMS_FOR_COMBINATIONS}
 

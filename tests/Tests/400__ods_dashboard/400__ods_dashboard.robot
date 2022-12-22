@@ -13,6 +13,7 @@ Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource          ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource          ../../Resources/Page/HybridCloudConsole/OCM.robot
+Resource    ../../../tasks/Resources/RHODS_OLM/pre-tasks/oc_is_operator_installed.robot
 Suite Setup       Dashboard Suite Setup
 Suite Teardown    RHOSi Teardown
 Test Setup        Dashboard Test Setup
@@ -22,22 +23,6 @@ Test Teardown     Dashboard Test Teardown
 *** Variables ***
 ${RHOSAK_REAL_APPNAME}                  rhosak
 ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
-@{LIST_OF_IDS_FOR_COMBINATIONS}         documentation--check-box    Red Hat managed--check-box
-@{EXPECTED_ITEMS_FOR_ENABLE}            Create List                                                         Creating a Jupyter notebook
-...                                     Deploying a sample Python application using Flask and OpenShift
-...                                     How to install Python packages on your notebook server              How to update notebook server settings
-...                                     How to use data from Amazon S3 buckets                              How to view installed packages on your notebook server
-...                                     JupyterHub
-@{EXPECTED_ITEMS_FOR_APPLICATION}       Create List                                                         by Anaconda Professional
-@{EXPECTED_ITEMS_FOR_RESOURCE_TYPE}     Create List                                                         Tutorial
-@{EXPECTED_ITEMS_FOR_PROVIDER_TYPE}     Create List                                                         Connecting to Red Hat OpenShift Streams for Apache Kafka
-...                                     Creating a Jupyter notebook                                         Deploying a sample Python application using Flask and OpenShift
-...                                     How to install Python packages on your notebook server              How to update notebook server settings
-...                                     How to use data from Amazon S3 buckets                              How to view installed packages on your notebook server
-...                                     JupyterHub                                                          OpenShift API Management    OpenShift Streams for Apache Kafka    PerceptiLabs
-...                                     Securing a deployed model using Red Hat OpenShift API Management
-@{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
-...                                     PerceptiLabs
 @{IMAGES}                               PyTorch  TensorFlow  CUDA
 @{BUILDS_TO_BE_DELETED}                 pytorch  tensorflow  minimal  cuda-s2i-thoth
 @{BUILD_CONFIGS}                        11.4.2-cuda-s2i-base-ubi8    11.4.2-cuda-s2i-core-ubi8
@@ -159,20 +144,6 @@ Search and Verify GPU Items Appears In Resources Page
     ...       ODS-1226
     Search Items In Resources Section    GPU
     Check GPU Resources
-
-Verify Filters Are Working On Resources Page
-    [Documentation]    check if it is possible to filter items by enabling various filters like status,provider
-    [Tags]    Sanity
-    ...       ODS-489
-    ...       Tier1
-    ...       AutomationBug
-    Click Link    Resources
-    Wait Until Resource Page Is Loaded
-    Filter Resources By Status "Enabled" And Check Output
-    Filter By Resource Type And Check Output
-    Filter By Provider Type And Check Output
-    Filter By Application (Aka Povider) And Check Output
-    Filter By Using More Than One Filter And Check Output
 
 Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     [Documentation]     Verifies that RHODS Notification Drawer doesn't contain "Notebook Images are building", if no build is running
@@ -609,54 +580,6 @@ Check GPU Resources
         ELSE
                 Page Should Contain Element    //a[@href=${gpu_re_link}[${counter}]]
         END
-    END
-
-Wait Until Resource Page Is Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
-
-Filter Resources By Status "Enabled" And Check Output
-    [Documentation]    Filters the resources By Status Enabled
-    Select Checkbox Using Id    enabled-filter-checkbox--check-box
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_ENABLE}
-    Deselect Checkbox Using Id    enabled-filter-checkbox--check-box
-
-Filter By Application (Aka Povider) And Check Output
-    [Documentation]    Filter by application (aka provider)
-    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-    IF  ${version-check}==False
-        ${id_name} =  Set Variable    Anaconda Commercial Edition--check-box
-    ELSE
-        ${id_name} =  Set Variable    Anaconda Professional--check-box
-    END
-    Select Checkbox Using Id    ${id_name}
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_APPLICATION}    index_of_text=1
-    Deselect Checkbox Using Id    id=${id_name}
-
-Filter By Resource Type And Check Output
-    [Documentation]    Filter by resource type
-    Select Checkbox Using Id    id=tutorial--check-box
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_RESOURCE_TYPE}    index_of_text=2
-    Deselect Checkbox Using Id    id=tutorial--check-box
-
-Filter By Provider Type And Check Output
-    [Documentation]    Filter by provider type
-    Select Checkbox Using Id    id=Red Hat managed--check-box
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
-    Deselect Checkbox Using Id    id=Red Hat managed--check-box
-
-Filter By Using More Than One Filter And Check Output
-    [Documentation]    Filter resouces using more than one filter ${list_of_ids} = list of check-box ids
-    FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
-        Select Checkbox Using Id    id=${id}
-    END
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_COMBINATIONS}
-    FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
-        Deselect Checkbox Using Id    id=${id}
     END
 
 Verify Anaconda Success Message Based On Version

@@ -238,7 +238,6 @@ Verify RHODS Dashboard CR Contains Expected Values
 Verify Default Access Groups Settings
     [Documentation]     Verifies that ODS contains the expected default groups settings
     &{exp_values}=  Create Dictionary  spec.groupsConfig.adminGroups=${STANDARD_ADMINS_GROUP}  spec.groupsConfig.allowedGroups=${STANDARD_USERS_GROUP}
-    # &{exp_values}=  Create Dictionary  adminGroups=${STANDARD_ADMINS_GROUP}  allowedGroups=${STANDARD_USERS_GROUP}
     Verify RHODS Dashboard CR Contains Expected Values   &{exp_values}
 
 

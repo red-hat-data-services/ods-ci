@@ -91,7 +91,7 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
 Teardown Admin UI
     [Documentation]  Setup Default Values In User Management Settings
     Revert Changes To Access Configuration
-    #RHOSi Teardown
+    RHOSi Teardown
 
 Revert Changes To Access Configuration
     Set Standard RHODS Groups Variables
@@ -101,6 +101,6 @@ Revert Changes To Access Configuration
 Setup Admin UI
     [Documentation]  Customized Steup for admin UI
     Set Library Search Order  SeleniumLibrary
-    #RHOSi Setup
+    RHOSi Setup
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings

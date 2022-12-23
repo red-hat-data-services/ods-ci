@@ -4,7 +4,7 @@ Library  JupyterLibrary
 *** Keywords ***
 JupyterHub Dashboard Is Visible
    ${is_dashboard_visible} =  Run Keyword and Return Status  Get WebElement  xpath://a[@title="dashboard"]
-   [Return]  ${is_dashboard_visible}
+   RETURN  ${is_dashboard_visible}
 
 Open JupyterHub Control Panel
    Wait Until Page Contains Element  link:Control Panel

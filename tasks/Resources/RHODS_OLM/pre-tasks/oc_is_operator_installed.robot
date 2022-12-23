@@ -17,4 +17,4 @@ Is RHODS Installed
       ...  Oc Get  kind=CatalogSource  namespace=redhat-ods-operator
       ...          field_selector=metadata.name=addon-managed-odh-catalog
   END
-  [Return]  ${result}
+  RETURN  ${result}

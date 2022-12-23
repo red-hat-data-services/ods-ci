@@ -154,7 +154,7 @@ Get Model Route via UI
     # TODO: Open model serving home page if needed?
     Page Should Contain Element    xpath://div[.="${model_name} "]
     ${url}=    Get Element Attribute    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
-    [Return]    ${url}
+    RETURN    ${url}
 
 Open ${section} Options Menu
     [Documentation]    Opens the "Options menu" dropdown for different sections
@@ -169,14 +169,14 @@ Get Access Token via UI
     Project Should Be Listed    ${project_name}
     Open Data Science Project Details Page    ${project_name}
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
-    [Return]    ${token}
+    RETURN    ${token}
 
 Get Model Project
     [Documentation]    Returns the project under which a model has been deployed
     [Arguments]    ${model_name}
     Page Should Contain Element    //div[.="${model_name} "]
     ${project_name}=    Get Text    xpath://div[.="${model_name} "]${MS_TABLE_PROJECT}
-    [Return]    ${project_name}
+    RETURN    ${project_name}
 
 Get Model Inference
     [Documentation]    Returns the inference result after sending a POST request to a deployed
@@ -191,7 +191,7 @@ Get Model Inference
     ELSE
         ${inference_output} =    Run    curl -ks ${url} -d ${INFERENCE_INPUT}
     END
-    [Return]    ${inference_output}
+    RETURN    ${inference_output}
 
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output

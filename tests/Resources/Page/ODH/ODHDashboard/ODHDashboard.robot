@@ -64,11 +64,11 @@ Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    #Wait Until Page Contains  Log in with
    ${oauth_prompt_visible} =  Is OpenShift OAuth Login Prompt Visible
-   Run Keyword If  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
+   IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
    ${login-required} =  Is OpenShift Login Visible
-   Run Keyword If  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
+   IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ${authorize_service_account} =  Is rhods-dashboard Service Account Authorization Required
-   Run Keyword If  ${authorize_service_account}  Authorize rhods-dashboard service account
+   IF  ${authorize_service_account}  Authorize rhods-dashboard service account
 
 Logout From RHODS Dashboard
     [Documentation]  Logs out from the current user in the RHODS dashboard
@@ -200,7 +200,7 @@ Load Expected Data Of RHODS Explore Section
     IF    ${is_self_managed} == ${TRUE}
         Remove From Dictionary   ${apps_dict_obj}   @{ISV_TO_REMOVE_SELF_MANAGED}
     END
-    [Return]  ${apps_dict_obj}
+    RETURN  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded
     Wait Until Page Contains Element    xpath://div[contains(@class,'-apps__gallery')]
@@ -209,11 +209,11 @@ Wait Until Cards Are Loaded
 Get App ID From Card
     [Arguments]  ${card_locator}
     ${id}=  Get Element Attribute    xpath:${card_locator}    id
-    [Return]  ${id}
+    RETURN  ${id}
 
 Get Number Of Cards
     ${n_cards}=   Get Element Count    xpath:${CARDS_XP}
-    [Return]    ${n_cards}
+    RETURN    ${n_cards}
 
 Check Number Of Displayed Cards Is Correct
     [Arguments]  ${expected_data}
@@ -232,7 +232,7 @@ Get Card Texts
     ${title}=  Get Text    xpath:${card_locator}/${versioned_title_xp}
     ${provider}=  Get Text    xpath:${card_locator}/${PROVIDER_XP}
     ${desc}=  Get Text    xpath:${card_locator}/${DESCR_XP}
-    [Return]  ${title}  ${provider}  ${desc}
+    RETURN  ${title}  ${provider}  ${desc}
 
 Check Card Texts
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
@@ -249,7 +249,7 @@ Get Card Badges Titles
         ${btitle}=  Get Text   ${cb}
         Append To List    ${badges_titles}  ${btitle}
     END
-    [Return]  ${badges_titles}
+    RETURN  ${badges_titles}
 
 Check Card Badges And Return Titles
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
@@ -261,17 +261,17 @@ Check Card Badges And Return Titles
     END
     ${card_badges_titles}=  Get Card Badges Titles  card_locator=${card_locator}
     Run Keyword And Continue On Failure  Lists Should Be Equal  ${card_badges_titles}  ${expected_data}[${app_id}][badges]
-    Run Keyword If    $RH_BADGE_TITLE in $card_badges_titles
+    IF    $RH_BADGE_TITLE in $card_badges_titles
     ...    Run Keyword And Continue On Failure  Page Should Contain Element
     ...    xpath:${card_locator}/${versioned_official_badge_xp}
-    [Return]  ${card_badges_titles}
+    RETURN  ${card_badges_titles}
 
 Open Get Started Sidebar And Return Status
     [Arguments]  ${card_locator}
     Click Element  xpath:${card_locator}
     ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-c-drawer__panel-main')]
     Sleep  1
-    [Return]  ${status}
+    RETURN  ${status}
 
 Close Get Started Sidebar
     Click Button  xpath://button[@aria-label='Close drawer panel']
@@ -287,7 +287,7 @@ Check Get Started Sidebar Status
 
 Get Sidebar Links
     ${link_elements}=  Get WebElements    xpath://div[contains(@class,'pf-c-drawer__panel-main')]//a
-    [Return]  ${link_elements}
+    RETURN  ${link_elements}
 
 Check Sidebar Links
     [Arguments]  ${app_id}  ${expected_data}
@@ -340,7 +340,7 @@ Get Image Name
     [Arguments]  ${card_locator}
     ${src}=  Get Element Attribute    xpath:${card_locator}/${IMAGE_XP}  src
     ${image_name}=  Fetch From Right    ${src}    ${ODH_DASHBOARD_URL}
-    [Return]  ${src}  ${image_name}
+    RETURN  ${src}  ${image_name}
 
 Check Card Image
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
@@ -401,7 +401,7 @@ Get Question Mark Links
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}
     END
-    [Return]  @{links_list}
+    RETURN  @{links_list}
 
 Get RHODS Documentation Links From Dashboard
     [Documentation]    It returns a list containing rhods documentation links
@@ -413,7 +413,7 @@ Get RHODS Documentation Links From Dashboard
     ${links}=    Get Question Mark Links
     # inserting at 0th position
     Insert Into List    ${links}    0    ${href_view_the_doc}
-    [Return]  @{links}
+    RETURN  @{links}
 
 Check External Links Status
     [Documentation]      It iterates through the links and cheks their HTTP status code
@@ -622,7 +622,7 @@ Verify Custom Image Description
         Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
         FAIL
     END
-    [Return]    ${exists}
+    RETURN    ${exists}
 
 Verify Custom Image Is Listed
     [Documentation]    Verifies that the custom image is displayed in the dashboard
@@ -633,7 +633,7 @@ Verify Custom Image Is Listed
         Log  ${image_name} not visible in page
         FAIL
     END
-    [Return]    ${exists}
+    RETURN    ${exists}
 
 Verify Custom Image Owner
     [Documentation]    Verifies that the user listed for an image in the dahsboard
@@ -645,7 +645,7 @@ Verify Custom Image Owner
         Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
         FAIL
     END
-    [Return]  ${exists}
+    RETURN  ${exists}
 
 Enable Custom Image
     [Documentation]    Enables a custom image (i.e. displayed in JH) [WIP]
@@ -702,7 +702,7 @@ Get Dashboard Pods Names
     FOR    ${pod_name}    IN    @{dash_pods}
         Append To List      ${names}    ${pod_name}[metadata.name]
     END
-    [Return]   ${names}
+    RETURN   ${names}
 
 Get Dashboard Pod Logs
     [Documentation]     Fetches the logs from one dashboard pod
@@ -715,7 +715,7 @@ Get Dashboard Pod Logs
         Remove From List    ${pod_logs_lines}   ${n_lines-1}
         ${n_lines}=     Get Length    ${pod_logs_lines}
     END
-    [Return]    ${pod_logs_lines}   ${n_lines}
+    RETURN    ${pod_logs_lines}   ${n_lines}
 
 Get ConfigMaps For RHODS Groups Configuration
     [Documentation]     Returns a dictionary containing "rhods-group-config" and "groups-config"
@@ -730,7 +730,7 @@ Get ConfigMaps For RHODS Groups Configuration
     END
     ${group_config_maps}=   Create Dictionary     rgc=${rgc_yaml}[0]     gc=${gc_yaml}[0]
     Log     ${group_config_maps}
-    [Return]    ${group_config_maps}
+    RETURN    ${group_config_maps}
 
 Get Links From Switcher
     [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link
@@ -740,7 +740,7 @@ Get Links From Switcher
         ${href}=    Get Element Attribute    ${ext_link}    href
         Append To List    ${list_of_links}    ${href}
     END
-    [Return]    ${list_of_links}
+    RETURN    ${list_of_links}
 
 Open Application Switcher Menu
     [Documentation]     Clicks on the App Switcher in the top navigation bar of RHODS Dashboard

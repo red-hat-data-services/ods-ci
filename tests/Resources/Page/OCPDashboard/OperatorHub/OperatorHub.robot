@@ -7,7 +7,7 @@ Install Operator
     Search Operator    ${operator}
     Select Operator with Catalog Name     ${operator}   ${catalog}
     ${show_operator_warning_visible} =    Show Operator Warning Is Visible
-    Run Keyword If    ${show_operator_warning_visible}   Confirm Show Operator
+    IF    ${show_operator_warning_visible}   Confirm Show Operator
     Click Install
     Click Install
     Wait Until Installation Completes
@@ -32,7 +32,7 @@ Click Install
 Show Operator Warning Is Visible
    ${is_warning_visible} =    Run Keyword and Return Status
    ...                        Get WebElement    //*[contains(text(), "Show community Operator")]
-   [Return]    ${is_warning_visible}
+   RETURN    ${is_warning_visible}
 
 Confirm Show Operator
    Click Element    //*[@id="confirm-action"]
@@ -50,4 +50,4 @@ Get The Number of Operator Available
    Search Operator      ${operator}
    ${no_of_items}        Get Webelements    //a[contains(@data-test, "${operator}")]
    ${lenghth}   Get Length   ${no_of_items}
-   [Return]   ${lenghth}
+   RETURN   ${lenghth}

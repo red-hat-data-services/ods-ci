@@ -22,7 +22,7 @@ Is OpenShift OAuth Login Prompt Visible
 
 Is OpenShift Login Visible
    ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in with
-   Return From Keyword If  ${login_prompt_visible}  True
+   IF  ${login_prompt_visible}  RETURN  True
    ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in to your account
    [Return]  ${login_prompt_visible}
 
@@ -37,12 +37,12 @@ Login To Openshift
     # Check if we are in the Openshift auth page
     ${should_login} =    Is Current Domain Equal To    https://oauth-openshift
     IF  ${should_login}==False
-        Return From Keyword
+        RETURN
     END
     # If here we need to login
     Wait Until Element is Visible  xpath://div[@class="pf-c-login"]  timeout=10s
     ${select_auth_type} =  Does Login Require Authentication Type
-    Run Keyword If  ${select_auth_type}  Select Login Authentication Type  ${ocp_user_auth_type}
+    IF  ${select_auth_type}  Select Login Authentication Type  ${ocp_user_auth_type}
     Wait Until Page Contains  Log in to your account
     Input Text  id=inputUsername  ${ocp_user_name}
     Input Text  id=inputPassword  ${ocp_user_pw}

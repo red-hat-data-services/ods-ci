@@ -103,7 +103,7 @@ Create Service Account From Connection Menu
     Wait Until Element Is Enabled    xpath=//button[@data-testid='modalCredentials-buttonClose']
     Click Button    xpath=//button[@data-testid='modalCredentials-buttonClose']
     Wait Until Element Is Not Visible    xpath=//div[@class='pf-l-bullseye']
-    [Return]    &{service_account_creds}
+    RETURN    &{service_account_creds}
 
 Assign Permissions To ServiceAccount In RHOSAK
     [Documentation]    Configures the SA's permission on a kafka stream from RHOSAK UI

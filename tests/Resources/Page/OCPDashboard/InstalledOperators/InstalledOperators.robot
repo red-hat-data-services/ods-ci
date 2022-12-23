@@ -24,7 +24,7 @@ Uninstall Operator
 Is All Projects Selected
   ${is_selected} =  Run Keyword And Return Status
   ...               Page Should Contain  Project: All Projects
-  [Return]  ${is_selected}
+  RETURN  ${is_selected}
 
 Select All Projects
   Click Element  //div[@data-test-id="namespace-bar-dropdown"]/div
@@ -41,20 +41,20 @@ Is Operator Installed
   Run Keyword and Return Status     Wait Until Element is Visible      //a[@data-test-operator-row="${operator}"]    timeout=10
   ${is_installed} =  Run Keyword and Return Status
   ...                Get WebElement  //a[@data-test-operator-row="${operator}"]
-  [Return]  ${is_installed}
+  RETURN  ${is_installed}
 
 Expand Installed Operator Menu
   [Arguments]  ${operator}
   Set Local Variable  ${operator_row}  //a[@data-test-operator-row="${operator}"]/../..
   Set Local Variable  ${operator_menu}  ${operator_row}//button[@data-test-id="kebab-button"]
   ${is_operator_menu_expanded} =  Is Installed Operator Menu Expanded  ${operator_menu}
-  Run Keyword if  "${is_operator_menu_expanded}" == "false"
+  IF  "${is_operator_menu_expanded}" == "false"
   ...             Click Element  ${operator_menu}
 
 Is Installed Operator Menu Expanded
   [Arguments]  ${menu}
   ${is_expanded} =  Get Element Attribute  ${menu}  attribute=aria-expanded
-  [Return]  ${is_expanded}
+  RETURN  ${is_expanded}
 
 Click Uninstall Operator
   Press Keys  //button[@data-test-action="Uninstall Operator"]  RETURN
@@ -85,7 +85,7 @@ Click On Searched Operator
 Check IF URL On The Page Is Commercial
     [Arguments]  ${url}
      FOR  ${value}  IN   @{verification_list}
-          Run keyword If       $value in $url     FAIL    URL doesn't look like commerial it contain '${value}' in it
+          IF       $value in $url     FAIL    URL doesn't look like commerial it contain '${value}' in it
      END
 
 Get RHODS version
@@ -94,7 +94,7 @@ Get RHODS version
          ${RHODS_VERSION} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
     END
     Log  ${RHODS_VERSION}
-    [Return]  ${RHODS_VERSION}
+    RETURN  ${RHODS_VERSION}
 
 Is RHODS Version Greater Or Equal Than
     [Arguments]  ${target}
@@ -102,7 +102,7 @@ Is RHODS Version Greater Or Equal Than
     ${ver} =  Fetch From Left  ${ver}  -
     ${comparison} =  GTE  ${ver}  ${target}
     # Returns True or False
-    [Return]  ${comparison}
+    RETURN  ${comparison}
 
 Move To Installed Operator Page Tab in Openshift
     [Documentation]   This keyword help move to any tab name present inside any installed operator
@@ -110,7 +110,7 @@ Move To Installed Operator Page Tab in Openshift
     Switch To Administrator Perspective
     Navigate to Installed Operators
     Installed Operators Should Be Open
-    Run Keyword If  "${namespace}" == "None"   Select Project By Name  All Projects
+    IF  "${namespace}" == "None"   Select Project By Name  All Projects
     ...         ELSE   Select Project By Name   ${namespace}
     Sleep   1s
     Click On Searched Operator   ${operator_name}
@@ -149,8 +149,8 @@ Check If Operator Is Already Installed In Opneshift
     Open Installed Operators Page
     Search Installed Operator    ${operator_name}
     ${status}   Is Operator Installed        ${operator_name}
-    Run Keyword If  ${status}   Log To Console    Operator "${operator_name}" is already installed
-    [Return]  ${status}
+    IF  ${status}   Log To Console    Operator "${operator_name}" is already installed
+    RETURN  ${status}
 
 Check And Install Operator in Openshift
     [Documentation]   This keyword verify if operator is already installed or not

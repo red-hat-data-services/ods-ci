@@ -26,7 +26,7 @@ ${FILE_NAME}            nodejs-ex
 *** Keywords ***
 Get JupyterLab Selected Tab Label
   ${tab_label} =  Get Text  ${JL_TABBAR_SELECTED_XPATH}/div[contains(@class,"p-TabBar-tabLabel")]
-  [return]  ${tab_label}
+  RETURN  ${tab_label}
 
 JupyterLab Launcher Tab Is Visible
   Get WebElement  xpath:${JL_TABBAR_CONTENT_XPATH}/li/div[.="Launcher"]
@@ -73,14 +73,14 @@ JupyterLab Code Cell Error Output Should Not Be Visible
 
 Get JupyterLab Code Cell Error Text
   ${error_txt} =  Get Text  //div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]
-  [Return]  ${error_txt}
+  RETURN  ${error_txt}
 
 Run Git Repo And Return Last Cell Error Text
   [Documentation]    It actually clones the git repo, runs it and then returns the error
   [Arguments]    ${REPO_URL}  ${NOTEBOOK_TO_RUN}
   Run Keyword And Ignore Error    Clone Git Repository And Run    ${LINK_OF_GITHUB}    ${PATH_TO_FILE}
   ${output} =    Get JupyterLab Code Cell Error Text
-  [Return]    ${output}
+  RETURN    ${output}
 
 Wait Until JupyterLab Code Cell Is Not Active
   [Documentation]  Waits until the current cell no longer has an active prompt "[*]:". This assumes that there is only one cell currently active and it is the currently selected cell
@@ -119,7 +119,7 @@ Run Cell And Check Output
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     Should Match  ${output}  ${expected_output}
-    [Return]    ${output}
+    RETURN    ${output}
 
 Run Cell And Get Output
     [Documentation]    Runs a code cell and returns its output
@@ -127,7 +127,7 @@ Run Cell And Get Output
     Add and Run JupyterLab Code Cell in Active Notebook  ${input}
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-    [Return]    ${output}
+    RETURN    ${output}
 
 Python Version Check
   [Arguments]  ${expected_version}=3.8
@@ -139,7 +139,7 @@ Python Version Check
   ${output} =  Fetch From Right  ${output}  ${SPACE}
   ${vers} =  Get Substring  ${output}  0  3
   ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
-  Run Keyword If  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"
+  IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"
   
 
 Maybe Select Kernel
@@ -170,14 +170,14 @@ Get User Notebook Pod Name
   ${safe_username}=  Get Safe Username    ${username}
   #${notebook_pod_name}=   Set Variable  jupyterhub-nb-${safe_username}
   ${notebook_pod_name}=   Set Variable  jupyter-nb-${safe_username}-0
-  [Return]  ${notebook_pod_name}
+  RETURN  ${notebook_pod_name}
 
 Get User CR Notebook Name
     [Documentation]   Returns notebook CR name for given username  (e.g. for user ldap-admin1 it will be jupyter-nb-ldap-2dadmin1)
     [Arguments]  ${username}
     ${safe_username}=  Get Safe Username    ${username}
     ${notebook_cr_name}=   Set Variable  jupyter-nb-${safe_username}
-    [Return]  ${notebook_cr_name}
+    RETURN  ${notebook_cr_name}
 
 Wait Until User Server Is Clean
     [Documentation]    Waits until the JL UI does not show any items (folders/files) in the user's server
@@ -224,7 +224,7 @@ Delete Folder In User Notebook
 
 JupyterLab Is Visible
   ${jupyterlab_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=30
-  [return]  ${jupyterlab_visible}
+  RETURN  ${jupyterlab_visible}
 
 Wait Until JupyterLab Is Loaded
   [Arguments]   ${timeout}=60
@@ -317,7 +317,7 @@ Maybe Close Popup
       # Check if a popup exists
       ${accept} =    Get WebElements    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]
       # Click the right most button of the popup
-      Run Keyword If    ${accept}    Click Element    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]/button[last()]
+      IF    ${accept}    Click Element    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]/button[last()]
       Capture Page Screenshot
     END
 
@@ -359,12 +359,12 @@ Wait Until JupyterLab Code Cell Is Not Active In a Given Tab
 Get Selected Tab ID
   ${active-nb-tab} =    Get WebElement    xpath:${JL_TABBAR_SELECTED_XPATH}
   ${tab-id} =    Get Element Attribute    ${active-nb-tab}    id
-  [Return]  ${tab-id}
+  RETURN  ${tab-id}
 
 Get JupyterLab Code Output In a Given Tab
    [Arguments]  ${tab_id_to_read}
    ${outputtext}=  Get Text  (//div[@aria-labelledby="${tab_id_to_read}"]/div[@aria-label="notebook content"]/div[1]/div[contains(@class, jp-Cell-outputWrapper)]/div[contains(@class,"jp-Cell-outputArea")]//div[contains(@class,"jp-RenderedText")])[last()]
-   [Return]  ${outputtext}
+   RETURN  ${outputtext}
 
 Select ${filename} Tab
   Click Element    xpath:${JL_TABBAR_CONTENT_XPATH}/li/div[.="${filename}"]
@@ -372,8 +372,8 @@ Select ${filename} Tab
 Verify Installed Library Version
     [Arguments]  ${lib}  ${ver}
     ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !pip show ${lib} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'  ${ver}
-    Run Keyword If  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected ${lib} at version ${ver}, but ${value}"
-    [Return]    ${status}    ${value}
+    IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected ${lib} at version ${ver}, but ${value}"
+    RETURN    ${status}    ${value}
 
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
@@ -401,14 +401,14 @@ Check Versions In JupyterLab
             END
         END
         Continue For Loop If  "${libDetail}[0]" not in ${packages}
-        Run Keyword If    "${libDetail}[0]" not in ${package_versions}
+        IF    "${libDetail}[0]" not in ${package_versions}
         ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
         IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
              ${return_status} =    Set Variable    FAIL
              Run Keyword And Continue On Failure  FAIL  "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
         END
     END
-    [Return]  ${return_status}
+    RETURN  ${return_status}
 
 Install And Import Package In JupyterLab
     [Documentation]  Install any Package and import it
@@ -434,7 +434,7 @@ Get User Notebook PVC Name
     [Arguments]  ${username}
     ${safe_username} =   Get Safe Username    ${username}
     ${notebook_pod_name} =   Set Variable  jupyterhub-nb-${safe_username}-pvc
-    [Return]    ${notebook_pod_name}
+    RETURN    ${notebook_pod_name}
 
 Open New Notebook
     [Documentation]    Opens one new jupyter notebook
@@ -459,14 +459,14 @@ Clone Repo and Return Error Message
     Clone Repo    ${repo_url}
     Wait Until Page Contains    Cloning...    timeout=5s
     ${err_msg} =    Get Git Clone Error Message
-    [RETURN]    ${err_msg}
+    RETURN    ${err_msg}
 
 Get Directory Name From Git Repo URL
     [Documentation]    Returns directory name from repo link
     [Arguments]    ${repo_url}
     @{ans} =    Split Path    ${repo_url}
     ${ans} =    Remove String    ${ans}[1]    .git
-    [RETURN]    ${ans}
+    RETURN    ${ans}
 
 Get Git Clone Error Message
     [Documentation]    Returns expected error after a git clone operation. Fails if error didn't occur
@@ -477,7 +477,7 @@ Get Git Clone Error Message
     #dismiss button
     Click Button
     ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"]
-    [RETURN]    ${err_msg}
+    RETURN    ${err_msg}
 
 Verify Git Plugin
     [Documentation]     Checks if it can successfully clone a repository.
@@ -489,7 +489,7 @@ Get Current User In JupyterLab
    ${current_user_escaped} =  Run Cell And Get Output
    ...    import os; s=os.environ["HOSTNAME"]; username = s.split("-")[2:-1]; print("-".join(username))
    ${current_user} =  Get Unsafe Username  ${current_user_escaped}
-   [Return]  ${current_user}
+   RETURN  ${current_user}
 
 Image Should Be Pinned To A Numeric Version
     [Documentation]     Verifies if the Image Tag is (probably) pinned to a specific image version (e.g., 2.5.0-8).

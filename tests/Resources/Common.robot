@@ -24,7 +24,7 @@ Begin Web Test
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${username}  ${password}  ${auth_type}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
     Go To  ${ODH_DASHBOARD_URL}
 
@@ -42,19 +42,19 @@ Load Json File
     [Arguments]   ${file_path}
     ${j_file}=    Get File    ${file_path}
     ${obj}=    Evaluate    json.loads('''${j_file}''')    json
-    [Return]    ${obj}
+    RETURN    ${obj}
 
 Load Json String
     [Arguments]     ${json_string}
     ${obj}=     Evaluate  json.loads("""${json_string}""")
-    [Return]    ${obj}
+    RETURN    ${obj}
 
 Get CSS Property Value
     [Documentation]    Get the CSS property value of a given element
     [Arguments]    ${locator}    ${property_name}
     ${element}=       Get WebElement    ${locator}
     ${css_prop}=    Call Method       ${element}    value_of_css_property    ${property_name}
-    [Return]     ${css_prop}
+    RETURN     ${css_prop}
 
 CSS Property Value Should Be
     [Documentation]     Compare the actual CSS property value with the expected one
@@ -75,7 +75,7 @@ Get Cluster ID
         Fail    Unable to retrieve cluster ID. Are you logged using `oc login` command?
     END
     ${cluster_id}=    Remove String    ${cluster_id}    "
-    [Return]    ${cluster_id}
+    RETURN    ${cluster_id}
 
 Get Cluster Name By Cluster ID
     [Documentation]     Retrieves the name of the currently connected cluster given its ID
@@ -84,7 +84,7 @@ Get Cluster Name By Cluster ID
     IF    not $cluster_name
         Fail    Unable to retrieve cluster name for cluster ID ${cluster_id}
     END
-    [Return]    ${cluster_name}
+    RETURN    ${cluster_name}
 
 Wait Until HTTP Status Code Is
     [Documentation]     Waits Until Status Code Of URl Matches expected Status Code
@@ -98,7 +98,7 @@ Check HTTP Status Code
     ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
     ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}  verify=${verify_ssl}
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
-    [Return]  ${response.status_code}
+    RETURN  ${response.status_code}
 
 URLs HTTP Status Code Should Be Equal To
     [Documentation]    Given a list of link web elements, extracts the URLs and
@@ -122,7 +122,7 @@ Get List Of Atrributes
         ${ids}=    Get Element Attribute    ${ext_link}    ${attribute}
         Append To List    ${list_of_atrributes}    ${ids}
     END
-    [Return]    ${list_of_atrributes}
+    RETURN    ${list_of_atrributes}
 
 Verify NPM Version
     [Documentation]  Verifies the installed version of an NPM library
@@ -134,7 +134,7 @@ Verify NPM Version
 Get Cluster Name From Console URL
     [Documentation]    Get the cluster name from the Openshift console URL
     ${name}=    Split String    ${OCP_CONSOLE_URL}        .
-    [Return]    ${name}[2]
+    RETURN    ${name}[2]
 
 Clean Resource YAML Before Creating It
     [Documentation]    Removes from a yaml of an Openshift resource the metadata which prevent
@@ -142,7 +142,7 @@ Clean Resource YAML Before Creating It
     [Arguments]    ${yaml_data}
     ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
     Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
-    [Return]   ${clean_yaml_data}
+    RETURN   ${clean_yaml_data}
 
 Skip If RHODS Version Greater Or Equal Than
     [Documentation]    Skips test if RHODS version is greater or equal than ${version}
@@ -172,7 +172,7 @@ Get Domain From Current URL
     ...    e.g. https://rhods-dashboard-redhat-ods-applications.apps.<cluster>.rhods.ccitredhat.com/ -> https://rhods-dashboard-redhat-ods-applications
     ${current_url} =    Get Location
     ${domain} =    Fetch From Left    string=${current_url}    marker=.
-    [Return]    ${domain}
+    RETURN    ${domain}
 
 Is Current Domain Equal To
     [Documentation]    Compare the lowest level domain to a given string
@@ -181,14 +181,14 @@ Is Current Domain Equal To
     ${domain} =    Get Domain From Current URL
     ${comparison} =    Run Keyword And Return Status    Should Be Equal As Strings
     ...    ${domain}    ${url}
-    [Return]    ${comparison}
+    RETURN    ${comparison}
 
 Get OAuth Cookie
     [Documentation]     Fetches the "_oauth_proxy" cookie from Dashboard page.
     ...                 You can use the value from this cookie to perform login in API calls.
     ...                 It assumes Dashboard UI has been launched and login performed using UI.
     ${cookie}=     Get Cookie  _oauth_proxy
-    [Return]    ${cookie.value}
+    RETURN    ${cookie.value}
 
 Is Generic Modal Displayed
     [Documentation]    Checks if a modal window is displayed on the page.
@@ -202,7 +202,7 @@ Is Generic Modal Displayed
         ${is_displayed}=    Run Keyword And Return Status
         ...                 Page Should Contain Element    xpath=//*[@id="${id}")]
     END
-    [Return]    ${is_displayed}
+    RETURN    ${is_displayed}
 
 Wait Until Generic Modal Disappears
     [Documentation]    Waits until a modal window disappears from the page.

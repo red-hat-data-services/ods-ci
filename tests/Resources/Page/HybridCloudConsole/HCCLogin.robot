@@ -5,7 +5,7 @@ Library         SeleniumLibrary
 Is SSO Login Page Visible
   ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain Element    xpath://body[@id='rh-login']
   # ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in to your Red Hat account
-  [Return]  ${login_prompt_visible}
+  RETURN  ${login_prompt_visible}
 
 Wait For HCC Splash Page
    Wait Until Page Contains Element    xpath://span[contains(@class, 'pf-c-spinner')]   timeout=15
@@ -31,7 +31,7 @@ Login To HCC
 
 Maybe Skip RHOSAK Tour
    ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//button[text()='Take tour']
-   Run Keyword If  ${tour_modal}  Click Button    Show me later
+   IF    ${tour_modal}    Click Button    Show me later
 
 Maybe Agree RH Terms and Conditions
   ${agree_required}=  Run Keyword And Return Status  Page Should Contain  Red Hat Terms and Conditions
@@ -97,4 +97,4 @@ Open Cluster By Name
 
 Maybe Skip OCM Tour
   ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id="pendo-guide-container"]
-  Run Keyword If  ${tour_modal}  Click Element  xpath=//button[@class="_pendo-close-guide"]
+  IF  ${tour_modal}  Click Element  xpath=//button[@class="_pendo-close-guide"]

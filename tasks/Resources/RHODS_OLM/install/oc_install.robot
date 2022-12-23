@@ -63,7 +63,7 @@ Verify Builds Number
   @{builds}=  Oc Get  kind=Build  namespace=redhat-ods-applications
   ${build_length}=  Get Length  ${builds}
   Should Be Equal As Integers  ${build_length}  ${expected_builds}
-  [Return]  ${builds}
+  RETURN  ${builds}
 
 Verify Builds Status
   [Arguments]  ${build_status}

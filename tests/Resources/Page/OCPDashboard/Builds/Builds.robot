@@ -10,33 +10,33 @@ Get Build Status
   Navigate To Page    Builds    Builds
   Search Last Item Instance By Title in OpenShift Table  search_term=${build_search_term}  namespace=${namespace}
   ${build_status}=  Get Text    xpath://tr[@data-key='0-0']/td/span/span[@data-test='status-text']
-  [Return]  ${build_status}
+  RETURN  ${build_status}
 
 Delete BuildConfig using Name
     [Arguments]    ${namespace}                    ${name}
     ${status}      Check If BuildConfig Exists    ${namespace}      ${name}
-    Run Keyword If          '${status}'=='PASS'   Oc Delete  kind=BuildConfig   name=${name}   namespace=${namespace}
+    IF          '${status}'=='PASS'   Oc Delete  kind=BuildConfig   name=${name}   namespace=${namespace}
     ...        ELSE          FAIL        No BuildConfig present with name '${name}' in '${namespace}' namespace, Check the BuildConfig name and namespace provide is correct and try again
     Wait Until Keyword Succeeds     10s  2s
     ...         Dependent Build should not Present     ${name}
     ${status}      Check If BuildConfig Exists    ${namespace}      ${name}
-    Run Keyword IF          '${status}'!='FAIL'     FAIL       BuildConfig with name '${name}' is not deleted in '${namespace}'
+    IF          '${status}'!='FAIL'     FAIL       BuildConfig with name '${name}' is not deleted in '${namespace}'
 
 Check If BuildConfig Exists
     [Arguments]    ${namespace}      ${name}
     ${status}   ${val}  Run keyword and Ignore Error   Oc Get  kind=BuildConfig  namespace=${namespace}     field_selector=metadata.name==${name}
-    [Return]   ${status}
+    RETURN   ${status}
 
 Dependent Build should not Present
      [Arguments]     ${selector}
      ${isExist}      Run Keyword and Return Status          OC Get     kind=Build    label_selector=buildconfig=${selector}
-     Run Keyword IF     not ${isExist}        Log    Build attached to Build config has been deleted
+     IF     not ${isExist}        Log    Build attached to Build config has been deleted
      ...        ELSE    FAIL       Attached Build to Build config is not deleted
 
 Check Image Build Status
   [Arguments]  ${target_status}     ${build_name}   ${namespace}=redhat-ods-applications
   ${build_status}=  Get Build Status    namespace=${namespace}  build_search_term=${build_name}
-  Run Keyword If    "${build_status}" == "${target_status}"
+  IF    "${build_status}" == "${target_status}"
   ...    Log   The '${build_name}' image match the expected target status
   ...  ELSE
   ...    Fail  The '${build_name}' image build status doesn't match the target status '${target_status}'
@@ -49,7 +49,7 @@ Search Last Build
         Fail    msg=Could not find any build including ${build_name_includes} in ${namespace} namespace
     END
     @{builds} =  Split String  ${build}  \n
-    [Return]    ${builds}[-1]
+    RETURN    ${builds}[-1]
 
 Delete Build
     [Documentation]    Deletes the build ${build_name} in ${namespace}
@@ -62,14 +62,14 @@ Start New Build
     ${name} =    Run    oc start-build ${buildconfig} -n ${namespace}
     @{list_for} =    Split String    ${name}    ${SPACE}
     @{name_list} =    Split String    ${list_for}[0]    /
-    [Return]    ${name_list}[1]
+    RETURN    ${name_list}[1]
 
 Get Build Status From Oc
     [Documentation]    Get Status of build using name
     [Arguments]    ${namespace}    ${build_name}
     ${status} =    Run    oc get builds -n ${namespace} -o json | jq '.items[] | select(.metadata.name == "${build_name}") | .status.phase'
     ${status}    Replace String    ${status}    "    ${EMPTY}
-    [Return]    ${status}
+    RETURN    ${status}
 
 Build Status Should Be
     [Documentation]    Gets build status and fails if not equal to  ${expected_status}
@@ -93,7 +93,7 @@ Wait Until Build Exists
     [Arguments]    ${namespace}    ${build_name_includes}    ${timeout}=20 min
     ${build_name} =    Wait Until Keyword Succeeds    ${timeout}    1 min
     ...    Search Last Build    namespace=${namespace}   build_name_includes=${build_name_includes}
-    [Return]    ${build_name}
+    RETURN    ${build_name}
 
 Wait Until Build Status Is
     [Documentation]    Check status build with ${expected_status} for every min until is succeed or timeout
@@ -146,7 +146,7 @@ Provoke Image Build Failure
     Run Command In Container    namespace=${namespace}    pod_name=${pod_name}    command=/bin/kill 1    container_name=${container_to_kill}
     Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
     ...    expected_status=Failed    timeout=5 min
-    [Return]    ${failed_build_name}
+    RETURN    ${failed_build_name}
 
 Delete Failed Build And Start New One
     [Documentation]    It will delete failed build and start new build

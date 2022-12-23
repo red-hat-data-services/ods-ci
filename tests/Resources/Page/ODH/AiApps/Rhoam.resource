@@ -13,7 +13,7 @@ ${RHOAM_DISPLAYED_NAME}=    OpenShift API Management
 Get RHOAM Installation Stage
     [Documentation]     Get the installation stage by reading the "RHOAM installation object" YAML
     ${rhmi_stage}=     Run    oc get rhmi rhoam -n redhat-rhoam-operator -o json | jq .status.stage | sed 's/"//g'
-    [Return]    ${rhmi_stage}
+    RETURN    ${rhmi_stage}
 
 RHOAM Installation Stage Should Be
     [Documentation]     Check if the current installation stage is the expected one

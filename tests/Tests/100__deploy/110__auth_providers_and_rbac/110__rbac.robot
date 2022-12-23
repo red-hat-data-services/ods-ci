@@ -7,7 +7,7 @@ Suite Teardown      Rbac Suite Teardown
 
 
 *** Test Cases ***
-Verify Default Access Groups Settings And JupyterLab Notebook Access
+Verify RHODS Has The Expected Default Access Groups Settings
     [Documentation]    Verify that RHODS is installed with the expected default user groups configuration
     [Tags]    Sanity
     ...       Tier1

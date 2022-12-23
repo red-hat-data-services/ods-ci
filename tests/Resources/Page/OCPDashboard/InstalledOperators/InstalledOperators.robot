@@ -12,12 +12,10 @@ ${RHODS_VERSION}              None
 Uninstall Operator
   [Arguments]    ${operator}
   ${is_all_projects_selected} =  Is All Projects Selected
-  Run Keyword If  not ${is_all_projects_selected}
-  ...                 Select All Projects
+  IF  not ${is_all_projects_selected}  Select All Projects
   Search Installed Operator  ${operator}
   ${is_operator_installed} =  Is Operator Installed  ${operator}
-  Run Keyword If  not ${is_operator_installed}
-  ...                 Pass execution  ${operator}  operator is not installed
+  IF  not ${is_operator_installed}  Pass execution  ${operator}  operator is not installed
   Expand Installed Operator Menu  ${operator}
   Click Uninstall Operator
   Confirm Uninstall

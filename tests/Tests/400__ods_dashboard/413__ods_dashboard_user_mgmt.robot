@@ -90,7 +90,7 @@ Teardown Admin UI
     [Documentation]  Setup Default Values In User Management Settings
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
-    # RHOSi Teardown
+    RHOSi Teardown
 
 Setup Admin UI
     [Documentation]  Customized Steup for admin UI

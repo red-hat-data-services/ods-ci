@@ -22,11 +22,13 @@ Verify The CRD Gets Updated After Applying Changes In Admin UI
 
 Verify If Unauthorized User Can Not Change The Permission
     [Documentation]  Verify If Unauthorized User Can Not Change the Permission even if the UI is visible in browser cache,
-     ...    if the unauthorized user has saved, the changes should not reflect In CRD file
+    ...    if the unauthorized user has saved, the changes should not reflect In CRD file
+    ...    Product Bug:    RHODS-6282
     [Tags]  ODS-1660
     ...     ODS-1555
     ...     Tier1
     ...     Sanity
+    ...     ProductBug
     Launch Dashboard And Check User Management Option Is Available For The User
     ...    ${TEST_USER_3.USERNAME}   ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
     Remove OpenShift Groups From Data Science Administrator Groups     rhods-admins
@@ -89,7 +91,7 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
 Teardown Admin UI
     [Documentation]  Setup Default Values In User Management Settings
     Revert Changes To Access Configuration
-    RHOSi Teardown
+    #RHOSi Teardown
 
 Revert Changes To Access Configuration
     Set Standard RHODS Groups Variables
@@ -99,6 +101,6 @@ Revert Changes To Access Configuration
 Setup Admin UI
     [Documentation]  Customized Steup for admin UI
     Set Library Search Order  SeleniumLibrary
-    RHOSi Setup
+    #RHOSi Setup
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings

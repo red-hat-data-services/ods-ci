@@ -18,13 +18,13 @@ Create Starburst Route
     ${rc}=    Run And Return Rc    oc expose svc starburst --name ${name} -n ${STARBURST_CR_DEFAULT_NAMESPACE}
     # ${rc}=    Run And Return Rc    oc create route edge ${name} --service=starburst --insecure-policy="Redirect" -n ${STARBURST_CR_DEFAULT_NAMESPACE}    # robocop: disable
     ${route}=    Get Starburst Route
-    [Return]    ${rc}    ${route}
+    RETURN    ${rc}    ${route}
 
 Get Starburst Route
     [Documentation]    Gets the starburst route
     [Arguments]    ${name}=${STARBURST_ROUTE}
     ${route}=    Oc Get    kind=Route  name=${name}  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  fields=['spec.host']
-    [Return]    ${route[0]['spec.host']}
+    RETURN    ${route[0]['spec.host']}
 
 Create Starburst Route If Not Exists
     [Documentation]    Exposes starburst service for external connections
@@ -37,7 +37,7 @@ Create Starburst Route If Not Exists
         Log    message=Route ${name} already present under ${STARBURST_CR_DEFAULT_NAMESPACE} namespace
         ${host}=    Get Starburst Route
     END
-    [Return]    ${host}
+    RETURN    ${host}
 
 Perform Log In
     [Documentation]    Performs Log In of Trino/Starburst Dashboard

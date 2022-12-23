@@ -73,6 +73,6 @@ Verify Documentation Is Accessible
   [Documentation]   Checks documentation link is accessible.
   ${link}=  Get Element Attribute   //div[@class="pf-l-flex pf-m-space-items-lg pf-m-column"]//a    href
   ${status}=    Check HTTP Status Code    ${link}
-  Run Keyword IF  ${status}!=200      FAIL
+  IF  ${status}!=200      FAIL
   ...     Documentation Is Not Accessible
 

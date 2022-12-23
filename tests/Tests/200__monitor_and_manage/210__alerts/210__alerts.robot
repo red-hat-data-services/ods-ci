@@ -456,7 +456,7 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=s2i-generic-data-science-notebook
     Clone Git Repository And Run    ${notebook_repo}    ${notebook_path}
@@ -636,7 +636,7 @@ Check Cluster Name Contain "Aisrhods" Or Not
     [Documentation]     Return true if cluster name contains aisrhods and if not return false
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${return_value} =  Evaluate  "aisrhods" in "${cluster_name}"
-    [Return]  ${return_value}
+    RETURN  ${return_value}
 
 Check Particular Text Is Present In Rhods-operator's Log
     [Documentation]     Check if text is present in log

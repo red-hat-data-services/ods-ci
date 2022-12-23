@@ -44,11 +44,11 @@ Get PagerDuty Key From Alertmanager ConfigMap
      ${a_data}    Set Variable     ${c_data[0]['data']['alertmanager.yml']}
      ${match_list}      Get Regexp Matches   ${a_data}     service_key(:).*
      ${key}       Split String    ${match_list[0]}
-     [Return]     ${key[-1]}
+     RETURN     ${key[-1]}
 
 Get PagerDuty Key From Secrets
      [Documentation]    Get Secert Key From Secrets
      ${new}     Oc Get  kind=Secret  namespace=${namespace}   field_selector=metadata.name==${SECRET_NAME}
      ${body}    Set Variable    ${new[0]['data']['PAGERDUTY_KEY']}
      ${string}  Evaluate    base64.b64decode('${body}').decode('ascii')      modules=base64
-     [Return]   ${string}
+     RETURN   ${string}

@@ -71,14 +71,14 @@ Check Connect Button Status
 Get Connect Button Status
     [Documentation]    Get the "Connect" button status of ACE's card in Explore page.
     ${button_status}=    Get Element Attribute    xpath://*/footer/*[.='Connect']    aria-disabled
-    [Return]    ${button_status}
+    RETURN    ${button_status}
 
 Check Anaconda CE Image Build Status
     [Documentation]    Checks the ACE's image build status
     [Arguments]    ${target_status}
     ${ace_build_status}=    Get Build Status    namespace=redhat-ods-applications
     ...    build_search_term=minimal-notebook-anaconda
-    Run Keyword If    "${ace_build_status}" == "Failed"
+    IF    "${ace_build_status}" == "Failed"
     ...    Fail    the Anaconda image build has failed
     ...    ELSE
     ...    Should Be Equal    ${ace_build_status}    ${target_status}

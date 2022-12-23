@@ -55,7 +55,7 @@ Get Average Time For Spawning
         ${total_time} =    Evaluate    ${total_time} + ${avg}
     END
     ${average_time} =    Evaluate    ${total_time} / ${number_of_images}
-    [Return]    ${average_time}
+    RETURN    ${average_time}
 
 Average Spawning Time Should Be Less Than
     [Documentation]    Checks than average time is less than ${time}
@@ -73,7 +73,7 @@ Spawn and Stop Server
     Spawn Notebook
     Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     # If this fails we waited for 60s. Avg. time will be thrown off, might be acceptable
     # given that we weren't able to spawn?
     Run Keyword And Continue On Failure  Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
@@ -87,7 +87,7 @@ Spawn and Stop Server
     Launch Jupyter From RHODS Dashboard Link
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
-    [Return]    ${time}
+    RETURN    ${time}
 
 Close Previous Tabs
     [Documentation]    Closes the previous opened tabs

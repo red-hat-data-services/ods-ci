@@ -4,4 +4,4 @@ Get RHODS Version
   FOR  ${version}  IN  @{versions}
     ${csv_version} =  Set Variable  ${version}[spec][version]
   END
-  [Return]  ${csv_version}
+  RETURN  ${csv_version}

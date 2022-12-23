@@ -171,7 +171,7 @@ Verify Links Are Not Broken For Each QuickStart
 Get QuickStart Items
         Wait Until Resource Page Is Loaded
         ${quickStartElements}=     Wait for QuickStart to Load
-        [Return]    ${quickStartElements}
+        RETURN    ${quickStartElements}
 
 
 Open QuickStart Step

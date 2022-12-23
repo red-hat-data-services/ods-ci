@@ -381,7 +381,7 @@ Get Lengths Of Dashboard Pods Logs
         ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pod Logs     pod_name=${pod_name}
         Set To Dictionary   ${lengths_dict}     ${pod_name}  ${n_lines}
     END
-    [Return]    ${lengths_dict}
+    RETURN    ${lengths_dict}
 
 New Lines In Logs Of Dashboard Pods Should Contain
     [Documentation]     Verifies that newly generated lines in the logs contain the given message
@@ -398,7 +398,7 @@ New Lines In Logs Of Dashboard Pods Should Contain
             ...     item=${exp_msg}
         END
     END
-    [Return]    ${new_logs_lengths}
+    RETURN    ${new_logs_lengths}
 
 Wait Until New Log Lines Are Generated In A Dashboard Pod
     [Documentation]     Waits until new messages in the logs are generated
@@ -413,7 +413,7 @@ Wait Until New Log Lines Are Generated In A Dashboard Pod
     IF    $equal_flag == False
         Fail    Something got wrong. Check the logs
     END
-    [Return]    ${pod_logs_lines}[${prev_length}:]     ${n_lines}
+    RETURN    ${pod_logs_lines}[${prev_length}:]     ${n_lines}
 
 Set RHODS Admins Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
@@ -486,7 +486,7 @@ Get List Of Ids Of Tiles
     [Documentation]    Returns the list of ids of tiles present in resources page
     ${list_of_ids}=    Get List Of Atrributes
     ...    xpath=//article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
-    [Return]    ${list_of_ids}
+    RETURN    ${list_of_ids}
 
 Set Item As Favorite
     [Documentation]    Add the tiles in favorite
@@ -525,7 +525,7 @@ Get The List Of Ids of Tiles In List View
     FOR    ${index}    IN RANGE    0    ${len}    2
         Append To List    ${list_of_ids_in_list_view}    ${list_of_new_tile_ids}[${index}]
     END
-    [Return]    ${list_of_ids_in_list_view}
+    RETURN    ${list_of_ids_in_list_view}
 
 Remove Items From Favorites
     [Documentation]    Removes the items from favorites
@@ -591,7 +591,7 @@ Set GPU Expected Resources
         ...   'https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/openshift/contents.html'
     END
     ${gpu_re_exp}=    Get Length    ${gpu_re_id}
-    [Return]    ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}
+    RETURN    ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}
 
 Check GPU Resources
     [Documentation]   Check resource tiles for GPU is present
@@ -604,7 +604,7 @@ Check GPU Resources
         IF    ${gpu_re_link}[${counter}] == '#'
                 ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
                 ${no_of_open_link}=    Get Length    ${counter}
-                Run Keyword IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
+                IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
                 ...        ELSE    Fail     Mismatch on the number of GPU tile present with 'Open' link.Please check the RHODS dashboard.  #robocop disable
         ELSE
                 Page Should Contain Element    //a[@href=${gpu_re_link}[${counter}]]

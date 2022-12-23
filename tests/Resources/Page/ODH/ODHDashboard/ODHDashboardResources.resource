@@ -19,7 +19,7 @@ Star QuickStart Tour
 Get The Count Of QuickStart Steps
     [Documentation]     Gives the count of steps in a the quick start
     ${count}=   Get ELement Count   //div[@class="pfext-quick-start-content"]/ul/li
-    [Return]    ${count}
+    RETURN    ${count}
 
 Link Text On QuickStart Card Should Be
     [Arguments]     ${element}  ${exp_link_text}
@@ -93,7 +93,7 @@ Wait for QuickStart to Load
     Wait Until Element Is Visible       xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
     Select Checkbox                         xpath=//*[@id="quickstart--check-box"]
     ${quickStartElements}=   Get WebElements    xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
-    [Return]    ${quickStartElements}
+    RETURN    ${quickStartElements}
 
 Wait Until Resource Page Is Loaded
     Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
@@ -104,7 +104,7 @@ Get Link Web Elements From Resource Page
     ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
     ${len}=    Get Length    ${link_elements}
     Log To Console    ${len} Links found\n
-    [Return]    ${link_elements}
+    RETURN    ${link_elements}
 
 Verify Quick Starts Work As Expected When All Steps Are Marked As Yes
     [Arguments]    ${element}
@@ -217,7 +217,7 @@ Verify Links Are Not Broken For Each QuickStart
 Get QuickStart Items
         Wait Until Resource Page Is Loaded
         ${quickStartElements}=     Wait for QuickStart to Load
-        [Return]    ${quickStartElements}
+        RETURN    ${quickStartElements}
 
 Open QuickStart Step
     [Documentation]   Click next if next not found cick tab to find buttion

@@ -62,7 +62,7 @@ Is RHODS Self-Managed
     ELSE
         ${is_self_managed}=    Set Variable    ${TRUE}
     END
-    [Return]    ${is_self_managed}
+    RETURN    ${is_self_managed}
 
 Get MachineSets
     [Documentation]    Returns a list of machinesets names
@@ -70,4 +70,4 @@ Get MachineSets
     @{machinesets} =    Split To Lines    ${machine_sets_oc}
     ${tmp} =    Remove From List    ${machinesets}    0
     Should Be Equal As Strings    ${tmp}    NAME
-    [Return]    @{machinesets}
+    RETURN    @{machinesets}

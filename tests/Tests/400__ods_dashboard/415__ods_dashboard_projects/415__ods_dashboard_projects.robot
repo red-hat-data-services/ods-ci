@@ -369,7 +369,7 @@ Check Corresponding Namespace Exists
     [Arguments]     ${project_title}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     Oc Get      kind=Project    name=${ns_name}
-    [Return]    ${ns_name}
+    RETURN    ${ns_name}
 
 Check Corresponding Notebook CR Exists
     [Documentation]    Checks if a workbench has its own Notebook CustomResource

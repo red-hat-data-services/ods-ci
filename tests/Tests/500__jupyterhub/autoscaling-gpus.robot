@@ -62,7 +62,7 @@ Spawn Notebook And Trigger Autoscale
     Spawn Notebook    spawner_timeout=20 minutes  expect_autoscaling=${True}
     Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Maybe Close Popup
     Open New Notebook In Jupyterlab Menu

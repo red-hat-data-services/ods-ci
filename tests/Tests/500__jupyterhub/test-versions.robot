@@ -92,7 +92,7 @@ Verify Libraries In Base Image    # robocop: disable
     Launch Jupyter From RHODS Dashboard Link
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
-    [Return]    ${status}
+    RETURN    ${status}
 
 Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
@@ -108,5 +108,5 @@ Verify List Of Libraries In Image
     [Arguments]    ${image}    @{additional_libs}
     ${status} =    Verify Libraries In Base Image    ${image}    ${additional_libs}
     Append To List    ${status_list}    ${status}
-    Run Keyword If    '${status}' == 'FAIL'    Fail    Shown and installed libraries for ${image} image do not match
+    IF    '${status}' == 'FAIL'    Fail    Shown and installed libraries for ${image} image do not match
 

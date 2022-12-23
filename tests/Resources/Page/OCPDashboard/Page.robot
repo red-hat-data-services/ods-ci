@@ -14,7 +14,7 @@ Page Should Be Open
 
   ${status}       Run keyword and Return Status      Location Should Contain  ${url}
   ${new_url}       Remove string    ${url}         https://
-  Run Keyword If   ${status} == ${False}    Location Should Contain  ${new_url}
+  IF   ${status} == ${False}    Location Should Contain  ${new_url}
 
 
 Maybe Click Show Default Project Button

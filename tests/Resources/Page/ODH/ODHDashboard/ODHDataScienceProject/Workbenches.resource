@@ -201,7 +201,7 @@ Access To Workbench
     Switch Window   NEW
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
     ${authorization_required}=  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize Jupyterhub Service Account
+    IF  ${authorization_required}  Authorize Jupyterhub Service Account
     Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Maybe Close Popup
 
@@ -293,6 +293,6 @@ Get Openshift Notebook CR From Workbench
     [Documentation]    Retrieves name of Notebook CR corresponding to a workbench
     [Arguments]     ${workbench_title}      ${namespace}
     ${rc}  ${cr_name}=    Run And Return Rc And Output   oc get notebook -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${workbench_title}")].metadata.name}'
-    [Return]    ${rc}    ${cr_name}
+    RETURN    ${rc}    ${cr_name}
 
 

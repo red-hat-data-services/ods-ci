@@ -135,7 +135,7 @@ Read Current CPU Usage
     ELSE
         ${cpu_usage} =    Set Variable    ${resp.json()["data"]["result"][0]["value"][-1]}
     END
-    [Return]    ${cpu_usage}
+    RETURN    ${cpu_usage}
 
 CPU Usage Should Have Increased
      [Documentation]   Verifies that CPU usage for notebook pods has increased since previous value
@@ -161,7 +161,7 @@ Iterative Image Test
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=${image}
     Run Cell And Check Output    print("Hello World!")    Hello World!

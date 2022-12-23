@@ -63,7 +63,7 @@ Is SegmentKey Exposed In JupyterHub API
     &{data} =    Evaluate    dict(${data[0].text})
     @{keys} =    Get Dictionary Keys    ${data["segment_key"]}
     ${return_value} =    Evaluate    'segmentKey' in ${keys}
-    [Return]    ${return_value}
+    RETURN    ${return_value}
 
 JupyterHub API Should Not Exposes SegmentKey
     [Documentation]     Checks API is not exposing segmentkey

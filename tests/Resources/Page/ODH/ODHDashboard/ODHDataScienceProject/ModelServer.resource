@@ -83,7 +83,7 @@ Get Model Serving Access Token via UI
     [Arguments]    ${service_account_name}=default-name
     Click Element    //td[@data-label="Tokens"]/button
     ${token}=    Get Element Attribute    //div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
-    [Return]    ${token}
+    RETURN    ${token}
 
 Click Plus Button
     [Documentation]    Clicks the plus button of the model server replica counter

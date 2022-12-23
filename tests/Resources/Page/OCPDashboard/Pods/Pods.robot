@@ -37,18 +37,18 @@ Get Pod Logs From UI
         Fail    No logs window found..
     END
     ${log_rows}=    Text To List    ${logs_text}
-    [Return]    ${log_rows}
+    RETURN    ${log_rows}
 
 Delete Pods Using Label Selector
     [Documentation]    Deletes an openshift pod by label selector
     [Arguments]    ${namespace}    ${label_selector}
     ${status}=    Check If POD Exists    ${namespace}    ${label_selector}
-    Run Keyword IF    '${status}'=='PASS'    Oc Delete    kind=Pod    namespace=${namespace}
+    IF    '${status}'=='PASS'    Oc Delete    kind=Pod    namespace=${namespace}
     ...    label_selector=${label_selector}    ELSE    FAIL
     ...    No PODS present with Label '${label_selector}' in '${namespace}' namespace, Check the label selector and namespace provide is correct and try again
     Sleep    2
     ${status}=    Check If POD Exists    ${namespace}    ${label_selector}
-    Run Keyword IF    '${status}'!='FAIL'    FAIL
+    IF    '${status}'!='FAIL'    FAIL
     ...    PODS with Label '${label_selector}' is not deleted in '${namespace}' namespace
 
 Check If POD Exists
@@ -56,27 +56,27 @@ Check If POD Exists
     [Arguments]    ${namespace}    ${label_selector}
     ${status}    ${val}=    Run Keyword And Ignore Error    Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=${label_selector}
-    [Return]    ${status}
+    RETURN    ${status}
 
 Verify Operator Pod Status
     [Documentation]    Verify Pod status
     [Arguments]  ${namespace}   ${label_selector}  ${expected_status}=Running
     ${status}    Get Pod Status    ${namespace}    ${label_selector}
-    Run Keyword IF   $status != $expected_status     Fail    Unexpected operator status (found: ${status}, expected:${expected_status})   #robocop:disable
+    IF   $status != $expected_status     Fail    Unexpected operator status (found: ${status}, expected:${expected_status})   #robocop:disable
 
 Get Pod Name
     [Documentation]    Get the POD name based on namespace and label selector
     [Arguments]   ${namespace}   ${label_selector}
     ${data}       Run Keyword   Oc Get   kind=Pod
     ...    namespace=${namespace}   label_selector=${label_selector}
-    [Return]      ${data[0]['metadata']['name']}
+    RETURN      ${data[0]['metadata']['name']}
 
 Get Pod Status
     [Documentation]    Get the Pod status based on namespace and label selector
     [Arguments]   ${namespace}   ${label_selector}
     ${data}       Run Keyword   Oc Get   kind=Pod
     ...    namespace=${namespace}   label_selector=${label_selector}
-    [Return]      ${data[0]['status']['phase']}
+    RETURN      ${data[0]['status']['phase']}
 
 Get POD Names
     [Documentation]    Get the name of list based on
@@ -93,7 +93,7 @@ Get POD Names
     ELSE
          FAIL    No POD found with the provided label selector in a given namespace '${namespace}'
     END
-    [Return]    ${pod_name}
+    RETURN    ${pod_name}
 
 Get Containers With Non Zero Restart Counts
     [Documentation]    Get the container name with restart
@@ -111,7 +111,7 @@ Get Containers With Non Zero Restart Counts
         END
         Set To Dictionary    ${pod_restarts}    ${pod_name}    ${container_restarts}
     END
-    [Return]    ${pod_restarts}
+    RETURN    ${pod_restarts}
 
 Verify Containers Have Zero Restarts
     [Documentation]    Get and verify container restart
@@ -140,7 +140,7 @@ Search Pod
     [Arguments]   ${namespace}  ${pod_start_with}
     ${pod} =  Run  oc get pods -n ${namespace} -o json | jq '.items[] | select(.metadata.name | startswith("${pod_start_with}")) | .metadata.name'    #robocop:disable
     @{list_pods} =  Split String  ${pod}  \n
-    [Return]  ${list_pods}
+    RETURN  ${list_pods}
 
 Run Command In Container
     [Documentation]    Executes a command in a container.
@@ -151,7 +151,7 @@ Run Command In Container
     ELSE
         ${output}    Run    oc exec ${pod_name} -n ${namespace} -c ${container_name} -- ${command}
     END
-    [Return]    ${output}
+    RETURN    ${output}
 
 Wait Until Container Exist
     [Documentation]     Waits until container is exists
@@ -169,7 +169,7 @@ Find First Pod By Name
     [Documentation]   Returns first occurred pod  ${pod_start_with} = here ypu have to provide starting of pod name
     [Arguments]   ${namespace}  ${pod_start_with}
     ${list_pods} =  Search Pod  namespace=${namespace}  pod_start_with=${pod_start_with}
-    [Return]  ${list_pods}[0]
+    RETURN  ${list_pods}[0]
 
 Get Containers
     [Documentation]    Returns list of containers
@@ -177,14 +177,14 @@ Get Containers
     ${containers}    Run    oc get pod ${pod_name} -n ${namespace} -o json | jq '.spec.containers[] | .name'
     ${containers}    Replace String    ${containers}    "    ${EMPTY}
     @{containers}    Split String    ${containers}    \n
-    [Return]    ${containers}
+    RETURN    ${containers}
 
 Get User Server Node
     [Documentation]    Returns the name of the node on which the user's server pod is running
     [Arguments]    ${username}=${TEST_USER.USERNAME}
     ${pod_name} =    Get User Notebook Pod Name    ${username}
     ${node_name} =    Run    oc describe Pod ${pod_name} -n rhods-notebooks | grep Node: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"/"); print b[1]}'
-    [Return]    ${node_name}
+    RETURN    ${node_name}
 
 Go To Log Tab And Select A Container
     [Documentation]     Click on log tab and change container with help of ${container_button_id}
@@ -204,4 +204,4 @@ Get Pod Tolerations
     Create File    podspec.txt    ${output}
     ${tolerations_list} =    Parse File For Tolerations    podspec.txt
     Remove File    podspec.txt
-    [Return]    ${tolerations_list}
+    RETURN    ${tolerations_list}

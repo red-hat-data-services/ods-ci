@@ -25,7 +25,7 @@ Get Average Availability For Time Range
     ...    pm_query=avg_over_time(rhods_aggregate_availability[${time_range}])*100
     ${value}=    Set Variable    ${response.json()["data"]["result"][0]["value"][-1]}
     ${value}=    Convert To Number    ${value}    ${precision}
-    [Return]    ${value}
+    RETURN    ${value}
 
 Create Suite Availability Checkpoint
     [Documentation]    Obtains and stores Average Availability for the last 2m, 15m, 1h and 3h
@@ -105,7 +105,7 @@ Log If Average Availability For Time Range Breached SLA
         ...    ${message_prefix}ODS Availability is currently breaching SLA: ${availability} < ${SLA_AVAILABILITY} (time-range:${time_range})
         Log    message=${message}    level=WARN    console=False
     END
-    [Return]    ${availability}
+    RETURN    ${availability}
 
 Fail If Average Availability For Time Range Breached SLA
     [Documentation]    Gets Average Availability for ${time_range} and Fails test if the value is under 99.95

@@ -95,7 +95,7 @@ Load Expected Test Data
     ${custom_app_dict}=  Load Json File  ${CUSTOM_APP_DICT_PATH}
     ${exp_data_dict}=    Load Expected Data Of RHODS Explore Section
     Set To Dictionary   ${exp_data_dict}    custom-odsci-app=${custom_app_dict["custom-odsci-app"]}
-    [Return]  ${exp_data_dict}
+    RETURN  ${exp_data_dict}
 
 Check Items Have Been Displayed In Resources Page
     [Documentation]     Launches Dashboard and waits until the custom doc item appears in Resources page

@@ -46,18 +46,18 @@ Find Max Number Of GPUs In One Node
             ${max_gpus} =    Set Variable    ${node_gpu_num}
         END
     END
-    [Return]    ${max_gpus}
+    RETURN    ${max_gpus}
 
 Get GPU nodes
     [Documentation]    Returns a list containing all nodes with GPUs
     ${nodes_from_oc} =    Run    oc get nodes -l nvidia.com/gpu.present=true | grep ip | awk '{split($0,a); print a[1]}'
     @{node_names} =    Split To Lines    ${nodes_from_oc}
-    [Return]    @{node_names}
+    RETURN    @{node_names}
 
 Get GPU Serial Number
     [Documentation]    Returns GPU Serial Number attached to server
     ${serial_no} =    Run Cell And Get Output    !nvidia-smi -q | grep "Serial Number" | awk '{split($0,a,": "); print a[2]}'
-    [Return]    ${serial_no}
+    RETURN    ${serial_no}
 
 Find Max Number Of GPUs In One MachineSet
     [Documentation]    Returns the max number of GPUs present in a single MachineSet
@@ -70,7 +70,7 @@ Find Max Number Of GPUs In One MachineSet
             ${max_gpus} =    Set Variable    ${ms_gpu_num}
         END
     END
-    [Return]    ${max_gpus}
+    RETURN    ${max_gpus}
 
 Is GPU Autoscaling Enabled
     [Documentation]    Returns ${True} if a machine autoscaler with gpu nodes is found
@@ -88,4 +88,4 @@ Is GPU Autoscaling Enabled
             END
         END
     END
-    [Return]    ${autoscaling_enabled}
+    RETURN    ${autoscaling_enabled}

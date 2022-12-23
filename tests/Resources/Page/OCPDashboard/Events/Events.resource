@@ -17,7 +17,7 @@ Get Openshift Event
     ELSE
         FAIL    All the Events are not captured
     END
-    [Return]    ${res_data}
+    RETURN    ${res_data}
 
 Get Data Based On Object Kind
     [Documentation]    Compare and filter data
@@ -32,4 +32,4 @@ Get Data Based On Object Kind
             Append To List    ${tem_data}    ${element}
         END
     END
-    [Return]    ${tem_data}
+    RETURN    ${tem_data}

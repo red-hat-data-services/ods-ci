@@ -57,7 +57,7 @@ Get "Usage Data Collection" Key
     ${usage_data_collection_key}=    Evaluate
     ...    base64.b64decode("${usage_data_collection_key_base64}").decode('utf-8')    modules=base64
 
-    [Return]    ${usage_data_collection_key}
+    RETURN    ${usage_data_collection_key}
 
 Is Usage Data Collection Enabled
     [Documentation]    Returns a boolean with the value of configmap odh-segment-key-config > segmentKeyEnabled
@@ -65,7 +65,7 @@ Is Usage Data Collection Enabled
     ${usage_data_collection_enabled}=    Run
     ...    oc get configmap odh-segment-key-config -n redhat-ods-applications -o jsonpath='{.data.segmentKeyEnabled}'
     ${usage_data_collection_enabled}=    Convert To Boolean    ${usage_data_collection_enabled}
-    [Return]    ${usage_data_collection_enabled}
+    RETURN    ${usage_data_collection_enabled}
 
 Usage Data Collection Should Be Enabled
     [Documentation]    Fails if "Usage Data Collection" is not enabled in ODS Dashboard > Cluster Settings
@@ -151,7 +151,7 @@ Get Notification Email From Addon-Managed-Odh-Parameters Secret
     [Documentation]    Gets email form addon-managed-odh-parameters secret
     ${resp} =    Oc Get  kind=Secret  namespace=redhat-ods-operator  name=addon-managed-odh-parameters
     ${resp} =  Evaluate  dict(${resp[0]["metadata"]["annotations"]["kubectl.kubernetes.io/last-applied-configuration"]})
-    [Return]  ${resp["stringData"]["notification-email"]}
+    RETURN  ${resp["stringData"]["notification-email"]}
 
 Notification Email In Alertmanager ConfigMap Should Be
     [Documentation]    Check expected email is present in Alertmanager
@@ -185,7 +185,7 @@ Get RHODS URL From OpenShift Using UI
     ${link_elements}  Get WebElements
     ...     //a[@data-test="application-launcher-item" and starts-with(@href,'https://rhods')]
     ${href}  Get Element Attribute    ${link_elements}    href
-    [Return]   ${href}
+    RETURN   ${href}
 
 OpenShift Resource Field Value Should Be Equal As Strings
     [Documentation]
@@ -248,22 +248,22 @@ Verify Default Access Groups Settings
 Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
     ${grafana_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
-    [Return]    ${grafana_port_forwarding_process}
+    RETURN    ${grafana_port_forwarding_process}
 
 Enable Access To Prometheus Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Prometheus Using OpenShift Port-Forwarding
     ${promethues_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep prometheus | awk '{print $1}') 9090  shell=True  # robocop: disable
-    [Return]    ${promethues_port_forwarding_process}
+    RETURN    ${promethues_port_forwarding_process}
 
 Enable Access To Alert Manager Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Alert Manager Using OpenShift Port-Forwarding
     ${alertmanager_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep prometheus | awk '{print $1}') 9093   shell=True  # robocop: disable
-    [Return]    ${alertmanager_port_forwarding_process}
+    RETURN    ${alertmanager_port_forwarding_process}
 
 Get Grafana Url
     [Documentation]  Returns Grafana URL
     ${grafana_url} =    Run    oc get routes/grafana -n redhat-ods-monitoring -o json | jq -r '.spec.host'
-    [Return]    ${grafana_url}
+    RETURN    ${grafana_url}
 
 Verify CPU And Memory Requests And Limits Are Defined For Pod
     [Documentation]    Verifies that CPU and memory requests and limits are defined
@@ -288,17 +288,17 @@ Verify CPU And Memory Requests And Limits Are Defined For Pod Container
     [Arguments]    ${container_info}
     &{container_info_dict} =    Set Variable    ${container_info}
     OpenShift Resource Component Should Contain Field     ${container_info_dict}    resources
-    Run Keyword If   'resources' in ${container_info_dict}
+    IF   'resources' in ${container_info_dict}
     ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources}    requests
-    Run Keyword If   'resources' in ${container_info_dict}
+    IF   'resources' in ${container_info_dict}
     ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources}    limits
-    Run Keyword If   'requests' in ${container_info_dict.resources}
+    IF   'requests' in ${container_info_dict.resources}
     ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.requests}    cpu
-    Run Keyword If   'requests' in ${container_info_dict.resources}
+    IF   'requests' in ${container_info_dict.resources}
     ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.requests}    memory
-    Run Keyword If   'limits' in ${container_info_dict.resources}
+    IF   'limits' in ${container_info_dict.resources}
     ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.limits}    cpu
-    Run Keyword If   'limits' in ${container_info_dict.resources}
+    IF   'limits' in ${container_info_dict.resources}
     ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.limits}    memory
 
 Fetch Project Pods Info
@@ -309,7 +309,7 @@ Fetch Project Pods Info
     ...        project_pods_info: List of Project Pods information
     [Arguments]    ${project}
     @{project_pods_info}=    Oc Get    kind=Pod    api_version=v1    namespace=${project}
-    [Return]    @{project_pods_info}
+    RETURN    @{project_pods_info}
 
 Fetch Cluster Platform Type
     [Documentation]  Fetches the platform type of the cluster
@@ -319,7 +319,7 @@ Fetch Cluster Platform Type
     ...        cluster_platform_type(str): Platform type of the cluster
     &{cluster_infrastructure_info}=    Fetch Cluster Infrastructure Info
     ${cluster_platform_type}=    Set Variable    ${cluster_infrastructure_info.spec.platformSpec.type}
-    [Return]    ${cluster_platform_type}
+    RETURN    ${cluster_platform_type}
 
 
 Fetch Cluster Infrastructure Info
@@ -330,21 +330,21 @@ Fetch Cluster Infrastructure Info
     ...        cluster_infrastructure_info(dict): Dictionary containing the information of the infrastructure of the cluster
     @{resources_info_list}=    Oc Get    kind=Infrastructure    api_version=config.openshift.io/v1    name=cluster
     &{cluster_infrastructure_info}=    Set Variable    ${resources_info_list}[0]
-    [Return]    &{cluster_infrastructure_info}
+    RETURN    &{cluster_infrastructure_info}
 
 Fetch ODS Cluster Environment
    [Documentation]  Fetches the environment type of the cluster
    ...        Returns:
    ...        Cluster Environment (str)
    ${match}=    Fetch Cluster Platform Type
-   Run Keyword If    '${match}'!='AWS' and '${match}'!='GCP'    FAIL    msg=This keyword should be used only in OSD clusters
+   IF    '${match}'!='AWS' and '${match}'!='GCP'    FAIL    msg=This keyword should be used only in OSD clusters
    ${match}  ${status}=    Run Keyword And Ignore Error  Should Contain    ${OCP_CONSOLE_URL}    devshift.org
    IF    "${match}" == "PASS"
        ${cluster_type}=  Set Variable  stage
    ELSE
        ${cluster_type}=  Set Variable  production
    END
-   [Return]    ${cluster_type}
+   RETURN    ${cluster_type}
 
 OpenShift Resource Component Field Should Not Be Empty
     [Documentation]    Checks if the specified OpenShift resource component field is not empty
@@ -374,7 +374,7 @@ Fetch Cluster Worker Nodes Info
     ...        cluster_nodes_info(list(dict)): Cluster nodes information
     @{cluster_nodes_info}=    Oc Get    kind=Node    api_version=v1
     ...    label_selector=node-role.kubernetes.io/worker=,node-role.kubernetes.io!=master,node-role.kubernetes.io!=infra
-    [Return]    @{cluster_nodes_info}
+    RETURN    @{cluster_nodes_info}
 
 Delete RHODS Config Map
     [Documentation]    Deletes the given config map. It assumes the namespace is

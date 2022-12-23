@@ -137,7 +137,7 @@ Push Changes To Remote
 Get Last Commit Message
     [Documentation]    Return the last cpmmit message
     ${output}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
-    [Return]    ${output}
+    RETURN    ${output}
 
 Simple Staging Not Clicked
     [Documentation]    Ensures that Simple Staging has not clicked

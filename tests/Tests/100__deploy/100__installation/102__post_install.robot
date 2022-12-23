@@ -339,7 +339,7 @@ Verify Grafana Datasources Have TLS Enabled
     ${secret} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=redhat-ods-monitoring
     ${secret} =  Evaluate  base64.b64decode("${secret[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
     ${secret} =  Evaluate  json.loads('''${secret}''')  json
-    Run Keyword If  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
+    IF  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
     ...  Should Be Equal As Strings  ${secret['datasources'][0]['jsonData']['tlsSkipVerify']}  False
 
 Verify Grafana Can Obtain Data From Prometheus Datasource
@@ -363,9 +363,9 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     FOR    ${pod_info}    IN    @{project_pods_info}
         Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
         IF    "${project}" == "redhat-ods-applications"
-            Run Keyword If    "cuda-s2i" in "${pod_info['metadata']['name']}"
+            IF    "cuda-s2i" in "${pod_info['metadata']['name']}"
             ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
-            Run Keyword If    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
+            IF    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
             ...    Verify Requests Contains Expected Values  cpu=4  memory=8Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
         END
     END

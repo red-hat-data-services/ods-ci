@@ -1,7 +1,7 @@
 *** Keywords ***
 Uninstalling RHODS Operator
   ${is_operator_installed} =  Is RHODS Installed
-  Run Keyword If  ${is_operator_installed}  Run Keywords
+  IF  ${is_operator_installed}  Run Keywords
   ...  Log  Uninstalling RHODS operator in ${cluster_type}  console=yes  AND
   ...  Uninstall RHODS
 

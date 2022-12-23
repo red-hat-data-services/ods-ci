@@ -255,7 +255,7 @@ Extract Value From JSON Path
     FOR    ${idx}    ${split}    IN ENUMERATE    @{path_splits}  start=1
         Log    ${idx} - ${split}
         ${present}=    Run Keyword And Return Status
-        ...    Dictionary Should Contain Key    key=${split}
+        ...    Dictionary Should Contain Key    dictionary=${value}    key=${split}
         IF    ${present} == ${TRUE}
             ${value}=    Set Variable    ${value["${split}"]}
         ELSE

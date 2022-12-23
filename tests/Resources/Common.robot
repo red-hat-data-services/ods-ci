@@ -254,7 +254,16 @@ Extract Value From JSON Path
     ${value}=    Set Variable    ${json_dict}
     FOR    ${idx}    ${split}    IN ENUMERATE    @{path_splits}  start=1
         Log    ${idx} - ${split}
-        ${value}=    Set Variable    ${value["${split}"]}
+        ${present}=    Run Keyword And Return Status
+        ...    Dictionary Should Contain Key    key=${split}
+        IF    ${present} == ${TRUE}
+            ${value}=    Set Variable    ${value["${split}"]}
+        ELSE
+            ${value}=    Set Variable    ${EMPTY}
+            Log    message=${path} or part of it is not found in the given JSON
+            ...    level=ERROR
+            Exit For Loop
+        END 
     END
     [Return]    ${value}
 

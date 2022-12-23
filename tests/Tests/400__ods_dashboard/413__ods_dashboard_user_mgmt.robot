@@ -39,7 +39,7 @@ Verify If Unauthorized User Can Not Change The Permission
     Save Changes In User Management Setting
     Page Should Contain  Unable to load user and group settings
     Switch Browser  2
-    [Teardown]  Teardown Admin UI
+    [Teardown]  Revert Changes To Access Configuration
 
 Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     [Documentation]    Verify unauthorized User Is Not Able To Spawn Jupyter
@@ -66,7 +66,7 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
         Launch Jupyter From RHODS Dashboard Link
         Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=none
     END
-    [Teardown]  Teardown Admin UI
+    [Teardown]  Revert Changes To Access Configuration
 
 Verify Automatically Detects a Group Selected Is Removed and Notify the User
     [Documentation]  Verify if the group is deleted the user should get the
@@ -88,9 +88,13 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
 *** Keywords ***
 Teardown Admin UI
     [Documentation]  Setup Default Values In User Management Settings
+    Revert Changes To Access Configuration
+    RHOSi Teardown
+
+Revert Changes To Access Configuration
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
-    RHOSi Teardown
+
 
 Setup Admin UI
     [Documentation]  Customized Steup for admin UI

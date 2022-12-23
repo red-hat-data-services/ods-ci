@@ -53,7 +53,7 @@ Verify Filters Are Working On Resources Page
     ...       ODS-489
     ...       Tier1
     Click Link    Resources
-    Wait for RHODS Dashboard to Load    expected_page=Resources
+    Wait For RHODS Dashboard To Load    expected_page=Resources
     Set Expected Items Based On RHODS Type
     Number Of Items Should Be    expected_number=${EXPECTED_RESOURCE_ITEMS}
     Filter Resources By Status "Enabled" And Check Output
@@ -164,7 +164,7 @@ Filter Resources By Status "Enabled" And Check Output
 
 Filter By Application (Aka Povider) And Check Output
     [Documentation]    Filter by application (aka provider)
-    ${id_name} =  Set Variable    Anaconda Professional--check-box
+    ${id_name}=  Set Variable    Anaconda Professional--check-box
     Select Checkbox Using Id    ${id_name}
     Verify The Resources Are Filtered
     ...    expected_providers=${EXPECTED_ITEM_PROVIDERS}    expected_number=10
@@ -195,7 +195,7 @@ Filter By Using More Than One Filter And Check Output
         Deselect Checkbox Using Id    id=${id}
     END
 
-Set Expected Items Based On RHODS Type
+Set Expected Items Based On RHODS Type    # robocop: disable
     [Documentation]    Sets some required variables depending on if RHODS is
     ...                installed as Self-Managed or Cloud Service
     ${is_self_managed}=    Is RHODS Self-Managed
@@ -220,7 +220,7 @@ Set Expected Items Based On RHODS Type
     ...    Jupyter    OpenShift Streams for Apache Kafka
     ...    OpenShift API Management
     ...    Securing a deployed model using Red Hat OpenShift API Management
-    @{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List
+    @{EXPECTED_ITEMS_FOR_COMBINATIONS}=      Create List
     ...    Jupyter    OpenShift Streams for Apache Kafka    OpenShift API Management
     IF    ${is_self_managed} == ${TRUE}
         Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1

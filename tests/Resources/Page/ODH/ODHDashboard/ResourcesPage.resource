@@ -35,6 +35,8 @@ Search Resources
     Input Text    xpath=${XP_SEARCH_BAR}   text=${search_term}
 
 Number Of Items Should Be
+    [Documentation]    Checks if the page contain the expected number of items.
+    ...                Returns the list of items (webElements) plus the actual number
     [Arguments]    ${expected_number}
     @{items}=    Get WebElements    //div[@class="pf-c-card__title odh-card__doc-title"]
     ${actual_n_results}=    Get Length     ${items}
@@ -68,8 +70,6 @@ Verify The Resources Are Filtered
         END
     END
 
-
-
 Resource Page Should Contain
     [Arguments]     ${search_term}   ${expected_items}    ${filter}=${NONE}
     IF    filter != None
@@ -78,4 +78,3 @@ Resource Page Should Contain
     Search Resources    search_term=${search_term}
     Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
     ...    list_of_items=${expected_items}
-

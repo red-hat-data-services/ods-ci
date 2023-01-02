@@ -76,5 +76,4 @@ Resource Page Should Contain
         Select Checkbox Filter By Label     partial_label=${filter}
     END
     Search Resources    search_term=${search_term}
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${expected_items}
+    Verify The Resources Are Filtered    list_of_items=${expected_items}

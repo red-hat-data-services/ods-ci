@@ -209,7 +209,13 @@ Verify Links Are Not Broken For Each QuickStart
     [Documentation]     Clicks on al the quick start and verify links
     [Arguments]    ${quickStartElements}
     ${quickStartCount}=   Get Length           ${quickStartElements}
-    ${TitleElements}=     Get WebElements      //div[@class="pf-c-card__title odh-card__doc-title"]
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-content"]
+    ELSE
+        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-card__title odh-card__doc-title"]
+    END
+    ${TitleElements}=     Get WebElements      ${versioned_title_xp}
     FOR    ${counter}    IN RANGE     ${quickStartCount}
         Log    \n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++    console=yes
         ${Title}=   Get Text          ${TitleElements[${counter}]}

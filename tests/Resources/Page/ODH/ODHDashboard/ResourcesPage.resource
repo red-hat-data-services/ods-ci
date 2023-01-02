@@ -38,7 +38,13 @@ Number Of Items Should Be
     [Documentation]    Checks if the page contain the expected number of items.
     ...                Returns the list of items (webElements) plus the actual number
     [Arguments]    ${expected_number}
-    @{items}=    Get WebElements    //div[@class="pf-c-card__title odh-card__doc-title"]
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-content"]
+    ELSE
+        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-card__title odh-card__doc-title"]
+    END
+    @{items}=    Get WebElements    ${versioned_title_xp}
     ${actual_n_results}=    Get Length     ${items}
     Run Keyword And Continue On Failure    Should Be Equal As Integers     ${actual_n_results}     ${expected_number}
     RETURN    ${items}    ${actual_n_results}

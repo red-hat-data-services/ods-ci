@@ -146,7 +146,7 @@ Check Custom Application Item Has Been Successfully Created
     Run Keyword And Continue On Failure     External Link Should Be     expected_url=${DASH_EXPLORE_EXP_DATA["custom-odsci-app"]["sidebar_links"]["0"]["url"]}
     ...                         item_type=documentation
     Click Link      Explore
-    Wait for RHODS Dashboard to Load    expected_page=Explore
+    Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
     Check Cards Details Are Correct    expected_data=${DASH_EXPLORE_EXP_DATA}
 

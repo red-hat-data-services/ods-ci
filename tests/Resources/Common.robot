@@ -262,13 +262,14 @@ Extract Value From JSON Path
             ${value}=    Set Variable    ${EMPTY}
             Log    message=${path} or part of it is not found in the given JSON
             ...    level=ERROR
-            Exit For Loop
-        END 
+            BREAK
+        END
     END
-    [Return]    ${value}
+    RETURN    ${value}
 
 Extract URLs From Text
-    [Documentation]    
+    [Documentation]    Reads a text and extracts portions which match the pattern
+    ...                of a URL
     [Arguments]    ${text}
     ${urls}=     Get Regexp Matches   ${text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
-    [Return]    ${urls}
+    RETURN    ${urls}

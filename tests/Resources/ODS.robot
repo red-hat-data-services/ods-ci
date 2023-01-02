@@ -235,12 +235,12 @@ Verify RHODS Dashboard CR Contains Expected Values
         ...    path=${json_path}
         Should Be Equal As Strings  ${value}   ${exp_values["${json_path}"]}
     END
+
 Verify Default Access Groups Settings
     [Documentation]     Verifies that ODS contains the expected default groups settings
     &{exp_values}=  Create Dictionary  spec.groupsConfig.adminGroups=${STANDARD_ADMINS_GROUP}
     ...    spec.groupsConfig.allowedGroups=${STANDARD_USERS_GROUP}
     Verify RHODS Dashboard CR Contains Expected Values   &{exp_values}
-
 
 Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
@@ -379,4 +379,3 @@ Delete RHODS Config Map
     ...                corresponding argument
     [Arguments]     ${name}  ${namespace}=redhat-ods-applications
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
-

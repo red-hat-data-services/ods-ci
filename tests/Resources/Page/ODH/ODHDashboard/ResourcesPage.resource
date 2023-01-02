@@ -41,7 +41,7 @@ Number Of Items Should Be
     @{items}=    Get WebElements    //div[@class="pf-c-card__title odh-card__doc-title"]
     ${actual_n_results}=    Get Length     ${items}
     Run Keyword And Continue On Failure    Should Be Equal As Integers     ${actual_n_results}     ${expected_number}
-    [Return]    ${items}    ${actual_n_results}
+    RETURN    ${items}    ${actual_n_results}
 
 Verify The Resources Are Filtered
     [Documentation]    verified the items, ${index_of_text} is index text appear on resource 0 = title,1=provider,2=tag(like documentation,tutorial)

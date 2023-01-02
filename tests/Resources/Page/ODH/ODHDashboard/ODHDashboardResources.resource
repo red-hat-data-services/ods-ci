@@ -200,7 +200,7 @@ External URLs Should Not Be Broken
             ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
             Run Keyword And Continue On Failure
             ...    URLs HTTP Status Code Should Be Equal To    ${element_list}
-            ${doc_text}     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]
+            ${doc_text}=     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]    # robocop: disable
             ${doc_link}=    Extract URLs From Text    text=${doc_text}
             Validate Links Extracted From Text     ${doc_link}
     END
@@ -221,8 +221,9 @@ Verify Links Are Not Broken For Each QuickStart
     END
 
 Get QuickStart Items
-    Wait for RHODS Dashboard to Load    expected_page=Resources
-    ${quickStartElements}=     Wait for QuickStart to Load
+    [Documentation]    Fetches and returns the web elements of RHODS Quick Starts
+    Wait For RHODS Dashboard To Load    expected_page=Resources
+    ${quickStartElements}=     Wait For QuickStart To Load
     RETURN    ${quickStartElements}
 
 Open QuickStart Step
@@ -238,6 +239,8 @@ Open QuickStart Step
     END
 
 Validate Links Extracted From Text
+    [Documentation]    Checks the health status of the links which have been
+    ...                extracted from the quick start texts
     [Arguments]    ${doc_links}
     FOR    ${doc_link}    IN    @{doc_links}
         Log   ${doc_link}
@@ -249,6 +252,6 @@ Validate Links Extracted From Text
                  ${doc_link}=    Set Variable    ${doc_link[:${-1}]}
             END
             ${status}=  Run Keyword And Continue On Failure
-                ...    Check HTTP Status Code  ${doc_link}
+            ...    Check HTTP Status Code  ${doc_link}
         END
     END

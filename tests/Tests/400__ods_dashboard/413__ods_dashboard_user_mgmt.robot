@@ -89,14 +89,15 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
 
 *** Keywords ***
 Teardown Admin UI
-    [Documentation]  Setup Default Values In User Management Settings
+    [Documentation]    Sets the default values In User Management Settings
+    ...                and runs the RHOSi Teardown
     Revert Changes To Access Configuration
     RHOSi Teardown
 
 Revert Changes To Access Configuration
+    [Documentation]  Sets the default values In User Management Settings
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
-
 
 Setup Admin UI
     [Documentation]  Customized Steup for admin UI

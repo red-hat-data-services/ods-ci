@@ -133,7 +133,7 @@ Verify Service Is Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait for RHODS Dashboard to Load    expected_page=Explore
+  Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
   Page Should Contain Element    //article//*[.='${app_name}']
 
@@ -141,7 +141,7 @@ Verify Service Is Not Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait for RHODS Dashboard to Load    expected_page=Explore
+  Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
   Page Should Not Contain Element    //article//*[.='${app_name}']
 
@@ -203,6 +203,7 @@ Load Expected Data Of RHODS Explore Section
     RETURN  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded
+    [Documentation]    Waits until the Application cards are displayed in the page
     Wait Until Page Contains Element    xpath://div[contains(@class,'__gallery')]
     
 

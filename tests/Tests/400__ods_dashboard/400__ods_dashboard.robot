@@ -59,7 +59,7 @@ Verify Content In RHODS Explore Section
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
-    Wait for RHODS Dashboard to Load    expected_page=Explore
+    Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Cards Details Are Correct    expected_data=${EXP_DATA_DICT}
 
@@ -69,7 +69,7 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     ...       ODS-1890
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
-    Wait for RHODS Dashboard to Load    expected_page=Explore
+    Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Dashboard Diplayes Expected ISVs    expected_data=${EXP_DATA_DICT}
 
@@ -114,7 +114,7 @@ Verify CSS Style Of Getting Started Descriptions
     [Tags]    Smoke
     ...       ODS-1165
     Click Link    Explore
-    Wait for RHODS Dashboard to Load    expected_page=Explore
+    Wait For RHODS Dashboard To Load    expected_page=Explore
     Open Get Started Sidebar And Return Status    card_locator=${SAMPLE_APP_CARD_XP}
     Capture Page Screenshot    get_started_sidebar.png
     Verify Jupyter Card CSS Style

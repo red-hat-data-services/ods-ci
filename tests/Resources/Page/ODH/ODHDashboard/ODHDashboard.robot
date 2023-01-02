@@ -141,7 +141,7 @@ Verify Service Is Not Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Cards Are Loaded
+  Wait for RHODS Dashboard to Load    expected_page=Explore
   Capture Page Screenshot
   Page Should Not Contain Element    //article//*[.='${app_name}']
 

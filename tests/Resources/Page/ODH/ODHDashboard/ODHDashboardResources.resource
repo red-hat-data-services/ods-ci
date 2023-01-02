@@ -209,7 +209,7 @@ Verify Links Are Not Broken For Each QuickStart
     [Documentation]     Clicks on al the quick start and verify links
     [Arguments]    ${quickStartElements}
     ${quickStartCount}=   Get Length           ${quickStartElements}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
         ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-content"]
     ELSE

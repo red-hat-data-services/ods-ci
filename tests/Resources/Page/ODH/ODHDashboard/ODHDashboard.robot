@@ -15,15 +15,17 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__
 ${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
 ${SAMPLE_APP_CARD_XP}=   //article[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
-${TITLE_XP}=  div[@class='pf-c-card__title']//div/div[1]
-${TITLE_XP_OLD}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
+${TITLE_XP}=   div[@class='pf-c-card__title']//span
+${TITLE_XP_OLD}=  div[@class='pf-c-card__title']//div/div[1]
 ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
 ${DESCR_XP}=  div[@class='pf-c-card__body']
-${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
-${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//img[contains(@class, 'supported-image')]
-${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]    # robocop: disable
+${BADGES_XP}=  ${HEADER_XP}//div[contains(@class, 'badge') or contains(@class, 'coming-soon')]
+${BADGES_XP_OLD}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
+${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//img
+${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-c-card__title']//img[contains(@class, 'supported-image')]    # robocop: disable
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
-${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
+${IMAGE_XP}=  ${HEADER_XP}//picture[contains(@class,'pf-m-picture')]/source
+${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Files/AppsInfoDictionary.json
 ${APPS_DICT_PATH_LATEST}=   tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
@@ -229,7 +231,7 @@ Check Number Of Displayed Cards Is Correct
 
 Get Card Texts
     [Arguments]  ${card_locator}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
         ${versioned_title_xp}=    Set Variable    ${TITLE_XP}
     ELSE
@@ -249,7 +251,13 @@ Check Card Texts
 
 Get Card Badges Titles
     [Arguments]  ${card_locator}
-    ${badges}=  Get WebElements    xpath:${card_locator}/${BADGES_XP}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        ${versioned_badge_xp}=    Set Variable    ${BADGES_XP}
+    ELSE
+        ${versioned_badge_xp}=    Set Variable    ${BADGES_XP_OLD}
+    END
+    ${badges}=  Get WebElements    xpath:${card_locator}/${versioned_badge_xp}
     ${badges_titles}=  Create List
     FOR    ${cb}    IN    @{badges}
         ${btitle}=  Get Text   ${cb}
@@ -344,7 +352,15 @@ Check Get Started Sidebar
 
 Get Image Name
     [Arguments]  ${card_locator}
-    ${src}=  Get Element Attribute    xpath:${card_locator}/${IMAGE_XP}  src
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        ${versioned_image_xp}=    Set Variable    ${IMAGE_XP}
+        ${versioned_src_xp}=    Set Variable    srcset
+    ELSE
+        ${versioned_image_xp}=    Set Variable    ${IMAGE_XP_OLD}
+        ${versioned_src_xp}=    Set Variable    src
+    END
+    ${src}=  Get Element Attribute    xpath:${card_locator}/${versioned_image_xp}  ${versioned_src_xp}
     ${image_name}=  Fetch From Right    ${src}    ${ODH_DASHBOARD_URL}
     RETURN  ${src}  ${image_name}
 

@@ -77,7 +77,12 @@ Logout From RHODS Dashboard
     # Another option for the logout button
     #${user} =  Get Text  xpath:/html/body/div/div/header/div[2]/div/div[3]/div/button/span[1]
     #Click Element  xpath://span[.="${user}"]/..
-    Click Button  xpath:(//button[@id="toggle-id"])[2]
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        Click Button  xpath://button[@id="user-menu-toggle"]
+    ELSE
+        Click Button  xpath:(//button[@id="toggle-id"])[2]
+    END
     Wait Until Page Contains Element  xpath://a[.="Log out"]
     Click Element  xpath://a[.="Log out"]
     Wait Until Page Contains  Log in with OpenShift
@@ -204,7 +209,7 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    Wait Until Page Contains Element    xpath://div[contains(@class,'__gallery')]
+    Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')]/article
     
 
 Get App ID From Card

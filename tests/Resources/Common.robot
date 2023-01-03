@@ -106,6 +106,7 @@ URLs HTTP Status Code Should Be Equal To
     [Arguments]    ${link_elements}    ${expected_status}=200    ${timeout}=20
     FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
         ${href}=    Get Element Attribute    ${ext_link}    href
+        ${text}=    Get Text    ${ext_link}
         ${status}=    Run Keyword And Continue On Failure    Check HTTP Status Code    link_to_check=${href}
         ...                                                                            expected=${expected_status}
         Log To Console    ${idx}. ${href} gets status code ${status}
@@ -243,3 +244,32 @@ Close Generic Modal If Present
         Click Element    xpath=//button[@aria-label="Close"]
         Wait Until Generic Modal Disappears
     END
+
+Extract Value From JSON Path
+    [Documentation]    Given a Python JSON Object (i.e., a dictionary) and
+    ...                a desired path (e.g., spec.resources.limits.cpu), it retrieves
+    ...                the value by looping into the dictionary.
+    [Arguments]    ${json_dict}    ${path}
+    ${path_splits}=    Split String    string=${path}    separator=.
+    ${value}=    Set Variable    ${json_dict}
+    FOR    ${idx}    ${split}    IN ENUMERATE    @{path_splits}  start=1
+        Log    ${idx} - ${split}
+        ${present}=    Run Keyword And Return Status
+        ...    Dictionary Should Contain Key    dictionary=${value}    key=${split}
+        IF    ${present} == ${TRUE}
+            ${value}=    Set Variable    ${value["${split}"]}
+        ELSE
+            ${value}=    Set Variable    ${EMPTY}
+            Log    message=${path} or part of it is not found in the given JSON
+            ...    level=ERROR
+            BREAK
+        END
+    END
+    RETURN    ${value}
+
+Extract URLs From Text
+    [Documentation]    Reads a text and extracts portions which match the pattern
+    ...                of a URL
+    [Arguments]    ${text}
+    ${urls}=     Get Regexp Matches   ${text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
+    RETURN    ${urls}

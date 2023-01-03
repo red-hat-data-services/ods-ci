@@ -226,24 +226,21 @@ OpenShift Resource Component Should Contain Field
     [Arguments]    ${resource_component}    ${field}
     Run Keyword And Continue On Failure    Should Contain    ${resource_component}    ${field}
 
-Verify RHODS Groups Config Map Contains Expected Values
+Verify RHODS Dashboard CR Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
     [Arguments]        &{exp_values}
-    ${configmap}=  Oc Get  kind=ConfigMap  namespace=redhat-ods-applications  name=rhods-groups-config
-    FOR    ${group}    IN    @{exp_values.keys()}
-        Should Be Equal As Strings  ${configmap[0]["data"]["${group}"]}   ${exp_values["${group}"]}
+    ${config_cr}=  Oc Get  kind=OdhDashboardConfig  namespace=redhat-ods-applications  name=odh-dashboard-config
+    FOR    ${json_path}    IN    @{exp_values.keys()}
+        ${value}=    Extract Value From JSON Path    json_dict=${config_cr[0]}
+        ...    path=${json_path}
+        Should Be Equal As Strings  ${value}   ${exp_values["${json_path}"]}
     END
 
 Verify Default Access Groups Settings
     [Documentation]     Verifies that ODS contains the expected default groups settings
-    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check} == True
-        &{exp_values}=  Create Dictionary  admin_groups=dedicated-admins  allowed_groups=system:authenticated
-        Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
-    ELSE
-        &{exp_values}=  Create Dictionary  admin_groups=rhods-admins  allowed_groups=rhods-users
-        Verify RHODS Groups Config Map Contains Expected Values   &{exp_values}
-    END
+    &{exp_values}=  Create Dictionary  spec.groupsConfig.adminGroups=${STANDARD_ADMINS_GROUP}
+    ...    spec.groupsConfig.allowedGroups=${STANDARD_USERS_GROUP}
+    Verify RHODS Dashboard CR Contains Expected Values   &{exp_values}
 
 Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
@@ -382,4 +379,3 @@ Delete RHODS Config Map
     ...                corresponding argument
     [Arguments]     ${name}  ${namespace}=redhat-ods-applications
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
-

@@ -67,8 +67,14 @@ Verify The Resources Are Filtered
             ...    List Should Contain Value    ${list_of_items}    ${texts}[0]    # item title
         END
         IF    "${expected_types}" != "${NONE}"
+            ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+            IF  ${version_check}==True
+                ${versioned_type}=    Get Text    xpath=//ul[@aria-label='Label group category']/li[1]
+            ELSE
+                ${versioned_type}=    ${texts}[2]
+            END
             Run Keyword And Continue On Failure
-            ...    List Should Contain Value    ${expected_types}    ${texts}[2]    # item type
+            ...    List Should Contain Value    ${expected_types}    ${versioned_type}    # item type
         END
         IF    "${expected_providers}" != "${NONE}"
             Run Keyword And Continue On Failure

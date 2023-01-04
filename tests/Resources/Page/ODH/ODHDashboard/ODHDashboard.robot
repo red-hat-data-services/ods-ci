@@ -501,7 +501,14 @@ Search Items In Resources Section
 Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
     [Arguments]    ${user_name}
-    Element Text Should Be    xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]    ${user_name}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        ${versioned_user_xp}=    Set Variable  xpath=//button[@id="user-menu-toggle"]/span[contains(@class,'toggle-text')]
+    ELSE
+        ${versioned_user_xp}=    Set Variable  xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]
+    END
+
+    Element Text Should Be    ${versioned_user_xp}    ${user_name}
 
 Set PVC Value In RHODS Dashboard
     [Documentation]    Change the default value for PVC

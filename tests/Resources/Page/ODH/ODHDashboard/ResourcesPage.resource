@@ -71,7 +71,7 @@ Verify The Resources Are Filtered
             IF  ${version_check}==True
                 ${versioned_type}=    Get Text    xpath=//ul[@aria-label='Label group category']/li[1]
             ELSE
-                ${versioned_type}=    ${texts}[2]
+                ${versioned_type}=    Set Variable    ${texts}[2]
             END
             Run Keyword And Continue On Failure
             ...    List Should Contain Value    ${expected_types}    ${versioned_type}    # item type

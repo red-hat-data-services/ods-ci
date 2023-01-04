@@ -416,9 +416,15 @@ Re-validate License For Disabled Application From Enabled Page
 
 Get Question Mark Links
     [Documentation]      It returns the link elements from the question mark
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        Click Button  id:help-icon-toggle
+    ELSE
+        Click Element    xpath=//*[@id="toggle-id"]
+    END
     @{links_list}=  Create List
     @{link_elements}=  Get WebElements
-    ...    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
+    ...    //a[contains(@class,"pf-c-dropdown__menu-item")]
     FOR  ${link}  IN  @{link_elements}
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}
@@ -428,12 +434,10 @@ Get Question Mark Links
 Get RHODS Documentation Links From Dashboard
     [Documentation]    It returns a list containing rhods documentation links
     Click Link    Resources
-    Sleep    2
-    # get the documentation link
-    ${href_view_the_doc}=    Get Element Attribute    //a[@class='odh-dashboard__external-link']    href
-    Click Element    xpath=//*[@id="toggle-id"]
+    Wait For RHODS Dashboard To Load    expected_page=Resources
+    ${href_view_the_doc}=    Get Element Attribute    //a[text()='view the documentation. ']    href
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     ${links}=    Get Question Mark Links
-    # inserting at 0th position
     Insert Into List    ${links}    0    ${href_view_the_doc}
     RETURN  @{links}
 

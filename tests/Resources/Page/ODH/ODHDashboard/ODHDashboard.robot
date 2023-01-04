@@ -157,12 +157,12 @@ Remove Disabled Application From Enabled Page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
-   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]//span[contains(@class,'disabled-text')]
+   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//span[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=300
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
-   ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
-   Click Element  ${buttons_here}[1]
+   ${buttons_here}=  Get WebElements    css:div[class*='popover'] button
+   Click Element  ${buttons_here}[2]
    Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
    Capture Page Screenshot  ${app_id}_removed.png
 

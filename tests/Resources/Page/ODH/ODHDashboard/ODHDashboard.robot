@@ -435,8 +435,7 @@ Get RHODS Documentation Links From Dashboard
     [Documentation]    It returns a list containing rhods documentation links
     Click Link    Resources
     Wait For RHODS Dashboard To Load    expected_page=Resources
-    ${href_view_the_doc}=    Get Element Attribute    //a[text()='view the documentation. ']    href
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    ${href_view_the_doc}=    Get Element Attribute    //a[contains(text(),'view the documentation.')]    href
     ${links}=    Get Question Mark Links
     Insert Into List    ${links}    0    ${href_view_the_doc}
     RETURN  @{links}

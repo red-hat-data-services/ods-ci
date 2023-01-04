@@ -507,7 +507,8 @@ Verify Username Displayed On RHODS Dashboard
     [Arguments]    ${user_name}
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
-        ${versioned_user_xp}=    Set Variable  xpath=//button[@id="user-menu-toggle"]/span[contains(@class,'toggle-text')]
+        ${versioned_user_xp}=    Set Variable
+        ...    xpath=//button[@id="user-menu-toggle"]/span[contains(@class,'toggle-text')]
     ELSE
         ${versioned_user_xp}=    Set Variable  xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]
     END

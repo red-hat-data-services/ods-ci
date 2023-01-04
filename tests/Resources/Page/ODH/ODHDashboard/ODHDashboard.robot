@@ -267,7 +267,7 @@ Get Card Badges Titles
 
 Check Card Badges And Return Titles
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
         ${versioned_official_badge_xp}=    Set Variable    ${OFFICIAL_BADGE_XP}
     ELSE

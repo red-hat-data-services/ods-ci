@@ -1,5 +1,7 @@
 # Infrastructure Configuration Variables
-# create a table
+
+The infrastructure configuration variables are used to configure the infrastructure for the cluster. These variables are located in  infrastructure_configuration.yaml file. 
+
 | Variable | Description | Default | Provider |
 | -------- | ----------- | ------- | -------- |
 | `provider` | The provider to use for the infrastructure. | `AWS` | `all` |
@@ -7,10 +9,10 @@
 | `hive_claim_name` | The name of the claim. | `rhods{provider}claim` | `all` |
 | `image_set` | The image set name to use for the cluster. | `rhods-openshift` | `all` |
 | `aws_region` | The AWS region to use for the cluster. | `us-east-1` | `aws` |
-| `worker_node_instance_type` | The AWS instance type to use for the worker nodes. | `m5.xlarge` | `aws` |
-| `worker_node_replicas` | The number of worker nodes to create. | `2` | `aws` |
-| `master_node_instance_type` | The AWS instance type to use for the master nodes. | `m5.xlarge` | `aws` |
-| `master_node_replicas` | The number of master nodes to create. | `3` | `aws` |
+| `worker_node_instance_type` | The instance type to use for the worker nodes. | `m5.xlarge` | `all` |
+| `worker_node_replicas` | The number of worker nodes to create. | `2` | `all` |
+| `master_node_instance_type` | The AWS instance type to use for the master nodes. | `m5.xlarge` | `all` |
+| `master_node_replicas` | The number of master nodes to create. | `3` | `all` |
 | `aws_region` | The AWS region to use for the cluster. | `us-east-1` | `aws` |
 | `pull_secret` | The pull secret to use for the cluster. | `""` | `all` |
 | `ssh_key` | The SSH key to use for the cluster. | `""` | `all` |

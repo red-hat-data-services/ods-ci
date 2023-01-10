@@ -167,6 +167,18 @@ Skip If RHODS Is Self-Managed
        Skip If    condition=${is_self_managed}==True    msg=This test is skipped for Self-managed RHODS
     END
 
+Run Keyword If RHODS Is Managed
+    [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Managed (Cloud Version)
+    [Arguments]    ${name}    @{arguments}
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == False    Run Keyword    ${name}    @{arguments}
+
+Run Keyword If RHODS Is Self-Managed
+    [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Self-Managed
+    [Arguments]    ${name}    @{arguments}
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == True    Run Keyword    ${name}    @{arguments}
+
 Get Domain From Current URL
     [Documentation]    Gets the lowest level domain from the current URL (i.e. everything before the first dot in the URL)
     ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console

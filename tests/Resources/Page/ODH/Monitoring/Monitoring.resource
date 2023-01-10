@@ -117,7 +117,7 @@ Fail If Average Availability For Time Range Breached SLA
 
 Suite Availability Setup
     [Documentation]    Obtains and stores Average Availability for the last 2m, 15m, 1h and 3h
-    ...    Log a WARN message if availability is under 99.95
+    ...    Log a WARN message if availability is under 99.95 or an alert is firing
     [Arguments]    ${pm_url}    ${pm_token}
     Run Keyword And Warn On Failure
     ...    Create Suite Availability Checkpoint    pm_url=${pm_url}    pm_token=${pm_token}
@@ -127,7 +127,7 @@ Suite Availability Setup
 
 Suite Availability Teardown
     [Documentation]    Compare current Average Availability with the values stored in Suite Availability.
-    ...    Logs a WARN message if the current values are lower
+    ...    Logs a WARN message if the current values are lower or an alert is firing
     [Arguments]    ${pm_url}    ${pm_token}
     Run Keyword And Warn On Failure
     ...    Log If Availability Decreased Since Suite Availability Checkpoint     pm_url=${pm_url}    pm_token=${pm_token}

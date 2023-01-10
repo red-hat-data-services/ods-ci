@@ -4,6 +4,7 @@ Documentation       Applies RHOSi settings to run the test suites
 Library             RPA.RobotLogListener
 Resource            Page/ODH/Monitoring/Monitoring.resource
 Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
+Resource    Common.robot
 
 
 *** Variables ***
@@ -43,7 +44,8 @@ RHOSi Setup
     ...                Do Not extend this keyword for high-level setup, e.g., don't open browser
     Protect Sensitive Variables In Keywords
     Initialize Global Variables
-    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    Run Keyword If RHODS Is Managed
+    ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
     # TO DO: oc login
 
 RHOSi Teardown
@@ -51,7 +53,8 @@ RHOSi Teardown
     ...                stored at RHOSi setup
     ...                The suggested usage of this keyword is to call it inside all the Suite Teardown keywords.
     ...                Do Not extend this keyword for high-level setup, e.g., don't close browser
-    Suite Availability Teardown    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    Run Keyword If RHODS Is Managed
+    ...    Suite Availability Teardown    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
 
 Protect Sensitive Variables In Keywords
     [Documentation]    Register keywords which use sensitive data as "Protected"

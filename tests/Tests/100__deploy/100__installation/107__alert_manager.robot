@@ -13,6 +13,7 @@ Verify Alert Manager Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-238
+    Skip If RHODS Is Self-Managed
     @{alertmanager_services_info} =    Fetch Alert Manager Services Info
     @{alertmanager_routes_info} =    Fetch Alert Manager Routes Info
     OpenShift Resource Field Value Should Be Equal As Strings    spec.ports[0].name    alertmanager    @{alertmanager_services_info}

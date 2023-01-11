@@ -11,7 +11,7 @@ Library             SeleniumLibrary
 Library             JupyterLibrary
 
 Suite Setup         Alerts Suite Setup
-Suite Teardown      RHOSi Teardown
+Suite Teardown      Alerts Suite Teardown
 
 
 *** Variables ***
@@ -431,7 +431,13 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
+    Skip If RHODS Is Self-Managed
     RHOSi Setup
+
+Alerts Suite Teardown
+    [Documentation]    Test suite teardown
+    Skip If RHODS Is Self-Managed
+    RHOSi Teardown
 
 Teardown PVC Alert Test
     [Documentation]    Deletes user notebook files using the new "Clean Up User Notebook"

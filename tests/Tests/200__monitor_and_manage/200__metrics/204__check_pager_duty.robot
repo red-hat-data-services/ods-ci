@@ -14,6 +14,7 @@ Library        String
 Library        OpenShiftLibrary
 
 Resource       ../../../Resources/RHOSi.resource
+Resource       ../../../Resources/Common.robot
 
 Suite Setup     RHOSi Setup
 Suite Teardown  RHOSi Teardown
@@ -32,6 +33,7 @@ PagerDuty Dummy Secret Verification
      ...     Tier1
      ...     ODS-737
      ...     Deployment-Cli
+     Skip If RHODS Is Self-Managed
      ${service_key}   Get PagerDuty Key From Alertmanager ConfigMap
      ${secret_key}    Get PagerDuty Key From Secrets
      Should Be Equal As Strings    ${service_key}   ${secret_key}   foo-bar

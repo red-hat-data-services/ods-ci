@@ -114,6 +114,7 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-735
+    Skip If RHODS Is Self-Managed
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
     Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    blackbox-exporter
     ...    quay.io/integreatly/prometheus-blackbox-exporter
@@ -123,6 +124,7 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-733
+    Skip If RHODS Is Self-Managed
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    alertmanager
     ...    registry.redhat.io/openshift4/ose-prometheus-alertmanager
@@ -158,6 +160,7 @@ Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1090
+    Skip If RHODS Is Self-Managed
     Verify BlackboxExporter Includes Oauth Proxy
     Verify Authentication Is Required To Access BlackboxExporter
 

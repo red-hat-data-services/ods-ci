@@ -13,6 +13,7 @@ Verify Prometheus Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-232
+    Skip If RHODS Is Self-Managed
     @{prometheus_pods_info} =    Fetch Prometheus Pods Info
     @{prometheus_deployment_info} =    Fetch Prometheus Deployments Info
     @{prometheus_services_info} =    Fetch Prometheus Services Info

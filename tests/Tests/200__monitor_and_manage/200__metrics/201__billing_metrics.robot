@@ -44,6 +44,7 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     [Tags]    Sanity
     ...       ODS-634
     ...       Tier1
+    Skip If RHODS Is Self-Managed
     ${value} =    Run OpenShift Metrics Query    query=rhods_total_users
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_total_users
     Should Be Equal    ${value_from_promothues}    ${value}
@@ -54,6 +55,7 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     [Tags]    Sanity
     ...       ODS-637
     ...       Tier1
+    Skip If RHODS Is Self-Managed
     ${value} =    Run OpenShift Metrics Query    query=rhods_aggregate_availability
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_aggregate_availability
     Should Be Equal    ${value_from_promothues}    ${value}

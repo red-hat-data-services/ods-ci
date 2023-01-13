@@ -223,7 +223,8 @@ Verify User Can Launch A Workbench
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
 Verify User Can Add A S3 Data Connection
-    [Tags]    Sanity    Tier1    ODS-1825
+    [Tags]    Sanity    Tier1
+    ...       ODS-1825    ODS-1972
     [Documentation]    Verifies users can add a Data connection to AWS S3
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}

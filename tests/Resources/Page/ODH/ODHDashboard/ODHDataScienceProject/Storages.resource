@@ -6,7 +6,7 @@ Resource       Projects.resource
 
 
 *** Variables ***
-${STORAGE_SECTION_XP}=             xpath=//div[div//h4[@id="cluster-storages"]]
+${STORAGE_SECTION_XP}=             xpath=//div[@id="cluster-storages"]
 ${STORAGE_NAME_INPUT_XP}=          xpath=//input[@name="create-new-storage-name"]
 ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-description"]
 ${STORAGE_SIZE_INPUT_XP}=         xpath=//div/input[@aria-label="Input"]
@@ -21,14 +21,14 @@ ${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[contains(text(), "Add")
 Storage Should Be Listed
     [Documentation]    Checks storage is listed in DS Project details page
     [Arguments]     ${name}   ${description}   ${type}   ${connected_workbench}
-    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/h4/div[text()="${name}"]
+    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]//h4/div[text()="${name}"]
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/p[text()="${description}"]
-    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[@data-label="Type"]/p[text()=" ${type}"]
+    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//h4/div[text()="${name}"]]/td[@data-label="Type"]/p[contains(text(),"${type}")]
     IF    "${connected_workbench}" == "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[text()="No connections"]
+        Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//h4/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
-            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
+            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//h4/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
         END
     END
 
@@ -37,14 +37,15 @@ Storage Should Not Be Listed
     [Arguments]     ${name}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Does Not Contain Element
-    ...    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    ...    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//h4/div[text()="${name}"]]
     ...    timeout=10s
 
 Storage Size Should Be
     [Documentation]    Checks displayed PV size corresponds to PV size in Openshift.
     ...                Query on Openshift annotation based on this syntax: https://kubernetes.io/docs/reference/kubectl/jsonpath/
     [Arguments]     ${name}      ${size}    ${namespace}
-    Click Element    ${STORAGE_SECTION_XP}//tr[td/h4/div[text()="${name}"]]/td/button[contains(@id,"expand-toggle")]
+    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}
+    Click Element    ${STORAGE_SECTION_XP}//tr[td//h4/div[text()="${name}"]]/td/button[contains(@id,"expand-toggle")]
     Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
     ${displayed_size}=      Get Text    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]

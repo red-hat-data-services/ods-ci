@@ -157,12 +157,12 @@ Remove Disabled Application From Enabled Page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
-   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]//span[contains(@class,'disabled-text')]
+   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//span[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=300
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
-   ${buttons_here}=  Get WebElements    xpath://div[contains(@class,'popover__body')]//button[text()='here']
-   Click Element  ${buttons_here}[1]
+   ${buttons_here}=  Get WebElements    css:div[class*='popover'] button
+   Click Element  ${buttons_here}[2]
    Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
    Capture Page Screenshot  ${app_id}_removed.png
 
@@ -267,7 +267,7 @@ Get Card Badges Titles
 
 Check Card Badges And Return Titles
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
         ${versioned_official_badge_xp}=    Set Variable    ${OFFICIAL_BADGE_XP}
     ELSE
@@ -416,9 +416,15 @@ Re-validate License For Disabled Application From Enabled Page
 
 Get Question Mark Links
     [Documentation]      It returns the link elements from the question mark
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        Click Button  id:help-icon-toggle
+    ELSE
+        Click Element    xpath=//*[@id="toggle-id"]
+    END
     @{links_list}=  Create List
     @{link_elements}=  Get WebElements
-    ...    //a[@class="odh-dashboard__external-link pf-c-dropdown__menu-item" and not(starts-with(@href, '#'))]
+    ...    //a[contains(@class,"pf-c-dropdown__menu-item")]
     FOR  ${link}  IN  @{link_elements}
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}
@@ -428,12 +434,9 @@ Get Question Mark Links
 Get RHODS Documentation Links From Dashboard
     [Documentation]    It returns a list containing rhods documentation links
     Click Link    Resources
-    Sleep    2
-    # get the documentation link
-    ${href_view_the_doc}=    Get Element Attribute    //a[@class='odh-dashboard__external-link']    href
-    Click Element    xpath=//*[@id="toggle-id"]
+    Wait For RHODS Dashboard To Load    expected_page=Resources
+    ${href_view_the_doc}=    Get Element Attribute    //a[contains(text(),'view the documentation.')]    href
     ${links}=    Get Question Mark Links
-    # inserting at 0th position
     Insert Into List    ${links}    0    ${href_view_the_doc}
     RETURN  @{links}
 
@@ -501,7 +504,15 @@ Search Items In Resources Section
 Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
     [Arguments]    ${user_name}
-    Element Text Should Be    xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]    ${user_name}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        ${versioned_user_xp}=    Set Variable
+        ...    xpath=//button[@id="user-menu-toggle"]/span[contains(@class,'toggle-text')]
+    ELSE
+        ${versioned_user_xp}=    Set Variable  xpath=//div[@class='pf-c-page__header-tools-item'][3]//span[1]
+    END
+
+    Element Text Should Be    ${versioned_user_xp}    ${user_name}
 
 Set PVC Value In RHODS Dashboard
     [Documentation]    Change the default value for PVC

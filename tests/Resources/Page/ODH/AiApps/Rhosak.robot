@@ -34,7 +34,7 @@ Open Consumer Notebook
 Enable RHOSAK
     [Documentation]    Perfors the RHOSAK activation though RHODS Dashboard
     Menu.Navigate To Page    Applications    Explore
-    Wait Until Page Contains    ${RHOSAK_DISPLAYED_APPNAME}    timeout=30
+    Wait For RHODS Dashboard To Load    expected_page=Explore
     Click Element    xpath://*[@id='${RHOSAK_REAL_APPNAME}']
     Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}    timeout=10
     ...    error=${RHOSAK_REAL_APPNAME} does not have sidebar with information in the Explore page of ODS Dashboard

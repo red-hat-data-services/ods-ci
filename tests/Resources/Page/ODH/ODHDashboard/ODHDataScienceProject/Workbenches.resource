@@ -14,7 +14,7 @@ ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-desc
 ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//button[@aria-label="Options menu"]
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li/button
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
-${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@id="container-size"]/li/button
+${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
@@ -24,7 +24,7 @@ ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
-
+${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
 *** Keywords ***
 Create Workbench
@@ -41,7 +41,7 @@ Create Workbench
     Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Select Workbench Jupyter Image    image_name=${image_name}
-    # Select Workbench Container Size # to fix, by default Small is already select
+    IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
     IF    "${envs}" != "${NONE}"
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
@@ -177,6 +177,15 @@ Workbench Status Should Be
     ...    Page Should Contain Element    
     ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
 
+Status Error Icon Should Appear
+    [Documentation]
+    [Arguments]     ${workbench_title}
+    Run keyword And Continue On Failure     
+    ...    Page Should Contain Element    
+    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
+    Mouse Over    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}
+    Page Should Contain    Insufficient resources to start
+
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
     [Arguments]     ${workbench_title}      ${timeout}=30s
@@ -295,4 +304,11 @@ Get Openshift Notebook CR From Workbench
     ${rc}  ${cr_name}=    Run And Return Rc And Output   oc get notebook -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${workbench_title}")].metadata.name}'
     RETURN    ${rc}    ${cr_name}
 
-
+Start Workbench Should Fail
+    [Arguments]    ${workbech_title}
+    ${failed}=    Run Keyword And Return Status
+    ...    Wait Until Workbench Is Started     workbench_title=${workbech_title}
+    IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
+    Status Error Icon Should Appear    workbench_title=${workbech_title}
+    
+    

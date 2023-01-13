@@ -26,6 +26,8 @@ ${WORKBENCH_3_TITLE}=   ODS-CI Workbench 3
 ${WORKBENCH_3_DESCRIPTION}=   ODS-CI Workbench 3 is a test workbench using ${NB_IMAGE} image to test DS Projects feature
 ${WORKBENCH_4_TITLE}=   ODS-CI Workbench 4 - envs
 ${WORKBENCH_4_DESCRIPTION}=   ODS-CI Workbench 4 - envs is a test workbench
+${WORKBENCH_5_TITLE}=   ODS-CI Workbench 5 - XL
+${WORKBENCH_5_DESCRIPTION}=   ODS-CI Workbench 5 - XL is a test workbench
 ...    using ${NB_IMAGE} image to test DS Projects feature
 ${PV_BASENAME}=         ods-ci-pv
 ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
@@ -318,6 +320,19 @@ Verify User Can Create A Workbench With Environment Variables
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
     Launch Workbench    workbench_title=${WORKBENCH_4_TITLE}
     Check Environment Variables Exist    exp_env_variables=${envs_list}
+
+Verify Error Is Reported When Workbench Fails To Start
+    [Tags]    Tier1    Sanity
+    ...       ODS-1973
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_5_TITLE}  workbench_description=${WORKBENCH_5_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Medium
+    ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...                 pv_description=${NONE}  pv_size=${NONE}
+    ...                 press_cancel=${FALSE}    envs=${NONE}
+    Start Workbench Should Fail    workbench_title=${WORKBENCH_5_TITLE}
+    Workbench Status Should Be    workbench_title=${WORKBENCH_5_TITLE}    status=Starting
+    
 
 Verify User Can Delete A Data Science Project
     [Tags]    Sanity    Tier1    ODS-1784

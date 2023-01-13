@@ -16,6 +16,7 @@ ${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}/div/button[text()="Add data conne
 ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[text()="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
 ${S3_DC_ADD_BTN}=    //footer/button[.="Add data connection"]
+${DC_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
 
 
 *** Keywords ***
@@ -35,6 +36,16 @@ Create S3 Data Connection
     IF  ${version_check}==True
         Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
     END
+    IF    "${connected_workbench}" == "${NONE}"
+        Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
+    ELSE
+        Run Keyword And Continue On Failure    
+        ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
+        FOR    ${workbench_title}    IN    @{connected_workbench}
+            Set Connection Between Data Connection And Workbench    ${workbench_title}
+            Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}
+        END
+    END
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
@@ -43,6 +54,14 @@ Create S3 Data Connection
     END
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
+
+Set Connection Between Data Connection And Workbench
+    [Documentation]    Connects a DataConnection to an existent workbench
+    [Arguments]    ${workbench_title}
+    Wait Until Element Is Enabled    xpath=//button[@aria-label="Options menu"]
+    Click Element    xpath=//button[@aria-label="Options menu"]
+    Wait Until Page Contains Element    ${DC_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
+    Click Element                       ${DC_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
 
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page

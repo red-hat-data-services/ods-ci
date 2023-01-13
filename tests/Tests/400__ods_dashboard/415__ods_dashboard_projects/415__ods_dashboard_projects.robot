@@ -32,6 +32,7 @@ ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
 # PV size are in GB
 ${PV_SIZE}=         2
 ${DC_S3_NAME}=    ods-ci-s3
+${DC_2_S3_NAME}=    ods-ci-s3-connected
 ${DC_S3_AWS_SECRET_ACCESS_KEY}=    custom dummy secret access key
 ${DC_S3_AWS_ACCESS_KEY}=    custom dummy access key id
 ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
@@ -221,6 +222,25 @@ Verify User Can Launch A Workbench
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_2_TITLE}
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
+Verify User Can Add A S3 Data Connection
+    [Tags]    Sanity    Tier1    ODS-1825
+    [Documentation]    Verifies users can add a Data connection to AWS S3
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
+    ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
+    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${NONE}
+    Check Corresponding Data Connection Secret Exists    dc_name=${DC_S3_NAME}    namespace=${ns_name}
+    ${workbenches}=    Create List    ${WORKBENCH_2_TITLE}    ${WORKBENCH_3_TITLE}
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
+    ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
+    ...                          connected_workbench=${workbenches}
+    Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+
 Verify User Can Stop A Workbench From Projects Home Page
     [Tags]    Sanity    Tier1    ODS-1823
     [Documentation]    Verifies users can stop a running workbench from Data Science Projects home page
@@ -268,18 +288,6 @@ Verify User Can Delete A Persistent Storage
     Delete Storage    name=${pv_name}    press_cancel=${FALSE}
     Storage Should Not Be Listed    name=${pv_name}
     Check Storage PersistentVolumeClaim Is Deleted    storage_name=${pv_name}    namespace=${ns_name}
-
-Verify User Can Add A S3 Data Connection
-    [Tags]    Sanity    Tier1    ODS-1825
-    [Documentation]    Verifies users can add a Data connection to AWS S3
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
-    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
-    ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
-    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${NONE}
-    Check Corresponding Data Connection Secret Exists    dc_name=${DC_S3_NAME}    namespace=${ns_name}
 
 Verify User Can Delete A Data Connection
     [Tags]    Sanity    Tier1    ODS-1826

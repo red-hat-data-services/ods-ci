@@ -35,7 +35,10 @@ Storage Should Be Listed
 Storage Should Not Be Listed
     [Documentation]    Checks storage is not listed in DS Project details page
     [Arguments]     ${name}
-    Run Keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Does Not Contain Element
+    ...    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    ...    timeout=10s
 
 Storage Size Should Be
     [Documentation]    Checks displayed PV size corresponds to PV size in Openshift.
@@ -70,10 +73,11 @@ Fill In New PV Data
     [Arguments]    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
     ${is_storage_modal}=     Run Keyword And Return Status    Page Should Contain Element     ${STORAGE_ADD_BTN_2_XP}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
-    Run Keyword If   ${is_storage_modal} == ${TRUE}     Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
+    IF   ${is_storage_modal} == ${TRUE}     Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
+    Clear Element Text    ${STORAGE_NAME_INPUT_XP}
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
-    Run Keyword If   ${is_storage_modal} == ${TRUE}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
+    IF   ${is_storage_modal} == ${TRUE}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
     Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
     Clear Element Text    ${STORAGE_SIZE_INPUT_XP}
     IF    ${size} > 1
@@ -113,4 +117,4 @@ Get Openshift PVC From Storage
     [Documentation]    Retrieves the PVC resource name from Openshift given the Displayed Name in DS Project details page
     [Arguments]     ${name}      ${namespace}
     ${rc}  ${pvc_name}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].metadata.name}'
-    [Return]    ${rc}    ${pvc_name}
+    RETURN    ${rc}    ${pvc_name}

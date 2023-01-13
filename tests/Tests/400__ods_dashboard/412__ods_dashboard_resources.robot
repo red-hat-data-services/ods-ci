@@ -11,6 +11,10 @@ Test Setup        Resources Test Setup
 Test Teardown     Resources Test Teardown
 
 
+*** Variables ***
+@{LIST_OF_IDS_FOR_COMBINATIONS}         documentation--check-box    Red Hat managed--check-box
+
+
 *** Test Cases ***
 Verify Quick Starts Work As Expected
     [Tags]  Sanity
@@ -25,14 +29,13 @@ Verify Quick Starts Work As Expected
     Verify Quick Starts Work As Expected When One Step Is Marked As No  openvino-inference-notebook
 
 Verify External Links In Quick Starts Are Not Broken
-        [Tags]  Sanity
-        ...     Tier1
-        ...     ODS-1305
-        ...     ProductBug
-        [Documentation]    Verify external links in Quick Starts are not broken
-        Click Link                 Resources
-        ${quickStartElements}=     Get QuickStart Items
-        Verify Links Are Not Broken For Each QuickStart      ${quickStartElements}
+    [Tags]  Sanity
+    ...     Tier1
+    ...     ODS-1305
+    [Documentation]    Verify external links in Quick Starts are not broken
+    Click Link                 Resources
+    ${quickStartElements}=     Get QuickStart Items
+    Verify Links Are Not Broken For Each QuickStart      ${quickStartElements}
 
 Verify Resource Link HTTP Status Code
     [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
@@ -43,6 +46,21 @@ Verify Resource Link HTTP Status Code
     Sleep    5
     ${link_elements}=     Get Link Web Elements From Resource Page
     URLs HTTP Status Code Should Be Equal To     link_elements=${link_elements}    expected_status=200
+
+Verify Filters Are Working On Resources Page
+    [Documentation]    check if it is possible to filter items by enabling various filters like status,provider
+    [Tags]    Sanity
+    ...       ODS-489
+    ...       Tier1
+    Click Link    Resources
+    Wait For RHODS Dashboard To Load    expected_page=Resources
+    Set Expected Items Based On RHODS Type
+    Number Of Items Should Be    expected_number=${EXPECTED_RESOURCE_ITEMS}
+    Filter Resources By Status "Enabled" And Check Output
+    Filter By Resource Type And Check Output
+    Filter By Provider Type And Check Output
+    Filter By Application (Aka Povider) And Check Output
+    Filter By Using More Than One Filter And Check Output
 
 *** Keywords ***
 Resources Test Setup
@@ -136,76 +154,84 @@ Verify Quick Starts Work As Expected When At Least One Step Is Skipped
     Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      In Progress
     Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
 
-External URLs Should Not Be Broken
-    [Documentation]     Go through a QuickStart and checks the status of all the external links
-    ${quick_start_steps}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
-    ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-    URLs HTTP Status Code Should Be Equal To    ${element_list}
+Filter Resources By Status "Enabled" And Check Output
+    [Documentation]    Filters the resources By Status Enabled
+    Select Checkbox Using Id    enabled-filter-checkbox--check-box
+    Run Keyword And Continue On Failure
+    ...    Verify The Resources Are Filtered
+    ...    list_of_items=${EXPECTED_ITEMS_FOR_ENABLE}
+    Deselect Checkbox Using Id    enabled-filter-checkbox--check-box
 
-    FOR    ${quick_start_step}    IN     @{quick_start_steps}
-            Open QuickStart Step  ${quick_start_step}
-            ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-            URLs HTTP Status Code Should Be Equal To    ${element_list}
-            ${Doc_Text}     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]
-            ${Doc_links}     Get Regexp Matches   ${Doc_Text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
-            IF  ${Doc_links}
-                Validate Links Extracted From Text     ${Doc_links}
-            END
+Filter By Application (Aka Povider) And Check Output
+    [Documentation]    Filter by application (aka provider)
+    ${id_name}=  Set Variable    Anaconda Professional--check-box
+    Select Checkbox Using Id    ${id_name}
+    Verify The Resources Are Filtered
+    ...    expected_providers=${EXPECTED_ITEM_PROVIDERS}    expected_number=10
+    Deselect Checkbox Using Id    id=${id_name}
+
+Filter By Resource Type And Check Output
+    [Documentation]    Filter by resource type
+    Select Checkbox Using Id    id=tutorial--check-box
+    Verify The Resources Are Filtered
+    ...    expected_types=${EXPECTED_ITEM_RESOURCE_TYPE}    expected_number=14
+    Deselect Checkbox Using Id    id=tutorial--check-box
+
+Filter By Provider Type And Check Output
+    [Documentation]    Filter by provider type
+    Select Checkbox Using Id    id=Red Hat managed--check-box
+    Verify The Resources Are Filtered
+    ...    list_of_items=${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
+    Deselect Checkbox Using Id    id=Red Hat managed--check-box
+
+Filter By Using More Than One Filter And Check Output
+    [Documentation]    Filter resouces using more than one filter ${list_of_ids} = list of check-box ids
+    FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
+        Select Checkbox Using Id    id=${id}
+    END
+    Verify The Resources Are Filtered
+    ...    list_of_items=${EXPECTED_ITEMS_FOR_COMBINATIONS}
+    FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
+        Deselect Checkbox Using Id    id=${id}
     END
 
-Verify Links Are Not Broken For Each QuickStart
-    [Documentation]     Clicks on al the quick start and verify links
-    [Arguments]    ${quickStartElements}
-    ${quickStartCount}=   Get Length           ${quickStartElements}
-    ${TitleElements}=     Get WebElements      //div[@class="pf-c-card__title odh-card__doc-title"]
-    FOR    ${counter}    IN RANGE     ${quickStartCount}
-        Log To Console    \n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        ${Title}=   Get Text          ${TitleElements[${counter}]}
-        ${Title}=   Split To Lines    ${Title}
-        Log To Console                ${Title[${0}]}
-        Click Element                 ${quickStartElements[${counter}]}
-        Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
-        External URLs Should Not Be Broken
+Set Expected Items Based On RHODS Type    # robocop: disable
+    [Documentation]    Sets some required variables depending on if RHODS is
+    ...                installed as Self-Managed or Cloud Service
+    ${is_self_managed}=    Is RHODS Self-Managed
+    ${n_items}=    Set Variable    50
+    ${EXPECTED_ITEMS_FOR_ENABLE}=    Create List    Creating a Jupyter notebook
+    ...    Deploying a sample Python application using Flask and OpenShift.
+    ...    How to install Python packages on your notebook server
+    ...    How to update notebook server settings
+    ...    How to use data from Amazon S3 buckets
+    ...    How to view installed packages on your notebook server
+    ...    Jupyter
+    ${EXPECTED_ITEM_PROVIDERS}=    Create List       by Anaconda Professional
+    ${EXPECTED_ITEM_RESOURCE_TYPE}=    Create List     Tutorial
+    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}=    Create List
+    ...    Connecting to Red Hat OpenShift Streams for Apache Kafka
+    ...    Creating a Jupyter notebook
+    ...    How to install Python packages on your notebook server
+    ...    How to update notebook server settings
+    ...    How to use data from Amazon S3 buckets
+    ...    How to view installed packages on your notebook server
+    ...    Deploying a sample Python application using Flask and OpenShift.
+    ...    Jupyter    OpenShift Streams for Apache Kafka
+    ...    OpenShift API Management
+    ...    Securing a deployed model using Red Hat OpenShift API Management
+    @{EXPECTED_ITEMS_FOR_COMBINATIONS}=      Create List
+    ...    Jupyter    OpenShift Streams for Apache Kafka    OpenShift API Management
+    IF    ${is_self_managed} == ${TRUE}
+        Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
+        Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
+        Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
+        ${n_items}=    Set Variable    43
     END
-
-Get QuickStart Items
-        Wait Until Resource Page Is Loaded
-        ${quickStartElements}=     Wait for QuickStart to Load
-        [Return]    ${quickStartElements}
-
-
-Open QuickStart Step
-    [Documentation]   Click next if next not found cick tab to find buttion
-    [Arguments]  ${quick_start_step}
-    ${status}   Run Keyword And Return Status   Click Element  ${quick_start_step}
-    IF  ${status} == False
-        Click Button    Next
-    END
-
-    FOR    ${counter}    IN RANGE    5
-        Press Keys    NONE    TAB
-    END
-
-
-Validate Links Extracted From Text
-    [Arguments]    ${doc_links}
-    @{valiadte_urls}  Create List
-    @{invalidLinks}   Create List
-    Append To List  ${invalidLinks}   http://s2i-python-service.my-project.svc.cluster.local:8080.  http://example.apps.organization.abc3.p4.openshiftapps.com/predictions  https://my-project-s2i-python-service-openapi-3scale-api.cluster.com/?user_key=USER_KEY     https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/?user_key=<API_KEY_GOES_HERE>     https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/status/?user_key=.
-
-    FOR    ${doc_link}    IN    @{doc_links}
-        Log To Console   ${doc_link}
-        ${status}=   Run Keyword And Return Status    List Should Contain Value    ${invalidLinks}    ${doc_link}
-        IF  ${status}
-            Log To Console  Skipped invalid link   ${doc_link}
-        ELSE
-            IF  "${doc_link[${-1}]}" != '.'
-                ${status}=  Check HTTP Status Code  ${doc_link}
-                Log To Console  ${doc_link}
-            ELSE IF  "${doc_link[${-1}]}" == '.'
-                ${status}=  Check HTTP Status Code   ${doc_link[:${-1}]}
-                 Log To Console   ${doc_link[:${-1}]}
-            END
-        END
-    END
+    Set Suite Variable    ${EXPECTED_RESOURCE_ITEMS}    ${n_items}
+    Set Suite Variable    ${EXPECTED_ITEMS_FOR_ENABLE}    ${EXPECTED_ITEMS_FOR_ENABLE}
+    Set Suite Variable    ${EXPECTED_ITEM_PROVIDERS}    ${EXPECTED_ITEM_PROVIDERS}
+    Set Suite Variable    ${EXPECTED_ITEM_RESOURCE_TYPE}    ${EXPECTED_ITEM_RESOURCE_TYPE}
+    Set Suite Variable    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
+    Set Suite Variable    ${EXPECTED_ITEMS_FOR_COMBINATIONS}    ${EXPECTED_ITEMS_FOR_COMBINATIONS}
 

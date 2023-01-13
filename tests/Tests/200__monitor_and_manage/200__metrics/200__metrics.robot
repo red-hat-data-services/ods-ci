@@ -27,6 +27,7 @@ Test Existence of Prometheus Alerting Rules
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-509
+    Skip If RHODS Is Self-Managed
     Check Prometheus Alerting Rules
 
 Test Existence of Prometheus Recording Rules
@@ -34,6 +35,7 @@ Test Existence of Prometheus Recording Rules
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-510
+    Skip If RHODS Is Self-Managed
     Check Prometheus Recording Rules
 
 Test Metric "Notebook CPU Usage" On ODS Prometheus
@@ -41,6 +43,7 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-178
+    Skip If RHODS Is Self-Managed
     ${cpu_usage_before} =    Read Current CPU Usage
     Run Jupyter Notebook For 5 Minutes
     Wait Until Keyword Succeeds    10 times   30s
@@ -52,6 +55,7 @@ Test Metric "Rhods_Total_Users" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-628
+    Skip If RHODS Is Self-Managed
     # Note: the expression ends with "step=1" to obtain the value for current second
     ${expression} =    Set Variable    rhods_total_users&step=1
     ${rhods_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
@@ -76,6 +80,7 @@ Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-636
+    Skip If RHODS Is Self-Managed
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
@@ -127,15 +132,15 @@ Check Prometheus Alerting Rules
 
 Read Current CPU Usage
     [Documentation]    Returns list of current cpu usage
-    ${Expression} =    Set Variable
-    ...    sum(rate(container_cpu_usage_seconds_total{prometheus_replica="prometheus-k8s-0", container="",pod=~"jupyter-nb.*",namespace="rhods-notebooks"}[1h]))    # robocop:disable
-    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${Expression}
+    ${expression} =    Set Variable
+    ...    sum(rate(container_cpu_usage_seconds_total{container="",pod=~"jupyter-nb.*",namespace="rhods-notebooks"}[1h]))    # robocop:disable
+    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     IF    ${resp.json()["data"]["result"]} == []
         ${cpu_usage} =    Set Variable    0
     ELSE
         ${cpu_usage} =    Set Variable    ${resp.json()["data"]["result"][0]["value"][-1]}
     END
-    [Return]    ${cpu_usage}
+    RETURN    ${cpu_usage}
 
 CPU Usage Should Have Increased
      [Documentation]   Verifies that CPU usage for notebook pods has increased since previous value
@@ -161,7 +166,7 @@ Iterative Image Test
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=${image}
     Run Cell And Check Output    print("Hello World!")    Hello World!

@@ -100,7 +100,7 @@ Get Notebook Culler Pod Name
     ${culler_pod_name} =  Set Variable  ${culler_pod[0]}[metadata][name]
     Log  ${culler_pod}
     Log  ${culler_pod_name}
-    [Return]  ${culler_pod_name}
+    RETURN  ${culler_pod_name}
 
 Get And Verify Notebook Culler Timeout
     [Documentation]    Gets the current culler timeout from configmap and culler pod, compares the two
@@ -110,20 +110,20 @@ Get And Verify Notebook Culler Timeout
     ${culler_env_timeout} =  Get Notebook Culler Timeout From Culler Pod
     Log  ${culler_env_timeout}
     Should Be Equal  ${current_timeout}  ${culler_env_timeout}
-    [Return]  ${current_timeout}
+    RETURN  ${current_timeout}
 
 Get Notebook Culler Timeout From Configmap
     [Documentation]    Gets the current culler timeout from configmap
     ${current_timeout} =  OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config
     ...    namespace=redhat-ods-applications  fields=['data.CULL_IDLE_TIME']
     ${current_timeout} =  Set Variable  ${current_timeout[0]['data.CULL_IDLE_TIME']}
-    [Return]  ${current_timeout}
+    RETURN  ${current_timeout}
 
 Get Notebook Culler Timeout From Culler Pod
     [Documentation]    Gets the current culler timeout from culler pod
     ${CULLER_POD} =  Get Notebook Culler Pod Name
     ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -n redhat-ods-applications -- printenv CULL_IDLE_TIME  # robocop: disable
-    [Return]  ${culler_env_timeout}
+    RETURN  ${culler_env_timeout}
 
 Modify Notebook Culler Timeout
     [Documentation]    Modifies the culler timeout via UI

@@ -39,6 +39,11 @@ Verify Model Can Be Deployed Via UI
     Click Button    Create server
     Wait Until Page Contains    Data science projects
     Wait Until Page Contains Element    //button[.="Create data science project"]
+    ${already_present} =    Run Keyword And Return Status    Page Should Contain    ${PRJ_TITLE}
+    IF    ${already_present}
+        Delete Data Science Project    ${PRJ_TITLE}
+        Sleep    10s    reason=It takes a while for the namespace to be actually deleted
+    END
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}

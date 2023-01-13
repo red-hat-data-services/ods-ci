@@ -11,7 +11,7 @@ Library             SeleniumLibrary
 Library             JupyterLibrary
 
 Suite Setup         Alerts Suite Setup
-Suite Teardown      RHOSi Teardown
+Suite Teardown      Alerts Suite Teardown
 
 
 *** Variables ***
@@ -431,7 +431,13 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
+    Skip If RHODS Is Self-Managed
     RHOSi Setup
+
+Alerts Suite Teardown
+    [Documentation]    Test suite teardown
+    Skip If RHODS Is Self-Managed
+    RHOSi Teardown
 
 Teardown PVC Alert Test
     [Documentation]    Deletes user notebook files using the new "Clean Up User Notebook"
@@ -456,7 +462,7 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=s2i-generic-data-science-notebook
     Clone Git Repository And Run    ${notebook_repo}    ${notebook_path}
@@ -636,7 +642,7 @@ Check Cluster Name Contain "Aisrhods" Or Not
     [Documentation]     Return true if cluster name contains aisrhods and if not return false
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${return_value} =  Evaluate  "aisrhods" in "${cluster_name}"
-    [Return]  ${return_value}
+    RETURN  ${return_value}
 
 Check Particular Text Is Present In Rhods-operator's Log
     [Documentation]     Check if text is present in log

@@ -14,10 +14,10 @@ Does ClusterName Exists
         IF    "${name}[metadata][name]" == "${infrastructure_configurations['hive_cluster_name']}"
             Log    ${name}[metadata][name]    console=True
             ${clustername_exists} =    Set Variable    "${name}[metadata][name]"
-            Return From Keyword    ${clustername_exists}
+            RETURN    ${clustername_exists}
         END  
     END
-    [Return]    False
+    RETURN    False
 
 Get Clusters
     @{clusters} =    Oc Get    kind=ClusterClaim    namespace=rhods
@@ -48,7 +48,7 @@ Provision Cluster
     Log    Setting cluster configuration    console=True
     ${template} =    Select Provisioner Template
     ${clustername_exists} =    Does ClusterName Exists
-    Run Keyword If    ${clustername_exists}    
+    IF    ${clustername_exists}    
     ...    FAIL    Cluster name ${infrastructure_configurations['hive_cluster_name']} already exists. Please choose a different name.
     Log     Configuring cluster    console=True
     Log Many    ${infrastructure_configurations['hive_cluster_name']}    console=True
@@ -65,7 +65,7 @@ Select Provisioner Template
     ELSE
         FAIL    Invalid provider name
     END
-    [Return]    ${template}
+    RETURN    ${template}
 
 Verify Cluster Is Successfully Provisioned
     [Arguments]    ${namespace}
@@ -80,8 +80,8 @@ Wait For Cluster To Be Ready
     Log    ${namespace[0]['metadata']['name']}    console=True
     ${result} =    Wait Until Keyword Succeeds    50 min    10 s 
     ...    Verify Cluster Is Successfully Provisioned    ${namespace[0]['metadata']['name']}
-    Run Keyword If    ${result} == False    Delete Cluster Configuration
-    Run Keyword If    ${result} == False    FAIL    
+    IF    ${result} == False    Delete Cluster Configuration
+    IF    ${result} == False    FAIL    
     ...    Cluster provisioning failed. Please look into the logs for more details.
     
 Confirm Cluster Is Claimed

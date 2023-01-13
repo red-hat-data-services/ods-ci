@@ -130,6 +130,8 @@ def generate_test_config_file(
     data["S3"]["AWS_ACCESS_KEY_ID"] = config_data["S3"]["AWS_ACCESS_KEY_ID"]
     data["S3"]["AWS_SECRET_ACCESS_KEY"] = config_data[
         "S3"]["AWS_SECRET_ACCESS_KEY"]
+    data["S3"]["AWS_DEFAULT_ENDPOINT"] = config_data["S3"]["AWS_DEFAULT_ENDPOINT"]
+    data["S3"]["AWS_DEFAULT_REGION"] = config_data["S3"]["AWS_DEFAULT_REGION"]
     data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data[
         "ANACONDA_CE"]["ACTIVATION_KEY"]
     data["OCP_CONSOLE_URL"] = config_data[

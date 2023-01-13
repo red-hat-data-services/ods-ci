@@ -53,4 +53,4 @@ Get Query Results
             ${metrics_query_result_row1_value} =   Set Variable  ${EMPTY}
         END
     END
-    [Return]  ${metrics_query_result_row1_value}
+    RETURN  ${metrics_query_result_row1_value}

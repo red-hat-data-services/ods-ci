@@ -79,7 +79,7 @@ Get Pachd Version
     ${version}=     Get Text        (//dd[@data-test-selector="details-item-value__Version"])[1]
     ${seperator}=   Set Variable    v
     ${res_version}=     Fetch From Right    ${version}      ${seperator}
-    [Return]    ${res_version}
+    RETURN    ${res_version}
 
 Create Pachyderm AWS-Secret
     [Documentation]     Creates a Pachyderm AWS Secret.
@@ -88,7 +88,7 @@ Create Pachyderm AWS-Secret
 Verify Pipeline Pod Creation
     [Documentation]     Checks pipeline pod has been created in workloads.
     ${status}=    Check If POD Exists    pachyderm      app=pipeline-edges-v1
-    Run Keyword IF    '${status}'=='FAIL'    FAIL
+    IF    '${status}'=='FAIL'    FAIL
     ...    PODS with Label '${label_selector}' is not present in '${namespace}' namespace
     Wait Until Keyword Succeeds     120     5   Verify Operator Pod Status  pachyderm   app=pipeline-edges-v1
 
@@ -98,7 +98,7 @@ Create Command In Multiple Lines
     ...     from IPython.display import Image, display
     ...     Image(filename='original_liberty.png')
     Log     ${command_string}
-    [Return]    ${command_string}
+    RETURN    ${command_string}
 
 Create Pachyderm Pipeline Using JupyterLab
     [Documentation]     Creates pachyderm pipeline by running multiple commands on jupyterlab.

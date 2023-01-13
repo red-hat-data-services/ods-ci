@@ -13,6 +13,7 @@ Verify Blackbox Exporter Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-235
+    Skip If RHODS Is Self-Managed
     @{blackbox_exporter_pods_info} =    Fetch Blackbox Exporter Pods Info
     @{blackbox_exporter_deployment_info} =    Fetch Blackbox Exporter Deployments Info
     @{blackbox_exporter_services_info} =    Fetch Blackbox Exporter Services Info
@@ -39,7 +40,7 @@ Fetch Blackbox Exporter Pods Info
     ...    Returns:
     ...        blackbox_exporter_pods_info(list(dict)): Blackbox Exporter pods selected by label and namespace
     @{blackbox_exporter_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-monitoring    label_selector=deployment=blackbox-exporter
-    [Return]    @{blackbox_exporter_pods_info}
+    RETURN    @{blackbox_exporter_pods_info}
 
 Fetch Blackbox Exporter Deployments Info
     [Documentation]    Fetch information from Blackbox Exporter Deployments
@@ -49,7 +50,7 @@ Fetch Blackbox Exporter Deployments Info
     ...        blackbox_exporter_deployments(list(dict)): Blackbox Exporter deployments selected by label and namespace
     @{blackbox_exporter_deployments} =    Oc Get    kind=Deployment    api_version=v1    namespace=redhat-ods-monitoring
     ...    label_selector=deployment=blackbox-exporter
-    [Return]    @{blackbox_exporter_deployments}
+    RETURN    @{blackbox_exporter_deployments}
 
 Fetch Blackbox Exporter Services Info
     [Documentation]    Fetch information from Blackbox Exporter services
@@ -58,7 +59,7 @@ Fetch Blackbox Exporter Services Info
     ...    Returns:
     ...        blackbox_exporter_services_info(list(dict)): Blackbox Exporter services selected by name and namespace
     @{blackbox_exporter_services_info} =    Oc Get    kind=Service    api_version=v1    name=blackbox-exporter    namespace=redhat-ods-monitoring
-    [Return]    @{blackbox_exporter_services_info}
+    RETURN    @{blackbox_exporter_services_info}
 
 Verify Blackbox Exporter ReplicaSets Info
     [Documentation]    Fetch and verify information from Blackbox Exporter replicasets

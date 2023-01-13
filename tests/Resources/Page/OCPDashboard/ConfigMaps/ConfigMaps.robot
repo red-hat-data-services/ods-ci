@@ -8,16 +8,16 @@ Resource   ../../ODH/ODHDashboard/ODHDashboard.robot
 Delete ConfigMap using Name
     [Arguments]    ${namespace}                              ${configmap_name}
     ${status}      Check If ConfigMap Exists      ${namespace}      ${configmap_name}
-    Run Keyword IF          '${status}'=='PASS'   Oc Delete   kind=ConfigMap   name=${configmap_name}   namespace=${namespace}
+    IF    '${status}'=='PASS'   Oc Delete   kind=ConfigMap   name=${configmap_name}   namespace=${namespace}
     ...        ELSE         FAIL        No configmaps present with name '${configmap_name}' in '${namespace}' namespace, Check the configmap name and namespace provide is correct and try again
     ${status}      Check If ConfigMap Exists      ${namespace}      ${configmap_name}
-    Run Keyword IF          '${status}'!='FAIL'     FAIL        ConfigMaps with name '${configmap_name}' is not deleted in '${namespace}' namespace
+    IF    '${status}'!='FAIL'     FAIL        ConfigMaps with name '${configmap_name}' is not deleted in '${namespace}' namespace
 
 
 Check If ConfigMap Exists
     [Arguments]   ${namespace}   ${configmap_name}
     ${status}     ${val}  Run keyword and Ignore Error   Oc Get  kind=ConfigMap  namespace=${namespace}   field_selector=metadata.name==${configmap_name}
-    [Return]   ${status}
+    RETURN   ${status}
 
 Get PVC Size
     [Documentation]    Get configure PVC size from OdhDashboardConfig CR
@@ -25,7 +25,7 @@ Get PVC Size
     ${data}    Oc Get  kind=OdhDashboardConfig  namespace=${namespace}
     ...    field_selector=metadata.name==${configmap_name}
     ${size}    Set Variable      ${data[0]['spec']['notebookController']['pvcSize']}
-    [Return]   ${size}[:-2]
+    RETURN   ${size}[:-2]
 
 Change PVC Size From ConfigMap
     [Documentation]    Configure PVC size for Notebook controller

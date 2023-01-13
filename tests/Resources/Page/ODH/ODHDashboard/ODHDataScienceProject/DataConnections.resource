@@ -31,7 +31,10 @@ Create S3 Data Connection
     Input Text    ${S3_SECRET_DC_INPUT_XP}    ${aws_secret_access}
     Input Text    ${S3_ENDPOINT_DC_INPUT_XP}    ${aws_s3_endpoint}
     Input Text    ${S3_REGION_DC_INPUT_XP}    ${aws_region}
-    Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
+    END
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
@@ -69,7 +72,7 @@ Get Openshift Secret From Data Connection
     [Documentation]    Retrieves name of Openshift secret corresponding to a given S3 Data Connection based on Dispayed name in DS Project details page
     [Arguments]     ${dc_name}      ${namespace}
     ${rc}  ${secret_name}=    Run And Return Rc And Output   oc get secret -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${dc_name}")].metadata.name}'
-    [Return]    ${rc}    ${secret_name}
+    RETURN    ${rc}    ${secret_name}
 
 Delete Data Connection
     [Documentation]    Deletes a Data Connection from DS Project details page

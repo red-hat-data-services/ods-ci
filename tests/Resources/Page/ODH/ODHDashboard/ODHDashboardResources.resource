@@ -3,6 +3,14 @@ Resource      ../../../Page/Components/Components.resource
 Resource       ../../../Common.robot
 
 
+*** Variables ***
+@{INVALID_LINKS}=   http://s2i-python-service.my-project.svc.cluster.local:8080.
+...                 http://example.apps.organization.abc3.p4.openshiftapps.com/prediction
+...                 https://my-project-s2i-python-service-openapi-3scale-api.cluster.com/?user_key=USER_KEY
+...                 https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/?user_key=<API_KEY_GOES_HERE>
+...                 https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/status/?user_key=.
+
+
 *** Keywords ***
 Open QuickStart Element in Resource Section By Name
     [Documentation]     It opens the element by enabling Quick Start filter in Resources Section of ODS Dashboard.
@@ -19,7 +27,7 @@ Star QuickStart Tour
 Get The Count Of QuickStart Steps
     [Documentation]     Gives the count of steps in a the quick start
     ${count}=   Get ELement Count   //div[@class="pfext-quick-start-content"]/ul/li
-    [Return]    ${count}
+    RETURN    ${count}
 
 Link Text On QuickStart Card Should Be
     [Arguments]     ${element}  ${exp_link_text}
@@ -93,7 +101,7 @@ Wait for QuickStart to Load
     Wait Until Element Is Visible       xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
     Select Checkbox                         xpath=//*[@id="quickstart--check-box"]
     ${quickStartElements}=   Get WebElements    xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
-    [Return]    ${quickStartElements}
+    RETURN    ${quickStartElements}
 
 Wait Until Resource Page Is Loaded
     Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
@@ -104,7 +112,7 @@ Get Link Web Elements From Resource Page
     ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
     ${len}=    Get Length    ${link_elements}
     Log To Console    ${len} Links found\n
-    [Return]    ${link_elements}
+    RETURN    ${link_elements}
 
 Verify Quick Starts Work As Expected When All Steps Are Marked As Yes
     [Arguments]    ${element}
@@ -187,37 +195,42 @@ External URLs Should Not Be Broken
     ${quick_start_steps}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
     ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
     URLs HTTP Status Code Should Be Equal To    ${element_list}
-
     FOR    ${quick_start_step}    IN     @{quick_start_steps}
             Open QuickStart Step  ${quick_start_step}
             ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-            URLs HTTP Status Code Should Be Equal To    ${element_list}
-            ${Doc_Text}     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]
-            ${Doc_links}     Get Regexp Matches   ${Doc_Text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
-            IF  ${Doc_links}
-                Validate Links Extracted From Text     ${Doc_links}
-            END
+            Run Keyword And Continue On Failure
+            ...    URLs HTTP Status Code Should Be Equal To    ${element_list}
+            ${doc_text}=     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]    # robocop: disable
+            ${doc_link}=    Extract URLs From Text    text=${doc_text}
+            Validate Links Extracted From Text     ${doc_link}
     END
 
 Verify Links Are Not Broken For Each QuickStart
     [Documentation]     Clicks on al the quick start and verify links
     [Arguments]    ${quickStartElements}
     ${quickStartCount}=   Get Length           ${quickStartElements}
-    ${TitleElements}=     Get WebElements      //div[@class="pf-c-card__title odh-card__doc-title"]
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-content"]
+    ELSE
+        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-card__title odh-card__doc-title"]
+    END
+    ${TitleElements}=     Get WebElements      ${versioned_title_xp}
     FOR    ${counter}    IN RANGE     ${quickStartCount}
-        Log To Console    \n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        Log    \n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++    console=yes
         ${Title}=   Get Text          ${TitleElements[${counter}]}
         ${Title}=   Split To Lines    ${Title}
-        Log To Console                ${Title[${0}]}
+        Log                ${Title[${0}]}    console=yes
         Click Element                 ${quickStartElements[${counter}]}
         Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
         External URLs Should Not Be Broken
     END
 
 Get QuickStart Items
-        Wait Until Resource Page Is Loaded
-        ${quickStartElements}=     Wait for QuickStart to Load
-        [Return]    ${quickStartElements}
+    [Documentation]    Fetches and returns the web elements of RHODS Quick Starts
+    Wait For RHODS Dashboard To Load    expected_page=Resources
+    ${quickStartElements}=     Wait For QuickStart To Load
+    RETURN    ${quickStartElements}
 
 Open QuickStart Step
     [Documentation]   Click next if next not found cick tab to find buttion
@@ -232,23 +245,19 @@ Open QuickStart Step
     END
 
 Validate Links Extracted From Text
+    [Documentation]    Checks the health status of the links which have been
+    ...                extracted from the quick start texts
     [Arguments]    ${doc_links}
-    @{valiadte_urls}  Create List
-    @{invalidLinks}   Create List
-    Append To List  ${invalidLinks}   http://s2i-python-service.my-project.svc.cluster.local:8080.  http://example.apps.organization.abc3.p4.openshiftapps.com/predictions  https://my-project-s2i-python-service-openapi-3scale-api.cluster.com/?user_key=USER_KEY     https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/?user_key=<API_KEY_GOES_HERE>     https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/status/?user_key=.
-
     FOR    ${doc_link}    IN    @{doc_links}
-        Log To Console   ${doc_link}
-        ${status}=   Run Keyword And Return Status    List Should Contain Value    ${invalidLinks}    ${doc_link}
+        Log   ${doc_link}
+        ${status}=   Run Keyword And Return Status    List Should Contain Value    ${INVALID_LINKS}    ${doc_link}
         IF  ${status}
-            Log To Console  Skipped invalid link   ${doc_link}
+            Log  Skipped invalid link ${doc_link}
         ELSE
-            IF  "${doc_link[${-1}]}" != '.'
-                ${status}=  Check HTTP Status Code  ${doc_link}
-                Log To Console  ${doc_link}
-            ELSE IF  "${doc_link[${-1}]}" == '.'
-                ${status}=  Check HTTP Status Code   ${doc_link[:${-1}]}
-                 Log To Console   ${doc_link[:${-1}]}
+            IF  "${doc_link[${-1}]}" == '.'
+                 ${doc_link}=    Set Variable    ${doc_link[:${-1}]}
             END
+            ${status}=  Run Keyword And Continue On Failure
+            ...    Check HTTP Status Code  ${doc_link}
         END
     END

@@ -15,15 +15,17 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__
 ${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
 ${SAMPLE_APP_CARD_XP}=   //article[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
-${TITLE_XP}=  div[@class='pf-c-card__title']//div/div[1]
-${TITLE_XP_OLD}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]
+${TITLE_XP}=   div[@class='pf-c-card__title']//span
+${TITLE_XP_OLD}=  div[@class='pf-c-card__title']//div/div[1]
 ${PROVIDER_XP}=  div[@class='pf-c-card__title']//span[contains(@class, "provider")]
 ${DESCR_XP}=  div[@class='pf-c-card__body']
-${BADGES_XP}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
-${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//img[contains(@class, 'supported-image')]
-${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-c-card__title']//span[contains(@class, "title")]/img[contains(@class, 'supported-image')]    # robocop: disable
+${BADGES_XP}=  ${HEADER_XP}//div[contains(@class, 'badge') or contains(@class, 'coming-soon')]
+${BADGES_XP_OLD}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
+${OFFICIAL_BADGE_XP}=  div[@class='pf-c-card__title']//img
+${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-c-card__title']//img[contains(@class, 'supported-image')]    # robocop: disable
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
-${IMAGE_XP}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
+${IMAGE_XP}=  ${HEADER_XP}//picture[contains(@class,'pf-m-picture')]/source
+${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH}=  tests/Resources/Files/AppsInfoDictionary.json
 ${APPS_DICT_PATH_LATEST}=   tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
@@ -49,9 +51,11 @@ ${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo"]
 *** Keywords ***
 Launch Dashboard
   [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}  ${dashboard_url}  ${browser}  ${browser_options}
+  ...          ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-  Wait for RHODS Dashboard to Load
+  Wait for RHODS Dashboard to Load    expected_page=${expected_page}
+  ...    wait_for_cards=${wait_for_cards}
 
 Authorize rhods-dashboard service account
   Wait Until Page Contains  Authorize Access
@@ -62,11 +66,11 @@ Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    #Wait Until Page Contains  Log in with
    ${oauth_prompt_visible} =  Is OpenShift OAuth Login Prompt Visible
-   Run Keyword If  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
+   IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
    ${login-required} =  Is OpenShift Login Visible
-   Run Keyword If  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
+   IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ${authorize_service_account} =  Is rhods-dashboard Service Account Authorization Required
-   Run Keyword If  ${authorize_service_account}  Authorize rhods-dashboard service account
+   IF  ${authorize_service_account}  Authorize rhods-dashboard service account
 
 Logout From RHODS Dashboard
     [Documentation]  Logs out from the current user in the RHODS dashboard
@@ -75,15 +79,28 @@ Logout From RHODS Dashboard
     # Another option for the logout button
     #${user} =  Get Text  xpath:/html/body/div/div/header/div[2]/div/div[3]/div/button/span[1]
     #Click Element  xpath://span[.="${user}"]/..
-    Click Button  xpath:(//button[@id="toggle-id"])[2]
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        Click Button  xpath://button[@id="user-menu-toggle"]
+    ELSE
+        Click Button  xpath:(//button[@id="toggle-id"])[2]
+    END
     Wait Until Page Contains Element  xpath://a[.="Log out"]
     Click Element  xpath://a[.="Log out"]
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"
+    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"    ${wait_for_cards}=${TRUE}
+    ...          ${expected_page}=Enabled
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=15s
+    IF    "${expected_page}" != "${NONE}"
+        Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]        
+    END
+    IF    ${wait_for_cards} == ${TRUE}
+        Wait Until Cards Are Loaded
+    END
+    
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
@@ -123,9 +140,17 @@ Verify Service Is Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    Jupyter  timeout=30
+  Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
   Page Should Contain Element    //article//*[.='${app_name}']
+
+Verify Service Is Not Available In The Explore Page
+  [Documentation]   Verify the service appears in Applications > Explore
+  [Arguments]  ${app_name}
+  Menu.Navigate To Page    Applications    Explore
+  Wait For RHODS Dashboard To Load    expected_page=Explore
+  Capture Page Screenshot
+  Page Should Not Contain Element    //article//*[.='${app_name}']
 
 Remove Disabled Application From Enabled Page
    [Documentation]  The keyword let you re-enable or remove the card from Enabled page
@@ -182,19 +207,21 @@ Load Expected Data Of RHODS Explore Section
     IF    ${is_self_managed} == ${TRUE}
         Remove From Dictionary   ${apps_dict_obj}   @{ISV_TO_REMOVE_SELF_MANAGED}
     END
-    [Return]  ${apps_dict_obj}
+    RETURN  ${apps_dict_obj}
 
 Wait Until Cards Are Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-explore-apps__gallery')]
+    [Documentation]    Waits until the Application cards are displayed in the page
+    Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')]/article
+    
 
 Get App ID From Card
     [Arguments]  ${card_locator}
     ${id}=  Get Element Attribute    xpath:${card_locator}    id
-    [Return]  ${id}
+    RETURN  ${id}
 
 Get Number Of Cards
     ${n_cards}=   Get Element Count    xpath:${CARDS_XP}
-    [Return]    ${n_cards}
+    RETURN    ${n_cards}
 
 Check Number Of Displayed Cards Is Correct
     [Arguments]  ${expected_data}
@@ -204,7 +231,7 @@ Check Number Of Displayed Cards Is Correct
 
 Get Card Texts
     [Arguments]  ${card_locator}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
         ${versioned_title_xp}=    Set Variable    ${TITLE_XP}
     ELSE
@@ -213,7 +240,7 @@ Get Card Texts
     ${title}=  Get Text    xpath:${card_locator}/${versioned_title_xp}
     ${provider}=  Get Text    xpath:${card_locator}/${PROVIDER_XP}
     ${desc}=  Get Text    xpath:${card_locator}/${DESCR_XP}
-    [Return]  ${title}  ${provider}  ${desc}
+    RETURN  ${title}  ${provider}  ${desc}
 
 Check Card Texts
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
@@ -224,13 +251,19 @@ Check Card Texts
 
 Get Card Badges Titles
     [Arguments]  ${card_locator}
-    ${badges}=  Get WebElements    xpath:${card_locator}/${BADGES_XP}
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        ${versioned_badge_xp}=    Set Variable    ${BADGES_XP}
+    ELSE
+        ${versioned_badge_xp}=    Set Variable    ${BADGES_XP_OLD}
+    END
+    ${badges}=  Get WebElements    xpath:${card_locator}/${versioned_badge_xp}
     ${badges_titles}=  Create List
     FOR    ${cb}    IN    @{badges}
         ${btitle}=  Get Text   ${cb}
         Append To List    ${badges_titles}  ${btitle}
     END
-    [Return]  ${badges_titles}
+    RETURN  ${badges_titles}
 
 Check Card Badges And Return Titles
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
@@ -242,17 +275,17 @@ Check Card Badges And Return Titles
     END
     ${card_badges_titles}=  Get Card Badges Titles  card_locator=${card_locator}
     Run Keyword And Continue On Failure  Lists Should Be Equal  ${card_badges_titles}  ${expected_data}[${app_id}][badges]
-    Run Keyword If    $RH_BADGE_TITLE in $card_badges_titles
+    IF    $RH_BADGE_TITLE in $card_badges_titles
     ...    Run Keyword And Continue On Failure  Page Should Contain Element
     ...    xpath:${card_locator}/${versioned_official_badge_xp}
-    [Return]  ${card_badges_titles}
+    RETURN  ${card_badges_titles}
 
 Open Get Started Sidebar And Return Status
     [Arguments]  ${card_locator}
     Click Element  xpath:${card_locator}
     ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-c-drawer__panel-main')]
     Sleep  1
-    [Return]  ${status}
+    RETURN  ${status}
 
 Close Get Started Sidebar
     Click Button  xpath://button[@aria-label='Close drawer panel']
@@ -268,7 +301,7 @@ Check Get Started Sidebar Status
 
 Get Sidebar Links
     ${link_elements}=  Get WebElements    xpath://div[contains(@class,'pf-c-drawer__panel-main')]//a
-    [Return]  ${link_elements}
+    RETURN  ${link_elements}
 
 Check Sidebar Links
     [Arguments]  ${app_id}  ${expected_data}
@@ -319,9 +352,17 @@ Check Get Started Sidebar
 
 Get Image Name
     [Arguments]  ${card_locator}
-    ${src}=  Get Element Attribute    xpath:${card_locator}/${IMAGE_XP}  src
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
+    IF  ${version_check}==True
+        ${versioned_image_xp}=    Set Variable    ${IMAGE_XP}
+        ${versioned_src_xp}=    Set Variable    srcset
+    ELSE
+        ${versioned_image_xp}=    Set Variable    ${IMAGE_XP_OLD}
+        ${versioned_src_xp}=    Set Variable    src
+    END
+    ${src}=  Get Element Attribute    xpath:${card_locator}/${versioned_image_xp}  ${versioned_src_xp}
     ${image_name}=  Fetch From Right    ${src}    ${ODH_DASHBOARD_URL}
-    [Return]  ${src}  ${image_name}
+    RETURN  ${src}  ${image_name}
 
 Check Card Image
     [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
@@ -382,7 +423,7 @@ Get Question Mark Links
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}
     END
-    [Return]  @{links_list}
+    RETURN  @{links_list}
 
 Get RHODS Documentation Links From Dashboard
     [Documentation]    It returns a list containing rhods documentation links
@@ -394,7 +435,7 @@ Get RHODS Documentation Links From Dashboard
     ${links}=    Get Question Mark Links
     # inserting at 0th position
     Insert Into List    ${links}    0    ${href_view_the_doc}
-    [Return]  @{links}
+    RETURN  @{links}
 
 Check External Links Status
     [Documentation]      It iterates through the links and cheks their HTTP status code
@@ -603,7 +644,7 @@ Verify Custom Image Description
         Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
         FAIL
     END
-    [Return]    ${exists}
+    RETURN    ${exists}
 
 Verify Custom Image Is Listed
     [Documentation]    Verifies that the custom image is displayed in the dashboard
@@ -614,7 +655,7 @@ Verify Custom Image Is Listed
         Log  ${image_name} not visible in page
         FAIL
     END
-    [Return]    ${exists}
+    RETURN    ${exists}
 
 Verify Custom Image Owner
     [Documentation]    Verifies that the user listed for an image in the dahsboard
@@ -626,7 +667,7 @@ Verify Custom Image Owner
         Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
         FAIL
     END
-    [Return]  ${exists}
+    RETURN  ${exists}
 
 Enable Custom Image
     [Documentation]    Enables a custom image (i.e. displayed in JH) [WIP]
@@ -683,7 +724,7 @@ Get Dashboard Pods Names
     FOR    ${pod_name}    IN    @{dash_pods}
         Append To List      ${names}    ${pod_name}[metadata.name]
     END
-    [Return]   ${names}
+    RETURN   ${names}
 
 Get Dashboard Pod Logs
     [Documentation]     Fetches the logs from one dashboard pod
@@ -696,7 +737,7 @@ Get Dashboard Pod Logs
         Remove From List    ${pod_logs_lines}   ${n_lines-1}
         ${n_lines}=     Get Length    ${pod_logs_lines}
     END
-    [Return]    ${pod_logs_lines}   ${n_lines}
+    RETURN    ${pod_logs_lines}   ${n_lines}
 
 Get ConfigMaps For RHODS Groups Configuration
     [Documentation]     Returns a dictionary containing "rhods-group-config" and "groups-config"
@@ -711,7 +752,7 @@ Get ConfigMaps For RHODS Groups Configuration
     END
     ${group_config_maps}=   Create Dictionary     rgc=${rgc_yaml}[0]     gc=${gc_yaml}[0]
     Log     ${group_config_maps}
-    [Return]    ${group_config_maps}
+    RETURN    ${group_config_maps}
 
 Get Links From Switcher
     [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link
@@ -721,7 +762,7 @@ Get Links From Switcher
         ${href}=    Get Element Attribute    ${ext_link}    href
         Append To List    ${list_of_links}    ${href}
     END
-    [Return]    ${list_of_links}
+    RETURN    ${list_of_links}
 
 Open Application Switcher Menu
     [Documentation]     Clicks on the App Switcher in the top navigation bar of RHODS Dashboard

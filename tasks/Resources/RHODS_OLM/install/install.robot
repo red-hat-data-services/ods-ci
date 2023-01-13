@@ -1,7 +1,7 @@
 *** Keywords ***
 Installing RHODS Operator ${operator_version}
   ${is_operator_installed} =  Is RHODS Installed
-  Run Keyword Unless  ${is_operator_installed}  Run Keywords
+  IF  not ${is_operator_installed}  Run Keywords
   ...  Log  Installing RHODS operator in ${cluster_type}  console=yes  AND
   ...  Set Suite Variable  ${operator_version}  AND
   ...  Set Test Variable  ${RHODS_INSTALL_REPO}  AND

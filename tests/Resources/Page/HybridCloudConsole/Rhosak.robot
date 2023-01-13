@@ -103,7 +103,7 @@ Create Service Account From Connection Menu
     Wait Until Element Is Enabled    xpath=//button[@data-testid='modalCredentials-buttonClose']
     Click Button    xpath=//button[@data-testid='modalCredentials-buttonClose']
     Wait Until Element Is Not Visible    xpath=//div[@class='pf-l-bullseye']
-    [Return]    &{service_account_creds}
+    RETURN    &{service_account_creds}
 
 Assign Permissions To ServiceAccount In RHOSAK
     [Documentation]    Configures the SA's permission on a kafka stream from RHOSAK UI
@@ -226,7 +226,7 @@ Clean Up RHOSAK
     [Documentation]    Cleans up all the RHOSAK created resources from RHOSAK and RHODS UI
     [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}  ${rhosak_app_id}
     ${window_title}=    Get Title
-    IF    $window_title == "Streams for Apache Kafka | Red Hat OpenShift Application Services"
+    IF    $window_title == "Streams for Apache Kafka | Red Hat OpenShift Application Services" or $window_title == "Red Hat OpenShift Streams for Apache Kafka"
         Maybe Skip RHOSAK Tour
         ${modal_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=//*[contains(@class, "modal")]
         IF    ${modal_exists}==${TRUE}

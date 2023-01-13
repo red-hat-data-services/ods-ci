@@ -33,7 +33,7 @@ Can Login To Jupyterhub
     [Tags]  Sanity  Smoke  ODS-936
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
@@ -70,12 +70,12 @@ Can Spawn Notebook
     Spawn Notebook  same_tab=${False}
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Sleep  3
     Maybe Close Popup
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
-    Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
+    IF  not ${is_launcher_selected}  Open JupyterLab Launcher
     Launch a new JupyterLab Document
     Close Other JupyterLab Tabs
 
@@ -86,6 +86,7 @@ Verify Message That Image Builds Are In Progress
     ...         ODS-381
     ...         ODS-1348
     ...         FlakyTest
+    Skip If RHODS Version Greater Or Equal Than    1.20.0    CUDA build chain removed in v1.20
     Delete Last Pytorch Build
     ${new_buildname}=  Start New Pytorch Build
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
@@ -108,7 +109,7 @@ Start New Pytorch Build
     [Documentation]     Starts new Pytorch build and waits until status is running
     ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
-    [Return]    ${new_buildname}
+    RETURN    ${new_buildname}
 
 Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
    [Documentation]    Try spawning a server size for which there's not enough resources

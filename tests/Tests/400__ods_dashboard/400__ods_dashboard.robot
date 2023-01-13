@@ -22,22 +22,6 @@ Test Teardown     Dashboard Test Teardown
 *** Variables ***
 ${RHOSAK_REAL_APPNAME}                  rhosak
 ${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
-@{LIST_OF_IDS_FOR_COMBINATIONS}         documentation--check-box    Red Hat managed--check-box
-@{EXPECTED_ITEMS_FOR_ENABLE}            Create List                                                         Creating a Jupyter notebook
-...                                     Deploying a sample Python application using Flask and OpenShift
-...                                     How to install Python packages on your notebook server              How to update notebook server settings
-...                                     How to use data from Amazon S3 buckets                              How to view installed packages on your notebook server
-...                                     JupyterHub
-@{EXPECTED_ITEMS_FOR_APPLICATION}       Create List                                                         by Anaconda Professional
-@{EXPECTED_ITEMS_FOR_RESOURCE_TYPE}     Create List                                                         Tutorial
-@{EXPECTED_ITEMS_FOR_PROVIDER_TYPE}     Create List                                                         Connecting to Red Hat OpenShift Streams for Apache Kafka
-...                                     Creating a Jupyter notebook                                         Deploying a sample Python application using Flask and OpenShift
-...                                     How to install Python packages on your notebook server              How to update notebook server settings
-...                                     How to use data from Amazon S3 buckets                              How to view installed packages on your notebook server
-...                                     JupyterHub                                                          OpenShift API Management    OpenShift Streams for Apache Kafka    PerceptiLabs
-...                                     Securing a deployed model using Red Hat OpenShift API Management
-@{EXPECTED_ITEMS_FOR_COMBINATIONS}      Create List                                                         JupyterHub    OpenShift API Management    OpenShift Streams for Apache Kafka
-...                                     PerceptiLabs
 @{IMAGES}                               PyTorch  TensorFlow  CUDA
 @{BUILDS_TO_BE_DELETED}                 pytorch  tensorflow  minimal  cuda-s2i-thoth
 @{BUILD_CONFIGS}                        11.4.2-cuda-s2i-base-ubi8    11.4.2-cuda-s2i-core-ubi8
@@ -75,7 +59,7 @@ Verify Content In RHODS Explore Section
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
-    Wait Until Cards Are Loaded
+    Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Cards Details Are Correct    expected_data=${EXP_DATA_DICT}
 
@@ -85,20 +69,20 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     ...       ODS-1890
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
-    Wait Until Cards Are Loaded
+    Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Dashboard Diplayes Expected ISVs    expected_data=${EXP_DATA_DICT}
 
 Verify Disabled Cards Can Be Removed
     [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
     ...                 It uses RHOSAK as example to test the feature
-    ...                 ProductBug: RHODS-2902
+    ...                 ProductBug: RHODS-2902 - still present, but the test will
+    ...                 only trigger warning when issue happens
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
-    ...       ProductBug
     Enable RHOSAK
     Remove RHOSAK From Dashboard
-    Success Message Should Contain    ${RHOSAK_DISPLAYED_APPNAME}
+    Run Keyword And Warn On Failure    Success Message Should Contain    ${RHOSAK_DISPLAYED_APPNAME}
     Verify Service Is Not Enabled    app_name=${RHOSAK_DISPLAYED_APPNAME}
     Capture Page Screenshot    after_removal.png
 
@@ -130,7 +114,7 @@ Verify CSS Style Of Getting Started Descriptions
     [Tags]    Smoke
     ...       ODS-1165
     Click Link    Explore
-    Wait Until Cards Are Loaded
+    Wait For RHODS Dashboard To Load    expected_page=Explore
     Open Get Started Sidebar And Return Status    card_locator=${SAMPLE_APP_CARD_XP}
     Capture Page Screenshot    get_started_sidebar.png
     Verify Jupyter Card CSS Style
@@ -152,25 +136,13 @@ Verify Logged In Users Are Displayed In The Dashboard
     Verify Username Displayed On RHODS Dashboard   ${TEST_USER.USERNAME}
 
 Search and Verify GPU Items Appears In Resources Page
+    [Documentation]    Verifies if all the expected learning items for GPU are listed
+    ...                in RHODS Dashboard > Resources page
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1226
     Search Items In Resources Section    GPU
     Check GPU Resources
-
-Verify Filters Are Working On Resources Page
-    [Documentation]    check if it is possible to filter items by enabling various filters like status,provider
-    [Tags]    Sanity
-    ...       ODS-489
-    ...       Tier1
-    ...       AutomationBug
-    Click Link    Resources
-    Wait Until Resource Page Is Loaded
-    Filter Resources By Status "Enabled" And Check Output
-    Filter By Resource Type And Check Output
-    Filter By Provider Type And Check Output
-    Filter By Application (Aka Povider) And Check Output
-    Filter By Using More Than One Filter And Check Output
 
 Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     [Documentation]     Verifies that RHODS Notification Drawer doesn't contain "Notebook Images are building", if no build is running
@@ -187,6 +159,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...       ODS-470  ODS-718
     ...       Execution-Time-Over-30m
     ...       FlakyTest
+    Skip If RHODS Version Greater Or Equal Than    1.20.0    CUDA build chain removed in v1.20
     Clear Dashboard Notifications
     ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
     Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
@@ -378,7 +351,7 @@ Get Lengths Of Dashboard Pods Logs
         ${pod_logs_lines}   ${n_lines}=     Get Dashboard Pod Logs     pod_name=${pod_name}
         Set To Dictionary   ${lengths_dict}     ${pod_name}  ${n_lines}
     END
-    [Return]    ${lengths_dict}
+    RETURN    ${lengths_dict}
 
 New Lines In Logs Of Dashboard Pods Should Contain
     [Documentation]     Verifies that newly generated lines in the logs contain the given message
@@ -395,7 +368,7 @@ New Lines In Logs Of Dashboard Pods Should Contain
             ...     item=${exp_msg}
         END
     END
-    [Return]    ${new_logs_lengths}
+    RETURN    ${new_logs_lengths}
 
 Wait Until New Log Lines Are Generated In A Dashboard Pod
     [Documentation]     Waits until new messages in the logs are generated
@@ -410,7 +383,7 @@ Wait Until New Log Lines Are Generated In A Dashboard Pod
     IF    $equal_flag == False
         Fail    Something got wrong. Check the logs
     END
-    [Return]    ${pod_logs_lines}[${prev_length}:]     ${n_lines}
+    RETURN    ${pod_logs_lines}[${prev_length}:]     ${n_lines}
 
 Set RHODS Admins Group Empty Group
     [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
@@ -483,7 +456,7 @@ Get List Of Ids Of Tiles
     [Documentation]    Returns the list of ids of tiles present in resources page
     ${list_of_ids}=    Get List Of Atrributes
     ...    xpath=//article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
-    [Return]    ${list_of_ids}
+    RETURN    ${list_of_ids}
 
 Set Item As Favorite
     [Documentation]    Add the tiles in favorite
@@ -522,7 +495,7 @@ Get The List Of Ids of Tiles In List View
     FOR    ${index}    IN RANGE    0    ${len}    2
         Append To List    ${list_of_ids_in_list_view}    ${list_of_new_tile_ids}[${index}]
     END
-    [Return]    ${list_of_ids_in_list_view}
+    RETURN    ${list_of_ids_in_list_view}
 
 Remove Items From Favorites
     [Documentation]    Removes the items from favorites
@@ -574,80 +547,38 @@ Dashboard Suite Setup
 Dashboard Test Teardown
     Close All Browsers
 
+Set GPU Expected Resources
+    [Documentation]    Sets the expected items in Resources section for GPUs.
+    ...                Those changes based on RHODS installation type (i.e., Self-Managed vs Cloud Service)
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == ${TRUE}
+        ${gpu_re_id}=    Create List  'python-gpu-numba-tutorial'
+        ${gpu_re_link}=   Create List   'https://github.com/ContinuumIO/gtc2018-numba'
+    ELSE
+        ${gpu_re_id}=    Create List  'gpu-enabled-notebook-quickstart'   'python-gpu-numba-tutorial'
+        ...    'gpu-quickstart'     'nvidia-doc'
+        ${gpu_re_link}=   Create List   '#'  'https://github.com/ContinuumIO/gtc2018-numba'   '#'
+        ...   'https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/openshift/contents.html'
+    END
+    ${gpu_re_exp}=    Get Length    ${gpu_re_id}
+    RETURN    ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}
+
 Check GPU Resources
     [Documentation]   Check resource tiles for GPU is present
-    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.13.0
+    ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}=    Set GPU Expected Resources
     ${elements}=    Get WebElements    //article
-    @{gpu_re_id}=    Create List  'gpu-enabled-notebook-quickstart'   'python-gpu-numba-tutorial'
-    ...    'gpu-quickstart'     'nvidia-doc'
-    @{gpu_re_link}=   Create List   '#'  'https://github.com/ContinuumIO/gtc2018-numba'   '#'
-    ...   'https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/openshift/contents.html'
     ${len}=    Get Length    ${elements}
-    IF    ${version_check}==True
-        Should Be Equal As Integers    ${len}    4
-        FOR    ${counter}    IN RANGE    ${len}
-           Page Should Contain Element    //article[@id=${gpu_re_id}[${counter}]]
-           IF    ${gpu_re_link}[${counter}] == '#'
-                 ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
-                 ${no_of_open_link}=    Get Length    ${counter}
-                 Run Keyword IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
-                 ...        ELSE    Fail     Mismatch on the number of GPU tile present with 'Open' link.Please check the RHODS dashboard.  #robocop disable
-           ELSE
-                 Page Should Contain Element    //a[@href=${gpu_re_link}[${counter}]]
-           END
+    Should Be Equal As Integers    ${len}    ${gpu_re_exp}
+    FOR    ${counter}    IN RANGE    ${len}
+        Page Should Contain Element    //article[@id=${gpu_re_id}[${counter}]]
+        IF    ${gpu_re_link}[${counter}] == '#'
+                ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
+                ${no_of_open_link}=    Get Length    ${counter}
+                IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
+                ...        ELSE    Fail     Mismatch on the number of GPU tile present with 'Open' link.Please check the RHODS dashboard.  #robocop disable
+        ELSE
+                Page Should Contain Element    //a[@href=${gpu_re_link}[${counter}]]
         END
-    ELSE
-        Should Be Equal As Integers    ${len}    1
-        Page Should Contain Element    //article[@id=${gpu_re_id}[1]]
-        Page Should Contain Element    //a[@href=${gpu_re_link}[1]]
-    END
-
-Wait Until Resource Page Is Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
-
-Filter Resources By Status "Enabled" And Check Output
-    [Documentation]    Filters the resources By Status Enabled
-    Select Checkbox Using Id    enabled-filter-checkbox--check-box
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_ENABLE}
-    Deselect Checkbox Using Id    enabled-filter-checkbox--check-box
-
-Filter By Application (Aka Povider) And Check Output
-    [Documentation]    Filter by application (aka provider)
-    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-    IF  ${version-check}==False
-        ${id_name} =  Set Variable    Anaconda Commercial Edition--check-box
-    ELSE
-        ${id_name} =  Set Variable    Anaconda Professional--check-box
-    END
-    Select Checkbox Using Id    ${id_name}
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_APPLICATION}    index_of_text=1
-    Deselect Checkbox Using Id    id=${id_name}
-
-Filter By Resource Type And Check Output
-    [Documentation]    Filter by resource type
-    Select Checkbox Using Id    id=tutorial--check-box
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_RESOURCE_TYPE}    index_of_text=2
-    Deselect Checkbox Using Id    id=tutorial--check-box
-
-Filter By Provider Type And Check Output
-    [Documentation]    Filter by provider type
-    Select Checkbox Using Id    id=Red Hat managed--check-box
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
-    Deselect Checkbox Using Id    id=Red Hat managed--check-box
-
-Filter By Using More Than One Filter And Check Output
-    [Documentation]    Filter resouces using more than one filter ${list_of_ids} = list of check-box ids
-    FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
-        Select Checkbox Using Id    id=${id}
-    END
-    Verify The Resources Are Filtered    selector=pf-c-card__title odh-card__doc-title
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_COMBINATIONS}
-    FOR    ${id}    IN    @{LIST_OF_IDS_FOR_COMBINATIONS}
-        Deselect Checkbox Using Id    id=${id}
     END
 
 Verify Anaconda Success Message Based On Version

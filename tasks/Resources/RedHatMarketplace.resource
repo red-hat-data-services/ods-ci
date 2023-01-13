@@ -19,7 +19,7 @@ Is Cluster Registered
     ...    field_selector=metadata.name=redhat-marketplace-pull-secret  AND
     ...  Oc Get  kind=Subscription  namespace=${RH_MARKETPLACE_NS}
     ...    field_selector=metadata.name=redhat-marketplace-operator
-    [Return]  ${result}
+    RETURN  ${result}
 
 Check Cluster Is Not Already Registered
     [Documentation]    Checks the cluster is not registered. Fails if it is registered

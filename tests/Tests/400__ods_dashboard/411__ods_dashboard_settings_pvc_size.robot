@@ -97,7 +97,7 @@ Verify Multiple Unsupported Size
        Change And Apply PVC size     ${NS_SIZE}Gi
        ${status}     Run Keyword And Return Status   Verify Notebook Size   60s   ${NS_SIZE}
        Run Keyword And Continue On Failure    Page Should Contain    Server request failed to start
-       Run Keyword IF    '${status}'=='FAIL'   Log   Unable to Spawn Notebook
+       IF    '${status}'=='FAIL'   Log   Unable to Spawn Notebook
        ...   for unsupported values
     END
 

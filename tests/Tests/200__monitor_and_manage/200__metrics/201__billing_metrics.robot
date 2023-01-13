@@ -44,6 +44,7 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     [Tags]    Sanity
     ...       ODS-634
     ...       Tier1
+    Skip If RHODS Is Self-Managed
     ${value} =    Run OpenShift Metrics Query    query=rhods_total_users
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_total_users
     Should Be Equal    ${value_from_promothues}    ${value}
@@ -54,6 +55,7 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     [Tags]    Sanity
     ...       ODS-637
     ...       Tier1
+    Skip If RHODS Is Self-Managed
     ${value} =    Run OpenShift Metrics Query    query=rhods_aggregate_availability
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_aggregate_availability
     Should Be Equal    ${value_from_promothues}    ${value}
@@ -129,14 +131,14 @@ Run Query On Metrics And Return Value
     Click Button    Run queries
     Wait Until Element is Visible    xpath://table[@class="pf-c-table pf-m-compact"]    timeout=15seconds
     @{data} =    Get WebElements    //table[@class="pf-c-table pf-m-compact"] //tbody/tr/td[${count_of_columns}]
-    [Return]    ${data[0].text}
+    RETURN    ${data[0].text}
 
 Fire Query On RHODS Prometheus And Return Value
     [Documentation]    Fires query in Prometheus through cli and returns value
     [Arguments]    ${query}
     ${expression} =    Set Variable    ${query}&step=1    #step = 1 beacuase it will return value of current second
     ${query_result} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
-    [Return]    ${query_result.json()["data"]["result"][0]["value"][-1]}
+    RETURN    ${query_result.json()["data"]["result"][0]["value"][-1]}
 
 Skip Test If Previous CPU Usage Is Not Zero
     [Documentation]     Skips test if CPU usage is not zero
@@ -176,7 +178,7 @@ Run OpenShift Metrics Query
     Metrics.Verify Page Loaded
     Metrics.Run Query    ${query}    ${retry_attempts}
     ${result} =    Metrics.Get Query Results    return_zero_if_result_empty=${return_zero_if_result_empty}
-    [Return]    ${result}
+    RETURN    ${result}
 
 Verify Previus CPU Usage Is Greater Than Zero
     [Documentation]     Verifies the cpu usage is greater than zero
@@ -204,7 +206,7 @@ Iterative Image Test
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=${image}
     Run Cell And Check Output    print("Hello World!")    Hello World!
@@ -226,7 +228,7 @@ CleanUp JupyterHub
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     # Additional check on running server
     ${control_panel_visible} =  Control Panel Is Visible
     IF  ${control_panel_visible}==True

@@ -13,6 +13,7 @@ Verify Grafana Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-231
+    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
     @{grafana_pods_info} =    Fetch Grafana Pods Info
     @{grafana_deployment_info} =    Fetch Grafana Deployments Info
     @{grafana_services_info} =    Fetch Grafana Services Info
@@ -43,7 +44,7 @@ Fetch Grafana Pods Info
     ...    Returns:
     ...        grafana_pods_info(list(dict)): Grafana pods selected by label and namespace
     @{grafana_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-monitoring    label_selector=app=grafana
-    [Return]    @{grafana_pods_info}
+    RETURN    @{grafana_pods_info}
 
 Fetch Grafana Deployments Info
     [Documentation]    Fetch information from Grafana Deployments
@@ -53,7 +54,7 @@ Fetch Grafana Deployments Info
     ...        grafana_deployments(list(dict)): Grafana deployments selected by label and namespace
     @{grafana_deployments} =    Oc Get    kind=Deployment    api_version=v1    namespace=redhat-ods-monitoring
     ...    label_selector=app=grafana
-    [Return]    @{grafana_deployments}
+    RETURN    @{grafana_deployments}
 
 Fetch Grafana Services Info
     [Documentation]    Fetch information from Grafana services
@@ -62,7 +63,7 @@ Fetch Grafana Services Info
     ...    Returns:
     ...        grafana_services_info(list(dict)): Grafana services selected by name and namespace
     @{grafana_services_info} =    Oc Get    kind=Service    api_version=v1    name=grafana    namespace=redhat-ods-monitoring
-    [Return]    @{grafana_services_info}
+    RETURN    @{grafana_services_info}
 
 Fetch Grafana Routes Info
     [Documentation]    Fetch information from Grafana routes
@@ -72,7 +73,7 @@ Fetch Grafana Routes Info
     ...        grafana_routes_info(list(dict)): Grafana routes selected by name and namespace
     @{grafana_routes_info} =    Oc Get    kind=Route    api_version=route.openshift.io/v1    name=grafana
     ...    namespace=redhat-ods-monitoring
-    [Return]    @{grafana_routes_info}
+    RETURN    @{grafana_routes_info}
 
 Verify Grafana ReplicaSets Info
     [Documentation]    Fetchs and verifies information for Grafana replicasets

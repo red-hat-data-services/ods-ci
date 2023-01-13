@@ -36,7 +36,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     Launch Dashboard  ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${auth_type}
     ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     Menu.Navigate To Page    Settings    User management
     SeleniumLibrary.Wait Until Element Is Visible   //*[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"]  timeout=20
 

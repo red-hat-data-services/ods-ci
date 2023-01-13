@@ -13,6 +13,7 @@ Verify Prometheus Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-232
+    Skip If RHODS Is Self-Managed
     @{prometheus_pods_info} =    Fetch Prometheus Pods Info
     @{prometheus_deployment_info} =    Fetch Prometheus Deployments Info
     @{prometheus_services_info} =    Fetch Prometheus Services Info
@@ -45,7 +46,7 @@ Fetch Prometheus Pods Info
     ...    Returns:
     ...        prometheus_pods_info(list(dict)): Prometheus pods selected by label and namespace
     @{prometheus_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-monitoring    label_selector=deployment=prometheus
-    [Return]    @{prometheus_pods_info}
+    RETURN    @{prometheus_pods_info}
 
 Fetch Prometheus Deployments Info
     [Documentation]    Fetch information from Prometheus Deployments
@@ -55,7 +56,7 @@ Fetch Prometheus Deployments Info
     ...        prometheus_deployments(list(dict)): Prometheus deployments selected by label and namespace
     @{prometheus_deployments_info} =    Oc Get    kind=Deployment    api_version=v1    namespace=redhat-ods-monitoring
     ...    label_selector=app=prometheus
-    [Return]    @{prometheus_deployments_info}
+    RETURN    @{prometheus_deployments_info}
 
 Fetch Prometheus Services Info
     [Documentation]    Fetch information from Prometheus services
@@ -64,7 +65,7 @@ Fetch Prometheus Services Info
     ...    Returns:
     ...        prometheus_services_info(list(dict)): Prometheus services selected by name and namespace
     @{prometheus_services_info} =    Oc Get    kind=Service    api_version=v1    name=prometheus    namespace=redhat-ods-monitoring
-    [Return]    @{prometheus_services_info}
+    RETURN    @{prometheus_services_info}
 
 Fetch Prometheus Routes Info
     [Documentation]    Fetch information from Prometheus routes
@@ -74,7 +75,7 @@ Fetch Prometheus Routes Info
     ...        prometheus_routes_info(list(dict)): Prometheus routes selected by name and namespace
     @{prometheus_routes_info} =    Oc Get    kind=Route    api_version=route.openshift.io/v1    name=prometheus
     ...    namespace=redhat-ods-monitoring
-    [Return]    @{prometheus_routes_info}
+    RETURN    @{prometheus_routes_info}
 
 Verify Prometheus ReplicaSets Info
     [Documentation]    Fetches and verifies information from Prometheus replicasets

@@ -26,7 +26,7 @@ Is Managed Starburst Installed
     ...  Oc Get  kind=Project  field_selector=metadata.name=${STARBURST_CR_DEFAULT_NAMESPACE}  AND
     ...  Oc Get  kind=CatalogSource  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}
     ...    field_selector=metadata.name=addon-managed-starburst-catalog
-    [Return]  ${result}
+    RETURN  ${result}
 
 Status Of Managed Starburst CR Should Be
     [Documentation]     Get the installation stage by reading the "RHOAM installation object" YAML

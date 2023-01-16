@@ -180,11 +180,10 @@ Workbench Status Should Be
 Status Error Icon Should Appear
     [Documentation]
     [Arguments]     ${workbench_title}
-    Run keyword And Continue On Failure     
-    ...    Page Should Contain Element    
+    Page Should Contain Element    
     ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
     Mouse Over    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}
-    Page Should Contain    Insufficient resources to start
+    Wait Until Page Contains    Insufficient resources to start
 
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
@@ -305,10 +304,12 @@ Get Openshift Notebook CR From Workbench
     RETURN    ${rc}    ${cr_name}
 
 Start Workbench Should Fail
-    [Arguments]    ${workbech_title}
+    [Arguments]    ${workbench_title}
     ${failed}=    Run Keyword And Return Status
-    ...    Wait Until Workbench Is Started     workbench_title=${workbech_title}
+    ...    Wait Until Workbench Is Started     workbench_title=${workbench_title}
     IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
-    Status Error Icon Should Appear    workbench_title=${workbech_title}
+    Run keyword And Continue On Failure
+    ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
+    
     
     

@@ -324,15 +324,17 @@ Verify User Can Create A Workbench With Environment Variables
 Verify Error Is Reported When Workbench Fails To Start
     [Tags]    Tier1    Sanity
     ...       ODS-1973
+    [Documentation]    Verify UI informs users about workbenches failed to start.
+    ...                At the moment the test is considering only the scenario where
+    ...                the workbench fails for Insufficient resources.
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_5_TITLE}  workbench_description=${WORKBENCH_5_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Medium
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=X Large
     ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...                 pv_description=${NONE}  pv_size=${NONE}
     ...                 press_cancel=${FALSE}    envs=${NONE}
+    Workbench Status Should Be    workbench_title=${WORKBENCH_5_TITLE}    status=Starting...
     Start Workbench Should Fail    workbench_title=${WORKBENCH_5_TITLE}
-    Workbench Status Should Be    workbench_title=${WORKBENCH_5_TITLE}    status=Starting
-    
 
 Verify User Can Delete A Data Science Project
     [Tags]    Sanity    Tier1    ODS-1784

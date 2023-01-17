@@ -368,3 +368,4 @@ Page Should Contain Event Log
         Page Should Contain Element
         ...    xpath=//div[contains(@class,"alert")]//h4[contains(text(),"${expected_result_text}")]
     END
+    Capture Page Screenshot

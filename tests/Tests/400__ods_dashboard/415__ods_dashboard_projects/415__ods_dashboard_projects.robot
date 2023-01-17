@@ -29,6 +29,9 @@ ${WORKBENCH_4_DESCRIPTION}=   ODS-CI Workbench 4 - envs is a test workbench
 ${WORKBENCH_5_TITLE}=   ODS-CI Workbench 5 - XL
 ${WORKBENCH_5_DESCRIPTION}=   ODS-CI Workbench 5 - XL is a test workbench
 ...    using ${NB_IMAGE} image to test DS Projects feature
+${WORKBENCH_6_TITLE}=   ODS-CI Workbench 6 - event log
+${WORKBENCH_6_DESCRIPTION}=   ODS-CI Workbench 6 - event log is a test workbench
+...    using ${NB_IMAGE} image to test DS Projects feature
 ${PV_BASENAME}=         ods-ci-pv
 ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
 # PV size are in GB
@@ -305,6 +308,7 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
+    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB
     ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
@@ -321,12 +325,34 @@ Verify User Can Create A Workbench With Environment Variables
     Launch Workbench    workbench_title=${WORKBENCH_4_TITLE}
     Check Environment Variables Exist    exp_env_variables=${envs_list}
 
+Verify Event Log Is Accessible While Starting A Workbench
+    [Tags]    Tier1    Sanity
+    ...       ODS-1970
+    [Documentation]    Verify user can access event log while starting a workbench
+    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_6_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_6_TITLE}  workbench_description=${WORKBENCH_6_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...                 pv_description=${NONE}  pv_size=${NONE}
+    ...                 press_cancel=${FALSE}    envs=${NONE}
+    Workbench Status Should Be    workbench_title=${WORKBENCH_6_TITLE}
+    ...    status=${WORKBENCH_STATUS_STARTING}
+    Open Notebook Event Log    workbench_title=${WORKBENCH_6_TITLE}
+    Page Should Contain Event Log
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_6_TITLE}
+    Page Should Contain Event Log    expected_progress_text=Oauth proxy container started
+    ...    expected_result_text=Success
+    Close Event Log
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+
 Verify Error Is Reported When Workbench Fails To Start
     [Tags]    Tier1    Sanity
     ...       ODS-1973
     [Documentation]    Verify UI informs users about workbenches failed to start.
     ...                At the moment the test is considering only the scenario where
     ...                the workbench fails for Insufficient resources.
+    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_5_TITLE}  workbench_description=${WORKBENCH_5_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=X Large

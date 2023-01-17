@@ -4,7 +4,7 @@ Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
 Resource       ../../../Common.robot
 Resource       ../JupyterHub/ODHJupyterhub.resource
 Resource      ../../../Page/ODH/ODHDashboard/ResourcesPage.resource
-Resource      ../../../Page/ODH/ODHDashboard/ODHAdminUI.robot
+Resource      ../../../Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource    ../../../OCP.resource
 Library       JupyterLibrary
 

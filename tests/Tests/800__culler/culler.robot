@@ -5,7 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Library          ../../../libs/Helpers.py
 Library          OpenShiftLibrary
 Suite Setup      Set Library Search Order    SeleniumLibrary

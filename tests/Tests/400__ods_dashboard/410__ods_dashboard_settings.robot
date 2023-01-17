@@ -3,7 +3,7 @@ Documentation       Tests features in ODS Dashboard "Settings" section
 
 Library             SeleniumLibrary
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 

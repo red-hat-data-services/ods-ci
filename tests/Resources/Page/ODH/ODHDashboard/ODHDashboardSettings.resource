@@ -2,6 +2,11 @@
 Library         OpenShiftLibrary
 Resource        ../../LoginPage.robot
 
+
+*** Variables ***
+${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
+
+
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
@@ -97,6 +102,16 @@ Set Pod Toleration Via UI
     Wait Until Element Is Enabled    xpath://input[@id="toleration-key-input"]
     Input Text    xpath://input[@id="toleration-key-input"]    ${toleration}
 
+Disable Pod Toleration Via UI
+    [Documentation]    Disable toleration using admin UI
+    Wait Until Page Contains Element    xpath:${TOLERATION_CHECKBOX}
+    Sleep  2s
+    ${selected} =    Run Keyword And Return Status    Checkbox Should Be Selected    xpath:${TOLERATION_CHECKBOX}
+    IF  ${selected}
+        Click Element    xpath:${TOLERATION_CHECKBOX}
+    END
+    Element Should Be Disabled    xpath://input[@id="toleration-key-input"]
+
 Save Changes In Cluster Settings
     [Documentation]    Clicks on the "Save changes" button in Cluster Settings and
     ...    waits until "Settings changes saved" is shown
@@ -182,7 +197,6 @@ Modify Notebook Culler Timeout
 
 Open Dashboard Cluster Settings
     [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
-    
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Sleep  1s

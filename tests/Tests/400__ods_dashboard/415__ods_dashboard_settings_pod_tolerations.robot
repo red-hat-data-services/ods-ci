@@ -1,14 +1,13 @@
 *** Settings ***
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource         ../../Resources/Page/OCPDashboard/Pods/Pods.robot
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Library          ../../../../libs/Helpers.py
 Suite Setup      Begin Web Test
 Suite Teardown   Teardown
 
 
 *** Variables ***
-${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
 @{UNSUPPORTED_TOLERATIONS}=    --UNSUPPORTED--    Unsupported-    -Unsupported    Unsupported!    1-_.a@    L@5t0n3!
 
 

@@ -1,5 +1,6 @@
 *** Settings ***
 Documentation   Set of Keywords for PVC change support
+Resource        ../ODHDashboard/ODHAdminUI.robot
 Library         OpenShiftLibrary
 
 

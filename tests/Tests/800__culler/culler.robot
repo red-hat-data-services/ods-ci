@@ -5,8 +5,10 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
 Library          ../../../libs/Helpers.py
 Library          OpenShiftLibrary
+Suite Setup      Set Library Search Order    SeleniumLibrary
 Suite Teardown   Teardown
 Force Tags       JupyterHub
 
@@ -124,56 +126,6 @@ Get Notebook Culler Timeout From Culler Pod
     ${CULLER_POD} =  Get Notebook Culler Pod Name
     ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -n redhat-ods-applications -- printenv CULL_IDLE_TIME  # robocop: disable
     RETURN  ${culler_env_timeout}
-
-Modify Notebook Culler Timeout
-    [Documentation]    Modifies the culler timeout via UI
-    [Arguments]    ${new_timeout}
-    Open Dashboard Cluster Settings
-    Set Notebook Culler Timeout  ${new_timeout}
-    Sleep  10s  msg=Give time for rollout
-
-Open Dashboard Cluster Settings
-    [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
-    Set Library Search Order    SeleniumLibrary
-    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-    Sleep  1s
-    ${settings_hidden} =  Run Keyword And Return Status  Page Should Contain Element
-    ...    xpath://section[@aria-labelledby="settings"][@hidden=""]
-    IF  ${settings_hidden}==True
-        Click Element  xpath://button[@id="settings"]
-    END
-    Click Element  xpath://a[.="Cluster settings"]
-
-Set Notebook Culler Timeout
-    [Documentation]    Modifies the notebook culler timeout using the dashboard UI setting it to ${new_timeout} seconds
-    [Arguments]    ${new_timeout}
-    ${hours}  ${minutes} =  Convert To Hours And Minutes  ${new_timeout}
-    Sleep  5
-    ${disabled_field} =  Run Keyword And Return Status    Page Should Contain Element
-    ...    xpath://input[@id="hour-input"][@disabled=""]
-    IF  ${disabled_field}==True
-        Click Element  xpath://input[@id="culler-timeout-limited"]
-    END
-    Input Text  //input[@id="hour-input"]  ${hours}
-    Input Text  //input[@id="minute-input"]  ${minutes}
-    Sleep  0.5s
-    ${changed_setting} =  Run Keyword And Return Status    Page Should Contain Element
-    ...    xpath://button[.="Save changes"][@aria-disabled="false"]
-    IF  ${changed_setting}==True
-        Save Changes In Cluster Settings
-    END
-
-Disable Notebook Culler
-    [Documentation]    Disables the culler (i.e. sets the default timeout of 1 year)
-    Open Dashboard Cluster Settings
-    Sleep  5
-    ${disabled_field} =  Run Keyword And Return Status  Page Should Contain Element
-    ...    xpath://input[@id="hour-input"][@disabled=""]
-    IF  ${disabled_field}==False
-        Click Element  xpath://input[@id="culler-timeout-unlimited"]
-        Save Changes In Cluster Settings
-    END
 
 Teardown
     [Documentation]    Teardown for the test

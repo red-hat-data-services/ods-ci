@@ -84,3 +84,111 @@ Clear User Management Settings
     FOR  ${user}   IN   @{remove_users_list}
         Click Button  (//*[@class="pf-c-form__group-control"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
     END
+
+Set Pod Toleration Via UI
+    [Documentation]    Sets toleration using admin UI
+    [Arguments]    ${toleration}
+    Wait Until Page Contains Element    xpath:${TOLERATION_CHECKBOX}
+    Sleep  2s
+    ${selected} =    Run Keyword And Return Status    Checkbox Should Be Selected    xpath:${TOLERATION_CHECKBOX}
+    IF  not ${selected}
+        Click Element    xpath:${TOLERATION_CHECKBOX}
+    END
+    Wait Until Element Is Enabled    xpath://input[@id="toleration-key-input"]
+    Input Text    xpath://input[@id="toleration-key-input"]    ${toleration}
+
+Save Changes In Cluster Settings
+    [Documentation]    Clicks on the "Save changes" button in Cluster Settings and
+    ...    waits until "Settings changes saved" is shown
+    Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="false"]    timeout=15s
+    Click Button    Save changes
+    Wait Until Keyword Succeeds    30    1
+    ...    Wait Until Page Contains    Settings changes saved
+    # New setting applies after a few seconds, empirically >15s.
+    # Sleep here to make sure it is applied.
+    Sleep  30s
+
+Enable "Usage Data Collection"
+    [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
+    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
+    ...    ${USAGE_DATA_COLLECTION_XP}
+    IF    ${is_data_collection_enabled}==False
+        Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
+        Save Changes In Cluster Settings
+    END
+
+Disable "Usage Data Collection"
+    [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
+    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
+    ...    ${USAGE_DATA_COLLECTION_XP}
+    IF    ${is_data_collection_enabled}==True
+        Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
+        Save Changes In Cluster Settings
+    END
+
+Set PVC Value In RHODS Dashboard
+    [Documentation]    Change the default value for PVC
+    ...    only whole number is selected
+    [Arguments]    ${size}
+    Menu.Navigate To Page    Settings    Cluster settings
+    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
+    Input Text    //input[@id="pvc-size-input"]    ${size}
+    Save Changes In Cluster Settings
+
+Restore PVC Value To Default Size
+    [Documentation]    Set the PVC value to default
+    ...    value i.e., 20Gi
+    Menu.Navigate To Page    Settings    Cluster settings
+    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
+    Click Button    Restore Default
+    Save Changes In Cluster Settings
+
+Set Notebook Culler Timeout
+    [Documentation]    Modifies the notebook culler timeout using the dashboard UI setting it to ${new_timeout} seconds
+    [Arguments]    ${new_timeout}
+    ${hours}  ${minutes} =  Convert To Hours And Minutes  ${new_timeout}
+    Sleep  5
+    ${disabled_field} =  Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath://input[@id="hour-input"][@disabled=""]
+    IF  ${disabled_field}==True
+        Click Element  xpath://input[@id="culler-timeout-limited"]
+    END
+    Input Text  //input[@id="hour-input"]  ${hours}
+    Input Text  //input[@id="minute-input"]  ${minutes}
+    Sleep  0.5s
+    ${changed_setting} =  Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath://button[.="Save changes"][@aria-disabled="false"]
+    IF  ${changed_setting}==True
+        Save Changes In Cluster Settings
+    END
+
+Disable Notebook Culler
+    [Documentation]    Disables the culler (i.e. sets the default timeout of 1 year)
+    Open Dashboard Cluster Settings
+    Sleep  5
+    ${disabled_field} =  Run Keyword And Return Status  Page Should Contain Element
+    ...    xpath://input[@id="hour-input"][@disabled=""]
+    IF  ${disabled_field}==False
+        Click Element  xpath://input[@id="culler-timeout-unlimited"]
+        Save Changes In Cluster Settings
+    END
+
+Modify Notebook Culler Timeout
+    [Documentation]    Modifies the culler timeout via UI
+    [Arguments]    ${new_timeout}
+    Open Dashboard Cluster Settings
+    Set Notebook Culler Timeout  ${new_timeout}
+    Sleep  10s  msg=Give time for rollout
+
+Open Dashboard Cluster Settings
+    [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
+    
+    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    Sleep  1s
+    ${settings_hidden} =  Run Keyword And Return Status  Page Should Contain Element
+    ...    xpath://section[@aria-labelledby="settings"][@hidden=""]
+    IF  ${settings_hidden}==True
+        Click Element  xpath://button[@id="settings"]
+    END
+    Click Element  xpath://a[.="Cluster settings"]

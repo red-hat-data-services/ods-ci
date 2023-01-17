@@ -333,8 +333,15 @@ Verify Error Is Reported When Workbench Fails To Start
     ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...                 pv_description=${NONE}  pv_size=${NONE}
     ...                 press_cancel=${FALSE}    envs=${NONE}
-    Workbench Status Should Be    workbench_title=${WORKBENCH_5_TITLE}    status=Starting...
+    Workbench Status Should Be    workbench_title=${WORKBENCH_5_TITLE}
+    ...    status=${WORKBENCH_STATUS_STARTING}
     Start Workbench Should Fail    workbench_title=${WORKBENCH_5_TITLE}
+    Open Notebook Event Log    workbench_title=${WORKBENCH_5_TITLE}
+    ...    exp_preview_text=Insufficient
+    Event Log Should Report The Failure    exp_progress_text=Insufficient resources to start
+    ...    exp_result_text=FailedScheduling
+    Close Event Log
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
 
 Verify User Can Delete A Data Science Project
     [Tags]    Sanity    Tier1    ODS-1784

@@ -26,6 +26,7 @@ ${KEYVALUE_TYPE}=        Key / value
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
+
 *** Keywords ***
 Create Workbench
     [Documentation]     Creates a new workbench in a Data Science project. It assumes
@@ -304,6 +305,7 @@ Get Openshift Notebook CR From Workbench
     RETURN    ${rc}    ${cr_name}
 
 Start Workbench Should Fail
+    [Documentation]    Checks the workbench fails to start
     [Arguments]    ${workbench_title}
     ${failed}=    Run Keyword And Return Status
     ...    Wait Until Workbench Is Started     workbench_title=${workbench_title}
@@ -311,5 +313,58 @@ Start Workbench Should Fail
     Run keyword And Continue On Failure
     ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
     
-    
-    
+Open Notebook Event Log
+    [Documentation]    Opens the event log of the given workbench
+    [Arguments]    ${workbench_title}    ${exp_preview_text}=${NONE}
+    Click Element
+    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${WORKBENCH_STATUS_STARTING}"]    # robocop: disable
+    Page Should Contain Event Log Preview    expected_text=${exp_preview_text}
+    Click Element    xpath=//div[contains(@class,"popover")]//footer/button[text()="Event log"]
+    Wait Until Generic Modal Appears
+
+Event Log Should Report The Failure
+    [Documentation]    Checks that the Event log modal reports the
+    ...                workbench start failure
+    [Arguments]    ${exp_progress_text}=${NONE}    ${exp_result_text}=${NONE}
+    Page Should Contain Event Log    expected_progress_text=${exp_progress_text}
+    ...    expected_result_text=${exp_result_text}
+
+Close Event Log
+    [Documentation]    Closes the event log which was previously opened by the robot
+    ${cancel_present}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    ${KFNBC_MODAL_CANCEL_XPATH}
+    IF    ${cancel_present} == ${TRUE}
+        Click Element    ${KFNBC_MODAL_CANCEL_XPATH}
+    ELSE
+        Click Element    ${KFNBC_MODAL_X_XPATH}
+    END
+    Wait Until Generic Modal Disappears
+
+Page Should Contain Event Log Preview
+    [Documentation]    Check if a preview of the event log is displayed when
+    ...                user clicks on "Starting..." status label
+    [Arguments]    ${expected_text}=${NONE}
+    Wait Until Page Contains Element    xpath=//div[contains(@class,"popover")]//h6[text()="Notebook status"]
+    IF   "${expected_text}" != "${NONE}"
+        Page Should Contain Element
+        ...    xpath=//div[contains(@class,"popover")]//div[contains(text(),"${expected_text}")]
+    END
+    Wait Until Page Contains Element
+    ...    xpath=//div[contains(@class,"popover")]//footer/button[text()="Event log"]
+
+Page Should Contain Event Log
+    [Documentation]    Checks if the event log is displayed
+    [Arguments]    ${expected_progress_text}=${NONE}    ${expected_result_text}=${NONE} 
+    Is Generic Modal Displayed
+    Run Keyword And Continue On Failure    Page Should Contain    Starting server
+    Run Keyword And Continue On Failure    Page Should Contain    Event log
+    Run Keyword And Continue On Failure    Page Should Contain Element    css:ul[data-id="event-logs"]
+    ${text}=    Get Text    css:ul[data-id="event-logs"]
+    IF   "${expected_progress_text}" != "${NONE}"
+        Page Should Contain Element
+        ...    xpath=//div[@data-id="progress-bar"]//div[contains(text(),"${expected_progress_text}")]
+    END
+    IF   "${expected_result_text}" != "${NONE}"
+        Page Should Contain Element
+        ...    xpath=//div[contains(@class,"alert")]//h4[contains(text(),"${expected_result_text}")]
+    END

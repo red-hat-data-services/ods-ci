@@ -166,7 +166,7 @@ class OpenshiftClusterManager:
                 log.info("Using the osd version given by user as it is...")
             version = "--version {} ".format(self.openshift_version)
         else:
-            log.info("Using the latest osd version available in AWS...")
+            log.info("Using the latest osd version available ...")
 
         channel_grp = ""
         if self.channel_group != "":

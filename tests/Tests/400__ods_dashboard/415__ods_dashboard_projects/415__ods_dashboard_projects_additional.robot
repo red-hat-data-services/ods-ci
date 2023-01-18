@@ -66,12 +66,13 @@ Verify Server Workbench Has The Expected Toleration
     ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...    namespace=${namespace}
     ${received}=    Get Pod Tolerations    ${workbench_cr_name}-0
+    ...    ns=${namespace}
     List Should Contain Value  ${received}  ${expected}
     ...    msg=Unexpected Pod Toleration
 
 Restore Tolerations Settings
     [Documentation]    Reset the notebook tolerations after testing
-    Menu.Navigate To Page    Settings    Cluster settings
+    Open Dashboard Cluster Settings
     Wait for RHODS Dashboard to Load    expected_page=Cluster Settings
     ...    wait_for_cards=${FALSE}
     Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}

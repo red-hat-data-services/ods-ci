@@ -246,6 +246,8 @@ Verify User Can Add A S3 Data Connection
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     ...                          connected_workbench=${workbenches}
     Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_3_TITLE}
 
 Verify User Can Stop A Workbench From Projects Home Page
     [Tags]    Sanity    Tier1    ODS-1823

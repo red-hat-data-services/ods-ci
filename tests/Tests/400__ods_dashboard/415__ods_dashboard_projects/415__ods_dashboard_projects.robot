@@ -351,6 +351,7 @@ Verify Event Log Is Accessible While Starting A Workbench
 Verify Error Is Reported When Workbench Fails To Start
     [Tags]    Tier1    Sanity
     ...       ODS-1973
+    ...       AutomationBug
     [Documentation]    Verify UI informs users about workbenches failed to start.
     ...                At the moment the test is considering only the scenario where
     ...                the workbench fails for Insufficient resources.

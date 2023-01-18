@@ -54,8 +54,8 @@ Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    #Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
-    #RHOSi Teardown
+    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    RHOSi Teardown
 
 Verify Server Workbench Has The Expected Toleration
     [Documentation]    Verifies notebook pod created as workbench

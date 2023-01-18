@@ -117,6 +117,12 @@ Save Changes In Cluster Settings
     ...    waits until "Settings changes saved" is shown
     Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="false"]    timeout=15s
     Click Button    Save changes
+    ${clicked}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    xpath://button[.="Save changes"][@aria-disabled="true"]
+    IF    ${clicked} == ${FALSE}
+        Capture Page Screenshot
+        Click Button    Save changes
+    END
     Wait Until Keyword Succeeds    30    1
     ...    Wait Until Page Contains    Settings changes saved
     # New setting applies after a few seconds, empirically >15s.

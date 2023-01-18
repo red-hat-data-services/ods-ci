@@ -87,8 +87,6 @@ Add Spawner Environment Variable
    Click Button  Add more variables
    #Input Text  xpath://input[@id="---NO KEY---"]  ${env_var}
    Input Text  xpath://input[contains(@id,"-NO KEY-")][1]  ${env_var}
-   #Element Attribute Value Should Be  xpath://input[@id="${env_var}"]  value  ${env_var}
-   #Element Attribute Value Should Be  xpath://input[contains(@id,"-${env_var}")][1]  value  ${env_var}
    Element Attribute Value Should Be  xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"-${env_var}")]  value  ${env_var}
    #Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
    Input Text  xpath://input[contains(@id, "-${env_var}-value")]  ${env_var_value}

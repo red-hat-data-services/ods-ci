@@ -354,7 +354,7 @@ Verify Error Is Reported When Workbench Fails To Start
     [Documentation]    Verify UI informs users about workbenches failed to start.
     ...                At the moment the test is considering only the scenario where
     ...                the workbench fails for Insufficient resources.
-    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_5_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_5_TITLE}  workbench_description=${WORKBENCH_5_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=X Large

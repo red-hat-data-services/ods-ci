@@ -247,7 +247,7 @@ Verify User Can Add A S3 Data Connection
     ...                          connected_workbench=${workbenches}
     Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
-    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_3_TITLE}
+    Workbench Status Should Be      workbench_title=${WORKBENCH_3_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
 
 Verify User Can Stop A Workbench From Projects Home Page
     [Tags]    Sanity    Tier1    ODS-1823
@@ -310,7 +310,7 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
-    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    # [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB
     ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}

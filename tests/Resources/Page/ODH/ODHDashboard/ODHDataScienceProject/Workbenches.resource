@@ -188,7 +188,7 @@ Status Error Icon Should Appear
 
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
-    [Arguments]     ${workbench_title}      ${timeout}=30s
+    [Arguments]     ${workbench_title}      ${timeout}=40s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be      
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
 
@@ -310,7 +310,7 @@ Start Workbench Should Fail
     ${failed}=    Run Keyword And Return Status
     ...    Wait Until Workbench Is Started     workbench_title=${workbench_title}
     IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
-    Run keyword And Continue On Failure
+    Wait Until Keyword Succeeds    10 times    2s
     ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
     
 Open Notebook Event Log

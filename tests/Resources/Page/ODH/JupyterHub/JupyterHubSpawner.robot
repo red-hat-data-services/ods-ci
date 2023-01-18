@@ -23,6 +23,7 @@ ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
+${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-c-form__group-control"]
 
 
 *** Keywords ***
@@ -30,7 +31,7 @@ JupyterHub Spawner Is Visible
     [Documentation]  Checks if spawner is visibile and returns the status
     ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain Element
     ...    xpath:${KFNBC_SPAWNER_HEADER_XPATH}
-    RETURN  ${spawner_visible}
+    [Return]  ${spawner_visible}
 
 Wait Until JupyterHub Spawner Is Ready
     [Documentation]  Waits for the spawner page to be ready using the server size dropdown
@@ -78,7 +79,7 @@ Fetch Max Number Of GPUs In Spawner Page
     ELSE
        ${maxGPUs} =    Set Variable    ${0}
     END
-    RETURN    ${maxGPUs}
+    [Return]    ${maxGPUs}
 
 Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
@@ -87,7 +88,8 @@ Add Spawner Environment Variable
    #Input Text  xpath://input[@id="---NO KEY---"]  ${env_var}
    Input Text  xpath://input[contains(@id,"-NO KEY-")][1]  ${env_var}
    #Element Attribute Value Should Be  xpath://input[@id="${env_var}"]  value  ${env_var}
-   Element Attribute Value Should Be  xpath://input[contains(@id,"-${env_var}")][1]  value  ${env_var}
+   #Element Attribute Value Should Be  xpath://input[contains(@id,"-${env_var}")][1]  value  ${env_var}
+   Element Attribute Value Should Be  xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"-${env_var}")]  value  ${env_var}
    #Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
    Input Text  xpath://input[contains(@id, "-${env_var}-value")]  ${env_var_value}
    #Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}
@@ -122,13 +124,13 @@ Spawner Environment Variable Exists
    [Documentation]  Checks if an environment variable is set based on the ${env_var} argument
    [Arguments]  ${env_var}
    ${var_visible} =  Run Keyword And Return Status  Element Should Be Visible  xpath://input[contains(@id, "-${env_var}")][1]
-   RETURN  ${var_visible}
+   [Return]  ${var_visible}
 
 Get Spawner Environment Variable Value
    [Documentation]  Get the value of an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
    ${env_var_value} =  Get Value  xpath://input[contains(@id, "-${env_var}")][1]
-   RETURN  ${env_var_value}
+   [Return]  ${env_var_value}
 
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
@@ -214,7 +216,7 @@ Spawn Notebook
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed
     ${spawn_status} =  Run Keyword And Return Status  Page Should Contain  Spawn failed
-    RETURN  ${spawn_status}
+    [Return]  ${spawn_status}
 
 Spawn Notebook With Arguments  # robocop: disable
    [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
@@ -296,17 +298,17 @@ Launch JupyterHub Spawner From Dashboard
 Get Spawner Progress Message
    [Documentation]  Get the progress message currently displayed
    ${msg} =  Get Text  progress-message
-   RETURN  ${msg}
+   [Return]  ${msg}
 
 Get Spawner Event Log
    [Documentation]  Get the spawner event log messages as a list
    ${event_elements} =  Get WebElements  class:progress-log-event
-   RETURN @{event_elements}
+   [Return] @{event_elements}
 
 Server Not Running Is Visible
    [Documentation]  Checks if "Server Not Running" page is open
    ${SNR_visible} =  Run Keyword And Return Status  Wait Until Page Contains    Server not running  timeout=15
-   RETURN  ${SNR_visible}
+   [Return]  ${SNR_visible}
 
 Handle Server Not Running
    [Documentation]  Moves back to spawner page
@@ -315,7 +317,7 @@ Handle Server Not Running
 Start My Server Is Visible
    [Documentation]  Checks if "Start My Server" page is open
    ${SMS_visible} =  Run Keyword And Return Status  Page Should Contain  Start My Server
-   RETURN  ${SMS_visible}
+   [Return]  ${SMS_visible}
 
 Handle Start My Server
    [Documentation]  Moves back to spawner page
@@ -325,7 +327,7 @@ Handle Start My Server
 Server Is Stopping Is Visible
    [Documentation]  Checks if "Server Is Stopping" page is open
    ${SIS_visible} =  Run Keyword And Return Status  Page Should Contain  Your server is stopping.
-   RETURN  ${SIS_visible}
+   [Return]  ${SIS_visible}
 
 Handle Server Is Stopping
    [Documentation]  Handles "Server Is Stopping" page
@@ -336,7 +338,7 @@ Control Panel Is Visible
    [Documentation]  Checks if Control Panel page is open
    Sleep  2s
    ${control_panel_visible} =  Run Keyword And Return Status  Page Should Contain  Notebook server control panel
-   RETURN  ${control_panel_visible}
+   [Return]  ${control_panel_visible}
 
 Handle Control Panel
    [Documentation]  Handles control panel page
@@ -348,7 +350,7 @@ Handle Control Panel
 Spawner Modal Is Visible
    [Documentation]  Checks if the spawner modal is present in the spawner page
    ${modal_visible} =  Run Keyword And Return Status  Page Should Contain Element  ${KFNBC_MODAL_HEADER_XPATH}
-   RETURN  ${modal_visible}
+   [Return]  ${modal_visible}
 
 Handle Spawner Modal
    [Documentation]  Closes the spawner modal
@@ -441,7 +443,7 @@ Get Container Size
    ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
    ${l_data}   Convert To Lower Case    ${data}
    ${data}    Get Formated Container Size To Dictionary     ${l_data}
-   RETURN  ${data}
+   [Return]  ${data}
 
 Get Formated Container Size To Dictionary
    [Documentation]   This is the helper keyword to format the size and convert it to Dictionary
@@ -454,7 +456,7 @@ Get Formated Container Size To Dictionary
    Set To Dictionary    ${limits}     ${limit[2]}[:-1]=${limit[1]}     ${limit[4]}=${limit[3]}
    Set To Dictionary    ${req}    ${limit[${idx} + ${2}]}[:-1]=${limit[${idx} + ${1}]}    ${limit[${idx} + ${4}]}=${limit[${idx} + ${3}]}
    Set To Dictionary    ${f_dict}       limits=${limits}          requests=${req}
-   RETURN    ${f_dict}
+   [Return]    ${f_dict}
 
 Fetch Image Description Info
     [Documentation]  Fetches libraries in image description text
@@ -462,7 +464,7 @@ Fetch Image Description Info
     ${xpath_img_description} =  Set Variable  //input[contains(@id, "${img}")]/../span
     ${text} =  Get Text  ${xpath_img_description}
     ${text} =  Fetch From Left  ${text}  ,
-    RETURN  ${text}
+    [Return]  ${text}
 
 Fetch Image Tooltip Description
     [Documentation]  Fetches Description in image tooltip
@@ -472,7 +474,7 @@ Fetch Image Tooltip Description
     Click Element  ${xpath_img_tooltip}
     ${desc} =  Get Text  ${xpath_tooltip_desc}
     Click Element  //div[@class='jsp-app__header__title']
-    RETURN  ${desc}
+    [Return]  ${desc}
 
 Fetch Image Tooltip Info
     [Documentation]    Fetches libraries in image tooltip text
@@ -489,7 +491,7 @@ Fetch Image Tooltip Info
         Append To List    ${tmp_list}    ${item}
     END
     Click Element    xpath://div[@class='pf-c-popover__content']/button[@aria-label="Close"]
-    RETURN    ${tmp_list}
+    [Return]    ${tmp_list}
 
 Spawn Notebooks And Set S3 Credentials
     [Documentation]     Spawn a jupyter notebook server and set the env variables
@@ -552,7 +554,7 @@ Get List Of All Available Container Size
           ${text}      Get Text    ${ext_link}
           Append To List    ${size}     ${text}
     END
-    RETURN    ${size}
+    [Return]    ${size}
 
 Open New Notebook In Jupyterlab Menu
     [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu

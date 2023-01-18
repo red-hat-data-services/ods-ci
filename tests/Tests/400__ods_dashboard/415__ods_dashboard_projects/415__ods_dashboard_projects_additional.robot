@@ -63,7 +63,7 @@ Verify Server Workbench Has The Expected Toleration
     [Arguments]    ${workbench_title}    ${project_title}    ${toleration}
     ${expected}=    Set Variable    ${toleration}:NoSchedule op=Exists
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
-    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
+    ${_}  ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...    namespace=${namespace}
     ${received}=    Get Pod Tolerations    ${workbench_cr_name}-0
     ...    ns=${namespace}

@@ -181,6 +181,8 @@ Workbench Status Should Be
 Status Error Icon Should Appear
     [Documentation]
     [Arguments]     ${workbench_title}
+    Reload Page
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Page Should Contain Element    
     ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
     Mouse Over    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}

@@ -363,8 +363,6 @@ Verify Error Is Reported When Workbench Fails To Start
     ...                 press_cancel=${FALSE}    envs=${NONE}
     Workbench Status Should Be    workbench_title=${WORKBENCH_5_TITLE}
     ...    status=${WORKBENCH_STATUS_STARTING}
-    Reload Page
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Start Workbench Should Fail    workbench_title=${WORKBENCH_5_TITLE}
     Open Notebook Event Log    workbench_title=${WORKBENCH_5_TITLE}
     ...    exp_preview_text=Insufficient

@@ -9,7 +9,7 @@ Library          String
 ***Variables***
 ${cluster_type}          selfmanaged
 ${image_url}             ${EMPTY}
-${RHODS_OSD_INSTALL_REPO}     https://gitlab.cee.redhat.com/data-hub/olminstall.git
+${RHODS_OSD_INSTALL_REPO}     None
 @{SUPPORTED_TEST_ENV}    AWS   GCP   PSI
 ${TEST_ENV}              AWS
 ${INSTALL_TYPE}          OperatorHub

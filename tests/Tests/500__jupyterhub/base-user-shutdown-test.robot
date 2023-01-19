@@ -11,9 +11,9 @@ Suite Teardown   End Web Test
 *** Test Cases ***
 Verify Base User Can Stop A Running Server
     [Documentation]    Verifies that a base user has enough permission to start
-    ...    and stop a notebook server
+    ...                and stop a notebook server
     [Tags]    Smoke
-    ...   ODS-1978
+    ...       ODS-1978
     Launch KFNBC Spawner As Base User
     Launch Notebook And Go Back To Control Panel Window
     Verify That Server Can Be Stopped
@@ -45,8 +45,8 @@ Verify That Server Can Be Stopped
     [Documentation]    Tries to stop a server and verifies that the pod is group_name
     ...    from the cluster, waiting for a configurable `${timeout}` for it to disappear
     [Arguments]    ${timeout}=30
-    Handle Control Panel
-    Wait Until JupyterHub Spawner Is Ready
+    #Handle Control Panel
+    #Wait Until JupyterHub Spawner Is Ready
     ${notebook_pod_name} =   Get User Notebook Pod Name  ${TEST_USER_3.USERNAME}
     ${stopped} =    Set Variable    ${False}
     TRY
@@ -57,5 +57,6 @@ Verify That Server Can Be Stopped
             Sleep    1s
         END
     EXCEPT    WHILE loop was aborted    type=start
-        Fail    Notebook pod was not removed within ${timeout}s
+        Delete User Notebook CR    ${TEST_USER_3.USERNAME}
+        Fail    User Notebook pod was not removed within ${timeout}s
     END

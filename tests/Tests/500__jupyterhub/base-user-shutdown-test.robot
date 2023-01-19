@@ -45,8 +45,8 @@ Verify That Server Can Be Stopped
     [Documentation]    Tries to stop a server and verifies that the pod is group_name
     ...    from the cluster, waiting for a configurable `${timeout}` for it to disappear
     [Arguments]    ${timeout}=30
-    #Handle Control Panel
-    #Wait Until JupyterHub Spawner Is Ready
+    Handle Control Panel
+    Wait Until JupyterHub Spawner Is Ready
     ${notebook_pod_name} =   Get User Notebook Pod Name  ${TEST_USER_3.USERNAME}
     ${stopped} =    Set Variable    ${False}
     TRY
@@ -57,6 +57,6 @@ Verify That Server Can Be Stopped
             Sleep    1s
         END
     EXCEPT    WHILE loop was aborted    type=start
-        Delete User Notebook CR    ${TEST_USER_3.USERNAME}
+        Delete User Notebook CR    ${TEST_USER_3.USERNAME}    
         Fail    User Notebook pod was not removed within ${timeout}s
     END

@@ -227,7 +227,7 @@ Verify User Can Launch A Workbench
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_2_TITLE}
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
-Verify User Can Add A S3 Data Connection
+Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     [Tags]    Sanity    Tier1
     ...       ODS-1825    ODS-1972
     [Documentation]    Verifies users can add a Data connection to AWS S3

@@ -223,7 +223,9 @@ Verify User Can Launch A Workbench
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Start Workbench     workbench_title=${WORKBENCH_2_TITLE}
-    Launch Workbench    workbench_title=${WORKBENCH_2_TITLE}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_2_TITLE}
+    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_2_TITLE}
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
@@ -270,7 +272,9 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     ...    namespace=${ns_name}
     Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_2_TITLE}   project_title=${PRJ_TITLE}
     ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
-    Launch Workbench From Projects Home Page    workbench_title=${WORKBENCH_2_TITLE}  project_title=${PRJ_TITLE}
+    Launch And Access Workbench From Projects Home Page    workbench_title=${WORKBENCH_2_TITLE}
+    ...    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}    auth_type=${TEST_USER_3.AUTH_TYPE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_2_TITLE}
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
@@ -324,8 +328,39 @@ Verify User Can Create A Workbench With Environment Variables
     ...                 pv_description=${NONE}  pv_size=${NONE}
     ...                 press_cancel=${FALSE}    envs=${envs_list}
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
-    Launch Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Check Environment Variables Exist    exp_env_variables=${envs_list}
+
+Verify User Can Log Out And Return To Project From Jupyter Notebook
+    [Tags]    Sanity    Tier1    ODS-1971
+    [Documentation]    Verifies user can log out and return to the project from Jupyter notebook.
+    ...                Users have 2 options:
+    ...                1. click "File" > "Log Out" to actually close the login session
+    ...                2. click "File" > "Hub Control Panel" to return to project details page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Open Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    Run Keyword And Continue On Failure
+    ...    Log In Should Be Requested
+    Access To Workbench    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
+    Open JupyterLab Control Panel
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Workbench Status Should Be      workbench_title=${WORKBENCH_4_TITLE}
+    ...    status=${WORKBENCH_STATUS_RUNNING}
+    Open Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    Run Keyword And Continue On Failure
+    ...    Log In Should Not Be Requested
+    Wait Until JupyterLab Is Loaded
+    Logout JupyterLab
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Workbench Status Should Be      workbench_title=${WORKBENCH_4_TITLE}
+    ...    status=${WORKBENCH_STATUS_RUNNING}
+    Open Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    Run Keyword And Continue On Failure
+    ...    Log In Should Be Requested
+
 
 Verify Event Log Is Accessible While Starting A Workbench
     [Tags]    Tier1    Sanity

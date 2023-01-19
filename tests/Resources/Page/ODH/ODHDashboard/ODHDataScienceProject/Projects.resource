@@ -213,16 +213,19 @@ Wait Until Workbench Is Stopped From Projects Home Page
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}   project_title=${project_title}
 
-Launch Workbench From Projects Home Page
+Launch And Access Workbench From Projects Home Page
     [Documentation]    Launches a running workbench from DS Projects home page.
-    [Arguments]     ${workbench_title}    ${project_title}
+    [Arguments]     ${workbench_title}    ${project_title}    ${username}=${TEST_USER_3.USERNAME}
+    ...             ${password}=${TEST_USER_3.PASSWORD}    ${auth_type}=${TEST_USER_3.AUTH_TYPE}
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
         Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
-        Access To Workbench
+        Switch Window   NEW
+        Access To Workbench    username=${username}    password=${password}
+        ...    auth_type=${auth_type}
     ELSE
-        Fail   msg=Cannot launch workbench ${workbench_title} because it is not running...
+        Fail   msg=Cannot Launch And Access Workbench ${workbench_title} because it is not running...
     END
 
 Workbench Launch Link Should Be Disabled

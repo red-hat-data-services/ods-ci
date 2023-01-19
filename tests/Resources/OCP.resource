@@ -42,12 +42,21 @@ Verify Namespace Status
 Verify CR Status
     [Documentation]  Verifies that a CR exists, that it's available
     ...    and that the name matches
-    [Arguments]  ${crd}  ${cr_name}
-    @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=${crd}
+    [Arguments]  ${crd}  ${cr_name}  ${status}=Available
+    @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=${crd}  name=${cr_name}
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
-    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Available
+    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  ${status}
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True
+
+Verify Notebook CR Is Running
+    [Documentation]  Verifies that a Notebook CR exists, that it's running
+    ...    and that the name matches
+    [Arguments]  ${cr_name}
+    @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=Notebook  name=${cr_name}
+    &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
+    Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
+    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Running
 
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed

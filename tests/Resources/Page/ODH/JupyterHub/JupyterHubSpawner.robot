@@ -23,6 +23,7 @@ ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
+${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-c-form__group-control"]
 
 
 *** Keywords ***
@@ -86,8 +87,7 @@ Add Spawner Environment Variable
    Click Button  Add more variables
    #Input Text  xpath://input[@id="---NO KEY---"]  ${env_var}
    Input Text  xpath://input[contains(@id,"-NO KEY-")][1]  ${env_var}
-   #Element Attribute Value Should Be  xpath://input[@id="${env_var}"]  value  ${env_var}
-   Element Attribute Value Should Be  xpath://input[contains(@id,"-${env_var}")][1]  value  ${env_var}
+   Element Attribute Value Should Be  xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"-${env_var}")]  value  ${env_var}
    #Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
    Input Text  xpath://input[contains(@id, "-${env_var}-value")]  ${env_var_value}
    #Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}

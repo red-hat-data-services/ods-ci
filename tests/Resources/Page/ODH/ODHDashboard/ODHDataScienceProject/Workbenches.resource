@@ -179,13 +179,13 @@ Workbench Status Should Be
     ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
 
 Status Error Icon Should Appear
-    [Documentation]
+    [Documentation]    Checks if the error icon appears on the given workbench
     [Arguments]     ${workbench_title}
     Reload Page
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
-    Page Should Contain Element    
+    Page Should Contain Element
     ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
-    Mouse Over    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}
+    Mouse Over    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
     Wait Until Page Contains    Insufficient resources to start
 
 Wait Until Workbench Is Started
@@ -314,7 +314,7 @@ Start Workbench Should Fail
     IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
     Wait Until Keyword Succeeds    20 times    2s
     ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
-    
+
 Open Notebook Event Log
     [Documentation]    Opens the event log of the given workbench
     [Arguments]    ${workbench_title}    ${exp_preview_text}=${NONE}
@@ -356,7 +356,7 @@ Page Should Contain Event Log Preview
 
 Page Should Contain Event Log
     [Documentation]    Checks if the event log is displayed
-    [Arguments]    ${expected_progress_text}=${NONE}    ${expected_result_text}=${NONE} 
+    [Arguments]    ${expected_progress_text}=${NONE}    ${expected_result_text}=${NONE}
     Is Generic Modal Displayed
     Run Keyword And Continue On Failure    Page Should Contain    Starting server
     Run Keyword And Continue On Failure    Page Should Contain    Event log

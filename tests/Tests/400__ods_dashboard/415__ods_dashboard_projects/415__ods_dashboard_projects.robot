@@ -348,7 +348,7 @@ Verify Event Log Is Accessible While Starting A Workbench
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
 
-Verify Error Is Reported When Workbench Fails To Start
+Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     [Tags]    Tier1    Sanity
     ...       ODS-1973
     ...       AutomationBug

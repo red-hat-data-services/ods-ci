@@ -39,7 +39,7 @@ Create S3 Data Connection
     IF    "${connected_workbench}" == "${NONE}"
         Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
     ELSE
-        Run Keyword And Continue On Failure    
+        Run Keyword And Continue On Failure
         ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
         FOR    ${workbench_title}    IN    @{connected_workbench}
             Set Connection Between Data Connection And Workbench    ${workbench_title}

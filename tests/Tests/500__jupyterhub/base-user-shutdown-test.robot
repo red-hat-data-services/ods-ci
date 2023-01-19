@@ -6,11 +6,14 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Suite Setup      Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
 
 
 *** Test Cases ***
 Verify Base User Can Stop A Running Server
+    [Documentation]    Verifies that a base user has enough permission to start
+    ...    and stop a notebook server
+    [Tags]    Smoke
+    ...   ODS-1978
     Launch KFNBC Spawner As Base User
     Launch Notebook And Go Back To Control Panel Window
     Verify That Server Can Be Stopped
@@ -18,22 +21,29 @@ Verify Base User Can Stop A Running Server
 
 *** Keywords ***
 Setup
+    [Documentation]    Suite setup keyword
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
 
 Launch KFNBC Spawner As Base User
+    [Documentation]    Launches a browser and logs into KFNBC as a base user
     Launch Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Launch JupyterHub Spawner From Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}
     ...    ${TEST_USER.AUTH_TYPE}
 
 Launch Notebook And Go Back To Control Panel Window
-    ${handle} = 	Switch Window    CURRENT
+    [Documentation]    Spawns a notebook server, opens it in a new tab, and Switches
+    ...    back to the dashboard control panel
+    ${handle} =    Switch Window    CURRENT
     Select Notebook Image    s2i-minimal-notebook
-    Select Container Size    Small
+    Select Container Size     Small
     Spawn Notebook    same_tab=${False}
     Switch Window    ${handle}
 
 Verify That Server Can Be Stopped
+    [Documentation]    Tries to stop a server and verifies that the pod is group_name
+    ...    from the cluster, waiting for a configurable `${timeout}` for it to disappear
     [Arguments]    ${timeout}=30
     Handle Control Panel
     Wait Until JupyterHub Spawner Is Ready

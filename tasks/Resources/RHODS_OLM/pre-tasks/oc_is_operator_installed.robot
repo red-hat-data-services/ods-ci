@@ -7,7 +7,7 @@ Is RHODS Installed
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
       ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-      ...          field_selector=metadata.name=self-managed-rhods
+      ...          field_selector=metadata.name=redhat-operators
   ELSE IF  "${cluster_type}" == "managed"
       ${result}=  Run Keyword And Return Status
       ...  Run Keywords

@@ -1,17 +1,21 @@
 *** Settings ***
 Library    String
+Library    OpenShiftLibrary
 *** Keywords ***
 Install RHODS
-  [Arguments]  ${cluster_type}     ${operator_version}=${EMPTY}
+  [Arguments]  ${cluster_type}     ${image_url}
+  Clone OLM Install Repo
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
-          Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${operator_version}
+          Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
+          Oc Apply   kind=List   src=tasks/Resources/RHODS_OLM/install/catalogsource.yaml
       ELSE
-           FAIL    Provided test envrioment is not supported
+           FAIL    Provided test envrioment and install type is not supported
       END
   ELSE IF  "${cluster_type}" == "managed"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
-          Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${operator_version}
+          Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
           FAIL    Provided test envrioment is not supported
       END
@@ -23,26 +27,26 @@ Verify RHODS Installation
   ...                   namespace=redhat-ods-operator
   ...                   label_selector=name=rhods-operator
   ...                   timeout=2000
-  Log  pod operator created
+  Log  pod operator created   console=yes
   Wait For Pods Number  5
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=rhods-dashboard
   ...                   timeout=1200
-  Log  pods rhods-dashboard created
+  Log  pods rhods-dashboard created   console=yes
   Wait For Pods Number  1
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=notebook-controller
   ...                   timeout=1200
-  Log  pods notebook-controller created
+  Log  pods notebook-controller created   console=yes
   Wait For Pods Number  1
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=odh-notebook-controller
   ...                   timeout=1200
-  Log  pods odh-notebook-controller created
+  Log  pods odh-notebook-controller created   console=yes
   Wait For Pods Number  3
   ...                   namespace=redhat-ods-monitoring
+  ...                   label_selector=prometheus=rhods-model-monitoring
   ...                   timeout=1200
-  #Verify Builds In redhat-ods-applications
   Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
   Log  Verified redhat-ods-applications  console=yes
   Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200
@@ -58,45 +62,22 @@ Verify Builds In redhat-ods-applications
   Wait Until Keyword Succeeds  45 min  15 s  Verify Builds Status  Complete
   Log  Builds Verified  console=yes
 
-Verify Builds Number
-  [Arguments]  ${expected_builds}
-  @{builds}=  Oc Get  kind=Build  namespace=redhat-ods-applications
-  ${build_length}=  Get Length  ${builds}
-  Should Be Equal As Integers  ${build_length}  ${expected_builds}
-  RETURN  ${builds}
-
-Verify Builds Status
-  [Arguments]  ${build_status}
-  @{builds}=  Oc Get  kind=Build  namespace=redhat-ods-applications
-  FOR  ${build}  IN  @{builds}
-    Should Be Equal As Strings  ${build}[status][phase]  ${build_status}
-    Should Not Be Equal As Strings  ${build}[status][phase]  Cancelled
-    Should Not Be Equal As Strings  ${build}[status][phase]  Failed
-    Should Not Be Equal As Strings  ${build}[status][phase]  Error
-  END
-
-Install RHODS In Self Managed Cluster Using CLI
-   [Documentation]   Install rhods on sself managed cluster using cli
-   [Arguments]     ${cluster_type}     ${operator_version}
-   ${data}     Split String    ${RHODS_INSTALL_REPO}     /
-   ${filename}  Split String     ${data}[-1]            .
-   Set Test Variable     ${filename}       ${filename}[0]
-   ${return_code}	  Run And Return Rc    git clone ${RHODS_INSTALL_REPO}
-   Should Be Equal As Integers	${return_code}	 0
-   IF    "${operator_version}" != "${EMPTY}"
-          ${return_code}   Run And Return Rc   sed -i "s@quay.io/modh/self-managed-rhods-index:beta@${operator_version}@g" ${EXECDIR}/${filename}/manifests/catalogsource.yaml  #robocop:disable
-          Should Be Equal As Integers	${return_code}	 0
-   END
-   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./rhods install   #robocop:disable
-   Log To Console    ${output}
-   Should Be Equal As Integers	${return_code}	 0  msg=Error detected while installing RHODS
-
-Install RHODS In Managed Cluster Using CLI
-   [Documentation]   Install rhods on sself managed cluster using cli
-   [Arguments]     ${cluster_type}     ${operator_version}
+Clone OLM Install Repo
+   [Documentation]   Clone OLM git repo
    ${return_code}	  Run And Return Rc    git clone ${RHODS_OSD_INSTALL_REPO} rhodsolm
    Should Be Equal As Integers	${return_code}	 0
    Set Test Variable     ${filename}    rhodsolm
-   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh ${operator_version}   #robocop:disable
+
+Install RHODS In Self Managed Cluster Using CLI
+   [Documentation]   Install rhods on self managed cluster using cli
+   [Arguments]     ${cluster_type}     ${image_url}
+   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh -t operator -i ${image_url}   #robocop:disable
+   Log To Console    ${output}
+   Should Be Equal As Integers	${return_code}	 0
+
+Install RHODS In Managed Cluster Using CLI
+   [Documentation]   Install rhods on managed managed cluster using cli
+   [Arguments]     ${cluster_type}     ${image_url}
+   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh -t addon -i ${image_url}  #robocop:disable
    Log To Console    ${output}
    Should Be Equal As Integers	${return_code}	 0

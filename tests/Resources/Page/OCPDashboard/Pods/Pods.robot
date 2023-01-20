@@ -200,7 +200,7 @@ Get Pod Tolerations
     [Documentation]    Returns the list of pod tolerations
     [Arguments]    ${pod_name}    ${ns}=rhods-notebooks
     OpenShiftLibrary.Search Pods    ${pod_name}    namespace=${ns}
-    ${output} =    Run   oc describe pod ${pod_name} -n rhods-notebooks
+    ${output} =    Run   oc describe pod ${pod_name} -n ${ns}
     Create File    podspec.txt    ${output}
     ${tolerations_list} =    Parse File For Tolerations    podspec.txt
     Remove File    podspec.txt

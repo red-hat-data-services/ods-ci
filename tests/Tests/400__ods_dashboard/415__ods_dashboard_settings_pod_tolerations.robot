@@ -1,13 +1,13 @@
 *** Settings ***
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource         ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Library          ../../../../libs/Helpers.py
 Suite Setup      Begin Web Test
 Suite Teardown   Teardown
 
 
 *** Variables ***
-${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
 @{UNSUPPORTED_TOLERATIONS}=    --UNSUPPORTED--    Unsupported-    -Unsupported    Unsupported!    1-_.a@    L@5t0n3!
 
 
@@ -39,18 +39,6 @@ Verify Toleration Is Applied To Pod
 
 
 *** Keywords ***
-Set Pod Toleration Via UI
-    [Documentation]    Sets toleration using admin UI
-    [Arguments]    ${toleration}
-    Wait Until Page Contains Element    xpath:${TOLERATION_CHECKBOX}
-    Sleep  2s
-    ${selected} =    Run Keyword And Return Status    Checkbox Should Be Selected    xpath:${TOLERATION_CHECKBOX}
-    IF  not ${selected}
-        Click Element    xpath:${TOLERATION_CHECKBOX}
-    END
-    Wait Until Element Is Enabled    xpath://input[@id="toleration-key-input"]
-    Input Text    xpath://input[@id="toleration-key-input"]    ${toleration}
-
 Verify Server Pod Has The Expected Toleration
     [Documentation]    Verifies Pod contains toleration
     [Arguments]    ${toleration}

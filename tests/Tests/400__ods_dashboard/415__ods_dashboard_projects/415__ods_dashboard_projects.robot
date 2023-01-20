@@ -16,7 +16,7 @@ Test Teardown      Close All Browsers
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project
 ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test
-${PRJ_DESCRIPTION}=   ODS-CI DS Project is a test for validating DSG feature
+${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Projects feature
 ${NB_IMAGE}=        Minimal Python
 ${WORKBENCH_TITLE}=   ODS-CI Workbench 1
 ${WORKBENCH_DESCRIPTION}=   ODS-CI Workbench 1 is a test workbench using ${NB_IMAGE} image to test DS Projects feature
@@ -320,7 +320,7 @@ Verify User Can Delete A Data Science Project
 
 *** Keywords ***
 Project Suite Setup
-    [Documentation]    Suite setup steps for testing DSG. It creates some test variables
+    [Documentation]    Suite setup steps for testing DS Projects. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
@@ -328,7 +328,7 @@ Project Suite Setup
     RHOSi Setup
 
 Project Suite Teardown
-    [Documentation]    Suite teardown steps after testing DSG. It Deletes
+    [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
     # Delete All Data Science Projects From CLI
@@ -341,14 +341,6 @@ Set Variables For User Access Test
     Set Suite Variable    ${PRJ_2_USER3}    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}-#2
     Set Suite Variable    ${PRJ_A_USER4}    ${PRJ_TITLE}-${TEST_USER_4.USERNAME}-#A
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_1_USER3}    ${PRJ_2_USER3}    ${PRJ_A_USER4}
-
-Launch Data Science Project Main Page
-    [Documentation]    Launch DS Projects page in RHODS Dashboard using a given user
-    [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}
-    ...             ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}
-    Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${ocp_user_auth_type}
-    ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    Open Data Science Projects Home Page
 
 Create Project With Empty Title And Expect Error
     [Documentation]    Tries to create a DS project with emtpy title and checks the Selenium error

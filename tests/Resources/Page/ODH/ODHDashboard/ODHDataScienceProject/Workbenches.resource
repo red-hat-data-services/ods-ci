@@ -2,6 +2,7 @@
 Documentation    Collection of keywords to interact with Workbenches
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
+Resource       ../ODHDataScienceProject/Storages.resource
 Resource       Projects.resource
 
 

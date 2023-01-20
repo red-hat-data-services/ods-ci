@@ -333,7 +333,7 @@ Verify User Can Create A Workbench With Environment Variables
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Check Environment Variables Exist    exp_env_variables=${envs_list}
 
-Verify User Can Log Out And Return To Project From Jupyter Notebook
+Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
     [Tags]    Sanity    Tier1    ODS-1971
     [Documentation]    Verifies user can log out and return to the project from Jupyter notebook.
     ...                Users have 2 options:
@@ -360,7 +360,6 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook
     Open Workbench    workbench_title=${WORKBENCH_4_TITLE}
     Run Keyword And Continue On Failure
     ...    Log In Should Be Requested
-
 
 Verify Event Log Is Accessible While Starting A Workbench
     [Tags]    Tier1    Sanity

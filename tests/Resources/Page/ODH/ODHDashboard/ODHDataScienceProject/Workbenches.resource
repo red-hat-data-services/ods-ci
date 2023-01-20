@@ -15,7 +15,7 @@ ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-desc
 ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//button[@aria-label="Options menu"]
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li/button
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
-${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@id="container-size"]/li/button
+${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
@@ -25,6 +25,7 @@ ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
+${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
 
 *** Keywords ***
@@ -42,7 +43,7 @@ Create Workbench
     Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Select Workbench Jupyter Image    image_name=${image_name}
-    # Select Workbench Container Size # to fix, by default Small is already select
+    IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
     IF    "${envs}" != "${NONE}"
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
@@ -178,9 +179,19 @@ Workbench Status Should Be
     ...    Page Should Contain Element    
     ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
 
+Status Error Icon Should Appear
+    [Documentation]    Checks if the error icon appears on the given workbench
+    [Arguments]     ${workbench_title}
+    Reload Page
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Page Should Contain Element
+    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
+    Mouse Over    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
+    Wait Until Page Contains    Insufficient resources to start
+
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
-    [Arguments]     ${workbench_title}      ${timeout}=30s
+    [Arguments]     ${workbench_title}      ${timeout}=40s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be      
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
 
@@ -296,4 +307,68 @@ Get Openshift Notebook CR From Workbench
     ${rc}  ${cr_name}=    Run And Return Rc And Output   oc get notebook -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${workbench_title}")].metadata.name}'
     RETURN    ${rc}    ${cr_name}
 
+Start Workbench Should Fail
+    [Documentation]    Checks the workbench fails to start
+    [Arguments]    ${workbench_title}
+    ${failed}=    Run Keyword And Return Status
+    ...    Wait Until Workbench Is Started     workbench_title=${workbench_title}
+    IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
+    Wait Until Keyword Succeeds    20 times    2s
+    ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
 
+Open Notebook Event Log
+    [Documentation]    Opens the event log of the given workbench
+    [Arguments]    ${workbench_title}    ${exp_preview_text}=${NONE}
+    Click Element
+    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${WORKBENCH_STATUS_STARTING}"]    # robocop: disable
+    Page Should Contain Event Log Preview    expected_text=${exp_preview_text}
+    Click Element    xpath=//div[contains(@class,"popover")]//footer/button[text()="Event log"]
+    Wait Until Generic Modal Appears
+
+Event Log Should Report The Failure
+    [Documentation]    Checks that the Event log modal reports the
+    ...                workbench start failure
+    [Arguments]    ${exp_progress_text}=${NONE}    ${exp_result_text}=${NONE}
+    Page Should Contain Event Log    expected_progress_text=${exp_progress_text}
+    ...    expected_result_text=${exp_result_text}
+
+Close Event Log
+    [Documentation]    Closes the event log which was previously opened by the robot
+    ${cancel_present}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    ${KFNBC_MODAL_CANCEL_XPATH}
+    IF    ${cancel_present} == ${TRUE}
+        Click Element    ${KFNBC_MODAL_CANCEL_XPATH}
+    ELSE
+        Click Element    ${KFNBC_MODAL_X_XPATH}
+    END
+    Wait Until Generic Modal Disappears
+
+Page Should Contain Event Log Preview
+    [Documentation]    Check if a preview of the event log is displayed when
+    ...                user clicks on "Starting..." status label
+    [Arguments]    ${expected_text}=${NONE}
+    Wait Until Page Contains Element    xpath=//div[contains(@class,"popover")]//h6[text()="Notebook status"]
+    IF   "${expected_text}" != "${NONE}"
+        Page Should Contain Element
+        ...    xpath=//div[contains(@class,"popover")]//div[contains(text(),"${expected_text}")]
+    END
+    Wait Until Page Contains Element
+    ...    xpath=//div[contains(@class,"popover")]//footer/button[text()="Event log"]
+
+Page Should Contain Event Log
+    [Documentation]    Checks if the event log is displayed
+    [Arguments]    ${expected_progress_text}=${NONE}    ${expected_result_text}=${NONE}
+    Is Generic Modal Displayed
+    Run Keyword And Continue On Failure    Page Should Contain    Starting server
+    Run Keyword And Continue On Failure    Page Should Contain    Event log
+    Run Keyword And Continue On Failure    Page Should Contain Element    css:ul[data-id="event-logs"]
+    ${text}=    Get Text    css:ul[data-id="event-logs"]
+    IF   "${expected_progress_text}" != "${NONE}"
+        Page Should Contain Element
+        ...    xpath=//div[@data-id="progress-bar"]//div[contains(text(),"${expected_progress_text}")]
+    END
+    IF   "${expected_result_text}" != "${NONE}"
+        Page Should Contain Element
+        ...    xpath=//div[contains(@class,"alert")]//h4[contains(text(),"${expected_result_text}")]
+    END
+    Capture Page Screenshot

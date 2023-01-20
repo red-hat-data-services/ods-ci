@@ -210,7 +210,6 @@ Start Workbench
 Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched
     [Arguments]    ${username}  ${password}  ${auth_type}
-    # Switch Window   NEW
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
     ${authorization_required}=  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize Jupyterhub Service Account

@@ -52,13 +52,9 @@ Login To Openshift
 Log In Should Be Requested
     [Documentation]    Passes if the login page appears and fails otherwise
     ${present}=    Is OpenShift Login Visible
-    IF    ${present} == ${FALSE}
-        Fail    msg=Log in page did not appear as expected       
-    END
+    IF    ${present} == ${FALSE}    Fail    msg=Log in page did not appear as expected
    
 Log In Should Not Be Requested
     [Documentation]    Fails if the login page appears and passes otherwise
     ${present}=    Is OpenShift Login Visible
-    IF    ${present} == ${TRUE}
-        Fail    msg=Log in page did not appear as expected       
-    END
+    IF    ${present} == ${TRUE}    Fail    msg=Log in page did not appear as expected

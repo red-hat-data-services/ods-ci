@@ -100,7 +100,6 @@ Open JupyterLab Control Panel
 
 Stop JupyterLab Notebook Server
   Open JupyterLab Control Panel
-  #SeleniumLibrary.Switch Window    NEW
   Handle Control Panel
 
 Logout JupyterLab

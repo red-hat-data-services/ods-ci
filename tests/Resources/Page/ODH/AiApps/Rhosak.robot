@@ -35,9 +35,8 @@ Enable RHOSAK
     [Documentation]    Perfors the RHOSAK activation though RHODS Dashboard
     Menu.Navigate To Page    Applications    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
-    Click Element    xpath://*[@id='${RHOSAK_REAL_APPNAME}']
-    Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}    timeout=10
-    ...    error=${RHOSAK_REAL_APPNAME} does not have sidebar with information in the Explore page of ODS Dashboard
+    ${status}=    Open Get Started Sidebar And Return Status    card_locator=//*[@id='${RHOSAK_REAL_APPNAME}']
+    Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
     Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
     ...    message=${RHOSAK_REAL_APPNAME} does not have a "Enable" button in ODS Dashboard
     Click Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}

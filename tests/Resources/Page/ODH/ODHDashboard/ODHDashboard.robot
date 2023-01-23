@@ -10,7 +10,6 @@ Library       JupyterLibrary
 
 
 *** Variables ***
-${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}=                //*[@class="pf-c-drawer__panel-main"]//div[@class="odh-get-started__header"]/h1
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
@@ -174,9 +173,9 @@ Verify Service Provides "Enable" Button In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    Jupyter  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
-  Click Element     xpath://article//*[.='${app_name}']/../..
+  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//article//*[.='${app_name}']/../..
   Capture Page Screenshot
-  Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10   error=${app_name} does not have sidebar with information in the Explore page of ODS Dashboard
+  Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
   Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${app_name} does not have a "Enable" button in ODS Dashboard
 
 Verify Service Provides "Get Started" Button In The Explore Page
@@ -185,9 +184,9 @@ Verify Service Provides "Get Started" Button In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    Jupyter  timeout=30
   Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
-  Click Element     xpath://article//*[.='${app_name}']/../..
+  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//article//*[.='${app_name}']/../..
   Capture Page Screenshot
-  Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}   timeout=10   error=${app_name} does not have sidebar with information in the Explore page of ODS Dashboard
+  Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
   Page Should Contain Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   message=${app_name} does not have a "Get started" button in ODS Dashboard
 
 Go To RHODS Dashboard

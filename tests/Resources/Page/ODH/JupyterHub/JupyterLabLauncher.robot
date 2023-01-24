@@ -96,11 +96,10 @@ Start JupyterLab Notebook Server
 
 Open JupyterLab Control Panel
   Open With JupyterLab Menu  File  Hub Control Panel
-  #Switch Window  JupyterHub
+  SeleniumLibrary.Switch Window    NEW
 
 Stop JupyterLab Notebook Server
   Open JupyterLab Control Panel
-  SeleniumLibrary.Switch Window    NEW
   Handle Control Panel
 
 Logout JupyterLab

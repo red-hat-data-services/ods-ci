@@ -34,7 +34,7 @@ Create Workbench
     ...                 the DS Project data. It allows to add new or existent PV storage,
     ...                 add Environment variables and select Jupyter image
     [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
-    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}   
+    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}
     ...             ${press_cancel}=${FALSE}  ${envs}=${NONE}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
@@ -95,7 +95,7 @@ Add Environment Variables In Workbench
             ${n_pairs}=    Get Length    ${env_variable.keys()}
             FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable}
                 Log   ${pair_idx}-${key}-${value}
-                Run Keyword And Continue On Failure    Wait Until Page Contains Element    
+                Run Keyword And Continue On Failure    Wait Until Page Contains Element
                 ...    xpath=//input[@aria-label="key of item ${pair_idx}"]
                 Input Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//input[@aria-label="key of item ${pair_idx}"]
                 ...           ${key}
@@ -119,7 +119,7 @@ Select Environment Variable Types
     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${variable_index}]//div[contains(@class,"pf-c-select")]/button
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
     Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
-    Run Keyword And Continue On Failure    
+    Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element    ${ENV_VARIABLES_SECTION_XP}//button[div/span[text()="Select one"]]
     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${variable_index}]//button[div/span[text()="Select one"]]
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
@@ -135,7 +135,7 @@ Remove All Environment Variables
 Select An Existent PV
     [Documentation]    Selects an existent PV Storage in the workbench creation page
     [Arguments]    ${name}
-    Run Keyword And Continue On Failure    
+    Run Keyword And Continue On Failure
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
     Wait Until Page Contains Element    xpath=//ul/li/button[text()="${name}"]
@@ -161,22 +161,22 @@ Select Workbench Container Size
 Workbench Should Be Listed
     [Documentation]    Checks a workbench is listed in the DS Project details page
     [Arguments]     ${workbench_title}
-    Run keyword And Continue On Failure     
-    ...    Wait Until Page Contains Element    
+    Run keyword And Continue On Failure
+    ...    Wait Until Page Contains Element
     ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]
 
 Workbench Should Not Be Listed
     [Documentation]    Checks a workbench is not listed in the DS Project details page
     [Arguments]     ${workbench_title}
-    Run keyword And Continue On Failure     
-    ...    Wait Until Page Does Not Contain Element    
+    Run keyword And Continue On Failure
+    ...    Wait Until Page Does Not Contain Element
     ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]
 
 Workbench Status Should Be
     [Documentation]    Checks a workbench status is the expected one in the DS Project details page
     [Arguments]     ${workbench_title}      ${status}
-    Run keyword And Continue On Failure     
-    ...    Page Should Contain Element    
+    Run keyword And Continue On Failure
+    ...    Page Should Contain Element
     ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
 
 Status Error Icon Should Appear
@@ -192,13 +192,13 @@ Status Error Icon Should Appear
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
     [Arguments]     ${workbench_title}      ${timeout}=40s
-    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be      
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
 
 Start Workbench
     [Documentation]    Starts a workbench from the DS Project details page
     [Arguments]     ${workbench_title}
-    ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be      
+    ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
         Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
@@ -209,30 +209,37 @@ Start Workbench
 
 Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched
-    [Arguments]    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
-    Switch Window   NEW
+    [Arguments]    ${username}  ${password}  ${auth_type}
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
     ${authorization_required}=  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize Jupyterhub Service Account
     Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Maybe Close Popup
 
-Launch Workbench
+Launch And Access Workbench
     [Documentation]    Launches a workbench from DS Project details page
-    [Arguments]     ${workbench_title}
-    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be      
+    [Arguments]     ${workbench_title}    ${username}=${TEST_USER_3.USERNAME}
+    ...    ${password}=${TEST_USER_3.PASSWORD}  ${auth_type}=${TEST_USER_3.AUTH_TYPE}
+    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
-        Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
-        Access To Workbench
+        Open Workbench    workbench_title=${workbench_title}
+        Access To Workbench    username=${username}    password=${password}
+        ...    auth_type=${auth_type}
     ELSE
-        Fail   msg=Cannot launch workbench ${workbench_title} because it is not running...
+        Fail   msg=Cannot Launch And Access Workbench ${workbench_title} because it is not running...
     END
+
+Open Workbench
+    [Documentation]    Clicks on "open" link for a given workbench
+    [Arguments]    ${workbench_title}
+    Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
+    Switch Window   NEW
 
 Stop Workbench
     [Documentation]    Stops a workbench from DS Project details page
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
-    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be      
+    ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
         Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
@@ -246,7 +253,7 @@ Handle Stop Workbench Confirmation Modal
     [Documentation]    Handles modal to stop workbench
     [Arguments]    ${press_cancel}=${FALSE}
     Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
-    Run Keyword And Continue On Failure    
+    Run Keyword And Continue On Failure
     ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
     Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your workbench
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]

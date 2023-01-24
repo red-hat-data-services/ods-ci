@@ -48,3 +48,13 @@ Login To Openshift
     Input Text  id=inputPassword  ${ocp_user_pw}
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
     Maybe Skip Tour
+
+Log In Should Be Requested
+    [Documentation]    Passes if the login page appears and fails otherwise
+    ${present} =    Is OpenShift Login Visible
+    IF    ${present} == ${FALSE}    Fail    msg=Log in page did not appear as expected
+
+Log In Should Not Be Requested
+    [Documentation]    Fails if the login page appears and passes otherwise
+    ${present} =    Is OpenShift Login Visible
+    IF    ${present} == ${TRUE}    Fail    msg=Log in page did not appear as expected

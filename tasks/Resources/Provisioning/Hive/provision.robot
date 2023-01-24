@@ -90,4 +90,5 @@ Set Cluster API URL
     ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[0]['metadata']['name']}
     ...    namespace=${ns[0]['metadata']['name']}    api_version=hive.openshift.io/v1
     ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
+    Set Test Variable    ${ns}
     Set Test Variable     ${apiURL}

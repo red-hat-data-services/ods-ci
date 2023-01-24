@@ -35,7 +35,7 @@ Get Cluster Credentials
     Append to File  cluster_details.txt  password=${credentials_splited[1]}\n
 
 Login To Cluster
-    Wait Until Keyword Succeeds    10 min    1 s    Set Cluster API URL
+    Set Cluster API URL
     ${credentials} =    Run and Return Rc And Output    oc extract -n ${ns[0]['metadata']['name']} secret/$(oc -n ${ns[0]['metadata']['name']} get cd ${ns[0]['metadata']['name']} -o jsonpath='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to=-
     ${credentials_splited} =    Split To Lines    ${credentials[1]}
     Run And Return Rc    oc login --username=${credentials_splited[3]} --password=${credentials_splited[1]} ${apiURL} --insecure-skip-tls-verify
@@ -87,8 +87,16 @@ Confirm Cluster Is Claimed
 
 Set Cluster API URL
     ${ns} =    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations['hive_cluster_name']}
-    ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[0]['metadata']['name']}
-    ...    namespace=${ns[0]['metadata']['name']}    api_version=hive.openshift.io/v1
-    ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
+     FOR    ${x}  IN RANGE    len(${ns})
+              ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[${x}]['metadata']['name']}
+              ...    namespace=${ns[${x}]['metadata']['name']}    api_version=hive.openshift.io/v1
+              Log To Console    "${ClusterDeployment[0]['status']['apiURL']}"
+              ${status}=  Run Keyword And Return Status   Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
+              IF  ${status}
+                    ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
+                    Set Test Variable     ${apiURL}
+                    Exit For Loop
+              END
+     END
     Set Test Variable    ${ns}
-    Set Test Variable     ${apiURL}
+

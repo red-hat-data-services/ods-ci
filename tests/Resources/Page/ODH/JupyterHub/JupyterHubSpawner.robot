@@ -22,6 +22,7 @@ ${KFNBC_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-number
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
+${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-c-form__group-control"]
 
@@ -600,3 +601,15 @@ CleanUp JupyterHub For N Users
         Fix Spawner Status
     END
     [Teardown]    SeleniumLibrary.Close All Browsers
+
+Delete User Notebook CR
+    [Documentation]    Delete the `Notebook` CR for a specific user
+    [Arguments]    ${user}
+    ${safe_username} =   Get Safe Username    ${user}
+    ${CR_name} =    Set Variable    jupyter-nb-${safe_username}
+    TRY
+        Verify Notebook CR Is Running    cr_name=${CR_name}
+    EXCEPT
+        Fail    Notebook not found/running for ${user}, cannot stop it
+    END
+    OpenShiftLibrary.Oc Delete    kind=Notebook    name=${CR_name}    namespace=rhods-notebooks

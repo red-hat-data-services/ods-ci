@@ -1,6 +1,6 @@
 *** Settings ***
 Resource        ../../Resources/Common.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHAdminUI.robot
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource        ../../Resources/ODS.robot
 Suite Setup     Setup Admin UI
 Suite Teardown  Teardown Admin UI

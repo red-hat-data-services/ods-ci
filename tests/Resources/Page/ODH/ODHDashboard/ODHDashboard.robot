@@ -4,6 +4,7 @@ Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
 Resource       ../../../Common.robot
 Resource       ../JupyterHub/ODHJupyterhub.resource
 Resource      ../../../Page/ODH/ODHDashboard/ResourcesPage.resource
+Resource      ../../../Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource    ../../../OCP.resource
 Library       JupyterLibrary
 
@@ -461,35 +462,6 @@ Verify Cluster Settings Is Not Available
     ${cluster_settings_available}=    Run Keyword And Return Status    Verify Cluster Settings Is Available
     Should Not Be True    ${cluster_settings_available}    msg=Cluster Settings shoudn't be visible for this user
 
-Save Changes In Cluster Settings
-    [Documentation]    Clicks on the "Save changes" button in Cluster Settings and
-    ...    waits until "Settings changes saved" is shown
-    Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="false"]    timeout=15s
-    Click Button    Save changes
-    Wait Until Keyword Succeeds    30    1
-    ...    Wait Until Page Contains    Settings changes saved
-    # New setting applies after a few seconds, empirically >15s.
-    # Sleep here to make sure it is applied.
-    Sleep  30s
-
-Enable "Usage Data Collection"
-    [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
-    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
-    ...    ${USAGE_DATA_COLLECTION_XP}
-    IF    ${is_data_collection_enabled}==False
-        Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
-        Save Changes In Cluster Settings
-    END
-
-Disable "Usage Data Collection"
-    [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
-    ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
-    ...    ${USAGE_DATA_COLLECTION_XP}
-    IF    ${is_data_collection_enabled}==True
-        Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
-        Save Changes In Cluster Settings
-    END
-
 Search Items In Resources Section
     [Arguments]     ${element}
     Click Link      Resources
@@ -513,23 +485,6 @@ Verify Username Displayed On RHODS Dashboard
     END
 
     Element Text Should Be    ${versioned_user_xp}    ${user_name}
-
-Set PVC Value In RHODS Dashboard
-    [Documentation]    Change the default value for PVC
-    ...    only whole number is selected
-    [Arguments]    ${size}
-    Menu.Navigate To Page    Settings    Cluster settings
-    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
-    Input Text    //input[@id="pvc-size-input"]    ${size}
-    Save Changes In Cluster Settings
-
-Restore PVC Value To Default Size
-    [Documentation]    Set the PVC value to default
-    ...    value i.e., 20Gi
-    Menu.Navigate To Page    Settings    Cluster settings
-    Wait Until Page Contains Element  xpath://input[@id="pvc-size-input"]  timeout=30
-    Click Button    Restore Default
-    Save Changes In Cluster Settings
 
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message

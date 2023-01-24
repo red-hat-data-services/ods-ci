@@ -35,10 +35,7 @@ Get Cluster Credentials
     Append to File  cluster_details.txt  password=${credentials_splited[1]}\n
 
 Login To Cluster
-    ${ns} =    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations['hive_cluster_name']}
-    ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[0]['metadata']['name']}    
-    ...    namespace=${ns[0]['metadata']['name']}    api_version=hive.openshift.io/v1
-    ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
+    Wait Until Keyword Succeeds    30    1    Set Cluster API URL
     ${credentials} =    Run and Return Rc And Output    oc extract -n ${ns[0]['metadata']['name']} secret/$(oc -n ${ns[0]['metadata']['name']} get cd ${ns[0]['metadata']['name']} -o jsonpath='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to=-
     ${credentials_splited} =    Split To Lines    ${credentials[1]}
     Run And Return Rc    oc login --username=${credentials_splited[3]} --password=${credentials_splited[1]} ${apiURL} --insecure-skip-tls-verify
@@ -78,12 +75,19 @@ Wait For Cluster To Be Ready
     ${namespace} =    Wait Until Keyword Succeeds    2 min    2 s
     ...    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations['hive_cluster_name']}
     Log    ${namespace[0]['metadata']['name']}    console=True
-    ${result} =    Wait Until Keyword Succeeds    50 min    10 s 
+    ${result} =    Wait Until Keyword Succeeds    50 min    10 s
     ...    Verify Cluster Is Successfully Provisioned    ${namespace[0]['metadata']['name']}
     IF    ${result} == False    Delete Cluster Configuration
-    IF    ${result} == False    FAIL    
+    IF    ${result} == False    FAIL
     ...    Cluster provisioning failed. Please look into the logs for more details.
-    
+
 Confirm Cluster Is Claimed
     ${status} =    Oc Get    kind=ClusterClaim    name=${infrastructure_configurations}[hive_claim_name]    namespace=rhods
     Should Be Equal As Strings    ${status[0]['status']['conditions'][0]['reason']}    ClusterClaimed
+
+Set Cluster API URL
+    ${ns} =    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations['hive_cluster_name']}
+    ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[0]['metadata']['name']}
+    ...    namespace=${ns[0]['metadata']['name']}    api_version=hive.openshift.io/v1
+    ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
+    Set Test Variable     ${apiURL}

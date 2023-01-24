@@ -35,7 +35,7 @@ Get Cluster Credentials
     Append to File  cluster_details.txt  password=${credentials_splited[1]}\n
 
 Login To Cluster
-    Wait Until Keyword Succeeds    30    1    Set Cluster API URL
+    Wait Until Keyword Succeeds    90    1    Set Cluster API URL
     ${credentials} =    Run and Return Rc And Output    oc extract -n ${ns[0]['metadata']['name']} secret/$(oc -n ${ns[0]['metadata']['name']} get cd ${ns[0]['metadata']['name']} -o jsonpath='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to=-
     ${credentials_splited} =    Split To Lines    ${credentials[1]}
     Run And Return Rc    oc login --username=${credentials_splited[3]} --password=${credentials_splited[1]} ${apiURL} --insecure-skip-tls-verify

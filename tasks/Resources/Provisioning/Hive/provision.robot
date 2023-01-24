@@ -90,7 +90,6 @@ Set Cluster API URL
      FOR    ${x}  IN RANGE    len(${ns})
               ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[${x}]['metadata']['name']}
               ...    namespace=${ns[${x}]['metadata']['name']}    api_version=hive.openshift.io/v1
-              Log To Console    "${ClusterDeployment[0]['status']['apiURL']}"
               ${status}=  Run Keyword And Return Status   Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
               IF  ${status}
                     ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"

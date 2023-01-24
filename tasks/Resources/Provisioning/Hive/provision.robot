@@ -1,5 +1,5 @@
 *** Keywords ***
-Claim Cluster    
+Claim Cluster
     Log    Claiming cluster    console=True
     Oc Apply    kind=ClusterClaim    src=tasks/Resources/Provisioning/Hive/claim.yaml
     ...    template_data=${infrastructure_configurations}
@@ -15,7 +15,7 @@ Does ClusterName Exists
             Log    ${name}[metadata][name]    console=True
             ${clustername_exists} =    Set Variable    "${name}[metadata][name]"
             RETURN    ${clustername_exists}
-        END  
+        END
     END
     RETURN    False
 
@@ -35,7 +35,7 @@ Get Cluster Credentials
     Append to File  cluster_details.txt  password=${credentials_splited[1]}\n
 
 Login To Cluster
-    Wait Until Keyword Succeeds    90    1    Set Cluster API URL
+    Wait Until Keyword Succeeds    10 min    1 s    Set Cluster API URL
     ${credentials} =    Run and Return Rc And Output    oc extract -n ${ns[0]['metadata']['name']} secret/$(oc -n ${ns[0]['metadata']['name']} get cd ${ns[0]['metadata']['name']} -o jsonpath='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to=-
     ${credentials_splited} =    Split To Lines    ${credentials[1]}
     Run And Return Rc    oc login --username=${credentials_splited[3]} --password=${credentials_splited[1]} ${apiURL} --insecure-skip-tls-verify
@@ -45,11 +45,11 @@ Provision Cluster
     Log    Setting cluster configuration    console=True
     ${template} =    Select Provisioner Template
     ${clustername_exists} =    Does ClusterName Exists
-    IF    ${clustername_exists}    
+    IF    ${clustername_exists}
     ...    FAIL    Cluster name ${infrastructure_configurations['hive_cluster_name']} already exists. Please choose a different name.
     Log     Configuring cluster    console=True
     Log Many    ${infrastructure_configurations['hive_cluster_name']}    console=True
-    Oc Apply    kind=List    src=${template}    api_version=v1        
+    Oc Apply    kind=List    src=${template}    api_version=v1
     ...    template_data=${infrastructure_configurations}
 
 Select Provisioner Template

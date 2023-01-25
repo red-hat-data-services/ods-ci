@@ -34,9 +34,8 @@ Enable Anaconda
     [Arguments]    ${license_key}    ${license_validity}=${TRUE}
     Menu.Navigate To Page    Applications    Explore
     Verify Page Contain Anaconda Based On Version
-    Click Element    xpath://*[@id='${ANACONDA_APPNAME}']
-    Wait Until Page Contains Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_TITLE}    timeout=10
-    ...    error=${ANACONDA_APPNAME} does not have sidebar with information in the Explore page of ODS Dashboard
+    ${status}=    Open Get Started Sidebar And Return Status    card_locator=//*[@id='${ANACONDA_APPNAME}']
+    Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
     Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}
     ...    message=${ANACONDA_APPNAME} does not have a "Enable" button in ODS Dashboard
     Click Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}

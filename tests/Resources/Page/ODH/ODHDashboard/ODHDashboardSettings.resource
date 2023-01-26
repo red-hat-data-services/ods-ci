@@ -118,7 +118,7 @@ Save Changes In Cluster Settings
     Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="false"]    timeout=15s
     Click Button    Save changes
     ${clicked}=    Run Keyword And Return Status
-    ...    Page Should Contain Element    xpath://button[.="Save changes"][@aria-disabled="true"]
+    ...    Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="true"]
     IF    ${clicked} == ${FALSE}
         Capture Page Screenshot
         Click Button    Save changes

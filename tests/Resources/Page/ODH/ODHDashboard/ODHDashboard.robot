@@ -335,10 +335,10 @@ Check Sidebar Header Text
     [Arguments]  ${app_id}  ${expected_data}
     ${h1}=  Get Text    xpath://div[contains(@class,'odh-markdown-view')]/h1
     Run Keyword And Continue On Failure  Should Be Equal  ${h1}  ${expected_data}[${app_id}][sidebar_h1]
-    ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__panel-main')]//div[@class='odh-get-started__header']/h1[contains(@class, 'title')]
-    ${getstarted_provider}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__panel-main')]//div[@class='odh-get-started__header']//span[contains(@class, 'provider')]
-    Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_title}  ${expected_data}[${app_id}][title]
-    Run Keyword And Continue On Failure  Should Be Equal   ${getstarted_provider}  ${expected_data}[${app_id}][provider]
+    ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-c-drawer__head')]
+    ${titles}=    Split String    ${getstarted_title}   separator=\n    max_split=1
+    Run Keyword And Continue On Failure  Should Be Equal   ${titles[0]}  ${expected_data}[${app_id}][title]
+    Run Keyword And Continue On Failure  Should Be Equal   ${titles[1]}  ${expected_data}[${app_id}][provider]
 
 Check Get Started Sidebar
     [Arguments]  ${card_locator}  ${card_badges}  ${app_id}  ${expected_data}

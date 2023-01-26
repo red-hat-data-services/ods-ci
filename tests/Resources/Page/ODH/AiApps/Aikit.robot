@@ -13,12 +13,13 @@ Remove AIKIT Operator
 
 Uninstall AIKIT Operator
     [Documentation]    Uninstall intel aikit operator and it's realted component
+    [Arguments]    ${cr_kind}=AIKitContainers    ${cr_name}=intel-aikit-container
+    ...            ${cr_ns}=redhat-ods-applications
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
-    Delete Tabname Instance For Installed Operator    ${intel_aikit_operator_name}    AIKitContainer
-    ...    redhat-ods-applications
+    Oc Delete    kind=${cr_kind}  name=${cr_name}  namespace=${cr_ns}
     Uninstall Operator    ${intel_aikit_operator_name}
-    Oc Delete    kind=ImageStream    namespace=redhat-ods-applications
+    Oc Delete    kind=ImageStream    namespace=${cr_ns}
     ...    label_selector=opendatahub.io/notebook-image=true    field_selector=metadata.name==oneapi-aikit
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}

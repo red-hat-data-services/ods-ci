@@ -56,7 +56,7 @@ Pachyderm Suite Teardown
     Go To    ${OCP_CONSOLE_URL}
     Oc Delete    kind=Pachyderm  name=pachyderm-sample  namespace=pachyderm
     Uninstall Operator    ${pachyderm_operator_name}
-    Delete Project By Name      pachyderm
+    Oc Delete    kind=Project    name=pachyderm
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}

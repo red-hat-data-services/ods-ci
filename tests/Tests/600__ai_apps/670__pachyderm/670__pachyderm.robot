@@ -13,6 +13,7 @@ Suite Teardown      Pachyderm Suite Teardown
 ${pachyderm_container_name}     Pachyderm
 ${pachyderm_operator_name}      Pachyderm
 ${pachyderm_appname}            pachyderm
+${pachyderm_ns}                 pachyderm
 
 
 *** Test Cases ***
@@ -45,7 +46,7 @@ Pachyderm Suite Setup
     Login to OCP
     Wait Until OpenShift Console Is Loaded
     Check And Install Operator in Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
-    Oc Create    kind=Project    name=pachyderm
+    Oc Create    kind=Project    name=${pachyderm_ns}
     Create Pachyderm AWS-Secret
     Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}
     Wait Until Status Is Running
@@ -54,13 +55,15 @@ Pachyderm Suite Setup
 
 Pachyderm Suite Teardown
     Go To    ${OCP_CONSOLE_URL}
-    Oc Delete    kind=Pachyderm  name=pachyderm-sample  namespace=pachyderm
+    Oc Delete    kind=Pachyderm  name=pachyderm-sample  namespace=${pachyderm_ns}
+    Move To Installed Operator Page Tab in Openshift    operator_name=${pachyderm_operator_name}
+    ...    tab_name=Pachyderm    namespace=${pachyderm_ns}
     Uninstall Operator    ${pachyderm_operator_name}
-    Oc Delete    kind=Project    name=pachyderm
+    Oc Delete    kind=Project    name=${pachyderm_ns}
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
-    Remove Disabled Application From Enabled Page    app_id=pachyderm
+    Remove Disabled Application From Enabled Page    app_id=${pachyderm_appname}
     Close All Browsers
 
 Wait Until Status Is Running

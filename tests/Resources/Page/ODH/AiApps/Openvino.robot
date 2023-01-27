@@ -20,6 +20,8 @@ Uninstall Openvino Operator
     ...            ${cr_ns}=redhat-ods-applications
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
+    Move To Installed Operator Page Tab in Openshift    operator_name=${openvino_operator_name}
+    ...    tab_name=Notebook    namespace=${cr_ns}
     Delete Openvino Notebook CR    cr_kind=${cr_kind}    cr_name=${cr_name}
     ...    cr_ns=${cr_ns}
     Uninstall Operator    ${openvino_operator_name}

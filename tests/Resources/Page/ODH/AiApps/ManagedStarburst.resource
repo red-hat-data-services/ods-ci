@@ -79,7 +79,7 @@ Open Managed Staburst Web UI
     END
     Open Browser      url=http://${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Perform Log In    username=${user}
-    Wait Until Page Contains     Cluster overview
+    Wait Until Page Contains     Overview
 
 Check Worksheet Tool Is Accessible
     [Documentation]    Check "Worksheet" tool inside Starburst UI is accessible
@@ -95,12 +95,10 @@ Check Managed Starburst Web UI Is Loaded
     Wait Until Page Contains     Overview
     Wait Until Page Contains     CPU usage
     Wait Until Page Contains     Workers
-    Wait Until Page Contains     Query history
+    Wait Until Page Contains     Query overview
     Wait Until Page Contains     Cluster history
+    Wait Until Page Contains     Query editor
     Wait Until Page Contains     Insights
-    Wait Until Page Contains     Worksheet
-    Wait Until Page Contains     Documentation
-    Wait Until Page Contains     Web UI
     Wait Until Page Contains Element    xpath=//canvas[@class="chartjs-render-monitor"]
 
 Run Query And Check Output

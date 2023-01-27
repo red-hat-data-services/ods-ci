@@ -16,14 +16,35 @@ Remove Openvino Operator
 
 Uninstall Openvino Operator
     [Documentation]    Uninstall openvino operator and it's realted component
+    [Arguments]    ${cr_kind}=Notebook    ${cr_name}=v2022.3
+    ...            ${cr_ns}=redhat-ods-applications
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
-    Delete Tabname Instance For Installed Operator    ${openvino_operator_name}    Notebook    redhat-ods-applications
+    Delete Openvino Notebook CR    cr_kind=${cr_kind}    cr_name=${cr_name}
+    ...    cr_ns=${cr_ns}
     Uninstall Operator    ${openvino_operator_name}
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
     Remove Disabled Application From Enabled Page    app_id=openvino
+
+Delete Openvino Notebook CR
+    [Documentation]    Deletes the openvino CRs using OpenshiftLibrary.
+    ...                Temporarily, it deletes all the CRs it finds, but
+    ...                this going to change when installation will be replaces with CLI:
+    ...                at that point the kw will delete a specific CR by name
+    [Arguments]    ${cr_kind}    ${cr_name}    ${cr_ns}
+    ${openvinos}=    Oc Get    api_version=intel.com/v1alpha1    kind=${cr_kind}   namespace=${cr_ns}
+    ...            fields=['metadata.name']
+    ${n_openvinos}=    Get Length    ${openvinos}
+    IF    "${n_openvinos}" > "${1}"    
+        Log    message=There are more than once instance of Openvino..deleting all of them!
+        ...    level=WARN
+    END
+    FOR    ${instance}    IN    @{openvinos}
+        Oc Delete    api_version=intel.com/v1alpha1
+        ...    kind=${cr_kind}  name=${instance}[metadata.name]  namespace=${cr_ns}
+    END
 
 Verify JupyterHub Can Spawn Openvino Notebook
     [Documentation]    Spawn openvino notebook and check if

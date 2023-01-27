@@ -45,7 +45,7 @@ Pachyderm Suite Setup
     Login to OCP
     Wait Until OpenShift Console Is Loaded
     Check And Install Operator in Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
-    Create Project      pachyderm
+    Oc Create    kind=Project    pachyderm
     Create Pachyderm AWS-Secret
     Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}
     Wait Until Status Is Running
@@ -54,7 +54,7 @@ Pachyderm Suite Setup
 
 Pachyderm Suite Teardown
     Go To    ${OCP_CONSOLE_URL}
-    Delete Tabname Instance For Installed Operator    ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}
+    Oc Delete    kind=Pachyderm  name=pachyderm-sample  namespace=pachyderm
     Uninstall Operator    ${pachyderm_operator_name}
     Delete Project By Name      pachyderm
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}

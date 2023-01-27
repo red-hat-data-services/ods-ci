@@ -37,7 +37,7 @@ Delete Openvino Notebook CR
     ${openvinos}=    Oc Get    api_version=intel.com/v1alpha1    kind=${cr_kind}   namespace=${cr_ns}
     ...            fields=['metadata.name']
     ${n_openvinos}=    Get Length    ${openvinos}
-    IF    "${n_openvinos}" > "${1}"    
+    IF    "${n_openvinos}" > "${1}"
         Log    message=There are more than once instance of Openvino..deleting all of them!
         ...    level=WARN
     END

@@ -60,6 +60,8 @@ Pachyderm Suite Teardown
     ...    tab_name=Pachyderm    namespace=${pachyderm_ns}
     Uninstall Operator    ${pachyderm_operator_name}
     Oc Delete    kind=Project    name=${pachyderm_ns}
+    Sleep    30s
+    ...    reason=There is a bug in dashboard showing an error message after ISV uninstall
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}

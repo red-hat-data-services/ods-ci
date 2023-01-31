@@ -25,6 +25,8 @@ Uninstall Openvino Operator
     Delete Openvino Notebook CR    cr_kind=${cr_kind}    cr_name=${cr_name}
     ...    cr_ns=${cr_ns}
     Uninstall Operator    ${openvino_operator_name}
+    Sleep    30s
+    ...    reason=There is a bug in dashboard showing an error message after ISV uninstall
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}

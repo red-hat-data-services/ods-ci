@@ -56,7 +56,7 @@ Pachyderm Suite Setup
 Pachyderm Suite Teardown
     Go To    ${OCP_CONSOLE_URL}
     Oc Delete    kind=Pachyderm  name=pachyderm-sample  namespace=${pachyderm_ns}
-    Move To Installed Operator Page Tab in Openshift    operator_name=${pachyderm_operator_name}
+    Move To Installed Operator Page Tab In Openshift    operator_name=${pachyderm_operator_name}
     ...    tab_name=Pachyderm    namespace=${pachyderm_ns}
     Uninstall Operator    ${pachyderm_operator_name}
     Oc Delete    kind=Project    name=${pachyderm_ns}

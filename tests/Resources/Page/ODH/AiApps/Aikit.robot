@@ -18,7 +18,7 @@ Uninstall AIKIT Operator
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
     Oc Delete    kind=${cr_kind}  name=${cr_name}  namespace=${cr_ns}
-    Move To Installed Operator Page Tab in Openshift    operator_name=${intel_aikit_operator_name}
+    Move To Installed Operator Page Tab In Openshift    operator_name=${intel_aikit_operator_name}
     ...    tab_name=AIKitContainer    namespace=${cr_ns}
     Uninstall Operator    ${intel_aikit_operator_name}
     Oc Delete    kind=ImageStream    namespace=${cr_ns}

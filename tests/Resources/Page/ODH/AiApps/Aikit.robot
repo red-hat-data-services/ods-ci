@@ -13,7 +13,7 @@ Remove AIKIT Operator
 
 Uninstall AIKIT Operator
     [Documentation]    Uninstall intel aikit operator and it's realted component
-    [Arguments]    ${cr_kind}=AIKitContainers    ${cr_name}=intel-aikit-container
+    [Arguments]    ${cr_kind}=AIKitContainer    ${cr_name}=intel-aikit-container
     ...            ${cr_ns}=redhat-ods-applications
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour

@@ -29,7 +29,7 @@ Uninstall Openvino Operator
     ...    reason=There is a bug in dashboard showing an error message after ISV uninstall
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
-    ...    browser_options=${BROWSER.OPTIONS}
+    ...    browser_options=${BROWSER.OPTIONS}        wait_for_cards=${FALSE}
     Remove Disabled Application From Enabled Page    app_id=openvino
 
 Delete Openvino Notebook CR

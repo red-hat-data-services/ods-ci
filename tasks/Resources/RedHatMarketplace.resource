@@ -35,6 +35,10 @@ Check Cluster Is Not Already Registered
         END
     END
 
+Create RedHat Marketplace Project
+    [Documentation]    Creates the projects ${RH_MARKETPLACE_NS}
+    Run    oc new-project ${RH_MARKETPLACE_NS}
+
 Install RedHat Marketplace Operator
     [Documentation]    Installs the RHM operator
     Run    oc apply -f "https://marketplace.redhat.com/provisioning/v1/rhm-operator/rhm-operator-subscription?approvalStrategy=Automatic"

@@ -37,7 +37,7 @@ Check Cluster Is Not Already Registered
 
 Create RedHat Marketplace Project
     [Documentation]    Creates the projects ${RH_MARKETPLACE_NS}
-    Run    oc new-project ${RH_MARKETPLACE_NS}
+    ${rc}  ${out}=    Run And Return Rc And Output    oc create namespace ${RH_MARKETPLACE_NS}
 
 Install RedHat Marketplace Operator
     [Documentation]    Installs the RHM operator

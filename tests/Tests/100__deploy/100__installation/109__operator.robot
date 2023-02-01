@@ -53,6 +53,7 @@ Verify Clean Up ODS Deployer Post-Migration
     [Tags]    Tier1
     ...       ODS-1767
     ...       Sanity
+    ...       AutomationBug
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.17.0
     IF    ${version_check} == False
         Log    Skipping test case as RHODS version is less than 1.17.0
@@ -114,7 +115,7 @@ Fetch Odh-deployer Pod Info
     ...        odhdeployer_pod_info(dict): Dictionary containing the information of the odhdeployer pod
     @{resources_info_list}=    Oc Get    kind=Pod    api_version=v1    label_selector=name=rhods-operator
     &{odhdeployer_pod_info}=    Set Variable    ${resources_info_list}[0]
-    [Return]    &{odhdeployer_pod_info}
+    RETURN    &{odhdeployer_pod_info}
 
 Fetch Odh-deployer Pod Logs
     [Documentation]  Fetches the logs of pod odh-deployer
@@ -127,7 +128,7 @@ Fetch Odh-deployer Pod Logs
     ...                         name=${odhdeployer_pod_info.metadata.name}
     ...                         namespace=redhat-ods-operator
     ...                         container=rhods-deployer
-    [Return]    ${odhdeployer_pod_Logs}
+    RETURN    ${odhdeployer_pod_Logs}
 
 Fetch Operator Pod Info
     [Documentation]  Fetches information about operator pod
@@ -136,7 +137,7 @@ Fetch Operator Pod Info
     ...    Returns:
     ...        operator_pod_info(dict): Dictionary containing the information of the operator pod
     @{operator_pod_info}=    Oc Get    kind=Pod    api_version=v1    label_selector=name=rhods-operator
-    [Return]    @{operator_pod_info}
+    RETURN    @{operator_pod_info}
 
 Verify Operator Pods Have CrashLoopBackOff Status After Upgrade
     [Documentation]  Verifies operator pods have CrashLoopBackOff status after upgrade
@@ -151,7 +152,7 @@ Verify Operator Pods Have CrashLoopBackOff Status After Upgrade
     ...    status.containerStatuses[0].state.waiting.reason
     ...    CrashLoopBackOff
     ...    @{operator_pod_info}
-    [Return]    ${crashloopbackoff}
+    RETURN    ${crashloopbackoff}
 
 Log Error And Fail Pods When Pods Were Terminated
     [Documentation]  Logs the error why the specified pods were terminated and fails the pod for the specified reason

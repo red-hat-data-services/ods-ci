@@ -4,6 +4,7 @@ Resource    ../../Resources/Common.robot
 Resource    ../../Resources/Page/ODH/JupyterHub/LaunchJupyterHub.robot
 Resource    ../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
 Resource    ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource    ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource    ../../Resources/Page/OCPDashboard/OCPMenu.robot
 Library     SeleniumLibrary
 Test Setup    Test Suite For Web
@@ -63,7 +64,7 @@ Is SegmentKey Exposed In JupyterHub API
     &{data} =    Evaluate    dict(${data[0].text})
     @{keys} =    Get Dictionary Keys    ${data["segment_key"]}
     ${return_value} =    Evaluate    'segmentKey' in ${keys}
-    [Return]    ${return_value}
+    RETURN    ${return_value}
 
 JupyterHub API Should Not Exposes SegmentKey
     [Documentation]     Checks API is not exposing segmentkey

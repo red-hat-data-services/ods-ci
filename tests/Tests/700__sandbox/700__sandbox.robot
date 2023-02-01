@@ -88,7 +88,7 @@ Verify None Of The Card Are Enabled
     [Documentation]    Verify none of the cards available in explore section is enabled
     ${link_elements}  Get WebElements    //article[@class="pf-c-card pf-m-selectable odh-card"]
     ${length}      Get Length    ${link_elements}
-    Run Keyword If  ${length} != ${0}    Fail     '${length}' tiles in Explore section is Enabled
+    IF  ${length} != ${0}    Fail     '${length}' tiles in Explore section is Enabled
 
 Verify Support Link Is Not Present in RHODS Dashbaord
     [Documentation]   Check suppurt url is not present in the sandbox RHODS dashabord

@@ -16,11 +16,10 @@ Resource            ../../../Resources/Common.robot
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
 
-*** Test Cases ***
 
+*** Test Cases ***
 Verify Dashbord has no message with NO Component Found
-    [Tags]  Sanity
-    ...     Tier1
+    [Tags]  Tier3
     ...     ODS-1493
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with bad subscription present in openshift
@@ -43,14 +42,14 @@ Verify Traefik Deployment
     Skip      msg=Traefik proxy is removed after KFNBC migration
 
 Verify Notebook Controller Deployment
-    [Documentation]  Verifies RHODS Notebook Controller deployment
+    [Documentation]    Verifies RHODS Notebook Controller deployment
     [Tags]    Sanity
     ...       ODS-546  ODS-294  ODS-1250  ODS-237
-     @{NBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=notebook-controller
-     @{ONBC}=  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=odh-notebook-controller
-     ${containerNames} =  Create List  manager
-     Verify Deployment  ${NBC}  1  1  ${containerNames}
-     Verify Deployment  ${ONBC}  1  1  ${containerNames}
+    @{NBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=notebook-controller
+    @{ONBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=odh-notebook-controller
+    ${containerNames} =  Create List  manager
+    Verify Deployment  ${NBC}  1  1  ${containerNames}
+    Verify Deployment  ${ONBC}  1  1  ${containerNames}
 
 Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed
@@ -81,8 +80,8 @@ Verify GPU Operator Deployment  # robocop: disable
     Verify DaemonSet Status  label=app=nvidia-dcgm-exporter  dsname=nvidia-dcgm-exporter
     Verify DaemonSet Status  label=app=nvidia-dcgm  dsname=nvidia-dcgm
     Verify DaemonSet Status  label=app=nvidia-device-plugin-daemonset  dsname=nvidia-device-plugin-daemonset
-    #app=nvidia-driver-daemonset-410.84.202205191234-0
-    #Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  dsname=nvidia-driver-daemonset-*
+    # app=nvidia-driver-daemonset-410.84.202205191234-0
+    # Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  dsname=nvidia-driver-daemonset-*
     Verify DaemonSet Status  label=app=nvidia-node-status-exporter  dsname=nvidia-node-status-exporter
     Verify DaemonSet Status  label=app=nvidia-operator-validator  dsname=nvidia-operator-validator
     Verify CR Status  crd=NodeFeatureDiscovery  cr_name=ocp-gpu-addon
@@ -93,47 +92,51 @@ Verify That Prometheus Image Is A CPaaS Built Image
     ...       Tier1
     ...       ODS-734
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
-    Verify Container Image    redhat-ods-monitoring    ${pod}    prometheus
-    ...    "registry.redhat.io/openshift4/ose-prometheus"
-    Verify Container Image    redhat-ods-monitoring    ${pod}    oauth-proxy
-    ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
+    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    prometheus
+    ...    registry.redhat.io/openshift4/ose-prometheus
+    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    oauth-proxy
+    ...    registry.redhat.io/openshift4/ose-oauth-proxy
 
-Verify That Grafana Image Is A Red Hat Built Image
+Verify That Grafana Image Is A CPaaS Built Image
     [Documentation]    Verifies the images used for grafana
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-736
+    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=grafana-
-    Verify Container Image    redhat-ods-monitoring    ${pod}    grafana
-    ...    "registry.redhat.io/rhel8/grafana:7"
-    Verify Container Image    redhat-ods-monitoring    ${pod}    auth-proxy
-    ...    "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
+    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    grafana
+    ...    registry.redhat.io/rhel8/grafana
+    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    auth-proxy
+    ...    registry.redhat.io/openshift4/ose-oauth-proxy
 
 Verify That Blackbox-exporter Image Is A CPaaS Built Image
     [Documentation]    Verifies the image used for blackbox-exporter
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-735
+    Skip If RHODS Is Self-Managed
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
-    Verify Container Image    redhat-ods-monitoring    ${pod}    blackbox-exporter
-    ...    "quay.io/integreatly/prometheus-blackbox-exporter:v0.19.0"
+    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    blackbox-exporter
+    ...    quay.io/integreatly/prometheus-blackbox-exporter
 
 Verify That Alert Manager Image Is A CPaaS Built Image
     [Documentation]    Verifies the image used for alertmanager
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-733
+    Skip If RHODS Is Self-Managed
     ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
-    Verify Container Image    redhat-ods-monitoring    ${pod}    alertmanager
-    ...    "registry.redhat.io/openshift4/ose-prometheus-alertmanager"
+    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    alertmanager
+    ...    registry.redhat.io/openshift4/ose-prometheus-alertmanager
 
-Verify Oath-Proxy Image Is fetched From CPaaS
+Verify Oath-Proxy Image Is A CPaaS Built Image
+    [Documentation]    Verifies the image used for oauth-proxy
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-666
     ${pod} =    Find First Pod By Name  namespace=redhat-ods-applications   pod_start_with=rhods-dashboard-
-    Verify Container Image      redhat-ods-applications     ${pod}      oauth-proxy
-    ...     "registry.redhat.io/openshift4/ose-oauth-proxy:v4.8"
+    Container Image Url Should Contain      redhat-ods-applications     ${pod}      oauth-proxy
+    ...     registry.redhat.io/openshift4/ose-oauth-proxy
 
 Verify That CUDA Build Chain Succeeds
     [Documentation]    Check Cuda builds are complete. Verify CUDA (minimal-gpu),
@@ -141,15 +144,23 @@ Verify That CUDA Build Chain Succeeds
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-316    ODS-481
-    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==False
+        Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    END
     Verify Image Can Be Spawned    image=pytorch  size=Small
+    ...    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Verify Image Can Be Spawned    image=tensorflow  size=Small
+    ...    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
+    ...    auth_type=${TEST_USER.AUTH_TYPE}
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1090
+    Skip If RHODS Is Self-Managed
     Verify BlackboxExporter Includes Oauth Proxy
     Verify Authentication Is Required To Access BlackboxExporter
 
@@ -207,8 +218,10 @@ Verify Grafana Is Connected To Prometheus Using TLS
     [Documentation]    Verifies Grafana is connected to Prometheus using TLS
     [Tags]    Tier2
     ...       ODS-963
-    ...       AutomationBug
+    ...       ProductBug
     [Setup]  Set Library Search Order  Selenium Library
+    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
+    ...    msg=Grafana was removed in RHODS 1.20
     Verify Grafana Datasources Have TLS Enabled
     Verify Grafana Can Obtain Data From Prometheus Datasource
     [Teardown]  Close Browser
@@ -236,7 +249,7 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
 Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
-    [Tags]  Tier2
+    [Tags]  Tier3
     ...     ODS-1556
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with data value empty for odh-enabled-applications-config
@@ -297,7 +310,7 @@ Verify Authentication Is Required To Access BlackboxExporter
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
     ...    username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}
-    Length Should Be    ${links}    2
+    Length Should Be    ${links}    3    msg=Unexpected number of target endpoints in blackbox-exporter
     ${pod_name} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     FOR    ${link}    IN    @{links}
         ${command} =    Set Variable    curl --silent --insecure ${link}
@@ -329,7 +342,7 @@ Verify Grafana Datasources Have TLS Enabled
     ${secret} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=redhat-ods-monitoring
     ${secret} =  Evaluate  base64.b64decode("${secret[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
     ${secret} =  Evaluate  json.loads('''${secret}''')  json
-    Run Keyword If  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
+    IF  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
     ...  Should Be Equal As Strings  ${secret['datasources'][0]['jsonData']['tlsSkipVerify']}  False
 
 Verify Grafana Can Obtain Data From Prometheus Datasource
@@ -341,7 +354,7 @@ Verify Grafana Can Obtain Data From Prometheus Datasource
     Run Promql Query  query=traefik_backend_server_up
     Page Should Contain  text=Graph
 
-Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods in Project
+Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project
     [Documentation]    Verifies that CPU and Memory requests and limits are defined
     ...                for all containers in all pods for the specified project
     ...    Args:
@@ -353,9 +366,9 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     FOR    ${pod_info}    IN    @{project_pods_info}
         Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
         IF    "${project}" == "redhat-ods-applications"
-            Run Keyword If    "cuda-s2i" in "${pod_info['metadata']['name']}"
+            IF    "cuda-s2i" in "${pod_info['metadata']['name']}"
             ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
-            Run Keyword If    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
+            IF    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
             ...    Verify Requests Contains Expected Values  cpu=4  memory=8Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
         END
     END

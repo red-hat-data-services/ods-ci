@@ -32,11 +32,11 @@ Login To Grafana
     [Documentation]    Login to Grafana
     [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
     ${oauth_prompt_visible} =  Is OpenShift OAuth Login Prompt Visible
-    Run Keyword If  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
+    IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
     ${login_required} =  Is OpenShift Login Visible
-    Run Keyword If  ${login_required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
+    IF  ${login_required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
     ${authorize_service_account} =  Is grafana Service Account Authorization Required
-    Run Keyword If  ${authorize_service_account}  Authorize Grafana Service Account
+    IF  ${authorize_service_account}  Authorize Grafana Service Account
 
 Authorize Grafana Service Account
     [Documentation]  Authorize Grafana Service Account

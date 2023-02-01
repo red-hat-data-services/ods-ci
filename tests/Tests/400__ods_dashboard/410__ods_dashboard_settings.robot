@@ -3,6 +3,7 @@ Documentation       Tests features in ODS Dashboard "Settings" section
 
 Library             SeleniumLibrary
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 
@@ -41,10 +42,10 @@ Verify That "Usage Data Collection" Can Be Set In "Cluster Settings"
     ...       ODS-1218
     Open ODS Dashboard With Admin User
     Verify Cluster Settings Is Available
-    ODHDashboard.Enable "Usage Data Collection"
+    Enable "Usage Data Collection"
     Capture Page Screenshot
     ODS.Usage Data Collection Should Be Enabled
-    ODHDashboard.Disable "Usage Data Collection"
+    Disable "Usage Data Collection"
     Capture Page Screenshot
     ODS.Usage Data Collection Should Not Be Enabled
     [Teardown]    Restore Default Configuration For "Usage Data Collection" And TearDown
@@ -64,7 +65,7 @@ Open ODS Dashboard With Non Admin User
 Restore Default Configuration For "Usage Data Collection" And TearDown
     [Documentation]    Restores "Usage Data Collection" default configuration and runs test teardown
     Verify Cluster Settings Is Available
-    ODHDashboard.Enable "Usage Data Collection"
+    Enable "Usage Data Collection"
     Capture Page Screenshot
     Dashboard Settings Test Teardown
 

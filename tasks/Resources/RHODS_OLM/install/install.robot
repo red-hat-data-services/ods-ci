@@ -1,11 +1,11 @@
 *** Keywords ***
-Installing RHODS Operator ${operator_version}
+Installing RHODS Operator ${image_url}
   ${is_operator_installed} =  Is RHODS Installed
-  Run Keyword Unless  ${is_operator_installed}  Run Keywords
+  IF  not ${is_operator_installed}  Run Keywords
   ...  Log  Installing RHODS operator in ${cluster_type}  console=yes  AND
-  ...  Set Suite Variable  ${operator_version}  AND
-  ...  Set Test Variable  ${RHODS_INSTALL_REPO}  AND
-  ...  Install RHODS  ${operator_version}   ${cluster_type}
+  ...  Set Suite Variable  ${image_url}  AND
+  ...  Set Test Variable  ${RHODS_OSD_INSTALL_REPO}  AND
+  ...  Install RHODS   ${cluster_type}    ${image_url}
 
 RHODS Operator Should Be installed
   Verify RHODS Installation

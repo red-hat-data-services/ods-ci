@@ -29,7 +29,7 @@ Perform Request
     Set To Dictionary    ${LOG_RESP_DICT}      url=${response.url}   headers=${response.headers}   body=${response.text}
     ...                                      status_code=${response.status_code}   reason=${response.reason}
     Log     ${request_type} Response: ${LOG_RESP_DICT}
-    [Return]    ${response.json()}
+    RETURN    ${response.json()}
 
 Perform Dashboard API Endpoint GET Call
     [Documentation]     Runs a GET call to the given API endpoint. Result may change based
@@ -42,7 +42,7 @@ Perform Dashboard API Endpoint GET Call
     IF    ${response} == ${NONE}
         Log    msg=HTTP response is empty. The request may have failed to be performed  level=ERROR
     END
-    [Return]    ${response}
+    RETURN    ${response}
 
 Perform Dashboard API Endpoint PUT Call
     [Documentation]     Runs a PUT call to the given API endpoint. Result may change based
@@ -125,7 +125,7 @@ Prepare Payload
     ELSE
         ${payload}=     Set Variable    ${body}
     END
-    [Return]    ${payload}
+    RETURN    ${payload}
 
 Remove OAuth Token From Header
     [Documentation]     Hides oauth proxy from header

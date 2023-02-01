@@ -14,6 +14,7 @@ Library        String
 Library        OpenShiftLibrary
 
 Resource       ../../../Resources/RHOSi.resource
+Resource       ../../../Resources/Common.robot
 
 Suite Setup     RHOSi Setup
 Suite Teardown  RHOSi Teardown
@@ -32,6 +33,7 @@ PagerDuty Dummy Secret Verification
      ...     Tier1
      ...     ODS-737
      ...     Deployment-Cli
+     Skip If RHODS Is Self-Managed
      ${service_key}   Get PagerDuty Key From Alertmanager ConfigMap
      ${secret_key}    Get PagerDuty Key From Secrets
      Should Be Equal As Strings    ${service_key}   ${secret_key}   foo-bar
@@ -44,11 +46,11 @@ Get PagerDuty Key From Alertmanager ConfigMap
      ${a_data}    Set Variable     ${c_data[0]['data']['alertmanager.yml']}
      ${match_list}      Get Regexp Matches   ${a_data}     service_key(:).*
      ${key}       Split String    ${match_list[0]}
-     [Return]     ${key[-1]}
+     RETURN     ${key[-1]}
 
 Get PagerDuty Key From Secrets
      [Documentation]    Get Secert Key From Secrets
      ${new}     Oc Get  kind=Secret  namespace=${namespace}   field_selector=metadata.name==${SECRET_NAME}
      ${body}    Set Variable    ${new[0]['data']['PAGERDUTY_KEY']}
      ${string}  Evaluate    base64.b64decode('${body}').decode('ascii')      modules=base64
-     [Return]   ${string}
+     RETURN   ${string}

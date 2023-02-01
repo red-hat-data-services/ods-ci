@@ -31,6 +31,6 @@ Launch JupyterLab
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
     Spawn Notebooks And Set S3 Credentials    image=s2i-generic-data-science-notebook

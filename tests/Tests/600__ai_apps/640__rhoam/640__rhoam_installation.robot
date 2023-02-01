@@ -26,6 +26,7 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
     ...     ODS-1136
     ...     DestructiveTest
     ...     Execution-Time-Over-2h
+    Skip If RHODS Is Self-Managed
     Verify RHOAM Is Enabled In RHODS Dashboard
     Uninstall RHODS From OSD Cluster    clustername=${CLUSTER_NAME}
     Wait Until RHODS Uninstallation Is Completed
@@ -35,6 +36,7 @@ Verify RHODS Can Be Uninstalled When RHOAM Is Installed
 RHOAM Install Suite Setup
     [Documentation]    RHOAM Suite setup
     Set Library Search Order  OpenShiftLibrary  SeleniumLibrary
+    Skip If RHODS Is Self-Managed
     ${cluster_id}=   Get Cluster ID
     ${CLUSTER_NAME}=   Get Cluster Name By Cluster ID     cluster_id=${cluster_id}
     Set Suite Variable     ${CLUSTER_NAME}
@@ -44,6 +46,7 @@ RHOAM Install Suite Setup
 
 RHOAM Suite Teardown
     [Documentation]    RHOAM Suite teardown. It triggers RHOAM Uninstallation
+    Skip If RHODS Is Self-Managed
     Log To Console    Starting uninstallation of RHOAM Addon...
     Uninstall Rhoam Using Addon Flow    cluster_name=${CLUSTER_NAME}
     Log To Console    RHOAM Addon has been uninstalled!

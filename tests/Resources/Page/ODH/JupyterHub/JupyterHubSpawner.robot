@@ -22,7 +22,9 @@ ${KFNBC_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-number
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
+${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
+${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-c-form__group-control"]
 
 
 *** Keywords ***
@@ -30,7 +32,7 @@ JupyterHub Spawner Is Visible
     [Documentation]  Checks if spawner is visibile and returns the status
     ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain Element
     ...    xpath:${KFNBC_SPAWNER_HEADER_XPATH}
-    [Return]  ${spawner_visible}
+    RETURN  ${spawner_visible}
 
 Wait Until JupyterHub Spawner Is Ready
     [Documentation]  Waits for the spawner page to be ready using the server size dropdown
@@ -78,7 +80,7 @@ Fetch Max Number Of GPUs In Spawner Page
     ELSE
        ${maxGPUs} =    Set Variable    ${0}
     END
-    [Return]    ${maxGPUs}
+    RETURN    ${maxGPUs}
 
 Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
@@ -86,8 +88,7 @@ Add Spawner Environment Variable
    Click Button  Add more variables
    #Input Text  xpath://input[@id="---NO KEY---"]  ${env_var}
    Input Text  xpath://input[contains(@id,"-NO KEY-")][1]  ${env_var}
-   #Element Attribute Value Should Be  xpath://input[@id="${env_var}"]  value  ${env_var}
-   Element Attribute Value Should Be  xpath://input[contains(@id,"-${env_var}")][1]  value  ${env_var}
+   Element Attribute Value Should Be  xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"-${env_var}")]  value  ${env_var}
    #Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
    Input Text  xpath://input[contains(@id, "-${env_var}-value")]  ${env_var_value}
    #Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}
@@ -122,13 +123,13 @@ Spawner Environment Variable Exists
    [Documentation]  Checks if an environment variable is set based on the ${env_var} argument
    [Arguments]  ${env_var}
    ${var_visible} =  Run Keyword And Return Status  Element Should Be Visible  xpath://input[contains(@id, "-${env_var}")][1]
-   [Return]  ${var_visible}
+   RETURN  ${var_visible}
 
 Get Spawner Environment Variable Value
    [Documentation]  Get the value of an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
    ${env_var_value} =  Get Value  xpath://input[contains(@id, "-${env_var}")][1]
-   [Return]  ${env_var_value}
+   RETURN  ${env_var_value}
 
 Spawn Notebook
     [Documentation]  Start the notebook pod spawn and wait ${spawner_timeout} seconds (DEFAULT: 600s)
@@ -155,7 +156,7 @@ Spawn Notebook
             # If route annotation is empty redirect won't work, fail here
             Wait Until Page Does Not Contain Element    xpath:${KFNBC_CONTROL_PANEL_HEADER_XPATH}
             ...    timeout=15s    error=Redirect hasn't happened, check route annotation (opendatahub.io/link) in Notebook CR
-            Return From Keyword
+            RETURN
         ELSE
             Reload Page
             Sleep  5s
@@ -170,7 +171,7 @@ Spawn Notebook
                     IF  ${spawn_fail}==True
                         # If the modal is now visible, and spawn has failed
                         # return and let `Spawn Notebook With Arguments` deal with it
-                        Return From Keyword
+                        RETURN
                     ELSE
                         # If modal is visible and spawn hasn't failed, continue
                         # execution and let rest of keyword deal with the timeout
@@ -179,14 +180,14 @@ Spawn Notebook
                     END
                 END
             ELSE IF  ${control_panel_visible}==True
-                # If the user has been redirected to the control panel, 
+                # If the user has been redirected to the control panel,
                 # move to the server and continue execution
                 Click Button    Return to server
-                Return From Keyword
+                RETURN
             ELSE IF  ${JL_Visible}==True
                 # We are in JL, return and let `Spawn Notebook With Arguments`
                 # deal with it
-                Return From Keyword
+                RETURN
             ELSE
                 # No idea where we are
                 Capture Page Screenshot
@@ -214,7 +215,7 @@ Spawn Notebook
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed
     ${spawn_status} =  Run Keyword And Return Status  Page Should Contain  Spawn failed
-    [Return]  ${spawn_status}
+    RETURN  ${spawn_status}
 
 Spawn Notebook With Arguments  # robocop: disable
    [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
@@ -222,7 +223,9 @@ Spawn Notebook With Arguments  # robocop: disable
    ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
    ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
-   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}  &{envs}
+   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}
+   ...    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
+   ...    &{envs}
    ${spawn_fail} =  Set Variable  True
    FOR  ${index}  IN RANGE  0  1+${retries}
       ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
@@ -248,10 +251,11 @@ Spawn Notebook With Arguments  # robocop: disable
             END
          END
          Spawn Notebook    ${spawner_timeout}    ${same_tab}
-         Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+         Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
          ${authorization_required} =  Is Service Account Authorization Required
-         Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+         IF  ${authorization_required}  Authorize jupyterhub service account
          Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+         Sleep    2s    reason=Wait for a possible popup
          Maybe Close Popup
          Open New Notebook In Jupyterlab Menu
          Spawned Image Check    ${image}
@@ -284,7 +288,7 @@ Launch JupyterHub Spawner From Dashboard
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${username}  ${password}  ${auth}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
     #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
     Wait Until Page Contains   Start server
@@ -293,17 +297,17 @@ Launch JupyterHub Spawner From Dashboard
 Get Spawner Progress Message
    [Documentation]  Get the progress message currently displayed
    ${msg} =  Get Text  progress-message
-   [Return]  ${msg}
+   RETURN  ${msg}
 
 Get Spawner Event Log
    [Documentation]  Get the spawner event log messages as a list
    ${event_elements} =  Get WebElements  class:progress-log-event
-   [Return] @{event_elements}
+   RETURN @{event_elements}
 
 Server Not Running Is Visible
    [Documentation]  Checks if "Server Not Running" page is open
    ${SNR_visible} =  Run Keyword And Return Status  Wait Until Page Contains    Server not running  timeout=15
-   [Return]  ${SNR_visible}
+   RETURN  ${SNR_visible}
 
 Handle Server Not Running
    [Documentation]  Moves back to spawner page
@@ -312,7 +316,7 @@ Handle Server Not Running
 Start My Server Is Visible
    [Documentation]  Checks if "Start My Server" page is open
    ${SMS_visible} =  Run Keyword And Return Status  Page Should Contain  Start My Server
-   [Return]  ${SMS_visible}
+   RETURN  ${SMS_visible}
 
 Handle Start My Server
    [Documentation]  Moves back to spawner page
@@ -322,7 +326,7 @@ Handle Start My Server
 Server Is Stopping Is Visible
    [Documentation]  Checks if "Server Is Stopping" page is open
    ${SIS_visible} =  Run Keyword And Return Status  Page Should Contain  Your server is stopping.
-   [Return]  ${SIS_visible}
+   RETURN  ${SIS_visible}
 
 Handle Server Is Stopping
    [Documentation]  Handles "Server Is Stopping" page
@@ -333,7 +337,7 @@ Control Panel Is Visible
    [Documentation]  Checks if Control Panel page is open
    Sleep  2s
    ${control_panel_visible} =  Run Keyword And Return Status  Page Should Contain  Notebook server control panel
-   [Return]  ${control_panel_visible}
+   RETURN  ${control_panel_visible}
 
 Handle Control Panel
    [Documentation]  Handles control panel page
@@ -345,7 +349,7 @@ Handle Control Panel
 Spawner Modal Is Visible
    [Documentation]  Checks if the spawner modal is present in the spawner page
    ${modal_visible} =  Run Keyword And Return Status  Page Should Contain Element  ${KFNBC_MODAL_HEADER_XPATH}
-   [Return]  ${modal_visible}
+   RETURN  ${modal_visible}
 
 Handle Spawner Modal
    [Documentation]  Closes the spawner modal
@@ -362,6 +366,7 @@ Fix Spawner Status
    ...              test cases from passing. If a server is already running
    ...              or if we are redirected to an alternative spawner page,
    ...              this keyword will bring us back to the actual spawner.
+   [Arguments]    ${username}=${TEST_USER.USERNAME}
    ${spawner_visible} =  JupyterHub Spawner Is Visible
    IF  ${spawner_visible}!=True
       ${control_panel_visible} =  Control Panel Is Visible
@@ -371,7 +376,7 @@ Fix Spawner Status
          ${JL_visible} =  JupyterLab Is Visible
          IF  ${JL_visible}==True
             Maybe Close Popup
-            Clean Up Server
+            Clean Up Server    username=${username}
             Stop JupyterLab Notebook Server
          END
       END
@@ -430,14 +435,14 @@ Maybe Handle Server Not Running Page
 Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
-   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}   
+   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}
    ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
    Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
    Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10
    ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
    ${l_data}   Convert To Lower Case    ${data}
    ${data}    Get Formated Container Size To Dictionary     ${l_data}
-   [Return]  ${data}
+   RETURN  ${data}
 
 Get Formated Container Size To Dictionary
    [Documentation]   This is the helper keyword to format the size and convert it to Dictionary
@@ -450,7 +455,7 @@ Get Formated Container Size To Dictionary
    Set To Dictionary    ${limits}     ${limit[2]}[:-1]=${limit[1]}     ${limit[4]}=${limit[3]}
    Set To Dictionary    ${req}    ${limit[${idx} + ${2}]}[:-1]=${limit[${idx} + ${1}]}    ${limit[${idx} + ${4}]}=${limit[${idx} + ${3}]}
    Set To Dictionary    ${f_dict}       limits=${limits}          requests=${req}
-   [Return]    ${f_dict}
+   RETURN    ${f_dict}
 
 Fetch Image Description Info
     [Documentation]  Fetches libraries in image description text
@@ -458,7 +463,7 @@ Fetch Image Description Info
     ${xpath_img_description} =  Set Variable  //input[contains(@id, "${img}")]/../span
     ${text} =  Get Text  ${xpath_img_description}
     ${text} =  Fetch From Left  ${text}  ,
-    [Return]  ${text}
+    RETURN  ${text}
 
 Fetch Image Tooltip Description
     [Documentation]  Fetches Description in image tooltip
@@ -468,24 +473,24 @@ Fetch Image Tooltip Description
     Click Element  ${xpath_img_tooltip}
     ${desc} =  Get Text  ${xpath_tooltip_desc}
     Click Element  //div[@class='jsp-app__header__title']
-    [Return]  ${desc}
+    RETURN  ${desc}
 
 Fetch Image Tooltip Info
-    [Documentation]  Fetches libraries in image tooltip text
-    [Arguments]  ${img}
-    ${xpath_img_tooltip} =  Set Variable  //input[contains(@id, "${img}")]/../label/span/*
-    ${xpath_tooltip_items} =  Set Variable  //div[@class='pf-c-popover__body']/p
-    @{tmp_list} =  Create List
-    Click Element  ${xpath_img_tooltip}
-    ${libs} =  Get Element Count  ${xpath_tooltip_items}
-    Log  ${libs}
-    FOR  ${index}  IN RANGE  3  1+${libs}
-        Sleep  0.1s
-        ${item} =  Get Text  ${xpath_tooltip_items}\[${index}]
-        Append To List  ${tmp_list}  ${item}
+    [Documentation]    Fetches libraries in image tooltip text
+    [Arguments]    ${img}
+    ${xpath_img_tooltip} =    Set Variable    //input[contains(@id, "${img}")]/../label//div[@class=""][.=""]
+    ${xpath_tooltip_items} =    Set Variable    //div[@class='pf-c-popover__body']/p
+    @{tmp_list} =    Create List
+    Click Element    ${xpath_img_tooltip}
+    ${libs} =    Get Element Count    ${xpath_tooltip_items}
+    Log    ${libs}
+    FOR    ${index}    IN RANGE    3    1+${libs}
+        Sleep    0.1s
+        ${item} =    Get Text    ${xpath_tooltip_items}\[${index}]
+        Append To List    ${tmp_list}    ${item}
     END
-    Click Element  xpath://div[.="Deployment size"]
-    [Return]  ${tmp_list}
+    Click Element    xpath://div[@class='pf-c-popover__content']/button[@aria-label="Close"]
+    RETURN    ${tmp_list}
 
 Spawn Notebooks And Set S3 Credentials
     [Documentation]     Spawn a jupyter notebook server and set the env variables
@@ -517,12 +522,16 @@ Handle Bad Gateway Page
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
     [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=s2i-generic-data-science-notebook    ${size}=Small
-    ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}    &{envs}
-    Begin Web Test
+    ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}
+    ...    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
+    ...    ${auth_type}=${TEST_USER.AUTH_TYPE}    &{envs}
+    Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    retries=${retries}   retries_delay=${retries_delay}    image=${image}    size=${size}
-    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}    envs=&{envs}
-    End Web Test
+    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}
+    ...    username=${username}    password=${password}
+    ...    auth_type=${auth_type}  envs=&{envs}
+    End Web Test    username=${username}
 
 Verify Library Version Is Greater Than
     [Arguments]     ${library}      ${target}
@@ -544,12 +553,13 @@ Get List Of All Available Container Size
           ${text}      Get Text    ${ext_link}
           Append To List    ${size}     ${text}
     END
-    [Return]    ${size}
+    RETURN    ${size}
 
 Open New Notebook In Jupyterlab Menu
     [Documentation]     Opens a new Jupyterlab Launcher and Opens New Notebook from Jupyterlab Menu
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
-    Run Keyword If  not ${is_launcher_selected}  Open JupyterLab Launcher
+    Maybe Select Kernel
+    IF  not ${is_launcher_selected}  Open JupyterLab Launcher
     Open With JupyterLab Menu  File  New  Notebook
     Sleep  1
     Maybe Close Popup
@@ -568,7 +578,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required
-        Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+        IF    ${authorization_required}    Authorize jupyterhub service account
         Fix Spawner Status
         Spawn Notebook With Arguments
     END
@@ -586,8 +596,20 @@ CleanUp JupyterHub For N Users
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required
-        Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+        IF    ${authorization_required}    Authorize jupyterhub service account
         #Fix Spawner Status stops the current notebook, handling the different possible states
         Fix Spawner Status
     END
     [Teardown]    SeleniumLibrary.Close All Browsers
+
+Delete User Notebook CR
+    [Documentation]    Delete the `Notebook` CR for a specific user
+    [Arguments]    ${user}
+    ${safe_username} =   Get Safe Username    ${user}
+    ${CR_name} =    Set Variable    jupyter-nb-${safe_username}
+    TRY
+        Verify Notebook CR Is Running    cr_name=${CR_name}
+    EXCEPT
+        Fail    Notebook not found/running for ${user}, cannot stop it
+    END
+    OpenShiftLibrary.Oc Delete    kind=Notebook    name=${CR_name}    namespace=rhods-notebooks

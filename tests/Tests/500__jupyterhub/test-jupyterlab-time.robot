@@ -32,7 +32,10 @@ Verify Average Spawn Time Is Less Than 40 Seconds
 *** Keywords ***
 Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
-    Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF    ${version_check}==False
+       Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+    END
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
 
@@ -52,13 +55,13 @@ Get Average Time For Spawning
         ${total_time} =    Evaluate    ${total_time} + ${avg}
     END
     ${average_time} =    Evaluate    ${total_time} / ${number_of_images}
-    [Return]    ${average_time}
+    RETURN    ${average_time}
 
 Average Spawning Time Should Be Less Than
     [Documentation]    Checks than average time is less than ${time}
     [Arguments]    ${avg_time}    ${time}
     ${result} =    Evaluate    float(${avg_time}) < float(${time})
-    Run Keyword Unless    ${result}    Fail
+    IF    not ${result}    Fail
 
 
 Spawn and Stop Server
@@ -70,20 +73,21 @@ Spawn and Stop Server
     Spawn Notebook
     Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     # If this fails we waited for 60s. Avg. time will be thrown off, might be acceptable
     # given that we weren't able to spawn?
     Run Keyword And Continue On Failure  Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     ${time2} =    Get Time
     ${time} =    Subtract Date From Date    ${time2}    ${time1}
-    Sleep  0.5s
+    Sleep  1s
+    Maybe Close Popup
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}
     Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
-    [Return]    ${time}
+    RETURN    ${time}
 
 Close Previous Tabs
     [Documentation]    Closes the previous opened tabs

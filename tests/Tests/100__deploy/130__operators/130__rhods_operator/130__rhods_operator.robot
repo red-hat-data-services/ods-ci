@@ -28,12 +28,12 @@ Verify RHODS operator information
   FOR  ${idx}  ${external_link}  IN ENUMERATE  @{link_elements}  start=1
         ${href}=    Get Element Attribute    ${external_link}    href
         Append to List      ${temp_list}       ${href}
-        Run Keyword IF      $href == "mailto:undefined"   Continue For Loop
+        IF      $href == "mailto:undefined"   Continue For Loop
         ...    ELSE IF     '${href}' == '${commercial_url}'   Get HTTP Status Code   ${href}
         ...       ELSE      Fail      URL '${href}' should not be Present in RHODS Cluster Service Detail Section
   END
 
-  Run Keyword IF     "mailto:undefined" not in $temp_list     FAIL    There shouldn't be reference to maintainers email
+  IF     "mailto:undefined" not in $temp_list     FAIL    There shouldn't be reference to maintainers email
 
 
 *** Keywords ***

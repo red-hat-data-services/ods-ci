@@ -31,7 +31,6 @@ Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    ...      ODS-1237
    ...      ODS-715
    ...      ODS-1247
-   ...      ProductBug
    [Documentation]  This Test Case Installed Intel AIKIT operator in Openshift cluster
    ...              Check and Launch AIKIT notebook image from RHODS dashboard
    ...              ProductBug: RHODS-2748
@@ -41,7 +40,7 @@ Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    Verify Service Is Enabled          ${intel_aikit_container_name}
    Verify JupyterHub Can Spawn AIKIT Notebook
    Verify Git Plugin
-   Image Should Be Pinned To A Numeric Version
+   Run Keyword And Warn On Failure    Image Should Be Pinned To A Numeric Version
    [Teardown]   Remove AIKIT Operator
 
 

@@ -4,6 +4,7 @@ Documentation       Applies RHOSi settings to run the test suites
 Library             RPA.RobotLogListener
 Resource            Page/ODH/Monitoring/Monitoring.resource
 Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
+Resource    Common.robot
 
 
 *** Variables ***
@@ -27,6 +28,13 @@ Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robo
 ...                         Perform Dashboard API Endpoint PATCH Call
 ...                         Perform Dashboard API Endpoint POST Call
 ...                         Perform Dashboard API Endpoint DELETE Call
+...                         Check Managed Starburst Addon Is Not Installed
+...                         Delete Managed Starburst CRs
+...                         Create RedHat Marketplace Secret
+...                         Get Observatorium Token
+...                         Get Original License Secret
+...                         Apply Fake Starburst License
+...                         Restore Starburst Original License And Verify Deployment
 
 
 *** Keywords ***
@@ -36,7 +44,8 @@ RHOSi Setup
     ...                Do Not extend this keyword for high-level setup, e.g., don't open browser
     Protect Sensitive Variables In Keywords
     Initialize Global Variables
-    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    Run Keyword If RHODS Is Managed
+    ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
     # TO DO: oc login
 
 RHOSi Teardown
@@ -44,7 +53,8 @@ RHOSi Teardown
     ...                stored at RHOSi setup
     ...                The suggested usage of this keyword is to call it inside all the Suite Teardown keywords.
     ...                Do Not extend this keyword for high-level setup, e.g., don't close browser
-    Suite Availability Teardown    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    Run Keyword If RHODS Is Managed
+    ...    Suite Availability Teardown    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
 
 Protect Sensitive Variables In Keywords
     [Documentation]    Register keywords which use sensitive data as "Protected"

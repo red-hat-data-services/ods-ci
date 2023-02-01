@@ -59,7 +59,7 @@ Fetch JupyterHub DB Pods Info
     ...        jupyterhub_db_pod_info(list(dict)): JupyterHub DB Pods information
     @{jupyterhub_db_pods_info}=    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-applications
     ...    label_selector=deployment=jupyterhub-db-1
-    [Return]    @{jupyterhub_db_pods_info}
+    RETURN    @{jupyterhub_db_pods_info}
 
 Fetch JupyterHub DB Services Info
     [Documentation]  Fetches information about JupyterHub DB services
@@ -68,7 +68,7 @@ Fetch JupyterHub DB Services Info
     ...    Returns:
     ...        jupyterhubdb_services_info(list(dict): JupyterHub DB Services information
     @{jupyterhub_db_services_info}=    Oc Get    kind=Service   api_version=v1    name=jupyterhub-db    namespace=redhat-ods-applications
-    [Return]    @{jupyterhub_db_services_info}
+    RETURN    @{jupyterhub_db_services_info}
 
 Fetch JupyterHub DB ReplicationControllers Info
     [Documentation]    Fetch information about JupyterHub DB ReplicationControllers
@@ -78,7 +78,7 @@ Fetch JupyterHub DB ReplicationControllers Info
     ...        jupyterhubdb_replicationcontrollers_info(list(dict)): JupyterHub DB ReplicationControllers information
     @{jupyterhub_db_replicationcontrollers_info} =    Oc Get    kind=ReplicationController    api_version=v1    namespace=redhat-ods-applications
     ...    name=jupyterhub-db-1
-    [Return]    @{jupyterhub_db_replicationcontrollers_info}
+    RETURN    @{jupyterhub_db_replicationcontrollers_info}
 
 Fetch JupyterHub RDS Secret Info
     [Documentation]  Fetches information about JupyterHub RDS Secret
@@ -89,4 +89,4 @@ Fetch JupyterHub RDS Secret Info
     @{resources_info_list}=    Oc Get    kind=Secret    api_version=v1    namespace=redhat-ods-applications
     ...    name=jupyterhub-rds-secret
      &{jupyterhub_rds_secret_info}=    Set Variable    ${resources_info_list}[0]
-    [Return]    &{jupyterhub_rds_secret_info}
+    RETURN    &{jupyterhub_rds_secret_info}

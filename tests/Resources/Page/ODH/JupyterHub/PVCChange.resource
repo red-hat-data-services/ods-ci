@@ -1,5 +1,6 @@
 *** Settings ***
 Documentation   Set of Keywords for PVC change support
+Resource        ../ODHDashboard/ODHDashboardSettings.resource
 Library         OpenShiftLibrary
 
 
@@ -52,7 +53,7 @@ Get Notebook PVC Size
     ...     field_selector=metadata.name==${pvc_name}
     ${size}    Set Variable    ${data[0]['status']['capacity']['storage']}
     ${int_size}   Convert To Integer    ${size}[:-2]
-    [Return]   ${int_size}
+    RETURN   ${int_size}
 
 May Be Delete Notebook POD
     [Documentation]   Delete Notebook Pod Name based on Name

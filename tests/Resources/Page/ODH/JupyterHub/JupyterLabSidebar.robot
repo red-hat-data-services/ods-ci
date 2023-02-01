@@ -34,7 +34,7 @@ Get Install Plugin list from JupyterLab
         ${status}=  Get HTTP Status Code   ${href}
         Log To Console    ${idx}. ${href} gets status code ${status}
   END
-  [Return]   ${plugin_names}
+  RETURN   ${plugin_names}
 
 
 Get HTTP Status Code
@@ -42,4 +42,4 @@ Get HTTP Status Code
     ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
     Run Keyword And Continue On Failure  Status Should Be  200
     #Run Keyword And Warn On Failure  Status Should Be  200
-    [Return]  ${response.status_code}
+    RETURN  ${response.status_code}

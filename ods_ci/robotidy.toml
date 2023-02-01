@@ -1,0 +1,19 @@
+#########################################################
+# Robotidy configuration for ods-ci coding style guide  #
+#########################################################
+[tool.robotidy]
+verbose = false
+overwrite = false
+diff = true
+spacecount = 4
+configure = [
+    "AlignTestCases:enabled=True",
+    "AlignVariablesSection:up_to_column=3",
+    "NormalizeNewLines:section_lines=2",
+    #"NormalizeTags:case=tittle case"
+    "NormalizeTags:normalize_case=False",
+    "RenameKeywords:enabled=False",
+    "RenameTestCases:enabled=True",
+    "ReplaceRunKeywordIf:enabled=False",
+    "SplitTooLongLine:line_length=120"
+]

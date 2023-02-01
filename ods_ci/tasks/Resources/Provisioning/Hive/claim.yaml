@@ -1,0 +1,7 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterClaim
+metadata:
+  name: {{ hive_claim_name|default("rhodsawsclaim") }}
+  namespace: rhods
+spec:
+  clusterPoolName: {{ hive_cluster_name|default("rhodsaws") }}

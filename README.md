@@ -7,6 +7,8 @@ using QE tiered testing.
   Linux distribution that supports Selenium automation of a chromium web browser using [ChromeDriver](https://chromedriver.chromium.org)
   * chromedriver binaries can be downloaded from https://chromedriver.chromium.org/downloads. The chromedriver version must match the installed version of chromium/google-chrome
 
+  [Poetry](https://python-poetry.org/docs/#installation) installed and added to your $PATH
+
 # Quick Start
   1. Create a variables file for all of the global test values
      ```bash

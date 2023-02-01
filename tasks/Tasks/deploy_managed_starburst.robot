@@ -42,6 +42,7 @@ Managed Starburst Installation Setup
     [Documentation]    Setup steps before running the tasks.
     ...                Register the clusters to RHM if not and run RHOSi Setup
     Check Cluster Is Not Already Registered    warn_on_failure=${TRUE}
+    Create RedHat Marketplace Project
     Install RedHat Marketplace Operator
     Create RedHat Marketplace Secret    token=${RHM_TOKEN}
     RHOSi Setup

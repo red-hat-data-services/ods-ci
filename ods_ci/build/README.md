@@ -1,15 +1,18 @@
 # ODS-CI Container Image
 
+## Important Note
+    With the switch to Poetry, the project directory structure has changed. You are now require to launch these commands from the root of the ods-ci repo, but the paths have to take into account the relative subfolder ods_ci. The examples shown here already deal with this new subfolder, but take care of double checking your paths if writing commands manually.
+
 A [Dockerfile](Dockerfile) is available for running tests in a container. Below you can read how to build and run ods-ci test suites container.
 
 ```bash
 # Build the container (optional if you dont want to use the latest from quay.io/odsci)
-$ podman build -t ods-ci:master -f build/Dockerfile .
+$ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
 
 # Mount a file volume to provide a test-variables.yml file at runtime
 # Mount a volume to preserve the test run artifacts
-$ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
-                  -v $PWD/test-output:/tmp/ods-ci/test-output:Z
+$ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
+                  -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                   ods-ci:master
 ```
 Additional arguments for container build
@@ -19,7 +22,7 @@ OC_VERSION (default: 4.10)
 OC_CHANNEL (default: stable)
 
 # example
-podman build -t ods-ci:master -f build/Dockerfile .
+podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
              --build-arg OC_CHANNEL=latest
              --build-arg OC_VERSION=4.9
 
@@ -56,8 +59,8 @@ ROBOT_EXTRA_ARGS: it takes any robot framework arguments. Look at robot --help t
 Example of test execution using the container
 ```bash
 # example
-$ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
-                  -v $PWD/test-output:/tmp/ods-ci/test-output:Z
+$ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
+                  -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                   -e ROBOT_EXTRA_ARGS='-l NONE'
                   -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
                   ods-ci:master
@@ -66,16 +69,16 @@ $ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
 Examples of test execution using the container - with email report enabled
 ```bash
 # example - send results by email using localhost
-$ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
-                  -v $PWD/test-output:/tmp/ods-ci/test-output:Z
+$ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
+                  -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                   -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com'
                   -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
                   ods-ci:master
 ```
 ```bash
 # example - send results by email using gmail smtp
-$ podman run --rm -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
-  -v $PWD/test-output:/tmp/ods-ci/test-output:Z
+$ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
+  -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
   -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com  --email-server smtp.gmail.com:587 --email-server-user mymail@redhat.com  --email-server-pw <password>'
   -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
   ods-ci:master
@@ -100,7 +103,7 @@ NOTE: This example pod attaches a PVC to preserve the test artifacts directory b
 oc apply -f ods_ci_rbac.yaml
 
 # Creates a Secret with test variables that can be mounted in ODS-CI container
-oc create secret generic ods-ci-test-variables --from-file test-variables.yml
+oc create secret generic ods-ci-test-variables --from-file ods_ci/test-variables.yml
 ```
 
 ### Deploy postfix smtp server
@@ -109,8 +112,8 @@ If you are running ods-ci container on your local machine, you could use [podman
 ```bash
 podman run -d --pod new:<pod_name>  <postfix_imagename>:<image_label>
 podman run --rm --pod=<pod_name>
-                -v $PWD/test-variables.yml:/tmp/ods-ci/test-variables.yml:Z
-                -v $PWD/test-output:/tmp/ods-ci/test-output:Z
+                -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
+                -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                 -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com'
                 -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
                 ods-ci:master

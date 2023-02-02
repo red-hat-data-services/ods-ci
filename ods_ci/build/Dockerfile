@@ -32,24 +32,34 @@ WORKDIR $HOME/ods-ci
 RUN groupadd --gid 1001 ods-ci-users
 RUN useradd -r -u 1001 -g ods-ci-users ods-ci-runner
 
-COPY tests tests/
-COPY tasks tasks/
-COPY libs libs/
-COPY run_robot_test.sh  .
-COPY build/run.sh  .
-COPY utils/scripts/Sender  utils/scripts/Sender/
-COPY utils/scripts/ocm/ocm.py  utils/scripts/ocm/ocm.py
-COPY utils/scripts/logger.py  utils/scripts/logger.py
-COPY utils/scripts/util.py  utils/scripts/util.py
-COPY utils/scripts/SplitSuite.py  utils/scripts/SplitSuite.py
-COPY utils/scripts/testconfig/test-variables.yml test-variables.yml.model
-RUN  chmod +x run.sh
-COPY requirements.txt setup.py .
-RUN  python3 --version
-RUN  python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
+COPY ods_ci/tests ods_ci/tests/
+COPY ods_ci/tasks ods_ci/tasks/
+COPY ods_ci/libs ods_ci/libs/
+COPY ods_ci/run_robot_test.sh ods_ci/run_robot_test.sh
+COPY ods_ci/build/run.sh  ods_ci/run.sh
+COPY ods_ci/utils/scripts/Sender  ods_ci/utils/scripts/Sender/
+COPY ods_ci/utils/scripts/ocm/ocm.py  ods_ci/utils/scripts/ocm/ocm.py
+COPY ods_ci/utils/scripts/logger.py  ods_ci/utils/scripts/logger.py
+COPY ods_ci/utils/scripts/util.py  ods_ci/utils/scripts/util.py
+COPY ods_ci/utils/scripts/SplitSuite.py  ods_ci/utils/scripts/SplitSuite.py
+COPY ods_ci/utils/scripts/testconfig/test-variables.yml ods_ci/test-variables.yml.model
+RUN  chmod +x ods_ci/run.sh
+COPY pyproject.toml .
+COPY poetry.lock .
+COPY README.md .
+#COPY requirements.txt setup.py .
+RUN python3 --version
+#RUN python3 -m ensurepip --upgrade
+#RUN python3 -m pip install --user pipx
+#RUN python3 -m pipx ensurepath
+#RUN pipx install poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="${PATH}:$HOME/.local/bin"
+RUN poetry install
+#RUN  python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
 
 # set the non-root user
-RUN chgrp -R 1001 $HOME/ods-ci && chown -R 1001 $HOME/ods-ci && chmod -R 744 $HOME/ods-ci
+RUN chgrp -R 1001 $HOME/ods-ci && chown -R 1001 $HOME/ods-ci && chmod -R 744 $HOME/ods-ci && chown -R 1001 /tmp/.cache/pypoetry
 USER 1001
 
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["./ods_ci/run.sh"]

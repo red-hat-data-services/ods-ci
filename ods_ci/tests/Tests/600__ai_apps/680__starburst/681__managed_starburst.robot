@@ -142,7 +142,7 @@ Restore Starburst Original License And Verify Deployment
     Restart Coordinator And Workers Pods
     ${status}=    Run Keyword And Return Status    Wait Until Managed Starburst Installation Is Completed
     ...    cr_chk_retries=1    cr_chk_retries_interval=10s
-    ...    pods_chk_retries=10    pods_chk_retries_interval=10s
+    ...    pods_chk_retries=50    pods_chk_retries_interval=10s
     IF    ${status} == ${FALSE}
         Fail    msg=Coordinator and workers pod should be successfully running
     END

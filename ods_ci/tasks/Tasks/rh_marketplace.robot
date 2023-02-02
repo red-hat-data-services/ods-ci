@@ -11,6 +11,7 @@ Register Cluster To RedHat Marketplace
     [Documentation]    Registers a cluster to RHM if not already done
     [Tags]    rhm-register
     Check Cluster Is Not Already Registered
+    Create RedHat Marketplace Project
     Install RedHat Marketplace Operator
     Create RedHat Marketplace Secret    token=${RHM_TOKEN}
     Is Cluster Registered

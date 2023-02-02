@@ -7,7 +7,7 @@ Library    SeleniumLibrary
 
 *** Variables ***
 ${STARBURST_CR_DEFAULT_NAMESPACE}=    redhat-starburst-operator
-${USERNAME_XP}=    xpath=//input[@id="username"]
+${USERNAME_XP}=    xpath=//input[@name="username"]
 ${STARBURST_ROUTE}=    web-ui
 
 
@@ -43,11 +43,11 @@ Perform Log In
     [Documentation]    Performs Log In of Trino/Starburst Dashboard
     [Arguments]    ${username}
     ${is_login_required}=    Run Keyword And Return Status
-    ...    Wait Until Page Contains Element   xpath=//form[@id="login"]
+    ...    Wait Until Page Contains Element   xpath=//h3[text()="Sign in to your account"]
     IF    ${is_login_required} == ${TRUE}
-        # Wait Until Page Contains Element    ${USERNAME_XP}
+        Wait Until Page Contains Element    ${USERNAME_XP}
         Input Text    ${USERNAME_XP}    ${username}
-        Click Button   Log In
+        Click Button   Sign in
     ELSE
         Log    message=Log In page didn't appear.     level=WARN
     END
@@ -57,10 +57,12 @@ Open Trino Web UI
     [Arguments]    ${url}=${NONE}    ${user}=dummy-user
     IF    "${url}" == "${NONE}"
         Log    message=Fetching Starburst Route...
-        ${url}=    Get Starburst Route
+        ${starburst_url}=    Get Starburst Route
+        ${url}=     Set Variable    ${starburst_url}/ui
     END
     Open Browser      url=http://${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Perform Log In    username=${user}
+    Go To    http://${url}
     Wait Until Page Contains     Cluster Overview
 
 Check Trino Web UI Is Loaded
@@ -74,8 +76,7 @@ Open Managed Staburst Web UI
     [Arguments]    ${url}=${NONE}    ${user}=dummy-user
     IF    "${url}" == "${NONE}"
         Log    message=Fetching Starburst Route...
-        ${trino_url}=    Get Starburst Route
-        ${url}=     Set Variable    ${trino_url}/ui/insights
+        ${url}=    Get Starburst Route
     END
     Open Browser      url=http://${url}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Perform Log In    username=${user}
@@ -84,11 +85,9 @@ Open Managed Staburst Web UI
 Check Worksheet Tool Is Accessible
     [Documentation]    Check "Worksheet" tool inside Starburst UI is accessible
     ...                and able to reach test data sources
-    Click Element    xpath=//div[text()="Worksheet"]
-    Wait Until Page Contains Element    xpath=//div[text()="loading"]
-    Wait Until Page Does Not Contain Element    xpath=//div[text()="loading"]   timeout=15s
-    Wait Until Page Contains Element     xpath=//span[text()="system"]
-    Wait Until Page Contains Element     xpath=//span[text()="tpch"]
+    Click Element    xpath=//span[text()="Query editor"]
+    Wait Until Page Contains Element     xpath=//div[text()="system"]    timeout=10s
+    Wait Until Page Contains Element     xpath=//div[text()="tpch"]      timeout=10s
 
 Check Managed Starburst Web UI Is Loaded
     [Documentation]    Checks Starburst Web UI is rendered

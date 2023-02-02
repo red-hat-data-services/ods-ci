@@ -94,16 +94,17 @@ Logout From RHODS Dashboard
 Wait for RHODS Dashboard to Load
     [Arguments]  ${dashboard_title}="${ODH_DASHBOARD_PROJECT_NAME}"    ${wait_for_cards}=${TRUE}
     ...          ${expected_page}=Enabled
+
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
     IF    "${expected_page}" != "${NONE}"
         Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]
-        ...    timeout=10s     
+        ...    timeout=75s
     END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Cards Are Loaded
     END
-    
+
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments

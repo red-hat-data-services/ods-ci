@@ -2,7 +2,7 @@
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource         ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
-Library          ../../../../libs/Helpers.py
+Library          ../../../libs/Helpers.py
 Suite Setup      Begin Web Test
 Suite Teardown   Teardown
 

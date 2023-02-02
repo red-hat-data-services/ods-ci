@@ -1,6 +1,6 @@
 from semver import VersionInfo
 from robotlibcore import keyword
-from utils.scripts.ocm.ocm import OpenshiftClusterManager
+from ods_ci.utils.scripts.ocm.ocm import OpenshiftClusterManager
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
 

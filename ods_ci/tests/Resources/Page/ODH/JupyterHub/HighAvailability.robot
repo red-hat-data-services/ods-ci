@@ -4,7 +4,7 @@ Resource    ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 Resource    ../../../Common.robot
 Library     Collections
 Library     OpenShiftLibrary
-Library     ../../../../libs/Helpers.py
+Library     ../../../../../libs/Helpers.py
 
 
 *** Keywords ***

@@ -287,17 +287,8 @@ if command -v yq &> /dev/null
         echo "we did not find yq, so not trying the oc login"
 fi
 
-VENV_ROOT=${currentpath}/venv
-if [[ ! -d "${VENV_ROOT}" ]]; then
-  python3 -m venv "${VENV_ROOT}"
-fi
-# shellcheck disable=SC1091,SC2086
-source ${VENV_ROOT}/bin/activate
-
-if [[ ${SKIP_PIP_INSTALL} -eq 0 ]]; then
-  ${VENV_ROOT}/bin/pip install --upgrade pip
-  ${VENV_ROOT}/bin/pip install -r requirements.txt
-fi
+poetry install
+source $(poetry env info --path)/bin/activate
 
 #Create a unique directory to store the output for current test run
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then
@@ -317,7 +308,7 @@ if ! ${SUBFOLDER}; then
 fi
 
 
-./venv/bin/robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
+robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
 # shellcheck disable=SC2116
 exit_status=$(echo $?)
 echo "${exit_status}"
@@ -333,9 +324,10 @@ if ${EMAIL_REPORT}
             rm rf_results.tar.gz
             tar cvzf rf_results.tar.gz $(find ${TEST_ARTIFACT_DIR} -regex  '.*\(xml\|html\)$') &> /dev/null
      fi
-     ./venv/bin/python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" \
+     python3 utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" \
                         -v ${EMAIL_SERVER} -a "rf_results.tar.gz" -u  ${EMAIL_SERVER_USER}  -p  ${EMAIL_SERVER_PW} \
                         -l ${EMAIL_SERVER_SSL} -d ${EMAIL_SERVER_UNSECURE}
 fi
 
+deactivate
 exit ${exit_status}

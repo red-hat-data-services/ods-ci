@@ -3,7 +3,7 @@ Documentation       Collection of keywords to work with Pods
 Library             OpenShiftLibrary
 Resource            ../../OCPDashboard/Page.robot
 Resource            ../../ODH/ODHDashboard/ODHDashboard.robot
-Library             ../../../../libs/Helpers.py
+Library             ../../../../../libs/Helpers.py
 
 
 *** Keywords ***

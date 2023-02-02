@@ -2,7 +2,7 @@
 Library  SeleniumLibrary
 Library  OperatingSystem
 Library  String
-Library  ../../../../libs/Helpers.py
+Library  ../../../../../libs/Helpers.py
 
 *** Variables ***
 @{verification_list}           beta   preview   stage

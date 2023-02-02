@@ -1,13 +1,13 @@
-import os
 import argparse
-import sys
 import json
+import os
+import sys
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 
-from util import execute_command
 from logger import log
+from util import execute_command
 
 """
 Class for Report portal operations

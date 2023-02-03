@@ -154,6 +154,7 @@ Verify That CUDA Build Chain Succeeds
     Verify Image Can Be Spawned    image=tensorflow  size=Small
     ...    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
+    [Teardown]    CUDA Teardown
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
     [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
@@ -397,3 +398,9 @@ Verify Requests Contains Expected Values
     [Arguments]   ${cpu}  ${memory}  ${requests}
     Should Be Equal As Strings    ${requests['cpu']}  ${cpu}
     Should Be Equal As Strings    ${requests['memory']}  ${memory}
+
+CUDA Teardown
+    [Documentation]    Ensures spawner is cleaned up if spawn fails
+    ...    during the cuda smoke verification
+    Fix Spawner Status
+    End Web Test

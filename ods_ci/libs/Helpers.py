@@ -3,7 +3,7 @@ from robot.libraries.BuiltIn import BuiltIn
 from robotlibcore import keyword
 from semver import VersionInfo
 
-from utils.scripts.ocm.ocm import OpenshiftClusterManager
+from ods_ci.utils.scripts.ocm.ocm import OpenshiftClusterManager
 
 
 class Helpers:

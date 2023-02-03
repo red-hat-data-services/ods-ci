@@ -1,13 +1,14 @@
-import os
 import argparse
-import sys
+import os
 import shutil
+import sys
+
 from python_terraform import *
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../../")
-from util import render_template
 from logger import log
+from util import render_template
 
 """
 Class for Openstack Terraform Provisioner

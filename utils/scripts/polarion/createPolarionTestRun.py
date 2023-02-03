@@ -3,9 +3,9 @@
 # Install pylero.
 # Doc: https://github.com/RedHatQE/pylero#readme
 
+import argparse
 import os
 import ssl
-import argparse
 
 ssl._create_default_https_context = ssl._create_unverified_context
 

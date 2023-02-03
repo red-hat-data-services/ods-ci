@@ -6,9 +6,10 @@
 # Based on Splitter authored by: Akash Shende
 # https://github.com/akash0x53/robot-parallel/blob/master/SplitSuite.py
 
-from robot.api import SuiteVisitor
-from itertools import islice
 import math
+from itertools import islice
+
+from robot.api import SuiteVisitor
 
 
 def chunked(lst, nchunk):

@@ -1,8 +1,9 @@
-from semver import VersionInfo
-from robotlibcore import keyword
-from ods_ci.utils.scripts.ocm.ocm import OpenshiftClusterManager
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
+from robotlibcore import keyword
+from semver import VersionInfo
+
+from utils.scripts.ocm.ocm import OpenshiftClusterManager
 
 
 class Helpers:
@@ -164,7 +165,9 @@ class Helpers:
     @keyword
     def inference_comparison(self, expected, received, threshold=0.00001):
         try:
-            import numbers, decimal, ast
+            import ast
+            import decimal
+            import numbers
 
             # Cast from string to python type
             expected=ast.literal_eval(expected)

@@ -58,7 +58,7 @@ jobs:
           with:
             sarif_file: .sarif.json
             category: robocop
-  run_isort_linter:
+  isort_linter:
     name: isort
     runs-on: ubuntu-latest
     steps:

@@ -16,6 +16,7 @@ Provision Self-Managed Cluster
     Provision Cluster
     Claim Cluster
     Wait For Cluster To Be Ready
+    Verify Cluster Claim
     Login To Cluster
     [Teardown]  Clean Failed Cluster
 

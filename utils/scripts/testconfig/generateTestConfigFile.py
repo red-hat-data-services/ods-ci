@@ -1,16 +1,17 @@
 # Script to generate test config file
 
-import os
 import argparse
+import os
 import re
-import subprocess
 import shutil
-import yaml
+import subprocess
 import sys
+
+import yaml
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
-from util import clone_config_repo, read_yaml, oc_login, execute_command
+from util import clone_config_repo, execute_command, oc_login, read_yaml
 
 
 def parse_args():

@@ -1,16 +1,17 @@
-import os
 import argparse
+import os
 import re
-import subprocess
 import shutil
-import yaml
+import subprocess
 import sys
+
 import pexpect
+import yaml
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
-from util import execute_command
 from logger import log
+from util import execute_command
 
 """
 Class for Openshift Installation on AWS

@@ -1,13 +1,15 @@
 # Script to update ods-ci test results in polarion
 
-import os
 import argparse
+import os
 import re
 import shutil
-import yaml
+import subprocess
 import sys
 import uuid
-import subprocess
+
+import yaml
+
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 

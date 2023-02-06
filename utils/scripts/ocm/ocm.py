@@ -1,29 +1,24 @@
-import os
 import argparse
-import re
 import ast
-import subprocess
-import shutil
-import yaml
-import sys
-import jinja2
-import time
 import glob
 import io
 import json
-from contextlib import redirect_stdout, redirect_stderr
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from contextlib import redirect_stderr, redirect_stdout
+
+import jinja2
+import yaml
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
-from util import (
-    clone_config_repo,
-    read_yaml,
-    execute_command,
-    write_data_in_json,
-    read_data_from_json,
-    compare_dicts,
-)
 from logger import log
+from util import (clone_config_repo, compare_dicts, execute_command,
+                  read_data_from_json, read_yaml, write_data_in_json)
 
 """
 Class for Openshift Cluster Manager

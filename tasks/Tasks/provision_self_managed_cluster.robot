@@ -14,8 +14,8 @@ Provision Self-Managed Cluster
     [Documentation]    Provision a self-managed cluster
     [Tags]  self_managed_provision
     Provision Cluster
-    Wait For Cluster To Be Ready
     Claim Cluster
+    Wait For Cluster To Be Ready
     Login To Cluster
     [Teardown]  Clean Failed Cluster
 

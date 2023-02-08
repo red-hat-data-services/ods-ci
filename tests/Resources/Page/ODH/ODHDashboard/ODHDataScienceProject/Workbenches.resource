@@ -198,6 +198,12 @@ Wait Until Workbench Is Started
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
 
+Wait Until Workbench Is Stopped
+    [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
+    [Arguments]     ${workbench_title}      ${timeout}=40s
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
+    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
+
 Wait Until Workbench Is Restarting
     [Documentation]    Waits until workbench status is "STARTING" in the DS Project details page
     [Arguments]     ${workbench_title}      ${timeout}=40s
@@ -401,9 +407,14 @@ Edit GPU Number
     [Documentation]    Edit a workbench
     [Arguments]     ${workbench_title}    ${gpus}=1
     Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
-    Select Workbench Number Of GPUs    gpus=${gpus}
-    Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
-    Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
+    ${status}=    Run Keyword And Return Status    Select Workbench Number Of GPUs    gpus=${gpus}
+    IF    ${status} == ${FALSE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+        Fail
+    ELSE
+        Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
+        Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
+    END
 
 Delete Workbench From CLI
     [Arguments]    ${workbench_title}    ${project_title}
@@ -411,3 +422,11 @@ Delete Workbench From CLI
     ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
     ...    workbench_title=${workbench_title}  namespace=${ns_name}
     Oc Delete    kind=Notebook  name=${cr_name}  namespace=${ns_name}
+
+GPU Dropdown Should Be Disabled
+    [Documentation]    Checks if the GPU dropdown is not able editable
+    [Arguments]     ${workbench_title}
+    Sleep    10s     reason=There is some delay in updating the GPU availability in Dashboard
+    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Wait Until Page Contains Element    ${WORKBENCH_GPU_MENU_BTN_XP}
+    Element Should Be Disabled    ${WORKBENCH_GPU_MENU_BTN_XP}

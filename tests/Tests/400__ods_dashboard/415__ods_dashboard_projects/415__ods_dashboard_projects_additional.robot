@@ -65,6 +65,28 @@ Verify User Can Add GPUs To Workbench
     [Teardown]    Clean Project    workbench_title=${WORKBENCH_TITLE_GPU}
     ...    pvc_title=${PV_NAME_GPU}    project_title=${PRJ_TITLE}
 
+Verify User Can Remove GPUs From Workbench
+    [Documentation]    Verifies user can remove GPUs from an already started workbench
+    [Tags]    Tier1    Sanity
+    ...       ODS-2014
+    Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
+    ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
+    ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
+    ...    pv_description=${EMPTY}  pv_size=${PV_SIZE}    gpus=1
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
+    Run Keyword And Continue On Failure    GPU Dropdown Should Be Disabled    workbench_title=${WORKBENCH_TITLE_GPU}
+    Click Button    ${GENERIC_CANCEL_BTN_XP}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Stopped     workbench_title=${WORKBENCH_TITLE_GPU}
+    Wait Until Keyword Succeeds    10 times    5s
+    ...    Edit GPU Number    workbench_title=${WORKBENCH_TITLE_GPU}    gpus=0
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
+    Open New Notebook In Jupyterlab Menu
+    Run Keyword And Expect Error    'Using cpu device' does not match 'Using cuda device'    Verify Pytorch Can See GPU
+    
 
 *** Keywords ***
 Project Suite Setup
@@ -76,7 +98,6 @@ Project Suite Setup
     RHOSi Setup
     Launch Data Science Project Main Page
     Open Data Science Projects Home Page
-    # Open Data Science Project Details Page    ${PRJ_TITLE_GPU}
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
 

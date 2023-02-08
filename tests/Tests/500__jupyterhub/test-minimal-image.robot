@@ -10,11 +10,13 @@ Library             ../../../../libs/Helpers.py
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
 
-Force Tags          Smoke    Sanity    JupyterHub
+Force Tags          Smoke    Sanity    JupyterHub    OpenDataHub
+
 
 *** Variables ***
 ${RequirementsFileRepo}=    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main.git
 ${RequirementsFilePath}=    ods-ci-notebooks-main/notebooks/500__jupyterhub/test-minimal-image/
+
 
 *** Test Cases ***
 Open RHODS Dashboard
@@ -33,7 +35,8 @@ Can Login to Jupyterhub
 Can Spawn Notebook
     [Tags]    ODS-901    ODS-903
     Fix Spawner Status
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook
+    #Spawn Notebook With Arguments    image=s2i-minimal-notebook
+    Spawn Notebook With Arguments    image=jupyter-minimal-notebook
 
 Can Launch Python3 Smoke Test Notebook
     [Tags]    ODS-905    ODS-907    ODS-913    ODS-914    ODS-915    ODS-916    ODS-917    ODS-918    ODS-919

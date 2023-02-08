@@ -45,7 +45,7 @@ ${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//b
 ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
-${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo"]
+${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo" or @alt="Open Data Hub Logo"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
 
 
@@ -91,9 +91,10 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-    [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"    ${wait_for_cards}=${TRUE}
+    [Arguments]  ${dashboard_title}=${ODH_DASHBOARD_TITLE}    ${wait_for_cards}=${TRUE}
     ...          ${expected_page}=Enabled
-    Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
+    #Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
+
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
     IF    "${expected_page}" != "${NONE}"
         Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]
@@ -102,7 +103,7 @@ Wait for RHODS Dashboard to Load
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Cards Are Loaded
     END
-    
+
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments

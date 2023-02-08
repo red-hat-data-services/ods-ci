@@ -1,3 +1,4 @@
+robotframework>=5,<6
 robotframework-lsp
 robotframework-robocop
 robotframework-tidy

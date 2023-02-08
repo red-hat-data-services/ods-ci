@@ -199,17 +199,12 @@ Spawn Notebook
     IF    ${expect_autoscaling}
         Wait Until Page Contains    TriggeredScaleUp    timeout=120s
     END
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
-    IF  ${version-check}==True
-        Wait Until Page Contains    The notebook server is up and running.    ${spawner_timeout}
-        IF  ${same_tab}
-            Click Button    Open in current tab
-        ELSE
-            Click Button    Open in new tab
-            Switch Window    NEW
-        END
+    Wait Until Page Contains    The notebook server is up and running.    ${spawner_timeout}
+    IF  ${same_tab}
+        Click Button    Open in current tab
     ELSE
-        Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
+        Click Button    Open in new tab
+        Switch Window    NEW
     END
 
 Has Spawn Failed

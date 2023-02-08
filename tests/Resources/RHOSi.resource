@@ -64,5 +64,6 @@ Protect Sensitive Variables In Keywords
 Initialize Global Variables
     [Documentation]   Sets global variables
     [Arguments]    ${force_fetch}=False
-    ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
-    Set Global Variable   ${RHODS_VERSION}
+    Log    Variable initialization temporally disabled
+#    ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
+#    Set Global Variable   ${RHODS_VERSION}

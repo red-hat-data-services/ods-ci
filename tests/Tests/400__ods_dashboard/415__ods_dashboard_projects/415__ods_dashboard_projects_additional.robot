@@ -3,21 +3,27 @@ Documentation      Suite to test additional scenarios for Data Science Projects 
 Resource           ../../../Resources/OCP.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
+Resource           ../../../Resources/Page/ODH/JupyterHub/GPU.resource
 Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
 Test Teardown      Close All Browsers
 
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project 2
+${PRJ_TITLE_GPU}=   ODS-CI DS Project GPU
 ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test-additional
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Project feature
 ${TOLERATIONS}=    workbench-tolerations
 ${DEFAULT_TOLERATIONS}=    NotebooksOnly   
 ${WORKBENCH_TITLE}=   ODS-CI Workbench Tolerations
-${WORKBENCH_DESCRIPTION}=   ${WORKBENCH_TITLE} is a test workbench using to check tolerations are applied
+${WORKBENCH_DESCRIPTION}=   ${WORKBENCH_TITLE} is a test workbench to check tolerations are applied
+${WORKBENCH_TITLE_GPU}=   ODS-CI Workbench GPU
+${WORKBENCH_DESCRIPTION_GPU}=   ${WORKBENCH_TITLE_GPU} is a test workbench using GPU
 ${NB_IMAGE}=        Minimal Python
+${NB_IMAGE_GPU}=        PyTorch
 ${PV_NAME}=         ods-ci-tolerations
-${PV_DESCRIPTION}=         ${PV_NAME} is a PV created to test DS Projects feature
+${PV_NAME_GPU}=         ods-ci-gpu
+${PV_DESCRIPTION}=         it is a PV created to test DS Projects feature
 ${PV_SIZE}=         1
 
 
@@ -31,15 +37,31 @@ Verify Notebook Tolerations Are Applied To Workbenches When Set Up
     Set Pod Toleration Via UI    ${TOLERATIONS}
     Save Changes In Cluster Settings
     Launch Data Science Project Main Page
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Sleep   5s
+    Sleep   10s
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE}
     ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
     [Teardown]    Restore Tolerations Settings
+
+Verify User Can Add GPUs To Workbench
+    [Documentation]    Verifies user can adds GPUs to an already started workbench
+    [Tags]    Tier1    Sanity
+    ...       ODS-2013
+    Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
+    ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
+    ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}  
+    ...    pv_description=${EMPTY}  pv_size=${PV_SIZE}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
+    Edit GPU Number    workbench_title=${WORKBENCH_TITLE_GPU}    gpus=1
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Restarting    workbench_title=${WORKBENCH_TITLE_GPU}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
+    Open New Notebook In Jupyterlab Menu
+    Verify Pytorch Can See GPU
 
 
 *** Keywords ***
@@ -50,6 +72,11 @@ Project Suite Setup
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     RHOSi Setup
+    Launch Data Science Project Main Page
+    Open Data Science Projects Home Page
+    # Open Data Science Project Details Page    ${PRJ_TITLE_GPU}
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    resource_name=${PRJ_RESOURCE_NAME}
 
 Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes

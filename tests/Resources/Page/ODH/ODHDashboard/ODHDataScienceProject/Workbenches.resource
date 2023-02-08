@@ -16,6 +16,8 @@ ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]/
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li/button
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
+${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]
+${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
@@ -34,7 +36,7 @@ Create Workbench
     ...                 the DS Project data. It allows to add new or existent PV storage,
     ...                 add Environment variables and select Jupyter image
     [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
-    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}
+    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}    ${gpus}=${NONE}
     ...             ${press_cancel}=${FALSE}  ${envs}=${NONE}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
@@ -44,6 +46,7 @@ Create Workbench
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Select Workbench Jupyter Image    image_name=${image_name}
     IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
+    IF    "${gpus}" != "${NONE}"    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    "${envs}" != "${NONE}"
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
@@ -195,6 +198,12 @@ Wait Until Workbench Is Started
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
 
+Wait Until Workbench Is Restarting
+    [Documentation]    Waits until workbench status is "STARTING" in the DS Project details page
+    [Arguments]     ${workbench_title}      ${timeout}=40s
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
+    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
+
 Start Workbench
     [Documentation]    Starts a workbench from the DS Project details page
     [Arguments]     ${workbench_title}
@@ -269,8 +278,8 @@ Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${item_title}    ${item_type}    ${action}
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="Delete ${item_type}"]
+    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
+    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
 
 Handle Deletion Confirmation Modal
     [Documentation]    Handles confirmation modal on item deletion
@@ -379,3 +388,20 @@ Page Should Contain Event Log
         ...    xpath=//div[contains(@class,"alert")]//h4[contains(text(),"${expected_result_text}")]
     END
     Capture Page Screenshot
+
+Select Workbench Number Of GPUs
+    [Documentation]    Selects the container size in the workbench creation page
+    [Arguments]     ${gpus}
+    Wait Until Page Contains Element    ${WORKBENCH_GPU_MENU_BTN_XP}
+    Click Button    ${WORKBENCH_GPU_MENU_BTN_XP}
+    Wait Until Page Contains Element    ${WORKBENCH_GPU_ITEM_BTN_XP}/self::*[text()="${gpus}"]
+    Click Element    ${WORKBENCH_GPU_ITEM_BTN_XP}/self::*[text()="${gpus}"]
+
+Edit GPU Number
+    [Documentation]    Edit a workbench
+    [Arguments]     ${workbench_title}    ${gpus}=1
+    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Select Workbench Number Of GPUs    gpus=${gpus}
+    Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
+    Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
+    

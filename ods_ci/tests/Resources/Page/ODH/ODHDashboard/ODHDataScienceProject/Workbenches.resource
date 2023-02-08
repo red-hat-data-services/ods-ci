@@ -78,7 +78,7 @@ Create Workbench
         Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
         Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
-    Wait Until Generic Modal Disappears
+    Wait Until Generic Modal Disappears  timeout=1 minute
     Wait Until Project Is Open    project_title=${prj_title}
 
 Add Environment Variables In Workbench

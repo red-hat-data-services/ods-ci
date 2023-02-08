@@ -404,4 +404,10 @@ Edit GPU Number
     Select Workbench Number Of GPUs    gpus=${gpus}
     Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
-    
+
+Delete Workbench From CLI
+    [Arguments]    ${workbench_title}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
+    ...    workbench_title=${workbench_title}  namespace=${ns_name}
+    Oc Delete    kind=Notebook  name=${cr_name}  namespace=${ns_name}

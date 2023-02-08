@@ -47,12 +47,12 @@ Verify Notebook Tolerations Are Applied To Workbenches When Set Up
     [Teardown]    Restore Tolerations Settings
 
 Verify User Can Add GPUs To Workbench
-    [Documentation]    Verifies user can adds GPUs to an already started workbench
+    [Documentation]    Verifies user can add GPUs to an already started workbench
     [Tags]    Tier1    Sanity
     ...       ODS-2013
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
     ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
-    ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}  
+    ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
     ...    pv_description=${EMPTY}  pv_size=${PV_SIZE}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
     Edit GPU Number    workbench_title=${WORKBENCH_TITLE_GPU}    gpus=1
@@ -62,6 +62,8 @@ Verify User Can Add GPUs To Workbench
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
     Verify Pytorch Can See GPU
+    [Teardown]    Clean Project    workbench_title=${WORKBENCH_TITLE_GPU}
+    ...    pvc_title=${PV_NAME_GPU}    project_title=${PRJ_TITLE}
 
 
 *** Keywords ***
@@ -106,4 +108,12 @@ Restore Tolerations Settings
     Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}
     Disable Pod Toleration Via UI
     Save Changes In Cluster Settings
-    
+
+Clean Project
+    [Documentation]    Deletes resources from a test project to free up
+    ...                resources or re-use titles
+    [Arguments]    ${workbench_title}    ${pvc_title}
+    ...            ${project_title}
+    Delete Workbench From CLI    workbench_title=${workbench_title}
+    ...    project_title=${project_title}
+    Delete PVC From CLI    pvc_title=${pvc_title}    project_title=${project_title}

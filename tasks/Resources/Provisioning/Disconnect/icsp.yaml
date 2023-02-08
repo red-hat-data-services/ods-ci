@@ -1,0 +1,46 @@
+---
+apiVersion: operator.openshift.io/v1alpha1
+kind: ImageContentSourcePolicy
+metadata:
+  name: generic-0
+spec:
+  repositoryDigestMirrors:
+  - mirrors:
+    - registry.rh-ods.com:8443/openshift
+    source: quay.io/openshift
+  - mirrors:
+    - registry.rh-ods.com:8443/modh
+    source: quay.io/modh
+  - mirrors:
+    - registry.rh-ods.com:8443/openshift-release-dev
+    source: quay.io/openshift-release-dev
+  - mirrors:
+    - registry.rh-ods.com:8443/integreatly
+    source: quay.io/integreatly
+  - mirrors:
+    - registry.rh-ods.com:8443
+    source: quay.io
+---
+apiVersion: operator.openshift.io/v1alpha1
+kind: ImageContentSourcePolicy
+metadata:
+  labels:
+    operators.openshift.org/catalog: "true"
+  name: operator-0
+spec:
+  repositoryDigestMirrors:
+  - mirrors:
+    - registry.rh-ods.com:8443/openshift4
+    source: registry.redhat.io/openshift4
+  - mirrors:
+    - registry.rh-ods.com:8443/rhods
+    source: registry.redhat.io/rhods
+  - mirrors:
+    - registry.rh-ods.com:8443/rhel7
+    source: registry.redhat.io/rhel7
+  - mirrors:
+    - registry.rh-ods.com:8443/ubi8
+    source: registry.redhat.io/ubi8
+  - mirrors:
+    - registry.rh-ods.com:8443/redhat
+    source: registry.redhat.io/redhat

@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation      Suite to test additional scenarios for Data Science Projects (a.k.a DSG) feature
 Resource           ../../../Resources/OCP.resource
+Resource           ../../../Resources/ODS.robot
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource           ../../../Resources/Page/ODH/JupyterHub/GPU.resource
@@ -59,6 +60,8 @@ Verify User Can Add GPUs To Workbench
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Restarting    workbench_title=${WORKBENCH_TITLE_GPU}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
+    Verify Workbench Pod Has Limits And Requests For GPU    workbench_title=${WORKBENCH_TITLE_GPU}
+    ...    exp_value=1    project_title=${PRJ_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
     Verify Pytorch Can See GPU
@@ -82,6 +85,8 @@ Verify User Can Remove GPUs From Workbench
     ...    Edit GPU Number    workbench_title=${WORKBENCH_TITLE_GPU}    gpus=0
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Start Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
+    Verify Workbench Pod Has Limits And Requests For GPU    workbench_title=${WORKBENCH_TITLE_GPU}
+    ...    exp_value=0    project_title=${PRJ_TITLE}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
@@ -138,3 +143,28 @@ Clean Project
     Delete Workbench From CLI    workbench_title=${workbench_title}
     ...    project_title=${project_title}
     Delete PVC From CLI    pvc_title=${pvc_title}    project_title=${project_title}
+
+Verify Workbench Pod Has Limits And Requests For GPU
+    [Documentation]    Checks if the notebook/workbench pod has all the limits/requests
+    ...                set, including the ones for GPUs
+    [Arguments]    ${workbench_title}    ${exp_value}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
+    ...    workbench_title=${workbench_title}  namespace=${ns_name}
+    ${pod_info}=    Oc Get    kind=Pod  name=${cr_name}-0  api_version=v1  namespace=${ns_name}
+    Log    ${pod_info}
+    Log    ${pod_info[0]}
+    Log    ${pod_info[0]['spec']}
+    FOR    ${container_info}    IN    @{pod_info[0]['spec']['containers']}
+        ${container_name}=    Set Variable    ${container_info['name']}
+        IF    "${container_name}" == "${cr_name}"
+            Verify CPU And Memory Requests And Limits Are Defined For Pod Container    ${container_info}
+            ...    nvidia_gpu=${TRUE}
+            ${requests}=    Set Variable     ${container_info['resources']['requests']}
+            Run Keyword And Continue On Failure
+            ...    Should Be Equal     ${requests['nvidia.com/gpu']}    ${exp_value}
+            ${limits}=    Set Variable     ${container_info['resources']['limits']}
+            Run Keyword And Continue On Failure
+            ...    Should Be Equal     ${limits['nvidia.com/gpu']}    ${exp_value}
+        END  
+    END

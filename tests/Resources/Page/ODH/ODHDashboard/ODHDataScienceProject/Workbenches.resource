@@ -430,3 +430,12 @@ GPU Dropdown Should Be Disabled
     Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_GPU_MENU_BTN_XP}
     Element Should Be Disabled    ${WORKBENCH_GPU_MENU_BTN_XP}
+
+Get Workbench Pod
+    [Documentation]    Retrieves info of a workbench pod: namespace, CR resource name and pod definition
+    [Arguments]    ${workbench_title}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
+    ...    workbench_title=${workbench_title}  namespace=${ns_name}
+    ${pod_info}=    Oc Get    kind=Pod  name=${cr_name}-0  api_version=v1  namespace=${ns_name}
+    RETURN    ${ns_name}    ${cr_name}    ${pod_info}

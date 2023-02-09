@@ -65,7 +65,7 @@ Verify User Can Add GPUs To Workbench
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
     ...    timeout=60s
     Verify Workbench Pod Has Limits And Requests For GPU    workbench_title=${WORKBENCH_TITLE_GPU}
-    ...    exp_value=1    project_title=${PRJ_TITLE}
+    ...    project_title=${PRJ_TITLE}    exp_gpu_value=1
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
     Verify Pytorch Can See GPU
@@ -92,8 +92,8 @@ Verify User Can Remove GPUs From Workbench
     ...    Edit GPU Number    workbench_title=${WORKBENCH_TITLE_GPU}    gpus=0
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Start Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
-    Verify Workbench Pod Has Limits And Requests For GPU    workbench_title=${WORKBENCH_TITLE_GPU}
-    ...    exp_value=0    project_title=${PRJ_TITLE}
+    Verify Workbench Pod Does Not Have Limits And Requests For GPU    workbench_title=${WORKBENCH_TITLE_GPU}
+    ...    project_title=${PRJ_TITLE}  
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
@@ -154,28 +154,52 @@ Clean Project
     Delete Workbench From CLI    workbench_title=${workbench_title}
     ...    project_title=${project_title}
     Delete PVC From CLI    pvc_title=${pvc_title}    project_title=${project_title}
+    Sleep    10s    reason=There is some delay in updating the GPU availability in Dashboard
 
 Verify Workbench Pod Has Limits And Requests For GPU
     [Documentation]    Checks if the notebook/workbench pod has all the limits/requests
     ...                set, including the ones for GPUs
-    [Arguments]    ${workbench_title}    ${exp_value}    ${project_title}
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
-    ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
-    ...    workbench_title=${workbench_title}  namespace=${ns_name}
-    ${pod_info}=    Oc Get    kind=Pod  name=${cr_name}-0  api_version=v1  namespace=${ns_name}
-    Log    ${pod_info}
-    Log    ${pod_info[0]}
-    Log    ${pod_info[0]['spec']}
-    FOR    ${container_info}    IN    @{pod_info[0]['spec']['containers']}
+    [Arguments]    ${workbench_title}    ${project_title}    ${exp_gpu_value}
+    ${ns_name}    ${cr_name}    ${pod_info}=    Get Workbench Pod    workbench_title=${workbench_title}
+    ...    project_title=${project_title}
+    Check Limits And Requests For Every Workbench Pod Container
+    ...    containers_info=${pod_info[0]['spec']['containers']}
+    ...    wb_cr_name=${cr_name}    gpu_present=${TRUE}    exp_gpu_value=${exp_gpu_value}
+
+Verify Workbench Pod Does Not Have Limits And Requests For GPU
+    [Documentation]    Checks if the notebook/workbench pod has all the limits/requests
+    ...                set, including the ones for GPUs
+    [Arguments]    ${workbench_title}    ${project_title}
+    ${ns_name}    ${cr_name}    ${pod_info}=    Get Workbench Pod    workbench_title=${workbench_title}
+    ...    project_title=${project_title}
+    Check Limits And Requests For Every Workbench Pod Container
+    ...    containers_info=${pod_info[0]['spec']['containers']}
+    ...    wb_cr_name=${cr_name}    gpu_present=${FALSE}
+
+Check Limits And Requests For Every Workbench Pod Container
+    [Documentation]    Loops through each container inside a workbench
+    ...                to check if limits and requests are set
+    [Arguments]    ${containers_info}    ${wb_cr_name}    ${gpu_present}=${TRUE}    ${exp_gpu_value}=1
+    FOR    ${container_info}    IN    @{containers_info}
         ${container_name}=    Set Variable    ${container_info['name']}
-        IF    "${container_name}" == "${cr_name}"
+        IF    "${container_name}" == "${wb_cr_name}"
             Verify CPU And Memory Requests And Limits Are Defined For Pod Container    ${container_info}
-            ...    nvidia_gpu=${TRUE}
+            ...    nvidia_gpu=${gpu_present}
             ${requests}=    Set Variable     ${container_info['resources']['requests']}
-            Run Keyword And Continue On Failure
-            ...    Should Be Equal     ${requests['nvidia.com/gpu']}    ${exp_value}
             ${limits}=    Set Variable     ${container_info['resources']['limits']}
-            Run Keyword And Continue On Failure
-            ...    Should Be Equal     ${limits['nvidia.com/gpu']}    ${exp_value}
+            IF    ${gpu_present} == ${TRUE}
+                Run Keyword And Continue On Failure
+                ...    Should Be Equal     ${requests['nvidia.com/gpu']}    ${exp_gpu_value}
+                Run Keyword And Continue On Failure
+                ...    Should Be Equal     ${limits['nvidia.com/gpu']}    ${exp_gpu_value}
+            ELSE
+                Run Keyword And Continue On Failure
+                ...    Dictionary Should Not Contain Key    ${requests}    nvidia.com/gpu
+                Run Keyword And Continue On Failure
+                ...    Dictionary Should Not Contain Key    ${limits}    nvidia.com/gpu
+            END
+        ELSE
+            Verify CPU And Memory Requests And Limits Are Defined For Pod Container    ${container_info}
+            ...    nvidia_gpu=${FALSE}
         END
     END

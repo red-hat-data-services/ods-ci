@@ -51,7 +51,7 @@ Verify Notebook Tolerations Are Applied To Workbenches When Set Up
 Verify User Can Add GPUs To Workbench
     [Documentation]    Verifies user can add GPUs to an already started workbench
     [Tags]    Tier1    Sanity
-    ...       ODS-2013
+    ...       ODS-2013    Resources-GPU
     Launch Data Science Project Main Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
@@ -75,7 +75,7 @@ Verify User Can Add GPUs To Workbench
 Verify User Can Remove GPUs From Workbench
     [Documentation]    Verifies user can remove GPUs from an already started workbench
     [Tags]    Tier1    Sanity
-    ...       ODS-2014
+    ...       ODS-2014    Resources-GPU
     Launch Data Science Project Main Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}

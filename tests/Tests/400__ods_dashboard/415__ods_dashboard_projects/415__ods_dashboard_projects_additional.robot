@@ -46,7 +46,7 @@ Verify Notebook Tolerations Are Applied To Workbenches When Set Up
     ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE}
     ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
-    [Teardown]    Restore Tolerations Settings
+    [Teardown]    Restore Tolerations Settings And Clean Project
 
 Verify User Can Add GPUs To Workbench
     [Documentation]    Verifies user can add GPUs to an already started workbench
@@ -63,6 +63,7 @@ Verify User Can Add GPUs To Workbench
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Restarting    workbench_title=${WORKBENCH_TITLE_GPU}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
+    ...    timeout=60s
     Verify Workbench Pod Has Limits And Requests For GPU    workbench_title=${WORKBENCH_TITLE_GPU}
     ...    exp_value=1    project_title=${PRJ_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
@@ -134,7 +135,7 @@ Verify Server Workbench Has The Expected Toleration
     List Should Contain Value  ${received}  ${expected}
     ...    msg=Unexpected Pod Toleration
 
-Restore Tolerations Settings
+Restore Tolerations Settings And Clean Project
     [Documentation]    Reset the notebook tolerations after testing
     Open Dashboard Cluster Settings
     Wait for RHODS Dashboard to Load    expected_page=Cluster Settings
@@ -142,6 +143,8 @@ Restore Tolerations Settings
     Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}
     Disable Pod Toleration Via UI
     Save Changes In Cluster Settings
+    Clean Project    workbench_title=${WORKBENCH_TITLE}
+    ...    pvc_title=${PV_NAME}    project_title=${PRJ_TITLE}
 
 Clean Project
     [Documentation]    Deletes resources from a test project to free up

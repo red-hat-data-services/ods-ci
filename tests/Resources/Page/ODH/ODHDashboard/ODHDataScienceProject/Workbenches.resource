@@ -16,7 +16,7 @@ ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]/
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li/button
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
-${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]
+${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
@@ -417,6 +417,7 @@ Edit GPU Number
     END
 
 Delete Workbench From CLI
+    [Documentation]    Deletes a workbench CR from CLI
     [Arguments]    ${workbench_title}    ${project_title}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
@@ -426,7 +427,6 @@ Delete Workbench From CLI
 GPU Dropdown Should Be Disabled
     [Documentation]    Checks if the GPU dropdown is not able editable
     [Arguments]     ${workbench_title}
-    Sleep    10s     reason=There is some delay in updating the GPU availability in Dashboard
     Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_GPU_MENU_BTN_XP}
     Element Should Be Disabled    ${WORKBENCH_GPU_MENU_BTN_XP}

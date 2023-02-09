@@ -9,6 +9,7 @@ Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
 Test Teardown      Close All Browsers
 
+
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project 2
 ${PRJ_TITLE_GPU}=   ODS-CI DS Project GPU
@@ -77,6 +78,7 @@ Verify User Can Remove GPUs From Workbench
     ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
     ...    pv_description=${EMPTY}  pv_size=${PV_SIZE}    gpus=1
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
+    Sleep    10s     reason=There is some delay in updating the GPU availability in Dashboard
     Run Keyword And Continue On Failure    GPU Dropdown Should Be Disabled    workbench_title=${WORKBENCH_TITLE_GPU}
     Click Button    ${GENERIC_CANCEL_BTN_XP}
     Stop Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
@@ -91,7 +93,7 @@ Verify User Can Remove GPUs From Workbench
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
     Run Keyword And Expect Error    'Using cpu device' does not match 'Using cuda device'    Verify Pytorch Can See GPU
-    
+
 
 *** Keywords ***
 Project Suite Setup
@@ -166,5 +168,5 @@ Verify Workbench Pod Has Limits And Requests For GPU
             ${limits}=    Set Variable     ${container_info['resources']['limits']}
             Run Keyword And Continue On Failure
             ...    Should Be Equal     ${limits['nvidia.com/gpu']}    ${exp_value}
-        END  
+        END
     END

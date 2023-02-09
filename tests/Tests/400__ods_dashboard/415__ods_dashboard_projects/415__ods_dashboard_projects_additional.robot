@@ -52,6 +52,8 @@ Verify User Can Add GPUs To Workbench
     [Documentation]    Verifies user can add GPUs to an already started workbench
     [Tags]    Tier1    Sanity
     ...       ODS-2013
+    Open Data Science Projects Home Page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
     ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
     ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
@@ -73,6 +75,8 @@ Verify User Can Remove GPUs From Workbench
     [Documentation]    Verifies user can remove GPUs from an already started workbench
     [Tags]    Tier1    Sanity
     ...       ODS-2014
+    Open Data Science Projects Home Page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
     ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
     ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
@@ -93,6 +97,8 @@ Verify User Can Remove GPUs From Workbench
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
     Run Keyword And Expect Error    'Using cpu device' does not match 'Using cuda device'    Verify Pytorch Can See GPU
+    [Teardown]    Clean Project    workbench_title=${WORKBENCH_TITLE_GPU}
+    ...    pvc_title=${PV_NAME_GPU}    project_title=${PRJ_TITLE}
 
 
 *** Keywords ***

@@ -214,7 +214,6 @@ Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
     Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')]/article
     ...    timeout=10s
-    
 
 Get App ID From Card
     [Arguments]  ${card_locator}

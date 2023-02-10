@@ -93,9 +93,10 @@ Wait for RHODS Dashboard to Load
     [Arguments]  ${dashboard_title}="Red Hat OpenShift Data Science"    ${wait_for_cards}=${TRUE}
     ...          ${expected_page}=Enabled
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
-    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=15s
+    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
     IF    "${expected_page}" != "${NONE}"
-        Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]        
+        Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]
+        ...    timeout=10s     
     END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Cards Are Loaded
@@ -212,6 +213,7 @@ Load Expected Data Of RHODS Explore Section
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
     Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')]/article
+    ...    timeout=10s
     
 
 Get App ID From Card

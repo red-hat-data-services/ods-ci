@@ -14,25 +14,25 @@ Begin Web Test
     [Documentation]  This keyword should be used as a Suite Setup; it will log in to the
     ...              ODH dashboard, checking that the spawner is in a ready state before
     ...              handing control over to the test suites.
-
+    [Arguments]    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
+    ...            ${auth_type}=${TEST_USER.AUTH_TYPE}
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup
-
-
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Login To RHODS Dashboard  ${username}  ${password}  ${auth_type}
     Wait for RHODS Dashboard to Load
     Launch Jupyter From RHODS Dashboard Link
-    Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Login To Jupyterhub  ${username}  ${password}  ${auth_type}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     Fix Spawner Status
     Go To  ${ODH_DASHBOARD_URL}
 
 End Web Test
+    [Arguments]    ${username}=${TEST_USER.USERNAME}
     ${server}=  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
     IF  ${server}==True
-        Clean Up Server
+        Clean Up Server    username=${username}
         Stop JupyterLab Notebook Server
         Capture Page Screenshot
     END
@@ -42,19 +42,19 @@ Load Json File
     [Arguments]   ${file_path}
     ${j_file}=    Get File    ${file_path}
     ${obj}=    Evaluate    json.loads('''${j_file}''')    json
-    [Return]    ${obj}
+    RETURN    ${obj}
 
 Load Json String
     [Arguments]     ${json_string}
     ${obj}=     Evaluate  json.loads("""${json_string}""")
-    [Return]    ${obj}
+    RETURN    ${obj}
 
 Get CSS Property Value
     [Documentation]    Get the CSS property value of a given element
     [Arguments]    ${locator}    ${property_name}
     ${element}=       Get WebElement    ${locator}
     ${css_prop}=    Call Method       ${element}    value_of_css_property    ${property_name}
-    [Return]     ${css_prop}
+    RETURN     ${css_prop}
 
 CSS Property Value Should Be
     [Documentation]     Compare the actual CSS property value with the expected one
@@ -75,7 +75,7 @@ Get Cluster ID
         Fail    Unable to retrieve cluster ID. Are you logged using `oc login` command?
     END
     ${cluster_id}=    Remove String    ${cluster_id}    "
-    [Return]    ${cluster_id}
+    RETURN    ${cluster_id}
 
 Get Cluster Name By Cluster ID
     [Documentation]     Retrieves the name of the currently connected cluster given its ID
@@ -84,7 +84,7 @@ Get Cluster Name By Cluster ID
     IF    not $cluster_name
         Fail    Unable to retrieve cluster name for cluster ID ${cluster_id}
     END
-    [Return]    ${cluster_name}
+    RETURN    ${cluster_name}
 
 Wait Until HTTP Status Code Is
     [Documentation]     Waits Until Status Code Of URl Matches expected Status Code
@@ -98,7 +98,7 @@ Check HTTP Status Code
     ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
     ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}  verify=${verify_ssl}
     Run Keyword And Continue On Failure  Status Should Be  ${expected}
-    [Return]  ${response.status_code}
+    RETURN  ${response.status_code}
 
 URLs HTTP Status Code Should Be Equal To
     [Documentation]    Given a list of link web elements, extracts the URLs and
@@ -106,6 +106,7 @@ URLs HTTP Status Code Should Be Equal To
     [Arguments]    ${link_elements}    ${expected_status}=200    ${timeout}=20
     FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
         ${href}=    Get Element Attribute    ${ext_link}    href
+        ${text}=    Get Text    ${ext_link}
         ${status}=    Run Keyword And Continue On Failure    Check HTTP Status Code    link_to_check=${href}
         ...                                                                            expected=${expected_status}
         Log To Console    ${idx}. ${href} gets status code ${status}
@@ -122,7 +123,7 @@ Get List Of Atrributes
         ${ids}=    Get Element Attribute    ${ext_link}    ${attribute}
         Append To List    ${list_of_atrributes}    ${ids}
     END
-    [Return]    ${list_of_atrributes}
+    RETURN    ${list_of_atrributes}
 
 Verify NPM Version
     [Documentation]  Verifies the installed version of an NPM library
@@ -134,7 +135,7 @@ Verify NPM Version
 Get Cluster Name From Console URL
     [Documentation]    Get the cluster name from the Openshift console URL
     ${name}=    Split String    ${OCP_CONSOLE_URL}        .
-    [Return]    ${name}[2]
+    RETURN    ${name}[2]
 
 Clean Resource YAML Before Creating It
     [Documentation]    Removes from a yaml of an Openshift resource the metadata which prevent
@@ -142,7 +143,7 @@ Clean Resource YAML Before Creating It
     [Arguments]    ${yaml_data}
     ${clean_yaml_data}=     Copy Dictionary    dictionary=${yaml_data}  deepcopy=True
     Remove From Dictionary    ${clean_yaml_data}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
-    [Return]   ${clean_yaml_data}
+    RETURN   ${clean_yaml_data}
 
 Skip If RHODS Version Greater Or Equal Than
     [Documentation]    Skips test if RHODS version is greater or equal than ${version}
@@ -166,13 +167,25 @@ Skip If RHODS Is Self-Managed
        Skip If    condition=${is_self_managed}==True    msg=This test is skipped for Self-managed RHODS
     END
 
+Run Keyword If RHODS Is Managed
+    [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Managed (Cloud Version)
+    [Arguments]    ${name}    @{arguments}
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == False    Run Keyword    ${name}    @{arguments}
+
+Run Keyword If RHODS Is Self-Managed
+    [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Self-Managed
+    [Arguments]    ${name}    @{arguments}
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed} == True    Run Keyword    ${name}    @{arguments}
+
 Get Domain From Current URL
     [Documentation]    Gets the lowest level domain from the current URL (i.e. everything before the first dot in the URL)
     ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console
     ...    e.g. https://rhods-dashboard-redhat-ods-applications.apps.<cluster>.rhods.ccitredhat.com/ -> https://rhods-dashboard-redhat-ods-applications
     ${current_url} =    Get Location
     ${domain} =    Fetch From Left    string=${current_url}    marker=.
-    [Return]    ${domain}
+    RETURN    ${domain}
 
 Is Current Domain Equal To
     [Documentation]    Compare the lowest level domain to a given string
@@ -181,11 +194,94 @@ Is Current Domain Equal To
     ${domain} =    Get Domain From Current URL
     ${comparison} =    Run Keyword And Return Status    Should Be Equal As Strings
     ...    ${domain}    ${url}
-    [Return]    ${comparison}
+    RETURN    ${comparison}
 
 Get OAuth Cookie
     [Documentation]     Fetches the "_oauth_proxy" cookie from Dashboard page.
     ...                 You can use the value from this cookie to perform login in API calls.
     ...                 It assumes Dashboard UI has been launched and login performed using UI.
     ${cookie}=     Get Cookie  _oauth_proxy
-    [Return]    ${cookie.value}
+    RETURN    ${cookie.value}
+
+Is Generic Modal Displayed
+    [Documentation]    Checks if a modal window is displayed on the page.
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
+    ...                piloted with ${id} and ${partial_match} arguments
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    IF    ${partial_match} == ${TRUE}
+        ${is_displayed}=    Run Keyword And Return Status
+        ...                 Page Should Contain Element    xpath=//*[contains(@id,"${id}")]
+    ELSE
+        ${is_displayed}=    Run Keyword And Return Status
+        ...                 Page Should Contain Element    xpath=//*[@id="${id}")]
+    END
+    RETURN    ${is_displayed}
+
+Wait Until Generic Modal Disappears
+    [Documentation]    Waits until a modal window disappears from the page.
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
+    ...                piloted with ${id} and ${partial_match} arguments
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    ${is_modal}=    Is Generic Modal Displayed
+    IF    ${is_modal} == ${TRUE}
+        IF    ${partial_match} == ${TRUE}
+            Wait Until Page Does Not Contain Element    xpath=//*[contains(@id,"${id}")]    timeout=${timeout}
+        ELSE
+            Wait Until Page Does Not Contain Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+        END
+    ELSE
+        Log     No Modals on the screen right now..     level=WARN
+    END
+
+Wait Until Generic Modal Appears
+    [Documentation]    Waits until a modal window appears on the page.
+    ...                It assumes the html "id" contains "pf-modal-", but it can be
+    ...                piloted with ${id} and ${partial_match} arguments
+    [Arguments]     ${id}=pf-modal-  ${partial_match}=${TRUE}  ${timeout}=10s
+    ${is_modal}=    Is Generic Modal Displayed
+    IF    ${is_modal} == ${FALSE}
+        IF    ${partial_match} == ${TRUE}
+            Wait Until Page Contains Element    xpath=//*[contains(@id,"${id}")]    timeout=${timeout}
+        ELSE
+            Wait Until Page Contains Element    xpath=//*[@id="${id}")]    timeout=${timeout}
+        END
+    ELSE
+        Log     No Modals on the screen right now..     level=WARN
+    END
+
+Close Generic Modal If Present
+    [Documentation]    Close a modal window from the page and waits for it to disappear
+    ${is_modal}=    Is Generic Modal Displayed
+    IF    ${is_modal} == ${TRUE}
+        Click Element    xpath=//button[@aria-label="Close"]
+        Wait Until Generic Modal Disappears
+    END
+
+Extract Value From JSON Path
+    [Documentation]    Given a Python JSON Object (i.e., a dictionary) and
+    ...                a desired path (e.g., spec.resources.limits.cpu), it retrieves
+    ...                the value by looping into the dictionary.
+    [Arguments]    ${json_dict}    ${path}
+    ${path_splits}=    Split String    string=${path}    separator=.
+    ${value}=    Set Variable    ${json_dict}
+    FOR    ${idx}    ${split}    IN ENUMERATE    @{path_splits}  start=1
+        Log    ${idx} - ${split}
+        ${present}=    Run Keyword And Return Status
+        ...    Dictionary Should Contain Key    dictionary=${value}    key=${split}
+        IF    ${present} == ${TRUE}
+            ${value}=    Set Variable    ${value["${split}"]}
+        ELSE
+            ${value}=    Set Variable    ${EMPTY}
+            Log    message=${path} or part of it is not found in the given JSON
+            ...    level=ERROR
+            BREAK
+        END
+    END
+    RETURN    ${value}
+
+Extract URLs From Text
+    [Documentation]    Reads a text and extracts portions which match the pattern
+    ...                of a URL
+    [Arguments]    ${text}
+    ${urls}=     Get Regexp Matches   ${text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
+    RETURN    ${urls}

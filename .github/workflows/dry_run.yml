@@ -19,7 +19,7 @@ jobs:
           mkdir -p ./pr
           cp -r test-output ./pr/test-output
           echo ${{ github.event.number }} > ./pr/NR
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: pr
           path: pr/

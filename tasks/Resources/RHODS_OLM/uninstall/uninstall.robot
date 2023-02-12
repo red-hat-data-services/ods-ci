@@ -1,38 +1,32 @@
+*** Settings ***
+Resource   ../install/oc_install.robot
 *** Keywords ***
 Uninstalling RHODS Operator
   ${is_operator_installed} =  Is RHODS Installed
-  Run Keyword If  ${is_operator_installed}  Run Keywords
+  IF  ${is_operator_installed}  Run Keywords
   ...  Log  Uninstalling RHODS operator in ${cluster_type}  console=yes  AND
   ...  Uninstall RHODS
 
 Uninstall RHODS
-  IF  '${cluster_type}'=='OSD'
+  IF  "${cluster_type}" == "managed"
     Uninstall RHODS In OSD
-  ELSE IF  '${cluster_type}'=='PSI' or "${cluster_type}" == "AWS" or "${cluster_type}" == "GCP"
+  ELSE IF  "${cluster_type}" == "selfmanaged"
     Uninstall RHODS In Self Managed Cluster
   ELSE
-    Fail  Only PSI and OSD are cluster types available
+    Fail  Kindly provide supported cluster type
   END
 
 Uninstall RHODS In OSD
-  Delete RHODS CatalogSource
-  Trigger RHODS Uninstall
+  Clone OLM Install Repo
+  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./cleanup.sh -t addon   #robocop:disable
+  Should Be Equal As Integers	${return_code}	 0   msg=Error detected while un-installing RHODS
+  Log To Console   ${output}
 
 Uninstall RHODS In Self Managed Cluster
-      ${return_code}    ${output}	  Run And Return Rc And Output   git clone ${RHODS_INSTALL_REPO}
-      Log   ${output}    console=yes
-      Should Be Equal As Integers	${return_code}	 0
-      ${git_folder} =  Get Regexp Matches    ${output}	   Cloning into \'(.*?)\'    1
-      Log   ${git_folder}[0]
-      ${return_code}    ${output}    Run And Return Rc And Output   (cd ${git_folder}[0]; ./rhods uninstall <<< Y); wait $!; sleep 60   #robocop:disable
-      Log    ${output}    console=yes
-      Should Be Equal As Integers	${return_code}	 0
-      ${return_code}    ${output}    Run And Return Rc And Output   (cd ${git_folder}[0]; ./rhods cleanup <<< Y); wait $!; sleep 60   #robocop:disable
-      Log    ${output}    console=yes
-      Should Be Equal As Integers	${return_code}	 0
-      ${return_code}	  ${output}    Run And Return Rc And Output   rm -rf ${git_folder}[0]
-      Log    ${output}    console=yes
-      Should Be Equal As Integers	  ${return_code}	 0
+  Clone OLM Install Repo
+  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./cleanup.sh -t operator   #robocop:disable
+  Should Be Equal As Integers	${return_code}	 0   msg=Error detected while un-installing RHODS
+  Log To Console   ${output}
 
 RHODS Operator Should Be Uninstalled
   Verify RHODS Uninstallation

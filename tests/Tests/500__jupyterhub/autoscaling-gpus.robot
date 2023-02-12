@@ -1,15 +1,16 @@
 *** Settings ***
-Documentation    Tests for a scenario in which a gpu machine pool with autoscaling
-...              Is present on the cluster. Tests that the spawner shows the correct
-...              No. of GPUs available and that autoscaling can be triggered
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
-Resource         ../../Resources/Page/OCPDashboard/Pods/Pods.robot
-Library          JupyterLibrary
-Suite Setup      Spawner Suite Setup
+Documentation     Tests for a scenario in which a gpu machine pool with autoscaling
+...               Is present on the cluster. Tests that the spawner shows the correct
+...               No. of GPUs available and that autoscaling can be triggered
+Resource          ../../Resources/ODS.robot
+Resource          ../../Resources/Common.robot
+Resource          ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource          ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource          ../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource          ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Library           JupyterLibrary
+Suite Setup       Spawner Suite Setup
+Suite Teardown    End Web Test
 
 
 *** Variables ***
@@ -61,7 +62,7 @@ Spawn Notebook And Trigger Autoscale
     Spawn Notebook    spawner_timeout=20 minutes  expect_autoscaling=${True}
     Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    Run Keyword If  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize jupyterhub service account
     Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Maybe Close Popup
     Open New Notebook In Jupyterlab Menu

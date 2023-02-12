@@ -1,16 +1,17 @@
 # Script to generate test config file
 
-import os
 import argparse
+import os
 import re
-import subprocess
 import shutil
-import yaml
+import subprocess
 import sys
+
+import yaml
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
-from util import clone_config_repo, read_yaml, oc_login, execute_command
+from util import clone_config_repo, execute_command, oc_login, read_yaml
 
 
 def parse_args():
@@ -130,6 +131,8 @@ def generate_test_config_file(
     data["S3"]["AWS_ACCESS_KEY_ID"] = config_data["S3"]["AWS_ACCESS_KEY_ID"]
     data["S3"]["AWS_SECRET_ACCESS_KEY"] = config_data[
         "S3"]["AWS_SECRET_ACCESS_KEY"]
+    data["S3"]["AWS_DEFAULT_ENDPOINT"] = config_data["S3"]["AWS_DEFAULT_ENDPOINT"]
+    data["S3"]["AWS_DEFAULT_REGION"] = config_data["S3"]["AWS_DEFAULT_REGION"]
     data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data[
         "ANACONDA_CE"]["ACTIVATION_KEY"]
     data["OCP_CONSOLE_URL"] = config_data[
@@ -180,8 +183,14 @@ def generate_test_config_file(
     data["GITHUB_USER"]["USERNAME"] = config_data["GITHUB_USER"]["USERNAME"]
     data["GITHUB_USER"]["TOKEN"] = config_data["GITHUB_USER"]["TOKEN"]
     data["SERVICE_ACCOUNT"]["NAME"] = config_data["SERVICE_ACCOUNT"]["NAME"]
-    data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data[
-        "SERVICE_ACCOUNT"]["FULL_NAME"]
+    data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data["SERVICE_ACCOUNT"]["FULL_NAME"]
+    data["STARBURST"]["LICENSE"] = config_data["STARBURST"]["LICENSE"]
+    data["STARBURST"]["OBS_CLIENT_SECRET"] = config_data["STARBURST"]["OBS_CLIENT_SECRET"]
+    data["STARBURST"]["OBS_CLIENT_ID"] = config_data["STARBURST"]["OBS_CLIENT_ID"]
+    data["STARBURST"]["OBS_URL"] = config_data["STARBURST"]["OBS_URL"]
+    data["STARBURST"]["OBS_TOKEN_URL"] = config_data["STARBURST"]["OBS_TOKEN_URL"]
+    data["DEFAULT_NOTIFICATION_EMAIL"] = config_data["DEFAULT_NOTIFICATION_EMAIL"]
+    data["RHM_TOKEN"] = config_data["RHM_TOKEN"]
 
     # Login to test cluster using oc command
     oc_login(

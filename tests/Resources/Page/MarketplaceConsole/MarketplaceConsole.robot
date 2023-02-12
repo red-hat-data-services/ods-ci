@@ -7,7 +7,7 @@ Is SSO Login Page Visible
     Click Element     //a[contains(@aria-label,"Log in")]
     sleep   5
     ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain    Enter your email to log in
-    [Return]  ${login_prompt_visible}
+    RETURN  ${login_prompt_visible}
 
 Get the OC commands For Cluster registration
     Launch Cluster Tab from Marketplace
@@ -24,7 +24,7 @@ Get the OC commands For Cluster registration
         Set To Dictionary       ${oc_command_dict}      ${itemname[${idx}]}    ${ext_link.text}
 
     END
-    [Return]    ${oc_command_dict}
+    RETURN    ${oc_command_dict}
 
 Wait For Marketplace Page To Load
     Wait Until Page Contains Element    xpath://a[contains(text(), 'Workspace')]   timeout=15
@@ -59,4 +59,4 @@ Launch Cluster Tab from Marketplace
     Click Button       Add cluster
     Wait Until Page Contains                     Register cluster           timeout=120
     ${status}   Run Keyword and Return Status  Page Should Contain    Register cluster
-    [Return]  ${status}
+    RETURN  ${status}

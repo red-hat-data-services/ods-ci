@@ -531,12 +531,7 @@ Verify Access To status API Endpoint
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
-    ...                                        body=${EMPTY}    str_to_json=${FALSE}
-    Operation Should Be Unauthorized
-    Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
-    ...                                        body=${EMPTY}    str_to_json=${FALSE}
-    Operation Should Be Allowed
+    Perform AllowedUsers API Call Based On RHODS Version
 
 Verify Access To validate-isv API Endpoint
     [Documentation]     Verifies the endpoint "validate-isv" works as expected
@@ -738,7 +733,7 @@ Log In As RHODS Admin
     ...    browser_options=${BROWSER.OPTIONS}
     ${oauth_proxy_cookie}=     Get OAuth Cookie
     Close Browser
-    [Return]    ${oauth_proxy_cookie}
+    RETURN    ${oauth_proxy_cookie}
 
 Log In As RHODS Basic User
     [Documentation]     Perfom OC login using a RHODS basic user
@@ -747,7 +742,7 @@ Log In As RHODS Basic User
     ...    browser_options=${BROWSER.OPTIONS}
     ${oauth_proxy_cookie}=     Get OAuth Cookie
     Close Browser
-    [Return]    ${oauth_proxy_cookie}
+    RETURN    ${oauth_proxy_cookie}
 
 Spawn Minimal Python Notebook Server
     [Documentation]    Suite Setup
@@ -761,7 +756,7 @@ Spawn Minimal Python Notebook Server
     ${status}   ${image_tag_name}=     Run And Return Rc And Output
     ...     oc get Notebook --field-selector=metadata.name=${cr_name} -n ${NOTEBOOK_NS} -o=jsonpath='{.items[0].metadata.annotations.notebooks\\.opendatahub\\.io/last-image-selection}'
     ${image_tag_name}=      Split String From Right    string=${image_tag_name}    separator=:  max_split=1
-    [Return]    ${cr_name}    ${image_tag_name[1]}
+    RETURN    ${cr_name}    ${image_tag_name[1]}
 
 Create A Dummy Secret In Dashboard Namespace
     [Documentation]     Creates a dummy secret to use in tests to avoid getting sensitive secrets
@@ -817,19 +812,19 @@ Set Username In Secret Payload
     [Documentation]     Fill in the json body for creating/updating a Secrets with the username
     [Arguments]     ${notebook_username}
     ${complete_secret}=     Replace String    ${SECRET_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
-    [Return]    ${complete_secret}
+    RETURN    ${complete_secret}
 
 Set Username In ConfigMap Payload
     [Documentation]     Fill in the json body for creating/updating a ConfigMaps with the username
     [Arguments]     ${notebook_username}
     ${complete_cm}=     Replace String    ${CM_ENDPOINT_BODY}    <NB_USERNAME>    ${notebook_username}
-    [Return]    ${complete_cm}
+    RETURN    ${complete_cm}
 
 Set Username In PVC Payload
     [Documentation]     Fill in the json body for creating/updating a PVCs with the username
     [Arguments]     ${username}
     ${complete_pvc}=     Replace String    ${PVC_ENDPOINT_BODY}    <PVC_NAME>    ${username}
-    [Return]    ${complete_pvc}
+    RETURN    ${complete_pvc}
 
 Fill In Notebook Payload For Creation/Update
     [Documentation]     Fill in the json body for creating/updating a Notebook with the username
@@ -840,7 +835,7 @@ Fill In Notebook Payload For Creation/Update
         ${body}=       Replace String    ${NB_ENDPOINT_BODY_B}    <USERNAME>    ${notebook_username}
     END
     ${complete_body}=     Replace String    ${body}    <IMAGETAGNAME>    ${imagetagname}
-    [Return]    ${complete_body}
+    RETURN    ${complete_body}
 
 Fill In Notebook Payload For Stopping
     [Documentation]     Fill in the json body for creating/updating a Notebook with the username
@@ -850,7 +845,7 @@ Fill In Notebook Payload For Stopping
     ELSE
         ${complete_body}=       Replace String    ${NB_STOP_ENDPOINT_BODY_B}    <USERNAME>    ${notebook_username}
     END
-    [Return]    ${complete_body}
+    RETURN    ${complete_body}
 
 Delete Test PVCs
     [Documentation]     Delets the PVCs received as arguments
@@ -863,3 +858,23 @@ Delete Test PVCs
             OpenshiftLibrary.Oc Delete    kind=PersistentVolumeClaim    namespace=${NOTEBOOK_NS}    name=${pvc}
         END
     END
+
+Perform AllowedUsers API Call Based On RHODS Version
+    [Documentation]     Verifies the endpoint "status/allowedUsers" works as expected
+    ...                 based on the permissions of the users. The Type of request changes
+    ...                 based on the RHODS version
+    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF  ${version_check}==True
+        Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+        Operation Should Be Unauthorized
+        Perform Dashboard API Endpoint GET Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+        Operation Should Be Allowed
+    ELSE
+        Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
+        ...                                        body=${EMPTY}    str_to_json=${FALSE}
+        Operation Should Be Unauthorized
+        Perform Dashboard API Endpoint POST Call   endpoint=${STATUS_ENDPOINT_PT1}    token=${ADMIN_TOKEN}
+        ...                                        body=${EMPTY}    str_to_json=${FALSE}
+        Operation Should Be Allowed
+    END
+    

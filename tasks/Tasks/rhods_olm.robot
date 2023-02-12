@@ -7,14 +7,17 @@ Library          OperatingSystem
 Library          String
 
 ***Variables***
-${cluster_type}          OSD
-${operator_version}      ${EMPTY}
-${RHODS_INSTALL_REPO}    https://${GITHUB_USER.TOKEN}@github.com/red-hat-data-services/self-managed-installer.git
+${cluster_type}          selfmanaged
+${image_url}             ${EMPTY}
+${RHODS_OSD_INSTALL_REPO}     None
+@{SUPPORTED_TEST_ENV}    AWS   GCP   PSI
+${TEST_ENV}              AWS
+${INSTALL_TYPE}          OperatorHub
 *** Tasks ***
 Can Install RHODS Operator
   [Tags]  install
   Given Selected Cluster Type ${cluster_type}
-  When Installing RHODS Operator ${operator_version}
+  When Installing RHODS Operator ${image_url}
   Then RHODS Operator Should Be Installed
   [Teardown]   Install Teardown
 
@@ -28,5 +31,5 @@ Can Upgrade RHODS Operator
   [Tags]  upgrade
   ...     ODS-543
   Given Selected Cluster Type ${cluster_type}
-  When Upgrading RHODS Operator ${operator_version}
+  When Upgrading RHODS Operator ${image_url}
   Then RHODS Operator Should Be Upgraded

@@ -1,28 +1,24 @@
-import os
 import argparse
-import re
 import ast
-import subprocess
-import shutil
-import yaml
-import sys
-import jinja2
-import time
 import glob
 import io
-from contextlib import redirect_stdout, redirect_stderr
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from contextlib import redirect_stderr, redirect_stdout
+
+import jinja2
+import yaml
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
-from util import (
-    clone_config_repo,
-    read_yaml,
-    execute_command,
-    write_data_in_json,
-    read_data_from_json,
-    compare_dicts,
-)
 from logger import log
+from util import (clone_config_repo, compare_dicts, execute_command,
+                  read_data_from_json, read_yaml, write_data_in_json)
 
 """
 Class for Openshift Cluster Manager
@@ -165,7 +161,7 @@ class OpenshiftClusterManager:
                 log.info("Using the osd version given by user as it is...")
             version = "--version {} ".format(self.openshift_version)
         else:
-            log.info("Using the latest osd version available in AWS...")
+            log.info("Using the latest osd version available ...")
 
         channel_grp = ""
         if self.channel_group != "":
@@ -555,6 +551,27 @@ class OpenshiftClusterManager:
             return False
         else:
             return True
+    
+
+    def hide_values_in_op_json(self, fields, json_str):
+        json_dict = json.loads(json_str)
+        params = json_dict["parameters"]["items"]
+        for field in fields:
+            for p in params:
+                if p["id"] == field:
+                    p["value"] = "##hidden##"
+        return json.dumps(json_dict)
+        
+
+    def hide_values_in_op_json(self, fields, json_str):
+        json_dict = json.loads(json_str)
+        params = json_dict["parameters"]["items"]
+        for field in fields:
+            for p in params:
+                if p["id"] == field:
+                    p["value"] = "##hidden##"
+        return json.dumps(json_dict)
+
 
     def install_addon(
         self,
@@ -563,6 +580,7 @@ class OpenshiftClusterManager:
         output_filename="install_operator.json",
         add_replace_vars=None,
         exit_on_failure=True,
+        fields_to_hide=[]
     ):
         """Installs addon"""
         replace_vars = {
@@ -571,7 +589,7 @@ class OpenshiftClusterManager:
         }
         if add_replace_vars:
             replace_vars.update(add_replace_vars)
-            print(replace_vars)
+            # print(replace_vars)
         template_file = template_filename
         output_file = output_filename
         self._render_template(template_file, output_file, replace_vars)
@@ -581,6 +599,8 @@ class OpenshiftClusterManager:
         )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
+        if len(fields_to_hide) > 0:
+            ret = self.hide_values_in_op_json(fields_to_hide, ret)
         log.info("\nRET: {}".format(ret))
         failure_flag = False
         if ret is None:
@@ -724,6 +744,42 @@ class OpenshiftClusterManager:
             addon_name="managed-api-service", exit_on_failure=exit_on_failure
         )
         self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
+
+    def install_managed_starburst_addon(self, license, exit_on_failure=True):
+        if not self.is_addon_installed(addon_name="managed-starburst"):
+            add_vars = {"NOTIFICATION_EMAIL": self.notification_email, "STARBURST_LICENSE": license}
+            failure_flags = []
+            failure = self.install_addon(
+                addon_name="managed-starburst",
+                template_filename="install_addon_starburst.jinja",
+                output_filename="install_starburst_operator.json",
+                add_replace_vars=add_vars,
+                exit_on_failure=exit_on_failure,
+                fields_to_hide=["starburst-license"]
+            )
+            failure_flags.append(failure)
+            if True in failure_flags:
+                log.info(
+                    "Something got wrong while installing Starburst: "
+                    "thus system is not waiting for installation status."
+                    "\nPlease check the cluster and try again..."
+                )
+                return False
+            return True
+            # else:
+            #    self.wait_for_addon_installation_to_complete(addon_name="managed-starburst")
+        else:
+            log.info(
+                "managed-api-service is already installed on {}".format(
+                    self.cluster_name
+                )
+            )
+    def uninstall_managed_starburst_addon(self, exit_on_failure=True):
+        """Uninstalls RHOAM addon"""
+        self.uninstall_addon(
+            addon_name="managed-starburst", exit_on_failure=exit_on_failure
+        )
+        self.wait_for_addon_uninstallation_to_complete(addon_name="managed-starburst")
 
     def create_idp(self):
         """Creates Identity Provider"""

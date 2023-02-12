@@ -17,7 +17,7 @@ Provision Self-Managed Cluster
     Provision Cluster
     Wait For Cluster To Be Ready
     Claim Cluster
-    # Login To Cluster
+    Login To Cluster
     [Teardown]  Clean Failed Cluster
 
 Deprovision Self-Managed Cluster

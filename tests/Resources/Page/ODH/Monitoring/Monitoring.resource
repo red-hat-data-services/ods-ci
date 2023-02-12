@@ -25,7 +25,7 @@ Get Average Availability For Time Range
     ...    pm_query=avg_over_time(rhods_aggregate_availability[${time_range}])*100
     ${value}=    Set Variable    ${response.json()["data"]["result"][0]["value"][-1]}
     ${value}=    Convert To Number    ${value}    ${precision}
-    [Return]    ${value}
+    RETURN    ${value}
 
 Create Suite Availability Checkpoint
     [Documentation]    Obtains and stores Average Availability for the last 2m, 15m, 1h and 3h
@@ -105,7 +105,7 @@ Log If Average Availability For Time Range Breached SLA
         ...    ${message_prefix}ODS Availability is currently breaching SLA: ${availability} < ${SLA_AVAILABILITY} (time-range:${time_range})
         Log    message=${message}    level=WARN    console=False
     END
-    [Return]    ${availability}
+    RETURN    ${availability}
 
 Fail If Average Availability For Time Range Breached SLA
     [Documentation]    Gets Average Availability for ${time_range} and Fails test if the value is under 99.95
@@ -117,14 +117,21 @@ Fail If Average Availability For Time Range Breached SLA
 
 Suite Availability Setup
     [Documentation]    Obtains and stores Average Availability for the last 2m, 15m, 1h and 3h
-    ...    Log a WARN message if availability is under 99.95
+    ...    Log a WARN message if availability is under 99.95 or an alert is firing
     [Arguments]    ${pm_url}    ${pm_token}
-    Run Keyword And Warn On Failure    Create Suite Availability Checkpoint    pm_url=${pm_url}    pm_token=${pm_token}
+    Run Keyword And Warn On Failure
+    ...    Create Suite Availability Checkpoint    pm_url=${pm_url}    pm_token=${pm_token}
+    Run Keyword And Warn On Failure    Alerts Should Not Be Firing
+    ...    pm_url=${pm_url}    pm_token=${pm_token}    expected-firing-alert=DeadManSnitch
+    ...    message_prefix=Suite Setup: ${SUITE NAME}:
 
 Suite Availability Teardown
     [Documentation]    Compare current Average Availability with the values stored in Suite Availability.
-    ...    Logs a WARN message if the current values are lower
+    ...    Logs a WARN message if the current values are lower or an alert is firing
     [Arguments]    ${pm_url}    ${pm_token}
-
-    Run Keyword And Warn On Failure    Log If Availability Decreased Since Suite Availability Checkpoint     pm_url=${pm_url}    pm_token=${pm_token}
-    ...    message_prefix=Suite Teardown: ${SUITE NAME}:
+    Run Keyword And Warn On Failure
+    ...    Log If Availability Decreased Since Suite Availability Checkpoint     pm_url=${pm_url}    pm_token=${pm_token}
+    ...    message_prefix=Suite Trdwn: ${SUITE NAME}:
+    Run Keyword And Warn On Failure    Alerts Should Not Be Firing
+    ...    pm_url=${pm_url}    pm_token=${pm_token}    expected-firing-alert=DeadManSnitch
+    ...    message_prefix=Suite Trdwn: ${SUITE NAME}:

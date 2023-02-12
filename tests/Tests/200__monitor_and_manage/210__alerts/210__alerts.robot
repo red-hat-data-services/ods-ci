@@ -11,7 +11,7 @@ Library             SeleniumLibrary
 Library             JupyterLibrary
 
 Suite Setup         Alerts Suite Setup
-Suite Teardown      RHOSi Teardown
+Suite Teardown      Alerts Suite Teardown
 
 
 *** Variables ***
@@ -33,7 +33,10 @@ Verify All Alerts Severity
     ...       Tier1
     ...       ODS-1227
 
-    Verify "Jupyter Image Builds Are Failing" Alerts Severity And Continue On Failure
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF    ${version_check}==False
+        Verify "Jupyter Image Builds Are Failing" Alerts Severity And Continue On Failure
+    END
     Verify "DeadManSnitch" Alerts Severity And Continue On Failure
     Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     Verify "ODH Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
@@ -48,8 +51,11 @@ Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-l
     ...       Tier1
     ...       ODS-540
 
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    Builds    Jupyter image builds are failing    alert-duration=120
+    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
+    IF    ${version_check}==False
+        Verify Alert Is Not Firing And Continue On Failure
+        ...    Builds    Jupyter image builds are failing    alert-duration=120
+    END
 
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
@@ -322,6 +328,8 @@ Verify Alert "Jupyter image builds are failing" Fires When There Is An Image Bui
     ...       ODS-717
     ...       Execution-Time-Over-30m
 
+    Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
+
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
@@ -374,6 +382,8 @@ Verify Alert "Jupyter Image Builds Are Failing" Fires At Least 20 Minutes When T
     ...       ODS-790
     ...       Execution-Time-Over-30m
 
+    Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
+
     ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
     ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
@@ -421,7 +431,13 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
+    Skip If RHODS Is Self-Managed
     RHOSi Setup
+
+Alerts Suite Teardown
+    [Documentation]    Test suite teardown
+    Skip If RHODS Is Self-Managed
+    RHOSi Teardown
 
 Teardown PVC Alert Test
     [Documentation]    Deletes user notebook files using the new "Clean Up User Notebook"
@@ -446,7 +462,7 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=s2i-generic-data-science-notebook
     Clone Git Repository And Run    ${notebook_repo}    ${notebook_path}
@@ -626,7 +642,7 @@ Check Cluster Name Contain "Aisrhods" Or Not
     [Documentation]     Return true if cluster name contains aisrhods and if not return false
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${return_value} =  Evaluate  "aisrhods" in "${cluster_name}"
-    [Return]  ${return_value}
+    RETURN  ${return_value}
 
 Check Particular Text Is Present In Rhods-operator's Log
     [Documentation]     Check if text is present in log

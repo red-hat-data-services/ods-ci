@@ -13,6 +13,7 @@ Suite Teardown      Pachyderm Suite Teardown
 ${pachyderm_container_name}     Pachyderm
 ${pachyderm_operator_name}      Pachyderm
 ${pachyderm_appname}            pachyderm
+${pachyderm_ns}                 pachyderm
 
 
 *** Test Cases ***
@@ -45,7 +46,7 @@ Pachyderm Suite Setup
     Login to OCP
     Wait Until OpenShift Console Is Loaded
     Check And Install Operator in Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
-    Create Project      pachyderm
+    Run    oc new-project ${pachyderm_ns}
     Create Pachyderm AWS-Secret
     Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}
     Wait Until Status Is Running
@@ -54,13 +55,17 @@ Pachyderm Suite Setup
 
 Pachyderm Suite Teardown
     Go To    ${OCP_CONSOLE_URL}
-    Delete Tabname Instance For Installed Operator    ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}
+    Oc Delete    kind=Pachyderm  name=pachyderm-sample  namespace=${pachyderm_ns}
+    Move To Installed Operator Page Tab In Openshift    operator_name=${pachyderm_operator_name}
+    ...    tab_name=Pachyderm    namespace=${pachyderm_ns}
     Uninstall Operator    ${pachyderm_operator_name}
-    Delete Project By Name      pachyderm
+    Oc Delete    kind=Project    name=${pachyderm_ns}
+    Sleep    30s
+    ...    reason=There is a bug in dashboard showing an error message after ISV uninstall
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
-    Remove Disabled Application From Enabled Page    app_id=pachyderm
+    Remove Disabled Application From Enabled Page    app_id=${pachyderm_appname}
     Close All Browsers
 
 Wait Until Status Is Running
@@ -79,7 +84,7 @@ Get Pachd Version
     ${version}=     Get Text        (//dd[@data-test-selector="details-item-value__Version"])[1]
     ${seperator}=   Set Variable    v
     ${res_version}=     Fetch From Right    ${version}      ${seperator}
-    [Return]    ${res_version}
+    RETURN    ${res_version}
 
 Create Pachyderm AWS-Secret
     [Documentation]     Creates a Pachyderm AWS Secret.
@@ -88,7 +93,7 @@ Create Pachyderm AWS-Secret
 Verify Pipeline Pod Creation
     [Documentation]     Checks pipeline pod has been created in workloads.
     ${status}=    Check If POD Exists    pachyderm      app=pipeline-edges-v1
-    Run Keyword IF    '${status}'=='FAIL'    FAIL
+    IF    '${status}'=='FAIL'    FAIL
     ...    PODS with Label '${label_selector}' is not present in '${namespace}' namespace
     Wait Until Keyword Succeeds     120     5   Verify Operator Pod Status  pachyderm   app=pipeline-edges-v1
 
@@ -98,7 +103,7 @@ Create Command In Multiple Lines
     ...     from IPython.display import Image, display
     ...     Image(filename='original_liberty.png')
     Log     ${command_string}
-    [Return]    ${command_string}
+    RETURN    ${command_string}
 
 Create Pachyderm Pipeline Using JupyterLab
     [Documentation]     Creates pachyderm pipeline by running multiple commands on jupyterlab.

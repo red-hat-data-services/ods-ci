@@ -16,7 +16,7 @@ items:
           name: gcp-creds
     installConfigSecretTemplateRef:
       name: gcp-sno-install-config
-    size: 1
+    size: 0
     skipMachinePools: true
 - apiVersion: v1
   kind: Secret

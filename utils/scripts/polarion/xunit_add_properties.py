@@ -1,10 +1,11 @@
 """Inserts properties from a config file into a xunit format XML file"""
 import argparse
 import codecs
-import xml.etree.ElementTree as et
-from xml.dom import minidom
 import re
+import xml.etree.ElementTree as et
 from copy import deepcopy
+from xml.dom import minidom
+
 import yaml
 
 

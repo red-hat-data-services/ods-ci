@@ -1,10 +1,8 @@
 *** Keywords ***
-Claim Cluster    
+Claim Cluster
     Log    Claiming cluster    console=True
     Oc Apply    kind=ClusterClaim    src=tasks/Resources/Provisioning/Hive/claim.yaml
     ...    template_data=${infrastructure_configurations}
-    Wait Until Keyword Succeeds    30 min    10 s
-    ...    Confirm Cluster Is Claimed
 
 Does ClusterName Exists
     @{clusterpoolname} =    Oc Get   kind=ClusterPool    namespace=rhods    api_version=hive.openshift.io/v1
@@ -14,10 +12,10 @@ Does ClusterName Exists
         IF    "${name}[metadata][name]" == "${infrastructure_configurations['hive_cluster_name']}"
             Log    ${name}[metadata][name]    console=True
             ${clustername_exists} =    Set Variable    "${name}[metadata][name]"
-            Return From Keyword    ${clustername_exists}
-        END  
+            RETURN    ${clustername_exists}
+        END
     END
-    [Return]    False
+    RETURN    False
 
 Get Clusters
     @{clusters} =    Oc Get    kind=ClusterClaim    namespace=rhods
@@ -36,7 +34,7 @@ Get Cluster Credentials
 
 Login To Cluster
     ${ns} =    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations['hive_cluster_name']}
-    ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[0]['metadata']['name']}    
+    ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${ns[0]['metadata']['name']}
     ...    namespace=${ns[0]['metadata']['name']}    api_version=hive.openshift.io/v1
     ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
     ${credentials} =    Run and Return Rc And Output    oc extract -n ${ns[0]['metadata']['name']} secret/$(oc -n ${ns[0]['metadata']['name']} get cd ${ns[0]['metadata']['name']} -o jsonpath='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to=-
@@ -48,11 +46,11 @@ Provision Cluster
     Log    Setting cluster configuration    console=True
     ${template} =    Select Provisioner Template
     ${clustername_exists} =    Does ClusterName Exists
-    Run Keyword If    ${clustername_exists}    
+    IF    ${clustername_exists}
     ...    FAIL    Cluster name ${infrastructure_configurations['hive_cluster_name']} already exists. Please choose a different name.
     Log     Configuring cluster    console=True
     Log Many    ${infrastructure_configurations['hive_cluster_name']}    console=True
-    Oc Apply    kind=List    src=${template}    api_version=v1        
+    Oc Apply    kind=List    src=${template}    api_version=v1
     ...    template_data=${infrastructure_configurations}
 
 Select Provisioner Template
@@ -65,7 +63,7 @@ Select Provisioner Template
     ELSE
         FAIL    Invalid provider name
     END
-    [Return]    ${template}
+    RETURN    ${template}
 
 Verify Cluster Is Successfully Provisioned
     [Arguments]    ${namespace}
@@ -78,12 +76,16 @@ Wait For Cluster To Be Ready
     ${namespace} =    Wait Until Keyword Succeeds    2 min    2 s
     ...    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${infrastructure_configurations['hive_cluster_name']}
     Log    ${namespace[0]['metadata']['name']}    console=True
-    ${result} =    Wait Until Keyword Succeeds    50 min    10 s 
+    ${result} =    Wait Until Keyword Succeeds    50 min    10 s
     ...    Verify Cluster Is Successfully Provisioned    ${namespace[0]['metadata']['name']}
-    Run Keyword If    ${result} == False    Delete Cluster Configuration
-    Run Keyword If    ${result} == False    FAIL    
+    IF    ${result} == False    Delete Cluster Configuration
+    IF    ${result} == False    FAIL
     ...    Cluster provisioning failed. Please look into the logs for more details.
-    
+
+Verify Cluster Claim
+    Wait Until Keyword Succeeds    30 min    10 s
+    ...    Confirm Cluster Is Claimed
+
 Confirm Cluster Is Claimed
     ${status} =    Oc Get    kind=ClusterClaim    name=${infrastructure_configurations}[hive_claim_name]    namespace=rhods
     Should Be Equal As Strings    ${status[0]['status']['conditions'][0]['reason']}    ClusterClaimed

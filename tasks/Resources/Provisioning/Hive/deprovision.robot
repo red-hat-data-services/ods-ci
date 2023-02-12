@@ -12,9 +12,9 @@ Deprovision Cluster
     ...    Unclaim Cluster    ${infrastructure_configurations['hive_claim_name']}
     ${cluster_deprovision} =    Run Keyword And Return Status
     ...    Delete Cluster Configuration
-    Run Keyword If    ${cluster_claim} == False
+    IF    ${cluster_claim} == False
     ...    Log    Cluster Claim does not exists. Deleting Configuration   console=True
-    Run Keyword If    ${cluster_deprovision} == False
+    IF    ${cluster_deprovision} == False
     ...    Log    Cluster has not been delete. Please do it manually   console=True
     Log    Cluster has been deprovisioned    console=True
 

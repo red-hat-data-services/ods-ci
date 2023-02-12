@@ -42,22 +42,36 @@ Verify Namespace Status
 Verify CR Status
     [Documentation]  Verifies that a CR exists, that it's available
     ...    and that the name matches
-    [Arguments]  ${crd}  ${cr_name}
-    @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=${crd}
+    [Arguments]  ${crd}  ${cr_name}  ${status}=Available
+    @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=${crd}  name=${cr_name}
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
-    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Available
+    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  ${status}
     Should Be Equal  ${cr_obj_dictionary.status.conditions[0].status}  True
+
+Verify Notebook CR Is Running
+    [Documentation]  Verifies that a Notebook CR exists, that it's running
+    ...    and that the name matches
+    [Arguments]  ${cr_name}
+    @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=Notebook  name=${cr_name}
+    &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
+    Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
+    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Running
 
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
     ...                 in the cluster (e.g., usually on OSD, ROSA).
     ...                 Returns ${TRUE} if RHODS Self-Managed is installed (e.g., usually on PSI or baremetal)
-    ${is_self_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
+    ${is_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
     ...                                                      kind=CatalogSource
-    ...                                                      name=self-managed-rhods
-    ...                                                      namespace=openshift-marketplace
-    [Return]    ${is_self_managed}
+    ...                                                      name=addon-managed-odh-catalog
+    ...                                                      namespace=redhat-ods-operator
+    IF    ${is_managed} == ${TRUE}
+        ${is_self_managed}=    Set Variable    ${FALSE}
+    ELSE
+        ${is_self_managed}=    Set Variable    ${TRUE}
+    END
+    RETURN    ${is_self_managed}
 
 Get MachineSets
     [Documentation]    Returns a list of machinesets names
@@ -65,4 +79,4 @@ Get MachineSets
     @{machinesets} =    Split To Lines    ${machine_sets_oc}
     ${tmp} =    Remove From List    ${machinesets}    0
     Should Be Equal As Strings    ${tmp}    NAME
-    [Return]    @{machinesets}
+    RETURN    @{machinesets}

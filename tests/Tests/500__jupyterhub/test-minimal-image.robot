@@ -26,7 +26,7 @@ Can Launch Jupyterhub
 Can Login to Jupyterhub
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    Run Keyword If    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize jupyterhub service account
     #Wait Until Page Contains Element    xpath://span[@id='jupyterhub-logo']
     Wait Until Page Contains  Start a notebook server
 
@@ -92,7 +92,7 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     Wait Until JupyterLab Code Cell Is Not Active
     ${updated_version} =  Run Cell And Get Output  !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'
     ${res} =      GT    ${updated_version}.0    ${version}[1].0
-    Run Keyword Unless    ${res}    Fail
+    IF   not ${res}    Fail
     [Teardown]    Clean Up Server
 
 Verify Jupyterlab Server Pods Are Spawned In A Custom Namespace

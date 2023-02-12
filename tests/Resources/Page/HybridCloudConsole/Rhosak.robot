@@ -36,6 +36,7 @@ Create Kafka Stream Instance
     Click Element    xpath=//div[text()='${cloud_provider}']
     Click Element    id:form-cloud-region-option
     Click Element    xpath=//li/*[text()="${stream_region}"]
+    Sleep  2s
     Click Button    Create instance
     Capture Page Screenshot    form.png
     Wait Until Page Does Not Contain Element    xpath=//div[@id='modalCreateKafka']    timeout=20
@@ -54,7 +55,7 @@ Check Stream Creation
 Delete Kafka Stream Instance
     [Documentation]    Deletes a kafka stream from RHOSAK UI
     [Arguments]    ${stream_name}
-    Click From Actions Menu    search_col=Name    search_value=${stream_name}    action=Delete
+    Click From Actions Menu    search_col=Name    search_value=${stream_name}    action=Delete instance
     Wait Until Page Contains HCC Generic Modal
     Capture Page Screenshot    1.png
     Input Text    id:name__input    ${stream_name}
@@ -102,7 +103,7 @@ Create Service Account From Connection Menu
     Wait Until Element Is Enabled    xpath=//button[@data-testid='modalCredentials-buttonClose']
     Click Button    xpath=//button[@data-testid='modalCredentials-buttonClose']
     Wait Until Element Is Not Visible    xpath=//div[@class='pf-l-bullseye']
-    [Return]    &{service_account_creds}
+    RETURN    &{service_account_creds}
 
 Assign Permissions To ServiceAccount In RHOSAK
     [Documentation]    Configures the SA's permission on a kafka stream from RHOSAK UI
@@ -225,7 +226,8 @@ Clean Up RHOSAK
     [Documentation]    Cleans up all the RHOSAK created resources from RHOSAK and RHODS UI
     [Arguments]    ${stream_to_delete}    ${topic_to_delete}    ${sa_clientid_to_delete}  ${rhosak_app_id}
     ${window_title}=    Get Title
-    IF    $window_title == "Streams for Apache Kafka | Red Hat OpenShift Application Services"
+    IF    $window_title == "Streams for Apache Kafka | Red Hat OpenShift Application Services" or $window_title == "Red Hat OpenShift Streams for Apache Kafka"
+        Maybe Skip RHOSAK Tour
         ${modal_exists}=     Run Keyword And Return Status   Wait Until Page Contains Element    xpath=//*[contains(@class, "modal")]
         IF    ${modal_exists}==${TRUE}
            Click Button    xpath=//button[@aria-label="Close"]
@@ -234,9 +236,10 @@ Clean Up RHOSAK
                 Click Button   xpath=${CONFIRM_WARNING_FIRST_BUTTON_XP}
            END
         END
+    ELSE
+        Switch Window    title:Red Hat OpenShift Streams for Apache Kafka
     END
     Oc Delete    kind=ConfigMap    name=rhosak-validation-result    namespace=redhat-ods-applications
-    Switch Window    title:Red Hat OpenShift Streams for Apache Kafka
     Menu.Navigate To Page    Streams for Apache Kafka    Kafka Instances
     Enter Stream    stream_name=${stream_to_delete}
     Enter Stream Topics Section

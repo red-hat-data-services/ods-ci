@@ -81,8 +81,8 @@ Spawn Notebook And Verify Size
         ...    oc get pods -n ${NAMESPACE} ${notebook_pod_name} -o jsonpath='{.spec.containers[0].resources}'
         ${data}    Convert To Lower Case    ${status}
         ${dict_pod_data}    Evaluate    json.loads('''${data}''')    json
-        Run Keyword And Continue On Failure    Run Keyword If    &{dict_pod_data} != &{jh_container_size}    Fail
-        ...    Container size didn't match.
+        IF    &{dict_pod_data} != &{jh_container_size}    Run Keyword And Continue On Failure
+        ...    Fail    Container size didn't match.
         ...    Pod container size '${dict_pod_data}' and JH conaintainer is '${jh_container_size}'
         Fix Spawner Status
     END

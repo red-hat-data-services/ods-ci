@@ -49,7 +49,7 @@ RHODS Performance Result Validation
     [Documentation]   Compare the current memory usage against expected threshold value
     [Arguments]     ${m_data}
     ${m_sum}    Evaluate    math.fsum(${m_data})                      math
-    Run Keyword If     ${m_sum} > ${MEMORY_THRESHOLD}
+    IF     ${m_sum} > ${MEMORY_THRESHOLD}
     ...   FAIL      Kube-API Server Pod memory value is higher than expected
 
 Run Performance Test On RHODS Operator
@@ -70,7 +70,7 @@ Verify Sandbox Toolchain Data
            FOR    ${data}    IN    @{k_mem_data}
                   ${km_data}    Split String    ${data}       :
                   ${m_value}    Convert To Number    ${km_data[1]}[:-3]
-                  Run Keyword And Continue On Failure    Run Keyword Unless     ${m_value} <= ${MEMORY_THRESHOLD}
+                  IF    not ${m_value} <= ${MEMORY_THRESHOLD}    Run Keyword And Continue On Failure
                   ...   FAIL    Kube-API server value is higher than,
                   ...   expected in toolchain result=> ${km_data[0]} : ${m_value}
            END

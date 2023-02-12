@@ -41,5 +41,4 @@ Delete GPU Node From Self-Managed AWS Cluster
 Disconnect Self-Managed Cluster
     [Documentation]    Disconnect a self-managed cluster
     [Tags]    self_managed_disconnect
-    Login To Cluster
     Disconnect Cluster

@@ -84,7 +84,7 @@ class OpenshiftClusterManager:
     def _is_ocmcli_installed(self):
         """Checks if ocm cli is installed"""
         cmd = "ocm version"
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("ocm cli not installed.")
             return False
@@ -96,13 +96,13 @@ class OpenshiftClusterManager:
         if not self._is_ocmcli_installed():
             log.info("Installing ocm cli...")
             cmd = "sudo curl -Lo /bin/ocm {}".format(self.ocm_cli_binary_url)
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             if ret is None:
                 log.info("Failed to download ocm cli binary")
                 sys.exit(1)
 
             cmd = "sudo chmod +x /bin/ocm"
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             if ret is None:
                 log.info("Failed to give execute permission to ocm cli binary")
                 sys.exit(1)
@@ -112,7 +112,7 @@ class OpenshiftClusterManager:
         cmd = "ocm describe cluster {}".format(self.cluster_name)
         if filter != "":
             cmd += " " + filter
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("ocm describe for cluster " "{} failed".format(self.cluster_name))
             return None
@@ -218,7 +218,7 @@ class OpenshiftClusterManager:
                 )
             )
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("Failed to create osd cluster {}".format(self.cluster_name))
             sys.exit(1)
@@ -388,7 +388,7 @@ class OpenshiftClusterManager:
             " | grep "
             "{} ".format(self.cluster_name, addon_name)
         )
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info(
                 "Failed to get {} addon state for cluster "
@@ -408,7 +408,7 @@ class OpenshiftClusterManager:
         cmd = "/bin/ocm list machinepools --cluster {} " "| grep -w {}".format(
             self.cluster_name, self.pool_name
         )
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             return False
         return True
@@ -435,7 +435,7 @@ class OpenshiftClusterManager:
                 )
             )
             log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             if ret is None:
                 log.info("Failed to add machine pool {}".format(self.cluster_name))
                 sys.exit(1)
@@ -493,7 +493,7 @@ class OpenshiftClusterManager:
         """Lists IDPs for the cluster"""
 
         cmd = "ocm list idps --cluster {} --columns name".format(self.cluster_name)
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             return []
         if ret != []:
@@ -518,7 +518,7 @@ class OpenshiftClusterManager:
                 cluster_id, addon_name
             )
             log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             if ret is None:
                 log.info(
                     "Failed to uninstall {} addon on cluster "
@@ -544,7 +544,7 @@ class OpenshiftClusterManager:
     def is_secret_existent(self, secret_name, namespace):
         cmd = "oc get secret {} -n {}".format(secret_name, namespace)
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         log.info("\nRET: {}".format(ret))
         if ret is None or "Error" in ret:
             log.info("Failed to find {} secret".format(secret_name))
@@ -598,7 +598,7 @@ class OpenshiftClusterManager:
             cluster_id, output_file
         )
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if len(fields_to_hide) > 0:
             ret = self.hide_values_in_op_json(fields_to_hide, ret)
         log.info("\nRET: {}".format(ret))
@@ -629,7 +629,7 @@ class OpenshiftClusterManager:
         for retry in range(retries):
             cmd = """oc get {} {}  -n {}""".format(kind, name, namespace)
             log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             if ret is None or "Error" in ret:
                 log.info(
                     "Failed to find {} object. It may not be ready yet. Trying again in {} seconds".format(
@@ -678,7 +678,7 @@ class OpenshiftClusterManager:
                    --type=merge --patch '{\"spec\":{\"useClusterStorage\":
                     \"false\"}}'"""
             log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             log.info("\nRET: {}".format(ret))
             if ret is None:
                 log.info("Failed to patch RHMI to set useClusterStorage")
@@ -796,7 +796,7 @@ class OpenshiftClusterManager:
                 )
             )
             log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             if ret is None:
                 log.info(
                     "Failed to add identity provider of "
@@ -818,7 +818,7 @@ class OpenshiftClusterManager:
             # time.sleep(10)
 
             # log.info("CMD: {}".format(cmd))
-            # ret = execute_command(cmd)
+            # ret = execute_command(cmd, stderrPrint=True)
             # if ret is None:
             #    log.info(
             #        "Failed to add identity provider of "
@@ -833,7 +833,7 @@ class OpenshiftClusterManager:
             )
             cmd = "oc apply -f {}".format(ldap_yaml_file)
             log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             if ret is None:
                 log.info("Failed to deploy openldap application")
                 sys.exit(1)
@@ -854,7 +854,7 @@ class OpenshiftClusterManager:
                 "--body={}".format(cluster_id, output_file)
             )
             log.info("CMD: {}".format(cmd))
-            ret = execute_command(cmd)
+            ret = execute_command(cmd, stderrPrint=True)
             if ret is None:
                 log.info("Failed to add ldap identity provider")
             self.add_users_to_rhods_group()
@@ -865,7 +865,7 @@ class OpenshiftClusterManager:
 
         cmd = "ocm delete idp -c {} {}".format(self.cluster_name, self.idp_name)
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info(
                 "Failed to delete identity provider of " "type {}".format(self.idp_name)
@@ -888,7 +888,7 @@ class OpenshiftClusterManager:
                 user, self.cluster_name, group
             )
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("Failed to add user {} to group " "{}".format(user, group))
 
@@ -902,7 +902,7 @@ class OpenshiftClusterManager:
             user, self.cluster_name, group
         )
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("Failed to delete user {} of group " "{}".format(user, group))
 
@@ -911,7 +911,7 @@ class OpenshiftClusterManager:
 
         cmd = "oc adm groups new {}".format(group_name)
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("Failed to add group " "{}".format(group_name))
 
@@ -947,12 +947,12 @@ class OpenshiftClusterManager:
 
         cmd = "oc get users"
         log.info("CMD: {}".format(cmd))
-        users_list = execute_command(cmd)
+        users_list = execute_command(cmd, stderrPrint=True)
         log.info("Users present in cluster: {}".format(users_list))
 
         cmd = "oc get groups"
         log.info("CMD: {}".format(cmd))
-        groups_list = execute_command(cmd)
+        groups_list = execute_command(cmd, stderrPrint=True)
         log.info("Groups present in cluster: {}".format(groups_list))
 
     def create_cluster(self):
@@ -1014,7 +1014,7 @@ class OpenshiftClusterManager:
 
         cmd = "OCM_CONFIG=ocm.json." + self.testing_platform + " " + cmd
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("Failed to login to aws openshift platform using token")
             sys.exit(1)
@@ -1026,7 +1026,7 @@ class OpenshiftClusterManager:
         cluster_id = self.get_osd_cluster_id()
         cmd = "ocm delete cluster {}".format(cluster_id)
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("Failed to delete osd cluster {}".format(self.cluster_name))
             sys.exit(1)
@@ -1068,7 +1068,7 @@ class OpenshiftClusterManager:
             "--body={}".format(cluster_id, addon_name, output_file)
         )
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info(
                 "Failed to update email address to {} addon on cluster "
@@ -1093,7 +1093,7 @@ class OpenshiftClusterManager:
         output_file = "install_isv.yaml"
         self._render_template(template_file, output_file, replace_vars)
         cmd = "oc apply -f {} ".format(output_file)
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("Failed to apply install isv subscription")
             if exit_on_failure:
@@ -1115,7 +1115,7 @@ class OpenshiftClusterManager:
         )
         log.info("CMD: {}".format(cmd))
         while count <= timeout:
-            isv_state = execute_command(cmd)
+            isv_state = execute_command(cmd, stderrPrint=True)
             if isv_state.replace('"', "").strip() == "Succeeded":
                 log.info("addon {} is in installed state".format(isv_name))
                 check_flag = True
@@ -1146,7 +1146,7 @@ class OpenshiftClusterManager:
             "ocm list versions --channel-group  candidate |"
             " grep  ^{}.{}|tail -1".format(osd_major_version, osd_minor_version)
         )
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.info("Failed  to get latest version of ODS ")
         return ret

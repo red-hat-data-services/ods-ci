@@ -73,8 +73,8 @@ def execute_command(cmd, get_stderr=False, stderrPrint=False):
         )
 
         output = process.stdout
-        if stderrPrint():
-            print("ERROR: {}".format(process.stderr))
+        if stderrPrint and process.stderr:
+            print("ods-ci-Error:{}".format(stderrPrint.stderr, end=""))
 
         if get_stderr:
             err = process.stderr

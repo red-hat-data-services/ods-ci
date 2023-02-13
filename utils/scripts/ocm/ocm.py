@@ -1232,7 +1232,7 @@ class OpenshiftClusterManager:
             " --body {}".format(cluster_id, self.update_ocm_channel_json)
         )
         log.info(run_change_channel_cmd)
-        ret = execute_command(run_change_channel_cmd)
+        ret = execute_command(run_change_channel_cmd,stderrPrint=True)
         if ret is None:
             log.info("Failed to update the channel to {}".format(self.cluster_name))
             return ret
@@ -1243,7 +1243,7 @@ class OpenshiftClusterManager:
         utc_time_cmd = """ oc debug node/"$(oc get nodes | awk 'FNR == 2 {print $1}')"\
          -- chroot /host date -d '+7 min' -u '+%Y-%m-%dT%H:%M:%SZ' """
 
-        utc_time = execute_command(utc_time_cmd)
+        utc_time = execute_command(utc_time_cmd, stderrPrint=True)
         data = read_data_from_json(self.update_policies_json)
         data["next_run"] = utc_time.replace("\n", "")
 
@@ -1251,7 +1251,7 @@ class OpenshiftClusterManager:
             get_latest_upgrade_version = "ocm get cluster {} | jq -r '.version.available_upgrades | values'".format(
                 cluster_id
             )
-            latest_upgrade_version = execute_command(get_latest_upgrade_version)
+            latest_upgrade_version = execute_command(get_latest_upgrade_version, stderrPrint=True)
             log.info(
                 "Version Available to Upgrade are ...{}".format(latest_upgrade_version)
             )
@@ -1263,7 +1263,7 @@ class OpenshiftClusterManager:
             "ocm post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"
             " --body {}".format(cluster_id, self.update_policies_json)
         )
-        ret = execute_command(schedule_cluster_upgrade)
+        ret = execute_command(schedule_cluster_upgrade,stderrPrint=True)
         if ret is None:
             log.info("Failed  to Update the Upgrade Policy")
             return ret

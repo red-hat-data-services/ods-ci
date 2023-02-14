@@ -1,4 +1,4 @@
 robotframework-lsp
-robotframework-robocop
-robotframework-tidy
+robotframework-robocop >=2.6
+robotframework-tidy >=3.3.2
 black

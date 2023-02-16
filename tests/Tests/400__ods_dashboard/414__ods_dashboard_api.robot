@@ -504,15 +504,15 @@ Verify Access To nb-events API Endpoint
     ...       Tier1    Sanity
     ...       Security
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
-    ${NB_PODNAME_BASIC_USER}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
-    ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER}
+    ${NB_PODUID_BASIC_USER}=   Get User Notebook Pod UID    ${TEST_USER_3.USERNAME}    ${NOTEBOOK_NS}
+    ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODUID_BASIC_USER}
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
-    ${NB_PODNAME_BASIC_USER_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
-    ${NB_EVENTS_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODNAME_BASIC_USER_2}
+    ${NB_PODUID_BASIC_USER_2}=   Get User Notebook Pod UID    ${TEST_USER_4.USERNAME}    ${NOTEBOOK_NS}
+    ${NB_EVENTS_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODUID_BASIC_USER_2}
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}

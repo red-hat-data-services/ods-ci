@@ -500,9 +500,11 @@ Verify Access To nb-events API Endpoint
     ...                 the events from user notebook
     ...                 The syntax to reach this endpoint is:
     ...                 `nb-events/<notebook_namespace>/jupyter-nb-<username_nb>`
+    ...                 ProductBug: RHODS-7150
     [Tags]    ODS-1725
     ...       Tier1    Sanity
     ...       Security
+    ...    ProductBug
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_PODUID_BASIC_USER}=   Get User Notebook Pod UID    ${TEST_USER_3.USERNAME}    ${NOTEBOOK_NS}
     ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}/${NB_PODUID_BASIC_USER}

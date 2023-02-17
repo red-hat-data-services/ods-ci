@@ -16,7 +16,7 @@ ${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
-${SPAWNER_LINK}=        xpath=//a[text()="Launch Jupyter"]
+${SPAWNER_LINK}=        xpath=//*[text()="Launch Jupyter"]
 
 
 *** Keywords ***

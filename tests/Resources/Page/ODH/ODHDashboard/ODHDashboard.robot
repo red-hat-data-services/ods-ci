@@ -12,8 +12,8 @@ Library       JupyterLibrary
 *** Variables ***
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
-${CARDS_XP}=  //div[contains(@class, 'pf-c-card')]
-${SAMPLE_APP_CARD_XP}=   //article[@id="pachyderm"]
+${CARDS_XP}=  //div[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
+${SAMPLE_APP_CARD_XP}=   //div[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=   div[@class='pf-c-card__title']//span
 ${TITLE_XP_OLD}=  div[@class='pf-c-card__title']//div/div[1]
@@ -127,8 +127,8 @@ Verify Service Is Enabled
   Menu.Navigate To Page    Applications    Enabled
   Wait Until Page Contains    Jupyter  timeout=30
   Wait Until Page Contains    ${app_name}  timeout=180
-  Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
-  Page Should Not Contain Element    xpath://article//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
+  Page Should Contain Element    xpath://div//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
+  Page Should Not Contain Element    xpath://div//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
 
 
 Verify Service Is Not Enabled
@@ -143,7 +143,7 @@ Verify Service Is Available In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  Page Should Contain Element    //article//*[.='${app_name}']
+  Page Should Contain Element    //div//*[.='${app_name}']
 
 Verify Service Is Not Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
@@ -151,20 +151,20 @@ Verify Service Is Not Available In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  Page Should Not Contain Element    //article//*[.='${app_name}']
+  Page Should Not Contain Element    //div//*[.='${app_name}']
 
 Remove Disabled Application From Enabled Page
    [Documentation]  The keyword let you re-enable or remove the card from Enabled page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
-   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//span[contains(@class,'disabled-text')]
+   ${card_disabled_xp}=  Set Variable  //div[@id='${app_id}']//span[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=300
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
    ${buttons_here}=  Get WebElements    css:div[class*='popover'] button
    Click Element  ${buttons_here}[2]
-   Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
+   Wait Until Page Does Not Contain Element    xpath://div[@id='${app_id}']
    Capture Page Screenshot  ${app_id}_removed.png
 
 
@@ -173,8 +173,8 @@ Verify Service Provides "Enable" Button In The Explore Page
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    Jupyter  timeout=30
-  Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
-  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//article//*[.='${app_name}']/../..
+  Page Should Contain Element    xpath://div//*[.='${app_name}']/../..
+  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//div//*[.='${app_name}']/../..
   Capture Page Screenshot
   Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
   Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${app_name} does not have a "Enable" button in ODS Dashboard
@@ -184,8 +184,8 @@ Verify Service Provides "Get Started" Button In The Explore Page
   [Arguments]  ${app_name}
   Menu.Navigate To Page    Applications    Explore
   Wait Until Page Contains    Jupyter  timeout=30
-  Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
-  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//article//*[.='${app_name}']/../..
+  Page Should Contain Element    xpath://div//*[.='${app_name}']/../..
+  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//div//*[.='${app_name}']/../..
   Capture Page Screenshot
   Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
   Page Should Contain Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   message=${app_name} does not have a "Get started" button in ODS Dashboard
@@ -408,7 +408,7 @@ Re-validate License For Disabled Application From Enabled Page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
-   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
+   ${card_disabled_xp}=  Set Variable  //div[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=120
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click

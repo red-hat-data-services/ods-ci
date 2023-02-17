@@ -118,7 +118,7 @@ External Link Should Be
     IF  "${item_type}" == "documentation"
         ${href}=    Get Element Attribute    //a[text()="View documentation"]    href
     ELSE IF   "${item_type}" == "howto"
-        ${href}=    Get Element Attribute    //a[text()="Read how-to article"]    href
+        ${href}=    Get Element Attribute    //a[text()="Read how-to div"]    href
     ELSE IF     "${item_type}" == "tutorial"
         ${href}=    Get Element Attribute    //a[text()="Access tutorial"]    href
     ELSE IF     "${item_type}" == "quickstart"

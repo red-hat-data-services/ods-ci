@@ -61,7 +61,7 @@ ${IMG_ENDPOINT_PT1}=        byon
 ${IMG_ENDPOINT_BODY}=        {"name":"Test-Byon-Image","description":"","packages":[],"software":[],"url":"test-url"}
 
 ${NB_EVENTS_ENDPOINT_PT0}=      api/nb-events
-${NB_EVENTS_ENDPOINT_PT1}=      ${NB_EVENTS_ENDPOINT_PT0}/${NOTEBOOK_NS}/
+${NB_EVENTS_ENDPOINT_PT1}=      ${NB_EVENTS_ENDPOINT_PT0}/${NOTEBOOK_NS}
 
 ${STATUS_ENDPOINT_PT0}=      api/status
 ${STATUS_ENDPOINT_PT1}=      ${STATUS_ENDPOINT_PT0}/${DASHBOARD_NS}/allowedUsers
@@ -505,14 +505,14 @@ Verify Access To nb-events API Endpoint
     ...       Security
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_PODUID_BASIC_USER}=   Get User Notebook Pod UID    ${TEST_USER_3.USERNAME}    ${NOTEBOOK_NS}
-    ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODUID_BASIC_USER}
+    ${NB_EVENTS_ENDPOINT_BASIC_USER}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}/${NB_PODUID_BASIC_USER}
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER}    token=${ADMIN_TOKEN}
     Operation Should Be Allowed
     Spawn Minimal Python Notebook Server     username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     ${NB_PODUID_BASIC_USER_2}=   Get User Notebook Pod UID    ${TEST_USER_4.USERNAME}    ${NOTEBOOK_NS}
-    ${NB_EVENTS_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}${NB_PODUID_BASIC_USER_2}
+    ${NB_EVENTS_ENDPOINT_BASIC_USER_2}=     Set Variable    ${NB_EVENTS_ENDPOINT_PT1}/${NB_PODUID_BASIC_USER_2}
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_BASIC_USER_2}    token=${BASIC_USER_TOKEN}
     Operation Should Be Forbidden
     Perform Dashboard API Endpoint GET Call   endpoint=${NB_EVENTS_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}

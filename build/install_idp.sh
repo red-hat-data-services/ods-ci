@@ -126,7 +126,7 @@ install_identity_provider(){
         oc create secret generic htpasswd-password --from-literal=bindPassword="$htp_string" -n openshift-config
         OAUTH_HTPASSWD_JSON="$(cat build/oauth_htp_idp.json)"
         oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
-
+  fi
 
   # update test-variables.yml with admin creds
   yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' test-variables.yml
@@ -152,7 +152,7 @@ install_identity_provider(){
           sed -i "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" utils/scripts/ocm/templates/create_ldap_idp.jinja
           sed -i 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' utils/scripts/ocm/templates/create_ldap_idp.jinja
           ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=utils/scripts/ocm/templates/create_ldap_idp.jinja
-
+  fi
   # add users to RHODS groups
   oc adm groups new rhods-admins
   oc adm groups new rhods-users
@@ -165,6 +165,7 @@ install_identity_provider(){
           add_users_to_dedicated_admins ldap-adm
       else
           add_users_to_groups dedicated-admins ldap-adm
+  fi
 
   add_users_to_groups rhods-users ldap-usr
   add_users_to_groups rhods-noaccess ldap-noaccess
@@ -196,10 +197,12 @@ function check_installation(){
               echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are already installed. Skipping installation \033[0m"
               exit 0
             fi
+  fi
 }
 
 if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           perform_ocm_login
+fi
 check_installation
 install_identity_provider

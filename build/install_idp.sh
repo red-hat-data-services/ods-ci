@@ -95,7 +95,7 @@ install_identity_provider(){
   rand_string=$(generate_rand_string)
   echo Random htp pasword: $rand_string
   oc create secret generic htpasswd-password --from-literal=bindPassword="$rand_string" -n openshift-config
-  OAUTH_HTPASSWD_JSON="$(cat build/oauth-htpasswd.idp.json)"
+  OAUTH_HTPASSWD_JSON="$(cat build/oauth_htp_idp.json)"
   oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
 
   # update test-variables.yml with admin creds
@@ -110,7 +110,7 @@ install_identity_provider(){
   # create ldap deployment
   oc apply -f configs/templates/ldap/ldap.yaml
   oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config
-  OAUTH_LDAP_JSON="$(cat build/oauth-ldap.idp.json)"
+  OAUTH_LDAP_JSON="$(cat build/oauth_ldap_idp.json)"
   oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
 
   # add users to RHODS groups

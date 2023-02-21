@@ -77,13 +77,8 @@ def execute_command(cmd, get_stderr=False, stderrPrint=False):
             print("ods-ci-Error: {}".format(process.stderr, end=""))
             return
 
-        if get_stderr:
-            err = process.stderr
-            return output, err
         return output
     except:
-        if get_stderr:
-            return None, None
         return None
 
 

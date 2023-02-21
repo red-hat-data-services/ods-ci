@@ -59,7 +59,7 @@ def read_yaml(filename):
         return None
 
 
-def execute_command(cmd, get_stderr=False, stderrPrint=False):
+def execute_command(cmd, get_stderr=False):
     """
     Executes command in the local node
     """
@@ -67,18 +67,19 @@ def execute_command(cmd, get_stderr=False, stderrPrint=False):
         process = subprocess.run(
             cmd,
             shell=True,
+            check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            universal_newlines=True,
         )
-
         output = process.stdout
-        if stderrPrint and process.stderr:
-            print("ods-ci-Error: {}".format(process.stderr, end=""))
-            return
-
+        if get_stderr:
+            err = process.stderr
+            return output, err
         return output
     except:
+        if get_stderr:
+            return None, None
         return None
 
 
@@ -95,7 +96,7 @@ def oc_login(ocp_console_url, username, password, timeout=600):
     count = 0
     chk_flag = 0
     while count <= timeout:
-        out = execute_command(cmd, stderrPrint=True)
+        out = execute_command(cmd)
         if (out is not None) and ("Login successful" in out):
             print("Logged into cluster successfully")
             chk_flag = 1

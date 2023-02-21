@@ -99,7 +99,7 @@ def get_prometheus_token(project):
     Get prometheus token for the cluster.
     """
     cmd = "oc serviceaccounts new-token prometheus -n {}".format(project)
-    prometheus_token = execute_command(cmd)
+    prometheus_token = execute_command(cmd, stderrPrint=True)
     return prometheus_token.strip("\n")
 
 
@@ -111,7 +111,7 @@ def get_prometheus_url(project):
     cmd = "oc get route prometheus -n {} -o jsonpath='{}'".format(
         project, host_jsonpath
     )
-    prometheus_url = execute_command(cmd)
+    prometheus_url = execute_command(cmd, stderrPrint=True)
     return "https://" + prometheus_url.strip("\n")
 
 

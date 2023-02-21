@@ -37,14 +37,14 @@ class OpenshiftOps:
         """
         cmd = "ssh-keygen -t rsa -b 4096 -N '' -f {}/id_rsa".format(self.work_dir)
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.error("Failed to generate ssh key")
             return None
 
         cmd = 'eval "$(ssh-agent -s)";' + "ssh-add {}/id_rsa".format(self.work_dir)
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.error("Failed to eval ssh-agent and to add ssh rsa key")
             return None
@@ -57,7 +57,7 @@ class OpenshiftOps:
         """
 
         cmd = "cat {}/id_rsa.pub".format(self.work_dir)
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.error("Failed to add ssh rsa key")
             return None
@@ -101,7 +101,7 @@ class OpenshiftOps:
             f.write(contents)
 
         cmd = "sh aws.sh"
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.error("Failed to configure aws")
             return None
@@ -135,7 +135,7 @@ class OpenshiftOps:
         self.install_prerequisites()
         install_config_dir = os.path.dirname(self.install_config_file)
         cmd = "cd {}".format(install_config_dir)
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.error("Failed to cd to directory where install config is present")
             return None
@@ -190,14 +190,14 @@ class OpenshiftOps:
         install_config_dir = os.path.dirname(self.install_config_file)
         cmd = "cd {}".format(install_config_dir)
 
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.error("Failed to cd to directory where install config is present")
             sys.exit(1)
 
         cmd = "openshift-install destroy cluster"
         log.info("CMD: {}".format(cmd))
-        ret = execute_command(cmd)
+        ret = execute_command(cmd, stderrPrint=True)
         if ret is None:
             log.error("Failed to destroy openshift cluster")
             sys.exit(1)

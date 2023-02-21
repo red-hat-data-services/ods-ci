@@ -19,7 +19,7 @@ function generates_ldap_creds(){
   rand_string=""
   rand=$(generate_rand_string)
   export RAND_LDAP=$rand
-  echo Random pw: $rand
+  echo Random LDAP pw: $rand
   # generate users and pw (admin, user, noaccess)
   for i in {1..20}
     do
@@ -83,13 +83,6 @@ function add_special_users_to_groups(){
     done
   }
 
-function add_users_to_dedicated_admins(){
-  for i in {1..20}
-    do
-      ocm create user $1$i --cluster $CLUSTER_NAME --group=dedicated-admins
-    done
-}
-
 install_identity_provider(){
   echo "---> Installing the required IDPs"
 
@@ -104,9 +97,6 @@ install_identity_provider(){
   oc create secret generic htpasswd-password --from-literal=bindPassword="$rand_string" -n openshift-config
   OAUTH_HTPASSWD_JSON="$(cat build/oauth-htpasswd.idp.json)"
   oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
-
-  ocm create idp -c "${CLUSTER_NAME}" -t htpasswd -n htpasswd --username htpasswd-user --password $rand_string
-  ocm create user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
 
   # update test-variables.yml with admin creds
   yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' test-variables.yml
@@ -130,8 +120,7 @@ install_identity_provider(){
   oc adm groups new dedicated-admins
 
   add_users_to_groups rhods-admins ldap-adm
-  # add_users_to_groups dedicated-admins ldap-adm
-  add_users_to_dedicated_admins  ldap-adm
+  add_users_to_groups dedicated-admins ldap-adm
   add_users_to_groups rhods-users ldap-usr
   add_users_to_groups rhods-noaccess ldap-noaccess
   add_special_users_to_groups rhods-users  ldap-special
@@ -142,7 +131,7 @@ install_identity_provider(){
 }
 
 function check_installation(){
-  # Test if any oauth identityProviders exists. If not, initialize the identityProvider list
+  # Checks if any oauth identityProviders exists. If not, initialize the identityProvider list
   CURRENT_IDP_LIST=$(oc get oauth cluster -o json | jq -e '.spec.identityProviders')
   if [[ -z "${CURRENT_IDP_LIST}" ]] || [[  "${CURRENT_IDP_LIST}" == "null" ]]; then
     echo 'No oauth identityProvider exists. Initializing oauth .spec.identityProviders = []'

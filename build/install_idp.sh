@@ -7,6 +7,22 @@ perform_oc_logic(){
     done
 }
 
+perform_ocm_login(){
+  echo "---> Performing log in OCM"
+  if [ -n "${OCM_TOKEN}" ]
+    then
+        echo "ocm envirnment: ${OCM_ENV}"
+        if [ -n "${OCM_ENV}" ]; then \
+                ocm login --token=${OCM_TOKEN} --url=${OCM_ENV} ;\
+        else
+                ocm login --token=${OCM_TOKEN}
+        fi
+    else
+        echo -e "\033[0;33m OCM Token not set. Please run again and set the required token \033[0m"
+        exit 0
+  fi
+}
+
 function generate_rand_string(){
   sleep 2
   date +%s | sha256sum | base64 | head -c 64
@@ -83,6 +99,13 @@ function add_special_users_to_groups(){
     done
   }
 
+function add_users_to_dedicated_admins(){
+  for i in {1..20}
+    do
+      ocm create user $1$i --cluster $CLUSTER_NAME --group=dedicated-admins
+    done
+}
+
 install_identity_provider(){
   echo "---> Installing the required IDPs"
 
@@ -94,10 +117,16 @@ install_identity_provider(){
   echo Cluster name is $CLUSTER_NAME
   rand_string=$(generate_rand_string)
   echo Random htp pasword: $rand_string
-  $htp_string=$(htpasswd -b -B -n htpasswd-user $rand_string)
-  oc create secret generic htpasswd-password --from-literal=bindPassword="$htp_string" -n openshift-config
-  OAUTH_HTPASSWD_JSON="$(cat build/oauth_htp_idp.json)"
-  oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+    then
+        ocm create idp -c "${CLUSTER_NAME}" -t htpasswd -n htpasswd --username htpasswd-user --password $rand_string
+        ocm create user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
+    else
+        $htp_string=$(htpasswd -b -B -n htpasswd-user $rand_string)
+        oc create secret generic htpasswd-password --from-literal=bindPassword="$htp_string" -n openshift-config
+        OAUTH_HTPASSWD_JSON="$(cat build/oauth_htp_idp.json)"
+        oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
+
 
   # update test-variables.yml with admin creds
   yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' test-variables.yml
@@ -114,6 +143,16 @@ install_identity_provider(){
   OAUTH_LDAP_JSON="$(cat build/oauth_ldap_idp.json)"
   oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
 
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+      then
+          ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
+          # configure the jinja template for adding ldap idp in OCM
+          rand_admin=$(echo $RAND_ADMIN | base64 -d)
+          sed -i "s/{{ LDAP_BIND_PASSWORD }}/$RAND_ADMIN/g" utils/scripts/ocm/templates/create_ldap_idp.jinja
+          sed -i "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" utils/scripts/ocm/templates/create_ldap_idp.jinja
+          sed -i 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' utils/scripts/ocm/templates/create_ldap_idp.jinja
+          ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=utils/scripts/ocm/templates/create_ldap_idp.jinja
+
   # add users to RHODS groups
   oc adm groups new rhods-admins
   oc adm groups new rhods-users
@@ -121,7 +160,12 @@ install_identity_provider(){
   oc adm groups new dedicated-admins
 
   add_users_to_groups rhods-admins ldap-adm
-  add_users_to_groups dedicated-admins ldap-adm
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+      then
+          add_users_to_dedicated_admins ldap-adm
+      else
+          add_users_to_groups dedicated-admins ldap-adm
+
   add_users_to_groups rhods-users ldap-usr
   add_users_to_groups rhods-noaccess ldap-noaccess
   add_special_users_to_groups rhods-users  ldap-special
@@ -132,17 +176,30 @@ install_identity_provider(){
 }
 
 function check_installation(){
-  # Checks if any oauth identityProviders exists. If not, initialize the identityProvider list
-  CURRENT_IDP_LIST=$(oc get oauth cluster -o json | jq -e '.spec.identityProviders')
-  if [[ -z "${CURRENT_IDP_LIST}" ]] || [[  "${CURRENT_IDP_LIST}" == "null" ]]; then
-    echo 'No oauth identityProvider exists. Initializing oauth .spec.identityProviders = []'
-    oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders", "value": []}]'
-  else
-    echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are already installed. Skipping installation \033[0m"
-    exit 0
-  fi
   echo "---> Looking for LDAP and HTPASSWD already present in the cluster..."
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+      then
+            ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
+            echo $ocm_clusterid
+            while read -r line; do
+              if [[ $line == *"ldap-provider-qe"* ]] || [[ $line == *"htpasswd"* ]] ; then
+                  echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are already installed. Skipping installation \033[0m"
+                  exit 0
+              fi
+            done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
+      else
+            CURRENT_IDP_LIST=$(oc get oauth cluster -o json | jq -e '.spec.identityProviders')
+            if [[ -z "${CURRENT_IDP_LIST}" ]] || [[  "${CURRENT_IDP_LIST}" == "null" ]]; then
+              echo 'No oauth identityProvider exists. Initializing oauth .spec.identityProviders = []'
+              oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders", "value": []}]'
+            else
+              echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are already installed. Skipping installation \033[0m"
+              exit 0
+            fi
 }
 
+if [ "${USE_OCM_IDP}" -eq 1 ]
+      then
+          perform_ocm_login
 check_installation
 install_identity_provider

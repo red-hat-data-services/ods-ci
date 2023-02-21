@@ -89,9 +89,10 @@ Verify Disabled Cards Can Be Removed
 Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
+    ...               ProductBug: RHODS-6539
     [Tags]    Sanity
     ...       ODS-1097   ODS-357
-    ...       FlakyTest
+    ...       ProductBug
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard Jupyter Is Visible

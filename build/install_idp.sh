@@ -126,6 +126,8 @@ install_identity_provider(){
         oc create secret generic htpasswd-password --from-literal=bindPassword="$htp_string" -n openshift-config
         OAUTH_HTPASSWD_JSON="$(cat build/oauth_htp_idp.json)"
         oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
+        sed -i "s/<rolebinding_name>/ods-ci-htp-admin/g" configs/templates/ca-rolebinding.yaml
+        sed -i "s/<username>/htpasswd-user/g" configs/templates/ca-rolebinding.yaml
   fi
 
   # update test-variables.yml with admin creds
@@ -139,10 +141,6 @@ install_identity_provider(){
 
   # create ldap deployment
   oc apply -f configs/templates/ldap/ldap.yaml
-  oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config
-  OAUTH_LDAP_JSON="$(cat build/oauth_ldap_idp.json)"
-  oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
-
   if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
@@ -152,6 +150,10 @@ install_identity_provider(){
           sed -i "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" utils/scripts/ocm/templates/create_ldap_idp.jinja
           sed -i 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' utils/scripts/ocm/templates/create_ldap_idp.jinja
           ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=utils/scripts/ocm/templates/create_ldap_idp.jinja
+      else
+          oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config
+          OAUTH_LDAP_JSON="$(cat build/oauth_ldap_idp.json)"
+          oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'  
   fi
   # add users to RHODS groups
   oc adm groups new rhods-admins

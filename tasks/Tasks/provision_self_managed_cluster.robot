@@ -4,6 +4,7 @@ Metadata         provision
 Resource         ../Resources/Provisioning/Hive/provision.robot
 Resource         ../Resources/Provisioning/Hive/deprovision.robot
 Resource         ../Resources/Provisioning/Hive/gpu-provision.robot
+Resource         ../Resources/Provisioning/Hive/disconnect.robot
 Library          OperatingSystem
 Library          OpenShiftLibrary
 Library          String
@@ -14,9 +15,8 @@ Provision Self-Managed Cluster
     [Documentation]    Provision a self-managed cluster
     [Tags]  self_managed_provision
     Provision Cluster
-    Claim Cluster
     Wait For Cluster To Be Ready
-    Verify Cluster Claim
+    Claim Cluster
     Login To Cluster
     [Teardown]  Clean Failed Cluster
 
@@ -37,3 +37,8 @@ Delete GPU Node From Self-Managed AWS Cluster
     [Tags]    gpu_node_aws_self_managed_deprovision
     Login To Cluster
     Delete GPU Node In Self Managed AWS Cluster
+
+Disconnect Self-Managed Cluster
+    [Documentation]    Disconnect a self-managed cluster
+    [Tags]    self_managed_disconnect
+    Disconnect Cluster

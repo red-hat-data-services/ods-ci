@@ -32,8 +32,6 @@ The infrastructure configuration variables are used to configure the infrastruct
 | `gcp_token_uri` | The GCP token URI to use for the cluster. | `""` | `gcp` |
 | `gcp_auth_provider_x509_cert_url` | The GCP auth provider x509 cert URL to use for the cluster. | `""` | `gcp` |
 | `gcp_client_x509_cert_url` | The GCP client x509 cert URL to use for the cluster. | `""` | `gcp` |
-
-
-
-
+| registry_pull_secret | The registry pull secret to use for the cluster. | `""` | `all` |
+| registryCA | The registry CA to use for the cluster. | `""` | `all` |
 

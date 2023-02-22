@@ -19,6 +19,7 @@ if [ "${SET_ENVIRONMENT}" -eq 1 ]; then \
                   ./install_idp.sh
               else
                   echo "-----| USE_OCM_IDP option is disabled, but you are connected to a different cluster than ${OC_HOST}. To prevent you to change IDPs of the wrong cluster, ODS-CI stops here...|-----"
+                  exit 0
             fi
         fi
   fi

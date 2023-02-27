@@ -71,7 +71,7 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
-    # Check Dashboard Diplayes Expected ISVs    expected_data=${EXP_DATA_DICT}
+    Check Dashboard Diplayes Expected ISVs    expected_data=${EXP_DATA_DICT}
 
 Verify Disabled Cards Can Be Removed
     [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.

@@ -106,11 +106,13 @@ Wait for RHODS Dashboard to Load
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
-  Wait Until Element is Visible  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]  30seconds
+  # Wait Until Element is Visible  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]  30seconds
+  Wait Until Element is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-c-card__title"]//*[text()="${dashboard_app}"]
 
 Launch ${dashboard_app} From RHODS Dashboard Link
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
-  Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
+  # Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
+  Click Link  xpath://div[contains(@class,'gallery')]/div[//div[@class="pf-c-card__title"]//*[text()="${dashboard_app}"]]/div[contains(@class,"pf-c-card__footer")]/a
   IF    "${dashboard_app}" != "Jupyter"
        Switch Window  NEW
   END

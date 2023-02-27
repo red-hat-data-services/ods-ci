@@ -141,11 +141,17 @@ Verify Service Is Not Enabled
 
 Verify Service Is Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${split_last}=${FALSE}
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  Page Should Contain Element    //div//*[.='${app_name}']
+  IF    ${split_last} == ${TRUE}
+      ${splits}=    Split String From Right    ${app_name}    max_split=1
+      Page Should Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[0]} ']
+      Page Should Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[1]}']
+  ELSE
+      Page Should Contain Element    xpath://*[.='${app_name}']
+  END
 
 Verify Service Is Not Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
@@ -153,7 +159,13 @@ Verify Service Is Not Available In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  Page Should Not Contain Element    //div//*[.='${app_name}']
+  IF    ${split_last} == ${FALSE}
+      ${splits}=    Split String From Right    ${app_name}    max_split=1
+      Page Should Not Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[0]} ']
+      Page Should Not Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[1]}']
+  ELSE
+      Page Should Not Contain Element    xpath://*[.='${app_name}']
+  END
 
 Remove Disabled Application From Enabled Page
    [Documentation]  The keyword let you re-enable or remove the card from Enabled page
@@ -172,22 +184,30 @@ Remove Disabled Application From Enabled Page
 
 Verify Service Provides "Enable" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is an "Enable" button
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${app_id}=${NONE}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    Jupyter  timeout=30
-  Page Should Contain Element    xpath://div//*[.='${app_name}']/../..
-  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//div//*[.='${app_name}']/../..
+  Wait For RHODS Dashboard To Load    expected_page=Explore
+  IF    "${app_id}" == "${NONE}"
+      ${card_locator}=    Set Variable    //div//*[.='${select_attribute}']/../..
+  ELSE
+      ${card_locator}=    Set Variable    //div[@id='${app_id}']
+  END
+  ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
   Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
   Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${app_name} does not have a "Enable" button in ODS Dashboard
 
 Verify Service Provides "Get Started" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is a "Get Started" button
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${app_id}=${NONE}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    Jupyter  timeout=30
-  Page Should Contain Element    xpath://div//*[.='${app_name}']/../..
-  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//div//*[.='${app_name}']/../..
+  Wait For RHODS Dashboard To Load    expected_page=Explore
+  IF    "${app_id}" == "${NONE}"
+      ${card_locator}=    Set Variable    //div//*[.='${select_attribute}']/../..
+  ELSE
+      ${card_locator}=    Set Variable    //div[@id='${app_id}']
+  END
+  ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
   Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
   Page Should Contain Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   message=${app_name} does not have a "Get started" button in ODS Dashboard

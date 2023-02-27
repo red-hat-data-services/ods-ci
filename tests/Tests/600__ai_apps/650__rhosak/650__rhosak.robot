@@ -33,8 +33,11 @@ Verify RHOSAK Is Available In RHODS Dashboard Explore Page
     [Tags]    Smoke
     ...       ODS-258
     Verify Service Is Available In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
+    ...    split_last=${TRUE}
     Verify Service Provides "Get Started" Button In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
+    ...    app_id=rhosak
     Verify Service Provides "Enable" Button In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
+    ...    app_id=rhosak
 
 Verify User Can Enable RHOSAK from Dashboard Explore Page
     [Documentation]    Checks it is possible to enable RHOSAK from RHODS Dashboard > Explore Page

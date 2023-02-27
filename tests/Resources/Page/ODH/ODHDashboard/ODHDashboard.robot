@@ -203,7 +203,7 @@ Verify Service Provides "Get Started" Button In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   IF    "${app_id}" == "${NONE}"
-      ${card_locator}=    Set Variable    //div//*[.='${select_attribute}']/../..
+      ${card_locator}=    Set Variable    //div//*[.='${app_name}']/../..
   ELSE
       ${card_locator}=    Set Variable    //div[@id='${app_id}']
   END

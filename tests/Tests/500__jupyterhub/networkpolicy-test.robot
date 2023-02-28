@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation    Test for the new Notebook network policies (RHODS-6878)
+Documentation    Test for the new Notebook network policies
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot

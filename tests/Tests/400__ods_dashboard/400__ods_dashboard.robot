@@ -583,12 +583,7 @@ Check GPU Resources
 
 Verify Anaconda Success Message Based On Version
     [Documentation]  Checks Anaconda success message based on version
-    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-    IF  ${version-check}==False
-        Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME}
-    ELSE
-        Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME_LATEST}
-    END
+    Success Message Should Contain    ${ANACONDA_DISPLAYED_NAME_LATEST}
 
 Verify RHODS Notification After Logging Out
     [Documentation]     Logs out from RHODS Dashboard and then relogin to check notifications

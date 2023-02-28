@@ -26,12 +26,7 @@ Verify if the Starburst Beta text has been removed from Getting Started
 
 *** Keywords ***
 Check Beta Description
-    ${version-check}=    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version-check}==True
-        Page Should not Contain Element    xpath:${SB_BETA_DESC}
-    ELSE
-        Page Should Contain Element    xpath:${SB_BETA_DESC}
-    END
+    Page Should not Contain Element    xpath:${SB_BETA_DESC}
 
 Dashboard Test Setup
     Set Library Search Order    SeleniumLibrary

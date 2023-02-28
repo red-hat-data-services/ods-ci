@@ -281,6 +281,22 @@ Verify RHODS Display Name and Version
     Should Be Equal       ${rhods_version_t[1]}   ${rhods_version}   msg=RHODS vesrion and label is not consistent
     Should Be Equal       ${rhods_displayname}   Red Hat OpenShift Data Science  msg=Dieplay name doesn't match
 
+Verify RHODS Notebooks Network Policies
+    [Documentation]    Verifies that the network policies for RHODS Notebooks are present on the cluster
+    [Tags]    Smoke    TESTME
+    Launch Notebook And Stop It
+    ${CR_name} =    Get User CR Notebook Name    username=${TEST_USER.USERNAME}
+    ${policy_ctrl} =    Run    oc get networkpolicy ${CR_name}-ctrl-np -n rhods-notebooks -o json | jq '.spec.ingress[0]'
+    ${expected_policy_ctrl} =    Get File    tests/Resources/Files/expected_ctrl_np.txt
+    Should Be Equal As Strings    ${policy_ctrl}    ${expected_policy_ctrl}
+    Log    ${policy_ctrl}
+    Log    ${expected_policy_ctrl}
+    ${policy_oauth} =    Run    oc get networkpolicy ${CR_name}-oauth-np -n rhods-notebooks -o json | jq '.spec.ingress[0]'
+    ${expected_policy_oauth} =    Get File    tests/Resources/Files/expected_oauth_np.txt
+    Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
+    Log    ${policy_oauth}
+    Log    ${expected_policy_oauth}
+
 
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back
@@ -403,4 +419,19 @@ CUDA Teardown
     [Documentation]    Ensures spawner is cleaned up if spawn fails
     ...    during the cuda smoke verification
     Fix Spawner Status
+    End Web Test
+
+Launch Notebook And Stop It
+    [Documentation]    Opens a Notebook, forcing the creation of the NetworkPolicies
+    Set Library Search Order    SeleniumLibrary
+    Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
+    Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    Wait For RHODS Dashboard To Load
+    Launch Jupyter From RHODS Dashboard Link
+    Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ${authorization_required} =    Is Service Account Authorization Required
+    IF    ${authorization_required}    Authorize jupyterhub service account
+    Wait Until Page Contains    Start a notebook server
+    Fix Spawner Status
+    Spawn Notebook With Arguments    image=s2i-minimal-notebook
     End Web Test

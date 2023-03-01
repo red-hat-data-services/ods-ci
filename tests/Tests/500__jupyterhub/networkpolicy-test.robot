@@ -66,7 +66,7 @@ Open Browser And Start Notebook As Second User With Env Vars
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     &{first_pod_details} =  Create Dictionary  pod_ip=${pod_ip}  pod_login=${pod_login_name}
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook    username=${TEST_USER_2.USERNAME}  
+    Spawn Notebook With Arguments    image=s2i-minimal-notebook    username=${TEST_USER_2.USERNAME}
     ...    password=${TEST_USER_2.PASSWORD}    auth_type=${TEST_USER_2.AUTH_TYPE}    envs=&{first_pod_details}
 
 Run Additional Notebook Cells

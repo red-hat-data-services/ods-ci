@@ -286,12 +286,14 @@ Verify RHODS Notebooks Network Policies
     [Tags]    Smoke    TESTME
     Launch Notebook And Stop It
     ${CR_name} =    Get User CR Notebook Name    username=${TEST_USER.USERNAME}
-    ${policy_ctrl} =    Run    oc get networkpolicy ${CR_name}-ctrl-np -n rhods-notebooks -o json | jq '.spec.ingress[0]'
+    ${policy_ctrl} =    Run    
+    ...    oc get networkpolicy ${CR_name}-ctrl-np -n rhods-notebooks -o json | jq '.spec.ingress[0]'
     ${expected_policy_ctrl} =    Get File    tests/Resources/Files/expected_ctrl_np.txt
     Should Be Equal As Strings    ${policy_ctrl}    ${expected_policy_ctrl}
     Log    ${policy_ctrl}
     Log    ${expected_policy_ctrl}
-    ${policy_oauth} =    Run    oc get networkpolicy ${CR_name}-oauth-np -n rhods-notebooks -o json | jq '.spec.ingress[0]'
+    ${policy_oauth} =    Run    
+    ...    oc get networkpolicy ${CR_name}-oauth-np -n rhods-notebooks -o json | jq '.spec.ingress[0]'
     ${expected_policy_oauth} =    Get File    tests/Resources/Files/expected_oauth_np.txt
     Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
     Log    ${policy_oauth}
@@ -421,7 +423,7 @@ CUDA Teardown
     Fix Spawner Status
     End Web Test
 
-Launch Notebook And Stop It
+Launch Notebook And Stop It    # robocop: disable
     [Documentation]    Opens a Notebook, forcing the creation of the NetworkPolicies
     Set Library Search Order    SeleniumLibrary
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
@@ -430,7 +432,7 @@ Launch Notebook And Stop It
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize Jupyterhub Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     Spawn Notebook With Arguments    image=s2i-minimal-notebook

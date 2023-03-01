@@ -16,7 +16,7 @@ Test Network Policy Effect
     [Documentation]    Spawns two Notebooks with two different users and verifies
     ...    That the new network policies prevent user2 from accessing user1's workspace
     [Tags]  Sanity    Tier1
-    ...    TESTMENB
+    ...     TESTMENB
     Open Browser And Start Notebook As First User
     Open Browser And Start Notebook As Second User With Env Vars
     Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/api/notebook_access.ipynb
@@ -32,7 +32,7 @@ Test Network Policy Effect
 *** Keywords ***
 Open Browser And Start Notebook As First User
     [Documentation]    Opens a Notebook, forcing the creation of the NetworkPolicies
-    ...    And leaves it running
+    ...                and leaves it running
     Set Library Search Order    SeleniumLibrary
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
@@ -40,7 +40,7 @@ Open Browser And Start Notebook As First User
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize Jupyterhub Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     Spawn Notebook With Arguments    image=s2i-minimal-notebook
@@ -62,7 +62,7 @@ Open Browser And Start Notebook As Second User With Env Vars
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER_2.USERNAME}    ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize Jupyterhub Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     &{first_pod_details} =  Create Dictionary  pod_ip=${pod_ip}  pod_login=${pod_login_name}

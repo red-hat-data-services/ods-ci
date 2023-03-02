@@ -22,7 +22,6 @@ Test Network Policy Effect
     Clone Git Repository And Run    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ods-ci-notebooks-main/notebooks/500__jupyterhub/api/notebook_access.ipynb
     Sleep  1
     JupyterLab Code Cell Error Output Should Not Be Visible
-    Sleep    5s
     Run Keyword And Continue On Failure    Run Additional Notebook Cells
     End Web Test    username=${TEST_USER_2.USERNAME}
     Switch Browser    ${first_browser_id}

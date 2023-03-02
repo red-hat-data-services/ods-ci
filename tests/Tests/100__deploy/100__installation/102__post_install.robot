@@ -283,7 +283,7 @@ Verify RHODS Display Name and Version
 
 Verify RHODS Notebooks Network Policies
     [Documentation]    Verifies that the network policies for RHODS Notebooks are present on the cluster
-    [Tags]    Smoke    Tier1
+    [Tags]    Smoke
     ...       ODS-2045
     Launch Notebook And Stop It
     ${CR_name} =    Get User CR Notebook Name    username=${TEST_USER.USERNAME}

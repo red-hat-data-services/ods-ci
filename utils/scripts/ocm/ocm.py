@@ -836,9 +836,15 @@ class OpenshiftClusterManager:
             fin = open(ldap_yaml_file, "rt")
             fout = open(ldap_yaml_file+"_replaced", "wt")
             for line in fin:
-                fout.write(line.replace('<users_string>', self.ldap_users_string))
-                fout.write(line.replace('<passwords_string>', self.ldap_passwords_string))
-                fout.write(line.replace('<adminpassword>', self.ldap_bind_password))
+                if '<users_string>' in line:
+                    fout.write(line.replace('<users_string>', self.ldap_users_string))
+                elif '<passwords_string>' in line:
+                    fout.write(line.replace('<passwords_string>', self.ldap_passwords_string))
+                elif  '<adminpassword>' in line:
+                    fout.write(line.replace('<adminpassword>', self.ldap_bind_password))
+                else:
+                    fout.write(line)
+                    
             fin.close()
             fout.close()
             ldap_yaml_file = (

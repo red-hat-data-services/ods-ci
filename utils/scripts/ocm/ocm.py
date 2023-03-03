@@ -57,6 +57,8 @@ class OpenshiftClusterManager:
         self.ldap_url = args.get("ldap_url")
         self.ldap_bind_dn = args.get("ldap_bind_dn")
         self.ldap_bind_password = args.get("ldap_bind_password")
+        self.ldap_users_string = args.get("ldap_users_string")
+        self.ldap_passwords_string = args.get("ldap_passwords_string")
         self.ldap_test_password = args.get("ldap_test_password")
         self.idp_type = args.get("idp_type")
         self.idp_name = args.get("idp_name")
@@ -830,6 +832,18 @@ class OpenshiftClusterManager:
             ldap_yaml_file = (
                 os.path.abspath(os.path.dirname(__file__))
                 + "/../../../configs/templates/ldap/ldap.yaml"
+            )
+            fin = open(ldap_yaml_file, "rt")
+            fout = open(ldap_yaml_file+"_replaced", "wt")
+            for line in fin:
+                fout.write(line.replace('<users_string>', self.ldap_users_string))
+                fout.write(line.replace('<passwords_string>', self.ldap_passwords_string))
+                fout.write(line.replace('<adminpassword>', self.ldap_bind_password))
+            fin.close()
+            fout.close()
+            ldap_yaml_file = (
+                os.path.abspath(os.path.dirname(__file__))
+                + "/../../../configs/templates/ldap/ldap.yaml_replaced"
             )
             cmd = "oc apply -f {}".format(ldap_yaml_file)
             log.info("CMD: {}".format(cmd))

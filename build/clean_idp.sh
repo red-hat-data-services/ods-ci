@@ -20,7 +20,6 @@ perform_ocm_login(){
   fi
 }
 
-
 function delete_users(){
   for i in {1..20}
     do
@@ -46,24 +45,24 @@ uninstall_identity_provider(){
   echo "---> Uninstalling the IDPs previously installed by ODS-CI"
 
   echo $OC_HOST
-  CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')
-  echo Cluster name is $CLUSTER_NAME
-  ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
-
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+    then
+      CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')
+      echo Cluster name is $CLUSTER_NAME
+      ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
+  fi
   # login using admin user
   perform_oc_logic  $OC_HOST  $ADMIN_USERNAME  $ADMIN_PASS
-
-  # delete ldap deployment and idp
-  # oc wait --for=delete $(oc get namespace openldap)
-  oc delete -f configs/templates/ldap/ldap.yaml
-  ocm delete idp -c "${CLUSTER_NAME}" ldap-provider-qe
 
   # add users to RHODS groups
   oc delete group rhods-admins
   oc delete group rhods-users
   oc delete group rhods-noaccess
 
-  remove_user_from_dedicated_admins  ldap-adm
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+    then
+      remove_user_from_dedicated_admins  ldap-adm
+  fi
   delete_users  ldap-adm
   delete_users  ldap-usr
   delete_users  ldap-noaccess
@@ -72,38 +71,71 @@ uninstall_identity_provider(){
   # delete user identities from OCP cluster
   oc get identity -oname | xargs oc delete
 
-  # delete htpasswd idp
-  ocm delete user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
-  ocm delete idp -c "${CLUSTER_NAME}" htpasswd
+  # delete htpasswd and LDAp idp
+  # delete ldap deployment and idp
+  # oc wait --for=delete $(oc get namespace openldap)
+  oc delete -f configs/templates/ldap/ldap.yaml
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+    then
+      ocm delete idp -c "${CLUSTER_NAME}" ldap-provider-qe
+      ocm delete user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
+      ocm delete idp -c "${CLUSTER_NAME}" htpasswd
+    else
+      oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders", "value": []}]'
+      delete_users  htpasswd-user
+  fi
   # wait for IdP to disappear in the login page
   echo "sleeping 120sec to wait for IDPs to disappear in the OCP login page..."
 
-  sleep 210
+  sleep 120
 }
 
 function check_installation(){
   echo "---> Looking for LDAP and HTPASSWD already present in the cluster..."
-  ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
-  echo $ocm_clusterid
-  while read -r line; do
-    if [[ $line == *"ldap-provider-qe"* ]] || [[ $line == *"htpasswd"* ]] ; then
-        echo -e "\033[0;33m LDAP and/or htpasswd Identity providers found. Starting the clean up. \033[0m"
-        break
-    fi
-  done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+      then
+            ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
+            echo $ocm_clusterid
+            while read -r line; do
+              if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
+                  echo -e "\033[0;33m LDAP and/or htpasswd Identity providers found. Going to remove IDPs \033[0m"
+                else
+                  echo -e "\033[0;33m LDAP and/or htpasswd Identity not found. Skipping removal of IDPs \033[0m"
+                  exit 0
+              fi
+            done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
+      else
+            CURRENT_IDP_LIST=$(oc get oauth cluster -o json | jq -e '.spec.identityProviders')
+            if [[ -z "${CURRENT_IDP_LIST}" ]] || [[  "${CURRENT_IDP_LIST}" == "null" ]]; then
+              echo -e "\033[0;33m LDAP and/or htpasswd Identity not found. Skipping removal of IDPs \033[0m"
+              exit 0
+            else
+              echo -e "\033[0;33m LDAP and/or htpasswd Identity providers found. Going to remove IDPs \033[0m"
+            fi
+  fi
 }
 
 function check_uninstallation(){
   echo "---> Looking for LDAP and HTPASSWD already present in the cluster..."
-  ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
-  echo $ocm_clusterid
-  while read -r line; do
-    if [[ $line == *"ldap-provider-qe"* ]] || [[ $line == *"htpasswd"* ]] ; then
-        echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
-        exit 0
-    fi
-    echo -e "\033[0;33m LDAP and/or htpasswd Identity providers have been deleted from the cluster \033[0m"
-  done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
+  if [ "${USE_OCM_IDP}" -eq 1 ]
+      then
+            ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
+            echo $ocm_clusterid
+            while read -r line; do
+              if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
+                  echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
+                  exit 0
+              fi
+            done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
+      else
+            CURRENT_IDP_LIST=$(oc get oauth cluster -o json | jq -e '.spec.identityProviders')
+            if [[ -z "${CURRENT_IDP_LIST}" ]] || [[  "${CURRENT_IDP_LIST}" == "null" ]]; then
+              echo -e "\033[0;33m LDAP and/or htpasswd Identity providers have been deleted from the cluster \033[0m"
+            else
+              echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
+              exit 0
+            fi
+  fi
 }
 
 while [ "$#" -gt 0 ]; do
@@ -111,6 +143,12 @@ while [ "$#" -gt 0 ]; do
     --host)
       shift
       OC_HOST=$1
+      shift
+      ;;
+    
+    --use-ocm)
+      shift
+      USE_OCM_IDP=$1
       shift
       ;;
 

@@ -13,15 +13,14 @@ if [ "${SET_ENVIRONMENT}" -eq 1 ]; then \
         if [ "${USE_OCM_IDP}" -eq 0 ]
           then
             actual_host="$(oc whoami --show-server)"
-            if [ -z "${RUN_FROM_CONTAINER}" ]  && [ "${actual_host}" == "${OC_HOST}" ]
+            if [ -z "${RUN_FROM_CONTAINER}" ]  && [ "${actual_host}" != "${OC_HOST}" ]
               then
-                  echo "-----| SET_ENVIRONMENT option is enabled. ODS-CI is going to configure the test environment for you..|-----"
-                  ./install_idp.sh
-              else
                   echo "-----| USE_OCM_IDP option is disabled, but you are connected to a different cluster than ${OC_HOST}. To prevent you to change IDPs of the wrong cluster, ODS-CI stops here...|-----"
                   exit 0
             fi
         fi
+        echo "-----| SET_ENVIRONMENT option is enabled. ODS-CI is going to configure the test environment for you..|-----"
+        ./build/install_idp.sh
   fi
 fi
 echo "-----| ODS-CI is starting the tests run...|-----"

@@ -137,7 +137,7 @@ install_identity_provider(){
   yq --inplace '.OCP_ADMIN_USER.PASSWORD=env(RAND_STRING)' test-variables.yml
 
   # login using htpasswd
-  # perform_oc_logic  $OC_HOST  htpasswd-user  $rand_string
+  perform_oc_logic  $OC_HOST  htpasswd-user  $rand_string
 
   # create ldap deployment
   oc apply -f configs/templates/ldap/ldap.yaml

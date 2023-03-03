@@ -113,12 +113,12 @@ install_identity_provider(){
 
   # create htpasswd idp and user
   echo $OC_HOST
-  CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')
-  echo Cluster name is $CLUSTER_NAME
   rand_string=$(generate_rand_string)
   echo Random htp pasword: $rand_string
   if [ "${USE_OCM_IDP}" -eq 1 ]
     then
+        CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')
+        echo Cluster name is $CLUSTER_NAME
         ocm create idp -c "${CLUSTER_NAME}" -t htpasswd -n htpasswd --username htpasswd-user --password $rand_string
         ocm create user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
     else
@@ -137,7 +137,7 @@ install_identity_provider(){
   yq --inplace '.OCP_ADMIN_USER.PASSWORD=env(RAND_STRING)' test-variables.yml
 
   # login using htpasswd
-  perform_oc_logic  $OC_HOST  htpasswd-user  $rand_string
+  # perform_oc_logic  $OC_HOST  htpasswd-user  $rand_string
 
   # create ldap deployment
   oc apply -f configs/templates/ldap/ldap.yaml
@@ -185,7 +185,7 @@ function check_installation(){
             ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
             echo $ocm_clusterid
             while read -r line; do
-              if [[ $line == *"ldap-provider-qe"* ]] || [[ $line == *"htpasswd"* ]] ; then
+              if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
                   echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are already installed. Skipping installation \033[0m"
                   exit 0
               fi

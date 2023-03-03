@@ -12,8 +12,8 @@ if [ "${SET_ENVIRONMENT}" -eq 1 ]; then \
       else
         if [ "${USE_OCM_IDP}" -eq 0 ]
           then
-            $actual_host=$(oc whoami --show-server)
-            if [ "${actual_host}" == "${OC_HOST}" ]
+            actual_host="$(oc whoami --show-server)"
+            if [ -z "${RUN_FROM_CONTAINER}" ]  && [ "${actual_host}" == "${OC_HOST}" ]
               then
                   echo "-----| SET_ENVIRONMENT option is enabled. ODS-CI is going to configure the test environment for you..|-----"
                   ./install_idp.sh

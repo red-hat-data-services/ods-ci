@@ -153,7 +153,7 @@ install_identity_provider(){
       else
           oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config
           OAUTH_LDAP_JSON="$(cat configs/resources/oauth_ldap_idp.json)"
-          oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'  
+          oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
   fi
   # add users to RHODS groups
   oc adm groups new rhods-admins

@@ -12,8 +12,8 @@ Library       JupyterLibrary
 *** Variables ***
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
-${CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
-${SAMPLE_APP_CARD_XP}=   //article[@id="pachyderm"]
+${CARDS_XP}=  //div[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
+${SAMPLE_APP_CARD_XP}=   //div[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=   div[@class='pf-c-card__title']//span
 ${TITLE_XP_OLD}=  div[@class='pf-c-card__title']//div/div[1]
@@ -106,11 +106,13 @@ Wait for RHODS Dashboard to Load
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
-  Wait Until Element is Visible  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]  30seconds
+  Wait Until Element is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-c-card__title"]//*[text()="${dashboard_app}"]
+  ...    timeout=30s
 
 Launch ${dashboard_app} From RHODS Dashboard Link
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
-  Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
+  # Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
+  Click Link  xpath://div[contains(@class,'gallery')]/div[//div[@class="pf-c-card__title"]//*[text()="${dashboard_app}"]]/div[contains(@class,"pf-c-card__footer")]/a
   IF    "${dashboard_app}" != "Jupyter"
        Switch Window  NEW
   END
@@ -127,8 +129,8 @@ Verify Service Is Enabled
   Menu.Navigate To Page    Applications    Enabled
   Wait Until Page Contains    Jupyter  timeout=30
   Wait Until Page Contains    ${app_name}  timeout=180
-  Page Should Contain Element    xpath://article//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
-  Page Should Not Contain Element    xpath://article//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
+  Page Should Contain Element    xpath://div//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
+  Page Should Not Contain Element    xpath://div//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
 
 
 Verify Service Is Not Enabled
@@ -139,11 +141,17 @@ Verify Service Is Not Enabled
 
 Verify Service Is Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${split_last}=${FALSE}
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  Page Should Contain Element    //article//*[.='${app_name}']
+  IF    ${split_last} == ${TRUE}
+      ${splits}=    Split String From Right    ${app_name}    max_split=1
+      Page Should Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[0]} ']
+      Page Should Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[1]}']
+  ELSE
+      Page Should Contain Element    xpath://*[.='${app_name}']
+  END
 
 Verify Service Is Not Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
@@ -151,41 +159,55 @@ Verify Service Is Not Available In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  Page Should Not Contain Element    //article//*[.='${app_name}']
+  IF    ${split_last} == ${FALSE}
+      ${splits}=    Split String From Right    ${app_name}    max_split=1
+      Page Should Not Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[0]} ']
+      Page Should Not Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[1]}']
+  ELSE
+      Page Should Not Contain Element    xpath://*[.='${app_name}']
+  END
 
 Remove Disabled Application From Enabled Page
    [Documentation]  The keyword let you re-enable or remove the card from Enabled page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
-   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//span[contains(@class,'disabled-text')]
+   ${card_disabled_xp}=  Set Variable  //div[@id='${app_id}']//span[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=300
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
    ${buttons_here}=  Get WebElements    css:div[class*='popover'] button
    Click Element  ${buttons_here}[2]
-   Wait Until Page Does Not Contain Element    xpath://article[@id='${app_id}']
+   Wait Until Page Does Not Contain Element    xpath://div[@id='${app_id}']
    Capture Page Screenshot  ${app_id}_removed.png
 
 
 Verify Service Provides "Enable" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is an "Enable" button
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${app_id}=${NONE}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    Jupyter  timeout=30
-  Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
-  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//article//*[.='${app_name}']/../..
+  Wait For RHODS Dashboard To Load    expected_page=Explore
+  IF    "${app_id}" == "${NONE}"
+      ${card_locator}=    Set Variable    //div//*[.='${app_name}']/../..
+  ELSE
+      ${card_locator}=    Set Variable    //div[@id='${app_id}']
+  END
+  ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
   Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
   Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${app_name} does not have a "Enable" button in ODS Dashboard
 
 Verify Service Provides "Get Started" Button In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is a "Get Started" button
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${app_id}=${NONE}
   Menu.Navigate To Page    Applications    Explore
-  Wait Until Page Contains    Jupyter  timeout=30
-  Page Should Contain Element    xpath://article//*[.='${app_name}']/../..
-  ${status}=    Open Get Started Sidebar And Return Status    card_locator=//article//*[.='${app_name}']/../..
+  Wait For RHODS Dashboard To Load    expected_page=Explore
+  IF    "${app_id}" == "${NONE}"
+      ${card_locator}=    Set Variable    //div//*[.='${app_name}']/../..
+  ELSE
+      ${card_locator}=    Set Variable    //div[@id='${app_id}']
+  END
+  ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
   Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
   Page Should Contain Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   message=${app_name} does not have a "Get started" button in ODS Dashboard
@@ -212,7 +234,7 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')]/article
+    Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')]/div
     ...    timeout=10s
 
 Get App ID From Card
@@ -408,7 +430,7 @@ Re-validate License For Disabled Application From Enabled Page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
-   ${card_disabled_xp}=  Set Variable  //article[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
+   ${card_disabled_xp}=  Set Variable  //div[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=120
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click

@@ -456,7 +456,7 @@ Verify Star Icons Are Clickable
 Get List Of Ids Of Tiles
     [Documentation]    Returns the list of ids of tiles present in resources page
     ${list_of_ids}=    Get List Of Atrributes
-    ...    xpath=//article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
+    ...    xpath=//div[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
     RETURN    ${list_of_ids}
 
 Set Item As Favorite
@@ -567,11 +567,11 @@ Set GPU Expected Resources
 Check GPU Resources
     [Documentation]   Check resource tiles for GPU is present
     ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}=    Set GPU Expected Resources
-    ${elements}=    Get WebElements    //article
+    ${elements}=    Get WebElements    //div
     ${len}=    Get Length    ${elements}
     Should Be Equal As Integers    ${len}    ${gpu_re_exp}
     FOR    ${counter}    IN RANGE    ${len}
-        Page Should Contain Element    //article[@id=${gpu_re_id}[${counter}]]
+        Page Should Contain Element    //div[@id=${gpu_re_id}[${counter}]]
         IF    ${gpu_re_link}[${counter}] == '#'
                 ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
                 ${no_of_open_link}=    Get Length    ${counter}

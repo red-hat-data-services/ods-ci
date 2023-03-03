@@ -86,7 +86,7 @@ Available Container Sizes Should Be
 
 Verify None Of The Card Are Enabled
     [Documentation]    Verify none of the cards available in explore section is enabled
-    ${link_elements}  Get WebElements    //article[@class="pf-c-card pf-m-selectable odh-card"]
+    ${link_elements}  Get WebElements    //div[@class="pf-c-card pf-m-selectable odh-card"]
     ${length}      Get Length    ${link_elements}
     IF  ${length} != ${0}    Fail     '${length}' tiles in Explore section is Enabled
 

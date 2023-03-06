@@ -122,7 +122,7 @@ install_identity_provider(){
         ocm create idp -c "${CLUSTER_NAME}" -t htpasswd -n htpasswd --username htpasswd-user --password $rand_string
         ocm create user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
     else
-        $htp_string=$(htpasswd -b -B -n htpasswd-user $rand_string)
+        htp_string=$(htpasswd -b -B -n htpasswd-user $rand_string)
         oc create secret generic htpasswd-password --from-literal=bindPassword="$htp_string" -n openshift-config
         OAUTH_HTPASSWD_JSON="$(cat configs/resources/oauth_htp_idp.json)"
         oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'

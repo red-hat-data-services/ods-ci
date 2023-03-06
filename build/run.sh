@@ -2,6 +2,7 @@
 echo RUN SCRIPT ARGS: "${RUN_SCRIPT_ARGS}"
 echo ROBOT EXTRA ARGS: "${ROBOT_EXTRA_ARGS}"
 echo SET TEST ENVIRONMENT: "${SET_ENVIRONMENT}"
+echo -- USE OCM to install IDPs: "${USE_OCM_IDP}"
 
 # feature requested for MPS pipeline onboarding
 if [ "${SET_ENVIRONMENT}" -eq 1 ]; then \

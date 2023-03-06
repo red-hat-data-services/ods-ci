@@ -189,7 +189,10 @@ done
 
 # printf "Insert cluster admin user's password:"
 # read -s ADMIN_PASS
-perform_ocm_login
+if [ "${USE_OCM_IDP}" -eq 1 ]
+      then
+          perform_ocm_login
+fi
 check_installation
 uninstall_identity_provider
 check_uninstallation

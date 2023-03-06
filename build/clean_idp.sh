@@ -83,7 +83,7 @@ uninstall_identity_provider(){
       ocm delete idp -c "${CLUSTER_NAME}" htpasswd
     else
       oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders", "value": []}]'
-      oc delete secret htpasswd-bind-password -n openshift-config
+      oc delete secret htpasswd-password -n openshift-config
       delete_users  htpasswd-user
   fi
   # wait for IdP to disappear in the login page

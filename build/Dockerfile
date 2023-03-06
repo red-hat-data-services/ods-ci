@@ -15,7 +15,7 @@ ARG OC_CHANNEL=stable
 
 
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
-    dnf install -y python38 jq git unzip chromium chromedriver redhat-lsb-core &&\
+    dnf install -y python38 jq git unzip chromium chromedriver redhat-lsb-core httpd-tools &&\
     dnf clean all
 
 ## Install yq in the image
@@ -42,8 +42,8 @@ COPY tests tests/
 COPY tasks tasks/
 COPY libs libs/
 COPY run_robot_test.sh  .
-COPY build/run.sh  .
-COPY build/install_idp.sh  .
+COPY build/run.sh  build/run.sh
+COPY build/install_idp.sh  build/install_idp.sh
 COPY utils/scripts/Sender  utils/scripts/Sender/
 COPY utils/scripts/ocm/ocm.py  utils/scripts/ocm/ocm.py
 COPY utils/scripts/logger.py  utils/scripts/logger.py
@@ -52,9 +52,12 @@ COPY utils/scripts/SplitSuite.py  utils/scripts/SplitSuite.py
 COPY utils/scripts/testconfig/test-variables.yml test-variables.yml.model
 COPY test-variables.yml.example test-variables.yml
 COPY configs/templates/ldap/ldap.yaml configs/templates/ldap/ldap.yaml
+COPY configs/resources/oauth_htp_idp.json configs/resources/oauth_htp_idp.json
+COPY configs/resources/oauth_ldap_idp.json configs/resources/oauth_ldap_idp.json
+COPY configs/templates/ca-rolebinding.yaml configs/templates/ca-rolebinding.yaml
 COPY utils/scripts/ocm/templates/create_ldap_idp.jinja utils/scripts/ocm/templates/create_ldap_idp.jinja
-RUN  chmod +x run.sh
 COPY requirements.txt setup.py .
+RUN  chmod +x build/run.sh
 RUN  python3 --version
 RUN  python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade pip && venv/bin/pip3 install -r requirements.txt
 
@@ -62,4 +65,4 @@ RUN  python3 -m venv venv && source venv/bin/activate &&  pip3 install --upgrade
 RUN chgrp -R 1001 $HOME/ods-ci && chown -R 1001 $HOME/ods-ci && chmod -R 744 $HOME/ods-ci
 USER 1001
 
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["./build/run.sh"]

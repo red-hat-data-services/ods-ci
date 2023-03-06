@@ -2068,6 +2068,20 @@ if __name__ == "__main__":
                 dest="ldap_bind_password",
                 required=True,
             )
+            required_create_idp_parser.add_argument(
+                "--ldap-users-string",
+                help="ldap: Ldap users string",
+                action="store",
+                dest="ldap_users_string",
+                required=True,
+            )
+            required_create_idp_parser.add_argument(
+                "--ldap-passwords-string",
+                help="ldap: Ldap users passwords string",
+                action="store",
+                dest="ldap_passwords_string",
+                required=True,
+            )
             optional_create_idp_parser.add_argument(
                 "--num-users-to-create-per-group",
                 help="ldap: Ldap bind password",

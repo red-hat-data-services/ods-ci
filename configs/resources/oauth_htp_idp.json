@@ -1,1 +1,1 @@
-{"name":"htpasswd-cluster-admin","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"htpasswd-bind-password"}}}
+{"name":"htpasswd-cluster-admin","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"htpasswd-password"}}}

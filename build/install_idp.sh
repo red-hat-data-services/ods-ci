@@ -128,6 +128,7 @@ install_identity_provider(){
         oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
         sed -i "s/<rolebinding_name>/ods-ci-htp-admin/g" configs/templates/ca-rolebinding.yaml
         sed -i "s/<username>/htpasswd-user/g" configs/templates/ca-rolebinding.yaml
+        oc apply -f configs/templates/ca-rolebinding.yaml
   fi
 
   # update test-variables.yml with admin creds

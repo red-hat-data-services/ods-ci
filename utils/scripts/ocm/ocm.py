@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import time
+import base64
 from contextlib import redirect_stderr, redirect_stdout
 
 import jinja2
@@ -844,9 +845,12 @@ class OpenshiftClusterManager:
                     fout.write(line.replace('<adminpassword>', self.ldap_bind_password))
                 else:
                     fout.write(line)
-                    
             fin.close()
             fout.close()
+            base64_message = self.ldap_bind_password
+            base64_bytes = base64_message.encode('ascii')
+            message_bytes = base64.b64decode(base64_bytes)
+            ldap_bind_password_dec = message_bytes.decode('ascii')
             ldap_yaml_file = (
                 os.path.abspath(os.path.dirname(__file__))
                 + "/../../../configs/templates/ldap/ldap.yaml_replaced"
@@ -861,7 +865,7 @@ class OpenshiftClusterManager:
             replace_vars = {
                 "LDAP_URL": self.ldap_url,
                 "LDAP_BIND_DN": self.ldap_bind_dn,
-                "LDAP_BIND_PASSWORD": self.ldap_bind_password,
+                "LDAP_BIND_PASSWORD": ldap_bind_password_dec,
             }
             template_file = "create_ldap_idp.jinja"
             output_file = "create_ldap_idp.json"

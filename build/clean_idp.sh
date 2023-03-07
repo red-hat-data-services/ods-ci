@@ -89,6 +89,7 @@ uninstall_identity_provider(){
       oc patch oauth cluster --type json -p "[{'op': 'remove', 'path': '/spec/identityProviders/$htp_idx'}]"
       oc delete secret htpasswd-password -n openshift-config
       delete_users  htpasswd-user
+      oc delete clusterrolebinding ods-ci-htp-admin
   fi
   # wait for IdP to disappear in the login page
   echo "sleeping 120sec to wait for IDPs to disappear in the OCP login page..."

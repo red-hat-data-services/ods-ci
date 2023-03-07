@@ -89,7 +89,6 @@ uninstall_identity_provider(){
       oc patch oauth cluster --type json -p "[{'op': 'remove', 'path': '/spec/identityProviders/$htp_idx'}]"
       oc delete secret htpasswd-password -n openshift-config
       delete_users  htpasswd-user
-      
   fi
   # wait for IdP to disappear in the login page
   echo "sleeping 120sec to wait for IDPs to disappear in the OCP login page..."
@@ -105,19 +104,26 @@ function check_installation(){
             echo $ocm_clusterid
             while read -r line; do
               if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
-                  echo -e "\033[0;33m LDAP and/or htpasswd Identity providers found. Going to remove IDPs \033[0m"
-                else
-                  echo -e "\033[0;33m LDAP and/or htpasswd Identity not found. Skipping removal of IDPs \033[0m"
-                  exit 0
+                  found=1                 
               fi
             done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
+            if  [ -z $found ]
+              then
+                echo -e "\033[0;33m LDAP and/or htpasswd Identity not found. Skipping removal of IDPs \033[0m"
+                exit 0
+              else 
+                echo -e "\033[0;33m LDAP and/or htpasswd Identity providers found. Going to remove IDPs \033[0m"
+            fi
       else
             CURRENT_IDP_LIST=$(oc get oauth cluster -o json | jq -e '.spec.identityProviders')
             if [[ -z "${CURRENT_IDP_LIST}" ]] || [[  "${CURRENT_IDP_LIST}" == "null" ]]; then
               echo -e "\033[0;33m LDAP and/or htpasswd Identity not found. Skipping removal of IDPs \033[0m"
               exit 0
-            else
+            elif [[ "${CURRENT_IDP_LIST}" == *"ldap"* ]] || [[  "${CURRENT_IDP_LIST}" == *"htpasswd"* ]]; then
               echo -e "\033[0;33m LDAP and/or htpasswd Identity providers found. Going to remove IDPs \033[0m"
+            else
+              echo -e "\033[0;33m Only IDPs different from LDAP and HTPassword are installed. Skipping removal. Check the cluster \033[0m"
+              exit 0
             fi
   fi
 }
@@ -131,16 +137,24 @@ function check_uninstallation(){
             while read -r line; do
               if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
                   echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
+                  found=1 
                   exit 0
               fi
             done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
+            if  [ -z $found ]
+              then
+                echo -e "\033[0;33m LDAP and/or htpasswd Identity providers have been deleted from the cluster \033[0m"
+              else 
+                echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
+            fi
       else
             CURRENT_IDP_LIST=$(oc get oauth cluster -o json | jq -e '.spec.identityProviders')
             if [[ -z "${CURRENT_IDP_LIST}" ]] || [[  "${CURRENT_IDP_LIST}" == "null" ]]; then
-              echo -e "\033[0;33m LDAP and/or htpasswd Identity providers have been deleted from the cluster \033[0m"
-            else
+              echo -e "\033[0;33m No oauth identityProvider exists. LDAP and/or htpasswd Identity providers have been deleted from the cluster \033[0m"
+            elif [[ "${CURRENT_IDP_LIST}" == *"ldap"* ]] || [[  "${CURRENT_IDP_LIST}" == *"htpasswd"* ]]; then
               echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
-              exit 0
+            else
+              echo -e "\033[0;33m LDAP and/or htpasswd Identity providers have been deleted, but other different IDPs are installed. Check the cluster \033[0m"
             fi
   fi
 }
@@ -189,7 +203,6 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
-
 
 
 # printf "Insert cluster admin user's password:"

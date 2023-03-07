@@ -75,16 +75,21 @@ uninstall_identity_provider(){
   # delete ldap deployment and idp
   # oc wait --for=delete $(oc get namespace openldap)
   oc delete -f configs/templates/ldap/ldap.yaml
-  oc delete secret ldap-bind-password -n openshift-config
   if [ "${USE_OCM_IDP}" -eq 1 ]
     then
       ocm delete idp -c "${CLUSTER_NAME}" ldap-provider-qe
       ocm delete user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
       ocm delete idp -c "${CLUSTER_NAME}" htpasswd
     else
-      oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders", "value": []}]'
+      oc delete secret ldap-bind-password -n openshift-config
+      ldap_idx=$(oc get oauth cluster -o json | jq '.spec.identityProviders | map(.name == "ldap-provider-qe") | index(true)')
+      oc patch oauth cluster --type json -p "[{'op': 'remove', 'path': '/spec/identityProviders/$ldap_idx'}]"
+      # oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders", "value": []}]'
+      htp_idx=$(oc get oauth cluster -o json | jq '.spec.identityProviders | map(.name == "htpasswd") | index(true)')
+      oc patch oauth cluster --type json -p "[{'op': 'remove', 'path': '/spec/identityProviders/$htp_idx'}]"
       oc delete secret htpasswd-password -n openshift-config
       delete_users  htpasswd-user
+      
   fi
   # wait for IdP to disappear in the login page
   echo "sleeping 120sec to wait for IDPs to disappear in the OCP login page..."

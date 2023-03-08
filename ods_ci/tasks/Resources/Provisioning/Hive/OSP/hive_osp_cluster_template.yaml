@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: List
+items:
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterPool
+  metadata:
+    name: ${HIVE_CLUSTER_POOL}
+    namespace: ${HIVE_CLAIM_NS}
+  spec:
+    baseDomain: ${AWS_DOMAIN}
+    imageSetRef:
+      name: rhods-imageset-ocp-${OCP_VERSION} # see line 99
+    inventory:
+      - name: ${HIVE_CLUSTER_CONF} # see line 71
+    platform:
+      openstack:
+        cloud: ${OS_CLOUD}
+        credentialsSecretRef:
+          name: ${CLUSTER_NAME}-creds # see line 90
+    installConfigSecretTemplateRef:
+      name: ${CLUSTER_NAME}-sec # see line 30
+    size: 1
+    maxSize: 1
+    maxConcurrent: 1
+    runningCount: 1
+    skipMachinePools: true
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-sec
+    namespace: ${HIVE_CLAIM_NS}
+  type: Opaque
+  stringData:
+    install-config.yaml: |
+      apiVersion: v1
+      baseDomain: ${AWS_DOMAIN}
+      compute:
+      - name: worker
+        platform:
+          openstack:
+            type: g.standard.xl
+        replicas: 3
+      controlPlane:
+        name: master
+        platform:
+          openstack:
+            type: g.standard.xl
+        replicas: 3
+      metadata:
+        name: ${CLUSTER_NAME}-install
+      networking:
+        clusterNetwork:
+        - cidr: 10.128.0.0/14
+          hostPrefix: 23
+        machineNetwork:
+        - cidr: 192.169.0.0/16
+        networkType: OpenShiftSDN
+        serviceNetwork:
+        - 172.30.0.0/16
+      platform:
+        openstack:
+          cloud: ${OS_CLOUD}
+          computeFlavor: m1.large
+          externalDNS: null
+          externalNetwork: ${OSP_NETWORK}
+      pullSecret: '${QUAY_PULL_SEC}'
+      sshKey: ${QUAY_SSH_KEY}
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterDeploymentCustomization
+  metadata:
+    name: ${HIVE_CLUSTER_CONF}
+    namespace: ${HIVE_CLAIM_NS}
+  spec:
+    installConfigPatches:
+      - op: add
+        path: /platform/openstack/apiFloatingIP
+        value: ${FIP_API}
+      - op: add
+        path: /platform/openstack/ingressFloatingIP
+        value: ${FIP_APPS}
+      - op: add
+        path: /platform/openstack/externalNetwork
+        value: ${OSP_NETWORK}
+      - op: add
+        path: /metadata/name
+        value: ${CLUSTER_NAME}
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-creds
+    namespace: ${HIVE_CLAIM_NS}
+  type: Opaque
+  data:
+    clouds.yaml: ${OSP_CRED_DECODED}
+    cloud: ${OSP_CLOUD_DECODED}
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterImageSet
+  metadata:
+    name: rhods-imageset-ocp-${OCP_VERSION}
+    namespace: ${HIVE_CLAIM_NS}
+  spec:
+    releaseImage: quay.io/openshift-release-dev/ocp-release:${OCP_VERSION}-x86_64

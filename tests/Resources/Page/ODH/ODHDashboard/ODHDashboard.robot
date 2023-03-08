@@ -253,21 +253,27 @@ Check Number Of Displayed Cards Is Correct
     Run Keyword And Continue On Failure    Should Be Equal  ${n_cards}  ${expected_n_cards}
 
 Get Card Texts
-    [Arguments]  ${card_locator}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
-    IF  ${version_check}==True
-        ${versioned_title_xp}=    Set Variable    ${TITLE_XP}
+    [Arguments]  ${card_locator}    ${badges_title}=${EMPTY}
+    Log    ${badges_title}
+    IF    "Red Hat managed" in $badges_title
+        ${title_xp_mod}=    Set Variable    ${TITLE_XP}/..
     ELSE
-        ${versioned_title_xp}=    Set Variable    ${TITLE_XP_OLD}
+        ${title_xp_mod}=    Set Variable    ${TITLE_XP}
     END
-    ${title}=  Get Text    xpath:${card_locator}/${versioned_title_xp}
+    ${title}=  Get Text    xpath:${card_locator}/${title_xp_mod}
+    IF    "Red Hat managed" in $badges_title
+        ${title}=    Replace String    string=${title}    search_for=\n    replace_with=${EMPTY}
+        ${title}=    Split String    string=${title}    separator=by    max_split=1
+        ${title}=    Set Variable    ${title[0]}
+    END
     ${provider}=  Get Text    xpath:${card_locator}/${PROVIDER_XP}
     ${desc}=  Get Text    xpath:${card_locator}/${DESCR_XP}
     RETURN  ${title}  ${provider}  ${desc}
 
 Check Card Texts
-    [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
+    [Arguments]    ${card_locator}    ${app_id}    ${expected_data}    ${badges_title}
     ${card_title}  ${card_provider}  ${card_desc}=  Get Card Texts  card_locator=${card_locator}
+    ...    badges_title=${badges_title}
     Run Keyword And Continue On Failure  Should Be Equal   ${card_title}  ${expected_data}[${app_id}][title]
     Run Keyword And Continue On Failure  Should Be Equal   ${card_provider}  ${expected_data}[${app_id}][provider]
     Run Keyword And Continue On Failure  Should Be Equal   ${card_desc}  ${expected_data}[${app_id}][description]
@@ -400,8 +406,9 @@ Check Cards Details Are Correct
         ${card_xp}=  Set Variable  (${CARDS_XP})[${idx}]
         ${application_id}=  Get App ID From Card  card_locator=${card_xp}
         Log    ${application_id}
-        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        ...    badges_title=${badges_titles}
         Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
     END

@@ -133,7 +133,7 @@ Alerts Should Not Be Firing    #robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if any Prometheus alert is in pending or firing state,
     ...  excluding alert with name = ${expected-firing-alert}
     [Arguments]    ${pm_url}    ${pm_token}    ${expected-firing-alert}=${EMPTY}     ${message_prefix}=${EMPTY}
-    
+
     ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
     ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
     @{alerts_firing}=    Create List
@@ -233,7 +233,7 @@ Wait Until Alert Is Firing    # robocop: disable:too-many-arguments
     ...    checking the alert state every 30 seconds
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=10 min
-    Wait Until Keyword Succeeds    ${timeout}    30s
+    Wait Until Keyword Succeeds    ${timeout}    1s
     ...    Alert Should Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
@@ -241,7 +241,7 @@ Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
     ...    checking the alert state every 30 seconds
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=5 min
-    Wait Until Keyword Succeeds    ${timeout}    30s
+    Wait Until Keyword Succeeds    ${timeout}    1s
     ...    Alert Should Not Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Get Target Endpoints

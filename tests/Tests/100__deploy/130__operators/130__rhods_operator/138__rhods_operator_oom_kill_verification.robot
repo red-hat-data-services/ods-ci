@@ -43,18 +43,17 @@ Create Namespace In Openshift
     [Arguments]    ${number}=${NUMBER}
     FOR    ${counter}    IN RANGE    1    ${number}+1
         ${create_namespace}    Run    oc create namespace testuser'${counter}'
-        ${temp_count}    Run    oc get namespace | wc -l
-        Log    ${temp_count}
+        ${label_namespace}    Run    oc label namespace testuser'${counter}' testuser=testuser
     END
+    ${temp_count}    Run    oc get namespace | wc -l
+    Log    ${temp_count}
 
 Delete Namespace From Openshift
     [Documentation]    Delete dummy namespace from opneshift
     [Arguments]    ${number}=${NUMBER}
-    FOR    ${counter}    IN RANGE    1    ${number}+1
-        ${create_namespace}    Run    oc delete namespace testuser'${counter}'
-        ${temp_count}    Run    oc get namespace | wc -l
-        Log    ${temp_count}
-    END
+    ${delete_namespace}    Run    oc delete namespace --selector testuser=testuser
+    ${temp_count}    Run    oc get namespace | wc -l
+    Log    ${temp_count}
 
 Basic Dashboard Test Verification
     [Documentation]    Basic verification of RHODS feature

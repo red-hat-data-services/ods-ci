@@ -11,6 +11,7 @@ must-gather-results.txt
 .DS_Store
 .idea/
 .vscode
+.history
 Results/
 results/
 __pycache__/

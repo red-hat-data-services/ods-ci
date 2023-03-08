@@ -6,7 +6,7 @@ Resource       ODHDataScienceProject/ModelServer.resource
 Library        ../../../../../libs/Helpers.py
 
 *** Variables ***
-${MS_HEADER_XP}=     xpath=//h1[text()="Deployed models"]
+${MS_HEADER_XP}=     xpath=//h1[text()="Model serving"]
 ${S3_NAME_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field Name"]
 ${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_ACCESS_KEY_ID"]
 ${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_SECRET_ACCESS_KEY"]
@@ -38,8 +38,8 @@ Serve Model
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}
     # TODO: Does not work if there's already a model deployed
-    Wait Until Page Contains    Serve model
-    Click Button    Serve model
+    Wait Until Page Contains    Deploy model
+    Click Button    Deploy model
     Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
@@ -154,7 +154,7 @@ Get Model Route via UI
     # TODO: Open model serving home page if needed?
     Page Should Contain Element    xpath://div[.="${model_name} "]
     ${url}=    Get Element Attribute    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
-    RETURN    ${url}
+    [Return]    ${url}
 
 Open ${section} Options Menu
     [Documentation]    Opens the "Options menu" dropdown for different sections
@@ -169,14 +169,14 @@ Get Access Token via UI
     Project Should Be Listed    ${project_name}
     Open Data Science Project Details Page    ${project_name}
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
-    RETURN    ${token}
+    [Return]    ${token}
 
 Get Model Project
     [Documentation]    Returns the project under which a model has been deployed
     [Arguments]    ${model_name}
     Page Should Contain Element    //div[.="${model_name} "]
     ${project_name}=    Get Text    xpath://div[.="${model_name} "]${MS_TABLE_PROJECT}
-    RETURN    ${project_name}
+    [Return]    ${project_name}
 
 Get Model Inference
     [Documentation]    Returns the inference result after sending a POST request to a deployed
@@ -191,7 +191,7 @@ Get Model Inference
     ELSE
         ${inference_output} =    Run    curl -ks ${url} -d ${INFERENCE_INPUT}
     END
-    RETURN    ${inference_output}
+    [Return]    ${inference_output}
 
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output

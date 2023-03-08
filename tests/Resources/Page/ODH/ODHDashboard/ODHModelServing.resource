@@ -7,6 +7,7 @@ Library        ../../../../../libs/Helpers.py
 
 *** Variables ***
 ${MS_HEADER_XP}=     xpath=//h1[text()="Model serving"]
+${MS_HEADER_XP_OLD}=     xpath=//h1[text()="Deployed models"]
 ${S3_NAME_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field Name"]
 ${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_ACCESS_KEY_ID"]
 ${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_SECRET_ACCESS_KEY"]
@@ -29,7 +30,12 @@ Open Model Serving Home Page
     Page Should Contain    Model Serving
     Click Link      Model Serving
     Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
-    Wait Until Page Contains Element    ${MS_HEADER_XP}    timeout=30
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.23.0
+    IF  ${version-check}==False
+        Wait Until Page Contains Element    ${MS_HEADER_XP_OLD}    timeout=30
+    ELSE
+        Wait Until Page Contains Element    ${MS_HEADER_XP}    timeout=30
+    END
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model
@@ -38,8 +44,14 @@ Serve Model
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}
     # TODO: Does not work if there's already a model deployed
-    Wait Until Page Contains    Deploy model
-    Click Button    Deploy model
+    ${version-check}=  Is RHODS Version Greater Or Equal Than  1.23.0
+    IF  ${version-check}==False
+        Wait Until Page Contains    Serve model
+        Click Button    Serve model
+    ELSE
+        Wait Until Page Contains    Deploy model
+        Click Button    Deploy model
+    END
     Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}

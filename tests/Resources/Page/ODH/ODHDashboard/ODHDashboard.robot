@@ -13,6 +13,7 @@ Library       JupyterLibrary
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //div[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
+${RES_CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
 ${SAMPLE_APP_CARD_XP}=   //div[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=   div[@class='pf-c-card__title']//span

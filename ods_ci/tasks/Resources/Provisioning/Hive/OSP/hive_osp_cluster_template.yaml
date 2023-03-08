@@ -4,21 +4,21 @@ items:
 - apiVersion: hive.openshift.io/v1
   kind: ClusterPool
   metadata:
-    name: ${HIVE_CLUSTER_POOL}
-    namespace: ${HIVE_CLAIM_NS}
+    name: {{ hive_cluster_name }}-pool
+    namespace: {{ hive_claim_ns|default("rhods") }}
   spec:
-    baseDomain: ${AWS_DOMAIN}
+    baseDomain: {{ aws_domain|default("rhods.ccitredhat.com") }}
     imageSetRef:
-      name: rhods-imageset-ocp-${OCP_VERSION} # see line 99
+      name: rhods-imageset-ocp-{{ ocp_version }} # see line 99
     inventory:
-      - name: ${HIVE_CLUSTER_CONF} # see line 71
+      - name: {{ hive_cluster_name }}-conf # see line 71
     platform:
       openstack:
-        cloud: ${OS_CLOUD}
+        cloud: {{ osp_cloud_name|default("openstack") }}
         credentialsSecretRef:
-          name: ${CLUSTER_NAME}-creds # see line 90
+          name: {{ hive_cluster_name }}-cred # see line 90
     installConfigSecretTemplateRef:
-      name: ${CLUSTER_NAME}-sec # see line 30
+      name: {{ hive_cluster_name }}-sec # see line 30
     size: 1
     maxSize: 1
     maxConcurrent: 1
@@ -27,27 +27,27 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: ${CLUSTER_NAME}-sec
-    namespace: ${HIVE_CLAIM_NS}
+    name: {{ hive_cluster_name }}-sec
+    namespace: {{ hive_claim_ns|default("rhods") }}
   type: Opaque
   stringData:
     install-config.yaml: |
       apiVersion: v1
-      baseDomain: ${AWS_DOMAIN}
+      baseDomain: {{ aws_domain|default("rhods.ccitredhat.com") }}
       compute:
       - name: worker
         platform:
           openstack:
-            type: g.standard.xl
+            type: {{ osp_flavor|default("g.standard.xl") }}
         replicas: 3
       controlPlane:
         name: master
         platform:
           openstack:
-            type: g.standard.xl
+            type: {{ osp_flavor|default("g.standard.xl") }}
         replicas: 3
       metadata:
-        name: ${CLUSTER_NAME}-install
+        name: {{ hive_cluster_name }}-install
       networking:
         clusterNetwork:
         - cidr: 10.128.0.0/14
@@ -59,44 +59,44 @@ items:
         - 172.30.0.0/16
       platform:
         openstack:
-          cloud: ${OS_CLOUD}
+          cloud: {{ osp_cloud_name|default("openstack") }}
           computeFlavor: m1.large
           externalDNS: null
-          externalNetwork: ${OSP_NETWORK}
-      pullSecret: '${QUAY_PULL_SEC}'
-      sshKey: ${QUAY_SSH_KEY}
+          externalNetwork: {{ osp_network|default("shared_net_5") }}
+      pullSecret: {{ pull_secret|default("") }}
+      sshKey: {{ ssh_key|default("") }}
 - apiVersion: hive.openshift.io/v1
   kind: ClusterDeploymentCustomization
   metadata:
-    name: ${HIVE_CLUSTER_CONF}
-    namespace: ${HIVE_CLAIM_NS}
+    name: {{ hive_cluster_name }}-conf
+    namespace: {{ hive_claim_ns|default("rhods") }}
   spec:
     installConfigPatches:
       - op: add
         path: /platform/openstack/apiFloatingIP
-        value: ${FIP_API}
+        value: {{ osp_fip_api }}
       - op: add
         path: /platform/openstack/ingressFloatingIP
-        value: ${FIP_APPS}
+        value: {{ osp_fip_apps }}
       - op: add
         path: /platform/openstack/externalNetwork
-        value: ${OSP_NETWORK}
+        value: {{ osp_network|default("shared_net_5") }}
       - op: add
         path: /metadata/name
-        value: ${CLUSTER_NAME}
+        value: {{ hive_cluster_name }}
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: ${CLUSTER_NAME}-creds
-    namespace: ${HIVE_CLAIM_NS}
+    name: {{ hive_cluster_name }}-cred
+    namespace: {{ hive_claim_ns|default("rhods") }}
   type: Opaque
   data:
-    clouds.yaml: ${OSP_CRED_DECODED}
-    cloud: ${OSP_CLOUD_DECODED}
+    clouds.yaml: {{ OSP_CRED_DECODED }}
+    cloud: {{ OSP_CLOUD_DECODED }}
 - apiVersion: hive.openshift.io/v1
   kind: ClusterImageSet
   metadata:
-    name: rhods-imageset-ocp-${OCP_VERSION}
-    namespace: ${HIVE_CLAIM_NS}
+    name: rhods-imageset-ocp-{{ ocp_version }}
+    namespace: {{ hive_claim_ns|default("rhods") }}
   spec:
-    releaseImage: quay.io/openshift-release-dev/ocp-release:${OCP_VERSION}-x86_64
+    releaseImage: quay.io/openshift-release-dev/ocp-release:{{ ocp_version }}-x86_64

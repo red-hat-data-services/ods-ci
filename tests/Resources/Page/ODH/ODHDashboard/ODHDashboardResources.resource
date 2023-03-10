@@ -37,18 +37,24 @@ QuickStart Status Should Be
     [Documentation]     Verifies the label on the item card which shows the progress and closes the sidebar.
     [Arguments]     ${element}  ${progress_string}
     IF  '${progress_string}'=='In Progress'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-purple pf-m-outline"]     In Progress
+        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-purple pf-m-outline"]
+        ...    In Progress
     ELSE IF     '${progress_string}'=='Complete'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]      Complete
+        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
+        ...    Complete
     ELSE IF     '${progress_string}'=='Failed'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]        Failed
+        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]
+        ...    Failed
     END
 
 QuickStart Status Should Not Be Set
     [Arguments]     ${element}
-    Page Should Not Contain   xpath=${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-purple pf-m-outline"]
-    Page Should Not Contain   xpath=${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
-    Page Should Not Contain   xpath=${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]
+    Page Should Not Contain
+    ...    xpath=${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-purple pf-m-outline"]
+    Page Should Not Contain
+    ...    xpath=${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
+    Page Should Not Contain
+    ...    xpath=${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]
 
 Close QuickStart From Top
     [Arguments]     ${decision}=leave

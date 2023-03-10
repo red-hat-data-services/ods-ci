@@ -65,7 +65,7 @@ Test Inference With Token Authentication
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
     [Tags]    Sanity    Tier1
     ...    ODS-1920
-    Run Keyword And Continue on Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
+    Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
     # Testing the same endpoint without token auth, should receive login page
     Open Model Serving Home Page
     ${out}=    Get Model Inference   ${MODEL_NAME}    ${INFERENCE_INPUT}    token_auth=${FALSE}
@@ -104,7 +104,7 @@ Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
     [Tags]    Sanity    Tier1
     ...    ODS-2053
-    Run Keyword And Continue on Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
+    Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
 
 
 *** Keywords ***
@@ -182,7 +182,7 @@ Try Opening Create Server
     ...    In order to deploy a single model in a new project. ${retries}
     ...    controls how many retries are made.
     [Arguments]    ${retries}=3
-    FOR    ${try}    IN RANGE    0    ${retries}    
+    FOR    ${try}    IN RANGE    0    ${retries}
         ${status} =    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Create server
         IF    ${status}
             SeleniumLibrary.Click Button    Create server
@@ -194,3 +194,4 @@ Try Opening Create Server
             SeleniumLibrary.Reload Page
         END
     END
+

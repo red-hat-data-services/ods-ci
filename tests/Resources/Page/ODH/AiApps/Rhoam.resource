@@ -44,3 +44,4 @@ Verify RHOAM Is Enabled In RHODS Dashboard
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
     Verify Service Is Enabled    app_name=${RHOAM_DISPLAYED_NAME}
+    Launch ${RHOAM_DISPLAYED_NAME} From RHODS Dashboard Link

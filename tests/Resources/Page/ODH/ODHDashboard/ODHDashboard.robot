@@ -156,11 +156,11 @@ Verify Service Is Available In The Explore Page
 
 Verify Service Is Not Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${split_last}=${FALSE}
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  IF    ${split_last} == ${FALSE}
+  IF    ${split_last} == ${TRUE}
       ${splits}=    Split String From Right    ${app_name}    max_split=1
       Page Should Not Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[0]} ']
       Page Should Not Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[1]}']

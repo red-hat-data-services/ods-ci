@@ -26,10 +26,16 @@ ${MS_TABLE_STATUS_FAILURE}=    //span[contains(@class,"pf-c-icon__content")][con
 *** Keywords ***
 Open Model Serving Home Page
     [Documentation]    Verifies submenu Settings > "Model Serving" is visible and navigates to page
-    Page Should Contain    Model Serving
-    Click Link      Model Serving
-    Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
-    Wait Until Page Contains Element    ${MS_HEADER_XP}    timeout=30
+    SeleniumLibrary.Page Should Contain    Model Serving
+    SeleniumLibrary.Click Link      Model Serving
+    Sleep    1s
+    ${loading_error} =    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Problem loading model serving page
+    IF    ${loading_error}
+        Sleep    5s
+        SeleniumLibrary.Reload Page
+    END
+    SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
+    SeleniumLibrary.Wait Until Page Contains Element    ${MS_HEADER_XP}    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model
@@ -202,4 +208,13 @@ Verify Model Inference
     Log    ${list}
     IF    ${result}==False
         Fail    msg=comparison between expected and actual failed, ${list}
+    END
+
+Clean Up Model Serving Page
+    [Documentation]    Deletes all currently deployed models, if any are present.
+    # Returns an empty list if no matching elements found
+    ${models} =    SeleniumLibrary.Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+    FOR  ${model}  IN  @{models}
+        ${name} =    SeleniumLibrary.Get Text   ${model}
+        Delete Model Via UI    ${name}
     END

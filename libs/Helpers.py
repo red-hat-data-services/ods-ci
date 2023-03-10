@@ -168,6 +168,8 @@ class Helpers:
             import ast
             import decimal
             import numbers
+            import re
+            model_name=re.compile('^^[\S]+__isvc-[\w\d]+$')
 
             # Cast from string to python type
             expected=ast.literal_eval(expected)
@@ -193,8 +195,15 @@ class Helpers:
                         # places as the current threshold
                         failures.append([expected,received,"{0:.{1}f}".format(expected-received,d)])
                 else:
+                    #if element is model name, don't care about ID
+                    result_ex = model_name.match(expected)
+                    result_rec = model_name.match(received)
+                    if result_ex != None and result_rec != None:
+                    	if expected.split('__')[0]!=received.split('__')[0]:
+                            failures.append([expected,received])
                     # else compare values are equal
-                    if not expected==received: failures.append([expected,received])
+                    else:
+                        if not expected==received: failures.append([expected,received])
                     
             _inference_object_comparison(expected, received, threshold)
             if len(failures)>0:

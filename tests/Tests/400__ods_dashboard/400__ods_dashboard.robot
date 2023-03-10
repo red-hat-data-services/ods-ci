@@ -567,11 +567,11 @@ Set GPU Expected Resources
 Check GPU Resources
     [Documentation]   Check resource tiles for GPU is present
     ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}=    Set GPU Expected Resources
-    ${elements}=    Get WebElements    //div
+    ${elements}=    Get WebElements    ${RES_CARDS_XP}
     ${len}=    Get Length    ${elements}
     Should Be Equal As Integers    ${len}    ${gpu_re_exp}
     FOR    ${counter}    IN RANGE    ${len}
-        Page Should Contain Element    //div[@id=${gpu_re_id}[${counter}]]
+        Page Should Contain Element    xpath:${RES_CARDS_XP}\[@id=${gpu_re_id}[${counter}]]
         IF    ${gpu_re_link}[${counter}] == '#'
                 ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
                 ${no_of_open_link}=    Get Length    ${counter}

@@ -12,7 +12,8 @@ Library       JupyterLibrary
 *** Variables ***
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
-${CARDS_XP}=  //div[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
+${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
+${RES_CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
 ${SAMPLE_APP_CARD_XP}=   //div[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
 ${TITLE_XP}=   div[@class='pf-c-card__title']//span
@@ -145,26 +146,26 @@ Verify Service Is Available In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  IF    ${split_last} == ${TRUE}
+  IF    ${split_last}==${TRUE}
       ${splits}=    Split String From Right    ${app_name}    max_split=1
-      Page Should Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[0]} ']
-      Page Should Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[1]}']
+      Page Should Contain Element    xpath:${CARDS_XP}//*[text()='${splits[0]} ']
+      Page Should Contain Element    xpath:${CARDS_XP}//*[text()='${splits[1]}']
   ELSE
-      Page Should Contain Element    xpath://*[.='${app_name}']
+      Page Should Contain Element    xpath:${CARDS_XP}//*[.='${app_name}']
   END
 
 Verify Service Is Not Available In The Explore Page
   [Documentation]   Verify the service appears in Applications > Explore
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${split_last}=${FALSE}
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  IF    ${split_last} == ${FALSE}
+  IF    ${split_last}==${TRUE}
       ${splits}=    Split String From Right    ${app_name}    max_split=1
-      Page Should Not Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[0]} ']
-      Page Should Not Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[1]}']
+      Page Should Not Contain Element    xpath:${CARDS_XP}//*[text()='${splits[0]} ']
+      Page Should Not Contain Element    xpath:${CARDS_XP}//*[text()='${splits[1]}']
   ELSE
-      Page Should Not Contain Element    xpath://*[.='${app_name}']
+      Page Should Not Contain Element    xpath:${CARDS_XP}//*[.='${app_name}']
   END
 
 Remove Disabled Application From Enabled Page
@@ -188,9 +189,9 @@ Verify Service Provides "Enable" Button In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   IF    "${app_id}" == "${NONE}"
-      ${card_locator}=    Set Variable    //div//*[.='${app_name}']/../..
+      ${card_locator}=    Set Variable    ${CARDS_XP}//*[.='${app_name}']/../..
   ELSE
-      ${card_locator}=    Set Variable    //div[@id='${app_id}']
+      ${card_locator}=    Set Variable    ${CARDS_XP}\[@id='${app_id}']
   END
   ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
@@ -203,9 +204,9 @@ Verify Service Provides "Get Started" Button In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   IF    "${app_id}" == "${NONE}"
-      ${card_locator}=    Set Variable    //div//*[.='${app_name}']/../..
+      ${card_locator}=    Set Variable    ${CARDS_XP}//*[.='${app_name}']/../..
   ELSE
-      ${card_locator}=    Set Variable    //div[@id='${app_id}']
+      ${card_locator}=    Set Variable    ${CARDS_XP}\[@id='${app_id}']
   END
   ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
@@ -234,7 +235,8 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')]/div
+    # Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')][div | article]
+    Wait Until Page Contains Element    xpath:${CARDS_XP}
     ...    timeout=10s
 
 Get App ID From Card
@@ -253,21 +255,27 @@ Check Number Of Displayed Cards Is Correct
     Run Keyword And Continue On Failure    Should Be Equal  ${n_cards}  ${expected_n_cards}
 
 Get Card Texts
-    [Arguments]  ${card_locator}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
-    IF  ${version_check}==True
-        ${versioned_title_xp}=    Set Variable    ${TITLE_XP}
+    [Arguments]  ${card_locator}    ${badges_title}=${EMPTY}
+    Log    ${badges_title}
+    IF    "Red Hat managed" in $badges_title
+        ${title_xp_mod}=    Set Variable    ${TITLE_XP}/..
     ELSE
-        ${versioned_title_xp}=    Set Variable    ${TITLE_XP_OLD}
+        ${title_xp_mod}=    Set Variable    ${TITLE_XP}
     END
-    ${title}=  Get Text    xpath:${card_locator}/${versioned_title_xp}
+    ${title}=  Get Text    xpath:${card_locator}/${title_xp_mod}
+    IF    "Red Hat managed" in $badges_title
+        ${title}=    Replace String    string=${title}    search_for=\n    replace_with=${EMPTY}
+        ${title}=    Split String    string=${title}    separator=by    max_split=1
+        ${title}=    Set Variable    ${title[0]}
+    END
     ${provider}=  Get Text    xpath:${card_locator}/${PROVIDER_XP}
     ${desc}=  Get Text    xpath:${card_locator}/${DESCR_XP}
     RETURN  ${title}  ${provider}  ${desc}
 
 Check Card Texts
-    [Arguments]  ${card_locator}  ${app_id}  ${expected_data}
+    [Arguments]    ${card_locator}    ${app_id}    ${expected_data}    ${badges_title}
     ${card_title}  ${card_provider}  ${card_desc}=  Get Card Texts  card_locator=${card_locator}
+    ...    badges_title=${badges_title}
     Run Keyword And Continue On Failure  Should Be Equal   ${card_title}  ${expected_data}[${app_id}][title]
     Run Keyword And Continue On Failure  Should Be Equal   ${card_provider}  ${expected_data}[${app_id}][provider]
     Run Keyword And Continue On Failure  Should Be Equal   ${card_desc}  ${expected_data}[${app_id}][description]
@@ -400,8 +408,9 @@ Check Cards Details Are Correct
         ${card_xp}=  Set Variable  (${CARDS_XP})[${idx}]
         ${application_id}=  Get App ID From Card  card_locator=${card_xp}
         Log    ${application_id}
-        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         ${badges_titles}=  Check Card Badges And Return Titles  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        Check Card Texts  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
+        ...    badges_title=${badges_titles}
         Check Card Image  card_locator=${card_xp}  app_id=${application_id}  expected_data=${expected_data}
         Check Get Started Sidebar  card_locator=${card_xp}  card_badges=${badges_titles}  app_id=${application_id}  expected_data=${expected_data}
     END

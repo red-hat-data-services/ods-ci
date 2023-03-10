@@ -12,7 +12,7 @@ Library       JupyterLibrary
 *** Variables ***
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
-${CARDS_XP}=  //div[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
+${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
 ${RES_CARDS_XP}=  //article[contains(@class, 'pf-c-card')]
 ${SAMPLE_APP_CARD_XP}=   //div[@id="pachyderm"]
 ${HEADER_XP}=  div[@class='pf-c-card__header']
@@ -146,12 +146,13 @@ Verify Service Is Available In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  IF    ${split_last} == ${TRUE}
+  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.23.0
+  IF    "${split_last}"=="${TRUE}" and "${version-check}"=="True"
       ${splits}=    Split String From Right    ${app_name}    max_split=1
-      Page Should Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[0]} ']
-      Page Should Contain Element    xpath://div[contains(@class,'gallery')]/div//*[text()='${splits[1]}']
+      Page Should Contain Element    xpath:${CARDS_XP}//*[text()='${splits[0]} ']
+      Page Should Contain Element    xpath:${CARDS_XP}//*[text()='${splits[1]}']
   ELSE
-      Page Should Contain Element    xpath://*[.='${app_name}']
+      Page Should Contain Element    xpath:${CARDS_XP}//*[.='${app_name}']
   END
 
 Verify Service Is Not Available In The Explore Page
@@ -189,9 +190,9 @@ Verify Service Provides "Enable" Button In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   IF    "${app_id}" == "${NONE}"
-      ${card_locator}=    Set Variable    //div//*[.='${app_name}']/../..
+      ${card_locator}=    Set Variable    ${CARDS_XP}//*[.='${app_name}']/../..
   ELSE
-      ${card_locator}=    Set Variable    //div[@id='${app_id}']
+      ${card_locator}=    Set Variable    ${CARDS_XP}\[@id='${app_id}']
   END
   ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
@@ -204,9 +205,9 @@ Verify Service Provides "Get Started" Button In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   IF    "${app_id}" == "${NONE}"
-      ${card_locator}=    Set Variable    //div//*[.='${app_name}']/../..
+      ${card_locator}=    Set Variable    ${CARDS_XP}//*[.='${app_name}']/../..
   ELSE
-      ${card_locator}=    Set Variable    //div[@id='${app_id}']
+      ${card_locator}=    Set Variable    ${CARDS_XP}\[@id='${app_id}']
   END
   ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
@@ -235,7 +236,8 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')][div | article]
+    # Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')][div | article]
+    Wait Until Page Contains Element    xpath:${CARDS_XP}
     ...    timeout=10s
 
 Get App ID From Card

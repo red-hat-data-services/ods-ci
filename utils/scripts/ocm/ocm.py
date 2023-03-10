@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import time
+import base64
 from contextlib import redirect_stderr, redirect_stdout
 
 import jinja2
@@ -57,6 +58,8 @@ class OpenshiftClusterManager:
         self.ldap_url = args.get("ldap_url")
         self.ldap_bind_dn = args.get("ldap_bind_dn")
         self.ldap_bind_password = args.get("ldap_bind_password")
+        self.ldap_users_string = args.get("ldap_users_string")
+        self.ldap_passwords_string = args.get("ldap_passwords_string")
         self.ldap_test_password = args.get("ldap_test_password")
         self.idp_type = args.get("idp_type")
         self.idp_name = args.get("idp_name")
@@ -831,6 +834,27 @@ class OpenshiftClusterManager:
                 os.path.abspath(os.path.dirname(__file__))
                 + "/../../../configs/templates/ldap/ldap.yaml"
             )
+            fin = open(ldap_yaml_file, "rt")
+            fout = open(ldap_yaml_file+"_replaced", "wt")
+            for line in fin:
+                if '<users_string>' in line:
+                    fout.write(line.replace('<users_string>', self.ldap_users_string))
+                elif '<passwords_string>' in line:
+                    fout.write(line.replace('<passwords_string>', self.ldap_passwords_string))
+                elif  '<adminpassword>' in line:
+                    fout.write(line.replace('<adminpassword>', self.ldap_bind_password))
+                else:
+                    fout.write(line)
+            fin.close()
+            fout.close()
+            base64_message = self.ldap_bind_password
+            base64_bytes = base64_message.encode('ascii')
+            message_bytes = base64.b64decode(base64_bytes)
+            ldap_bind_password_dec = message_bytes.decode('ascii')
+            ldap_yaml_file = (
+                os.path.abspath(os.path.dirname(__file__))
+                + "/../../../configs/templates/ldap/ldap.yaml_replaced"
+            )
             cmd = "oc apply -f {}".format(ldap_yaml_file)
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
@@ -841,7 +865,7 @@ class OpenshiftClusterManager:
             replace_vars = {
                 "LDAP_URL": self.ldap_url,
                 "LDAP_BIND_DN": self.ldap_bind_dn,
-                "LDAP_BIND_PASSWORD": self.ldap_bind_password,
+                "LDAP_BIND_PASSWORD": ldap_bind_password_dec,
             }
             template_file = "create_ldap_idp.jinja"
             output_file = "create_ldap_idp.json"
@@ -2046,6 +2070,20 @@ if __name__ == "__main__":
                 help="ldap: Ldap bind password",
                 action="store",
                 dest="ldap_bind_password",
+                required=True,
+            )
+            required_create_idp_parser.add_argument(
+                "--ldap-users-string",
+                help="ldap: Ldap users string",
+                action="store",
+                dest="ldap_users_string",
+                required=True,
+            )
+            required_create_idp_parser.add_argument(
+                "--ldap-passwords-string",
+                help="ldap: Ldap users passwords string",
+                action="store",
+                dest="ldap_passwords_string",
                 required=True,
             )
             optional_create_idp_parser.add_argument(

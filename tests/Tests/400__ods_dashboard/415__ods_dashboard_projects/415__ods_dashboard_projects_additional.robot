@@ -17,13 +17,15 @@ ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test-additional
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Project feature
 ${TOLERATIONS}=    workbench-tolerations
 ${DEFAULT_TOLERATIONS}=    NotebooksOnly   
-${WORKBENCH_TITLE}=   ODS-CI Workbench Tolerations
-${WORKBENCH_DESCRIPTION}=   ${WORKBENCH_TITLE} is a test workbench to check tolerations are applied
+${WORKBENCH_TITLE_TOL_1}=   ODS-CI Workbench Tolerations
+${WORKBENCH_TITLE_TOL_2}=   ODS-CI Workbench Tolerations 2
+${WORKBENCH_DESCRIPTION}=   a test workbench to check tolerations are applied
 ${WORKBENCH_TITLE_GPU}=   ODS-CI Workbench GPU
 ${WORKBENCH_DESCRIPTION_GPU}=   ${WORKBENCH_TITLE_GPU} is a test workbench using GPU
 ${NB_IMAGE}=        Minimal Python
 ${NB_IMAGE_GPU}=        PyTorch
-${PV_NAME}=         ods-ci-tolerations
+${PV_NAME_TOL_1}=         ods-ci-tolerations
+${PV_NAME_TOL_2}=         ods-ci-tolerations-2
 ${PV_NAME_GPU}=         ods-ci-gpu
 ${PV_DESCRIPTION}=         it is a PV created to test DS Projects feature
 ${PV_SIZE}=         1
@@ -35,16 +37,29 @@ Verify Notebook Tolerations Are Applied To Workbenches When Set Up
     ...                admins in "Cluster Settings" page
     [Tags]    Tier1    Sanity
     ...       ODS-1969
+    # Launch Data Science Project Main Page
+    # Open Data Science Projects Home Page
+    # Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_1}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
     Open Dashboard Cluster Settings
     Set Pod Toleration Via UI    ${TOLERATIONS}
     Save Changes In Cluster Settings
     Launch Data Science Project Main Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Sleep   20s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
-    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    Sleep   40s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
+    Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
-    Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE}
+    ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_2}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
+    Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Stopped     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE_TOL_1}
     ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
     [Teardown]    Restore Tolerations Settings And Clean Project
 
@@ -109,7 +124,7 @@ Project Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
-    RHOSi Setup
+    #RHOSi Setup
     Launch Data Science Project Main Page
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -120,7 +135,7 @@ Project Suite Teardown
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
-    RHOSi Teardown
+    #RHOSi Teardown
 
 Verify Server Workbench Has The Expected Toleration
     [Documentation]    Verifies notebook pod created as workbench
@@ -143,8 +158,26 @@ Restore Tolerations Settings And Clean Project
     Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}
     Disable Pod Toleration Via UI
     Save Changes In Cluster Settings
-    Clean Project    workbench_title=${WORKBENCH_TITLE}
-    ...    pvc_title=${PV_NAME}    project_title=${PRJ_TITLE}
+    Open Data Science Projects Home Page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    Sleep    40s
+    ...    reason=waiting for dashboard to fetch the latest tolerations settings
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    Run Keyword And Expect Error    Unexpected Pod Toleration
+    ...    Verify Server Workbench Has The Expected Toleration
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
+    Run Keyword And Expect Error    Unexpected Pod Toleration
+    ...    Verify Server Workbench Has The Expected Toleration
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
+    Clean Project    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...    pvc_title=${PV_NAME_TOL_1}    project_title=${PRJ_TITLE}
+    Clean Project    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    ...    pvc_title=${PV_NAME_TOL_2}    project_title=${PRJ_TITLE}
 
 Clean Project
     [Documentation]    Deletes resources from a test project to free up

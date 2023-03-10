@@ -146,8 +146,8 @@ Verify Service Is Available In The Explore Page
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   Capture Page Screenshot
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.23.0
-  IF    "${split_last}"=="${TRUE}" and "${version-check}"=="True"
+  ${version_check}=  Is RHODS Version Greater Or Equal Than  1.23.0
+  IF    "${split_last}"=="${TRUE}" and "${version_check}"=="True"
       ${splits}=    Split String From Right    ${app_name}    max_split=1
       Page Should Contain Element    xpath:${CARDS_XP}//*[text()='${splits[0]} ']
       Page Should Contain Element    xpath:${CARDS_XP}//*[text()='${splits[1]}']

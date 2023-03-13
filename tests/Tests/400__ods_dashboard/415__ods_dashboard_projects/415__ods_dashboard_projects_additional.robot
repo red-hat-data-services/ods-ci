@@ -170,7 +170,7 @@ Verify Workbench Has The Expected Tolerations
 
 Verify Workbench Does Not Have The Given Tolerations
     [Documentation]    Verifies notebook pod created as workbench does not
-    ...                contain the given toleration  
+    ...                contain the given toleration
     [Arguments]    ${workbench_title}    ${tolerations_text}
     ...            ${project_title}=${PRJ_TITLE}
     Run Keyword And Continue On Failure

@@ -54,6 +54,10 @@ Verify Notebook Tolerations Are Applied To Workbenches
     ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_2}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE_TOL_2}
     ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
+    Run Keyword And Expect Error    Unexpected Pod Toleration
+    ...    Verify Server Workbench Has The Expected Toleration
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
     Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Stopped     workbench_title=${WORKBENCH_TITLE_TOL_1}
     Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}

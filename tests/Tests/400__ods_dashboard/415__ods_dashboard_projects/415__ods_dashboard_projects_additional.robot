@@ -36,16 +36,19 @@ ${PV_SIZE}=         1
 Verify Notebook Tolerations Are Applied To Workbenches
     [Documentation]    Verifies workbenches get the custom tolerations set by
     ...  admins in "Cluster Settings" page. It checks 3 scenarios:
-    ...  - tolerations changes applied to a workbench created after toleration changes (from toleration = null to toletation != null)
-    ...  - tolerations change applied to existent workbench, after restart (from toleration = null to toletation A)
-    ...  - tolerations change applied to existent workbench, after restart (from toleration = A to toletation = B)
-    ...  - tolerations get removed from existent workbench, after restart (in the teardown)
+    ...  -tolerations changes applied to workbench created after the changes (value from null to A)
+    ...  -tolerations change applied to existent workbench, after restart (value from null to A)
+    ...  -tolerations change applied to existent workbench, after restart (value from A to A)
+    ...  -tolerations get removed from existent workbench, after restart (check in teardown)
     [Tags]    Tier1    Sanity
     ...       ODS-1969    ODS-2057
-    Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}  workbench_description=${WORKBENCH_DESCRIPTION}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...                 workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_1}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
-    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_1}
+    ...                 pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
+    Run Keyword And Continue On Failure
+    ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
     Open Settings And Set Tolerations To    ${TOLERATIONS}
     Open Data Science Projects Home Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -166,6 +169,8 @@ Verify Workbench Has The Expected Tolerations
     ...    msg=Unexpected Pod Toleration
 
 Verify Workbench Does Not Have The Given Tolerations
+    [Documentation]    Verifies notebook pod created as workbench does not
+    ...                contain the given toleration  
     [Arguments]    ${workbench_title}    ${tolerations_text}
     ...            ${project_title}=${PRJ_TITLE}
     Run Keyword And Continue On Failure
@@ -261,6 +266,8 @@ Check Limits And Requests For Every Workbench Pod Container
     END
 
 Open Settings And Set Tolerations To
+    [Documentation]    Opens the "Cluster Settings" page in RHODS Dashboard
+    ...                and set the tolerations settings to the given one
     [Arguments]    ${tolerations_text}
     Open Dashboard Cluster Settings
     Set Pod Toleration Via UI    ${tolerations_text}

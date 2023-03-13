@@ -181,7 +181,7 @@ Verify Workbench Does Not Have The Given Tolerations
 
 Restore Tolerations Settings And Clean Project
     [Documentation]    Reset the notebook tolerations after testing
-    Open Settings And Set Tolerations To    ${DEFAULT_TOLERATIONS}
+    Open Settings And Disable Tolerations
     Open Data Science Projects Home Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
@@ -190,10 +190,10 @@ Restore Tolerations Settings And Clean Project
     ...    reason=waiting for dashboard to fetch the latest tolerations settings
     Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
     Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}
-    Verify Workbench Has The Expected Tolerations    workbench_title=${WORKBENCH_TITLE_TOL_2}
-    ...    toleration=${DEFAULT_TOLERATIONS}    project_title=${PRJ_TITLE}
-    Verify Workbench Has The Expected Tolerations    workbench_title=${WORKBENCH_TITLE_TOL_2}
-    ...    toleration=${DEFAULT_TOLERATIONS}    project_title=${PRJ_TITLE}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}    tolerations_text=${DEFAULT_TOLERATIONS}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_2}    tolerations_text=${DEFAULT_TOLERATIONS}
     Verify Workbench Does Not Have The Given Tolerations
     ...    workbench_title=${WORKBENCH_TITLE_TOL_1}    tolerations_text=${TOLERATIONS}
     Verify Workbench Does Not Have The Given Tolerations
@@ -271,4 +271,13 @@ Open Settings And Set Tolerations To
     [Arguments]    ${tolerations_text}
     Open Dashboard Cluster Settings
     Set Pod Toleration Via UI    ${tolerations_text}
+    Save Changes In Cluster Settings
+
+Open Settings And Disable Tolerations
+    [Documentation]    Opens the "Cluster Settings" page in RHODS Dashboard
+    ...                and disable the tolerations settings.
+    ...                Before disabling the setting, it restores the default value
+    Open Dashboard Cluster Settings
+    Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}
+    Disable Pod Toleration Via UI
     Save Changes In Cluster Settings

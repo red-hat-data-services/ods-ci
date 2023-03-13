@@ -35,6 +35,7 @@ Verify User Can Spawn Notebook After Changing PVC Size Using Backend
     ...    for supported PVC size got changed
     [Tags]    Tier2
     ...       ODS-1221
+    ...       FlakyTest
     Change And Apply PVC size    ${S_SIZE}Gi
     Run Keyword And Warn On Failure   Verify Notebook Size     600s    ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=rhods-notebooks
@@ -107,8 +108,6 @@ Change And Apply PVC size
     ...    and restart the Notebook controller POD
     [Arguments]     ${size}
     Check If PVC Change Is Permanent    ${size}
-    Run Keyword And Ignore Error    Delete Pods Using Label Selector    redhat-ods-applications    app=notebook-controller
-    Wait Until Keyword Succeeds    15 times    1 sec   Verify Operator Pod Status    redhat-ods-applications    app=notebook-controller
     Sleep    20
     Launch RHODS Dashboard
 

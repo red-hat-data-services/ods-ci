@@ -17,8 +17,8 @@ ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test-additional
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Project feature
 ${TOLERATIONS}=    workbench-tolerations
 ${DEFAULT_TOLERATIONS}=    NotebooksOnly   
-${WORKBENCH_TITLE_TOL_1}=   ODS-CI Workbench Tolerations
-${WORKBENCH_TITLE_TOL_2}=   ODS-CI Workbench Tolerations 2
+${WORKBENCH_TITLE_TOL_1}=   ODS-CI Workbench Tol
+${WORKBENCH_TITLE_TOL_2}=   ODS-CI Workbench Tol 2
 ${WORKBENCH_DESCRIPTION}=   a test workbench to check tolerations are applied
 ${WORKBENCH_TITLE_GPU}=   ODS-CI Workbench GPU
 ${WORKBENCH_DESCRIPTION_GPU}=   ${WORKBENCH_TITLE_GPU} is a test workbench using GPU
@@ -32,14 +32,13 @@ ${PV_SIZE}=         1
 
 
 *** Test Cases ***
-Verify Notebook Tolerations Are Applied To Workbenches When Set Up
+Verify Notebook Tolerations Are Applied To Workbenches
     [Documentation]    Verifies workbenches get the custom tolerations set by
-    ...                admins in "Cluster Settings" page
+    ...                admins in "Cluster Settings" page. It checks 2 scenarios:
+    ...                - workbench created after toleration change
+    ...                - toleration change applied to existent workbench (after restart)
     [Tags]    Tier1    Sanity
     ...       ODS-1969
-    # Launch Data Science Project Main Page
-    # Open Data Science Projects Home Page
-    # Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_1}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
@@ -47,7 +46,7 @@ Verify Notebook Tolerations Are Applied To Workbenches When Set Up
     Open Dashboard Cluster Settings
     Set Pod Toleration Via UI    ${TOLERATIONS}
     Save Changes In Cluster Settings
-    Launch Data Science Project Main Page
+    Open Data Science Projects Home Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Sleep   40s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
     Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}  workbench_description=${WORKBENCH_DESCRIPTION}
@@ -124,7 +123,7 @@ Project Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
-    #RHOSi Setup
+    RHOSi Setup
     Launch Data Science Project Main Page
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -135,7 +134,7 @@ Project Suite Teardown
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
-    #RHOSi Teardown
+    RHOSi Teardown
 
 Verify Server Workbench Has The Expected Toleration
     [Documentation]    Verifies notebook pod created as workbench

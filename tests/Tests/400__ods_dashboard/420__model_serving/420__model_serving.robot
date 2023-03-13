@@ -80,7 +80,7 @@ Verify Openvino_IR Model Via UI
     Clean Up DSP Page
     Open Model Serving Home Page
     Try Opening Create Server
-    SeleniumLibrary.Wait Until Page Contains    Data science projects
+    SeleniumLibrary.Wait Until Page Contains    Data Science Projects
     SeleniumLibrary.Wait Until Page Contains Element    //button[.="Create data science project"]
     ${already_present} =    Run Keyword And Return Status    Page Should Contain    ${PRJ_TITLE}
     IF    ${already_present}

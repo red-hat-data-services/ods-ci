@@ -72,3 +72,4 @@ spec:
           ports:
             - name: tcp-ldap
               containerPort: 1389
+

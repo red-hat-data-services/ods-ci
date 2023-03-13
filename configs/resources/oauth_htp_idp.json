@@ -1,1 +1,2 @@
 {"name":"htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"htpasswd-password"}}}
+

@@ -35,9 +35,11 @@ ${PV_SIZE}=         1
 *** Test Cases ***
 Verify Notebook Tolerations Are Applied To Workbenches
     [Documentation]    Verifies workbenches get the custom tolerations set by
-    ...                admins in "Cluster Settings" page. It checks 2 scenarios:
-    ...                - workbench created after toleration change
-    ...                - toleration change applied to existent workbench (after restart)
+    ...  admins in "Cluster Settings" page. It checks 3 scenarios:
+    ...  - tolerations changes applied to a workbench created after toleration changes (from toleration = null to toletation != null)
+    ...  - tolerations change applied to existent workbench, after restart (from toleration = null to toletation != null)
+    ...  - tolerations change applied to existent workbench, after restart (from toleration = A to toletation = B)
+    ...  - tolerations get removed from existent workbench, after restart
     [Tags]    Tier1    Sanity
     ...       ODS-1969    ODS-2057
     Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}  workbench_description=${WORKBENCH_DESCRIPTION}

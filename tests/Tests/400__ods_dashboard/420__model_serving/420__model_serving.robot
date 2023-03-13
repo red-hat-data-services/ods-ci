@@ -192,6 +192,7 @@ Try Opening Create Server
             Clean Up DSP Page
             Open Model Serving Home Page
             SeleniumLibrary.Reload Page
+            Sleep  5s
         END
     END
 

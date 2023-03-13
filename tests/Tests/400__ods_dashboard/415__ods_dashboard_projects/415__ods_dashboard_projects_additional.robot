@@ -136,8 +136,8 @@ Verify User Can Remove GPUs From Workbench
 
 *** Keywords ***
 Project Suite Setup
-    [Documentation]    Suite setup steps for testing DS Projects. It creates some test variables
-    ...                and runs RHOSi setup
+    [Documentation]    Suite setup steps for testing DS Projects. 
+    ...                It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}

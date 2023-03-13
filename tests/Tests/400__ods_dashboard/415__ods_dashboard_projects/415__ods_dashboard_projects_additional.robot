@@ -37,7 +37,7 @@ Verify Notebook Tolerations Are Applied To Workbenches
     [Documentation]    Verifies workbenches get the custom tolerations set by
     ...  admins in "Cluster Settings" page. It checks 3 scenarios:
     ...  - tolerations changes applied to a workbench created after toleration changes (from toleration = null to toletation != null)
-    ...  - tolerations change applied to existent workbench, after restart (from toleration = null to toletation != null)
+    ...  - tolerations change applied to existent workbench, after restart (from toleration = null to toletation A)
     ...  - tolerations change applied to existent workbench, after restart (from toleration = A to toletation = B)
     ...  - tolerations get removed from existent workbench, after restart (in the teardown)
     [Tags]    Tier1    Sanity

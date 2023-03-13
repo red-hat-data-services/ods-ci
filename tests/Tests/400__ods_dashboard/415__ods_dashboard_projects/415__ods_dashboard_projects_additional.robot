@@ -16,6 +16,7 @@ ${PRJ_TITLE_GPU}=   ODS-CI DS Project GPU
 ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test-additional
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Project feature
 ${TOLERATIONS}=    workbench-tolerations
+${TOLERATIONS_2}=    workbench-tolerations-two
 ${DEFAULT_TOLERATIONS}=    NotebooksOnly   
 ${WORKBENCH_TITLE_TOL_1}=   ODS-CI Workbench Tol
 ${WORKBENCH_TITLE_TOL_2}=   ODS-CI Workbench Tol 2
@@ -38,7 +39,7 @@ Verify Notebook Tolerations Are Applied To Workbenches
     ...                - workbench created after toleration change
     ...                - toleration change applied to existent workbench (after restart)
     [Tags]    Tier1    Sanity
-    ...       ODS-1969
+    ...       ODS-1969    ODS-2057
     Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_1}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
@@ -63,6 +64,22 @@ Verify Notebook Tolerations Are Applied To Workbenches
     Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
     Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
+    Open Dashboard Cluster Settings
+    Set Pod Toleration Via UI    ${TOLERATIONS_2}
+    Save Changes In Cluster Settings
+    Sleep   40s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
+    Open Data Science Projects Home Page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Stopped     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...    toleration=${TOLERATIONS_2}    project_title=${PRJ_TITLE}
+    Run Keyword And Expect Error    Unexpected Pod Toleration
+    ...    Verify Server Workbench Has The Expected Toleration
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}
     ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
     [Teardown]    Restore Tolerations Settings And Clean Project
 

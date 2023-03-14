@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation    Provision Self-Managed clusters for testing Beta
 Metadata         provision
+Resource         ../../tests/Resources/Common.robot
 Resource         ../Resources/Provisioning/Hive/provision.robot
 Resource         ../Resources/Provisioning/Hive/deprovision.robot
 Resource         ../Resources/Provisioning/Hive/gpu-provision.robot

@@ -201,7 +201,7 @@ OpenShift Resource Field Value Should Be Equal As Strings
         ${status} =    Run Keyword And Return Status    Should Be Equal As Strings    ${dict.${actual}}    ${expected}
         Exit For Loop If    ${status}
     END
-    Run Keyword If    not ${status}   Fail     msg: Expected value didn't match with actual value
+    IF    not ${status}   Fail     msg: Expected value didn't match with actual value
 
 OpenShift Resource Field Value Should Match Regexp
     [Documentation]

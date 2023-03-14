@@ -16,36 +16,68 @@ ${PRJ_TITLE_GPU}=   ODS-CI DS Project GPU
 ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test-additional
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Project feature
 ${TOLERATIONS}=    workbench-tolerations
+${TOLERATIONS_2}=    workbench-tolerations-two
 ${DEFAULT_TOLERATIONS}=    NotebooksOnly   
-${WORKBENCH_TITLE}=   ODS-CI Workbench Tolerations
-${WORKBENCH_DESCRIPTION}=   ${WORKBENCH_TITLE} is a test workbench to check tolerations are applied
+${WORKBENCH_TITLE_TOL_1}=   ODS-CI Workbench Tol
+${WORKBENCH_TITLE_TOL_2}=   ODS-CI Workbench Tol 2
+${WORKBENCH_DESCRIPTION}=   a test workbench to check tolerations are applied
 ${WORKBENCH_TITLE_GPU}=   ODS-CI Workbench GPU
 ${WORKBENCH_DESCRIPTION_GPU}=   ${WORKBENCH_TITLE_GPU} is a test workbench using GPU
 ${NB_IMAGE}=        Minimal Python
 ${NB_IMAGE_GPU}=        PyTorch
-${PV_NAME}=         ods-ci-tolerations
+${PV_NAME_TOL_1}=         ods-ci-tolerations
+${PV_NAME_TOL_2}=         ods-ci-tolerations-2
 ${PV_NAME_GPU}=         ods-ci-gpu
 ${PV_DESCRIPTION}=         it is a PV created to test DS Projects feature
 ${PV_SIZE}=         1
 
 
 *** Test Cases ***
-Verify Notebook Tolerations Are Applied To Workbenches When Set Up
+Verify Notebook Tolerations Are Applied To Workbenches
     [Documentation]    Verifies workbenches get the custom tolerations set by
-    ...                admins in "Cluster Settings" page
+    ...  admins in "Cluster Settings" page. It checks 3 scenarios:
+    ...  -tolerations changes applied to workbench created after the changes (value from null to A)
+    ...  -tolerations change applied to existent workbench, after restart (value from null to A)
+    ...  -tolerations change applied to existent workbench, after restart (value from A to A)
+    ...  -tolerations get removed from existent workbench, after restart (check in teardown)
     [Tags]    Tier1    Sanity
-    ...       ODS-1969
-    Open Dashboard Cluster Settings
-    Set Pod Toleration Via UI    ${TOLERATIONS}
-    Save Changes In Cluster Settings
-    Launch Data Science Project Main Page
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Sleep   20s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
-    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...       ODS-1969    ODS-2057
+    Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...                 workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
-    Verify Server Workbench Has The Expected Toleration    workbench_title=${WORKBENCH_TITLE}
-    ...    toleration=${TOLERATIONS}    project_title=${PRJ_TITLE}
+    ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_1}
+    ...                 pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
+    Run Keyword And Continue On Failure
+    ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Open Settings And Set Tolerations To    ${TOLERATIONS}
+    Open Data Science Projects Home Page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Sleep   40s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
+    Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_2}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
+    Verify Workbench Has The Expected Tolerations    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    ...    toleration=${TOLERATIONS}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}    tolerations_text=${TOLERATIONS}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Stopped     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Verify Workbench Has The Expected Tolerations    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...    toleration=${TOLERATIONS}
+    Open Settings And Set Tolerations To    ${TOLERATIONS_2}
+    Sleep   40s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
+    Open Data Science Projects Home Page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Stopped     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Verify Workbench Has The Expected Tolerations    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...    toleration=${TOLERATIONS_2}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}    tolerations_text=${TOLERATIONS}
     [Teardown]    Restore Tolerations Settings And Clean Project
 
 Verify User Can Add GPUs To Workbench
@@ -104,8 +136,8 @@ Verify User Can Remove GPUs From Workbench
 
 *** Keywords ***
 Project Suite Setup
-    [Documentation]    Suite setup steps for testing DS Projects. It creates some test variables
-    ...                and runs RHOSi setup
+    [Documentation]    Suite setup steps for testing DS Projects. 
+    ...                It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
@@ -122,29 +154,58 @@ Project Suite Teardown
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
-Verify Server Workbench Has The Expected Toleration
+Verify Workbench Has The Expected Tolerations
     [Documentation]    Verifies notebook pod created as workbench
     ...                contains toleration
-    [Arguments]    ${workbench_title}    ${project_title}    ${toleration}
+    [Arguments]    ${workbench_title}    ${toleration}
+    ...            ${project_title}=${PRJ_TITLE}
     ${expected}=    Set Variable    ${toleration}:NoSchedule op=Exists
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...    namespace=${namespace}
     ${received}=    Get Pod Tolerations    ${workbench_cr_name}-0
     ...    ns=${namespace}
-    List Should Contain Value  ${received}  ${expected}
+    Run Keyword And Continue On Failure    List Should Contain Value  ${received}  ${expected}
     ...    msg=Unexpected Pod Toleration
+
+Verify Workbench Does Not Have The Given Tolerations
+    [Documentation]    Verifies notebook pod created as workbench does not
+    ...                contain the given toleration
+    [Arguments]    ${workbench_title}    ${tolerations_text}
+    ...            ${project_title}=${PRJ_TITLE}
+    Run Keyword And Continue On Failure
+    ...    Run Keyword And Expect Error    Unexpected Pod Toleration
+    ...    Verify Workbench Has The Expected Tolerations
+    ...    workbench_title=${workbench_title}
+    ...    toleration=${tolerations_text}    project_title=${project_title}
 
 Restore Tolerations Settings And Clean Project
     [Documentation]    Reset the notebook tolerations after testing
-    Open Dashboard Cluster Settings
-    Wait for RHODS Dashboard to Load    expected_page=Cluster Settings
-    ...    wait_for_cards=${FALSE}
-    Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}
-    Disable Pod Toleration Via UI
-    Save Changes In Cluster Settings
-    Clean Project    workbench_title=${WORKBENCH_TITLE}
-    ...    pvc_title=${PV_NAME}    project_title=${PRJ_TITLE}
+    Open Settings And Disable Tolerations
+    Open Data Science Projects Home Page
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    Sleep    40s
+    ...    reason=waiting for dashboard to fetch the latest tolerations settings
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Start Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}    tolerations_text=${DEFAULT_TOLERATIONS}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_2}    tolerations_text=${DEFAULT_TOLERATIONS}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}    tolerations_text=${TOLERATIONS}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_2}    tolerations_text=${TOLERATIONS}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_1}    tolerations_text=${TOLERATIONS_2}
+    Verify Workbench Does Not Have The Given Tolerations
+    ...    workbench_title=${WORKBENCH_TITLE_TOL_2}    tolerations_text=${TOLERATIONS_2}
+    Clean Project    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    ...    pvc_title=${PV_NAME_TOL_1}    project_title=${PRJ_TITLE}
+    Clean Project    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    ...    pvc_title=${PV_NAME_TOL_2}    project_title=${PRJ_TITLE}
 
 Clean Project
     [Documentation]    Deletes resources from a test project to free up
@@ -203,3 +264,20 @@ Check Limits And Requests For Every Workbench Pod Container
             ...    nvidia_gpu=${FALSE}
         END
     END
+
+Open Settings And Set Tolerations To
+    [Documentation]    Opens the "Cluster Settings" page in RHODS Dashboard
+    ...                and set the tolerations settings to the given one
+    [Arguments]    ${tolerations_text}
+    Open Dashboard Cluster Settings
+    Set Pod Toleration Via UI    ${tolerations_text}
+    Save Changes In Cluster Settings
+
+Open Settings And Disable Tolerations
+    [Documentation]    Opens the "Cluster Settings" page in RHODS Dashboard
+    ...                and disable the tolerations settings.
+    ...                Before disabling the setting, it restores the default value
+    Open Dashboard Cluster Settings
+    Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}
+    Disable Pod Toleration Via UI
+    Save Changes In Cluster Settings

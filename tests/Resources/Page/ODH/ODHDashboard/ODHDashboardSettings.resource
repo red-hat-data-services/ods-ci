@@ -212,3 +212,5 @@ Open Dashboard Cluster Settings
         Click Element  xpath://button[@id="settings"]
     END
     Click Element  xpath://a[.="Cluster settings"]
+    Wait For RHODS Dashboard To Load    expected_page=Cluster Settings
+    ...    wait_for_cards=${FALSE}

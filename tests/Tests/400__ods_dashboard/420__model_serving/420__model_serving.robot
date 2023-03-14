@@ -37,17 +37,8 @@ Verify Model Can Be Deployed Via UI
     [Tags]    Sanity    Tier1
     ...    ODS-1921
     Open Model Serving Home Page
-    Clean Up Model Serving Page
-    Clean Up DSP Page
-    Open Model Serving Home Page
     Try Opening Create Server
-    SeleniumLibrary.Wait Until Page Contains    Data science projects
-    SeleniumLibrary.Wait Until Page Contains Element    //button[.="Create data science project"]
-    ${already_present} =    Run Keyword And Return Status    Page Should Contain    ${PRJ_TITLE}
-    IF    ${already_present}
-        Delete Data Science Project    ${PRJ_TITLE}
-        Sleep    10s    reason=It takes a while for the namespace to be actually deleted
-    END
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page="Data science projects"
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -76,17 +67,8 @@ Verify Openvino_IR Model Via UI
     [Tags]    Sanity    Tier1
     ...    ODS-2054
     Open Model Serving Home Page
-    Clean Up Model Serving Page
-    Clean Up DSP Page
-    Open Model Serving Home Page
     Try Opening Create Server
-    SeleniumLibrary.Wait Until Page Contains    Data Science Projects
-    SeleniumLibrary.Wait Until Page Contains Element    //button[.="Create data science project"]
-    ${already_present} =    Run Keyword And Return Status    Page Should Contain    ${PRJ_TITLE}
-    IF    ${already_present}
-        Delete Data Science Project    ${PRJ_TITLE}
-        Sleep    10s    reason=It takes a while for the namespace to be actually deleted
-    END
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page="Data science projects"
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -161,7 +143,7 @@ Model Serving Suite Teardown
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
-    Close All Browsers
+    SeleniumLibrary.Close All Browsers
     RHOSi Teardown
 
 Clean Up DSP Page

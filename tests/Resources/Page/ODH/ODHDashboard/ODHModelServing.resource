@@ -29,14 +29,17 @@ Open Model Serving Home Page
     [Documentation]    Verifies submenu Settings > "Model Serving" is visible and navigates to page
     SeleniumLibrary.Page Should Contain    Model Serving
     SeleniumLibrary.Click Link      Model Serving
+    # Replace sleep with better Wait keyword. Confirm if error page has "Model serving" h1 element.
     Sleep    1s
     ${loading_error} =    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Problem loading model serving page
     IF    ${loading_error}
+        Log    "Page load error encountered"    level=WARN
+        SeleniumLibrary.Capture Page Screenshot
         Sleep    5s
         SeleniumLibrary.Reload Page
     END
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Model serving
     SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
-    SeleniumLibrary.Wait Until Page Contains Element    ${MS_HEADER_XP}    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model

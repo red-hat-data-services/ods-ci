@@ -4,21 +4,21 @@ items:
 - apiVersion: hive.openshift.io/v1
   kind: ClusterPool
   metadata:
-    name: {{ hive_cluster_name }}-pool
-    namespace: {{ hive_claim_ns|default("rhods") }}
+    name: ${infrastructure_configurations}[hive_cluster_name]-pool
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
   spec:
-    baseDomain: {{ aws_domain|default("rhods.ccitredhat.com") }}
+    baseDomain: ${infrastructure_configurations}[aws_domain]
     imageSetRef:
-      name: rhods-imageset-ocp-{{ ocp_version }} # see line 99
+      name: rhods-imageset-ocp-${infrastructure_configurations}[ocp_version] # see line 99
     inventory:
-      - name: {{ hive_cluster_name }}-conf # see line 71
+      - name: ${infrastructure_configurations}[hive_cluster_name]-conf # see line 71
     platform:
       openstack:
-        cloud: {{ osp_cloud_name|default("openstack") }}
+        cloud: ${infrastructure_configurations}[osp_cloud_name]
         credentialsSecretRef:
-          name: {{ hive_cluster_name }}-cred # see line 90
+          name: ${infrastructure_configurations}[hive_cluster_name]-cred # see line 90
     installConfigSecretTemplateRef:
-      name: {{ hive_cluster_name }}-sec # see line 30
+      name: ${infrastructure_configurations}[hive_cluster_name]-sec # see line 30
     size: 1
     maxSize: 1
     maxConcurrent: 1
@@ -27,27 +27,27 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: {{ hive_cluster_name }}-sec
-    namespace: {{ hive_claim_ns|default("rhods") }}
+    name: ${infrastructure_configurations}[hive_cluster_name]-sec
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
   type: Opaque
   stringData:
     install-config.yaml: |
       apiVersion: v1
-      baseDomain: {{ aws_domain|default("rhods.ccitredhat.com") }}
+      baseDomain: ${infrastructure_configurations}[aws_domain]
       compute:
       - name: worker
         platform:
           openstack:
-            type: {{ osp_flavor|default("g.standard.xl") }}
+            type: ${infrastructure_configurations}[osp_flavor]
         replicas: 3
       controlPlane:
         name: master
         platform:
           openstack:
-            type: {{ osp_flavor|default("g.standard.xl") }}
+            type: ${infrastructure_configurations}[osp_flavor]
         replicas: 3
       metadata:
-        name: {{ hive_cluster_name }}-install
+        name: ${infrastructure_configurations}[hive_cluster_name]-install
       networking:
         clusterNetwork:
         - cidr: 10.128.0.0/14
@@ -59,44 +59,44 @@ items:
         - 172.30.0.0/16
       platform:
         openstack:
-          cloud: {{ osp_cloud_name|default("openstack") }}
+          cloud: ${infrastructure_configurations}[osp_cloud_name]
           computeFlavor: m1.large
           externalDNS: null
-          externalNetwork: {{ osp_network|default("shared_net_5") }}
-      pullSecret: {{ pull_secret|default("") }}
-      sshKey: {{ ssh_key|default("") }}
+          externalNetwork: ${infrastructure_configurations}[osp_network]
+      pullSecret: ${QUAY_PULL_SEC}
+      sshKey: ${QUAY_SSH_KEY}
 - apiVersion: hive.openshift.io/v1
   kind: ClusterDeploymentCustomization
   metadata:
-    name: {{ hive_cluster_name }}-conf
-    namespace: {{ hive_claim_ns|default("rhods") }}
+    name: ${infrastructure_configurations}[hive_cluster_name]-conf
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
   spec:
     installConfigPatches:
       - op: add
         path: /platform/openstack/apiFloatingIP
-        value: {{ osp_fip_api }}
+        value: ${FIP_API}
       - op: add
         path: /platform/openstack/ingressFloatingIP
-        value: {{ osp_fip_apps }}
+        value: ${FIP_APPS}
       - op: add
         path: /platform/openstack/externalNetwork
-        value: {{ osp_network|default("shared_net_5") }}
+        value: ${infrastructure_configurations}[osp_network]
       - op: add
         path: /metadata/name
-        value: {{ hive_cluster_name }}
+        value: ${infrastructure_configurations}[hive_cluster_name]
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: {{ hive_cluster_name }}-cred
-    namespace: {{ hive_claim_ns|default("rhods") }}
+    name: ${infrastructure_configurations}[hive_cluster_name]-cred
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
   type: Opaque
   data:
-    clouds.yaml: {{ OSP_CRED_DECODED }}
-    cloud: {{ OSP_CLOUD_DECODED }}
+    clouds.yaml: ${PSI_CLOUD_YAML_ECODED}
+    cloud: ${PSI_CLOUD_NAME_ECODED}
 - apiVersion: hive.openshift.io/v1
   kind: ClusterImageSet
   metadata:
-    name: rhods-imageset-ocp-{{ ocp_version }}
-    namespace: {{ hive_claim_ns|default("rhods") }}
+    name: rhods-imageset-ocp-${infrastructure_configurations}[ocp_version]
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
   spec:
-    releaseImage: quay.io/openshift-release-dev/ocp-release:{{ ocp_version }}-x86_64
+    releaseImage: quay.io/openshift-release-dev/ocp-release:${infrastructure_configurations}[ocp_version]-x86_64

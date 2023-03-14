@@ -111,9 +111,14 @@ Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   ...    timeout=30s
 
 Launch ${dashboard_app} From RHODS Dashboard Link
-  Wait Until RHODS Dashboard ${dashboard_app} Is Visible
-  # Click Link  xpath://div[@class="pf-c-card__title" and .="${dashboard_app}"]/../div[contains(@class,"pf-c-card__footer")]/a
-  Click Link  xpath://div[contains(@class,'gallery')]/div[//div[@class="pf-c-card__title"]//*[text()="${dashboard_app}"]]/div[contains(@class,"pf-c-card__footer")]/a
+  Wait for RHODS Dashboard to Load    wait_for_cards=${TRUE}
+  ...    expected_page=Enabled
+  IF    "OpenShift" in $dashboard_app
+      ${splits}=    Split String From Right    ${dashboard_app}    max_split=1
+      Click Link   xpath:${CARDS_XP}//*[text()='${splits[0]} ']/../..//a
+  ELSE
+      Click Link  xpath://div[contains(@class,'gallery')]/div[//div[@class="pf-c-card__title"]//*[text()="${dashboard_app}"]]/div[contains(@class,"pf-c-card__footer")]/a
+  END
   IF    "${dashboard_app}" != "Jupyter"
        Switch Window  NEW
   END

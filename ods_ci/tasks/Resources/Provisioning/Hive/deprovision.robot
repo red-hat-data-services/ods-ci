@@ -4,12 +4,16 @@ Clean Failed Cluster
 
 Delete Cluster Configuration 
     Log    Deleting cluster configuration    console=True
-    ${template} =    Select Provisioner Template
-    ${Delete_Cluster} =    Oc Delete    kind=List    src=${template}    template_data=${infrastructure_configurations}
+    @{Delete_Cluster} =    Oc Delete    kind=ClusterPool    name=${pool_name}    
+    ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+    Log Many    @{Delete_Cluster}
+    ${Delete_Cluster} =    Oc Delete    kind=ClusterDeploymentCustomization    name=${conf_name}    
+    ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+    Log Many    @{Delete_Cluster}
 
 Deprovision Cluster
     ${cluster_claim} =    Run Keyword And Return Status
-    ...    Unclaim Cluster    ${infrastructure_configurations['hive_claim_name']}
+    ...    Unclaim Cluster    ${claim_name}
     ${cluster_deprovision} =    Run Keyword And Return Status
     ...    Delete Cluster Configuration
     IF    ${cluster_claim} == False
@@ -20,5 +24,7 @@ Deprovision Cluster
 
 Unclaim Cluster
     [Arguments]    ${unclaimname}
-    Oc Delete    kind=ClusterClaim    name=${unclaimname}    namespace=rhods
-    ${status} =    Oc Get    kind=ClusterClaim    name=${unclaimname}    namespace=rhods
+    Oc Delete    kind=ClusterClaim    name=${unclaimname}    
+    ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+    ${status} =    Oc Get    kind=ClusterClaim    name=${unclaimname}    namespace=${hive_namespace}
+    Log    ${status}    console=True

@@ -3,6 +3,7 @@ test-variables.yml
 # Ignore runtime files created by the run_robot_test.sh script
 venv/
 ods_ci.egg-info/
+ods-ci.log*
 test-output/
 dist/
 drivers/**/chromedriver

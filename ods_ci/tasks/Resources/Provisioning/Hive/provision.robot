@@ -124,8 +124,8 @@ Verify Cluster Is Successfully Provisioned
 Wait For Cluster To Be Ready
     ${namespace} =    Wait Until Keyword Succeeds    2 min    2 s
     ...    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${cluster_name}-pool
-    ${pool_namespace} =     ${namespace[0]['metadata']['name']}
-    Log    Watching Hive Pool namespace: ${namespace[0]['metadata']['name']}    console=True
+    ${pool_namespace} =    Set Variable   ${namespace[0]['metadata']['name']}
+    Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
     Set Task Variable    ${install_log_file}    ${artifacts_dir}${cluster_name}_install.log
     Create File    ${install_log_file}
     ${result} =    Wait Until Keyword Succeeds    50 min    10 s

@@ -40,15 +40,15 @@ osp_dashboard="$(openstack catalog show keystone -c endpoints -c name -c type \
 echo "Connected to Openstack: ${osp_dashboard}"
 
 echo "Allocating a floating IP for cluster's API"
-FIP_API=$(openstack floating ip create --description "$CLUSTER_NAME API" -f value -c floating_ip_address $OSP_NETWORK)
-if [ $? != 0 ]; then
+FIP_API=$(openstack floating ip create --description "$CLUSTER_NAME API" -f value -c floating_ip_address "$OSP_NETWORK") || rc=$?
+if [ "$rc" != 0 ]; then
   echo "Failed to allocate a floating IP for API"
   exit 10
 fi
 
 echo "Allocating a floating IP for cluster's ingress"
-FIP_APPS=$(openstack floating ip create --description "$CLUSTER_NAME APPS" -f value -c floating_ip_address $OSP_NETWORK)
-if [ $? != 0 ]; then
+FIP_APPS=$(openstack floating ip create --description "$CLUSTER_NAME APPS" -f value -c floating_ip_address "$OSP_NETWORK") || rc=$?
+if [ "$rc" != 0 ]; then
   echo "Failed to allocate a floating IP for ingress"
   exit 10
 fi
@@ -68,35 +68,42 @@ echo "========================================================================"
 
 echo "Getting zone ID in Route53"
 ZONES=$(aws route53 list-hosted-zones --output json)
-ZONE_ID=$(echo $ZONES | jq -r ".HostedZones[] | select(.Name==\"$AWS_DOMAIN.\") | .Id")
-if [ -z $ZONE_ID ]; then
+ZONE_ID=$(echo "$ZONES" | jq -r ".HostedZones[] | select(.Name==\"$AWS_DOMAIN.\") | .Id")
+if [ -z "$ZONE_ID" ]; then
   echo "Domain $AWS_DOMAIN not found in Route53"
   exit 20
 fi
 
 echo "Updating DNS records (cluster api's) in Route53"
-RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID --change-batch '{ "Comment": "Update A record for cluster API", "Changes": [ { "Action": "CREATE", "ResourceRecordSet": { "Name": "api.'$CLUSTER_NAME'.'$AWS_DOMAIN'", "Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'$FIP_API'" } ] } } ] }' --output json)
-if [ $? != 0 ]; then
+RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch \
+'{ "Comment": "Update A record for cluster API", "Changes": 
+[ { "Action": "CREATE", "ResourceRecordSet": { "Name": "api.'"$CLUSTER_NAME"'.'"$AWS_DOMAIN"'", 
+"Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'"$FIP_API"'" } ] } } ] }' --output json) || rc=$?
+if [ "$rc" != 0 ]; then
   echo "Failed to update A record for cluster"
   echo "Releasing previously allocated floating IP"
-  openstack floating ip delete $FIP_API
+  openstack floating ip delete "$FIP_API"
   exit 25
 fi
 
 echo "Waiting for DNS change to propagate"
-aws route53 wait resource-record-sets-changed --id $(echo $RESPONSE | jq -r '.ChangeInfo.Id')
+aws route53 wait resource-record-sets-changed --id "$(echo "$RESPONSE" | jq -r '.ChangeInfo.Id')"
 
 echo "Updating DNS records (cluster ingress) in Route53"
-RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID --change-batch '{ "Comment": "Update A record for cluster API", "Changes": [ { "Action": "CREATE", "ResourceRecordSet": { "Name": "*.apps.'$CLUSTER_NAME'.'$AWS_DOMAIN'", "Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'$FIP_APPS'" } ] } } ] }' --output json)
-if [ $? != 0 ]; then
+RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch \
+'{ "Comment": "Update A record for cluster API", "Changes": 
+[ { "Action": "CREATE", "ResourceRecordSet": { "Name": "*.apps.'"$CLUSTER_NAME"'.'"$AWS_DOMAIN"'", 
+"Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'"$FIP_APPS"'" } ] } } ] }' --output json) || rc=$?
+
+if [ "$rc" != 0 ]; then
   echo "Failed to update A record for cluster"
   echo "Releasing previously allocated floating IP"
-  openstack floating ip delete $FIP_APPS
+  openstack floating ip delete "$FIP_APPS"
   exit 25
 fi
 
 echo "Waiting for DNS change to propagate"
-aws route53 wait resource-record-sets-changed --id $(echo $RESPONSE | jq -r '.ChangeInfo.Id')
+aws route53 wait resource-record-sets-changed --id "$(echo "$RESPONSE" | jq -r '.ChangeInfo.Id')"
 
 mkdir -p "$OUTPUT_DIR"
 export CLUSTER_FIPS="$OUTPUT_DIR/$CLUSTER_NAME.$AWS_DOMAIN.fips"
@@ -104,8 +111,8 @@ echo "Exporting Floating IPs of API '$FIP_API' and *APPS '$FIP_APPS', and saving
 
 : > "$CLUSTER_FIPS"
 
-echo "export FIP_API=$FIP_API" >> $CLUSTER_FIPS
-echo "export FIP_APPS=$FIP_APPS" >> $CLUSTER_FIPS
+echo "export FIP_API=$FIP_API" >> "$CLUSTER_FIPS"
+echo "export FIP_APPS=$FIP_APPS" >> "$CLUSTER_FIPS"
 
 cat "$CLUSTER_FIPS"
 

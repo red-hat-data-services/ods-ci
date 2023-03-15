@@ -35,8 +35,7 @@ Can Login to Jupyterhub
 Can Spawn Notebook
     [Tags]    ODS-901    ODS-903
     Fix Spawner Status
-    #Spawn Notebook With Arguments    image=s2i-minimal-notebook
-    Spawn Notebook With Arguments    image=jupyter-minimal-notebook
+    Spawn Notebook With Arguments    image=minimal-notebook
 
 Can Launch Python3 Smoke Test Notebook
     [Tags]    ODS-905    ODS-907    ODS-913    ODS-914    ODS-915    ODS-916    ODS-917    ODS-918    ODS-919
@@ -102,5 +101,5 @@ Verify Jupyterlab Server Pods Are Spawned In A Custom Namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)
     [Tags]    ODS-320
     ${pod_name} =    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
-    Verify Operator Pod Status    namespace=rhods-notebooks    label_selector=statefulset.kubernetes.io/pod-name=${pod_name}
+    Verify Operator Pod Status    namespace=${NOTEBOOKS_NAMESPACE}    label_selector=statefulset.kubernetes.io/pod-name=${pod_name}
     ...    expected_status=Running

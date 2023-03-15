@@ -43,7 +43,7 @@ May Be Delete PVC
     [Documentation]    Delete PVC from openshift
     [Arguments]    ${pvc_name}
     Run Keyword And Return Status    Oc Delete    kind=PersistentVolumeClaim
-    ...   field_selector=metadata.name==${pvc_name}    namespace=rhods-notebooks
+    ...   field_selector=metadata.name==${pvc_name}    namespace=${NOTEBOOKS_NAMESPACE}
 
 Get Notebook PVC Size
     [Documentation]    Return Notebook PVC size

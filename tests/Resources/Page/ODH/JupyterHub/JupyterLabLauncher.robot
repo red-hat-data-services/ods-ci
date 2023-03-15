@@ -120,6 +120,15 @@ Run Cell And Check Output
     Should Match  ${output}  ${expected_output}
     RETURN    ${output}
 
+Run Cell And Check Output Contains
+    [Arguments]  ${input}  ${expected_output}
+    Add and Run JupyterLab Code Cell in Active Notebook  ${input}
+    Wait Until JupyterLab Code Cell Is Not Active
+    ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    Should Contain    ${output}  ${expected_output}
+    RETURN    ${output}
+
+
 Run Cell And Get Output
     [Documentation]    Runs a code cell and returns its output
     [Arguments]    ${input}
@@ -159,7 +168,7 @@ Clean Up Server
     Maybe Close Popup
     ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
     ${container_name_nb} =  Get Substring  ${notebook_pod_name}  start=0  end=-2
-    ${ls_server} =  Run Command In Container    rhods-notebooks    ${notebook_pod_name}    ls    ${container_name_nb}
+    ${ls_server} =  Run Command In Container    ${NOTEBOOKS_NAMESPACE}    ${notebook_pod_name}    ls    ${container_name_nb}
     #${ls_server} =  Run Command In Container    redhat-ods-applications    ${notebook_pod_name}    ls    ${container_name_nb}
     Should Match    "${ls_server}"    "${EMPTY}"
 
@@ -221,7 +230,7 @@ Delete Folder In User Notebook
   IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
 
       ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}

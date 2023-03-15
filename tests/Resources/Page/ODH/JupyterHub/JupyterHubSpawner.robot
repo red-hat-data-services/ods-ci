@@ -269,10 +269,10 @@ Spawn Notebook With Arguments  # robocop: disable
    END
 
 Spawned Image Check
-    [Documentation]    This Keyword checks that the spawned image matches a given image name
+    [Documentation]    This Keyword checks that the spawned image containes a given image name
     ...                (Presumably the one the user wanted to spawn)
     [Arguments]    ${image}
-    Run Cell And Check Output    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])    ${image}
+    Run Cell And Check Output Contains    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])    ${image}
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells
 

@@ -198,8 +198,10 @@ OpenShift Resource Field Value Should Be Equal As Strings
     [Arguments]    ${actual}    ${expected}    @{resources}
     FOR    ${resource}    IN    @{resources}
         &{dict} =    Set Variable    ${resource}
-        Should Be Equal As Strings    ${dict.${actual}}    ${expected}
+        ${status} =    Run Keyword And Return Status    Should Be Equal As Strings    ${dict.${actual}}    ${expected}
+        Exit For Loop If    ${status}
     END
+    IF    not ${status}   Fail     msg: Expected value didn't match with actual value
 
 OpenShift Resource Field Value Should Match Regexp
     [Documentation]

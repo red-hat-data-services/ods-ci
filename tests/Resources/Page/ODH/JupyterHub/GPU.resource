@@ -28,8 +28,8 @@ Verify Tensorflow Can See GPU
     [Documentation]    Verifies that Tensorflow can see a GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
-        # TODO: use Install And Import Package In JupyterLab after #202 is merged
-        Run Cell And Check For Errors  !pip install tensorflow==2.7
+        # This installs the latest .z stream available for 2.7 to avoid the protobuf bug
+        Run Cell And Check For Errors  !pip install tensorflow~=2.7
     END
     # Need to wrap output in double quotes
     ${out} =  Run Cell And Get Output  import tensorflow as tf; import os; os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'; tf.config.list_physical_devices('GPU')  # robocop: disable

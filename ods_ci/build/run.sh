@@ -25,6 +25,6 @@ if [ "${SET_ENVIRONMENT}" -eq 1 ]; then \
   fi
 fi
 echo "-----| ODS-CI is starting the tests run...|-----"
-./run_robot_test.sh --skip-pip-install ${RUN_SCRIPT_ARGS} --extra-robot-args "${ROBOT_EXTRA_ARGS}"
+./ods_ci/run_robot_test.sh --skip-pip-install ${RUN_SCRIPT_ARGS} --extra-robot-args "${ROBOT_EXTRA_ARGS}"
 
 

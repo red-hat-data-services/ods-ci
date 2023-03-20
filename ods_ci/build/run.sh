@@ -21,7 +21,7 @@ if [ "${SET_ENVIRONMENT}" -eq 1 ]; then \
             fi
         fi
         echo "-----| SET_ENVIRONMENT option is enabled. ODS-CI is going to configure the test environment for you..|-----"
-        ./build/install_idp.sh
+        ./ods_ci/build/install_idp.sh
   fi
 fi
 echo "-----| ODS-CI is starting the tests run...|-----"

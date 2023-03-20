@@ -46,7 +46,7 @@ spec:
         - name: ods-ci-test-variables
           mountPath: /tmp/ods-ci-test-variables
 
-        - mountPath: /tmp/ods-ci/test-output
+        - mountPath: /tmp/ods-ci/ods_ci/test-output
           name: ods-ci-test-output
   restartPolicy: Never
   volumes:

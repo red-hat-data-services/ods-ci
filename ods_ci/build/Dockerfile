@@ -42,7 +42,8 @@ COPY ods_ci/tests ods_ci/tests/
 COPY ods_ci/tasks ods_ci/tasks/
 COPY ods_ci/libs ods_ci/libs/
 COPY ods_ci/run_robot_test.sh ods_ci/run_robot_test.sh
-COPY ods_ci/build/run.sh  ods_ci/run.sh
+COPY ods_ci/build/run.sh  ods_ci/build/run.sh
+COPY ods_ci/build/install_idp.sh  ods_ci/build/install_idp.sh
 COPY ods_ci/utils/scripts/Sender  ods_ci/utils/scripts/Sender/
 COPY ods_ci/utils/scripts/ocm/ocm.py  ods_ci/utils/scripts/ocm/ocm.py
 COPY ods_ci/utils/scripts/logger.py  ods_ci/utils/scripts/logger.py
@@ -68,4 +69,4 @@ RUN poetry install
 RUN chgrp -R 1001 $HOME/ods-ci && chown -R 1001 $HOME/ods-ci && chmod -R 744 $HOME/ods-ci && chown -R 1001 /tmp/.cache/pypoetry
 USER 1001
 
-ENTRYPOINT ["./ods_ci/run.sh"]
+ENTRYPOINT ["./ods_ci/build/run.sh"]

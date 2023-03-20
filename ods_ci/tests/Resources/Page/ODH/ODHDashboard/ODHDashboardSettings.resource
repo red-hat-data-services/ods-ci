@@ -114,7 +114,7 @@ Disable Pod Toleration Via UI
 
 Save Changes In Cluster Settings
     [Documentation]    Clicks on the "Save changes" button in Cluster Settings and
-    ...    waits until "Settings changes saved" is shown
+    ...    waits until "Cluster settings changes saved" is shown
     Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="false"]    timeout=15s
     Click Button    Save changes
     ${clicked}=    Run Keyword And Return Status
@@ -124,7 +124,7 @@ Save Changes In Cluster Settings
         Click Button    Save changes
     END
     Wait Until Keyword Succeeds    30    1
-    ...    Wait Until Page Contains    Settings changes saved
+    ...    Wait Until Page Contains    Cluster settings changes saved
     # New setting applies after a few seconds, empirically >15s.
     # Sleep here to make sure it is applied.
     Sleep  30s
@@ -212,3 +212,5 @@ Open Dashboard Cluster Settings
         Click Element  xpath://button[@id="settings"]
     END
     Click Element  xpath://a[.="Cluster settings"]
+    Wait For RHODS Dashboard To Load    expected_page=Cluster Settings
+    ...    wait_for_cards=${FALSE}

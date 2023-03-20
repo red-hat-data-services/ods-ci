@@ -119,3 +119,11 @@ Get Openshift PVC From Storage
     [Arguments]     ${name}      ${namespace}
     ${rc}  ${pvc_name}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].metadata.name}'
     RETURN    ${rc}    ${pvc_name}
+
+Delete PVC From CLI
+    [Documentation]    Deletes a given PVC from CLI
+    [Arguments]    ${pvc_title}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${_}  ${cr_name}=    Get Openshift PVC From Storage
+    ...    name=${pvc_title}  namespace=${ns_name}
+    Oc Delete    kind=PersistentVolumeClaim   name=${pvc_title}   namespace=${ns_name}

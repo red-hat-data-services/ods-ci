@@ -198,8 +198,10 @@ OpenShift Resource Field Value Should Be Equal As Strings
     [Arguments]    ${actual}    ${expected}    @{resources}
     FOR    ${resource}    IN    @{resources}
         &{dict} =    Set Variable    ${resource}
-        Should Be Equal As Strings    ${dict.${actual}}    ${expected}
+        ${status} =    Run Keyword And Return Status    Should Be Equal As Strings    ${dict.${actual}}    ${expected}
+        Exit For Loop If    ${status}
     END
+    IF    not ${status}   Fail     msg: Expected value didn't match with actual value
 
 OpenShift Resource Field Value Should Match Regexp
     [Documentation]
@@ -282,7 +284,7 @@ Verify CPU And Memory Requests And Limits Are Defined For Pod Container
     ...        container_info: Container information
     ...    Returns:
     ...        None
-    [Arguments]    ${container_info}
+    [Arguments]    ${container_info}    ${nvidia_gpu}=${FALSE}
     &{container_info_dict} =    Set Variable    ${container_info}
     OpenShift Resource Component Should Contain Field     ${container_info_dict}    resources
     IF   'resources' in ${container_info_dict}
@@ -297,6 +299,14 @@ Verify CPU And Memory Requests And Limits Are Defined For Pod Container
     ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.limits}    cpu
     IF   'limits' in ${container_info_dict.resources}
     ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.limits}    memory
+    IF    ${nvidia_gpu} == ${TRUE}
+        IF   'requests' in ${container_info_dict.resources}
+        ...    OpenShift Resource Component Should Contain Field
+        ...    ${container_info_dict.resources.requests}    nvidia.com/gpu
+        IF   'limits' in ${container_info_dict.resources}
+        ...    OpenShift Resource Component Should Contain Field
+        ...    ${container_info_dict.resources.limits}    nvidia.com/gpu
+    END
 
 Fetch Project Pods Info
     [Documentation]    Fetches information of all Pods for the specified Project

@@ -9,7 +9,7 @@ Test Teardown       Dashboard Test Teardown
 
 
 *** Variables ***
-${SB_CARDS_XP}=     //article[@id="starburst"]
+${SB_CARDS_XP}=     //div[@id="starburst"]
 ${SB_BETA_DESC}=    //*[@class="pf-c-drawer__panel-main"]//div[@class="pf-c-alert pf-m-inline pf-m-info"]
 
 

@@ -5,8 +5,9 @@ Resource       ../../../Common.robot
 Resource       ODHDataScienceProject/ModelServer.resource
 Library        ../../../../../libs/Helpers.py
 
+
 *** Variables ***
-${MS_HEADER_XP}=     xpath=//h1[text()="Deployed models"]
+${MS_HEADER_XP}=     xpath=//h1[text()="Model serving"]
 ${S3_NAME_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field Name"]
 ${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_ACCESS_KEY_ID"]
 ${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_SECRET_ACCESS_KEY"]
@@ -26,10 +27,19 @@ ${MS_TABLE_STATUS_FAILURE}=    //span[contains(@class,"pf-c-icon__content")][con
 *** Keywords ***
 Open Model Serving Home Page
     [Documentation]    Verifies submenu Settings > "Model Serving" is visible and navigates to page
-    Page Should Contain    Model Serving
-    Click Link      Model Serving
-    Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
-    Wait Until Page Contains Element    ${MS_HEADER_XP}    timeout=30
+    SeleniumLibrary.Page Should Contain    Model Serving
+    SeleniumLibrary.Click Link      Model Serving
+    # Replace sleep with better Wait keyword. Confirm if error page has "Model serving" h1 element.
+    Sleep    1s
+    ${loading_error} =    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Problem loading model serving page
+    IF    ${loading_error}
+        Log    "Page load error encountered"    level=WARN
+        SeleniumLibrary.Capture Page Screenshot
+        Sleep    5s
+        SeleniumLibrary.Reload Page
+    END
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Model serving
+    SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model
@@ -38,8 +48,8 @@ Serve Model
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}
     # TODO: Does not work if there's already a model deployed
-    Wait Until Page Contains    Serve model
-    Click Button    Serve model
+    Wait Until Page Contains    Deploy model
+    Click Button    Deploy model
     Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
@@ -202,4 +212,13 @@ Verify Model Inference
     Log    ${list}
     IF    ${result}==False
         Fail    msg=comparison between expected and actual failed, ${list}
+    END
+
+Clean Up Model Serving Page
+    [Documentation]    Deletes all currently deployed models, if any are present.
+    # Returns an empty list if no matching elements found
+    ${models} =    SeleniumLibrary.Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+    FOR  ${model}  IN  @{models}
+        ${name} =    SeleniumLibrary.Get Text   ${model}
+        Delete Model Via UI    ${name}
     END

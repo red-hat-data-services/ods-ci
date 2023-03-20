@@ -89,9 +89,10 @@ Verify Disabled Cards Can Be Removed
 Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
+    ...               ProductBug: RHODS-6539
     [Tags]    Sanity
     ...       ODS-1097   ODS-357
-    ...       FlakyTest
+    ...       ProductBug
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard Jupyter Is Visible
@@ -455,7 +456,7 @@ Verify Star Icons Are Clickable
 Get List Of Ids Of Tiles
     [Documentation]    Returns the list of ids of tiles present in resources page
     ${list_of_ids}=    Get List Of Atrributes
-    ...    xpath=//article[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
+    ...    xpath=//div[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
     RETURN    ${list_of_ids}
 
 Set Item As Favorite
@@ -566,11 +567,11 @@ Set GPU Expected Resources
 Check GPU Resources
     [Documentation]   Check resource tiles for GPU is present
     ${gpu_re_id}    ${gpu_re_link}    ${gpu_re_exp}=    Set GPU Expected Resources
-    ${elements}=    Get WebElements    //article
+    ${elements}=    Get WebElements    ${RES_CARDS_XP}
     ${len}=    Get Length    ${elements}
     Should Be Equal As Integers    ${len}    ${gpu_re_exp}
     FOR    ${counter}    IN RANGE    ${len}
-        Page Should Contain Element    //article[@id=${gpu_re_id}[${counter}]]
+        Page Should Contain Element    xpath:${RES_CARDS_XP}\[@id=${gpu_re_id}[${counter}]]
         IF    ${gpu_re_link}[${counter}] == '#'
                 ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
                 ${no_of_open_link}=    Get Length    ${counter}

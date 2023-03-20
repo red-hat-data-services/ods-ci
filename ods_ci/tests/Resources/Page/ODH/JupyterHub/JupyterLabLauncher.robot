@@ -178,6 +178,14 @@ Get User CR Notebook Name
     ${notebook_cr_name}=   Set Variable  jupyter-nb-${safe_username}
     RETURN  ${notebook_cr_name}
 
+Get User Notebook Pod UID
+    [Documentation]   Returns notebook pod UID for given username and ${namespace}  (e.g. for user ldap-admin1 it will be jupyter-nb-ldap-2dadmin1)
+    [Arguments]  ${username}    ${namespace}
+    ${notebook_pod_name}=    Get User Notebook Pod Name    ${username}
+    ${pod_info}=    Oc Get    kind=Pod  name=${notebook_pod_name}  api_version=v1  namespace=${namespace}
+    ${notebook_pod_uid}=    Set Variable    ${pod_info[0]['metadata']['uid']}
+    RETURN  ${notebook_pod_uid}
+
 Wait Until User Server Is Clean
     [Documentation]    Waits until the JL UI does not show any items (folders/files) in the user's server
     [Arguments]    ${timeout}=30s

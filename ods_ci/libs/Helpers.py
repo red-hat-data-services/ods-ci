@@ -150,7 +150,9 @@ class Helpers:
         ocm_client.cluster_name = cluster_name
         ocm_client.notification_email = email_address
         license_escaped = license.replace('"', '\\"')
-        result = ocm_client.install_managed_starburst_addon(license=license_escaped, exit_on_failure=False)
+        result = ocm_client.install_managed_starburst_addon(
+            license=license_escaped, exit_on_failure=False
+        )
         if not result:
             self.BuiltIn.fail(
                 "Something got wrong while installing Managed Starburst. Check the logs"
@@ -168,37 +170,66 @@ class Helpers:
             import ast
             import decimal
             import numbers
+            import re
+
+            model_name = re.compile("^[\S]+__isvc-[\w\d]+$")
 
             # Cast from string to python type
-            expected=ast.literal_eval(expected)
-            received=ast.literal_eval(received)
+            expected = ast.literal_eval(expected)
+            received = ast.literal_eval(received)
 
-            failures=[]
-            
+            failures = []
+
             def _inference_object_comparison(expected, received, threshold):
                 if isinstance(expected, dict):
                     # if current element is a dict, compare the keys and then each value
-                    if not expected.keys()==received.keys(): failures.append([expected.keys(),received.keys()])
+                    if not expected.keys() == received.keys():
+                        failures.append([expected.keys(), received.keys()])
                     for k in expected.keys():
-                        _inference_object_comparison(expected[k], received[k], threshold)
+                        _inference_object_comparison(
+                            expected[k], received[k], threshold
+                        )
                 elif isinstance(expected, list):
                     # if current element is a list, compare each value 1 by 1
-                    for id, _ in enumerate(expected): _inference_object_comparison(expected[id],received[id], threshold)				
+                    for id, _ in enumerate(expected):
+                        _inference_object_comparison(
+                            expected[id], received[id], threshold
+                        )
                 elif isinstance(expected, numbers.Number):
                     # if current element is a number, compare each value with a rounding threshold
                     if not expected - received <= threshold:
                         # Get number of decimal places in the threshold number
-                        d=abs(decimal.Decimal(str(threshold)).as_tuple().exponent)
+                        d = abs(decimal.Decimal(str(threshold)).as_tuple().exponent)
                         # format the difference between expected and received with the same number of decimal
                         # places as the current threshold
-                        failures.append([expected,received,"{0:.{1}f}".format(expected-received,d)])
+                        failures.append(
+                            [
+                                expected,
+                                received,
+                                "{0:.{1}f}".format(expected - received, d),
+                            ]
+                        )
                 else:
+                    # if element is model name, don't care about ID
+                    result_ex = model_name.match(expected)
+                    result_rec = model_name.match(received)
+                    if result_ex != None and result_rec != None:
+                        if expected.split("__")[0] != received.split("__")[0]:
+                            failures.append([expected, received])
                     # else compare values are equal
-                    if not expected==received: failures.append([expected,received])
-                    
+                    else:
+                        if not expected == received:
+                            failures.append([expected, received])
+
             _inference_object_comparison(expected, received, threshold)
-            if len(failures)>0:
+            if len(failures) > 0:
                 return False, failures
             return True, failures
         except Exception as e:
-            return False, [['exception thrown during comparison'], ['expected', expected], ['received', received], ['threshold', threshold], ['exception', e]]
+            return False, [
+                ["exception thrown during comparison"],
+                ["expected", expected],
+                ["received", received],
+                ["threshold", threshold],
+                ["exception", e],
+            ]

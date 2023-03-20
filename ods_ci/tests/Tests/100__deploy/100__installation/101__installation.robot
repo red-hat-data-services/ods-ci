@@ -38,8 +38,8 @@ Verify User Can Access RHODS Documentation From OCM Console
   Open Cluster By Name
   Wait Until Page Contains Element    //div[@id="cl-details-top"]     20
   Click Button      //button[@data-ouia-component-id="Add-ons"]
-  Wait Until Page Contains Element      //article[@data-ouia-component-id="card-addon-managed-odh"]     10
-  Click Element     //article[@data-ouia-component-id="card-addon-managed-odh"]
+  Wait Until Page Contains Element      //div[@data-ouia-component-id="card-addon-managed-odh"]     10
+  Click Element     //div[@data-ouia-component-id="card-addon-managed-odh"]
   Page Should Contain Element       //div[@class="pf-l-flex pf-m-space-items-lg pf-m-column"]//a
   Verify Documentation Is Accessible
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Make changes to gpu install file
 
-GPU_INSTALL_FILE=tasks/Resources/Provisioning/GPU
+GPU_INSTALL_FILE=ods_ci/tasks/Resources/Provisioning/GPU
 
 CHANNEL=$(oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.defaultChannel}')
 

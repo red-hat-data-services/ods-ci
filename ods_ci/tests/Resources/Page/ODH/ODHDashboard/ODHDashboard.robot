@@ -492,7 +492,7 @@ Check External Links Status
     END
 
 Verify Cluster Settings Is Available
-    [Documentation]    Verifies submenu Settings > Cluster settings" is visible
+    [Documentation]    Verifies submenu Settings > Cluster settings is visible
     Page Should Contain    Settings
     Menu.Navigate To Page    Settings    Cluster settings
     Capture Page Screenshot

@@ -136,12 +136,6 @@ Spawn Notebook
     ...    If ${expect_autoscaling} is set to ${True} also expects a "TriggeredScaleUp" message in the
     ...    spawn modal.
     [Arguments]  ${spawner_timeout}=600 seconds  ${same_tab}=${True}  ${expect_autoscaling}=${False}
-    # TODO: Make sure server spawns in same tab in 1.17+
-    # Currently no way to know if option already selected or not
-    #${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
-    #IF  ${version-check}==True
-    #    Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
-    #END
     Click Button  Start server
     # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
     # if the spawn was successful
@@ -199,17 +193,12 @@ Spawn Notebook
     IF    ${expect_autoscaling}
         Wait Until Page Contains    TriggeredScaleUp    timeout=120s
     END
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
-    IF  ${version-check}==True
-        Wait Until Page Contains    The notebook server is up and running.    ${spawner_timeout}
-        IF  ${same_tab}
-            Click Button    Open in current tab
-        ELSE
-            Click Button    Open in new tab
-            Switch Window    NEW
-        END
+    Wait Until Page Contains    The notebook server is up and running.    ${spawner_timeout}
+    IF  ${same_tab}
+        Click Button    Open in current tab
     ELSE
-        Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
+        Click Button    Open in new tab
+        Switch Window    NEW
     END
 
 Has Spawn Failed

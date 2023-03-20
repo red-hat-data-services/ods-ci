@@ -107,81 +107,36 @@ Anaconda Activation Should Have Failed
 
 Verify Anaconda Element Present Based On Version
   [Documentation]   Checks Anaconda input element present based on version.
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Wait Until Page Contains Element  xpath://input[@name='Anaconda Commercial Edition']  timeout=15
-  ELSE
-    Wait Until Page Contains Element  xpath://input[@name='Anaconda Professional']    timeout=15
-  END
+  Wait Until Page Contains Element  xpath://input[@name='Anaconda Professional']    timeout=15
 
 Verify Anaconda Element Enabled Based On Version
   [Documentation]   Checks Anaconda element is enabled based on version.
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Wait Until Element Is Enabled    xpath://input[@name="Anaconda Commercial Edition"]   timeout=10
-  ELSE
-    Wait Until Element Is Enabled    xpath://input[@name="Anaconda Professional"]   timeout=10
-  END
+  Wait Until Element Is Enabled    xpath://input[@name="Anaconda Professional"]   timeout=10
 
 Verify Anaconda Card Present Based On Version
   [Documentation]   Checks Anaconda card is present based on version.
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Page Should Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
-  ELSE
-    Page Should Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Professional"]
-  END
+  Page Should Contain Element  xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Professional"]
 
 Verify Anaconda Card Not Present Based On Version
   [Documentation]    Checks Anaconda card is not present based on version.
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Page Should Not Contain Element     xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Commercial Edition"]
-  ELSE
-    Page Should Not Contain Element     xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Professional"]
-  END
+  Page Should Not Contain Element     xpath://div[@class="pf-c-card__title"]/span[.="Anaconda Professional"]
 
 Verify Service Is Available In The Explore Page Based On Version
   [Documentation]   Checks service is available in explore page based on version.
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Verify Service Is Available In The Explore Page    Anaconda Commercial Edition
-  ELSE
-    Verify Service Is Available In The Explore Page    Anaconda Professional
-  END
+  Verify Service Is Available In The Explore Page    Anaconda Professional
 
 Verify Service Provides "Get Started" Button In The Explore Page Based On Version
   [Documentation]    Checks service provides "get started" button in explore based on version.
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Commercial Edition
-  ELSE
-    Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Professional
-  END
+  Verify Service Provides "Get Started" Button In The Explore Page    Anaconda Professional
 
 Verify Service Provides "Enable" Button In The Explore Page Based On Version
   [Documentation]   Checks service provides "enable" button in explore page based on version
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Verify Service Provides "Enable" Button In The Explore Page     Anaconda Commercial Edition
-  ELSE
-    Verify Service Provides "Enable" Button In The Explore Page     Anaconda Professional
-  END
+  Verify Service Provides "Enable" Button In The Explore Page     Anaconda Professional
 
 Verify Anaconda Service Is Enabled Based On Version
   [Documentation]   Checks service is enabled based on version.
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Verify Service Is Enabled   Anaconda Commercial Edition
-  ELSE
-    Verify Service Is Enabled   Anaconda Professional
-  END
+  Verify Service Is Enabled   Anaconda Professional
 
 Verify Page Contain Anaconda Based On Version
   [Documentation]    Checks page contain Anaconda text or not based on version.
-  ${version-check}=  Is RHODS Version Greater Or Equal Than  1.11.0
-  IF  ${version-check}==False
-    Wait Until Page Contains    Anaconda Commercial Edition     timeout=30
-  ELSE
-    Wait Until Page Contains    Anaconda Professional           timeout=30
-  END
+  Wait Until Page Contains    Anaconda Professional           timeout=30

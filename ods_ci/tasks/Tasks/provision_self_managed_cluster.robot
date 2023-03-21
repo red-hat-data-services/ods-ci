@@ -12,11 +12,10 @@ Library          String
 Library          Process
 
 ***Variables***
+${hive_kubeconf}         %{KUBECONFIG}
 ${cluster_name}          ${infrastructure_configurations}[hive_cluster_name]
 ${hive_namespace}        ${infrastructure_configurations}[hive_claim_ns]
 ${provider_type}         ${infrastructure_configurations}[provider]
-${FIP_API}               ${infrastructure_configurations}[fip_api]
-${FIP_APPS}              ${infrastructure_configurations}[fip_apps]
 ${claim_name}            ${cluster_name}-claim
 ${pool_name}             ${cluster_name}-pool
 ${conf_name}             ${cluster_name}-conf
@@ -29,8 +28,9 @@ Provision Self-Managed Cluster
     Claim Cluster
     Wait For Cluster To Be Ready
     Verify Cluster Claim
+    Save Cluster Credentials
     Login To Cluster
-    [Teardown]  Clean Failed Cluster
+    Set Cluster Storage
 
 Deprovision Self-Managed Cluster
     [Documentation]    Deprovision a self-managed cluster

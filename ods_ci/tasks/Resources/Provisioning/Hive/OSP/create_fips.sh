@@ -40,17 +40,21 @@ osp_dashboard="$(openstack catalog show keystone -c endpoints -c name -c type \
 echo "Connected to Openstack: ${osp_dashboard}"
 
 echo "Allocating a floating IP for cluster's API"
-FIP_API=$(openstack floating ip create --description "$CLUSTER_NAME API" -f value -c floating_ip_address "$OSP_NETWORK") || rc=$?
-if [ "$rc" != 0 ]; then
-  echo "Failed to allocate a floating IP for API"
-  exit 10
+cmd=(openstack floating ip create --description "$CLUSTER_NAME API" -f value -c floating_ip_address "$OSP_NETWORK")
+echo "${cmd[@]}"
+FIP_API=$("${cmd[@]}" 2>&1) || rc=$?
+if [[ -n "$rc" ]] ; then
+  echo -e "Failure [$rc] allocating floating IP for API: \n $FIP_API"
+  exit ${rc:+$rc}
 fi
 
 echo "Allocating a floating IP for cluster's ingress"
-FIP_APPS=$(openstack floating ip create --description "$CLUSTER_NAME APPS" -f value -c floating_ip_address "$OSP_NETWORK") || rc=$?
-if [ "$rc" != 0 ]; then
-  echo "Failed to allocate a floating IP for ingress"
-  exit 10
+cmd=(openstack floating ip create --description "$CLUSTER_NAME APPS" -f value -c floating_ip_address "$OSP_NETWORK")
+echo "${cmd[@]}"
+FIP_APPS=$("${cmd[@]}" 2>&1) || rc=$?
+if [[ -n "$rc" ]] ; then
+  echo -e "Failure [$rc] allocating floating IP for APPS (ingress): \n $FIP_APPS"
+  exit ${rc:+$rc}
 fi
 
 echo ""
@@ -69,7 +73,7 @@ echo "========================================================================"
 echo "Getting zone ID in Route53"
 ZONES=$(aws route53 list-hosted-zones --output json)
 ZONE_ID=$(echo "$ZONES" | jq -r ".HostedZones[] | select(.Name==\"$AWS_DOMAIN.\") | .Id")
-if [ -z "$ZONE_ID" ]; then
+if [[ -z "$ZONE_ID" ]] ; then
   echo "Domain $AWS_DOMAIN not found in Route53"
   exit 20
 fi
@@ -79,11 +83,10 @@ RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" -
 '{ "Comment": "Update A record for cluster API", "Changes": 
 [ { "Action": "CREATE", "ResourceRecordSet": { "Name": "api.'"$CLUSTER_NAME"'.'"$AWS_DOMAIN"'", 
 "Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'"$FIP_API"'" } ] } } ] }' --output json) || rc=$?
-if [ "$rc" != 0 ]; then
-  echo "Failed to update A record for cluster"
-  echo "Releasing previously allocated floating IP"
+if [[ -n "$rc" ]] ; then
+  echo "Failed to update A record for cluster. Releasing previously allocated floating IP"
   openstack floating ip delete "$FIP_API"
-  exit 25
+  exit ${rc:+$rc}
 fi
 
 echo "Waiting for DNS change to propagate"
@@ -95,11 +98,10 @@ RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" -
 [ { "Action": "CREATE", "ResourceRecordSet": { "Name": "*.apps.'"$CLUSTER_NAME"'.'"$AWS_DOMAIN"'", 
 "Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'"$FIP_APPS"'" } ] } } ] }' --output json) || rc=$?
 
-if [ "$rc" != 0 ]; then
-  echo "Failed to update A record for cluster"
-  echo "Releasing previously allocated floating IP"
+if [[ -n "$rc" ]] ; then
+  echo "Failed to update A record for cluster. Releasing previously allocated floating IP"
   openstack floating ip delete "$FIP_APPS"
-  exit 25
+  exit ${rc:+$rc}
 fi
 
 echo "Waiting for DNS change to propagate"

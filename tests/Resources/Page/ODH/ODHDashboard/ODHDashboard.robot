@@ -117,7 +117,11 @@ Launch ${dashboard_app} From RHODS Dashboard Link
       ${splits}=    Split String From Right    ${dashboard_app}    max_split=1
       Click Link   xpath:${CARDS_XP}//*[text()='${splits[0]} ']/../..//a
   ELSE
-      Click Link  xpath://div[contains(@class,'gallery')]/div[//div[@class="pf-c-card__title"]//*[text()="${dashboard_app}"]]/div[contains(@class,"pf-c-card__footer")]/a
+      IF    "${dashboard_app}" == "Jupyter"
+          Click Link    xpath://div[contains(@class,'pf-l-gallery')]/div[contains(@class,'pf-c-card')]/div[@class="pf-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-c-card__footer")]/a
+      ELSE
+          Click Link    xpath://div[contains(@class,'pf-l-gallery')]/div[contains(@class,'pf-c-card')]/div[@class="pf-c-card__title"]//span[text()="${dashboard_app}"]/../..//div[contains(@class,"pf-c-card__footer")]/a
+      END
   END
   IF    "${dashboard_app}" != "Jupyter"
        Switch Window  NEW

@@ -9,7 +9,8 @@ def get_safe_username(username):
     #  https://github.com/jupyterhub/kubespawner/blob/
     #  251a0b65ffaff72e722446d5b9aac738ad6923d1/kubespawner/spawner.py#L1709
     safe_chars = set(string.ascii_lowercase + string.digits)
-    return escapism.escape(username, safe=safe_chars, escape_char='-').lower()
+    return escapism.escape(username, safe=safe_chars, escape_char="-").lower()
+
 
 def get_unsafe_username(username):
-    return escapism.unescape(username, escape_char='-').lower()
+    return escapism.unescape(username, escape_char="-").lower()

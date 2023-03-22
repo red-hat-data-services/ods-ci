@@ -56,7 +56,7 @@ COPY ods_ci/configs/resources/oauth_htp_idp.json ods_ci/configs/resources/oauth_
 COPY ods_ci/configs/resources/oauth_ldap_idp.json ods_ci/configs/resources/oauth_ldap_idp.json
 COPY ods_ci/configs/templates/ca-rolebinding.yaml ods_ci/configs/templates/ca-rolebinding.yaml
 COPY ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
-RUN  chmod +x ods_ci/run.sh
+RUN  chmod +x ods_ci/build/run.sh
 COPY pyproject.toml .
 COPY poetry.lock .
 COPY README.md .

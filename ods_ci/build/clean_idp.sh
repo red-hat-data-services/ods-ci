@@ -74,7 +74,7 @@ uninstall_identity_provider(){
   # delete htpasswd and LDAp idp
   # delete ldap deployment and idp
   # oc wait --for=delete $(oc get namespace openldap)
-  oc delete -f configs/templates/ldap/ldap.yaml
+  oc delete -f ods_ci/configs/templates/ldap/ldap.yaml
   if [ "${USE_OCM_IDP}" -eq 1 ]
     then
       ocm delete idp -c "${CLUSTER_NAME}" ldap-provider-qe

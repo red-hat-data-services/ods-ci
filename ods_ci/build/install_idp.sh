@@ -61,27 +61,27 @@ function generates_ldap_creds(){
   rand_base64=$(echo -n $rand_string | base64 -w 0)
 
   # update ldap.yaml with creds
-  sed -i "s/<users_string>/$users_base64/g" ../configs/templates/ldap/ldap.yaml
-  sed -i "s/<passwords_string>/$rand_base64/g" ../configs/templates/ldap/ldap.yaml
+  sed -i "s/<users_string>/$users_base64/g" ods_ci/configs/templates/ldap/ldap.yaml
+  sed -i "s/<passwords_string>/$rand_base64/g" ods_ci/configs/templates/ldap/ldap.yaml
   rand=$(generate_rand_string)
   export RAND_ADMIN=$rand
   rand_base64=$(echo -n $rand | base64 -w 0)
-  sed -i "s/<adminpassword>/$rand_base64/g" ../configs/templates/ldap/ldap.yaml
+  sed -i "s/<adminpassword>/$rand_base64/g" ods_ci/configs/templates/ldap/ldap.yaml
 
   # update test-variables.yml file with the test users' creds
   export PREFIX=$1
-  yq --inplace '.TEST_USER.AUTH_TYPE="ldap-provider-qe"' ../test-variables.yml
-  yq --inplace '.TEST_USER.USERNAME=env(PREFIX)+"-adm1"' ../test-variables.yml
-  yq --inplace '.TEST_USER.PASSWORD=env(RAND_LDAP)' ../test-variables.yml
-  yq --inplace '.TEST_USER_2.AUTH_TYPE="ldap-provider-qe"' ../test-variables.yml
-  yq --inplace '.TEST_USER_2.USERNAME=env(PREFIX)+"-adm2"' ../test-variables.yml
-  yq --inplace '.TEST_USER_2.PASSWORD=env(RAND_LDAP)' ../test-variables.yml
-  yq --inplace '.TEST_USER_3.AUTH_TYPE="ldap-provider-qe"' ../test-variables.yml
-  yq --inplace '.TEST_USER_3.USERNAME=env(PREFIX)+"-adm3"' ../test-variables.yml
-  yq --inplace '.TEST_USER_3.PASSWORD=env(RAND_LDAP)' ../test-variables.yml
-  yq --inplace '.TEST_USER_4.AUTH_TYPE="ldap-provider-qe"' ../test-variables.yml
-  yq --inplace '.TEST_USER_4.USERNAME=env(PREFIX)+"-adm4"' ../test-variables.yml
-  yq --inplace '.TEST_USER_4.PASSWORD=env(RAND_LDAP)' ../test-variables.yml
+  yq --inplace '.TEST_USER.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER.USERNAME=env(PREFIX)+"-adm1"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER.PASSWORD=env(RAND_LDAP)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_2.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_2.USERNAME=env(PREFIX)+"-adm2"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_2.PASSWORD=env(RAND_LDAP)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_3.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_3.USERNAME=env(PREFIX)+"-adm3"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_3.PASSWORD=env(RAND_LDAP)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_4.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_4.USERNAME=env(PREFIX)+"-adm4"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_4.PASSWORD=env(RAND_LDAP)' ods_ci/test-variables.yml
   }
 
 function add_users_to_groups(){
@@ -124,36 +124,36 @@ install_identity_provider(){
     else
         htp_string=$(htpasswd -b -B -n htpasswd-user $rand_string)
         oc create secret generic htpasswd-password --from-literal=htpasswd="$htp_string" -n openshift-config
-        OAUTH_HTPASSWD_JSON="$(cat ../configs/resources/oauth_htp_idp.json)"
+        OAUTH_HTPASSWD_JSON="$(cat ods_ci/configs/resources/oauth_htp_idp.json)"
         oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
-        sed -i "s/<rolebinding_name>/ods-ci-htp-admin/g" ../configs/templates/ca-rolebinding.yaml
-        sed -i "s/<username>/htpasswd-user/g" ../configs/templates/ca-rolebinding.yaml
-        oc apply -f ../configs/templates/ca-rolebinding.yaml
+        sed -i "s/<rolebinding_name>/ods-ci-htp-admin/g" ods_ci/configs/templates/ca-rolebinding.yaml
+        sed -i "s/<username>/htpasswd-user/g" ods_ci/configs/templates/ca-rolebinding.yaml
+        oc apply -f ods_ci/configs/templates/ca-rolebinding.yaml
   fi
 
   # update test-variables.yml with admin creds
-  yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' ../test-variables.yml
-  yq --inplace '.OCP_ADMIN_USER.USERNAME="htpasswd-user"' ../test-variables.yml
+  yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' ods_ci/test-variables.yml
+  yq --inplace '.OCP_ADMIN_USER.USERNAME="htpasswd-user"' ods_ci/test-variables.yml
   export RAND_STRING=$rand_string
-  yq --inplace '.OCP_ADMIN_USER.PASSWORD=env(RAND_STRING)' ../test-variables.yml
+  yq --inplace '.OCP_ADMIN_USER.PASSWORD=env(RAND_STRING)' ods_ci/test-variables.yml
 
   # login using htpasswd
   perform_oc_logic  $OC_HOST  htpasswd-user  $rand_string
 
   # create ldap deployment
-  oc apply -f ../configs/templates/ldap/ldap.yaml
+  oc apply -f ods_ci/configs/templates/ldap/ldap.yaml
   if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
           # configure the jinja template for adding ldap idp in OCM
           rand_admin=$(echo $RAND_ADMIN | base64 -d)
-          sed -i "s/{{ LDAP_BIND_PASSWORD }}/$RAND_ADMIN/g" ../utils/scripts/ocm/templates/create_ldap_idp.jinja
-          sed -i "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" ../utils/scripts/ocm/templates/create_ldap_idp.jinja
-          sed -i 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' ../utils/scripts/ocm/templates/create_ldap_idp.jinja
-          ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=../utils/scripts/ocm/templates/create_ldap_idp.jinja
+          sed -i "s/{{ LDAP_BIND_PASSWORD }}/$RAND_ADMIN/g" ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
+          sed -i "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
+          sed -i 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
+          ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
       else
           oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config
-          OAUTH_LDAP_JSON="$(cat ../configs/resources/oauth_ldap_idp.json)"
+          OAUTH_LDAP_JSON="$(cat ods_ci/configs/resources/oauth_ldap_idp.json)"
           oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
   fi
   # add users to RHODS groups

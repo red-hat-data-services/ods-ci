@@ -109,8 +109,7 @@ def create_testplan(project_id, release_testplan, build_testplan):
     build_testplan_id = build_testplan.replace(".", "_")
     rst_res = Plan.search("id:{}".format(release_testplan_id))
     if rst_res == []:
-        Plan.create(
-            release_testplan_id, release_testplan, project_id, None, "release")
+        Plan.create(release_testplan_id, release_testplan, project_id, None, "release")
     else:
         print("release test plan {} already exists".format(release_testplan))
     plan = Plan(project_id=project_id, plan_id=release_testplan_id)
@@ -151,8 +150,7 @@ def create_testrun(project_id, testrun_name, build_testplan):
         TestRun(project_id=project_id, test_run_id=testrun_name)
         print("test run {} already exists".format(testrun_name))
     except:
-        TestRun.create(
-            project_id, testrun_name, "Build Acceptance type", testrun_name)
+        TestRun.create(project_id, testrun_name, "Build Acceptance type", testrun_name)
     tr = TestRun(project_id=project_id, test_run_id=testrun_name)
     tr.plannedin = build_testplan_id
     tr.update()

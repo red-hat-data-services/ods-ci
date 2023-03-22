@@ -3,8 +3,18 @@ import argparse
 from EmailSender import EmailSender
 
 
-def send_email_report(sender, receiver, subject, text, attachments,
-                      server, server_user, server_pw, ssl,  unsecure):
+def send_email_report(
+    sender,
+    receiver,
+    subject,
+    text,
+    attachments,
+    server,
+    server_user,
+    server_pw,
+    ssl,
+    unsecure,
+):
     print("Composing your email...")
     print("Sender:", sender)
     print("Receiver:", receiver)
@@ -57,23 +67,14 @@ if __name__ == "__main__":
         help="Send RF report of results by email",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    args_email_sender_parser = email_sender_parser.add_argument_group(
-        "arguments")
+    args_email_sender_parser = email_sender_parser.add_argument_group("arguments")
 
     args_email_sender_parser.add_argument(
-        "-s",
-        "--sender-address",
-        help="Send email from",
-        action="store",
-        required=True
+        "-s", "--sender-address", help="Send email from", action="store", required=True
     )
 
     args_email_sender_parser.add_argument(
-        "-r",
-        "--receiver-addresses",
-        help="Send email to",
-        nargs="+",
-        required=True
+        "-r", "--receiver-addresses", help="Send email to", nargs="+", required=True
     )
 
     args_email_sender_parser.add_argument(

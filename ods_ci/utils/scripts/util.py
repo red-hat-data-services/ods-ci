@@ -21,8 +21,7 @@ def clone_config_repo(**kwargs):
         kwargs["git_password"] = ""
 
     try:
-        if os.path.exists(kwargs["repo_dir"]) and os.path.isdir(
-            kwargs["repo_dir"]):
+        if os.path.exists(kwargs["repo_dir"]) and os.path.isdir(kwargs["repo_dir"]):
             shutil.rmtree(kwargs["repo_dir"])
         os.makedirs(kwargs["repo_dir"])
         print("git repo dir '%s' created successfully" % kwargs["repo_dir"])
@@ -32,11 +31,9 @@ def clone_config_repo(**kwargs):
 
     git_repo_with_credens = kwargs["git_repo"]
     if kwargs["git_username"] != "" and kwargs["git_password"] != "":
-        git_credens = "{}:{}".format(
-            kwargs["git_username"], kwargs["git_password"])
+        git_credens = "{}:{}".format(kwargs["git_username"], kwargs["git_password"])
         git_repo_with_credens = re.sub(
-            r"(https://)(.*)", r"\1" + git_credens + "@" + r"\2",
-            kwargs["git_repo"]
+            r"(https://)(.*)", r"\1" + git_credens + "@" + r"\2", kwargs["git_repo"]
         )
     cmd = "git clone {} -b {} {}".format(
         git_repo_with_credens, kwargs["git_branch"], kwargs["repo_dir"]
@@ -87,8 +84,7 @@ def oc_login(ocp_console_url, username, password, timeout=600):
     """
     Login to test cluster using oc cli command
     """
-    cluster_api_url = ocp_console_url.replace(
-        "console-openshift-console.apps", "api")
+    cluster_api_url = ocp_console_url.replace("console-openshift-console.apps", "api")
     cluster_api_url = re.sub(r"/$", "", cluster_api_url) + ":6443"
     cmd = "oc login -u {} -p {} {} --insecure-skip-tls-verify=true".format(
         username, password, cluster_api_url
@@ -120,8 +116,7 @@ def render_template(search_path, template_file, output_file, replace_vars):
             fh.write(outputText)
     except:
         print(
-            "Failed to render template and create json " "file {}".format(
-                output_file)
+            "Failed to render template and create json " "file {}".format(output_file)
         )
         sys.exit(1)
 
@@ -164,8 +159,7 @@ def compare_dicts(dict1, dict2, level=0):
 
     max_len = max(tuple(map(len, keys1 | keys2))) + 2
     for key in keys1 & keys2:
-        if compare_dicts(
-                dict1[key], dict2[key], level=level + 1) == "MISMATCH!":
+        if compare_dicts(dict1[key], dict2[key], level=level + 1) == "MISMATCH!":
             lst_to_trigger_job.append("{}-latest".format(key))
     for key in keys1 - keys2:
         lst_to_trigger_job.append("{}-latest".format(key))

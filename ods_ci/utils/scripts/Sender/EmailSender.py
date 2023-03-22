@@ -30,8 +30,7 @@ class EmailSender(Sender):
         if attachments is not None:
             for filepath in attachments:
                 with open(filepath, "rb") as file:
-                    part = MIMEApplication(
-                        file.read(), Name=basename(filepath))
+                    part = MIMEApplication(file.read(), Name=basename(filepath))
                     part[
                         "Content-Disposition"
                     ] = 'attachment; filename="%s"' % basename(filepath)
@@ -50,8 +49,7 @@ class EmailSender(Sender):
         if self._use_unsecure:
             smtp = smtplib.SMTP(host=self._server, port=self._port)
         elif self._use_ssl:
-            smtp = smtplib.SMTP_SSL(
-                host=self._server, port=self._port, context=context)
+            smtp = smtplib.SMTP_SSL(host=self._server, port=self._port, context=context)
         else:
             print("--> using SMTP with TLS")
             smtp = smtplib.SMTP(host=self._server, port=self._port)
@@ -59,8 +57,7 @@ class EmailSender(Sender):
         if self._server_usr and self._server_pw:
             smtp.login(self._server_usr, self._server_pw)
         smtp.sendmail(
-            self._sender_address, self._receiver_addresses,
-            self._message.as_string()
+            self._sender_address, self._receiver_addresses, self._message.as_string()
         )
         smtp.close()
 

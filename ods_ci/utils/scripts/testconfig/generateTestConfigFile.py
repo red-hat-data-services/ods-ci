@@ -87,7 +87,7 @@ def parse_args():
         "-s",
         "--skip-git-clone",
         help="If this option is used then "
-             "cloning config git repo for ods-ci tests is skipped.",
+        "cloning config git repo for ods-ci tests is skipped.",
         action="store_true",
         dest="skip_clone",
     )
@@ -129,46 +129,56 @@ def generate_test_config_file(
 
     data["BROWSER"]["NAME"] = config_data["BROWSER"]["NAME"]
     data["S3"]["AWS_ACCESS_KEY_ID"] = config_data["S3"]["AWS_ACCESS_KEY_ID"]
-    data["S3"]["AWS_SECRET_ACCESS_KEY"] = config_data[
-        "S3"]["AWS_SECRET_ACCESS_KEY"]
+    data["S3"]["AWS_SECRET_ACCESS_KEY"] = config_data["S3"]["AWS_SECRET_ACCESS_KEY"]
     data["S3"]["AWS_DEFAULT_ENDPOINT"] = config_data["S3"]["AWS_DEFAULT_ENDPOINT"]
     data["S3"]["AWS_DEFAULT_REGION"] = config_data["S3"]["AWS_DEFAULT_REGION"]
-    data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data[
-        "ANACONDA_CE"]["ACTIVATION_KEY"]
-    data["OCP_CONSOLE_URL"] = config_data[
-        "TEST_CLUSTERS"][test_cluster]["OCP_CONSOLE_URL"]
-    data["ODH_DASHBOARD_URL"] = config_data[
-        "TEST_CLUSTERS"][test_cluster]["ODH_DASHBOARD_URL"]
-    data["TEST_USER"]["AUTH_TYPE"] = config_data[
-        "TEST_CLUSTERS"][test_cluster]["TEST_USER"]["AUTH_TYPE"]
-    data["TEST_USER"]["USERNAME"] = config_data[
-        "TEST_CLUSTERS"][test_cluster]["TEST_USER"]["USERNAME"]
-    data["TEST_USER"]["PASSWORD"] = config_data[
-        "TEST_CLUSTERS"][test_cluster]["TEST_USER"]["PASSWORD"]
-    data["OCP_ADMIN_USER"]["AUTH_TYPE"] = config_data[
-        "TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["AUTH_TYPE"]
-    data["OCP_ADMIN_USER"]["USERNAME"] = config_data[
-        "TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["USERNAME"]
-    data["OCP_ADMIN_USER"]["PASSWORD"] = config_data[
-        "TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["PASSWORD"]
+    data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data["ANACONDA_CE"]["ACTIVATION_KEY"]
+    data["OCP_CONSOLE_URL"] = config_data["TEST_CLUSTERS"][test_cluster][
+        "OCP_CONSOLE_URL"
+    ]
+    data["ODH_DASHBOARD_URL"] = config_data["TEST_CLUSTERS"][test_cluster][
+        "ODH_DASHBOARD_URL"
+    ]
+    data["TEST_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster][
+        "TEST_USER"
+    ]["AUTH_TYPE"]
+    data["TEST_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster][
+        "TEST_USER"
+    ]["USERNAME"]
+    data["TEST_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster][
+        "TEST_USER"
+    ]["PASSWORD"]
+    data["OCP_ADMIN_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster][
+        "OCP_ADMIN_USER"
+    ]["AUTH_TYPE"]
+    data["OCP_ADMIN_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster][
+        "OCP_ADMIN_USER"
+    ]["USERNAME"]
+    data["OCP_ADMIN_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster][
+        "OCP_ADMIN_USER"
+    ]["PASSWORD"]
     data["SSO"]["USERNAME"] = config_data["SSO"]["USERNAME"]
     data["SSO"]["PASSWORD"] = config_data["SSO"]["PASSWORD"]
-    data["RHOSAK_CONFIG_TEST"]["STREAM_REGION"] = config_data[
-        "RHOSAK_CONFIG_TEST"]["STREAM_REGION"]
-    data["RHOSAK_CONFIG_TEST"]["CLOUD_PROVIDER"] = config_data[
-        "RHOSAK_CONFIG_TEST"]["CLOUD_PROVIDER"]
-    data["RHOSAK_CONFIG_TEST"]["STREAM_NAME"] = config_data[
-        "RHOSAK_CONFIG_TEST"]["STREAM_NAME"]
-    data["RHOSAK_CONFIG_TEST"]["SERVICE_ACCOUNT"] = config_data[
-        "RHOSAK_CONFIG_TEST"]["SERVICE_ACCOUNT"]
-    data["RHOSAK_CONFIG_TEST"]["TOPIC_NAME"] = config_data[
-        "RHOSAK_CONFIG_TEST"]["TOPIC_NAME"]
-    data["RHOSAK_CONFIG_TEST"]["CONSUMER_GROUP"] = config_data[
-        "RHOSAK_CONFIG_TEST"]["CONSUMER_GROUP"]
-    data["RHODS_BUILD"]["PULL_SECRET"] = config_data[
-        "RHODS_BUILD"]["PULL_SECRET"]
-    data["RHODS_BUILD"]["SECRET_FILE"] = config_data[
-        "RHODS_BUILD"]["SECRET_FILE"]
+    data["RHOSAK_CONFIG_TEST"]["STREAM_REGION"] = config_data["RHOSAK_CONFIG_TEST"][
+        "STREAM_REGION"
+    ]
+    data["RHOSAK_CONFIG_TEST"]["CLOUD_PROVIDER"] = config_data["RHOSAK_CONFIG_TEST"][
+        "CLOUD_PROVIDER"
+    ]
+    data["RHOSAK_CONFIG_TEST"]["STREAM_NAME"] = config_data["RHOSAK_CONFIG_TEST"][
+        "STREAM_NAME"
+    ]
+    data["RHOSAK_CONFIG_TEST"]["SERVICE_ACCOUNT"] = config_data["RHOSAK_CONFIG_TEST"][
+        "SERVICE_ACCOUNT"
+    ]
+    data["RHOSAK_CONFIG_TEST"]["TOPIC_NAME"] = config_data["RHOSAK_CONFIG_TEST"][
+        "TOPIC_NAME"
+    ]
+    data["RHOSAK_CONFIG_TEST"]["CONSUMER_GROUP"] = config_data["RHOSAK_CONFIG_TEST"][
+        "CONSUMER_GROUP"
+    ]
+    data["RHODS_BUILD"]["PULL_SECRET"] = config_data["RHODS_BUILD"]["PULL_SECRET"]
+    data["RHODS_BUILD"]["SECRET_FILE"] = config_data["RHODS_BUILD"]["SECRET_FILE"]
     data["RHODS_BUILD"]["IMAGE"] = config_data["RHODS_BUILD"]["IMAGE"]
     data["TEST_USER_2"]["AUTH_TYPE"] = config_data["TEST_USER_2"]["AUTH_TYPE"]
     data["TEST_USER_2"]["USERNAME"] = config_data["TEST_USER_2"]["USERNAME"]
@@ -185,7 +195,9 @@ def generate_test_config_file(
     data["SERVICE_ACCOUNT"]["NAME"] = config_data["SERVICE_ACCOUNT"]["NAME"]
     data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data["SERVICE_ACCOUNT"]["FULL_NAME"]
     data["STARBURST"]["LICENSE"] = config_data["STARBURST"]["LICENSE"]
-    data["STARBURST"]["OBS_CLIENT_SECRET"] = config_data["STARBURST"]["OBS_CLIENT_SECRET"]
+    data["STARBURST"]["OBS_CLIENT_SECRET"] = config_data["STARBURST"][
+        "OBS_CLIENT_SECRET"
+    ]
     data["STARBURST"]["OBS_CLIENT_ID"] = config_data["STARBURST"]["OBS_CLIENT_ID"]
     data["STARBURST"]["OBS_URL"] = config_data["STARBURST"]["OBS_URL"]
     data["STARBURST"]["OBS_TOKEN_URL"] = config_data["STARBURST"]["OBS_TOKEN_URL"]
@@ -209,8 +221,7 @@ def generate_test_config_file(
         data["RHODS_PROMETHEUS_URL"] = prometheus_url
 
     with open(config_file, "w") as yaml_file:
-        yaml_file.write(yaml.dump(
-            data, default_flow_style=False, sort_keys=False))
+        yaml_file.write(yaml.dump(data, default_flow_style=False, sort_keys=False))
 
 
 def main():
@@ -236,10 +247,7 @@ def main():
 
     # Generate test config file
     generate_test_config_file(
-        args.config_template,
-        config_data,
-        args.test_cluster,
-        args.set_prometheus_config
+        args.config_template, config_data, args.test_cluster, args.set_prometheus_config
     )
 
 

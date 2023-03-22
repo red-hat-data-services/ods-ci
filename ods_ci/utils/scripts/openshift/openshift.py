@@ -21,7 +21,6 @@ Pre-requisites to install before executing the script: awscli, openshift-install
 
 class OpenshiftOps:
     def __init__(self, args={}):
-
         # Initialize instance variables
         self.aws_access_key_id = args.get("aws_access_key_id")
         self.aws_secret_access_key = args.get("aws_secret_access_key")
@@ -204,7 +203,6 @@ class OpenshiftOps:
 
 
 if __name__ == "__main__":
-
     # Instance for OpenshiftOps Class
     oc_obj = OpenshiftOps()
 

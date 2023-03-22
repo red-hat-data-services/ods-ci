@@ -1,5 +1,6 @@
 import argparse
 import ast
+import base64
 import glob
 import io
 import json
@@ -9,7 +10,6 @@ import shutil
 import subprocess
 import sys
 import time
-import base64
 from contextlib import redirect_stderr, redirect_stdout
 
 import jinja2
@@ -28,7 +28,6 @@ Class for Openshift Cluster Manager
 
 class OpenshiftClusterManager:
     def __init__(self, args={}):
-
         # Initialize instance variables
         self.aws_account_id = args.get("aws_account_id")
         self.aws_access_key_id = args.get("aws_access_key_id")
@@ -554,17 +553,6 @@ class OpenshiftClusterManager:
             return False
         else:
             return True
-    
-
-    def hide_values_in_op_json(self, fields, json_str):
-        json_dict = json.loads(json_str)
-        params = json_dict["parameters"]["items"]
-        for field in fields:
-            for p in params:
-                if p["id"] == field:
-                    p["value"] = "##hidden##"
-        return json.dumps(json_dict)
-        
 
     def hide_values_in_op_json(self, fields, json_str):
         json_dict = json.loads(json_str)
@@ -575,6 +563,14 @@ class OpenshiftClusterManager:
                     p["value"] = "##hidden##"
         return json.dumps(json_dict)
 
+    def hide_values_in_op_json(self, fields, json_str):
+        json_dict = json.loads(json_str)
+        params = json_dict["parameters"]["items"]
+        for field in fields:
+            for p in params:
+                if p["id"] == field:
+                    p["value"] = "##hidden##"
+        return json.dumps(json_dict)
 
     def install_addon(
         self,
@@ -583,7 +579,7 @@ class OpenshiftClusterManager:
         output_filename="install_operator.json",
         add_replace_vars=None,
         exit_on_failure=True,
-        fields_to_hide=[]
+        fields_to_hide=[],
     ):
         """Installs addon"""
         replace_vars = {
@@ -750,7 +746,10 @@ class OpenshiftClusterManager:
 
     def install_managed_starburst_addon(self, license, exit_on_failure=True):
         if not self.is_addon_installed(addon_name="managed-starburst"):
-            add_vars = {"NOTIFICATION_EMAIL": self.notification_email, "STARBURST_LICENSE": license}
+            add_vars = {
+                "NOTIFICATION_EMAIL": self.notification_email,
+                "STARBURST_LICENSE": license,
+            }
             failure_flags = []
             failure = self.install_addon(
                 addon_name="managed-starburst",
@@ -758,7 +757,7 @@ class OpenshiftClusterManager:
                 output_filename="install_starburst_operator.json",
                 add_replace_vars=add_vars,
                 exit_on_failure=exit_on_failure,
-                fields_to_hide=["starburst-license"]
+                fields_to_hide=["starburst-license"],
             )
             failure_flags.append(failure)
             if True in failure_flags:
@@ -777,6 +776,7 @@ class OpenshiftClusterManager:
                     self.cluster_name
                 )
             )
+
     def uninstall_managed_starburst_addon(self, exit_on_failure=True):
         """Uninstalls RHOAM addon"""
         self.uninstall_addon(
@@ -835,22 +835,24 @@ class OpenshiftClusterManager:
                 + "/../../../configs/templates/ldap/ldap.yaml"
             )
             fin = open(ldap_yaml_file, "rt")
-            fout = open(ldap_yaml_file+"_replaced", "wt")
+            fout = open(ldap_yaml_file + "_replaced", "wt")
             for line in fin:
-                if '<users_string>' in line:
-                    fout.write(line.replace('<users_string>', self.ldap_users_string))
-                elif '<passwords_string>' in line:
-                    fout.write(line.replace('<passwords_string>', self.ldap_passwords_string))
-                elif  '<adminpassword>' in line:
-                    fout.write(line.replace('<adminpassword>', self.ldap_bind_password))
+                if "<users_string>" in line:
+                    fout.write(line.replace("<users_string>", self.ldap_users_string))
+                elif "<passwords_string>" in line:
+                    fout.write(
+                        line.replace("<passwords_string>", self.ldap_passwords_string)
+                    )
+                elif "<adminpassword>" in line:
+                    fout.write(line.replace("<adminpassword>", self.ldap_bind_password))
                 else:
                     fout.write(line)
             fin.close()
             fout.close()
             base64_message = self.ldap_bind_password
-            base64_bytes = base64_message.encode('ascii')
+            base64_bytes = base64_message.encode("ascii")
             message_bytes = base64.b64decode(base64_bytes)
-            ldap_bind_password_dec = message_bytes.decode('ascii')
+            ldap_bind_password_dec = message_bytes.decode("ascii")
             ldap_yaml_file = (
                 os.path.abspath(os.path.dirname(__file__))
                 + "/../../../configs/templates/ldap/ldap.yaml_replaced"
@@ -1222,7 +1224,6 @@ class OpenshiftClusterManager:
             write_data_in_json(filename=self.osd_latest_version_data, data=old_data)
             return None
         else:
-
             if (
                 self.osd_major_version not in old_data.keys()
                 and self.osd_major_version in new_data.keys()
@@ -1294,7 +1295,6 @@ class OpenshiftClusterManager:
 
 
 if __name__ == "__main__":
-
     # Instance for OpenshiftClusterManager Class
     ocm_obj = OpenshiftClusterManager()
 

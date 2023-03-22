@@ -17,7 +17,6 @@ Class for Openstack Terraform Provisioner
 
 class OpenstackTerraformProvisioner:
     def __init__(self, args={}):
-
         # Initialize instance variables
         self.cloud_name = args.get("cloud_name")
         self.vm_name = args.get("vm_name")
@@ -112,7 +111,6 @@ class OpenstackTerraformProvisioner:
 
 
 if __name__ == "__main__":
-
     # Instance for OpenstackTerraformProvisioner Class
     prov_obj = OpenstackTerraformProvisioner()
 

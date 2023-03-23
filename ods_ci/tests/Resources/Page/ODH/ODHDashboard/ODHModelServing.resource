@@ -112,7 +112,7 @@ Set Folder Path
     ...    e.g.: file in root of S3 bucket -> model_path = filename
     ...    e.g.: file in subfolder of S3 bucket -> model_path = subfolder/filename
     [Arguments]    ${model_path}
-    Input Text    xpath://input[@id="storage-path"]    ${model_path}
+    Input Text    xpath://input[@id="folder-path"]    ${model_path}
 
 Set Up New Data Connection
     [Documentation]    Fills in details for new data connection in "deploy model" modal

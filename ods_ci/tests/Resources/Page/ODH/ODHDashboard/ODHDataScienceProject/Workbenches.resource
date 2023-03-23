@@ -7,7 +7,7 @@ Resource       Projects.resource
 
 
 *** Variables ***
-${WORKBENCH_SECTION_XP}=             xpath=//div[div//h4[@id="workbenches"]]
+${WORKBENCH_SECTION_XP}=             xpath=//div[@id="workbenches"]
 ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
@@ -270,7 +270,8 @@ Handle Stop Workbench Confirmation Modal
     Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
     Run Keyword And Continue On Failure
     ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
-    Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your workbench
+    Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your
+    Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
     Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
     Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]

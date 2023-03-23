@@ -9,7 +9,7 @@ TEST_VARIABLES_FILE=ods_ci/test-variables.yml
 TEST_VARIABLES=""
 TEST_ARTIFACT_DIR="ods_ci/test-output"
 EXTRA_ROBOT_ARGS=""
-SKIP_PIP_INSTALL=0
+SKIP_INSTALL=0
 TEST_INCLUDE_TAG=""
 TEST_EXCLUDE_TAG=""
 EMAIL_REPORT=false
@@ -96,10 +96,10 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
 
-    # Skip the pip install during the execution of this script
-    --skip-pip-install)
+    # Skip the dependency install during the execution of this script
+    --skip-install)
       shift
-      SKIP_PIP_INSTALL=1
+      SKIP_INSTALL=1
       ;;
 
     --email-report)
@@ -287,7 +287,9 @@ if command -v yq &> /dev/null
         echo "we did not find yq, so not trying the oc login"
 fi
 
-poetry install
+if [[ ${SKIP_INSTALL} -eq 0 ]]; then
+  poetry install
+fi
 source $(poetry env info --path)/bin/activate
 
 #Create a unique directory to store the output for current test run

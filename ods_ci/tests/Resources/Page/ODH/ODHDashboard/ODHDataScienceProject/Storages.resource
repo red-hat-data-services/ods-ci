@@ -13,8 +13,8 @@ ${STORAGE_SIZE_INPUT_XP}=         xpath=//div/input[@aria-label="Input"]
 ${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@aria-label="mount-path-folder-value"]
 ${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
-${STORAGE_ADD_BTN_1_XP}=           xpath=//div[div/h4[@id="cluster-storages"]]/div/button[text()="Add cluster storage"]
-${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[contains(text(), "Add")]
+${STORAGE_ADD_BTN_1_XP}=           ${STORAGE_SECTION_XP}//button[.="Add cluster storage"]
+${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[.="Add storage"]
 
 
 *** Keywords ***
@@ -45,9 +45,9 @@ Storage Size Should Be
     ...                Query on Openshift annotation based on this syntax: https://kubernetes.io/docs/reference/kubectl/jsonpath/
     [Arguments]     ${name}      ${size}    ${namespace}
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}
-    Click Element    ${STORAGE_SECTION_XP}//tr[td//h4/div[text()="${name}"]]/td/button[contains(@id,"expand-toggle")]
+    Click Element    ${STORAGE_SECTION_XP}//tr[td//h4/div[text()="${name}"]]//button[@aria-label="Details"]
     Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
-    Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
+    Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]    timeout=45s
     ${displayed_size}=      Get Text    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
     Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
     ${rc}  ${oc_object_size}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].spec.resources.requests.storage}'

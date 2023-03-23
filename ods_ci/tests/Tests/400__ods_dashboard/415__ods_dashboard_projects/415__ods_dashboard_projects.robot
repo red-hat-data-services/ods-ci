@@ -334,11 +334,12 @@ Verify User Can Create A Workbench With Environment Variables
     Check Environment Variables Exist    exp_env_variables=${envs_list}
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
-    [Tags]    Sanity    Tier1    ODS-1971
+    [Tags]    Sanity    Tier1    ODS-1971    AutomationBug
     [Documentation]    Verifies user can log out and return to the project from Jupyter notebook.
     ...                Users have 2 options:
     ...                1. click "File" > "Log Out" to actually close the login session
     ...                2. click "File" > "Hub Control Panel" to return to project details page
+    ...                AutomationBug: JupyterLibrary's log out keyword seems to be broken
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Open Workbench    workbench_title=${WORKBENCH_4_TITLE}
     Run Keyword And Continue On Failure

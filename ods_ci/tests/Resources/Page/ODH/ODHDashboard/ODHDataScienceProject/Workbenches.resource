@@ -336,7 +336,10 @@ Start Workbench Should Fail
     ${failed}=    Run Keyword And Return Status
     ...    Wait Until Workbench Is Started     workbench_title=${workbench_title}
     IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
-    Wait Until Keyword Succeeds    40 times    2s
+    Wait Until Keyword Succeeds    30 times    2s
+    ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
+    SeleniumLibrary.Reload Page
+    Wait Until Keyword Succeeds    20 times    2s
     ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
 
 Open Notebook Event Log

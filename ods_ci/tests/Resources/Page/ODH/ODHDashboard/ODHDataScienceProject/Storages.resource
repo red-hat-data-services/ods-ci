@@ -47,7 +47,7 @@ Storage Size Should Be
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}
     Click Element    ${STORAGE_SECTION_XP}//tr[td//h4/div[text()="${name}"]]//button[@aria-label="Details"]
     Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
-    Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
+    Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]    timeout=30s
     ${displayed_size}=      Get Text    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]
     Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
     ${rc}  ${oc_object_size}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].spec.resources.requests.storage}'

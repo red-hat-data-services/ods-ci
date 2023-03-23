@@ -12,10 +12,10 @@ ${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_SECR
 ${S3_ENDPOINT_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_S3_ENDPOINT"]
 ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_DEFAULT_REGION"]
 ${DC_SECTION_XP}=             xpath=//div[@id="data-connections"]
-${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}//button[text()="Add data connection"]
+${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}//button[.="Add data connection"]
 ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[.="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
-${S3_DC_ADD_BTN}=    //footer/button[.="Add data connection"]
+${S3_DC_ADD_BTN}=             xpath=//footer/button[.="Add data connection"]
 ${DC_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
 
 

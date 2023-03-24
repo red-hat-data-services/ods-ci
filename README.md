@@ -27,8 +27,8 @@ using QE tiered testing.
     ```
     This script is a wrapper for creating the python virtual environment and running the Robot Framework CLI.  You can run any of the test cases by creating the python virual environment, install the packages in requirements.txt and running the `robot` command directly
 # Contributing
-See [CONTRIBUTING.md](./CONTRIBUTING.md)
+See [CONTRIBUTING.md](ods_ci/CONTRIBUTING.md)
 # ODS-CI Container Image
-See build [README](build/README.md) on how you can build a container to run ODS-CI automation in OpenShift.
+See build [README](ods_ci/build/README.md) on how you can build a container to run ODS-CI automation in OpenShift.
 # License
 This project is open sourced under MIT License.

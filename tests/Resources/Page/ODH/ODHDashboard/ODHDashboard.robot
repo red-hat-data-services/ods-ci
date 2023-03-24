@@ -10,6 +10,7 @@ Library       JupyterLibrary
 
 
 *** Variables ***
+${ODH_DASHBOARD_PROJECT}=   Red Hat OpenShift Data Science
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
@@ -45,7 +46,7 @@ ${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-c-drawer__panel"]/div/div//b
 ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-c-drawer__panel" and @hidden=""]
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
-${RHODS_LOGO_XPATH}=    //img[@alt="Red Hat OpenShift Data Science Logo" or @alt="Open Data Hub Logo"]
+${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT} Logo"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
 
 
@@ -91,14 +92,14 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait for RHODS Dashboard to Load
-    [Arguments]  ${dashboard_title}=${ODH_DASHBOARD_TITLE}    ${wait_for_cards}=${TRUE}
+    [Arguments]  ${dashboard_title}=${ODH_DASHBOARD_PROJECT}    ${wait_for_cards}=${TRUE}
     ...          ${expected_page}=Enabled
     #Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
 
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
     IF    "${expected_page}" != "${NONE}"
         Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]
-        ...    timeout=10s     
+        ...    timeout=10s
     END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Cards Are Loaded

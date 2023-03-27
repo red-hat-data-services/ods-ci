@@ -77,6 +77,8 @@ Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometh
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
 
+    Sleep    60s    reason=Wait until metrics are available
+
     ${active_users_after} =    Run OpenShift Metrics Query
     ...    query=cluster:usage:consumption:rhods:active_users
     ...    retry_attempts=1    return_zero_if_result_empty=True
@@ -96,6 +98,7 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
+    Sleep    60s    reason=Wait until metrics are available
     ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:pod:up
     Should Not Be Empty    ${value}    msg=Metrics does not contains value for pod:up query
     [Teardown]    CleanUp JupyterHub For N Users    list_of_usernames=${list_of_usernames}

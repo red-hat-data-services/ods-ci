@@ -84,6 +84,7 @@ Project's Owner Should Be
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}
     [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}
+    Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}
     Click Button    ${PROJECT_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${TITLE_INPUT_XP}
     Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}

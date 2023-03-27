@@ -31,6 +31,7 @@ Verify MT-SRE Can Connect To Prometheus Using Port-Forwarding
     [Documentation]    Verifies that MT-SRE can connect to Prometheus using Port-forwarding
     [Tags]    Tier2
     ...       ODS-752
+    ...       AutomationBug
     ${prometheus_port_forwarding_process} =  Enable Access To Prometheus Using OpenShift Port Forwarding
     Wait Until HTTP Status Code Is  url=http://localhost:9090  retry=10x  expected_status_code=200
     Go To  http://localhost:9090
@@ -41,6 +42,7 @@ Verify MT-SRE Can Connect To Alert Manager Using Port-forwarding
     [Documentation]    Verifies that MT-SRE can connect to Alert Manager using Port Forwarding
     [Tags]    Tier2
     ...       ODS-753
+    ...       AutomationBug
     ${alertmanager_port_forwarding_process} =  Enable Access To Alert Manager Using OpenShift Port Forwarding
     Wait Until HTTP Status Code Is  url=http://localhost:9093  retry=10x  expected_status_code=200
     Go To  http://localhost:9093

@@ -17,6 +17,7 @@ Verify ODS Availability After OpenShift Node Failure
     ...       Tier3
     ...       ODS-568
     ...       Execution-Time-Over-5min
+    ...       AutomationBug
     @{cluster_nodes_info}=    Fetch Cluster Worker Nodes Info
     &{cluster_node_info_dict}=    Set Variable    ${cluster_nodes_info}[0]
     Force Reboot OpenShift Cluster Node    ${cluster_node_info_dict.metadata.name}
@@ -26,9 +27,11 @@ Verify rhods_aggregated_availability Detects Downtime In Jupyterhub And Dashboar
     [Documentation]    Verifies if rhods_aggregated_availability detects downtime in Jupyterhub and Dashboard.
     [Tags]    ODS-1608
     ...       Tier3
+    ...       AutomationBug
     Verify rhods_aggregated_availability Detects Downtime In Component    jupyterhub
     Verify rhods_aggregated_availability Detects Downtime In Component    rhods-dashboard
     Verify rhods_aggregated_availability Detects Downtime In Component    combined
+
 
 *** Keywords ***
 Verify rhods_aggregated_availability Detects Downtime In Component

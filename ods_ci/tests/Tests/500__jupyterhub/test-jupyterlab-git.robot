@@ -110,28 +110,28 @@ Clone Git Repository In Current Folder
 Commit Changes
     [Documentation]    It does the git commit with commit message
     [Arguments]    ${commit_message}    ${name}    ${email_id}
-    Click Element    xpath=//*[@id="tab-key-6"]/div[1]
-    Input Text    xpath=//*[@id="jp-git-sessions"]/div/form/input[1]    ${commit_message}
+    Click Element    xpath=//li[@title="Git"]
+    Input Text    xpath=//*[@id="jp-git-sessions"]//input[contains(@placeholder, "Summary")]    ${commit_message}
     Sleep    2s
-    ${attr} =    Get Element Attribute    //*[@id="jp-git-sessions"]/div/form/input[2]    title
+    ${attr} =    Get Element Attribute    xpath=//div[contains(@class, "CommitBox")]//button[.="Commit"]    title
     IF    '''${attr}''' == 'Disabled: No files are staged for commit'
         Set Staging Status    OFF
         Set Staging Status    ON
     END
-    Click Button    xpath=//*[@id="jp-git-sessions"]/div/form/input[2]
+    Click Button    xpath=//div[contains(@class, "CommitBox")]//button[.="Commit"]
     Wait Until Page Contains    Who is committing?    timeout=10s
-    Input Text    //input[@class='jp-mod-styled'][1]    ${name}
-    Input Text    //input[@class='jp-mod-styled'][2]    ${email_id}
-    Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]
+    Input Text    xpath=//input[@placeholder="Name"]    ${name}
+    Input Text    xpath=//input[@placeholder="Email"]    ${email_id}
+    Click Element    xpath=//button[.="OK"]
 
 Push Changes To Remote
     [Documentation]    Push changes to remote directory
     [Arguments]    ${github_username}    ${token}
     Open With JupyterLab Menu    Git    Push to Remote
     Wait Until Page Contains    Git credentials required    timeout=200s
-    Input Text    //input[@class='jp-mod-styled'][1]    ${github_username}
-    Input Text    //input[@class='jp-mod-styled'][2]    ${token}
-    Click Element    //button[@class='jp-Dialog-button jp-mod-accept jp-mod-styled']//div[2]
+    Input Text    xpath=//input[@placeholder="username"]    ${github_username}
+    Input Text    xpath=//input[@placeholder="password / personal access token"]    ${token}
+    Click Element    xpath=//button[.="OK"]
     Sleep    4s
 
 Get Last Commit Message

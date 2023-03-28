@@ -38,7 +38,7 @@ Can Launch Python3 Smoke Test Notebook
   Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  Git  Clone a Repository
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/lugi0/clustering-notebook
-  Click Element  xpath://div[.="CLONE"]
+  Click Element  xpath://button[.="Clone"]
   Sleep  10
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  clustering-notebook/CCFraud-clustering-S3.ipynb

@@ -128,5 +128,5 @@ Verify Unsupported Environment Variable Is Not Allowed
     [Arguments]    ${env_var}
     Add Spawner Environment Variable    ${env_var}    ${env_var}
     Page Should Contain    Invalid variable name. The name must consist of alphabetic characters, digits, '_', '-', or '.', and must not start with a digit.
-    #Element Should Be Disabled    xpath://button[.="Start server"]
+    Element Should Be Disabled    xpath://button[.="Start server"]
     Remove Spawner Environment Variable    ${env_var}

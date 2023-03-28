@@ -58,7 +58,7 @@ Can Launch Python3 Smoke Test Notebook
     Wait Until Page Contains    Clone a repo    timeout=30
     Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input
     ...    https://github.com/lugi0/minimal-nb-image-test
-    Click Element    xpath://div[.="CLONE"]
+    Click Element    xpath://button[.="Clone"]
     Sleep    1
     Open With JupyterLab Menu    File    Open from Path…
     Wait Until Page Contains    Open Path    timeout=30

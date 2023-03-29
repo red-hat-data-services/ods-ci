@@ -19,6 +19,7 @@ ${provider_type}         ${infrastructure_configurations}[provider]
 ${claim_name}            ${cluster_name}-claim
 ${pool_name}             ${cluster_name}-pool
 ${conf_name}             ${cluster_name}-conf
+${artifacts_dir}          .    # It should be ${OUTPUT DIR} once robotframework-openshift/pull/2 is merged
 
 *** Tasks ***
 Provision Self-Managed Cluster

@@ -76,7 +76,7 @@ Create Openstack Resources
     Set Task Variable    ${FIP_APPS}
     Log    FIP_API = ${FIP_API}    console=True
     Log    FIP_APPS = ${FIP_APPS}    console=True
-    ${hive_yaml} =    Set Variable    ${OUTPUT DIR}/${cluster_name}_hive.yaml
+    ${hive_yaml} =    Set Variable    ${artifacts_dir}/${cluster_name}_hive.yaml
     Create File From Template    ${template}    ${hive_yaml}
     Log    Hive configuration for ${provider_type}: ${hive_yaml}    console=True
     Oc Apply    kind=List    src=${hive_yaml}    api_version=v1
@@ -89,10 +89,10 @@ Create Floating IPs
     File Should Not Be Empty    ${osp_clouds_yaml}
     ${shell_script} =     Set Variable     ${CURDIR}/OSP/create_fips.sh
     ${result} 	Run Process 	sh     ${shell_script}    ${cluster_name}    ${infrastructure_configurations}[aws_domain]
-    ...    ${infrastructure_configurations}[osp_network]    ${OUTPUT DIR}/    shell=yes
+    ...    ${infrastructure_configurations}[osp_network]    ${artifacts_dir}/    shell=yes
     Log    ${shell_script}:\n${result.stdout}\n${result.stderr}     console=True
     Should Be True    ${result.rc} == 0
-    ${fips_file_to_export} =    Set Variable    ${OUTPUT DIR}/${cluster_name}.${infrastructure_configurations}[aws_domain].fips
+    ${fips_file_to_export} =    Set Variable    ${artifacts_dir}/${cluster_name}.${infrastructure_configurations}[aws_domain].fips
     Export Variables From File    ${fips_file_to_export}
 
 Verify Cluster Is Successfully Provisioned
@@ -112,7 +112,7 @@ Verify Cluster Is Successfully Provisioned
 Wait For Cluster To Be Ready
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
     Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
-    Set Task Variable    ${install_log_file}    ${OUTPUT DIR}/${cluster_name}_install.log
+    Set Task Variable    ${install_log_file}    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
     ${result} =    Wait Until Keyword Succeeds    50 min    10 s
     ...    Verify Cluster Is Successfully Provisioned    ${pool_namespace}
@@ -129,8 +129,8 @@ Confirm Cluster Is Claimed
     Should Be Equal As Strings    ${status[0]['status']['conditions'][0]['reason']}    ClusterClaimed
 
 Save Cluster Credentials
-    Set Task Variable    ${cluster_details}    ${OUTPUT DIR}/${cluster_name}_details.txt
-    Set Task Variable    ${cluster_kubeconf}    ${OUTPUT DIR}/kubeconfig
+    Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
+    Set Task Variable    ${cluster_kubeconf}    ${artifacts_dir}/kubeconfig
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
     ${result} 	Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{ .status.webConsoleURL }'    shell=yes
     Log    Cluster ${cluster_name} Web Console: ${result.stdout}     console=True
@@ -140,21 +140,21 @@ Save Cluster Credentials
     ...    namespace=${pool_namespace}    api_version=hive.openshift.io/v1
     ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
     Append to File     ${cluster_details}     api=${apiURL}\n
-    ${result} 	Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${OUTPUT DIR}
+    ${result} 	Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
-    ${username} = 	Get File 	${OUTPUT DIR}/username
-    ${password} = 	Get File 	${OUTPUT DIR}/password
+    ${username} = 	Get File 	${artifacts_dir}/username
+    ${password} = 	Get File 	${artifacts_dir}/password
     Append to File     ${cluster_details}     username=${username}\n
     Append to File     ${cluster_details}     password=${password}\n
-    ${result} 	Run Process 	oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${OUTPUT DIR}
+    ${result} 	Run Process 	oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     RETURN    ${cluster_kubeconf}
     
 Login To Cluster
     Export Variables From File    ${cluster_details}
-    ${temp_kubeconfig} =    Set Variable    ${OUTPUT DIR}/temp_kubeconfig
+    ${temp_kubeconfig} =    Set Variable    ${artifacts_dir}/temp_kubeconfig
     Create File     ${temp_kubeconfig}
     ${result} 	Run Process    KUBECONFIG\=${temp_kubeconfig} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
     ...    shell=yes

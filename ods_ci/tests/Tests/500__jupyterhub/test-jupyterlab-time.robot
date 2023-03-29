@@ -23,6 +23,7 @@ Verify Average Spawn Time Is Less Than 40 Seconds
     [Documentation]    Verifies that average spawn time for all JupyterHub images is less than 40 seconds
     [Tags]    ODS-691
     ...       Tier2
+    ...       Execution-Time-Over-15m
     ${len} =    Get Length    ${LIST_OF_IMAGES}
     ${avg_time} =    Get Average Time For Spawning    ${len}
     Log    total_avg time to spawn ${avg_time}

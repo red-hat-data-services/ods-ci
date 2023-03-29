@@ -115,20 +115,19 @@ Remove Spawner Environment Variable
    [Arguments]  ${env_var}
    ${env_check} =  Spawner Environment Variable Exists   ${env_var}
    IF  ${env_check}==True
-      #Click Element  xpath://input[@id="${env_var}"]/../../../../div/button
-      Click Element  xpath://input[contains(@id, "-${env_var}")][1]/../../../../div/button
+      Click Element  xpath://input[contains(@id, "environment-variable-row")][@value="${env_var}"]/../../../../div/button
    END
 
 Spawner Environment Variable Exists
    [Documentation]  Checks if an environment variable is set based on the ${env_var} argument
    [Arguments]  ${env_var}
-   ${var_visible} =  Run Keyword And Return Status  Element Should Be Visible  xpath://input[contains(@id, "-${env_var}")][1]
+   ${var_visible} =  Run Keyword And Return Status  Element Should Be Visible  xpath://input[contains(@id, "environment-variable-row")][@value="${env_var}"]
    RETURN  ${var_visible}
 
 Get Spawner Environment Variable Value
    [Documentation]  Get the value of an existing environment variable based on the ${env_var} argument
    [Arguments]  ${env_var}
-   ${env_var_value} =  Get Value  xpath://input[contains(@id, "-${env_var}")][1]
+   ${env_var_value} =  Get Value  xpath://input[contains(@id, "environment-variable-row")][@value="${env_var}"]/../../..//input[contains(@id, "${env_var}-value")]
    RETURN  ${env_var_value}
 
 Spawn Notebook

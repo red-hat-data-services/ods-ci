@@ -456,7 +456,7 @@ Clone Repo
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Open With JupyterLab Menu    Git    Clone a Repository
     Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${repo_url}
-    Click Element    xpath://div[.="CLONE"]
+    Click Element    xpath://button[.="Clone"]
 
 
 Clone Repo and Return Error Message

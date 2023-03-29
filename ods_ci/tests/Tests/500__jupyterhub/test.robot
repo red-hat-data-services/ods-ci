@@ -76,7 +76,7 @@ Can Spawn Notebook
     Maybe Close Popup
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
     IF  not ${is_launcher_selected}  Open JupyterLab Launcher
-    Launch a new JupyterLab Document
+    Launch a new JupyterLab Document    kernel=Python 3.9.14
     Close Other JupyterLab Tabs
 
 Verify Message That Image Builds Are In Progress
@@ -128,5 +128,5 @@ Verify Unsupported Environment Variable Is Not Allowed
     [Arguments]    ${env_var}
     Add Spawner Environment Variable    ${env_var}    ${env_var}
     Page Should Contain    Invalid variable name. The name must consist of alphabetic characters, digits, '_', '-', or '.', and must not start with a digit.
-    #Element Should Be Disabled    xpath://button[.="Start server"]
+    Element Should Be Disabled    xpath://button[.="Start server"]
     Remove Spawner Environment Variable    ${env_var}

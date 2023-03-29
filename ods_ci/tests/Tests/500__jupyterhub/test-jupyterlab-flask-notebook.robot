@@ -41,7 +41,7 @@ Can Run Flask Test Notebook
   Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  Git  Clone a Repository
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/tmckayus/flask-notebook
-  Click Element  xpath://div[.="CLONE"]
+  Click Element  xpath://button[.="Clone"]
 
   # Run the flask server
   Open With JupyterLab Menu  File  Open from Path…

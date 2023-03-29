@@ -26,6 +26,7 @@ Open RHODS Dashboard
 
 Iterative Testing Classifiers
   [Tags]  Sanity  POLARION-ID-Classifiers
+  ...     Execution-Time-Over-15m
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[classifiers]
     Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]

@@ -14,15 +14,10 @@ class ReadPR:
 
     def run(self):
         data = self.get_diff()
-        files_changed = []
-        for line in data:
-            if line.startswith('diff --git '):
-                files_changed.append(line)
+        files_changed = [line for line in data if line.startswith('diff --git ')]
         infos = []
         for f in files_changed:
-            is_resource = f and f.endswith('.resource')
-            is_robot = f.endswith('.robot')
-            if is_robot or is_resource:
+            if f.endswith(('.robot', '.resource')):
                 infos.append(self.get_sections_info(f))
 
         all_tags = set()
@@ -56,7 +51,7 @@ class ReadPR:
 
     def search_content_tag(self, info):
         all_tags_file = set()
-        my_path = '../tests/Tests'
+        my_path = '../../tests/Tests'
         files = sorted(glob.glob(my_path + '/**/*.robot', recursive=True))
         for filename in info:
             for section_name in info[filename]:
@@ -156,7 +151,7 @@ class ReadPR:
 
     def get_file_lines(self, file_path):
         file_path = file_path.split(' ')[-1]
-        file_name = '../' + file_path[2:]
+        file_name = f'../../../{file_path[2:]}'
         if file_path.startswith('b/'):
             with open(file_name) as f:
                 lines = f.readlines()
@@ -172,4 +167,3 @@ class ReadPR:
 
 if __name__ == "__main__":
     ReadPR().run()
-

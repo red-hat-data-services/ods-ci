@@ -36,7 +36,7 @@ As an example, for RHODS release 1.21.0-21 we would create a branch releases/1.2
 
 # How to update dependencies with Poetry
 
-When using Poetry, we have a `poetry.lock` file specifying which exact versions of all dependencies we should be using. This file is not updated automatically and should instead be regularly updated by contributors.
+[Poetry](https://python-poetry.org) is a tool for dependency management and packaging in Python. When using Poetry, we have a `poetry.lock` file specifying which exact versions of all dependencies we should be using. This file is not updated automatically and should instead be regularly updated by contributors.
 If we only want to get the latest version(s) of our dependencies **that respect the requirements**, we can run `poetry update` and then commit the updated `poetry.lock` to the repo.
 
 
@@ -46,12 +46,13 @@ If a specific dependency needs to be updated to an higher major version then, yo
 
 To give a pratical example, these are the steps that we would take to upgrade to Robot Framework 6:
 
-    1. Clone ods-ci and cd into the root of the project
-    2. Open `pyproject.toml`
-    3. Update `robotframework = "^5"` to `robotframework = "^6"` (this won't allow versions <6 anymore, and will instead fetch any version >=6 and <7)
-    4. Save `pyproject.toml`
-    5. In the root of the project, run `poetry update`
-    6. Assuming all dependencies are resolved, commit the updated `pyproject.toml` and `poetry.lock` files back to ods-ci.
+    1. Install Poetry if not already installed: `url -sSL https://install.python-poetry.org | python3 -`
+    2. Clone ods-ci and cd into the root of the project
+    3. Open `pyproject.toml`
+    4. Update `robotframework = "^5"` to `robotframework = "^6"` (this won't allow versions <6 anymore, and will instead fetch any version >=6 and <7)
+    5. Save `pyproject.toml`
+    6. In the root of the project, run `poetry update`
+    7. Assuming all dependencies are resolved, commit the updated `pyproject.toml` and `poetry.lock` files back to ods-ci.
 
 All these operations could also be carried out with the [`poetry add` command](https://python-poetry.org/docs/cli/#add), which doesn't require to manually modify the contraint in `pyproject.toml`, i.e.:
 

@@ -50,7 +50,6 @@ Create Provider Resources
     ELSE
         FAIL    Invalid provider name
     END
-    [Teardown]  Clean Failed Cluster
     
 Select Provisioner Template
     [Arguments]    ${provider_type}
@@ -71,7 +70,7 @@ Select Provisioner Template
 Create Openstack Resources
     ${FIP_API}    Evaluate    ${infrastructure_configurations}.get('fip_api')
     ${FIP_APPS}    Evaluate    ${infrastructure_configurations}.get('fip_apps')
-    Run Keyword If    ${FIP_API} is None or ${FIP_APPS} is None    Create Floating IPs
+    Run Keyword If    "${FIP_API}" == "" or "${FIP_APPS}" == ""    Create Floating IPs
     Set Task Variable    ${FIP_API}
     Set Task Variable    ${FIP_APPS}
     Log    FIP_API = ${FIP_API}    console=True
@@ -170,7 +169,7 @@ Set Cluster Storage
     ${result} 	Run Process 	oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard-csi -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
     ...    shell=yes
     Log    StorageClass standard-csi:\n${result.stdout}\n${result.stderr}     console=True
-    Should Be True    ${result.rc} == 0
+    Run Keyword And Ignore Error    Should Be True    ${result.rc} == 0
 
 Get Cluster Pool Namespace
     [Arguments]    ${hive_pool_name}

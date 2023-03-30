@@ -32,6 +32,7 @@ Provision Self-Managed Cluster
     Save Cluster Credentials
     Login To Cluster
     Set Cluster Storage
+    [Teardown]  Clean Failed Cluster
 
 Deprovision Self-Managed Cluster
     [Documentation]    Deprovision a self-managed cluster

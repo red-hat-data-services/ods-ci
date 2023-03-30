@@ -115,18 +115,18 @@ files = [
 
 [[package]]
 name = "awscli"
-version = "1.27.112"
+version = "1.27.100"
 description = "Universal Command Line Environment for AWS."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "awscli-1.27.112-py3-none-any.whl", hash = "sha256:84f81e664f36c8613f881c527e1f09b37fb4f6435e70deb24e57d19a0c5ba276"},
-    {file = "awscli-1.27.112.tar.gz", hash = "sha256:a1fe4352e2fd8e7ce934328cefa51945f47465c89b221cd7eaeb53a9e229e998"},
+    {file = "awscli-1.27.100-py3-none-any.whl", hash = "sha256:d8be4bafca815feef5073ea481e11d070a2bcb90bde58531ceb1bdf95c9cebf0"},
+    {file = "awscli-1.27.100.tar.gz", hash = "sha256:3844687d46078f89f662ddcb7f729acaaad84ef773236da1fe5ffac1380c4ee6"},
 ]
 
 [package.dependencies]
-botocore = "1.29.112"
+botocore = "1.29.100"
 colorama = ">=0.2.5,<0.4.5"
 docutils = ">=0.10,<0.17"
 PyYAML = ">=3.10,<5.5"
@@ -245,14 +245,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.112"
+version = "1.29.100"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.112-py3-none-any.whl", hash = "sha256:2cbaddb09b46dcb0a05490724d51acb224d3a8df433c347f995b4d78bfb02c8a"},
-    {file = "botocore-1.29.112.tar.gz", hash = "sha256:1f52d9371d7b5ee30a53dcef7954c3cf22e04b131cfab5268035f3299ccde9e1"},
+    {file = "botocore-1.29.100-py3-none-any.whl", hash = "sha256:d5c4c5bbbbf0ec62a4235ccac1b9bbb579558f7bb3231d7fb6054e1f64d3a623"},
+    {file = "botocore-1.29.100.tar.gz", hash = "sha256:ff6585df3dcef2057be5e54b45d254608d3769d726ea4ccd4e17f77825e5b13d"},
 ]
 
 [package.dependencies]
@@ -951,14 +951,14 @@ files = [
 
 [[package]]
 name = "google-auth"
-version = "2.17.3"
+version = "2.16.3"
 description = "Google Authentication Library"
 category = "main"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*"
 files = [
-    {file = "google-auth-2.17.3.tar.gz", hash = "sha256:ce311e2bc58b130fddf316df57c9b3943c2a7b4f6ec31de9663a9333e4064efc"},
-    {file = "google_auth-2.17.3-py2.py3-none-any.whl", hash = "sha256:f586b274d3eb7bd932ea424b1c702a30e0393a2e2bc4ca3eae8263ffd8be229f"},
+    {file = "google-auth-2.16.3.tar.gz", hash = "sha256:611779ce33a3aee265b94b74d4bb8c188f33010f5814761250a0ebbde94cc745"},
+    {file = "google_auth-2.16.3-py2.py3-none-any.whl", hash = "sha256:4dfcfd8ecd1cf03ddc97fddfb3b1f2973ea4f3f664aa0d8cfaf582ef9f0c60e7"},
 ]
 
 [package.dependencies]
@@ -3583,14 +3583,14 @@ doc = ["furo", "sphinx", "sphinx-copybutton (==0.3.3)", "sphinx-design"]
 
 [[package]]
 name = "rpaframework"
-version = "22.5.1"
+version = "22.3.0"
 description = "A collection of tools and libraries for RPA"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "rpaframework-22.5.1-py3-none-any.whl", hash = "sha256:cc403b07d4217731c0773c18ccf9a643206f038f380faab2e3e90ecd8f61f279"},
-    {file = "rpaframework-22.5.1.tar.gz", hash = "sha256:f101c04125ddd48625b6924c79a1a53368371e0334163228aea22bd218a30571"},
+    {file = "rpaframework-22.3.0-py3-none-any.whl", hash = "sha256:b30bd40449b6f25364710ce71c656690ce088108a59d3cd5767d25540c4786e6"},
+    {file = "rpaframework-22.3.0.tar.gz", hash = "sha256:94d11bc9aeb972a98b704a637cc72f1e3bd98da556153cec99bab1fb76ff4c4e"},
 ]
 
 [package.dependencies]
@@ -3670,14 +3670,14 @@ webdriver-manager = ">=3.8.3,<4.0.0"
 
 [[package]]
 name = "rpaframework-pdf"
-version = "7.1.5"
+version = "7.1.2"
 description = "PDF library of RPA Framework"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "rpaframework_pdf-7.1.5-py3-none-any.whl", hash = "sha256:1dd01624e067a3ce59e83a7beb2228ab78fd6ca83693383e0973878df641fe40"},
-    {file = "rpaframework_pdf-7.1.5.tar.gz", hash = "sha256:9a2bbf4b7fde3a276abc7d604b90801ac6a6d6e17786994bd96c6771540042d5"},
+    {file = "rpaframework_pdf-7.1.2-py3-none-any.whl", hash = "sha256:29eedc0c84ca82096627c95ecfb53afc4014b3ba67a6278559e5a38b31afb121"},
+    {file = "rpaframework_pdf-7.1.2.tar.gz", hash = "sha256:d77838c6b39105e0ab4f674025e606bf24d29bcf9a2e8fc95f605162d3475213"},
 ]
 
 [package.dependencies]

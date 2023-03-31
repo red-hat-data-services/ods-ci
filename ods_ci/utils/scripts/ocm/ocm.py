@@ -18,8 +18,11 @@ import yaml
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 from logger import log
+# fmt: off
 from util import (clone_config_repo, compare_dicts, execute_command,
                   read_data_from_json, read_yaml, write_data_in_json)
+
+# fmt: on
 
 """
 Class for Openshift Cluster Manager
@@ -1080,6 +1083,41 @@ class OpenshiftClusterManager:
             )
             sys.exit(1)
 
+    def hibernate_cluster(self):
+        """Hibernate OSD Cluster"""
+
+        cluster_id = self.get_osd_cluster_id()
+        cmd = "ocm hibernate cluster {}".format(cluster_id)
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        if ret is None:
+            log.info("Failed to hibernate osd cluster {}".format(self.cluster_name))
+            sys.exit(1)
+        self.wait_for_osd_cluster_to_get_hibernated()
+
+    def wait_for_osd_cluster_to_get_hibernated(self, timeout=1800):
+        """Waits for cluster to get hibernated"""
+
+        log.info("Waiting for cluster to be in hibernating state")
+        cluster_state = self.get_osd_cluster_state()
+        count = 0
+        check_flag = False
+        while count <= timeout:
+            cluster_state = self.get_osd_cluster_state()
+            if cluster_state == "hibernating":
+                log.info("{} is in hibernating state".format(self.cluster_name))
+                check_flag = True
+                break
+
+            time.sleep(60)
+            count += 60
+        if not check_flag:
+            log.info(
+                "{} not in hibernating state even after 30 mins."
+                " EXITING".format(self.cluster_name)
+            )
+            sys.exit(1)
+
     def update_notification_email_address(
         self, addon_name, email_address, exit_on_failure=True
     ):
@@ -1729,6 +1767,22 @@ if __name__ == "__main__":
         default="qeaisrhods-xyz",
     )
     delete_cluster_parser.set_defaults(func=ocm_obj.delete_cluster)
+
+    # Argument parsers for hibernate_cluster
+    hibernate_cluster_parser = subparsers.add_parser(
+        "hibernate_cluster",
+        help=("Hibernates managed OpenShift Dedicated v4 clusters via OCM."),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    hibernate_cluster_parser.add_argument(
+        "--cluster-name",
+        help="osd cluster name",
+        action="store",
+        dest="cluster_name",
+        metavar="",
+        default="qeaisrhods-xyz",
+    )
+    hibernate_cluster_parser.set_defaults(func=ocm_obj.hibernate_cluster)
 
     # Argument parsers for delete_idp
     delete_idp_parser = subparsers.add_parser(

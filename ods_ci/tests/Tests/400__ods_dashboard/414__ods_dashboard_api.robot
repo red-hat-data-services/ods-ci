@@ -96,6 +96,9 @@ ${ROUTE_ENDPOINT_PT1}=      ${ROUTE_ENDPOINT_PT0}/${NOTEBOOK_NS}
 ${ROUTE_ENDPOINT_PT1B}=     ${ROUTE_ENDPOINT_PT0}/${DASHBOARD_NS}
 ${ROUTE_ENDPOINT_PT2B}=     ${ROUTE_ENDPOINT_PT1B}/rhods-dashboard
 
+${NAMESPACES_ENDPOINT_PT0}=    api/namespaces
+${PRJ_K8S_ENDPOINT_PT0}=    api/k8s/apis/project.openshift.io/v1/projectrequests/
+
 
 *** Test Cases ***
 Verify Access To cluster-settings API Endpoint
@@ -713,6 +716,44 @@ Verify Access To route API Endpoint
     Operation Should Be Allowed
     [Teardown]    Delete Test Notebooks CRs And PVCs From CLI
 
+Verify Access To namespaces API Endpoint
+    [Documentation]     Verifies the endpoint "namespaces" works as expected
+    ...                 based on the permissions of the users who query the endpoint
+    ...                 The syntaxes to reach this endpoint are:
+    ...                 `api/namespaces/<NS_NAME>/0/` and `api/namespaces/<NS_NAME>/1/`
+    [Tags]    ODS-XYZ
+    ...       Tier1    Sanity
+    ...       Security
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
+    Operation Should Be Unavailable
+    ${prj_admin_name}=    Set Variable    ${TEST_USER.USERNAME}-project
+    Create An OpenShift Project Via API    title=${prj_admin_name}
+    ...    token=${ADMIN_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}   token=${ADMIN_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/0    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/0   token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/1    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unauthorized
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/1   token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    ${prj_user_name}=    Set Variable    ${TEST_USER_3.USERNAME}-project
+    Create An OpenShift Project Via API    title=${prj_user_name}
+    ...    token=${BASIC_USER_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/0    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/0   token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/1    token=${BASIC_USER_TOKEN}
+    Operation Should Be Allowed
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/1   token=${ADMIN_TOKEN}
+    Operation Should Be Allowed
 
 *** Keywords ***
 Endpoint Testing Setup
@@ -879,4 +920,8 @@ Perform AllowedUsers API Call Based On RHODS Version
         ...                                        body=${EMPTY}    str_to_json=${FALSE}
         Operation Should Be Allowed
     END
-    
+
+Create An OpenShift Project Via API
+    [Arguments]    ${title}    ${token}
+    Perform Dashboard API Endpoint GET Call   endpoint=${PRJ_K8S_ENDPOINT_PT0}/${title}    token=${token}
+    Operation Should Be Allowed

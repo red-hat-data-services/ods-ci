@@ -150,8 +150,8 @@ Select Workbench Jupyter Image
     [Arguments]     ${image_name}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
-    Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}/span[text()="${image_name}"]
-    Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}/span[text()="${image_name}"]
+    Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}/[text()="${image_name}"]
+    Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}/[text()="${image_name}"]
 
 Select Workbench Container Size
     [Documentation]    Selects the container size in the workbench creation page

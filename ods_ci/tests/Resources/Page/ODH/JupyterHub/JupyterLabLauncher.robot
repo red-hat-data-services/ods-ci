@@ -390,7 +390,7 @@ Check Versions In JupyterLab
         # libString = LibName vX.Y -> libDetail= [libName, X.Y]
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
         IF  "${libDetail}[0]" == "TensorFlow"
-            ${status}  ${value} =  Verify Installed Library Version  tensorflow-gpu  ${libDetail}[1]
+            ${status}  ${value} =  Verify Installed Library Version  tensorflow  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
             END

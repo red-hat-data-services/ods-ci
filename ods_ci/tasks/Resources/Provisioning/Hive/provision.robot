@@ -82,7 +82,7 @@ Create Openstack Resources
 
 Create Floating IPs
     ${osp_clouds_yaml} =    Set Variable    ~/.config/openstack/clouds.yaml
-    ${result} 	Run Process 	echo '${PSI_CLOUD_YAML_ECODED}' | base64 --decode    shell=yes
+    ${result} 	Run Process 	echo '${infrastructure_configurations}[psi_cloud_yaml_encoded]' | base64 --decode    shell=yes
     Should Be True    ${result.rc} == 0
     Create File    ${osp_clouds_yaml}    ${result.stdout}
     File Should Not Be Empty    ${osp_clouds_yaml}

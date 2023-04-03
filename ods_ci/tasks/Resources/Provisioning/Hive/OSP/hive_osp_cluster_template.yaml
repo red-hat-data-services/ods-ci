@@ -63,8 +63,8 @@ items:
           computeFlavor: m1.large
           externalDNS: null
           externalNetwork: ${infrastructure_configurations}[osp_network]
-      pullSecret: ${QUAY_PULL_SEC}
-      sshKey: ${QUAY_SSH_KEY}
+      pullSecret: '${infrastructure_configurations}[quay_pull_sec]'
+      sshKey: ${infrastructure_configurations}[ssh_key]
 - apiVersion: hive.openshift.io/v1
   kind: ClusterDeploymentCustomization
   metadata:
@@ -91,8 +91,8 @@ items:
     namespace: ${infrastructure_configurations}[hive_claim_ns]
   type: Opaque
   data:
-    clouds.yaml: ${PSI_CLOUD_YAML_ECODED}
-    cloud: ${PSI_CLOUD_NAME_ECODED}
+    clouds.yaml: ${infrastructure_configurations}[psi_cloud_yaml_encoded]
+    cloud: ${infrastructure_configurations}[psi_cloud_name_encoded]
 - apiVersion: hive.openshift.io/v1
   kind: ClusterImageSet
   metadata:

@@ -25,6 +25,8 @@ ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-c-form__group-control"]
+${DEFAULT_PYTHON_VER} =    3.9
+${PREVIOUS_PYTHON_VER} =    3.8
 
 
 *** Keywords ***
@@ -40,13 +42,36 @@ Wait Until JupyterHub Spawner Is Ready
     Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]    timeout=15s
 
 Select Notebook Image
-    [Documentation]  Selects a notebook image based on a partial match of ${notebook_image} argument
-    [Arguments]    ${notebook_image}
-    #Wait Until Element Is Visible    xpath://div[@class="jsp-spawner__image-options"]
+    [Documentation]    Selects a notebook image based on a partial match of ${notebook_image} argument
+    ...                ${version} controls if the default or previous version is selected (default | previous)
+    [Arguments]    ${notebook_image}    ${version}=default
+    ${KFNBC_IMAGE_ROW} =    Set Variable    //input[contains(@id, "${notebook_image}")]
+    ${KFNBC_IMAGE_DROPDOWN} =    Set Variable    ${KFNBC_IMAGE_ROW}/../../div[contains(@class, "notebook-image-tags")]
     Wait Until Element Is Visible    xpath://div[.="Notebook image"]/..
-    Wait Until Element Is Visible    xpath://input[contains(@id, "${notebook_image}")]
-    Element Should Be Enabled    xpath://input[contains(@id, "${notebook_image}")]
-    Click Element    xpath://input[contains(@id, "${notebook_image}")]
+    Wait Until Element Is Visible    xpath=${KFNBC_IMAGE_ROW}
+    Element Should Be Enabled    xpath=${KFNBC_IMAGE_ROW}
+    IF    "${version}"=="default"
+        Click Element    xpath=${KFNBC_IMAGE_ROW}
+    ELSE IF    "${version}"=="previous"
+        Verify Version Dropdown Is Present    ${notebook_image}
+        Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
+        Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/../input
+    ELSE
+        Log To Console    Unknown image version requested
+        Fail    Unknown image version requested
+    END
+
+Verify Version Dropdown Is Present
+    [Documentation]    Validates the version dropdown for a given Notebook image
+    [Arguments]    ${notebook_image}
+    ${KFNBC_IMAGE_ROW} =    Set Variable    //input[contains(@id, "${notebook_image}")]
+    ${KFNBC_IMAGE_DROPDOWN} =    Set Variable    ${KFNBC_IMAGE_ROW}/../../div[contains(@class, "notebook-image-tags")]
+    Page Should Contain Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
+    Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
+    Wait Until Page Contains Element    xpath=${KFNBC_IMAGE_DROPDOWN}
+    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${DEFAULT_PYTHON_VER}")]
+    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]
+    Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
 
 Select Container Size
     [Documentation]  Selects the container size based on the ${container_size} argument
@@ -198,17 +223,12 @@ Spawn Notebook
     IF    ${expect_autoscaling}
         Wait Until Page Contains    TriggeredScaleUp    timeout=120s
     END
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
-    IF  ${version-check}==True
-        Wait Until Page Contains    The notebook server is up and running.    ${spawner_timeout}
-        IF  ${same_tab}
-            Click Button    Open in current tab
-        ELSE
-            Click Button    Open in new tab
-            Switch Window    NEW
-        END
+    Wait Until Page Contains    The notebook server is up and running.    ${spawner_timeout}
+    IF  ${same_tab}
+        Click Button    Open in current tab
     ELSE
-        Wait Until Page Does Not Contain Element  xpath://div[@role="progressbar"]  ${spawner_timeout}
+        Click Button    Open in new tab
+        Switch Window    NEW
     END
 
 Has Spawn Failed
@@ -217,66 +237,73 @@ Has Spawn Failed
     RETURN  ${spawn_status}
 
 Spawn Notebook With Arguments  # robocop: disable
-   [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
-   ...              It will try again ${retries} times (Default: 1) after ${retries_delay} delay (Default: 0 seconds).
-   ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
-   ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
-   [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
-   ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}
-   ...    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
-   ...    &{envs}
-   ${spawn_fail} =  Set Variable  True
-   FOR  ${index}  IN RANGE  0  1+${retries}
-      ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
-      IF  ${spawner_ready}==True
-         Select Notebook Image  ${image}
-         Select Container Size  ${size}
-         ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
-         IF  ${gpu_visible}==True and ${gpus}>0
-            Set Number Of Required GPUs  ${gpus}
-         ELSE IF  ${gpu_visible}==False and ${gpus}>0
-            Fail  GPUs required but not available
-         END
-         IF   ${refresh}
-              Reload Page
-              Capture Page Screenshot    reload.png
-              Wait Until JupyterHub Spawner Is Ready
-         END
-         IF  &{envs}
-            Remove All Spawner Environment Variables
-            FOR  ${key}  ${value}  IN  &{envs}[envs]
-               Sleep  1
-               Add Spawner Environment Variable  ${key}  ${value}
+    [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
+    ...              It will try again ${retries} times (Default: 1) after ${retries_delay} delay (Default: 0 seconds).
+    ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
+    ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
+    ...              ${version} controls if the default or previous version is selected (default | previous)
+    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
+    ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}
+    ...    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
+    ...    ${version}=default    &{envs}
+    ${spawn_fail} =  Set Variable  True
+    FOR  ${index}  IN RANGE  0  1+${retries}
+        ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
+        IF  ${spawner_ready}==True
+            Select Notebook Image    ${image}    ${version}
+            Select Container Size  ${size}
+            ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
+            IF  ${gpu_visible}==True and ${gpus}>0
+                Set Number Of Required GPUs  ${gpus}
+            ELSE IF  ${gpu_visible}==False and ${gpus}>0
+                Fail  GPUs required but not available
             END
-         END
-         Spawn Notebook    ${spawner_timeout}    ${same_tab}
-         Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
-         ${authorization_required} =  Is Service Account Authorization Required
-         IF  ${authorization_required}  Authorize jupyterhub service account
-         Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
-         Sleep    2s    reason=Wait for a possible popup
-         Maybe Close Popup
-         Open New Notebook In Jupyterlab Menu
-         Spawned Image Check    ${image}
-         ${spawn_fail} =  Has Spawn Failed
-         Exit For Loop If  ${spawn_fail} == False
-         #Click Element  xpath://span[@id='jupyterhub-logo']
-         Reload Page
-      ELSE
-         Sleep  ${retries_delay}
-         #Click Element  xpath://span[@id='jupyterhub-logo']
-         Reload Page
-      END
-   END
-   IF  ${spawn_fail} == True
-      Fail  msg= Spawner failed loading after ${retries} retries
-   END
+            IF   ${refresh}
+                Reload Page
+                Capture Page Screenshot    reload.png
+                Wait Until JupyterHub Spawner Is Ready
+            END
+            IF  &{envs}
+                Remove All Spawner Environment Variables
+                FOR  ${key}  ${value}  IN  &{envs}[envs]
+                    Sleep  1
+                    Add Spawner Environment Variable  ${key}  ${value}
+                END
+            END
+            Spawn Notebook    ${spawner_timeout}    ${same_tab}
+            Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
+            ${authorization_required} =  Is Service Account Authorization Required
+            IF  ${authorization_required}  Authorize jupyterhub service account
+            Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+            Sleep    2s    reason=Wait for a possible popup
+            Maybe Close Popup
+            Open New Notebook In Jupyterlab Menu
+            Spawned Image Check    ${image}    ${version}
+            ${spawn_fail} =  Has Spawn Failed
+            Exit For Loop If  ${spawn_fail} == False
+            Reload Page
+        ELSE
+            Sleep  ${retries_delay}
+            Reload Page
+        END
+    END
+    IF  ${spawn_fail} == True
+        Fail  msg= Spawner failed loading after ${retries} retries
+    END
 
 Spawned Image Check
     [Documentation]    This Keyword checks that the spawned image matches a given image name
     ...                (Presumably the one the user wanted to spawn)
-    [Arguments]    ${image}
+    [Arguments]    ${image}    ${version}=default
     Run Cell And Check Output    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])    ${image}
+    IF    "${version}"=="default"
+        Python Version Check    expected_version=${DEFAULT_PYTHON_VER}
+    ELSE IF    "${version}"=="previous"
+        Python Version Check    expected_version=${PREVIOUS_PYTHON_VER}
+    ELSE
+        Log To Console    Unknown image version requested
+        Fail    Unknown image version requested
+    END
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells
 

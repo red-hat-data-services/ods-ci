@@ -5,6 +5,7 @@ Resource        ../../LoginPage.robot
 
 *** Variables ***
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
+${GROUP_BTN_XP}=    (//*[@class="pf-c-chip-group"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
 
 
 *** Keywords ***
@@ -49,7 +50,7 @@ Remove OpenShift Groups From Data Science User Groups
     [Documentation]   Remove OpenShift Groups From Data Science User Groups From Dashboard
     [Arguments]   @{user_groups}
     FOR    ${user_group}    IN    @{user_groups}
-            Click Element     (//*[@class="pf-c-form__group-control"])[${2}]//*[@class="pf-c-chip__text" and contains(text(),"${user_groups}")]//following-sibling::button[${1}]
+            Click Element     (//*[@class="pf-c-chip-group"])[${2}]//*[@class="pf-c-chip__text" and contains(text(),"${user_groups}")]//following-sibling::button[${1}]
     END
     Press Keys    None    ESC
 
@@ -57,7 +58,7 @@ Remove OpenShift Groups From Data Science Administrator Groups
     [Documentation]  Remove OpenShift Groups From Data Science Administrator Groups From Dashboard
     [Arguments]     @{admin_groups}
     FOR    ${admin_group}    IN    @{admin_groups}
-            Click Button    (//*[@class="pf-c-form__group-control"])[${1}]//*[@class="pf-c-chip__text" and contains(text(),"${admin_group}")]//following-sibling::button[${1}]
+            Click Button    (//*[@class="pf-c-chip-group"])[${1}]//*[@class="pf-c-chip__text" and contains(text(),"${admin_group}")]//following-sibling::button[${1}]
     END
     Press Keys    None    ESC
 
@@ -85,9 +86,9 @@ AllowedGroups In OdhDashboardConfig CRD Should Be
 
 Clear User Management Settings
     [Documentation]  Clear all groups from User Management Settings
-    @{remove_users_list}  Get Webelements  (//*[@class="pf-c-form__group-control"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
+    @{remove_users_list}  Get Webelements  ${GROUP_BTN_XP}
     FOR  ${user}   IN   @{remove_users_list}
-        Click Button  (//*[@class="pf-c-form__group-control"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
+        Click Button  ${GROUP_BTN_XP}
     END
 
 Set Pod Toleration Via UI

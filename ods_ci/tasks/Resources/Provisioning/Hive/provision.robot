@@ -41,10 +41,10 @@ Create Provider Resources
     Log    Creating Hive resources for ${provider_type} according to: ${template}   console=True
     IF    "${provider_type}" == "AWS"
         Oc Apply    kind=List    src=${template}    api_version=v1
-        ...    template_data=${template}
+        ...    template_data=${infrastructure_configurations}
     ELSE IF    "${provider_type}" == "GCP"
         Oc Apply    kind=List    src=${template}    api_version=v1
-        ...    template_data=${template}
+        ...    template_data=${infrastructure_configurations}
     ELSE IF    "${provider_type}" == "OSP"
         Create Openstack Resources
     ELSE
@@ -82,7 +82,7 @@ Create Openstack Resources
 
 Create Floating IPs
     ${osp_clouds_yaml} =    Set Variable    ~/.config/openstack/clouds.yaml
-    ${result} 	Run Process 	echo '${infrastructure_configurations}[psi_cloud_yaml_encoded]' | base64 --decode    shell=yes
+    ${result} 	Run Process 	echo '${infrastructure_configurations}[osp_yaml_encoded]' | base64 --decode    shell=yes
     Should Be True    ${result.rc} == 0
     Create File    ${osp_clouds_yaml}    ${result.stdout}
     File Should Not Be Empty    ${osp_clouds_yaml}

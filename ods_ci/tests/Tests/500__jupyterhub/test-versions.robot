@@ -17,9 +17,9 @@ Force Tags          JupyterHub
 *** Variables ***
 @{status_list}      # robocop: disable
 &{package_versions}      # robocop: disable
-${JupyterLab_Version}         v3.2
-${Notebook_Version}           v6.4
-${JupyterLab-git_Version}     v0.30
+${JupyterLab_Version}         v3.5
+${Notebook_Version}           v6.5
+${JupyterLab-git_Version}     v0.41
 
 
 *** Test Cases ***
@@ -37,7 +37,6 @@ Verify Libraries in Minimal Image
 Verify Libraries in Cuda Image
     [Documentation]    Verifies libraries in Minimal Python image
     [Tags]    Sanity
-    ...       ProductBug
     Verify List Of Libraries In Image    minimal-gpu    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in SDS Image
@@ -50,21 +49,18 @@ Verify Libraries in PyTorch Image
     [Documentation]    Verifies libraries in PyTorch image
     [Tags]    Sanity
     ...       ODS-215    ODS-216    ODS-217    ODS-218    ODS-466
-    ...       ProductBug
     Verify List Of Libraries In Image    pytorch    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in Tensorflow Image
     [Documentation]    Verifies libraries in Tensorflow image
     [Tags]    Sanity
     ...       ODS-204    ODS-205    ODS-206    ODS-207  ODS-474
-    ...       ProductBug
     Verify List Of Libraries In Image    tensorflow    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify All Images And Spawner
     [Documentation]    Verifies that all images have the correct libraries with same versions
     [Tags]    Sanity
     ...       ODS-340    ODS-452    ODS-468
-    ...       ProductBug
     List Should Not Contain Value    ${status_list}    FAIL
     ${length} =    Get Length    ${status_list}
     Should Be Equal As Integers    ${length}    5

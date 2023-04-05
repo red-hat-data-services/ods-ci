@@ -14,7 +14,7 @@ Force Tags       JupyterHub
 
 
 *** Variables ***
-@{IMAGE_LIST}    s2i-minimal-notebook    s2i-generic-data-science-notebook    tensorflow    pytorch    minimal-gpu
+@{IMAGE_LIST}    minimal-notebook    generic-data-science-notebook    tensorflow    pytorch    minimal-gpu
 
 
 *** Test Cases ***
@@ -29,16 +29,27 @@ Verify All OOTB Images Have Version Dropdowns
     END
     [Teardown]    End Web Test
 
-Verify All OOTB Images Spawn Both Versions
-    [Documentation]    Verifies all images in ${IMAGE_LIST} can be spawned in
-    ...                either version, and the spawned image is the correct one.
+Verify All OOTB Images Spawn Previous Versions
+    [Documentation]    Verifies all images in ${IMAGE_LIST} can be spawned using
+    ...                the previous version, and the spawned image is the correct one.
     [Tags]    Sanity    Tier1
     ...       ODS-XXXX
     [Setup]    Multiple Image Tags Suite Setup
     FOR    ${image}    IN    @{IMAGE_LIST}
-        Spawn Notebook With Arguments    image=${image}
-        Close Previous Server
         Spawn Notebook With Arguments    image=${image}    version=previous
+        Close Previous Server
+    END
+    [Teardown]    End Web Test
+
+Workload Test For Previous Image Versions
+    [Documentation]    Spawns each notebook image using the previous available
+    ...                version, and runs a workload on it.
+    [Tags]    Tier2    LiveTesting
+    ...       ODS-XXXX
+    [Setup]    Multiple Image Tags Suite Setup
+    FOR    ${image}    IN    @{IMAGE_LIST}
+        Spawn Notebook With Arguments    image=${image}    version=previous
+        Run Regression Workload On Notebook Image    ${image}
         Close Previous Server
     END
     [Teardown]    End Web Test
@@ -51,8 +62,28 @@ Multiple Image Tags Suite Setup
     Launch JupyterHub Spawner From Dashboard
 
 Close Previous Server
-    [Documentation]  Closes previous server and goes back to Spawner
+    [Documentation]    Closes previous server and goes back to Spawner
     Clean Up Server
     Stop JupyterLab Notebook Server
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
+
+Run Regression Workload On Notebook Image
+    [Documentation]    Runs a workload based on the image argument
+    [Arguments]    ${image}
+    IF    "${image}"=="minimal-notebook"
+        Run Repo And Clean  https://github.com/lugi0/minimal-nb-image-test    minimal-nb-image-test/minimal-nb.ipynb
+    ELSE IF    "${image}"=="generic-data-science-notebook"
+        Run Repo And Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
+    ELSE IF    "${image}"=="minimal-gpu"
+        ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
+        Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
+        Run Repo And Clean  https://github.com/lugi0/minimal-nb-image-test    minimal-nb-image-test/minimal-nb.ipynb
+    ELSE IF    "${image}"=="tensorflow"
+        Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
+    ELSE IF    "${image}"=="pytorch"
+        Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
+    ELSE
+        Log To Console    Unknown image
+        Fail
+    END

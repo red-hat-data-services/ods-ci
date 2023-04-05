@@ -79,7 +79,18 @@ Verify PyTorch Image GPU Workload
     ...     Resources-GPU
     ...     ODS-1148
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
-    JupyterLab Code Cell Error Output Should Not Be Visible
+
+Verify Previous PyTorch Notebook Image With GPU
+    [Documentation]    Runs a workload after spawning the N-1 PyTorch Notebook 
+    [Tags]    Tier2    LiveTesting
+    ...       Resources-GPU
+    ...       ODS-XXXX
+    [Setup]    N-1 PyTorch Setup
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
+    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
+    Verify PyTorch Can See GPU
+    Run Repo And Clean    https://github.com/lugi0/notebook-benchmarks    notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
+    [Teardown]    End Web Test
 
 
 *** Keywords ***
@@ -99,3 +110,10 @@ Close Previous Server
     Stop JupyterLab Notebook Server
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
+
+N-1 PyTorch Setup
+    [Documentation]    Closes the previous browser (if any) and starts a clean
+    ...                run spawning the N-1 PyTorch image
+    End Web Test
+    Begin Web Test
+    Launch JupyterHub Spawner From Dashboard

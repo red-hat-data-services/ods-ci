@@ -458,7 +458,7 @@ Clone Repo
     Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${repo_url}
     # new/old git extensions versions have a different capitalization of "clone" (Clone v. CLONE). Use a translate
     # hack in the xpath to match in a case-insensitive way.
-    Click Element    xpath://button[translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') = 'clone']
+    Click Element    xpath://button/div[translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') = 'clone']
 
 
 Clone Repo and Return Error Message

@@ -23,6 +23,9 @@ ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting...
 ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"]
+${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
+${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
+${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="workbench-image-version-selection"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
@@ -37,14 +40,14 @@ Create Workbench
     ...                 add Environment variables and select Jupyter image
     [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}    ${gpus}=${NONE}
-    ...             ${press_cancel}=${FALSE}  ${envs}=${NONE}
+    ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}
     Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
-    Select Workbench Jupyter Image    image_name=${image_name}
+    Select Workbench Jupyter Image    image_name=${image_name}    version=${version}
     IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
     IF    "${gpus}" != "${NONE}"    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    "${envs}" != "${NONE}"
@@ -147,11 +150,44 @@ Select An Existent PV
 
 Select Workbench Jupyter Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
-    [Arguments]     ${image_name}
+    [Arguments]     ${image_name}    ${version}=default
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
     Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
+    IF    "${version}"=="default"
+        Verify Version Selection Dropdown
+    ELSE IF    "${version}"=="previous"
+        Select Workbench Image Version    ${version}
+    ELSE
+        Fail    ${version} does not exist, use default/previous
+    END
+
+Verify Version Selection Dropdown
+    [Documentation]    Verifies the version selection dropdown is present
+    ...                uses the recommended image by default, and has two options
+    Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_LABEL}
+    Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
+    Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
+    Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span[contains(text(), "Python v${DEFAULT_PYTHON_VER}")]
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]
+    Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
+
+Select Workbench Image Version
+    [Documentation]    Select the (default | previous) image version
+    [Arguments]    ${version}=default
+    Verify Version Selection Dropdown
+    Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
+    Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
+    IF    "${version}"=="default"
+        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span[contains(text(), "Python v${DEFAULT_PYTHON_VER}")]/..
+    ELSE IF    "${version}"=="previous"
+        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/..
+    ELSE
+        Fail    ${version} does not exist, use default/previous
+    END
 
 Select Workbench Container Size
     [Documentation]    Selects the container size in the workbench creation page

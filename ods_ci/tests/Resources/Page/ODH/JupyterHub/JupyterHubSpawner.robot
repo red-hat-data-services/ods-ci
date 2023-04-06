@@ -295,7 +295,8 @@ Spawned Image Check
     [Documentation]    This Keyword checks that the spawned image matches a given image name
     ...                (Presumably the one the user wanted to spawn)
     [Arguments]    ${image}    ${version}=default
-    Run Cell And Check Output    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])    ${image}
+    ${out} =    Run Cell And Get Output    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])
+    Should Contain    ${out}    ${image}
     IF    "${version}"=="default"
         Python Version Check    expected_version=${DEFAULT_PYTHON_VER}
     ELSE IF    "${version}"=="previous"

@@ -103,7 +103,7 @@ Verify Cluster Is Successfully Provisioned
     ${install_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=hive    namespace=${namespace}    
     @{new_lines} =    Split To Lines    ${install_log_data}    ${last_line_index}
     FOR    ${line}    IN    @{new_lines}
-        Log    ${line}    console=True
+        Log To Console    ${line}
     END
     Create File    ${install_log_file}    ${install_log_data}
     Should Contain    ${install_log_data}    install completed successfully

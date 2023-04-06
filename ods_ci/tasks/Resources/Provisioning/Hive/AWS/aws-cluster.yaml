@@ -1,9 +1,10 @@
 apiVersion: v1
+kind: List
 items:
 - apiVersion: hive.openshift.io/v1
   kind: ClusterPool
   metadata:
-    name: {{ hive_cluster_name|default("rhodsaws") }}
+    name: {{ hive_cluster_name|default("rhodsaws") }}-pool
     namespace: rhods
   spec:
     baseDomain: rhods.ccitredhat.com
@@ -20,6 +21,10 @@ items:
     skipMachinePools: true
 - apiVersion: v1
   kind: Secret
+  metadata:
+    name: aws-sno-install-config
+    namespace: rhods
+  type: Opaque
   stringData:
     install-config.yaml: |
       apiVersion: v1
@@ -52,19 +57,15 @@ items:
           region: {{ aws_region|default("us-east-1") }}
       pullSecret: {{ pull_secret|default("") }}
       sshKey: {{ ssh_key|default("") }}
-  metadata:
-    name: aws-sno-install-config
-    namespace: rhods
-  type: Opaque
 - apiVersion: v1
   kind: Secret
   metadata:
     name: aws-creds
     namespace: rhods
+  type: Opaque
   stringData:
     aws_access_key_id: {{ AWS_ACCESS_KEY_ID }}
     aws_secret_access_key: {{ AWS_SECRET_ACCESS_KEY }}
-  type: Opaque
 - apiVersion: hive.openshift.io/v1
   kind: ClusterImageSet
   metadata:
@@ -72,5 +73,3 @@ items:
     namespace: rhods
   spec:
     releaseImage: {{ openshift_image|default("quay.io/openshift-release-dev/ocp-release:4.10.42-x86_64") }}
-kind: List
-metadata: {}

@@ -258,6 +258,8 @@ Spawn Notebook With Arguments  # robocop: disable
             ELSE IF  ${gpu_visible}==False and ${gpus}>0
                 IF    ${index} < ${retries}
                     Sleep    30s    reason=Wait for GPU to free up
+                    SeleniumLibrary.Reload Page
+                    Wait Until JupyterHub Spawner Is Ready
                     CONTINUE
                 ELSE
                     Fail  GPUs required but not available

@@ -104,3 +104,6 @@ N-1 CUDA Setup
     End Web Test
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
+    Sleep    30s    reason=Wait for resources to become available again
+    SeleniumLibrary.Reload Page
+    Wait Until JupyterHub Spawner Is Ready

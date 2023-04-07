@@ -84,7 +84,7 @@ Verify Previous PyTorch Notebook Image With GPU
     [Documentation]    Runs a workload after spawning the N-1 PyTorch Notebook 
     [Tags]    Tier2    LiveTesting
     ...       Resources-GPU
-    ...       ODS-XXXX
+    ...       ODS-2129
     [Setup]    N-1 PyTorch Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}

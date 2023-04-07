@@ -66,7 +66,7 @@ Verify User Can Access Jupyter Launcher From DS Project Page
 Verify Workbench Images Have Multiple Versions
     [Documentation]    Verifies that workbench images have an additional
     ...                dropdown which supports N/N-1 image versions.
-    [Tags]    Smoke    ODS-XXXX
+    [Tags]    Smoke    ODS-2131
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${EMPTY}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
@@ -74,6 +74,7 @@ Verify Workbench Images Have Multiple Versions
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     FOR    ${img}    IN    @{IMAGE_LIST}
         Select Workbench Jupyter Image    image_name=${img}    version=previous
+        Select Workbench Jupyter Image    image_name=${img}    version=default
     END
     [Teardown]    Project Suite Teardown
 

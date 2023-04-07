@@ -22,7 +22,7 @@ Verify All OOTB Images Have Version Dropdowns
     [Documentation]    Verifies all images in ${IMAGE_LIST} have a version dropdown
     ...                with an N and N-1 pick.
     [Tags]    Smoke
-    ...       ODS-XXXX
+    ...       ODS-2125
     [Setup]    Multiple Image Tags Suite Setup
     FOR    ${image}    IN    @{IMAGE_LIST}
         Verify Version Dropdown Is Present    ${image}
@@ -33,7 +33,7 @@ Verify All OOTB Images Spawn Previous Versions
     [Documentation]    Verifies all images in ${IMAGE_LIST} can be spawned using
     ...                the previous version, and the spawned image is the correct one.
     [Tags]    Sanity    Tier1
-    ...       ODS-XXXX
+    ...       ODS-2126
     [Setup]    Multiple Image Tags Suite Setup
     FOR    ${image}    IN    @{IMAGE_LIST}
         Spawn Notebook With Arguments    image=${image}    version=previous
@@ -45,7 +45,7 @@ Workload Test For Previous Image Versions
     [Documentation]    Spawns each notebook image using the previous available
     ...                version, and runs a workload on it.
     [Tags]    Tier2    LiveTesting
-    ...       ODS-XXXX
+    ...       ODS-2127
     [Setup]    Multiple Image Tags Suite Setup
     FOR    ${image}    IN    @{IMAGE_LIST}
         Spawn Notebook With Arguments    image=${image}    version=previous

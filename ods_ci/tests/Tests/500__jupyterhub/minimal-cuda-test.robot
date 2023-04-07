@@ -58,7 +58,7 @@ Verify Previous CUDA Notebook Image With GPU
     [Documentation]    Runs a workload after spawning the N-1 CUDA Notebook 
     [Tags]    Tier2    LiveTesting
     ...       Resources-GPU
-    ...       ODS-XXXX
+    ...       ODS-2128
     [Setup]    N-1 CUDA Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}

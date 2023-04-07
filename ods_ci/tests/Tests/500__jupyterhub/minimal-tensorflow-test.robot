@@ -82,7 +82,7 @@ Verify Previous Tensorflow Notebook Image With GPU
     [Documentation]    Runs a workload after spawning the N-1 Tensorflow Notebook 
     [Tags]    Tier2    LiveTesting
     ...       Resources-GPU
-    ...       ODS-XXXX
+    ...       ODS-2130
     [Setup]    N-1 Tensorflow Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}

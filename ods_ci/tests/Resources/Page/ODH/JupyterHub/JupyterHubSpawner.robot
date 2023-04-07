@@ -256,7 +256,12 @@ Spawn Notebook With Arguments  # robocop: disable
             IF  ${gpu_visible}==True and ${gpus}>0
                 Set Number Of Required GPUs  ${gpus}
             ELSE IF  ${gpu_visible}==False and ${gpus}>0
-                Fail  GPUs required but not available
+                IF    ${index} < ${retries}
+                    Sleep    30s    reason=Wait for GPU to free up
+                    CONTINUE
+                ELSE
+                    Fail  GPUs required but not available
+                END
             END
             IF   ${refresh}
                 Reload Page

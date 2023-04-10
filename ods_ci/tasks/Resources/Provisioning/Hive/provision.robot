@@ -3,7 +3,7 @@ Resource    deprovision.robot
 
 *** Keywords ***
 Claim Cluster
-    Log    Claiming cluster    console=True
+    Log    Claiming cluster ${cluster_name}    console=True
     Oc Apply    kind=ClusterClaim    src=tasks/Resources/Provisioning/Hive/claim.yaml
     ...    template_data=${infrastructure_configurations}
 
@@ -27,18 +27,17 @@ Get Clusters
     END
 
 Provision Cluster
-    Log    Setting cluster configuration    console=True
+    Log    Setting cluster ${cluster_name} configuration    console=True
     Should Be True    "${hive_kubeconf}" != "${EMPTY}"
     ${clustername_exists} =    Does ClusterName Exists
     ${template} =    Select Provisioner Template    ${provider_type}
     IF    ${clustername_exists}
-    ...    FAIL    Cluster name ${cluster_name} already exists. Please choose a different name.
-    Log     Configuring cluster    console=True
-    Log    ${cluster_name}    console=True
+    ...    FAIL    Cluster name '${cluster_name}' already exists. Please choose a different name.
+    Log     Configuring cluster ${cluster_name}    console=True
     Create Provider Resources
 
 Create Provider Resources
-    Log    Creating Hive resources for ${provider_type} according to: ${template}   console=True
+    Log    Creating Hive resources for cluster ${cluster_name} on ${provider_type} according to: ${template}   console=True
     IF    "${provider_type}" == "AWS"
         Oc Apply    kind=List    src=${template}    api_version=v1
         ...    template_data=${infrastructure_configurations}
@@ -55,13 +54,13 @@ Select Provisioner Template
     [Arguments]    ${provider_type}
     IF    "${provider_type}" == "AWS"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/AWS/aws-cluster.yaml
-        Log    Setting AWS Template ${template}   console=True
+        Log    Setting AWS Hive Template ${template}   console=True
     ELSE IF    "${provider_type}" == "GCP"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/GCP/gcp-cluster.yaml
-        Log    Setting GCP Template ${template}    console=True
+        Log    Setting GCP Hive Template ${template}    console=True
     ELSE IF    "${provider_type}" == "OSP"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/OSP/hive_osp_cluster_template.yaml
-        Log    Setting OSP Template ${template}    console=True
+        Log    Setting OSP Hive Template ${template}    console=True
     ELSE
         FAIL    Invalid provider name
     END
@@ -77,7 +76,7 @@ Create Openstack Resources
     Log    FIP_APPS = ${FIP_APPS}    console=True
     ${hive_yaml} =    Set Variable    ${artifacts_dir}/${cluster_name}_hive.yaml
     Create File From Template    ${template}    ${hive_yaml}
-    Log    Hive configuration for ${provider_type}: ${hive_yaml}    console=True
+    Log    OSP Hive configuration for cluster ${cluster_name}: ${hive_yaml}    console=True
     Oc Apply    kind=List    src=${hive_yaml}    api_version=v1
 
 Create Floating IPs
@@ -163,6 +162,7 @@ Login To Cluster
     Should Be True    ${result.rc} == 0
 
 Set Cluster Storage
+    Log    Update Cluster ${cluster_name} Storage Class     console=True
     ${result} 	Run Process 	oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
     ...    shell=yes
     Log    StorageClass standard:\n${result.stdout}\n${result.stderr}     console=True

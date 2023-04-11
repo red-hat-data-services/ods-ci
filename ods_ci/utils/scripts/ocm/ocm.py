@@ -1118,6 +1118,41 @@ class OpenshiftClusterManager:
             )
             sys.exit(1)
 
+    def resume_cluster(self):
+        """Resume OSD Cluster"""
+
+        cluster_id = self.get_osd_cluster_id()
+        cmd = "ocm resume cluster {}".format(cluster_id)
+        log.info("CMD: {}".format(cmd))
+        ret = execute_command(cmd)
+        if ret is None:
+            log.info("Failed to resume osd cluster {}".format(self.cluster_name))
+            sys.exit(1)
+        self.wait_for_osd_cluster_to_get_resumed()
+
+    def wait_for_osd_cluster_to_get_resumed(self, timeout=3600):
+        """Waits for cluster to get resumed"""
+
+        log.info("Waiting for cluster to be in ready state")
+        cluster_state = self.get_osd_cluster_state()
+        count = 0
+        check_flag = False
+        while count <= timeout:
+            cluster_state = self.get_osd_cluster_state()
+            if cluster_state == "ready":
+                log.info("{} is in ready state".format(self.cluster_name))
+                check_flag = True
+                break
+
+            time.sleep(60)
+            count += 60
+        if not check_flag:
+            log.info(
+                "{} not in ready state even after 30 mins."
+                " EXITING".format(self.cluster_name)
+            )
+            sys.exit(1)
+
     def update_notification_email_address(
         self, addon_name, email_address, exit_on_failure=True
     ):
@@ -1783,6 +1818,22 @@ if __name__ == "__main__":
         default="qeaisrhods-xyz",
     )
     hibernate_cluster_parser.set_defaults(func=ocm_obj.hibernate_cluster)
+
+    # Argument parsers for resume_cluster
+    resume_cluster_parser = subparsers.add_parser(
+        "resume_cluster",
+        help=("Resumes managed OpenShift Dedicated v4 clusters via OCM."),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    resume_cluster_parser.add_argument(
+        "--cluster-name",
+        help="osd cluster name",
+        action="store",
+        dest="cluster_name",
+        metavar="",
+        default="qeaisrhods-xyz",
+    )
+    resume_cluster_parser.set_defaults(func=ocm_obj.resume_cluster)
 
     # Argument parsers for delete_idp
     delete_idp_parser = subparsers.add_parser(

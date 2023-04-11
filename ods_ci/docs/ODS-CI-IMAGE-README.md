@@ -3,17 +3,20 @@
 ## Important Note
     With the switch to Poetry, the project directory structure has changed. You are now require to launch these commands from the root of the ods-ci repo, but the paths have to take into account the relative subfolder ods_ci. The examples shown here already deal with this new subfolder, but take care of double checking your paths if writing commands manually.
 
-A [Dockerfile](Dockerfile) is available for running tests in a container. Below you can read how to build and run ods-ci test suites container.
+A [Dockerfile](ods_ci/build/Dockerfile) is available for running tests in a container. Below you can read how to build and run ods-ci test suites container.
+
+****
+# Build
 
 ```bash
-# Build the container (optional if you dont want to use the latest from quay.io/odsci)
-$ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
+# Build the container (optional if you dont want to use the tags from quay.io/repository/modh/ods-ci)
+$ podman build -t ods-ci:<mytag> -f ods_ci/build/Dockerfile .
 
 # Mount a file volume to provide a test-variables.yml file at runtime
 # Mount a volume to preserve the test run artifacts
 $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
                   -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
-                  ods-ci:master
+                  ods-ci:<mytag>
 ```
 Additional arguments for container build
 ```bash
@@ -24,10 +27,24 @@ OC_CHANNEL (default: stable)
 # example
 podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
              --build-arg OC_CHANNEL=latest
-             --build-arg OC_VERSION=4.9
-
+             --build-arg OC_VERSION=4.12
 ```
-Additional arguments for container run
+
+****
+# Run
+## Running the ods-ci container image from terminal
+
+**Example 1** of test execution using the container
+```bash
+# example
+$ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
+                  -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
+                  -e ROBOT_EXTRA_ARGS='-l NONE'
+                  -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
+                  ods-ci:1.24.0
+```
+
+### Additional arguments for container run:
 ```
 # env variables to control test execution
 RUN_SCRIPT_ARGS:
@@ -54,41 +71,40 @@ RUN_SCRIPT_ARGS:
 * The container uses STARTTLS protocol by default if --email-server-ssl and --email-server-unsecure are set to false
 
 ROBOT_EXTRA_ARGS: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun )
+
+SET_ENVIRONMENT (default:0): it enables/disables the installation of Identity providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
+
+If SET_ENVIRONMENT = 1:
+- OC_HOST: it contains the OpenShift API URL of the test cluster where the Identity Providers are going to be installed and tests are going to be executed.
+- USE_OCM_IDP (default: 1): it sets the IDP creation script to use either OCM (OpenShift Cluster Manager) CLI and APIs or OC CLI to create the IDPs in the cluster. If it is sets to 0, OC CLI is used.
+  If USE_OCM_IDP = 1:
+    - OCM_TOKEN: it contains the authorization token to allow ODS-CI to install IDPs in the test cluster using OCM
+    - OCM_ENV (default: stage): it contains the OCM environment name, e.g., stage vs production
 ```
 
-Example of test execution using the container
+**Example 2** test execution using the container with email report enabled: localhost as email server
 ```bash
-# example
-$ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
-                  -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
-                  -e ROBOT_EXTRA_ARGS='-l NONE'
-                  -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
-                  ods-ci:master
-```
-
-Examples of test execution using the container - with email report enabled
-```bash
-# example - send results by email using localhost
 $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
                   -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                   -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com'
                   -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
-                  ods-ci:master
+                  ods-ci:1.24.0
 ```
+**Example 3** test execution using the container with email report enabled: gmail as email server
+
 ```bash
-# example - send results by email using gmail smtp
 $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
   -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
   -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com  --email-server smtp.gmail.com:587 --email-server-user mymail@redhat.com  --email-server-pw <password>'
   -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
-  ods-ci:master
+  ods-ci:1.24.0
 
-*using gmail smtp, the sender email address will be overwritten by --email-server-user
-**the container sends the entire result artifacts directory (i.e., images plus html/xml reports) only if the overall size is less than 20MB.
-  Otherwise, it sends only the html and xml files.
+# *using gmail smtp, the sender email address will be overwritten by --email-server-user
+# **the container sends the entire result artifacts directory (i.e., images plus html/xml reports) only if the overall size is less than 20MB.
+#  Otherwise, it sends only the html and xml files.
 ```
 ****
-### Running the ods-ci container image in OpenShift
+## Running the ods-ci container image in OpenShift
 
 After building the container, you can deploy the container in a pod running on OpenShift. You can use [this](./ods-ci.pod.yaml) PersistentVolumeClaim and Pod definition to deploy the ods-ci container.
 Before deploying the pod:

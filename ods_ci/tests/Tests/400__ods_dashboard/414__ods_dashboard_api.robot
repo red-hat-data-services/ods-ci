@@ -6,6 +6,7 @@ Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Resource          ../../Resources/Page/ODH/AiApps/Rhosak.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup       Endpoint Testing Setup
 Suite Teardown    Endpoint Testing Teardown
 
@@ -724,35 +725,35 @@ Verify Access To namespaces API Endpoint
     [Tags]    ODS-XYZ
     ...       Tier1    Sanity
     ...       Security
+    [Setup]    Create User Test Projects
+    [Teardown]    Delete User Test Projects
     Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     Operation Should Be Unavailable
     Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}    token=${ADMIN_TOKEN}
     Operation Should Be Unavailable
-    ${prj_admin_name}=    Set Variable    ${TEST_USER.USERNAME}-project
-    Create An OpenShift Project Via API    title=${prj_admin_name}
-    ...    token=${ADMIN_TOKEN}
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}    token=${BASIC_USER_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${ADMIN_USER_PRJ}    token=${BASIC_USER_TOKEN}
     Operation Should Be Unavailable
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}   token=${ADMIN_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${ADMIN_USER_PRJ}   token=${ADMIN_TOKEN}
     Operation Should Be Unavailable
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/0    token=${BASIC_USER_TOKEN}
-    Operation Should Be Unauthorized
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/0   token=${ADMIN_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${ADMIN_USER_PRJ}/0    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${ADMIN_USER_PRJ}/0   token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/1    token=${BASIC_USER_TOKEN}
-    Operation Should Be Unauthorized
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/1   token=${ADMIN_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${ADMIN_USER_PRJ}/1    token=${BASIC_USER_TOKEN}
+    Operation Should Be Forbidden
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${ADMIN_USER_PRJ}/1   token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    ${prj_user_name}=    Set Variable    ${TEST_USER_3.USERNAME}-project
-    Create An OpenShift Project Via API    title=${prj_user_name}
-    ...    token=${BASIC_USER_TOKEN}
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/0    token=${BASIC_USER_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${BASIC_USER_PRJ}    token=${BASIC_USER_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${BASIC_USER_PRJ}   token=${ADMIN_TOKEN}
+    Operation Should Be Unavailable
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${BASIC_USER_PRJ}/0    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/0   token=${ADMIN_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${BASIC_USER_PRJ}/0   token=${ADMIN_TOKEN}
     Operation Should Be Allowed
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/1    token=${BASIC_USER_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${BASIC_USER_PRJ}/1    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed
-    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${prj_admin_name}/1   token=${ADMIN_TOKEN}
+    Perform Dashboard API Endpoint GET Call   endpoint=${NAMESPACES_ENDPOINT_PT0}/${BASIC_USER_PRJ}/1   token=${ADMIN_TOKEN}
     Operation Should Be Allowed
 
 *** Keywords ***
@@ -921,7 +922,17 @@ Perform AllowedUsers API Call Based On RHODS Version
         Operation Should Be Allowed
     END
 
-Create An OpenShift Project Via API
-    [Arguments]    ${title}    ${token}
-    Perform Dashboard API Endpoint GET Call   endpoint=${PRJ_K8S_ENDPOINT_PT0}/${title}    token=${token}
-    Operation Should Be Allowed
+Create User Test Projects
+    ${BASIC_USER_PRJ}=    Set Variable    ${TEST_USER_3.USERNAME}-project
+    ${ADMIN_USER_PRJ}=    Set Variable    ${TEST_USER.USERNAME}-project
+    Set Suite Variable    ${BASIC_USER_PRJ}
+    Set Suite Variable    ${ADMIN_USER_PRJ}
+    Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
+    Create Data Science Project    title=${BASIC_USER_PRJ}    description=${EMPTY}
+    Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
+    Create Data Science Project    title=${ADMIN_USER_PRJ}    description=${EMPTY}
+    Close All Browsers
+
+Delete User Test Projects
+    ${projects_to_delete}=    Create List    ${BASIC_USER_PRJ}    ${ADMIN_USER_PRJ}
+    Delete Data Science Projects From CLI   ocp_projects=${projects_to_delete}

@@ -62,7 +62,6 @@ Verify Filters Are Working On Resources Page
     Filter By Application (Aka Povider) And Check Output
     Filter By Using More Than One Filter And Check Output
 
-
 Verify App Name On Resource Tile
     [Documentation]    Check that each resource tile specifies which application it refers to
     [Tags]    Sanity

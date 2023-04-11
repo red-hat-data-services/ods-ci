@@ -210,7 +210,7 @@ You could provide other variable files or single variables using the robot argum
 
 
 ### Deploy postfix smtp server
-To use localhost as smtp server while running ods-ci container, you could leverage on a postfix container. One [example](./Dockerfile_smtpserver) is reported in this repo.
+To use localhost as smtp server while running ods-ci container, you could leverage on a postfix container. One [example](ods_ci/build/Dockerfile_smtpserver) is reported in this repo.
 If you are running ods-ci container on your local machine, you could use [podman](https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods) to run both the containers, like this:
 ```bash
 podman run -d --pod new:<pod_name>  <postfix_imagename>:<image_label>
@@ -219,8 +219,10 @@ podman run --rm --pod=<pod_name>
                 -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                 -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com'
                 -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
-                ods-ci:master
+                ods-ci:1.24.0
 
 ```
-If you are running ods-ci container on a cluster you could use the pod template [ods-ci.pod_with_postfix.yaml](./ods-ci.pod_with_postfix.yaml) from this repository.
-Keep in mind that this solution is not working on OSD clusters as reported [here](https://access.redhat.com/solutions/880233).
+If you are running ods-ci container on a cluster you could use the pod template [ods-ci.pod_with_postfix.yaml](ods_ci/docs/ods-ci.pod_with_postfix.yaml) from this repository. Based on your case, you may need to merge [ods-ci.pod_with_postfix.yaml](ods_ci/docs/ods-ci.pod_with_postfix.yaml) with one of the yaml used in the above examples pod definitions.
+
+
+**NOTE**: Keep in mind that this solution is not working on OSD clusters as reported [here](https://access.redhat.com/solutions/880233).

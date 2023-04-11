@@ -21,11 +21,12 @@ using QE tiered testing.
         ** JupyterHub.<br>
      * Test user credentials.
      * Browser webdriver to use for testing.
-  1. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite
-    ```bash
-    sh run_robot_test.sh
+  1. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite.
     ```
-    This script is a wrapper for creating the python virtual environment and running the Robot Framework CLI.  You can run any of the test cases by creating the python virual environment, install the packages in requirements.txt and running the `robot` command directly
+    sh run_robot_test.sh
+    ```bash
+    This script is a wrapper for creating the python virtual environment and running the Robot Framework CLI.  You can run any of the test cases by creating the python virual environment, install the packages in requirements.txt and running the `robot` command directly.
+The run_robot_test.sh has several arguments and you can find details in the dedicated document file. See [run_args.md](ods_ci/docs/run_args.md)
 # Contributing
 See [CONTRIBUTING.md](ods_ci/CONTRIBUTING.md)
 # ODS-CI Container Image

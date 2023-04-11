@@ -66,10 +66,11 @@ Verify App Name On Resource Tile
     [Documentation]    Check that each resource tile specifies which application it refers to
     [Tags]    Sanity
     ...       ODS-395
-    ...       Tier1    xxxx
+    ...       Tier1
     Click Link    Resources
     Wait For RHODS Dashboard To Load    expected_page=Resources
     Validate App Name Is Present On Each Tile
+
 
 *** Keywords ***
 Resources Test Setup
@@ -247,11 +248,12 @@ Set Expected Items Based On RHODS Type    # robocop: disable
 Validate App Name Is Present On Each Tile
     [Documentation]    Check that each Resource tile contains
     ...    the name of the application
-    ${elements} =    Get WebElements    //article[contains(@class, 'pf-c-card')]//div[@class="pf-c-content"]//small
+    ${elements}=    Get WebElements    //article[contains(@class, 'pf-c-card')]//div[@class="pf-c-content"]//small
     ${len}=    Get Length    ${elements}
     FOR    ${counter}    IN RANGE    ${len}
         ${name}=    Get Text    ${elements}[${counter}]
-        should contain    ${name}    by
-        ${length} =	Get Length    ${name}
-        Should Be True	${length} > 5
+        Should Start With    ${name}    by
+        ${appName}=    Remove string    ${name}    by
+        ${length}=    Get Length    ${appName}
+        Should Be True	${length} > 2
     END

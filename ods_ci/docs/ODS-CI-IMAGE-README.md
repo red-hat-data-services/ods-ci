@@ -45,7 +45,7 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
     - USE_OCM_IDP (default: 1): it sets the IDP creation script to use either OCM (OpenShift Cluster Manager) CLI and APIs or OC CLI to create the IDPs in the cluster. If it is sets to 0, OC CLI is used.
     * If USE_OCM_IDP = 1:
       - OCM_TOKEN: it contains the authorization token to allow ODS-CI to install IDPs in the test cluster using OCM
-      - OCM_ENV (default: stage): it contains the OCM environment name, e.g., stage vs production
+      - OCM_ENV: it contains the OCM environment name, e.g., staging vs production. If not set, OCM CLI assumes it is production
 
 ## Running the ODS-CI container image from terminal
 
@@ -90,21 +90,124 @@ $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-vari
 ****
 ## Running the ODS-CI container image in OpenShift
 
-After building the container, you can deploy the container in a pod running on OpenShift. You can use [this](ods_ci/build/ods-ci.pod.yaml) PersistentVolumeClaim and Pod definition to deploy the ods-ci container.
-Before deploying the pod:
+After building the container, you can deploy the container in a pod running on OpenShift. See [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml) as example*.
+
+
+*Pre-req task*
+- login to a test cluster with ```oc login ...``` command. See [official documentation](https://docs.openshift.com/online/pro/cli_reference/get_started_cli.html) for more details
 - create the namespace/project "ods-ci"
-- apply the rbac settings
-- create a secret to store your "test-variables.yml" file
+- create the service account by applying the rbac settings. See [this](ods_ci/docs/ods-ci_rbac.yaml)
+- create a secret to store your "test-variables.yml" file. Refer to main [README.md](ods_ci/README.md) to get your test-variables.yml file.
+- [optional] create a pull secret to fetch the ods-ci image from your registry if it is private. Ensure to patch the SA created at the previous step in order to add the pull secret name
+- [optional] create a PVC to store test artifacts. It is embedded in the sample [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml). If you don't want it, you can modify the YAML file as per your need
 
-NOTE: This example pod attaches a PVC to preserve the test artifacts directory between runs and mounts the test-variables.yml file from a Secret.
 
+**Example 1** run ods-ci pod in a OpenShift cluster - minimum configuration
+```bash
+# create service account
+oc apply -f ods_ci_rbac.yaml -n ods-ci
+
+# create a secret with test variables that can be mounted in ODS-CI container
+oc create secret generic ods-ci-test-variables --from-file ods_ci/test-variables.yml -n ods-ci
+
+# Optional: create registry pull secret and patch SA
+oc create secret docker-registry  ods-ci-pull-secret --docker-server='quay.io' --docker-username='my-username'  --docker-password='my-pw' --docker-email='my-email@email.com' -n ods-ci
+
+oc patch serviceaccount rhods-test-runner -p '{"imagePullSecrets": [{"name": "ods-ci-pull-secret"}]}' -n ods-ci
+
+# deploy ods-ci pod and its PVC
+oc apply -f ods-ci_pod.yaml -n ods-ci
 ```
-# Apply rbac settings
-oc apply -f ods_ci_rbac.yaml
 
-# Creates a Secret with test variables that can be mounted in ODS-CI container
-oc create secret generic ods-ci-test-variables --from-file ods_ci/test-variables.yml
+**Example 1**
+test execution using the container in a OpenShift pod - minimum configuration, extracted from [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml)
+```yaml
+      image: quay.io/modh/ods-ci:latest
+      imagePullPolicy: Always
+      name: ods-ci-testrun
+      env:
+        - name: RUN_SCRIPT_ARGS
+          value: "--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml --skip-oclogin true --set-urls-variables true --include Smoke"
+        - name: ROBOT_EXTRA_ARGS
+          value: "--L DEBUG --dryrun"
+      volumeMounts:
+        - name: ods-ci-test-variables
+          mountPath: /tmp/ods-ci-test-variables
+        - mountPath: /tmp/ods-ci/ods_ci/test-output
+          name: ods-ci-test-output
 ```
+**Example 2** test execution using the container in a OpenShift pod - install IDP with OCM CLI/APIs, extracted from [ods-ci_pod_ocm_idp.yaml](ods_ci/docs/ods-ci_pod_ocm_idp.yaml)
+```yaml
+      image: quay.io/modh/ods-ci:latest
+      imagePullPolicy: IfNotPresent
+      name: ods-ci-testrun
+      serviceAccountName: rhods-test-runner
+      env:
+        - name: OC_HOST
+          value: "https://api.mycluster.abcd.domain.org:1234"
+        - name: SET_ENVIRONMENT
+          value: "1"
+        - name: OCM_ENV
+          value: "staging"                    
+        - name: OCM_TOKEN
+          value: "my-ocm-token"
+        - name: RUN_SCRIPT_ARGS
+          value: "--skip-oclogin false --set-urls-variables true"
+        - name: ROBOT_EXTRA_ARGS
+          value: "-i Smoke --dryrun"
+      volumeMounts:
+        - mountPath: /tmp/ods-ci/test-output
+          name: ods-ci-test-output
+```
+
+**Example 3** test execution using the container in a OpenShift pod - install IDP without OCM CLI/APIs, extracted from [ods-ci_pod_oc_idp.yaml](ods_ci/docs/ods-ci_pod_oc_idp.yaml)
+```yaml
+      image: quay.io/modh/ods-ci:latest
+      imagePullPolicy: IfNotPresent
+      name: ods-ci-testrun
+      serviceAccountName: rhods-test-runner
+      env:
+        # Use this environment variable to pass args to the ods-ci run script in the container
+        - name: OC_HOST
+          value: "https://api.mycluster.abcd.domain.org:1234"
+        - name: SET_ENVIRONMENT
+          value: "1"
+        - name: OCM_ENV
+          value: "staging"                    
+        - name: OCM_TOKEN
+          value: "my-ocm-token"
+        - name: RUN_SCRIPT_ARGS
+          value: "--skip-oclogin false --set-urls-variables true"
+        - name: ROBOT_EXTRA_ARGS
+          value: "-i Smoke --dryrun"
+```
+**NOTE**: when letting the container install the IDPs, the container automatically modifies the test-variables.yml.example to set the user login credentials. We suggest not to overwrite the test-variables.yaml like done in Example 1 (i.e., ```--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml```). 
+You could provide other variable files or single variables using the robot arguments, like below. Although, the solution below has not been tested. If you fall under this use case, please contact ods-qe@redhat.com
+```yaml
+      image: quay.io/modh/ods-ci:latest
+      imagePullPolicy: IfNotPresent
+      name: ods-ci-testrun
+      serviceAccountName: rhods-test-runner
+      env:
+        - name: OC_HOST
+          value: "https://api.mycluster.abcd.domain.org:1234"
+        - name: SET_ENVIRONMENT
+          value: "1"
+        - name: OCM_ENV
+          value: "staging"                    
+        - name: OCM_TOKEN
+          value: "my-ocm-token"
+        - name: RUN_SCRIPT_ARGS
+          value: "--skip-oclogin false --set-urls-variables true"
+        - name: ROBOT_EXTRA_ARGS
+          value: "-i Smoke --dryrun --variablefile /tmp/ods-ci-test-variables/second-test-variables.yml --variable MYVAR:myvalue"
+      volumeMounts:
+        - mountPath: /tmp/ods-ci/test-output
+          name: ods-ci-test-output
+        - mountPath: /tmp/ods-ci-test-variables
+          name: ods-ci-test-variables
+```
+
 
 ### Deploy postfix smtp server
 To use localhost as smtp server while running ods-ci container, you could leverage on a postfix container. One [example](./Dockerfile_smtpserver) is reported in this repo.

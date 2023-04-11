@@ -721,7 +721,7 @@ Verify Access To namespaces API Endpoint
     ...                 based on the permissions of the users who query the endpoint
     ...                 The syntaxes to reach this endpoint are:
     ...                 `api/namespaces/<NS_NAME>/0/` and `api/namespaces/<NS_NAME>/1/`
-    [Tags]    ODS-XYZ
+    [Tags]    ODS-2132
     ...       Tier1    Sanity
     ...       Security
     [Setup]    Create User Test Projects

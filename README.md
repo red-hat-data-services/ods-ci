@@ -29,6 +29,6 @@ using QE tiered testing.
 # Contributing
 See [CONTRIBUTING.md](ods_ci/CONTRIBUTING.md)
 # ODS-CI Container Image
-See build [README](ods_ci/build/README.md) on how you can build a container to run ODS-CI automation in OpenShift.
+See build [README](ods_ci/docs/ODS-CI-IMAGE-README.md) on how you can build a container to run ODS-CI automation in OpenShift.
 # License
 This project is open sourced under MIT License.

@@ -67,17 +67,17 @@ Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
     [Arguments]     ${name}   ${type}   ${connected_workbench}
     Run keyword And Continue On Failure     Page Should Contain Element    
-    ...    ${DC_SECTION_XP}//td[@data-label="Name"]/h4/div[text()="${name}"]
+    ...    ${DC_SECTION_XP}//td[@data-label="Name"]/*/div[text()="${name}"]
     Run keyword And Continue On Failure     Page Should Contain Element
-    ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[text()=" ${type}"]
+    ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[text()=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
         Run Keyword And Continue On Failure    Page Should Contain Element    
-        ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[text()="No connections"]
+        ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
             Log    ${index}: ${workbench_title}
             Run Keyword And Continue On Failure    Page Should Contain Element    
-            ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
+            ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
         END
     END
 
@@ -85,7 +85,7 @@ Data Connection Should Not Be Listed
     [Documentation]    Checks a Data Connection is not listed in DS Project details page
     [Arguments]     ${name}
     Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    
-    ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/h4/div[text()="${name}"]]
+    ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]
 
 Get Openshift Secret From Data Connection
     [Documentation]    Retrieves name of Openshift secret corresponding to a given S3 Data Connection based on Dispayed name in DS Project details page

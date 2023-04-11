@@ -456,7 +456,9 @@ Clone Repo
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
     Open With JupyterLab Menu    Git    Clone a Repository
     Input Text    //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input    ${repo_url}
-    Click Element    xpath://button[.="Clone"]
+    # new/old git extensions versions have a different capitalization of "clone" (Clone v. CLONE). Use a translate
+    # hack in the xpath to match in a case-insensitive way.
+    Click Element    xpath://button/div[translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') = 'clone']
 
 
 Clone Repo and Return Error Message

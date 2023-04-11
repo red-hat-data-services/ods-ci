@@ -77,7 +77,18 @@ Verify Tensorflow Image GPU Workload
     ...     Resources-GPU
     ...     ODS-1154
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
-    JupyterLab Code Cell Error Output Should Not Be Visible
+
+Verify Previous Tensorflow Notebook Image With GPU
+    [Documentation]    Runs a workload after spawning the N-1 Tensorflow Notebook 
+    [Tags]    Tier2    LiveTesting
+    ...       Resources-GPU
+    ...       ODS-2130
+    [Setup]    N-1 Tensorflow Setup
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
+    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
+    Verify Tensorflow Can See GPU
+    Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
+    [Teardown]    End Web Test
 
 
 *** Keywords ***
@@ -96,4 +107,14 @@ Close Previous Server
     Clean Up Server
     Stop JupyterLab Notebook Server
     Fix Spawner Status
+    Wait Until JupyterHub Spawner Is Ready
+
+N-1 Tensorflow Setup
+    [Documentation]    Closes the previous browser (if any) and starts a clean
+    ...                run spawning the N-1 Tensorflow image
+    End Web Test
+    Begin Web Test
+    Launch JupyterHub Spawner From Dashboard
+    Sleep    30s    reason=Wait for resources to become available again
+    SeleniumLibrary.Reload Page
     Wait Until JupyterHub Spawner Is Ready

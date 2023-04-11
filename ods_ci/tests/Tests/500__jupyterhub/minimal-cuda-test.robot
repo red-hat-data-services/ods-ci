@@ -46,13 +46,27 @@ Verify Tensorflow Library Can See GPUs In Minimal CUDA
     ...     ODS-1143
     Verify Tensorflow Can See GPU    install=True
 
-Verify Cuda Image Have NVCC Installed
+Verify Cuda Image Has NVCC Installed
     [Documentation]     Verifies NVCC Version in Minimal CUDA Image
     [Tags]  Sanity    Tier1
     ...     Resources-GPU
     ...     ODS-483
     ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
     Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
+
+Verify Previous CUDA Notebook Image With GPU
+    [Documentation]    Runs a workload after spawning the N-1 CUDA Notebook 
+    [Tags]    Tier2    LiveTesting
+    ...       Resources-GPU
+    ...       ODS-2128
+    [Setup]    N-1 CUDA Setup
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
+    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
+    Verify PyTorch Can See GPU    install=True
+    Verify Tensorflow Can See GPU    install=True
+    ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
+    Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
+    [Teardown]    End Web Test
 
 
 *** Keywords ***
@@ -83,3 +97,13 @@ Verify CUDA Image Suite Setup
     Run Keyword And Warn On Failure  Should Be Equal    ${maxSpawner}    ${maxNo-1}
     Close Browser
     Switch Browser  ${old_browser}[0]
+
+N-1 CUDA Setup
+    [Documentation]    Closes the previous browser (if any) and starts a clean
+    ...                run spawning the N-1 PyTorch image
+    End Web Test
+    Begin Web Test
+    Launch JupyterHub Spawner From Dashboard
+    Sleep    30s    reason=Wait for resources to become available again
+    SeleniumLibrary.Reload Page
+    Wait Until JupyterHub Spawner Is Ready

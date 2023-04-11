@@ -43,6 +43,7 @@ ${DC_S3_AWS_ACCESS_KEY}=    custom dummy access key id
 ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
 ${DC_S3_TYPE}=    Object storage
+@{IMAGE_LIST}    Minimal Python    CUDA   PyTorch    Standard Data Science    TensorFlow
 
 
 *** Test Cases ***
@@ -61,6 +62,21 @@ Verify User Can Access Jupyter Launcher From DS Project Page
     Page Should Contain Element     ${SPAWNER_LINK}
     Click Element    ${SPAWNER_LINK}
     Wait Until JupyterHub Spawner Is Ready
+
+Verify Workbench Images Have Multiple Versions
+    [Documentation]    Verifies that workbench images have an additional
+    ...                dropdown which supports N/N-1 image versions.
+    [Tags]    Smoke    ODS-2131
+    Launch Data Science Project Main Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${EMPTY}
+    Click Element    ${WORKBENCH_CREATE_BTN_XP}
+    Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
+    Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
+    FOR    ${img}    IN    @{IMAGE_LIST}
+        Select Workbench Jupyter Image    image_name=${img}    version=previous
+        Select Workbench Jupyter Image    image_name=${img}    version=default
+    END
+    [Teardown]    Project Suite Teardown
 
 Verify User Cannot Create Project With Empty Fields
     [Tags]    Sanity   ODS-1783

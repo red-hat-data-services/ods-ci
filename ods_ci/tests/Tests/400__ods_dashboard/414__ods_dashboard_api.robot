@@ -98,7 +98,6 @@ ${ROUTE_ENDPOINT_PT1B}=     ${ROUTE_ENDPOINT_PT0}/${DASHBOARD_NS}
 ${ROUTE_ENDPOINT_PT2B}=     ${ROUTE_ENDPOINT_PT1B}/rhods-dashboard
 
 ${NAMESPACES_ENDPOINT_PT0}=    api/namespaces
-${PRJ_K8S_ENDPOINT_PT0}=    api/k8s/apis/project.openshift.io/v1/projectrequests/
 
 
 *** Test Cases ***

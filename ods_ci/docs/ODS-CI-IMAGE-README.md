@@ -32,71 +32,55 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
 
 ****
 # Run
-## Running the ods-ci container image from terminal
+## Arguments to control container run:
 
-**Example 1** of test execution using the container
+* RUN_SCRIPT_ARGS: it takes the run arguments to pass to ods-ci robot wrapper script ```run_robot_test.sh```. All the details in the dedicated document file [RUN_ARGUMENTS.md](ods_ci/docs/RUN_ARGUMENTS.md)
+
+* ROBOT_EXTRA_ARGS: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun ) or at official [Robot Framework User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html) 
+
+* SET_ENVIRONMENT (default: 0): it enables/disables the installation of Identity providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
+
+  * If SET_ENVIRONMENT = 1:
+    - OC_HOST: it contains the OpenShift API URL of the test cluster where the Identity Providers are going to be installed and tests are going to be executed.
+    - USE_OCM_IDP (default: 1): it sets the IDP creation script to use either OCM (OpenShift Cluster Manager) CLI and APIs or OC CLI to create the IDPs in the cluster. If it is sets to 0, OC CLI is used.
+    * If USE_OCM_IDP = 1:
+      - OCM_TOKEN: it contains the authorization token to allow ODS-CI to install IDPs in the test cluster using OCM
+      - OCM_ENV (default: stage): it contains the OCM environment name, e.g., stage vs production
+
+## Running the ODS-CI container image from terminal
+
+**Example 1** of test execution using the container - minimum configuration
 ```bash
-# example
 $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
                   -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
-                  -e ROBOT_EXTRA_ARGS='-l NONE'
-                  -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
+                  -e RUN_SCRIPT_ARGS='--skip-oclogin false --include Smoke'
                   ods-ci:1.24.0
 ```
 
-### Additional arguments for container run:
-```
-# env variables to control test execution
-RUN_SCRIPT_ARGS:
-  --skip-oclogin (default: false): script does not perform login using OC CLI
-    --service-account (default: ""): if assigned, ODS-CI will try to log into the cluster using the given service account.
-            ODS-CI automatically creates SERVICE_ACCOUNT.NAME and SERVICE_ACCOUNT.FULL_NAME global variables to be used in tests.
-    --sa-namespace (default: "default"): the namespace where the service account is created
-  --set-urls-variables (default: false): script gets automatically the cluster URLs (i.e., OCP Console, RHODS Dashboard, OCP API Server)
-  --include: run only test cases with the given tags (e.g., --include Smoke --include XYZ)
-  --exclude: do not run the test cases with the given tag (e.g., --exclude LongLastingTC)
-  --test-variable: set a global RF variable
-  --test-variables-file (default: test-variables.yml): set the RF file containing global variables to use in TCs
-  --test-case: run only the test cases from the given robot file
-  --test-artifact-dir: set the RF output directory to store log files
-  --email-report (default: false): send the test run artifacts via email
-    --email-from: (mandatory if email report is true) set the sender email address
-    --email-to: (mandatory if email report is true) set the email address which will receive the result artifacts
-    --email-server (default: localhost): set the smtp server to use, e.g., smtp.gmail.com:465 (the port specification is not mandatory, the default value is 587)
-    --email-server-user: (optional, depending on the smtp server) username to access smtp server
-    --email-server-pw: (optional, depending on the smtp server) password to access smtp server
-    --email-server-ssl (default: false): if true, it forces the usage of encrypted connection (TLS)
-    --email-server-unsecure (default: false): no encryption applied, using SMTP unsecure connection
-
-* The container uses STARTTLS protocol by default if --email-server-ssl and --email-server-unsecure are set to false
-
-ROBOT_EXTRA_ARGS: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun )
-
-SET_ENVIRONMENT (default:0): it enables/disables the installation of Identity providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
-
-If SET_ENVIRONMENT = 1:
-- OC_HOST: it contains the OpenShift API URL of the test cluster where the Identity Providers are going to be installed and tests are going to be executed.
-- USE_OCM_IDP (default: 1): it sets the IDP creation script to use either OCM (OpenShift Cluster Manager) CLI and APIs or OC CLI to create the IDPs in the cluster. If it is sets to 0, OC CLI is used.
-  If USE_OCM_IDP = 1:
-    - OCM_TOKEN: it contains the authorization token to allow ODS-CI to install IDPs in the test cluster using OCM
-    - OCM_ENV (default: stage): it contains the OCM environment name, e.g., stage vs production
+**Example 2** of test execution using the container - adding some ```ROBOT_EXTRA_ARGS```
+```bash
+$ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
+                  -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
+                  -e ROBOT_EXTRA_ARGS='-L DEBUG --dryrun'
+                  -e RUN_SCRIPT_ARGS='--skip-oclogin false --include Smoke'
+                  ods-ci:1.24.0
 ```
 
-**Example 2** test execution using the container with email report enabled: localhost as email server
+**Example 3** test execution using the container with email report enabled - localhost as email server
 ```bash
 $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
                   -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                   -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com'
-                  -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
+                  -e RUN_SCRIPT_ARGS='--skip-oclogin false --include Smoke'
                   ods-ci:1.24.0
 ```
-**Example 3** test execution using the container with email report enabled: gmail as email server
+**Example 4** test execution using the container with email report enabled - gmail as email server
 
 ```bash
 $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
   -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
   -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com  --email-server smtp.gmail.com:587 --email-server-user mymail@redhat.com  --email-server-pw <password>'
-  -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
+  -e RUN_SCRIPT_ARGS='--skip-oclogin false --include Smoke'
   ods-ci:1.24.0
 
 # *using gmail smtp, the sender email address will be overwritten by --email-server-user
@@ -104,9 +88,9 @@ $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-vari
 #  Otherwise, it sends only the html and xml files.
 ```
 ****
-## Running the ods-ci container image in OpenShift
+## Running the ODS-CI container image in OpenShift
 
-After building the container, you can deploy the container in a pod running on OpenShift. You can use [this](./ods-ci.pod.yaml) PersistentVolumeClaim and Pod definition to deploy the ods-ci container.
+After building the container, you can deploy the container in a pod running on OpenShift. You can use [this](ods_ci/build/ods-ci.pod.yaml) PersistentVolumeClaim and Pod definition to deploy the ods-ci container.
 Before deploying the pod:
 - create the namespace/project "ods-ci"
 - apply the rbac settings

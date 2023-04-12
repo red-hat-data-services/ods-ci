@@ -178,7 +178,7 @@ test execution using the container in a OpenShift pod - minimum configuration, e
         - name: ROBOT_EXTRA_ARGS
           value: "-i Smoke --dryrun"
 ```
-**NOTE**: when letting the container install the IDPs, the container automatically modifies the test-variables.yml.example to set the user login credentials. We suggest not to overwrite the test-variables.yaml like done in Example 1 (i.e., ```--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml```). 
+**NOTE**: when letting the container install the IDPs, the container automatically modifies the test-variables.yml.example to set the user login credentials. We suggest not to overwrite the test-variables.yaml like done in Example 2 (i.e., ```--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml```). 
 You could provide other variable files or single variables using the robot arguments, like below. Although, the solution below has not been tested. If you fall under this use case, please contact ods-qe@redhat.com
 ```yaml
       image: quay.io/modh/ods-ci:latest

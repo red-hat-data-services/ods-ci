@@ -79,11 +79,11 @@ $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-vari
   -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com  --email-server smtp.gmail.com:587 --email-server-user mymail@redhat.com  --email-server-pw <password>'
   -e RUN_SCRIPT_ARGS='--skip-oclogin false --include Smoke'
   ods-ci:1.24.0
-
-# *using gmail smtp, the sender email address will be overwritten by --email-server-user
-# **the container sends the entire result artifacts directory (i.e., images plus html/xml reports) only if the overall size is less than 20MB.
-#  Otherwise, it sends only the html and xml files.
 ```
+**NOTES**
+* using gmail smtp, the sender email address will be overwritten by ```--email-server-user```
+* the container sends the entire result artifacts directory (i.e., images plus html/xml reports) only if the overall size is less than 20MB.
+  Otherwise, it sends only the html and xml files.
 ****
 ## Running the ODS-CI container image in OpenShift
 

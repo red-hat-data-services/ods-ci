@@ -87,7 +87,7 @@ $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-vari
 ****
 ## Running the ODS-CI container image in OpenShift
 
-After building the container, you can deploy the container in a pod running on OpenShift. See [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml) as example*.
+After building the container, you can deploy the container in a pod running on OpenShift. See [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml) as example.
 
 
 *Pre-req task*

@@ -31,18 +31,18 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
 # Run
 ## Arguments to control container run:
 
-* RUN_SCRIPT_ARGS: it takes the run arguments to pass to ods-ci robot wrapper script ```run_robot_test.sh```. All the details in the dedicated document file [RUN_ARGUMENTS.md](ods_ci/docs/RUN_ARGUMENTS.md)
+* ```RUN_SCRIPT_ARGS```: it takes the run arguments to pass to ods-ci robot wrapper script ```run_robot_test.sh```. All the details in the dedicated document file [RUN_ARGUMENTS.md](ods_ci/docs/RUN_ARGUMENTS.md)
 
-* ROBOT_EXTRA_ARGS: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun ) or at official [Robot Framework User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html) 
+* ```ROBOT_EXTRA_ARGS```: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun ) or at official [Robot Framework User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html) 
 
-* SET_ENVIRONMENT (default: 0): it enables/disables the installation of Identity providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
+* ```SET_ENVIRONMENT``` (default: 0): it enables/disables the installation of Identity providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
 
-  * If SET_ENVIRONMENT = 1:
-    - OC_HOST: it contains the OpenShift API URL of the test cluster where the Identity Providers are going to be installed and tests are going to be executed.
-    - USE_OCM_IDP (default: 1): it sets the IDP creation script to use either OCM (OpenShift Cluster Manager) CLI and APIs or OC CLI to create the IDPs in the cluster. If it is sets to 0, OC CLI is used.
-    * If USE_OCM_IDP = 1:
-      - OCM_TOKEN: it contains the authorization token to allow ODS-CI to install IDPs in the test cluster using OCM
-      - OCM_ENV: it contains the OCM environment name, e.g., staging vs production. If not set, OCM CLI assumes it is production
+  * If ```SET_ENVIRONMENT``` = 1:
+    - ```OC_HOST```: it contains the OpenShift API URL of the test cluster where the Identity Providers are going to be installed and tests are going to be executed.
+    - ```USE_OCM_IDP``` (default: 1): it sets the IDP creation script to use either OCM (OpenShift Cluster Manager) CLI and APIs or OC CLI to create the IDPs in the cluster. If it is sets to 0, OC CLI is used.
+    * If ```USE_OCM_IDP``` = 1:
+      - ```OCM_TOKEN```: it contains the authorization token to allow ODS-CI to install IDPs in the test cluster using OCM
+      - ```OCM_ENV```: it contains the OCM environment name, e.g., staging vs production. If not set, OCM CLI assumes it is production
 
 ## Running the ODS-CI container image from terminal
 

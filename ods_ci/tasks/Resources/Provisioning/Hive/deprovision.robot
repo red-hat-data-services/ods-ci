@@ -36,7 +36,6 @@ Deprovision Cluster
 
 Unclaim Cluster
     [Arguments]    ${unclaimname}
-    Oc Delete    kind=ClusterClaim    name=${unclaimname}    
-    ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+    Oc Delete    kind=ClusterClaim    name=${unclaimname}    namespace=${hive_namespace}
     ${status} =    Oc Get    kind=ClusterClaim    name=${unclaimname}    namespace=${hive_namespace}
     Log    ${status}    console=True

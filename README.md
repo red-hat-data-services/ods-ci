@@ -34,9 +34,9 @@ using QE tiered testing.
      sh run_robot_test.sh --include ODS-XYZ 
    ```
    
-   * This run_robot_test.sh is a wrapper for creating the python virtual environment and running the Robot Framework CLI.  You can run any of the test cases by creating the python virual environment, install the packages in requirements.txt and running the `robot` command directly
-   
+   * This run_robot_test.sh is a wrapper for creating the python virtual environment and running the Robot Framework CLI.   
    * The wrapper script has several arguments and you can find details in the dedicated document file. See [run_args.md](ods_ci/docs/RUN_ARGUMENTS.md)
+   * As alternative, you can run any of the test cases by creating the python virual environment, install the packages in [poetry.lock](poetry.lock) and running the `robot` command directly
 
 
 # Contributing

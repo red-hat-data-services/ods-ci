@@ -99,7 +99,7 @@ After building the container, you can deploy the container in a pod running on O
 - [optional] create a PVC to store test artifacts. It is embedded in the sample [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml). If you don't want it, you can modify the YAML file as per your need
 
 
-**Example 1** run ods-ci pod in a OpenShift cluster - minimum configuration
+**Example 1** steps to run ods-ci pod in a OpenShift cluster
 ```bash
 # create service account
 oc apply -f ods_ci_rbac.yaml -n ods-ci
@@ -116,7 +116,7 @@ oc patch serviceaccount rhods-test-runner -p '{"imagePullSecrets": [{"name": "od
 oc apply -f ods-ci_pod.yaml -n ods-ci
 ```
 
-**Example 1**
+**Example 2**
 test execution using the container in a OpenShift pod - minimum configuration, extracted from [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml)
 ```yaml
       image: quay.io/modh/ods-ci:latest
@@ -133,7 +133,7 @@ test execution using the container in a OpenShift pod - minimum configuration, e
         - mountPath: /tmp/ods-ci/ods_ci/test-output
           name: ods-ci-test-output
 ```
-**Example 2** test execution using the container in a OpenShift pod - install IDP with OCM CLI/APIs, extracted from [ods-ci_pod_ocm_idp.yaml](ods_ci/docs/ods-ci_pod_ocm_idp.yaml)
+**Example 3** test execution using the container in a OpenShift pod - install IDP with OCM CLI/APIs, extracted from [ods-ci_pod_ocm_idp.yaml](ods_ci/docs/ods-ci_pod_ocm_idp.yaml)
 ```yaml
       image: quay.io/modh/ods-ci:latest
       imagePullPolicy: IfNotPresent
@@ -157,7 +157,7 @@ test execution using the container in a OpenShift pod - minimum configuration, e
           name: ods-ci-test-output
 ```
 
-**Example 3** test execution using the container in a OpenShift pod - install IDP without OCM CLI/APIs, extracted from [ods-ci_pod_oc_idp.yaml](ods_ci/docs/ods-ci_pod_oc_idp.yaml)
+**Example 4** test execution using the container in a OpenShift pod - install IDP without OCM CLI/APIs, extracted from [ods-ci_pod_oc_idp.yaml](ods_ci/docs/ods-ci_pod_oc_idp.yaml)
 ```yaml
       image: quay.io/modh/ods-ci:latest
       imagePullPolicy: IfNotPresent

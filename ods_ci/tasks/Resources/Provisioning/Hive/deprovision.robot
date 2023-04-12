@@ -1,13 +1,25 @@
 *** Keywords ***
+Set Hive Default Variables
+    ${cluster_name} =    Get Variable Value    ${cluster_name}    %{TEST_CLUSTER}
+    Set Suite Variable    ${cluster_name}
+    ${pool_name} =    Get Variable Value    ${pool_name}    ${cluster_name}-pool
+    Set Suite Variable    ${pool_name}
+    ${claim_name} =    Get Variable Value    ${claim_name}    ${cluster_name}-claim
+    Set Suite Variable    ${claim_name}
+    ${conf_name} =    Get Variable Value    ${conf_name}    ${cluster_name}-conf
+    Set Suite Variable    ${conf_name}
+    ${hive_namespace} =    Get Variable Value    ${hive_namespace}    rhods
+    Set Suite Variable    ${hive_namespace}
+
 Clean Failed Cluster
     Run Keyword If Test Failed      Deprovision Cluster
 
-Delete Cluster Configuration 
+Delete Cluster Configuration
     Log    Deleting cluster ${cluster_name} configuration    console=True
-    @{Delete_Cluster} =    Oc Delete    kind=ClusterPool    name=${pool_name}    
+    @{Delete_Cluster} =    Oc Delete    kind=ClusterPool    name=${pool_name}
     ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
     Log Many    @{Delete_Cluster}
-    ${Delete_Cluster} =    Oc Delete    kind=ClusterDeploymentCustomization    name=${conf_name}    
+    ${Delete_Cluster} =    Oc Delete    kind=ClusterDeploymentCustomization    name=${conf_name}
     ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
     Log Many    @{Delete_Cluster}
 

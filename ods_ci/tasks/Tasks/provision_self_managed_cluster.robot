@@ -37,6 +37,7 @@ Provision Self-Managed Cluster
 Deprovision Self-Managed Cluster
     [Documentation]    Deprovision a self-managed cluster
     [Tags]    self_managed_deprovision
+    [Setup]   Set Hive Default Variables
     Deprovision Cluster
 
 Add GPU Node To Self-Managed AWS Cluster

@@ -7,9 +7,10 @@ Suite Teardown  Teardown Admin UI
 
 
 *** Test Cases ***
-Verify The CRD Gets Updated After Applying Changes In Admin UI
-    [Documentation]  Verify The CRD Gets Updated After Applying Changes In Admin UI
-    [Tags]  ODS-1661
+Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
+    [Documentation]    Verify that users can set multiple admin groups and
+    ...                check OdhDashboardConfig CRD gets updated according to Admin UI
+    [Tags]  ODS-1661    ODS-1555
     ...     Tier1
     ...     Sanity
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -19,13 +20,15 @@ Verify The CRD Gets Updated After Applying Changes In Admin UI
     Save Changes In User Management Setting
     AdminGroups In OdhDashboardConfig CRD Should Be     rhods-admins  rhods-users
     AllowedGroups In OdhDashboardConfig CRD Should Be   system:authenticated
+    Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER_3.USERNAME}   ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
+
 
 Verify If Unauthorized User Can Not Change The Permission
     [Documentation]  Verify If Unauthorized User Can Not Change the Permission even if the UI is visible in browser cache,
     ...    if the unauthorized user has saved, the changes should not reflect In CRD file
     ...    Product Bug:    RHODS-6282
     [Tags]  ODS-1660
-    ...     ODS-1555
     ...     Tier1
     ...     Sanity
     ...     ProductBug

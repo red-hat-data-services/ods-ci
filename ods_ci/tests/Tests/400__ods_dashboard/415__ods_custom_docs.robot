@@ -10,15 +10,15 @@ Suite Teardown   Custom Doc Suite Taerdown
 
 
 *** Variables ***
-${QS_YAML}=                  tests/Resources/Files/custom_quickstart.yaml
-${APP_YAML}=                 tests/Resources/Files/custom_app.yaml
-${HOWTO_YAML}=               tests/Resources/Files/custom_doc_howto.yaml
-${TUTORIAL_YAML}=            tests/Resources/Files/custom_doc_tutorial.yaml
+${QS_YAML}=                  ods_ci/tests/Resources/Files/custom_quickstart.yaml
+${APP_YAML}=                 ods_ci/tests/Resources/Files/custom_app.yaml
+${HOWTO_YAML}=               ods_ci/tests/Resources/Files/custom_doc_howto.yaml
+${TUTORIAL_YAML}=            ods_ci/tests/Resources/Files/custom_doc_tutorial.yaml
 &{EXPECTED_ITEMS_TITLES}=    quickstart=TEST - Custom Quick Start
 ...                          application=TEST - Custom ODS-CI Application
 ...                          howto=TEST - Custom How-To Documentation
 ...                          tutorial=TEST - Custom Tutorial Documentation
-${CUSTOM_APP_DICT_PATH}=     tests/Resources/Files/CustomAppInfoDictionary.json
+${CUSTOM_APP_DICT_PATH}=     ods_ci/tests/Resources/Files/CustomAppInfoDictionary.json
 
 
 *** Test Cases ***
@@ -118,7 +118,7 @@ External Link Should Be
     IF  "${item_type}" == "documentation"
         ${href}=    Get Element Attribute    //a[text()="View documentation"]    href
     ELSE IF   "${item_type}" == "howto"
-        ${href}=    Get Element Attribute    //a[text()="Read how-to div"]    href
+        ${href}=    Get Element Attribute    //a[text()="Read how-to article"]    href
     ELSE IF     "${item_type}" == "tutorial"
         ${href}=    Get Element Attribute    //a[text()="Access tutorial"]    href
     ELSE IF     "${item_type}" == "quickstart"

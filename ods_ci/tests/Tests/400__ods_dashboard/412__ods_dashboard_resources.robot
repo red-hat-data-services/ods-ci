@@ -96,7 +96,6 @@ Verify Filters Are Working On Resources Page
     Filter By Application (Aka Povider) And Check Output
     Filter By Using More Than One Filter And Check Output
 
-<<<<<<< HEAD
 Verify App Name On Resource Tile
     [Documentation]    Check that each resource tile specifies which application it refers to
     [Tags]    Sanity
@@ -106,8 +105,6 @@ Verify App Name On Resource Tile
     Wait For RHODS Dashboard To Load    expected_page=Resources
     Validate App Name Is Present On Each Tile
 
-=======
->>>>>>> 9256755 (Adding Quickstart test for restart functionality [RHODS-4116])
 
 *** Keywords ***
 Resources Test Setup

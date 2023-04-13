@@ -233,7 +233,7 @@ Wait Until Workbench Is Started
     [Arguments]     ${workbench_title}      ${timeout}=40s    ${status}=${WORKBENCH_STATUS_RUNNING}
 
     Wait Until Page Contains Element
-    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/h4[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}
+    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}
 
 Wait Until Workbench Is Stopped
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page

@@ -2,6 +2,7 @@
 Library   SeleniumLibrary
 Library   JupyterLibrary
 Library   OperatingSystem
+Library   Process
 Library   RequestsLibrary
 Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
@@ -48,6 +49,25 @@ Load Json String
     [Arguments]     ${json_string}
     ${obj}=     Evaluate  json.loads("""${json_string}""")
     RETURN    ${obj}
+
+Create File From Template
+    [Documentation]     Create new file from a template file, by replacing environment variables values
+    [Arguments]   ${template_file}    ${output_file}
+    ${template_data} = 	Get File 	${template_file}
+    ${output_data} = 	Replace Variables 	${template_data}
+    Create File  ${output_file}  ${output_data}
+
+Export Variables From File
+    [Documentation]     Export variables from file with lines format of: variable=value
+    [Arguments]   ${variables_file}
+    ${file_data} = 	Get File 	${variables_file}
+    @{list} =    Split to lines  ${file_data}     
+    FOR    ${line}     IN    @{list}
+        Log     ${line}
+        ${line} =    Remove String    ${line}    export
+        ${var_and_value} =    Split String    string=${line}    separator==
+        Set Suite Variable    ${${var_and_value}[0]}    ${var_and_value}[1]
+    END
 
 Get CSS Property Value
     [Documentation]    Get the CSS property value of a given element

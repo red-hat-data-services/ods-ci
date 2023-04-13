@@ -25,13 +25,13 @@ using QE tiered testing.
   1. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite.
   ```bash
      # running all the tests 
-     sh run_robot_test.sh 
+     sh ods_ci/run_robot_test.sh 
 
      # running Smoke test suite via tag
-     sh run_robot_test.sh --include Smoke 
+     sh ods_ci/run_robot_test.sh --include Smoke 
 
      # running a specific test via tag
-     sh run_robot_test.sh --include ODS-XYZ 
+     sh ods_ci/run_robot_test.sh --include ODS-XYZ 
    ```
    
    * This run_robot_test.sh is a wrapper for creating the python virtual environment and running the Robot Framework CLI.   

@@ -76,6 +76,8 @@ Close QuickStart From Button
 Mark Step Check As Yes
     Wait Until Page Contains Element    //input[@data-testid="qs-drawer-check-yes"]
     Click Button    //input[@data-testid="qs-drawer-check-yes"]
+    Wait Until Page Contains Element    //div[contains(@class, "pf-m-success")]
+
 
 Mark Step Check As No
     Wait Until Page Contains Element    //input[@data-testid="qs-drawer-check-no"]

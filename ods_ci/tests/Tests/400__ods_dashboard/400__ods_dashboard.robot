@@ -66,6 +66,7 @@ Verify Content In RHODS Explore Section
 Verify RHODS Explore Section Contains Only Expected ISVs
     [Documentation]    It verifies if the ISV reported in Explore section of RHODS corresponds to expected ones
     [Tags]    Smoke
+    ...       Tier1
     ...       ODS-1890
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
@@ -113,6 +114,7 @@ Verify License Of Disabled Cards Can Be Re-validated
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
     [Tags]    Smoke
+    ...       Tier1
     ...       ODS-1165
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore

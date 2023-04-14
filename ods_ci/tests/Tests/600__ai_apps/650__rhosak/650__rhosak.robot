@@ -31,6 +31,7 @@ ${KAFKA_CLIENT_SECRET}=         "placeholder"
 Verify RHOSAK Is Available In RHODS Dashboard Explore Page
     [Documentation]    Checks RHOSAK card is present in RHODS Dashboard > Explore Page
     [Tags]    Smoke
+    ...       Tier1
     ...       ODS-258
     Verify Service Is Available In The Explore Page    ${RHOSAK_DISPLAYED_APPNAME}
     ...    split_last=${TRUE}

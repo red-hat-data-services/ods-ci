@@ -16,13 +16,17 @@ Force Tags       JupyterHub
 
 *** Test Cases ***
 Logged Into OpenShift
-    [Tags]  Sanity  Smoke  ODS-127
+    [Tags]   Sanity    Smoke
+    ...      Tier1
+    ...      ODS-127
     Open OCP Console
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait Until OpenShift Console Is Loaded
 
 Can Launch Jupyterhub
-    [Tags]  Sanity  Smoke  ODS-935
+    [Tags]   Sanity    Smoke
+    ...      Tier1
+    ...      ODS-935
     #This keyword will work with accounts that are not cluster admins.
     Launch Jupyterhub via App
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -30,7 +34,9 @@ Can Launch Jupyterhub
     Launch Jupyter From RHODS Dashboard Link
 
 Can Login To Jupyterhub
-    [Tags]  Sanity  Smoke  ODS-936
+    [Tags]   Sanity    Smoke
+    ...      Tier1
+    ...      ODS-936
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize jupyterhub service account
@@ -38,6 +44,7 @@ Can Login To Jupyterhub
 
 Can Spawn Notebook
     [Tags]  Sanity  Smoke
+    ...     Tier1
     ...     ODS-1808
     Fix Spawner Status
     Select Notebook Image  s2i-generic-data-science-notebook

@@ -13,6 +13,7 @@ Verify Base User Can Stop A Running Server
     [Documentation]    Verifies that a base user has enough permission to start
     ...                and stop a notebook server
     [Tags]    Smoke
+    ...       Tier1
     ...       ODS-1978
     Launch KFNBC Spawner As Base User
     Launch Notebook And Go Back To Control Panel Window

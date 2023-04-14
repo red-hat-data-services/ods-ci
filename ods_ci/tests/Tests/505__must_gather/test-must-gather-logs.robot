@@ -4,7 +4,9 @@ Library   OperatingSystem
 
 *** Test Cases ***
 Verify that the must-gather image provides RHODS logs and info
-      [Tags]  Smoke  Sanity  ODS-505
+      [Tags]   Smoke    Sanity
+      ...      Tier1
+      ...      ODS-505
       Get must-gather logs
       Verify logs for redhat-ods-applications
       Verify logs for redhat-ods-operator

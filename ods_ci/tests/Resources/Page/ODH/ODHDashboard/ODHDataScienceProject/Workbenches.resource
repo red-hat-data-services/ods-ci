@@ -67,7 +67,7 @@ Create Workbench
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
         ELSE
-            Log    msg="pv_existent" argument not set, using default PV settings"   level=WARN
+            Log    msg="pv_existent" argument not set, using default PV settings   level=WARN
         END
     ELSE
         Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
@@ -78,7 +78,7 @@ Create Workbench
         Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
         Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
-    Wait Until Generic Modal Disappears
+    Wait Until Generic Modal Disappears  timeout=1 minute
     Wait Until Project Is Open    project_title=${prj_title}
 
 Add Environment Variables In Workbench
@@ -230,9 +230,10 @@ Status Error Icon Should Appear
 
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
-    [Arguments]     ${workbench_title}      ${timeout}=40s
-    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
-    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
+    [Arguments]     ${workbench_title}      ${timeout}=40s    ${status}=${WORKBENCH_STATUS_RUNNING}
+
+    Wait Until Page Contains Element
+    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}
 
 Wait Until Workbench Is Stopped
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
@@ -248,7 +249,8 @@ Wait Until Workbench Is Restarting
 
 Start Workbench
     [Documentation]    Starts a workbench from the DS Project details page
-    [Arguments]     ${workbench_title}
+    [Arguments]     ${workbench_title}      ${timeout}=30s
+
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
@@ -256,7 +258,7 @@ Start Workbench
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
-    Wait Until Workbench Is Started     workbench_title=${workbench_title}
+    Wait Until Workbench Is Started     workbench_title=${workbench_title}   timeout=${timeout}
 
 Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched

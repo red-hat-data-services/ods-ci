@@ -52,4 +52,6 @@ Uninstall RHODS In Self Managed Cluster For Operatorhub
    ${return_code}    ${output}    Run And Return Rc And Output   oc label configmap/delete-self-managed-odh api.openshift.com/addon-managed-odh-delete=true -n redhat-ods-operator
    Should Be Equal As Integers	${return_code}	 0   msg=Error observed while adding label to configmap
    Verify Project Does Not Exists  redhat-ods-applications
+   Verify Project Does Not Exists  redhat-ods-monitoring
+   Verify Project Does Not Exists  rhods-notebooks
    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator

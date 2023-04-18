@@ -13,7 +13,7 @@ Suite Setup     Performance Suite Setup
 ${NAMESPACE}     openshift-kube-apiserver
 ${LABEL_SELECTOR}     app=openshift-kube-apiserver
 ${MEMORY_THRESHOLD}    102400
-${PERF_CODE}    go run setup/main.go --users 50 --default 50  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-applications:notebook-controller-deployment --workloads redhat-ods-applications:odh-notebook-controller-manager --workloads redhat-ods-applications:modelmesh-controller --workloads redhat-ods-applications:etcd --workloads redhat-ods-applications:odh-model-controller --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:rhods-prometheus-operator --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
+${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads redhat-ods-applications:rhods-dashboard --workloads redhat-ods-applications:notebook-controller-deployment --workloads redhat-ods-applications:odh-notebook-controller-manager --workloads redhat-ods-applications:modelmesh-controller --workloads redhat-ods-applications:etcd --workloads redhat-ods-applications:odh-model-controller --workloads redhat-ods-monitoring:blackbox-exporter --workloads redhat-ods-monitoring:rhods-prometheus-operator --workloads redhat-ods-monitoring:prometheus <<< y   #robocop:disable
 ${ISV_DATA}    ${{ {'pachyderm':['pachyderm','stable']} }}
 
 *** Test Cases ***
@@ -83,7 +83,7 @@ Performance Suite Setup
      FOR    ${isv}    IN    @{ISV_DATA.values()}
            Install ISV By Name    ${isv[0]}      ${isv[1]}
      END
-    # Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
+     Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
      Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git
      ${return_code}    ${output}    Run And Return Rc And Output    sed -i 's/"rhods\.yaml"\,//g' ${EXECDIR}/toolchain-e2e/setup/operators/operators.go    #robocop:disable
      Should Be Equal As Integers	 ${return_code}	 0

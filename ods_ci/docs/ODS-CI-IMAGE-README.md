@@ -3,7 +3,7 @@
 ## Important Note
     With the switch to Poetry, the project directory structure has changed. You are now require to launch these commands from the root of the ods-ci repo, but the paths have to take into account the relative subfolder ods_ci. The examples shown here already deal with this new subfolder, but take care of double checking your paths if writing commands manually.
 
-A [Dockerfile](ods_ci/build/Dockerfile) is available for running tests in a container. Below you can read how to build and run ods-ci test suites container.
+A [Dockerfile](../build/Dockerfile) is available for running tests in a container. Below you can read how to build and run ods-ci test suites container.
 
 ****
 # Build
@@ -31,9 +31,9 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
 # Run
 ## Arguments to control container run:
 
-* ```RUN_SCRIPT_ARGS```: it takes the run arguments to pass to ods-ci robot wrapper script ```run_robot_test.sh```. All the details in the dedicated document file [RUN_ARGUMENTS.md](ods_ci/docs/RUN_ARGUMENTS.md)
+* ```RUN_SCRIPT_ARGS```: it takes the run arguments to pass to ods-ci robot wrapper script ```run_robot_test.sh```. All the details in the dedicated document file [RUN_ARGUMENTS.md](./RUN_ARGUMENTS.md)
 
-* ```ROBOT_EXTRA_ARGS```: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., --log NONE, --dryrun ) or at official [Robot Framework User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html) 
+* ```ROBOT_EXTRA_ARGS```: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., ```--log NONE```, ```--dryrun```) or at official [Robot Framework User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html) 
 
 * ```SET_ENVIRONMENT``` (default: 0): it enables/disables the installation of Identity providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
 
@@ -87,16 +87,16 @@ $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-vari
 ****
 ## Running the ODS-CI container image in OpenShift
 
-After building the container, you can deploy the container in a pod running on OpenShift. See [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml) as example.
+After building the container, you can deploy the container in a pod running on OpenShift. See [ods-ci_pod.yaml](./ods-ci_pod.yaml) as example.
 
 
 *Pre-req task*
 - login to a test cluster with ```oc login ...``` command. See [official documentation](https://docs.openshift.com/online/pro/cli_reference/get_started_cli.html) for more details
 - create the namespace/project "ods-ci"
-- create the service account by applying the rbac settings. See [this](ods_ci/docs/ods-ci_rbac.yaml)
+- create the service account by applying the rbac settings. See [this](./ods-ci_rbac.yaml)
 - create a secret to store your "test-variables.yml" file. Refer to main [README.md](ods_ci/README.md) to get your test-variables.yml file.
 - [optional] create a pull secret to fetch the ods-ci image from your registry if it is private. Ensure to patch the SA created at the previous step in order to add the pull secret name
-- [optional] create a PVC to store test artifacts. It is embedded in the sample [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml). If you don't want it, you can modify the YAML file as per your need
+- [optional] create a PVC to store test artifacts. It is embedded in the sample [ods-ci_pod.yaml](./ods-ci_pod.yaml). If you don't want it, you can modify the YAML file as per your need
 
 
 **Example 1** steps to run ods-ci pod in a OpenShift cluster
@@ -117,7 +117,7 @@ oc apply -f ods-ci_pod.yaml -n ods-ci
 ```
 
 **Example 2**
-test execution using the container in a OpenShift pod - minimum configuration, extracted from [ods-ci_pod.yaml](ods_ci/docs/ods-ci_pod.yaml)
+test execution using the container in a OpenShift pod - minimum configuration, extracted from [ods-ci_pod.yaml](./ods-ci_pod.yaml)
 ```yaml
       image: quay.io/modh/ods-ci:latest
       imagePullPolicy: Always
@@ -133,7 +133,7 @@ test execution using the container in a OpenShift pod - minimum configuration, e
         - mountPath: /tmp/ods-ci/ods_ci/test-output
           name: ods-ci-test-output
 ```
-**Example 3** test execution using the container in a OpenShift pod - install IDP with OCM CLI/APIs, extracted from [ods-ci_pod_ocm_idp.yaml](ods_ci/docs/ods-ci_pod_ocm_idp.yaml)
+**Example 3** test execution using the container in a OpenShift pod - install IDP with OCM CLI/APIs, extracted from [ods-ci_pod_ocm_idp.yaml](./ods-ci_pod_ocm_idp.yaml)
 ```yaml
       image: quay.io/modh/ods-ci:latest
       imagePullPolicy: IfNotPresent
@@ -157,7 +157,7 @@ test execution using the container in a OpenShift pod - minimum configuration, e
           name: ods-ci-test-output
 ```
 
-**Example 4** test execution using the container in a OpenShift pod - install IDP without OCM CLI/APIs, extracted from [ods-ci_pod_oc_idp.yaml](ods_ci/docs/ods-ci_pod_oc_idp.yaml)
+**Example 4** test execution using the container in a OpenShift pod - install IDP without OCM CLI/APIs, extracted from [ods-ci_pod_oc_idp.yaml](./ods-ci_pod_oc_idp.yaml)
 ```yaml
       image: quay.io/modh/ods-ci:latest
       imagePullPolicy: IfNotPresent
@@ -219,7 +219,7 @@ podman run --rm --pod=<pod_name>
                 ods-ci:1.24.0
 
 ```
-If you are running ods-ci container on a cluster you could use the pod template [ods-ci.pod_with_postfix.yaml](ods_ci/docs/ods-ci.pod_with_postfix.yaml) from this repository. Based on your case, you may need to merge [ods-ci.pod_with_postfix.yaml](ods_ci/docs/ods-ci.pod_with_postfix.yaml) with one of the yaml used in the above examples pod definitions.
+If you are running ods-ci container on a cluster you could use the pod template [ods-ci.pod_with_postfix.yaml](./ods-ci_pod_with_postfix.yaml) from this repository. Based on your case, you may need to merge [ods-ci.pod_with_postfix.yaml](./ods-ci_pod_with_postfix.yaml) with one of the yaml used in the above examples pod definitions.
 
 
 **NOTE**: Keep in mind that this solution is not working on OSD clusters as reported [here](https://access.redhat.com/solutions/880233).

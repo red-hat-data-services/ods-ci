@@ -26,7 +26,8 @@ Verify Model Serving Installation
     [Documentation]    Verifies that the core components of model serving have been
     ...    deployed in the redhat-ods-applications namespace
     [Tags]    Smoke
-    ...    ODS-1919
+    ...       Tier1
+    ...       ODS-1919
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify odh-model-controller Deployment
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Etcd Pod

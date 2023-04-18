@@ -50,14 +50,18 @@ ${DC_S3_TYPE}=    Object storage
 Verify Data Science Projects Page Is Accessible
     [Documentation]    Verifies "Data Science Projects" page is accessible from
     ...                the navigation menu on the left
-    [Tags]    Smoke    ODS-1876
+    [Tags]    Smoke
+    ...       Tier1
+    ...       ODS-1876
     Open Data Science Projects Home Page
     Page Should Contain Element     ${PROJECT_CREATE_BTN_XP}
 
 Verify User Can Access Jupyter Launcher From DS Project Page
     [Documentation]    Verifies Data Science Projects home page contains
     ...                a link to Jupyter Spawner and it is working
-    [Tags]    Smoke    ODS-1877
+    [Tags]    Smoke
+    ...       Tier1
+    ...       ODS-1877
     Open Data Science Projects Home Page
     Page Should Contain Element     ${SPAWNER_LINK}
     Click Element    ${SPAWNER_LINK}
@@ -66,7 +70,9 @@ Verify User Can Access Jupyter Launcher From DS Project Page
 Verify Workbench Images Have Multiple Versions
     [Documentation]    Verifies that workbench images have an additional
     ...                dropdown which supports N/N-1 image versions.
-    [Tags]    Smoke    ODS-2131
+    [Tags]    Smoke
+    ...       Tier1
+    ...       ODS-2131
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${EMPTY}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}

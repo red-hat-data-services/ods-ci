@@ -272,6 +272,7 @@ Verify RHODS Display Name and Version
     [Documentation]   Verify consistent rhods display name and version using
     ...    ClusterServiceVersion CR
     [Tags]    Smoke
+    ...       Tier1
     ...       ODS-1862
     ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    label_selector=olm.copiedFrom=redhat-ods-operator
     ${rhods_csv_name}     Set Variable     ${rhods_csv_detail[0]['metadata']['name']}
@@ -284,6 +285,7 @@ Verify RHODS Display Name and Version
 Verify RHODS Notebooks Network Policies
     [Documentation]    Verifies that the network policies for RHODS Notebooks are present on the cluster
     [Tags]    Smoke
+    ...       Tier1
     ...       ODS-2045
     Launch Notebook And Stop It
     ${CR_name} =    Get User CR Notebook Name    username=${TEST_USER.USERNAME}

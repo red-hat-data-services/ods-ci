@@ -16,19 +16,32 @@ using QE tiered testing.
   1. Edit the test variables file to include information required for this test run.
      You will need to add info required for test execution:
      * URLs based on the test case you are executing.<br>
-        ** OpenShift Console.<br>
-        ** Open Data Hub Dashboard.<br>
-        ** JupyterHub.<br>
+        *   OpenShift Console.<br>
+        *   Open Data Hub Dashboard.<br>
+        *   JupyterHub.<br>
      * Test user credentials.
      * Browser webdriver to use for testing.
-  1. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite
-    ```bash
-    sh run_robot_test.sh
-    ```
-    This script is a wrapper for creating the python virtual environment and running the Robot Framework CLI.  You can run any of the test cases by creating the python virual environment, install the packages in requirements.txt and running the `robot` command directly
+
+  1. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite.
+  ```bash
+     # running all the tests 
+     sh ods_ci/run_robot_test.sh 
+
+     # running Smoke test suite via tag
+     sh ods_ci/run_robot_test.sh --include Smoke 
+
+     # running a specific test via tag
+     sh ods_ci/run_robot_test.sh --include ODS-XYZ 
+   ```
+   
+   * This run_robot_test.sh is a wrapper for creating the python virtual environment and running the Robot Framework CLI.   
+   * The wrapper script has several arguments and you can find details in the dedicated document file. See [run_args.md](ods_ci/docs/RUN_ARGUMENTS.md)
+   * As alternative, you can run any of the test cases by creating the python virual environment, install the packages in [poetry.lock](poetry.lock) and running the `robot` command directly
+
+
 # Contributing
 See [CONTRIBUTING.md](ods_ci/CONTRIBUTING.md)
 # ODS-CI Container Image
-See build [README](ods_ci/build/README.md) on how you can build a container to run ODS-CI automation in OpenShift.
+See build [README](ods_ci/docs/ODS-CI-IMAGE-README.md) on how you can build and use a container to run ODS-CI automation in OpenShift.
 # License
 This project is open sourced under MIT License.

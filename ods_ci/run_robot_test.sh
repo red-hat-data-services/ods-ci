@@ -287,10 +287,17 @@ if command -v yq &> /dev/null
         echo "we did not find yq, so not trying the oc login"
 fi
 
+# Activating the virtual environment
+# python3 -c help you to understand what is going on with environments
 if [[ ${SKIP_INSTALL} -eq 0 ]]; then
+  python3 -c 'import sys;print(sys.executable)'
+  poetry env use 3.9
+  source $(poetry env info --path)/bin/activate
+  python3 -c 'import sys;print(sys.executable)'
   poetry install
+else
+  echo "poetry install skipped"
 fi
-source $(poetry env info --path)/bin/activate
 
 #Create a unique directory to store the output for current test run
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then

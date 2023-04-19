@@ -25,7 +25,7 @@ Verify Quick Starts Work As Expected On Yes And Restart
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1306    ODS-1308    ODS-1166
-    ...     ODS-1406    ODS-1405
+    ...     ODS-1406    ODS-1405    ProductBug
     Set Quick Starts Elements List Based On RHODS Type
     Validate Number Of Quick Starts In Dashboard Is As Expected    ${QUICKSTART_ELEMENTS}
     Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   ${QUICKSTART_ELEMENTS}
@@ -45,9 +45,11 @@ Verify Quick Starts Work When All Steps Are Skipped
 Verify Quick Starts Work When At Least One Step Is Skipped
     [Documentation]   Verify the Quickstarts work fine when at least of the
     ...    steps are skipped
+    ...    ProductBug: RHODS-7935
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1403
+    ...     ProductBug
     Set Quick Starts Elements List Based On RHODS Type
     Validate Number Of Quick Starts In Dashboard Is As Expected    ${QUICKSTART_ELEMENTS}
     Verify Quick Starts Work As Expected When At Least One Step Is Skipped    ${QUICKSTART_ELEMENTS}
@@ -55,9 +57,11 @@ Verify Quick Starts Work When At Least One Step Is Skipped
 Verify Quick Starts Work As Expected When At Least One Step Is Marked As No
     [Documentation]   Verify the Quickstarts are works as expected
     ...    when mark last one step as no
+    ...    ProductBug: RHODS-7935
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1307
+    ...     ProductBug
     Set Quick Starts Elements List Based On RHODS Type
     Validate Number Of Quick Starts In Dashboard Is As Expected    ${QUICKSTART_ELEMENTS}
     Verify Quick Starts Work As Expected When One Step Is Marked As No    ${QUICKSTART_ELEMENTS}

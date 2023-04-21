@@ -157,8 +157,7 @@ Verify That CUDA Build Chain Succeeds
     [Teardown]    CUDA Teardown
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
-    [Documentation]    Vrifies the blackbok-exporter inludes 2 containers one for application and second for oauth proxy
-    [Tags]  Sanity
+    [Documentation]    Vrifies the blackbok-exporter inludes 4 containers one for application,odh-notebook-controller,notebook-controller and data-science-pipelines each
     ...     Tier1
     ...     ODS-1090
     Skip If RHODS Is Self-Managed
@@ -332,7 +331,7 @@ Verify Authentication Is Required To Access BlackboxExporter
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
     ...    username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}
-    Length Should Be    ${links}    3    msg=Unexpected number of target endpoints in blackbox-exporter
+    Length Should Be    ${links}    4    msg=Unexpected number of target endpoints in blackbox-exporter
     ${pod_name} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
     FOR    ${link}    IN    @{links}
         ${command} =    Set Variable    curl --silent --insecure ${link}

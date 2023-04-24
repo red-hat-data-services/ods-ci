@@ -82,6 +82,7 @@ Verify DS Projects Home Page Shows The Right Number Of Items The User Has Select
     ...                multiple data science projects are added
     [Tags]    many-projects
     ...    ODS-2015    Sanity    Tier1
+    [Teardown]    Delete Multiple Data Science Projects    title=ds-project-ldap-user    number=20
     ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=${EMPTY}
     ...    number=20
     Number Of Displayed Projects Should Be    expected_number=10

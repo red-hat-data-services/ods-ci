@@ -157,7 +157,8 @@ Verify That CUDA Build Chain Succeeds
     [Teardown]    CUDA Teardown
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
-    [Documentation]    Vrifies the blackbok-exporter inludes 4 containers one for application,odh-notebook-controller,notebook-controller and data-science-pipelines each
+    [Documentation]    Verifies the blackbok-exporter inludes 4 containers one for application,odh-notebook-controller,notebook-controller and data-science-pipelines each
+    [Tags]  Sanity
     ...     Tier1
     ...     ODS-1090
     Skip If RHODS Is Self-Managed

@@ -12,7 +12,6 @@ Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
 Test Teardown      Close All Browsers
 
-
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project
 ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test
@@ -83,6 +82,27 @@ Verify Workbench Images Have Multiple Versions
         Select Workbench Jupyter Image    image_name=${img}    version=default
     END
     [Teardown]    Project Suite Teardown
+
+Verify DS Projects Home Page Shows The Right Number Of Items The User Has Selected
+    [Documentation]    Verifies that correct number of data science projects appear when
+    ...                multiple data science projects are added
+    [Tags]    many-projects
+    ...    ODS-2015    Sanity    Tier1
+    [Teardown]    Delete Multiple Data Science Projects    title=ds-project-ldap-user    number=20
+    ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=${EMPTY}
+    ...    number=20
+    Number Of Displayed Projects Should Be    expected_number=10
+    ${curr_page_projects}=    Get All Displayed Projects
+    ${remaining_projects}=    Remove Current Page Projects From All Projects
+    ...                        ${all_projects}    ${curr_page_projects}
+    Check Pagination Is Correct On The Current Page    page=1    total=20
+    Go To Next Page Of Data Science Projects
+    Number Of Displayed Projects Should Be    expected_number=10
+    ${curr_page_projects}=    Get All Displayed Projects
+    ${remaining_projects}=    Remove Current Page Projects From All Projects
+    ...                       ${all_projects}    ${curr_page_projects}
+    Check Pagination Is Correct On The Current Page    page=2    total=20
+    Should Be Empty    ${remaining_projects}
 
 Verify User Cannot Create Project With Empty Fields
     [Tags]    Sanity   ODS-1783
@@ -570,3 +590,20 @@ Check Environment Variables Exist
     END
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells
+
+Create Multiple Data Science Projects
+    [Documentation]    Create a given number of data science projects based on title and description
+    [Arguments]    ${title}     ${description}    ${number}
+    ${all_projects}=    Create List
+    FOR    ${counter}    IN RANGE    1    ${number}+1    1
+        Create Data Science Project    title=${title}${counter}    description=${EMPTY}
+        Open Data Science Projects Home Page
+        Append To List    ${all_projects}    ${title}${counter}
+    END
+    RETURN    ${all_projects}
+
+Delete Multiple Data Science Projects
+    [Arguments]    ${title}     ${number}
+    FOR    ${counter}    IN RANGE    1    ${number}+1    1
+        ${rc}  ${output}=    Run And Return Rc And Output    oc delete project ${title}${counter}
+    END

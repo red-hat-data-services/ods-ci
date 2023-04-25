@@ -253,6 +253,10 @@ Number Of Displayed Projects Should Be
     ${n_listed}=    Get Length    ${listed}
     Run Keyword And Continue On Failure    Should Be Equal As Integers    ${n_listed}    ${expected_number}
 
+Go To Next Page Of Data Science Projects
+    [Documentation]    Navigate to next page when more than 10 Data Science Projects Appear
+    Click Button    xpath=//button[@data-action="next"]
+
 Launch Data Science Project Main Page
     [Documentation]    Launch DS Projects page in RHODS Dashboard using a given user
     [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}
@@ -260,3 +264,22 @@ Launch Data Science Project Main Page
     Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${ocp_user_auth_type}
     ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     Open Data Science Projects Home Page
+
+Remove Current Page Projects From All Projects
+    [Documentation]    Remove list of currently displayed Data Science projects from list of all projects
+    [Arguments]        ${all_projects}    ${curr_page_projects}
+    FOR    ${project}    IN    @{curr_page_projects}
+        Remove Values From List    ${all_projects}    ${project}
+    END
+    RETURN    ${all_projects}
+
+Check Pagination Is Correct On The Current Page
+    [Documentation]    Check the pagination is correct for the Data Science displayed on current page
+    [Arguments]     ${page}    ${total}
+    ${actual_text}=    Get Text    xpath://span[@class="pf-c-options-menu__toggle-text"]
+    IF    ${page}==1
+        ${expected_text}=    Set Variable   1 - 10 of ${total}
+    ELSE IF    ${page}==2
+        ${expected_text}=    Set Variable   11 - ${total} of ${total}
+    END
+    Should Be Equal    ${expected_text}    ${actual_text}

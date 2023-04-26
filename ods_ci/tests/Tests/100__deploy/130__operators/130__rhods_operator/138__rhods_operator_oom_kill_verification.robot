@@ -31,6 +31,7 @@ Verify RHODS Operator OOM Kill Behaviour
     ${dfeault_np_count}    Run    oc get namespace | wc -l
     Create Namespace In Openshift
     Verify Operator Pod Status    ${NAMESPACE}    name=rhods-operator
+    Verify Pods Status
     Basic Dashboard Test Verification
     Delete Namespace From Openshift
     ${new__np_count}    Run    oc get namespace | wc -l
@@ -63,3 +64,8 @@ Basic Dashboard Test Verification
     Spawn Notebook With Arguments
     Fix Spawner Status
     Close Browser
+Verify Pods Status
+    [Documentation]    Verify each pod status in the rhods namespace
+    Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
+    Wait For Pods Status  namespace=redhat-ods-operator  timeout=60
+    Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=60

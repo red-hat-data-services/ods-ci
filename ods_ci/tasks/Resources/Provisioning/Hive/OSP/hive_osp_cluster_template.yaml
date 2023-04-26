@@ -54,7 +54,7 @@ items:
           hostPrefix: 23
         machineNetwork:
         - cidr: 192.169.0.0/16
-        networkType: OpenShiftSDN
+        networkType: {{ ${infrastructure_configurations}[ocp_network_type]|default("OVNKubernetes") }}
         serviceNetwork:
         - 172.30.0.0/16
       platform:

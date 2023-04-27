@@ -78,13 +78,14 @@ if [[ -z "$ZONE_ID" ]] ; then
   exit 20
 fi
 
-echo "Updating DNS records (cluster api's) in Route53"
+echo "Updating DNS records (cluster api's) in AWS Route53"
 RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch \
 '{ "Comment": "Update A record for cluster API", "Changes": 
-[ { "Action": "CREATE", "ResourceRecordSet": { "Name": "api.'"$CLUSTER_NAME"'.'"$AWS_DOMAIN"'", 
+[ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "api.'"$CLUSTER_NAME"'.'"$AWS_DOMAIN"'", 
 "Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'"$FIP_API"'" } ] } } ] }' --output json) || rc=$?
 if [[ -n "$rc" ]] ; then
-  echo "Failed to update A record for cluster. Releasing previously allocated floating IP"
+  echo -e "Failed to update DNS A record in AWS for cluster API. 
+  \n Releasing previously allocated floating IP in $OS_CLOUD ($FIP_API)"
   openstack floating ip delete "$FIP_API"
   exit ${rc:+$rc}
 fi
@@ -92,14 +93,15 @@ fi
 echo "Waiting for DNS change to propagate"
 aws route53 wait resource-record-sets-changed --id "$(echo "$RESPONSE" | jq -r '.ChangeInfo.Id')"
 
-echo "Updating DNS records (cluster ingress) in Route53"
+echo "Updating DNS records (cluster ingress) in AWS Route53"
 RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch \
-'{ "Comment": "Update A record for cluster API", "Changes": 
-[ { "Action": "CREATE", "ResourceRecordSet": { "Name": "*.apps.'"$CLUSTER_NAME"'.'"$AWS_DOMAIN"'", 
+'{ "Comment": "Update A record for cluster APPS", "Changes": 
+[ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "*.apps.'"$CLUSTER_NAME"'.'"$AWS_DOMAIN"'", 
 "Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'"$FIP_APPS"'" } ] } } ] }' --output json) || rc=$?
 
 if [[ -n "$rc" ]] ; then
-  echo "Failed to update A record for cluster. Releasing previously allocated floating IP"
+  echo -e "Failed to update DNS A record in AWS for cluster APPS. 
+  \n Releasing previously allocated floating IP in $OS_CLOUD ($FIP_APPS)"
   openstack floating ip delete "$FIP_APPS"
   exit ${rc:+$rc}
 fi

@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream8
+FROM quay.io/centos/centos:stream9
 
 # Use this build arg to set any default test script arguments
 ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}

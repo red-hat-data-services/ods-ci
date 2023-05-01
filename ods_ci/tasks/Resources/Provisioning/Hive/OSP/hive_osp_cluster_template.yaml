@@ -92,7 +92,7 @@ items:
   type: Opaque
   data:
     clouds.yaml: ${infrastructure_configurations}[osp_yaml_encoded]
-    cloud: ${infrastructure_configurations}[osp_name_encoded]
+    cloud: ${OSP_CLOUD}
 - apiVersion: hive.openshift.io/v1
   kind: ClusterImageSet
   metadata:

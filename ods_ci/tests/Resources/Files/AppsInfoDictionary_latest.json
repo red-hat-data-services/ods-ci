@@ -204,7 +204,7 @@
              "sidebar_links": {
                    "0": {
                          "text": "Get started",
-                         "url": "https://docs.pachyderm.com/latest/getting_started/",
+                         "url": "https://docs.pachyderm.com/latest/getting-started",
                          "matching": ""
                    },
                    "1": {
@@ -224,7 +224,7 @@
                    },
                    "4": {
                          "text": "Open CV",
-                         "url": "https://docs.pachyderm.com/latest/getting_started/beginner_tutorial/",
+                         "url": "https://docs.pachyderm.com/latest/getting-started/beginner-tutorial/",
                          "matching": ""
                    },
                    "5": {
@@ -244,7 +244,7 @@
                    },
                    "8": {
                          "text": "tutorial",
-                         "url": "https://docs.pachyderm.com/latest/getting_started/beginner_tutorial/",
+                         "url": "https://docs.pachyderm.com/latest/getting-started/beginner-tutorial/",
                          "matching": ""
                    },
                    "9": {

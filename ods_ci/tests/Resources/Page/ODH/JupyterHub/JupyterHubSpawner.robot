@@ -57,8 +57,15 @@ Select Notebook Image
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
         Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/../input
     ELSE
-        Log To Console    Unknown image version requested
-        Fail    Unknown image version requested
+        Verify Version Dropdown Is Present    ${notebook_image}
+        Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
+        ${tag_exists} =    Run Keyword And Return Status    Page Should Contain    xpath=${KFNBC_IMAGE_DROPDOWN}//div[@class="" and .="Version ${version}"]/../../../input
+        IF  ${tag_exists}==True
+            Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//div[@class="" and .="Version ${version}"]/../../../input
+        ELSE
+            Log To Console    Unknown image version requested
+            Fail    Unknown image version requested
+        END
     END
 
 Verify Version Dropdown Is Present

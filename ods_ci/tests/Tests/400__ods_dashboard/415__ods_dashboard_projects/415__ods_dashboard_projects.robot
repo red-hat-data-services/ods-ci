@@ -449,6 +449,26 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
 
+Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
+    [Tags]    Tier1    Sanity
+    ...       ODS-XYZ
+    [Documentation]    Verify UI informs users about workbenches failed to start.
+    ...                At the moment the test is considering only the scenario where
+    ...                the workbench fails for Insufficient resources.
+    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...                 pv_description=${NONE}  pv_size=${NONE}
+    ...                 press_cancel=${FALSE}    envs=${envs_list}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
+    Check Environment Variables Exist    exp_env_variables=${envs_list}
+
 Verify User Can Delete A Data Science Project
     [Tags]    Sanity    Tier1    ODS-1784
     [Documentation]    Verifies users can delete a Data Science project

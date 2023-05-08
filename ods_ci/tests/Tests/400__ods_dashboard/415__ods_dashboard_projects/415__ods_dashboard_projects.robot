@@ -378,9 +378,10 @@ Verify User Can Create A Workbench With Environment Variables
 
 Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     [Tags]    Tier1    Sanity
-    ...       ODS-XYZ
+    ...       ODS-1883
     [Documentation]    Verify user can set environment varibles in their workbenches by
     ...                uploading a yaml Secret or Config Map file.
+    ...                ProductBug: RHODS-8249
     ${envs_var_secret}=    Create Dictionary    filepath=${ENV_SECRET_FILEPATH}
     ...    k8s_type=Secret  input_type=${UPLOAD_TYPE}
     ${envs_var_cm}=    Create Dictionary    filepath=${ENV_CM_FILEPATH}

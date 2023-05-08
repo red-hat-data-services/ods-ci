@@ -62,7 +62,7 @@ Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
     [Arguments]     ${project_title}
     Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
-    # Maybe Wait For Dashboard Loading Spinner Page
+    Maybe Wait For Dashboard Loading Spinner Page
 
 Project Should Be Listed
     [Documentation]    Checks a Project is available in DS Project home page

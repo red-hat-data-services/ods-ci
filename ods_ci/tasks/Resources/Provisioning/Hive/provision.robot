@@ -76,7 +76,7 @@ Create Openstack Resources
     Run Keyword If    "${FIP_API}" == "" or "${FIP_APPS}" == ""    Create Floating IPs
     ...    ELSE    Log    Reusing existing Floating IPs    console=True
     Set Task Variable    ${FIP_API}
-    Set Task Variable    ${FIP_APPS}
+    Set Task Variable    ${FIP_APPS}    
     Log    FIP_API = ${FIP_API}    console=True
     Log    FIP_APPS = ${FIP_APPS}    console=True
     ${hive_yaml} =    Set Variable    ${artifacts_dir}/${cluster_name}_hive.yaml

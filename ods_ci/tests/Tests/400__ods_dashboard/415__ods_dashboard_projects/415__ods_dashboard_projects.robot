@@ -43,7 +43,8 @@ ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
 ${DC_S3_TYPE}=    Object storage
 @{IMAGE_LIST}    Minimal Python    CUDA   PyTorch    Standard Data Science    TensorFlow
-
+${ENV_SECRET_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_secret.yaml
+${ENV_CM_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_cm.yaml
 
 *** Test Cases ***
 Verify Data Science Projects Page Is Accessible
@@ -356,7 +357,7 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
-    # [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB
     ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
@@ -373,6 +374,34 @@ Verify User Can Create A Workbench With Environment Variables
     Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
+    Check Environment Variables Exist    exp_env_variables=${envs_list}
+
+Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
+    [Tags]    Tier1    Sanity
+    ...       ODS-XYZ
+    [Documentation]    Verify UI informs users about workbenches failed to start.
+    ...                At the moment the test is considering only the scenario where
+    ...                the workbench fails for Insufficient resources.
+    ${envs_var_secret}=    Create Dictionary    filepath=${ENV_SECRET_FILEPATH}
+    ...    k8s_type=Secret  input_type=${UPLOAD_TYPE}
+    ${envs_var_cm}=    Create Dictionary    filepath=${ENV_CM_FILEPATH}
+    ...    k8s_type=Config Map  input_type=${UPLOAD_TYPE}
+    ${envs_list}=    Create List   ${envs_var_secret}     ${envs_var_cm}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...                 pv_description=${NONE}  pv_size=${NONE}
+    ...                 press_cancel=${FALSE}    envs=${envs_list}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
+    ${test_envs_var_secret}=    Create Dictionary    FAKE_ID=hello-id
+    ...    FAKE_VALUE=hello-value
+    ${test_envs_var_cm}=    Create Dictionary    MY_VAR1=myvalue1
+    ...    MY_VAR2=myvalue2
+    ${test_envs_list}=    Create List   ${test_envs_var_secret}     ${test_envs_var_cm}
     Check Environment Variables Exist    exp_env_variables=${envs_list}
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
@@ -448,26 +477,6 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     ...    exp_result_text=FailedScheduling
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
-
-Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
-    [Tags]    Tier1    Sanity
-    ...       ODS-XYZ
-    [Documentation]    Verify UI informs users about workbenches failed to start.
-    ...                At the moment the test is considering only the scenario where
-    ...                the workbench fails for Insufficient resources.
-    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
-    ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
-    ...                 pv_description=${NONE}  pv_size=${NONE}
-    ...                 press_cancel=${FALSE}    envs=${envs_list}
-    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
-    Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
-    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
-    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Check Environment Variables Exist    exp_env_variables=${envs_list}
 
 Verify User Can Delete A Data Science Project
     [Tags]    Sanity    Tier1    ODS-1784
@@ -599,14 +608,12 @@ Check Environment Variables Exist
     # Add and Run JupyterLab Code Cell in Active Notebook    import os
     FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}
         Remove From Dictionary    ${env_variable_dict}     k8s_type    input_type
-        # IF    "${input_type}" == "${KEYVALUE_TYPE}"
         ${n_pairs}=    Get Length    ${env_variable_dict.keys()}
         FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable_dict}
             Log   ${pair_idx}-${key}-${value}
             Run Keyword And Continue On Failure     Run Cell And Check Output    import os;print(os.environ["${key}"])    ${value}
             Capture Page Screenshot
         END
-        # END
     END
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells

@@ -779,7 +779,7 @@ Open Application Switcher Menu
 Maybe Wait For Dashboard Loading Spinner Page
     [Documentation]     Detecs the loading symbol (spinner) and wait for it to disappear.
     ...                 If the spinner does not appear, the keyword ignores the error.
-    [Arguments]    ${timeout}=5s
+    [Arguments]    ${timeout-pre}=3s    ${timeout}=5s
 
     ${do not wait for spinner}=    Get Variable Value    ${ODH_DASHBOARD_DO_NOT_WAIT_FOR_SPINNER_PAGE}  # defaults to None if undefined
     IF   ${do not wait for spinner} == ${true}
@@ -787,6 +787,6 @@ Maybe Wait For Dashboard Loading Spinner Page
     END
 
     Run Keyword And Ignore Error    Run Keywords
-    ...    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=3s
+    ...    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout-pre}
     ...    AND
     ...    Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}

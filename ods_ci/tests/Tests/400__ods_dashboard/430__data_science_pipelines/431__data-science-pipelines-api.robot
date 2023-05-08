@@ -15,7 +15,7 @@ Suite Teardown      RHOSi Teardown
 ${REDHAT_OPENSHIFT_PIPELINES_YAML}=            ods_ci/tests/Resources/Files/redhat-openshift-pipelines.yaml
 ${DATA_SCIENCE_PIPELINES_APPLICATION_YAML}=    ods_ci/tests/Resources/Files/data-science-pipelines-sample.yaml
 ${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/opendatahub-io/data-science-pipelines-operator/main/tests/resources/dsp-operator/test-pipeline-run.yaml
-&{OPENSHIFT_PIPELINES_VERSION}=                4.10=pipelines-1.8   4.11=pipelines-1.9  4.12=pipelines-1.10   4.13=pipelines-1.10
+&{OPENSHIFT_PIPELINES_VERSION}=                4.10=pipelines-1.8   4.11=pipelines-1.9  4.12=pipelines-1.10   4.13=pipelines-1.10  #robocop:disable
 
 *** Test Cases ***
 Verify ODS users can create and run a data science pipeline using the API
@@ -60,7 +60,7 @@ Install Red Hat OpenShfit Pipelines
     [Documentation]    Install Red Hat OpenShfit Pipelines
     ${oc_vesrion}    Get OpenShift Version
     ${pipeline}   Get From Dictionary     ${OPENSHIFT_PIPELINES_VERSION}    ${oc_vesrion}
-    ${return_code}    ${output}    Run And Return Rc And Output    sed -i "s,channel: .*,channel: ${pipeline},g" ${EXECDIR}/${REDHAT_OPENSHIFT_PIPELINES_YAML}
+    ${return_code}    ${output}    Run And Return Rc And Output    sed -i "s,channel: .*,channel: ${pipeline},g" ${EXECDIR}/${REDHAT_OPENSHIFT_PIPELINES_YAML}    #robocop:disable
     Should Be Equal As Integers	 ${return_code}	 0
     Oc Apply    kind=Subscription    src=${REDHAT_OPENSHIFT_PIPELINES_YAML}     namespace=openshift-operators
     ${pod_count}    Get Redhat Openshift Pipelines

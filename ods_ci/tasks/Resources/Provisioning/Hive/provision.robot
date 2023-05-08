@@ -67,11 +67,16 @@ Select Provisioner Template
     RETURN    ${template}
         
 Create Openstack Resources
+    Log    Creating OSP resources in Cloud '${infrastructure_configurations}[osp_cloud_name]'    console=True
+    ${result} 	 	Run Process 	echo '${infrastructure_configurations}[osp_cloud_name]' | base64 -w0    shell=yes
+    Should Be True    ${result.rc} == 0
+    Set Task Variable    ${OSP_CLOUD}    ${result.stdout}
     ${FIP_API}    Evaluate    ${infrastructure_configurations}.get('fip_api')
     ${FIP_APPS}    Evaluate    ${infrastructure_configurations}.get('fip_apps')
     Run Keyword If    "${FIP_API}" == "" or "${FIP_APPS}" == ""    Create Floating IPs
+    ...    ELSE    Log    Reusing existing Floating IPs    console=True
     Set Task Variable    ${FIP_API}
-    Set Task Variable    ${FIP_APPS}
+    Set Task Variable    ${FIP_APPS}    
     Log    FIP_API = ${FIP_API}    console=True
     Log    FIP_APPS = ${FIP_APPS}    console=True
     ${hive_yaml} =    Set Variable    ${artifacts_dir}/${cluster_name}_hive.yaml
@@ -80,6 +85,7 @@ Create Openstack Resources
     Oc Apply    kind=List    src=${hive_yaml}    api_version=v1
 
 Create Floating IPs
+    Log    Creating Openstack Floating IPs and AWS DNS Records    console=True
     ${osp_clouds_yaml} =    Set Variable    ~/.config/openstack/clouds.yaml
     ${result} 	Run Process 	echo '${infrastructure_configurations}[osp_yaml_encoded]' | base64 --decode    shell=yes
     Should Be True    ${result.rc} == 0

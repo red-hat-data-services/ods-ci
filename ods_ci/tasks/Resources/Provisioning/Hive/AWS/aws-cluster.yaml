@@ -49,7 +49,7 @@ items:
           hostPrefix: 23
         machineNetwork:
         - cidr: 10.0.0.0/16
-        networkType: OpenShiftSDN
+        networkType: {{ ocp_network_type|default("OVNKubernetes") }}
         serviceNetwork:
         - 172.30.0.0/16
       platform:

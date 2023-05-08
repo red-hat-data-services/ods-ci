@@ -2,11 +2,6 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: my-env-var-cm
-  labels:
-    opendatahub.io/dashboard: 'true'
-    opendatahub.io/managed: 'true'
-  annotations:
-    openshift.io/display-name: 'My Env Variables CM'
 data:
   MY_VAR1: 'myvalue1'
   MY_VAR2: 'myvalue2'

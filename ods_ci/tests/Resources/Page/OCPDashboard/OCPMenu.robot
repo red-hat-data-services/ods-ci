@@ -57,5 +57,5 @@ Maybe Skip Tour
 Get OpenShift Version
     [Documentation]   Get the installed openshitf version on the cluster.
     ${data}=   Oc Get    kind=ClusterVersion
-    ${version}=   Split String From Right    ${data[0]['spec']['desiredUpdate']['version']}      .    1
+    ${version}=   Split String From Right    ${data[0]['status']['desired']['version']}      .    1
     RETURN     ${version[0]}

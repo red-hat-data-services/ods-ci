@@ -787,6 +787,6 @@ Maybe Wait For Dashboard Loading Spinner Page
     END
 
     Run Keyword And Ignore Error    Run Keywords
-    ...    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
+    ...    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=3s
     ...    AND
     ...    Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}

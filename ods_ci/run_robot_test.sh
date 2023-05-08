@@ -191,22 +191,22 @@ case "$(uname -s)" in
          echo "$PATH"
          ;;
     Linux)
-       case "$(lsb_release --id --short)" in
-       "Fedora"|"CentOS")
+       case "$(distro -j | jq '.id')" in
+       "fedora"|"centos")
              ## Bootstrap script to setup drivers ##
              echo "setting driver  to $currentpath/Drivers/fedora"
              PATH=$PATH:$currentpath/drivers/fedora
              export PATH=$PATH
              echo "$PATH"
         ;;
-        "Ubuntu")
+        "ubuntu")
              echo "Ubuntu"
              echo "setting driver  to $currentpath/drivers/ubuntu"
              PATH=$PATH:$currentpath/drivers/ubuntu
              export PATH=$PATH
              echo "$PATH"
         ;;
-        "openSUSE project"|"SUSE LINUX"|"openSUSE")
+        "opensuse project"|"suse linux"|"opensuse")
              echo "Not yet supported, but shouldn't be hard for you to fix :) "
              echo "Please add the driver, test and submit PR"
              exit 1

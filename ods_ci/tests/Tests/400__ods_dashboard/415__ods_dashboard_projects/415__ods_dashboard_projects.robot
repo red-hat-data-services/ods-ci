@@ -402,7 +402,7 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ${test_envs_var_cm}=    Create Dictionary    MY_VAR1=myvalue1
     ...    MY_VAR2=myvalue2
     ${test_envs_list}=    Create List   ${test_envs_var_secret}     ${test_envs_var_cm}
-    Check Environment Variables Exist    exp_env_variables=${envs_list}
+    Check Environment Variables Exist    exp_env_variables=${test_envs_list}
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
     [Tags]    Sanity    Tier1    ODS-1971    AutomationBug
@@ -618,6 +618,10 @@ Check Environment Variables Exist
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells
 
+Check Environment Variable Is Stored And Displayed As
+    [Documentation]    Checks if an enviornment variables is stored and displayed according
+    ...                to its type (i.e., Secret vs ConfigMap)
+    Log    ciao
 Create Multiple Data Science Projects
     [Documentation]    Create a given number of data science projects based on title and description
     [Arguments]    ${title}     ${description}    ${number}

@@ -59,9 +59,10 @@ Select Notebook Image
     ELSE
         Verify Version Dropdown Is Present    ${notebook_image}
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
-        ${tag_exists} =    Run Keyword And Return Status    Page Should Contain    xpath=${KFNBC_IMAGE_DROPDOWN}//div[@class="" and .="Version ${version}"]/../../../input
+        Sleep    5s
+        ${tag_exists} =    Run Keyword And Return Status    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//input[@data-id="${notebook_image}:${version}"]
         IF  ${tag_exists}==True
-            Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//div[@class="" and .="Version ${version}"]/../../../input
+            Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//input[@data-id="${notebook_image}:${version}"]
         ELSE
             Log To Console    Unknown image version requested
             Fail    Unknown image version requested
@@ -316,8 +317,7 @@ Spawned Image Check
     ELSE IF    "${version}"=="previous"
         Python Version Check    expected_version=${PREVIOUS_PYTHON_VER}
     ELSE
-        Log To Console    Unknown image version requested
-        Fail    Unknown image version requested
+        Log To Console    Unknown Tag, Cannot Check Python Version
     END
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells

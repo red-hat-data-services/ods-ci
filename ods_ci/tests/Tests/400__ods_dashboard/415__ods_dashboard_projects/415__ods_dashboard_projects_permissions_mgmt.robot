@@ -1,6 +1,8 @@
 *** Settings ***
 Documentation      Suite to test additional scenarios for Data Science Projects (a.k.a DSG) feature
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
+# Suite Setup        Set Library Search Order    SeleniumLibrary
 Suite Setup        Project Permissions Mgmt Suite Setup
 Suite Teardown     Project Permissions Mgmt Suite Teardown
 Test Teardown      Close All Browsers
@@ -16,7 +18,6 @@ ${PV_NAME}=         ods-ci-project-sharing
 ${PV_DESCRIPTION}=         it is a PV created to test DS Projects Sharing feature
 ${PV_SIZE}=         1
 
-
 *** Test Cases ***
 Verify User Can Access Permission Tab In Their Owned DS Project
     [Tags]    Tier1    Smoke
@@ -24,7 +25,13 @@ Verify User Can Access Permission Tab In Their Owned DS Project
     Pass Execution    The Test is executed as part of Suite Setup
 
 Verify User Make Their Owned DS Project Accessible To Other Users
-    # TO DO
+    [Tags]    Tier1    Smoke
+    ...       ODS-XYZ
+    Switch To User    ${TEST_USER_3.USERNAME}
+    Move To Tab    Permissions
+    Assign Edit Permission To ${TEST_USER_4.USERNAME}
+
+    
 
 Verify User Can Revoke Access To DS Projects From Other Users
     # TO DO
@@ -44,6 +51,7 @@ Project Permissions Mgmt Suite Setup
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
+    ...    browser_alias=${TEST_USER_3.USERNAME}-session
     Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_3.USERNAME}
     ...    description=${PRJ_DESCRIPTION}
     Permissions Tab Should Be Accessible
@@ -51,6 +59,7 @@ Project Permissions Mgmt Suite Setup
     Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
     ...    password=${TEST_USER_4.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}
+    ...    browser_alias=${TEST_USER_4.USERNAME}-session
     Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_4.USERNAME}
     ...    description=${PRJ_DESCRIPTION}
     Permissions Tab Should Be Accessible
@@ -62,3 +71,7 @@ Project Permissions Mgmt Suite Teardown
     Close All Browsers
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
+
+Switch To User
+    [Arguments]    ${username}
+    Switch Browser    ${username}-sessions

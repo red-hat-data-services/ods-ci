@@ -2,6 +2,7 @@
 Resource  ../../Common.robot
 Library  JupyterLibrary
 Library  String
+Library  OpenShiftLibrary
 
 *** Variables ***
 ${APP_LAUNCHER_ELEMENT}                 xpath=//*[@aria-label='Application launcher']/button
@@ -52,3 +53,9 @@ Maybe Skip Tour
     END
     ${tour_modal} =  Run Keyword And Return Status  Wait Until Page Contains Element  xpath=//div[@id='guided-tour-modal']  timeout=5s
     IF  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button
+
+Get OpenShift Version
+    [Documentation]   Get the installed openshitf version on the cluster.
+    ${data}=   Oc Get    kind=ClusterVersion
+    ${version}=   Split String From Right    ${data[0]['status']['desired']['version']}      .    1
+    RETURN     ${version[0]}

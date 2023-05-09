@@ -45,22 +45,6 @@ Open Data Science Project Details Page
     Wait Until Project Is Open    project_title=${project_title}
     Maybe Wait For Dashboard Loading Spinner Page
 
-Permissions Tab Should Be Accessible
-    Run Keyword And Continue On Failure
-    ...    Page Should Contain Element
-    ...    xpath://span[text()="Permissions"]
-    Move To Tab    tab_title=Permissions
-
-Components Tab Should Be Accessible
-    Run Keyword And Continue On Failure
-    ...    Page Should Contain Element
-    ...    xpath://span[text()="Components"]
-    Move To Tab    tab_title=Components
-
-Move To Tab
-    [Arguments]    ${tab_title}
-    Click Element    xpath://span[text()="${tab_title}"]
-
 Delete Data Science Project
     [Documentation]    Deletes a given DS project. It allows cancelling the operation
     ...                by setting the ${press_cancel} argument
@@ -276,9 +260,10 @@ Go To Next Page Of Data Science Projects
 Launch Data Science Project Main Page
     [Documentation]    Launch DS Projects page in RHODS Dashboard using a given user
     [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}
-    ...             ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}
+    ...             ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}    ${browser_alias}=${NONE}
     Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${ocp_user_auth_type}
     ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ...                 browser_alias=${browser_alias}
     Open Data Science Projects Home Page
 
 Remove Current Page Projects From All Projects
@@ -299,3 +284,28 @@ Check Pagination Is Correct On The Current Page
         ${expected_text}=    Set Variable   11 - ${total} of ${total}
     END
     Should Be Equal    ${expected_text}    ${actual_text}
+
+Permissions Tab Should Be Accessible
+    Run Keyword And Continue On Failure
+    ...    Page Should Contain Element
+    ...    xpath://span[text()="Permissions"]
+    Move To Tab    tab_title=Permissions
+
+Wait Until Permissions Tab Is Open
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Contains Element    id:user-permission-User
+
+# Wait Until Components Tab Is Open
+#     Run Keyword And Continue On Failure
+#     ...    Wait Until Page Contains Element    id:workbenches-title
+
+Components Tab Should Be Accessible
+    Run Keyword And Continue On Failure
+    ...    Page Should Contain Element
+    ...    xpath://span[text()="Components"]
+    Move To Tab    tab_title=Components
+
+Move To Tab
+    [Arguments]    ${tab_title}
+    Click Element    xpath://span[text()="${tab_title}"]
+    Wait Until Permissions Tab Is Open

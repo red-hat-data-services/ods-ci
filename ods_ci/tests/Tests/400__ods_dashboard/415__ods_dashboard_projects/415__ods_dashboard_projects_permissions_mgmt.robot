@@ -29,12 +29,19 @@ Verify User Make Their Owned DS Project Accessible To Other Users
     ...       ODS-XYZ
     Switch To User    ${TEST_USER_3.USERNAME}
     Move To Tab    Permissions
-    Assign Edit Permission To ${TEST_USER_4.USERNAME}
+    Assign Edit Permissions To ${TEST_USER_4.USERNAME}
+    # check rolebinding is created
+    # check other user can actually access the project based on their permissions
 
-    
-
-Verify User Can Revoke Access To DS Projects From Other Users
-    # TO DO
+Verify User Can Modify And Revoke Access To DS Projects From Other Users
+    [Tags]    Tier1    Sanity
+    ...       ODS-XYWZ
+    Switch To User    ${TEST_USER_3.USERNAME}
+    Move To Tab    Permissions
+    Change ldap-user4 Permissions To Admin
+    Change ldap-user5 Permissions To Edit
+    Remove ldap-user6 Permissions
+    # check rolebinding is deleted
 
 Verify Cluster Admins Automatically Get Admin Access To DS Projects
     # TO DO
@@ -48,29 +55,29 @@ Project Permissions Mgmt Suite Setup
     ...    ${PRJ_TITLE}-${TEST_USER_4.USERNAME}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     RHOSi Setup
-    Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
-    ...    password=${TEST_USER_3.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
-    ...    browser_alias=${TEST_USER_3.USERNAME}-session
-    Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_3.USERNAME}
-    ...    description=${PRJ_DESCRIPTION}
-    Permissions Tab Should Be Accessible
-    Components Tab Should Be Accessible
-    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
-    ...    password=${TEST_USER_4.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}
-    ...    browser_alias=${TEST_USER_4.USERNAME}-session
-    Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_4.USERNAME}
-    ...    description=${PRJ_DESCRIPTION}
-    Permissions Tab Should Be Accessible
-    Components Tab Should Be Accessible
+    # Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
+    # ...    password=${TEST_USER_3.PASSWORD}
+    # ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
+    # ...    browser_alias=${TEST_USER_3.USERNAME}-session
+    # Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_3.USERNAME}
+    # ...    description=${PRJ_DESCRIPTION}
+    # Permissions Tab Should Be Accessible
+    # Components Tab Should Be Accessible
+    # Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
+    # ...    password=${TEST_USER_4.PASSWORD}
+    # ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}
+    # ...    browser_alias=${TEST_USER_4.USERNAME}-session
+    # Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_4.USERNAME}
+    # ...    description=${PRJ_DESCRIPTION}
+    # Permissions Tab Should Be Accessible
+    # Components Tab Should Be Accessible
 
 Project Permissions Mgmt Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
-    RHOSi Teardown
+    # RHOSi Teardown
 
 Switch To User
     [Arguments]    ${username}

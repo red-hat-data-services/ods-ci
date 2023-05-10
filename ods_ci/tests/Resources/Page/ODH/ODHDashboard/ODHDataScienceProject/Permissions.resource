@@ -2,20 +2,38 @@
 Documentation    Collection of keywords to interact with Storages
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
-Resource       Projects.resource
-Library    RPA.Desktop
 
 *** Variables ***
-
+${SAVE_BUTTON}=    xpath://button[@data-id="save-rolebinding-button"]
+${PERMISSIONS_DROPDOWN}=    xpath://td[@data-label="Permission"]//button[@aria-label="Options menu"] 
 
 *** Keywords ***
-Assign ${permission_type} Permission To ${username}
+Assign ${permission_type} Permissions To ${username}
     Log     ${username} - ${permission_type}
-    Click Element    css:button span[text="Add user"]
-    Input Text    aria-label:project-sharing-name-input    ${username}
+    Click Element    xpath://button[text()="Add user"]
+    Element Should Be Disabled    ${SAVE_BUTTON}
+    Input Text    css:input[aria-label="project-sharing-name-input"]    ${username}
     Select Permission Type    permission_type=${permission_type}
+
+Change ${username} Permissions To ${permission_type}
+    Permissions.Click Action From Actions Menu    username=${username}
+    ...    action=Edit
+    Select Permission Type    permission_type=${permission_type}
+
+Remove ${username} Permissions
+    Permissions.Click Action From Actions Menu    username=${username}
+    ...    action=Delete
 
 Select Permission Type
     [Arguments]    ${permission_type}
-    Click Element    css:td[data-label="Permission"] button[aria-label="Options menu"] 
-    Click Element    css:ul li[text="${permission_type}"]
+    Click Element    ${PERMISSIONS_DROPDOWN}
+    Click Element    xpath://ul/li/button/span[text()="${permission_type}"]
+    Element Should Be Enabled    ${SAVE_BUTTON}
+    Click Element    ${SAVE_BUTTON}
+    Wait Until Page Does Not Contain Element    ${SAVE_BUTTON}
+Click Action From Actions Menu
+    [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
+    [Arguments]    ${username}    ${action}
+    Click Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]/td[contains(@class,"pf-c-table__action")]/div/button[@aria-label="Actions"]
+    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]/td[contains(@class,"pf-c-table__action")]/div/ul/li/button[text()="${action}"]
+    Click Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]/td[contains(@class,"pf-c-table__action")]/div/ul/li/button[text()="${action}"]

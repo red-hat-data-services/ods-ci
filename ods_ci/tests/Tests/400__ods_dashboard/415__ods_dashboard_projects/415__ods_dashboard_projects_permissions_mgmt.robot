@@ -24,9 +24,9 @@ Verify User Can Access Permission Tab In Their Owned DS Project
     ...       ODS-2194
     Pass Execution    The Test is executed as part of Suite Setup
 
-Verify User Make Their Owned DS Project Accessible To Other Users
+Verify User Can Make Their Owned DS Project Accessible To Other Users
     [Tags]    Tier1    Smoke
-    ...       ODS-XYZ
+    ...       ODS-2201
     Switch To User    ${TEST_USER_3.USERNAME}
     Move To Tab    Permissions
     Assign Edit Permissions To ${TEST_USER_4.USERNAME}
@@ -35,7 +35,7 @@ Verify User Make Their Owned DS Project Accessible To Other Users
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users
     [Tags]    Tier1    Sanity
-    ...       ODS-XYWZ
+    ...       ODS-XYZ
     Switch To User    ${TEST_USER_3.USERNAME}
     Move To Tab    Permissions
     Change ldap-user4 Permissions To Admin

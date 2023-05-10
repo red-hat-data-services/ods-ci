@@ -42,7 +42,7 @@ Verify Pipeline Can Be Submitted And Runs Correctly
     # Set Runtime Image In Pipeline Properties <- Currently bugged
     Set Runtime Image In All Nodes    runtime_image=Datascience with Python 3.8 (UBI8)
     Run Pipeline    runtime_platform=KUBEFLOW_PIPELINES    runtime_config=test
-    Wait Until Page Contains Element    xpath=//a[.="Run Details."]
+    Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${job_id} =    Get Pipeline Job ID
     ${handle} =    Switch To Pipeline Execution Page
     Verify Successful Pipeline Run    ${job_id}

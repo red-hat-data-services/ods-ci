@@ -35,7 +35,7 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users
     [Tags]    Tier1    Sanity
-    ...       ODS-XYZ
+    ...       ODS-2202
     Switch To User    ${TEST_USER_3.USERNAME}
     Move To Tab    Permissions
     Change ldap-user4 Permissions To Admin

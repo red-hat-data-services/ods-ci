@@ -10,7 +10,8 @@ Library       JupyterLibrary
 
 
 *** Variables ***
-${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift Data Science
+# ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift Data Science
+${ODH_DASHBOARD_PROJECT_NAME}=   Open Data Hub
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
@@ -53,8 +54,9 @@ ${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
 *** Keywords ***
 Launch Dashboard
   [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}  ${dashboard_url}  ${browser}  ${browser_options}
-  ...          ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
+  ...          ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}    ${browser_alias}=${NONE}
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
+  ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
   Wait for RHODS Dashboard to Load    expected_page=${expected_page}
   ...    wait_for_cards=${wait_for_cards}

@@ -74,4 +74,4 @@ Project Permissions Mgmt Suite Teardown
 
 Switch To User
     [Arguments]    ${username}
-    Switch Browser    ${username}-sessions
+    Switch Browser    ${username}-session

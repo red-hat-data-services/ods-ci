@@ -26,7 +26,7 @@ ${SVG_SINGLE_NODE} =    /*[name()="g" and contains(@class, "d3-draggable")]
 Verify Pipeline Is Displayed Correctly
     [Documentation]    Loads an example Elyra pipeline and confirms the Web UI displays it correctly
     [Tags]    Sanity    Tier1
-    ...       ODS-XXXX
+    ...       ODS-2197
     [Setup]    Elyra Pipelines SDS Setup
     # Until https://github.com/elyra-ai/examples/pull/120 is merged
     Clone Git Repository And Open    https://github.com/lugi0/examples    examples/pipelines/run-generic-pipelines-on-kubeflow-pipelines/hello-generic-world.pipeline
@@ -37,7 +37,7 @@ Verify Pipeline Can Be Submitted And Runs Correctly
     [Documentation]    Submits an example Elyra pipeline to be run by Kubeflow and
     ...    Confirms that it runs correctly
     [Tags]    Sanity    Tier1
-    ...       ODS-XXXX
+    ...       ODS-2199
     # Assumes there's already a runtime config with correct values called `test`
     # Set Runtime Image In Pipeline Properties <- Currently bugged
     Set Runtime Image In All Nodes    runtime_image=Datascience with Python 3.8 (UBI8)

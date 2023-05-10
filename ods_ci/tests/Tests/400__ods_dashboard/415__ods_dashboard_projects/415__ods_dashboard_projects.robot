@@ -357,7 +357,6 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
-    [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB
     ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
@@ -388,6 +387,7 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ...    k8s_type=Config Map  input_type=${UPLOAD_TYPE}
     ${envs_list}=    Create List   ${envs_var_secret}     ${envs_var_cm}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_name=${WORKBENCH_4_TITLE}-PV  pv_existent=${FALSE}

@@ -291,6 +291,12 @@ Permissions Tab Should Be Accessible
     ...    xpath://span[text()="Permissions"]
     Move To Tab    tab_title=Permissions
 
+Permissions Tab Should Not Be Accessible
+    ${status}=    Run Keyword And Return Status    Permissions Tab Should Be Accessible
+    IF    ${status} == ${TRUE}
+        Fail    msg=user should not have rights to access Permissions tab on the current DS Project        
+    END
+
 Wait Until Permissions Tab Is Open
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element    id:user-permission-User

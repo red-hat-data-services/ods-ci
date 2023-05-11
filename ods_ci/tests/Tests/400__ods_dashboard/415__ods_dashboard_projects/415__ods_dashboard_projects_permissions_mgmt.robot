@@ -30,17 +30,26 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users
     Switch To User    ${TEST_USER_3.USERNAME}
     Move To Tab    Permissions
     Assign Edit Permissions To ${TEST_USER_4.USERNAME}
-    # check rolebinding is created
-    # check other user can actually access the project based on their permissions
+    Assign Admin Permissions To ${TEST_USER_2.USERNAME}
+    Switch To User    ${TEST_USER_4.USERNAME}
+    Open Data Science Project Details Page    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}
+    Permissions Tab Should Not Be Accessible
+    Switch To User    ${TEST_USER_2.USERNAME}
+    Reload Page
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
+    Maybe Wait For Dashboard Loading Spinner Page
+    Open Data Science Project Details Page    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}
+    Permissions Tab Should Be Accessible
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users
     [Tags]    Tier1    Sanity
     ...       ODS-2202
     Switch To User    ${TEST_USER_3.USERNAME}
     Move To Tab    Permissions
-    Change ldap-user4 Permissions To Admin
-    Change ldap-user5 Permissions To Edit
-    Remove ldap-user6 Permissions
+    Change ${TEST_USER_4.USERNAME} Permissions To Admin
+    Change ${TEST_USER_2.USERNAME} Permissions To Edit
+    Remove ${TEST_USER_4.USERNAME} Permissions
     # check rolebinding is deleted
 
 Verify Cluster Admins Automatically Get Admin Access To DS Projects
@@ -54,23 +63,33 @@ Project Permissions Mgmt Suite Setup
     ${to_delete}=    Create List    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}
     ...    ${PRJ_TITLE}-${TEST_USER_4.USERNAME}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
-    RHOSi Setup
-    # Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
-    # ...    password=${TEST_USER_3.PASSWORD}
-    # ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
-    # ...    browser_alias=${TEST_USER_3.USERNAME}-session
-    # Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_3.USERNAME}
-    # ...    description=${PRJ_DESCRIPTION}
-    # Permissions Tab Should Be Accessible
-    # Components Tab Should Be Accessible
-    # Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
-    # ...    password=${TEST_USER_4.PASSWORD}
-    # ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}
-    # ...    browser_alias=${TEST_USER_4.USERNAME}-session
-    # Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_4.USERNAME}
-    # ...    description=${PRJ_DESCRIPTION}
-    # Permissions Tab Should Be Accessible
-    # Components Tab Should Be Accessible
+    #RHOSi Setup
+    Remove User From Group    username=${TEST_USER_2.USERNAME}
+    ...    group_name=dedicated-admins
+    Remove User From Group    username=${TEST_USER_2.USERNAME}
+    ...    group_name=rhods-admins
+    Add User To Group    username=${TEST_USER_2.USERNAME}
+    ...    group_name=rhods-users
+    Launch Data Science Project Main Page    username=${TEST_USER_2.USERNAME}
+    ...    password=${TEST_USER_2.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER_2.AUTH_TYPE}
+    ...    browser_alias=${TEST_USER_2.USERNAME}-session
+    Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
+    ...    browser_alias=${TEST_USER_3.USERNAME}-session
+    Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_3.USERNAME}
+    ...    description=${PRJ_DESCRIPTION}
+    Permissions Tab Should Be Accessible
+    Components Tab Should Be Accessible
+    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
+    ...    password=${TEST_USER_4.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}
+    ...    browser_alias=${TEST_USER_4.USERNAME}-session
+    Create Data Science Project    title=${PRJ_TITLE}-${TEST_USER_4.USERNAME}
+    ...    description=${PRJ_DESCRIPTION}
+    Permissions Tab Should Be Accessible
+    Components Tab Should Be Accessible
 
 Project Permissions Mgmt Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
@@ -78,6 +97,12 @@ Project Permissions Mgmt Suite Teardown
     Close All Browsers
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     # RHOSi Teardown
+    Remove User From Group    username=${TEST_USER_2.USERNAME}
+    ...    group_name=rhods-users
+    Add User To Group    username=${TEST_USER_2.USERNAME}
+    ...    group_name=dedicated-admins
+    Add User To Group    username=${TEST_USER_2.USERNAME}
+    ...    group_name=rhods-admins
 
 Switch To User
     [Arguments]    ${username}

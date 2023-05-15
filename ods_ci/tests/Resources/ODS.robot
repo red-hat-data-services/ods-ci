@@ -100,9 +100,8 @@ Apply Access Groups Settings
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}
-    Oc Patch    kind=OdhDashboardConfig
-    ...                   src={"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}
-    ...                   name=odh-dashboard-config   namespace=redhat-ods-applications  type=merge
+    ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n redhat-ods-applications --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
+    Should Be Equal As Integers	${return_code}	 0    msg=Pathc failed
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map

@@ -290,7 +290,7 @@ Permissions Tab Should Not Be Accessible
     [Documentation]    Verify user cannot access the "Permissions" tab of a DS project
     ${status}=    Run Keyword And Return Status    Permissions Tab Should Be Accessible
     IF    ${status} == ${TRUE}
-        Fail    msg=user should not have rights to access Permissions tab on the current DS Project 
+        Fail    msg=user should not have rights to access Permissions tab on the current DS Project
     END
 
 Wait Until Permissions Tab Is Open

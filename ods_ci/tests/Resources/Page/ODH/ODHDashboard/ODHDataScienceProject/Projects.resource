@@ -279,32 +279,39 @@ Check Pagination Is Correct On The Current Page
     Should Be Equal    ${expected_text}    ${actual_text}
 
 Permissions Tab Should Be Accessible
+    [Documentation]    Verify user can access the "Permissions" tab of a DS project
     Run Keyword And Continue On Failure
     ...    Page Should Contain Element
     ...    xpath://span[text()="Permissions"]
     Move To Tab    tab_title=Permissions
+    Wait Until Permissions Tab Is Open
 
 Permissions Tab Should Not Be Accessible
+    [Documentation]    Verify user cannot access the "Permissions" tab of a DS project
     ${status}=    Run Keyword And Return Status    Permissions Tab Should Be Accessible
     IF    ${status} == ${TRUE}
-        Fail    msg=user should not have rights to access Permissions tab on the current DS Project        
+        Fail    msg=user should not have rights to access Permissions tab on the current DS Project   
     END
 
 Wait Until Permissions Tab Is Open
+    [Documentation]    Wait until "Permissions" tab is rendered
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element    id:user-permission-User
 
-# Wait Until Components Tab Is Open
-#     Run Keyword And Continue On Failure
-#     ...    Wait Until Page Contains Element    id:workbenches-title
+Wait Until Components Tab Is Open
+    [Documentation]    Wait until "Components" tab is rendered
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Contains Element    id:workbenches-title
 
 Components Tab Should Be Accessible
+    [Documentation]    Verify user can access the "Permissions" tab of a DS project
     Run Keyword And Continue On Failure
     ...    Page Should Contain Element
     ...    xpath://span[text()="Components"]
     Move To Tab    tab_title=Components
+    Wait Until Components Tab Is Open
 
 Move To Tab
+    [Documentation]    Open one of the tabs in a DS Project details page (e.g., Permissions)
     [Arguments]    ${tab_title}
     Click Element    xpath://span[text()="${tab_title}"]
-    Wait Until Permissions Tab Is Open

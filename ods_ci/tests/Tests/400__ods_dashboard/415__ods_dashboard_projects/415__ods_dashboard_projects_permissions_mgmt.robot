@@ -15,13 +15,16 @@ ${PV_NAME}=         ods-ci-project-sharing
 ${PV_DESCRIPTION}=         it is a PV created to test DS Projects Sharing feature
 ${PV_SIZE}=         1
 
+
 *** Test Cases ***
 Verify User Can Access Permission Tab In Their Owned DS Project
+    [Documentation]    Verify user has access to "Permissions" tab in their DS Projects
     [Tags]    Tier1    Smoke
     ...       ODS-2194
     Pass Execution    The Test is executed as part of Suite Setup
 
 Verify User Can Make Their Owned DS Project Accessible To Other Users
+    [Documentation]    Verify user can give access permissions for their DS Projects to other users
     [Tags]    Tier1    Smoke
     ...       ODS-2201
     Switch To User    ${TEST_USER_3.USERNAME}
@@ -36,6 +39,7 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users
     Permissions Tab Should Be Accessible
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users
+    [Documentation]    Verify user can modify/remove access permissions for their DS Projects to other users
     [Tags]    Tier1    Sanity
     ...       ODS-2202
     Switch To User    ${TEST_USER_3.USERNAME}
@@ -63,9 +67,13 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users
 
 
 Verify Cluster Admins Automatically Get Admin Access To DS Projects
+    [Documentation]    Verify users with cluster-admins permissions can access permissions
+    ...    settings of any DS Projects
     # TO DO
 
 Verify User Can Launch A Workbench Owned By Another User
+    [Documentation]    Verify users who got permissions to DS Projects owned by other users
+    ...    can launch workbenches in those projects
     # TO DO
 
 *** Keywords ***
@@ -117,5 +125,7 @@ Project Permissions Mgmt Suite Teardown
     ...    group_name=rhods-admins
 
 Switch To User
+    [Documentation]    Move from one browser window to another. Every browser window
+    ...    is a user login session in RHODS Dashboard
     [Arguments]    ${username}
     Switch Browser    ${username}-session

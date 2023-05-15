@@ -19,18 +19,18 @@ Assign ${permission_type} Permissions To ${username}
     Select Permission Type    permission_type=${permission_type}
 
 Change ${username} Permissions To ${permission_type}
-    [Documentation]    Change the level of permission ${permission_type} for the given user ${username} 
+    [Documentation]    Change the level of permission ${permission_type} for the given user ${username}
     ...    in the currently open DS Project in UI
     Permissions.Click Action From Actions Menu    username=${username}
     ...    action=Edit
     Select Permission Type    permission_type=${permission_type}
 
 Remove ${username} Permissions
-    [Documentation]    Remove the the access to the given user ${username} 
+    [Documentation]    Remove the the access to the given user ${username}
     ...    from the currently open DS Project in UI
     Permissions.Click Action From Actions Menu    username=${username}
     ...    action=Delete
-    
+
 Select Permission Type
     [Documentation]    Set the dropdown for selecting the level of permission of a user
     ...    to the given value ${permission_type} in the currently open DS Project in UI
@@ -50,7 +50,7 @@ Click Action From Actions Menu
 
 Get OpenShift RoleBinding
     [Documentation]    Fetch the RoleBinding object defining the level of permission of a
-    ...    given subject ${subject_name} (i.e., user or group) to the given namespace ${namespace} 
+    ...    given subject ${subject_name} (i.e., user or group) to the given namespace ${namespace}
     [Arguments]    ${namespace}    ${subject_name}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc get rolebinding -n ${namespace} -o jsonpath='{.items[?(@.subjects[0].name=="${subject_name}")]}'

@@ -38,7 +38,7 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users
     Open Data Science Project Details Page    ${PRJ_A_TITLE}
     Permissions Tab Should Be Accessible
 
-Verify User Can Modify And Revoke Access To DS Projects From Other Users
+Verify User Can Modify And Revoke Access To DS Projects From Other Users    # robocop: disable
     [Documentation]    Verify user can modify/remove access permissions for their DS Projects to other users
     [Tags]    Tier1    Sanity
     ...       ODS-2202
@@ -66,19 +66,9 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users
     ...    subject_name=${TEST_USER_4.USERNAME}
 
 
-Verify Cluster Admins Automatically Get Admin Access To DS Projects
-    [Documentation]    Verify users with cluster-admins permissions can access permissions
-    ...    settings of any DS Projects
-    # TO DO
-
-Verify User Can Launch A Workbench Owned By Another User
-    [Documentation]    Verify users who got permissions to DS Projects owned by other users
-    ...    can launch workbenches in those projects
-    # TO DO
-
 *** Keywords ***
-Project Permissions Mgmt Suite Setup
-    [Documentation]    Suite setup steps for testing DS Projects. 
+Project Permissions Mgmt Suite Setup    # robocop: disable
+    [Documentation]    Suite setup steps for testing DS Projects.
     ...                It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_A_TITLE}
@@ -91,9 +81,10 @@ Project Permissions Mgmt Suite Setup
     ...    group_name=rhods-admins
     Add User To Group    username=${TEST_USER_2.USERNAME}
     ...    group_name=rhods-users
-    Launch Dashboard    ocp_user_name=${TEST_USER_2.USERNAME}  ocp_user_pw=${TEST_USER_2.PASSWORD}  ocp_user_auth_type=${TEST_USER_2.AUTH_TYPE}
-    ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    ...                 browser_alias=${TEST_USER_2.USERNAME}-session
+    Launch Dashboard    ocp_user_name=${TEST_USER_2.USERNAME}  ocp_user_pw=${TEST_USER_2.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER_2.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    ...    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ...    browser_alias=${TEST_USER_2.USERNAME}-session
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}

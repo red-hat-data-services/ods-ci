@@ -1,6 +1,5 @@
 *** Settings ***
 Documentation    Collection of keywords to interact with Data Science Projects
-Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
 Resource       ./Workbenches.resource
 
@@ -112,13 +111,7 @@ Validate Generated Resource Name
 Get Openshift Namespace From Data Science Project
     [Documentation]    Gets the resource name of a DS Project starting from the Displayed Name
     [Arguments]     ${project_title}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==True
-        ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name'    # robocop: disable
-    ELSE
-        ${dp_with_suffix}=    Set Variable    ${project_title}\[DSP]
-        ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${dp_with_suffix}")) | .metadata.name'    # robocop: disable
-    END
+    ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name'    # robocop: disable
     ${k8s_name}=    Replace String    ${k8s_name}    "    ${EMPTY}
     [Return]    ${k8s_name}
 

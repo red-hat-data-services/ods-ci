@@ -16,15 +16,7 @@ class DataSciencePipelinesAPI:
         self.sa_token = None
 
     @keyword
-    def create_operator(self, file):
-        print(os.path.abspath(__file__))
-        current_path = __file__.index('/libs/')
-        current_path = __file__[:current_path]
-        response, error = self.run_oc(f"oc apply -f {current_path}/{file}")
-        print(f'create_operator({error}): {response}')
-
-    @keyword
-    def get_redhat_openshift_pipelines(self):
+    def wait_until_openshift_pipelines_operator_is_deployed(self):
         """
         when creating at the first time, it can take like 1 minute to have the pods ready
         """
@@ -94,11 +86,6 @@ class DataSciencePipelinesAPI:
                 break
             time.sleep(1)
             count += 1
-        self.run_oc(f"oc new-project {project}")
-
-    @keyword
-    def create_pipeline_project(self, project):
-        self.run_oc(f"oc new-project {project}")
 
     @keyword
     def create_pipeline(self, url_test_pipeline_run_yaml):

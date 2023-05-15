@@ -29,6 +29,7 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="wo
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
+${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
@@ -111,6 +112,9 @@ Add Environment Variables In Workbench
                     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
                 END
             END
+        ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"
+            ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
+            Choose File    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//div[@class="pf-c-file-upload"]//input[@type="file"]    ${pwd}/${env_variable}[filepath]
         END
         IF    ${n_objects}-${idx} > 0
             Click Button    Add more variables

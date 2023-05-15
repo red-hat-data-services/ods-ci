@@ -121,7 +121,7 @@ Apply Fake Starburst License
     ${new_secret}=    Copy Dictionary    ${ORIGINAL_SECRET}    deepcopy=${TRUE}
     Remove From Dictionary    ${new_secret}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
     Set To Dictionary    ${new_secret}[data]    starburstdata.license=ZmFrZSBsaWNlbnNlIQo=
-    Oc Apply    kind=Secret    src=${new_secret}
+    ${rc}    ${out}=    Run And Return Rc And Output    echo ${new_secret} | oc apply -f -
 
 Restart Coordinator And Workers Pods
     Oc Delete    kind=Pod   namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  label_selector=role=worker 
@@ -138,7 +138,7 @@ Starburst Deployment Should Not Be Successful
 Restore Starburst Original License And Verify Deployment
     ${new_secret}=    Copy Dictionary    ${ORIGINAL_SECRET}    deepcopy=${TRUE}
     Remove From Dictionary    ${new_secret}[metadata]  managedFields  resourceVersion  uid  creationTimestamp  annotations
-    Oc Apply        kind=Secret    src=${new_secret}
+    ${rc}    ${out}=    Run And Return Rc And Output    echo ${new_secret} | oc apply -f -
     Restart Coordinator And Workers Pods
     ${status}=    Run Keyword And Return Status    Wait Until Managed Starburst Installation Is Completed
     ...    cr_chk_retries=1    cr_chk_retries_interval=10s

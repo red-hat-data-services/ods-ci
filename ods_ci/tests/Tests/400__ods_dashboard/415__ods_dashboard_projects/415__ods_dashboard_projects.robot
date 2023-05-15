@@ -43,7 +43,8 @@ ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
 ${DC_S3_TYPE}=    Object storage
 @{IMAGE_LIST}    Minimal Python    CUDA   PyTorch    Standard Data Science    TensorFlow
-
+${ENV_SECRET_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_secret.yaml
+${ENV_CM_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_cm.yaml
 
 *** Test Cases ***
 Verify Data Science Projects Page Is Accessible
@@ -356,7 +357,6 @@ Verify User Can Delete A Data Connection
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
-    # [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB
     ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
@@ -373,7 +373,38 @@ Verify User Can Create A Workbench With Environment Variables
     Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Check Environment Variables Exist    exp_env_variables=${envs_list}
+    Environment Variables Should Be Available In Jupyter    exp_env_variables=${envs_list}
+
+Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
+    [Tags]    Tier1    Sanity
+    ...       ODS-1883
+    [Documentation]    Verify user can set environment varibles in their workbenches by
+    ...                uploading a yaml Secret or Config Map file.
+    ...                ProductBug: RHODS-8249
+    ${envs_var_secret}=    Create Dictionary    filepath=${ENV_SECRET_FILEPATH}
+    ...    k8s_type=Secret  input_type=${UPLOAD_TYPE}
+    ${envs_var_cm}=    Create Dictionary    filepath=${ENV_CM_FILEPATH}
+    ...    k8s_type=Config Map  input_type=${UPLOAD_TYPE}
+    ${envs_list}=    Create List   ${envs_var_secret}     ${envs_var_cm}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_name=${WORKBENCH_4_TITLE}-PV  pv_existent=${FALSE}
+    ...                 pv_description=${NONE}  pv_size=${2}
+    ...                 press_cancel=${FALSE}    envs=${envs_list}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
+    ${test_envs_var_secret}=    Create Dictionary    FAKE_ID=hello-id
+    ...    FAKE_VALUE=hello-value    input_type=Secret
+    ${test_envs_var_cm}=    Create Dictionary    MY_VAR1=myvalue1
+    ...    MY_VAR2=myvalue2    input_type=Config Map
+    ${test_envs_list}=    Create List   ${test_envs_var_secret}     ${test_envs_var_cm}
+    Environment Variables Should Be Displayed According To Their Type
+    ...    workbench_title=${WORKBENCH_4_TITLE}    exp_env_variables=${test_envs_list}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
+    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
+    Environment Variables Should Be Available In Jupyter    exp_env_variables=${test_envs_list}
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
     [Tags]    Sanity    Tier1    ODS-1971    AutomationBug
@@ -568,7 +599,7 @@ Project Should Not Exist In Openshift
         Fail   msg=The project ${project_title} exists!
     END
 
-Check Environment Variables Exist
+Environment Variables Should Be Available In Jupyter
     [Documentation]    Runs code in JupyterLab to check if the expected environment variables are available
     [Arguments]    ${exp_env_variables}
     Open With JupyterLab Menu  File  New  Notebook
@@ -579,17 +610,57 @@ Check Environment Variables Exist
     # Add and Run JupyterLab Code Cell in Active Notebook    import os
     FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}
         Remove From Dictionary    ${env_variable_dict}     k8s_type    input_type
-        # IF    "${input_type}" == "${KEYVALUE_TYPE}"
         ${n_pairs}=    Get Length    ${env_variable_dict.keys()}
         FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable_dict}
             Log   ${pair_idx}-${key}-${value}
             Run Keyword And Continue On Failure     Run Cell And Check Output    import os;print(os.environ["${key}"])    ${value}
             Capture Page Screenshot
         END
-        # END
     END
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells
+
+Environment Variables Should Be Displayed According To Their Type
+    [Documentation]    Checks if the enviornment variables are displayed according
+    ...                to their types (i.e., Secret vs ConfigMap) after their creation.
+    ...                It goes to "Edit workbench" page and compare the environment variables
+    ...                settings with the ones which were inserted during workbench creation.
+    [Arguments]    ${workbench_title}    ${exp_env_variables}
+    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Click Element    xpath://a[@href="#environment-variables"]
+    Sleep   2s
+    FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}    start=1
+        ${n_pairs}=    Get Length    ${env_variable_dict.keys()}
+        ${input_type}=    Set Variable    ${env_variable_dict}[input_type]
+        Remove From Dictionary    ${env_variable_dict}     input_type
+        Environment Variable Type Should Be    expected_type=${input_type}    var_idx=${idx}
+        FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable_dict}
+            Log   ${pair_idx}-${key}-${value}
+            Environment Variable Key/Value Fields Should Be Correctly Displayed    var_idx=${idx}    var_pair_idx=${pair_idx}
+            ...    expected_key=${key}    expected_value=${value}    type=${input_type}
+        END
+    END
+    Click Button    ${GENERIC_CANCEL_BTN_XP}
+    Capture Page Screenshot
+
+Environment Variable Type Should Be
+    [Arguments]    ${expected_type}    ${var_idx}
+    ${displayed_type}=    Get Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//div[contains(@class,"pf-c-select")]/button//span[contains(@class,'toggle-text')]
+    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_type}    ${expected_type}
+
+Environment Variable Key/Value Fields Should Be Correctly Displayed
+    [Arguments]    ${var_idx}    ${var_pair_idx}    ${expected_key}    ${expected_value}    ${type}
+    ${displayed_value_xp}=    Set Variable    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//input[@aria-label="value of item ${var_pair_idx}"]
+    ${displayed_key_xp}=    Set Variable    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//input[@aria-label="key of item ${var_pair_idx}"]
+    ${displayed_key}=    Get Value    ${displayed_key_xp}
+    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_key}    ${expected_key}
+    ${displayed_val}=    Get Value    ${displayed_value_xp}
+    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_val}    ${expected_value}
+    IF    "${type}" == "Secret"
+        Run Keyword And Continue On Failure    Element Attribute Value Should Be    ${displayed_value_xp}    type    password
+    ELSE
+        Run Keyword And Continue On Failure    Element Attribute Value Should Be    ${displayed_value_xp}    type    text
+    END
 
 Create Multiple Data Science Projects
     [Documentation]    Create a given number of data science projects based on title and description

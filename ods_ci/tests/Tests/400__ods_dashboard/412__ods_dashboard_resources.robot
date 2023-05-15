@@ -79,7 +79,7 @@ Verify Resource Link HTTP Status Code
     [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
     ...                redirects users to working URLs (i.e., http status must be 200)
     [Tags]    Sanity
-    ...       ODS-531    ODS-507    ProductBug
+    ...       ODS-531    ODS-507
     Click Link    Resources
     Sleep    5
     ${link_elements}=     Get Link Web Elements From Resource Page

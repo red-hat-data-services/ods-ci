@@ -43,7 +43,6 @@ Open Data Science Project Details Page
     END
     Click Link    ${project_title}
     Wait Until Project Is Open    project_title=${project_title}
-    Maybe Wait For Dashboard Loading Spinner Page
 
 Delete Data Science Project
     [Documentation]    Deletes a given DS project. It allows cancelling the operation

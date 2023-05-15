@@ -134,7 +134,7 @@ Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
     ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
     ...    ${USAGE_DATA_COLLECTION_XP}
-    Set Test Variable    ${is_data_collection_enabled}
+    Set Test Variable    ${is_data_collection_enabled}    #robocop:disable
     IF    ${is_data_collection_enabled}==False
         Select Checkbox    ${USAGE_DATA_COLLECTION_XP}
         Save Changes In Cluster Settings
@@ -144,7 +144,7 @@ Disable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
     ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
     ...    ${USAGE_DATA_COLLECTION_XP}
-    Set Test Variable    ${is_data_collection_enabled}
+    Set Test Variable    ${is_data_collection_enabled}    #robocop:disable
     IF    ${is_data_collection_enabled}==True
         Unselect Checkbox    ${USAGE_DATA_COLLECTION_XP}
         Save Changes In Cluster Settings

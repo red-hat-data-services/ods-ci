@@ -2,10 +2,8 @@
 Documentation      Suite to test additional scenarios for Data Science Projects (a.k.a DSG) feature
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
-# Suite Setup        Set Library Search Order    SeleniumLibrary
 Suite Setup        Project Permissions Mgmt Suite Setup
 Suite Teardown     Project Permissions Mgmt Suite Teardown
-Test Teardown      Close All Browsers
 
 
 *** Variables ***
@@ -35,10 +33,6 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users
     Open Data Science Project Details Page    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}
     Permissions Tab Should Not Be Accessible
     Switch To User    ${TEST_USER_2.USERNAME}
-    Reload Page
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
-    Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
-    Maybe Wait For Dashboard Loading Spinner Page
     Open Data Science Project Details Page    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}
     Permissions Tab Should Be Accessible
 
@@ -49,10 +43,21 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users
     Move To Tab    Permissions
     Change ${TEST_USER_4.USERNAME} Permissions To Admin
     Change ${TEST_USER_2.USERNAME} Permissions To Edit
+    Switch To User    ${TEST_USER_4.USERNAME}
+    Open Data Science Project Details Page    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}
+    Permissions Tab Should Be Accessible
+    Components Tab Should Be Accessible
+    Switch To User    ${TEST_USER_2.USERNAME}
+    Open Data Science Project Details Page    ${PRJ_TITLE}-${TEST_USER_3.USERNAME}
+    Permissions Tab Should Not Be Accessible
+    Switch To User    ${TEST_USER_3.USERNAME}
     Remove ${TEST_USER_4.USERNAME} Permissions
     # check rolebinding is deleted
 
 Verify Cluster Admins Automatically Get Admin Access To DS Projects
+    # TO DO
+
+Verify User Can Launch A Workbench Owned By Another User
     # TO DO
 
 *** Keywords ***
@@ -70,10 +75,9 @@ Project Permissions Mgmt Suite Setup
     ...    group_name=rhods-admins
     Add User To Group    username=${TEST_USER_2.USERNAME}
     ...    group_name=rhods-users
-    Launch Data Science Project Main Page    username=${TEST_USER_2.USERNAME}
-    ...    password=${TEST_USER_2.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER_2.AUTH_TYPE}
-    ...    browser_alias=${TEST_USER_2.USERNAME}-session
+    Launch Dashboard    ocp_user_name=${TEST_USER_2.USERNAME}  ocp_user_pw=${TEST_USER_2.PASSWORD}  ocp_user_auth_type=${TEST_USER_2.AUTH_TYPE}
+    ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ...                 browser_alias=${TEST_USER_2.USERNAME}-session
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}

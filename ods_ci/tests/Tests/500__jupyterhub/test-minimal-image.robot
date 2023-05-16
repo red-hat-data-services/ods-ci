@@ -44,7 +44,7 @@ Can Launch Python3 Smoke Test Notebook
     Sleep    5
     Run Cell And Check For Errors    !pip install boto3
 
-    Add and Run JupyterLab Code Cell in Active Notebook    import os
+    Add And Run JupyterLab Code Cell In Active Notebook    import os
     Run Cell And Check Output    print("Hello World!")    Hello World!
 
     Capture Page Screenshot
@@ -85,10 +85,10 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     Clone Git Repository And Open    ${RequirementsFileRepo}    ${RequirementsFilePath}
     Open New Notebook
     Close Other JupyterLab Tabs
-    Add and Run JupyterLab Code Cell In Active Notebook    !pip install -r requirements.txt --progress-bar off
+    Add And Run JupyterLab Code Cell In Active Notebook    !pip install -r requirements.txt --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
     ${version} =    Verify Installed Library Version    tensorflow    2.7
-    Add and Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
+    Add And Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
     ${updated_version} =  Run Cell And Get Output  !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'
     ${res} =      GT    ${updated_version}.0    ${version}[1].0

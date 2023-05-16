@@ -32,6 +32,7 @@ Upgrade RHODS
     ...     Upgrade
     ${return_code}    ${output}    Run And Return Rc And Output   oc patch installplan $(oc get installplans -n redhat-ods-operator | grep -v NAME | awk '{print $1}') -n redhat-ods-operator --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'   #robocop:disable
     Should Be Equal As Integers    ${return_code}     0   msg=Error while upgradeing RHODS
+    Sleep  10s      reason=wait for ten second until operator goes into init state
     ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n redhat-ods-operator -l name=rhods-operator --no-headers --output='custom-columns=STATUS:.status.phase'    #robocop:disable
     Should Contain    ${output}    Pending
     OpenShiftLibrary.Wait For Pods Status  namespace=redhat-ods-operator  timeout=300

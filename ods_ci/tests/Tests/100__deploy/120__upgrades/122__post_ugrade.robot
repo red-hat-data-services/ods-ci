@@ -93,6 +93,18 @@ Resetting Pod Toleration Via UI
     END
     [Teardown]   Dashboard Test Teardown
 
+Verify POD Status
+    [Documentation]    Verify all the pods are up and running
+    [Tags]  Upgrade
+    Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
+    Log  Verified redhat-ods-applications  console=yes
+    Wait For Pods Status  namespace=redhat-ods-operator  timeout=60
+    Log  Verified redhat-ods-operator  console=yes
+    Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=60
+    Log  Verified redhat-ods-monitoring  console=yes
+    Oc Get  kind=Namespace  field_selector=metadata.name=rhods-notebooks
+    Log  "Verified rhods-notebook"
+
 
 *** Keywords ***
 Dashboard Suite Setup

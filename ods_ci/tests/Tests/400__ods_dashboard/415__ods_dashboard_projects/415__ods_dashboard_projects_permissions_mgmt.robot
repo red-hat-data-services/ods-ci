@@ -23,7 +23,7 @@ Verify User Can Access Permission Tab In Their Owned DS Project
     ...       ODS-2194
     Pass Execution    The Test is executed as part of Suite Setup
 
-Verify User Can Make Their Owned DS Project Accessible To Other Users
+Verify User Can Make Their Owned DS Project Accessible To Other Users    # robocop: disable
     [Documentation]    Verify user can give access permissions for their DS Projects to other users
     [Tags]    Tier1    Smoke
     ...       ODS-2201

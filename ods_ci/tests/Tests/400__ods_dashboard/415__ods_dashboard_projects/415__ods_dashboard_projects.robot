@@ -607,7 +607,7 @@ Environment Variables Should Be Available In Jupyter
     Maybe Close Popup
     Maybe Select Kernel
     Sleep   3s
-    # Add and Run JupyterLab Code Cell in Active Notebook    import os
+    # Add And Run JupyterLab Code Cell In Active Notebook    import os
     FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}
         Remove From Dictionary    ${env_variable_dict}     k8s_type    input_type
         ${n_pairs}=    Get Length    ${env_variable_dict.keys()}

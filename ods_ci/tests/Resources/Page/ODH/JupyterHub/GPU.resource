@@ -18,7 +18,7 @@ Verify Pytorch Can See GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
         # TODO: use Install And Import Package In JupyterLab after #202 is merged
-        Run Cell And Check For Errors  !pip install torch==1.8 numpy==1.19
+        Run Cell And Check For Errors    !pip install torch==1.8 numpy==1.19    timeout=300s
     END
     Run Cell And Check Output
     ...    import torch; device = "cuda" if torch.cuda.is_available() else "cpu"; print(f"Using {device} device")
@@ -29,11 +29,11 @@ Verify Tensorflow Can See GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
         # This installs the latest .z stream available for 2.7 to avoid the protobuf bug
-        Run Cell And Check For Errors  !pip install tensorflow~=2.7
+        Run Cell And Check For Errors    !pip install tensorflow~=2.7    timeout=300s
     END
     # Need to wrap output in double quotes
-    ${out} =  Run Cell And Get Output  import tensorflow as tf; import os; os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'; tf.config.list_physical_devices('GPU')  # robocop: disable
-    Should Be Equal  "${out}"  "[PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]"
+    ${out} =    Run Cell And Get Output    import tensorflow as tf; import os; os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'; tf.config.list_physical_devices('GPU')  # robocop: disable
+    Should Be Equal    "${out}"    "[PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]"
 
 Find Max Number Of GPUs In One Node
     [Documentation]    Returns the maximum number of GPUs present in a single node

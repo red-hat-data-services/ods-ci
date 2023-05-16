@@ -38,13 +38,13 @@ Can Spawn Notebook
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity  ODS-906
-  Add and Run JupyterLab Code Cell in Active Notebook  import os
-  Add and Run JupyterLab Code Cell in Active Notebook  print("Hello World!")
+  Add And Run JupyterLab Code Cell In Active Notebook  import os
+  Add And Run JupyterLab Code Cell In Active Notebook  print("Hello World!")
   Capture Page Screenshot
 
   JupyterLab Code Cell Error Output Should Not Be Visible
 
-  Add and Run JupyterLab Code Cell in Active Notebook  !pip freeze
+  Add And Run JupyterLab Code Cell In Active Notebook  !pip freeze
   Wait Until JupyterLab Code Cell Is Not Active
   Capture Page Screenshot
 

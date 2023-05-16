@@ -84,8 +84,10 @@ Run Git Repo And Return Last Cell Error Text
 
 Wait Until JupyterLab Code Cell Is Not Active
   [Documentation]  Waits until the current cell no longer has an active prompt "[*]:". This assumes that there is only one cell currently active and it is the currently selected cell
-  [Arguments]  ${timeout}=120seconds
-  Wait Until Element Is Not Visible  //div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]  ${timeout}
+  [Arguments]    ${timeout}=120seconds
+  Wait Until Element Is Not Visible
+  ...    //div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]
+  ...    ${timeout}
 
 Select Empty JupyterLab Code Cell
   Click Element  //div[contains(@class,"jp-mod-noOutputs jp-Notebook-cell")]
@@ -106,15 +108,15 @@ Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out
 
 Run Cell And Check For Errors
-    [Arguments]  ${input}
-    Add and Run JupyterLab Code Cell in Active Notebook  ${input}
-    Wait Until JupyterLab Code Cell Is Not Active
-    ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-    Should Not Match  ${output}  *ERROR*    ignore_case=${TRUE}
+    [Arguments]    ${input}    ${timeout}=120seconds
+    Add And Run JupyterLab Code Cell In Active Notebook    ${input}
+    Wait Until JupyterLab Code Cell Is Not Active    ${timeout}
+    ${output} =    Get Text    (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    Should Not Match    ${output}    *ERROR*    ignore_case=${TRUE}
 
 Run Cell And Check Output
     [Arguments]  ${input}  ${expected_output}
-    Add and Run JupyterLab Code Cell in Active Notebook  ${input}
+    Add And Run JupyterLab Code Cell In Active Notebook  ${input}
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     Should Match  ${output}  ${expected_output}
@@ -123,14 +125,14 @@ Run Cell And Check Output
 Run Cell And Get Output
     [Documentation]    Runs a code cell and returns its output
     [Arguments]    ${input}
-    Add and Run JupyterLab Code Cell in Active Notebook  ${input}
+    Add And Run JupyterLab Code Cell In Active Notebook  ${input}
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     RETURN    ${output}
 
 Python Version Check
   [Arguments]  ${expected_version}=3.8
-  Add and Run JupyterLab Code Cell in Active Notebook  !python --version
+  Add And Run JupyterLab Code Cell In Active Notebook  !python --version
   Wait Until JupyterLab Code Cell Is Not Active
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
@@ -328,7 +330,7 @@ Maybe Close Popup
       Capture Page Screenshot
     END
 
-Add and Run JupyterLab Code Cell in Active Notebook
+Add And Run JupyterLab Code Cell In Active Notebook    # robocop:disable
     [Arguments]    @{code}    ${n}=1
     [Documentation]    Add a ``code`` cell to the ``n`` th notebook on the page and run it.
     ...    ``code`` is a list of strings to set as lines in the code editor.
@@ -420,8 +422,8 @@ Check Versions In JupyterLab
 Install And Import Package In JupyterLab
     [Documentation]  Install any Package and import it
     [Arguments]  ${package}
-    Add and Run JupyterLab Code Cell in Active Notebook  !pip install ${package}
-    Add and Run JupyterLab Code Cell in Active Notebook  import ${package}
+    Add And Run JupyterLab Code Cell In Active Notebook  !pip install ${package}
+    Add And Run JupyterLab Code Cell In Active Notebook  import ${package}
     Wait Until JupyterLab Code Cell Is Not Active
     JupyterLab Code Cell Error Output Should Not Be Visible
     Capture Page Screenshot
@@ -429,7 +431,7 @@ Install And Import Package In JupyterLab
 Verify Package Is Not Installed In JupyterLab
     [Documentation]  Check Package is not Installed
     [Arguments]  ${package_name}
-    Add and Run JupyterLab Code Cell in Active Notebook  import ${package_name}
+    Add And Run JupyterLab Code Cell In Active Notebook  import ${package_name}
     Wait Until JupyterLab Code Cell Is Not Active
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     ${output}   Split String     ${output}   \n\n

@@ -39,14 +39,14 @@ Can Launch Python3 Smoke Test Notebook
   # Manual Notebook Input
   ##################################################
   Sleep  5
-  Add And Run JupyterLab Code Cell in Active Notebook  !pip install boto3
+  Add And Run JupyterLab Code Cell In Active Notebook  !pip install boto3
   Wait Until JupyterLab Code Cell Is Not Active
   #Get the text of the last output cell
   ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
   Should Not Match  ${output}  ERROR*
 
-  Add And Run JupyterLab Code Cell in Active Notebook  import os
-  Add And Run JupyterLab Code Cell in Active Notebook  print("Hello World!")
+  Add And Run JupyterLab Code Cell In Active Notebook  import os
+  Add And Run JupyterLab Code Cell In Active Notebook  print("Hello World!")
   Capture Page Screenshot
 
   JupyterLab Code Cell Error Output Should Not Be Visible

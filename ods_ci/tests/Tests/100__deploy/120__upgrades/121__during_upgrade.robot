@@ -20,7 +20,7 @@ Long Running Jupyter Notebook
     [Documentation]    Launch a long running notebook before the upgrade
     [Tags]  Upgrade
     Launch Notebook
-    Add And Run JupyterLab Code Cell in Active Notebook  ${CODE}
+    Add And Run JupyterLab Code Cell In Active Notebook  ${CODE}
     ${return_code}    ${timestamp}    Run And Return Rc And Output   oc get pod -n rhods-notebooks jupyter-nb-ldap-2dadmin2-0 --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'   #robocop:disable
     Should Be Equal As Integers    ${return_code}     0
     Set Global Variable    ${timestamp}   #robocop: disable

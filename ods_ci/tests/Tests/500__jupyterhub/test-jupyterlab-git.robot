@@ -42,7 +42,7 @@ Verify Updating Project With Changes From Git Repository
     Sleep    1s
     Open New Notebook
     ${commit_msg1}=    Get Last Commit Message
-    Add And Run JupyterLab Code Cell in Active Notebook    ! mkdir ../folder/
+    Add And Run JupyterLab Code Cell In Active Notebook    ! mkdir ../folder/
     Sleep    2s
     Open Folder or File    folder
 

@@ -14,6 +14,7 @@ Test Teardown      Close All Browsers
 
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project
+${PRJ_TITLE1}=    ODS-CI DS Project1
 ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Projects feature
 ${NB_IMAGE}=        Minimal Python
@@ -45,6 +46,8 @@ ${DC_S3_TYPE}=    Object storage
 @{IMAGE_LIST}    Minimal Python    CUDA   PyTorch    Standard Data Science    TensorFlow
 ${ENV_SECRET_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_secret.yaml
 ${ENV_CM_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_cm.yaml
+${NEW_PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a New edited test project for validating DS Projects feature
+${NEW_PRJ_TITLE}=   ODS-CI DS Project Updated
 
 *** Test Cases ***
 Verify Data Science Projects Page Is Accessible
@@ -173,6 +176,20 @@ Verify User Can Create A Data Science Project
     Project Should Be Listed    project_title=${PRJ_TITLE}
     Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
+
+Verify User Can Edit A Data Science Project
+    [Tags]    Sanity    Tier1    ODS-2112    edit
+    [Documentation]    Verifies users can edit a DS project
+    [Setup]   Launch Data Science Project Main Page
+    [Teardown]    Delete Data Science Project    project_title=${NEW_PRJ_TITLE}
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION}
+    ...    resource_name=${PRJ_RESOURCE_NAME}
+    Open Data Science Projects Home Page
+    Project Should Be Listed    project_title=${PRJ_TITLE1}
+    Check Resource Name Should Be Immutable    project_title=${PRJ_TITLE1}
+    Check Name And Description Should Be Editable    project_title=${PRJ_TITLE1}    new_title=${NEW_PRJ_TITLE}
+    ...    new_description=${NEW_PRJ_DESCRIPTION}
 
 Verify User Can Create And Start A Workbench With Ephimeral Storage
     [Tags]    Sanity    Tier1    ODS-1812

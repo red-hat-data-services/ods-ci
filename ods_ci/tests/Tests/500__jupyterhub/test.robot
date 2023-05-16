@@ -83,7 +83,7 @@ Can Spawn Notebook
     Maybe Close Popup
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
     IF  not ${is_launcher_selected}  Open JupyterLab Launcher
-    Launch a new JupyterLab Document    kernel=Python 3.9.14
+    Launch a new JupyterLab Document    kernel=Python 3.9
     Close Other JupyterLab Tabs
 
 Verify Message That Image Builds Are In Progress

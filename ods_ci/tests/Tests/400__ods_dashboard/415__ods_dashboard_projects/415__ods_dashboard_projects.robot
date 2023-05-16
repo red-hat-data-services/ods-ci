@@ -186,9 +186,9 @@ Verify User Can Edit A Data Science Project
     ...    resource_name=${PRJ_RESOURCE_NAME}
     Open Data Science Projects Home Page
     Project Should Be Listed    project_title=${PRJ_TITLE1}
-    Check Resource Name Should Be Immutable    project_title=${PRJ_TITLE1}
-    Check Name And Description Should Be Editable    project_title=${PRJ_TITLE1}    new_title=${NEW_PRJ_TITLE}
-    ...    new_description=${NEW_PRJ_DESCRIPTION}
+    Run Keyword And Continue On Failure         Check Resource Name Should Be Immutable    project_title=${PRJ_TITLE1}
+    Run Keyword And Continue On Failure         Check Name And Description Should Be Editable
+    ...    project_title=${PRJ_TITLE1}    new_title=${NEW_PRJ_TITLE}    new_description=${NEW_PRJ_DESCRIPTION}
 
 Verify User Can Create And Start A Workbench With Ephimeral Storage
     [Tags]    Sanity    Tier1    ODS-1812
@@ -694,3 +694,9 @@ Delete Multiple Data Science Projects
     FOR    ${counter}    IN RANGE    1    ${number}+1    1
         ${rc}  ${output}=    Run And Return Rc And Output    oc delete project ${title}${counter}
     END
+
+Check Name And Description Should Be Editable
+    [Documentation]    Checks and verifies if the DSG Name and Description is editable
+    [Arguments]    ${project_title}     ${new_title}    ${new_description}
+    Update And Verify Data Science Project Name    ${project_title}     ${new_title}
+    Update And Verify Data Science Project Description    ${new_title}    ${new_description}

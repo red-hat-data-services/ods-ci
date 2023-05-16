@@ -291,19 +291,26 @@ Check Resource Name Should Be Immutable
     Element Should Be Disabled    ${RESOURCE_INPUT_XP}
     Click Button    Cancel
 
-Check Name And Description Should Be Editable
-    [Documentation]    Checks if the Resource Name is not able editable
-    [Arguments]     ${project_title}    ${new_title}    ${new_description}
+Update And Verify Data Science Project Name
+    [Documentation]    Updates the existing DSG project name and verifies changes are done
+    [Arguments]     ${project_title}    ${new_title}
     Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
     Wait Until Page Contains Element    ${DESCR_INPUT_XP}
     Input Text    ${TITLE_INPUT_XP}    ${new_title}
-    Input Text    ${DESCR_INPUT_XP}    ${new_description}
     Click Button    Update
     Wait Until Generic Modal Disappears
     ${is_open}=    Is Data Science Projects Page Open
     IF    ${is_open} == ${FALSE}    Open Data Science Projects Home Page
     Wait Until Page Contains    ${new_title}
-    Project Should Be Listed    ${new_title}
-    Open Data Science Project Details Page       project_title=${new_title}
+
+Update And Verify Data Science Project Description
+    [Documentation]    Updates the existing DSG project description and verifies changes are done
+    [Arguments]    ${project_title}    ${new_description}
+    Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    Wait Until Page Contains Element    ${DESCR_INPUT_XP}
+    Input Text    ${DESCR_INPUT_XP}    ${new_description}
+    Click Button    Update
+    Wait Until Generic Modal Disappears
+    Open Data Science Project Details Page       project_title=${project_title}
     Page Should Contain    ${new_description}
 

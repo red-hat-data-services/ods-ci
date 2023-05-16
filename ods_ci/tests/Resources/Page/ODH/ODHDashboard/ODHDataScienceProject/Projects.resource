@@ -301,9 +301,7 @@ Check Name And Description Should Be Editable
     Click Button    Update
     Wait Until Generic Modal Disappears
     ${is_open}=    Is Data Science Projects Page Open
-    IF    ${is_open} == ${FALSE}
-        Open Data Science Projects Home Page
-    END
+    IF    ${is_open} == ${FALSE}    Open Data Science Projects Home Page
     Wait Until Page Contains    ${new_title}
     Project Should Be Listed    ${new_title}
     Open Data Science Project Details Page       project_title=${new_title}

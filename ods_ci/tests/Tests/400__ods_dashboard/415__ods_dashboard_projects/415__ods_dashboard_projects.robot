@@ -90,8 +90,7 @@ Verify Workbench Images Have Multiple Versions
 Verify DS Projects Home Page Shows The Right Number Of Items The User Has Selected
     [Documentation]    Verifies that correct number of data science projects appear when
     ...                multiple data science projects are added
-    [Tags]    many-projects
-    ...    ODS-2015    Sanity    Tier1
+    [Tags]    ODS-2015    Sanity    Tier1
     [Teardown]    Delete Multiple Data Science Projects    title=ds-project-ldap-user    number=20
     ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=${EMPTY}
     ...    number=20
@@ -178,7 +177,7 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Edit A Data Science Project
-    [Tags]    Sanity    Tier1    ODS-2112    edit
+    [Tags]    Sanity    Tier1    ODS-2112
     [Documentation]    Verifies users can edit a DS project
     [Setup]   Launch Data Science Project Main Page
     [Teardown]    Delete Data Science Project    project_title=${NEW_PRJ_TITLE}

@@ -89,7 +89,7 @@ Resetting Pod Toleration Via UI
     Disable Pod Toleration Via UI
     Enable "Usage Data Collection"
     IF    ${is_data_collection_enabled}==True
-          Fail    msg=USage data colletion is enbaled after the upgrade
+          Fail    msg=Usage data colletion is enbaled after the upgrade
     END
     [Teardown]   Dashboard Test Teardown
 

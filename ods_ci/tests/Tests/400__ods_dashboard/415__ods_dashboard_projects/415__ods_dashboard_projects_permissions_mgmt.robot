@@ -34,9 +34,11 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users
     Switch To User    ${TEST_USER_4.USERNAME}
     Open Data Science Project Details Page    ${PRJ_A_TITLE}
     Permissions Tab Should Not Be Accessible
+    Capture Page Screenshot
     Switch To User    ${TEST_USER_2.USERNAME}
     Open Data Science Project Details Page    ${PRJ_A_TITLE}
     Permissions Tab Should Be Accessible
+    Capture Page Screenshot
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users    # robocop: disable
     [Documentation]    Verify user can modify/remove access permissions for their DS Projects to other users

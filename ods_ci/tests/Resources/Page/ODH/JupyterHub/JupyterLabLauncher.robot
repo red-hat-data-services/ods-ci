@@ -84,8 +84,8 @@ Run Git Repo And Return Last Cell Error Text
 
 Wait Until JupyterLab Code Cell Is Not Active
   [Documentation]  Waits until the current cell no longer has an active prompt "[*]:". This assumes that there is only one cell currently active and it is the currently selected cell
-  [Arguments]  ${timeout}=120seconds
-  Wait Until Element Is Not Visible  //div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]  ${timeout}
+  [Arguments]    ${timeout}=120seconds
+  Wait Until Element Is Not Visible    //div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]    ${timeout}
 
 Select Empty JupyterLab Code Cell
   Click Element  //div[contains(@class,"jp-mod-noOutputs jp-Notebook-cell")]
@@ -106,11 +106,11 @@ Logout JupyterLab
   Open With JupyterLab Menu  File  Log Out
 
 Run Cell And Check For Errors
-    [Arguments]  ${input}
-    Add and Run JupyterLab Code Cell in Active Notebook  ${input}
-    Wait Until JupyterLab Code Cell Is Not Active
-    ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-    Should Not Match  ${output}  *ERROR*    ignore_case=${TRUE}
+    [Arguments]    ${input}    ${timeout}=120seconds
+    Add and Run JupyterLab Code Cell in Active Notebook    ${input}
+    Wait Until JupyterLab Code Cell Is Not Active    ${timeout}
+    ${output} =    Get Text    (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    Should Not Match    ${output}    *ERROR*    ignore_case=${TRUE}
 
 Run Cell And Check Output
     [Arguments]  ${input}  ${expected_output}

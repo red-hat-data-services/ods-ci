@@ -106,7 +106,6 @@ Wait for RHODS Dashboard to Load
         Wait Until Cards Are Loaded
     END
 
-
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
@@ -791,3 +790,11 @@ Maybe Wait For Dashboard Loading Spinner Page
     ...    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
     ...    AND
     ...    Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
+
+Reload RHODS Dashboard Page
+    [Documentation]    Reload the web page and wait for RHODS Dashboard
+    ...    to be loaded
+    [Arguments]    ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
+    Reload Page
+    Wait for RHODS Dashboard to Load    expected_page=${expected_page}
+    ...    wait_for_cards=${wait_for_cards}    

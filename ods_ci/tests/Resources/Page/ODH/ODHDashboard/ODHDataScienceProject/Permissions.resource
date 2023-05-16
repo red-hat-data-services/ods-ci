@@ -10,7 +10,7 @@ ${PERMISSIONS_DROPDOWN}=    xpath://td[@data-label="Permission"]//button[@aria-l
 
 *** Keywords ***
 Assign ${permission_type} Permissions To ${username}
-    [Documentation]    Ass the user ${username} and level of permission ${permission_type}
+    [Documentation]    Assign the user ${username} and level of permission ${permission_type}
     ...    to the currently open DS Project in UI
     Log     ${username} - ${permission_type}
     Click Element    xpath://button[text()="Add user"]

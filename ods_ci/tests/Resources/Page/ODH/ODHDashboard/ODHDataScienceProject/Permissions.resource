@@ -75,5 +75,5 @@ RoleBinding Should Exist
     ...    project_title=${project_title}
     ${rc}    ${out}=    Get OpenShift RoleBinding    namespace=${ns}
     ...    subject_name=${subject_name}
-    Run Keyword And Continue On Failure    Should Be Empty    ${out}
+    Run Keyword And Continue On Failure    Should Not Be Empty    ${out}
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${rc}    0

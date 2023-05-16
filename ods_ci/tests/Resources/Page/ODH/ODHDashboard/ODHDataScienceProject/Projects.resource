@@ -103,7 +103,7 @@ Create Data Science Project
         IF    ${is_home_open} == ${TRUE}
             Log    message=After DS Project creation, user did not get redirected to details page...
             Open Data Science Project Details Page    project_title=${title}
-        END        
+        END
     END
 
 Validate Generated Resource Name

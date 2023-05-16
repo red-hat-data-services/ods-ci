@@ -796,5 +796,5 @@ Reload RHODS Dashboard Page
     ...    to be loaded
     [Arguments]    ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
     Reload Page
-    Wait for RHODS Dashboard to Load    expected_page=${expected_page}
-    ...    wait_for_cards=${wait_for_cards}    
+    Wait For RHODS Dashboard To Load    expected_page=${expected_page}
+    ...    wait_for_cards=${wait_for_cards}

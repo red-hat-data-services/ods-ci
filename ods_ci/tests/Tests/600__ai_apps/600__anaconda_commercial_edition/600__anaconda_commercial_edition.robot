@@ -128,7 +128,7 @@ Install Numpy Package Should Be Successful
     [Documentation]     Tries to install python package "numpy" and checks
     ...                 if it runs without errors.
     ...                 The installation should be successful because runs after token validation
-    Add And Run JupyterLab Code Cell In Active Notebook  !conda install -y numpy
+    Add And Run JupyterLab Code Cell in Active Notebook  !conda install -y numpy
     Wait Until JupyterLab Code Cell Is Not Active
     Run Cell And Check For Errors  import numpy as np
     Capture Page Screenshot  conda_lib_install_result.png

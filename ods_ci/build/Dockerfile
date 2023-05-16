@@ -36,6 +36,7 @@ COPY ods_ci/libs ods_ci/libs/
 COPY ods_ci/run_robot_test.sh ods_ci/run_robot_test.sh
 COPY ods_ci/build/run.sh  ods_ci/build/run.sh
 COPY ods_ci/build/install_idp.sh  ods_ci/build/install_idp.sh
+COPY ods_ci/build/clean_idp.sh ods_ci/build/clean_idp.sh
 COPY ods_ci/utils/scripts/Sender  ods_ci/utils/scripts/Sender/
 COPY ods_ci/utils/scripts/ocm/ocm.py  ods_ci/utils/scripts/ocm/ocm.py
 COPY ods_ci/utils/scripts/logger.py  ods_ci/utils/scripts/logger.py
@@ -49,6 +50,7 @@ COPY ods_ci/configs/resources/oauth_ldap_idp.json ods_ci/configs/resources/oauth
 COPY ods_ci/configs/templates/ca-rolebinding.yaml ods_ci/configs/templates/ca-rolebinding.yaml
 COPY ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
 RUN  chmod +x ods_ci/build/run.sh &&\
+     chmod +x ods_ci/build/clean_idp.sh &&\
      chmod 775 . # writing permissions for ods-ci.log
 COPY pyproject.toml .
 COPY poetry.lock .

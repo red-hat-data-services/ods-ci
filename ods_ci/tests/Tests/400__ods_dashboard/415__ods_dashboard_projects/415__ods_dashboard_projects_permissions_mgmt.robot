@@ -62,6 +62,8 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     Switch To User    ${TEST_USER_3.USERNAME}
     Remove ${TEST_USER_4.USERNAME} Permissions
     Switch To User    ${TEST_USER_4.USERNAME}
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}
     Open Data Science Projects Home Page
     Project Should Not Be Listed    project_title=${PRJ_A_TITLE}
     RoleBinding Should Not Exist    project_title=${PRJ_A_TITLE}

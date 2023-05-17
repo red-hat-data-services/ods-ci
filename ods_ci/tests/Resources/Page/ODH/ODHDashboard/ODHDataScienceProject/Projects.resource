@@ -284,6 +284,33 @@ Check Pagination Is Correct On The Current Page
     END
     Should Be Equal    ${expected_text}    ${actual_text}
 
+Check Resource Name Should Be Immutable
+    [Documentation]    Checks if the Resource Name is not editable
+    [Arguments]     ${project_title}
+    Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    Wait Until Page Contains Element    ${RESOURCE_INPUT_XP}
+    Element Should Be Disabled    ${RESOURCE_INPUT_XP}
+    Click Button    Cancel
+
+Update Data Science Project Name
+    [Documentation]    Updates the existing DSG project name and verifies changes are done
+    [Arguments]     ${project_title}    ${new_title}
+    Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    Wait Until Page Contains Element    ${DESCR_INPUT_XP}
+    Input Text    ${TITLE_INPUT_XP}    ${new_title}
+    Click Button    Update
+    Wait Until Generic Modal Disappears
+    Wait Until Page Contains    ${new_title}
+
+Update Data Science Project Description
+    [Documentation]    Updates the existing DSG project description
+    [Arguments]    ${project_title}    ${new_description}
+    Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    Wait Until Page Contains Element    ${DESCR_INPUT_XP}
+    Input Text    ${DESCR_INPUT_XP}    ${new_description}
+    Click Button    Update
+    Wait Until Generic Modal Disappears
+
 Permissions Tab Should Be Accessible
     [Documentation]    Verify user can access the "Permissions" tab of a DS project
     Run Keyword And Continue On Failure

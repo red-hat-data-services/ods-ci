@@ -16,7 +16,7 @@ Suite Teardown      RHOSi Teardown
 
 
 *** Test Cases ***
-Verify Ods users can create and run a data science pipeline using the kfp_tekton python package
+Verify Ods Users Can Create And Run A Data Science Pipeline Using The Kfp_tekton Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
     [Tags]      Sanity
@@ -34,10 +34,10 @@ End To End Pipeline Workflow Using Kfp Tekton
     New Project    ${project}
     Install DataSciencePipelinesApplication CR    ${project}
     ${status}    Login Using User And Password    ${username}    ${password}    ${project}
-    Should Be True    ${status} == 200    DSP routing is working
-    ${result}    Kfp Tekton Create Run From Pipeline Func    ${username}    ${password}    ${project}    flipcoin_pipeline    # robocop: disable:line-too-long
+    Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
+    ${result}    Kfp Tekton Create Run From Pipeline Func    ${username}    ${password}    ${project}    flip_coin.py    flipcoin_pipeline    # robocop: disable:line-too-long
     ${run_status}   Kfp Tekton Wait For Run Completion    ${username}    ${password}    ${project}    ${result}
-    Should Be True    '${run_status}' == 'Completed'    Run ends
+    Should Be True    '${run_status}' == 'Completed'    Pipeline run doesn't have Completed status
     [Teardown]    Remove Pipeline Project    ${project}
 
 Data Science Pipelines Suite Setup

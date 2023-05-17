@@ -1,6 +1,5 @@
 *** Settings ***
 Documentation    Collection of keywords to interact with Data Science Projects
-Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
 Resource       ./Workbenches.resource
 
@@ -97,7 +96,14 @@ Create Data Science Project
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Generic Modal Disappears
-    Wait Until Project Is Open    project_title=${title}
+    ${open}=    Run Keyword And Return Status    Wait Until Project Is Open    project_title=${title}
+    IF    ${open} == ${FALSE}
+        ${is_home_open}=    Is Data Science Projects Page Open
+        IF    ${is_home_open} == ${TRUE}
+            Log    message=After DS Project creation, user did not get redirected to details page...
+            Open Data Science Project Details Page    project_title=${title}
+        END
+    END
 
 Validate Generated Resource Name
     [Documentation]    Checks if the generated resource name matches the expected validation regex
@@ -111,13 +117,7 @@ Validate Generated Resource Name
 Get Openshift Namespace From Data Science Project
     [Documentation]    Gets the resource name of a DS Project starting from the Displayed Name
     [Arguments]     ${project_title}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==True
-        ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name'    # robocop: disable
-    ELSE
-        ${dp_with_suffix}=    Set Variable    ${project_title}\[DSP]
-        ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${dp_with_suffix}")) | .metadata.name'    # robocop: disable
-    END
+    ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name'    # robocop: disable
     ${k8s_name}=    Replace String    ${k8s_name}    "    ${EMPTY}
     [Return]    ${k8s_name}
 
@@ -259,9 +259,10 @@ Go To Next Page Of Data Science Projects
 Launch Data Science Project Main Page
     [Documentation]    Launch DS Projects page in RHODS Dashboard using a given user
     [Arguments]     ${username}=${TEST_USER_3.USERNAME}     ${password}=${TEST_USER_3.PASSWORD}
-    ...             ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}
+    ...             ${ocp_user_auth_type}=${TEST_USER_3.AUTH_TYPE}    ${browser_alias}=${NONE}
     Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${ocp_user_auth_type}
     ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ...                 browser_alias=${browser_alias}
     Open Data Science Projects Home Page
 
 Remove Current Page Projects From All Projects
@@ -310,3 +311,40 @@ Update Data Science Project Description
     Click Button    Update
     Wait Until Generic Modal Disappears
 
+Permissions Tab Should Be Accessible
+    [Documentation]    Verify user can access the "Permissions" tab of a DS project
+    Run Keyword And Continue On Failure
+    ...    Page Should Contain Element
+    ...    xpath://span[text()="Permissions"]
+    Move To Tab    tab_title=Permissions
+    Wait Until Permissions Tab Is Open
+
+Permissions Tab Should Not Be Accessible
+    [Documentation]    Verify user cannot access the "Permissions" tab of a DS project
+    ${status}=    Run Keyword And Return Status    Permissions Tab Should Be Accessible
+    IF    ${status} == ${TRUE}
+        Fail    msg=user should not have rights to access Permissions tab on the current DS Project
+    END
+
+Wait Until Permissions Tab Is Open
+    [Documentation]    Wait until "Permissions" tab is rendered
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Contains Element    id:user-permission-User
+
+Wait Until Components Tab Is Open
+    [Documentation]    Wait until "Components" tab is rendered
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Contains Element    id:workbenches-title
+
+Components Tab Should Be Accessible
+    [Documentation]    Verify user can access the "Permissions" tab of a DS project
+    Run Keyword And Continue On Failure
+    ...    Page Should Contain Element
+    ...    xpath://span[text()="Components"]
+    Move To Tab    tab_title=Components
+    Wait Until Components Tab Is Open
+
+Move To Tab
+    [Documentation]    Open one of the tabs in a DS Project details page (e.g., Permissions)
+    [Arguments]    ${tab_title}
+    Click Element    xpath://span[text()="${tab_title}"]

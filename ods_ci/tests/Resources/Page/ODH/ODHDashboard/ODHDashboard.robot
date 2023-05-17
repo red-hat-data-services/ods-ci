@@ -53,8 +53,9 @@ ${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
 *** Keywords ***
 Launch Dashboard
   [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}  ${dashboard_url}  ${browser}  ${browser_options}
-  ...          ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
+  ...          ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}    ${browser_alias}=${NONE}
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
+  ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
   Wait for RHODS Dashboard to Load    expected_page=${expected_page}
   ...    wait_for_cards=${wait_for_cards}
@@ -104,7 +105,6 @@ Wait for RHODS Dashboard to Load
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Cards Are Loaded
     END
-
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
@@ -790,3 +790,11 @@ Maybe Wait For Dashboard Loading Spinner Page
     ...    Wait Until Page Contains Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout-pre}
     ...    AND
     ...    Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-c-spinner__tail-ball"]    timeout=${timeout}
+
+Reload RHODS Dashboard Page
+    [Documentation]    Reload the web page and wait for RHODS Dashboard
+    ...    to be loaded
+    [Arguments]    ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
+    Reload Page
+    Wait For RHODS Dashboard To Load    expected_page=${expected_page}
+    ...    wait_for_cards=${wait_for_cards}

@@ -55,23 +55,6 @@ Maybe Accept Cookie Policy
     Capture Page Screenshot  cookieaccepted.png
   END
 
-Search Item By Name and Owner in RHOSAK Table
-  [Arguments]  ${name_search_term}  ${owner_search_term}
-  Wait Until Page Contains Element    xpath://input[@id='filterText']
-  Clear Element Text    xpath://input[@id='filterText']
-  Input Text    xpath://input[@id='filterText']    ${name_search_term}
-  Click Button    xpath=//button[@aria-label='Search instances']
-  Click Button  xpath=//button[contains(@id, 'pf-select-toggle-id')]
-  Wait Until Page Contains Element    xpath=//button[text()='Owner']
-  Click Button  xpath=//button[text()='Owner']
-  Wait Until Page Contains Element    xpath://input[@id='filterOwners']  # needed because unpredictable refreshes
-  Clear Element Text    xpath://input[@id='filterOwners']
-  Input Text    xpath://input[@id='filterOwners']    ${owner_search_term}
-  Click Button    xpath=//button[@aria-label='Search owners']
-  Sleep  1
-  Click Button    xpath://th[@data-label='Time created']/button
-  Click Button    xpath://th[@data-label='Time created']/button
-
 Maybe Handle Something Went Wrong Page
   ${sww_required}=  Run Keyword And Return Status  Page Should Contain  Something went wrong
   IF    ${sww_required} == True

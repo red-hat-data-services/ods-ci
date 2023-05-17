@@ -184,11 +184,15 @@ Verify User Can Edit A Data Science Project
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE1}
     Open Data Science Projects Home Page
     Project Should Be Listed    project_title=${PRJ_TITLE1}
     Run Keyword And Continue On Failure         Check Resource Name Should Be Immutable    project_title=${PRJ_TITLE1}
     Run Keyword And Continue On Failure         Check Name And Description Should Be Editable
     ...    project_title=${PRJ_TITLE1}    new_title=${NEW_PRJ_TITLE}    new_description=${NEW_PRJ_DESCRIPTION}
+    ${ns_newname}=    Get Openshift Namespace From Data Science Project   project_title=${NEW_PRJ_TITLE}
+    Should Be Equal As Strings  ${ns_name}  ${ns_newname}
+
 
 Verify User Can Create And Start A Workbench With Ephimeral Storage
     [Tags]    Sanity    Tier1    ODS-1812
@@ -698,5 +702,7 @@ Delete Multiple Data Science Projects
 Check Name And Description Should Be Editable
     [Documentation]    Checks and verifies if the DSG Name and Description is editable
     [Arguments]    ${project_title}     ${new_title}    ${new_description}
-    Update And Verify Data Science Project Name    ${project_title}     ${new_title}
-    Update And Verify Data Science Project Description    ${new_title}    ${new_description}
+    Update Data Science Project Name    ${project_title}     ${new_title}
+    Update Data Science Project Description    ${new_title}    ${new_description}
+    Open Data Science Project Details Page       project_title=${new_title}
+    Page Should Contain    ${new_description}

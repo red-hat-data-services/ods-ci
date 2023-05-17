@@ -8,29 +8,6 @@ Resource    ../../../ODS.robot
 
 
 *** Keywords ***
-Check Consumer And Producer Output Equality
-    [Documentation]    Checks the code cell outputs are equal between Producer and Consumer notebooks
-    [Arguments]    ${producer_text}    ${consumer_text}
-    ${producer_output_list}=    Text To List    text=${producer_text}
-    ${consumer_output_list}=    Text To List    text=${consumer_text}
-    Should Be Equal    ${producer_output_list}    ${consumer_output_list}[1:]
-
-Open Producer Notebook
-    [Documentation]    Open the Producer notebook in JL
-    [Arguments]    ${dir_path}    ${filename}
-    Open With JupyterLab Menu    File    Open from Path…
-    Input Text    xpath=//input[@placeholder="/path/relative/to/jlab/root"]    ${dir_path}/${filename}
-    Click Element    xpath://div[.="Open"]
-    Wait Until ${filename} JupyterLab Tab Is Selected
-
-Open Consumer Notebook
-    [Documentation]    Open the Consumer notebook in JL
-    [Arguments]    ${dir_path}    ${filename}
-    Open With JupyterLab Menu    File    Open from Path…
-    Input Text    xpath=//input[@placeholder="/path/relative/to/jlab/root"]    ${dir_path}/${filename}
-    Click Element    xpath://div[.="Open"]
-    Wait Until ${filename} JupyterLab Tab Is Selected
-
 Enable RHOSAK
     [Documentation]    Perfors the RHOSAK activation though RHODS Dashboard
     Menu.Navigate To Page    Applications    Explore

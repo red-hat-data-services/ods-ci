@@ -70,8 +70,12 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     ...    subject_name=${USER_C}
 
 Verify User Can Assign Access Permissions To User Groups
+    [Tags]    Tier1    Smoke
+    ...       ODS-XYZ
     [Setup]    Restore Permissions Of The Project
     Switch To User    ${USER_B}
+    Assign Edit Permissions To Group ${USER_GROUP_1}
+    Assign Admin Permissions To Group ${USER_GROUP_2}
 
 
 *** Keywords ***
@@ -155,22 +159,28 @@ Set User Groups For Testing
     ...    group_name=dedicated-admins
     Remove User From Group    username=${USER_A}
     ...    group_name=rhods-admins
-    Add User To Group    username=${USER_A}
-    ...    group_name=${USER_GROUP_2}
     Remove User From Group    username=${USER_C}
     ...    group_name=rhods-users
     Remove User From Group    username=${USER_B}
     ...    group_name=rhods-users
-    Add User To Group    username=${USER_C}
+    Add User To Group    username=${USER_A}
     ...    group_name=${USER_GROUP_1}
+    Add User To Group    username=${USER_C}
+    ...    group_name=${USER_GROUP_2}
     Add User To Group    username=${USER_B}
     ...    group_name=${USER_GROUP_1}
 
 Restore Permissions Of The Project
     Switch To User    ${USER_B}
     Move To Tab    Permissions
-    Remove ${USER_A} Permissions
-    Remove ${USER_C} Permissions
+    ${present_a}=    Is ${USER_A} In The Permissions Table
+    IF    ${present_a} == ${TRUE}
+        Remove ${USER_A} Permissions        
+    END
+    ${present_c}=    Is ${USER_C} In The Permissions Table
+    IF    ${present_c} == ${TRUE}
+        Remove ${USER_C} Permissions        
+    END
     Switch To User    ${USER_A}
     Open Data Science Projects Home Page
     Reload RHODS Dashboard Page    expected_page=Data science projects

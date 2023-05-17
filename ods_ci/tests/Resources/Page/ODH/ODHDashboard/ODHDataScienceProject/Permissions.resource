@@ -17,6 +17,7 @@ Assign ${permission_type} Permissions To ${username}
     Element Should Be Disabled    ${SAVE_BUTTON}
     Input Text    css:input[aria-label="project-sharing-name-input"]    ${username}
     Select Permission Type    permission_type=${permission_type}
+    Save Permission
 
 Change ${username} Permissions To ${permission_type}
     [Documentation]    Change the level of permission ${permission_type} for the given user ${username}
@@ -37,9 +38,22 @@ Select Permission Type
     [Arguments]    ${permission_type}
     Click Element    ${PERMISSIONS_DROPDOWN}
     Click Element    xpath://ul/li/button/span[text()="${permission_type}"]
+
+Save Permission
     Element Should Be Enabled    ${SAVE_BUTTON}
     Click Element    ${SAVE_BUTTON}
     Wait Until Page Does Not Contain Element    ${SAVE_BUTTON}
+
+Assign ${permission_type} Permissions To Group ${group_name}
+    [Documentation]    Assign the user ${username} and level of permission ${permission_type}
+    ...    to the currently open DS Project in UI
+    Log     ${username} - ${permission_type}
+    Click Element    xpath://button[text()="Add group"]
+    Element Should Be Disabled    ${SAVE_BUTTON}
+    Click Element    css:inputþ[aria-label="Name selection"]
+    Wait Until Page Contains Element    xpath://li/button[text()="${group_name}"]
+    Select Permission Type    permission_type=${permission_type}
+    Save Permission
 
 Click Action From Actions Menu
     [Documentation]    Click an action from Actions menu (3-dots menu on the right)
@@ -77,3 +91,8 @@ RoleBinding Should Exist
     ...    subject_name=${subject_name}
     Run Keyword And Continue On Failure    Should Not Be Empty    ${out}
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${rc}    0
+
+Is ${username} In The Permissions Table
+    ${present}=    Run Keyword And Return Status
+    ...    Page Should Contain Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]
+    RETURN    ${present}

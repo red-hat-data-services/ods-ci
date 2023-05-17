@@ -69,6 +69,10 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_C}
 
+Verify User Can Assign Access Permissions To User Groups
+    [Setup]    Restore Permissions Of The Project
+    Switch To User    ${USER_B}
+
 
 *** Keywords ***
 Project Permissions Mgmt Suite Setup    # robocop: disable
@@ -76,12 +80,13 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     ...                It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    ${to_delete}=    Create List
+    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Launch RHODS Dashboard Session With User A
     Launch RHODS Dashboard Session And Create A DS Project With User B
     Launch RHODS Dashboard Session With User C
-    ${to_delete}=    Create List    ${PRJ_USER_B_TITLE}
-    ...    ${PRJ_USER_C_TITLE}
-    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
+    Set User Groups For Testing
+    
 
 Project Permissions Mgmt Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
@@ -95,6 +100,12 @@ Project Permissions Mgmt Suite Teardown
     ...    group_name=dedicated-admins
     Add User To Group    username=${USER_A}
     ...    group_name=rhods-admins
+    Add User To Group    username=${USER_C}
+    ...    group_name=rhods-users
+    Add User To Group    username=${USER_B}
+    ...    group_name=rhods-users
+    Delete Group    ${USER_GROUP_1}
+    Delete Group    ${USER_GROUP_2}
 
 Switch To User
     [Documentation]    Move from one browser window to another. Every browser window
@@ -111,6 +122,7 @@ Launch RHODS Dashboard Session With User A
 
 Launch RHODS Dashboard Session And Create A DS Project With User B
     ${PRJ_USER_B_TITLE}=    Set Variable   ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
+    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_B_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
@@ -124,6 +136,7 @@ Launch RHODS Dashboard Session And Create A DS Project With User B
 
 Launch RHODS Dashboard Session With User C
     ${PRJ_USER_C_TITLE}=    Set Variable   ${PRJ_BASE_TITLE}-${TEST_USER_4.USERNAME}
+    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_C_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
     ...    password=${TEST_USER_4.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}
@@ -134,6 +147,24 @@ Launch RHODS Dashboard Session With User C
     Components Tab Should Be Accessible
     Set Suite Variable    ${USER_C}    ${TEST_USER_4.USERNAME}
     Set Suite Variable    ${PRJ_USER_C_TITLE}    ${PRJ_USER_C_TITLE}
+
+Set User Groups For Testing
+    Create Group    ${USER_GROUP_1}
+    Create Group    ${USER_GROUP_2}
+    Remove User From Group    username=${USER_A}
+    ...    group_name=dedicated-admins
+    Remove User From Group    username=${USER_A}
+    ...    group_name=rhods-admins
+    Add User To Group    username=${USER_A}
+    ...    group_name=${USER_GROUP_2}
+    Remove User From Group    username=${USER_C}
+    ...    group_name=rhods-users
+    Remove User From Group    username=${USER_B}
+    ...    group_name=rhods-users
+    Add User To Group    username=${USER_C}
+    ...    group_name=${USER_GROUP_1}
+    Add User To Group    username=${USER_B}
+    ...    group_name=${USER_GROUP_1}
 
 Restore Permissions Of The Project
     Switch To User    ${USER_B}

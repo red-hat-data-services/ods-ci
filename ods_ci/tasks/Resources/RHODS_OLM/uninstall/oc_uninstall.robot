@@ -30,5 +30,14 @@ Verify Project Does Not Exists
   ${project_exists}=  Run Keyword and return status
   ...  Oc Get  kind=Namespace  field_selector=metadata.name=${project}
   IF  ${project_exists}
-  ...  wait until project does not exists  ${project}  3600
+  ...  Wait Until Project Is Deleted  ${project}  3600
   Log  ${project} deleted  console=yes
+
+Wait Until Project Is Deleted
+  [Arguments]  ${project}    ${timeout}
+   FOR    ${counter}    IN RANGE    ${timeout}
+        ${project_exists}=  Run Keyword and return status
+        ...  Oc Get  kind=Namespace  field_selector=metadata.name=${project}
+        Exit For Loop If     not ${project_exists}
+
+   END

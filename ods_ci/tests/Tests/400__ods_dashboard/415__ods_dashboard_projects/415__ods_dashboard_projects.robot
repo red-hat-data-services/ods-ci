@@ -183,7 +183,7 @@ Verify User Can Edit A Data Science Project
     [Teardown]    Delete Data Science Project    project_title=${NEW_PRJ_TITLE}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${PRJ_RESOURCE_NAME}
+    ...    resource_name=${NONE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE1}
     Open Data Science Projects Home Page
     Project Should Be Listed    project_title=${PRJ_TITLE1}

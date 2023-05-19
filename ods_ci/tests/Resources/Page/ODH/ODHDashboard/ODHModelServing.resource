@@ -8,12 +8,12 @@ Library        ../../../../../libs/Helpers.py
 
 *** Variables ***
 ${MS_HEADER_XP}=     xpath=//h1[text()="Model serving"]
-${S3_NAME_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field Name"]
-${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_ACCESS_KEY_ID"]
-${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_SECRET_ACCESS_KEY"]
-${S3_ENDPOINT_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_S3_ENDPOINT"]
-${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_DEFAULT_REGION"]
-${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
+${S3_NAME_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list Name"]
+${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_ACCESS_KEY_ID"]
+${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_SECRET_ACCESS_KEY"]
+${S3_ENDPOINT_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_S3_ENDPOINT"]
+${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_DEFAULT_REGION"]
+${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKET"]
 ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
 ${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
@@ -46,13 +46,15 @@ Serve Model
     [Documentation]    Deploys a model via the Model Serving page (NOT the Model Server section of a DSP)
     ...    the framework should be either "onnx" or "openvino_ir". 
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
-    ...    ${existing_data_connection}=${TRUE}
+    ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test
     # TODO: Does not work if there's already a model deployed
     Wait Until Page Contains    Deploy model
     Click Button    Deploy model
     Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
+    Select Model Server    ${model_server}
+    Wait Until Page Contains Element    xpath://span[.="Model framework"]
     Select Framework    ${framework}
     IF    ${existing_data_connection}==${TRUE} 
         # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
@@ -88,6 +90,14 @@ Set Model Name
     [Documentation]    Sets the model name in the "deploy model" modal
     [Arguments]    ${model_name}
     Input Text    xpath://input[@id="inference-service-name-input"]    ${model_name}
+
+Select Model Server
+    [Arguments]    ${model_server}
+    ${selectable} =    Run Keyword And Return Status    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
+    IF    ${selectable}==True
+        Open Model servers Options Menu
+        Click Element    xpath=//li/button[.="${model_server}"]
+    END
 
 Select Framework
     [Documentation]    Selects the framework in the "deploy model" modal.

@@ -19,6 +19,7 @@ ${PRJ_TITLE}=    model-serving-project
 ${PRJ_DESCRIPTION}=    project used for model serving tests
 ${MODEL_NAME}=    test-model
 ${MODEL_CREATED}=    False
+${RUNTIME_NAME}=    Model Serving Test
 
 
 *** Test Cases ***
@@ -44,11 +45,13 @@ Verify Model Can Be Deployed Via UI
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server
+    Create Model Server    server_name=${RUNTIME_NAME}
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=onnx    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
@@ -74,11 +77,13 @@ Verify Openvino_IR Model Via UI
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${FALSE}
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
@@ -125,11 +130,11 @@ Verify odh-model-controller Deployment
 
 Verify Openvino Deployment
     [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
-    [Arguments]    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
-    @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-model-server-${project_name}
+    [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
+    @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
     ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
     Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-model-server-${project_name} | grep ${num_replicas}/${num_replicas} -o
+    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o
     Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
 
 Model Serving Suite Teardown

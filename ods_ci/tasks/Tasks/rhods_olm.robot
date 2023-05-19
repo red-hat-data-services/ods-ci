@@ -7,12 +7,14 @@ Library          OperatingSystem
 Library          String
 
 ***Variables***
-${cluster_type}          selfmanaged
-${image_url}             ${EMPTY}
-${RHODS_OSD_INSTALL_REPO}     None
-@{SUPPORTED_TEST_ENV}    AWS   GCP   PSI
-${TEST_ENV}              AWS
-${INSTALL_TYPE}          OperatorHub
+${cluster_type}              selfmanaged
+${image_url}                 ${EMPTY}
+${RHODS_OSD_INSTALL_REPO}    None
+@{SUPPORTED_TEST_ENV}        AWS   GCP   PSI
+${TEST_ENV}                  AWS
+${INSTALL_TYPE}              OperatorHub
+${OLM_DIR}                   rhodsolm
+
 *** Tasks ***
 Can Install RHODS Operator
   [Tags]  install

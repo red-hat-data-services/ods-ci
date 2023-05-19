@@ -68,7 +68,7 @@ Select Provisioner Template
         
 Create Openstack Resources
     Log    Creating OSP resources in Cloud '${infrastructure_configurations}[osp_cloud_name]'    console=True
-    ${result} 	 	Run Process 	echo '${infrastructure_configurations}[osp_cloud_name]' | base64 -w0    shell=yes
+    ${result}    Run Process 	echo '${infrastructure_configurations}[osp_cloud_name]' | base64 -w0    shell=yes
     Should Be True    ${result.rc} == 0
     Set Task Variable    ${OSP_CLOUD}    ${result.stdout}
     ${FIP_API}    Evaluate    ${infrastructure_configurations}.get('fip_api')
@@ -76,7 +76,7 @@ Create Openstack Resources
     Run Keyword If    "${FIP_API}" == "" or "${FIP_APPS}" == ""    Create Floating IPs
     ...    ELSE    Log    Reusing existing Floating IPs    console=True
     Set Task Variable    ${FIP_API}
-    Set Task Variable    ${FIP_APPS}    
+    Set Task Variable    ${FIP_APPS}
     Log    FIP_API = ${FIP_API}    console=True
     Log    FIP_APPS = ${FIP_APPS}    console=True
     ${hive_yaml} =    Set Variable    ${artifacts_dir}/${cluster_name}_hive.yaml
@@ -136,7 +136,7 @@ Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
     Set Task Variable    ${cluster_kubeconf}    ${artifacts_dir}/kubeconfig
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-    ${result} 	Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{ .status.webConsoleURL }'    shell=yes
+    ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{ .status.webConsoleURL }'    shell=yes
     Log    Cluster ${cluster_name} Web Console: ${result.stdout}     console=True
     Should Be True    ${result.rc} == 0
     Create File     ${cluster_details}    console=${result.stdout}\n
@@ -144,14 +144,14 @@ Save Cluster Credentials
     ...    namespace=${pool_namespace}    api_version=hive.openshift.io/v1
     ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
     Append to File     ${cluster_details}     api=${apiURL}\n
-    ${result} 	Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${artifacts_dir}
+    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     ${username} = 	Get File 	${artifacts_dir}/username
     ${password} = 	Get File 	${artifacts_dir}/password
     Append to File     ${cluster_details}     username=${username}\n
     Append to File     ${cluster_details}     password=${password}\n
-    ${result} 	Run Process 	oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
+    ${result} =    Run Process 	oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     RETURN    ${cluster_kubeconf}
@@ -160,19 +160,19 @@ Login To Cluster
     Export Variables From File    ${cluster_details}
     ${temp_kubeconfig} =    Set Variable    ${artifacts_dir}/temp_kubeconfig
     Create File     ${temp_kubeconfig}
-    ${result} 	Run Process    KUBECONFIG\=${temp_kubeconfig} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
+    ${result} =    Run Process    KUBECONFIG\=${temp_kubeconfig} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
     ...    shell=yes
     Should Be True    ${result.rc} == 0
-    ${result} 	Run Process    KUBECONFIG\=${cluster_kubeconf} oc status    shell=yes
+    ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc status    shell=yes
     Log    ${result.stdout}\n${result.stderr}     console=True
     Should Be True    ${result.rc} == 0
 
 Set Cluster Storage
     Log    Update Cluster ${cluster_name} Storage Class     console=True
-    ${result} 	Run Process 	oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
+    ${result} =    Run Process 	oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
     ...    shell=yes
     Log    StorageClass standard:\n${result.stdout}\n${result.stderr}     console=True
-    ${result} 	Run Process 	oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard-csi -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+    ${result} =    Run Process 	oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard-csi -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
     ...    shell=yes
     Log    StorageClass standard-csi:\n${result.stdout}\n${result.stderr}     console=True
     Run Keyword And Ignore Error    Should Be True    ${result.rc} == 0

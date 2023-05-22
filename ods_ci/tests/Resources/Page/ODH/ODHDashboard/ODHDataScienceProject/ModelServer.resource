@@ -17,15 +17,19 @@ ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[.="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
 ${REPLICAS_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${REPLICAS_MIN_BTN_XP}=         xpath=//div/button[@aria-label="Minus"]
+${SERVING_RUNTIME_NAME}=        xpath=//input[@id="serving-runtime-name-input"]
 
 
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}    ${token}=${TRUE}
+    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
+    ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     Click Button    Configure server
     Wait Until Page Contains Element    //span[.="Configure model server"]
+    Set Model Server Name    ${server_name}
     Set Replicas Number With Buttons    ${no_replicas}
+    Set Model Server Runtime    ${runtime}
     Set Server Size    ${server_size}
     IF    ${ext_route}==${TRUE}
         Enable External Serving Route
@@ -62,11 +66,23 @@ Set Server Size
     ...    Can be "Small", "Medium", "Large", "Custom"
     ...    If "Custom", need CPU request/limit and Memory request/limit
     [Arguments]    ${size}
-    Click Element    xpath://button[@aria-label="Options menu"]
+    Open Model server size Options Menu  # robocop:disable
     # Does Not Work for "Custom"
     # //li/button[.="Custom"]
     Click Element    xpath://li//span[.="${size}"]/../../button
     # TODO: Implement Custom
+
+Set Model Server Runtime
+    [Documentation]    Selects a given Runtime for the model server
+    [Arguments]    ${runtime}
+    Open Serving runtime Options Menu  # robocop: disable
+    Click Element    xpath://li//button[.="${runtime}"]
+    # TODO: Implement Custom
+
+Set Model Server Name
+    [Documentation]    Sets a custom name for the model server
+    [Arguments]    ${server_name}
+    Input Text    ${SERVING_RUNTIME_NAME}    ${server_name}
 
 Enable External Serving Route
     [Documentation]    Enables the serving route to be accessed externally
@@ -81,8 +97,10 @@ Get Model Serving Access Token via UI
     [Documentation]    Returns the token used for authentication to the serving route
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
     [Arguments]    ${service_account_name}=default-name
-    Click Element    //td[@data-label="Tokens"]/button
-    ${token}=    Get Element Attribute    //div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+    Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
+    Click Element    xpath://td[@data-label="Tokens"]/button
+    ${token}=    Get Element Attribute
+    ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     RETURN    ${token}
 
 Click Plus Button

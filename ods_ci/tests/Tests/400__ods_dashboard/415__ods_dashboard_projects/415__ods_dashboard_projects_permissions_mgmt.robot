@@ -29,8 +29,8 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users    # roboc
     ...       ODS-2201
     Switch To User    ${USER_B}
     Move To Tab    Permissions
-    Assign Edit Permissions To ${USER_C}
-    Assign Admin Permissions To ${USER_A}
+    Assign Edit Permissions To User ${USER_C}
+    Assign Admin Permissions To User ${USER_A}
     Switch To User    ${USER_C}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Not Be Accessible
@@ -70,12 +70,42 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     ...    subject_name=${USER_C}
 
 Verify User Can Assign Access Permissions To User Groups
-    [Tags]    Tier1    Smoke
+    [Tags]    Tier1    Sanity
     ...       ODS-XYZ
     [Setup]    Restore Permissions Of The Project
     Switch To User    ${USER_B}
     Assign Edit Permissions To Group ${USER_GROUP_1}
+    RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
+    ...    subject_name=${USER_GROUP_1}
     Assign Admin Permissions To Group ${USER_GROUP_2}
+    RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
+    ...    subject_name=${USER_GROUP_2}
+    Switch To User    ${USER_A}
+    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
+    Permissions Tab Should Not Be Accessible
+    Switch To User    ${USER_C}
+    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
+    Permissions Tab Should Be Accessible
+    Components Tab Should Be Accessible
+    Switch To User    ${USER_B}
+    Change ${USER_GROUP_1} Permissions To Admin
+    Change ${USER_GROUP_2} Permissions To Edit
+    Switch To User    ${USER_A}
+    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
+    Permissions Tab Should Be Accessible
+    Components Tab Should Be Accessible
+    Switch To User    ${USER_C}
+    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
+    Permissions Tab Should Not Be Accessible
+    Switch To User    ${USER_B}
+    Remove ${USER_GROUP_2} Permissions
+    Switch To User    ${USER_C}
+    Open Data Science Projects Home Page
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}
+    Project Should Not Be Listed    project_title=${PRJ_USER_B_TITLE}
+    RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
+    ...    subject_name=${USER_C}
 
 
 *** Keywords ***
@@ -113,9 +143,12 @@ Project Permissions Mgmt Suite Teardown
 
 Switch To User
     [Documentation]    Move from one browser window to another. Every browser window
-    ...    is a user login session in RHODS Dashboard
-    [Arguments]    ${username}
+    ...    is a user login session in RHODS Dashboard.
+    ...    The variable ${is_cluster_admin} is used to enable UI flows which require
+    ...    a user with cluster-admin or dedicated-admin level of privileges.
+    [Arguments]    ${username}    ${is_cluster_admin}=${FALSE}
     Switch Browser    ${username}-session
+    Set Suite Variable    ${IS_CLUSTER_ADMIN}    ${is_cluster_admin}
 
 Launch RHODS Dashboard Session With User A
     Launch Dashboard    ocp_user_name=${TEST_USER_2.USERNAME}  ocp_user_pw=${TEST_USER_2.PASSWORD}

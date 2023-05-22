@@ -6,10 +6,11 @@ Resource       ./Projects.resource
 *** Variables ***
 ${SAVE_BUTTON}=    xpath://button[@data-id="save-rolebinding-button"]
 ${PERMISSIONS_DROPDOWN}=    xpath://td[@data-label="Permission"]//button[@aria-label="Options menu"]
+${IS_CLUSTER_ADMIN}=    ${FALSE}
 
 
 *** Keywords ***
-Assign ${permission_type} Permissions To ${username}
+Assign ${permission_type} Permissions To User ${username}
     [Documentation]    Assign the user ${username} and level of permission ${permission_type}
     ...    to the currently open DS Project in UI
     Log     ${username} - ${permission_type}
@@ -45,13 +46,17 @@ Save Permission
     Wait Until Page Does Not Contain Element    ${SAVE_BUTTON}
 
 Assign ${permission_type} Permissions To Group ${group_name}
-    [Documentation]    Assign the user ${username} and level of permission ${permission_type}
+    [Documentation]    Assign the user ${group_name} and level of permission ${permission_type}
     ...    to the currently open DS Project in UI
-    Log     ${username} - ${permission_type}
+    Log     ${group_name} - ${permission_type}
     Click Element    xpath://button[text()="Add group"]
     Element Should Be Disabled    ${SAVE_BUTTON}
-    Click Element    css:inputþ[aria-label="Name selection"]
-    Wait Until Page Contains Element    xpath://li/button[text()="${group_name}"]
+    IF    ${IS_CLUSTER_ADMIN} == ${FALSE}
+        Input Text    css:input[aria-label="project-sharing-name-input"]    ${group_name}
+    ELSE
+        Click Element    css:input[aria-label="Name selection"]
+        Wait Until Page Contains Element    xpath://li/button[text()="${group_name}"]
+    END
     Select Permission Type    permission_type=${permission_type}
     Save Permission
 

@@ -136,7 +136,7 @@ Verify Openvino Deployment
     @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
     ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
     Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o
+    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
     Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
 
 Model Serving Suite Teardown

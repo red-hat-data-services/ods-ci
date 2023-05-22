@@ -78,14 +78,16 @@ class DataSciencePipelinesAPI:
         print(f"DSP route should be working: {self.route}")
         status = -1
         count = 0
-        while status != 200 and count < 30:
-            if count > 0:
-                print(f"({count}): HTTP Status: {status}")
-                time.sleep(1)
+        while status != 200 and count < 120:
             response, status = self.do_get(
                 f"https://{self.route}/apis/v1beta1/runs",
                 headers={"Authorization": f"Bearer {self.sa_token}"},
             )
+            # 503 -> service not deployed
+            # 504 -> service not ready
+            # if you need to debug, try to print also the response
+            print(f"({count}): HTTP Status: {status}")
+            time.sleep(1)
             count += 1
         return status
 

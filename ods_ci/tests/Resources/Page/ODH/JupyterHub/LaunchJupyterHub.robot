@@ -20,7 +20,7 @@ Launch Jupyterhub via Routes
    Sleep  10s
    Switch Window  JupyterHub
 
-Launch Jupyterhub via App
+Launch RHODS Via OCP Application Launcher
     [Documentation]    Uses the Application Launcher in the OCP Web UI to open the
     ...    RHODS Dashboard page.
     Click Element    xpath://button[@aria-label="Application launcher"]

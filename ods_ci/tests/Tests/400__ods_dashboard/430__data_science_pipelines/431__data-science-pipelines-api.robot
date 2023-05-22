@@ -35,11 +35,11 @@ End To End Pipeline Workflow Via Api
     New Project    ${project}
     Install DataSciencePipelinesApplication CR    ${project}
     ${status}    Login Using User And Password    ${username}    ${password}    ${project}
-    Should Be True    ${status} == 200    DSP routing is working
+    Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     ${pipeline_id}    Create Pipeline    ${URL_TEST_PIPELINE_RUN_YAML}
     ${run_id}    Create Run    ${pipeline_id}
     ${run_status}    Check Run Status    ${run_id}
-    Should Be True    '${run_status}' == 'Completed'    Run ends
+    Should Be True    '${run_status}' == 'Completed'    Pipeline run doesn't have Completed status
     Delete Runs    ${run_id}
     Delete Pipeline    ${pipeline_id}
     [Teardown]    Remove Pipeline Project    ${project}

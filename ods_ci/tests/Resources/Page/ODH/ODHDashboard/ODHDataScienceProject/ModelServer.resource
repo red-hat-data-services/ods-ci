@@ -23,7 +23,8 @@ ${SERVING_RUNTIME_NAME}=        xpath=//input[@id="serving-runtime-name-input"]
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
+    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
+    ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     Click Button    Configure server
     Wait Until Page Contains Element    //span[.="Configure model server"]
     Set Model Server Name    ${server_name}
@@ -65,19 +66,21 @@ Set Server Size
     ...    Can be "Small", "Medium", "Large", "Custom"
     ...    If "Custom", need CPU request/limit and Memory request/limit
     [Arguments]    ${size}
-    Open Model server size Options Menu
+    Open Model server size Options Menu  # robocop:disable
     # Does Not Work for "Custom"
     # //li/button[.="Custom"]
     Click Element    xpath://li//span[.="${size}"]/../../button
     # TODO: Implement Custom
 
 Set Model Server Runtime
+    [Documentation]    Selects a given Runtime for the model server
     [Arguments]    ${runtime}
-    Open Serving runtime Options Menu
+    Open Serving runtime Options Menu  # robocop: disable
     Click Element    xpath://li//button[.="${runtime}"]
     # TODO: Implement Custom
 
 Set Model Server Name
+    [Documentation]    Sets a custom name for the model server
     [Arguments]    ${server_name}
     Input Text    ${SERVING_RUNTIME_NAME}    ${server_name}
 
@@ -96,7 +99,8 @@ Get Model Serving Access Token via UI
     [Arguments]    ${service_account_name}=default-name
     Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
     Click Element    xpath://td[@data-label="Tokens"]/button
-    ${token}=    Get Element Attribute    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+    ${token}=    Get Element Attribute
+    ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     RETURN    ${token}
 
 Click Plus Button

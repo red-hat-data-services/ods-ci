@@ -92,10 +92,13 @@ Set Model Name
     Input Text    xpath://input[@id="inference-service-name-input"]    ${model_name}
 
 Select Model Server
+    [Documentation]    If there are multiple model servers to choose from, this keyword
+    ...    Selects the given one
     [Arguments]    ${model_server}
-    ${selectable} =    Run Keyword And Return Status    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
+    ${selectable} =    Run Keyword And Return Status
+    ...    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
     IF    ${selectable}==True
-        Open Model servers Options Menu
+        Open Model servers Options Menu  # robocop:disable
         Click Element    xpath=//li/button[.="${model_server}"]
     END
 

@@ -51,7 +51,8 @@ Verify Model Can Be Deployed Via UI
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
     ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
     ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
+    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
@@ -83,7 +84,8 @@ Verify Openvino_IR Model Via UI
     ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
     ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
     ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
+    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True

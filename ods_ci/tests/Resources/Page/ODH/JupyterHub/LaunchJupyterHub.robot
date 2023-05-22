@@ -21,11 +21,9 @@ Launch Jupyterhub via Routes
    Switch Window  JupyterHub
 
 Launch Jupyterhub via App
-   Click Element  xpath://header[@id='page-main-header']/div[2]/div[1]/div[1]/nav/button
-   Sleep  1
-   #Click Element  xpath://a[contains(@href, 'https://rhods-dashboard')]
-   #Switch Window  NEW
-
-   # Temporary workaround, open new tab and go to RHODS dashboard
-   Execute Javascript    window.open('${ODH_DASHBOARD_URL}')
-   Switch Window    NEW
+    [Documentation]    Uses the Application Launcher in the OCP Web UI to open the
+    ...    RHODS Dashboard page.
+    Click Element    xpath://button[@aria-label="Application launcher"]
+    Wait Until Page Contains Element    xpath://span[.="Red Hat OpenShift Data Science"]
+    Click Element    xpath://span[.="Red Hat OpenShift Data Science"]/..
+    Switch Window    NEW

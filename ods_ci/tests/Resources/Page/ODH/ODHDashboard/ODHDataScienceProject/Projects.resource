@@ -102,8 +102,8 @@ Create Data Science Project
         IF    ${is_home_open} == ${TRUE}
             Log    message=After DS Project creation, user did not get redirected to details page...
             Reload Page
-            Wait Until Page Contains Element    ${DS_PROJECT_XP}
-            Wait Until Page Contains Element    xpath://a[.="${title}"]
+            Wait Until Page Contains Element    ${DS_PROJECT_XP}  timeout=30s
+            Wait Until Page Contains Element    xpath://a[.="${title}"]  timeout=30s
             Open Data Science Project Details Page    project_title=${title}
         END
     END

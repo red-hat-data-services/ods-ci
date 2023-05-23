@@ -1,6 +1,7 @@
 *** Settings ***
 Library    String
 Library    OpenShiftLibrary
+
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
@@ -64,20 +65,19 @@ Verify Builds In redhat-ods-applications
 
 Clone OLM Install Repo
    [Documentation]   Clone OLM git repo
-   ${return_code}	  Run And Return Rc    git clone ${RHODS_OSD_INSTALL_REPO} rhodsolm
+   ${return_code}	  Run And Return Rc    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}
    Should Be Equal As Integers	${return_code}	 0
-   Set Test Variable     ${filename}    rhodsolm
 
 Install RHODS In Self Managed Cluster Using CLI
    [Documentation]   Install rhods on self managed cluster using cli
    [Arguments]     ${cluster_type}     ${image_url}
-   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url}   #robocop:disable
+   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url}   #robocop:disable
    Log To Console    ${output}
    Should Be Equal As Integers	${return_code}	 0   msg=Error detected while installing RHODS
 
 Install RHODS In Managed Cluster Using CLI
    [Documentation]   Install rhods on managed managed cluster using cli
    [Arguments]     ${cluster_type}     ${image_url}
-   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url}  #robocop:disable
+   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url}  #robocop:disable
    Log To Console    ${output}
    Should Be Equal As Integers	${return_code}	 0  msg=Error detected while installing RHODS

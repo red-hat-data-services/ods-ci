@@ -15,6 +15,5 @@ RHODS Operator Should Be installed
 
 Install Teardown
   [Documentation]   Remove cloned git repository
-  [Arguments]    ${folder_name}= ${filename}
-  ${return_code}	  Run And Return Rc  rm -rf ${EXECDIR}/${filename}
+  ${return_code}	  Run And Return Rc  rm -rf ${EXECDIR}/${OLM_DIR}
   Should Be Equal As Integers	  ${return_code}	 0

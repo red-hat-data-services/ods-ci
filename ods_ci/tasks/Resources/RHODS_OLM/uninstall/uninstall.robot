@@ -19,7 +19,7 @@ Uninstall RHODS
 
 Uninstall RHODS In OSD
   Clone OLM Install Repo
-  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./cleanup.sh -t addon   #robocop:disable
+  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon   #robocop:disable
   Should Be Equal As Integers	${return_code}	 0   msg=Error detected while un-installing RHODS
   Log To Console   ${output}
 
@@ -41,7 +41,7 @@ RHODS Operator Should Be Uninstalled
 Uninstall RHODS In Self Managed Cluster Using CLI
    [Documentation]   UnInstall rhods on self-managedcluster using cli
    Clone OLM Install Repo
-   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${filename} && ./cleanup.sh -t operator   #robocop:disable
+   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator   #robocop:disable
    Should Be Equal As Integers	${return_code}	 0   msg=Error detected while un-installing RHODS
    Log To Console   ${output}
 

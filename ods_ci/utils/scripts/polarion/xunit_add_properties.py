@@ -97,6 +97,8 @@ def add_testcase_properties(xml_obj, tcconfig=None):
 
     if xml_obj.tag == "testsuites":
         expression = "./testsuite/testcase"
+    elif xml_obj.tag == "testsuite":
+        expression = "./testsuite/testsuite/testcase"
     else:
         expression = "./testcase"
 

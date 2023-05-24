@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Test suite for OpenShift Pipeline
+Documentation       Collection of keywords to interact with Data Science Pipelines
 Resource            ../../../RHOSi.resource
 Resource            ../../../ODS.robot
 Resource            ../../../Common.robot
@@ -13,7 +13,6 @@ ${DATA_SCIENCE_PIPELINES_APPLICATION_YAML}=    ods_ci/tests/Resources/Files/data
 ${PIPELINES_IMPORT_BTN_FORM_XP}=    xpath://footer/button[text()="Import pipeline"]
 ${PIPELINE_NAME_INPUT_XP}=    id:pipeline-name
 ${PIPELINE_DESC_INPUT_XP}=    id:pipeline-description
-
 
 *** Keywords ***
 Install DataSciencePipelinesApplication CR

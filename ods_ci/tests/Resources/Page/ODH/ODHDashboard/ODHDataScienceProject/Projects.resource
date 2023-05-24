@@ -17,7 +17,6 @@ ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
 ${SPAWNER_LINK}=        xpath=//*[text()="Launch Jupyter"]
 
-
 *** Keywords ***
 Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible

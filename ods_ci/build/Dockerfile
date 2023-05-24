@@ -29,9 +29,6 @@ RUN mkdir $HOME/ods-ci
 # Change the WORKDIR so the run script references any files/folders from the root of the repo
 WORKDIR $HOME/ods-ci
 
-# create non-root user
-RUN groupadd --gid 1001 ods-ci-users
-RUN useradd -r -u 1001 -g ods-ci-users ods-ci-runner
 
 COPY ods_ci/tests ods_ci/tests/
 COPY ods_ci/tasks ods_ci/tasks/
@@ -39,6 +36,7 @@ COPY ods_ci/libs ods_ci/libs/
 COPY ods_ci/run_robot_test.sh ods_ci/run_robot_test.sh
 COPY ods_ci/build/run.sh  ods_ci/build/run.sh
 COPY ods_ci/build/install_idp.sh  ods_ci/build/install_idp.sh
+COPY ods_ci/build/clean_idp.sh ods_ci/build/clean_idp.sh
 COPY ods_ci/utils/scripts/Sender  ods_ci/utils/scripts/Sender/
 COPY ods_ci/utils/scripts/ocm/ocm.py  ods_ci/utils/scripts/ocm/ocm.py
 COPY ods_ci/utils/scripts/logger.py  ods_ci/utils/scripts/logger.py
@@ -51,7 +49,9 @@ COPY ods_ci/configs/resources/oauth_htp_idp.json ods_ci/configs/resources/oauth_
 COPY ods_ci/configs/resources/oauth_ldap_idp.json ods_ci/configs/resources/oauth_ldap_idp.json
 COPY ods_ci/configs/templates/ca-rolebinding.yaml ods_ci/configs/templates/ca-rolebinding.yaml
 COPY ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
-RUN  chmod +x ods_ci/build/run.sh
+RUN  chmod +x ods_ci/build/run.sh &&\
+     chmod +x ods_ci/build/clean_idp.sh &&\
+     chmod 775 . # writing permissions for ods-ci.log
 COPY pyproject.toml .
 COPY poetry.lock .
 COPY README.md .
@@ -60,8 +60,5 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="${PATH}:$HOME/.local/bin"
 RUN poetry install
 
-# set the non-root user
-RUN chgrp -R 1001 $HOME/ods-ci && chown -R 1001 $HOME/ods-ci && chmod -R 744 $HOME/ods-ci && chown -R 1001 /tmp/.cache/pypoetry
-USER 1001
 
 ENTRYPOINT ["./ods_ci/build/run.sh"]

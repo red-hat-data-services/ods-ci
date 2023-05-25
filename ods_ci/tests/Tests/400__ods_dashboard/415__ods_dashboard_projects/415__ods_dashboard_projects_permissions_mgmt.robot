@@ -71,59 +71,29 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
 
 Verify User Can Assign Access Permissions To User Groups
     [Tags]    Tier1    Sanity
-    ...       ODS-XYZ
+    ...       ODS-2208
     [Setup]    Restore Permissions Of The Project
     Switch To User    ${USER_B}
     Assign Edit Permissions To Group ${USER_GROUP_1}
-    RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_GROUP_1}
     Assign Admin Permissions To Group ${USER_GROUP_2}
     RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
+    ...    subject_name=${USER_GROUP_1}
+    
+    RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_GROUP_2}
-
-    Switch To User    ${USER_A}
-    Open Data Science Projects Home Page
-    Reload Page If Project ${PRJ_USER_B_TITLE} Is Not Listed
-    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
-    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
-    Permissions Tab Should Not Be Accessible
-
-    Switch To User    ${USER_C}
-    Open Data Science Projects Home Page
-    Reload Page If Project ${PRJ_USER_B_TITLE} Is Not Listed
-    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
-    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
-    Permissions Tab Should Be Accessible
-    Components Tab Should Be Accessible
-
+    Sleep   5s
+    ${USER_A} Should Have Edit Access To ${PRJ_USER_B_TITLE}
+    ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
     Change ${USER_GROUP_1} Permissions To Admin
     Change ${USER_GROUP_2} Permissions To Edit
-
-    Switch To User    ${USER_A}
-    Open Data Science Projects Home Page
-    Reload Page If Project ${PRJ_USER_B_TITLE} Is Not Listed
-    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
-    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
-    Permissions Tab Should Be Accessible
-    Components Tab Should Be Accessible
-
-    Switch To User    ${USER_C}
-    Open Data Science Projects Home Page
-    Reload Page If Project ${PRJ_USER_B_TITLE} Is Not Listed
-    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
-    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
-    Permissions Tab Should Not Be Accessible
-
+    Sleep   5s
+    ${USER_A} Should Have Admin Access To ${PRJ_USER_B_TITLE}
+    ${USER_C} Should Have Edit Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
     Remove ${USER_GROUP_2} Permissions
-
-    Switch To User    ${USER_C}
-    Open Data Science Projects Home Page
-    Reload Page If Project ${PRJ_USER_B_TITLE} Is Listed
-    Project Should Not Be Listed    project_title=${PRJ_USER_B_TITLE}
-    RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_C}
+    Sleep   5s
+    ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
 
 *** Keywords ***
@@ -140,7 +110,6 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     Set User Groups For Testing
     Refresh Pages
     
-
 Project Permissions Mgmt Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
@@ -284,3 +253,28 @@ Reload Page If Project ${project_title} Is Listed
         Reload RHODS Dashboard Page    expected_page=Data science projects
         ...    wait_for_cards=${FALSE}        
     END
+
+${username} Should Have Edit Access To ${project_title}
+    Switch To User    ${username}
+    Open Data Science Projects Home Page
+    Reload Page If Project ${project_title} Is Not Listed
+    Wait Until Project Is Listed    project_title=${project_title}
+    Open Data Science Project Details Page    ${project_title}
+    Permissions Tab Should Not Be Accessible
+
+${username} Should Have Admin Access To ${project_title}
+    Switch To User    ${username}
+    Open Data Science Projects Home Page
+    Reload Page If Project ${project_title} Is Not Listed
+    Wait Until Project Is Listed    project_title=${project_title}
+    Open Data Science Project Details Page    ${project_title}
+    Permissions Tab Should Be Accessible
+    Components Tab Should Be Accessible
+
+${username} Should Not Have Access To ${project_title}
+    Switch To User    ${username}
+    Open Data Science Projects Home Page
+    Reload Page If Project ${project_title} Is Listed
+    Project Should Not Be Listed    project_title=${project_title}
+    RoleBinding Should Not Exist    project_title=${project_title}
+    ...    subject_name=${username}

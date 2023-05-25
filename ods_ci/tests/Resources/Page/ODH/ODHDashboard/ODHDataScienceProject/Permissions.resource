@@ -26,6 +26,7 @@ Change ${username} Permissions To ${permission_type}
     Permissions.Click Action From Actions Menu    username=${username}
     ...    action=Edit
     Select Permission Type    permission_type=${permission_type}
+    Save Permission
 
 Remove ${username} Permissions
     [Documentation]    Remove the the access to the given user ${username}

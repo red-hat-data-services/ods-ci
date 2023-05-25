@@ -80,25 +80,49 @@ Verify User Can Assign Access Permissions To User Groups
     Assign Admin Permissions To Group ${USER_GROUP_2}
     RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_GROUP_2}
+
     Switch To User    ${USER_A}
+    Capture Page Screenshot
+    Open Data Science Projects Home Page
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}
+    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Not Be Accessible
+
     Switch To User    ${USER_C}
+    Open Data Science Projects Home Page
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}
+    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Be Accessible
     Components Tab Should Be Accessible
+
     Switch To User    ${USER_B}
     Change ${USER_GROUP_1} Permissions To Admin
     Change ${USER_GROUP_2} Permissions To Edit
+
     Switch To User    ${USER_A}
+    Open Data Science Projects Home Page
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}
+    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Be Accessible
     Components Tab Should Be Accessible
+
     Switch To User    ${USER_C}
+    Open Data Science Projects Home Page
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}
+    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Not Be Accessible
+
     Switch To User    ${USER_B}
     Remove ${USER_GROUP_2} Permissions
+
     Switch To User    ${USER_C}
     Open Data Science Projects Home Page
     Reload RHODS Dashboard Page    expected_page=Data science projects
@@ -120,6 +144,7 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     Launch RHODS Dashboard Session And Create A DS Project With User B
     Launch RHODS Dashboard Session With User C
     Set User Groups For Testing
+    Refresh Pages
     
 
 Project Permissions Mgmt Suite Teardown
@@ -219,6 +244,7 @@ Restore Permissions Of The Project
     Reload RHODS Dashboard Page    expected_page=Data science projects
     ...    wait_for_cards=${FALSE}
     Project Should Not Be Listed    project_title=${PRJ_USER_B_TITLE}
+    Capture Page Screenshot
     RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_A}
     Switch To User    ${USER_C}
@@ -228,3 +254,19 @@ Restore Permissions Of The Project
     Project Should Not Be Listed    project_title=${PRJ_USER_B_TITLE}
     RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_C}
+
+Refresh Pages
+    Switch To User    ${USER_A}
+    Open Data Science Projects Home Page
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}
+    Switch To User    ${USER_B}
+    Open Data Science Projects Home Page
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}
+    Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
+    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
+    Switch To User    ${USER_C}
+    Open Data Science Projects Home Page
+    Reload RHODS Dashboard Page    expected_page=Data science projects
+    ...    wait_for_cards=${FALSE}

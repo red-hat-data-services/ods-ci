@@ -220,7 +220,15 @@ Reload Page If Project ${project_title} Is Not Listed
         Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list!    # robocop:disable
         ...    level=WARN
         Reload RHODS Dashboard Page    expected_page=Data science projects
-        ...    wait_for_cards=${FALSE}        
+        ...    wait_for_cards=${FALSE}
+        ${is_listed}=    Run Keyword And Return Status
+        ...    Project Should Be Listed    project_title=${project_title}
+        IF    ${is_listed} == ${FALSE}
+            Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
+            ...    level=WARN
+            Reload RHODS Dashboard Page    expected_page=Data science projects
+            ...    wait_for_cards=${FALSE}
+        END
     END
 
 Reload Page If Project ${project_title} Is Listed

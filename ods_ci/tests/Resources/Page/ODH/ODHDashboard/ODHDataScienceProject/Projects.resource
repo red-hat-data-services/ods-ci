@@ -106,7 +106,7 @@ Create Data Science Project
     IF    ${open} == ${FALSE}
         ${is_home_open}=    Is Data Science Projects Page Open
         IF    ${is_home_open} == ${TRUE}
-            Log    message=After DS Project creation, user did not get redirected to details page...
+            Log    message=After DS Project ${title} creation, user did not get redirected to details page...
             ...    level=WARN
             Reload Page
             Wait Until Page Contains Element    ${DS_PROJECT_XP}  timeout=30s
@@ -333,6 +333,7 @@ Permissions Tab Should Not Be Accessible
     [Documentation]    Verify user cannot access the "Permissions" tab of a DS project
     ${status}=    Run Keyword And Return Status    Permissions Tab Should Be Accessible
     IF    ${status} == ${TRUE}
+        Capture Page Screenshot
         Fail    msg=user should not have rights to access Permissions tab on the current DS Project
     END
 

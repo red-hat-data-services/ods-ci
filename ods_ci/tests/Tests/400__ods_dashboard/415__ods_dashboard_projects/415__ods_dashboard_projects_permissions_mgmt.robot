@@ -31,14 +31,8 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users    # roboc
     Move To Tab    Permissions
     Assign Edit Permissions To User ${USER_C}
     Assign Admin Permissions To User ${USER_A}
-    Switch To User    ${USER_C}
-    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
-    Permissions Tab Should Not Be Accessible
-    Capture Page Screenshot
-    Switch To User    ${USER_A}
-    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
-    Permissions Tab Should Be Accessible
-    Capture Page Screenshot
+    ${USER_C} Should Have Edit Access To ${PRJ_USER_B_TITLE}
+    ${USER_A} Should Have Admin Access To ${PRJ_USER_B_TITLE}
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users    # robocop: disable
     [Documentation]    Verify user can modify/remove access permissions for their DS Projects to other users
@@ -48,26 +42,11 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     Move To Tab    Permissions
     Change ${USER_C} Permissions To Admin
     Change ${USER_A} Permissions To Edit
-    Switch To User    ${USER_C}
-    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
-    Permissions Tab Should Be Accessible
-    Components Tab Should Be Accessible
-    RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_C}
-    Switch To User    ${USER_A}
-    Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
-    Permissions Tab Should Not Be Accessible
-    RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_A}
+    ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
+    ${USER_A} Should Have Edit Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
     Remove ${USER_C} Permissions
-    Switch To User    ${USER_C}
-    Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
-    ...    wait_for_cards=${FALSE}
-    Project Should Not Be Listed    project_title=${PRJ_USER_B_TITLE}
-    RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_C}
+    ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
 Verify User Can Assign Access Permissions To User Groups
     [Tags]    Tier1    Sanity
@@ -261,6 +240,7 @@ ${username} Should Have Edit Access To ${project_title}
     Wait Until Project Is Listed    project_title=${project_title}
     Open Data Science Project Details Page    ${project_title}
     Permissions Tab Should Not Be Accessible
+    # add checks on subsections
 
 ${username} Should Have Admin Access To ${project_title}
     Switch To User    ${username}

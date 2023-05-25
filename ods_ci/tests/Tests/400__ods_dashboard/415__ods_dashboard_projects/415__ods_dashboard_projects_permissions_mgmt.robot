@@ -82,18 +82,15 @@ Verify User Can Assign Access Permissions To User Groups
     ...    subject_name=${USER_GROUP_2}
 
     Switch To User    ${USER_A}
-    Capture Page Screenshot
     Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
-    ...    wait_for_cards=${FALSE}
+    Reload Page If Project ${PRJ_USER_B_TITLE} Is Not Listed
     Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Not Be Accessible
 
     Switch To User    ${USER_C}
     Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
-    ...    wait_for_cards=${FALSE}
+    Reload Page If Project ${PRJ_USER_B_TITLE} Is Not Listed
     Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Be Accessible
@@ -105,8 +102,7 @@ Verify User Can Assign Access Permissions To User Groups
 
     Switch To User    ${USER_A}
     Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
-    ...    wait_for_cards=${FALSE}
+    Reload Page If Project ${PRJ_USER_B_TITLE} Is Not Listed
     Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Be Accessible
@@ -114,8 +110,7 @@ Verify User Can Assign Access Permissions To User Groups
 
     Switch To User    ${USER_C}
     Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
-    ...    wait_for_cards=${FALSE}
+    Reload Page If Project ${PRJ_USER_B_TITLE} Is Not Listed
     Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Permissions Tab Should Not Be Accessible
@@ -125,8 +120,7 @@ Verify User Can Assign Access Permissions To User Groups
 
     Switch To User    ${USER_C}
     Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
-    ...    wait_for_cards=${FALSE}
+    Reload Page If Project ${PRJ_USER_B_TITLE} Is Listed
     Project Should Not Be Listed    project_title=${PRJ_USER_B_TITLE}
     RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_C}
@@ -270,3 +264,23 @@ Refresh Pages
     Open Data Science Projects Home Page
     Reload RHODS Dashboard Page    expected_page=Data science projects
     ...    wait_for_cards=${FALSE}
+
+Reload Page If Project ${project_title} Is Not Listed
+    ${is_listed}=    Run Keyword And Return Status
+    ...    Project Should Be Listed    project_title=${project_title}
+    IF    ${is_listed} == ${FALSE}
+        Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list!    # robocop:disable
+        ...    level=WARN
+        Reload RHODS Dashboard Page    expected_page=Data science projects
+        ...    wait_for_cards=${FALSE}        
+    END
+
+Reload Page If Project ${project_title} Is Listed
+    ${is_listed}=    Run Keyword And Return Status
+    ...    Project Should Be Listed    project_title=${project_title}
+    IF    ${is_listed} == ${TRUE}
+        Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list!    # robocop:disable
+        ...    level=WARN
+        Reload RHODS Dashboard Page    expected_page=Data science projects
+        ...    wait_for_cards=${FALSE}        
+    END

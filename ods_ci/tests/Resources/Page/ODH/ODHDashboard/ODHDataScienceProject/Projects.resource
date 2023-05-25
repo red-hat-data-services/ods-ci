@@ -110,7 +110,7 @@ Create Data Science Project
             ...    level=WARN
             Reload Page
             Wait Until Page Contains Element    ${DS_PROJECT_XP}  timeout=30s
-            Wait Until Page Contains Element    xpath://a[.="${title}"]  timeout=30s
+            Wait Until Project Is Listed    project_title=${title}
             Open Data Science Project Details Page    project_title=${title}
         END
     END

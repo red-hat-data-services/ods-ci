@@ -68,6 +68,12 @@ Project Should Be Listed
     [Arguments]     ${project_title}
     Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//td/div/a[text()="${project_title}"]
 
+Wait Until Project Is Listed
+    [Documentation]    Waits until the DS projects appears in the list in DS project Home Page
+    [Arguments]     ${project_title}    ${timeout}=30s
+    Wait Until Page Contains Element    xpath=//td/div/a[text()="${project_title}"]
+    ...    timeout=${timeout}
+
 Project Should Not Be Listed
     [Documentation]    Checks a Project is not available in DS Project home page
     [Arguments]     ${project_title}
@@ -101,6 +107,7 @@ Create Data Science Project
         ${is_home_open}=    Is Data Science Projects Page Open
         IF    ${is_home_open} == ${TRUE}
             Log    message=After DS Project creation, user did not get redirected to details page...
+            ...    level=WARN
             Reload Page
             Wait Until Page Contains Element    ${DS_PROJECT_XP}  timeout=30s
             Wait Until Page Contains Element    xpath://a[.="${title}"]  timeout=30s

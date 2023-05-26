@@ -42,6 +42,7 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     Move To Tab    Permissions
     Change ${USER_C} Permissions To Admin
     Change ${USER_A} Permissions To Edit
+    Refresh Pages
     ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
     ${USER_A} Should Have Edit Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
@@ -181,21 +182,8 @@ Restore Permissions Of The Project
     IF    ${present_c} == ${TRUE}
         Remove ${USER_C} Permissions        
     END
-    Switch To User    ${USER_A}
-    Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
-    ...    wait_for_cards=${FALSE}
-    Project Should Not Be Listed    project_title=${PRJ_USER_B_TITLE}
-    Capture Page Screenshot
-    RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_A}
-    Switch To User    ${USER_C}
-    Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
-    ...    wait_for_cards=${FALSE}
-    Project Should Not Be Listed    project_title=${PRJ_USER_B_TITLE}
-    RoleBinding Should Not Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_C}
+    ${USER_A} Should Not Have Access To ${PRJ_USER_B_TITLE}
+    ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
 Refresh Pages
     Switch To User    ${USER_A}

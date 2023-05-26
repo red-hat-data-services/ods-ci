@@ -19,6 +19,8 @@ Verify User Can Create A DS Pipeline From DS Project UI
     ...       ODS-XYZ
     Reload RHODS Dashboard Page    expected_page=${PRJ_TITLE}
     ...    wait_for_cards=${FALSE}
+    Log    message=reload needed to avoid RHODS-8923
+    ...    level=WARN
     Create Pipeline server    dc_name=${DC_NAME}
     # Verify Pipeline Server Deployments    project_title=${PRJ_TITLE}
 

@@ -46,6 +46,7 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
     ${USER_A} Should Have Edit Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
+    Move To Tab    Permissions
     Remove ${USER_C} Permissions
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 

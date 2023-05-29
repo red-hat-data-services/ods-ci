@@ -11,6 +11,9 @@ Suite Teardown     Pipelines Suite Teardown
 ${PRJ_BASE_TITLE}=   DSP
 ${PRJ_DESCRIPTION}=   ${PRJ_BASE_TITLE} is a test project for validating DS Pipelines feature
 ${DC_NAME}=    ds-pipeline-conn
+${PIPELINE_TEST_BASENAME}=    iris
+${PIPELINE_TEST_DESC}=    test pipeline definition
+${PIPELINE_TEST_FILEPATH}=    ods_ci/tests/Resources/Files/pipeline-samples/iris-pipeline-compiled.yaml
 
 
 *** Test Cases ***
@@ -19,12 +22,30 @@ Verify User Can Create A DS Pipeline From DS Project UI
     ...       ODS-XYZ
     Create Pipeline server    dc_name=${DC_NAME}
     Wait Until Pipeline Server Is Deployed
+    Import Pipeline    name=${PIPELINE_TEST_NAME}
+    ...    description=${PIPELINE_TEST_DESC}
+    ...    project_title=${PRJ_TITLE}
+    ...    filepath=${PIPELINE_TEST_FILEPATH}
+    ...    press_cancel=${TRUE}
+    Pipeline Should Not Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
+    Import Pipeline    name=${PIPELINE_TEST_NAME}
+    ...    description=${PIPELINE_TEST_DESC}
+    ...    project_title=${PRJ_TITLE}
+    ...    filepath=${PIPELINE_TEST_FILEPATH}
+    ...    press_cancel=${FALSE}
+    Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
+    Capture Page Screenshot
+    
+
+
 
 *** Keywords ***
 Pipelines Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${prj_title}=    Set Variable    ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
+    ${iris_pipeline_name}=    Set Variable    ${PIPELINE_TEST_BASENAME}-${TEST_USER_3.USERNAME}
     Set Suite Variable    ${PRJ_TITLE}    ${prj_title}
+    Set Suite Variable    ${PIPELINE_TEST_NAME}    ${iris_pipeline_name}
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}    
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
@@ -37,7 +58,8 @@ Pipelines Suite Setup
     ...            aws_bucket_name=ods-ci-ds-pipelines
     Reload RHODS Dashboard Page    expected_page=${PRJ_TITLE}
     ...    wait_for_cards=${FALSE}
-    Maybe Wait For Dashboard Loading Spinner Page
+    Wait Until Project Is Open
+    TO DELETE # Maybe Wait For Dashboard Loading Spinner Page
     Log    message=reload needed to avoid RHODS-8923
     ...    level=WARN
     RHOSi Setup

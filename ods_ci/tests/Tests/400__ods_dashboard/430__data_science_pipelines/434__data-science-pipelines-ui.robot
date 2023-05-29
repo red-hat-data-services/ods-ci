@@ -14,10 +14,10 @@ ${DC_NAME}=    ds-pipeline-conn
 ${PIPELINE_TEST_BASENAME}=    iris
 ${PIPELINE_TEST_DESC}=    test pipeline definition
 ${PIPELINE_TEST_FILEPATH}=    ods_ci/tests/Resources/Files/pipeline-samples/iris-pipeline-compiled.yaml
-
+${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 
 *** Test Cases ***
-Verify User Can Create A DS Pipeline From DS Project UI
+Verify User Can Create And Run A DS Pipeline From DS Project Details Page
     [Tags]    Sanity    Tier1
     ...       ODS-2206
     Create Pipeline server    dc_name=${DC_NAME}
@@ -37,7 +37,25 @@ Verify User Can Create A DS Pipeline From DS Project UI
     Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
     ...    pipeline_description=${PIPELINE_TEST_DESC}
     Capture Page Screenshot
-    
+    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    from_actions_menu=${FALSE}    run_type=Immediate
+    ...    press_cancel=${TRUE}
+    Open Data Science Project Details Page    ${PRJ_TITLE}
+    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    from_actions_menu=${FALSE}    run_type=Immediate
+    # check pipeline details section - for future PR
+    # check pipeline representation exists  - for future PR
+    # check run output section  - for future PR
+    Open Data Science Project Details Page    ${PRJ_TITLE}
+    Wait Until Pipeline Last Run Is Finished    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    timeout=180s
+    Pipeline Last Run Should Be    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    run_name=${PIPELINE_TEST_RUN_BASENAME}
+    Pipeline Last Run Status Should Be    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    status=Completed
+    Pipeline Run Should be Listed    name=${PIPELINE_TEST_RUN_BASENAME}
+    ...    pipeline_name=${PIPELINE_TEST_NAME}
+
 
 *** Keywords ***
 Pipelines Suite Setup

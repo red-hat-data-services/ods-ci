@@ -25,19 +25,48 @@ Install DataSciencePipelinesApplication CR
     Should Be True    ${generation_value} == 1    DataSciencePipelinesApplication created
 
 Fill In Pipeline Import Form
-    [Documentation]    Compiles the form to create a pipeline server.
+    [Documentation]    Compiles the form to create a pipeline.
     ...                It works when you start server creation from either
     ...                DS Project details page or DS Pipelines page.
     [Arguments]    ${name}    ${filepath}    ${project_title}
-    ...            ${description}=${NONE}    ${press_cancel}=${FALSE}
+    ...            ${description}=${NONE}
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
     Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_DESC_INPUT_XP}    ${description}
     ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
     Choose File    //div[@class="pf-c-file-upload"]//input[@type="file"]    ${pwd}/${filepath}
     Element Should Be Enabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
-    IF    ${press_cancel} == ${TRUE}
-        Click Button    ${GENERIC_CANCEL_BTN_XP}
-    ELSE
-        Click Button    ${PIPELINES_IMPORT_BTN_FORM_XP}
-    END
+
+Fill In Run Creation Form
+    [Documentation]    Compiles the form to create a pipeline run.
+    ...                It works when you start server creation from either
+    ...                DS Project details page or DS Pipelines page.
+    [Arguments]    ${name}    ${pipeline_name}    ${from_actions}=${TRUE}    ${run_type}=Immediate    ${trigger_type}=Periodic
+    ...            ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
+    ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}&{model_param}
+    Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
+    Input Text    ${PIPELINE_DESC_INPUT_XP}    ${name}
+    Run Keyword And Continue On Failure
+    ...    Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}  
+    Select Pipeline For The Run    pipeline_name=${pipeline_name}
+    Element Should Be Enabled    ${GENERIC_CREATE_BTN_XP}
+    # select run_type
+    # set options based on run_type
+    # change model param if required
+    # check selected project
+    # insert name
+    # insert description
+    # select pipeline
+    # select run type
+    # insert additional params based on run type
+    # insert additinal params based on the model
+
+Select Pipeline For The Run
+    [Documentation]    Selects the given ${pipeline_name} from the pipeline
+    ...                dropdown in the Run creation form.
+    [Arguments]    ${pipeline_name}
+    Click Element    xpath://section[@id="run-section-pipeline"]//span[text()="Select a pipeline"]/..
+    Wait Until Page Contains Element    xpath://ul/li/a[text()="${pipeline_name}"]
+    Click Element     xpath://ul/li/a[text()="${pipeline_name}"]
+
+    

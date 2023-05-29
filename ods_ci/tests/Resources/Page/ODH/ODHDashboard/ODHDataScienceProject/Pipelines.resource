@@ -9,7 +9,7 @@ ${PIPELINES_SECTION_XP}=    xpath://div[@id="pipelines-projects"]
 ${PIPELINES_SERVER_BTN_XP}=    xpath://button[text()="Create a pipeline server"]
 ${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath://button[text()="Configure"]
 ${PIPELINES_IMPORT_BTN_XP}=    xpath://button[text()="Import pipeline"]
-
+${CREATE_RUN_BTN_XP}=    xpath://*[text()="Create run"]
 
 
 *** Keywords ***
@@ -45,6 +45,11 @@ Import Pipeline
     Wait Until Generic Modal Appears
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
     Fill In Pipeline Import Form    ${name}    ${filepath}    ${project_title}    ${description}    ${press_cancel}
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+    ELSE
+        Click Button    ${PIPELINES_IMPORT_BTN_FORM_XP}
+    END
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
 
@@ -54,18 +59,39 @@ Create Pipeline Run
     ...                - immediate
     ...                - schedule -> this requires to insert additional arguments
     ...                TEMPORARILY SUPPORTING ONLY IMMEDIATE RUNS AND DEFAULT MODEL PARAMS
-    [Arguments]    ${name}    ${pipeline_name}    ${run_type}=Immediate    ${trigger_type}=Periodic
-    ...            ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
-    ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    &{model_param}
-    Log    working in progress...
-    # check selected project
-    # insert name
-    # insert description
-    # select pipeline
-    # select run type
-    # insert additional params based on run type
-    # insert additinal params based on the model
-    
+    [Arguments]    ${name}    ${pipeline_name}    ${from_actions_menu}=${TRUE}    ${run_type}=Immediate
+    ...            ${trigger_type}=Periodic    ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
+    ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    ${press_cancel}=${FALSE}    &{model_param}
+    IF    ${from_actions_menu} == ${FALSE}
+        Show Pipeline Runs Section    pipeline_name=${pipeline_name}
+        Wait Until Page Contains Element    ${CREATE_RUN_BTN_XP}
+        Click Element    ${CREATE_RUN_BTN_XP}
+    ELSE
+        Pipelines.Click Action From Actions Menu    pipeline_name=${pipeline_name}
+        ...    action=Create run
+    END
+    Wait for RHODS Dashboard to Load    expected_page=Create run
+    ...    wait_for_cards=${FALSE}
+    Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
+    ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
+    ...    start_time=${start_time}    end_date=${end_date}    end_time=${end_time}
+    ...    cron_expr=${cron_expr}    &{model_param}
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+        Wait for RHODS Dashboard to Load    expected_page=Pipelines
+        ...    wait_for_cards=${FALSE}
+    ELSE
+        Click Element    ${GENERIC_CREATE_BTN_XP}
+        Wait for RHODS Dashboard to Load    expected_page=${name}
+        ...    wait_for_cards=${FALSE}
+    END
+
+Click Action From Actions Menu
+    [Documentation]    Click an action from Actions menu (3-dots menu on the right)
+    [Arguments]    ${pipeline_name}    ${action}
+    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${pipeline_name}"]]/td[contains(@class,"pf-c-table__action")]/div/button[@aria-label="Actions"]    # robocop: disable
+    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${pipeline_name}"]]/td[contains(@class,"pf-c-table__action")]/div/ul/li/button[text()="${action}"]    # robocop: disable
+    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${pipeline_name}"]]/td[contains(@class,"pf-c-table__action")]/div/ul/li/button[text()="${action}"]    # robocop: disable
 
 Pipeline Should Be Listed
     [Documentation]    Checks a pipeline is listed in the DS Project details page
@@ -93,6 +119,47 @@ Pipeline Should Not Be Listed
     ...    Wait Until Page Does Not Contain Element
     ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
 
+Pipeline Run Should Be Listed
+    [Documentation]    Checks a pipeline run is listed in the DS Project details page
+    ...                under the hidden run sub-section.
+    ...                THIS KEYWORD NEED A REFINEMENT TO CHECK THE RUN AND ITS CORRESPONDING STATUS
+    ...                WHEN MULTIPLE RUNS ARE EXECUTED
+    [Arguments]     ${name}    ${pipeline_name}
+    Show Pipeline Runs Section    pipeline_name=${pipeline_name}
+    Run keyword And Continue On Failure
+    ...    Wait Until Page Contains Element
+    ...        ${PIPELINES_SECTION_XP}//a//span[text()="${name}"]
+
+Pipeline Last Run Should Be
+    [Documentation]    Checks the pipeline last run which is reported is the expected one
+    [Arguments]    ${pipeline_name}    ${run_name}
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    Run keyword And Continue On Failure
+    ...    Page Should Contain Element
+    ...        ${pipeline_row_xp}//td/a//span[text()="${run_name}"]
+
+Pipeline Last Run Status Should Be
+    [Documentation]    Checks if the pipeline last run has the expected status
+    [Arguments]    ${pipeline_name}    ${status}
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    Run keyword And Continue On Failure
+    ...    Page Should Contain Element
+    ...        ${pipeline_row_xp}//td/div[text()="${status}"]
+
+Wait Until Pipeline Last Run Is Finished
+    [Documentation]
+    [Arguments]    ${pipeline_name}    ${timeout}=60s
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    Wait Until Page Does Not Contain Element    ${pipeline_row_xp}//td/a//span[text()="Running"]
+    ...    timeout=${timeout}
+
+Show Pipeline Runs Section
+    [Documentation]    Open the sub-section of the pipeline runs in the DS Project details page.
+    ...                The sub-section is hidden and the robot clicks on a toggle button
+    ...                near the pipeline name to show the sub-section
+    [Arguments]    ${pipeline_name}
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    Click Element    ${pipeline_row_xp}//td[@class="pf-c-table__toggle"]/button
 
 Verify Pipeline Server Deployments
     [Documentation]    Verifies the correct deployment of modelmesh in the rhods namespace

@@ -59,4 +59,6 @@ Verify Pipeline Server Deployments
     ...    label_selector=app=mariadb-pipelines-definition
     ${containerNames} =  Create List  mariadb
     Verify Deployment    ${db}  1  1  ${containerNames}
-
+    
+    @{all_pods} =  Oc Get    kind=Pod    namespace=${namespace}
+    Run Keyword And Continue On Failure    Length Should Be    ${all_pods}    4

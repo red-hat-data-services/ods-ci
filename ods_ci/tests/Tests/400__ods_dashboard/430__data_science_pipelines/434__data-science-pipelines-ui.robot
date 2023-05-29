@@ -17,13 +17,8 @@ ${DC_NAME}=    ds-pipeline-conn
 Verify User Can Create A DS Pipeline From DS Project UI
     [Tags]    Sanity    Tier1
     ...       ODS-XYZ
-    Reload RHODS Dashboard Page    expected_page=${PRJ_TITLE}
-    ...    wait_for_cards=${FALSE}
-    Log    message=reload needed to avoid RHODS-8923
-    ...    level=WARN
     Create Pipeline server    dc_name=${DC_NAME}
-    # Verify Pipeline Server Deployments    project_title=${PRJ_TITLE}
-
+    Wait Until Pipeline Server Is Deployed
 
 *** Keywords ***
 Pipelines Suite Setup
@@ -40,8 +35,20 @@ Pipelines Suite Setup
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-ds-pipelines
-    # RHOSi Setup
+    Reload RHODS Dashboard Page    expected_page=${PRJ_TITLE}
+    ...    wait_for_cards=${FALSE}
+    Maybe Wait For Dashboard Loading Spinner Page
+    Log    message=reload needed to avoid RHODS-8923
+    ...    level=WARN
+    RHOSi Setup
 
 Pipelines Suite Teardown
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
-    # RHOSi Teardown
+    RHOSi Teardown
+
+Wait Until Pipeline Server Is Deployed
+    [Documentation]    Waits until all the expected pods of the pipeline server
+    ...                are running
+    Wait Until Keyword Succeeds    5 times    5s
+    ...    Verify Pipeline Server Deployments    project_title=${PRJ_TITLE}
+

@@ -205,3 +205,27 @@ Get Pod Tolerations
     ${tolerations_list} =    Parse File For Tolerations    podspec.txt
     Remove File    podspec.txt
     RETURN    ${tolerations_list}
+
+Get Container Requests
+    [Documentation]    Gets the requests defined in a specified container for a Pod
+    [Arguments]    ${namespace}    ${label}    ${container_name}
+    ${out} =    Run    oc get pod -n ${namespace} -l ${label} -o json | jq '.items[].spec.containers[] | select(.name == "${container_name}") | .resources.requests'
+    RETURN    ${out}
+
+Get Container Limits
+    [Documentation]    Gets the limits defined in a specified container for a Pod
+    [Arguments]    ${namespace}    ${label}    ${container_name}
+    ${out} =    Run    oc get pod -n ${namespace} -l ${label} -o json | jq '.items[].spec.containers[] | select(.name == "${container_name}") | .resources.limits'
+    RETURN    ${out}
+
+Get Node Pod Is Running On
+    [Documentation]    Returns the OCP name of the Node a specified Pod is running on
+    [Arguments]    ${namespace}    ${label}
+    ${node} =    Run    oc get pod -n ${namespace} -l ${label} -o json | jq '.items[].spec.nodeName'
+    RETURN    ${node}
+
+Get Instance Type Of Node
+    [Documentation]    Returns the Instance Type of an OCP Node
+    [Arguments]    ${node}
+    ${type} =    Run    oc get Node -o json ${node} | jq '.metadata.labels["beta.kubernetes.io/instance-type"]'
+    RETURN    ${type}

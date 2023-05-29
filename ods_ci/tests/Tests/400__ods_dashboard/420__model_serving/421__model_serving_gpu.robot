@@ -1,5 +1,6 @@
 *** Settings ***
 Library           OperatingSystem
+Library           ../../../../libs/Helpers.py
 Resource          ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
@@ -41,8 +42,12 @@ Verify GPU Model Deployment Via UI
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
     ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
-    # Verify serving pod is deployed on GPU node?
-    # Verify request for no_gpu nvidia.com/gpu resources?
+    ${requests} =    Get Container Requests    namespace=${PRJ_TITLE}    
+    ...    label=name=modelmesh-serving-${runtime_pod_name}    container_name=ovms
+    Should Contain    ${requests}    "nvidia.com/gpu": "1"
+    ${node} =    Get Node Pod Is Running On    namespace=${PRJ_TITLE}    label=name=modelmesh-serving-${runtime_pod_name}
+    ${type} =    Get Instance Type Of Node    ${node}
+    Should Be Equal As Strings    ${type}    "g4dn.xlarge"
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
 
@@ -50,13 +55,15 @@ Test Inference Load On GPU
     [Documentation]    Test the inference load on the GPU after sending random requests to the endpoint
     [Tags]    Sanity    Tier1    Resources-GPU
     ...    ODS-XXXX
-    Skip
-    # Send random requests to inference endpoint
+    ${url}=    Get Model Route via UI    ${MODEL_NAME}
+    Send Random Inference Request     endpoint=${url}    no_requests=100
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0
-    # ${expression} =    Set Variable    DCGM_FI_PROF_GR_ENGINE_ACTIVE  #&step=1
-    # ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
-    # Log    DCGM_FI_PROF_GR_ENGINE_ACTIVE: ${resp.json()["data"]["result"][0]["value"][-1]}
-    #Should Be True    ${resp.json()["data"]["result"][0]["value"][-1]} > ${0}
+    ${prometheus_route} =    Get OpenShift Prometheus Route
+    ${sa_token} =    Get OpenShift Prometheus Service Account Token
+    ${expression} =    Set Variable    DCGM_FI_PROF_GR_ENGINE_ACTIVE  #&step=1
+    ${resp} =    Prometheus.Run Query    ${prometheus_route}    ${sa_token}    ${expression}
+    Log    DCGM_FI_PROF_GR_ENGINE_ACTIVE: ${resp.json()["data"]["result"][0]["value"][-1]}
+    Should Be True    ${resp.json()["data"]["result"][0]["value"][-1]} > ${0}
 
 *** Keywords ***
 Model Serving Suite Setup
@@ -88,7 +95,7 @@ Model Serving Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        Run Keyword And Continue On Failure    Delete Model Via UI    test-model
+        Run Keyword And Continue On Failure    Delete Model Via UI    ${MODEL_NAME}
         ${projects}=    Create List    ${PRJ_TITLE}
         Delete Data Science Projects From CLI   ocp_projects=${projects}
     ELSE
@@ -129,3 +136,14 @@ Try Opening Create Server
         END
     END
 
+Get OpenShift Prometheus Route
+    [Documentation]    Fetches the route for the Prometheus instance of openshift-monitoring
+    ${host} =    Run    oc get route prometheus-k8s -n openshift-monitoring -o json | jq '.status.ingress[].host'
+    ${host} =    Strip String    ${host}    characters="
+    ${route} =    Catenate    SEPARATOR=    https://    ${host}
+    RETURN    ${route}
+
+Get OpenShift Prometheus Service Account Token
+    [Documentation]    Returns a token for a service account to be used with Prometheus
+    ${token} =    Run    oc serviceaccounts new-token prometheus-k8s -n openshift-monitoring
+    RETURN    ${token}

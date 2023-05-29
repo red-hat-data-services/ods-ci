@@ -233,3 +233,31 @@ class Helpers:
                 ["threshold", threshold],
                 ["exception", e],
             ]
+        
+    @keyword
+    def send_random_inference_request(self, endpoint, value_range=[0,255], shape={'B': 1, 'C': 3, 'H': 512, 'W': 512}, no_requests=100):
+        import os
+        import random
+        import requests
+
+        for _ in range(no_requests):
+            print(value_range)
+            print(shape)
+            print(shape['C']*shape['H']*shape['W'])
+            print(str(list(shape.values())))
+
+            data_img = [random.randrange(value_range[0],value_range[1]) for _ in range(shape['C']*shape['H']*shape['W'])]
+
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+
+            data = '{ "model_name": "vehicle-detection-0202", "inputs": [{ "name": "image", "shape": '+str(list(shape.values()))+', "datatype": "FP32", "data": '+str(data_img)+' }]}'
+
+            response = requests.post(
+                endpoint,
+                headers=headers,
+                data=data,
+                verify=False,
+            )
+            print(response.status_code)

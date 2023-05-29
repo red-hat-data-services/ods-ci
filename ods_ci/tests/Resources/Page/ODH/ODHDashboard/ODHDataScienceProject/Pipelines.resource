@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation    Collection of keywords to interact with DS Pipelines
 Resource       Projects.resource
+Resource       ../ODHDataSciencePipelines.resource
 
 
 *** Variables ***
@@ -8,9 +9,7 @@ ${PIPELINES_SECTION_XP}=    xpath://div[@id="pipelines-projects"]
 ${PIPELINES_SERVER_BTN_XP}=    xpath://button[text()="Create a pipeline server"]
 ${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath://button[text()="Configure"]
 ${PIPELINES_IMPORT_BTN_XP}=    xpath://button[text()="Import pipeline"]
-${PIPELINES_IMPORT_BTN_FORM_XP}=    xpath://footer/button[text()="Import pipeline"]
-${PIPELINE_NAME_INPUT_XP}=    id:pipeline-name
-${PIPELINE_DESC_INPUT_XP}=    id:pipeline-description
+
 
 
 *** Keywords ***
@@ -26,7 +25,6 @@ Create Pipeline server
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_SERVER_CONFIG_BTN_XP}
     Select Data Connection    dc_name=${dc_name}
     Element Should Be Enabled    ${PIPELINES_SERVER_CONFIG_BTN_XP}
-    # Sleep    10s    Waiting to give time the dc secret to be fully ready
     Click Element    ${PIPELINES_SERVER_CONFIG_BTN_XP}
     Wait Until Generic Modal Disappears
 
@@ -46,18 +44,28 @@ Import Pipeline
     Click Button    ${PIPELINES_IMPORT_BTN_XP}
     Wait Until Generic Modal Appears
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
-    Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
-    Input Text    ${PIPELINE_DESC_INPUT_XP}    ${description}
-    ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
-    Choose File    //div[@class="pf-c-file-upload"]//input[@type="file"]    ${pwd}/${filepath}
-    Element Should Be Enabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
-    IF    ${press_cancel} == ${TRUE}
-        Click Button    ${GENERIC_CANCEL_BTN_XP}
-    ELSE
-        Click Button    ${PIPELINES_IMPORT_BTN_FORM_XP}
-    END
+    Fill In Pipeline Import Form    ${name}    ${filepath}    ${project_title}    ${description}    ${press_cancel}
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
+
+Create Pipeline Run
+    [Documentation]    Create a pipeline run from DS Project details page.
+    ...                Note that the ${type} arguments can accept:
+    ...                - immediate
+    ...                - schedule -> this requires to insert additional arguments
+    ...                TEMPORARILY SUPPORTING ONLY IMMEDIATE RUNS AND DEFAULT MODEL PARAMS
+    [Arguments]    ${name}    ${pipeline_name}    ${run_type}=Immediate    ${trigger_type}=Periodic
+    ...            ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
+    ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    &{model_param}
+    Log    working in progress...
+    # check selected project
+    # insert name
+    # insert description
+    # select pipeline
+    # select run type
+    # insert additional params based on run type
+    # insert additinal params based on the model
+    
 
 Pipeline Should Be Listed
     [Documentation]    Checks a pipeline is listed in the DS Project details page
@@ -74,7 +82,6 @@ Pipeline Should Be Listed
         ...    Wait Until Page Contains Element
         ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
     END
-
 
 Pipeline Should Not Be Listed
     [Documentation]    Checks a pipeline is not listed in the DS Project details page

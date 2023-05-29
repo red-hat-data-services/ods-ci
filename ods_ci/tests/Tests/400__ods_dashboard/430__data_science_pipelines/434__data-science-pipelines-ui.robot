@@ -39,8 +39,6 @@ Verify User Can Create A DS Pipeline From DS Project UI
     Capture Page Screenshot
     
 
-
-
 *** Keywords ***
 Pipelines Suite Setup
     Set Library Search Order    SeleniumLibrary
@@ -53,6 +51,7 @@ Pipelines Suite Setup
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
+    # Open Data Science Project Details Page    ${PRJ_TITLE}
     Create Data Science Project    title=${PRJ_TITLE}
     ...    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
@@ -60,7 +59,7 @@ Pipelines Suite Setup
     ...            aws_bucket_name=ods-ci-ds-pipelines
     Reload RHODS Dashboard Page    expected_page=${PRJ_TITLE}
     ...    wait_for_cards=${FALSE}
-    Wait Until Project Is Open
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
     # TO DELETE # Maybe Wait For Dashboard Loading Spinner Page
     Log    message=reload needed to avoid RHODS-8923
     ...    level=WARN

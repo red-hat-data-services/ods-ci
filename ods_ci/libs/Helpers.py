@@ -257,7 +257,6 @@ class Helpers:
             response = requests.post(
                 endpoint,
                 headers=headers,
-                data=data,
-                verify=False,
+                data=data
             )
             print(response.status_code)

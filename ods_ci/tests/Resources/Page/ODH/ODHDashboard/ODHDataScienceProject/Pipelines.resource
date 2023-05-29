@@ -61,17 +61,31 @@ Import Pipeline
 
 Pipeline Should Be Listed
     [Documentation]    Checks a pipeline is listed in the DS Project details page
-    [Arguments]     ${pipeline_name}
+    [Arguments]     ${pipeline_name}    ${pipeline_description}
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
     ...        ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
+    IF    "${pipeline_description}" == ${NONE}
+        Run keyword And Continue On Failure
+        ...    Wait Until Page Does Not Contain Element
+        ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
+    ELSE
+        Run keyword And Continue On Failure
+        ...    Wait Until Page Contains Element
+        ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
+    END
+
 
 Pipeline Should Not Be Listed
     [Documentation]    Checks a pipeline is not listed in the DS Project details page
-    [Arguments]     ${pipeline_name}
+    [Arguments]     ${pipeline_name}    ${pipeline_description}
     Run keyword And Continue On Failure
     ...    Wait Until Page Does Not Contain Element
     ...        ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
+    Run keyword And Continue On Failure
+    ...    Wait Until Page Does Not Contain Element
+    ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
+
 
 Verify Pipeline Server Deployments
     [Documentation]    Verifies the correct deployment of modelmesh in the rhods namespace

@@ -19,7 +19,7 @@ ${PIPELINE_TEST_FILEPATH}=    ods_ci/tests/Resources/Files/pipeline-samples/iris
 *** Test Cases ***
 Verify User Can Create A DS Pipeline From DS Project UI
     [Tags]    Sanity    Tier1
-    ...       ODS-XYZ
+    ...       ODS-2206
     Create Pipeline server    dc_name=${DC_NAME}
     Wait Until Pipeline Server Is Deployed
     Import Pipeline    name=${PIPELINE_TEST_NAME}
@@ -28,12 +28,14 @@ Verify User Can Create A DS Pipeline From DS Project UI
     ...    filepath=${PIPELINE_TEST_FILEPATH}
     ...    press_cancel=${TRUE}
     Pipeline Should Not Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    pipeline_description=${PIPELINE_TEST_DESC}
     Import Pipeline    name=${PIPELINE_TEST_NAME}
     ...    description=${PIPELINE_TEST_DESC}
     ...    project_title=${PRJ_TITLE}
     ...    filepath=${PIPELINE_TEST_FILEPATH}
     ...    press_cancel=${FALSE}
     Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    pipeline_description=${PIPELINE_TEST_DESC}
     Capture Page Screenshot
     
 
@@ -59,7 +61,7 @@ Pipelines Suite Setup
     Reload RHODS Dashboard Page    expected_page=${PRJ_TITLE}
     ...    wait_for_cards=${FALSE}
     Wait Until Project Is Open
-    TO DELETE # Maybe Wait For Dashboard Loading Spinner Page
+    # TO DELETE # Maybe Wait For Dashboard Loading Spinner Page
     Log    message=reload needed to avoid RHODS-8923
     ...    level=WARN
     RHOSi Setup

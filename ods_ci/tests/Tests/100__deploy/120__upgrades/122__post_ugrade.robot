@@ -114,6 +114,7 @@ Dashboard Suite Setup
 
 Dashboard Test Teardown
     [Documentation]  Basic suite Teradown
+    Upgrade Test Teardown
     Close All Browsers
 
 Get Dashboard Config Data
@@ -126,8 +127,27 @@ Set Default Users
     [Documentation]  Set Default user settings
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
-
+    Upgrade Test Teardown
 Delete OOTB Image
    [Documentation]  Delete the Custom notbook create
    ${status}  Run Keyword And Return Status     Oc Delete  kind=ImageStream  name=byon-upgrade  namespace=redhat-ods-applications  #robocop:disable
    IF    not ${status}   Fail    Notebook image is deleted after the upgrade
+   Upgrade Test Teardown
+
+Upgrade Test Teardown
+    Skip If RHODS Is Self-Managed
+    ${expression} =    Set Variable    rhods_aggregate_availability&step=1
+    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
+    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
+    @{list_values} =    Create List    1
+     Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
+    ${expression} =    Set Variable     rhods_aggregate_availability{name="rhods-dashboard"}&step=1
+    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
+    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
+    @{list_values} =    Create List    1
+    Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
+    ${expression} =    Set Variable     rhods_aggregate_availability{name="notebook-spawner"}&step=1
+    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
+    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
+    @{list_values} =    Create List    1
+    Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}

@@ -23,7 +23,7 @@ ${RUNTIME_NAME}=    Model Serving GPU Test
 Verify GPU Model Deployment Via UI
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
     [Tags]    Sanity    Tier1    Resources-GPU
-    ...    ODS-XXXX
+    ...    ODS-2214
     Open Model Serving Home Page
     Try Opening Create Server
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
@@ -54,7 +54,7 @@ Verify GPU Model Deployment Via UI
 Test Inference Load On GPU
     [Documentation]    Test the inference load on the GPU after sending random requests to the endpoint
     [Tags]    Sanity    Tier1    Resources-GPU
-    ...    ODS-XXXX
+    ...    ODS-2213
     ${url}=    Get Model Route via UI    ${MODEL_NAME}
     Send Random Inference Request     endpoint=${url}    no_requests=100
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0

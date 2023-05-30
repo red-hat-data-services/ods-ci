@@ -69,4 +69,8 @@ Select Pipeline For The Run
     Wait Until Page Contains Element    xpath://ul/li/a[text()="${pipeline_name}"]
     Click Element     xpath://ul/li/a[text()="${pipeline_name}"]
 
-    
+Get Workflow Name From Topology Page
+    [Documentation]    Returns the workflow name corresponding to the displayed pipeline.
+    ...                The workflow name can be used to retrieve pods, for example
+    ${workflow_name}=    Get Text    xpath://div/div[text()="Workflow name"]/following-sibling::div
+    RETURN    ${workflow_name}

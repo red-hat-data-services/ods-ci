@@ -318,8 +318,8 @@ Extract URLs From Text
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:
   ...    Timeout in minutes: 10 by default.
-  ...    Excpected text: Verify the text exists in command output.
-  [Arguments]    ${command}    ${timeout_min}=10    ${excpected_text}=${NONE}
+  ...    Expected text: Verify the text exists in command output.
+  [Arguments]    ${command}    ${timeout_min}=10    ${expected_text}=${NONE}
   Log    Watching command output: ${command}   console=True
   @{args} =    Split String    ${command}
   ${process_log} =    Set Variable    ${OUTPUT DIR}/${args}[0].log
@@ -333,7 +333,7 @@ Run And Watch Command
   Terminate Process    ${process}    kill=true
   Should Be Equal As Integers	    ${proc_result.rc}    0    msg=Error occured while running: ${command}
   Should Be True    ${timeout_result.rc} == 0
-  Should Contain    ${process_log}    ${excpected_text}
+  Should Contain    ${process_log}    ${expected_text}
   RETURN    ${proc_result.rc}
 
 Read Command Log

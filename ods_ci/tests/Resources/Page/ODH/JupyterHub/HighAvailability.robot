@@ -32,7 +32,7 @@ Verify Deployment
                 Should Be Equal As Strings  ${state}[0]  running
             ELSE
                 Should Be Equal As Strings  ${state}[0]  ${containerStatuses[${j}]}
-            END 
+            END
         END
         Sort List  ${names}
         Sort List  ${containerNames}

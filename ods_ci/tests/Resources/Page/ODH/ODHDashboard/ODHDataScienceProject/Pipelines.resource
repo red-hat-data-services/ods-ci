@@ -56,7 +56,7 @@ Import Pipeline
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
 
-Create Pipeline Run
+Create Pipeline Run    # robocop: disable
     [Documentation]    Create a pipeline run from DS Project details page.
     ...                Note that the ${type} arguments can accept:
     ...                - immediate
@@ -73,7 +73,7 @@ Create Pipeline Run
         Pipelines.Click Action From Actions Menu    pipeline_name=${pipeline_name}
         ...    action=Create run
     END
-    Wait for RHODS Dashboard to Load    expected_page=Create run
+    Wait For RHODS Dashboard To Load    expected_page=Create run
     ...    wait_for_cards=${FALSE}
     Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
     ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
@@ -81,13 +81,13 @@ Create Pipeline Run
     ...    cron_expr=${cron_expr}    &{model_param}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
-        Wait for RHODS Dashboard to Load    expected_page=Pipelines
+        Wait For RHODS Dashboard To Load    expected_page=Pipelines
         ...    wait_for_cards=${FALSE}
         ${workflow_name}=    Set Variable    ${NONE}
     ELSE
         Click Element    ${GENERIC_CREATE_BTN_XP}
         Wait Until Page Contains Run Topology Page    run_name=${name}
-        ${workflow_name}=    Get Workflow Name From Topology Page    
+        ${workflow_name}=    Get Workflow Name From Topology Page
     END
     RETURN    ${workflow_name}
 
@@ -103,15 +103,15 @@ Pipeline Should Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...        ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
+    ...    ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
     IF    "${pipeline_description}" == ${NONE}
         Run Keyword And Continue On Failure
         ...    Wait Until Page Does Not Contain Element
-        ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
+        ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]    # robocop: disable
     ELSE
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
-        ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
+        ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]    # robocop: disable
     END
 
 Pipeline Should Not Be Listed
@@ -119,10 +119,10 @@ Pipeline Should Not Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Does Not Contain Element
-    ...        ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
+    ...    ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
     Run Keyword And Continue On Failure
     ...    Wait Until Page Does Not Contain Element
-    ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
+    ...    ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]    # robocop: disable
 
 Pipeline Run Should Be Listed
     [Documentation]    Checks a pipeline run is listed in the DS Project details page
@@ -133,35 +133,37 @@ Pipeline Run Should Be Listed
     Show Pipeline Runs Section    pipeline_name=${pipeline_name}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...        ${PIPELINES_SECTION_XP}//a//span[text()="${name}"]
+    ...    ${PIPELINES_SECTION_XP}//a//span[text()="${name}"]
 
 Pipeline Last Run Should Be
     [Documentation]    Checks the pipeline last run which is reported is the expected one
     [Arguments]    ${pipeline_name}    ${run_name}
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
     Run Keyword And Continue On Failure
     ...    Page Should Contain Element
-    ...        ${pipeline_row_xp}//td/a//span[text()="${run_name}"]
+    ...    ${pipeline_row_xp}//td/a//span[text()="${run_name}"]
 
 Pipeline Last Run Status Should Be
     [Documentation]    Checks if the pipeline last run has the expected status
     [Arguments]    ${pipeline_name}    ${status}
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
     Run Keyword And Continue On Failure
     ...    Page Should Contain Element
-    ...        ${pipeline_row_xp}//td/div[text()="${status}"]
+    ...    ${pipeline_row_xp}//td/div[text()="${status}"]
 
 Wait Until Pipeline Last Run Is Finished
-    [Documentation]
+    [Documentation]    Waits until the run reported in the "last run" column of the test pipeline
+    ...                in the DS Project details page completes the execution (i.e., status is not Running)
     [Arguments]    ${pipeline_name}    ${timeout}=60s
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
     Wait Until Page Does Not Contain Element    ${pipeline_row_xp}//td/div[text()="Running"]
     ...    timeout=${timeout}
 
 Wait Until Pipeline Last Run Is Started
-    [Documentation]
+    [Documentation]    Waits until the run reported in the "last run" column of the test pipeline
+    ...                in the DS Project details page starts the execution (i.e., status is Running)
     [Arguments]    ${pipeline_name}    ${timeout}=60s
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
     Wait Until Page Contains Element    ${pipeline_row_xp}//td/div[text()="Running"]
     ...    timeout=${timeout}
 
@@ -170,10 +172,12 @@ Show Pipeline Runs Section
     ...                The sub-section is hidden and the robot clicks on a toggle button
     ...                near the pipeline name to show the sub-section
     [Arguments]    ${pipeline_name}
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
     Click Element    ${pipeline_row_xp}//td[@class="pf-c-table__toggle"]/button
 
 Wait Until Page Contains Run Topology Page
+    [Documentation]    Waits until the page containing the run details and its topology
+    ...                is rendered on the screen
     [Arguments]    ${run_name}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    xpath://h1//div[text()="${run_name}"]    timeout=10s
@@ -184,7 +188,7 @@ Wait Until Page Contains Run Topology Page
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${RUN_TOPOLOGY_XP}
 
-Verify Pipeline Server Deployments
+Verify Pipeline Server Deployments    # robocop: disable
     [Documentation]    Verifies the correct deployment of DS Pipelines in the rhods namespace
     [Arguments]    ${project_title}
     ${namespace}=    Get Openshift Namespace From Data Science Project

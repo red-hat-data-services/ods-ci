@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation      Suite to test additional scenarios for Data Science Projects (a.k.a DSG) feature
+Documentation      Suite to test Data Science Pipeline feature using RHODS UI
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
@@ -16,11 +16,14 @@ ${PIPELINE_TEST_DESC}=    test pipeline definition
 ${PIPELINE_TEST_FILEPATH}=    ods_ci/tests/Resources/Files/pipeline-samples/iris-pipeline-compiled.yaml
 ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 
+
 *** Test Cases ***
-Verify User Can Create And Run A DS Pipeline From DS Project Details Page
+Verify User Can Create And Run A DS Pipeline From DS Project Details Page    # robocop: disable
+    [Documentation]    Verifies user are able to create and execute a DS Pipeline leveraging on
+    ...                DS Project UI
     [Tags]    Sanity    Tier1
     ...       ODS-2206
-    Create Pipeline server    dc_name=${DC_NAME}
+    Create Pipeline Server    dc_name=${DC_NAME}
     Wait Until Pipeline Server Is Deployed
     Import Pipeline    name=${PIPELINE_TEST_NAME}
     ...    description=${PIPELINE_TEST_DESC}
@@ -37,12 +40,12 @@ Verify User Can Create And Run A DS Pipeline From DS Project Details Page
     Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
     ...    pipeline_description=${PIPELINE_TEST_DESC}
     Capture Page Screenshot
-    ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}    pipeline_name=${PIPELINE_TEST_NAME}
-    ...    from_actions_menu=${FALSE}    run_type=Immediate
+    ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
+    ...    pipeline_name=${PIPELINE_TEST_NAME}    from_actions_menu=${FALSE}    run_type=Immediate
     ...    press_cancel=${TRUE}
     Open Data Science Project Details Page    ${PRJ_TITLE}
-    ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}    pipeline_name=${PIPELINE_TEST_NAME}
-    ...    from_actions_menu=${FALSE}    run_type=Immediate
+    ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
+    ...    pipeline_name=${PIPELINE_TEST_NAME}    from_actions_menu=${FALSE}    run_type=Immediate
     Open Data Science Project Details Page    ${PRJ_TITLE}
     Wait Until Pipeline Last Run Is Started    pipeline_name=${PIPELINE_TEST_NAME}
     ...    timeout=10s
@@ -95,39 +98,39 @@ Wait Until Pipeline Server Is Deployed
     Wait Until Keyword Succeeds    5 times    5s
     ...    Verify Pipeline Server Deployments    project_title=${PRJ_TITLE}
 
-Verify Pipeline Run Deployment Is Successful
+Verify Pipeline Run Deployment Is Successful    # robocop: disable
     [Documentation]    Verifies the correct deployment of the test pipeline run in the rhods namespace.
     ...                It checks all the expected pods for the "iris" test pipeline run used in the TC.
     [Arguments]    ${project_title}    ${workflow_name}
     ${namespace}=    Get Openshift Namespace From Data Science Project
     ...    project_title=${PRJ_TITLE}
-    @{data_prep} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{data_prep}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=tekton.dev/taskRun=${workflow_name}-data-prep
-    ${containerNames} =  Create List    step-main    step-output-taskrun-name
+    ${containerNames}=  Create List    step-main    step-output-taskrun-name
     ...    step-copy-results-artifacts    step-move-all-results-to-tekton-home    step-copy-artifacts
     ${podStatuses}=    Create List    Succeeded
-    ${containerStatuses} =  Create List        terminated    terminated
+    ${containerStatuses}=  Create List        terminated    terminated
     ...    terminated    terminated    terminated
     Verify Deployment    ${data_prep}  1  5  ${containerNames}    ${podStatuses}    ${containerStatuses}
-    @{train_model} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{train_model}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=tekton.dev/taskRun=${workflow_name}-train-model
-    ${containerNames} =  Create List    step-main    step-output-taskrun-name
+    ${containerNames}=  Create List    step-main    step-output-taskrun-name
     ...    step-copy-results-artifacts    step-move-all-results-to-tekton-home    step-copy-artifacts
     ${podStatuses}=    Create List    Succeeded
-    ${containerStatuses} =  Create List        terminated    terminated
+    ${containerStatuses}=  Create List        terminated    terminated
     ...    terminated    terminated    terminated
     Verify Deployment    ${train_model}  1  5  ${containerNames}    ${podStatuses}    ${containerStatuses}
-    @{eval_model} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{eval_model}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=tekton.dev/taskRun=${workflow_name}-evaluate-model
-    ${containerNames} =  Create List    step-main    step-copy-artifacts
+    ${containerNames}=  Create List    step-main    step-copy-artifacts
     ${podStatuses}=    Create List    Succeeded
-    ${containerStatuses} =  Create List        terminated    terminated
+    ${containerStatuses}=  Create List        terminated    terminated
     ...    terminated    terminated    terminated
     Verify Deployment    ${eval_model}  1  2  ${containerNames}    ${podStatuses}    ${containerStatuses}
-    @{valid_model} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{valid_model}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=tekton.dev/taskRun=${workflow_name}-validate-model
-    ${containerNames} =  Create List    step-main
+    ${containerNames}=  Create List    step-main
     ${podStatuses}=    Create List    Succeeded
-    ${containerStatuses} =  Create List        terminated    terminated
+    ${containerStatuses}=  Create List        terminated    terminated
     ...    terminated    terminated    terminated
     Verify Deployment    ${valid_model}  1  1  ${containerNames}    ${podStatuses}    ${containerStatuses}

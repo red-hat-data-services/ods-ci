@@ -247,10 +247,6 @@ class Helpers:
         import requests
 
         for _ in range(no_requests):
-            print(value_range)
-            print(shape)
-            print(shape["C"] * shape["H"] * shape["W"])
-            print(str(list(shape.values())))
 
             data_img = [
                 random.randrange(value_range[0], value_range[1])

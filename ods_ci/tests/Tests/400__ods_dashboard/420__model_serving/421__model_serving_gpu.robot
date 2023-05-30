@@ -60,7 +60,7 @@ Test Inference Load On GPU
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0
     ${prometheus_route} =    Get OpenShift Prometheus Route
     ${sa_token} =    Get OpenShift Prometheus Service Account Token
-    ${expression} =    Set Variable    DCGM_FI_PROF_GR_ENGINE_ACTIVE  #&step=1
+    ${expression} =    Set Variable    DCGM_FI_PROF_GR_ENGINE_ACTIVE
     ${resp} =    Prometheus.Run Query    ${prometheus_route}    ${sa_token}    ${expression}
     Log    DCGM_FI_PROF_GR_ENGINE_ACTIVE: ${resp.json()["data"]["result"][0]["value"][-1]}
     Should Be True    ${resp.json()["data"]["result"][0]["value"][-1]} > ${0}

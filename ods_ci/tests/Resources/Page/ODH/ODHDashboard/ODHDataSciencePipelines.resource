@@ -47,7 +47,7 @@ Fill In Run Creation Form    # robocop: disable
     Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_DESC_INPUT_XP}    ${name}
     Run Keyword And Continue On Failure
-    ...    Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP} 
+    ...    Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
     Select Pipeline For The Run    pipeline_name=${pipeline_name}
     Element Should Be Enabled    ${GENERIC_CREATE_BTN_XP}
     # select run_type

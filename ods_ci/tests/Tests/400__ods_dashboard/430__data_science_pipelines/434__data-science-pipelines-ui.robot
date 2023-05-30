@@ -24,6 +24,7 @@ Verify User Can Create And Run A DS Pipeline From DS Project Details Page    # r
     [Tags]    Sanity    Tier1
     ...       ODS-2206
     Create Pipeline Server    dc_name=${DC_NAME}
+    ...    project_title=${PRJ_TITLE}
     Wait Until Pipeline Server Is Deployed
     Import Pipeline    name=${PIPELINE_TEST_NAME}
     ...    description=${PIPELINE_TEST_DESC}
@@ -95,7 +96,7 @@ Pipelines Suite Teardown
 Wait Until Pipeline Server Is Deployed
     [Documentation]    Waits until all the expected pods of the pipeline server
     ...                are running
-    Wait Until Keyword Succeeds    5 times    5s
+    Wait Until Keyword Succeeds    10 times    10s
     ...    Verify Pipeline Server Deployments    project_title=${PRJ_TITLE}
 
 Verify Pipeline Run Deployment Is Successful    # robocop: disable

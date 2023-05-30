@@ -20,7 +20,7 @@ Create Pipeline Server
     [Documentation]    Creates the DS Pipeline server from DS Project details page
     ...                It assumes the Data Connection is aleady created
     ...                and you wants to use defaul DB configurations [TEMPORARY]
-    [Arguments]    ${dc_name}
+    [Arguments]    ${dc_name}    ${project_title}
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_XP}
     Element Should Be Enabled    ${PIPELINES_SERVER_BTN_XP}
     Click Button    ${PIPELINES_SERVER_BTN_XP}
@@ -30,6 +30,8 @@ Create Pipeline Server
     Element Should Be Enabled    ${PIPELINES_SERVER_CONFIG_BTN_XP}
     Click Element    ${PIPELINES_SERVER_CONFIG_BTN_XP}
     Wait Until Generic Modal Disappears
+    Wait Until Project Is Open    project_title=${project_title}
+    ...    timeout-pre-spinner=5s    timeout-spinner=35s
 
 Select Data Connection
     [Documentation]    Selects an existing data connection from the dropdown

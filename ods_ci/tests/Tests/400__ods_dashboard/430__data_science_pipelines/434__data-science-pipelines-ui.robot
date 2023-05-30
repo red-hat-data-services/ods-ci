@@ -37,24 +37,25 @@ Verify User Can Create And Run A DS Pipeline From DS Project Details Page
     Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
     ...    pipeline_description=${PIPELINE_TEST_DESC}
     Capture Page Screenshot
-    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}    pipeline_name=${PIPELINE_TEST_NAME}
+    ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}    pipeline_name=${PIPELINE_TEST_NAME}
     ...    from_actions_menu=${FALSE}    run_type=Immediate
     ...    press_cancel=${TRUE}
     Open Data Science Project Details Page    ${PRJ_TITLE}
-    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}    pipeline_name=${PIPELINE_TEST_NAME}
+    ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}    pipeline_name=${PIPELINE_TEST_NAME}
     ...    from_actions_menu=${FALSE}    run_type=Immediate
-    # check pipeline details section - for future PR
-    # check pipeline representation exists  - for future PR
-    # check run output section  - for future PR
     Open Data Science Project Details Page    ${PRJ_TITLE}
+    Wait Until Pipeline Last Run Is Started    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    timeout=10s
     Wait Until Pipeline Last Run Is Finished    pipeline_name=${PIPELINE_TEST_NAME}
     ...    timeout=180s
     Pipeline Last Run Should Be    pipeline_name=${PIPELINE_TEST_NAME}
     ...    run_name=${PIPELINE_TEST_RUN_BASENAME}
     Pipeline Last Run Status Should Be    pipeline_name=${PIPELINE_TEST_NAME}
     ...    status=Completed
-    Pipeline Run Should be Listed    name=${PIPELINE_TEST_RUN_BASENAME}
+    Pipeline Run Should Be Listed    name=${PIPELINE_TEST_RUN_BASENAME}
     ...    pipeline_name=${PIPELINE_TEST_NAME}
+    Verify Pipeline Run Deployment Is Successful    project_title=${PRJ_TITLE}
+    ...    workflow_name=${workflow_name}
 
 
 *** Keywords ***
@@ -69,7 +70,6 @@ Pipelines Suite Setup
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
-    # Open Data Science Project Details Page    ${PRJ_TITLE}
     Create Data Science Project    title=${PRJ_TITLE}
     ...    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
@@ -78,12 +78,13 @@ Pipelines Suite Setup
     Reload RHODS Dashboard Page    expected_page=${PRJ_TITLE}
     ...    wait_for_cards=${FALSE}
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
-    # TO DELETE # Maybe Wait For Dashboard Loading Spinner Page
     Log    message=reload needed to avoid RHODS-8923
     ...    level=WARN
     RHOSi Setup
 
 Pipelines Suite Teardown
+    [Documentation]    Deletes the test project which automatically triggers the
+    ...                deletion of any pipeline resource contained in it
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
@@ -93,3 +94,39 @@ Wait Until Pipeline Server Is Deployed
     Wait Until Keyword Succeeds    5 times    5s
     ...    Verify Pipeline Server Deployments    project_title=${PRJ_TITLE}
 
+Verify Pipeline Run Deployment Is Successful
+    [Documentation]    Verifies the correct deployment of the test pipeline run in the rhods namespace.
+    ...                It checks all the expected pods for the "iris" test pipeline run used in the TC.
+    [Arguments]    ${project_title}    ${workflow_name}
+    ${namespace}=    Get Openshift Namespace From Data Science Project
+    ...    project_title=${PRJ_TITLE}
+    @{data_prep} =  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=tekton.dev/taskRun=${workflow_name}-data-prep
+    ${containerNames} =  Create List    step-main    step-output-taskrun-name
+    ...    step-copy-results-artifacts    step-move-all-results-to-tekton-home    step-copy-artifacts
+    ${podStatuses}=    Create List    Succeeded
+    ${containerStatuses} =  Create List        terminated    terminated
+    ...    terminated    terminated    terminated
+    Verify Deployment    ${data_prep}  1  5  ${containerNames}    ${podStatuses}    ${containerStatuses}
+    @{train_model} =  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=tekton.dev/taskRun=${workflow_name}-train-model
+    ${containerNames} =  Create List    step-main    step-output-taskrun-name
+    ...    step-copy-results-artifacts    step-move-all-results-to-tekton-home    step-copy-artifacts
+    ${podStatuses}=    Create List    Succeeded
+    ${containerStatuses} =  Create List        terminated    terminated
+    ...    terminated    terminated    terminated
+    Verify Deployment    ${train_model}  1  5  ${containerNames}    ${podStatuses}    ${containerStatuses}
+    @{eval_model} =  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=tekton.dev/taskRun=${workflow_name}-evaluate-model
+    ${containerNames} =  Create List    step-main    step-copy-artifacts
+    ${podStatuses}=    Create List    Succeeded
+    ${containerStatuses} =  Create List        terminated    terminated
+    ...    terminated    terminated    terminated
+    Verify Deployment    ${eval_model}  1  2  ${containerNames}    ${podStatuses}    ${containerStatuses}
+    @{valid_model} =  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=tekton.dev/taskRun=${workflow_name}-validate-model
+    ${containerNames} =  Create List    step-main
+    ${podStatuses}=    Create List    Succeeded
+    ${containerStatuses} =  Create List        terminated    terminated
+    ...    terminated    terminated    terminated
+    Verify Deployment    ${valid_model}  1  1  ${containerNames}    ${podStatuses}    ${containerStatuses}

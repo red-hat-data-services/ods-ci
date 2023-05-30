@@ -10,6 +10,9 @@ ${PIPELINES_SERVER_BTN_XP}=    xpath://button[text()="Create a pipeline server"]
 ${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath://button[text()="Configure"]
 ${PIPELINES_IMPORT_BTN_XP}=    xpath://button[text()="Import pipeline"]
 ${CREATE_RUN_BTN_XP}=    xpath://*[text()="Create run"]
+${RUN_TOPOLOGY_DETAILS_BTN_XP}=    xpath://li//button[text()="Details"]
+${RUN_TOPOLOGY_OUTPUT_BTN_XP}=    xpath://li//button[text()="Run output"]
+${RUN_TOPOLOGY_XP}=    css:div[data-test-id="topology"]
 
 
 *** Keywords ***
@@ -80,11 +83,13 @@ Create Pipeline Run
         Click Button    ${GENERIC_CANCEL_BTN_XP}
         Wait for RHODS Dashboard to Load    expected_page=Pipelines
         ...    wait_for_cards=${FALSE}
+        ${workflow_name}=    Set Variable    ${NONE}
     ELSE
         Click Element    ${GENERIC_CREATE_BTN_XP}
-        Wait for RHODS Dashboard to Load    expected_page=${name}
-        ...    wait_for_cards=${FALSE}
+        Wait Until Page Contains Run Topology Page    run_name=${name}
+        ${workflow_name}=    Get Workflow Name From Topology Page    
     END
+    RETURN    ${workflow_name}
 
 Click Action From Actions Menu
     [Documentation]    Click an action from Actions menu (3-dots menu on the right)
@@ -150,7 +155,14 @@ Wait Until Pipeline Last Run Is Finished
     [Documentation]
     [Arguments]    ${pipeline_name}    ${timeout}=60s
     ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
-    Wait Until Page Does Not Contain Element    ${pipeline_row_xp}//td/a//span[text()="Running"]
+    Wait Until Page Does Not Contain Element    ${pipeline_row_xp}//td/div[text()="Running"]
+    ...    timeout=${timeout}
+
+Wait Until Pipeline Last Run Is Started
+    [Documentation]
+    [Arguments]    ${pipeline_name}    ${timeout}=60s
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
+    Wait Until Page Contains Element    ${pipeline_row_xp}//td/div[text()="Running"]
     ...    timeout=${timeout}
 
 Show Pipeline Runs Section
@@ -161,8 +173,19 @@ Show Pipeline Runs Section
     ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
     Click Element    ${pipeline_row_xp}//td[@class="pf-c-table__toggle"]/button
 
+Wait Until Page Contains Run Topology Page
+    [Arguments]    ${run_name}
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element
+    ...    xpath://h1//div[text()="${run_name}"]    timeout=10s
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element
+    ...    ${RUN_TOPOLOGY_DETAILS_BTN_XP}
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element
+    ...    ${RUN_TOPOLOGY_OUTPUT_BTN_XP}
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element
+    ...    ${RUN_TOPOLOGY_XP}
+
 Verify Pipeline Server Deployments
-    [Documentation]    Verifies the correct deployment of modelmesh in the rhods namespace
+    [Documentation]    Verifies the correct deployment of DS Pipelines in the rhods namespace
     [Arguments]    ${project_title}
     ${namespace}=    Get Openshift Namespace From Data Science Project
     ...    project_title=${project_title}

@@ -11,6 +11,7 @@ Library     ../../../../../libs/Helpers.py
 Verify Deployment
     [Documentation]     verifies the status of a Deployment in Openshift
     [Arguments]  ${component}  ${nPods}  ${nContainers}  ${containerNames}
+    ...          ${podStatuses}=${NONE}  ${containerStatuses}=${NONE}
     #No. of replicas
     Length Should Be  ${component}  ${nPods}
 
@@ -21,9 +22,17 @@ Verify Deployment
         @{names} =  Create List
         FOR  ${j}  IN RANGE  0  ${nContainers}
             Append To List  ${names}  ${pod.status.containerStatuses[${j}].name}
-            Should Be Equal As Strings  ${pod.status.phase}  Running
             ${state} =  Get Dictionary Keys  ${pod.status.containerStatuses[${j}].state}
-            Should Be Equal As Strings  ${state}[0]  running
+            IF    "${podStatuses}" == ${NONE}
+                Should Be Equal As Strings  ${pod.status.phase}  Running
+            ELSE
+                Should Be Equal As Strings  ${pod.status.phase}  ${podStatuses[${index}]}
+            END
+            IF    "${containerStatuses}" == ${NONE}
+                Should Be Equal As Strings  ${state}[0]  running
+            ELSE
+                Should Be Equal As Strings  ${state}[0]  ${containerStatuses[${j}]}
+            END 
         END
         Sort List  ${names}
         Sort List  ${containerNames}

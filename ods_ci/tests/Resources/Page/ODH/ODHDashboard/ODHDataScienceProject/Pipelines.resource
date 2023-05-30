@@ -47,7 +47,7 @@ Import Pipeline
     Click Button    ${PIPELINES_IMPORT_BTN_XP}
     Wait Until Generic Modal Appears
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
-    Fill In Pipeline Import Form    ${name}    ${filepath}    ${project_title}    ${description}    ${press_cancel}
+    Fill In Pipeline Import Form    ${name}    ${filepath}    ${project_title}    ${description}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE

@@ -35,7 +35,10 @@ function generates_ldap_creds(){
   rand_string=""
   rand=$(generate_rand_string)
   export RAND_LDAP=$rand
-  echo Random LDAP pw: $rand
+  if [ "${RETURN_PW}" -eq 1 ]
+    then
+          echo Random LDAP pw: $rand
+  fi
   # generate users and pw (admin, user, noaccess)
   for i in {1..20}
     do
@@ -114,7 +117,10 @@ install_identity_provider(){
   # create htpasswd idp and user
   echo $OC_HOST
   rand_string=$(generate_rand_string)
-  echo Random htp pasword: $rand_string
+  if [ "${RETURN_PW}" -eq 1 ]
+    then
+        echo Random htp pasword: $rand_string
+  fi
   if [ "${USE_OCM_IDP}" -eq 1 ]
     then
         CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')

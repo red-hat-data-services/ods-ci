@@ -23,12 +23,12 @@ Verify Deployment
         FOR  ${j}  IN RANGE  0  ${nContainers}
             Append To List  ${names}  ${pod.status.containerStatuses[${j}].name}
             ${state} =  Get Dictionary Keys  ${pod.status.containerStatuses[${j}].state}
-            IF    "${podStatuses}" == ${NONE}
+            IF    "${podStatuses}" == "${NONE}"
                 Should Be Equal As Strings  ${pod.status.phase}  Running
             ELSE
                 Should Be Equal As Strings  ${pod.status.phase}  ${podStatuses[${index}]}
             END
-            IF    "${containerStatuses}" == ${NONE}
+            IF    "${containerStatuses}" == "${NONE}"
                 Should Be Equal As Strings  ${state}[0]  running
             ELSE
                 Should Be Equal As Strings  ${state}[0]  ${containerStatuses[${j}]}

@@ -1,5 +1,6 @@
 *** Settings ***
 Resource   ../install/oc_install.robot
+Resource   ../../../../tests/Resources/Common.robot
 Resource   oc_uninstall.robot
 
 Library    Process
@@ -36,37 +37,6 @@ Uninstall RHODS In Self Managed Cluster
         FAIL    Provided install type is not supported
   END
 
-Run and Watch Command
-  [Arguments]    ${command}    ${timeout_min}=10    ${excpected_text}=${NONE}
-  Log    Watching command output: ${command}   console=True
-  @{args} =    Split String    ${command}
-  ${process_log} =    Set Variable    ${OUTPUT DIR}/${args}[0].log
-  Create File    ${process_log}
-  Create File    ${process_log}.old
-  ${process} =    Start Process    ${command}    shell=True    stdout=${process_log}    stderr=STDOUT    # robocop: disable
-  Log    Shell process started in the background   console=True
-  ${timeout_result} =    Wait Until Keyword Succeeds    ${timeout_min} min    10 s
-  ...    Read Command Log    ${process}    ${process_log}
-  ${proc_result} =	    Wait For Process    ${process}    timeout=3 secs
-  Terminate Process    ${process}    kill=true
-  Should Be Equal As Integers	    ${proc_result.rc}    0    msg=Error occured while running: ${command}
-  Should Be True    ${timeout_result.rc} == 0
-  Should Contain    ${process_log}    ${excpected_text}
-  RETURN    ${proc_result.rc}
-
-Read Command Log
-  [Arguments]    ${process}    ${process_log}
-  Log To Console    .    no_newline=true
-  ${new_log_data} = 	Get File 	${process_log}
-  ${old_log_data} = 	Get File 	${process_log}.old
-  ${last_line_index} =    Get Line Count    ${old_log_data}
-  @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
-  FOR    ${line}    IN    @{new_lines}
-      Log To Console    ${line}
-  END
-  Create File    ${process_log}.old    ${new_log_data}
-  Process Should Be Stopped	    ${process}
-
 RHODS Operator Should Be Uninstalled
   Verify RHODS Uninstallation
   Log  RHODS has been uninstalled  console=yes
@@ -74,10 +44,8 @@ RHODS Operator Should Be Uninstalled
 Uninstall RHODS In Self Managed Cluster Using CLI
   [Documentation]   UnInstall rhods on self-managedcluster using cli
   Clone OLM Install Repo
-  #  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator   #robocop:disable
   ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator    timeout_min=20
   Should Be Equal As Integers	${return_code}	 0   msg=Error detected while un-installing RHODS
-  # Log To Console   ${output}
 
 Uninstall RHODS In Self Managed Cluster For Operatorhub
   [Documentation]   Uninstall rhods on self-managed cluster for operatorhub installtion

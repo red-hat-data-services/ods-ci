@@ -36,13 +36,12 @@ Upgrade RHODS
     ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n redhat-ods-operator -l name=rhods-operator --no-headers --output='custom-columns=STATUS:.status.phase'    #robocop:disable
     Should Contain    ${output}    Pending
     OpenShiftLibrary.Wait For Pods Status  namespace=redhat-ods-operator  timeout=300
-    [Teardown]   End Web Test
 
 TensorFlow Image Test
     [Documentation]   Run basic tensorflow notebook during upgrade
     [Tags]  Upgrade
     Launch Notebook    tensorflow   ${TEST_USER.USERNAME}     ${TEST_USER.PASSWORD}   ${TEST_USER.AUTH_TYPE}
-    [Teardown]   End Web Test
+    [Teardown]   Upgrade Test Teardown
 
 PyTorch Image Workload Test
     [Documentation]   Run basic pytorch notebook during upgrade
@@ -51,19 +50,10 @@ PyTorch Image Workload Test
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
-    [Teardown]   End Web Test
+    [Teardown]   Upgrade Test Teardown
 
 
 *** Keywords ***
-Dashboard Suite Setup
-    [Documentation]  Basic suite setup
-    Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
-
-Dashboard Test Teardown
-    [Documentation]  Basic suite teardown
-    Close All Browsers
-
 Launch Notebook
     [Documentation]  Launch notebook for the suite
     [Arguments]   ${notbook_image}=s2i-minimal-notebook   ${username}=${TEST_USER2.USERNAME}   ${password}=${TEST_USER2.PASSWORD}   ${auth_type}=${TEST_USER2.AUTH_TYPE}  #robocop: disable
@@ -76,3 +66,22 @@ Launch Notebook
     IF    ${authorization_required}    Authorize Jupyterhub Service Account
     Fix Spawner Status
     Spawn Notebook With Arguments   image=${notbook_image}    username=${username}  password=${password}  auth_type=${auth_type}   #robocop: disable
+
+Upgrade Test Teardown
+    End Web Test
+    Skip If RHODS Is Self-Managed
+    ${expression} =    Set Variable    rhods_aggregate_availability&step=1
+    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
+    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
+    @{list_values} =    Create List    1
+     Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
+    ${expression} =    Set Variable     rhods_aggregate_availability{name="rhods-dashboard"}&step=1
+    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
+    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
+    @{list_values} =    Create List    1
+    Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
+    ${expression} =    Set Variable     rhods_aggregate_availability{name="notebook-spawner"}&step=1
+    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
+    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
+    @{list_values} =    Create List    1
+    Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}

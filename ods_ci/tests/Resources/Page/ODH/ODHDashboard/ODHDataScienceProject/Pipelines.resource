@@ -16,7 +16,7 @@ ${RUN_TOPOLOGY_XP}=    css:div[data-test-id="topology"]
 
 
 *** Keywords ***
-Create Pipeline server
+Create Pipeline Server
     [Documentation]    Creates the DS Pipeline server from DS Project details page
     ...                It assumes the Data Connection is aleady created
     ...                and you wants to use defaul DB configurations [TEMPORARY]
@@ -101,15 +101,15 @@ Click Action From Actions Menu
 Pipeline Should Be Listed
     [Documentation]    Checks a pipeline is listed in the DS Project details page
     [Arguments]     ${pipeline_name}    ${pipeline_description}
-    Run keyword And Continue On Failure
+    Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
     ...        ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
     IF    "${pipeline_description}" == ${NONE}
-        Run keyword And Continue On Failure
+        Run Keyword And Continue On Failure
         ...    Wait Until Page Does Not Contain Element
         ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
     ELSE
-        Run keyword And Continue On Failure
+        Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
         ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
     END
@@ -117,10 +117,10 @@ Pipeline Should Be Listed
 Pipeline Should Not Be Listed
     [Documentation]    Checks a pipeline is not listed in the DS Project details page
     [Arguments]     ${pipeline_name}    ${pipeline_description}
-    Run keyword And Continue On Failure
+    Run Keyword And Continue On Failure
     ...    Wait Until Page Does Not Contain Element
     ...        ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
-    Run keyword And Continue On Failure
+    Run Keyword And Continue On Failure
     ...    Wait Until Page Does Not Contain Element
     ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]
 
@@ -131,7 +131,7 @@ Pipeline Run Should Be Listed
     ...                WHEN MULTIPLE RUNS ARE EXECUTED
     [Arguments]     ${name}    ${pipeline_name}
     Show Pipeline Runs Section    pipeline_name=${pipeline_name}
-    Run keyword And Continue On Failure
+    Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
     ...        ${PIPELINES_SECTION_XP}//a//span[text()="${name}"]
 
@@ -139,7 +139,7 @@ Pipeline Last Run Should Be
     [Documentation]    Checks the pipeline last run which is reported is the expected one
     [Arguments]    ${pipeline_name}    ${run_name}
     ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
-    Run keyword And Continue On Failure
+    Run Keyword And Continue On Failure
     ...    Page Should Contain Element
     ...        ${pipeline_row_xp}//td/a//span[text()="${run_name}"]
 
@@ -147,7 +147,7 @@ Pipeline Last Run Status Should Be
     [Documentation]    Checks if the pipeline last run has the expected status
     [Arguments]    ${pipeline_name}    ${status}
     ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]
-    Run keyword And Continue On Failure
+    Run Keyword And Continue On Failure
     ...    Page Should Contain Element
     ...        ${pipeline_row_xp}//td/div[text()="${status}"]
 
@@ -189,25 +189,21 @@ Verify Pipeline Server Deployments
     [Arguments]    ${project_title}
     ${namespace}=    Get Openshift Namespace From Data Science Project
     ...    project_title=${project_title}
-    @{persistenceagent} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{persistenceagent}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-persistenceagent-pipelines-definition
-    ${containerNames} =  Create List  ds-pipeline-persistenceagent
+    ${containerNames}=  Create List  ds-pipeline-persistenceagent
     Verify Deployment    ${persistenceagent}  1  1  ${containerNames}
-
-    @{pipeline_definition} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{pipeline_definition}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-pipelines-definition
-    ${containerNames} =  Create List  oauth-proxy    ds-pipeline-api-server
+    ${containerNames}=  Create List  oauth-proxy    ds-pipeline-api-server
     Verify Deployment    ${pipeline_definition}  1  2  ${containerNames}
-
-    @{schedule_workflow} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{schedule_workflow}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-scheduledworkflow-pipelines-definition
-    ${containerNames} =  Create List  ds-pipeline-scheduledworkflow
+    ${containerNames}=  Create List  ds-pipeline-scheduledworkflow
     Verify Deployment    ${schedule_workflow}  1  1  ${containerNames}
-
-    @{db} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{db}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=mariadb-pipelines-definition
-    ${containerNames} =  Create List  mariadb
+    ${containerNames}=  Create List  mariadb
     Verify Deployment    ${db}  1  1  ${containerNames}
-    
-    @{all_pods} =  Oc Get    kind=Pod    namespace=${namespace}
+    @{all_pods}=  Oc Get    kind=Pod    namespace=${namespace}
     Run Keyword And Continue On Failure    Length Should Be    ${all_pods}    4

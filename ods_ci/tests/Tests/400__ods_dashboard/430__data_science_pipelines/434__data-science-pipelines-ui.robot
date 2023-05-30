@@ -59,14 +59,15 @@ Verify User Can Create And Run A DS Pipeline From DS Project Details Page
 
 
 *** Keywords ***
-Pipelines Suite Setup
+Pipelines Suite Setup    # robocop: disable
+    [Documentation]    Sets global test variables, create a DS project and a data connection
     Set Library Search Order    SeleniumLibrary
     ${prj_title}=    Set Variable    ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
     ${iris_pipeline_name}=    Set Variable    ${PIPELINE_TEST_BASENAME}-${TEST_USER_3.USERNAME}
     Set Suite Variable    ${PRJ_TITLE}    ${prj_title}
     Set Suite Variable    ${PIPELINE_TEST_NAME}    ${iris_pipeline_name}
     ${to_delete}=    Create List    ${PRJ_TITLE}
-    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}    
+    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}

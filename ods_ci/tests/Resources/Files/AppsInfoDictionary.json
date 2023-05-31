@@ -147,22 +147,22 @@
              "image": "data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTQ1Ij48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2UwMDt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPlJlZEhhdC1Mb2dvLUhhdC1Db2xvcjwvdGl0bGU+PHBhdGggZD0iTTE1Ny43Nyw2Mi42MWExNCwxNCwwLDAsMSwuMzEsMy40MmMwLDE0Ljg4LTE4LjEsMTcuNDYtMzAuNjEsMTcuNDZDNzguODMsODMuNDksNDIuNTMsNTMuMjYsNDIuNTMsNDRhNi40Myw2LjQzLDAsMCwxLC4yMi0xLjk0bC0zLjY2LDkuMDZhMTguNDUsMTguNDUsMCwwLDAtMS41MSw3LjMzYzAsMTguMTEsNDEsNDUuNDgsODcuNzQsNDUuNDgsMjAuNjksMCwzNi40My03Ljc2LDM2LjQzLTIxLjc3LDAtMS4wOCwwLTEuOTQtMS43My0xMC4xM1oiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMjcuNDcsODMuNDljMTIuNTEsMCwzMC42MS0yLjU4LDMwLjYxLTE3LjQ2YTE0LDE0LDAsMCwwLS4zMS0zLjQybC03LjQ1LTMyLjM2Yy0xLjcyLTcuMTItMy4yMy0xMC4zNS0xNS43My0xNi42QzEyNC44OSw4LjY5LDEwMy43Ni41LDk3LjUxLjUsOTEuNjkuNSw5MCw4LDgzLjA2LDhjLTYuNjgsMC0xMS42NC01LjYtMTcuODktNS42LTYsMC05LjkxLDQuMDktMTIuOTMsMTIuNSwwLDAtOC40MSwyMy43Mi05LjQ5LDI3LjE2QTYuNDMsNi40MywwLDAsMCw0Mi41Myw0NGMwLDkuMjIsMzYuMywzOS40NSw4NC45NCwzOS40NU0xNjAsNzIuMDdjMS43Myw4LjE5LDEuNzMsOS4wNSwxLjczLDEwLjEzLDAsMTQtMTUuNzQsMjEuNzctMzYuNDMsMjEuNzdDNzguNTQsMTA0LDM3LjU4LDc2LjYsMzcuNTgsNTguNDlhMTguNDUsMTguNDUsMCwwLDEsMS41MS03LjMzQzIyLjI3LDUyLC41LDU1LC41LDc0LjIyYzAsMzEuNDgsNzQuNTksNzAuMjgsMTMzLjY1LDcwLjI4LDQ1LjI4LDAsNTYuNy0yMC40OCw1Ni43LTM2LjY1LDAtMTIuNzItMTEtMjcuMTYtMzAuODMtMzUuNzgiLz48L3N2Zz4=",
              "sidebar_h1": "Red Hat OpenShift Streams for Apache Kafka",
              "sidebar_links": {
-                  "0": {
-                        "text": "Get started",
-                        "url": "https://console.redhat.com/application-services/streams/kafkas",
-                        "matching": ""
-                  },
-                  "1": {
-                        "text": "https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka",
-                        "url": "https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka",
-                        "matching": ""
-                  },
-                  "2": {
-                        "text": "https://console.redhat.com/application-services/streams/kafkas",
-                        "url": "https://console.redhat.com/beta/application-services/streams/kafkas",
-                        "matching": ""
-                  }
-              }
+                   "0": {
+                         "text": "Get started",
+                         "url": "https://console.redhat.com/application-services/streams/kafkas",
+                         "matching": ""
+                   },
+                   "1": {
+                         "text": "https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka",
+                         "url": "https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka",
+                         "matching": ""
+                   },
+                   "2": {
+                         "text": "https://console.redhat.com/application-services/streams/kafkas",
+                         "url": "https://console.redhat.com/beta/application-services/streams/kafkas",
+                         "matching": ""
+                   }
+               }
         },
         "openvino": {
              "badges": ["Self-managed"],
@@ -204,7 +204,7 @@
              "sidebar_links": {
                    "0": {
                          "text": "Get started",
-                         "url": "https://docs.pachyderm.com/latest/getting_started/",
+                         "url": "https://docs.pachyderm.com/latest/getting-started",
                          "matching": ""
                    },
                    "1": {
@@ -224,7 +224,7 @@
                    },
                    "4": {
                          "text": "Open CV",
-                         "url": "https://docs.pachyderm.com/latest/getting_started/beginner_tutorial/",
+                         "url": "https://docs.pachyderm.com/latest/getting-started/beginner-tutorial/",
                          "matching": ""
                    },
                    "5": {
@@ -244,7 +244,7 @@
                    },
                    "8": {
                          "text": "tutorial",
-                         "url": "https://docs.pachyderm.com/latest/getting_started/beginner_tutorial/",
+                         "url": "https://docs.pachyderm.com/latest/getting-started/beginner-tutorial/",
                          "matching": ""
                    },
                    "9": {
@@ -255,51 +255,6 @@
                    "10": {
                          "text": "Pachyderm's python client",
                          "url": "https://python-pachyderm.readthedocs.io/en/stable/",
-                         "matching": ""
-                   }
-               }
-        },
-        "seldon-deploy": {
-             "badges": ["Self-managed"],
-             "provider": "by Seldon",
-             "title": "Seldon Deploy",
-             "description": "Seldon Deploy is a set of tools to simplify and accelerate the process of deploying and managing your machine learning models.",
-             "image": "data:image/svg+xml;base64,PHN2ZyB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczpzb2RpcG9kaT0iaHR0cDovL3NvZGlwb2RpLnNvdXJjZWZvcmdlLm5ldC9EVEQvc29kaXBvZGktMC5kdGQiIHhtbG5zOmlua3NjYXBlPSJodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy9uYW1lc3BhY2VzL2lua3NjYXBlIiBpbmtzY2FwZTp2ZXJzaW9uPSIxLjAgKDQwMzVhNGZiNDksIDIwMjAtMDUtMDEpIiBoZWlnaHQ9IjE1Ni4xODI5NSIgd2lkdGg9IjEyNS43NTU1OSIgc29kaXBvZGk6ZG9jbmFtZT0ic2VsZG9uLnN2ZyIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTI1Ljc1NTU5IDE1Ni4xODI5NiIgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSI+IDxtZXRhZGF0YQoKICBpZD0ibWV0YWRhdGEzNyI+CiAgPHJkZjpSREY+CiAgICA8Y2M6V29yawogICAgICByZGY6YWJvdXQ9IiI+CiAgICAgIDxkYzpmb3JtYXQ+aW1hZ2Uvc3ZnK3htbDwvZGM6Zm9ybWF0PgogICAgICA8ZGM6dHlwZQogICAgICAgIHJkZjpyZXNvdXJjZT0iaHR0cDovL3B1cmwub3JnL2RjL2RjbWl0eXBlL1N0aWxsSW1hZ2UiIC8+CiAgICA8L2NjOldvcms+CiAgPC9yZGY6UkRGPgo8L21ldGFkYXRhPiA8c29kaXBvZGk6bmFtZWR2aWV3CgogIGlua3NjYXBlOmN1cnJlbnQtbGF5ZXI9IkxheWVyXzEiCiAgaW5rc2NhcGU6d2luZG93LW1heGltaXplZD0iMCIKICBpbmtzY2FwZTp3aW5kb3cteT0iMTYxIgogIGlua3NjYXBlOndpbmRvdy14PSIyMTMxIgogIGlua3NjYXBlOmN5PSI3OC43OTQyNzQiCiAgaW5rc2NhcGU6Y3g9IjM1Ni4wOTk3MyIKICBpbmtzY2FwZTp6b29tPSIxLjgzMzc3NjMiCiAgc2hvd2dyaWQ9ImZhbHNlIgogIGlkPSJuYW1lZHZpZXczNSIKICBpbmtzY2FwZTp3aW5kb3ctaGVpZ2h0PSI4NzYiCiAgaW5rc2NhcGU6d2luZG93LXdpZHRoPSIyMzQ5IgogIGlua3NjYXBlOnBhZ2VzaGFkb3c9IjIiCiAgaW5rc2NhcGU6cGFnZW9wYWNpdHk9IjAiCiAgZ3VpZGV0b2xlcmFuY2U9IjEwIgogIGdyaWR0b2xlcmFuY2U9IjEwIgogIG9iamVjdHRvbGVyYW5jZT0iMTAiCiAgYm9yZGVyb3BhY2l0eT0iMSIKICBib3JkZXJjb2xvcj0iIzY2NjY2NiIKICBwYWdlY29sb3I9IiNmZmZmZmYiIC8+CjxkZWZzCgogIGlkPSJkZWZzNCI+CiAgPHN0eWxlCiAgICBpZD0ic3R5bGUyIj4uY2xzLTF7ZmlsbDojMDBkZGNmO30uY2xzLTJ7ZmlsbDojZmU0MDcxO30uY2xzLTN7ZmlsbDojNTE1OGZlO30uY2xzLTR7ZmlsbDojZmVmZWZlO308L3N0eWxlPgo8L2RlZnM+IDx0aXRsZQoKICBpZD0idGl0bGU2Ij5zZWxkb248L3RpdGxlPgo8cGF0aAoKICBpZD0icGF0aDgiCiAgZD0ibSAxMDcuMzI0MjMsODcuMzc5ODAzIGMgLTEyLjQwNywtNC4zOTQ3MiAtMjQuODIxNzIsLTguNzY5MzUgLTM3LjI3Nzg0LC0xMy4wMjE0OSBhIDQuOTE2NjksNC45MTY2OSAwIDAgMSAtMy40MTM0NSwtMy40NzE0OSBjIC00LjQwMzgxLC0xMi43NDExNSAtOC43MzkyLC0yNS41MTAyMiAtMTMuNDI3NDMsLTM4LjE0NzY1IGEgMjcuMjUsMjcuMjUgMCAwIDAgLTMxLjgyMjA4LC0xNi44MjQ4OSAyNy41NTI5LDI3LjU1MjkgMCAwIDAgLTIuNTI0NzIsNTIuOTk4NTQgcSAxOC43MjM4MSw2LjYzMDUzIDM3LjUwNzgxLDEzLjA5MDIxIGEgMy44NzExNSwzLjg3MTE1IDAgMCAxIDIuNjY5MDcsMi42ODMyOSBjIDQuNDA1LDEyLjc0MDcyIDguODE3MDgsMjUuNDc5OTk3IDEzLjM3NzQ0LDM4LjE2NTcwNyA0LjU5MzI2LDEyLjc3NyAxNy42OTczOSwyMC4wNzUxMyAzMS4yNTg3OSwxNy41OTM2OSAxMi42NDgyNiwtMi4zMTQzNCAyMi4xMjIwNywtMTMuOTIzIDIyLjA4MzM3LC0yNy4wNTk3NiBBIDI3LjM1MzQ0LDI3LjM1MzQ0IDAgMCAwIDEwNy4zMjQyMyw4Ny4zNzk4MDMgWiBNIDIxLjkxNzM3LDU2LjAzNDI4MyBhIDE0LjIwNTUxLDE0LjIwNTUxIDAgMCAxIC04Ljc5NDQ0LC0xNC41NTggMTQuNjA0NDUsMTQuNjA0NDUgMCAwIDEgMTIuNjEwNzgsLTEzLjEzMTUyIGMgNS44NDUyMiwtMC45NzA4OCAxMi42MjIwNywyLjM3OTcgMTQuODgzNjEsOC4xNzcyNSAzLjc4NjkyLDkuNzA4IDcuMDYwNDgsMTkuNjE2MjcgMTAuNzM5MTMsMjkuOTcyMzUgLTEwLjIyMjc4LC0zLjYxMDI5IC0xOS44OTg2OCwtNi44NTU3MSAtMjkuNDM5MDgsLTEwLjQ2MDA4IHogbSA5MC43OTYzMiw1OC45MzU3ODcgYyAtMC42OTI1Niw2LjU4OCAtNS43MTY4LDExLjY5NzgxIC0xMi42MzQ4OSwxMi44NTAxIC01Ljg2MjY3LDAuOTc2NSAtMTIuNzI3MTEsLTIuNTU0NDUgLTE0Ljk4OTM4LC04LjQ0MzMgLTMuNjgxMjEsLTkuNTgyNyAtNi44OTI4OCwtMTkuMzQ1ODMgLTEwLjUxNjQyLC0yOS42Mzk5OTcgNi4zMDczOCwyLjE5OTUzIDEyLjAxMzkyLDQuMTgzNzggMTcuNzE2MTksNi4xODAxMiAzLjc2MjM5LDEuMzE3MTQgNy41NTY1OCwyLjU1NDM4IDExLjI2OTIzLDQuMDAwMyBhIDE0LjUxOTM5LDE0LjUxOTM5IDAgMCAxIDkuMTU1MjcsMTUuMDUyNzc3IHoiCiAgY2xhc3M9ImNscy0xIiAvPgo8cGF0aAoKICBpZD0icGF0aDIyIgogIGQ9Im0gMzEuMDQyNzMsMTE0LjMxNTQ3IGMgLTEzLjk5ODcyLC0yLjg5ODYyIC0yNy4xMTA5OTk5LDEwLjYwMTU2IC0yNC4xMjU5MDk5LDI0LjY0ODU2IDEuNzQwOSw4LjE5MjUgNi42MzY0MDk5LDEzLjgyNDU4IDE0LjYyMjM2OTksMTYuMjE5MTEgOC4wODEzNiwyLjQyMyAxNS4zNTIxMSwwLjQwMzY5IDIxLjI5Nzg1LC01LjY0MTQyIDQuMzEzMTEsLTQuMzg1MTMgOC40MzU4NiwtOC45NTc2NCAxMi42Mzk1MywtMTMuNDUwMzEgNC4wODE2NiwtNC4zNjIyNSA4LjE1ODI2LC04LjcyOTI1IDEyLjMzODMyLC0xMy4yMDI1MiBhIDYuMDE0OSw2LjAxNDkgMCAwIDAgLTEuMDcsLTAuNTQwNTMgQyA1NC44NDkxMywxMTkuNjQ3OTIgNDIuOTg1OTEsMTE2Ljc4ODYgMzEuMDQyNzMsMTE0LjMxNTQ3IFogbSAxLjI1NDY0LDI3LjExNzg2IGMgLTIuNDU3NTIsMi4yOTI0OCAtNi41ODExOCwyLjExMDkgLTkuMzQ0MTIsMC4xMzM3OCBhIDcuOTQxNzYsNy45NDE3NiAwIDAgMSAtMi45MDk3MiwtOS4xMTkwOCBjIDEuMjI4NTcsLTMuNDE2NzQgNC4zNjM3LC01Ljg1MyA3LjkwMTEyLC01LjMyNTggNC45MjEzMiwwLjczMzU4IDkuNzYwNTYsMi4wMTgyNSAxNS4xNjE1LDMuMTgwMzYgLTMuODM3NDcsMy45ODczNiAtNy4xNjMzOSw3LjczMDIyIC0xMC44MDg3OCwxMS4xMzA3NCB6IgogIGNsYXNzPSJjbHMtMiIgLz4KPHBhdGgKCiAgaWQ9InBhdGgyNCIKICBkPSJtIDgyLjcwNzUzLDM5LjE0Njc3MyBjIDUuMjk3LDEuMTA5MzEgMTAuNDU4NjEsMy4wMDkyMSAxNS45Njg4NywyLjk3MTg2IGEgMjEuMDE0NjgsMjEuMDE0NjggMCAwIDAgMTAuNTc0MjIsLTM4Ljk1ODkzIGMgLTcuODc1NDksLTQuODIwOCAtMTguNDY4ODEsLTQuMTY5NjcgLTI0Ljg4MzMsMi4yNTkxIC04Ljk3MjQ4LDguOTkyMzcgLTE3LjUxMTQ4LDE4LjQxNzMgLTI2LjQ3MTA3LDI3LjkwNjI1IGEgMTAuMzk3MTYsMTAuMzk3MTYgMCAwIDAgMS4yMjg3NiwwLjUwMjQ0IGMgNy44NTcxMSwxLjc5MDQxIDE1LjY5NjIyLDMuNjY3NzMgMjMuNTgyNTIsNS4zMTkyOCB6IG0gMTAuMjEyNjQsLTIzLjk0MzA2IGEgNy44ODE4NSw3Ljg4MTg1IDAgMCAxIDkuNzM1NDIsLTAuNzkzMDkgOC4xMjc3OSw4LjEyNzc5IDAgMCAxIDMuMTkxNzEsOS4yNzk0OCBjIC0xLjE0NzcxLDMuNDA5MyAtNC42MDc0Miw1LjkyOTE0IC04LjE1Myw1LjM0NTQgLTQuODQ3MjksLTAuNzk4MSAtOS42MjI2OCwtMi4wMzI5IC0xNC44OTA2MiwtMy4xODExNSAzLjYyOTM0LC0zLjg0MDQgNi43Nzg5MSwtNy4zNDAzNCAxMC4xMTY0OSwtMTAuNjUwNjQgeiIKICBjbGFzcz0iY2xzLTMiIC8+CjxwYXRoCgogIGlkPSJwYXRoMjYiCiAgZD0ibSAyNS43MzM3MSwyOC4zNDQ3NjMgYSAxNC42MDQ0NSwxNC42MDQ0NSAwIDAgMCAtMTIuNjEwNzgsMTMuMTMxNTMgMTQuMjA1NTEsMTQuMjA1NTEgMCAwIDAgOC43OTQ0NCwxNC41NTggYyA5LjU0MDQsMy42MDQzNyAxOS4yMTYzLDYuODQ5NzkgMjkuNDM5MDgsMTAuNDYwMDggLTMuNjc4NjUsLTEwLjM1NjA5IC02Ljk1MjIxLC0yMC4yNjQzNSAtMTAuNzM5MTMsLTI5Ljk3MjM2IC0yLjI2MTU0LC01Ljc5NzU1IC05LjAzODM5LC05LjE0ODEzIC0xNC44ODM2MSwtOC4xNzcyNSB6IgogIGNsYXNzPSJjbHMtNCIgLz4KPHBhdGgKCiAgaWQ9InBhdGgyOCIKICBkPSJtIDEwMy41NTg0Miw5OS45MTcyNzMgYyAtMy43MTI2NSwtMS40NDU5MiAtNy41MDY4NCwtMi42ODMxNiAtMTEuMjY5MjMsLTQuMDAwMyAtNS43MDIyNywtMS45OTYzNyAtMTEuNDA4ODEsLTMuOTgwNTkgLTE3LjcxNjE3LC02LjE4MDEyIDMuNjIzNTQsMTAuMjk0MTg3IDYuODM1MjEsMjAuMDU3MzE3IDEwLjUxNjQyLDI5LjYzOTk5NyAyLjI2MjI3LDUuODg4ODUgOS4xMjY3MSw5LjQxOTggMTQuOTg5MzgsOC40NDMzIDYuOTE4MDksLTEuMTUyMjkgMTEuOTQyMzMsLTYuMjYyMDkgMTIuNjM0ODksLTEyLjg1MDEgYSAxNC41MTkzOSwxNC41MTkzOSAwIDAgMCAtOS4xNTUyOSwtMTUuMDUyNzc3IHoiCiAgY2xhc3M9ImNscy00IiAvPgo8cGF0aAoKICBpZD0icGF0aDMwIgogIGQ9Im0gMjAuMDQzNTMsMTMyLjQ0ODAzIGEgNy45NDE3Niw3Ljk0MTc2IDAgMCAwIDIuOTA5NzIsOS4xMTkwOCBjIDIuNzYyOTQsMS45NzcxMiA2Ljg4NjYsMi4xNTg3IDkuMzQ0MTIsLTAuMTMzNzggMy42NDUzOSwtMy40MDA1MiA2Ljk3MTMxLC03LjE0MzM4IDEwLjgwODc4LC0xMS4xMzA3NCAtNS40MDA5NCwtMS4xNjIxMSAtMTAuMjQwMTgsLTIuNDQ2NzggLTE1LjE2MTUsLTMuMTgwMzYgLTMuNTM3NDIsLTAuNTI3MjIgLTYuNjcyNTUsMS45MDkwNiAtNy45MDExMiw1LjMyNTggeiIKICBjbGFzcz0iY2xzLTQiIC8+CjxwYXRoCgogIGlkPSJwYXRoMzIiCiAgZD0ibSAxMDUuODQ3MywyMy42OTAxMDMgYSA4LjEyNzc5LDguMTI3NzkgMCAwIDAgLTMuMTkxNzEsLTkuMjc5NDggNy44ODE4NSw3Ljg4MTg1IDAgMCAwIC05LjczNTQyLDAuNzkzMDkgYyAtMy4zMzc1OCwzLjMxMDMgLTYuNDg3MTIsNi44MTAyNCAtMTAuMTE2NTEsMTAuNjUwNjQgNS4yNjc5NCwxLjE0ODI1IDEwLjA0MzM2LDIuMzgzMDUgMTQuODkwNjIsMy4xODExNSAzLjU0NTYsMC41ODM3NCA3LjAwNTMxLC0xLjkzNjEgOC4xNTMwMiwtNS4zNDU0IHoiCiAgY2xhc3M9ImNscy00IiAvPgo8L3N2Zz4=",
-             "sidebar_h1": "Seldon Deploy",
-             "sidebar_links": {
-                   "0": {
-                         "text": "Get started",
-                         "url": "https://deploy.seldon.io/en/latest/contents/getting-started/",
-                         "matching": ""
-                   },
-                   "1": {
-                         "text": "Seldon Deploy",
-                         "url": "https://deploy.seldon.io/",
-                         "matching": ""
-                   },
-                   "2": {
-                         "text": "Seldon Core",
-                         "url": "https://github.com/SeldonIO/seldon-core",
-                         "matching": ""
-                   },
-                   "3": {
-                         "text": "Seldon Core resources",
-                         "url": "https://docs.seldon.io/projects/seldon-core/en/latest/workflow/overview.html",
-                         "matching": ""
-                   },
-                   "4": {
-                         "text": "https://deploy.seldon.io/en/v1.2/contents/getting-started/openshift-installation/index.html",
-                         "url": "https://deploy.seldon.io/en/v1.2/contents/getting-started/openshift-installation/index.html",
-                         "matching": ""
-                   },
-                   "5": {
-                         "text": "https://marketplace.redhat.com/en-us/products/seldon-deploy",
-                         "url": "https://marketplace.redhat.com/en-us/products/seldon-deploy",
-                         "matching": ""
-                   },
-                   "6": {
-                         "text": "https://marketplace.redhat.com/en-us/documentation/operators",
-                         "url": "https://marketplace.redhat.com/en-us/documentation/operators",
                          "matching": ""
                    }
                }

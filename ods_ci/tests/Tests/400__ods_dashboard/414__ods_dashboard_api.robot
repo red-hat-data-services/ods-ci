@@ -5,7 +5,6 @@ Library           OpenShiftLibrary
 Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
-Resource          ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup       Endpoint Testing Setup
 Suite Teardown    Endpoint Testing Teardown
@@ -86,7 +85,7 @@ ${ROLE_BIND_ENDPOINT_PT0}=      api/rolebindings
 ${ROLE_BIND_ENDPOINT_PT1}=      ${ROLE_BIND_ENDPOINT_PT0}/${DASHBOARD_NS}/${NOTEBOOK_NS}-image-pullers
 ${ROLE_BIND_ENDPOINT_BODY}=      {"kind":"RoleBinding","apiVersion":"rbac.authorization.k8s.io/v1","metadata":{"name":"${NOTEBOOK_NS}-image-pullers-test","namespace":"${DASHBOARD_NS}"},"subjects":[{"kind":"Group","apiGroup":"rbac.authorization.k8s.io","name":"system:serviceaccounts:${NOTEBOOK_NS}"}],"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"system:image-puller"}}
 
-${APP_TO_REMOVE}=                rhosak
+${APP_TO_REMOVE}=                anaconda-ce
 ${COMPONENTS_ENDPOINT_PT0}=      api/components
 ${COMPONENTS_ENDPOINT_PT1}=      ${COMPONENTS_ENDPOINT_PT0}/remove?appName=${APP_TO_REMOVE}
 

@@ -59,9 +59,10 @@ Delete Data Science Project
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
-    [Arguments]     ${project_title}
+    [Arguments]     ${project_title}    ${timeout-pre-spinner}=3s    ${timeout-spinner}=5s
     Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
+    ...    timeout-pre=${timeout-pre-spinner}    timeout=${timeout-spinner}
 
 Project Should Be Listed
     [Documentation]    Checks a Project is available in DS Project home page

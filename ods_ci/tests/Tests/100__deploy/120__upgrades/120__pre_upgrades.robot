@@ -5,7 +5,6 @@ Resource           ../../../Resources/RHOSi.resource
 Resource           ../../../Resources/ODS.robot
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource           ../../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource           ../../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource           ../../../Resources/Page/LoginPage.robot
 Resource           ../../../Resources/Page/OCPLogin/OCPLogin.robot

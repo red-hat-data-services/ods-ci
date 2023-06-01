@@ -5,7 +5,6 @@ Resource          ../../Resources/RHOSi.resource
 Resource          ../../Resources/ODS.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource          ../../Resources/Page/ODH/AiApps/Rhosak.resource
 Resource          ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource          ../../Resources/Page/LoginPage.robot
 Resource          ../../Resources/Page/OCPLogin/OCPLogin.robot
@@ -20,8 +19,6 @@ Test Teardown     Dashboard Test Teardown
 
 
 *** Variables ***
-${RHOSAK_REAL_APPNAME}                  rhosak
-${RHOSAK_DISPLAYED_APPNAME}             OpenShift Streams for Apache Kafka
 @{IMAGES}                               PyTorch  TensorFlow  CUDA
 @{BUILDS_TO_BE_DELETED}                 pytorch  tensorflow  minimal  cuda-s2i-thoth
 @{BUILD_CONFIGS}                        11.4.2-cuda-s2i-base-ubi8    11.4.2-cuda-s2i-core-ubi8
@@ -76,15 +73,18 @@ Verify RHODS Explore Section Contains Only Expected ISVs
 
 Verify Disabled Cards Can Be Removed
     [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
-    ...                 It uses RHOSAK as example to test the feature
+    ...                 It uses a custom App as example to test the feature
     ...                 ProductBug: RHODS-2902 - still present, but the test will
     ...                 only trigger warning when issue happens
+    ...                 AutomationBug: implementation is to be refactored after RHOSAK removal
+    ...                 for ods-ci
     [Tags]    Sanity
     ...       ODS-1081    ODS-1092
-    Enable RHOSAK
-    Remove RHOSAK From Dashboard
-    Run Keyword And Warn On Failure    Success Message Should Contain    ${RHOSAK_DISPLAYED_APPNAME}
-    Verify Service Is Not Enabled    app_name=${RHOSAK_DISPLAYED_APPNAME}
+    ...       AutomationBug
+    # Enable Custom App
+    # Remove Custom App From Dashboard
+    Run Keyword And Warn On Failure    Success Message Should Contain    ODS-CI Custom App
+    Verify Service Is Not Enabled    app_name=ODS-CI Custom App
     Capture Page Screenshot    after_removal.png
 
 Verify License Of Disabled Cards Can Be Re-validated

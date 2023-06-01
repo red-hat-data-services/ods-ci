@@ -29,10 +29,6 @@ Login To HCC
   Run Keyword And Ignore Error     Wait For HCC Splash Page
   Maybe Handle Something Went Wrong Page
 
-Maybe Skip RHOSAK Tour
-   ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//button[text()='Take tour']
-   IF    ${tour_modal}    Click Button    Show me later
-
 Maybe Agree RH Terms and Conditions
   ${agree_required}=  Run Keyword And Return Status  Page Should Contain  Red Hat Terms and Conditions
   IF    ${agree_required} == True

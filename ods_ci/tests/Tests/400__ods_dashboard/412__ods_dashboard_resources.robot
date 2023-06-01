@@ -313,12 +313,12 @@ Set Quick Starts Elements List Based On RHODS Type
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    ${is_self_managed} == ${TRUE}
             @{quickStartElements}=      Create List
-            ...    connect-rhosak-notebook    create-jupyter-notebook    create-jupyter-notebook-anaconda
+            ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
             ...    deploy-python-model    create-aikit-notebook    openvino-inference-notebook
             ...    pachyderm-beginner-tutorial-notebook    build-deploy-watson-model
     ELSE
             @{quickStartElements}=      Create List
-            ...    connect-rhosak-notebook    create-jupyter-notebook    create-jupyter-notebook-anaconda
+            ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
             ...    deploy-python-model    create-aikit-notebook    deploy-model-rhoam    gpu-enabled-notebook-quickstart
             ...    pachyderm-beginner-tutorial-notebook    openvino-inference-notebook    using-starburst-galaxy
             ...    gpu-quickstart    build-deploy-watson-model

@@ -48,7 +48,14 @@ class DataSciencePipelinesAPI:
         )
 
     @keyword
-    def login_using_user_and_password(self, user, pwd, project):
+    def login_and_wait_dsp_route(
+        self,
+        user,
+        pwd,
+        project,
+        route_name="ds-pipeline-pipelines-definition",
+        timeout=120,
+    ):
         print("Fetch token")
         basic_value = f"{user}:{pwd}".encode("ASCII")
         basic_value = base64.b64encode(basic_value).decode("ASCII")
@@ -70,15 +77,16 @@ class DataSciencePipelinesAPI:
         count = 0
         while self.route == "" and count < 60:
             self.route, _ = self.run_oc(
-                f"oc get route -n {project} ds-pipeline-ui-sample --template={{{{.spec.host}}}}"
+                f"oc get route -n {project} {route_name} --template={{{{.spec.host}}}}"
             )
             time.sleep(1)
             count += 1
 
+        assert self.route != "", "Route must not be empty"
         print(f"DSP route should be working: {self.route}")
         status = -1
         count = 0
-        while status != 200 and count < 120:
+        while status != 200 and count < timeout:
             response, status = self.do_get(
                 f"https://{self.route}/apis/v1beta1/runs",
                 headers={"Authorization": f"Bearer {self.sa_token}"},
@@ -210,12 +218,19 @@ class DataSciencePipelinesAPI:
         )
         assert status == 404
 
+    @keyword
+    def add_role_to_user(self, name, user, project):
+        output, error = self.run_oc(
+            f"oc policy add-role-to-user {name} {user} -n {project} --role-namespace={project}"
+        )
+        print(output, "->", error)
+
     def count_running_pods(
-        self, oc_command, name_startswith, status_phase, pod_criteria
+        self, oc_command, name_startswith, status_phase, pod_criteria, timeout=30
     ):
         pod_count = 0
         count = 0
-        while pod_count != pod_criteria and count < 30:
+        while pod_count != pod_criteria and count < timeout:
             pods = []
             response, _ = self.run_oc(oc_command)
             try:

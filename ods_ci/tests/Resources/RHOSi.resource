@@ -35,6 +35,7 @@ Resource    Common.robot
 ...                         Get Original License Secret
 ...                         Apply Fake Starburst License
 ...                         Restore Starburst Original License And Verify Deployment
+...                         Create S3 Data Connection
 
 
 *** Keywords ***

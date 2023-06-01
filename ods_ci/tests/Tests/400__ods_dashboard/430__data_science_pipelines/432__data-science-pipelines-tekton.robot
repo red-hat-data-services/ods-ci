@@ -33,10 +33,10 @@ End To End Pipeline Workflow Using Kfp Tekton
     Remove Pipeline Project    ${project}
     New Project    ${project}
     Install DataSciencePipelinesApplication CR    ${project}
-    ${status}    Login Using User And Password    ${username}    ${password}    ${project}
+    ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}    ds-pipeline-ui-sample
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
-    ${result}    Kfp Tekton Create Run From Pipeline Func    ${username}    ${password}    ${project}    flip_coin.py    flipcoin_pipeline    # robocop: disable:line-too-long
-    ${run_status}   Kfp Tekton Wait For Run Completion    ${username}    ${password}    ${project}    ${result}
+    ${result}    Kfp Tekton Create Run From Pipeline Func    ${username}    ${password}    ${project}    ds-pipeline-ui-sample    flip_coin.py    flipcoin_pipeline    # robocop: disable:line-too-long
+    ${run_status}   Kfp Tekton Wait For Run Completion    ${username}    ${password}    ${project}    ds-pipeline-ui-sample    ${result}
     Should Be True    '${run_status}' == 'Completed'    Pipeline run doesn't have Completed status
     [Teardown]    Remove Pipeline Project    ${project}
 

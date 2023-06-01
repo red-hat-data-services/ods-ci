@@ -15,10 +15,10 @@ class DataSciencePipelinesKfpTekton:
         self.client = None
         self.api = None
 
-    def get_client(self, user, pwd, project):
+    def get_client(self, user, pwd, project, route_name):
         if self.client is None:
             self.api = DataSciencePipelinesAPI()
-            self.api.login_using_user_and_password(user, pwd, project)
+            self.api.login_and_wait_dsp_route(user, pwd, project, route_name)
             self.client = kfp_tekton.TektonClient(
                 host=f"https://{self.api.route}/",
                 existing_token=self.api.sa_token,
@@ -51,9 +51,9 @@ class DataSciencePipelinesKfpTekton:
 
     @keyword
     def kfp_tekton_create_run_from_pipeline_func(
-        self, user, pwd, project, source_code, fn
+        self, user, pwd, project, route_name, source_code, fn
     ):
-        client, _ = self.get_client(user, pwd, project)
+        client, _ = self.get_client(user, pwd, project, route_name)
         # the current path is from where you are running the script
         # sh ods_ci/run_robot_test.sh
         # the current_path will be ods-ci
@@ -74,6 +74,8 @@ class DataSciencePipelinesKfpTekton:
     # we are calling DataSciencePipelinesAPI because of https://github.com/kubeflow/kfp-tekton/issues/1223
     # Waiting for a backport https://github.com/kubeflow/kfp-tekton/pull/1234
     @keyword
-    def kfp_tekton_wait_for_run_completion(self, user, pwd, project, run_result):
-        _, api = self.get_client(user, pwd, project)
+    def kfp_tekton_wait_for_run_completion(
+        self, user, pwd, project, route_name, run_result
+    ):
+        _, api = self.get_client(user, pwd, project, route_name)
         return api.check_run_status(run_result.run_id)

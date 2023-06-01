@@ -21,6 +21,7 @@ Create Pipeline Server
     ...                It assumes the Data Connection is aleady created
     ...                and you wants to use defaul DB configurations [TEMPORARY]
     [Arguments]    ${dc_name}    ${project_title}
+    Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_XP}
     Element Should Be Enabled    ${PIPELINES_SERVER_BTN_XP}
     Click Button    ${PIPELINES_SERVER_BTN_XP}

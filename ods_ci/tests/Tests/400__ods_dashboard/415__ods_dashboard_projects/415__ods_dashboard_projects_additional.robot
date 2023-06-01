@@ -17,7 +17,7 @@ ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test-additional
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Project feature
 ${TOLERATIONS}=    workbench-tolerations
 ${TOLERATIONS_2}=    workbench-tolerations-two
-${DEFAULT_TOLERATIONS}=    NotebooksOnly   
+${DEFAULT_TOLERATIONS}=    NotebooksOnly
 ${WORKBENCH_TITLE_TOL_1}=   ODS-CI Workbench Tol
 ${WORKBENCH_TITLE_TOL_2}=   ODS-CI Workbench Tol 2
 ${WORKBENCH_DESCRIPTION}=   a test workbench to check tolerations are applied
@@ -125,7 +125,7 @@ Verify User Can Remove GPUs From Workbench
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Start Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Verify Workbench Pod Does Not Have Limits And Requests For GPU    workbench_title=${WORKBENCH_TITLE_GPU}
-    ...    project_title=${PRJ_TITLE}  
+    ...    project_title=${PRJ_TITLE}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
@@ -136,7 +136,7 @@ Verify User Can Remove GPUs From Workbench
 
 *** Keywords ***
 Project Suite Setup
-    [Documentation]    Suite setup steps for testing DS Projects. 
+    [Documentation]    Suite setup steps for testing DS Projects.
     ...                It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}

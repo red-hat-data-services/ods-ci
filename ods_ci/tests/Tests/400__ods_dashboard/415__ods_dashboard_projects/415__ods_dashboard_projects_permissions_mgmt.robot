@@ -25,7 +25,7 @@ Verify User Can Access Permission Tab In Their Owned DS Project
 
 Verify User Can Make Their Owned DS Project Accessible To Other Users    # robocop: disable
     [Documentation]    Verify user can give access permissions for their DS Projects to other users
-    [Tags]    Tier1    Smoke
+    [Tags]    Tier1    Sanity
     ...       ODS-2201
     Switch To User    ${TEST_USER_3.USERNAME}
     Move To Tab    Permissions

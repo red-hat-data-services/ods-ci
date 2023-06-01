@@ -312,31 +312,33 @@ Run And Watch Command
   ...    Expected text: Verify the text exists in command output.
   [Arguments]    ${command}    ${timeout_min}=10    ${expected_text}=${NONE}
   Log    Watching command output: ${command}   console=True
-  @{args} =    Split String    ${command}
-  ${process_log} =    Set Variable    ${OUTPUT DIR}/${args}[0].log
+  ${process_log} =    Set Variable    ${OUTPUT DIR}/${TEST NAME}.log
+  ${temp_log} =    Set Variable    ${TEMPDIR}/${TEST NAME}.log
+  Set Test Variable    ${process_log}
+  Set Test Variable    ${temp_log}
   Create File    ${process_log}
-  Create File    ${process_log}.old
-  ${process} =    Start Process    ${command}    shell=True    stdout=${process_log}    stderr=STDOUT    # robocop: disable
+  Create File    ${temp_log}
+  ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}    stderr=STDOUT    # robocop: disable
   Log    Shell process started in the background   console=True
   ${timeout_result} =    Wait Until Keyword Succeeds    ${timeout_min} min    10 s
-  ...    Read Command Log    ${process}    ${process_log}
-  ${proc_result} =	    Wait For Process    ${process}    timeout=3 secs
-  Terminate Process    ${process}    kill=true
+  ...    Check Process Output and Status    ${process_id}
+  ${proc_result} =	    Wait For Process    ${process_id}    timeout=3 secs
+  Terminate Process    ${process_id}    kill=true
   Should Be Equal As Integers	    ${proc_result.rc}    0    msg=Error occured while running: ${command}
   Should Be True    ${timeout_result.rc} == 0
   Should Contain    ${process_log}    ${expected_text}
   RETURN    ${proc_result.rc}
 
-Read Command Log
-  [Documentation]    Helper keyward to tail the output log of 'Run And Watch Command' 
-  [Arguments]    ${process}    ${process_log}
+Check Process Output and Status
+  [Documentation]    Helper keyward for 'Run And Watch Command', to tail proccess and check its status
+  [Arguments]    ${process_id}
   Log To Console    .    no_newline=true
   ${new_log_data} = 	Get File 	${process_log}
-  ${old_log_data} = 	Get File 	${process_log}.old
+  ${old_log_data} = 	Get File 	${temp_log}
   ${last_line_index} =    Get Line Count    ${old_log_data}
   @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
   FOR    ${line}    IN    @{new_lines}
       Log To Console    ${line}
   END
-  Create File    ${process_log}.old    ${new_log_data}
-  Process Should Be Stopped	    ${process}
+  Create File    ${temp_log}    ${new_log_data}
+  Process Should Be Stopped	    ${process_id}

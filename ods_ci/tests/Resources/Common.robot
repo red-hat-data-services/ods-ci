@@ -320,12 +320,11 @@ Run And Watch Command
   Create File    ${temp_log}
   ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}    stderr=STDOUT    # robocop: disable
   Log    Shell process started in the background   console=True
-  ${timeout_result} =    Wait Until Keyword Succeeds    ${timeout_min} min    10 s
+  Wait Until Keyword Succeeds    ${timeout_min} min    10 s
   ...    Check Process Output and Status    ${process_id}
   ${proc_result} =	    Wait For Process    ${process_id}    timeout=3 secs
   Terminate Process    ${process_id}    kill=true
   Should Be Equal As Integers	    ${proc_result.rc}    0    msg=Error occured while running: ${command}
-  Should Be True    ${timeout_result.rc} == 0
   Should Contain    ${process_log}    ${expected_text}
   RETURN    ${proc_result.rc}
 

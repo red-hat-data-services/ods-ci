@@ -2,6 +2,7 @@
 Documentation    Perform and verify RHODS OLM tasks
 Metadata         RHODS OLM Version    1.0.0
 Resource         ../Resources/RHODS_OLM/RHODS_OLM.resource
+Resource         ../../tests/Resources/Common.robot
 Library          OpenShiftLibrary
 Library          OperatingSystem
 Library          String

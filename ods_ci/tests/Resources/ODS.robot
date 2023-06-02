@@ -10,6 +10,7 @@ Resource            ./Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
 Resource            ../../tasks/Resources/RHODS_OLM/uninstall/oc_uninstall.robot
 Resource            ../../tasks/Resources/RHODS_OLM/config/cluster.robot
+Resource            ../../tests/Resources/Common.robot
 
 Library  OpenShiftLibrary
 

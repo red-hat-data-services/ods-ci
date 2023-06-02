@@ -45,13 +45,13 @@ def print_msg(msg: str):
 )
 def flipcoin_pipeline():
     flip_coin_op = components.create_component_from_func(
-        flip_coin, base_image="registry.access.redhat.com/ubi8/python-36:latest"
+        flip_coin, base_image="registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
     )
     print_op = components.create_component_from_func(
-        print_msg, base_image="registry.access.redhat.com/ubi8/python-36:latest"
+        print_msg, base_image="registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
     )
     random_num_op = components.create_component_from_func(
-        random_num, base_image="registry.access.redhat.com/ubi8/python-36:latest"
+        random_num, base_image="registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
     )
 
     flip = flip_coin_op()

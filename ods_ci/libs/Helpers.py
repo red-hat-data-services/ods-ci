@@ -1,9 +1,9 @@
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
-from robotlibcore import keyword
 from semver import VersionInfo
 
 from ods_ci.utils.scripts.ocm.ocm import OpenshiftClusterManager
+from robotlibcore import keyword
 
 
 class Helpers:
@@ -233,3 +233,37 @@ class Helpers:
                 ["threshold", threshold],
                 ["exception", e],
             ]
+
+    @keyword
+    def send_random_inference_request(
+        self,
+        endpoint,
+        value_range=[0, 255],
+        shape={"B": 1, "C": 3, "H": 512, "W": 512},
+        no_requests=100,
+    ):
+        import os
+        import random
+        import requests
+
+        for _ in range(no_requests):
+
+            data_img = [
+                random.randrange(value_range[0], value_range[1])
+                for _ in range(shape["C"] * shape["H"] * shape["W"])
+            ]
+
+            headers = {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
+
+            data = (
+                '{ "model_name": "vehicle-detection-0202", "inputs": [{ "name": "image", "shape": '
+                + str(list(shape.values()))
+                + ', "datatype": "FP32", "data": '
+                + str(data_img)
+                + " }]}"
+            )
+
+            response = requests.post(endpoint, headers=headers, data=data)
+            print(response.status_code)

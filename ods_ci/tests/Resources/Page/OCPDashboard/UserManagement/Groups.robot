@@ -15,7 +15,9 @@ Go To ${group_name} Group Page
 Create Group
     [Documentation]     Creates a user group in OCP
     [Arguments]   ${group_name}
-    Oc Create  kind=Group   src={"metadata": {"name": "${group_name}"}, "users": null}
+    ${res}  ${output}=    Run And Return Rc And Output    oc adm groups new ${group_name}
+    # Oc Create  kind=Group   src={"metadata": {"name": "${group_name}"}, "users": null}
+    Should Be Equal As Integers    ${res}    0
 
 Delete Group
     [Documentation]     Deletes a user group in OCP

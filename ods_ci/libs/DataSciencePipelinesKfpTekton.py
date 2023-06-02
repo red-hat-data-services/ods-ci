@@ -7,6 +7,7 @@ import sys
 import kfp_tekton
 from DataSciencePipelinesAPI import DataSciencePipelinesAPI
 from robotlibcore import keyword
+from urllib3.exceptions import MaxRetryError, SSLError
 
 
 class DataSciencePipelinesKfpTekton:
@@ -19,11 +20,23 @@ class DataSciencePipelinesKfpTekton:
         if self.client is None:
             self.api = DataSciencePipelinesAPI()
             self.api.login_and_wait_dsp_route(user, pwd, project, route_name)
-            self.client = kfp_tekton.TektonClient(
-                host=f"https://{self.api.route}/",
-                existing_token=self.api.sa_token,
-                ssl_ca_cert=self.get_cert(self.api),
-            )
+            # the following fallback it is to simplify the test development
+            try:
+                # we assume it is a secured cluster
+                # ssl_ca_cert came from /path/to/python/lib/python3.x/site-packages/certifi/cacert.pem
+                # that certificate is "Mozilla's carefully curated collection of root certificates"
+                self.client = kfp_tekton.TektonClient(
+                    host=f"https://{self.api.route}/", existing_token=self.api.sa_token
+                )
+            except MaxRetryError as e:
+                # we assume it is a cluster with self-signed certs
+                if type(e.reason) == SSLError:
+                    # try to retrieve the certificate
+                    self.client = kfp_tekton.TektonClient(
+                        host=f"https://{self.api.route}/",
+                        existing_token=self.api.sa_token,
+                        ssl_ca_cert=self.get_cert(self.api),
+                    )
         return self.client, self.api
 
     def get_cert(self, api):

@@ -32,7 +32,7 @@ Create Pipeline Server
     Click Element    ${PIPELINES_SERVER_CONFIG_BTN_XP}
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
-    ...    timeout-pre-spinner=5s    timeout-spinner=35s
+    ...    timeout-pre-spinner=5s    timeout-spinner=60s
 
 Select Data Connection
     [Documentation]    Selects an existing data connection from the dropdown

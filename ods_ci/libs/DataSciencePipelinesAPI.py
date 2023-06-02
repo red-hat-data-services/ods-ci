@@ -225,6 +225,17 @@ class DataSciencePipelinesAPI:
         )
         print(output, "->", error)
 
+    @keyword
+    def do_http_request(self, url):
+        assert self.route != "", "Login First"
+        response = requests.get(
+            f"http://{self.route}/{url}",
+            headers={"Authorization": f"Bearer {self.sa_token}"},
+            verify=False,
+        )
+        assert response.status_code == 200
+        return response.url
+
     def count_running_pods(
         self, oc_command, name_startswith, status_phase, pod_criteria, timeout=30
     ):

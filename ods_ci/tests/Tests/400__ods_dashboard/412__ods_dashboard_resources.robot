@@ -329,7 +329,8 @@ Validate Number Of Quick Starts In Dashboard Is As Expected
     ${expectedLen} =    Get Length    ${quickStartElements}
     ${actualQuickStarts} =    Get QuickStart Items
     ${actualLen} =    Get Length    ${actualQuickStarts}
-    Should Be True    ${expectedLen} == ${actualLen}    Quick Starts have been updated. Update the list accordingly.
+    Run Keyword And Continue On Failure
+    ...    Should Be True    ${expectedLen} == ${actualLen}    Quick Starts have been updated. Update the list accordingly.
 
 Verify Quick Starts Work As Expected When Restarted And Left In Between
     [Arguments]    ${quickStartElements}

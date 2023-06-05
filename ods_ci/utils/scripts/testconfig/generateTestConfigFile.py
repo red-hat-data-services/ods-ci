@@ -159,24 +159,6 @@ def generate_test_config_file(
     ]["PASSWORD"]
     data["SSO"]["USERNAME"] = config_data["SSO"]["USERNAME"]
     data["SSO"]["PASSWORD"] = config_data["SSO"]["PASSWORD"]
-    data["RHOSAK_CONFIG_TEST"]["STREAM_REGION"] = config_data["RHOSAK_CONFIG_TEST"][
-        "STREAM_REGION"
-    ]
-    data["RHOSAK_CONFIG_TEST"]["CLOUD_PROVIDER"] = config_data["RHOSAK_CONFIG_TEST"][
-        "CLOUD_PROVIDER"
-    ]
-    data["RHOSAK_CONFIG_TEST"]["STREAM_NAME"] = config_data["RHOSAK_CONFIG_TEST"][
-        "STREAM_NAME"
-    ]
-    data["RHOSAK_CONFIG_TEST"]["SERVICE_ACCOUNT"] = config_data["RHOSAK_CONFIG_TEST"][
-        "SERVICE_ACCOUNT"
-    ]
-    data["RHOSAK_CONFIG_TEST"]["TOPIC_NAME"] = config_data["RHOSAK_CONFIG_TEST"][
-        "TOPIC_NAME"
-    ]
-    data["RHOSAK_CONFIG_TEST"]["CONSUMER_GROUP"] = config_data["RHOSAK_CONFIG_TEST"][
-        "CONSUMER_GROUP"
-    ]
     data["RHODS_BUILD"]["PULL_SECRET"] = config_data["RHODS_BUILD"]["PULL_SECRET"]
     data["RHODS_BUILD"]["SECRET_FILE"] = config_data["RHODS_BUILD"]["SECRET_FILE"]
     data["RHODS_BUILD"]["IMAGE"] = config_data["RHODS_BUILD"]["IMAGE"]

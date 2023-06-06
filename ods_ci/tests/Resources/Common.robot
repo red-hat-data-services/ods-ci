@@ -89,14 +89,15 @@ CSS Property Value Should Be
     END
 
 Get RHODS Version
-    [Documentation]    Return RHODS version. Will fetch version only if $RHODS_VERSION was not already set, or $force_fetch is True.
+    [Documentation]    Return RHODS version number.
+    ...    Will fetch version only if $RHODS_VERSION was not already set, or $force_fetch is True.
     [Arguments]    ${force_fetch}=False
     IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
          ${RHODS_VERSION} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
     END
     Log  ${RHODS_VERSION}
     RETURN  ${RHODS_VERSION}
-    
+
 Get Cluster ID
     [Documentation]     Retrieves the ID of the currently connected cluster
     ${cluster_id}=   Run    oc get clusterversion -o json | jq .items[].spec.clusterID

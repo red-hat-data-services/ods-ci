@@ -308,9 +308,10 @@ Extract URLs From Text
 
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:
-  ...    Timeout in minutes: 10 by default.
-  ...    Expected text: Verify the text exists in command output.
-  [Arguments]    ${command}    ${timeout_min}=10    ${expected_text}=${NONE}
+  ...    Timeout: 10 minutes by default.
+  ...    Output Should Contain: Verify an excpected text to exists in command output.
+  ...    Output Should Not Contain: Verify an excpected text to not exists in command output.
+  [Arguments]    ${command}    ${timeout}=10 min   ${output_should_contain}=${NONE}    ${output_should_not_contain}=${NONE}
   Log    Watching command output: ${command}   console=True
   ${process_log} =    Set Variable    ${OUTPUT DIR}/${TEST NAME}.log
   ${temp_log} =    Set Variable    ${TEMPDIR}/${TEST NAME}.log
@@ -320,12 +321,17 @@ Run And Watch Command
   Create File    ${temp_log}
   ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}    stderr=STDOUT    # robocop: disable
   Log    Shell process started in the background   console=True
-  Wait Until Keyword Succeeds    ${timeout_min} min    10 s
+  Wait Until Keyword Succeeds    ${timeout}    10 s
   ...    Check Process Output and Status    ${process_id}
   ${proc_result} =	    Wait For Process    ${process_id}    timeout=3 secs
   Terminate Process    ${process_id}    kill=true
   Should Be Equal As Integers	    ${proc_result.rc}    0    msg=Error occured while running: ${command}
-  Should Contain    ${process_log}    ${expected_text}
+  IF    "${output_should_contain}" != "${NONE}" 
+      Should Contain    ${process_log}    ${output_should_contain}
+  END
+  IF    "${output_should_not_contain}" != "${NONE}" 
+      Should Not Contain    ${process_log}    ${output_should_not_contain}
+  END
   RETURN    ${proc_result.rc}
 
 Check Process Output and Status

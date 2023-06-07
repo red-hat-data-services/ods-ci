@@ -243,7 +243,7 @@ Load Expected Data Of RHODS Explore Section
         ${to_be_displayed}=    Run Keyword And Return Status
         ...    List Should Contain Value    ${apps_dict_obj}[${app}][rhods_type]    ${installed_rhods_type}
         IF    "${to_be_displayed}" == "${FALSE}"
-            Remove From Dictionary   ${apps_dict_obj}   ${app}            
+            Remove From Dictionary   ${apps_dict_obj}   ${app}
         END
     END
     RETURN  ${apps_dict_obj}
@@ -801,3 +801,23 @@ Reload RHODS Dashboard Page
     Reload Page
     Wait For RHODS Dashboard To Load    expected_page=${expected_page}
     ...    wait_for_cards=${wait_for_cards}
+
+Handle Deletion Confirmation Modal
+    [Documentation]    Handles confirmation modal on item deletion
+    [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
+    Wait Until Generic Modal Appears
+    Run Keyword And Warn On Failure    Page Should Contain    Delete ${item_type}?
+    Run Keyword And Continue On Failure    Page Should Contain    This action cannot be undone.
+    IF    "${additional_msg}" != "${NONE}"
+        Run Keyword And Continue On Failure    Page Should Contain    ${additional_msg}
+    END
+    Run Keyword And Continue On Failure    Page Should Contain    Confirm deletion by typing ${item_title} below:
+    Run Keyword And Continue On Failure    Element Should Be Disabled    xpath=//button[text()="Delete ${item_type}"]
+    Input Text    xpath=//input[@id="delete-modal-input"]    ${item_title}
+    Wait Until Element Is Enabled    xpath=//button[text()="Delete ${item_type}"]
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+    ELSE
+        Click Button    xpath=//button[text()="Delete ${item_type}"]
+    END
+    Wait Until Generic Modal Disappears

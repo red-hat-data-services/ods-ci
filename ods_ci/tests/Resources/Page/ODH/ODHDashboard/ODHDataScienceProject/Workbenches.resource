@@ -330,26 +330,6 @@ Click Action From Actions Menu
     Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
 
-Handle Deletion Confirmation Modal
-    [Documentation]    Handles confirmation modal on item deletion
-    [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
-    Wait Until Generic Modal Appears
-    Run Keyword And Continue On Failure    Page Should Contain    Delete ${item_type}?
-    Run Keyword And Continue On Failure    Page Should Contain    This action cannot be undone.
-    IF    "${additional_msg}" != "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain    ${additional_msg}
-    END
-    Run Keyword And Continue On Failure    Page Should Contain    Confirm deletion by typing ${item_title} below:
-    Run Keyword And Continue On Failure    Element Should Be Disabled    xpath=//button[text()="Delete ${item_type}"]
-    Input Text    xpath=//input[@id="delete-modal-input"]    ${item_title}
-    Wait Until Element Is Enabled    xpath=//button[text()="Delete ${item_type}"]
-    IF    ${press_cancel} == ${TRUE}
-        Click Button    ${GENERIC_CANCEL_BTN_XP}
-    ELSE
-        Click Button    xpath=//button[text()="Delete ${item_type}"]
-    END
-    Wait Until Generic Modal Disappears
-
 Delete Workbench
     [Documentation]    Deletes a workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}

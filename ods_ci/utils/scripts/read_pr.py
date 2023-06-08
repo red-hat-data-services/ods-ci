@@ -27,24 +27,24 @@ class ReadPR:
         self.generate_arg_commands(all_tags)
 
     def generate_arg_commands(self, all_tags):
-        filtered_tags = []
-        for tag in all_tags:
-            if not tag.startswith('ODS-'):
-                filtered_tags.append(tag)
         destructive_tests = []
         slow_tests = []
         fast_tests = []
-        for ft in filtered_tags:
+        ods_tests = []
+        for ft in all_tags:
             if ft == 'DestructiveTest':
                 destructive_tests.append(self.parse_tag(ft))
             elif ft.startswith('Execution-Time-Over') or ft == 'Tier3' or ft == 'Tier1' or ft == 'Sanity':
                 slow_tests.append(self.parse_tag(ft))
+            elif ft.startswith('ODS-'):
+                ods_tests.append(self.parse_tag(ft))
             else:
                 fast_tests.append(self.parse_tag(ft))
 
         print(f"destructive_tests: {' '.join(destructive_tests)}")
         print(f"slow_tests: {' '.join(slow_tests)}")
         print(f"fast_tests: {' '.join(fast_tests)}")
+        print(f"ods_tests: {' '.join(ods_tests)}")
 
     def parse_tag(self, t):
         return f'--include {t}'

@@ -305,3 +305,45 @@ Extract URLs From Text
     [Arguments]    ${text}
     ${urls}=     Get Regexp Matches   ${text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
     RETURN    ${urls}
+
+Run And Watch Command
+  [Documentation]    Run any shell command (including args) with optional:
+  ...    Timeout: 10 minutes by default.
+  ...    Output Should Contain: Verify an excpected text to exists in command output.
+  ...    Output Should Not Contain: Verify an excpected text to not exists in command output.
+  [Arguments]    ${command}    ${timeout}=10 min   ${output_should_contain}=${NONE}    ${output_should_not_contain}=${NONE}
+  Log    Watching command output: ${command}   console=True
+  ${process_log} =    Set Variable    ${OUTPUT DIR}/${TEST NAME}.log
+  ${temp_log} =    Set Variable    ${TEMPDIR}/${TEST NAME}.log
+  Set Test Variable    ${process_log}
+  Set Test Variable    ${temp_log}
+  Create File    ${process_log}
+  Create File    ${temp_log}
+  ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}    stderr=STDOUT    # robocop: disable
+  Log    Shell process started in the background   console=True
+  Wait Until Keyword Succeeds    ${timeout}    10 s
+  ...    Check Process Output and Status    ${process_id}
+  ${proc_result} =	    Wait For Process    ${process_id}    timeout=3 secs
+  Terminate Process    ${process_id}    kill=true
+  Should Be Equal As Integers	    ${proc_result.rc}    0    msg=Error occured while running: ${command}
+  IF    "${output_should_contain}" != "${NONE}" 
+      Should Contain    ${process_log}    ${output_should_contain}
+  END
+  IF    "${output_should_not_contain}" != "${NONE}" 
+      Should Not Contain    ${process_log}    ${output_should_not_contain}
+  END
+  RETURN    ${proc_result.rc}
+
+Check Process Output and Status
+  [Documentation]    Helper keyward for 'Run And Watch Command', to tail proccess and check its status
+  [Arguments]    ${process_id}
+  Log To Console    .    no_newline=true
+  ${new_log_data} = 	Get File 	${process_log}
+  ${old_log_data} = 	Get File 	${temp_log}
+  ${last_line_index} =    Get Line Count    ${old_log_data}
+  @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
+  FOR    ${line}    IN    @{new_lines}
+      Log To Console    ${line}
+  END
+  Create File    ${temp_log}    ${new_log_data}
+  Process Should Be Stopped	    ${process_id}

@@ -58,7 +58,7 @@ ${IMG_DESCRIPTION}=     Testing Only This image is only for illustration purpose
 &{IMG_PACKAGES}=        elyra=2.2.4    foo-pkg=a.b.c
 ${IMG_ENDPOINT_PT0}=        api/images
 ${IMG_ENDPOINT_PT1}=        byon
-${IMG_ENDPOINT_BODY}=        {"name":"Test-Byon-Image","description":"","packages":[],"software":[],"url":"test-url.io/myimages/test-notebook:v1"}
+${IMG_ENDPOINT_BODY}=        {"name":"Test-Byon-Image","description":"","packages":[],"software":[],"url":"test-url.io/myimages/test-notebook:v1"}    # robocop: disable
 
 ${NB_EVENTS_ENDPOINT_PT0}=      api/nb-events
 ${NB_EVENTS_ENDPOINT_PT1}=      ${NB_EVENTS_ENDPOINT_PT0}/${NOTEBOOK_NS}

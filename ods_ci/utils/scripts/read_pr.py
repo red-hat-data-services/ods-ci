@@ -8,16 +8,16 @@ class ReadPR:
     """
 
     def __init__(self):
-        self.keyword_key = '*** Keywords ***'
-        self.magic_tag_separator = '_______'
-        self.magic_tag = '[Tags]'
+        self.keyword_key = "*** Keywords ***"
+        self.magic_tag_separator = "_______"
+        self.magic_tag = "[Tags]"
 
     def run(self):
         data = self.get_diff()
-        files_changed = [line for line in data if line.startswith('diff --git ')]
+        files_changed = [line for line in data if line.startswith("diff --git ")]
         infos = []
         for f in files_changed:
-            if f.endswith(('.robot', '.resource')):
+            if f.endswith((".robot", ".resource")):
                 infos.append(self.get_sections_info(f))
 
         all_tags = set()
@@ -32,11 +32,16 @@ class ReadPR:
         fast_tests = []
         ods_tests = []
         for ft in all_tags:
-            if ft == 'DestructiveTest':
+            if ft == "DestructiveTest":
                 destructive_tests.append(self.parse_tag(ft))
-            elif ft.startswith('Execution-Time-Over') or ft == 'Tier3' or ft == 'Tier1' or ft == 'Sanity':
+            elif (
+                ft.startswith("Execution-Time-Over")
+                or ft == "Tier3"
+                or ft == "Tier1"
+                or ft == "Sanity"
+            ):
                 slow_tests.append(self.parse_tag(ft))
-            elif ft.startswith('ODS-'):
+            elif ft.startswith("ODS-"):
                 ods_tests.append(self.parse_tag(ft))
             else:
                 fast_tests.append(self.parse_tag(ft))
@@ -47,12 +52,12 @@ class ReadPR:
         print(f"ods_tests: {' '.join(ods_tests)}")
 
     def parse_tag(self, t):
-        return f'--include {t}'
+        return f"--include {t}"
 
     def search_content_tag(self, info):
         all_tags_file = set()
-        my_path = '../../tests/Tests'
-        files = sorted(glob.glob(my_path + '/**/*.robot', recursive=True))
+        my_path = "../../tests/Tests"
+        files = sorted(glob.glob(my_path + "/**/*.robot", recursive=True))
         for filename in info:
             for section_name in info[filename]:
                 section_data = info[filename][section_name]
@@ -63,7 +68,7 @@ class ReadPR:
         return all_tags_file
 
     def search_content(self, filename, content):
-        with open(filename, 'r') as fp:
+        with open(filename, "r") as fp:
             # read all lines in a list
             lines = fp.readlines()
             found_content = False
@@ -88,18 +93,20 @@ class ReadPR:
                     # first line
                     index_tag = line.index(self.magic_tag) + len(self.magic_tag)
                     tag = line[index_tag:]
-                elif '...' in line:
+                elif "..." in line:
                     # >= second line
-                    tag = line.replace('...', ' ').strip().replace('\n', '')
+                    tag = line.replace("...", " ").strip().replace("\n", "")
                 else:
                     started = False
                 if started:
-                    tag = tag.strip().replace('\n', '')
+                    tag = tag.strip().replace("\n", "")
                     # multiple tag in one line or a tag with comments
-                    if '#' in tag:
+                    if "#" in tag:
                         # remove comment
-                        tag = tag[:tag.index('#')]
-                    tag_data = tag.replace(' ', self.magic_tag_separator).split(self.magic_tag_separator)
+                        tag = tag[: tag.index("#")]
+                    tag_data = tag.replace(" ", self.magic_tag_separator).split(
+                        self.magic_tag_separator
+                    )
                     for tag_it in tag_data:
                         tag_it = tag_it.strip()
                         if len(tag_it) > 0:
@@ -113,10 +120,11 @@ class ReadPR:
         sections_info = {}
 
         for line in lines:
-            if line.startswith('***'):
-
+            if line.startswith("***"):
                 # after each ***
-                self.apply_section_rule(section_name, section_data, sections_info, file_name)
+                self.apply_section_rule(
+                    section_name, section_data, sections_info, file_name
+                )
 
                 if self.keyword_key in line:
                     section_name = self.keyword_key
@@ -145,24 +153,25 @@ class ReadPR:
     def get_keywords(self, section_data):
         keywords = []
         for sd in section_data:
-            if not sd.startswith(' '):
-                keywords.append(sd.replace('\n', ''))
+            if not sd.startswith(" "):
+                keywords.append(sd.replace("\n", ""))
         return keywords
 
     def get_file_lines(self, file_path):
-        file_path = file_path.split(' ')[-1]
-        file_name = f'../../../{file_path[2:]}'
-        if file_path.startswith('b/'):
+        file_path = file_path.split(" ")[-1]
+        file_name = f"../../../{file_path[2:]}"
+        if file_path.startswith("b/"):
             with open(file_name) as f:
                 lines = f.readlines()
             return file_name, lines
         else:
-            raise ValueError(f'cannot find the path starting with b/ -> {file_path}')
+            raise ValueError(f"cannot find the path starting with b/ -> {file_path}")
 
-    def get_diff(self, target='git diff upstream/master'):
+    def get_diff(self, target="git diff upstream/master"):
         import subprocess
+
         output = subprocess.getoutput(target)
-        return output.split('\n')
+        return output.split("\n")
 
 
 if __name__ == "__main__":

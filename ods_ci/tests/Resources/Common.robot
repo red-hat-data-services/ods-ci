@@ -93,7 +93,7 @@ Get RHODS Version
     ...    Will fetch version only if $RHODS_VERSION was not already set, or $force_fetch is True.
     [Arguments]    ${force_fetch}=False
     IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
-         ${RHODS_VERSION} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
+        ${RHODS_VERSION}=  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
     END
     Log  ${RHODS_VERSION}
     RETURN  ${RHODS_VERSION}

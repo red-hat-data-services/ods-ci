@@ -78,7 +78,7 @@ Create Pipeline Run    # robocop: disable
     END
     Wait For RHODS Dashboard To Load    expected_page=Create run
     ...    wait_for_cards=${FALSE}
-    Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
+    Fill In Run Creation Form    name=${name}
     ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
     ...    start_time=${start_time}    end_date=${end_date}    end_time=${end_time}
     ...    cron_expr=${cron_expr}    &{model_param}

@@ -40,14 +40,15 @@ Fill In Run Creation Form    # robocop: disable
     [Documentation]    Compiles the form to create a pipeline run.
     ...                It works when you start server creation from either
     ...                DS Project details page or DS Pipelines page.
-    [Arguments]    ${name}    ${pipeline_name}    ${from_actions}=${TRUE}    ${run_type}=Immediate
+    [Arguments]    ${name}    ${pipeline_name}=${NONE}    ${from_actions}=${TRUE}    ${run_type}=Immediate
     ...            ${trigger_type}=Periodic    ${start_date}=${NONE}    ${start_time}=${NONE}
     ...            ${end_date}=${NONE}    ${end_time}=${NONE}    ${cron_expr}=${NONE}&{model_param}
     Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_DESC_INPUT_XP}    ${name}
-    Run Keyword And Continue On Failure
-    ...    Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
-    Select Pipeline For The Run    pipeline_name=${pipeline_name}
+    Run Keyword And Warn On Failure    Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
+    IF    "${pipeline_name}" != "${NONE}"
+        Select Pipeline For The Run    pipeline_name=${pipeline_name}
+    END
     Element Should Be Enabled    ${GENERIC_CREATE_BTN_XP}
     # select run_type
     # set options based on run_type

@@ -181,6 +181,11 @@ if [[ ! -f "${TEST_VARIABLES_FILE}" ]]; then
   exit 1
 fi
 
+if [[ ${SKIP_INSTALL} -eq 0 ]]; then
+  poetry install
+fi
+source $(poetry env info --path)/bin/activate
+
 currentpath=$(pwd)
 case "$(uname -s)" in
     Darwin)
@@ -286,11 +291,6 @@ if command -v yq &> /dev/null
     else
         echo "we did not find yq, so not trying the oc login"
 fi
-
-if [[ ${SKIP_INSTALL} -eq 0 ]]; then
-  poetry install
-fi
-source $(poetry env info --path)/bin/activate
 
 #Create a unique directory to store the output for current test run
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then

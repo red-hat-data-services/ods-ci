@@ -1,8 +1,9 @@
 *** Settings ***
-Library  SeleniumLibrary
-Library  OperatingSystem
-Library  String
-Library  ../../../../../libs/Helpers.py
+Library    OperatingSystem
+Library    String
+Library    SeleniumLibrary
+Library    ../../../../../libs/Helpers.py
+Resource   ../../../../../tests/Resources/Common.robot
 
 *** Variables ***
 @{verification_list}           beta   preview   stage
@@ -87,14 +88,6 @@ Check IF URL On The Page Is Commercial
      FOR  ${value}  IN   @{verification_list}
           IF       $value in $url     FAIL    URL doesn't look like commerial it contain '${value}' in it
      END
-
-Get RHODS version
-    [Arguments]    ${force_fetch}=False
-    IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
-         ${RHODS_VERSION} =  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
-    END
-    Log  ${RHODS_VERSION}
-    RETURN  ${RHODS_VERSION}
 
 Is RHODS Version Greater Or Equal Than
     [Arguments]  ${target}

@@ -15,10 +15,10 @@ RHODS Operator Should Be installed
 
 Install Teardown
   [Documentation]   Remove cloned git repository
-  ${status}   Run Keyword And Return Status    Directory Should Exist   ${EXECDIR}/${dir}
+  ${status}=   Run Keyword And Return Status    Directory Should Exist   ${EXECDIR}/${dir}
   IF    ${status}
-        ${return_code}	  Run And Return Rc  rm -rf ${EXECDIR}/${dir}
+        ${return_code}=	  Run And Return Rc  rm -rf ${EXECDIR}/${dir}
         Should Be Equal As Integers	  ${return_code}	 0
   ELSE
-       Fail     msg=Mentioned directory ${dir} is not present. Kindly verify if provided folder name is correct
+        Fail     msg=Mentioned directory ${dir} is not present. Kindly verify if provided folder name is correct
   END

@@ -65,7 +65,7 @@ Create Pipeline Run    # robocop: disable
     ...                - immediate
     ...                - schedule -> this requires to insert additional arguments
     ...                TEMPORARILY SUPPORTING ONLY IMMEDIATE RUNS AND DEFAULT MODEL PARAMS
-    [Arguments]    ${name}    ${pipeline_name}    ${from_actions_menu}=${TRUE}    ${run_type}=Immediate
+    [Arguments]    ${name}    ${pipeline_name}=${NONE}    ${from_actions_menu}=${TRUE}    ${run_type}=Immediate
     ...            ${trigger_type}=Periodic    ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
     ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    ${press_cancel}=${FALSE}    &{model_param}
     IF    ${from_actions_menu} == ${FALSE}
@@ -78,7 +78,7 @@ Create Pipeline Run    # robocop: disable
     END
     Wait For RHODS Dashboard To Load    expected_page=Create run
     ...    wait_for_cards=${FALSE}
-    Fill In Run Creation Form    name=${name}
+    Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
     ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
     ...    start_time=${start_time}    end_date=${end_date}    end_time=${end_time}
     ...    cron_expr=${cron_expr}    &{model_param}

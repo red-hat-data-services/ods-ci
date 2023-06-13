@@ -18,7 +18,7 @@ ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET
 ${REPLICAS_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${REPLICAS_MIN_BTN_XP}=         xpath=//div/button[@aria-label="Minus"]
 ${SERVING_RUNTIME_NAME}=        xpath=//input[@id="serving-runtime-name-input"]
-${GPU_SECTION_TITLE}=           xpath=//span[.="Model server gpus"]
+${GPU_SECTION_TITLE}=           xpath=//span[.="Model server GPUs"]
 ${GPU_SECTION_INPUT}=           ${GPU_SECTION_TITLE}/../../..//input
 ${GPU_SECTION_PLUS}=            ${GPU_SECTION_TITLE}/../../..//button[@aria-label="Plus"]
 ${GPU_SECTION_MINUS}=           ${GPU_SECTION_TITLE}/../../..//button[@aria-label="Minus"]

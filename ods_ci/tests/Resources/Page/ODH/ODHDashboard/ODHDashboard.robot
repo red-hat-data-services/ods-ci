@@ -234,7 +234,17 @@ Load Expected Data Of RHODS Explore Section
     ${apps_dict_obj}=  Set Variable  ${apps_dict_obj}[apps]
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    ${is_self_managed} == ${TRUE}
-        Remove From Dictionary   ${apps_dict_obj}   @{ISV_TO_REMOVE_SELF_MANAGED}
+        ${installed_rhods_type}=    Set Variable    Self-managed
+    ELSE
+        ${installed_rhods_type}=    Set Variable    Cloud Service
+    END
+    FOR    ${index}  ${app}    IN ENUMERATE    @{apps_dict_obj}
+        Log    ${index}: ${app}: ${apps_dict_obj}[${app}][rhods_type]
+        ${to_be_displayed}=    Run Keyword And Return Status
+        ...    List Should Contain Value    ${apps_dict_obj}[${app}][rhods_type]    ${installed_rhods_type}
+        IF    "${to_be_displayed}" == "${FALSE}"
+            Remove From Dictionary   ${apps_dict_obj}   ${app}            
+        END
     END
     RETURN  ${apps_dict_obj}
 

@@ -32,7 +32,7 @@ Verify GPU Model Deployment Via UI
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     # For 1.27 expects a custom runtime called New OVMS Server test to be present with the correct GPU flag
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    no_gpus=1    runtime=New OVMS Server test
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    no_gpus=1    runtime=OpenVINO Model Server (Supports GPUs)
     Verify Displayed GPU Count    server_name=${RUNTIME_NAME}    no_gpus=1
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}  # robocop:disable

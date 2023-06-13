@@ -147,11 +147,11 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         Wait Until Keyword Succeeds    120s    5s
-        ...    Page Should Contain Element    //div[.="${model_name}"]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
+        ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
         Wait Until Keyword Succeeds    120s    5s
-        ...    Page Should Contain Element    //div[.="${model_name}"]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
+        ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 

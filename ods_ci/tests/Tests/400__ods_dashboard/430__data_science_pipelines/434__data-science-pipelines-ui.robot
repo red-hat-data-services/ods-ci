@@ -80,11 +80,6 @@ Pipelines Suite Setup    # robocop: disable
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-ds-pipelines
-    Reload RHODS Dashboard Page    expected_page=${PRJ_TITLE}
-    ...    wait_for_cards=${FALSE}
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}
-    Log    message=reload needed to avoid RHODS-8923
-    ...    level=WARN
     RHOSi Setup
 
 Pipelines Suite Teardown

@@ -256,7 +256,10 @@ Open QuickStart Step
 
 Validate Links Extracted From Text
     [Documentation]    Checks the health status of the links which have been
-    ...                extracted from the quick start texts
+    ...                extracted from the quick start texts.
+    ...                It skips validation of textual links which are supposed to be
+    ...                mere examples, hence invalid links. e.g., 
+    ...                http://example.apps.organization.abc3.p4.openshiftapps.com/prediction
     [Arguments]    ${doc_links}
     FOR    ${doc_link}    IN    @{doc_links}
         Log   ${doc_link}

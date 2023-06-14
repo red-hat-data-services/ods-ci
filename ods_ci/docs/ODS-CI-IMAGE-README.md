@@ -19,7 +19,7 @@ $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-vari
                   ods-ci:<mytag>
 ```
 Additional arguments for container build
-* OC_VERSION (default: 4.10): version of OC CLI to download
+* OC_VERSION (default: 4.13): version of OC CLI to download
 * OC_CHANNEL (default: stable): release channel to download OC CLI from,e.g, latest, candidate, etc
 ```bash
 podman build -t ods-ci:master -f ods_ci/build/Dockerfile .

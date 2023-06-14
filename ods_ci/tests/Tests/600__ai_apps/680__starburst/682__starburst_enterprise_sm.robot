@@ -22,17 +22,8 @@ Verify Starburst Enterprise Operator Can Be Installed
     [Documentation]    Installs Starburst enterprise operator and check if
     ...                its tile/card appears in RHODS Enabled page
     [Tags]    ODS-2247    Tier2
-    Install ISV Operator From OperatorHub Via CLI    operator_name=${OPERATOR_NAME}
-    ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
-    ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
-    ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
-    Wait Until Operator Subscription Last Condition Is
-    ...    type=CatalogSourcesUnhealthy    status=False
-    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
-    ...    namespace=${NAMESPACE}
-    Controller Manager Pod Should Be Running    namespace=${NAMESPACE}
-    ...    prefix=starburst-enterprise-helm-operator
-    Create Starburst Route If Not Exists    name=${STARBURST_ROUTE_NAME}
+    #Create Starburst Route If Not Exists    name=${STARBURST_ROUTE_NAME}
+    Log    message=Operator is installed as part of Suite Setup
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
@@ -44,7 +35,16 @@ Starburst Enterprise Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${NAMESPACE}
-
+    Install ISV Operator From OperatorHub Via CLI    operator_name=${OPERATOR_NAME}
+    ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
+    ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
+    ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
+    Wait Until Operator Subscription Last Condition Is
+    ...    type=CatalogSourcesUnhealthy    status=False
+    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
+    ...    namespace=${NAMESPACE}
+    Controller Manager Pod Should Be Running    namespace=${NAMESPACE}
+    ...    prefix=starburst-enterprise-helm-operator
 
 Starburst Enterprise Suite Teardown
     Close All Browsers

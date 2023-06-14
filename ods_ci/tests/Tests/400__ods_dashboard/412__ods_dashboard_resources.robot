@@ -258,7 +258,7 @@ Set Expected Items Based On RHODS Type    # robocop: disable
     [Documentation]    Sets some required variables depending on if RHODS is
     ...                installed as Self-Managed or Cloud Service
     ${is_self_managed}=    Is RHODS Self-Managed
-    ${n_items}=    Set Variable    50
+    ${n_items}=    Set Variable    48
     ${EXPECTED_ITEMS_FOR_ENABLE}=    Create List    Creating a Jupyter notebook
     ...    Deploying a sample Python application using Flask and OpenShift.
     ...    How to install Python packages on your notebook server
@@ -269,23 +269,22 @@ Set Expected Items Based On RHODS Type    # robocop: disable
     ${EXPECTED_ITEM_PROVIDERS}=    Create List       by Anaconda Professional
     ${EXPECTED_ITEM_RESOURCE_TYPE}=    Create List     Tutorial
     ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}=    Create List
-    ...    Connecting to Red Hat OpenShift Streams for Apache Kafka
     ...    Creating a Jupyter notebook
     ...    How to install Python packages on your notebook server
     ...    How to update notebook server settings
     ...    How to use data from Amazon S3 buckets
     ...    How to view installed packages on your notebook server
     ...    Deploying a sample Python application using Flask and OpenShift.
-    ...    Jupyter    OpenShift Streams for Apache Kafka
+    ...    Jupyter
     ...    OpenShift API Management
     ...    Securing a deployed model using Red Hat OpenShift API Management
     @{EXPECTED_ITEMS_FOR_COMBINATIONS}=      Create List
-    ...    Jupyter    OpenShift Streams for Apache Kafka    OpenShift API Management
+    ...    Jupyter    OpenShift API Management
     IF    ${is_self_managed} == ${TRUE}
         Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
         Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
         Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
-        ${n_items}=    Set Variable    43
+        ${n_items}=    Set Variable    46
     END
     Set Suite Variable    ${EXPECTED_RESOURCE_ITEMS}    ${n_items}
     Set Suite Variable    ${EXPECTED_ITEMS_FOR_ENABLE}    ${EXPECTED_ITEMS_FOR_ENABLE}
@@ -330,7 +329,8 @@ Validate Number Of Quick Starts In Dashboard Is As Expected
     ${expectedLen} =    Get Length    ${quickStartElements}
     ${actualQuickStarts} =    Get QuickStart Items
     ${actualLen} =    Get Length    ${actualQuickStarts}
-    Should Be True    ${expectedLen} == ${actualLen}    Quick Starts have been updated. Update the list accordingly.
+    Run Keyword And Continue On Failure
+    ...    Should Be True    ${expectedLen} == ${actualLen}    Quick Starts have been updated. Update the list accordingly.
 
 Verify Quick Starts Work As Expected When Restarted And Left In Between
     [Arguments]    ${quickStartElements}

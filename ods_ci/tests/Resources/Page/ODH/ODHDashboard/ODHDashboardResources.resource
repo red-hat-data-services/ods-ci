@@ -9,6 +9,8 @@ Resource       ../../../Common.robot
 ...                 https://my-project-s2i-python-service-openapi-3scale-api.cluster.com/?user_key=USER_KEY
 ...                 https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/?user_key=<API_KEY_GOES_HERE>
 ...                 https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/status/?user_key=.
+...                 https://console-openshift-console.apps.test-cluster.example.com
+...                 console-openshift-console.apps.test-cluster.example.com
 
 
 *** Keywords ***

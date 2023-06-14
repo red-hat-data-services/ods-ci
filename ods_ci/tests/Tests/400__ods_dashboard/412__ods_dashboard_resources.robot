@@ -315,6 +315,7 @@ Set Quick Starts Elements List Based On RHODS Type
             ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
             ...    deploy-python-model    create-aikit-notebook    openvino-inference-notebook
             ...    pachyderm-beginner-tutorial-notebook    build-deploy-watson-model
+            ...    using-starburst-enterprise
     ELSE
             @{quickStartElements}=      Create List
             ...    create-jupyter-notebook    create-jupyter-notebook-anaconda

@@ -5,7 +5,7 @@ Resource            ../../../Resources/Page/Operators/ISVs.resource
 Resource            ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup          Starburst Enterprise Suite Setup
-# Suite Teardown       Starburst Enterprise Suite Teardown
+Suite Teardown       Starburst Enterprise Suite Teardown
 
 
 *** Variables ***
@@ -78,6 +78,8 @@ Verify User Can Perform Basic Queries Against Starburst From A DS Workbench
 *** Keywords ***
 Starburst Enterprise Suite Setup
     Set Library Search Order    SeleniumLibrary
+    ${PROJECTS_TO_DELETE}=    Create List    ${DS_PROJECT_NAME}
+    Set Suite Variable    ${PROJECTS_TO_DELETE}
     RHOSi Setup
     ${manager_containers}=  Create List  manager
     ${manager}=         Create Dictionary    label_selector=control-plane=controller-manager    n_pods=1
@@ -110,7 +112,11 @@ Starburst Enterprise Suite Setup
 
 Starburst Enterprise Suite Teardown
     Close All Browsers
-    # to do - uninstall starburst
+    Delete Data Science Projects From CLI    ${DS_PROJECT_NAME}
+    Delete Custom Resource    kind=StarburstEnterprise
+    ...    namespace=${NAMESPACE}    name=starburstenterprise-sample
+    Uninstall ISV Operator From OperatorHub Via CLI
+    ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
 
 Create Route And Workbench
     ${rc}  ${host}=    Create Starburst Route    name=${SEP_ROUTE_NAME}

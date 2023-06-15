@@ -92,3 +92,23 @@ Wait Until Operator Pods Are Running
     Wait Until Keyword Succeeds    ${pods_chk_retries} times    ${pods_chk_retries_interval}
     ...    Operator Pods Should Be Running    namespace=${namespace}
     ...    expected_pods_dict=${expected_pods_dict}
+
+Delete Custom Resource
+    [Arguments]    ${kind}    ${namespace}    ${name}
+    ${status}=    Run Keyword And Return Status
+    ...    Oc Delete    kind=${kind}   name=${name}
+    ...    namespace=${namespace}
+    # ...    field_selector=metadata.name=${name}}
+    IF    ${status} == ${FALSE}
+        Fail    msg=Failed to delete ${kind} CR
+    ELSE
+        Log    successfully deleted ${kind} CR
+    END
+
+Uninstall ISV Operator From OperatorHub Via CLI
+    [Arguments]    ${subscription_name}    ${namespace}
+    ${rc}    ${current_csv_name}=    Run And Return Rc And Output
+    ...    oc get subscription ${subscription_name} -n ${namespace} -ojson | jq '.status.currentCSV' | tr -d '"'    # robocop: disable
+    Oc Delete    kind=Subscription    name=${subscription_name}    namespace=${namespace}
+    Oc Delete    kind=ClusterServiceVersion    name=${current_csv_name}    namespace=${namespace}
+    

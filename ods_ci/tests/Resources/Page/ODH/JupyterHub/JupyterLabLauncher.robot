@@ -403,6 +403,9 @@ Check Versions In JupyterLab
             END
         ELSE IF  "${libDetail}[0]" == "Python"
             ${status} =  Python Version Check  ${libDetail}[1]
+        # CUDA version is checked in GPU-specific test cases, we can skip it here.
+        ELSE IF  "${libDetail}[0]" == "CUDA"
+            CONTINUE
         ELSE
             ${status}  ${value} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
             IF  '${status}' == 'FAIL'

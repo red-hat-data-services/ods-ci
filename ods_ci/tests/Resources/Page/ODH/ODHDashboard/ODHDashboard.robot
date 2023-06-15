@@ -542,9 +542,8 @@ RHODS Notification Drawer Should Contain
 Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
     Page Should Contain    Settings
-    Menu.Navigate To Page    Settings    Notebook Images
+    Menu.Navigate To Page    Settings    Notebook images
     Wait Until Page Contains    Notebook image settings
-    Page Should Contain    Notebook image settings
 
 Import New Custom Image
     [Documentation]    Opens the Custom Image import view and imports an image

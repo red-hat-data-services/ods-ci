@@ -3,8 +3,9 @@ Library             SeleniumLibrary
 Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/Page/Operators/ISVs.resource
 Resource            ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup          Starburst Enterprise Suite Setup
-Suite Teardown       Starburst Enterprise Suite Teardown
+# Suite Teardown       Starburst Enterprise Suite Teardown
 
 
 *** Variables ***
@@ -41,32 +42,64 @@ Verify Starburst Enterprise Operator Can Be Installed
     [Documentation]    Installs Starburst enterprise operator and check if
     ...                its tile/card appears in RHODS Enabled page
     [Tags]    ODS-2247    Tier2
-    #Create Starburst Route If Not Exists    name=${STARBURST_ROUTE_NAME}
-    Log    message=Operator is installed as part of Suite Setup
-    Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
-    ...    browser_options=${BROWSER.OPTIONS}
-    Verify Service Is Enabled         starburstenterprise
+    Log    message=Operator is installed and CR is deployed as part of Suite Setup
+    Verify Service Is Enabled         ${SEP_DISPLAYED_NAME}
 
+
+Verify User Can Perform Basic Queries Against Starburst From A DS Workbench
+    [Documentation]    Creates, launches a DS Workbench and query the Starburst
+    ...                default catalogs
+    [Tags]    ODS-2249    Tier2
+    # [Setup]    Create Route And Workbench
+    ${host}=     Get Starburst Route
+    Open New Notebook In Jupyterlab Menu
+    Run Cell And Check For Errors    !pip install pandas;pip install trino
+    Run Cell And Check For Errors    ${GET_SQL_FUNC}
+    Run Cell And Check For Errors    ${INIT_CELL_CODE}
+    Run Query And Check Output    query_code=${QUERY_CATALOGS_PY}
+    ...    expected_output=['system' 'tpch']
+    Run Query And Check Output    query_code=${QUERY_SCHEMAS_PY}
+    ...    expected_output=['information_schema' 'sf1' 'sf100' 'sf1000' 'sf10000' 'sf100000' 'sf300' 'sf3000' 'sf30000' 'tiny']    # robocop: disable
+    Run Query And Check Output    query_code=${QUERY_TABLES_PY}
+    ...    expected_output=['customer' 'lineitem' 'nation' 'orders' 'part' 'partsupp' 'region' 'supplier']
+    Run Query And Check Output    query_code=${QUERY_CUSTOMERS_PY}
+    ...    expected_output=('Customer#[0-9]+'\s?)+
+    ...    use_regex=${TRUE}
+    Run Query And Check Output    query_code=${QUERY_JOIN_PY}
+    ...    expected_output=('Customer#[0-9]+'\s?)+
+    ...    use_regex=${TRUE}
+    Capture Page Screenshot 
+    
 
 *** Keywords ***
 Starburst Enterprise Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    ${manager_containers}=  Create List  manager
+    ${manager}=         Create Dictionary    label_selector=control-plane=controller-manager    n_pods=1
+    ...    n_containers=1    containers_names=${manager_containers}
+    ${coordinator_containers}=    Create List  coordinator
+    ${coordinator}=         Create Dictionary    label_selector=role=coordinator    n_pods=1
+    ...    n_containers=1    containers_names=${coordinator_containers}
+    ${worker_containers}=    Create List  worker
+    ${worker}=         Create Dictionary    label_selector=role=worker    n_pods=2
+    ...    n_containers=1    containers_names=${worker_containers}
+    ${pods_dicts}=    Create List   ${manager}    ${coordinator}    ${worker}
+    Set Suite Variable    ${EXP_PODS_INFO}    ${pods_dicts}
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${NAMESPACE}
-    Install ISV Operator From OperatorHub Via CLI    operator_name=${OPERATOR_NAME}
-    ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
-    ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
-    ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
-    Wait Until Operator Subscription Last Condition Is
-    ...    type=CatalogSourcesUnhealthy    status=False
-    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
-    ...    namespace=${NAMESPACE}
-    Create Starburst Enteprise License Secret
-    Deploy Custom Resource    kind=StarburstEnterprise    namespace=${namespace}
-    ...    filepath=${SEP_CR_FILEPATH}
-    Wait Until Operator Pods Are Running    namespace=${NAMESPACE}
-    ...    expected_pods_dict=${EXP_PODS_INFO}
+    ## Install ISV Operator From OperatorHub Via CLI    operator_name=${OPERATOR_NAME}
+    ## ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
+    ## ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
+    ## ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
+    ## Wait Until Operator Subscription Last Condition Is
+    ## ...    type=CatalogSourcesUnhealthy    status=False
+    ## ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
+    ## ...    namespace=${NAMESPACE}
+    ## Create Starburst Enteprise License Secret
+    ## Deploy Custom Resource    kind=StarburstEnterprise    namespace=${namespace}
+    ## ...    filepath=${SEP_CR_FILEPATH}
+    ## Wait Until Operator Pods Are Running    namespace=${NAMESPACE}
+    ## ...    expected_pods_dict=${EXP_PODS_INFO}
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}

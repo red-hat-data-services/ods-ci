@@ -50,8 +50,12 @@ Verify User Can Perform Basic Queries Against Starburst From A DS Workbench
     [Documentation]    Creates, launches a DS Workbench and query the Starburst
     ...                default catalogs
     [Tags]    ODS-2249    Tier2
-    # [Setup]    Create Route And Workbench
-    ${host}=     Get Starburst Route
+    [Setup]    Create Route And Workbench
+    Launch And Access Workbench    workbench_title=${DS_WORKBENCH_NAME}
+    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
+    ${host}=     Get Starburst Route    name=${SEP_ROUTE_NAME}
+    ...    namespace=${NAMESPACE}
     Open New Notebook In Jupyterlab Menu
     Run Cell And Check For Errors    !pip install pandas;pip install trino
     Run Cell And Check For Errors    ${GET_SQL_FUNC}
@@ -87,19 +91,19 @@ Starburst Enterprise Suite Setup
     ${pods_dicts}=    Create List   ${manager}    ${coordinator}    ${worker}
     Set Suite Variable    ${EXP_PODS_INFO}    ${pods_dicts}
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${NAMESPACE}
-    ## Install ISV Operator From OperatorHub Via CLI    operator_name=${OPERATOR_NAME}
-    ## ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
-    ## ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
-    ## ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
-    ## Wait Until Operator Subscription Last Condition Is
-    ## ...    type=CatalogSourcesUnhealthy    status=False
-    ## ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
-    ## ...    namespace=${NAMESPACE}
-    ## Create Starburst Enteprise License Secret
-    ## Deploy Custom Resource    kind=StarburstEnterprise    namespace=${namespace}
-    ## ...    filepath=${SEP_CR_FILEPATH}
-    ## Wait Until Operator Pods Are Running    namespace=${NAMESPACE}
-    ## ...    expected_pods_dict=${EXP_PODS_INFO}
+    Install ISV Operator From OperatorHub Via CLI    operator_name=${OPERATOR_NAME}
+    ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
+    ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
+    ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
+    Wait Until Operator Subscription Last Condition Is
+    ...    type=CatalogSourcesUnhealthy    status=False
+    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
+    ...    namespace=${NAMESPACE}
+    Create Starburst Enteprise License Secret
+    Deploy Custom Resource    kind=StarburstEnterprise    namespace=${namespace}
+    ...    filepath=${SEP_CR_FILEPATH}
+    Wait Until Operator Pods Are Running    namespace=${NAMESPACE}
+    ...    expected_pods_dict=${EXP_PODS_INFO}
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
@@ -111,6 +115,7 @@ Starburst Enterprise Suite Teardown
 Create Route And Workbench
     ${rc}  ${host}=    Create Starburst Route    name=${SEP_ROUTE_NAME}
     ...    namespace=${NAMESPACE}
+    Set Suite Variable    ${SEP_HOST}    ${host}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${DS_PROJECT_NAME}    description=${DS_PRJ_DESCRIPTION}
     ${envs_var_cm}=         Create Dictionary    TRINO_USERNAME=${TEST_USER_3.USERNAME}   TRINO_HOSTNAME=${host}
@@ -120,10 +125,8 @@ Create Route And Workbench
     ...                 prj_title=${DS_PROJECT_NAME}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
+    ...                 envs=${envs_list}
     Wait Until Workbench Is Started     workbench_title=${DS_WORKBENCH_NAME}
-    Launch And Access Workbench    workbench_title=${DS_WORKBENCH_NAME}
-    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
-    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
 
 Create Starburst Enteprise License Secret
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<NAMESPACE>/${NAMESPACE}/g" ${SEP_SECRET_TEMPLATE_FILEPATH}

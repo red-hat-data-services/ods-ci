@@ -336,11 +336,13 @@ Run And Watch Command
   ${proc_result} =	    Wait For Process    ${process_id}    timeout=3 secs
   Terminate Process    ${process_id}    kill=true
   Should Be Equal As Integers	    ${proc_result.rc}    0    msg=Error occured while running: ${command}
-  IF    "${output_should_contain}" != "${NONE}" 
-      Should Contain    ${process_log}    ${output_should_contain}
+  IF  "${output_should_contain}" != "${NONE}"
+    ${result} =    Run Process 	grep '${output_should_contain}' '${process_log}'    shell=yes
+    Should Be True    ${result.rc} == 0    msg='${process_log}' should contain '${output_should_contain}'
   END
-  IF    "${output_should_not_contain}" != "${NONE}" 
-      Should Not Contain    ${process_log}    ${output_should_not_contain}
+  IF  "${output_should_not_contain}" != "${NONE}"
+    ${result} =    Run Process 	grep -L '${output_should_not_contain}' '${process_log}' | grep .    shell=yes
+    Should Be True    ${result.rc} == 0    msg='${process_log}' should not contain '${output_should_not_contain}'
   END
   RETURN    ${proc_result.rc}
 
@@ -348,12 +350,12 @@ Check Process Output and Status
   [Documentation]    Helper keyward for 'Run And Watch Command', to tail proccess and check its status
   [Arguments]    ${process_id}
   Log To Console    .    no_newline=true
-  ${new_log_data} = 	Get File 	${process_log}
-  ${old_log_data} = 	Get File 	${temp_log}
-  ${last_line_index} =    Get Line Count    ${old_log_data}
-  @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
+  ${log_data} = 	Get File 	${process_log}
+  ${temp_log_data} = 	Get File 	${temp_log}
+  ${last_line_index} =    Get Line Count    ${temp_log_data}
+  @{new_lines} =    Split To Lines    ${log_data}    ${last_line_index}
   FOR    ${line}    IN    @{new_lines}
       Log To Console    ${line}
   END
-  Create File    ${temp_log}    ${new_log_data}
+  Create File    ${temp_log}    ${log_data}
   Process Should Be Stopped	    ${process_id}

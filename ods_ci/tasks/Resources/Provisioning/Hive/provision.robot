@@ -112,6 +112,8 @@ Verify Cluster Is Successfully Provisioned
     END
     Create File    ${install_log_file}    ${install_log_data}
     Should Contain    ${install_log_data}    install completed successfully
+    ${result} =    Run Process 	grep 'install completed successfully' ${install_log_file}    shell=yes
+    Should Be True    ${result.rc} == 0
 
 Wait For Cluster To Be Ready
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}

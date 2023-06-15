@@ -93,7 +93,7 @@ Create Floating IPs
     File Should Not Be Empty    ${osp_clouds_yaml}
     ${shell_script} =     Set Variable     ${CURDIR}/OSP/create_fips.sh
     ${result} 	Run Process 	sh     ${shell_script}    ${cluster_name}    ${infrastructure_configurations}[aws_domain]
-    ...    ${infrastructure_configurations}[osp_network]    ${artifacts_dir}/    shell=yes
+    ...    ${infrastructure_configurations}[osp_network]    ${infrastructure_configurations}[osp_cloud_name]    ${artifacts_dir}/    shell=yes
     Log    ${shell_script}:\n${result.stdout}\n${result.stderr}     console=True
     Should Be True    ${result.rc} == 0
     ${fips_file_to_export} =    Set Variable    ${artifacts_dir}/${cluster_name}.${infrastructure_configurations}[aws_domain].fips

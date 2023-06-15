@@ -14,8 +14,8 @@ ${STARBURST_ROUTE}=    web-ui
 *** Keywords ***
 Create Starburst Route
     [Documentation]    Exposes starburst service for external connections
-    [Arguments]    ${name}
-    ${rc}=    Run And Return Rc    oc expose svc starburst --name ${name} -n ${STARBURST_CR_DEFAULT_NAMESPACE}
+    [Arguments]    ${name}    ${namespace}=${STARBURST_CR_DEFAULT_NAMESPACE}
+    ${rc}=    Run And Return Rc    oc expose svc starburst --name ${name} -n ${namespace}
     # ${rc}=    Run And Return Rc    oc create route edge ${name} --service=starburst --insecure-policy="Redirect" -n ${STARBURST_CR_DEFAULT_NAMESPACE}    # robocop: disable
     ${route}=    Get Starburst Route
     RETURN    ${rc}    ${route}

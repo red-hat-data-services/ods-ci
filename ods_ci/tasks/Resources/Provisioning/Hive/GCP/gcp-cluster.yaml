@@ -52,7 +52,7 @@ items:
         networkType: {{ ocp_network_type|default("OVNKubernetes") }}
         serviceNetwork:
         - 172.30.0.0/16
-      fips: true
+      fips: {{ fips_validation|default("false") }}
       platform:
         gcp:
           projectID: {{ gcp_project_id }}

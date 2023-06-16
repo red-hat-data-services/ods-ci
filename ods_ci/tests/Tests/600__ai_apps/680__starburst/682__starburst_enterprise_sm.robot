@@ -12,7 +12,7 @@ Suite Teardown       Starburst Enterprise Suite Teardown
 *** Variables ***
 ${OPERATOR_NAME}=     starburst-enterprise-helm-operator-rhmp
 ${SUBSCRIPTION_NAME}=    starburst-enterprise-helm-operator-rhmp-odsci
-${NAMESPACE}=    ods-ci-starburst
+${NAMESPACE}=    ods-ci-starburst2
 ${CHANNEL}=    alpha
 ${CATALOG_SOURCE_NAME}=    redhat-marketplace
 ${CATALOG_SOURCE_NAMESPACE}=    openshift-marketplace
@@ -39,6 +39,12 @@ ${QUERY_JOIN_PY}=    sql = '${QUERY_JOIN}'\ndf = get_sql(sql, conn)\nprint(df['n
 
 
 *** Test Cases ***
+# Test install keyword
+#     [Tags]    install
+#     Install Isv By Name    operator_name=${OPERATOR_NAME}
+#     ...    channel=${CHANNEL}    namespace=${NAMESPACE}
+#     ...    source=${CATALOG_SOURCE_NAME}
+
 Verify Starburst Enterprise Operator Can Be Installed
     [Documentation]    Installs Starburst enterprise operator and check if
     ...                its tile/card appears in RHODS Enabled page
@@ -96,10 +102,13 @@ Starburst Enterprise Suite Setup    # robocop: disable
     ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
     ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
     ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
-    Wait Until Operator Subscription Last Condition Is
-    ...    type=CatalogSourcesUnhealthy    status=False
-    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
-    ...    namespace=${NAMESPACE}
+    # Wait Until Operator Subscription Last Condition Is
+    # ...    type=CatalogSourcesUnhealthy    status=False
+    # ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
+    # ...    namespace=${NAMESPACE}
+    Install Isv By Name    operator_name=${OPERATOR_NAME}
+    ...    channel=${CHANNEL}    namespace=${NAMESPACE}
+    ...    source=${CATALOG_SOURCE_NAME}
     Create Starburst Enteprise License Secret
     Deploy Custom Resource    kind=StarburstEnterprise    namespace=${namespace}
     ...    filepath=${SEP_CR_FILEPATH}
@@ -117,6 +126,7 @@ Starburst Enterprise Suite Teardown
     Uninstall ISV Operator From OperatorHub Via CLI
     ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
     Delete Starburst Enterprise License Secret
+    Oc Delete    kind=Project  name=${NAMESPACE}
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}    wait_for_cards=${FALSE}

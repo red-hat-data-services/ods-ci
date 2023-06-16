@@ -12,7 +12,7 @@ Suite Teardown       Starburst Enterprise Suite Teardown
 *** Variables ***
 ${OPERATOR_NAME}=     starburst-enterprise-helm-operator-rhmp
 ${SUBSCRIPTION_NAME}=    starburst-enterprise-helm-operator-rhmp-odsci
-${NAMESPACE}=    ods-ci-starburst2
+${NAMESPACE}=    ods-ci-starburst
 ${CHANNEL}=    alpha
 ${CATALOG_SOURCE_NAME}=    redhat-marketplace
 ${CATALOG_SOURCE_NAMESPACE}=    openshift-marketplace
@@ -39,12 +39,6 @@ ${QUERY_JOIN_PY}=    sql = '${QUERY_JOIN}'\ndf = get_sql(sql, conn)\nprint(df['n
 
 
 *** Test Cases ***
-# Test install keyword
-#     [Tags]    install
-#     Install Isv By Name    operator_name=${OPERATOR_NAME}
-#     ...    channel=${CHANNEL}    namespace=${NAMESPACE}
-#     ...    source=${CATALOG_SOURCE_NAME}
-
 Verify Starburst Enterprise Operator Can Be Installed
     [Documentation]    Installs Starburst enterprise operator and check if
     ...                its tile/card appears in RHODS Enabled page
@@ -102,13 +96,10 @@ Starburst Enterprise Suite Setup    # robocop: disable
     ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
     ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
     ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
-    # Wait Until Operator Subscription Last Condition Is
-    # ...    type=CatalogSourcesUnhealthy    status=False
-    # ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
-    # ...    namespace=${NAMESPACE}
-    Install Isv By Name    operator_name=${OPERATOR_NAME}
-    ...    channel=${CHANNEL}    namespace=${NAMESPACE}
-    ...    source=${CATALOG_SOURCE_NAME}
+    Wait Until Operator Subscription Last Condition Is
+    ...    type=CatalogSourcesUnhealthy    status=False
+    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
+    ...    namespace=${NAMESPACE}
     Create Starburst Enteprise License Secret
     Deploy Custom Resource    kind=StarburstEnterprise    namespace=${namespace}
     ...    filepath=${SEP_CR_FILEPATH}

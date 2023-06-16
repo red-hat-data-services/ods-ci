@@ -150,5 +150,6 @@ Create Starburst Enteprise License Secret
     Remove File    ${secret_filepath}
 
 Delete Starburst Enterprise License Secret
+    [Documentation]    Deletes the secret containing the Starburst Enterprise license
     Oc Delete    kind=Secret    name=starburstdata
     ...    namespace=${NAMESPACE}

@@ -116,6 +116,7 @@ Starburst Enterprise Suite Teardown
     ...    namespace=${NAMESPACE}    name=starburstenterprise-sample
     Uninstall ISV Operator From OperatorHub Via CLI
     ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
+    Delete Starburst Enterprise License Secret
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}    wait_for_cards=${FALSE}
@@ -147,3 +148,7 @@ Create Starburst Enteprise License Secret
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<VALUE>/${STARBURST.LICENSE_ENCODED}/g" ${secret_filepath}    # robocop: disable
     Oc Apply    kind=Secret    src=${secret_filepath}
     Remove File    ${secret_filepath}
+
+Delete Starburst Enterprise License Secret
+    Oc Delete    kind=Secret    name=starburstdata
+    ...    namespace=${NAMESPACE}

@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation       Test suite to test integration with Starburst Enterprise operator in RHODS SM
 Library             SeleniumLibrary
 Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/Page/Operators/ISVs.resource
@@ -30,8 +31,8 @@ ${QUERY_SCHEMAS}=    SHOW SCHEMAS from tpch
 ${QUERY_TABLES}=    SHOW TABLES from tpch.sf1
 ${QUERY_CUSTOMERS}=    SELECT name FROM tpch.sf1.customer limit 3
 ${QUERY_JOIN}=    SELECT c.name FROM tpch.sf1.customer c JOIN tpch.sf1.orders o ON c.custkey = o.custkey ORDER BY o.orderdate DESC limit 3    # robocop: disable
-${QUERY_CATALOGS_PY}=    sql = '${QUERY_CATALOGS}'\ndf = get_sql(sql, conn)\nprint(df['Catalog'].values)\n
-${QUERY_SCHEMAS_PY}=    sql = '${QUERY_SCHEMAS}'\ndf = get_sql(sql, conn)\nprint(df['Schema'].values)\n
+${QUERY_CATALOGS_PY}=    sql = '${QUERY_CATALOGS}'\ndf = get_sql(sql, conn)\nprint(df['Catalog'].values)\n    # robocop: disable
+${QUERY_SCHEMAS_PY}=    sql = '${QUERY_SCHEMAS}'\ndf = get_sql(sql, conn)\nprint(df['Schema'].values)\n    # robocop: disable
 ${QUERY_TABLES_PY}=    sql = '${QUERY_TABLES}'\ndf = get_sql(sql, conn)\nprint(df['Table'].values)\n
 ${QUERY_CUSTOMERS_PY}=    sql = '${QUERY_CUSTOMERS}'\ndf = get_sql(sql, conn)\nprint(df['name'].values)\n    # robocop: disable
 ${QUERY_JOIN_PY}=    sql = '${QUERY_JOIN}'\ndf = get_sql(sql, conn)\nprint(df['name'].values)\n    # robocop: disable
@@ -45,8 +46,7 @@ Verify Starburst Enterprise Operator Can Be Installed
     Log    message=Operator is installed and CR is deployed as part of Suite Setup
     Verify Service Is Enabled         ${SEP_DISPLAYED_NAME}
 
-
-Verify User Can Perform Basic Queries Against Starburst From A DS Workbench
+Verify User Can Perform Basic Queries Against Starburst From A DS Workbench    # robocop: disable
     [Documentation]    Creates, launches a DS Workbench and query the Starburst
     ...                default catalogs
     [Tags]    ODS-2249    Tier2
@@ -65,18 +65,19 @@ Verify User Can Perform Basic Queries Against Starburst From A DS Workbench
     Run Query And Check Output    query_code=${QUERY_SCHEMAS_PY}
     ...    expected_output=['information_schema' 'sf1' 'sf100' 'sf1000' 'sf10000' 'sf100000' 'sf300' 'sf3000' 'sf30000' 'tiny']    # robocop: disable
     Run Query And Check Output    query_code=${QUERY_TABLES_PY}
-    ...    expected_output=['customer' 'lineitem' 'nation' 'orders' 'part' 'partsupp' 'region' 'supplier']
+    ...    expected_output=['customer' 'lineitem' 'nation' 'orders' 'part' 'partsupp' 'region' 'supplier']    # robocop: disable
     Run Query And Check Output    query_code=${QUERY_CUSTOMERS_PY}
     ...    expected_output=('Customer#[0-9]+'\s?)+
     ...    use_regex=${TRUE}
     Run Query And Check Output    query_code=${QUERY_JOIN_PY}
     ...    expected_output=('Customer#[0-9]+'\s?)+
     ...    use_regex=${TRUE}
-    Capture Page Screenshot 
-    
+    Capture Page Screenshot
+
 
 *** Keywords ***
 Starburst Enterprise Suite Setup
+    [Documentation]    Installs Starburst Enterprise operator and launch RHODS Dashboard
     Set Library Search Order    SeleniumLibrary
     ${PROJECTS_TO_DELETE}=    Create List    ${DS_PROJECT_NAME}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${PROJECTS_TO_DELETE}
@@ -107,10 +108,11 @@ Starburst Enterprise Suite Setup
     Wait Until Operator Pods Are Running    namespace=${NAMESPACE}
     ...    expected_pods_dict=${EXP_PODS_INFO}
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
-    ...    browser_options=${BROWSER.OPTIONS}
+    ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
 
 Starburst Enterprise Suite Teardown
+    [Documentation]    Uninstalls Starburst Enterprise operator
     Close All Browsers
     Delete Data Science Projects From CLI    ${DS_PROJECT_NAME}
     Delete Custom Resource    kind=StarburstEnterprise
@@ -118,18 +120,19 @@ Starburst Enterprise Suite Teardown
     Uninstall ISV Operator From OperatorHub Via CLI
     ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
-    ...    browser_options=${BROWSER.OPTIONS}        wait_for_cards=${FALSE}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}    wait_for_cards=${FALSE}
     Remove Disabled Application From Enabled Page    app_id=openvino
 
 Create Route And Workbench
+    [Documentation]    Creates the Starburst Enterprise route, the DS Project and workbench
     ${rc}  ${host}=    Create Starburst Route    name=${SEP_ROUTE_NAME}
     ...    namespace=${NAMESPACE}
     Set Suite Variable    ${SEP_HOST}    ${host}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${DS_PROJECT_NAME}    description=${DS_PRJ_DESCRIPTION}
-    ${envs_var_cm}=         Create Dictionary    TRINO_USERNAME=${TEST_USER_3.USERNAME}   TRINO_HOSTNAME=${host}
-    ...    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
+    ${envs_var_cm}=         Create Dictionary    TRINO_USERNAME=${TEST_USER_3.USERNAME}   
+    ...    TRINO_HOSTNAME=${host}    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_cm}
     Create Workbench    workbench_title=${DS_WORKBENCH_NAME}  workbench_description=${DS_WORKBENCH_NAME}
     ...                 prj_title=${DS_PROJECT_NAME}    image_name=${NB_IMAGE}   deployment_size=Small
@@ -139,6 +142,7 @@ Create Route And Workbench
     Wait Until Workbench Is Started     workbench_title=${DS_WORKBENCH_NAME}
 
 Create Starburst Enteprise License Secret
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<NAMESPACE>/${NAMESPACE}/g" ${SEP_SECRET_TEMPLATE_FILEPATH}
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<VALUE>/${STARBURST.LICENSE_ENCODED}/g" ${SEP_SECRET_TEMPLATE_FILEPATH}
+    [Documentation]    Applies the Starburst Enteprise license
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<NAMESPACE>/${NAMESPACE}/g" ${SEP_SECRET_TEMPLATE_FILEPATH}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<VALUE>/${STARBURST.LICENSE_ENCODED}/g" ${SEP_SECRET_TEMPLATE_FILEPATH}    # robocop: disable
     Oc Apply    kind=Secret    src=${SEP_SECRET_TEMPLATE_FILEPATH}

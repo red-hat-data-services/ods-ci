@@ -16,7 +16,7 @@ Create Starburst Route
     [Documentation]    Exposes starburst service for external connections
     [Arguments]    ${name}    ${namespace}=${STARBURST_CR_DEFAULT_NAMESPACE}
     ${rc}=    Run And Return Rc    oc expose svc starburst --name ${name} -n ${namespace}
-    # ${rc}=    Run And Return Rc    oc create route edge ${name} --service=starburst --insecure-policy="Redirect" -n ${STARBURST_CR_DEFAULT_NAMESPACE}    # robocop: disable
+    Should Be Equal As Integers    ${rc}    ${0}
     ${route}=    Get Starburst Route    name=${name}    namespace=${namespace}
     RETURN    ${rc}    ${route}
 

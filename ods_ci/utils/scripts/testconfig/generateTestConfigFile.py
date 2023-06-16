@@ -98,7 +98,7 @@ def get_prometheus_token(project):
     """
     Get prometheus token for the cluster.
     """
-    cmd = "oc create token prometheus -n {}".format(project)
+    cmd = "oc create token prometheus -n {} --duration 6h".format(project)
     prometheus_token = execute_command(cmd)
     return prometheus_token.strip("\n")
 

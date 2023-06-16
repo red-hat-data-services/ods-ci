@@ -11,7 +11,7 @@ ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}=   ${FILES_RESOURCES_DIRPATH}/isv-operat
 
 
 *** Keywords ***
-Install ISV Operator From OperatorHub Via CLI
+Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     [Documentation]    Installs the given operator via CLI
     [Arguments]    ${operator_name}    ${subscription_name}    ${namespace}=openshift-operators
     ...            ${channel}=stable    ${catalog_source_name}=certified-operators
@@ -27,7 +27,7 @@ Install ISV Operator From OperatorHub Via CLI
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
     IF    "${operator_group_target_ns}" != "${NONE}"
         Create Operator Group    operator_name=${operator_name}
-        ...    namespace=${namespace}    target_namespace=${operator_group_target_ns}        
+        ...    namespace=${namespace}    target_namespace=${operator_group_target_ns}
     END
 
 Create Operator Group
@@ -40,32 +40,32 @@ Create Operator Group
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<NAMESPACE>/${namespace}/g" ${operator_group_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<TARGET_NAMESPACE>/${target_namespace}/g" ${operator_group_filepath}    # robocop: disable
     Oc Apply    kind=OperatorGroup    src=${operator_group_filepath}    api_version=v1
-    
+
 Operator Subscription Last Condition Should Be
     [Documentation]    Checks the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
     ...    ${subcription_name}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get subscription ${subcription_name} -n ${namespace} -ojson | jq '.status.conditions | last | select(.type=="CatalogSourcesUnhealthy" and .status=="False" and .reason=="AllCatalogSourcesHealthy")'    # robocop: disable
+    ...    oc get subscription ${subcription_name} -n ${namespace} -ojson | jq '.status.conditions | last | select(.type=="${type}" and .status=="${status}" and .reason=="${reason}")'    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
     Should Not Be Empty    ${out}
 
-Wait Until Operator Subscription Last Condition Is
+Wait Until Operator Subscription Last Condition Is    # robocop: disable
     [Documentation]    Keeps checking until the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
     ...    ${subcription_name}    ${namespace}
     ...    ${retry}=20    ${retry_interval}=3s
     Wait Until Keyword Succeeds    ${retry} times    ${retry_interval}    Operator Subscription Last Condition Should Be    # robocop: disable
-    ...    type=CatalogSourcesUnhealthy    status=False
-    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
-    ...    namespace=${NAMESPACE}  
+    ...    type=${type}     status=${status}
+    ...    reason=${reason}    subcription_name=${subcription_name}
+    ...    namespace=${namespace}
 
 Deploy Custom Resource
     [Documentation]    Deploys the operator Custom Resource instance
     [Arguments]    ${kind}    ${namespace}    ${filepath}
     Oc Apply    kind=${kind}    namespace=${namespace}    src=${filepath}
 
-Operator Pods Should Be Running
+Operator Pods Should Be Running    # robocop: disable
     [Documentation]    Checks the expected pods of an operator are running
     [Arguments]    ${namespace}    ${expected_pods_dict}
     ${tot_pods}=    Set Variable    ${0}
@@ -81,19 +81,18 @@ Operator Pods Should Be Running
         ELSE
             @{pod}=  Oc Get    kind=Pod  namespace=${namespace}  label_selector=${pod_info}[label_selector]
         END
-        Verify Deployment  component=${pod}  nPods=${pod_info}[n_pods] 
+        Verify Deployment  component=${pod}  nPods=${pod_info}[n_pods]
         ...    nContainers=${pod_info}[n_containers]  containerNames=${pod_info}[containers_names]
-        ${tot_pods}=    Evaluate    ${tot_pods} + ${pod_info}[n_pods] 
+        ${tot_pods}=    Evaluate    ${tot_pods} + ${pod_info}[n_pods]
     END
     ${pods}=     Run    oc get pods -n ${namespace} -o json | jq '.items[] | .metadata.name' | sed 's/"//g'
     ${pods_list}=    Text To List    ${pods}
     Run Keyword And Continue On Failure    Length Should Be    ${pods_list}    ${tot_pods}
 
-Wait Until Operator Pods Are Running
+Wait Until Operator Pods Are Running    # robocop: disable
     [Documentation]    Keeps checking until the expected pods of an operator are running
-    [Arguments]    ${namespace}    ${expected_pods_dict}    ${cr_chk_retries}=30
-    ...            ${cr_chk_retries_interval}=30s    ${pods_chk_retries}=30
-    ...            ${pods_chk_retries_interval}=30s
+    [Arguments]    ${namespace}    ${expected_pods_dict}
+    ...            ${pods_chk_retries}=30    ${pods_chk_retries_interval}=30s
     Wait Until Keyword Succeeds    ${pods_chk_retries} times    ${pods_chk_retries_interval}
     ...    Operator Pods Should Be Running    namespace=${namespace}
     ...    expected_pods_dict=${expected_pods_dict}

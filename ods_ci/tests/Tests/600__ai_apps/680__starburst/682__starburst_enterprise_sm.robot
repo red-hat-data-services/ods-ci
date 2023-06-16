@@ -74,7 +74,7 @@ Verify User Can Perform Basic Queries Against Starburst From A DS Workbench    #
 
 
 *** Keywords ***
-Starburst Enterprise Suite Setup
+Starburst Enterprise Suite Setup    # robocop: disable
     [Documentation]    Installs Starburst Enterprise operator and launch RHODS Dashboard
     Set Library Search Order    SeleniumLibrary
     ${PROJECTS_TO_DELETE}=    Create List    ${DS_PROJECT_NAME}
@@ -129,7 +129,7 @@ Create Route And Workbench
     Set Suite Variable    ${SEP_HOST}    ${host}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${DS_PROJECT_NAME}    description=${DS_PRJ_DESCRIPTION}
-    ${envs_var_cm}=         Create Dictionary    TRINO_USERNAME=${TEST_USER_3.USERNAME}   
+    ${envs_var_cm}=         Create Dictionary    TRINO_USERNAME=${TEST_USER_3.USERNAME}
     ...    TRINO_HOSTNAME=${host}    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_cm}
     Create Workbench    workbench_title=${DS_WORKBENCH_NAME}  workbench_description=${DS_WORKBENCH_NAME}

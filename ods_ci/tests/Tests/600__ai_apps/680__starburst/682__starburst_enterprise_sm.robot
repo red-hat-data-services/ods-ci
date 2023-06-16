@@ -54,8 +54,6 @@ Verify User Can Perform Basic Queries Against Starburst From A DS Workbench    #
     Launch And Access Workbench    workbench_title=${DS_WORKBENCH_NAME}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
-    ${host}=     Get Starburst Route    name=${SEP_ROUTE_NAME}
-    ...    namespace=${NAMESPACE}
     Open New Notebook In Jupyterlab Menu
     Run Cell And Check For Errors    !pip install pandas;pip install trino
     Run Cell And Check For Errors    ${GET_SQL_FUNC}

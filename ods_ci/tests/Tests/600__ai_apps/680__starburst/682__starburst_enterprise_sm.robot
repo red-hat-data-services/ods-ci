@@ -79,7 +79,7 @@ Verify User Can Perform Basic Queries Against Starburst From A DS Workbench
 Starburst Enterprise Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${PROJECTS_TO_DELETE}=    Create List    ${DS_PROJECT_NAME}
-    Set Suite Variable    ${PROJECTS_TO_DELETE}
+    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${PROJECTS_TO_DELETE}
     RHOSi Setup
     ${manager_containers}=  Create List  manager
     ${manager}=         Create Dictionary    label_selector=control-plane=controller-manager    n_pods=1
@@ -117,6 +117,10 @@ Starburst Enterprise Suite Teardown
     ...    namespace=${NAMESPACE}    name=starburstenterprise-sample
     Uninstall ISV Operator From OperatorHub Via CLI
     ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
+    Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
+    ...    browser_options=${BROWSER.OPTIONS}        wait_for_cards=${FALSE}
+    Remove Disabled Application From Enabled Page    app_id=openvino
 
 Create Route And Workbench
     ${rc}  ${host}=    Create Starburst Route    name=${SEP_ROUTE_NAME}

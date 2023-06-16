@@ -111,7 +111,6 @@ Starburst Enterprise Suite Setup    # robocop: disable
 
 Starburst Enterprise Suite Teardown
     [Documentation]    Uninstalls Starburst Enterprise operator
-    Close All Browsers
     Delete Data Science Projects From CLI    ${PROJECTS_TO_DELETE}
     Delete Custom Resource    kind=StarburstEnterprise
     ...    namespace=${NAMESPACE}    name=starburstenterprise-sample
@@ -120,7 +119,8 @@ Starburst Enterprise Suite Teardown
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}    wait_for_cards=${FALSE}
-    Remove Disabled Application From Enabled Page    app_id=openvino
+    Remove Disabled Application From Enabled Page    app_id=starburstenterprise
+    Close All Browsers
 
 Create Route And Workbench
     [Documentation]    Creates the Starburst Enterprise route, the DS Project and workbench

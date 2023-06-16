@@ -76,6 +76,7 @@ Verify User Can Perform Basic Queries Against Starburst From A DS Workbench    #
 *** Keywords ***
 Starburst Enterprise Suite Setup    # robocop: disable
     [Documentation]    Installs Starburst Enterprise operator and launch RHODS Dashboard
+    Skip If RHODS Is Managed
     Set Library Search Order    SeleniumLibrary
     ${PROJECTS_TO_DELETE}=    Create List    ${DS_PROJECT_NAME}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${PROJECTS_TO_DELETE}

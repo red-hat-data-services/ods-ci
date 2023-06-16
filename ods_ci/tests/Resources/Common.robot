@@ -197,6 +197,16 @@ Skip If RHODS Is Self-Managed
        Skip If    condition=${is_self_managed}==True    msg=This test is skipped for Self-managed RHODS
     END
 
+Skip If RHODS Is Managed
+    [Documentation]    Skips test if RHODS is installed as Self-managed
+    [Arguments]    ${msg}=${EMPTY}
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    "${msg}" != "${EMPTY}"
+       Skip If    condition=${is_self_managed}==False    msg=${msg}
+    ELSE
+       Skip If    condition=${is_self_managed}==False    msg=This test is skipped for Managed RHODS
+    END
+
 Run Keyword If RHODS Is Managed
     [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Managed (Cloud Version)
     [Arguments]    ${name}    @{arguments}

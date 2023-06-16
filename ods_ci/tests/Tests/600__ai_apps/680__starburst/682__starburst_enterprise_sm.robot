@@ -112,7 +112,7 @@ Starburst Enterprise Suite Setup    # robocop: disable
 Starburst Enterprise Suite Teardown
     [Documentation]    Uninstalls Starburst Enterprise operator
     Close All Browsers
-    Delete Data Science Projects From CLI    ${DS_PROJECT_NAME}
+    Delete Data Science Projects From CLI    ${PROJECTS_TO_DELETE}
     Delete Custom Resource    kind=StarburstEnterprise
     ...    namespace=${NAMESPACE}    name=starburstenterprise-sample
     Uninstall ISV Operator From OperatorHub Via CLI

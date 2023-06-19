@@ -6,9 +6,10 @@
 export CLUSTER_NAME=${1:-$CLUSTER_NAME}
 export AWS_DOMAIN=${2:-$AWS_DOMAIN}
 export OSP_NETWORK=${3:-$OSP_NETWORK}
-export OUTPUT_DIR=${4:-.${CLUSTER_NAME}_conf}
+export OSP_CLOUD=${4:-openstack}
+export OUTPUT_DIR=${5:-.${CLUSTER_NAME}_conf}
 
-# Cluster name should converted to lowercase
+# Cluster name should be converted to lowercase
 export CLUSTER_NAME=${CLUSTER_NAME,,} 
 
 if [[ -z $CLUSTER_NAME || -z $AWS_DOMAIN || -z $OSP_NETWORK ]] ; then
@@ -22,7 +23,7 @@ else
   echo "Creating Floating IPs on OSP external network '$OSP_NETWORK' and A records in AWS domain: $CLUSTER_NAME.$AWS_DOMAIN"
 fi
 
-export OS_CLOUD=openstack
+export OS_CLOUD=${OSP_CLOUD}
 
 if ! openstack catalog list -c Endpoints ; then
   echo -e "Openstack access is not properly configured."

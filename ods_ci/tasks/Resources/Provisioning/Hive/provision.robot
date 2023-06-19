@@ -91,11 +91,11 @@ Create Floating IPs
     Should Be True    ${result.rc} == 0
     Create File    ${osp_clouds_yaml}    ${result.stdout}
     File Should Not Be Empty    ${osp_clouds_yaml}
-    ${shell_script} =     Set Variable     ${CURDIR}/OSP/create_fips.sh
-    ${result} 	Run Process 	sh     ${shell_script}    ${cluster_name}    ${infrastructure_configurations}[aws_domain]
-    ...    ${infrastructure_configurations}[osp_network]    ${artifacts_dir}/    shell=yes
-    Log    ${shell_script}:\n${result.stdout}\n${result.stderr}     console=True
-    Should Be True    ${result.rc} == 0
+    ${shell_script} =     Catenate
+    ...    ${CURDIR}/OSP/create_fips.sh ${cluster_name} ${infrastructure_configurations}[aws_domain]
+    ...    ${infrastructure_configurations}[osp_network] ${infrastructure_configurations}[osp_cloud_name] ${artifacts_dir}/    
+    ${return_code} =    Run and Watch Command    ${shell_script}    output_should_contain=Exporting Floating IPs
+    Should Be Equal As Integers	${return_code}	 0   msg=Error creating floating IPs for cluster '${cluster_name}'
     ${fips_file_to_export} =    Set Variable    ${artifacts_dir}/${cluster_name}.${infrastructure_configurations}[aws_domain].fips
     Export Variables From File    ${fips_file_to_export}
 
@@ -112,6 +112,8 @@ Verify Cluster Is Successfully Provisioned
     END
     Create File    ${install_log_file}    ${install_log_data}
     Should Contain    ${install_log_data}    install completed successfully
+    ${result} =    Run Process 	grep 'install completed successfully' ${install_log_file}    shell=yes
+    Should Be True    ${result.rc} == 0
 
 Wait For Cluster To Be Ready
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}

@@ -57,6 +57,7 @@ items:
         networkType: ${infrastructure_configurations}[ocp_network_type]
         serviceNetwork:
         - 172.30.0.0/16
+      fips: ${infrastructure_configurations}[fips_validation]
       platform:
         openstack:
           cloud: ${infrastructure_configurations}[osp_cloud_name]

@@ -29,7 +29,7 @@ Is Managed Starburst Installed
     RETURN  ${result}
 
 Status Of Managed Starburst CR Should Be
-    [Documentation]     Get the installation stage by reading the "RHOAM installation object" YAML
+    [Documentation]     Get the installation stage by reading the "starburstenterprise" CR YAML
     [Arguments]    ${expected_status}
     ${status}=     Run    oc get starburstenterprise -n ${STARBURST_CR_DEFAULT_NAMESPACE} -o json | jq '.items[].status.conditions[] | .reason,.type' | sed 's/"//g'   # robocop: disable
     ${status_list}=    Text To List    ${status}

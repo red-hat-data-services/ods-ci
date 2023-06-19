@@ -106,11 +106,12 @@ Select Framework
     [Documentation]    Selects the framework in the "deploy model" modal.
     ...    Possible values for now: "onnx", "openvino_ir"
     [Arguments]    ${framework}
-    IF    "${framework}" == "onnx" or "${framework}" == "openvino_ir"
+    TRY
         Open Model framework Options Menu
+        Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
         Click Element    xpath://li/button[contains(., "${framework}")]
-    ELSE
-        Fail    msg=unknown framework ${framework}, use one among "onnx" or "openvino_ir"
+    EXCEPT
+        Log    framework ${framework} does not appear to be supported by the chosen model server
     END
 
 Select Existing Data Connection

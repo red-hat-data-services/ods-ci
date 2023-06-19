@@ -1,5 +1,6 @@
 *** Settings ***
 Library           OperatingSystem
+Library           ../../../../libs/Helpers.py
 Resource          ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
@@ -95,6 +96,33 @@ Test Inference Without Token Authentication
     [Tags]    Sanity    Tier1
     ...    ODS-2053
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
+
+Verify Tensorflow Model Via UI
+    [Documentation]    Test the deployment of a tensorflow (.pb) model
+    [Tags]    Sanity    Tier1
+    ...    ODS-2268
+    Open Model Serving Home Page
+    Try Opening Create Server
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
+    Open Model Serving Home Page
+    Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=tensorflow    existing_data_connection=${TRUE}
+    ...    data_connection_name=model-serving-connection    model_path=inception_resnet_v2.pb
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
+    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
+    Verify Model Status    ${MODEL_NAME}    success
+    Set Suite Variable    ${MODEL_CREATED}    True
+    ${url}=    Get Model Route via UI    ${MODEL_NAME}
+    ${status_code}    ${response_text} =    Send Random Inference Request     endpoint=${url}    name=input
+    ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
+    Should Be Equal As Strings    ${status_code}    200
 
 
 *** Keywords ***

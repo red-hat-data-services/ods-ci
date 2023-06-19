@@ -120,7 +120,7 @@ Verify Tensorflow Model Via UI
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
     ${url}=    Get Model Route via UI    ${MODEL_NAME}
-    ${status_code}, ${response_text} =    Send Random Inference Request     endpoint=${url}    name="input"
+    ${status_code}    ${response_text} =    Send Random Inference Request     endpoint=${url}    name="input"
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
 

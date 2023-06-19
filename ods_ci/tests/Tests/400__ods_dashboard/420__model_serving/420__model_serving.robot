@@ -108,7 +108,7 @@ Model Serving Suite Setup
 
 Verify Etcd Pod
     [Documentation]    Verifies the correct deployment of the etcd pod in the rhods namespace
-    ${etcd_name} =    Run    oc get pod -l app=model-mesh,app.kubernetes.io/part-of=model-mesh -n ${RHODS_NAMESPACE} | grep etcd | awk '{split($0, a); print a[1]}'
+    ${etcd_name} =    Run    oc get pod -l component=model-mesh-etcd -n ${RHODS_NAMESPACE} | grep etcd | awk '{split($0, a); print a[1]}'
     ${etcd_running} =    Run    oc get pod ${etcd_name} -n ${RHODS_NAMESPACE} | grep 1/1 -o
     Should Be Equal As Strings    ${etcd_running}    1/1
 

@@ -14,16 +14,16 @@ ${STARBURST_ROUTE}=    web-ui
 *** Keywords ***
 Create Starburst Route
     [Documentation]    Exposes starburst service for external connections
-    [Arguments]    ${name}
-    ${rc}=    Run And Return Rc    oc expose svc starburst --name ${name} -n ${STARBURST_CR_DEFAULT_NAMESPACE}
-    # ${rc}=    Run And Return Rc    oc create route edge ${name} --service=starburst --insecure-policy="Redirect" -n ${STARBURST_CR_DEFAULT_NAMESPACE}    # robocop: disable
-    ${route}=    Get Starburst Route
+    [Arguments]    ${name}    ${namespace}=${STARBURST_CR_DEFAULT_NAMESPACE}
+    ${rc}=    Run And Return Rc    oc expose svc starburst --name ${name} -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${route}=    Get Starburst Route    name=${name}    namespace=${namespace}
     RETURN    ${rc}    ${route}
 
 Get Starburst Route
     [Documentation]    Gets the starburst route
-    [Arguments]    ${name}=${STARBURST_ROUTE}
-    ${route}=    Oc Get    kind=Route  name=${name}  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  fields=['spec.host']
+    [Arguments]    ${name}=${STARBURST_ROUTE}    ${namespace}=${STARBURST_CR_DEFAULT_NAMESPACE}
+    ${route}=    Oc Get    kind=Route  name=${name}  namespace=${namespace}  fields=['spec.host']
     RETURN    ${route[0]['spec.host']}
 
 Create Starburst Route If Not Exists

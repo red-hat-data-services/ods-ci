@@ -177,6 +177,7 @@ def generate_test_config_file(
     data["SERVICE_ACCOUNT"]["NAME"] = config_data["SERVICE_ACCOUNT"]["NAME"]
     data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data["SERVICE_ACCOUNT"]["FULL_NAME"]
     data["STARBURST"]["LICENSE"] = config_data["STARBURST"]["LICENSE"]
+    data["STARBURST"]["LICENSE_ENCODED"] = config_data["STARBURST"]["LICENSE_ENCODED"]
     data["STARBURST"]["OBS_CLIENT_SECRET"] = config_data["STARBURST"][
         "OBS_CLIENT_SECRET"
     ]

@@ -103,6 +103,15 @@ Create Data Science Project
     Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${title}
+    ${open}=    Run Keyword And Return Status    Wait Until Project Is Open    project_title=${title}
+    IF    ${open} == ${FALSE}
+        ${is_home_open}=    Is Data Science Projects Page Open
+        IF    ${is_home_open} == ${TRUE}
+            Log    message=After DS Project ${title} creation, user did not get redirected to details page...(RHODS-8477)
+            ...    level=WARN
+            Fail
+        END
+    END
 
 Validate Generated Resource Name
     [Documentation]    Checks if the generated resource name matches the expected validation regex

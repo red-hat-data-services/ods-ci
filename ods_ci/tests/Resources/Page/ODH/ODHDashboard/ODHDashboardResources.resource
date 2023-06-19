@@ -9,6 +9,8 @@ Resource       ../../../Common.robot
 ...                 https://my-project-s2i-python-service-openapi-3scale-api.cluster.com/?user_key=USER_KEY
 ...                 https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/?user_key=<API_KEY_GOES_HERE>
 ...                 https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/status/?user_key=.
+...                 https://console-openshift-console.apps.test-cluster.example.com
+...                 console-openshift-console.apps.test-cluster.example.com
 
 
 *** Keywords ***
@@ -254,7 +256,10 @@ Open QuickStart Step
 
 Validate Links Extracted From Text
     [Documentation]    Checks the health status of the links which have been
-    ...                extracted from the quick start texts
+    ...                extracted from the quick start texts.
+    ...                It skips validation of textual links which are supposed to be
+    ...                mere examples, hence invalid links. e.g., 
+    ...                http://example.apps.organization.abc3.p4.openshiftapps.com/prediction
     [Arguments]    ${doc_links}
     FOR    ${doc_link}    IN    @{doc_links}
         Log   ${doc_link}

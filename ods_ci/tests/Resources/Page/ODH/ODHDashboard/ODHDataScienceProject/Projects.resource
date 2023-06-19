@@ -102,16 +102,14 @@ Create Data Science Project
     Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
     Click Button    ${GENERIC_CREATE_BTN_XP}
     Wait Until Generic Modal Disappears
+    Wait Until Project Is Open    project_title=${title}
     ${open}=    Run Keyword And Return Status    Wait Until Project Is Open    project_title=${title}
     IF    ${open} == ${FALSE}
         ${is_home_open}=    Is Data Science Projects Page Open
         IF    ${is_home_open} == ${TRUE}
-            Log    message=After DS Project ${title} creation, user did not get redirected to details page...
+            Log    message=After DS Project ${title} creation, user did not get redirected to details page...(RHODS-8477)
             ...    level=WARN
-            Reload Page
-            Wait Until Page Contains Element    ${DS_PROJECT_XP}  timeout=30s
-            Wait Until Project Is Listed    project_title=${title}
-            Open Data Science Project Details Page    project_title=${title}
+            Fail
         END
     END
 

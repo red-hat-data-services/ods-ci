@@ -238,6 +238,7 @@ class Helpers:
     def send_random_inference_request(
         self,
         endpoint,
+        name="image",
         value_range=[0, 255],
         shape={"B": 1, "C": 3, "H": 512, "W": 512},
         no_requests=100,
@@ -258,7 +259,7 @@ class Helpers:
             }
 
             data = (
-                '{ "model_name": "vehicle-detection-0202", "inputs": [{ "name": "image", "shape": '
+                '{ "model_name": "vehicle-detection-0202", "inputs": [{ "name": "'+str(name)+'", "shape": '
                 + str(list(shape.values()))
                 + ', "datatype": "FP32", "data": '
                 + str(data_img)
@@ -266,4 +267,4 @@ class Helpers:
             )
 
             response = requests.post(endpoint, headers=headers, data=data)
-            print(response.status_code)
+        return response.status_code, response.text

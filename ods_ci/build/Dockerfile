@@ -51,8 +51,8 @@ COPY ods_ci/configs/resources/oauth_ldap_idp.json ods_ci/configs/resources/oauth
 COPY ods_ci/configs/templates/ca-rolebinding.yaml ods_ci/configs/templates/ca-rolebinding.yaml
 COPY ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
 RUN  chmod +x ods_ci/build/run.sh &&\
-     chmod +x ods_ci/build/clean_idp.sh &&\
-     chmod 775 . # writing permissions for ods-ci.log
+     chmod +x ods_ci/build/clean_idp.sh
+
 COPY pyproject.toml .
 COPY poetry.lock .
 COPY README.md .
@@ -60,6 +60,9 @@ RUN python3 --version
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="${PATH}:$HOME/.local/bin"
 RUN poetry install
+
+RUN chgrp -R 0 . && \
+    chmod -R g=u .
 
 
 ENTRYPOINT ["./ods_ci/build/run.sh"]

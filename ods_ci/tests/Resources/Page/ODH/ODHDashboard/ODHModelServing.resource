@@ -209,13 +209,26 @@ Get Model Inference
     ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
+    ${self_managed} =    Is RHODS Self-Managed
     ${url}=    Get Model Route via UI    ${model_name}
     IF    ${token_auth}
         ${project_title}=    Get Model Project    ${model_name}
         ${token}=    Get Access Token via UI    ${project_title}
-        ${inference_output} =    Run    curl -ks ${url} -d ${INFERENCE_INPUT} -H "Authorization: Bearer ${token}"
+        # If running on self-managed, fetch the CA bundle for the cluster
+        # so it can be used when making the inference request
+        IF  ${self_managed}==${TRUE}
+            Fetch Openshift CA Bundle
+            ${inference_output} =    Run    curl -s ${url} -d ${INFERENCE_INPUT} -H "Authorization: Bearer ${token}" --cacert openshift_ca.crt
+        ELSE
+            ${inference_output} =    Run    curl -ks ${url} -d ${INFERENCE_INPUT} -H "Authorization: Bearer ${token}"
+        END
     ELSE
-        ${inference_output} =    Run    curl -ks ${url} -d ${INFERENCE_INPUT}
+        IF  ${self_managed}==${TRUE}
+            Fetch Openshift CA Bundle
+            ${inference_output} =    Run    curl -s ${url} -d ${INFERENCE_INPUT} --cacert openshift_ca.crt
+        ELSE
+            ${inference_output} =    Run    curl -s ${url} -d ${INFERENCE_INPUT}
+        END
     END
     RETURN    ${inference_output}
 

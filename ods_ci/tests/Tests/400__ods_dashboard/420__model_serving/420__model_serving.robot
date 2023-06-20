@@ -6,6 +6,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resou
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../../Resources/OCP.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
 
@@ -119,6 +120,12 @@ Verify Tensorflow Model Via UI
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
+    # If running on self-managed, fetch the CA bundle for the cluster
+    # so it can be used when making the inference request
+    ${self_managed} =    Is RHODS Self-Managed
+    IF  ${self_managed}==${TRUE}
+        Fetch Openshift CA Bundle
+    END
     ${url}=    Get Model Route via UI    ${MODEL_NAME}
     ${status_code}    ${response_text} =    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
@@ -179,6 +186,9 @@ Model Serving Suite Teardown
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
+    # Will only be present on SM cluster runs, but keyword passes
+    # if file does not exist
+    Remove File    openshift_ca.crt
     SeleniumLibrary.Close All Browsers
     RHOSi Teardown
 

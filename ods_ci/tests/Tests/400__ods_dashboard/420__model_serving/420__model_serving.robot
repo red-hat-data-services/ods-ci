@@ -120,12 +120,6 @@ Verify Tensorflow Model Via UI
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
-    # If running on self-managed, fetch the CA bundle for the cluster
-    # so it can be used when making the inference request
-    ${self_managed} =    Is RHODS Self-Managed
-    IF  ${self_managed}==${TRUE}
-        Fetch Openshift CA Bundle
-    END
     ${url}=    Get Model Route via UI    ${MODEL_NAME}
     ${status_code}    ${response_text} =    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
@@ -140,6 +134,7 @@ Model Serving Suite Setup
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    Fetch CA Certificate If RHODS Is Self-Managed
 
 Verify Etcd Pod
     [Documentation]    Verifies the correct deployment of the etcd pod in the rhods namespace

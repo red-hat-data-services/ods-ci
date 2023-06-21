@@ -211,25 +211,17 @@ Get Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
     ${self_managed} =    Is RHODS Self-Managed
     ${url}=    Get Model Route via UI    ${model_name}
+    ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
     IF    ${token_auth}
         ${project_title}=    Get Model Project    ${model_name}
         ${token}=    Get Access Token via UI    ${project_title}
-        # If running on self-managed, fetch the CA bundle for the cluster
-        # so it can be used when making the inference request
-        IF  ${self_managed}==${TRUE}
-            Fetch Openshift CA Bundle
-            ${inference_output} =    Run    curl -s ${url} -d ${INFERENCE_INPUT} -H "Authorization: Bearer ${token}" --cacert openshift_ca.crt
-        ELSE
-            ${inference_output} =    Run    curl -ks ${url} -d ${INFERENCE_INPUT} -H "Authorization: Bearer ${token}"
-        END
-    ELSE
-        IF  ${self_managed}==${TRUE}
-            Fetch Openshift CA Bundle
-            ${inference_output} =    Run    curl -s ${url} -d ${INFERENCE_INPUT} --cacert openshift_ca.crt
-        ELSE
-            ${inference_output} =    Run    curl -s ${url} -d ${INFERENCE_INPUT}
-        END
+        ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
     END
+    IF  ${self_managed}==${TRUE}
+        Fetch Openshift CA Bundle
+        ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
+    END
+    ${inference_output} =    Run    ${curl_cmd}
     RETURN    ${inference_output}
 
 Verify Model Inference

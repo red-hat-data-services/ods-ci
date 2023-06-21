@@ -37,7 +37,7 @@ def rosa_create_cluster(cluster_name, region ,channel_name, compute_nodes,comput
         return ret
 
     cmd_check_cluster = ["rosa", "describe", "cluster", "--cluster={}".format(cluster_name)] #, '|', 'wc', '-l']
-    ret = execute_command(' '.join(cmd_check_cluster), retError=True)
+    ret = execute_command(' '.join(cmd_check_cluster))
     if ret is None:
         print("Failed  creation failed")
         return ret
@@ -49,7 +49,7 @@ def rosa_describe(cluster_name, filter=""):
     cmd = "rosa describe cluster --cluster {}".format(cluster_name)
     if filter != "":
         cmd += " " + filter
-    ret = execute_command(cmd, retError=True)
+    ret = execute_command(cmd)
     if ret is None:
         print("rosa describe for cluster " "{} failed".format(cluster_name))
         return None

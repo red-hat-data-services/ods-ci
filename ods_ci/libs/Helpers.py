@@ -246,9 +246,9 @@ class Helpers:
         import os
         import random
         import requests
+        from pathlib import Path
 
         for _ in range(no_requests):
-
             data_img = [
                 random.randrange(value_range[0], value_range[1])
                 for _ in range(shape["C"] * shape["H"] * shape["W"])
@@ -259,12 +259,24 @@ class Helpers:
             }
 
             data = (
-                '{ "model_name": "vehicle-detection-0202", "inputs": [{ "name": "'+str(name)+'", "shape": '
+                '{ "model_name": "vehicle-detection-0202", "inputs": [{ "name": "'
+                + str(name)
+                + '", "shape": '
                 + str(list(shape.values()))
                 + ', "datatype": "FP32", "data": '
                 + str(data_img)
                 + " }]}"
             )
 
-            response = requests.post(endpoint, headers=headers, data=data)
+            # This file only exists when running on self-managed clusters
+            ca_bundle = Path("openshift_ca.crt")
+            if ca_bundle.is_file():
+                response = requests.post(
+                    endpoint,
+                    headers=headers,
+                    data=data,
+                    verify="openshift_ca.crt",
+                )
+            else:
+                response = requests.post(endpoint, headers=headers, data=data)
         return response.status_code, response.text

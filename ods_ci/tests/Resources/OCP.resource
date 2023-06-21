@@ -1,5 +1,6 @@
 *** Settings ***
 Documentation  Set of Keywords for OCP checks
+Library    OperatingSystem
 Library    OpenShiftLibrary
 
 
@@ -80,3 +81,19 @@ Get MachineSets
     ${tmp} =    Remove From List    ${machinesets}    0
     Should Be Equal As Strings    ${tmp}    NAME
     RETURN    @{machinesets}
+
+Fetch Openshift CA Bundle
+    [Documentation]    Gets the CA bundle defined in the secret `router-certs-defaults` in namespace `openshift-ingress`
+    ...    Useful when working with self-managed clusters to verify connections
+    ${rc} =    Run And Return Rc    
+    ...    oc get secret -n openshift-ingress router-certs-default -o json | jq '.data."tls.crt"' | sed 's/"//g' | base64 -d > openshift_ca.crt  # robocop: disable
+    Should Be Equal As Strings    ${rc}    0
+
+Fetch CA Certificate If RHODS Is Self-Managed
+    [Documentation]    Fetches the OpenShift CA certificate if the keyword is run in a self-managed environment
+    ...    It saves it to a file called `openshift_ca.crt` in the root folder and can be used by other keywords
+    ...    e.g. curl commands or Requests calls against unsecured https endpoints.
+    ${self_managed} =    Is RHODS Self-Managed
+    IF  ${self_managed}==${TRUE}
+        Fetch Openshift CA Bundle
+    END

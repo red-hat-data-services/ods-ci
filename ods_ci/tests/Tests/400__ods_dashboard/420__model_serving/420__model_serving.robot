@@ -6,6 +6,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resou
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../../Resources/OCP.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
 
@@ -133,6 +134,7 @@ Model Serving Suite Setup
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    Fetch CA Certificate If RHODS Is Self-Managed
 
 Verify Etcd Pod
     [Documentation]    Verifies the correct deployment of the etcd pod in the rhods namespace
@@ -179,6 +181,9 @@ Model Serving Suite Teardown
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
+    # Will only be present on SM cluster runs, but keyword passes
+    # if file does not exist
+    Remove File    openshift_ca.crt
     SeleniumLibrary.Close All Browsers
     RHOSi Teardown
 

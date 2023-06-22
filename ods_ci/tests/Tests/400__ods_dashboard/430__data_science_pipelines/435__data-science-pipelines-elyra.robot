@@ -34,7 +34,7 @@ ${DC_NAME} =    elyra-s3
 
 *** Test Cases ***
 Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
-    [Documentation]    Loads an example Elyra pipeline and confirms the Web UI displays it correctly
+    [Documentation]    Loads an example Elyra pipeline and confirms the Elyra web UI displays it correctly
     [Tags]    Sanity    Tier1
     ...       ODS-2197
     [Setup]    Elyra Pipelines SDS Setup
@@ -50,7 +50,7 @@ Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
     Verify Hello World Pipeline Elements
 
 Verify Pipeline Can Be Submitted And Runs Correctly From Standard Data Science Workbench
-    [Documentation]    Submits an example Elyra pipeline to be run by Kubeflow and
+    [Documentation]    Submits an example Elyra pipeline to be run by Data Science Pipelines and
     ...    Confirms that it runs correctly
     [Tags]    Sanity    Tier1
     ...       ODS-2199
@@ -67,9 +67,7 @@ Verify Pipeline Can Be Submitted And Runs Correctly From Standard Data Science W
 
 *** Keywords ***
 Elyra Pipelines SDS Setup
-    [Documentation]    Suite Setup, launches spawner page and image.
-    ...                This assumes Pipelines have already been set up and the updated
-    ...                image tag for SDS is present in the spawner.
+    [Documentation]    Suite Setup, creates DS Project and opens it
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Install Red Hat OpenShift Pipelines

@@ -54,9 +54,9 @@ Save Pipeline Changes
 
 Run Pipeline
     [Documentation]    Submits the pipeline for a run
-    [Arguments]    ${runtime_platform}=KUBEFLOW_PIPELINES    ${runtime_config}=test
+    [Arguments]    ${runtime_config}=Data Science Pipeline
     Click Run Button
-    Select Runtime Platform    ${runtime_platform}
+    # Select Runtime Platform    ${runtime_platform}
     Select Runtime Config    ${runtime_config}
     Click Element    xpath=//button[.="OK"]
 
@@ -77,9 +77,9 @@ Select Runtime Config
     [Arguments]    ${runtime_config}=test
     Wait Until Page Contains Element   xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]
     Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]
-    Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]/option[@value="${runtime_config}"]
+    Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]/option[.="${runtime_config}"]
 
-Get Pipeline Job ID
+Get Pipeline Run Name
     [Documentation]    Gets the run ID after a pipeline is successfully submitted
     ${job_id} =    Get Text    xpath=//a[.="Run Details."]/../p
     ${job_id} =    Fetch From Right    ${job_id}    /

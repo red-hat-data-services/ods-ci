@@ -25,7 +25,7 @@ Verify User Can Create And Run A DS Pipeline From DS Project Details Page    # r
     ...       ODS-2206
     Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}
-    Wait Until Pipeline Server Is Deployed
+    Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
     Import Pipeline    name=${PIPELINE_TEST_NAME}
     ...    description=${PIPELINE_TEST_DESC}
     ...    project_title=${PRJ_TITLE}
@@ -87,12 +87,6 @@ Pipelines Suite Teardown
     ...                deletion of any pipeline resource contained in it
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
-
-Wait Until Pipeline Server Is Deployed
-    [Documentation]    Waits until all the expected pods of the pipeline server
-    ...                are running
-    Wait Until Keyword Succeeds    10 times    10s
-    ...    Verify Pipeline Server Deployments    project_title=${PRJ_TITLE}
 
 Verify Pipeline Run Deployment Is Successful    # robocop: disable
     [Documentation]    Verifies the correct deployment of the test pipeline run in the rhods namespace.

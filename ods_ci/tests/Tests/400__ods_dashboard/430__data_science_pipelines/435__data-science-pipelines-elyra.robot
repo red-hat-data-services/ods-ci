@@ -15,7 +15,8 @@ Resource         ../../../Resources/Page/Operators/OpenShiftPipelines.resource
 Library          Screenshot
 Library          DebugLibrary
 Library          JupyterLibrary
-Suite Teardown   Elyra Pipelines SDS Teardown
+Suite Setup      Elyra Pipelines Suite Setup
+Suite Teardown   Elyra Pipelines Suite Teardown
 
 
 *** Variables ***
@@ -30,6 +31,7 @@ ${PV_DESCRIPTION} =    ods-ci-pv-elyra is a PV created to test Elyra in workbenc
 ${PV_SIZE} =    2
 ${envs_list} =    ${NONE}
 ${DC_NAME} =    elyra-s3
+@{IMAGE_LIST}    PyTorch    TensorFlow    TrustyAI
 
 
 *** Test Cases ***
@@ -63,14 +65,29 @@ Verify Pipeline Can Be Submitted And Runs Correctly From Standard Data Science W
     ...    pipeline_name=hello-generic-world    project_name=${PRJ_TITLE}
     Switch Window    ${handle}
     Click Element    //button[.="OK"]
+    [Teardown]    Elyra Pipelines SDS Teardown
+
+
+Verify Elyra Pipelines In SDS-Based Images
+    [Documentation]
+    [Tags]    Sanity    Tier1
+    ...       ODS-XXXX
+    [Setup]    Elyra Pipelines SDS Setup
+    FOR    ${img}    IN    @{IMAGE_LIST}
+        Run Elyra Hello World Pipeline Test    ${img}
+    END
+    [Teardown]    Elyra Pipelines SDS Teardown
 
 
 *** Keywords ***
-Elyra Pipelines SDS Setup
-    [Documentation]    Suite Setup, creates DS Project and opens it
+Elyra Pipelines Suite Setup
+    [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Install Red Hat OpenShift Pipelines
+
+Elyra Pipelines SDS Setup
+    [Documentation]    Suite Setup, creates DS Project and opens it
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ${to_delete}=    Create List    ${PRJ_TITLE}
@@ -87,6 +104,10 @@ Elyra Pipelines SDS Teardown
     [Documentation]    Closes the browser and deletes the DS Project created
     Close All Browsers
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+
+Elyra Pipelines Suite Teardown
+    [Documentation]    Closes the browser and performs RHOSi Teardown
+    Close All Browsers
     RHOSi Teardown
 
 Verify Hello World Pipeline Elements
@@ -108,3 +129,25 @@ Create Env Var List If RHODS Is Self-Managed
         ...    k8s_type=Config Map  input_type=Key / value
         ${envs_list} =    Create List    ${env_vars_ssl}
     END
+
+Run Elyra Hello World Pipeline Test
+    [Documentation]    Runs the same steps of the first two tests of this Suite, but on different images
+    [Arguments]    ${img}
+    Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
+    ...                 prj_title=${PRJ_TITLE}    image_name=${img}  deployment_size=Small
+    ...                 storage=Persistent  pv_existent=${FALSE}
+    ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
+    ...                 envs=${envs_list}
+    Start Workbench     workbench_title=elyra_${img}    timeout=300s
+    Launch And Access Workbench    workbench_title=elyra_${img}
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
+    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    Verify Hello World Pipeline Elements
+    Set Runtime Image In All Nodes    runtime_image=Datascience with Python 3.9 (UBI9)
+    Run Pipeline    pipeline_name=${img} Pipeline
+    Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
+    ${pipeline_run_name} =    Get Pipeline Run Name
+    ${handle} =    Switch To Pipeline Execution Page
+    Verify Successful Pipeline Run Via Project UI   pipeline_run_name=${pipeline_run_name}
+    ...    pipeline_name=${img} Pipeline    project_name=${PRJ_TITLE}
+    Stop Workbench    workbench_title=elyra_${img}

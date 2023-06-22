@@ -54,9 +54,9 @@ Save Pipeline Changes
 
 Run Pipeline
     [Documentation]    Submits the pipeline for a run
-    [Arguments]    ${runtime_config}=Data Science Pipeline
+    [Arguments]    ${runtime_config}=Data Science Pipeline    ${pipeline_name}=hello-generic-world
     Click Run Button
-    # Select Runtime Platform    ${runtime_platform}
+    Set Pipeline Name    ${pipeline_name}
     Select Runtime Config    ${runtime_config}
     Click Element    xpath=//button[.="OK"]
 
@@ -67,17 +67,29 @@ Click Run Button
 
 Select Runtime Platform
     [Documentation]    Selects the runtime platform when submitting a pipeline run
-    [Arguments]    ${runtime_platform}=KUBEFLOW_PIPELINES
+    [Arguments]    ${runtime_platform}
     Wait Until Page Contains Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]
     Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]
-    Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]/option[@value="${runtime_platform}"]
+    Click Element    
+    ...    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]/option[@value="${runtime_platform}"]
+
+Set Pipeline Name
+    [Documentation]
+    [Arguments]    ${pipeline_name}
+    Wait Until Page Contains Element   xpath=//form[@class="elyra-dialog-form"]//input[@id="pipeline_name"]
+    ${current_name} =    Get Element Attribute    xpath=//form[@class="elyra-dialog-form"]//input[@id="pipeline_name"]
+    ...    value
+    IF    "${pipeline_name}" != "${current_name}"
+        Input Text    xpath=//form[@class="elyra-dialog-form"]//input[@id="pipeline_name"]    ${pipeline_name}
+    END
 
 Select Runtime Config
     [Documentation]    Selects the runtime config when submitting a pipeline run
     [Arguments]    ${runtime_config}=test
     Wait Until Page Contains Element   xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]
     Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]
-    Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]/option[.="${runtime_config}"]
+    Click Element    
+    ...    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]/option[.="${runtime_config}"]
 
 Get Pipeline Run Name
     [Documentation]    Gets the run ID after a pipeline is successfully submitted

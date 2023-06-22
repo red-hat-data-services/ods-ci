@@ -70,14 +70,6 @@ def main():
         help="AWS aws_region"
         )
     
-    # rosaClusterCreate_parser.add_argument(
-    #     "--profile",
-    #     required=True,
-    #     action="store",
-    #     dest="profile",
-    #     help="AWS CLI profile"
-    #     )
-    
     rosaClusterCreate_parser.add_argument(
         "--cluster-name", 
         required=True, 

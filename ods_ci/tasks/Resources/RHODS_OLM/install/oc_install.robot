@@ -37,32 +37,37 @@ Verify RHODS Installation
   Wait For Pods Number  1
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=notebook-controller
-  ...                   timeout=1200
+  ...                   timeout=400
   Log  pods notebook-controller created   console=yes
   Wait For Pods Number  1
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=odh-notebook-controller
-  ...                   timeout=600
+  ...                   timeout=400
   Log  pods odh-notebook-controller created   console=yes
   Wait For Pods Number  3
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=odh-model-controller
-  ...                   timeout=600
+  ...                   timeout=400
   Log  pods odh-model-controller created   console=yes
-  Wait For Pods Number  4
+  Wait For Pods Number  1
   ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=model-mesh
-  ...                   timeout=600
+  ...                   label_selector=component=model-mesh-etcd
+  ...                   timeout=400
+  Log  pods mode-mesh etcs created   console=yes
+  Wait For Pods Number  3
+  ...                   namespace=redhat-ods-applications
+  ...                   label_selector=app.kubernetes.io/name=modelmesh-controlle
+  ...                   timeout=400
   Log  pods mode-mesh controller created   console=yes
   Wait For Pods Number  1
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app.kubernetes.io/created-by=data-science-pipelines-operator
-  ...                   timeout=600
+  ...                   timeout=400
   Log  pods dsp operator created   console=yes
   Wait For Pods Number  3
   ...                   namespace=redhat-ods-monitoring
   ...                   label_selector=prometheus=rhods-model-monitoring
-  ...                   timeout=600
+  ...                   timeout=400
   Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
   Log  Verified redhat-ods-applications  console=yes
   Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200

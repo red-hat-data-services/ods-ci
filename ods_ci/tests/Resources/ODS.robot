@@ -319,7 +319,7 @@ Fetch Project Pods Info
     RETURN    @{project_pods_info}
 
 Fetch Cluster Platform Type
-    [Documentation]  Fetches the platform type of the cluster
+    [Documentation]  Fetches the platform type of the cluster (AWS, GCP, OpenStack, ...)
     ...    Args:
     ...        None
     ...    Returns:

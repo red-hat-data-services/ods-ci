@@ -46,7 +46,7 @@ Install Red Hat OpenShift Pipelines
     Log    message=Installing OpenShift Pipelines operator: ${openshift_pipelines_version} (${platform} ${oc_version} Self-Managed: ${is_self_managed})
     ...    console=True
 
-    ${return_code}    ${output}=    Run And Return Rc And Output
+    ${return_code}=    Run And Return Rc
     ...    sed -i "s,channel: .*,channel: ${openshift_pipelines_version},g" ${EXECDIR}/${REDHAT_OPENSHIFT_PIPELINES_YAML}
     Should Be Equal As Integers    ${return_code}    0
     Oc Apply    kind=Subscription    src=${REDHAT_OPENSHIFT_PIPELINES_YAML}

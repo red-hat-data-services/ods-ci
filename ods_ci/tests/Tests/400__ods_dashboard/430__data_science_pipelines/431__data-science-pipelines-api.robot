@@ -34,11 +34,12 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     New Project    project-redirect-http
     Install DataSciencePipelinesApplication CR    project-redirect-http
     ${status}    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
-    ...         project-redirect-http    ds-pipeline-ui-sample
+    ...         project-redirect-http    ds-pipeline-pipelines-definition
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     ${url}    Do Http Request    apis/v1beta1/runs
     Should Start With    ${url}    https
     Remove Pipeline Project    project-redirect-http
+
 
 *** Keywords ***
 End To End Pipeline Workflow Via Api
@@ -47,7 +48,7 @@ End To End Pipeline Workflow Via Api
     Remove Pipeline Project    ${project}
     New Project    ${project}
     Install DataSciencePipelinesApplication CR    ${project}
-    ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}    ds-pipeline-ui-sample
+    ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}    ds-pipeline-pipelines-definition
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     ${pipeline_id}    Create Pipeline    ${URL_TEST_PIPELINE_RUN_YAML}
     ${run_id}    Create Run    ${pipeline_id}

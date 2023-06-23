@@ -28,12 +28,22 @@ function generate_rand_string(){
   date +%s | sha256sum | base64 | head -c 64
 }
 
-function generate_users_creds_strings(){
-  idp=$(jq --arg idpname $1 '.[][$idpname]' user_credentials.json)
+function generate_user_prefix(){
+  GEN_PREFIX=""
+  array=()
+  for i in {a..z} {A..Z}; 
+    do
+    array[$RANDOM]=$i
+  done
+  GEN_PREFIX=$(printf %s ${array[@]::15} $'\n')
+}
+
+function generate_users_creds(){
+  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/build/user_credentials.json)
   echo $idp;
-  users_string=""
-  pw_string=""
-  pw=$(echo $idp | jq '.pw' | tr -d '[],"')
+  USERS_ARR=()
+  PWS_ARR=()
+  pw=$(echo $idp | jq -r '.pw')
   if [[ "$pw" =  "<GEN_RAMDOM_PW>" ]]
       then
           pw=$(generate_rand_string)
@@ -51,83 +61,91 @@ function generate_users_creds_strings(){
       i=1
       if [[ $no -eq 1 ]]
           then
-              users_string+=,$prefix
-              pw_string+=,$pw
+              USERS_ARR+=($prefix)
+              PWS_ARR+=($pw)
           else
               while [[ $i -le $no ]]; do
-                  users_string+=,$prefix-$i
-                  pw_string+=,rand_pw
+                  echo $prefix-$i
+                  USERS_ARR+=($prefix-$i)
+                  PWS_ARR+=(rand_pw)
                   ((i++))
               done
       fi
   done
-  USERS_STRING=${users_string:1}
-  PW_STRING=${pw_string:1}
-  # temporarily printing
-  echo    $USERS_STRING
-  echo    $PW_STRING
+  # echo ${#PWS_ARR[@]}
+  # ldap_users_str=$(printf ,%s ${USERS_ARR[@]})
+  # ldap_pws_str=$(printf ,%s ${PWS_ARR[@]})
+  # # temporarily printing
+  # echo    $ldap_users_str
+  # echo    $ldap_pws_str
 }
 
-function_set_users_test_variables(){
-  # get the mapping as input
-  export PREFIX=$1
-  yq --inplace '.TEST_USER.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER.USERNAME=env(PREFIX)+"-adm1"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER.PASSWORD=env(RAND_LDAP)' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_2.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_2.USERNAME=env(PREFIX)+"-adm2"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_2.PASSWORD=env(RAND_LDAP)' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_3.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_3.USERNAME=env(PREFIX)+"-adm3"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_3.PASSWORD=env(RAND_LDAP)' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_4.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_4.USERNAME=env(PREFIX)+"-adm4"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_4.PASSWORD=env(RAND_LDAP)' ods_ci/test-variables.yml
-
-  # update test-variables.yml with admin creds
-  yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' ods_ci/test-variables.yml
-  yq --inplace '.OCP_ADMIN_USER.USERNAME="htpasswd-user"' ods_ci/test-variables.yml
-  export RAND_STRING=$rand_string
-  yq --inplace '.OCP_ADMIN_USER.PASSWORD=env(RAND_STRING)' ods_ci/test-variables.yml
-}
-
-function set_htpasswd_users(){
-  generate_users_creds_strings  htpasswd
+function set_htpasswd_users_and_login(){
+  generate_users_creds  htpasswd
+  HTP_USERS=$USERS_ARR
+  htp_pw=$pw
+  cluster_adm_user=$(jq -r --arg idpname htpasswd '.[][$idpname].cluster_admin_username' ods_ci/build/user_credentials.json)
 
   if [ "${USE_OCM_IDP}" -eq 1 ]
     then
         CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')
         echo Cluster name is $CLUSTER_NAME
-        ocm create idp -c "${CLUSTER_NAME}" -t htpasswd -n htpasswd --username htpasswd-user --password $rand_string
+        ocm create idp -c "${CLUSTER_NAME}" -t htpasswd -n htpasswd --username $cluster_adm_user --password $htp_pw
         ocm create user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
     else
-        htp_string=$(htpasswd -b -B -n htpasswd-user $rand_string)
-        oc create secret generic htpasswd-password --from-literal=htpasswd="$htp_string" -n openshift-config
+        htp_string=$(htpasswd -b -B -n $cluster_adm_user $htp_pw)
+        # oc create secret generic htpasswd-password --from-literal=htpasswd="$htp_string" -n openshift-config
         OAUTH_HTPASSWD_JSON="$(cat ods_ci/configs/resources/oauth_htp_idp.json)"
-        oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
+        # oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
         sed -i "s/<rolebinding_name>/ods-ci-htp-admin/g" ods_ci/configs/templates/ca-rolebinding.yaml
-        sed -i "s/<username>/htpasswd-user/g" ods_ci/configs/templates/ca-rolebinding.yaml
-        oc apply -f ods_ci/configs/templates/ca-rolebinding.yaml
+        sed -i "s/<username>/$cluster_adm_user/g" ods_ci/configs/templates/ca-rolebinding.yaml
+        # oc apply -f ods_ci/configs/templates/ca-rolebinding.yaml
   fi
+  
+  # login using htpasswd
+  # perform_oc_logic  $OC_HOST  $cluster_adm_user  $htp_pw
+
+  oc get secret htpass-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ods_ci/build/users.htpasswd
+  for htp_user in "${HTP_USERS[@]}"; do
+    if [[ ! "$htp_user" =  "$cluster_adm_user" ]]
+      then
+        htpasswd -bB ods_ci/build/users.htpasswd $htp_user $htp_pw
+    fi
+  done
+  oc create secret generic htpass-secret --from-file=htpasswd=ods_ci/build/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
 
 
+  # update test-variables.yml with admin creds
+  export adm_user=$cluster_adm_user
+  export adm_p=$htp_pw
+  yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' ods_ci/test-variables.yml
+  yq --inplace '.OCP_ADMIN_USER.USERNAME=env(adm_user)' ods_ci/test-variables.yml
+  yq --inplace '.OCP_ADMIN_USER.PASSWORD=env(adm_p)' ods_ci/test-variables.yml
 }
 
 function set_ldap_users(){
-  generate_users_creds_strings  ldap
-  
+  generate_users_creds  ldap
+  LDAP_USERS=("${USERS_ARR[@]}")  
+  LDAP_PWS=("${PWS_ARR[@]}")  
+  ldap_users_str=$(printf ,%s ${LDAP_USERS[@]})
+  ldap_pws_str=$(printf ,%s ${LDAP_PWS[@]})
+  ldap_pw=$pw
   declare -a StringArray=("." "^" "$" "*" "?" "(" ")" "[" "]" "{" "}" "|" "@" ";")
   # declare -a StringArray=("." "^" "$" "*" "+" "?" "(" ")" "[" "]" "{" "}" "\\" "|" "@" ";" "<" ">")
   for char in "${StringArray[@]}";
     do
       users_string_special+=,ldap-special$char
-      rand_string+=,$rand
+      pw_string+=,$ldap_pw
     done
-  USERS_STRING=$USERS_STRING$users_string_special
-  PW_STRING=$PW_STRING$rand_string
+  ldap_users_str=$ldap_users_str$users_string_special
+  ldap_pws_str=$ldap_pws_str$pw_string
+  ldap_users_str=${ldap_users_str:1}
+  ldap_pws_str=${ldap_pws_str:1}
+  users_base64=$(echo -n $ldap_users_str | base64 -w 0)
+  rand_base64=$(echo -n $ldap_pws_str | base64 -w 0)
 
-  users_base64=$(echo -n $USERS_STRING | base64 -w 0)
-  rand_base64=$(echo -n $PW_STRING | base64 -w 0)
+  echo $users_base64
+  echo $rand_base64
 
   # update ldap.yaml with creds
   sed -i "s/<users_string>/$users_base64/g" ods_ci/configs/templates/ldap/ldap.yaml
@@ -136,53 +154,6 @@ function set_ldap_users(){
   export RAND_ADMIN=$rand
   rand_base64=$(echo -n $rand | base64 -w 0)
   sed -i "s/<adminpassword>/$rand_base64/g" ods_ci/configs/templates/ldap/ldap.yaml
-
-  ldap    $USERS_STRING
-  echo    $PW_STRING
-
-
-}
-
-function add_users_to_groups(){
-  for i in {1..20}
-    do
-      oc adm groups add-users $1 $2$i
-    done
-}
-
-function add_special_users_to_groups(){
-  declare -a StringArray=("." "^" "$" "*" "?" "(" ")" "[" "]" "{" "}" "|" "@" ";")
-  # declare -a StringArray=("." "^" "$" "*" "+" "?" "(" ")" "[" "]" "{" "}" "\\" "|" "@" ";" "<" ">")
-  for char in "${StringArray[@]}";
-    do
-      oc adm groups add-users $1 $2$char
-    done
-}
-
-function add_users_to_dedicated_admins(){
-  for i in {1..20}
-    do
-      ocm create user $1$i --cluster $CLUSTER_NAME --group=dedicated-admins
-    done
-}
-
-install_identity_provider(){
-  echo "---> Installing the required IDPs"
-
-  set_ldap_users
-  set_htpasswd_users
-  function_set_users_test_variables
-
-  # create htpasswd idp and user
-  echo $OC_HOST
-  # fetch cluster admin user from json
-  # to do
-
-
-
-
-  # login using htpasswd
-  perform_oc_logic  $OC_HOST  htpasswd-user  $rand_string
 
   # create ldap deployment
   oc apply -f ods_ci/configs/templates/ldap/ldap.yaml
@@ -200,23 +171,94 @@ install_identity_provider(){
           OAUTH_LDAP_JSON="$(cat ods_ci/configs/resources/oauth_ldap_idp.json)"
           oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
   fi
-  # add users to RHODS groups
+
+  echo    $USERS_STRING
+  echo    $PW_STRING
+
+  test_user=$(jq -r --arg idpname ldap '.[][$idpname].TEST_USER' ods_ci/build/user_credentials.json)
+  test_user_2=$(jq -r --arg idpname ldap '.[][$idpname].TEST_USER_2' ods_ci/build/user_credentials.json)
+  test_user_3=$(jq -r --arg idpname ldap '.[][$idpname].TEST_USER_3' ods_ci/build/user_credentials.json)
+  test_user_4=$(jq -r --arg idpname ldap '.[][$idpname].TEST_USER_4' ods_ci/build/user_credentials.json)
+
+  export ldap_pw=$ldap_pw
+  export username=$test_user
+  yq --inplace '.TEST_USER.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER.USERNAME=env(username)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER.PASSWORD=env(ldap_pw)' ods_ci/test-variables.yml
+  export username=$test_user_2
+  yq --inplace '.TEST_USER_2.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_2.USERNAME=env(username)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_2.PASSWORD=env(ldap_pw)' ods_ci/test-variables.yml
+  export username=$test_user_3
+  yq --inplace '.TEST_USER_3.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_3.USERNAME=env(username)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_3.PASSWORD=env(ldap_pw)' ods_ci/test-variables.yml
+  export username=$test_user_4
+  yq --inplace '.TEST_USER_4.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_4.USERNAME=env(username)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_4.PASSWORD=env(ldap_pw)' ods_ci/test-variables.yml
+
+}
+
+function create_groups_and_assign_users(){
   oc adm groups new rhods-admins
   oc adm groups new rhods-users
   oc adm groups new rhods-noaccess
   oc adm groups new dedicated-admins
+  for prefix in "${prefixes[@]}"; do
+    groups=$(jq --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' ods_ci/build/user_credentials.json)
+    groups=($groups)
+    for group in "${groups[@]}"; do
+      if [[ $group == *"dedicated-admins"* ]]; then
+          if [ "${USE_OCM_IDP}" -eq 1 ]
+              then
+                  add_users_to_dedicated_admins ldap-adm
+                  continue
+          fi
+      fi
+      # echo $group
+      add_users_to_groups $group ldap-adm
+    done
+  done
+}
 
-  add_users_to_groups rhods-admins ldap-adm
-  if [ "${USE_OCM_IDP}" -eq 1 ]
-      then
-          add_users_to_dedicated_admins ldap-adm
-      else
-          add_users_to_groups dedicated-admins ldap-adm
-  fi
 
-  add_users_to_groups rhods-users ldap-usr
-  add_users_to_groups rhods-noaccess ldap-noaccess
-  add_special_users_to_groups rhods-users  ldap-special
+function add_users_to_groups(){
+  for user in "${LDAP_USERS[@]}"; do
+    if [[ $user == *"$2"* ]]; then
+      oc adm groups add-users $1 $2
+      # echo  add-users $1 $2
+    fi
+  done
+}
+
+function add_special_users_to_groups(){
+  declare -a StringArray=("." "^" "$" "*" "?" "(" ")" "[" "]" "{" "}" "|" "@" ";")
+  # declare -a StringArray=("." "^" "$" "*" "+" "?" "(" ")" "[" "]" "{" "}" "\\" "|" "@" ";" "<" ">")
+  for char in "${StringArray[@]}";
+    do
+      oc adm groups add-users $1 $2$char
+    done
+}
+
+function add_users_to_dedicated_admins(){
+  for user in "${LDAP_USERS[@]}"; do
+    if [[ $user == *"$2"* ]]; then
+      ocm create user $user --cluster $CLUSTER_NAME --group=dedicated-admins
+    fi
+  done
+}
+
+function install_identity_provider(){
+  echo "---> Installing the required IDPs"
+  echo "host: $OC_HOST"
+  set_htpasswd_users_and_login
+  set_ldap_users
+   
+  # add users to RHODS groups
+  create_groups_and_assign_users
+  
+  # add_special_users_to_groups rhods-users  ldap-special
 
   # wait for IdP to appear in the login page
   echo "sleeping 120sec to wait for IDPs to appear in the OCP login page..."
@@ -254,5 +296,5 @@ if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           perform_ocm_login
 fi
-check_installation
+# check_installation
 install_identity_provider

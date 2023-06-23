@@ -147,6 +147,7 @@ Delete Data Science Projects From CLI
             Continue For Loop
         ELSE
             Oc Delete    kind=Project   name=${project_k8s_name}
+            Sleep    30s    reason=Wait for the project to be really deleted
         END
     END
 

@@ -67,11 +67,11 @@ Verify Pipeline Can Be Submitted And Runs Correctly From Standard Data Science W
     Click Element    //button[.="OK"]
     [Teardown]    Elyra Pipelines SDS Teardown
 
-
 Verify Elyra Pipelines In SDS-Based Images
-    [Documentation]
+    [Documentation]    Runs the same Elyra test of the first two test cases in the other images based on SDS
+    ...    (Tensorflow, Pytorch and TrustyAI)
     [Tags]    Sanity    Tier1
-    ...       ODS-XXXX
+    ...       ODS-2271
     [Setup]    Elyra Pipelines SDS Setup
     FOR    ${img}    IN    @{IMAGE_LIST}
         Run Elyra Hello World Pipeline Test    ${img}
@@ -90,7 +90,7 @@ Elyra Pipelines SDS Setup
     [Documentation]    Suite Setup, creates DS Project and opens it
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    ${to_delete}=    Create List    ${PRJ_TITLE}
+    ${to_delete} =    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -111,7 +111,7 @@ Elyra Pipelines Suite Teardown
     RHOSi Teardown
 
 Verify Hello World Pipeline Elements
-    [Documentation]
+    [Documentation]    Verifies that the example pipeline is displayed correctly by Elyra
     Wait Until Page Contains Element    xpath=${SVG_CANVAS}
     Maybe Migrate Pipeline
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Load weather data"]  # robocop: disable
@@ -130,7 +130,7 @@ Create Env Var List If RHODS Is Self-Managed
         ${envs_list} =    Create List    ${env_vars_ssl}
     END
 
-Run Elyra Hello World Pipeline Test
+Run Elyra Hello World Pipeline Test  # robocop: disable
     [Documentation]    Runs the same steps of the first two tests of this Suite, but on different images
     [Arguments]    ${img}
     Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
@@ -147,7 +147,7 @@ Run Elyra Hello World Pipeline Test
     Run Pipeline    pipeline_name=${img} Pipeline
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name
-    ${handle} =    Switch To Pipeline Execution Page
+    Switch To Pipeline Execution Page
     Verify Successful Pipeline Run Via Project UI   pipeline_run_name=${pipeline_run_name}
     ...    pipeline_name=${img} Pipeline    project_name=${PRJ_TITLE}
     Stop Workbench    workbench_title=elyra_${img}

@@ -55,12 +55,14 @@ Select Notebook Image
     ELSE IF    "${version}"=="previous"
         Verify Version Dropdown Is Present    ${notebook_image}
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
-        Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/../input
+        Click Element
+        ...    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/../input
     ELSE
         Verify Version Dropdown Is Present    ${notebook_image}
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
         Sleep    5s
-        ${tag_exists} =    Run Keyword And Return Status    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//input[@data-id="${notebook_image}:${version}"]
+        ${tag_exists} =    Run Keyword And Return Status    Page Should Contain Element
+        ...    xpath=${KFNBC_IMAGE_DROPDOWN}//input[@data-id="${notebook_image}:${version}"]
         IF  ${tag_exists}==True
             Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//input[@data-id="${notebook_image}:${version}"]
         ELSE

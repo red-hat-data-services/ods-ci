@@ -32,7 +32,8 @@ Set Runtime Image In Pipeline Properties
 
 Open Properties Panel
     [Documentation]    Opens the Pipeline/Node properties panel (if closed)
-    ${panel_open} =    Run Keyword And Return Status    Page Should Contain Element    xpath=//div[.="Pipeline Properties"]
+    ${panel_open} =    Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath=//div[.="Pipeline Properties"]
     IF    ${panel_open}==False
         Click Element    xpath=${PROPERTIES_PANEL_BTN}
         Wait Until Page Contains Element    xpath=//div[.="Pipeline Properties"]
@@ -40,7 +41,8 @@ Open Properties Panel
 
 Close Properties Panel
     [Documentation]    Closes the Pipeline/Node properties panel (if open)
-    ${panel_open} =    Run Keyword And Return Status    Page Should Contain Element    xpath=//div[.="Pipeline Properties"]
+    ${panel_open} =    Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath=//div[.="Pipeline Properties"]
     IF    ${panel_open}==True
         Click Element    xpath=${PROPERTIES_PANEL_BTN}
         Wait Until Page Does Not Contain Element    xpath=//div[.="Pipeline Properties"]
@@ -70,11 +72,11 @@ Select Runtime Platform
     [Arguments]    ${runtime_platform}
     Wait Until Page Contains Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]
     Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]
-    Click Element    
+    Click Element
     ...    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]/option[@value="${runtime_platform}"]
 
 Set Pipeline Name
-    [Documentation]
+    [Documentation]    Changes the pipeline name when submitting it to be run, if the name is different from the default
     [Arguments]    ${pipeline_name}
     Wait Until Page Contains Element   xpath=//form[@class="elyra-dialog-form"]//input[@id="pipeline_name"]
     ${current_name} =    Get Element Attribute    xpath=//form[@class="elyra-dialog-form"]//input[@id="pipeline_name"]
@@ -88,7 +90,7 @@ Select Runtime Config
     [Arguments]    ${runtime_config}=test
     Wait Until Page Contains Element   xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]
     Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]
-    Click Element    
+    Click Element
     ...    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]/option[.="${runtime_config}"]
 
 Get Pipeline Run Name

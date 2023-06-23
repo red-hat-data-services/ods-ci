@@ -164,13 +164,13 @@ Select Workbench Jupyter Image
     ELSE
         Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
         Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-    END
-    IF    "${version}"=="default"
-        Verify Version Selection Dropdown
-    ELSE IF    "${version}"=="previous"
-        Select Workbench Image Version    ${version}
-    ELSE
-        Fail    ${version} does not exist, use default/previous
+        IF    "${version}"=="default"
+            Verify Version Selection Dropdown
+        ELSE IF    "${version}"=="previous"
+            Select Workbench Image Version    ${version}
+        ELSE
+            Fail    ${version} does not exist, use default/previous
+        END
     END
 
 Verify Version Selection Dropdown

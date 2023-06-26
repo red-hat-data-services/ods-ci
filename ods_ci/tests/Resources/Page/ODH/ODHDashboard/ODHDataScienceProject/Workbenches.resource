@@ -14,6 +14,7 @@ ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
 ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//button[@aria-label="Options menu"]
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li/button
+${WORKBENCH_IMAGE_ITEM_SPAN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li//span
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
@@ -157,14 +158,19 @@ Select Workbench Jupyter Image
     [Arguments]     ${image_name}    ${version}=default
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
-    Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
-    Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-    IF    "${version}"=="default"
-        Verify Version Selection Dropdown
-    ELSE IF    "${version}"=="previous"
-        Select Workbench Image Version    ${version}
+    IF    "${image_name}"=="TrustyAI"
+        Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_SPAN_XP}\[text()="TrustyAI"]/..    timeout=10s
+        Click Element    ${WORKBENCH_IMAGE_ITEM_SPAN_XP}\[text()="TrustyAI"]/..
     ELSE
-        Fail    ${version} does not exist, use default/previous
+        Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
+        Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
+        IF    "${version}"=="default"
+            Verify Version Selection Dropdown
+        ELSE IF    "${version}"=="previous"
+            Select Workbench Image Version    ${version}
+        ELSE
+            Fail    ${version} does not exist, use default/previous
+        END
     END
 
 Verify Version Selection Dropdown

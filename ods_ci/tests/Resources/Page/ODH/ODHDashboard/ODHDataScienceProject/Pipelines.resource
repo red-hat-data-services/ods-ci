@@ -214,3 +214,26 @@ Verify Pipeline Server Deployments    # robocop: disable
     Verify Deployment    ${db}  1  1  ${containerNames}
     @{all_pods}=  Oc Get    kind=Pod    namespace=${namespace}
     Run Keyword And Continue On Failure    Length Should Be    ${all_pods}    4
+
+Wait Until Pipeline Server Is Deployed
+    [Documentation]    Waits until all the expected pods of the pipeline server
+    ...                are running
+    [Arguments]    ${project_title}
+    Wait Until Keyword Succeeds    10 times    10s
+    ...    Verify Pipeline Server Deployments    project_title=${project_title}
+
+Verify Successful Pipeline Run Via Project UI
+    [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state
+    ...    In the DS Project view of a given project
+    [Arguments]    ${pipeline_run_name}    ${pipeline_name}    ${project_name}
+    Open Data Science Project Details Page    ${project_name}
+    Wait Until Pipeline Last Run Is Started    pipeline_name=${pipeline_name}
+    ...    timeout=10s
+    Wait Until Pipeline Last Run Is Finished    pipeline_name=${pipeline_name}
+    ...    timeout=180s
+    Pipeline Last Run Should Be    pipeline_name=${pipeline_name}
+    ...    run_name=${pipeline_run_name}
+    Pipeline Last Run Status Should Be    pipeline_name=${pipeline_name}
+    ...    status=Completed
+    Pipeline Run Should Be Listed    name=${pipeline_run_name}
+    ...    pipeline_name=${pipeline_name}

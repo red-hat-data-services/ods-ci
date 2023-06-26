@@ -55,10 +55,20 @@ Select Notebook Image
     ELSE IF    "${version}"=="previous"
         Verify Version Dropdown Is Present    ${notebook_image}
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
-        Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/../input
+        Click Element
+        ...    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/../input
     ELSE
-        Log To Console    Unknown image version requested
-        Fail    Unknown image version requested
+        Verify Version Dropdown Is Present    ${notebook_image}
+        Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
+        Sleep    5s
+        ${tag_exists} =    Run Keyword And Return Status    Page Should Contain Element
+        ...    xpath=${KFNBC_IMAGE_DROPDOWN}//input[@data-id="${notebook_image}:${version}"]
+        IF  ${tag_exists}==True
+            Click Element    xpath=${KFNBC_IMAGE_DROPDOWN}//input[@data-id="${notebook_image}:${version}"]
+        ELSE
+            Log To Console    Unknown image version requested
+            Fail    Unknown image version requested
+        END
     END
 
 Verify Version Dropdown Is Present
@@ -309,8 +319,7 @@ Spawned Image Check
     ELSE IF    "${version}"=="previous"
         Python Version Check    expected_version=${PREVIOUS_PYTHON_VER}
     ELSE
-        Log To Console    Unknown image version requested
-        Fail    Unknown image version requested
+        Log To Console    Unknown Tag, Cannot Check Python Version
     END
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells

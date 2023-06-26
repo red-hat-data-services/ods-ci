@@ -128,7 +128,7 @@ Create Env Var List If RHODS Is Self-Managed
         ...    PIPELINES_SSL_SA_CERTS=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         ...    k8s_type=Config Map  input_type=Key / value
         ${list} =    Create List    ${env_vars_ssl}
-        ${envs_list} =    Set Suite Variable    ${list}
+        Set Suite Variable    ${envs_list}    ${list}
     END
 
 Run Elyra Hello World Pipeline Test  # robocop: disable

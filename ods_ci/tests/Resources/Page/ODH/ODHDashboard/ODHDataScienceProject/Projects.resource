@@ -134,20 +134,18 @@ Delete Data Science Projects From CLI
     ...                 It expects to receive a list of project (i.e,${ocp_projects}) as argument
     [Arguments]     ${ocp_projects}
     FOR   ${displayed_name}    IN  @{ocp_projects}
-        ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-        IF  ${version_check}==True
-            ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
-        ELSE
-            ${dp_with_suffix}=    Set Variable    ${displayed_name}\[DSP]
-            ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.annotations."openshift.io/display-name"=="${dp_with_suffix}")) | .metadata.name'    # robocop: disable
-        END
+        ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
         ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
         IF    "${project_k8s_name}" == "${EMPTY}"
             Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}
             Continue For Loop
         ELSE
             Oc Delete    kind=Project   name=${project_k8s_name}
-            Sleep    30s    reason=Wait for the project to be really deleted
+            WHILE    ${TRUE}
+                ${exists} =    Run And Return Rc    oc get project ${project_k8s_name}
+                IF    "${exists}" == "1"    BREAK
+                Sleep    5s    reason=let's not overload the API
+            END
         END
     END
 

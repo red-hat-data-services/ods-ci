@@ -29,7 +29,7 @@ ${PRJ_DESCRIPTION} =    testing Elyra pipeline functionality
 ${PV_NAME} =    ods-ci-pv-elyra
 ${PV_DESCRIPTION} =    ods-ci-pv-elyra is a PV created to test Elyra in workbenches
 ${PV_SIZE} =    2
-${envs_list} =    ${NONE}
+${ENVS_LIST} =    ${NONE}
 ${DC_NAME} =    elyra-s3
 @{IMAGE_LIST}    PyTorch    TensorFlow    TrustyAI
 
@@ -44,7 +44,7 @@ Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
     ...                 prj_title=${PRJ_TITLE}    image_name=Standard Data Science  deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
-    ...                 envs=${envs_list}
+    ...                 envs=${ENVS_LIST}
     Start Workbench     workbench_title=elyra-sds
     Launch And Access Workbench    workbench_title=elyra-sds
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
@@ -128,7 +128,7 @@ Create Env Var List If RHODS Is Self-Managed
         ...    PIPELINES_SSL_SA_CERTS=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         ...    k8s_type=Config Map  input_type=Key / value
         ${list} =    Create List    ${env_vars_ssl}
-        Set Suite Variable    ${envs_list}    ${list}
+        Set Suite Variable    ${ENVS_LIST}    ${list}
     END
 
 Run Elyra Hello World Pipeline Test  # robocop: disable
@@ -138,7 +138,7 @@ Run Elyra Hello World Pipeline Test  # robocop: disable
     ...                 prj_title=${PRJ_TITLE}    image_name=${img}  deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
-    ...                 envs=${envs_list}
+    ...                 envs=${ENVS_LIST}
     Start Workbench     workbench_title=elyra_${img}    timeout=300s
     Launch And Access Workbench    workbench_title=elyra_${img}
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main

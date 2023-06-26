@@ -8,6 +8,10 @@ ${SVG_INTERACTABLE} =    /*[name()="g" and @class="d3-canvas-group"]
 ${SVG_PIPELINE_NODES} =    /*[name()="g" and @class="d3-nodes-links-group"]
 ${SVG_SINGLE_NODE} =    /*[name()="g" and contains(@class, "d3-draggable")]
 ${PROPERTIES_PANEL_BTN} =    //div[@class="toolbar-right-bar"]//button[@class="bx--btn bx--btn--ghost"]
+${ELYRA_DIALOG} =    //form[@class="elyra-dialog-form"]
+${ELYRA_RUNTIME_PLATFORM} =    //select[@id="runtime_platform"]
+${ELYRA_PIPELINE_NAME} =    //input[@id="pipeline_name"]
+${ELYRA_RUNTIME_CONFIG} =    //select[@id="runtime_config"]
 
 
 *** Keywords ***
@@ -19,16 +23,17 @@ Maybe Migrate Pipeline
         Save Pipeline Changes
     END
 
-Set Runtime Image In Pipeline Properties
-    [Documentation]    Sets a default runtime image for the pipeline (currently bugged)
-    [Arguments]    ${runtime_image}=Datascience with Python 3.8 (UBI8)
-    Open Properties Panel
-    Click Element    xpath=//div[.="Pipeline Properties"]
-    Wait Until Page Contains Element    xpath=//div[@id="root_pipeline_defaults_runtime_image"]
-    Click Element    xpath=//select[@id="root_pipeline_defaults_runtime_image"]
-    Click Element    xpath=//option[.="${runtime_image}"]
-    Close Properties Panel
-    Save Pipeline Changes
+# This functionality is currently bugged, disabling the keyword for the time being
+# Set Runtime Image In Pipeline Properties
+#     [Documentation]    Sets a default runtime image for the pipeline (currently bugged)
+#     [Arguments]    ${runtime_image}=Datascience with Python 3.8 (UBI8)
+#     Open Properties Panel
+#     Click Element    xpath=//div[.="Pipeline Properties"]
+#     Wait Until Page Contains Element    xpath=//div[@id="root_pipeline_defaults_runtime_image"]
+#     Click Element    xpath=//select[@id="root_pipeline_defaults_runtime_image"]
+#     Click Element    xpath=//option[.="${runtime_image}"]
+#     Close Properties Panel
+#     Save Pipeline Changes
 
 Open Properties Panel
     [Documentation]    Opens the Pipeline/Node properties panel (if closed)
@@ -65,33 +70,34 @@ Run Pipeline
 Click Run Button
     [Documentation]    Click the `Run` button in Elyra
     Click Element    xpath=//button[@aria-label="Run Pipeline"]
-    Wait Until Page Contains Element    xpath=//form[@class="elyra-dialog-form"]
+    Wait Until Page Contains Element    xpath=${ELYRA_DIALOG}
 
-Select Runtime Platform
-    [Documentation]    Selects the runtime platform when submitting a pipeline run
-    [Arguments]    ${runtime_platform}
-    Wait Until Page Contains Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]
-    Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]
-    Click Element
-    ...    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_platform"]/option[@value="${runtime_platform}"]
+# This selector has been removed, leaving the keyword here in case it is added back in
+# Select Runtime Platform
+#     [Documentation]    Selects the runtime platform when submitting a pipeline run
+#     [Arguments]    ${runtime_platform}
+#     Wait Until Page Contains Element    xpath=${ELYRA_DIALOG}${ELYRA_RUNTIME_PLATFORM}
+#     Click Element    xpath=${ELYRA_DIALOG}${ELYRA_RUNTIME_PLATFORM}
+#     Click Element
+#     ...    xpath=${ELYRA_DIALOG}${ELYRA_RUNTIME_PLATFORM}/option[@value="${runtime_platform}"]
 
 Set Pipeline Name
     [Documentation]    Changes the pipeline name when submitting it to be run, if the name is different from the default
     [Arguments]    ${pipeline_name}
-    Wait Until Page Contains Element   xpath=//form[@class="elyra-dialog-form"]//input[@id="pipeline_name"]
-    ${current_name} =    Get Element Attribute    xpath=//form[@class="elyra-dialog-form"]//input[@id="pipeline_name"]
+    Wait Until Page Contains Element   xpath=${ELYRA_DIALOG}${ELYRA_PIPELINE_NAME}
+    ${current_name} =    Get Element Attribute    xpath=${ELYRA_DIALOG}${ELYRA_PIPELINE_NAME}
     ...    value
     IF    "${pipeline_name}" != "${current_name}"
-        Input Text    xpath=//form[@class="elyra-dialog-form"]//input[@id="pipeline_name"]    ${pipeline_name}
+        Input Text    xpath=${ELYRA_DIALOG}${ELYRA_PIPELINE_NAME}    ${pipeline_name}
     END
 
 Select Runtime Config
     [Documentation]    Selects the runtime config when submitting a pipeline run
     [Arguments]    ${runtime_config}=test
-    Wait Until Page Contains Element   xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]
-    Click Element    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]
+    Wait Until Page Contains Element   xpath=${ELYRA_DIALOG}${ELYRA_RUNTIME_CONFIG}
+    Click Element    xpath=${ELYRA_DIALOG}${ELYRA_RUNTIME_CONFIG}
     Click Element
-    ...    xpath=//form[@class="elyra-dialog-form"]//select[@id="runtime_config"]/option[.="${runtime_config}"]
+    ...    xpath=${ELYRA_DIALOG}${ELYRA_RUNTIME_CONFIG}/option[.="${runtime_config}"]
 
 Get Pipeline Run Name
     [Documentation]    Gets the run ID after a pipeline is successfully submitted

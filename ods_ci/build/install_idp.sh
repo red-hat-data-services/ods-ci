@@ -24,12 +24,23 @@ perform_ocm_login(){
 }
 
 function generate_rand_string(){
-  sleep 2
-  date +%s | sha256sum | base64 | head -c 64
+  # sleep 2
+  # date +%s | sha256sum | base64 | head -c 64
+  p_array=()
+  for i in {a..z} {A..Z} {0..9}; 
+    do
+    p_array[$RANDOM]=$i
+  done
+  # printf %s ${p_array[@]}
+  chars='@#$%&_+='
+  for el in ${p_array[@]}
+    do
+    p_array[$RANDOM]=${chars:$((RANDOM % ${#chars})):1}
+  done
+  printf %s ${p_array[@]}
 }
 
 function generate_rand_user_base_suffix(){
-  GEN_PREFIX=""
   array=()
   for i in {a..z} {A..Z}; 
     do
@@ -188,25 +199,33 @@ function set_htpasswd_users_and_login(){
         ocm create user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
     else
         htp_string=$(htpasswd -b -B -n $cluster_adm_user $htp_pw)
-        # oc create secret generic htpasswd-password --from-literal=htpasswd="$htp_string" -n openshift-config
+        oc create secret generic htpasswd-secret --from-literal=htpasswd="$htp_string" -n openshift-config
         OAUTH_HTPASSWD_JSON="$(cat ods_ci/configs/resources/oauth_htp_idp.json)"
-        # oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
+        oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
         sed -i "s/<rolebinding_name>/ods-ci-htp-admin/g" ods_ci/configs/templates/ca-rolebinding.yaml
         sed -i "s/<username>/$cluster_adm_user/g" ods_ci/configs/templates/ca-rolebinding.yaml
-        # oc apply -f ods_ci/configs/templates/ca-rolebinding.yaml
+        oc apply -f ods_ci/configs/templates/ca-rolebinding.yaml
   fi
   # login using htpasswd
-  # perform_oc_logic  $OC_HOST  $cluster_adm_user  $htp_pw
+  perform_oc_logic  $OC_HOST  $cluster_adm_user  $htp_pw
 
-  oc get secret htpass-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ods_ci/build/users.htpasswd
+  # add more htpasswd users, if present
+  oc get secret htpasswd-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ods_ci/build/users.htpasswd
+  update_secret=0
   for htp_user in "${HTP_USERS[@]}"; do
     if [[ ! "$htp_user" =  "$cluster_adm_user" ]]
       then
-        # htpasswd -bB ods_ci/build/users.htpasswd $htp_user $htp_pw
+        htpasswd -bB ods_ci/build/users.htpasswd $htp_user $htp_pw
         echo generating htpasswd string...
+        update_secret=1
     fi
   done
-  # oc create secret generic htpass-secret --from-file=htpasswd=ods_ci/build/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+  if [[ $update_secret -eq 1 ]]; then
+    oc create secret generic htpass-secret --from-file=htpasswd=ods_ci/build/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+  else
+    echo "no need to update htp secret.."
+  fi
+
   # update test-variables.yml with admin creds
   export adm_user=$cluster_adm_user
   export adm_p=$htp_pw
@@ -237,7 +256,7 @@ function set_ldap_users(){
   sed -i "s/<adminpassword>/$rand_base64/g" ods_ci/configs/templates/ldap/ldap.yaml
 
   # create ldap deployment
-  # oc apply -f ods_ci/configs/templates/ldap/ldap.yaml
+  oc apply -f ods_ci/configs/templates/ldap/ldap.yaml
   if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
@@ -248,9 +267,9 @@ function set_ldap_users(){
           sed -i 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
           ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
       else
-          # oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config
+          oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config
           OAUTH_LDAP_JSON="$(cat ods_ci/configs/resources/oauth_ldap_idp.json)"
-          # oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
+          oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
   fi
 
   test_user=$(extract_testvariables_users_mapping  ldap TEST_USER $ldap_users_str)
@@ -278,12 +297,12 @@ function set_ldap_users(){
 }
 
 function create_groups_and_assign_users(){
-  # oc adm groups new rhods-admins
-  # oc adm groups new rhods-users
-  # oc adm groups new rhods-noaccess
-  # oc adm groups new dedicated-admins
+  oc adm groups new rhods-admins
+  oc adm groups new rhods-users
+  oc adm groups new rhods-noaccess
+  oc adm groups new dedicated-admins
   for prefix in "${prefixes[@]}"; do
-    groups=$(jq --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' ods_ci/build/user_credentials.json)
+    groups=$(jq -r --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' ods_ci/build/user_credentials.json)
     echo $groups
     groups=($groups)
     for group in "${groups[@]}"; do
@@ -303,8 +322,8 @@ function create_groups_and_assign_users(){
 function add_users_to_groups(){
   for user in "${LDAP_USERS[@]}"; do
     if [[ $user == *"$2"* ]]; then
-      # oc adm groups add-users $1 $user
-      echo  add-users $1 $user
+      oc adm groups add-users $1 $user
+      # echo  add-users $1 $user
     fi
   done
 }

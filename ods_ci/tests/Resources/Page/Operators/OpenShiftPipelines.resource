@@ -18,11 +18,14 @@ ${REDHAT_OPENSHIFT_PIPELINES_YAML}      ods_ci/tests/Resources/Files/redhat-open
 # robocop: disable=too-many-calls-in-keyword,line-too-long
 Install Red Hat OpenShift Pipelines
     [Documentation]    Install Red Hat OpenShift Pipelines operator depending on
-    ...     OpenShift version, platform and RHODS flavor (Managed/Self-Managed):
+    ...     OpenShift version, platform (AWS/GCP/...) and RHODS flavor (Managed/Self-Managed) with the objective of
+    ...     testing all the operator versions without having to test all possible combinations:
     ...     - OpenShift 4.10:                  OpenShift Pipelines 1.8
     ...     - OpenShift 4.11:                  OpenShift Pipelines 1.9
     ...     - OpenShift >= 4.12 (AWS and GCP): OpenShift Pipelines 1.10 / 1.11 (depending on platform and flavor)
     ...     - OpenShift >= 4.12 (other):       OpenShift Pipelines 1.11
+    ...     Note: the complete operator compatiblity matrix is published at
+    ...      https://docs.openshift.com/container-platform/4.13/cicd/pipelines/op-release-notes.html
     ${oc_version}=    Get OpenShift Version
     ${is_self_managed}=    Is RHODS Self-Managed
     ${platform}=    Fetch Cluster Platform Type

@@ -3,6 +3,7 @@ Is RHODS Installed
   IF  "${cluster_type}" == "selfmanaged"
       ${result}=  Run Keyword And Return Status
       ...  Run Keywords
+      ...  Oc Get  kind=OdhDashboardConfig  namespace=redhat-ods-applications  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
@@ -11,6 +12,7 @@ Is RHODS Installed
   ELSE IF  "${cluster_type}" == "managed"
       ${result}=  Run Keyword And Return Status
       ...  Run Keywords
+      ...  Oc Get  kind=OdhDashboardConfig  namespace=redhat-ods-applications  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND

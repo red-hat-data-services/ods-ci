@@ -81,7 +81,7 @@ function generate_custom_suffixes(){
 }
 
 function generate_users_creds_v1(){
-  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/build/user_credentials.json)
+  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/configs/templates/user_config.json)
   echo $idp;
   USERS_ARR=()
   PWS_ARR=()
@@ -124,7 +124,7 @@ function generate_users_creds_v1(){
 }
 
 function extract_testvariables_users_mapping(){
-  test_user_mapping=$(jq -r --arg idpname $1 --arg test_user $2 '.[][$idpname][$test_user]' ods_ci/build/user_credentials.json)
+  test_user_mapping=$(jq -r --arg idpname $1 --arg test_user $2 '.[][$idpname][$test_user]' ods_ci/configs/templates/user_config.json)
   users_string=$3
   if [[ "$test_user_mapping" = *"<RAND_BASE>"* ]]; then
       test_user_regex=$(echo "${test_user_mapping/<RAND_BASE>/"[a-zA-Z]+"}")
@@ -136,7 +136,7 @@ function extract_testvariables_users_mapping(){
 }
 function generate_users_creds(){
   echo "--> Generating users based on requested configuration"
-  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/build/user_credentials.json)
+  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/configs/templates/user_config.json)
   USERS_ARR=()
   PWS_ARR=()
   pw=$(echo $idp | jq -r '.pw')
@@ -184,6 +184,10 @@ function set_htpasswd_users_and_login(){
   htp_pw=$pw
   htp_users_string=$(printf ,%s ${HTP_USERS[@]})
   cluster_adm_user=$(extract_testvariables_users_mapping  htpasswd cluster_admin_username $htp_users_string)
+  if [ "${RETURN_PW}" -eq 1 ]
+      then
+            echo cluster admin username $cluster_adm_user
+      fi
   echo "--> Configuring HTP IDP and users"
   if [ "${USE_OCM_IDP}" -eq 1 ]
     then
@@ -301,7 +305,7 @@ function create_groups_and_assign_users(){
   oc adm groups new rhods-noaccess
   oc adm groups new dedicated-admins
   for prefix in "${prefixes[@]}"; do
-    groups=$(jq -r --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' ods_ci/build/user_credentials.json)
+    groups=$(jq -r --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' ods_ci/configs/templates/user_config.json)
     echo $groups
     groups=($groups)
     for group in "${groups[@]}"; do

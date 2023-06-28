@@ -53,6 +53,7 @@ Create Model Server
         # Add Service Account
     END
     Click Button    Add
+    Sleep    1s    reason=Sometimes the modal will intercept later clicks even after being closed, wait for a second
 
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod

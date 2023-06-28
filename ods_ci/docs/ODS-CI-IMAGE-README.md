@@ -44,7 +44,7 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
         - ```OCM_ENV```: it contains the OCM environment name, e.g., staging vs production. If not set, OCM CLI assumes it is production.
     * ```RETURN_PW``` (default:1): 
       - if ```RETURN_PW``` = 1: CLI will prints the user password and cluster admin username. It's recommended to use for Debug purposes only, where the CLI output is not made publicly available.
-    * ```ods_ci/configs/templates/user_credentials.json```: this JSON file is necessary to instruct the image about desired user configuration. Check the dedicated section below.
+    * ```ods_ci/configs/templates/user_config.json```: this JSON file is necessary to instruct the image about desired user configuration. Check the dedicated section below.
   
 
 ## User Configuration JSON File
@@ -180,6 +180,9 @@ oc apply -f ods_ci_rbac.yaml -n ods-ci
 
 # create a secret with test variables that can be mounted in ODS-CI container
 oc create secret generic ods-ci-test-variables --from-file ods_ci/test-variables.yml -n ods-ci
+
+# Optional: create a secret with user_config.json that can be mounted in ODS-CI container
+oc create secret generic ods-ci-user-config --from-file ods_ci/user_config.json -n ods-ci
 
 # Optional: create registry pull secret and patch SA
 oc create secret docker-registry  ods-ci-pull-secret --docker-server='quay.io' --docker-username='my-username'  --docker-password='my-pw' --docker-email='my-email@email.com' -n ods-ci

@@ -31,7 +31,6 @@ function generate_rand_string(){
     do
     p_array[$RANDOM]=$i
   done
-  # printf %s ${p_array[@]}
   chars='@#$%&_+='
   for el in ${p_array[@]}
     do
@@ -46,13 +45,12 @@ function generate_rand_user_base_suffix(){
     do
     array[$RANDOM]=$i
   done
-  printf %s ${array[@]::15} $'\n'
+  printf %s ${array[@]::$1} $'\n'
 }
 
 function generate_incremental_suffixes(){
     n_users=$(echo $suffix_info | jq '.n_users')
     additional_base_suffix=$1
-    # echo $n_users
     i=1
     if [[ $n_users -eq 1 ]]
         then
@@ -60,7 +58,6 @@ function generate_incremental_suffixes(){
             PWS_ARR+=($pw)
         else
             while [[ $i -le $n_users ]]; do
-                # echo $prefix$additional_base_suffix$i
                 USERS_ARR+=($prefix$additional_base_suffix$i)
                 PWS_ARR+=($pw)
                 ((i++))
@@ -81,7 +78,6 @@ function generate_custom_suffixes(){
         USERS_ARR+=($complete_name)
         PWS_ARR+=($pw)
     done
-    # echo ${USERS_ARR[@]}
 }
 
 function generate_users_creds_v1(){
@@ -118,6 +114,7 @@ function generate_users_creds_v1(){
               done
       fi
   done
+  # use next lines for debugging
   # echo ${#PWS_ARR[@]}
   # ldap_users_str=$(printf ,%s ${USERS_ARR[@]})
   # ldap_pws_str=$(printf ,%s ${PWS_ARR[@]})
@@ -138,8 +135,8 @@ function extract_testvariables_users_mapping(){
   fi
 }
 function generate_users_creds(){
+  echo "--> Generating users based on requested configuration"
   idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/build/user_credentials.json)
-  echo $idp;
   USERS_ARR=()
   PWS_ARR=()
   pw=$(echo $idp | jq -r '.pw')
@@ -154,9 +151,6 @@ function generate_users_creds(){
   prefixes=$(echo $idp | jq --raw-output '.prefixes[]')
   prefixes=($prefixes)
   for prefix in "${prefixes[@]}"; do
-      # if [[ ! "$prefix" = "ldap-special-" ]]; then
-      #   continue
-      # fi
       suffix_info=$(echo $idp | jq --arg pref $prefix  '.suffixes[$pref]')
       suffix_type=$(echo $suffix_info | jq --raw-output '.type')
       echo "elaborating prefix: $prefix"
@@ -166,16 +160,16 @@ function generate_users_creds(){
             generate_incremental_suffixes
         ;;
         incremental_with_rand_base)
-            generated_base_suffix=$(generate_rand_user_base_suffix)
-            # echo $generated_base_suffix
+            rand_length=$(echo $suffix_info | jq '.rand_length')
+            generated_base_suffix=$(generate_rand_user_base_suffix  $rand_length)
             generate_incremental_suffixes   $generated_base_suffix
         ;;
         custom)
             generate_custom_suffixes
         ;;
         custom_with_rand_base)
-            generated_base_suffix=$(generate_rand_user_base_suffix)
-            # echo $generated_base_suffix
+            rand_length=$(echo $suffix_info | jq '.rand_length')
+            generated_base_suffix=$(generate_rand_user_base_suffix  $rand_length)
             generate_custom_suffixes  $generated_base_suffix
         ;;
         * )
@@ -190,8 +184,7 @@ function set_htpasswd_users_and_login(){
   htp_pw=$pw
   htp_users_string=$(printf ,%s ${HTP_USERS[@]})
   cluster_adm_user=$(extract_testvariables_users_mapping  htpasswd cluster_admin_username $htp_users_string)
-  # echo htp string: $htp_users_string
-  # echo clusteradmin: $cluster_adm_user
+  echo "--> Configuring HTP IDP and users"
   if [ "${USE_OCM_IDP}" -eq 1 ]
     then
         CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')
@@ -209,23 +202,24 @@ function set_htpasswd_users_and_login(){
         oc apply -f ods_ci/configs/ca-rolebinding.yaml
   fi
   # login using htpasswd
+  echo "----> Performing log in with newly created HTP user"
   perform_oc_logic  $OC_HOST  $cluster_adm_user  $htp_pw
 
   # add more htpasswd users, if present
+  echo "---> Adding additional HTP users, if needed per requested configuration"
   oc get secret htpasswd-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ods_ci/configs/users.htpasswd
   update_secret=0
   for htp_user in "${HTP_USERS[@]}"; do
     if [[ ! "$htp_user" =  "$cluster_adm_user" ]]
       then
         htpasswd -bB ods_ci/build/users.htpasswd $htp_user $htp_pw
-        echo generating htpasswd string...
         update_secret=1
     fi
   done
   if [[ $update_secret -eq 1 ]]; then
     oc create secret generic htpass-secret --from-file=htpasswd=ods_ci/build/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
   else
-    echo "no need to update htp secret.."
+    echo "----> SKIP"
   fi
 
   # update test-variables.yml with admin creds
@@ -250,6 +244,7 @@ function set_ldap_users(){
   rand_base64=$(echo -n $ldap_pws_str | base64 -w 0)
   
   # update ldap.yaml with creds
+  echo "--> configuring LDAP server and users"
   cp ods_ci/configs/templates/ldap/ldap.yaml  ods_ci/configs/ldap.yaml
   sed -i "s/<users_string>/$users_base64/g" ods_ci/configs/ldap.yaml
   sed -i "s/<passwords_string>/$rand_base64/g" ods_ci/configs/ldap.yaml
@@ -322,12 +317,10 @@ function create_groups_and_assign_users(){
   done
 }
 
-
 function add_users_to_groups(){
   for user in "${LDAP_USERS[@]}"; do
     if [[ $user == *"$2"* ]]; then
       oc adm groups add-users $1 $user
-      # echo  add-users $1 $user
     fi
   done
 }
@@ -341,20 +334,23 @@ function add_users_to_ocm_dedicated_admins(){
 }
 
 function install_identity_provider(){
-  echo "---> Installing the required IDPs"
+  echo "---- | Installing the required IDPs | ----"
   echo "host: $OC_HOST"
+  echo "Stage) Setting HTPASSWD Identity provider"
   set_htpasswd_users_and_login
+  echo "Stage) Setting LDAP Identity provider"
   set_ldap_users
   # add users to RHODS groups
+  echo "Stage) Configure RHODS test user groups"
   create_groups_and_assign_users
   
   # wait for IdP to appear in the login page
-  echo "sleeping 120sec to wait for IDPs to appear in the OCP login page..."
+  echo "Stage) Sleeping 120sec to wait for IDPs to become available"
   sleep 120
 }
 
 function check_installation(){
-  echo "---> Looking for LDAP and HTPASSWD already present in the cluster..."
+  echo "Stage) Looking for LDAP and HTPASSWD already present in the cluster..."
   if [ "${USE_OCM_IDP}" -eq 1 ]
       then
             ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')

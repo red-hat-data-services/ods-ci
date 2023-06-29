@@ -288,7 +288,7 @@ function add_users_to_groups(){
 
 function add_users_to_ocm_dedicated_admins(){
   for user in "${LDAP_USERS[@]}"; do
-    if [[ $user == *"$2"* ]]; then
+    if [[ $user == *"$1"* ]]; then
       ocm create user $user --cluster $CLUSTER_NAME --group=dedicated-admins
     fi
   done

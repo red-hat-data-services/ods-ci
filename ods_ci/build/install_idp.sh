@@ -80,49 +80,6 @@ function generate_custom_suffixes(){
     done
 }
 
-function generate_users_creds_v1(){
-  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/configs/templates/user_config.json)
-  echo $idp;
-  USERS_ARR=()
-  PWS_ARR=()
-  pw=$(echo $idp | jq -r '.pw')
-  if [[ "$pw" =  "<GEN_RAMDOM_PW>" ]]
-      then
-          pw=$(generate_rand_string)
-            if [ "${RETURN_PW}" -eq 1 ]
-              then
-                  echo Random $1 pasword: $pw
-            fi
-  fi
-  prefixes=$(echo $idp | jq --raw-output '.prefixes[]')
-  prefixes=($prefixes)
-  for prefix in "${prefixes[@]}"; do
-      echo $prefix
-      no=$(echo $idp | jq --arg pref $prefix  '.no_user_per_prefix[$pref]')
-      echo $no
-      i=1
-      if [[ $no -eq 1 ]]
-          then
-              USERS_ARR+=($prefix$additional_base_suffix)
-              PWS_ARR+=($pw)
-          else
-              while [[ $i -le $no ]]; do
-                  echo $prefix$i
-                  USERS_ARR+=($prefix$i)
-                  PWS_ARR+=($pw)
-                  ((i++))
-              done
-      fi
-  done
-  # use next lines for debugging
-  # echo ${#PWS_ARR[@]}
-  # ldap_users_str=$(printf ,%s ${USERS_ARR[@]})
-  # ldap_pws_str=$(printf ,%s ${PWS_ARR[@]})
-  # # temporarily printing
-  # echo    $ldap_users_str
-  # echo    $ldap_pws_str
-}
-
 function extract_testvariables_users_mapping(){
   test_user_mapping=$(jq -r --arg idpname $1 --arg test_user $2 '.[][$idpname][$test_user]' ods_ci/configs/templates/user_config.json)
   users_string=$3
@@ -380,9 +337,133 @@ function check_installation(){
   fi
 }
 
+function validate_user_config_fields_and_values(){
+  echo "--> Generating users based on requested configuration"
+  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/configs/templates/user_config.json)
+  pw=$(echo $idp | jq -r '.pw')
+  if  [[ $pw = "null" || -z "${pw// }" ]]; then
+    echo ".pw must be set with a custom value (i.e., no empty string or whitespacesonly) or <GEN_RAMDOM_PW>"
+    exit 1
+  fi
+  if [[ $1 = "ldap" ]]; then
+    test_user=$(echo $idp | jq -r '.TEST_USER')
+    echo $test
+    test_user_2=$(echo $idp | jq -r '.TEST_USER_2')
+    test_user_3=$(echo $idp | jq -r '.TEST_USER_3')
+    test_user_4=$(echo $idp | jq -r '.TEST_USER_4')
+    if  [[ -z "${test_user// }" || -z "${test_user_2// }" || -z "${test_user_3// }" || -z "${test_user_4// }" ]]; then
+      echo ".TEST_USER,.TEST_USER_2,TEST_USER_3 AND TEST_USER_4 must be set and different from empty"
+      exit 1
+    fi
+    if  [[ $test_user = "null" || $test_user_2 = "null" || $test_user_3 = "null" || $test_user_4 = "null" ]]; then
+      echo ".TEST_USER,.TEST_USER_2,TEST_USER_3 AND TEST_USER_4 must be set"
+      exit 1
+    fi
+
+
+  fi
+  if [[ $1 = "htpasswd" ]]; then
+    cluster_admin_user=$(echo $idp | jq -r '.cluster_admin_username')
+    if  [[ -z "${cluster_admin_user// }" || $cluster_admin_user = "null" ]]; then
+      echo ".cluster_admin_username must be set and different from empty"
+      exit 1
+    fi
+  fi
+  prefixes=$(echo $idp | jq --raw-output '.prefixes[]')
+  prefixes=($prefixes)
+  if  [[ $prefixes = "null" || -z "${prefixes// }" || ! ${#prefixes[@]} -gt 0 ]]; then
+    echo ".prefixes must be set and have more than 0 element!"
+    exit 1
+  fi
+  for prefix in "${prefixes[@]}"; do
+      suffix_info=$(echo $idp | jq --arg pref $prefix  '.suffixes[$pref]')
+      suffix_type=$(echo $suffix_info | jq --raw-output '.type')
+      if  [[ $suffix_info = "null" || -z "${suffix_info// }" || ! -n $suffix_info || $suffix_type = "null" || -z "${suffix_type// }" || ! -n $suffix_type ]]; then
+        echo ".suffixes and its content must be set!"
+        exit 1
+      fi
+      echo "elaborating prefix: $prefix"
+      echo "--> suffix type: $suffix_type"
+      case "$suffix_type" in
+        incremental)
+            n_users=$(echo $suffix_info | jq '.n_users')
+            if  [[ ! $n_users -gt 0 || -z "${n_users// }" ]]; then
+              echo ".n_users must be set and greater than 0 for incremental suffix!"
+              exit 1
+            fi
+        ;;
+        incremental_with_rand_base)
+            n_users=$(echo $suffix_info | jq '.n_users')
+            rand_length=$(echo $suffix_info | jq '.rand_length')
+            if  [[ ! $rand_length -gt 0 || -z "${rand_length// }" ]]; then
+              echo ".rand_length must be set and greater than 0 for incremental_with_rand_base suffix!"
+              exit 1
+            fi
+            if  [[ ! $n_users -gt 0 || -z "${n_users// }" ]]; then
+              echo ".n_users must be set and greater than 0 for incremental_with_rand_base suffix!"
+              exit 1
+            fi
+        ;;
+        custom)
+            list=$(echo $suffix_info | jq -c '.list[]')
+            list=($list)
+            if  [[ $list = "null" || -z "${list// }" || ! ${#list[@]} -gt 0 ]]; then
+              echo ".list must be set and have more than 0 element for custom_with_rand_base suffix!"
+              exit 1
+            fi
+        ;;
+        custom_with_rand_base)
+
+            rand_length=$(echo $suffix_info | jq '.rand_length')
+            if  [[ ! $rand_length -gt 0 || -z "${rand_length// }" ]]; then
+              echo ".rand_length must be set and greater than 0 for incremental_with_rand_base suffix!"
+              exit 1
+            fi
+            list=$(echo $suffix_info | jq -c '.list[]')
+            list=($list)
+            if  [[ $list = "null" || -z "${list// }" || ! ${#list[@]} -gt 0 ]]; then
+              echo ".list must be set and have more than 0 element for custom_with_rand_base suffix!"
+              exit 1
+            fi
+        ;;
+        * )
+            echo "The given suffix type $suffix_type is not supported..try again"
+      esac
+      if [[ $1 = "ldap" ]]; then
+        groups=$(jq -r --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' ods_ci/configs/templates/user_config.json)
+        groups=($groups)
+        if  [[ $groups = "null" || -z "${groups// }" || ! ${#groups[@]} -gt 0 ]]; then
+              echo ".groups_map must be set and have more than 0 element!"
+              exit 1
+        fi
+      fi
+  done
+}
+
+function validate_user_config_file(){
+  if [ ! -f "ods_ci/configs/templates/user_config.json" ]; then
+    echo user_config.json is not present in ods_ci/configs/templates! Fix it and try again...
+    exit 1
+  else
+    echo user_config.json found! Starting json validation..
+  fi  
+  json_format_checked=$(cat ods_ci/configs/templates/user_config.json | json_pp)
+  exit_status=$(echo $?)
+  if [[ ! $exit_status = 0 ]]; then
+    echo json format validation check failed for user_config.json. Fix it and try again...
+    exit $exit_status
+  else
+    echo json format validation check is successful for user_config.json.
+  fi
+  validate_user_config_fields_and_values htpasswd
+  validate_user_config_fields_and_values ldap
+
+}
+
 if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           perform_ocm_login
 fi
+check_user_config_file
 check_installation
 install_identity_provider

@@ -11,17 +11,17 @@
                 "rhods-adm-": {
                     "type": "incremental_with_rand_base",
                     "rand_length": 20,
-                    "n_users": 20
+                    "n_users": 5
                 },
                 "rhods-usr-": {
                     "type": "incremental_with_rand_base",
                     "rand_length": 20,
-                    "n_users": 20
+                    "n_users": 5
                 },
                 "rhods-noaccess-": {
-                    "type": "incremental_with_rand_base",
+                    "type": "incremental",
                     "rand_length": 20,
-                    "n_users": 20
+                    "n_users": 5
                 },
                 "rhods-special-": {
                     "type": "custom_with_rand_base",
@@ -30,7 +30,7 @@
                 }
             },
             "pw": "<GEN_RAMDOM_PW>",
-            "TEST_USER": "rhods-adm-<RAND_BASE>11",
+            "TEST_USER": "rhods-adm-<RAND_BASE>1",
             "TEST_USER_2": "rhods-adm-<RAND_BASE>2",
             "TEST_USER_3": "rhods-usr-<RAND_BASE>3",
             "TEST_USER_4":  "rhods-usr-<RAND_BASE>4",
@@ -64,7 +64,7 @@
                 "rhods-htp-basic-user-": {
                     "type": "incremental_with_rand_base",
                     "rand_length": 20,
-                    "n_users": 3
+                    "n_users": 2
                 }
             },
             "pw": "<GEN_RAMDOM_PW>",

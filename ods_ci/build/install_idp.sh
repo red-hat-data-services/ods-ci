@@ -151,7 +151,7 @@ function set_htpasswd_users_and_login(){
         CLUSTER_NAME=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $2}')
         echo Cluster name is $CLUSTER_NAME
         ocm create idp -c "${CLUSTER_NAME}" -t htpasswd -n htpasswd --username $cluster_adm_user --password $htp_pw
-        ocm create user htpasswd-user --cluster $CLUSTER_NAME --group=cluster-admins
+        ocm create user $cluster_adm_user --cluster $CLUSTER_NAME --group=cluster-admins
     else
         htp_string=$(htpasswd -b -B -n $cluster_adm_user $htp_pw)
         oc create secret generic htpasswd-secret --from-literal=htpasswd="$htp_string" -n openshift-config
@@ -315,7 +315,10 @@ function check_installation(){
   if [ "${USE_OCM_IDP}" -eq 1 ]
       then
             ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
-            echo $ocm_clusterid
+            if [ "${RETURN_PW}" -eq 1 ]
+              then
+                  echo OCM cluster ID: $ocm_clusterid
+            fi
             while read -r line; do
               if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
                   echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are already installed. Skipping installation \033[0m"

@@ -46,6 +46,7 @@ COPY ods_ci/utils/scripts/SplitSuite.py  ods_ci/utils/scripts/SplitSuite.py
 COPY ods_ci/utils/scripts/testconfig/test-variables.yml ods_ci/test-variables.yml.model
 COPY ods_ci/test-variables.yml.example ods_ci/test-variables.yml
 COPY ods_ci/configs/templates/ldap/ldap.yaml ods_ci/configs/templates/ldap/ldap.yaml
+COPY ods_ci/configs/templates/user_config.json ods_ci/configs/templates/user_config.json
 COPY ods_ci/configs/resources/oauth_htp_idp.json ods_ci/configs/resources/oauth_htp_idp.json
 COPY ods_ci/configs/resources/oauth_ldap_idp.json ods_ci/configs/resources/oauth_ldap_idp.json
 COPY ods_ci/configs/templates/ca-rolebinding.yaml ods_ci/configs/templates/ca-rolebinding.yaml

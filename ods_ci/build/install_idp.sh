@@ -447,23 +447,14 @@ function validate_user_config_file(){
   else
     echo user_config.json found! Starting json validation..
   fi  
-  json_format_checked=$(cat ods_ci/configs/templates/user_config.json | json_pp)
-  exit_status=$(echo $?)
-  if [[ ! $exit_status = 0 ]]; then
-    echo json format validation check failed for user_config.json. Fix it and try again...
-    exit $exit_status
-  else
-    echo json format validation check is successful for user_config.json.
-  fi
   validate_user_config_fields_and_values htpasswd
   validate_user_config_fields_and_values ldap
-
 }
 
 if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           perform_ocm_login
 fi
-check_user_config_file
+validate_user_config_file
 check_installation
 install_identity_provider

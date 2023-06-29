@@ -31,7 +31,7 @@ function generate_rand_string(){
     do
     p_array[$RANDOM]=$i
   done
-  chars='@#$%&_+='
+  chars='@#$%_+='
   for el in ${p_array[@]}
     do
     p_array[$RANDOM]=${chars:$((RANDOM % ${#chars})):1}
@@ -173,12 +173,12 @@ function set_htpasswd_users_and_login(){
   for htp_user in "${HTP_USERS[@]}"; do
     if [[ ! "$htp_user" =  "$cluster_adm_user" ]]
       then
-        htpasswd -bB ods_ci/build/users.htpasswd $htp_user $htp_pw
+        htpasswd -bB ods_ci/configs/users.htpasswd $htp_user $htp_pw
         update_secret=1
     fi
   done
   if [[ $update_secret -eq 1 ]]; then
-    oc create secret generic htpass-secret --from-file=htpasswd=ods_ci/build/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+    oc create secret generic htpass-secret --from-file=htpasswd=ods_ci/configs/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
   else
     echo "----> SKIP"
   fi

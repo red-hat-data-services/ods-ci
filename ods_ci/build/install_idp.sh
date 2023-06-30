@@ -31,11 +31,13 @@ function generate_rand_string(){
     do
     p_array[$RANDOM]=$i
   done
+  first=${p_array[-1]}
   chars='@#$%_+='
   for el in ${p_array[@]}
     do
     p_array[$RANDOM]=${chars:$((RANDOM % ${#chars})):1}
   done
+  p_array[0]=$first
   printf %s ${p_array[@]}
 }
 
@@ -168,7 +170,8 @@ function set_htpasswd_users_and_login(){
 
   # add more htpasswd users, if present
   echo "---> Adding additional HTP users, if needed per requested configuration"
-  oc get secret htpasswd-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ods_ci/configs/users.htpasswd
+  secret_name=$(oc get oauth cluster -o json | jq -r '.spec.identityProviders[] | select(.htpasswd!=null) | .htpasswd.fileData.name')
+  oc get secret $secret_name -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ods_ci/configs/users.htpasswd
   update_secret=0
   for htp_user in "${HTP_USERS[@]}"; do
     if [[ ! "$htp_user" =  "$cluster_adm_user" ]]
@@ -178,7 +181,7 @@ function set_htpasswd_users_and_login(){
     fi
   done
   if [[ $update_secret -eq 1 ]]; then
-    oc create secret generic htpass-secret --from-file=htpasswd=ods_ci/configs/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+    oc create secret generic $secret_name --from-file=htpasswd=ods_ci/configs/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
   else
     echo "----> SKIP"
   fi
@@ -220,7 +223,10 @@ function set_ldap_users(){
       then
           ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
           # configure the jinja template for adding ldap idp in OCM
-          rand_admin=$(echo $RAND_ADMIN | base64 -d)
+          if [[ -z $ocm_clusterid ]]; then
+            echo "Cluster $OC_HOST not found. Please fix it and try again..."
+            exit 1
+          fi
           cp  ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja  ods_ci/configs/create_ldap_idp.jinja
           sed -i "s/{{ LDAP_BIND_PASSWORD }}/$RAND_ADMIN/g" ods_ci/configs/create_ldap_idp.jinja
           sed -i "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" ods_ci/configs/create_ldap_idp.jinja
@@ -301,13 +307,10 @@ function install_identity_provider(){
   set_htpasswd_users_and_login
   echo "Stage) Setting LDAP Identity provider"
   set_ldap_users
-  # add users to RHODS groups
   echo "Stage) Configure RHODS test user groups"
-  create_groups_and_assign_users
-  
-  # wait for IdP to appear in the login page
-  echo "Stage) Sleeping 120sec to wait for IDPs to become available"
-  sleep 120
+  create_groups_and_assign_users  
+  echo "Stage) Sleeping 180sec to wait for IDPs to become available"
+  sleep 180
 }
 
 function check_installation(){
@@ -318,6 +321,10 @@ function check_installation(){
             if [ "${RETURN_PW}" -eq 1 ]
               then
                   echo OCM cluster ID: $ocm_clusterid
+            fi
+            if [[ -z $ocm_clusterid ]]; then
+              echo "Cluster $OC_HOST not found. Please fix it and try again..."
+              exit 1
             fi
             while read -r line; do
               if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
@@ -341,7 +348,7 @@ function check_installation(){
 }
 
 function validate_user_config_fields_and_values(){
-  echo "--> Generating users based on requested configuration"
+  echo "--> Going through requested users configuration"
   idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/configs/templates/user_config.json)
   pw=$(echo $idp | jq -r '.pw')
   if  [[ $pw = "null" || -z "${pw// }" ]]; then
@@ -362,8 +369,6 @@ function validate_user_config_fields_and_values(){
       echo ".TEST_USER,.TEST_USER_2,TEST_USER_3 AND TEST_USER_4 must be set"
       exit 1
     fi
-
-
   fi
   if [[ $1 = "htpasswd" ]]; then
     cluster_admin_user=$(echo $idp | jq -r '.cluster_admin_username')
@@ -385,7 +390,7 @@ function validate_user_config_fields_and_values(){
         echo ".suffixes and its content must be set!"
         exit 1
       fi
-      echo "elaborating prefix: $prefix"
+      echo "validating prefix: $prefix"
       echo "--> suffix type: $suffix_type"
       case "$suffix_type" in
         incremental)
@@ -444,6 +449,7 @@ function validate_user_config_fields_and_values(){
 }
 
 function validate_user_config_file(){
+  echo "Stage) validating user_config.json"
   if [ ! -f "ods_ci/configs/templates/user_config.json" ]; then
     echo user_config.json is not present in ods_ci/configs/templates! Fix it and try again...
     exit 1

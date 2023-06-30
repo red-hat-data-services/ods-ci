@@ -230,8 +230,9 @@ test execution using the container in a OpenShift pod - minimum configuration, e
         - name: ROBOT_EXTRA_ARGS
           value: "-i Smoke --dryrun"
       volumeMounts:
-        - mountPath: /tmp/ods_ci/configs/templates/
+        - mountPath: /tmp/ods-ci/ods_ci/configs/templates/user_config.json
           name: ods-ci-user-config
+          subPath: user_config.json
         - mountPath: /tmp/ods-ci/test-output
           name: ods-ci-test-output
 ```

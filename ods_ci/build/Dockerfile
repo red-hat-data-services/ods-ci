@@ -18,7 +18,7 @@ ARG OC_CHANNEL=stable
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
     dnf install -y jq git unzip chromium chromedriver python3-distro httpd-tools &&\
     dnf clean all &&\
-    curl --proto "=https" -L https://github.com/mikefarah/yq/releases/download/v4.25.1/yq_linux_amd64 -o /usr/bin/yq &&\
+    curl --proto "=https" -L https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -o /usr/bin/yq &&\
     chmod +x /usr/bin/yq &&\
     curl --proto "=https" -L https://mirror.openshift.com/pub/openshift-v$(echo $OC_VERSION | cut -d'.' -f 1)/x86_64/clients/ocp/$OC_CHANNEL-$OC_VERSION/openshift-client-linux.tar.gz -o $HOME/oc_client.tar.gz && \
     tar xvf $HOME/oc_client.tar.gz -C /usr/local/bin/ && \
@@ -64,6 +64,5 @@ RUN poetry install
 
 RUN chgrp -R 0 . && \
     chmod -R g=u .
-
 
 ENTRYPOINT ["./ods_ci/build/run.sh"]

@@ -14,9 +14,9 @@ TEST_USER:
   USERNAME: foo-user
   PASSWORD: foo-passwd
 OCP_ADMIN_USER:
-  AUTH_TYPE: "kube:admin"
-  USERNAME: kubeadmin
-  PASSWORD: abc123XYZ!
+  AUTH_TYPE: adm-auth
+  USERNAME: adminuser
+  PASSWORD: adminuser-passwd
 TEST_USER_2:
   AUTH_TYPE: foo-auth
   USERNAME: foo-user2

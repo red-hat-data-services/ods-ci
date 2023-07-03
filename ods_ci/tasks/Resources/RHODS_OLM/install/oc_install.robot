@@ -24,45 +24,42 @@ Install RHODS
 
 Verify RHODS Installation
   Log  Verifying RHODS installation  console=yes
-  Wait For Pods Number  1
+  Wait For Pods Numbers  1
   ...                   namespace=redhat-ods-operator
   ...                   label_selector=name=rhods-operator
   ...                   timeout=2000
-  Log  pod operator created   console=yes
-  Wait For Pods Number  5
+  Wait For Pods Numbers  5
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=rhods-dashboard
   ...                   timeout=1200
-  Log  pods rhods-dashboard created   console=yes
-  Wait For Pods Number  1
+  Wait For Pods Numbers  1
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=notebook-controller
-  ...                   timeout=1200
-  Log  pods notebook-controller created   console=yes
-  Wait For Pods Number  1
+  ...                   timeout=400
+  Wait For Pods Numbers  1
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=odh-notebook-controller
-  ...                   timeout=600
-  Log  pods odh-notebook-controller created   console=yes
-  Wait For Pods Number  3
+  ...                   timeout=400
+  Wait For Pods Numbers   3
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app=odh-model-controller
-  ...                   timeout=600
-  Log  pods odh-model-controller created   console=yes
-  Wait For Pods Number  4
+  ...                   timeout=400
+  Wait For Pods Numbers   1
   ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=model-mesh
-  ...                   timeout=600
-  Log  pods mode-mesh controller created   console=yes
-  Wait For Pods Number  1
+  ...                   label_selector=component=model-mesh-etcd
+  ...                   timeout=400
+  Wait For Pods Numbers   3
+  ...                   namespace=redhat-ods-applications
+  ...                   label_selector=app.kubernetes.io/name=modelmesh-controller
+  ...                   timeout=400
+  Wait For Pods Numbers   1
   ...                   namespace=redhat-ods-applications
   ...                   label_selector=app.kubernetes.io/created-by=data-science-pipelines-operator
-  ...                   timeout=600
-  Log  pods dsp operator created   console=yes
-  Wait For Pods Number  3
+  ...                   timeout=400
+  Wait For Pods Numbers   3
   ...                   namespace=redhat-ods-monitoring
   ...                   label_selector=prometheus=rhods-model-monitoring
-  ...                   timeout=600
+  ...                   timeout=400
   Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
   Log  Verified redhat-ods-applications  console=yes
   Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200
@@ -95,3 +92,20 @@ Install RHODS In Managed Cluster Using CLI
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url}  #robocop:disable
   Log To Console    ${output}
   Should Be Equal As Integers	${return_code}	 0  msg=Error detected while installing RHODS
+
+Wait For Pods Numbers
+  [Documentation]   Wait for number of pod during installtion
+  [Arguments]     ${count}     ${namespace}     ${label_selector}    ${timeout}
+  ${status}   Set Variable   False
+  FOR    ${counter}    IN RANGE   ${timeout}
+         ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n ${namespace} -l ${label_selector} | tail -n +2 | wc -l
+         IF    ${output} == ${count}
+               ${status}  Set Variable  True
+               Log To Console  pods ${label_selector} created
+               Exit For Loop
+         END
+         Sleep    1 sec
+  END
+  IF    '${status}' == 'False'
+        Run Keyword And Continue On Failure    FAIL    Timeout- ${output} pods found with the label selector ${label_selector} in ${namespace} namespace
+  END

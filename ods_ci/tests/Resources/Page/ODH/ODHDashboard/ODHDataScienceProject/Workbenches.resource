@@ -3,6 +3,7 @@ Documentation    Collection of keywords to interact with Workbenches
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
 Resource       ../ODHDataScienceProject/Storages.resource
+Resource       ../ODHDataScienceProject/DataConnections.resource
 Resource       Projects.resource
 
 
@@ -23,16 +24,16 @@ ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting...
-${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"]
+${WORKBENCH_STOP_BTN_XP}=                  xpath=//button[text()="Stop workbench"]
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
 ${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="workbench-image-version-selection"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
-${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
+${NEW_DATACONNECTION_RADIO}=        xpath=//input[@name="new-data-connection-radio"]
 
 
 *** Keywords ***
@@ -56,11 +57,19 @@ Create Workbench
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
     END
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==True
-        Run Keyword And Continue On Failure    Page Should Not Contain Element
-        ...    xpath=//input[contains(@name,"ephemeral")]
+    Add Storage Details In Workbench    ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}
+    IF    ${press_cancel} == ${TRUE}
+        Click Button    ${GENERIC_CANCEL_BTN_XP}
+    ELSE
+        Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
+        Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
+    Wait Until Generic Modal Disappears  timeout=1 minute
+    Wait Until Project Is Open    project_title=${prj_title}
+
+Add Storage Details In Workbench
+    [Documentation]    Adds the Storage details in the workbench creation page
+    [Arguments]    ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}
     IF    "${storage}" == "Persistent"
         IF    ${pv_existent} == ${TRUE}
             Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
@@ -72,16 +81,9 @@ Create Workbench
             Log    msg="pv_existent" argument not set, using default PV settings   level=WARN
         END
     ELSE
-        Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
+    Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
     END
-    IF    ${press_cancel} == ${TRUE}
-        Click Button    ${GENERIC_CANCEL_BTN_XP}
-    ELSE
-        Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
-        Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
-    END
-    Wait Until Generic Modal Disappears  timeout=1 minute
-    Wait Until Project Is Open    project_title=${prj_title}
+
 
 Add Environment Variables In Workbench
     [Documentation]    Adds the environment variables through the workbench creation page
@@ -492,3 +494,43 @@ Get Workbench Pod
     ...    workbench_title=${workbench_title}  namespace=${ns_name}
     ${pod_info}=    Oc Get    kind=Pod  name=${cr_name}-0  api_version=v1  namespace=${ns_name}
     RETURN    ${ns_name}    ${cr_name}    ${pod_info}
+
+Edit Workbench
+    [Documentation]    Edits an existing workbench
+    [Arguments]    ${workbench_title}    ${pv_name}=${None}    ${workbench_title_update}=${None}    ${workbench_description}=${None}
+    ...     ${image_name}=${None}    ${version}=${None}   ${deployment_size}=${None}   ${storage}=${None}    ${pv_existent}=${None}
+    ...     ${envs}=${None}     ${dc_name}=${None}     ${aws_access_key}=${None}
+    ...     ${aws_secret_access}=${None}   ${aws_s3_endpoint}=${None}     ${aws_region}=${None}     ${gpus}=${NONE}
+    ...     ${data_connection}=${None}
+    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
+    IF    "${workbench_title_update}" != "${NONE}"   Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title_update}
+    IF    "${workbench_description}" != "${NONE}"    Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
+    IF    "${image_name}" != "${NONE}"    Select Workbench Jupyter Image    image_name=${image_name}    version=${version}
+    IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
+    IF    "${gpus}" != "${NONE}"    Select Workbench Number Of GPUs    gpus=${gpus}
+    IF    "${envs}" != "${NONE}"
+        ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
+        Add Environment Variables In Workbench    env_variables=${envs_copy}
+    END
+    IF    "${storage}" != "${NONE}"    Add Storage Details In Workbench    ${storage}  ${pv_existent}   ${pv_name}
+    ...    ${pv_description}  ${pv_size}
+    IF    "${data_connection}" == "new"
+        Add New Data Connection in Workbench    ${dc_name}    ${aws_access_key}   ${aws_secret_access}
+        ...      ${aws_s3_endpoint}    ${aws_region}
+    END
+    Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
+    IF    "${workbench_title_update}" != "${NONE}"
+        Workbench Should Be Listed      workbench_title=${workbench_title_update}
+    ELSE
+        Workbench Should Be Listed      workbench_title=${workbench_title}
+    END
+
+Add New Data Connection in Workbench
+    [Documentation]    Add new connection in an existing workbench
+    [Arguments]    ${dc_name}    ${aws_access_key}   ${aws_secret_access}   ${aws_s3_endpoint}    ${aws_region}
+    Scroll Element Into View   xpath=//label[contains(text(),"Create new data connection")]
+    Click Element    ${NEW_DATACONNECTION_RADIO}
+    Capture Page Screenshot
+    Fill Create New S3 Data Connection Details    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
+    ...            ${aws_s3_endpoint}    ${aws_region}

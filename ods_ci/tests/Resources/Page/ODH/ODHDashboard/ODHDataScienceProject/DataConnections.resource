@@ -22,29 +22,24 @@ ${DC_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[
 *** Keywords ***
 Create S3 Data Connection
     [Documentation]    Creates a S3 Data Connection from DS Project details page
-    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
+    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    ${workbench_title}=${NONE}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
-    Click Button    ${DC_ADD_BTN_1_XP} 
+    Click Button    ${DC_ADD_BTN_1_XP}
     Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
     Input Text    ${S3_NAME_DC_INPUT_XP}    ${dc_name}
     Input Text    ${S3_KEY_DC_INPUT_XP}    ${aws_access_key}
     Input Text    ${S3_SECRET_DC_INPUT_XP}    ${aws_secret_access}
     Input Text    ${S3_ENDPOINT_DC_INPUT_XP}    ${aws_s3_endpoint}
     Input Text    ${S3_REGION_DC_INPUT_XP}    ${aws_region}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==True
-        Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
-    END
-    IF    "${connected_workbench}" == "${NONE}"
+    Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
+    IF  "${connected_workbench}" == "${NONE}"
         Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
     ELSE
         Run Keyword And Continue On Failure
         ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
-        FOR    ${workbench_title}    IN    @{connected_workbench}
-            Set Connection Between Data Connection And Workbench    ${workbench_title}
-            Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}
-        END
+        Set Connection Between Data Connection And Workbench    ${workbench_title}
+        Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}
     END
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
@@ -65,26 +60,23 @@ Set Connection Between Data Connection And Workbench
 
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
-    [Arguments]     ${name}   ${type}   ${connected_workbench}
-    Run keyword And Continue On Failure     Page Should Contain Element    
+    [Arguments]     ${name}   ${type}   ${workbench_title}=${NONE}   ${connected_workbench}=${NONE}
+    Run keyword And Continue On Failure     Page Should Contain Element
     ...    ${DC_SECTION_XP}//td[@data-label="Name"]/*/div[text()="${name}"]
     Run keyword And Continue On Failure     Page Should Contain Element
     ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[text()=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain Element    
+        Run Keyword And Continue On Failure    Page Should Contain Element
         ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
-        FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
-            Log    ${index}: ${workbench_title}
-            Run Keyword And Continue On Failure    Page Should Contain Element    
-            ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
-        END
+        Run Keyword And Continue On Failure    Page Should Contain Element
+        ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
     END
 
 Data Connection Should Not Be Listed
     [Documentation]    Checks a Data Connection is not listed in DS Project details page
     [Arguments]     ${name}
-    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element    
+    Run keyword And Continue On Failure     Wait Until Page Does Not Contain Element
     ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]
 
 Get Openshift Secret From Data Connection
@@ -98,3 +90,16 @@ Delete Data Connection
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
     Click Action From Actions Menu    item_title=${name}    item_type=data connection    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=data connection    press_cancel=${press_cancel}
+
+Fill Create New S3 Data Connection Details
+    [Documentation]    Fill in the details to create new data connection from any screen
+    [Arguments]    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
+    ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
+    ...            ${aws_bucket_name}=${NONE}
+    Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
+    Input Text    ${S3_NAME_DC_INPUT_XP}    ${dc_name}
+    Input Text    ${S3_KEY_DC_INPUT_XP}    ${aws_access_key}
+    Input Text    ${S3_SECRET_DC_INPUT_XP}    ${aws_secret_access}
+    Input Text    ${S3_ENDPOINT_DC_INPUT_XP}    ${aws_s3_endpoint}
+    Input Text    ${S3_REGION_DC_INPUT_XP}    ${aws_region}
+

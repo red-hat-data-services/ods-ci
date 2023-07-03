@@ -422,7 +422,7 @@ Verify User Can Edit Name and Description In A Workbench
     ...                workbench_description=Latest${WORKBENCH_DESCRIPTION}     image_name=${NB_IMAGE}
 
 Verify User Can Edit A Environment Variables In An Existing Workbench
-    [Tags]    Sanity    Tier1    ODS-1931XXX
+    [Tags]    Sanity    Tier1    ODS-2272
     [Documentation]    Verifies users can edit an environment variable within an existing workbench
     [Setup]   Launch Data Science Project Main Page
     [Teardown]    Run Keywords      Delete Workbench From CLI    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE2}

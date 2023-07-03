@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation      Suite to test Data Science Projects (a.k.a DSG) feature
 Library            SeleniumLibrary
+Library            Browser
 Library            OpenShiftLibrary
 Resource           ../../../Resources/OCP.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
@@ -15,6 +16,8 @@ Test Teardown      Close All Browsers
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project
 ${PRJ_TITLE1}=    ODS-CI DS Project1
+${PRJ_TITLE2}=    ODS-CI DS Project2
+${PRJ_TITLE3}=    =    ODS-CI DS Project3
 ${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Projects feature
 ${NB_IMAGE}=        Minimal Python
@@ -49,6 +52,7 @@ ${ENV_SECRET_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_secret.yaml
 ${ENV_CM_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_cm.yaml
 ${NEW_PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a New edited test project for validating DS Projects feature
 ${NEW_PRJ_TITLE}=   ODS-CI DS Project Updated
+${KEYVALUE_TYPE}=        Key / value
 
 *** Test Cases ***
 Verify Data Science Projects Page Is Accessible
@@ -396,9 +400,9 @@ Verify User Can Create A Workbench With Environment Variables
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Environment Variables Should Be Available In Jupyter    exp_env_variables=${envs_list}
 
-Verify User Can Edit A Workbench
+Verify User Can Edit Name and Description In A Workbench
     [Tags]    Sanity    Tier1    ODS-1931
-    [Documentation]    Verifies users can edit an existing workbench
+    [Documentation]    Verifies users can edit name and description fields in an existing workbench
     [Setup]   Launch Data Science Project Main Page
     [Teardown]    Delete Data Science Project    project_title=${PRJ_TITLE1}
     Open Data Science Projects Home Page
@@ -411,20 +415,35 @@ Verify User Can Edit A Workbench
     ...                 pv_description=${NONE}  pv_size=${2}
     ...                 press_cancel=${FALSE}
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
-    ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA
-    ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
+    Edit Workbench    workbench_title=${WORKBENCH_4_TITLE}    workbench_title_update=${WORKBENCH_4_TITLE}Updated
+    ...               workbench_description=Latest${WORKBENCH_DESCRIPTION}
+    Sleep    5    reason=Waiting for Workbench Updates to be complete
+    Verify Workbench Is Edited    workbench_title=${WORKBENCH_4_TITLE}Updated    deployment_size=Small
+    ...                workbench_description=Latest${WORKBENCH_DESCRIPTION}     image_name=${NB_IMAGE}
+
+Verify User Can Edit A Environment Variables In An Existing Workbench
+    [Tags]    Sanity    Tier1    ODS-1931XXX
+    [Documentation]    Verifies users can edit an environment variable within an existing workbench
+    [Setup]   Launch Data Science Project Main Page
+    [Teardown]    Run Keywords      Delete Workbench From CLI    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE2}
+    ...    AND     Delete Data Science Project     project_title=${PRJ_TITLE2}
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE2}    description=${PRJ_DESCRIPTION}
+    ...    resource_name=${NONE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE2}
+    Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE2}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_name=${WORKBENCH_4_TITLE}-PV  pv_existent=${FALSE}
+    ...                 pv_description=${NONE}  pv_size=${2}
+    ...                 press_cancel=${FALSE}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
+#    ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA
+#    ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
     ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM
     ...    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
-    ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
-    Edit Workbench    workbench_title=${WORKBENCH_4_TITLE}    workbench_title_update=${WORKBENCH_4_TITLE}Updated
-    ...               workbench_description=Latest${WORKBENCH_DESCRIPTION}    image_name=${NB_IMAGE1}
-    ...               version=previous    deployment_size=Medium    storage=Persistent    pv_existent=${TRUE}
-    ...               envs=${envs_list}    dc_name=${DC_S3_NAME}   aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
-    ...               aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}   aws_s3_endpoint=${DC_S3_ENDPOINT}
-    ...               aws_region=${DC_S3_REGION}    pv_name=${WORKBENCH_4_TITLE}-PV
-    Verify Workbench Is Edited    workbench_title=${WORKBENCH_4_TITLE}Updated        image_name=${NB_IMAGE1}
-    ...                deployment_size=Medium    workbench_description=Latest${WORKBENCH_DESCRIPTION}
-    Capture Page Screenshot
+    ${envs_list}=    Create List   ${envs_var_cm}
+    Edit Workbench    workbench_title=${WORKBENCH_4_TITLE}    envs=${envs_list}
+    Verify Environment Variables Are Edited    ${envs_var_cm}   workbench_title=${WORKBENCH_4_TITLE}
 
 Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     [Tags]    Tier1    Sanity
@@ -740,9 +759,32 @@ Check Name And Description Should Be Editable
 
 Verify Workbench Is Edited
     [Documentation]    Verifies that workbench with given details exists
-    [Arguments]    ${workbench_title}   ${image_name}   ${deployment_size}
-    ...            ${workbench_description}
+    [Arguments]    ${workbench_title}   ${workbench_description}    ${image_name}   ${deployment_size}
     Page Should Contain     ${workbench_title}
-    Page Should Contain     ${image_name}
     Page Should Contain     ${deployment_size}
     Page Should Contain     ${workbench_description}
+    Page Should Contain     ${image_name}
+
+
+Verify Environment Variables Are Edited
+    [Documentation]    Verifies that Environment variables were added succesfully
+    [Arguments]    ${envs_var_cm}   ${workbench_title}
+    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Scroll Element Into View     xpath=//section[@aria-label="Environment variables"]
+    Element Should Be Visible    xpath=//section[@aria-label="Environment variables"]
+    Capture Page Screenshot
+    FOR    ${key}    IN    @{envs_var_cm.keys()}
+        ${value}=    Get From Dictionary    ${envs_var_cm}    ${key}
+        Log To Console    ${key} Key
+        Log To Console    ${value} Value
+        IF  "${key}" == "k8s_type"
+            Scroll Element Into View   xpath=//span[contains(text(),"${value}")]
+            Capture Page Screenshot
+        ELSE IF  "${key}" == "input_type"
+            Scroll Element Into View   xpath=//span[contains(text(),"${value}")]
+            Capture Page Screenshot
+        ELSE IF  "${key}" != "k8s_type" and "${key}" != "input_type"
+            Scroll Element Into View   xpath=//input[contains(@value,"${key}")]
+            Capture Page Screenshot
+        END
+    END

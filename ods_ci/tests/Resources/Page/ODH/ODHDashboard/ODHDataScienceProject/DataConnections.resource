@@ -33,7 +33,10 @@ Create S3 Data Connection
     Input Text    ${S3_ENDPOINT_DC_INPUT_XP}    ${aws_s3_endpoint}
     Input Text    ${S3_REGION_DC_INPUT_XP}    ${aws_region}
     Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
-    Run Keyword And Continue On Failure
+    IF "${connected_workbench}" == "${NONE}"
+        Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
+    ELSE
+        Run Keyword And Continue On Failure
         ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
         FOR    ${workbench_title}    IN    @{connected_workbench}
             Set Connection Between Data Connection And Workbench    ${workbench_title}

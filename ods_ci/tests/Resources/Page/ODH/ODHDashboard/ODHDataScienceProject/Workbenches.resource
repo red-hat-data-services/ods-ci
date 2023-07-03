@@ -32,7 +32,7 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="wo
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
-${NEW_DATACONNECTION_CHECKBOX}=        xpath=//input[@name="enable-data-connection-checkbox"]
+${NEW_DATACONNECTION_RADIO}=        xpath=//input[@name="new-data-connection-radio"]
 
 
 *** Keywords ***
@@ -521,10 +521,10 @@ Edit Workbench
     END
 
 Add New Data Connection in Workbench
-    [Documentation]    Edits an existing workbench
+    [Documentation]    Add new connection in an existing workbench
     [Arguments]    ${dc_name}    ${aws_access_key}   ${aws_secret_access}   ${aws_s3_endpoint}    ${aws_region}
-    Select Checkbox    ${NEW_DATACONNECTION_CHECKBOX}
-    Checkbox Should Be Selected    ${NEW_DATACONNECTION_CHECKBOX}
-    Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
+    Scroll Element Into View   xpath=//label[contains(text(),"Create new data connection")]
+    Click Element    ${NEW_DATACONNECTION_RADIO}
+    Capture Page Screenshot
     Fill Create New S3 Data Connection Details    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${aws_s3_endpoint}    ${aws_region}

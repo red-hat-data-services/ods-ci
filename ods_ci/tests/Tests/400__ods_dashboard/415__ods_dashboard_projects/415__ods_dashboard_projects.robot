@@ -319,6 +319,36 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_3_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
 
+Verify User Can Switch From A Data Connection To New One
+    [Tags]    Sanity    Tier1    ODS-2171
+    [Documentation]    Verifies users can switch from  a Data connection to new connection
+    [Teardown]    Delete Data Science Project    project_title=${PRJ_TITLE1}
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION}
+    ...    resource_name=${NONE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE1}
+    Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE1}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_name=${WORKBENCH_4_TITLE}-PV  pv_existent=${FALSE}
+    ...                 pv_description=${NONE}  pv_size=${2}
+    ...                 press_cancel=${FALSE}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
+    Create S3 Data Connection    project_title=${PRJ_TITLE1}    dc_name=${DC_2_S3_NAME}
+    ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
+    ...                          connected_workbench=${WORKBENCH_4_TITLE}  workbench_title=${WORKBENCH_4_TITLE}
+    Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    workbench_title=${WORKBENCH_4_TITLE}
+    ...                          connected_workbench=${WORKBENCH_4_TITLE}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
+    Workbench Status Should Be      workbench_title=${WORKBENCH_4_TITLE}      status=${WORKBENCH_STATUS_RUNNING}
+    Sleep  45s  msg=Give time after first modification of workbench
+    Edit Workbench    data_connection=new    workbench_title=${WORKBENCH_4_TITLE}   aws_access_key=update${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_secret_access=update${DC_S3_AWS_SECRET_ACCESS_KEY}   dc_name=updated${DC_2_S3_NAME}
+    ...                          aws_s3_endpoint=update${DC_S3_ENDPOINT}    aws_region=update${DC_S3_REGION}
+    Data Connection Should Be Listed    name=updated${DC_2_S3_NAME}    type=${DC_S3_TYPE}    workbench_title=${WORKBENCH_4_TITLE}
+    ...                          connected_workbench=${WORKBENCH_4_TITLE}
+
 Verify User Can Stop A Workbench From Projects Home Page
     [Tags]    Sanity    Tier1    ODS-1823
     [Documentation]    Verifies users can stop a running workbench from Data Science Projects home page
@@ -437,8 +467,6 @@ Verify User Can Edit A Environment Variables In An Existing Workbench
     ...                 pv_description=${NONE}  pv_size=${2}
     ...                 press_cancel=${FALSE}
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
-#    ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA
-#    ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
     ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM
     ...    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_cm}

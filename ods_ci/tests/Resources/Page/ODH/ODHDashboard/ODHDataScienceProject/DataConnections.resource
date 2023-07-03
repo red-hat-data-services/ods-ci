@@ -22,7 +22,7 @@ ${DC_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[
 *** Keywords ***
 Create S3 Data Connection
     [Documentation]    Creates a S3 Data Connection from DS Project details page
-    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
+    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    ${workbench_title}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     Click Button    ${DC_ADD_BTN_1_XP}
@@ -33,15 +33,13 @@ Create S3 Data Connection
     Input Text    ${S3_ENDPOINT_DC_INPUT_XP}    ${aws_s3_endpoint}
     Input Text    ${S3_REGION_DC_INPUT_XP}    ${aws_region}
     Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
-    IF "${connected_workbench}" == "${NONE}"
+    IF  "${connected_workbench}" == "${NONE}"
         Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
     ELSE
         Run Keyword And Continue On Failure
         ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
-        FOR    ${workbench_title}    IN    @{connected_workbench}
-            Set Connection Between Data Connection And Workbench    ${workbench_title}
-            Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}
-        END
+        Set Connection Between Data Connection And Workbench    ${workbench_title}
+        Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}
     END
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
@@ -62,7 +60,7 @@ Set Connection Between Data Connection And Workbench
 
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
-    [Arguments]     ${name}   ${type}   ${connected_workbench}
+    [Arguments]     ${name}   ${type}   ${workbench_title}   ${connected_workbench}=${NONE}
     Run keyword And Continue On Failure     Page Should Contain Element
     ...    ${DC_SECTION_XP}//td[@data-label="Name"]/*/div[text()="${name}"]
     Run keyword And Continue On Failure     Page Should Contain Element
@@ -71,11 +69,8 @@ Data Connection Should Be Listed
         Run Keyword And Continue On Failure    Page Should Contain Element
         ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
-        FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
-            Log    ${index}: ${workbench_title}
-            Run Keyword And Continue On Failure    Page Should Contain Element
-            ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
-        END
+        Run Keyword And Continue On Failure    Page Should Contain Element
+        ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
     END
 
 Data Connection Should Not Be Listed

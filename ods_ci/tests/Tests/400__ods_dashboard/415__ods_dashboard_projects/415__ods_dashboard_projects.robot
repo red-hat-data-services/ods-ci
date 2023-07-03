@@ -309,13 +309,12 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${NONE}
     Check Corresponding Data Connection Secret Exists    dc_name=${DC_S3_NAME}    namespace=${ns_name}
-    ${workbenches}=    Create List    ${WORKBENCH_2_TITLE}    ${WORKBENCH_3_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_2_S3_NAME}
     ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
-    ...                          connected_workbench=${workbenches}
-    Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    ...                          connected_workbench=${WORKBENCH_2_TITLE}
+    Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${WORKBENCH_2_TITLE}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_3_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
 

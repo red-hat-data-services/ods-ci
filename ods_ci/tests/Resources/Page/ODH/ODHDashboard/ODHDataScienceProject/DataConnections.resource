@@ -22,7 +22,7 @@ ${DC_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[
 *** Keywords ***
 Create S3 Data Connection
     [Documentation]    Creates a S3 Data Connection from DS Project details page
-    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    ${workbench_title}
+    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    ${workbench_title}=${NONE}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     Click Button    ${DC_ADD_BTN_1_XP}
@@ -60,7 +60,7 @@ Set Connection Between Data Connection And Workbench
 
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
-    [Arguments]     ${name}   ${type}   ${workbench_title}   ${connected_workbench}=${NONE}
+    [Arguments]     ${name}   ${type}   ${workbench_title}=${NONE}   ${connected_workbench}=${NONE}
     Run keyword And Continue On Failure     Page Should Contain Element
     ...    ${DC_SECTION_XP}//td[@data-label="Name"]/*/div[text()="${name}"]
     Run keyword And Continue On Failure     Page Should Contain Element

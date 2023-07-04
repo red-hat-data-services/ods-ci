@@ -61,6 +61,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     Verify Pipeline Run Deployment Is Successful    project_title=${PRJ_TITLE}
     ...    workflow_name=${workflow_name}
     Delete Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}    ${PIPELINE_TEST_NAME}
+    Delete Pipeline    ${PIPELINE_TEST_NAME}
 
 *** Keywords ***
 Pipelines Suite Setup    # robocop: disable
@@ -134,7 +135,19 @@ Delete Pipeline Run
     Navigate To Page    Data Science Pipelines    Runs
     Wait Until Page Contains Element    xpath://span[text()='Triggered']
     Click Element    //span[text()='Triggered']
-    Pipelines.Click Action From Actions Menu    ${pipeline_name}    Delete
+    Pipelines.Click Action From Actions Menu    ${run_name}    Delete
     Handle Deletion Confirmation Modal    ${run_name}    triggered run
     Wait Until Page Contains Element    xpath://h2[contains(text(), 'No triggered runs yet')]
+    Capture Page Screenshot
+
+Delete Pipeline
+    [Documentation]    Delete a pipeline. From the left menu select "Data Science Pipelines" -> Pipelines.
+    ...                The "Delete Pipeline" will search for a line in the grid that match the pipeline name.
+    ...                Based on that, hit the ... Menu in the row and hit Delete drop down menu.
+    [Arguments]    ${pipeline_name}
+    Navigate To Page    Data Science Pipelines    Pipelines
+    Wait Until Page Contains Element    xpath://a[text()='${pipeline_name}']
+    Pipelines.Click Action From Actions Menu    ${pipeline_name}    Delete
+    Handle Deletion Confirmation Modal    ${pipeline_name}    pipeline
+    Wait Until Page Contains Element    xpath://h4[contains(text(), 'No pipelines yet')]
     Capture Page Screenshot

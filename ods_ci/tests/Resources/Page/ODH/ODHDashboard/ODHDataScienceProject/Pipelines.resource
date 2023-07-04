@@ -97,10 +97,10 @@ Create Pipeline Run    # robocop: disable
 Click Action From Actions Menu
     [Documentation]    Click an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_name}    ${action}
-    Wait Until Page Contains Element    xpath://table//tr[td[a[text()='${pipeline_name}']]]//td[contains(@class, 'pf-c-table__action')]/div    # robocop: disable
-    Click Element    xpath://table//tr[td[a[text()='${pipeline_name}']]]//td[contains(@class, 'pf-c-table__action')]/div    # robocop: disable
-    Wait Until Page Contains Element    //table//tr[td[a[text()='${pipeline_name}']]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]    # robocop: disable
-    Click Element    //table//tr[td[a[text()='${pipeline_name}']]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]    # robocop: disable
+    Wait Until Page Contains Element    xpath://table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div    # robocop: disable
+    Click Element    xpath://table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div    # robocop: disable
+    Wait Until Page Contains Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]    # robocop: disable
+    Click Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]    # robocop: disable
 
 Pipeline Should Be Listed
     [Documentation]    Checks a pipeline is listed in the DS Project details page

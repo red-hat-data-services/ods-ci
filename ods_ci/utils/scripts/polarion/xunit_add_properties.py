@@ -1,11 +1,11 @@
 """Inserts properties from a config file into a xunit format XML file"""
 import argparse
 import codecs
-import re
 import xml.etree.ElementTree as et
 from copy import deepcopy
 from xml.dom import minidom
-
+import os
+from junitparser import JUnitXml, TestCase, TestSuite
 import yaml
 
 
@@ -94,7 +94,6 @@ def get_results(xml_obj):
 
 def add_testcase_properties(xml_obj, tcconfig=None):
     """add properties to testcases"""
-
     if xml_obj.tag == "testsuites":
         expression = "./testsuite/testcase"
     else:
@@ -102,7 +101,6 @@ def add_testcase_properties(xml_obj, tcconfig=None):
 
     multile_test_ids = {}
     for testcase in xml_obj.findall(expression):
-        tcproperties = et.Element("properties")
         tcname, name = None, testcase.get("name")
         if tcconfig.get(name):
             tcname = name
@@ -115,15 +113,16 @@ def add_testcase_properties(xml_obj, tcconfig=None):
         test_id = ""
         if len(polarion_id) == 1:
             test_id = test_id.join(polarion_id)
+            tcproperties = et.Element("properties")
             attribs = {"name": "polarion-testcase-id", "value": test_id}
             element = et.Element("property", attrib=attribs)
             tcproperties.append(element)
+            testcase.insert(0, tcproperties)
         else:
+            xml_obj_testsuite = xml_obj.find("./testsuite")
             for i in range(len(polarion_id) - 1):
-                xml_obj.append(deepcopy(testcase))
+                xml_obj_testsuite.append(deepcopy(testcase))
             multile_test_ids[testcase.get("name")] = polarion_id
-
-        testcase.insert(0, tcproperties)
 
     for key in multile_test_ids.keys():
         for index, testcase in enumerate(
@@ -169,11 +168,45 @@ def write_xml(xml_obj, filename):
         print(xmlstr)
 
 
+def restructure_xml_for_polarion(src_xunit_xml_file, xunit_xml_file_restructured):
+    """
+    Modify the source xml for polarion test result update
+    """
+
+    # Read source xml file
+    src_xml = JUnitXml.fromfile(src_xunit_xml_file)
+
+    xml_testsuites = JUnitXml()
+    xml_testsuite = TestSuite()
+
+    # Add testsuite attributes to new xml file
+    xml_testsuite.name = src_xml.name
+    xml_testsuite.tests = src_xml.tests
+    xml_testsuite.errors = src_xml.errors
+    xml_testsuite.failures = src_xml.failures
+    xml_testsuite.skipped = src_xml.skipped
+    xml_testsuite.time = src_xml.time
+
+    for suite in src_xml:
+        tc = TestCase()
+        tc.name = suite.name
+        tc.time = suite.time
+        xml_testsuite.append(tc)
+    xml_testsuites.append(xml_testsuite)
+    xml_testsuites.write(xunit_xml_file_restructured, pretty=True)
+
+
 def main():
     """main function"""
     args = parse_args()
 
-    root = parse_xml(args.xunit_xml_file)
+    # Restructure the robot test result xml file
+    xunit_xml_file_restructured = (
+        os.path.dirname(os.path.realpath(__file__)) + "/restructured_xml_file.xml"
+    )
+    restructure_xml_for_polarion(args.xunit_xml_file, xunit_xml_file_restructured)
+
+    root = parse_xml(xunit_xml_file_restructured)
     with open(args.config_file) as config:
         testsuite_config = yaml.safe_load(config)
 

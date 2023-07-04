@@ -3,6 +3,7 @@ Documentation      Suite to test Data Science Pipeline feature using RHODS UI
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
 
@@ -140,24 +141,3 @@ Delete Pipeline Run
     Handle Deletion Confirmation Modal    ${run_name}    triggered run
     Wait Until Page Contains Element    xpath://h2[contains(text(), 'No triggered runs yet')]
 
-Delete Pipeline
-    [Documentation]    Delete a pipeline. From the left menu select "Data Science Pipelines" -> Pipelines.
-    ...                The "Delete Pipeline" will search for a line in the grid that match the pipeline name.
-    ...                Based on that, hit the ... Menu in the row and hit Delete drop down menu.
-    [Arguments]    ${pipeline_name}
-    Navigate To Page    Data Science Pipelines    Pipelines
-    Wait Until Page Contains Element    xpath://a[text()='${pipeline_name}']
-    Pipelines.Click Action From Actions Menu    ${pipeline_name}    Delete
-    Handle Deletion Confirmation Modal    ${pipeline_name}    pipeline
-    Wait Until Page Contains Element    xpath://h4[contains(text(), 'No pipelines yet')]
-
-Delete Data Science Project
-    [Documentation]    Delete a Data Science Project. From the left menu select "Data Science Projects".
-    ...                The "Delete Data Science Project" will search for a line in the grid that match the project name.
-    ...                Based on that, hit the ... Menu in the row and hit Delete drop down menu.
-    [Arguments]    ${project_name}
-    Open Data Science Projects Home Page
-    Wait Until Page Contains Element    xpath://a[text()='${project_name}']
-    Pipelines.Click Action From Actions Menu    ${project_name}    Delete
-    Handle Deletion Confirmation Modal    ${project_name}    project
-    Wait Until Page Contains Element    xpath://h2[contains(text(), 'No data science projects yet')]

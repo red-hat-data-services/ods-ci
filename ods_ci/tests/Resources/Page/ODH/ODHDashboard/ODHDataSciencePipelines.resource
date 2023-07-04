@@ -74,3 +74,14 @@ Get Workflow Name From Topology Page
     ...                The workflow name can be used to retrieve pods, for example
     ${workflow_name}=    Get Text    xpath://div/div[text()="Workflow name"]/following-sibling::div
     RETURN    ${workflow_name}
+
+Delete Pipeline
+    [Documentation]    Delete a pipeline. From the left menu select "Data Science Pipelines" -> Pipelines.
+    ...                The "Delete Pipeline" will search for a line in the grid that match the pipeline name.
+    ...                Based on that, hit the ... Menu in the row and hit Delete drop down menu.
+    [Arguments]    ${pipeline_name}
+    Navigate To Page    Data Science Pipelines    Pipelines
+    Wait Until Page Contains Element    xpath://a[text()='${pipeline_name}']
+    Pipelines.Click Action From Actions Menu    ${pipeline_name}    Delete
+    Handle Deletion Confirmation Modal    ${pipeline_name}    pipeline
+    Wait Until Page Contains Element    xpath://h4[contains(text(), 'No pipelines yet')]

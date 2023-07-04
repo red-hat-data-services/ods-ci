@@ -30,8 +30,8 @@ Create Model Server
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0
-    Click Button    Configure server
-    Wait Until Page Contains Element    //span[.="Configure model server"]
+    Click Button    Add server
+    Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
     Set Replicas Number With Buttons    ${no_replicas}
     Set Model Server Runtime    ${runtime}
@@ -52,7 +52,8 @@ Create Model Server
         # Set Service Account name
         # Add Service Account
     END
-    Click Button    Configure
+    Click Button    Add
+    Sleep    1s    reason=Sometimes the modal will intercept later clicks even after being closed, wait for a second
 
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod

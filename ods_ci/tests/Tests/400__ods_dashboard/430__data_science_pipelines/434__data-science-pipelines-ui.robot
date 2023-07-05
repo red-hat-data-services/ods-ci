@@ -3,6 +3,7 @@ Documentation      Suite to test Data Science Pipeline feature using RHODS UI
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
 
@@ -22,7 +23,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     [Documentation]    Verifies user are able to create and execute a DS Pipeline leveraging on
     ...                DS Project UI
     [Tags]    Sanity    Tier1
-    ...       ODS-2206    ODS-2207
+    ...       ODS-2206    ODS-2226
     Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}
     Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
@@ -61,6 +62,8 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     Verify Pipeline Run Deployment Is Successful    project_title=${PRJ_TITLE}
     ...    workflow_name=${workflow_name}
     Delete Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}    ${PIPELINE_TEST_NAME}
+    Delete Pipeline    ${PIPELINE_TEST_NAME}
+    Delete Data Science Project    ${PRJ_TITLE}
 
 *** Keywords ***
 Pipelines Suite Setup    # robocop: disable
@@ -124,17 +127,3 @@ Verify Pipeline Run Deployment Is Successful    # robocop: disable
     ${containerStatuses}=  Create List        terminated    terminated
     ...    terminated    terminated    terminated
     Verify Deployment    ${valid_model}  1  1  ${containerNames}    ${podStatuses}    ${containerStatuses}
-
-Delete Pipeline Run
-    [Documentation]    Delete a pipeline that ran based on name and pipeline. From the left menu select
-    ...                "Data Science Pipelines" -> Runs. In the new page, select the tab "Triggered".
-    ...                The "Delete Pipeline Run" will search for a line in the grid that match the pipeline name and
-    ...                the run name. Based on that, hit the ... Menu in the row and hit Delete drop down menu.
-    [Arguments]    ${run_name}    ${pipeline_name}
-    Navigate To Page    Data Science Pipelines    Runs
-    Wait Until Page Contains Element    xpath://span[text()='Triggered']
-    Click Element    //span[text()='Triggered']
-    Pipelines.Click Action From Actions Menu    ${pipeline_name}    Delete
-    Handle Deletion Confirmation Modal    ${run_name}    triggered run
-    Wait Until Page Contains Element    xpath://h2[contains(text(), 'No triggered runs yet')]
-    Capture Page Screenshot

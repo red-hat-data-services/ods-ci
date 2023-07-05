@@ -127,17 +127,3 @@ Verify Pipeline Run Deployment Is Successful    # robocop: disable
     ${containerStatuses}=  Create List        terminated    terminated
     ...    terminated    terminated    terminated
     Verify Deployment    ${valid_model}  1  1  ${containerNames}    ${podStatuses}    ${containerStatuses}
-
-Delete Pipeline Run
-    [Documentation]    Delete a pipeline that ran based on name and pipeline. From the left menu select
-    ...                "Data Science Pipelines" -> Runs. In the new page, select the tab "Triggered".
-    ...                The "Delete Pipeline Run" will search for a line in the grid that match the pipeline name and
-    ...                the run name. Based on that, hit the ... Menu in the row and hit Delete drop down menu.
-    [Arguments]    ${run_name}    ${pipeline_name}
-    Navigate To Page    Data Science Pipelines    Runs
-    Wait Until Page Contains Element    xpath://span[text()='Triggered']
-    Click Element    //span[text()='Triggered']
-    Pipelines.Click Action From Actions Menu    ${run_name}    Delete
-    Handle Deletion Confirmation Modal    ${run_name}    triggered run
-    Wait Until Page Contains Element    xpath://h2[contains(text(), 'No triggered runs yet')]
-

@@ -68,14 +68,15 @@ function generate_incremental_suffixes(){
 }
 
 function generate_custom_suffixes(){
-    suffixes=$(echo $suffix_info | jq -r '.list[]')
-    declare -a suffixes=($suffixes)
+  echo hello
+    suffixes=$(echo $suffix_info | jq -c '.list[]')
+    declare -a suffixes_arr=($suffixes)
     additional_base_suffix=$1
-    for suffix in "${suffixes[@]}"; do
+    for suffix in "${suffixes_arr[@]}"; do
         complete_name=$prefix$additional_base_suffix$suffix
         quotes_flag=$(echo $suffix | egrep -o '".+"')
         if [[ -n $quotes_flag ]]; then
-          complete_name=$(echo $prefix$additional_base_suffix$suffix | tr -d '"')
+          complete_name=$(echo $complete_name | tr -d '"')
         fi        
         USERS_ARR+=($complete_name)
         PWS_ARR+=($pw)
@@ -124,6 +125,8 @@ function generate_users_creds(){
             generate_incremental_suffixes   $generated_base_suffix
         ;;
         custom)
+            echo hello
+            echo $suffix_info
             generate_custom_suffixes
         ;;
         custom_with_rand_base)
@@ -206,7 +209,8 @@ function set_ldap_users(){
   ldap_pw=$pw
   users_base64=$(echo -n $ldap_users_str | base64 -w 0)
   rand_base64=$(echo -n $ldap_pws_str | base64 -w 0)
-  
+  echo users: $ldap_users_str
+  exit 0
   # update ldap.yaml with creds
   echo "--> configuring LDAP server and users"
   cp ods_ci/configs/templates/ldap/ldap.yaml  ods_ci/configs/ldap.yaml
@@ -304,11 +308,11 @@ function install_identity_provider(){
   echo "---- | Installing the required IDPs | ----"
   echo "host: $OC_HOST"
   echo "Stage) Setting HTPASSWD Identity provider"
-  set_htpasswd_users_and_login
+  # set_htpasswd_users_and_login
   echo "Stage) Setting LDAP Identity provider"
   set_ldap_users
   echo "Stage) Configure RHODS test user groups"
-  create_groups_and_assign_users  
+  # create_groups_and_assign_users  
   echo "Stage) Sleeping 180sec to wait for IDPs to become available"
   sleep 180
 }
@@ -464,6 +468,6 @@ if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           perform_ocm_login
 fi
-validate_user_config_file
-check_installation
+#validate_user_config_file
+#check_installation
 install_identity_provider

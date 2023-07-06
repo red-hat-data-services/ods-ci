@@ -38,7 +38,7 @@ Edit S3 Data Connection
     [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
-    DataConnections.Click Action From Actions Menu    ${dc_name}    Edit data connection
+    Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
     Fill Data Connection Form    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${S3_DC_EDIT_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
@@ -126,7 +126,7 @@ Fill Data Connection Form
 
 Get Data Connection Form Values
     [Arguments]    ${dc_name}
-    DataConnections.Click Action From Actions Menu    ${dc_name}    Edit data connection
+    Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
     Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
     ${s3_name}   get element attribute    ${S3_NAME_DC_INPUT_XP}      value
     ${s3_key}   get element attribute    ${S3_KEY_DC_INPUT_XP}      value
@@ -135,17 +135,3 @@ Get Data Connection Form Values
     ${s3_region}   get element attribute    ${S3_REGION_DC_INPUT_XP}      value
     ${s3_bucket}   get element attribute    ${S3_BUCKET_DC_INPUT_XP}      value
     [return]    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}
-
-# robocop: disable=too-many-calls-in-keyword,line-too-long
-Click Action From Actions Menu
-    [Documentation]    Click an action from Actions menu (3-dots menu on the right)
-    [Arguments]    ${data_connection_name}    ${action}
-    Wait Until Page Contains Element    xpath://table//tr[td[h3[div[text()='${data_connection_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div
-    Capture Page Screenshot
-    Click Element    xpath://table//tr[td[h3[div[text()='${data_connection_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div
-    Capture Page Screenshot
-    Wait Until Page Contains Element    //table//tr[td[h3[div[text()='${data_connection_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]
-    Capture Page Screenshot
-    Click Element    //table//tr[td[h3[div[text()='${data_connection_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]
-    Capture Page Screenshot
-

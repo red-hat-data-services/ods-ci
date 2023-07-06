@@ -507,6 +507,30 @@ Verify User Can Delete A Data Science Project
     Wait Until Data Science Project Is Deleted    project_title=${PRJ_TITLE}
     # check workbenches and resources get deleted too
 
+Verify User Can Edit A S3 Data Connection
+    [Tags]    Sanity    Tier1    ODS-1932
+    [Documentation]    Verifies users can add a Data connection to AWS S3
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    resource_name=${PRJ_RESOURCE_NAME}
+    Open Data Science Projects Home Page
+    Project Should Be Listed    project_title=${PRJ_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
+    ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
+    ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
+    Edit S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}-test    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}-test
+    ...            aws_bucket_name=ods-ci-ds-pipelines-test    aws_region=${DC_S3_REGION}
+    ...            aws_s3_endpoint=${DC_S3_ENDPOINT}
+    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}    Get Data Connection Form Values    ${DC_S3_NAME}
+    Should Be Equal  ${s3_name}  ${DC_S3_NAME}
+    Should Be Equal  ${s3_key}  ${S3.AWS_ACCESS_KEY_ID}-test
+    Should Be Equal  ${s3_secret}  ${S3.AWS_SECRET_ACCESS_KEY}-test
+    Should Be Equal  ${s3_endpoint}  ${DC_S3_ENDPOINT}
+    Should Be Equal  ${s3_region}  ${DC_S3_REGION}
+    Should Be Equal  ${s3_bucket}  ods-ci-ds-pipelines-test
 
 *** Keywords ***
 Project Suite Setup

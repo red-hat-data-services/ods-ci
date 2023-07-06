@@ -209,8 +209,6 @@ function set_ldap_users(){
   ldap_pw=$pw
   users_base64=$(echo -n $ldap_users_str | base64 -w 0)
   rand_base64=$(echo -n $ldap_pws_str | base64 -w 0)
-  echo users: $ldap_users_str
-  exit 0
   # update ldap.yaml with creds
   echo "--> configuring LDAP server and users"
   cp ods_ci/configs/templates/ldap/ldap.yaml  ods_ci/configs/ldap.yaml
@@ -468,6 +466,6 @@ if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           perform_ocm_login
 fi
-#validate_user_config_file
-#check_installation
+validate_user_config_file
+check_installation
 install_identity_provider

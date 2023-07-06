@@ -68,8 +68,8 @@ function generate_incremental_suffixes(){
 }
 
 function generate_custom_suffixes(){
-    suffixes=$(echo $suffix_info | jq -c '.list[]')
-    suffixes=($suffixes)
+    suffixes=$(echo $suffix_info | jq -r '.list[]')
+    declare -a suffixes=($suffixes)
     additional_base_suffix=$1
     for suffix in "${suffixes[@]}"; do
         complete_name=$prefix$additional_base_suffix$suffix

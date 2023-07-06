@@ -99,3 +99,15 @@ Delete Pipeline
     Pipelines.Click Action From Actions Menu    ${pipeline_name}    Delete
     Handle Deletion Confirmation Modal    ${pipeline_name}    pipeline
     Wait Until Page Contains Element    xpath://h4[contains(text(), 'No pipelines yet')]
+
+Delete Pipeline Server
+    [Documentation]    Delete a pipeline server. From the top right menu inside "Data Science Pipelines" -> Pipelines
+    [Arguments]    ${data_science_project_name}
+    Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Pipeline server actions')]
+    Click Element    //button[contains(span/text(), 'Pipeline server actions')]
+    Wait Until Page Contains Element    xpath://li[contains(a/text(), 'Delete pipeline server')]
+    Click Element    //li[contains(a/text(), 'Delete pipeline server')]
+    Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server
+    Wait Until Page Contains Element    xpath://h2[contains(text(), 'No pipeline server')]
+    ${pod_count}    Run    oc get pods -n dlovison-project | wc -l
+    Should Be True    ${pod_count} == 0    Pods weren't removed

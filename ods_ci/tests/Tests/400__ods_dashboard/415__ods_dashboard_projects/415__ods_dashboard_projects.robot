@@ -629,20 +629,6 @@ Check Storage PersistentVolumeClaim Is Deleted
         Fail    msg=The PVC for ${storage_name} storage is still present, while it should have been deleted.
     END
 
-Wait Until Data Science Project Is Deleted
-    [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
-    [Arguments]    ${project_title}
-    Wait Until Keyword Succeeds    15 times    2s
-    ...    Project Should Not Exist In Openshift    project_title=${project_title}
-
-Project Should Not Exist In Openshift
-    [Documentation]    Checks a given Project is not present in openshift
-    [Arguments]    ${project_title}
-    ${k8s_name} =     Get Openshift Namespace From Data Science Project   project_title=${project_title}
-    IF    "${k8s_name}" != "${EMPTY}"
-        Fail   msg=The project ${project_title} exists!
-    END
-
 Environment Variables Should Be Available In Jupyter
     [Documentation]    Runs code in JupyterLab to check if the expected environment variables are available
     [Arguments]    ${exp_env_variables}

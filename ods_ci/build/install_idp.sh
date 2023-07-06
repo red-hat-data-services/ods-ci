@@ -68,7 +68,6 @@ function generate_incremental_suffixes(){
 }
 
 function generate_custom_suffixes(){
-  echo hello
     suffixes=$(echo $suffix_info | jq -c '.list[]')
     declare -a suffixes_arr=($suffixes)
     additional_base_suffix=$1
@@ -125,8 +124,6 @@ function generate_users_creds(){
             generate_incremental_suffixes   $generated_base_suffix
         ;;
         custom)
-            echo hello
-            echo $suffix_info
             generate_custom_suffixes
         ;;
         custom_with_rand_base)
@@ -306,11 +303,11 @@ function install_identity_provider(){
   echo "---- | Installing the required IDPs | ----"
   echo "host: $OC_HOST"
   echo "Stage) Setting HTPASSWD Identity provider"
-  # set_htpasswd_users_and_login
+  set_htpasswd_users_and_login
   echo "Stage) Setting LDAP Identity provider"
   set_ldap_users
   echo "Stage) Configure RHODS test user groups"
-  # create_groups_and_assign_users  
+  create_groups_and_assign_users  
   echo "Stage) Sleeping 180sec to wait for IDPs to become available"
   sleep 180
 }

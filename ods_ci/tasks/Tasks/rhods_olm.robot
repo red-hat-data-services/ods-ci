@@ -30,6 +30,7 @@ Can Uninstall RHODS Operator
   Given Selected Cluster Type ${cluster_type}
   When Uninstalling RHODS Operator
   Then RHODS Operator Should Be Uninstalled
+  [Teardown]   Install Teardown
 
 Can Upgrade RHODS Operator
   [Tags]  upgrade

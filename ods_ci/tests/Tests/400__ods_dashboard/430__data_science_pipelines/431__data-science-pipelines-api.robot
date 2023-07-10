@@ -54,8 +54,8 @@ End To End Pipeline Workflow Via Api
     ${run_id}    Create Run    ${pipeline_id}
     ${run_status}    Check Run Status    ${run_id}
     Should Be True    '${run_status}' == 'Completed'    Pipeline run doesn't have Completed status
-    Delete Runs    ${run_id}
-    Delete Pipeline    ${pipeline_id}
+    DataSciencePipelinesAPI.Delete Runs    ${run_id}
+    DataSciencePipelinesAPI.Delete Pipeline    ${pipeline_id}
     [Teardown]    Remove Pipeline Project    ${project}
 
 Data Science Pipelines Suite Setup

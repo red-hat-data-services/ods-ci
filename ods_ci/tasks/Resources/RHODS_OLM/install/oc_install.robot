@@ -77,7 +77,8 @@ Verify Builds In redhat-ods-applications
 
 Clone OLM Install Repo
   [Documentation]   Clone OLM git repo
-  ${return_code}	  Run And Return Rc    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}
+  ${return_code}    ${output} 	  Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}
+  Log To Console    ${output}
   Should Be Equal As Integers	${return_code}	 0
 
 Install RHODS In Self Managed Cluster Using CLI

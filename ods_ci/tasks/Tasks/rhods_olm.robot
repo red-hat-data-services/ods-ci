@@ -8,14 +8,14 @@ Library          OperatingSystem
 Library          String
 
 ***Variables***
-${cluster_type}                 selfmanaged
-${image_url}                    ${EMPTY}
-${TEST_ENV}                     AWS
-${INSTALL_TYPE}                 OperatorHub
-${UPDATE_CHANNEL}               odh-nightlies
-${RHODS_VERSION}                None
-${CATALOG_SOURCE}               redhat-operators
-${RHOAI_VERSION}                ${EMPTY}
+${cluster_type}              selfmanaged
+${image_url}                 ${EMPTY}
+${RHODS_OSD_INSTALL_REPO}    None
+@{SUPPORTED_TEST_ENV}        AWS   GCP   PSI
+${TEST_ENV}                  AWS
+${INSTALL_TYPE}              OperatorHub
+${UPDATE_CHANNEL}            beta
+${OLM_DIR}                   olminstall
 
 *** Tasks ***
 Can Install RHODS Operator

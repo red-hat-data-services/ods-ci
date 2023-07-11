@@ -26,5 +26,5 @@ Install Teardown
             Fail     msg=Mentioned directory ${dir} is not present. Kindly verify if provided folder name is correct
       END
   ELSE
-            Log To Console    Operator is installed via Operatorhub.No file presen to delete.
+            Log To Console    RHODS Operator is uninstalled suecsfully.
   END

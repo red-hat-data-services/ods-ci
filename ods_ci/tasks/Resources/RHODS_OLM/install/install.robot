@@ -17,9 +17,14 @@ Install Teardown
   [Documentation]   Remove cloned git repository
   [Arguments]       ${dir}=${OLM_DIR}
   ${status} =   Run Keyword And Return Status    Directory Should Exist   ${EXECDIR}/${dir}
-  IF    ${status}
-        ${return_code} =	  Run And Return Rc  rm -rf ${EXECDIR}/${dir}
-        Should Be Equal As Integers	  ${return_code}	 0
+  IF  "${INSTALL_TYPE}" != "OperatorHub"
+      ${status} =   Run Keyword And Return Status    Directory Should Exist   ${dir}
+      IF    ${status}
+            ${return_code} =	  Run And Return Rc  rm -rf ${EXECDIR}/${dir}
+            Should Be Equal As Integers	  ${return_code}	 0
+      ELSE
+            Fail     msg=Mentioned directory ${dir} is not present. Kindly verify if provided folder name is correct
+      END
   ELSE
-        Fail     msg=Mentioned directory ${dir} is not present. Kindly verify if provided folder name is correct
+            Log To Console    Operator is installed via Operatorhub.No file presen to delete.
   END

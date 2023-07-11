@@ -15,7 +15,7 @@ ${RHODS_OSD_INSTALL_REPO}    None
 ${TEST_ENV}                  AWS
 ${INSTALL_TYPE}              OperatorHub
 ${UPDATE_CHANNEL}            beta
-${OLM_DIR}                   rhodsolm
+${OLM_DIR}                   olminstall
 
 *** Tasks ***
 Can Install RHODS Operator

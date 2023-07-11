@@ -16,7 +16,7 @@ RHODS Operator Should Be installed
 Install Teardown
   [Documentation]   Remove cloned git repository
   [Arguments]       ${dir}=${OLM_DIR}
-  ${status} =   Run Keyword And Return Status    Directory Should Exist   ${EXECDIR}/${dir}
+  ${status} =   Run Keyword And Return Status    Directory Should Exist   ${dir}
   IF    ${status}
         ${return_code} =	  Run And Return Rc  rm -rf ${EXECDIR}/${dir}
         Should Be Equal As Integers	  ${return_code}	 0

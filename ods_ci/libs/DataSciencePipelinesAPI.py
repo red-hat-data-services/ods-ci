@@ -83,7 +83,8 @@ class DataSciencePipelinesAPI:
             count += 1
 
         assert self.route != "", "Route must not be empty"
-        print(f"DSP route should be working: {self.route}")
+        print(f"Waiting for Data Science Pipeline route to be ready: {self.route}")
+        time.sleep(30)
         status = -1
         count = 0
         while status != 200 and count < timeout:
@@ -94,9 +95,10 @@ class DataSciencePipelinesAPI:
             # 503 -> service not deployed
             # 504 -> service not ready
             # if you need to debug, try to print also the response
-            print(f"({count}): HTTP Status: {status}")
-            time.sleep(1)
-            count += 1
+            print(f"({count}): Data Science Pipeline HTTP Status: {status}")
+            if status != 200:
+                time.sleep(30)
+                count += 30
         return status
 
     @keyword

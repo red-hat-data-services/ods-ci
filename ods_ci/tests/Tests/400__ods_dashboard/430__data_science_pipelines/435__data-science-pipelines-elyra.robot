@@ -45,7 +45,7 @@ Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
-    Start Workbench     workbench_title=elyra-sds
+    Start Workbench     workbench_title=elyra-sds    timeout=300s
     Launch And Access Workbench    workbench_title=elyra-sds
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable

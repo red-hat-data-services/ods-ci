@@ -1,0 +1,74 @@
+{
+    "idp":{
+        "ldap": {
+            "prefixes": [
+                "ldap-op-",
+                "ldap-usr-",
+                "ldap-noaccess-",
+                "ldap-special"
+            ],
+            "suffixes": {
+                "ldap-op-": {
+                    "type": "incremental_with_rand_base",
+                    "rand_length": 20,
+                    "n_users": 5
+                },
+                "ldap-usr-": {
+                    "type": "incremental_with_rand_base",
+                    "rand_length": 20,
+                    "n_users": 5
+                },
+                "ldap-noaccess-": {
+                    "type": "incremental_with_rand_base",
+                    "rand_length": 20,
+                    "n_users": 5
+                },
+                "ldap-special": {
+                    "type": "custom",
+                    "rand_length": 20,
+                    "list": [".","^","$","*","?","(",")","[","]","{","}","|","@",";"]
+                }
+            },
+            "pw": "<GEN_RAMDOM_PW>",
+            "TEST_USER": "ldap-op-<RAND_BASE>1",
+            "TEST_USER_2": "ldap-op-<RAND_BASE>2",
+            "TEST_USER_3": "ldap-usr-<RAND_BASE>3",
+            "TEST_USER_4":  "ldap-usr-<RAND_BASE>4",
+            "groups_map":{
+                "ldap-op-": [
+                    "rhods-admins", 
+                    "dedicated-admins"
+                ],
+                "ldap-usr-": [
+                    "rhods-users"
+                ],
+                "ldap-noaccess-": [
+                    "rhods-noaccess"
+                ],
+                "ldap-special": [
+                    "rhods-users"
+                ]
+            }
+        },
+        "htpasswd": {
+            "prefixes": [
+                "htp-user-",
+                "htp-basic-user-"
+            ],
+            "suffixes": {
+                "htp-user-": {
+                    "type": "incremental_with_rand_base",
+                    "rand_length": 20,
+                    "n_users": 1
+                },
+                "htp-basic-user-": {
+                    "type": "incremental_with_rand_base",
+                    "rand_length": 20,
+                    "n_users": 2
+                }
+            },
+            "pw": "<GEN_RAMDOM_PW>",
+            "cluster_admin_username":   "htp-user-<RAND_BASE>"
+        }
+    }
+}

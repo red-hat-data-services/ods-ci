@@ -46,9 +46,16 @@ spec:
           # Mount the test-variables to prevent leaking secure info for the cluster you test against
         - mountPath: /tmp/ods-ci/test-output
           name: ods-ci-test-output
+        - mountPath: /tmp/ods-ci/ods_ci/configs/templates/user_config.json
+          name: ods-ci-user-config
+          subPath: user_config.json
   restartPolicy: Never
   volumes:
     # Persistent Volume where we will store the test-output for this pod
     - name: ods-ci-test-output
       persistentVolumeClaim:
         claimName: ods-ci
+    - name: ods-ci-user-config
+      secret:
+        # Specify Secret that has the necessary user_configuration.json
+        secretName: ods-ci-user-config

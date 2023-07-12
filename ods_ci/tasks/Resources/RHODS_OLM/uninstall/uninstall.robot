@@ -59,6 +59,7 @@ Uninstall RHODS In OSD
 
 Uninstall RHODS In Self Managed Cluster
   [Documentation]  Uninstall rhods from self-managed cluster
+  Clone OLM Install Repo
   IF  "${INSTALL_TYPE}" == "Cli"
       Uninstall RHODS In Self Managed Cluster Using CLI
   ELSE IF  "${INSTALL_TYPE}" == "OperatorHub"
@@ -73,7 +74,6 @@ RHODS Operator Should Be Uninstalled
 
 Uninstall RHODS In Self Managed Cluster Using CLI
   [Documentation]   UnInstall rhods on self-managed cluster using cli
-  Clone OLM Install Repo
   ${return_code}    Run and Watch Command
   ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh servicemesh3 clusterobservability tempo opentelemetry kueue certmanager cma connectivitylink leaderworkerset jobset"
   ...    timeout=30 min

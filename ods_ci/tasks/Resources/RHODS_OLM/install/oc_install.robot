@@ -24,6 +24,7 @@ Install RHODS
 
 Verify RHODS Installation
   Log  Verifying RHODS installation  console=yes
+  Log To Console    Waiting for all RHODS resources to be up and running
   Wait For Pods Numbers  1
   ...                   namespace=redhat-ods-operator
   ...                   label_selector=name=rhods-operator

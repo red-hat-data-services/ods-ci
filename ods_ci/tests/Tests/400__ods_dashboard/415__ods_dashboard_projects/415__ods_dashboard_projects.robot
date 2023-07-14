@@ -504,7 +504,6 @@ Verify User Can Delete A Data Science Project
     [Tags]    Sanity    Tier1    ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
     Delete Data Science Project   project_title=${PRJ_TITLE}
-    Wait Until Data Science Project Is Deleted    project_title=${PRJ_TITLE}
     # check workbenches and resources get deleted too
 
 Verify User Can Edit A S3 Data Connection

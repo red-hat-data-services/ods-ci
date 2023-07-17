@@ -68,7 +68,8 @@ def get_rosa_cluster_state(cluster_name):
             "cluster name {}. EXITING".format(cluster_name)
         )
         sys.exit(1)
-    return cluster_state.strip("\n")
+    cluster_state = cluster_state.strip("\n")
+    return cluster_state
     
 
 def wait_for_osd_cluster_to_be_ready(cluster_name, timeout=7200):

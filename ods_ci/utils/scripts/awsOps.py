@@ -10,8 +10,6 @@ def aws_configure(aws_access_key_id, aws_secret_access_key, aws_region):
     Runs aws configure and set the configuration required
     for OpenShift/ROSA Installation
     """
-    print(aws_access_key_id, aws_secret_access_key, aws_region)
-
     cmd_aws_configure_key_id = [
         "aws",
         "configure",

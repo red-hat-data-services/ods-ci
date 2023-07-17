@@ -421,6 +421,7 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ${test_envs_list}=    Create List   ${test_envs_var_secret}     ${test_envs_var_cm}
     Environment Variables Should Be Displayed According To Their Type
     ...    workbench_title=${WORKBENCH_4_TITLE}    exp_env_variables=${test_envs_list}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}

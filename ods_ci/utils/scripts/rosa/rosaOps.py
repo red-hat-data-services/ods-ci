@@ -5,42 +5,116 @@ from logging import log
 from time import sleep
 import sys
 
-def create_account_roles():
-    cmd_create_account_roles=["rosa", "create", "account-roles", "--mode", "auto", "--yes"]
 
-    
-    print(' '.join(cmd_create_account_roles))
-    ret = execute_command(' '.join(cmd_create_account_roles))
+def create_account_roles():
+    cmd_create_account_roles = [
+        "rosa",
+        "create",
+        "account-roles",
+        "--mode",
+        "auto",
+        "--yes",
+    ]
+
+    ret = execute_command(" ".join(cmd_create_account_roles))
     if ret is None:
         print("Failed  to Create account roles")
-        return ret       
+        return ret
 
-def rosa_create_cluster(cluster_name, region ,channel_name, compute_nodes,compute_machine_type,rosa_version,sts=True):
-    if sts==True:
-        cmd_rosa_create_cluster = ["rosa", "create", "cluster", "--cluster-name", cluster_name, "--replicas   ", compute_nodes, "--region", region, "--compute-machine-type", compute_machine_type, "--yes", "--sts", "--version", rosa_version, "--channel-group", channel_name]
-        execute_command(' '.join(cmd_rosa_create_cluster))
+
+def rosa_create_cluster(
+    cluster_name,
+    region,
+    channel_name,
+    compute_nodes,
+    compute_machine_type,
+    rosa_version,
+    sts=True,
+):
+    if sts == True:
+        cmd_rosa_create_cluster = [
+            "rosa",
+            "create",
+            "cluster",
+            "--cluster-name",
+            cluster_name,
+            "--replicas   ",
+            compute_nodes,
+            "--region",
+            region,
+            "--compute-machine-type",
+            compute_machine_type,
+            "--yes",
+            "--sts",
+            "--version",
+            rosa_version,
+            "--channel-group",
+            channel_name,
+        ]
+        execute_command(" ".join(cmd_rosa_create_cluster))
     else:
-        cmd_rosa_create_cluster = ["rosa", "create", "cluster", "--cluster-name", cluster_name, "--replicas   ", compute_nodes, "--region", region, "--compute-machine-type", compute_machine_type, "--yes", "--version", rosa_version, "--channel-group", channel_name]
-        execute_command(' '.join(cmd_rosa_create_cluster))
+        cmd_rosa_create_cluster = [
+            "rosa",
+            "create",
+            "cluster",
+            "--cluster-name",
+            cluster_name,
+            "--replicas   ",
+            compute_nodes,
+            "--region",
+            region,
+            "--compute-machine-type",
+            compute_machine_type,
+            "--yes",
+            "--version",
+            rosa_version,
+            "--channel-group",
+            channel_name,
+        ]
+        execute_command(" ".join(cmd_rosa_create_cluster))
 
-
-    
-    cmd_create_operator_roles= ["rosa", "create", "operator-roles", "--cluster", cluster_name, "--mode", "auto", "--region", region, "--yes"]
-    ret = execute_command(' '.join(cmd_create_operator_roles))
-    print(' '.join(cmd_create_operator_roles))
+    cmd_create_operator_roles = [
+        "rosa",
+        "create",
+        "operator-roles",
+        "--cluster",
+        cluster_name,
+        "--mode",
+        "auto",
+        "--region",
+        region,
+        "--yes",
+    ]
+    ret = execute_command(" ".join(cmd_create_operator_roles))
+    print(" ".join(cmd_create_operator_roles))
     if ret is None:
         print("Failed  to Create operator-roles")
         return ret
 
-    cmd_create_oidc_provider = ["rosa", "create", "oidc-provider", "--cluster", cluster_name, "--mode", "auto", "--region", region, "--yes"]
-    ret = execute_command(' '.join(cmd_create_oidc_provider)) 
-    print(''.join(cmd_create_oidc_provider))
+    cmd_create_oidc_provider = [
+        "rosa",
+        "create",
+        "oidc-provider",
+        "--cluster",
+        cluster_name,
+        "--mode",
+        "auto",
+        "--region",
+        region,
+        "--yes",
+    ]
+    ret = execute_command(" ".join(cmd_create_oidc_provider))
     if ret is None:
         print("Failed  to Create oidc roles")
         return ret
 
-    cmd_check_cluster = ["rosa", "describe", "cluster", "--cluster={}".format(cluster_name)] 
-    ret = execute_command(' '.join(cmd_check_cluster))
+    cmd_check_cluster = [
+        "rosa",
+        "describe",
+        "cluster",
+        "--cluster={}".format(cluster_name),
+    ]
+    ret = execute_command(" ".join(cmd_check_cluster))
     if ret is None:
         print("Failed  creation failed")
         return ret
@@ -58,6 +132,7 @@ def rosa_describe(cluster_name, filter=""):
         return None
     return ret
 
+
 def get_rosa_cluster_state(cluster_name):
     """Gets osd cluster state"""
 
@@ -70,7 +145,7 @@ def get_rosa_cluster_state(cluster_name):
         sys.exit(1)
     cluster_state = cluster_state.strip("\n")
     return cluster_state
-    
+
 
 def wait_for_osd_cluster_to_be_ready(cluster_name, timeout=7200):
     """Waits for cluster to be in ready state"""
@@ -86,16 +161,13 @@ def wait_for_osd_cluster_to_be_ready(cluster_name, timeout=7200):
             check_flag = True
             break
         elif cluster_state == "error":
-            print(
-                "{} is in error state. Hence " "exiting!!".format(cluster_name)
-            )
+            print("{} is in error state. Hence " "exiting!!".format(cluster_name))
             sys.exit(1)
 
         sleep(60)
         count += 60
     if not check_flag:
         print(
-            "{} not in ready state even after 2 hours."
-            " EXITING".format(cluster_name)
+            "{} not in ready state even after 2 hours." " EXITING".format(cluster_name)
         )
         sys.exit(1)

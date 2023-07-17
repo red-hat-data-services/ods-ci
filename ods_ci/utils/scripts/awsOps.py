@@ -7,18 +7,7 @@ from time import sleep
 def aws_configure(aws_access_key_id, aws_secret_access_key, aws_region):
     """
     Runs aws configure and set the configuration required
-    for OpenShift Installation
-
-    === Code using pexpect ===
-    configure_cmd = pexpect.spawn("aws configure")
-    configure_cmd.expect("AWS Access Key ID .*: ")
-    configure_cmd.sendline(aws_access_key_id)
-    configure_cmd.expect("AWS Secret Access Key .*: ")
-    configure_cmd.sendline(aws_secret_access_key)
-    configure_cmd.expect("Default region name .*: ")
-    configure_cmd.sendline(aws_region)
-    configure_cmd.sendline("yaml")
-    configure_cmd.interact()
+    for OpenShift/ROSA Installation
     """
     print(aws_access_key_id, aws_secret_access_key, aws_region)
 

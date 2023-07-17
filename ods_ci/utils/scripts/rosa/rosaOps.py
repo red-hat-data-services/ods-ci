@@ -1,6 +1,4 @@
-from util import (
-    execute_command,
-)
+from util import execute_command
 from logging import log
 from time import sleep
 import sys

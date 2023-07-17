@@ -33,7 +33,6 @@ def aws_configure(aws_access_key_id, aws_secret_access_key, aws_region):
         "default.aws_secret_access_key",
         aws_secret_access_key,
     ]
-    print(" ".join(cmd_aws_configure_access_id))
     ret = execute_command(" ".join(cmd_aws_configure_access_id))
     if ret is None:
         print("Failed  to configure aws_secret_access_key")

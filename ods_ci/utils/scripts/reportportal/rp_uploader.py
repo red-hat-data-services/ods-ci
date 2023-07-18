@@ -48,7 +48,7 @@ class ReportPortalOperations:
         )
         log.info("CMD: {}".format(cmd))
         rp_output = execute_command(cmd)
-        rp_output_json = json.loads(rp_output)
+        rp_output_json = json.dumps(rp_output)
         self.write_output_file(json.dumps(rp_output_json))
 
 

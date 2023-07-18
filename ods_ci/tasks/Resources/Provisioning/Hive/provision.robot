@@ -160,9 +160,8 @@ Save Cluster Credentials
     
 Login To Cluster
     Export Variables From File    ${cluster_details}
-    ${temp_kubeconfig} =    Set Variable    ${artifacts_dir}/temp_kubeconfig
-    Create File     ${temp_kubeconfig}
-    ${result} =    Run Process    KUBECONFIG\=${temp_kubeconfig} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
+    Create File     ${cluster_kubeconf}
+    ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc status    shell=yes

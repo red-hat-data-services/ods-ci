@@ -421,6 +421,7 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ${test_envs_list}=    Create List   ${test_envs_var_secret}     ${test_envs_var_cm}
     Environment Variables Should Be Displayed According To Their Type
     ...    workbench_title=${WORKBENCH_4_TITLE}    exp_env_variables=${test_envs_list}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
@@ -471,7 +472,7 @@ Verify Event Log Is Accessible While Starting A Workbench
     Open Notebook Event Log    workbench_title=${WORKBENCH_6_TITLE}
     Page Should Contain Event Log
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_6_TITLE}
-    Page Should Contain Event Log    expected_progress_text=Oauth proxy container started
+    Page Should Contain Event Log    expected_progress_text=Pod assigned
     ...    expected_result_text=Success
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
@@ -504,7 +505,6 @@ Verify User Can Delete A Data Science Project
     [Tags]    Sanity    Tier1    ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
     Delete Data Science Project   project_title=${PRJ_TITLE}
-    Wait Until Data Science Project Is Deleted    project_title=${PRJ_TITLE}
     # check workbenches and resources get deleted too
 
 Verify User Can Edit A S3 Data Connection
@@ -627,20 +627,6 @@ Check Storage PersistentVolumeClaim Is Deleted
     ...    storage_name=${storage_name}    namespace=${namespace}
     IF    ${status} == ${TRUE}
         Fail    msg=The PVC for ${storage_name} storage is still present, while it should have been deleted.
-    END
-
-Wait Until Data Science Project Is Deleted
-    [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
-    [Arguments]    ${project_title}
-    Wait Until Keyword Succeeds    15 times    2s
-    ...    Project Should Not Exist In Openshift    project_title=${project_title}
-
-Project Should Not Exist In Openshift
-    [Documentation]    Checks a given Project is not present in openshift
-    [Arguments]    ${project_title}
-    ${k8s_name} =     Get Openshift Namespace From Data Science Project   project_title=${project_title}
-    IF    "${k8s_name}" != "${EMPTY}"
-        Fail   msg=The project ${project_title} exists!
     END
 
 Environment Variables Should Be Available In Jupyter

@@ -472,7 +472,7 @@ Verify Event Log Is Accessible While Starting A Workbench
     Open Notebook Event Log    workbench_title=${WORKBENCH_6_TITLE}
     Page Should Contain Event Log
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_6_TITLE}
-    Page Should Contain Event Log    expected_progress_text=Oauth proxy container started
+    Page Should Contain Event Log    expected_progress_text=Pod assigned
     ...    expected_result_text=Success
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}

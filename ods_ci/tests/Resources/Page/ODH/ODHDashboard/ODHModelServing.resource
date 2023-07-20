@@ -54,7 +54,7 @@ Serve Model
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
-    Wait Until Page Contains Element    xpath://span[.="Model framework"]
+    Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
     IF    ${existing_data_connection}==${TRUE} 
         # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
@@ -107,7 +107,7 @@ Select Framework
     ...    Possible values for now: "onnx", "openvino_ir"
     [Arguments]    ${framework}
     TRY
-        Open Model framework Options Menu
+        Open Model framework (name - version) Options Menu
         Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
         Click Element    xpath://li/button[contains(., "${framework}")]
     EXCEPT
@@ -184,7 +184,7 @@ Get Model Route via UI
 
 Open ${section} Options Menu
     [Documentation]    Opens the "Options menu" dropdown for different sections
-    ...    Valid sections are: "Name", "Model framework", "Project"
+    ...    Valid sections are: "Name", "Model framework (name - version)", "Project"
     Click Element    xpath://span[.="${section}"]/../../..//button[@aria-label="Options menu"]
 
 Get Access Token via UI

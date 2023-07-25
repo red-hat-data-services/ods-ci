@@ -1,8 +1,14 @@
+ConfigMap               dsg-prune-flag
 ConfigMap               kube-root-ca.crt
 ConfigMap               odh-common-config
 ConfigMap               openshift-service-ca.crt
+ImageStream             codeflare-notebook
+ImageStreamTag          codeflare-notebook:latest
+ImageTag                codeflare-notebook:latest
 KIND                    NAME
+Lease                   f9eb95d5.opendatahub.io
 NetworkPolicy           opendatahub
+OdhDashboardConfig      odh-dashboard-config
 RoleBinding             opendatahub
 RoleBinding             opendatahub
 RoleBinding             system:deployers

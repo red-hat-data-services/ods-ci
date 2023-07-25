@@ -36,23 +36,53 @@ ${PATCH_PREFIX} =    oc patch datasciencecluster ${DSC_NAME} --type='merge' -p '
 
 Verify Core Installation Profile
     [Documentation]
-    Verify Component Resources    component=dashboard
+    Run Keyword And Continue On Failure    Verify Component Resources    component=dashboard
+    Component Should Be Enabled    dashboard
+    Component Should Not Be Enabled    datasciencepipelines
+    Component Should Not Be Enabled    distributedWorkloads
+    Component Should Not Be Enabled    kserve
+    Component Should Not Be Enabled    modelmeshserving
+    Component Should Not Be Enabled    workbenches
 
 Verify Serving Installation Profile
     [Documentation]
-    Verify Component Resources    component=datasciencepipelines
+    Run Keyword And Continue On Failure    Verify Component Resources    component=datasciencepipelines
+    Component Should Be Enabled    datasciencepipelines
+    Component Should Not Be Enabled    dashboard
+    Component Should Not Be Enabled    distributedWorkloads
+    Component Should Not Be Enabled    kserve
+    Component Should Not Be Enabled    modelmeshserving
+    Component Should Not Be Enabled    workbenches
 
 Verify Training Installation Profile
     [Documentation]
-    Verify Component Resources    component=modelmeshserving
+    Run Keyword And Continue On Failure    Verify Component Resources    component=modelmeshserving
+    Component Should Be Enabled    modelmeshserving
+    Component Should Not Be Enabled    dashboard
+    Component Should Not Be Enabled    distributedWorkloads
+    Component Should Not Be Enabled    kserve
+    Component Should Not Be Enabled    modelmeshserving
+    Component Should Not Be Enabled    workbenches
 
 Verify Workbench Installation Profile
     [Documentation]
-    Verify Component Resources    component=workbenches
+    Run Keyword And Continue On Failure    Verify Component Resources    component=workbenches
+    Component Should Be Enabled    workbenches
+    Component Should Not Be Enabled    dashboard
+    Component Should Not Be Enabled    distributedWorkloads
+    Component Should Not Be Enabled    kserve
+    Component Should Not Be Enabled    modelmeshserving
+    Component Should Not Be Enabled    datasciencepipelines
 
 Verify None Installation Profile
     [Documentation]
-    Verify Component Resources    component=none
+    Run Keyword And Continue On Failure    Verify Component Resources    component=none
+    Component Should Not Be Enabled    datasciencepipelines
+    Component Should Not Be Enabled    dashboard
+    Component Should Not Be Enabled    distributedWorkloads
+    Component Should Not Be Enabled    kserve
+    Component Should Not Be Enabled    modelmeshserving
+    Component Should Not Be Enabled    workbenches
 
 
 *** Keywords ***
@@ -65,6 +95,17 @@ Verify None Installation Profile
 #     END
 #     ${out} =    Run    oc patch datasciencecluster ${dsc_name} --type='merge' -p '{"spec":{"profile":"${profile}"}}'
 #     Should Be Equal As Strings    ${out}    datasciencecluster.datasciencecluster.${namespace}.io/${dsc_name} patched
+
+Component Should Be Enabled
+    [Arguments]    ${component}    ${dsc_name}=default
+    ${status} =    Verify If Component Is Enabled    ${component}    ${dsc_name}
+    IF    '${status}' != 'true'    Fail
+
+Component Should Not Be Enabled
+    [Arguments]    ${component}    ${dsc_name}=default
+    ${status} =    Verify If Component Is Enabled    ${component}    ${dsc_name}
+    IF    '${status}' != 'false'    Fail
+
 
 Verify Component Resources
     [Documentation]    Currently always fails, need a better way to check
@@ -83,7 +124,7 @@ Verify Component Resources
 Verify If Component Is Enabled
     [Documentation]    Returns the enabled status of a single component (true/false)
     [Arguments]    ${component}    ${dsc_name}=default
-    ${status} =    Run    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}[]'
+    ${status} =    Run    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'
     RETURN    ${status}
 
 Enable Single Component

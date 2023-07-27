@@ -13,6 +13,23 @@ ${PATCH_PREFIX} =    oc patch datasciencecluster ${DSC_NAME} --type='merge' -p '
 
 
 *** Tasks ***
+Patch DataScienceCluster CustomResource
+    [Documentation]
+    Log to Console    Requested Configuration:
+    FOR    ${cmp}    IN    @{COMPONENTS}
+        Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
+    END
+    Patch DataScienceCluster CustomResource Using Test Variables
+    FOR    ${cmp}    IN    @{COMPONENTS}
+        IF    "${COMPONENTS.${cmp}}" == "True"
+            Component Should Be Enabled    ${cmp}
+        ELSE IF    "${COMPONENTS.${cmp}}" == "False"
+            Component Should Not Be Enabled    ${cmp}
+        ELSE
+            Fail    msg=Invalid parameters in test-variables.yml
+        END
+    END
+
 # Switch To Core Installation Profile
 #     [Documentation]
 #     Switch Installation Profile    profile=core
@@ -33,69 +50,58 @@ ${PATCH_PREFIX} =    oc patch datasciencecluster ${DSC_NAME} --type='merge' -p '
 #     [Documentation]
 #     Switch Installation Profile    profile=none
 
+# Verify Core Installation Profile
+#     [Documentation]
+#     Run Keyword And Continue On Failure    Verify Component Resources    component=dashboard
+#     Component Should Be Enabled    dashboard
+#     Component Should Not Be Enabled    datasciencepipelines
+#     Component Should Not Be Enabled    distributedWorkloads
+#     Component Should Not Be Enabled    kserve
+#     Component Should Not Be Enabled    modelmeshserving
+#     Component Should Not Be Enabled    workbenches
 
-Verify Core Installation Profile
-    [Documentation]
-    Run Keyword And Continue On Failure    Verify Component Resources    component=dashboard
-    Component Should Be Enabled    dashboard
-    Component Should Not Be Enabled    datasciencepipelines
-    Component Should Not Be Enabled    distributedWorkloads
-    Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    workbenches
+# Verify Serving Installation Profile
+#     [Documentation]
+#     Run Keyword And Continue On Failure    Verify Component Resources    component=datasciencepipelines
+#     Component Should Be Enabled    datasciencepipelines
+#     Component Should Not Be Enabled    dashboard
+#     Component Should Not Be Enabled    distributedWorkloads
+#     Component Should Not Be Enabled    kserve
+#     Component Should Not Be Enabled    modelmeshserving
+#     Component Should Not Be Enabled    workbenches
 
-Verify Serving Installation Profile
-    [Documentation]
-    Run Keyword And Continue On Failure    Verify Component Resources    component=datasciencepipelines
-    Component Should Be Enabled    datasciencepipelines
-    Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
-    Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    workbenches
+# Verify Training Installation Profile
+#     [Documentation]
+#     Run Keyword And Continue On Failure    Verify Component Resources    component=modelmeshserving
+#     Component Should Be Enabled    modelmeshserving
+#     Component Should Not Be Enabled    dashboard
+#     Component Should Not Be Enabled    distributedWorkloads
+#     Component Should Not Be Enabled    kserve
+#     Component Should Not Be Enabled    modelmeshserving
+#     Component Should Not Be Enabled    workbenches
 
-Verify Training Installation Profile
-    [Documentation]
-    Run Keyword And Continue On Failure    Verify Component Resources    component=modelmeshserving
-    Component Should Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
-    Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    workbenches
+# Verify Workbench Installation Profile
+#     [Documentation]
+#     Run Keyword And Continue On Failure    Verify Component Resources    component=workbenches
+#     Component Should Be Enabled    workbenches
+#     Component Should Not Be Enabled    dashboard
+#     Component Should Not Be Enabled    distributedWorkloads
+#     Component Should Not Be Enabled    kserve
+#     Component Should Not Be Enabled    modelmeshserving
+#     Component Should Not Be Enabled    datasciencepipelines
 
-Verify Workbench Installation Profile
-    [Documentation]
-    Run Keyword And Continue On Failure    Verify Component Resources    component=workbenches
-    Component Should Be Enabled    workbenches
-    Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
-    Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    datasciencepipelines
-
-Verify None Installation Profile
-    [Documentation]
-    Run Keyword And Continue On Failure    Verify Component Resources    component=none
-    Component Should Not Be Enabled    datasciencepipelines
-    Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
-    Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    workbenches
+# Verify None Installation Profile
+#     [Documentation]
+#     Run Keyword And Continue On Failure    Verify Component Resources    component=none
+#     Component Should Not Be Enabled    datasciencepipelines
+#     Component Should Not Be Enabled    dashboard
+#     Component Should Not Be Enabled    distributedWorkloads
+#     Component Should Not Be Enabled    kserve
+#     Component Should Not Be Enabled    modelmeshserving
+#     Component Should Not Be Enabled    workbenches
 
 
 *** Keywords ***
-# Switch Installation Profile
-#     [Documentation]
-#     [Arguments]    ${profile}=core    ${dsc_name}=example    ${namespace}=opendatahub
-#     ${current_profile} =    Get Current Installation Profile
-#     IF    ${current_profile} == "${profile}"
-#         Skip    msg=Installed profile is already profile ${profile}
-#     END
-#     ${out} =    Run    oc patch datasciencecluster ${dsc_name} --type='merge' -p '{"spec":{"profile":"${profile}"}}'
-#     Should Be Equal As Strings    ${out}    datasciencecluster.datasciencecluster.${namespace}.io/${dsc_name} patched
-
 Component Should Be Enabled
     [Arguments]    ${component}    ${dsc_name}=default
     ${status} =    Verify If Component Is Enabled    ${component}    ${dsc_name}
@@ -126,6 +132,29 @@ Verify If Component Is Enabled
     [Arguments]    ${component}    ${dsc_name}=default
     ${status} =    Run    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'
     RETURN    ${status}
+
+Patch DataScienceCluster CustomResource Using Test Variables
+    [Documentation]  Enables a mix of components based on the values provided in test-variables.yml
+    [Arguments]    ${dsc_name}=default
+    ${len} =    Get Length    ${COMPONENTS}
+    ${patch} =    Set Variable    ${PATCH_PREFIX}
+    FOR    ${index}    ${cmp}    IN ENUMERATE    @{COMPONENTS}
+        IF    ${COMPONENTS.${cmp}} == ${True}
+            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}
+        ELSE
+            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}    enable=false
+        END
+        IF    ${index} ==0
+            ${patch} =    Catenate    SEPARATOR=    ${patch}    ${sub}
+        ELSE
+            ${patch} =    Catenate    SEPARATOR=,${SPACE}    ${patch}    ${sub}
+        END
+    END
+    ${patch} =    Catenate    SEPARATOR=    ${patch}    }}}'
+    Log    ${patch}
+    ${status} =    Run    ${patch}
+    Log    ${status}
+    Sleep    30s
 
 Enable Single Component
     [Documentation]    Enables a single component AND disables all other components. If "none" is used

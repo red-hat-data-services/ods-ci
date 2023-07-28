@@ -1,19 +1,34 @@
 import argparse
 import yaml
+import os
 
 
 def toggle_components(yaml_file, component_states):
     "This function will enable and disable the component"
-    with open(yaml_file, "r") as f:
-        data_science_cluster = yaml.safe_load(f)
+    if os.path.exists(yaml_file):
+        with open(yaml_file, "r") as f:
+            data_science_cluster = yaml.safe_load(f)
+    else:
+        # If YAML file does not exist, create a new DataScienceCluster YAML
+        data_science_cluster = {
+            "apiVersion": "datasciencecluster.opendatahub.io/v1alpha1",
+            "kind": "DataScienceCluster",
+            "metadata": {"name": "dsc"},
+            "spec": {"components": {}},
+        }
 
     components = data_science_cluster["spec"]["components"]
-    for component, enabled in component_states.items():
-        if component in components:
-            components[component]["enabled"] = enabled
+    for component in components:
+        if component in component_states:
+            components[component]["enabled"] = component_states[component]
         else:
-            # If component is not present, add it to the YAML
-            components[component] = {"enabled": enabled}
+            # If component is not present, add it to the YAML with default state (False)
+            components[component] = {"enabled": False}
+
+    for component in component_states:
+        if component not in components:
+            # Add the component with its state to the YAML
+            components[component] = {"enabled": component_states[component]}
 
     with open(yaml_file, "w") as f:
         yaml.dump(data_science_cluster, f)

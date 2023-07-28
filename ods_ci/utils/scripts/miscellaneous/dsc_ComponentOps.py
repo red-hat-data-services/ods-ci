@@ -3,7 +3,7 @@ import yaml
 import os
 
 
-def toggle_components(yaml_file, component_states):
+def toggle_components(yaml_file, component_states, set_default=True):
     "This function will enable and disable the component"
     if os.path.exists(yaml_file):
         with open(yaml_file, "r") as f:
@@ -13,7 +13,7 @@ def toggle_components(yaml_file, component_states):
         data_science_cluster = {
             "apiVersion": "datasciencecluster.opendatahub.io/v1alpha1",
             "kind": "DataScienceCluster",
-            "metadata": {"name": "dsc"},
+            "metadata": {"name": "example"},
             "spec": {"components": {}},
         }
 
@@ -21,8 +21,8 @@ def toggle_components(yaml_file, component_states):
     for component in components:
         if component in component_states:
             components[component]["enabled"] = component_states[component]
-        else:
-            # If component is not present, add it to the YAML with default state (False)
+        elif set_default:
+            # If component is not present and set_default is True, add it to the YAML with default state (False)
             components[component] = {"enabled": False}
 
     for component in component_states:
@@ -47,6 +47,13 @@ def main():
         help="Comma-separated list of components and their states (component1:state1,component2:state2,...)",
     )
 
+    # Optional argument to skip setting default value for unspecified components
+    parser.add_argument(
+        "--no-default",
+        action="store_true",
+        help="Do not set default value for unspecified components",
+    )
+
     args = parser.parse_args()
 
     # Parse and convert the component states argument into a dictionary
@@ -57,7 +64,8 @@ def main():
             comp, state = component.split(":")
             component_states[comp] = True if state.lower() == "true" else False
 
-    toggle_components(args.yaml_file, component_states)
+    # Pass the set_default argument based on the --no-default parameter
+    toggle_components(args.yaml_file, component_states, not args.no_default)
     print("DataScienceCluster YAML has been updated.")
 
 

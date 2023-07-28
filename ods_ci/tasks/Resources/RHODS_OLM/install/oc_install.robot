@@ -1,6 +1,12 @@
 *** Settings ***
 Library    String
 Library    OpenShiftLibrary
+Library    OperatingSystem
+
+
+*** Variables ***
+${DSC_NAME} =    default
+
 
 *** Keywords ***
 Install RHODS
@@ -21,6 +27,9 @@ Install RHODS
           FAIL    Provided test envrioment is not supported
       END
   END
+  IF  "${UPDATE_CHANNEL}" != "stable"
+      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+  END
 
 Verify RHODS Installation
   Log  Verifying RHODS installation  console=yes
@@ -29,34 +38,46 @@ Verify RHODS Installation
   ...                   namespace=redhat-ods-operator
   ...                   label_selector=name=rhods-operator
   ...                   timeout=2000
-  Wait For Pods Numbers  5
-  ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=rhods-dashboard
-  ...                   timeout=1200
-  Wait For Pods Numbers  1
-  ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=notebook-controller
-  ...                   timeout=400
-  Wait For Pods Numbers  1
-  ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=odh-notebook-controller
-  ...                   timeout=400
-  Wait For Pods Numbers   3
-  ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app=odh-model-controller
-  ...                   timeout=400
-  Wait For Pods Numbers   1
-  ...                   namespace=redhat-ods-applications
-  ...                   label_selector=component=model-mesh-etcd
-  ...                   timeout=400
-  Wait For Pods Numbers   3
-  ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app.kubernetes.io/name=modelmesh-controller
-  ...                   timeout=400
-  Wait For Pods Numbers   1
-  ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app.kubernetes.io/created-by=data-science-pipelines-operator
-  ...                   timeout=400
+  ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
+  IF    "${UPDATE_CHANNEL}" == "stable" or "${dashboard}" == "true"
+    Wait For Pods Numbers  5
+    ...                   namespace=redhat-ods-applications
+    ...                   label_selector=app=rhods-dashboard
+    ...                   timeout=1200
+  END
+  ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
+  IF    "${UPDATE_CHANNEL}" == "stable" or "${workbenches}" == "true"
+    Wait For Pods Numbers  1
+    ...                   namespace=redhat-ods-applications
+    ...                   label_selector=app=notebook-controller
+    ...                   timeout=400
+    Wait For Pods Numbers  1
+    ...                   namespace=redhat-ods-applications
+    ...                   label_selector=app=odh-notebook-controller
+    ...                   timeout=400
+  END
+  ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
+  IF    "${UPDATE_CHANNEL}" == "stable" or "${modelmeshserving}" == "true"
+    Wait For Pods Numbers   3
+    ...                   namespace=redhat-ods-applications
+    ...                   label_selector=app=odh-model-controller
+    ...                   timeout=400
+    Wait For Pods Numbers   1
+    ...                   namespace=redhat-ods-applications
+    ...                   label_selector=component=model-mesh-etcd
+    ...                   timeout=400
+    Wait For Pods Numbers   3
+    ...                   namespace=redhat-ods-applications
+    ...                   label_selector=app.kubernetes.io/name=modelmesh-controller
+    ...                   timeout=400
+  END
+  ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
+  IF    "${UPDATE_CHANNEL}" == "stable" or "${datasciencepipelines}" == "true"
+    Wait For Pods Numbers   1
+    ...                   namespace=redhat-ods-applications
+    ...                   label_selector=app.kubernetes.io/created-by=data-science-pipelines-operator
+    ...                   timeout=400
+  END
   Wait For Pods Numbers   3
   ...                   namespace=redhat-ods-monitoring
   ...                   label_selector=prometheus=rhods-model-monitoring
@@ -111,3 +132,57 @@ Wait For Pods Numbers
   IF    '${status}' == 'False'
         Run Keyword And Continue On Failure    FAIL    Timeout- ${output} pods found with the label selector ${label_selector} in ${namespace} namespace
   END
+
+Apply DataScienceCluster CustomResource
+    [Documentation]
+    [Arguments]        ${dsc_name}=default
+    ${file_path} =    Set Variable    ods_ci/tasks/Resources/Files/
+    Log to Console    Requested Configuration:
+    FOR    ${cmp}    IN    @{COMPONENTS}
+        Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
+    END
+    Create DataScienceCluster CustomResource Using Test Variables
+    ${yml} =    Get File    ${file_path}dsc_apply.yml
+    Log To Console    Applying DSC yaml
+    Log To Console    ${yml}
+    Run    oc apply -f ${file_path}dsc_apply.yml
+    Remove File    ${file_path}dsc_apply.yml
+    FOR    ${cmp}    IN    @{COMPONENTS}
+        IF    "${COMPONENTS.${cmp}}" == "True"
+            Component Should Be Enabled    ${cmp}
+        ELSE IF    "${COMPONENTS.${cmp}}" == "False"
+            Component Should Not Be Enabled    ${cmp}
+        ELSE
+            Fail    msg=Invalid parameters in test-variables.yml
+        END
+    END
+
+Create DataScienceCluster CustomResource Using Test Variables
+    [Documentation]
+    [Arguments]    ${dsc_name}=default
+    ${file_path} =    Set Variable    ods_ci/tasks/Resources/Files/
+    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
+    Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    FOR    ${cmp}    IN    @{COMPONENTS}
+        IF    ${COMPONENTS.${cmp}} == ${True}
+            Run    sed -i 's/<${cmp}_value>/true/' ${file_path}dsc_apply.yml
+        ELSE
+            Run    sed -i 's/<${cmp}_value>/false/' ${file_path}dsc_apply.yml
+        END
+    END
+
+Component Should Be Enabled
+    [Arguments]    ${component}    ${dsc_name}=default
+    ${status} =    Is Component Enabled    ${component}    ${dsc_name}
+    IF    '${status}' != 'true'    Fail
+
+Component Should Not Be Enabled
+    [Arguments]    ${component}    ${dsc_name}=default
+    ${status} =    Is Component Enabled    ${component}    ${dsc_name}
+    IF    '${status}' != 'false'    Fail
+
+Is Component Enabled
+    [Documentation]    Returns the enabled status of a single component (true/false)
+    [Arguments]    ${component}    ${dsc_name}=default
+    ${status} =    Run    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'
+    RETURN    ${status}

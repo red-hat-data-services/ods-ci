@@ -30,23 +30,6 @@ ${PATCH_PREFIX} =    oc patch datasciencecluster ${DSC_NAME} --type='merge' -p '
 #         END
 #     END
 
-Create DataScienceCluster CustomResource
-    [Documentation]
-    Log to Console    Requested Configuration:
-    FOR    ${cmp}    IN    @{COMPONENTS}
-        Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
-    END
-    Create DataScienceCluster CustomResource Using Test Variables
-    FOR    ${cmp}    IN    @{COMPONENTS}
-        IF    "${COMPONENTS.${cmp}}" == "True"
-            Component Should Be Enabled    ${cmp}
-        ELSE IF    "${COMPONENTS.${cmp}}" == "False"
-            Component Should Not Be Enabled    ${cmp}
-        ELSE
-            Fail    msg=Invalid parameters in test-variables.yml
-        END
-    END
-
 # Switch To Core Installation Profile
 #     [Documentation]
 #     Switch Installation Profile    profile=core
@@ -119,16 +102,6 @@ Create DataScienceCluster CustomResource
 
 
 *** Keywords ***
-Component Should Be Enabled
-    [Arguments]    ${component}    ${dsc_name}=default
-    ${status} =    Verify If Component Is Enabled    ${component}    ${dsc_name}
-    IF    '${status}' != 'true'    Fail
-
-Component Should Not Be Enabled
-    [Arguments]    ${component}    ${dsc_name}=default
-    ${status} =    Verify If Component Is Enabled    ${component}    ${dsc_name}
-    IF    '${status}' != 'false'    Fail
-
 Verify Component Resources
     [Documentation]    Currently always fails, need a better way to check
     [Arguments]    ${component}
@@ -143,12 +116,6 @@ Verify Component Resources
     Remove File    ${filepath}${component}_runtime.txt
     Should Be Equal As Strings    ${expected}    ${actual}
 
-Verify If Component Is Enabled
-    [Documentation]    Returns the enabled status of a single component (true/false)
-    [Arguments]    ${component}    ${dsc_name}=default
-    ${status} =    Run    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'
-    RETURN    ${status}
-
 Patch DataScienceCluster CustomResource Using Test Variables
     [Documentation]  Enables a mix of components based on the values provided in test-variables.yml
     [Arguments]    ${dsc_name}=default
@@ -156,7 +123,7 @@ Patch DataScienceCluster CustomResource Using Test Variables
     ${patch} =    Set Variable    ${PATCH_PREFIX}
     FOR    ${index}    ${cmp}    IN ENUMERATE    @{COMPONENTS}
         IF    ${COMPONENTS.${cmp}} == ${True}
-            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}
+            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}    enable=true
         ELSE
             ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}    enable=false
         END
@@ -184,7 +151,7 @@ Enable Single Component
     ${patch} =    Set Variable    ${PATCH_PREFIX}
     FOR    ${index}    ${cmp}    IN ENUMERATE    @{COMPONENTS}
         IF     "${cmp}"=="${component}"
-            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}
+            ${sub} =    Change Component Status    component=${cmp}    enable=true    run=${FALSE}
         ELSE
             ${sub} =    Change Component Status    component=${cmp}    enable=false    run=${FALSE}
         END
@@ -216,22 +183,3 @@ Change Component Status
     ELSE
         RETURN    "${component}":{"enabled": ${enable}}
     END
-
-Create DataScienceCluster CustomResource Using Test Variables
-    [Documentation]
-    [Arguments]    ${dsc_name}=default
-    ${file_path} =    Set Variable    ods_ci/tasks/Resources/Files/
-    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
-    Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
-    FOR    ${cmp}    IN    @{COMPONENTS}
-        IF    ${COMPONENTS.${cmp}} == ${True}
-            Run    sed -i 's/<${cmp}_value>/true/' ${file_path}dsc_apply.yml
-        ELSE
-            Run    sed -i 's/<${cmp}_value>/false/' ${file_path}dsc_apply.yml
-        END
-    END
-    ${yml} =    Get File    ${file_path}dsc_apply.yml
-    Log To Console    Applying DSC yaml
-    Log To Console    ${yml}
-    Run    oc apply -f ${file_path}dsc_apply.yml
-    Remove File    ${file_path}dsc_apply.yml

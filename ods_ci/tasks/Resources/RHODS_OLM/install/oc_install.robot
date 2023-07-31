@@ -27,7 +27,7 @@ Install RHODS
           FAIL    Provided test envrioment is not supported
       END
   END
-  IF  "${UPDATE_CHANNEL}" != "stable"
+  IF  "${UPDATE_CHANNEL}" != "stable" and "${UPDATE_CHANNEL}" != "beta"
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
 
@@ -39,14 +39,14 @@ Verify RHODS Installation
   ...                   label_selector=name=rhods-operator
   ...                   timeout=2000
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
-  IF    "${UPDATE_CHANNEL}" == "stable" or "${dashboard}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
     Wait For Pods Numbers  5
     ...                   namespace=redhat-ods-applications
     ...                   label_selector=app=rhods-dashboard
     ...                   timeout=1200
   END
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
-  IF    "${UPDATE_CHANNEL}" == "stable" or "${workbenches}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
     Wait For Pods Numbers  1
     ...                   namespace=redhat-ods-applications
     ...                   label_selector=app=notebook-controller
@@ -57,7 +57,7 @@ Verify RHODS Installation
     ...                   timeout=400
   END
   ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
-  IF    "${UPDATE_CHANNEL}" == "stable" or "${modelmeshserving}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
     Wait For Pods Numbers   3
     ...                   namespace=redhat-ods-applications
     ...                   label_selector=app=odh-model-controller
@@ -72,7 +72,7 @@ Verify RHODS Installation
     ...                   timeout=400
   END
   ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
-  IF    "${UPDATE_CHANNEL}" == "stable" or "${datasciencepipelines}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
     Wait For Pods Numbers   1
     ...                   namespace=redhat-ods-applications
     ...                   label_selector=app.kubernetes.io/created-by=data-science-pipelines-operator

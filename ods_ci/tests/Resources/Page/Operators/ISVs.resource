@@ -44,7 +44,7 @@ Create Operator Group
 Operator Subscription Last Condition Should Be
     [Documentation]    Checks the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
-    ...    ${subcription_name}    ${namespace}
+    ...    ${subcription_name}    ${namespace}=openshift-operators
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc get subscription ${subcription_name} -n ${namespace} -ojson | jq '.status.conditions | last | select(.type=="${type}" and .status=="${status}" and .reason=="${reason}")'    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
@@ -53,7 +53,7 @@ Operator Subscription Last Condition Should Be
 Wait Until Operator Subscription Last Condition Is    # robocop: disable
     [Documentation]    Keeps checking until the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
-    ...    ${subcription_name}    ${namespace}
+    ...    ${subcription_name}    ${namespace}=openshift-operators
     ...    ${retry}=20    ${retry_interval}=3s
     Wait Until Keyword Succeeds    ${retry} times    ${retry_interval}    Operator Subscription Last Condition Should Be    # robocop: disable
     ...    type=${type}     status=${status}
@@ -112,7 +112,7 @@ Delete Custom Resource
 
 Uninstall ISV Operator From OperatorHub Via CLI
     [Documentation]    Uninstalls the given operator via CLI
-    [Arguments]    ${subscription_name}    ${namespace}
+    [Arguments]    ${subscription_name}    ${namespace}=openshift-operators
     ${rc}    ${current_csv_name}=    Run And Return Rc And Output
     ...    oc get subscription ${subscription_name} -n ${namespace} -ojson | jq '.status.currentCSV' | tr -d '"'    # robocop: disable
     Oc Delete    kind=Subscription    name=${subscription_name}    namespace=${namespace}

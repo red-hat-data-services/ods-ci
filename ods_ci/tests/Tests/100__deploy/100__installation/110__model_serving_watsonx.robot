@@ -46,7 +46,7 @@ Verify KServe Is Shipped
 
 *** Keywords ***
 Fetch KServe Pods
-    [Documentation]    Fetch information from KServe pods
+    [Documentation]    Fetches information from KServe pods
     ...    Args:
     ...        None
     ...    Returns:
@@ -56,7 +56,7 @@ Fetch KServe Pods
     RETURN    @{kserve_pods_info}
 
 Fetch KServe Deployments
-    [Documentation]    Fetch information from KServe deployments
+    [Documentation]    Fetches information from KServe deployments
     ...    Args:
     ...        None
     ...    Returns:
@@ -66,7 +66,7 @@ Fetch KServe Deployments
     RETURN    @{kserve_deployments_info}
 
 Fetch KServe Controller Services
-    [Documentation]    Fetch information from KServe services
+    [Documentation]    Fetches information from KServe services
     ...    Args:
     ...        None
     ...    Returns:
@@ -76,7 +76,7 @@ Fetch KServe Controller Services
     RETURN    @{kserve_services_info}
 
 Fetch KServe Webhook Services
-    [Documentation]    Fetch information from KServe services
+    [Documentation]    Fetches information from KServe services
     ...    Args:
     ...        None
     ...    Returns:
@@ -86,7 +86,7 @@ Fetch KServe Webhook Services
     RETURN    @{kserve_wh_services_info}
 
 Verify KServe ReplicaSets Info
-    [Documentation]    Fetchs and verifies information from KServe replicasets
+    [Documentation]    Fetches and verifies information from KServe replicasets
     @{kserve_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=${KSERVE_NS}
     ...    label_selector=app.kubernetes.io/part-of=kserve
     OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas
@@ -102,11 +102,11 @@ Verify Kserve Deployment
     Verify Deployment    ${kserve}    1    1    ${containerNames}
 
 ServingRuntime CustomResourceDefinition Should Exist
-    [Documentation]
+    [Documentation]    Checks that the ServingRuntime CRD is present
     ${sr_crd}=    Oc Get    kind=CustomResourceDefinition    field_selector=metadata.name=servingruntimes.serving.kserve.io
     Should Not Be Empty    ${sr_crd}
 
 InferenceService CustomResourceDefinition Should Exist
-    [Documentation]
-    ${sr_crd}=    Oc Get    kind=CustomResourceDefinition    field_selector=metadata.name=inferenceservices.serving.kserve.io
-    Should Not Be Empty    ${sr_crd}
+    [Documentation]    Checks that the InferenceService CRD is present
+    ${is_crd}=    Oc Get    kind=CustomResourceDefinition    field_selector=metadata.name=inferenceservices.serving.kserve.io
+    Should Not Be Empty    ${is_crd}

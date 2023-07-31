@@ -12,8 +12,12 @@ Suite Setup       Install Model Serving Stack Dependencies
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator-sub
 ${SERVERLESS_NS}=    openshift-serverless    
+${SERVERLESS_CR_NS}=    knative
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator-sub
+${SERVICEMESH_CONTROLPLANE_FILEPATH}=    ods_ci/tests/Resources/Files/llm/smcp.yaml
+${SERVICEMESH_ROLL_FILEPATH}=    ods_ci/tests/Resources/Files/llm/smmr.yaml
+${SERVICEMESH_CR_NS}=    istio-system
 ${KIALI_OP_NAME}=     kiali-ossm
 ${KIALI_SUB_NAME}=    kiali-ossm-sub
 ${JAEGER_OP_NAME}=     jaeger-product
@@ -31,6 +35,8 @@ Verify External Dependency Operators Can Be Deployed
 Install Model Serving Stack Dependencies
     Install Service Mesh Stack
     Install Serverless Stack
+    Deploy Service Mesh CRs And Wait For Pods
+    Deploy Serverless CRs And Wait For Pods
     # deploy CRs and configure
 
 
@@ -53,7 +59,22 @@ Install Service Mesh Stack
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${JAEGER_SUB_NAME}
-    
+
+Deploy Service Mesh CRs And Wait For Pods
+    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVICEMESH_CR_NS}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${SERVICEMESH_CONTROLPLANE_FILEPATH}    # replace NS in the yaml with a sed
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${SERVICEMESH_ROLL_FILEPATH}    # replace NS in the yaml with a sed
+    # add peer auth - replace namespaces with a sed
+    # Wait Until Operator Pods Are Running
+
+Deploy Serverless CRs And Wait For Pods
+    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVELESS_CR_NS}
+    Add Namespace To ServiceMeshMemberRoll    namespace=${SERVELESS_CR_NS}
+    # Wait Until Operator Pods Are Running
+
+
 Install Serverless Stack
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_NS}
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}

@@ -55,6 +55,21 @@ Delete Data Science Project
     Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project
     ...                                   press_cancel=${press_cancel}
     ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
+    Wait Until Data Science Project Is Deleted    project_title=${project_title}
+
+Wait Until Data Science Project Is Deleted
+    [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
+    [Arguments]    ${project_title}
+    Wait Until Keyword Succeeds    15 times    2s
+    ...    Project Should Not Exist In Openshift    project_title=${project_title}
+
+Project Should Not Exist In Openshift
+    [Documentation]    Checks a given Project is not present in openshift
+    [Arguments]    ${project_title}
+    ${k8s_name} =     Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    IF    "${k8s_name}" != "${EMPTY}"
+        Fail   msg=The project ${project_title} exists!
+    END
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded

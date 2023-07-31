@@ -1,7 +1,7 @@
 BROWSER:
   NAME: BROWSER_NAME
   # List of Chrome options - https://peter.sh/experiments/chromium-command-line-switches/
-  OPTIONS: add_argument("--ignore-certificate-errors");add_argument("window-size=1920,1024");add_argument('--headless');add_argument('--no-sandbox');add_argument('--disable-gpu')
+  OPTIONS: add_argument("--ignore-certificate-errors");add_argument("window-size=1920,1024");add_argument('--headless');add_argument('--no-sandbox');add_argument('--disable-gpu');add_argument('--disable-dev-shm-usage')
 S3:
   AWS_ACCESS_KEY_ID: S3_AWS_ACCESS_KEY_ID
   AWS_SECRET_ACCESS_KEY: S3_AWS_SECRET_ACCESS_KEY

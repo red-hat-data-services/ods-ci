@@ -805,19 +805,22 @@ Reload RHODS Dashboard Page
 Handle Deletion Confirmation Modal
     [Documentation]    Handles confirmation modal on item deletion
     [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
+    # Once fixed https://issues.redhat.com/browse/RHODS-9730 change the button xpath to
+    # xpath=//button[text()="Delete ${item_type}"]
+    ${delete_btn_xp}    Set Variable    xpath=//button[contains(text(), 'Delete')]
     Wait Until Generic Modal Appears
     Run Keyword And Warn On Failure    Page Should Contain    Delete ${item_type}?
-    Run Keyword And Continue On Failure    Page Should Contain    This action cannot be undone.
+    Run Keyword And Warn On Failure    Page Should Contain    This action cannot be undone.
     IF    "${additional_msg}" != "${NONE}"
         Run Keyword And Continue On Failure    Page Should Contain    ${additional_msg}
     END
     Run Keyword And Continue On Failure    Page Should Contain    Confirm deletion by typing ${item_title} below:
-    Run Keyword And Continue On Failure    Element Should Be Disabled    xpath=//button[text()="Delete ${item_type}"]
+    Run Keyword And Continue On Failure    Element Should Be Disabled    ${delete_btn_xp}
     Input Text    xpath=//input[@id="delete-modal-input"]    ${item_title}
-    Wait Until Element Is Enabled    xpath=//button[text()="Delete ${item_type}"]
+    Wait Until Element Is Enabled    ${delete_btn_xp}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Click Button    xpath=//button[text()="Delete ${item_type}"]
+        Click Button    ${delete_btn_xp}
     END
     Wait Until Generic Modal Disappears

@@ -63,6 +63,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    workflow_name=${workflow_name}
     Delete Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}    ${PIPELINE_TEST_NAME}
     Delete Pipeline    ${PIPELINE_TEST_NAME}
+    Delete Pipeline Server    ${PRJ_TITLE}
     Delete Data Science Project    ${PRJ_TITLE}
 
 *** Keywords ***

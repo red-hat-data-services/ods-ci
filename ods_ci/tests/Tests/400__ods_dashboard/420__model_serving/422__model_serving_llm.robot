@@ -1,10 +1,11 @@
 *** Settings ***
+Documentation    Collection of tests to validate the model serving stack for Large Language Models (LLM)
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
 Resource    ../../100__deploy/130__operators/130__rhods_operator/138__rhods_operator_oom_kill_verification.robot
 Suite Setup       Install Model Serving Stack Dependencies
-# Suite Teardown    
+# Suite Teardown
 
 
 *** Variables ***

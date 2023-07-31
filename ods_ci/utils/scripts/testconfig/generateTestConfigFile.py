@@ -91,7 +91,24 @@ def parse_args():
         action="store_true",
         dest="skip_clone",
     )
+    parser.add_argument(
+        "--components",
+        type=str,
+        dest="components",
+        help="Comma-separated list of components and their states (component1:state1,component2:state2,...)",
+    )
+
     return parser.parse_args()
+
+def changeComponentState(components):
+    # Parse and convert the component states argument into a dictionary
+    component_states = {}
+    components_list = components.split(",")
+    for component in components_list:
+        comp, state = component.split(":")
+        component_states[comp] = True if state.lower() == "true" else False
+    
+    return changeComponentState
 
 
 def get_prometheus_token(project):
@@ -116,7 +133,8 @@ def get_prometheus_url(project):
 
 
 def generate_test_config_file(
-    config_template, config_data, test_cluster, set_prometheus_config
+    config_template, config_data, test_cluster, set_prometheus_config,
+    components=None
 ):
     """
     Generates test config file dynamically by
@@ -187,6 +205,9 @@ def generate_test_config_file(
     data["DEFAULT_NOTIFICATION_EMAIL"] = config_data["DEFAULT_NOTIFICATION_EMAIL"]
     data["RHM_TOKEN"] = config_data["RHM_TOKEN"]
 
+    if components:
+        data["COMPONENTS"] = changeComponentState(components)
+
     # Login to test cluster using oc command
     oc_login(
         data["OCP_CONSOLE_URL"],
@@ -230,7 +251,9 @@ def main():
 
     # Generate test config file
     generate_test_config_file(
-        args.config_template, config_data, args.test_cluster, args.set_prometheus_config
+        args.config_template, config_data, args.test_cluster, args.set_prometheus_config,
+        components=args.components,
+
     )
 
 

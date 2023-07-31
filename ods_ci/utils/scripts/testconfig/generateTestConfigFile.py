@@ -100,7 +100,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def changeComponentState(components):
+def change_component_state(components):
     # Parse and convert the component states argument into a dictionary
     component_states = {}
     components_list = components.split(",")
@@ -108,7 +108,7 @@ def changeComponentState(components):
         comp, state = component.split(":")
         component_states[comp] = True if state.lower() == "true" else False
     
-    return changeComponentState
+    return component_states
 
 
 def get_prometheus_token(project):
@@ -206,7 +206,7 @@ def generate_test_config_file(
     data["RHM_TOKEN"] = config_data["RHM_TOKEN"]
 
     if components:
-        data["COMPONENTS"] = changeComponentState(components)
+        data["COMPONENTS"] = change_component_state(components)
 
     # Login to test cluster using oc command
     oc_login(

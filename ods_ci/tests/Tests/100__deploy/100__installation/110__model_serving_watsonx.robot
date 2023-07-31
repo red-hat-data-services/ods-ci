@@ -16,8 +16,7 @@ Verify KServe Is Shipped
     [Documentation]    Verify KServe Is Shipped And Enabled Within ODS
     [Tags]    WatsonX
     ...       ODS-2325
-    @{kserve_pods_info} =    Fetch KServe Pods   
-    @{kserve_deployments_info} =    Fetch KServe Deployments
+    @{kserve_pods_info} =    Fetch KServe Pods
     @{kserve_services_info} =    Fetch KServe Controller Services
     @{kserve_wh_services_info} =    Fetch KServe Webhook Services
     Verify KServe Deployment
@@ -54,16 +53,6 @@ Fetch KServe Pods
     @{kserve_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=${KSERVE_NS}
     ...    label_selector=app.kubernetes.io/part-of=kserve
     RETURN    @{kserve_pods_info}
-
-Fetch KServe Deployments
-    [Documentation]    Fetches information from KServe deployments
-    ...    Args:
-    ...        None
-    ...    Returns:
-    ...        kserve_deployments_info(list(dict)): KServe deployments selected by label and namespace
-    @{kserve_deployments_info} =    Oc Get    kind=Deployment    api_version=v1    namespace=${KSERVE_NS}
-    ...    label_selector=app.kubernetes.io/part-of=kserve
-    RETURN    @{kserve_deployments_info}
 
 Fetch KServe Controller Services
     [Documentation]    Fetches information from KServe services

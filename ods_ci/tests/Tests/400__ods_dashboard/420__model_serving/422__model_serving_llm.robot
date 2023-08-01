@@ -3,26 +3,29 @@ Documentation    Collection of tests to validate the model serving stack for Lar
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
-Resource    ../../100__deploy/130__operators/130__rhods_operator/138__rhods_operator_oom_kill_verification.robot
 Suite Setup       Install Model Serving Stack Dependencies
 # Suite Teardown
 
 
 *** Variables ***
+${DEFAULT_OP_NS}=    openshift-operators
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless    
-${SERVERLESS_CR_NS}=    knative
+${SERVERLESS_CR_NS}=    knative-serving
+${SERVERLESS_KNATIVECR_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio.yaml
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${SERVICEMESH_CONTROLPLANE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/smcp.yaml
 ${SERVICEMESH_ROLL_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/smmr.yaml
+${SERVICEMESH_PEERAUTH_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/peer_auth.yaml
 ${SERVICEMESH_CR_NS}=    istio-system
 ${KIALI_OP_NAME}=     kiali-ossm
 ${KIALI_SUB_NAME}=    kiali-ossm
 ${JAEGER_OP_NAME}=     jaeger-product
 ${JAEGER_SUB_NAME}=    jaeger-product
+${KSERVE_NS}=    kserve    # will be replaced by redhat-ods-applications
 
 
 
@@ -35,9 +38,9 @@ Verify External Dependency Operators Can Be Deployed
 *** Keywords ***
 Install Model Serving Stack Dependencies
     Install Service Mesh Stack
+    Deploy Service Mesh CRs
     Install Serverless Stack
-    Deploy Service Mesh CRs And Wait For Pods
-    Deploy Serverless CRs And Wait For Pods
+    Deploy Serverless CRs 
 
 Install Service Mesh Stack
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
@@ -58,8 +61,14 @@ Install Service Mesh Stack
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${JAEGER_SUB_NAME}
+    Wait For Pods To Be Ready    label_selector=name=istio-operator
+    ...    namespace=${DEFAULT_OP_NS}
+    Wait For Pods To Be Ready    label_selector=name=jaeger-operator
+    ...    namespace=${DEFAULT_OP_NS}
+    Wait For Pods To Be Ready    label_selector=name=kiali-operator
+    ...    namespace=${DEFAULT_OP_NS}
 
-Deploy Service Mesh CRs And Wait For Pods
+Deploy Service Mesh CRs
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVICEMESH_CR_NS}
     Copy File     ${SERVICEMESH_CONTROLPLANE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -67,17 +76,29 @@ Deploy Service Mesh CRs And Wait For Pods
     Copy File     ${SERVICEMESH_ROLL_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    Copy File     ${SERVICEMESH_PEERAUTH_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -f smcp_filled.yaml
+    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -f smmr_filled.yaml
-    # add peer auth - replace namespaces with a sed
-    # Wait Until Operator Pods Are Running
-
-Deploy Serverless CRs And Wait For Pods
-    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_CR_NS}
-    Add Namespace To ServiceMeshMemberRoll    namespace=${SERVERLESS_CR_NS}
-    # Wait Until Operator Pods Are Running
+    ...    sed -i "s/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i "s/{{KSERVE_NS}}/${KSERVE_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
+    Wait For Pods To Be Ready    label_selector=app=istiod
+    ...    namespace=${SERVICEMESH_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=prometheus
+    ...    namespace=${SERVICEMESH_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=istio-ingressgateway
+    ...    namespace=${SERVICEMESH_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=istio-egressgateway
+    ...    namespace=${SERVICEMESH_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=jaeger
+    ...    namespace=${SERVICEMESH_CR_NS}
 
 Install Serverless Stack
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_NS}
@@ -90,3 +111,34 @@ Install Serverless Stack
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+    Wait For Pods To Be Ready    label_selector=name=knative-openshift
+    ...    namespace=${SERVERLESS_NS}
+    Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
+    ...    namespace=${SERVERLESS_NS}
+    Wait For Pods To Be Ready    label_selector=knative-operator
+    ...    namespace=${SERVERLESS_NS}
+
+Deploy Serverless CRs 
+    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_CR_NS}
+    Add Namespace To ServiceMeshMemberRoll    namespace=${SERVERLESS_CR_NS}
+    Copy File     ${SERVERLESS_KNATIVECR_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i "s/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
+    Wait For Pods To Be Ready    label_selector=app=controller
+    ...    namespace=${SERVERLESS_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=net-istio-controller
+    ...    namespace=${SERVERLESS_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=net-istio-webhook
+    ...    namespace=${SERVERLESS_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=autoscaler-hpa
+    ...    namespace=${SERVERLESS_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=domain-mapping
+    ...    namespace=${SERVERLESS_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=webhook
+    ...    namespace=${SERVERLESS_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=activator
+    ...    namespace=${SERVERLESS_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=autoscaler
+    ...    namespace=${SERVERLESS_CR_NS}

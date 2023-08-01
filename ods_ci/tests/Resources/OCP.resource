@@ -97,3 +97,8 @@ Fetch CA Certificate If RHODS Is Self-Managed
     IF  ${self_managed}==${TRUE}
         Fetch Openshift CA Bundle
     END
+
+Wait For Pods To Be Ready
+    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}

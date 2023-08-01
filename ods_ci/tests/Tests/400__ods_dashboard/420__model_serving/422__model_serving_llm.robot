@@ -48,7 +48,7 @@ Install Model Serving Stack Dependencies
     Install Serverless Stack
     Deploy Serverless CRs
     Configure KNative Gateways
-    Set Up Test OpenShift Project    namespace=${TEST_NS}
+    Set Up Test OpenShift Project    test_ns=${TEST_NS}
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${TEST_NS}
 
@@ -193,6 +193,7 @@ Set Up Test OpenShift Project
     [Documentation]    Creates a test namespace and track it under ServiceMesh
     [Arguments]    ${test_ns}
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${test_ns}
+    Should Be Equal As Numbers    ${rc}    ${0}
     Add Peer Authentication    namespace=${test_ns}
     Add Namespace To ServiceMeshMemberRoll    namespace=${test_ns}
 

@@ -15,6 +15,8 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless    
 ${SERVERLESS_CR_NS}=    knative-serving
 ${SERVERLESS_KNATIVECR_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio.yaml
+${SERVERLESS_GATEWAYS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/gateways.yaml
+${WILDCARD_GEN_SCRIPT_FILEPATH}=    ods_ci/utils/scripts/generate-wildcard-certs.sh
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${SERVICEMESH_CONTROLPLANE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/smcp.yaml
@@ -40,7 +42,30 @@ Install Model Serving Stack Dependencies
     Install Service Mesh Stack
     Deploy Service Mesh CRs
     Install Serverless Stack
-    Deploy Serverless CRs 
+    Deploy Serverless CRs
+    Configure KNative Gateways
+
+Configure KNative Gateways
+    ${base_dir}=    Set Variable    ods_ci/tmp/certs
+    ${exists}=    Run Keyword And Return Status
+    ...    Directory Should Exist    ${base_dir}
+    IF    ${exists} == ${FALSE}
+        Create Directory    ${base_dir}        
+    END
+    ${rc}    ${domain_name}=    Run And Return Rc And Output
+    ...    oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}' | awk -F'.' '{print $(NF-1)"."$NF}'
+    ${rc}    ${common_name}=    Run And Return Rc And Output
+    ...    oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}'|sed 's/apps.//'
+    ${rc}    ${out}=    Run And Return Rc And Output    ./${WILDCARD_GEN_SCRIPT_FILEPATH} ${base_dir} ${domain_name} ${common_name}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc create secret tls wildcard-certs --cert=${base_dir}/wildcard.crt --key=${base_dir}/wildcard.key -n ${SERVICEMESH_CR_NS}
+    Copy File     ${SERVERLESS_GATEWAYS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i "s/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
 
 Install Service Mesh Stack
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}

@@ -9,19 +9,20 @@ Suite Setup       Install Model Serving Stack Dependencies
 
 
 *** Variables ***
+${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${SERVERLESS_OP_NAME}=     serverless-operator
-${SERVERLESS_SUB_NAME}=    serverless-operator-sub
+${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless    
 ${SERVERLESS_CR_NS}=    knative
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
-${SERVICEMESH_SUB_NAME}=    servicemeshoperator-sub
-${SERVICEMESH_CONTROLPLANE_FILEPATH}=    ods_ci/tests/Resources/Files/llm/smcp.yaml
-${SERVICEMESH_ROLL_FILEPATH}=    ods_ci/tests/Resources/Files/llm/smmr.yaml
+${SERVICEMESH_SUB_NAME}=    servicemeshoperator
+${SERVICEMESH_CONTROLPLANE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/smcp.yaml
+${SERVICEMESH_ROLL_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/smmr.yaml
 ${SERVICEMESH_CR_NS}=    istio-system
 ${KIALI_OP_NAME}=     kiali-ossm
-${KIALI_SUB_NAME}=    kiali-ossm-sub
+${KIALI_SUB_NAME}=    kiali-ossm
 ${JAEGER_OP_NAME}=     jaeger-product
-${JAEGER_SUB_NAME}=    jaeger-product-sub
+${JAEGER_SUB_NAME}=    jaeger-product
 
 
 
@@ -60,12 +61,12 @@ Install Service Mesh Stack
 
 Deploy Service Mesh CRs And Wait For Pods
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVICEMESH_CR_NS}
-    Copy File     ${SERVICEMESH_CONTROLPLANE_FILEPATH}    smcp_filled.yaml
+    Copy File     ${SERVICEMESH_CONTROLPLANE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" smcp_filled.yaml
-    Copy File     ${SERVICEMESH_ROLL_FILEPATH}    smmr_filled.yaml
+    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
+    Copy File     ${SERVICEMESH_ROLL_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" smmr_filled.yaml
+    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -74,8 +75,8 @@ Deploy Service Mesh CRs And Wait For Pods
     # Wait Until Operator Pods Are Running
 
 Deploy Serverless CRs And Wait For Pods
-    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVELESS_CR_NS}
-    Add Namespace To ServiceMeshMemberRoll    namespace=${SERVELESS_CR_NS}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_CR_NS}
+    Add Namespace To ServiceMeshMemberRoll    namespace=${SERVERLESS_CR_NS}
     # Wait Until Operator Pods Are Running
 
 Install Serverless Stack
@@ -83,7 +84,9 @@ Install Serverless Stack
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
     ...    subscription_name=${SERVERLESS_SUB_NAME}
     ...    catalog_source_name=redhat-operators
-    ...    operator_group_target_ns=${SERVERLESS_NS}
+    ...    operator_group_name=serverless-operators
+    ...    operator_group_ns=${SERVERLESS_NS}
+    ...    operator_group_target_ns=''
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}

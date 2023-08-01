@@ -37,8 +37,6 @@ Install Model Serving Stack Dependencies
     Install Serverless Stack
     Deploy Service Mesh CRs And Wait For Pods
     Deploy Serverless CRs And Wait For Pods
-    # deploy CRs and configure
-
 
 Install Service Mesh Stack
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
@@ -62,10 +60,16 @@ Install Service Mesh Stack
 
 Deploy Service Mesh CRs And Wait For Pods
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVICEMESH_CR_NS}
+    Copy File     ${SERVICEMESH_CONTROLPLANE_FILEPATH}    smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -f ${SERVICEMESH_CONTROLPLANE_FILEPATH}    # replace NS in the yaml with a sed
+    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" smcp_filled.yaml
+    Copy File     ${SERVICEMESH_ROLL_FILEPATH}    smmr_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -f ${SERVICEMESH_ROLL_FILEPATH}    # replace NS in the yaml with a sed
+    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" smmr_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f smcp_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f smmr_filled.yaml
     # add peer auth - replace namespaces with a sed
     # Wait Until Operator Pods Are Running
 
@@ -73,7 +77,6 @@ Deploy Serverless CRs And Wait For Pods
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVELESS_CR_NS}
     Add Namespace To ServiceMeshMemberRoll    namespace=${SERVELESS_CR_NS}
     # Wait Until Operator Pods Are Running
-
 
 Install Serverless Stack
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_NS}

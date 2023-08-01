@@ -72,6 +72,7 @@ Install Service Mesh Stack
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${JAEGER_SUB_NAME}
+    Sleep    30s
     Wait For Pods To Be Ready    label_selector=name=istio-operator
     ...    namespace=${DEFAULT_OP_NS}
     Wait For Pods To Be Ready    label_selector=name=jaeger-operator
@@ -95,6 +96,7 @@ Deploy Service Mesh CRs
     Add Peer Authentication    namespace=${SERVICEMESH_CR_NS}
     Add Peer Authentication    namespace=${SERVERLESS_CR_NS}
     Add Peer Authentication    namespace=${KSERVE_NS}
+    Sleep    30s
     Wait For Pods To Be Ready    label_selector=app=istiod
     ...    namespace=${SERVICEMESH_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=prometheus
@@ -104,6 +106,8 @@ Deploy Service Mesh CRs
     Wait For Pods To Be Ready    label_selector=app=istio-egressgateway
     ...    namespace=${SERVICEMESH_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=jaeger
+    ...    namespace=${SERVICEMESH_CR_NS}
+    Wait For Pods To Be Ready    label_selector=app=kiali
     ...    namespace=${SERVICEMESH_CR_NS}
 
 Add Peer Authentication
@@ -127,6 +131,7 @@ Install Serverless Stack
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+    Sleep    30s
     Wait For Pods To Be Ready    label_selector=name=knative-openshift
     ...    namespace=${SERVERLESS_NS}
     Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
@@ -143,6 +148,7 @@ Deploy Serverless CRs
     ...    sed -i "s/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
+    Sleep    15s
     Wait For Pods To Be Ready    label_selector=app=controller
     ...    namespace=${SERVERLESS_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=net-istio-controller

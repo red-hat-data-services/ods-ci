@@ -55,7 +55,7 @@ Verify RHODS Installation
   ...                   timeout=400
   Wait For Pods Numbers   1
   ...                   namespace=redhat-ods-applications
-  ...                   label_selector=app.kubernetes.io/created-by=data-science-pipelines-operator
+  ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
   ...                   timeout=400
   Wait For Pods Numbers   3
   ...                   namespace=redhat-ods-monitoring

@@ -2,7 +2,7 @@ apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
   name: minimal
-  namespace: istio-system
+  namespace: {{SERVICEMESH_CR_NS}}
 spec:
   addons:
     grafana:

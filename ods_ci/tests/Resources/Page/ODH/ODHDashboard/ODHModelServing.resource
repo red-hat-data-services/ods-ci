@@ -258,3 +258,11 @@ Deploy Model Via CLI
     ...    oc apply -f ${isvc_filepath} -n ${namespace}
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${out}
+
+Get KServe Inference Host Via CLI
+    [Arguments]    ${isvc_name}    ${namespace}
+    ${rc}    ${ksvc_host}=    Run And Return Rc And Output
+    ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
+    Should Be Equal As Integers    ${rc}    ${0}
+    Should Not Be Empty    ${ksvc_host}
+    RETURN    ${ksvc_host}

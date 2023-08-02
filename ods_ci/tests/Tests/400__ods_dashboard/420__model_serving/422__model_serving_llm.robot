@@ -55,6 +55,14 @@ Verify User Can Serve And Query A Model
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_isvc_name}
     ...    namespace=${TEST_NS}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_isvc_name}   namespace=${TEST_NS}
+    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
+    ${header}=    Set Variable    'mm-model-id: ${flan_isvc_name}'
+    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+    ...    json_body=${body}    json_header=${header}
+    ...    insecure=${TRUE}
+
 
 
 
@@ -92,7 +100,7 @@ Install Service Mesh Stack
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${JAEGER_SUB_NAME}
-    Sleep    30s
+    # Sleep   30s
     Wait For Pods To Be Ready    label_selector=name=istio-operator
     ...    namespace=${DEFAULT_OP_NS}
     Wait For Pods To Be Ready    label_selector=name=jaeger-operator
@@ -100,9 +108,11 @@ Install Service Mesh Stack
     Wait For Pods To Be Ready    label_selector=name=kiali-operator
     ...    namespace=${DEFAULT_OP_NS}
 
+
 Deploy Service Mesh CRs
     [Documentation]    Deploys CustomResources for ServiceMesh operator
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVICEMESH_CR_NS}
+    # Should Be Equal As Integers    ${rc}    ${0}
     Copy File     ${SERVICEMESH_CONTROLPLANE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
@@ -120,12 +130,7 @@ Deploy Service Mesh CRs
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
-    Add Peer Authentication    namespace=${SERVICEMESH_CR_NS}
-    Add Peer Authentication    namespace=${SERVERLESS_CR_NS}
-    Add Peer Authentication    namespace=${KSERVE_NS}
-    Sleep    30s
+    Should Be Equal As Integers    ${rc}    ${0}
     Wait For Pods To Be Ready    label_selector=app=istiod
     ...    namespace=${SERVICEMESH_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=prometheus
@@ -138,6 +143,17 @@ Deploy Service Mesh CRs
     ...    namespace=${SERVICEMESH_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=kiali
     ...    namespace=${SERVICEMESH_CR_NS}
+    Copy File     ${SERVICEMESH_ROLL_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_NS}
+    Add Peer Authentication    namespace=${SERVICEMESH_CR_NS}
+    Add Peer Authentication    namespace=${KSERVE_NS}
+    Add Namespace To ServiceMeshMemberRoll    namespace=${KSERVE_NS}
 
 Add Peer Authentication
     [Documentation]    Add a service to the service-to-service auth system of ServiceMesh
@@ -145,8 +161,10 @@ Add Peer Authentication
     Copy File     ${SERVICEMESH_PEERAUTH_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{NAMESPACE}}/${namespace}/g' ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
 
 Install Serverless Stack
     [Documentation]    Install the operators needed for Serverless operator purposes
@@ -162,7 +180,7 @@ Install Serverless Stack
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
     ...    namespace=${SERVERLESS_NS}
-    Sleep    30s
+    # Sleep   30s
     Wait For Pods To Be Ready    label_selector=name=knative-openshift
     ...    namespace=${SERVERLESS_NS}
     Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
@@ -173,13 +191,16 @@ Install Serverless Stack
 Deploy Serverless CRs 
     [Documentation]    Deploys the CustomResources for Serverless operator
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_CR_NS}
+    Add Peer Authentication    namespace=${SERVERLESS_CR_NS}
     Add Namespace To ServiceMeshMemberRoll    namespace=${SERVERLESS_CR_NS}
     Copy File     ${SERVERLESS_KNATIVECR_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
-    Sleep    15s
+    Should Be Equal As Integers    ${rc}    ${0}
+    # Sleep   15s
     Wait For Pods To Be Ready    label_selector=app=controller
     ...    namespace=${SERVERLESS_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=net-istio-controller
@@ -207,18 +228,25 @@ Configure KNative Gateways
     END
     ${rc}    ${domain_name}=    Run And Return Rc And Output
     ...    oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}' | awk -F'.' '{print $(NF-1)"."$NF}'
+    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${common_name}=    Run And Return Rc And Output
     ...    oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}'|sed 's/apps.//'
+    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output    ./${WILDCARD_GEN_SCRIPT_FILEPATH} ${base_dir} ${domain_name} ${common_name}
+    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc create secret tls wildcard-certs --cert=${base_dir}/wildcard.crt --key=${base_dir}/wildcard.key -n ${SERVICEMESH_CR_NS}
     Copy File     ${SERVERLESS_GATEWAYS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
+
 
 Set Up Test OpenShift Project
     [Documentation]    Creates a test namespace and track it under ServiceMesh

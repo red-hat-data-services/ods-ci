@@ -153,10 +153,11 @@ Apply DataScienceCluster CustomResource
     Run    oc apply -f ${file_path}dsc_apply.yml
     Remove File    ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        ${condition}    Evaluate    $COMPONENTS.["${cmp}"] if $cmp in $COMPONENTS else False
-        IF    ${condition}
+        IF    ${cmp} not in ${COMPONENTS}
+            Component Should Not Be Enabled    ${cmp}
+        ELSE IF    ${COMPONENTS.${cmp}} == ${True}
             Component Should Be Enabled    ${cmp}
-        ELSE
+        ELSE IF    ${COMPONENTS.${cmp}} == ${False}
             Component Should Not Be Enabled    ${cmp}
         END
     END
@@ -168,10 +169,11 @@ Create DataScienceCluster CustomResource Using Test Variables
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
     Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        ${condition}    Evaluate    $COMPONENTS.["${cmp}"] if $cmp in $COMPONENTS else False
-        IF    $condition
+        IF    ${cmp} not in ${COMPONENTS}
+            Run    sed -i 's/<${cmp}_value>/false/' ${file_path}dsc_apply.yml
+        ELSE IF    ${COMPONENTS.${cmp}} == ${True}
             Run    sed -i 's/<${cmp}_value>/true/' ${file_path}dsc_apply.yml
-        ELSE
+        ELSE IF    ${COMPONENTS.${cmp}} == ${False}
             Run    sed -i 's/<${cmp}_value>/false/' ${file_path}dsc_apply.yml
         END
     END

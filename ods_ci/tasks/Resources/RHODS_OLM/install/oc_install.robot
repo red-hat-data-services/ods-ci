@@ -136,7 +136,7 @@ Wait For Pods Numbers
 Apply DataScienceCluster CustomResource
     [Documentation]
     [Arguments]        ${dsc_name}=default
-    ${file_path} =    Set Variable    ods_ci/tasks/Resources/Files/
+    ${file_path} =    Set Variable    tasks/Resources/Files/
     Log to Console    Requested Configuration:
     FOR    ${cmp}    IN    @{COMPONENTS}
         Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
@@ -160,7 +160,7 @@ Apply DataScienceCluster CustomResource
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
     [Arguments]    ${dsc_name}=default
-    ${file_path} =    Set Variable    ods_ci/tasks/Resources/Files/
+    ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
     Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENTS}

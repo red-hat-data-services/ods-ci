@@ -15,7 +15,8 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     [Documentation]    Installs the given operator via CLI
     [Arguments]    ${operator_name}    ${subscription_name}    ${namespace}=openshift-operators
     ...            ${channel}=stable    ${catalog_source_name}=certified-operators
-    ...            ${cs_namespace}=openshift-marketplace    ${operator_group_target_ns}=${NONE}
+    ...            ${cs_namespace}=openshift-marketplace    ${operator_group_name}=${NONE}
+    ...            ${operator_group_ns}=${NONE}    ${operator_group_target_ns}=${NONE}
     ${operator_sub_filepath}=    Set Variable    ${FILES_RESOURCES_DIRPATH}/${operator_name}-sub.yaml
     Copy File    ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${operator_sub_filepath}
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<SUBSCRIPTION_NAME>/${subscription_name}/g" ${operator_sub_filepath}    # robocop: disable
@@ -25,18 +26,19 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
-    IF    "${operator_group_target_ns}" != "${NONE}"
-        Create Operator Group    operator_name=${operator_name}
-        ...    namespace=${namespace}    target_namespace=${operator_group_target_ns}
+    IF    "${operator_group_name}" != "${NONE}"
+        Create Operator Group    name=${operator_group_name}
+        ...    namespace=${operator_group_ns}    target_namespace=${operator_group_target_ns}
+        ...    operator_name=${operator_name}
     END
 
 Create Operator Group
     [Documentation]    Creates the Operator Group object which might be needed by an operator.
     ...                It currently supports creating OperatorGroups with only 1 targeted namespace
-    [Arguments]    ${operator_name}    ${namespace}    ${target_namespace}
+    [Arguments]    ${name}    ${namespace}    ${target_namespace}    ${operator_name}
     ${operator_group_filepath}=    Set Variable    ${FILES_RESOURCES_DIRPATH}/${operator_name}-group.yaml    # robocop: disable
     Copy File    ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${operator_group_filepath}
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<BASE_NAME>/${operator_name}/g" ${operator_group_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<BASE_NAME>/${name}/g" ${operator_group_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<NAMESPACE>/${namespace}/g" ${operator_group_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<TARGET_NAMESPACE>/${target_namespace}/g" ${operator_group_filepath}    # robocop: disable
     Oc Apply    kind=OperatorGroup    src=${operator_group_filepath}    api_version=v1
@@ -44,7 +46,7 @@ Create Operator Group
 Operator Subscription Last Condition Should Be
     [Documentation]    Checks the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
-    ...    ${subcription_name}    ${namespace}
+    ...    ${subcription_name}    ${namespace}=openshift-operators
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc get subscription ${subcription_name} -n ${namespace} -ojson | jq '.status.conditions | last | select(.type=="${type}" and .status=="${status}" and .reason=="${reason}")'    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
@@ -53,7 +55,7 @@ Operator Subscription Last Condition Should Be
 Wait Until Operator Subscription Last Condition Is    # robocop: disable
     [Documentation]    Keeps checking until the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
-    ...    ${subcription_name}    ${namespace}
+    ...    ${subcription_name}    ${namespace}=openshift-operators
     ...    ${retry}=20    ${retry_interval}=3s
     Wait Until Keyword Succeeds    ${retry} times    ${retry_interval}    Operator Subscription Last Condition Should Be    # robocop: disable
     ...    type=${type}     status=${status}
@@ -112,7 +114,7 @@ Delete Custom Resource
 
 Uninstall ISV Operator From OperatorHub Via CLI
     [Documentation]    Uninstalls the given operator via CLI
-    [Arguments]    ${subscription_name}    ${namespace}
+    [Arguments]    ${subscription_name}    ${namespace}=openshift-operators
     ${rc}    ${current_csv_name}=    Run And Return Rc And Output
     ...    oc get subscription ${subscription_name} -n ${namespace} -ojson | jq '.status.currentCSV' | tr -d '"'    # robocop: disable
     Oc Delete    kind=Subscription    name=${subscription_name}    namespace=${namespace}

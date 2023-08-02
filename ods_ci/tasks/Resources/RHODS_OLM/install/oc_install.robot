@@ -174,7 +174,7 @@ Create DataScienceCluster CustomResource Using Test Variables
         TRY
             IF    ${COMPONENTS.${cmp}} == ${True}
                 Run    sed -i 's/<${cmp}_value>/true/' ${file_path}dsc_apply.yml
-            ELSE
+            ELSE IF    ${COMPONENTS.${cmp}} == ${False}
                 Run    sed -i 's/<${cmp}_value>/false/' ${file_path}dsc_apply.yml
             END
         EXCEPT

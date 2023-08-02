@@ -10,6 +10,10 @@ Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource  RHOSi.resource
 
 
+*** Variables ***
+@{DEFAULT_CHARS_TO_ESCAPE}=    :    /    .
+
+
 *** Keywords ***
 Begin Web Test
     [Documentation]  This keyword should be used as a Suite Setup; it will log in to the
@@ -369,3 +373,10 @@ Check Process Output and Status
   END
   Create File    ${temp_log}    ${log_data}
   Process Should Be Stopped	    ${process_id}
+
+Escape String Chars
+    [Arguments]    ${str}    ${chars}=@{DEFAULT_CHARS_TO_ESCAPE}
+    FOR    ${char}    IN    @{chars}
+        ${str}=    Replace String   ${str}    ${char}    \\${char}
+    END
+    RETURN    ${str}

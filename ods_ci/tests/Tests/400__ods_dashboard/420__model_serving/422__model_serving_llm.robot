@@ -30,12 +30,34 @@ ${JAEGER_SUB_NAME}=    jaeger-product
 ${KSERVE_NS}=    kserve    # will be replaced by redhat-ods-applications
 ${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime.yaml
 ${TEST_NS}=    watsonx
-
+${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
+${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
+${USE_BUCKET_HTTPS}=    "1"
+${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
+${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
+${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 
 *** Test Cases ***
 Verify External Dependency Operators Can Be Deployed
     [Tags]    ODS-2326    WatsonX
     Pass Execution    message=Installation done as part of Suite Setup.
+
+Verify User Can Serve And Query A Model
+    [Tags]    ODS-XYZ    WatsonX
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
+    ...    region=us-east-2
+    ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
+    Compile Inference Service YAML    isvc_name=${flan_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_isvc_name}
+    ...    namespace=${TEST_NS}
+
+
+
 
 
 *** Keywords ***
@@ -43,14 +65,12 @@ Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
+    RHOSi Setup
     Install Service Mesh Stack
     Deploy Service Mesh CRs
     Install Serverless Stack
     Deploy Serverless CRs
     Configure KNative Gateways
-    Set Up Test OpenShift Project    test_ns=${TEST_NS}
-    # temporary step - caikit will be shipped OOTB
-    Deploy Caikit Serving Runtime    namespace=${TEST_NS}
 
 Install Service Mesh Stack
     [Documentation]    Installs the operators needed for Service Mesh operator purposes
@@ -85,7 +105,7 @@ Deploy Service Mesh CRs
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVICEMESH_CR_NS}
     Copy File     ${SERVICEMESH_CONTROLPLANE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
+    ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     Copy File     ${SERVICEMESH_ROLL_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
@@ -124,7 +144,7 @@ Add Peer Authentication
     [Arguments]    ${namespace}
     Copy File     ${SERVICEMESH_PEERAUTH_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{NAMESPACE}}/${namespace}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
+    ...    sed -i 's/{{NAMESPACE}}/${namespace}/g' ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
 
@@ -156,7 +176,7 @@ Deploy Serverless CRs
     Add Namespace To ServiceMeshMemberRoll    namespace=${SERVERLESS_CR_NS}
     Copy File     ${SERVERLESS_KNATIVECR_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
+    ...    sed -i 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
     Sleep    15s
@@ -194,9 +214,9 @@ Configure KNative Gateways
     ...    oc create secret tls wildcard-certs --cert=${base_dir}/wildcard.crt --key=${base_dir}/wildcard.key -n ${SERVICEMESH_CR_NS}
     Copy File     ${SERVERLESS_GATEWAYS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    ...    sed -i 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
 
@@ -214,3 +234,50 @@ Deploy Caikit Serving Runtime
     [Arguments]    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${CAIKIT_FILEPATH} -n ${namespace}
+
+Set Project And Runtime
+    [Arguments]    ${namespace}
+    Set Up Test OpenShift Project    test_ns=${namespace}
+    # temporary step - caikit will be shipped OOTB
+    Deploy Caikit Serving Runtime    namespace=${namespace}
+
+Create Secret For S3-Like Buckets
+    [Documentation]    Configures the cluster to fetch models from a S3-like bucket
+    [Arguments]    ${name}=${DEFAULT_BUCKET_SECRET_NAME}    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
+    ...            ${namespace}=${TEST_NS}    ${endpoint}=${S3.AWS_DEFAULT_ENDPOINT}
+    ...            ${region}=${S3.AWS_DEFAULT_REGION}    ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}
+    ...            ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}    ${use_https}=${USE_BUCKET_HTTPS}
+    Copy File     ${BUCKET_SECRET_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    Copy File     ${BUCKET_SA_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
+    ${endpoint_escaped}=    Escape String Chars    str=${endpoint}
+    ${accesskey_escaped}=    Escape String Chars    str=${access_key}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{ENDPOINT}}/${endpoint_escaped}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{USE_HTTPS}}/${use_https}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{REGION}}/${region}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{ACCESS_KEY_ID}}/${access_key_id}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{SECRET_ACCESS_KEY}}/${accesskey_escaped}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+        ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{NAME}}/${name}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
+    Run Keyword And Ignore Error    Run    oc create -f ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml -n ${namespace}
+    Add Secret To Service Account    sa_name=${sa_name}    secret_name=${name}    namespace=${namespace}
+
+Compile Inference Service YAML
+    [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}
+    Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{INFERENCE_SERVICE_NAME}}/${isvc_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml

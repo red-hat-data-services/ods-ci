@@ -156,7 +156,9 @@ Apply DataScienceCluster CustomResource
     ${yml} =    Get File    ${file_path}dsc_apply.yml
     Log To Console    Applying DSC yaml
     Log To Console    ${yml}
-    Run    oc apply -f ${file_path}dsc_apply.yml
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
+    Log To Console    ${output}
+    Should Be Equal As Integers	${return_code}	 0  msg=Error detected while applying DSC CR
     Remove File    ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    $cmp not in $COMPONENTS

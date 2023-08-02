@@ -126,8 +126,9 @@ Enable Single Component
     END
     ${patch} =    Catenate    SEPARATOR=    ${patch}    }}}'
     Log    ${patch}
-    ${status} =    Run    ${patch}
-    Log    ${status}
+    ${return_code}    ${output} =    Run And Return Rc And Output    ${patch}
+    Log    ${output}
+    Should Be Equal As Integers	${return_code}	 0  msg=Error detected while applying DSC CR
     Sleep    30s
 
 Change Component Status
@@ -175,6 +176,7 @@ Patch DataScienceCluster CustomResource To Original Configuration
     END
     ${patch} =    Catenate    SEPARATOR=    ${patch}    }}}'
     Log    ${patch}
-    ${status} =    Run    ${patch}
-    Log    ${status}
+    ${return_code}    ${output} =    Run And Return Rc And Output    ${patch}
+    Log    ${output}
+    Should Be Equal As Integers	${return_code}	 0  msg=Error detected while applying DSC CR
     Sleep    30s

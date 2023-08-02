@@ -123,6 +123,7 @@ Install Serverless Stack
     [Documentation]    Install the operators needed for Serverless operator purposes
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_NS}
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
+    ...    namespace=${SERVERLESS_NS}
     ...    subscription_name=${SERVERLESS_SUB_NAME}
     ...    catalog_source_name=redhat-operators
     ...    operator_group_name=serverless-operators
@@ -131,12 +132,13 @@ Install Serverless Stack
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+    ...    namespace=${SERVERLESS_NS}
     Sleep    30s
     Wait For Pods To Be Ready    label_selector=name=knative-openshift
     ...    namespace=${SERVERLESS_NS}
     Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
     ...    namespace=${SERVERLESS_NS}
-    Wait For Pods To Be Ready    label_selector=knative-operator
+    Wait For Pods To Be Ready    label_selector=name=knative-operator
     ...    namespace=${SERVERLESS_NS}
 
 Deploy Serverless CRs 

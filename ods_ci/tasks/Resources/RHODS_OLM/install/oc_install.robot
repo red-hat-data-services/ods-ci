@@ -79,16 +79,22 @@ Verify RHODS Installation
     ...                   label_selector=app.kubernetes.io/created-by=data-science-pipelines-operator
     ...                   timeout=400
   END
-  Wait For Pods Numbers   3
-  ...                   namespace=redhat-ods-monitoring
-  ...                   label_selector=prometheus=rhods-model-monitoring
-  ...                   timeout=400
+  # Monitoring stack not deployed with operator V2
+  IF    "${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta"
+    Wait For Pods Numbers   3
+    ...                   namespace=redhat-ods-monitoring
+    ...                   label_selector=prometheus=rhods-model-monitoring
+    ...                   timeout=400
+  END
   Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
   Log  Verified redhat-ods-applications  console=yes
   Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200
   Log  Verified redhat-ods-operator  console=yes
-  Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=1200
-  Log  Verified redhat-ods-monitoring  console=yes
+  # Monitoring stack not deployed with operator V2
+  IF    "${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta"
+    Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=1200
+    Log  Verified redhat-ods-monitoring  console=yes
+  END
   Oc Get  kind=Namespace  field_selector=metadata.name=rhods-notebooks
   Log  "Verified rhods-notebook"
 

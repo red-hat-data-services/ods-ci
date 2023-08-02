@@ -2,7 +2,6 @@
 Documentation  Set of Keywords for OCP checks
 Library    OperatingSystem
 Library    OpenShiftLibrary
-Library    Process
 Resource   Page/OCPDashboard/Pods/Pods.robot
 
 

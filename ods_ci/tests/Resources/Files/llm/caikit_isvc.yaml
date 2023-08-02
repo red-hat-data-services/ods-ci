@@ -13,5 +13,4 @@ spec:
       modelFormat:
         name: caikit
       runtime: caikit-runtime
-      #storageUri: s3://modelmesh-example-models/llm/models
       storageUri: {{STORAGE_URI}}

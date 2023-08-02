@@ -2,6 +2,8 @@
 Documentation  Set of Keywords for OCP checks
 Library    OperatingSystem
 Library    OpenShiftLibrary
+Library    Process
+Resource   Page/OCPDashboard/Pods/Pods.robot
 
 
 *** Keywords ***
@@ -100,5 +102,9 @@ Fetch CA Certificate If RHODS Is Self-Managed
 
 Wait For Pods To Be Ready
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s
+    Wait Until Keyword Succeeds    ${timeout}    3s
+    ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
+    ...    status_only=${FALSE}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
+    Should Be Equal As Numbers    ${rc}    ${0}

@@ -107,7 +107,7 @@ Enable Single Component
     ...    disables all components
     [Arguments]    ${component}    ${dsc_name}=default
     IF    "${component}" not in @{COMPONENTS} and "${component}" != "none"
-        Log    unknown component: ${component}
+        Log    unknown component: ${component}    level=WARN
         RETURN
     END
     ${len} =    Get Length    ${COMPONENTS}
@@ -136,13 +136,14 @@ Change Component Status
     ...    set to true) or return the patch string to be combined later for a bigger patch command.
     [Arguments]    ${component}    ${run}=${TRUE}    ${enable}=true
     IF    "${component}" not in @{COMPONENTS}
-        Log    unknown component: ${component}
+        Log    unknown component: ${component}    lvel=WARN
         RETURN
     END
     IF    ${run}==${TRUE}
         ${command} =    Catenate    SEPARATOR=    ${PATCH_PREFIX}   "${component}":{"enabled": ${enable}}    }}}'
-        ${status} =    Run    ${command}
-        Log    ${status}
+        ${return_code}    ${output} =    Run And Return Rc And Output    ${command}
+        Log    ${output}
+        Should Be Equal As Integers	${return_code}	 0  msg=Error detected while applying DSC CR
         Sleep    30s
     ELSE
         RETURN    "${component}":{"enabled": ${enable}}

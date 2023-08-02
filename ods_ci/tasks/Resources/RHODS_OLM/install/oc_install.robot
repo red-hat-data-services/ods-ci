@@ -158,7 +158,7 @@ Apply DataScienceCluster CustomResource
     Log To Console    ${yml}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
     Log To Console    ${output}
-    Should Be Equal As Integers	${return_code}	 0  msg=Error detected while applying DSC CR
+    Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while applying DSC CR
     Remove File    ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    $cmp not in $COMPONENTS
@@ -199,5 +199,7 @@ Component Should Not Be Enabled
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false)
     [Arguments]    ${component}    ${dsc_name}=default
-    ${status} =    Run    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'
-    RETURN    ${status}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'  #robocop:disable
+    Log    ${output}
+    Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while getting component status
+    RETURN    ${output}

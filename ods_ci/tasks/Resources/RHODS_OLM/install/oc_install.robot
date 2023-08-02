@@ -6,6 +6,7 @@ Library    OperatingSystem
 
 *** Variables ***
 ${DSC_NAME} =    default
+@{COMPONENT_LIST} =    dashboard    datasciencepipelines    distributedWorkloads    kserve    modelmeshserving    workbenches  # robocop: disable
 
 
 *** Keywords ***
@@ -138,7 +139,7 @@ Apply DataScienceCluster CustomResource
     [Arguments]        ${dsc_name}=default
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Log to Console    Requested Configuration:
-    FOR    ${cmp}    IN    @{COMPONENTS}
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
         Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
     END
     Create DataScienceCluster CustomResource Using Test Variables
@@ -147,7 +148,7 @@ Apply DataScienceCluster CustomResource
     Log To Console    ${yml}
     Run    oc apply -f ${file_path}dsc_apply.yml
     Remove File    ${file_path}dsc_apply.yml
-    FOR    ${cmp}    IN    @{COMPONENTS}
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    "${COMPONENTS.${cmp}}" == "True"
             Component Should Be Enabled    ${cmp}
         ELSE IF    "${COMPONENTS.${cmp}}" == "False"
@@ -163,7 +164,7 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
     Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
-    FOR    ${cmp}    IN    @{COMPONENTS}
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    ${COMPONENTS.${cmp}} == ${True}
             Run    sed -i 's/<${cmp}_value>/true/' ${file_path}dsc_apply.yml
         ELSE

@@ -96,7 +96,10 @@ Starburst Enterprise Suite Setup    # robocop: disable
     Install ISV Operator From OperatorHub Via CLI    operator_name=${OPERATOR_NAME}
     ...    subscription_name=${SUBSCRIPTION_NAME}    namespace=${NAMESPACE}
     ...    channel=${CHANNEL}    catalog_source_name=${CATALOG_SOURCE_NAME}
-    ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}    operator_group_target_ns=${NAMESPACE}
+    ...    cs_namespace=${CATALOG_SOURCE_NAMESPACE}
+    ...    operator_group_name=${OPERATOR_NAME}
+    ...    operator_group_ns=${NAMESPACE}
+    ...    operator_group_target_ns=${NAMESPACE}
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}

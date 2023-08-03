@@ -51,12 +51,18 @@ Delete Pods Using Label Selector
     IF    '${status}'!='FAIL'    FAIL
     ...    PODS with Label '${label_selector}' is not deleted in '${namespace}' namespace
 
-Check If POD Exists
+Check If Pod Exists
     [Documentation]    Check existence of an openshift pod by label selector
-    [Arguments]    ${namespace}    ${label_selector}
+    [Arguments]    ${namespace}    ${label_selector}    ${status_only}=${TRUE}
     ${status}    ${val}=    Run Keyword And Ignore Error    Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=${label_selector}
-    RETURN    ${status}
+        ...    label_selector=${label_selector}
+    IF    ${status_only} == ${TRUE}
+        RETURN    ${status}
+    ELSE
+        Should Be Equal    ${status}    PASS
+    END
+    
+    
 
 Verify Operator Pod Status
     [Documentation]    Verify Pod status

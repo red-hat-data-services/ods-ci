@@ -108,20 +108,8 @@ Wait For Pods To Be Ready
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     Should Be Equal As Numbers    ${rc}    ${0}
 
-Wait For Pods To Be Ready
-    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s
-    Wait Until Keyword Succeeds    ${timeout}    3s
-    ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
-    ...    status_only=${FALSE}
+Add Secret To Service Account
+    [Arguments]    ${sa_name}    ${secret_name}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
-    Should Be Equal As Numbers    ${rc}    ${0}
-
-Wait For Pods To Be Ready
-    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s
-    Wait Until Keyword Succeeds    ${timeout}    3s
-    ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
-    ...    status_only=${FALSE}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
-    Should Be Equal As Numbers    ${rc}    ${0}
+    ...    oc patch sa ${sa_name} -n ${namespace} -p '{"secrets": [{"name": "${secret_name}"}]}'
+    Should Be Equal As Integers    ${rc}    ${0}

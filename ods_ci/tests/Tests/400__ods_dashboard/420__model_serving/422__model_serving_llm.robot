@@ -44,7 +44,7 @@ Verify External Dependency Operators Can Be Deployed
     Pass Execution    message=Installation done as part of Suite Setup.
 
 Verify User Can Serve And Query A Model
-    [Tags]    ODS-XYZ    WatsonX
+    [Tags]    ODS-2341    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
     ...    region=us-east-2

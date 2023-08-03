@@ -248,6 +248,7 @@ Add Namespace To ServiceMeshMemberRoll
     [Arguments]    ${namespace}    ${servicemesh_ns}=istio-system
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'add', 'path': '/spec/members/-', 'value': \"${namespace}\"}]"
+    Should Be Equal As Integers    ${rc}    ${0}
 
 Deploy Model Via CLI
     [Documentation]    Deploys a model using Model Serving feature by applying the InfereceService

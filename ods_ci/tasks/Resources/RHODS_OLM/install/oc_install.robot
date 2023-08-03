@@ -76,22 +76,24 @@ Verify RHODS Installation
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
     Wait For Pods Numbers   1
     ...                   namespace=redhat-ods-applications
-    ...                   label_selector=app.kubernetes.io/created-by=data-science-pipelines-operator
+    ...                   label_selector=app.kubernetes.io/part-of=data-science-pipelines-operator
     ...                   timeout=400
   END
-  # Monitoring stack not deployed with operator V2
-  IF    "${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta"
+  # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
     Wait For Pods Numbers   3
     ...                   namespace=redhat-ods-monitoring
     ...                   label_selector=prometheus=rhods-model-monitoring
     ...                   timeout=400
   END
-  Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
-  Log  Verified redhat-ods-applications  console=yes
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
+    Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
+    Log  Verified redhat-ods-applications  console=yes
+  END
   Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200
   Log  Verified redhat-ods-operator  console=yes
-  # Monitoring stack not deployed with operator V2
-  IF    "${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta"
+  # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
     Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=1200
     Log  Verified redhat-ods-monitoring  console=yes
   END

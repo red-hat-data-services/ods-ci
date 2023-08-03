@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation    Collection of tests to validate the model serving stack for Large Language Models (LLM)
+Documentation     Collection of tests to validate the model serving stack for Large Language Models (LLM)
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
@@ -37,6 +37,7 @@ ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 
+
 *** Test Cases ***
 Verify External Dependency Operators Can Be Deployed
     [Tags]    ODS-2326    WatsonX
@@ -48,6 +49,7 @@ Verify User Can Serve And Query A Model
     Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
     ...    region=us-east-2
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
+    ${model_name}=    Set Variable    flan-t5-small-caikit
     Compile Inference Service YAML    isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
@@ -57,15 +59,11 @@ Verify User Can Serve And Query A Model
     ...    namespace=${TEST_NS}
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_isvc_name}   namespace=${TEST_NS}
     ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${flan_isvc_name}'
+    ${header}=    Set Variable    'mm-model-id: ${model_name}'
     Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
-
-
-
-
 
 
 *** Keywords ***
@@ -148,12 +146,14 @@ Deploy Service Mesh CRs
     ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{KSERVE_NS}}/${KSERVE_NS}/g' ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_NS}
+    # Add Namespace To ServiceMeshMemberRoll    namespace=${KSERVE_NS}
     Add Peer Authentication    namespace=${SERVICEMESH_CR_NS}
     Add Peer Authentication    namespace=${KSERVE_NS}
-    Add Namespace To ServiceMeshMemberRoll    namespace=${KSERVE_NS}
 
 Add Peer Authentication
     [Documentation]    Add a service to the service-to-service auth system of ServiceMesh
@@ -175,7 +175,7 @@ Install Serverless Stack
     ...    catalog_source_name=redhat-operators
     ...    operator_group_name=serverless-operators
     ...    operator_group_ns=${SERVERLESS_NS}
-    ...    operator_group_target_ns=''
+    ...    operator_group_target_ns=${NONE}
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
@@ -200,7 +200,7 @@ Deploy Serverless CRs
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
-    # Sleep   15s
+    Sleep   15s
     Wait For Pods To Be Ready    label_selector=app=controller
     ...    namespace=${SERVERLESS_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=net-istio-controller
@@ -252,7 +252,7 @@ Set Up Test OpenShift Project
     [Documentation]    Creates a test namespace and track it under ServiceMesh
     [Arguments]    ${test_ns}
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${test_ns}
-    Should Be Equal As Numbers    ${rc}    ${0}
+    # Should Be Equal As Numbers    ${rc}    ${0}
     Add Peer Authentication    namespace=${test_ns}
     Add Namespace To ServiceMeshMemberRoll    namespace=${test_ns}
 

@@ -76,7 +76,7 @@ Verify RHODS Installation
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
     Wait For Pods Numbers   1
     ...                   namespace=redhat-ods-applications
-    ...                   label_selector=app.kubernetes.io/part-of=data-science-pipelines-operator
+    ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
     ...                   timeout=400
   END
   # Monitoring stack not deployed with operator V2, only model serving monitoring stack present

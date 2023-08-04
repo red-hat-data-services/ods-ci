@@ -28,9 +28,6 @@ Install RHODS
           FAIL    Provided test envrioment is not supported
       END
   END
-  IF  "${UPDATE_CHANNEL}" != "stable" and "${UPDATE_CHANNEL}" != "beta"
-      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
-  END
 
 Verify RHODS Installation
   Log  Verifying RHODS installation  console=yes
@@ -39,6 +36,11 @@ Verify RHODS Installation
   ...                   namespace=redhat-ods-operator
   ...                   label_selector=name=rhods-operator
   ...                   timeout=2000
+  Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200
+  Log  Verified redhat-ods-operator  console=yes
+  IF  "${UPDATE_CHANNEL}" != "stable" and "${UPDATE_CHANNEL}" != "beta"
+      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+  END
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
     Wait For Pods Numbers  5
@@ -90,8 +92,6 @@ Verify RHODS Installation
     Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
     Log  Verified redhat-ods-applications  console=yes
   END
-  Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200
-  Log  Verified redhat-ods-operator  console=yes
   # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
     Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=1200

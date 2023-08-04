@@ -65,7 +65,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     Delete Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}    ${PIPELINE_TEST_NAME}
     Delete Pipeline    ${PIPELINE_TEST_NAME}
     Delete Pipeline Server    ${PRJ_TITLE}
-    Delete Data Science Project    ${PRJ_TITLE}
+    [Teardown]    Delete Data Science Project    ${PRJ_TITLE}
 
 Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
     [Documentation]    Verifies that metadata pods are not created when running a data science pipeline,
@@ -98,7 +98,7 @@ Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
         Log    ${pod['metadata']['name']}
         Should Not Contain    ${pod['metadata']['name']}    ds-pipeline-metadata
     END
-    Delete Data Science Project    ${PRJ_TITLE}
+    [Teardown]    Delete Data Science Project    ${PRJ_TITLE}
 
 *** Keywords ***
 Pipelines Suite Setup    # robocop: disable

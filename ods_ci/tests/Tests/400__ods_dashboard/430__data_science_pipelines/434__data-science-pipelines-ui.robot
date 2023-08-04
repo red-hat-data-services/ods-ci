@@ -67,7 +67,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     Delete Pipeline Server    ${PRJ_TITLE}
     Delete Data Science Project    ${PRJ_TITLE}
 
-Verify No Metadata Pods Were Deployed
+Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
     [Documentation]    Because the product includes code that is currently deactivated, it is imperative to prevent any
     ...         occurrences of disabled elements from appearing unexpectedly.
     [Tags]    Smoke

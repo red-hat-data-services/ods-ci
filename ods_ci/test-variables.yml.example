@@ -51,7 +51,6 @@ GITHUB_USER:
 COMPONENTS:
   dashboard: true
   datasciencepipelines: true
-  distributedWorkloads: true
   # Right now only one between modelmesh and kserve can be enabled
   kserve: false
   modelmeshserving: true

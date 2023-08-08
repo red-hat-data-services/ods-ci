@@ -8,8 +8,6 @@ spec:
       enabled: <dashboard_value>
     datasciencepipelines:
       enabled: <datasciencepipelines_value>
-    distributedWorkloads:
-      enabled: <distributedWorkloads_value>
     kserve:
       enabled: <kserve_value>
     modelmeshserving:

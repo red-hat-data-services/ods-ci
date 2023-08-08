@@ -10,7 +10,7 @@ Suite Teardown   Patch DataScienceCluster CustomResource To Original Configurati
 
 
 *** Variables ***
-@{COMPONENTS} =    dashboard    datasciencepipelines    distributedWorkloads    kserve    modelmeshserving    workbenches  # robocop: disable
+@{COMPONENTS} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches
 ${DSC_NAME} =    default
 ${PATCH_PREFIX} =    oc patch datasciencecluster ${DSC_NAME} --type='merge' -p '{"spec": {"components": {
 @{ORIGINAL_CONFIGURATION}
@@ -21,7 +21,6 @@ Verify Dashboard Component
     Run Keyword And Continue On Failure    Verify Component Resources    component=dashboard
     Component Should Be Enabled    dashboard
     Component Should Not Be Enabled    datasciencepipelines
-    Component Should Not Be Enabled    distributedWorkloads
     Component Should Not Be Enabled    kserve
     Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    workbenches
@@ -31,7 +30,6 @@ Verify DataSciencePipelines Component
     Run Keyword And Continue On Failure    Verify Component Resources    component=datasciencepipelines
     Component Should Be Enabled    datasciencepipelines
     Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
     Component Should Not Be Enabled    kserve
     Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    workbenches
@@ -41,7 +39,6 @@ Verify ModelMeshServing Component
     Run Keyword And Continue On Failure    Verify Component Resources    component=modelmeshserving
     Component Should Be Enabled    modelmeshserving
     Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
     Component Should Not Be Enabled    kserve
     Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    workbenches
@@ -51,7 +48,6 @@ Verify Workbenches Component
     Run Keyword And Continue On Failure    Verify Component Resources    component=workbenches
     Component Should Be Enabled    workbenches
     Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
     Component Should Not Be Enabled    kserve
     Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    datasciencepipelines
@@ -61,17 +57,6 @@ Verify Kserve Component
     Run Keyword And Continue On Failure    Verify Component Resources    component=kserve
     Component Should Be Enabled    kserve
     Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
-    Component Should Not Be Enabled    workbenches
-    Component Should Not Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    datasciencepipelines
-
-Verify DistributedWorkloads Component
-    [Documentation]
-    Run Keyword And Continue On Failure    Verify Component Resources    component=distributedWorkloads
-    Component Should Be Enabled    distributedWorkloads
-    Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    kserve
     Component Should Not Be Enabled    workbenches
     Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    datasciencepipelines
@@ -81,7 +66,6 @@ Verify No Components Enabled
     Run Keyword And Continue On Failure    Verify Component Resources    component=none
     Component Should Not Be Enabled    datasciencepipelines
     Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    distributedWorkloads
     Component Should Not Be Enabled    kserve
     Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    workbenches

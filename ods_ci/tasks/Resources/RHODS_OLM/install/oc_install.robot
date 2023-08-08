@@ -6,7 +6,7 @@ Library    OperatingSystem
 
 *** Variables ***
 ${DSC_NAME} =    default
-@{COMPONENT_LIST} =    dashboard    datasciencepipelines    distributedWorkloads    kserve    modelmeshserving    workbenches  # robocop: disable
+@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches
 
 
 *** Keywords ***

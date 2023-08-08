@@ -288,6 +288,9 @@ Spawn Notebook With Arguments  # robocop: disable
                 END
             END
             Spawn Notebook    ${spawner_timeout}    ${same_tab}
+            Run Keyword And Continue On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
+            ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
+            IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
             ${authorization_required} =  Is Service Account Authorization Required
             IF  ${authorization_required}  Authorize jupyterhub service account

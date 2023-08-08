@@ -75,6 +75,9 @@ Can Spawn Notebook
     # TODO: Verify why error isn't appearing within 1 minute
     # Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
     Spawn Notebook  same_tab=${False}
+    Run Keyword And Continue On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
+    ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
+    IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize jupyterhub service account

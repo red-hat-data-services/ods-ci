@@ -63,9 +63,11 @@ Create Workbench
     END
     IF    "${storage}" == "Persistent"
         IF    ${pv_existent} == ${TRUE}
+            Scroll Element Into View    xpath=//input[@name="persistent-existing-storage-type-radio"]
             Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
             Select An Existent PV   name=${pv_name}
         ELSE IF   ${pv_existent} == ${FALSE}
+            Scroll Element Into View    xpath=//input[@name="persistent-new-storage-type-radio"]
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
         ELSE
@@ -92,6 +94,7 @@ Add Environment Variables In Workbench
     ELSE
         ${add_key_value_text}=    Set Variable    Add another variable
     END
+    Scroll Element Into View    ${WORKBENCH_ADD_VAR_BTN_XP}
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
     ${n_objects}=    Get Length    ${env_variables}
     FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}    start=1

@@ -112,6 +112,7 @@ Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   ...    timeout=30s
 
 Launch ${dashboard_app} From RHODS Dashboard Link
+  Menu.Navigate To Page    Applications    Enabled
   Wait for RHODS Dashboard to Load    wait_for_cards=${TRUE}
   ...    expected_page=Enabled
   IF    "OpenShift" in $dashboard_app

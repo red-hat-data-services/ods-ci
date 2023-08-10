@@ -117,10 +117,14 @@ Add Environment Variables In Workbench
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
                     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
+                    # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
+                    # amount of pixels for the block of elements that gets added.
+                    IF    "${add_key_value_text}" == "Add another key / value pair"
+                        SeleniumLibrary.Execute Javascript    window.scrollBy(0,200)
+                    ELSE IF    "${add_key_value_text}" == "Add another variable"
+                        SeleniumLibrary.Execute Javascript    window.scrollBy(0,700)
+                    END
                 END
-                # The "Add another key/value pair" element might get pushed out of view on every loop
-                # The Key / Value block appears to be ~650px in height, so let's try scrolling by 700px on every loop
-                SeleniumLibrary.Execute Javascript    window.scrollBy(0,700)
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"
             ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD

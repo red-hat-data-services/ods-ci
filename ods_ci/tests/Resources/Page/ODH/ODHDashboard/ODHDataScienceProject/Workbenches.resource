@@ -118,6 +118,9 @@ Add Environment Variables In Workbench
                 IF    ${n_pairs}-${pair_idx} > 1
                     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
                 END
+                # The "Add another key/value pair" element might get pushed out of view on every loop
+                # The Key / Value block appears to be ~160px in height, so let's try scrolling by 200px on every loop
+                SeleniumLibrary.Execute Javascript    window.scrollBy(0,200)
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"
             ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
@@ -279,6 +282,9 @@ Start Workbench
 Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched
     [Arguments]    ${username}  ${password}  ${auth_type}
+    Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
+    ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
+    IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
     ${authorization_required}=  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize Jupyterhub Service Account

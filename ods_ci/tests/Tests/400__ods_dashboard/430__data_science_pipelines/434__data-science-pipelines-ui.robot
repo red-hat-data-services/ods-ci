@@ -9,7 +9,8 @@ Suite Teardown     Pipelines Suite Teardown
 
 
 *** Variables ***
-${PRJ_BASE_TITLE}=   DSP
+# lower case because it will be the OpenShift project
+${PRJ_BASE_TITLE}=   dsp
 ${PRJ_DESCRIPTION}=   ${PRJ_BASE_TITLE} is a test project for validating DS Pipelines feature
 ${DC_NAME}=    ds-pipeline-conn
 ${PIPELINE_TEST_BASENAME}=    iris
@@ -64,7 +65,40 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     Delete Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}    ${PIPELINE_TEST_NAME}
     Delete Pipeline    ${PIPELINE_TEST_NAME}
     Delete Pipeline Server    ${PRJ_TITLE}
-    Delete Data Science Project    ${PRJ_TITLE}
+    [Teardown]    Delete Data Science Project    ${PRJ_TITLE}
+
+Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
+    [Documentation]    Verifies that metadata pods are not created when running a data science pipeline,
+    ...         as this feature is currently disabled.
+    [Tags]    Smoke
+    ...       Tier1
+    Create Pipeline Server    dc_name=${DC_NAME}
+    ...    project_title=${PRJ_TITLE}
+    Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
+    Import Pipeline    name=${PIPELINE_TEST_NAME}
+    ...    description=${PIPELINE_TEST_DESC}
+    ...    project_title=${PRJ_TITLE}
+    ...    filepath=${PIPELINE_TEST_FILEPATH}
+    Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    pipeline_description=${PIPELINE_TEST_DESC}
+    Capture Page Screenshot
+    ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
+    ...    pipeline_name=${PIPELINE_TEST_NAME}    from_actions_menu=${FALSE}    run_type=Immediate
+    ...    press_cancel=${TRUE}
+    Open Data Science Project Details Page    ${PRJ_TITLE}
+    ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
+    ...    pipeline_name=${PIPELINE_TEST_NAME}    from_actions_menu=${FALSE}    run_type=Immediate
+    Open Data Science Project Details Page    ${PRJ_TITLE}
+    Wait Until Pipeline Last Run Is Started    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    timeout=10s
+    Wait Until Pipeline Last Run Is Finished    pipeline_name=${PIPELINE_TEST_NAME}
+    ...    timeout=180s
+    @{pods} =    Oc Get    kind=Pod    namespace=${PRJ_TITLE}
+    FOR    ${pod}    IN    @{pods}
+        Log    ${pod['metadata']['name']}
+        Should Not Contain    ${pod['metadata']['name']}    ds-pipeline-metadata
+    END
+    [Teardown]    Delete Data Science Project    ${PRJ_TITLE}
 
 *** Keywords ***
 Pipelines Suite Setup    # robocop: disable

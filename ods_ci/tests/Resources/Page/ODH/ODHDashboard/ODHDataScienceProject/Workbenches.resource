@@ -63,11 +63,13 @@ Create Workbench
     END
     IF    "${storage}" == "Persistent"
         IF    ${pv_existent} == ${TRUE}
-            Scroll Element Into View    xpath=//input[@name="persistent-existing-storage-type-radio"]
+            # Use the `Jump to section` links in the page to scroll the section into view
+            Click Element    //a[@href="#cluster-storage"]
             Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
             Select An Existent PV   name=${pv_name}
         ELSE IF   ${pv_existent} == ${FALSE}
-            Scroll Element Into View    xpath=//input[@name="persistent-new-storage-type-radio"]
+            # Use the `Jump to section` links in the page to scroll the section into view
+            Click Element    //a[@href="#cluster-storage"]
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
         ELSE
@@ -94,7 +96,8 @@ Add Environment Variables In Workbench
     ELSE
         ${add_key_value_text}=    Set Variable    Add another variable
     END
-    Scroll Element Into View    ${WORKBENCH_ADD_VAR_BTN_XP}
+    # Use the `Jump to section` links in the page to scroll the section into view
+    Click Element    //a[@href="#environment-variables"]
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
     ${n_objects}=    Get Length    ${env_variables}
     FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}    start=1
@@ -114,6 +117,13 @@ Add Environment Variables In Workbench
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
                     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
+                    # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
+                    # amount of pixels for the block of elements that gets added.
+                    IF    "${add_key_value_text}" == "Add another key / value pair"
+                        SeleniumLibrary.Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,200)  # robocop: disable
+                    ELSE IF    "${add_key_value_text}" == "Add another variable"
+                        SeleniumLibrary.Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,700)  # robocop: disable
+                    END
                 END
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"
@@ -276,6 +286,9 @@ Start Workbench
 Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched
     [Arguments]    ${username}  ${password}  ${auth_type}
+    Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
+    ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
+    IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
     ${authorization_required}=  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize Jupyterhub Service Account

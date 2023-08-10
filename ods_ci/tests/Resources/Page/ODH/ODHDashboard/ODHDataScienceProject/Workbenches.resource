@@ -116,14 +116,14 @@ Add Environment Variables In Workbench
                 Input Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//input[@aria-label="value of item ${pair_idx}"]
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
+                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
                     # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
                     # amount of pixels for the block of elements that gets added.
                     IF    "${add_key_value_text}" == "Add another key / value pair"
-                        SeleniumLibrary.Execute Javascript    window.scrollBy(0,200)
+                        SeleniumLibrary.Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,200)  # robocop: disable
                     ELSE IF    "${add_key_value_text}" == "Add another variable"
-                        SeleniumLibrary.Execute Javascript    window.scrollBy(0,700)
+                        SeleniumLibrary.Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,700)  # robocop: disable
                     END
-                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
                 END
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"

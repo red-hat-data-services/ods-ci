@@ -119,8 +119,8 @@ Add Environment Variables In Workbench
                     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
                 END
                 # The "Add another key/value pair" element might get pushed out of view on every loop
-                # The Key / Value block appears to be ~160px in height, so let's try scrolling by 200px on every loop
-                SeleniumLibrary.Execute Javascript    window.scrollBy(0,200)
+                # The Key / Value block appears to be ~650px in height, so let's try scrolling by 700px on every loop
+                SeleniumLibrary.Execute Javascript    window.scrollBy(0,700)
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"
             ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD

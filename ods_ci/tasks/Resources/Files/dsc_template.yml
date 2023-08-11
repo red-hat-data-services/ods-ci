@@ -4,6 +4,8 @@ metadata:
   name: <dsc_name>
 spec:
   components:
+    codeflare:
+      enabled: <codeflare_value>
     dashboard:
       enabled: <dashboard_value>
     datasciencepipelines:
@@ -12,6 +14,8 @@ spec:
       enabled: <kserve_value>
     modelmeshserving:
       enabled: <modelmeshserving_value>
+    ray:
+      enabled: <ray_value>
     workbenches:
       enabled: <workbenches_value>
 

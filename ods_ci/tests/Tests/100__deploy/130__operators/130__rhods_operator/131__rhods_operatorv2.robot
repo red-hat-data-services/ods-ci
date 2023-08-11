@@ -10,7 +10,7 @@ Suite Teardown   Patch DataScienceCluster CustomResource To Original Configurati
 
 
 *** Variables ***
-@{COMPONENTS} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches
+@{COMPONENTS} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray
 ${DSC_NAME} =    default
 ${PATCH_PREFIX} =    oc patch datasciencecluster ${DSC_NAME} --type='merge' -p '{"spec": {"components": {
 @{ORIGINAL_CONFIGURATION}

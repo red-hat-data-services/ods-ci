@@ -75,3 +75,8 @@ COMPONENTS:
   kserve: false
   modelmeshserving: true
   workbenches: true
+PRODUCT: RHODS
+APPLICATIONS_NAMESPACE: redhat-ods-applications
+MONITORING_NAMESPACE: redhat-ods-monitoring
+OPERATOR_NAMESPACE: redhat-ods-operator
+NOTEBOOKS_NAMESPACE: rhods-notebooks

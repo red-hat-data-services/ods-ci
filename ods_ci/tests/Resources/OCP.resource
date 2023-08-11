@@ -63,7 +63,8 @@ Verify Notebook CR Is Running
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
     ...                 in the cluster (e.g., usually on OSD, ROSA).
-    ...                 Returns ${TRUE} if RHODS Self-Managed is installed (e.g., usually on PSI or baremetal)
+    ...                 Returns ${TRUE} if RHODS Self-Managed is installed or if PRODUCT=ODH
+    IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
     ${is_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
     ...                                                      kind=CatalogSource
     ...                                                      name=addon-managed-odh-catalog
@@ -86,7 +87,7 @@ Get MachineSets
 Fetch Openshift CA Bundle
     [Documentation]    Gets the CA bundle defined in the secret `router-certs-defaults` in namespace `openshift-ingress`
     ...    Useful when working with self-managed clusters to verify connections
-    ${rc} =    Run And Return Rc    
+    ${rc} =    Run And Return Rc
     ...    oc get secret -n openshift-ingress router-certs-default -o json | jq '.data."tls.crt"' | sed 's/"//g' | base64 -d > openshift_ca.crt  # robocop: disable
     Should Be Equal As Strings    ${rc}    0
 

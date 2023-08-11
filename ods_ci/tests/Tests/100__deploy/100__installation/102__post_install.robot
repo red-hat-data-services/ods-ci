@@ -143,6 +143,7 @@ Verify That CUDA Build Chain Succeeds
     ...    Pytorch and Tensorflow can be spawned successfully
     [Tags]    Smoke
     ...       Tier1
+    ...       OpenDataHub
     ...       ODS-316    ODS-481
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
     IF  ${version_check}==False
@@ -290,13 +291,13 @@ Verify RHODS Notebooks Network Policies
     Launch Notebook And Stop It
     ${CR_name} =    Get User CR Notebook Name    username=${TEST_USER.USERNAME}
     ${policy_ctrl} =    Run
-    ...    oc get networkpolicy ${CR_name}-ctrl-np -n rhods-notebooks -o json | jq '.spec.ingress[0]'
+    ...    oc get networkpolicy ${CR_name}-ctrl-np -n ${NOTEBOOKS_NAMESPACE} -o json | jq '.spec.ingress[0]'
     ${expected_policy_ctrl} =    Get File    ods_ci/tests/Resources/Files/expected_ctrl_np.txt
     Should Be Equal As Strings    ${policy_ctrl}    ${expected_policy_ctrl}
     Log    ${policy_ctrl}
     Log    ${expected_policy_ctrl}
     ${policy_oauth} =    Run
-    ...    oc get networkpolicy ${CR_name}-oauth-np -n rhods-notebooks -o json | jq '.spec.ingress[0]'
+    ...    oc get networkpolicy ${CR_name}-oauth-np -n ${NOTEBOOKS_NAMESPACE} -o json | jq '.spec.ingress[0]'
     ${expected_policy_oauth} =    Get File    ods_ci/tests/Resources/Files/expected_oauth_np.txt
     Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
     Log    ${policy_oauth}
@@ -438,5 +439,5 @@ Launch Notebook And Stop It    # robocop: disable
     IF    ${authorization_required}    Authorize Jupyterhub Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook
+    Spawn Notebook With Arguments    image=minimal-notebook
     End Web Test

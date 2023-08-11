@@ -1,6 +1,7 @@
 # ODS-CI
-ODS-CI is a framework to test Red Hat Open Data Science features and functionality
-using QE tiered testing.
+ODS-CI is a framework to test [Red Hat Open Data Science](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science)
+and its upstream project, [Open Data Hub](https://opendatahub.io/).
+
 # Requirements
   Linux distribution that supports Selenium automation of a chromium web browser using [ChromeDriver](https://chromedriver.chromium.org)
   * chromedriver binaries can be downloaded from https://chromedriver.chromium.org/downloads. The chromedriver version must match the installed version of chromium/google-chrome
@@ -24,17 +25,29 @@ using QE tiered testing.
 
   1. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite.
   ```bash
-     # running all the tests 
-     sh ods_ci/run_robot_test.sh 
+     # Running all the tests
+     sh ods_ci/run_robot_test.sh
 
-     # running Smoke test suite via tag
-     sh ods_ci/run_robot_test.sh --include Smoke 
+     # Running Smoke test suite via tag
+     sh ods_ci/run_robot_test.sh --include Smoke
 
-     # running a specific test via tag
-     sh ods_ci/run_robot_test.sh --include ODS-XYZ 
+     # Running a specific test via tag
+     sh ods_ci/run_robot_test.sh --include ODS-XYZ
+
+     # Running a specific test via tag on Open Data Hub:
+     # We need to overwrite some global variables with --test-variable
+     # and some local variables with --variablefile
+     sh ods_ci/run_robot_test.sh \
+      --test-variable PRODUCT:ODH \
+      --test-variable APPLICATIONS_NAMESPACE:opendatahub \
+      --test-variable MONITORING_NAMESPACE:opendatahub \
+      --test-variable OPERATOR_NAMESPACE:openshift-operators \
+      --test-variable NOTEBOOKS_NAMESPACE:opendatahub \
+      --extra-robot-args '--variablefile ./ods_ci/test-variables-odh-overwrite.yml' \
+      --include XYZ
    ```
-   
-   * This run_robot_test.sh is a wrapper for creating the python virtual environment and running the Robot Framework CLI.   
+
+   * This run_robot_test.sh is a wrapper for creating the python virtual environment and running the Robot Framework CLI.
    * The wrapper script has several arguments and you can find details in the dedicated document file. See [run_args.md](ods_ci/docs/RUN_ARGUMENTS.md)
    * As alternative, you can run any of the test cases by creating the python virual environment, install the packages in [poetry.lock](poetry.lock) and running the `robot` command directly
 

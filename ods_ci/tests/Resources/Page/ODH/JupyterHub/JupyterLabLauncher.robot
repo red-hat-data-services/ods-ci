@@ -303,7 +303,7 @@ Run Repo and Clean
     [Documentation]    Clones a given repository and runs a given file. Cleans up
     ...    The server after execution is over, removing the cloned repository.
     Navigate Home (Root folder) In JupyterLab Sidebar File Browser
-    Run Keyword And Continue On Failure    Clone Git Repository And Run    ${REPO_URL}    ${NB_NAME}
+    Run Keyword And Warn On Failure    Clone Git Repository And Run    ${REPO_URL}    ${NB_NAME}
     Clean Up Server
 
 Maybe Close Popup

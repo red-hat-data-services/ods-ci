@@ -140,7 +140,7 @@ Get Original Configuration
         ${status} =    Is Component Enabled    ${cmp}
         Append To List    ${config}    ${status}
     END
-    ${ORIGINAL_CONFIGURATION} =    ${config}
+    ${ORIGINAL_CONFIGURATION} =    Set Variable    ${config}
 
 Patch DataScienceCluster CustomResource To Original Configuration
     [Documentation]  Enables a mix of components based on the values set before this test suite was started

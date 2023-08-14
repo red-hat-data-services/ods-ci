@@ -13,7 +13,7 @@ Uninstalling RHODS Operator
   ...  Uninstall RHODS
 
 Uninstall RHODS
-  ${new_operator} =    Is RHODS Version Greater Or Equal Than    2.0
+  ${new_operator} =    Is RHODS Version Greater Or Equal Than    2.0.0
   IF  "${cluster_type}" == "managed" and ${new_operator} == $False
     Uninstall RHODS In OSD
   ELSE IF  "${cluster_type}" == "selfmanaged" and ${new_operator} == $False

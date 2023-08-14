@@ -64,10 +64,10 @@ Uninstall RHODS In Self Managed Cluster For Operatorhub
 Uninstall RHODS V2
     [Documentation]    Keyword to uninstall the version 2 of the RHODS operator in Self-Managed
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete datasciencecluster $(oc get datasciencecluster --no-headers |  awk '{print $1}')
+    ...    oc delete datasciencecluster $(oc get datasciencecluster --no-headers | awk '{print $1}')
     Should Be Equal As Integers	${return_code}	 0   msg=Error deleting DataScienceCluster CR
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete dscinitialization $(oc get dscinitialization --no-headers |  awk '{print $1}')
+    ...    oc delete dscinitialization $(oc get dscinitialization --no-headers | awk '{print $1}')
     Should Be Equal As Integers	${return_code}	 0   msg=Error deleting DSCInitialization CR
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete subscription rhods-operator -n redhat-ods-operator

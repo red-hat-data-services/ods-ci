@@ -175,11 +175,11 @@ class DataSciencePipelinesAPI:
         return run_id
 
     @keyword
-    def check_run_status(self, run_id):
+    def check_run_status(self, run_id, timeout=160):
         run_status = None
         count = 0
-        while run_status != "Completed" and count < 160:
-            print(f"Checking run status: {run_status}")
+        run_finished_ok = False
+        while not run_finished_ok and count < timeout:
             response, status = self.do_get(
                 f"https://{self.route}/apis/v1beta1/runs/{run_id}",
                 headers={"Authorization": f"Bearer {self.sa_token}"},
@@ -191,9 +191,16 @@ class DataSciencePipelinesAPI:
             except JSONDecodeError:
                 print(response, status)
                 pass
+            print(f"Checking run status: {run_status}")
+            if run_status == 'Failed':
+                break
+            # https://github.com/tektoncd/pipeline/blob/main/docs/pipelineruns.md#monitoring-execution-status
+            if run_status == "Completed" or run_status == "Succeeded":
+                run_finished_ok = True
+                break
             time.sleep(1)
             count += 1
-        return run_status
+        return run_finished_ok
 
     @keyword
     def delete_runs(self, run_id):
@@ -288,6 +295,14 @@ class DataSciencePipelinesAPI:
         host = response[: response.index(":")]
         # host[4:] means that we need to remove '.api' from the url
         return f"https://oauth-openshift.apps.{host[4:]}/oauth/authorize?response_type=token&client_id=openshift-challenging-client"
+
+    def get_default_storage(self):
+        result, _ = self.run_oc("oc get storageclass -A -o json")
+        result = json.loads(result)
+        for storage_class in result['items']:
+            if storage_class['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] == 'true':
+                break
+        return storage_class['metadata']['name']
 
     def run_oc(self, command):
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)

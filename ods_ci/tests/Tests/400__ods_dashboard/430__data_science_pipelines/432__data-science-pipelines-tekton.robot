@@ -22,29 +22,39 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The Kfp_tekton
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-2203
+
     End To End Pipeline Workflow Using Kfp_tekton
     ...    username=${TEST_USER.USERNAME}
     ...    password=${TEST_USER.PASSWORD}
     ...    project=pipelineskfptekton1
-
+    ...    python_file=flip_coin.py
+    ...    method_name=flipcoin_pipeline
+    End To End Pipeline Workflow Using Kfp_tekton
+    ...    username=${TEST_USER.USERNAME}
+    ...    password=${TEST_USER.PASSWORD}
+    ...    project=pipelineskfptekton1
+    ...    python_file=upload_download.py
+    ...    method_name=wire_up_pipeline
+    ...    status_check_timeout=160
 
 *** Keywords ***
 # robocop: disable:line-too-long
 End To End Pipeline Workflow Using Kfp Tekton
     [Documentation]    Create, run and double check the pipeline result using Kfp_tekton python package. In the end,
     ...    clean the pipeline resources.
-    [Arguments]    ${username}    ${password}    ${project}
+    [Arguments]    ${username}    ${password}    ${project}    ${python_file}    ${method_name}
+    ...    ${status_check_timeout}=160
     Remove Pipeline Project    ${project}
     New Project    ${project}
     Install DataSciencePipelinesApplication CR    ${project}
     ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}    ds-pipeline-pipelines-definition
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working
     ${result}    Kfp Tekton Create Run From Pipeline Func    ${username}    ${password}    ${project}
-    ...    ds-pipeline-pipelines-definition    flip_coin.py    flipcoin_pipeline
+    ...    ds-pipeline-pipelines-definition    ${python_file}    ${method_name}
     ${run_status}   Kfp Tekton Wait For Run Completion    ${username}    ${password}    ${project}
-    ...    ds-pipeline-pipelines-definition    ${result}
-    Should Be True    '${run_status}' == 'Completed'    Pipeline run doesn't have Completed status
-    [Teardown]    Remove Pipeline Project    ${project}
+    ...    ds-pipeline-pipelines-definition    ${result}    ${status_check_timeout}
+    Should Be True    ${run_status}    Pipeline run doesn't have a status that means success. Check the log
+    Remove Pipeline Project    ${project}
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup

@@ -40,6 +40,10 @@ class DataSciencePipelinesAPI:
             deployment_count = len(deployments)
             time.sleep(1)
             count += 1
+        # https://github.com/opendatahub-io/odh-dashboard/issues/1673
+        # It is possible to start the Pipeline Server without pipelineruns.tekton.dev CRD
+        pipeline_run_crd_count = self.count_pods("oc get crd pipelineruns.tekton.dev", 1)
+        assert pipeline_run_crd_count == 1
         return self.count_running_pods(
             f"oc get pods -n openshift-operators -l name=openshift-pipelines-operator -o json",
             "openshift-pipelines-operator",
@@ -238,6 +242,20 @@ class DataSciencePipelinesAPI:
         assert response.status_code == 200
         return response.url
 
+    def count_pods(self, oc_command, pod_criteria, timeout=30):
+        oc_command = f'{oc_command} --no-headers'
+        pod_count = 0
+        count = 0
+        while pod_count != pod_criteria and count < timeout:
+            bash_str, _ = self.run_oc(oc_command)
+            # | wc -l is returning an empty string
+            pod_count = sum(1 for line in bash_str.split('\n') if line.strip())
+            if pod_count >= pod_criteria:
+                break
+            time.sleep(1)
+            count += 1
+        return pod_count
+
     def count_running_pods(
         self, oc_command, name_startswith, status_phase, pod_criteria, timeout=30
     ):
@@ -256,8 +274,8 @@ class DataSciencePipelinesAPI:
             except JSONDecodeError:
                 pass
             pod_count = len(pods)
-            # if there are more pods running then we were expecting we can stop the iteration to save time
-            if pod_count > pod_criteria:
+            # we can stop the iteration to save time
+            if pod_count >= pod_criteria:
                 break
             time.sleep(1)
             count += 1

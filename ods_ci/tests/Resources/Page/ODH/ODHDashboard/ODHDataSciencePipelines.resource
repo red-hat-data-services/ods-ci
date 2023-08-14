@@ -66,6 +66,7 @@ Select Pipeline For The Run
     [Documentation]    Selects the given ${pipeline_name} from the pipeline
     ...                dropdown in the Run creation form.
     [Arguments]    ${pipeline_name}
+    Wait Until Page Contains Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-c-dropdown__toggle-text"]/..
     Click Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-c-dropdown__toggle-text"]/..
     Wait Until Page Contains Element    xpath://ul/li/a[text()="${pipeline_name}"]
     Click Element     xpath://ul/li/a[text()="${pipeline_name}"]

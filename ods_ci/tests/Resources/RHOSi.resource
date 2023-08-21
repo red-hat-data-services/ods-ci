@@ -39,6 +39,7 @@ Resource    Common.robot
 ...                         Create Starburst Enteprise License Secret
 ...                         Get Data Connection Form Values
 ...                         Fill Data Connection Form
+...                         Create Secret For S3-Like Buckets
 
 
 *** Keywords ***

@@ -4,4 +4,5 @@ metadata:
   name: default
   namespace: {{SERVICEMESH_CR_NS}}
 spec:
-  members: []
+  members:
+    - {{KSERVE_NS}}

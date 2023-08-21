@@ -1,0 +1,16 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    serving.knative.openshift.io/enablePassthrough: "true"
+    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/rewriteAppHTTPProbers: "true"
+  name: {{INFERENCE_SERVICE_NAME}}
+spec:
+  predictor:
+    serviceAccountName: {{SA_NAME}}
+    model:
+      modelFormat:
+        name: caikit
+      runtime: caikit-runtime
+      storageUri: {{STORAGE_URI}}

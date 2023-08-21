@@ -169,3 +169,36 @@ Click Plus Button
 Click Minus Button
     [Documentation]    Clicks the minus button of the model server replica counter
     Click Element    ${REPLICAS_MIN_BTN_XP}
+
+Query Model With GRPCURL
+    [Arguments]    ${host}    ${port}    ${endpoint}    ${json_body}
+    ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    &{args}
+    ${cmd}=    Set Variable    grpcurl -d ${json_body}
+    IF    $json_header != None
+        ${cmd}=    Catenate    ${cmd}    -H ${json_header}
+    END
+    IF    ${insecure} == ${TRUE}
+        ${cmd}=    Catenate    ${cmd}    -insecure
+    END
+    # IF    ${plaintext} == ${TRUE}
+    #     ${cmd}=    Catenate    ${cmd}    -plaintext
+    # END
+    # IF    "${proto_filepath}" != "${NONE}"
+    #     ${cmd}=    Catenate    ${cmd}    -proto ${proto_filepath}
+    # END
+    FOR    ${index}    ${option}    IN ENUMERATE    @{args}
+        Log    ${index}: ${option}: ${args}[${option}]
+        ${cmd}=    Catenate    ${cmd}    -${option} ${args}[${option}]
+    END
+    ${cmd}=    Catenate    ${cmd}    ${host}:${port}
+    ${cmd}=    Catenate    ${cmd}    ${endpoint}
+    ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}
+    # ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT    cwd=${PROTO_DIRPATH}    shell=yes
+    # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
+    Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
+    # Log    ${query_process.stdout}    console=yes
+    Log    ${response}    console=yes
+    # ${json_res}=    Load Json String    ${query_process.stdout}
+    ${json_res}=    Load Json String    ${response}
+    # ...    strict=False
+    RETURN    ${json_res}

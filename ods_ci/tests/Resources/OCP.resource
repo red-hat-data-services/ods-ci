@@ -2,7 +2,6 @@
 Documentation  Set of Keywords for OCP checks
 Library    OperatingSystem
 Library    OpenShiftLibrary
-Library    Process
 Resource   Page/OCPDashboard/Pods/Pods.robot
 
 
@@ -108,3 +107,9 @@ Wait For Pods To Be Ready
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     Should Be Equal As Numbers    ${rc}    ${0}
+
+Add Secret To Service Account
+    [Arguments]    ${sa_name}    ${secret_name}    ${namespace}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch sa ${sa_name} -n ${namespace} -p '{"secrets": [{"name": "${secret_name}"}]}'
+    Should Be Equal As Integers    ${rc}    ${0}

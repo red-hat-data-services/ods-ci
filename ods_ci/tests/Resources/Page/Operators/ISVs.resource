@@ -17,6 +17,11 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ...            ${channel}=stable    ${catalog_source_name}=certified-operators
     ...            ${cs_namespace}=openshift-marketplace    ${operator_group_name}=${NONE}
     ...            ${operator_group_ns}=${NONE}    ${operator_group_target_ns}=${NONE}
+    IF    "${operator_group_name}" != "${NONE}"
+        Create Operator Group    name=${operator_group_name}
+        ...    namespace=${operator_group_ns}    target_namespace=${operator_group_target_ns}
+        ...    operator_name=${operator_name}
+    END
     ${operator_sub_filepath}=    Set Variable    ${FILES_RESOURCES_DIRPATH}/${operator_name}-sub.yaml
     Copy File    ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${operator_sub_filepath}
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<SUBSCRIPTION_NAME>/${subscription_name}/g" ${operator_sub_filepath}    # robocop: disable
@@ -26,11 +31,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
-    IF    "${operator_group_name}" != "${NONE}"
-        Create Operator Group    name=${operator_group_name}
-        ...    namespace=${operator_group_ns}    target_namespace=${operator_group_target_ns}
-        ...    operator_name=${operator_name}
-    END
+
 
 Create Operator Group
     [Documentation]    Creates the Operator Group object which might be needed by an operator.
@@ -42,6 +43,14 @@ Create Operator Group
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<NAMESPACE>/${namespace}/g" ${operator_group_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<TARGET_NAMESPACE>/${target_namespace}/g" ${operator_group_filepath}    # robocop: disable
     Oc Apply    kind=OperatorGroup    src=${operator_group_filepath}    api_version=v1
+    IF    "${target_namespace}" == "${NONE}"
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc patch OperatorGroup ${name} -n ${namespace} -p '{"spec": null}' --type=merge
+        Should Be Equal As Integers    ${rc}    ${0}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc patch OperatorGroup ${name} -n ${namespace} -p '{"spec": {}}' --type=merge
+        Should Be Equal As Integers    ${rc}    ${0}
+    END
 
 Operator Subscription Last Condition Should Be
     [Documentation]    Checks the subscription status matches the expected status

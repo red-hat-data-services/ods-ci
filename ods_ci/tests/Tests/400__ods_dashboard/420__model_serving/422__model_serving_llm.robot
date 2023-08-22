@@ -168,7 +168,7 @@ Add Peer Authentication
 
 Install Serverless Stack
     [Documentation]    Install the operators needed for Serverless operator purposes
-    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_NS}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
     ...    namespace=${SERVERLESS_NS}
     ...    subscription_name=${SERVERLESS_SUB_NAME}

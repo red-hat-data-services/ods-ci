@@ -85,9 +85,16 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_isvc_name}
     ...    namespace=${TEST_NS}
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_isvc_name}   namespace=${TEST_NS}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_one_name}   namespace=${TEST_NS}
     ${body}=    Set Variable    '{"text": "At what temperature does water boil?"}'
     ${header}=    Set Variable    'mm-model-id: ${model_one_name}'
+    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+    ...    json_body=${body}    json_header=${header}
+    ...    insecure=${TRUE}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_two_name}   namespace=${TEST_NS}
+    ${body}=    Set Variable    '{"text": "At what temperature does water boil?"}'
+    ${header}=    Set Variable    'mm-model-id: ${model_two_name}'
     Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}

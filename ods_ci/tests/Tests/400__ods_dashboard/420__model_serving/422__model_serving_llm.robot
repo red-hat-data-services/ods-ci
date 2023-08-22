@@ -46,8 +46,6 @@ Verify External Dependency Operators Can Be Deployed
 Verify User Can Serve And Query A Model
     [Tags]    ODS-2341    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
-    ...    region=us-east-2
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
     Compile Inference Service YAML    isvc_name=${flan_isvc_name}
@@ -58,12 +56,43 @@ Verify User Can Serve And Query A Model
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_isvc_name}
     ...    namespace=${TEST_NS}
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_isvc_name}   namespace=${TEST_NS}
-    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
+    ${body}=    Set Variable    '{"text": "At what temperature does water boil?"}'
     ${header}=    Set Variable    'mm-model-id: ${model_name}'
     Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
+    [Teardown]    Run And Return Rc And Output    oc delete project ${TEST_NS}
+
+Verify User Can Deploy Multiple Models In The Same Namespace
+    [Tags]    ODS-XYZ    WatsonX
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    ${model_one_isvc_name}=    Set Variable    bloom-560m-caikit
+    ${model_one_name}=    Set Variable    bloom-560m-caikit
+    ${model_two_isvc_name}=    Set Variable    flan-t5-small-caikit
+    ${model_two_name}=    Set Variable    flan-t5-small-caikit
+    Compile Inference Service YAML    isvc_name=${model_one_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${TEST_NS}
+    Compile Inference Service YAML    isvc_name=${model_two_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_isvc_name}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_isvc_name}
+    ...    namespace=${TEST_NS}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_isvc_name}   namespace=${TEST_NS}
+    ${body}=    Set Variable    '{"text": "At what temperature does water boil?"}'
+    ${header}=    Set Variable    'mm-model-id: ${model_one_name}'
+    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+    ...    json_body=${body}    json_header=${header}
+    ...    insecure=${TRUE}
+    [Teardown]    Run And Return Rc And Output    oc delete project ${TEST_NS}
 
 
 *** Keywords ***
@@ -250,9 +279,15 @@ Configure KNative Gateways
 
 Set Up Test OpenShift Project
     [Documentation]    Creates a test namespace and track it under ServiceMesh
-    [Arguments]    ${test_ns}
+    [Arguments]    ${test_ns}   
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get project ${test_ns}
+    IF    "${rc}" == "${0}"
+        Log    message=OpenShift Project ${test_ns} already present. Skipping project setup...
+        ...    level=WARN
+        RETURN 
+    END
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${test_ns}
-    # Should Be Equal As Numbers    ${rc}    ${0}
+    Should Be Equal As Numbers    ${rc}    ${0}
     Add Peer Authentication    namespace=${test_ns}
     Add Namespace To ServiceMeshMemberRoll    namespace=${test_ns}
 
@@ -260,12 +295,20 @@ Deploy Caikit Serving Runtime
     [Documentation]    Create the ServingRuntime CustomResource in the test ${namespace}.
     ...                This must be done before deploying a model which needs Caikit.
     [Arguments]    ${namespace}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get ServingRuntime caikit-runtime -n ${namespace}
+    IF    "${rc}" == "${0}"
+        Log    message=ServingRuntime caikit-runtime in ${namespace} NS already present. Skipping runtime setup...
+        ...    level=WARN
+        RETURN 
+    END
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${CAIKIT_FILEPATH} -n ${namespace}
 
 Set Project And Runtime
     [Arguments]    ${namespace}
     Set Up Test OpenShift Project    test_ns=${namespace}
+    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
+    ...    region=us-east-2
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}
 
@@ -275,6 +318,12 @@ Create Secret For S3-Like Buckets
     ...            ${namespace}=${TEST_NS}    ${endpoint}=${S3.AWS_DEFAULT_ENDPOINT}
     ...            ${region}=${S3.AWS_DEFAULT_REGION}    ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}
     ...            ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}    ${use_https}=${USE_BUCKET_HTTPS}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get secret ${name} -n ${namespace}
+    IF    "${rc}" == "${0}"
+        Log    message=Secret ${name} in ${namespace} NS already present. Skipping secret setup...
+        ...    level=WARN
+        RETURN 
+    END
     Copy File     ${BUCKET_SECRET_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     Copy File     ${BUCKET_SA_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
     ${endpoint_escaped}=    Escape String Chars    str=${endpoint}

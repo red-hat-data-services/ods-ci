@@ -173,7 +173,7 @@ Iterative Image Test
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
     # This ensures all workloads are run even if one (or more) fails
-    Run Keyword And Continue On Failure    Clone Git Repository And Run    ${REPO_URL}    ${NOTEBOOK_TO_RUN}
+    Run Keyword And Warn On Failure    Clone Git Repository And Run    ${REPO_URL}    ${NOTEBOOK_TO_RUN}
     Clean Up Server
     Stop JupyterLab Notebook Server
     Go To    ${ODH_DASHBOARD_URL}

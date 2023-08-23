@@ -47,3 +47,11 @@ GITHUB_USER:
   USERNAME: USER
   EMAIL: email@gmail.com
   TOKEN: token
+# Components to set as enabled in the operator v2.0 DSC CR
+COMPONENTS:
+  dashboard: true
+  datasciencepipelines: true
+  # Right now only one between modelmesh and kserve can be enabled
+  kserve: false
+  modelmeshserving: true
+  workbenches: true

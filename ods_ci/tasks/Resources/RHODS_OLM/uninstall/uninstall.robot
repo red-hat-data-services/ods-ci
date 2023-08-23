@@ -13,10 +13,13 @@ Uninstalling RHODS Operator
   ...  Uninstall RHODS
 
 Uninstall RHODS
-  IF  "${cluster_type}" == "managed"
+  ${new_operator} =    Is RHODS Version Greater Or Equal Than    2.0.0
+  IF  "${cluster_type}" == "managed" and ${new_operator} == $False
     Uninstall RHODS In OSD
-  ELSE IF  "${cluster_type}" == "selfmanaged"
+  ELSE IF  "${cluster_type}" == "selfmanaged" and ${new_operator} == $False
     Uninstall RHODS In Self Managed Cluster
+  ELSE IF  ${new_operator}
+    Uninstall RHODS V2
   ELSE
     Fail  Kindly provide supported cluster type
   END
@@ -57,3 +60,22 @@ Uninstall RHODS In Self Managed Cluster For Operatorhub
   Verify Project Does Not Exists  redhat-ods-monitoring
   Verify Project Does Not Exists  rhods-notebooks
   ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator
+
+Uninstall RHODS V2
+    [Documentation]    Keyword to uninstall the version 2 of the RHODS operator in Self-Managed
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete datasciencecluster $(oc get datasciencecluster --no-headers | awk '{print $1}')
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting DataScienceCluster CR
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete dscinitialization $(oc get dscinitialization --no-headers | awk '{print $1}')
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting DSCInitialization CR
+    # The subscription is currently called rhods-operator-dev, will most likely change soon
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete subscription rhods-operator-dev -n redhat-ods-operator
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting RHODS subscription
+    ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace
+    Verify Project Does Not Exists  redhat-ods-applications
+    Verify Project Does Not Exists  redhat-ods-monitoring
+    Verify Project Does Not Exists  rhods-notebooks
+    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator
+    Verify Project Does Not Exists  redhat-ods-operator

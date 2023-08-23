@@ -4,7 +4,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resou
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
 Library           OpenShiftLibrary
-#Suite Setup       Install Model Serving Stack Dependencies
+Suite Setup       Install Model Serving Stack Dependencies
 # Suite Teardown
 
 

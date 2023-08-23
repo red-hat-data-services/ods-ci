@@ -71,7 +71,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
 Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
     [Documentation]    Verifies that metadata pods are not created when running a data science pipeline,
     ...         as this feature is currently disabled.
-    [Tags]    Smoke
+    [Tags]    Sanity
     ...       Tier1
     Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}

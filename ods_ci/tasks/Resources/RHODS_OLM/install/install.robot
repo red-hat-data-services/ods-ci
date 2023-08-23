@@ -23,7 +23,7 @@ Install Teardown
             ${return_code} =	  Run And Return Rc  rm -rf ${EXECDIR}/${dir}
             Should Be Equal As Integers	  ${return_code}	 0
       ELSE
-            Log     Mentioned directory ${dir} is not present. Kindly verify if provided folder name is correct   level=Error   console=yes
+            Log     Mentioned directory ${dir} is not present. Kindly verify if provided folder name is correct   level=WARN   console=yes
       END
   ELSE
             Log To Console    RHODS Operator is uninstalled successfully.

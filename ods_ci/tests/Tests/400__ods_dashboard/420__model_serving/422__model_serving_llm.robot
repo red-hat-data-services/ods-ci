@@ -3,7 +3,8 @@ Documentation     Collection of tests to validate the model serving stack for La
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
-Suite Setup       Install Model Serving Stack Dependencies
+Library           OpenShiftLibrary
+#Suite Setup       Install Model Serving Stack Dependencies
 # Suite Teardown
 
 
@@ -12,7 +13,7 @@ ${DEFAULT_OP_NS}=    openshift-operators
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
-${SERVERLESS_NS}=    openshift-serverless    
+${SERVERLESS_NS}=    openshift-serverless
 ${SERVERLESS_CR_NS}=    knative-serving
 ${SERVERLESS_KNATIVECR_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio.yaml
 ${SERVERLESS_GATEWAYS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/gateways.yaml
@@ -65,6 +66,32 @@ Verify User Can Serve And Query A Model
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
 
+Verify Model Upgrade Using Canaray Rollout
+    [Tags]    ODS-XXX    WatsonX
+    [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
+    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
+    ...    region=us-east-2   namespace=canary-model-upgrade
+    ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    Compile And Query LLM model   isvc_name=${flan_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_name=${model_name}
+    ...    namespace=canary-model-upgrade
+    Log To Console    Applying Canary Tarffic for Model Upgrade
+    Compile And Query LLM Model   isvc_name=${flan_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    model_name=${model_name}
+    ...    canaryTrafficPercent=20
+    ...    namespace=canary-model-upgrade
+    Log To Console    Remove Canary Tarffic For Model Upgrade
+    Compile And Query LLM Model    isvc_name=${flan_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_name=${model_name}
+    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    namespace=canary-model-upgrade
+    [Teardown]   Run And Return Rc And Output    oc delete project canary-model-upgrade
 
 *** Keywords ***
 Install Model Serving Stack Dependencies
@@ -188,7 +215,7 @@ Install Serverless Stack
     Wait For Pods To Be Ready    label_selector=name=knative-operator
     ...    namespace=${SERVERLESS_NS}
 
-Deploy Serverless CRs 
+Deploy Serverless CRs
     [Documentation]    Deploys the CustomResources for Serverless operator
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_CR_NS}
     Add Peer Authentication    namespace=${SERVERLESS_CR_NS}
@@ -224,7 +251,7 @@ Configure KNative Gateways
     ${exists}=    Run Keyword And Return Status
     ...    Directory Should Exist    ${base_dir}
     IF    ${exists} == ${FALSE}
-        Create Directory    ${base_dir}        
+        Create Directory    ${base_dir}
     END
     ${rc}    ${domain_name}=    Run And Return Rc And Output
     ...    oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}' | awk -F'.' '{print $(NF-1)"."$NF}'
@@ -300,7 +327,7 @@ Create Secret For S3-Like Buckets
     Add Secret To Service Account    sa_name=${sa_name}    secret_name=${name}    namespace=${namespace}
 
 Compile Inference Service YAML
-    [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}
+    [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -309,3 +336,29 @@ Compile Inference Service YAML
     ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    IF   '${canaryTrafficPercent}' == '${EMPTY}'
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    sed -i '/canaryTrafficPercent/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ELSE
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    sed -i 's/{{CanaryTrafficPercent}}/${canaryTrafficPercent}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    END
+
+Compile And Query LLM model
+    [Arguments]    ${isvc_name}     ${model_storage_uri}    ${model_name}
+    ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
+    Compile Inference Service YAML    isvc_name=${isvc_name}
+    ...    sa_name=${sa_name}
+    ...    model_storage_uri=${model_storage_uri}
+    ...    canaryTrafficPercent=${canaryTrafficPercent}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
+    ...    namespace=${namespace}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
+    ${header}=    Set Variable    'mm-model-id: ${model_name}'
+    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+    ...    json_body=${body}    json_header=${header}
+    ...    insecure=${TRUE}

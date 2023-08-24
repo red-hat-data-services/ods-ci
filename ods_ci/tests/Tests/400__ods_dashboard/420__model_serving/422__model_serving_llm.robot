@@ -27,7 +27,7 @@ ${KIALI_OP_NAME}=     kiali-ossm
 ${KIALI_SUB_NAME}=    kiali-ossm
 ${JAEGER_OP_NAME}=     jaeger-product
 ${JAEGER_SUB_NAME}=    jaeger-product
-${KSERVE_NS}=    kserve    # will be replaced by redhat-ods-applications
+${KSERVE_NS}=    redhat-ods-operator    # NS is "kserve" for ODH
 ${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime.yaml
 ${TEST_NS}=    watsonx
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
@@ -36,6 +36,7 @@ ${USE_BUCKET_HTTPS}=    "1"
 ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
+${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 
 
 *** Test Cases ***
@@ -46,24 +47,48 @@ Verify External Dependency Operators Can Be Deployed
 Verify User Can Serve And Query A Model
     [Tags]    ODS-2341    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
-    ...    region=us-east-2
-    ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
-    ${model_name}=    Set Variable    flan-t5-small-caikit
-    Compile Inference Service YAML    isvc_name=${flan_isvc_name}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_isvc_name}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${TEST_NS}
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_isvc_name}   namespace=${TEST_NS}
-    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${model_name}'
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${TEST_NS}
+    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
+    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
     Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
+    [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
+    ...    isvc_names=${models_names}
+
+Verify User Can Deploy Multiple Models In The Same Namespace
+    [Tags]    ODS-2371    WatsonX
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    ${model_one_name}=    Set Variable    bloom-560m-caikit
+    ${model_two_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
+    Compile Inference Service YAML    isvc_name=${model_one_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${TEST_NS}
+    Compile Inference Service YAML    isvc_name=${model_two_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    ...    namespace=${TEST_NS}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
+    [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
+    ...    isvc_names=${models_names}
 
 
 *** Keywords ***
@@ -77,6 +102,26 @@ Install Model Serving Stack Dependencies
     Install Serverless Stack
     Deploy Serverless CRs
     Configure KNative Gateways
+    Load Expected Responses
+
+Clean Up Test Project
+    [Arguments]    ${test_ns}    ${isvc_names}
+    FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
+        Log    Deleting ${isvc_name}
+        ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${test_ns}
+        Should Be Equal As Integers    ${rc}    ${0}
+    END
+    Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
+    ...    servicemesh_ns=${SERVICEMESH_CR_NS}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
+    Should Be Equal As Integers    ${rc}    ${0}
+
+
+Load Expected Responses
+    [Documentation]    Loads the json file containing the expected answer for each
+    ...                query and model
+    ${exp_responses}=    Load Json File    ${EXP_RESPONSES_FILEPATH}
+    Set Suite Variable    ${EXP_RESPONSES}    ${exp_responses}
 
 Install Service Mesh Stack
     [Documentation]    Installs the operators needed for Service Mesh operator purposes
@@ -168,7 +213,7 @@ Add Peer Authentication
 
 Install Serverless Stack
     [Documentation]    Install the operators needed for Serverless operator purposes
-    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_NS}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
     ...    namespace=${SERVERLESS_NS}
     ...    subscription_name=${SERVERLESS_SUB_NAME}
@@ -250,9 +295,15 @@ Configure KNative Gateways
 
 Set Up Test OpenShift Project
     [Documentation]    Creates a test namespace and track it under ServiceMesh
-    [Arguments]    ${test_ns}
+    [Arguments]    ${test_ns}   
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get project ${test_ns}
+    IF    "${rc}" == "${0}"
+        Log    message=OpenShift Project ${test_ns} already present. Skipping project setup...
+        ...    level=WARN
+        RETURN 
+    END
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${test_ns}
-    # Should Be Equal As Numbers    ${rc}    ${0}
+    Should Be Equal As Numbers    ${rc}    ${0}
     Add Peer Authentication    namespace=${test_ns}
     Add Namespace To ServiceMeshMemberRoll    namespace=${test_ns}
 
@@ -260,12 +311,20 @@ Deploy Caikit Serving Runtime
     [Documentation]    Create the ServingRuntime CustomResource in the test ${namespace}.
     ...                This must be done before deploying a model which needs Caikit.
     [Arguments]    ${namespace}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get ServingRuntime caikit-runtime -n ${namespace}
+    IF    "${rc}" == "${0}"
+        Log    message=ServingRuntime caikit-runtime in ${namespace} NS already present. Skipping runtime setup...
+        ...    level=WARN
+        RETURN 
+    END
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${CAIKIT_FILEPATH} -n ${namespace}
 
 Set Project And Runtime
     [Arguments]    ${namespace}
     Set Up Test OpenShift Project    test_ns=${namespace}
+    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
+    ...    region=us-east-2
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}
 
@@ -275,6 +334,12 @@ Create Secret For S3-Like Buckets
     ...            ${namespace}=${TEST_NS}    ${endpoint}=${S3.AWS_DEFAULT_ENDPOINT}
     ...            ${region}=${S3.AWS_DEFAULT_REGION}    ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}
     ...            ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}    ${use_https}=${USE_BUCKET_HTTPS}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get secret ${name} -n ${namespace}
+    IF    "${rc}" == "${0}"
+        Log    message=Secret ${name} in ${namespace} NS already present. Skipping secret setup...
+        ...    level=WARN
+        RETURN 
+    END
     Copy File     ${BUCKET_SECRET_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     Copy File     ${BUCKET_SA_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
     ${endpoint_escaped}=    Escape String Chars    str=${endpoint}
@@ -300,6 +365,7 @@ Create Secret For S3-Like Buckets
     Add Secret To Service Account    sa_name=${sa_name}    secret_name=${name}    namespace=${namespace}
 
 Compile Inference Service YAML
+    [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
@@ -309,3 +375,39 @@ Compile Inference Service YAML
     ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+
+Model Response Should Match The Expectation
+    [Documentation]    Checks that the actual model response matches the expected answer.
+    ...                The goals are:
+    ...                   - to ensure we are getting an answer from the model (e.g., not an empty text)
+    ...                   - to check that we receive the answer from the right model
+    ...                when multiple ones are deployed
+    [Arguments]    ${model_response}    ${model_name}    ${query_idx}
+    Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]
+    ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
+    ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}
+    ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
+    ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
+    Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+
+Query Models And Check Responses Multiple Times
+    [Documentation]    Queries and checks the responses of the given models in a loop
+    ...                running ${n_times}. For each loop run it queries all the model in sequence
+    [Arguments]    ${models_names}    ${n_times}=10
+    FOR    ${counter}    IN RANGE    0    ${n_times}    1
+        Log    ${counter}
+        FOR    ${index}    ${model_name}    IN ENUMERATE    @{models_names}
+            Log    ${index}: ${model_name}
+            ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_name}   namespace=${TEST_NS}
+            ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
+            ${header}=    Set Variable    'mm-model-id: ${model_name}'
+            ${res}=    Query Model With GRPCURL   host=${host}    port=443
+            ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+            ...    json_body=${body}    json_header=${header}
+            ...    insecure=${TRUE}
+            Run Keyword And Continue On Failure
+            ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
+            ...    query_idx=0
+        END
+    END
+    

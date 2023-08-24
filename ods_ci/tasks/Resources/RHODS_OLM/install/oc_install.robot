@@ -17,7 +17,11 @@ Install RHODS
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
           Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
-          Oc Apply   kind=List   src=tasks/Resources/RHODS_OLM/install/catalogsource.yaml
+          ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
+          Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
+          Run    sed -i 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
+          Oc Apply   kind=List   src=t${file_path}cs_apply.yaml
+          Remove File    ${file_path}cs_apply.yml
       ELSE
            FAIL    Provided test envrioment and install type is not supported
       END
@@ -38,18 +42,18 @@ Verify RHODS Installation
   ...                   timeout=2000
   Wait For Pods Status  namespace=redhat-ods-operator  timeout=1200
   Log  Verified redhat-ods-operator  console=yes
-  IF  "${UPDATE_CHANNEL}" != "stable" and "${UPDATE_CHANNEL}" != "beta"
+  IF  "${UPDATE_CHANNEL}" != "stable" and "${UPDATE_CHANNEL}" != "beta" and "${UPDATE_CHANNEL}" != "odh-nightlies"
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${dashboard}" == "true"  # robocop: disable
     Wait For Pods Numbers  5
     ...                   namespace=redhat-ods-applications
     ...                   label_selector=app=rhods-dashboard
     ...                   timeout=1200
   END
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${workbenches}" == "true"  # robocop: disable
     Wait For Pods Numbers  1
     ...                   namespace=redhat-ods-applications
     ...                   label_selector=app=notebook-controller
@@ -60,7 +64,7 @@ Verify RHODS Installation
     ...                   timeout=400
   END
   ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${modelmeshserving}" == "true"  # robocop: disable
     Wait For Pods Numbers   3
     ...                   namespace=redhat-ods-applications
     ...                   label_selector=app=odh-model-controller
@@ -75,25 +79,25 @@ Verify RHODS Installation
     ...                   timeout=400
   END
   ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${datasciencepipelines}" == "true"  # robocop: disable
     Wait For Pods Numbers   1
     ...                   namespace=redhat-ods-applications
     ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
     ...                   timeout=400
   END
   # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${modelmeshserving}" == "true"  # robocop: disable
     Wait For Pods Numbers   3
     ...                   namespace=redhat-ods-monitoring
     ...                   label_selector=prometheus=rhods-model-monitoring
     ...                   timeout=400
   END
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
     Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
     Log  Verified redhat-ods-applications  console=yes
   END
   # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${modelmeshserving}" == "true"  # robocop: disable
     Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=1200
     Log  Verified redhat-ods-monitoring  console=yes
   END

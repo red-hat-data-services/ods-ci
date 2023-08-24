@@ -37,7 +37,8 @@ ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
-
+${FLAN_STORAGE_URI}=    s3://ods-ci-wisdom/flan-t5-small/
+${BLOOM_STORAGE_URI}=    s3://ods-ci-wisdom/bloom-560m/
 
 *** Test Cases ***
 Verify External Dependency Operators Can Be Deployed
@@ -51,7 +52,7 @@ Verify User Can Serve And Query A Model
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -75,12 +76,12 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
     Compile Inference Service YAML    isvc_name=${model_one_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    model_storage_uri=${BLOOM_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
@@ -144,7 +145,7 @@ Verify User Can Set The Minimum Number Of Replicas For A Model
     ${models_names}=    Create List    ${model_name}
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    min_replicas=2
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}

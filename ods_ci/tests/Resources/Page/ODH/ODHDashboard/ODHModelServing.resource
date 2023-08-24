@@ -44,7 +44,7 @@ Open Model Serving Home Page
 
 Serve Model
     [Documentation]    Deploys a model via the Model Serving page (NOT the Model Server section of a DSP)
-    ...    the framework should be either "onnx" or "openvino_ir". 
+    ...    the framework should be either "onnx" or "openvino_ir".
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test
     # TODO: Does not work if there's already a model deployed
@@ -56,7 +56,7 @@ Serve Model
     Select Model Server    ${model_server}
     Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
-    IF    ${existing_data_connection}==${TRUE} 
+    IF    ${existing_data_connection}==${TRUE}
         # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
         # Selected by default, let's skip for now
         Select Existing Data Connection    ${data_connection_name}
@@ -72,7 +72,7 @@ Serve Model
     Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 
 Select Project
-    [Documentation]    Selects a project in the "deploy model" modal. 
+    [Documentation]    Selects a project in the "deploy model" modal.
     ...    If the user has access to a single project or this is being done from within a DSP
     ...    there's no need to do anything but it checks that the project name is the expected one.
     [Arguments]    ${project_name}

@@ -38,6 +38,22 @@ S3:
   AWS_SECRET_ACCESS_KEY: Secret-Key
   AWS_DEFAULT_ENDPOINT:    https://s3.amazonaws.com/
   AWS_DEFAULT_REGION:    us-east-1
+  BUCKET_1:
+    NAME: my-first-bucket
+    REGION: us-east-2
+    ENDPOINT: https://s3.us-east-2.amazonaws.com/
+  BUCKET_2:
+    NAME: my-second-bucket
+    REGION: my-custom-region
+    ENDPOINT: https://mybuckets.mydomain.com/
+  BUCKET_3:
+    NAME: my-third-bucket
+    REGION: third-region
+    ENDPOINT: https://mybuckets.mydomain.com/
+  BUCKET_4:
+    NAME: my-forth-bucket
+    REGION: wherever-region
+    ENDPOINT: https://mybuckets.mydomain.com/
 ANACONDA_CE:
   ACTIVATION_KEY: license-key
 SSO:

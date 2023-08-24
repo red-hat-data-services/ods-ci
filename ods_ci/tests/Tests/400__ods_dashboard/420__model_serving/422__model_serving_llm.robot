@@ -36,6 +36,7 @@ ${USE_BUCKET_HTTPS}=    "1"
 ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
+${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 
 
 *** Test Cases ***
@@ -86,19 +87,23 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_isvc_name}
     ...    namespace=${TEST_NS}
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_one_name}   namespace=${TEST_NS}
-    ${body}=    Set Variable    '{"text": "At what temperature does water boil?"}'
+    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${model_one_name}'
-    Query Model With GRPCURL   host=${host}    port=443
+    ${res}=    Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
+    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_one_name}
+    ...    query_idx=0
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_two_name}   namespace=${TEST_NS}
-    ${body}=    Set Variable    '{"text": "At what temperature does water boil?"}'
+    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${model_two_name}'
-    Query Model With GRPCURL   host=${host}    port=443
+    ${res}=    Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
+    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_two_name}
+    ...    query_idx=0
     [Teardown]    Run And Return Rc And Output    oc delete project ${TEST_NS}
 
 
@@ -113,6 +118,13 @@ Install Model Serving Stack Dependencies
     Install Serverless Stack
     Deploy Serverless CRs
     Configure KNative Gateways
+    Load Expected Responses
+
+Load Expected Responses
+    [Documentation]    Loads the json file containing the expected answer for each
+    ...                query and model
+    ${exp_responses}=    Load Json File    ${EXP_RESPONSES_FILEPATH}
+    Set Suite Variable    ${EXP_RESPONSES}    ${exp_responses}
 
 Install Service Mesh Stack
     [Documentation]    Installs the operators needed for Service Mesh operator purposes
@@ -365,3 +377,12 @@ Compile Inference Service YAML
     ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+
+Model Response Should Match The Expectation
+    [Arguments]    ${model_response}    ${model_name}    ${query_idx}
+    Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]
+    ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
+    ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}
+    ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
+    ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
+    Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}

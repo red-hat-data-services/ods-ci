@@ -55,7 +55,7 @@ S3:
     REGION: wherever-region
     ENDPOINT: https://mybuckets.mydomain.com/
   BUCKET_5:
-    NAME: my-forth-bucket
+    NAME: my-fifth-bucket
     REGION: wherever-region
     ENDPOINT: https://mybuckets.mydomain.com/
 ANACONDA_CE:

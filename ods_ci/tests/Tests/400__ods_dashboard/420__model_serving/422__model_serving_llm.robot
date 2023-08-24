@@ -352,6 +352,7 @@ Create Secret For S3-Like Buckets
     Add Secret To Service Account    sa_name=${sa_name}    secret_name=${name}    namespace=${namespace}
 
 Compile Inference Service YAML
+    [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
@@ -363,6 +364,11 @@ Compile Inference Service YAML
     ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
 
 Model Response Should Match The Expectation
+    [Documentation]    Checks that the actual model response matches the expected answer.
+    ...                The goals are:
+    ...                   - to ensure we are getting an answer from the model (e.g., not an empty text)
+    ...                   - to check that we receive the answer from the right model
+    ...                when multiple ones are deployed
     [Arguments]    ${model_response}    ${model_name}    ${query_idx}
     Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]
     ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
@@ -372,6 +378,8 @@ Model Response Should Match The Expectation
     Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
 
 Query Models And Check Responses Multiple Times
+    [Documentation]    Queries and checks the responses of the given models in a loop
+    ...                running ${n_times}. For each loop run it queries all the model in sequence
     [Arguments]    ${models_names}    ${n_times}=10
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}

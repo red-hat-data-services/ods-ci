@@ -137,6 +137,19 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
 
+Verify User Can Set The Minimum Number Of Replicas For A Model
+    [Tags]    ODS-XYZ    WatsonX
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_name}
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    min_replicas=2
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${TEST_NS}
+
+
 Verify User Can Autoscale Using Concurrency
     [Tags]    ODS-2377    WatsonX
     [Setup]    Set Project And Runtime    namespace=autoscale-con
@@ -456,6 +469,8 @@ Compile Inference Service YAML
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{INFERENCE_SERVICE_NAME}}/${isvc_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{MIN_REPLICAS}}/${min_replicas}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output

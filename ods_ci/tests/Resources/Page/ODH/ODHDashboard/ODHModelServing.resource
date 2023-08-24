@@ -275,3 +275,9 @@ Get KServe Inference Host Via CLI
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
+
+Scale Number Of Replicas
+    [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch InferenceService ${model_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/predictor/minReplicas', 'value': ${n_replicas}}]"
+    Should Be Equal As Integers    ${rc}    ${0}

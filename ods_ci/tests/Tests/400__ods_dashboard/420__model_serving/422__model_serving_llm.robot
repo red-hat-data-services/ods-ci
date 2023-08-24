@@ -63,6 +63,7 @@ Verify User Can Serve And Query A Model
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=1
     [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
     ...    isvc_names=${models_names}
 

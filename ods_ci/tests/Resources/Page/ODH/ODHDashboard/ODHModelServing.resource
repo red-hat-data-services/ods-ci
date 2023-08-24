@@ -250,6 +250,14 @@ Add Namespace To ServiceMeshMemberRoll
     ...    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'add', 'path': '/spec/members/-', 'value': \"${namespace}\"}]"
     Should Be Equal As Integers    ${rc}    ${0}
 
+Remove Namespace From ServiceMeshMemberRoll
+    [Arguments]    ${namespace}    ${servicemesh_ns}=istio-system
+    ${rc}    ${ns_idx}=    Run And Return Rc And Output
+    ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'remove', 'path': '/spec/members/${ns_idx}'}]"
+    Should Be Equal As Integers    ${rc}    ${0}
+
 Deploy Model Via CLI
     [Documentation]    Deploys a model using Model Serving feature by applying the InfereceService
     ...                yaml via CLI. It assumes that the necessary Runtime has been already created

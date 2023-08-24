@@ -66,12 +66,13 @@ Verify User Can Serve And Query A Model
     [Teardown]    Run And Return Rc And Output    oc delete project ${TEST_NS}
 
 Verify User Can Deploy Multiple Models In The Same Namespace
-    [Tags]    ODS-XYZ    WatsonX
+    [Tags]    ODS-2371    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${model_one_isvc_name}=    Set Variable    bloom-560m-caikit
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
     Compile Inference Service YAML    isvc_name=${model_one_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
@@ -86,24 +87,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_isvc_name}
     ...    namespace=${TEST_NS}
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_one_name}   namespace=${TEST_NS}
-    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
-    ${header}=    Set Variable    'mm-model-id: ${model_one_name}'
-    ${res}=    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
-    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_one_name}
-    ...    query_idx=0
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_two_name}   namespace=${TEST_NS}
-    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
-    ${header}=    Set Variable    'mm-model-id: ${model_two_name}'
-    ${res}=    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
-    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_two_name}
-    ...    query_idx=0
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
     [Teardown]    Run And Return Rc And Output    oc delete project ${TEST_NS}
 
 
@@ -386,3 +370,23 @@ Model Response Should Match The Expectation
     ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
     ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
     Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+
+Query Models And Check Responses Multiple Times
+    [Arguments]    ${models_names}    ${n_times}=10
+    FOR    ${counter}    IN RANGE    0    ${n_times}    1
+        Log    ${counter}
+        FOR    ${index}    ${model_name}    IN ENUMERATE    @{models_names}
+            Log    ${index}: ${model_name}
+            ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_name}   namespace=${TEST_NS}
+            ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
+            ${header}=    Set Variable    'mm-model-id: ${model_name}'
+            ${res}=    Query Model With GRPCURL   host=${host}    port=443
+            ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+            ...    json_body=${body}    json_header=${header}
+            ...    insecure=${TRUE}
+            Run Keyword And Continue On Failure
+            ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
+            ...    query_idx=0
+        END
+    END
+    

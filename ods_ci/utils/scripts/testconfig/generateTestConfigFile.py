@@ -162,6 +162,9 @@ def generate_test_config_file(
     data["S3"]["BUCKET_4"]["NAME"] = config_data["S3"]["BUCKET_4"]["NAME"]
     data["S3"]["BUCKET_4"]["REGION"] = config_data["S3"]["BUCKET_4"]["REGION"]
     data["S3"]["BUCKET_4"]["ENDPOINT"] = config_data["S3"]["BUCKET_4"]["ENDPOINT"]
+    data["S3"]["BUCKET_5"]["NAME"] = config_data["S3"]["BUCKET_5"]["NAME"]
+    data["S3"]["BUCKET_5"]["REGION"] = config_data["S3"]["BUCKET_5"]["REGION"]
+    data["S3"]["BUCKET_5"]["ENDPOINT"] = config_data["S3"]["BUCKET_5"]["ENDPOINT"]
     data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data["ANACONDA_CE"]["ACTIVATION_KEY"]
     data["OCP_CONSOLE_URL"] = config_data["TEST_CLUSTERS"][test_cluster][
         "OCP_CONSOLE_URL"

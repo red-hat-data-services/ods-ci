@@ -47,48 +47,48 @@ Verify External Dependency Operators Can Be Deployed
 Verify User Can Serve And Query A Model
     [Tags]    ODS-2341    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
-    ${model_name}=    Set Variable    flan-t5-small-caikit
-    Compile Inference Service YAML    isvc_name=${flan_isvc_name}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_isvc_name}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${TEST_NS}
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_isvc_name}   namespace=${TEST_NS}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${TEST_NS}
     ${body}=    Set Variable    '{"text": "At what temperature does water boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${model_name}'
+    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
     Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
-    [Teardown]    Run And Return Rc And Output    oc delete project ${TEST_NS}
+    [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
+    ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Tags]    ODS-2371    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    ${model_one_isvc_name}=    Set Variable    bloom-560m-caikit
     ${model_one_name}=    Set Variable    bloom-560m-caikit
-    ${model_two_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
-    Compile Inference Service YAML    isvc_name=${model_one_isvc_name}
+    Compile Inference Service YAML    isvc_name=${model_one_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
-    Compile Inference Service YAML    isvc_name=${model_two_isvc_name}
+    Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_isvc_name}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=${TEST_NS}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_isvc_name}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${TEST_NS}
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
-    [Teardown]    Run And Return Rc And Output    oc delete project ${TEST_NS}
+    [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
+    ...    isvc_names=${models_names}
 
 
 *** Keywords ***
@@ -103,6 +103,19 @@ Install Model Serving Stack Dependencies
     Deploy Serverless CRs
     Configure KNative Gateways
     Load Expected Responses
+
+Clean Up Test Project
+    [Arguments]    ${test_ns}    ${isvc_names}
+    FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
+        Log    Deleting ${isvc_name}
+        ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${test_ns}
+        Should Be Equal As Integers    ${rc}    ${0}
+    END
+    Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
+    ...    servicemesh_ns=${SERVICEMESH_CR_NS}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
+    Should Be Equal As Integers    ${rc}    ${0}
+
 
 Load Expected Responses
     [Documentation]    Loads the json file containing the expected answer for each

@@ -2,18 +2,16 @@
     "queries": [
         {
             "query_text": "At what temperature does water boil?",
-            "models": [                    
-                    {        
-                        "model_name": "flan-t5-small-caikit",
-                        "generatedTokenCount":  5,
-                        "answer_text": "74 degrees F"
-                    },
-                    {        
-                        "model_name": "bloom-560m-caikit",       
-                        "generatedTokenCount":  20,
-                        "answer_text": "The temperature of water boiling depends on the temperature of the water. The boiling point of water is the"
-                    }
-            ]   
+            "models": {
+                "flan-t5-small-caikit": {
+                    "generatedTokenCount":  5,
+                    "response_text": "74 degrees F"
+                },
+                "bloom-560m-caikit": {
+                    "generatedTokenCount":  20,
+                    "response_text": "The temperature of water boiling depends on the temperature of the water. The boiling point of water is the"
+                }
+            } 
                     
         }
     ]

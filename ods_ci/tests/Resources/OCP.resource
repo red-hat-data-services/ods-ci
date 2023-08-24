@@ -96,13 +96,18 @@ Fetch CA Certificate If RHODS Is Self-Managed
     END
 
 Wait For Pods To Be Ready
-    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s
+    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
     Wait Until Keyword Succeeds    ${timeout}    3s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     Should Be Equal As Numbers    ${rc}    ${0}
+    IF    "${exp_replicas}" != "${NONE}"
+        @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
+        ...    label_selector=${label_selector}
+        Length Should Be  ${replicas}  ${exp_replicas}
+    END
 
 Add Secret To Service Account
     [Arguments]    ${sa_name}    ${secret_name}    ${namespace}

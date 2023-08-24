@@ -39,6 +39,7 @@ ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${FLAN_STORAGE_URI}=    s3://ods-ci-wisdom/flan-t5-small/
 ${BLOOM_STORAGE_URI}=    s3://ods-ci-wisdom/bloom-560m/
+${SKIP_PREREQS_INSTALL}=    ${FALSE}
 
 *** Test Cases ***
 Verify External Dependency Operators Can Be Deployed
@@ -149,7 +150,9 @@ Verify User Can Set The Minimum Number Of Replicas For A Model
     ...    min_replicas=2
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
-
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${TEST_NS}    exp_replicas=2
+    
 
 Verify User Can Autoscale Using Concurrency
     [Tags]    ODS-2377    WatsonX
@@ -191,11 +194,13 @@ Install Model Serving Stack Dependencies
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
     RHOSi Setup
-    Install Service Mesh Stack
-    Deploy Service Mesh CRs
-    Install Serverless Stack
-    Deploy Serverless CRs
-    Configure KNative Gateways
+    IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
+        Install Service Mesh Stack
+        Deploy Service Mesh CRs
+        Install Serverless Stack
+        Deploy Serverless CRs
+        Configure KNative Gateways        
+    END
     Load Expected Responses
 
 Clean Up Test Project

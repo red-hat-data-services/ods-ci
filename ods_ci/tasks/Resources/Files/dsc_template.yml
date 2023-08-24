@@ -1,0 +1,21 @@
+apiVersion: datasciencecluster.opendatahub.io/v1alpha1
+kind: DataScienceCluster
+metadata:
+  name: <dsc_name>
+spec:
+  components:
+    codeflare:
+      enabled: <codeflare_value>
+    dashboard:
+      enabled: <dashboard_value>
+    datasciencepipelines:
+      enabled: <datasciencepipelines_value>
+    kserve:
+      enabled: <kserve_value>
+    modelmeshserving:
+      enabled: <modelmeshserving_value>
+    ray:
+      enabled: <ray_value>
+    workbenches:
+      enabled: <workbenches_value>
+

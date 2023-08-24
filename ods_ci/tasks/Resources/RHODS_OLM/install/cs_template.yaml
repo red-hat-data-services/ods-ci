@@ -12,7 +12,7 @@ items:
           name: rhods-operator
           namespace: redhat-ods-operator
       spec:
-          channel: stable
+          channel: <UPDATE_CHANNEL>
           installPlanApproval: Automatic
           name: rhods-operator
           source: redhat-operators

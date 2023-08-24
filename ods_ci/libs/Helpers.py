@@ -280,3 +280,31 @@ class Helpers:
             else:
                 response = requests.post(endpoint, headers=headers, data=data)
         return response.status_code, response.text
+
+    @keyword
+    def process_resource_list(self, filename_in, filename_out=None):
+        """
+        Tries to remove pseudorandom substring from openshift resource names using a regex.
+        This portion of the regex: -\b(?:[a-z]+\d|\d+[a-z])[a-z0-9]*\b tries to find an
+        alphanumeric string of any length preceded by a `-`, while the second part of the regex
+        i.e. -\b[a-z]{5}$\b, tries to find substrings of length 5 with only alphabetic characters
+        at the end of the string, or with only numbers, preceded by a `-`.
+        This has the possibility of removing valid substrings of length 5 from a resource name
+        (i.e. token) if they appear at the end of the string, however assuming the reference
+        resource list as well as the runtime list are both processed this way, this should
+        not cause an issue.
+        """
+        import re
+
+        regex = re.compile(r"-\b(?:[a-z]+\d|\d+[a-z])[a-z0-9]*\b|-\b[a-z0-9]{5}$\b")
+        out = []
+        with open(filename_in, "r") as f:
+            for line in f:
+                spaces = line.count(" ")
+                resource_name = line.split()[1]
+                resource_name = regex.sub(repl="", string=resource_name)
+                out.append(line.split()[0] + " " * spaces + resource_name + "\n")
+        if filename_out == None:
+            filename_out = filename_in.split(".")[0] + "_processed.txt"
+        with open(filename_out, "w") as outfile:
+            outfile.write("".join(str(l) for l in out))

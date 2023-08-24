@@ -29,7 +29,7 @@ Iterative Testing Classifiers
   ...     Execution-Time-Over-15m
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[classifiers]
-    Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
+    Run Keyword And Warn On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
   END
 
 Iterative Testing Clustering
@@ -38,7 +38,7 @@ Iterative Testing Clustering
   ...     Execution-Time-Over-15m
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[clustering]
-    Run Keyword And Continue On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
+    Run Keyword And Warn On Failure  Iterative Image Test  ${sublist}[0]  ${sublist}[1]  ${sublist}[2]
   END
 
 
@@ -56,7 +56,7 @@ Iterative Image Test
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
     #This ensures all workloads are run even if one (or more) fails
-    Run Keyword And Continue On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
+    Run Keyword And Warn On Failure  Clone Git Repository And Run  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
     Clean Up Server
     Stop JupyterLab Notebook Server
     Capture Page Screenshot

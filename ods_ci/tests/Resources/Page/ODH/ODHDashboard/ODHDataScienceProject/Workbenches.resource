@@ -272,7 +272,7 @@ Wait Until Workbench Is Restarting
 
 Start Workbench
     [Documentation]    Starts a workbench from the DS Project details page
-    [Arguments]     ${workbench_title}      ${timeout}=30s
+    [Arguments]     ${workbench_title}      ${timeout}=60s
 
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}

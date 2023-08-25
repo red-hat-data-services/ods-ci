@@ -39,8 +39,10 @@ ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${SKIP_PREREQS_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
-${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/flan-t5-small/
-${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/bloom-560m/
+${FLAN_MODEL_S3_DIR}=    flan-t5-small
+${BLOOM_MODEL_S3_DIR}=    bloom-560m
+${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
+${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 
 
 *** Test Cases ***
@@ -445,6 +447,7 @@ Create Secret For S3-Like Buckets
     END
     Copy File     ${BUCKET_SECRET_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     Copy File     ${BUCKET_SA_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
+    ${endpoint}=    Replace String   ${endpoint}    https://    ${EMPTY}
     ${endpoint_escaped}=    Escape String Chars    str=${endpoint}
     ${accesskey_escaped}=    Escape String Chars    str=${access_key}
     ${rc}    ${out}=    Run And Return Rc And Output

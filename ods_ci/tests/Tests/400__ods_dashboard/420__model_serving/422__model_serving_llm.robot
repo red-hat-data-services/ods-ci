@@ -142,8 +142,8 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
 
-Verify User Can Set The Minimum Number Of Replicas For A Model
-    [Tags]    ODS-XYZ    WatsonX
+Verify User Can Change The Minimum Number Of Replicas For A Model
+    [Tags]    ODS-2376    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}

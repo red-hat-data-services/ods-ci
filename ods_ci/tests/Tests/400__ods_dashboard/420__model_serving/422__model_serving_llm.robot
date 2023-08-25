@@ -37,9 +37,11 @@ ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
-${FLAN_STORAGE_URI}=    s3://ods-ci-wisdom/flan-t5-small/
-${BLOOM_STORAGE_URI}=    s3://ods-ci-wisdom/bloom-560m/
 ${SKIP_PREREQS_INSTALL}=    ${FALSE}
+${MODELS_BUCKET}=    ${S3.BUCKET_3}
+${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/flan-t5-small/
+${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/bloom-560m/
+
 
 *** Test Cases ***
 Verify External Dependency Operators Can Be Deployed
@@ -101,13 +103,13 @@ Verify Model Upgrade Using Canaray Rollout
     ${models_names}=    Create List    ${model_name}
     Compile And Query LLM model   isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
     ...    namespace=canary-model-upgrade
     Log To Console    Applying Canary Tarffic for Model Upgrade
     Compile And Query LLM Model   isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    model_name=${model_name}
     ...    canaryTrafficPercent=20
     ...    namespace=canary-model-upgrade
@@ -116,7 +118,7 @@ Verify Model Upgrade Using Canaray Rollout
     Compile And Query LLM Model    isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_name=${model_name}
-    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    namespace=canary-model-upgrade
     [Teardown]   Clean Up Test Project    test_ns=canary-model-upgrade
     ...    isvc_names=${models_names}
@@ -129,7 +131,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ${models_names}=    Create List    ${model_name}
     Compile And Query LLM Model   isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
     ...    namespace=no-infer-kserve
     Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
@@ -424,8 +426,8 @@ Deploy Caikit Serving Runtime
 Set Project And Runtime
     [Arguments]    ${namespace}
     Set Up Test OpenShift Project    test_ns=${namespace}
-    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
-    ...    region=us-east-2    namespace=${namespace}
+    Create Secret For S3-Like Buckets    endpoint=${MODELS_BUCKET.ENDPOINT}
+    ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}
 

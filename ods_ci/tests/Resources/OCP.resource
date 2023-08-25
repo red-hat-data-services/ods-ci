@@ -69,12 +69,7 @@ Is RHODS Self-Managed
     ...                                                      kind=CatalogSource
     ...                                                      name=addon-managed-odh-catalog
     ...                                                      namespace=redhat-ods-operator
-    IF    ${is_managed} == ${TRUE}
-        ${is_self_managed}=    Set Variable    ${FALSE}
-    ELSE
-        ${is_self_managed}=    Set Variable    ${TRUE}
-    END
-    RETURN    ${is_self_managed}
+    Run Keyword And Return    Evaluate    not ${is_managed}
 
 Get MachineSets
     [Documentation]    Returns a list of machinesets names

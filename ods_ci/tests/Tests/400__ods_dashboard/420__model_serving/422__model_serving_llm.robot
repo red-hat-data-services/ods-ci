@@ -93,8 +93,6 @@ Verify User Can Deploy Multiple Models In The Same Namespace
 Verify Model Upgrade Using Canaray Rollout
     [Tags]    ODS-2372    WatsonX
     [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
-    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
-    ...    region=us-east-2   namespace=canary-model-upgrade
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
@@ -123,9 +121,6 @@ Verify Model Upgrade Using Canaray Rollout
 Verify Model Pods Are Deleted When No Inference Service Is Present
     [Tags]    ODS-2373    WatsonX
     [Setup]    Set Project And Runtime    namespace=no-infer-kserve
-    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
-    ...    region=us-east-2
-    ...    namespace=no-infer-kserve
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
@@ -378,7 +373,7 @@ Set Project And Runtime
     [Arguments]    ${namespace}
     Set Up Test OpenShift Project    test_ns=${namespace}
     Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
-    ...    region=us-east-2
+    ...    region=us-east-2    namespace= ${namespace}
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}
 

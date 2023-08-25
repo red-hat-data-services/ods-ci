@@ -3,7 +3,7 @@ import importlib
 import json
 import os
 import sys
-
+from kfp_tekton.compiler.pipeline_utils import TektonPipelineConf
 import kfp_tekton
 from DataSciencePipelinesAPI import DataSciencePipelinesAPI
 from robotlibcore import keyword
@@ -40,10 +40,8 @@ class DataSciencePipelinesKfpTekton:
         return self.client, self.api
 
     def get_cert(self, api):
-        cert_json, _ = api.run_oc(
-            "oc get secret -n openshift-ingress-operator router-ca -o json"
-        )
-        cert = json.loads(cert_json)["data"]["tls.crt"]
+        cert_json = self.get_secret(api, 'openshift-ingress-operator', 'router-ca')
+        cert = cert_json["data"]["tls.crt"]
         decoded_cert = base64.b64decode(cert).decode("utf-8")
 
         file_name = "/tmp/kft-cert"
@@ -51,6 +49,12 @@ class DataSciencePipelinesKfpTekton:
         cert_file.write(decoded_cert)
         cert_file.close()
         return file_name
+
+    def get_secret(self, api, project, name):
+        secret_json, _ = api.run_oc(
+            f"oc get secret -n {project} {name} -o json"
+        )
+        return json.loads(secret_json)
 
     def import_souce_code(self, path):
         module_name = os.path.basename(path).replace("-", "_")
@@ -64,21 +68,28 @@ class DataSciencePipelinesKfpTekton:
 
     @keyword
     def kfp_tekton_create_run_from_pipeline_func(
-        self, user, pwd, project, route_name, source_code, fn
+        self, user, pwd, project, route_name, source_code, fn, current_path=None
     ):
-        client, _ = self.get_client(user, pwd, project, route_name)
+        client, api = self.get_client(user, pwd, project, route_name)
+        mlpipeline_minio_artifact_secret = self.get_secret(api, 'pipelineskfptekton1', 'mlpipeline-minio-artifact')
         # the current path is from where you are running the script
         # sh ods_ci/run_robot_test.sh
         # the current_path will be ods-ci
-        current_path = os.getcwd()
+        if current_path is None:
+            current_path = os.getcwd()
         my_source = self.import_souce_code(
             f"{current_path}/ods_ci/tests/Resources/Files/pipeline-samples/{source_code}"
         )
         pipeline = getattr(my_source, fn)
+        os.environ["DEFAULT_STORAGE_CLASS"] = self.api.get_default_storage()
+        pipeline_conf = TektonPipelineConf()
+        pipeline_conf.set_condition_image_name('registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61')
         # create_run_from_pipeline_func will compile the code
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')
         result = client.create_run_from_pipeline_func(
-            pipeline_func=pipeline, arguments={}
+            pipeline_func=pipeline, arguments={
+                'mlpipeline_minio_artifact_secret': mlpipeline_minio_artifact_secret
+            }, pipeline_conf=pipeline_conf
         )
         # easy to debug and double check failures
         print(result)
@@ -88,7 +99,9 @@ class DataSciencePipelinesKfpTekton:
     # Waiting for a backport https://github.com/kubeflow/kfp-tekton/pull/1234
     @keyword
     def kfp_tekton_wait_for_run_completion(
-        self, user, pwd, project, route_name, run_result
+        self, user, pwd, project, route_name, run_result, timeout=160
     ):
         _, api = self.get_client(user, pwd, project, route_name)
-        return api.check_run_status(run_result.run_id)
+        return api.check_run_status(run_result.run_id, timeout=timeout)
+
+

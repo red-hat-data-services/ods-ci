@@ -132,8 +132,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
     ...    model_name=${model_name}
     ...    namespace=no-infer-kserve
-    ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${flan_isvc_name} -n no-infer-kserve
-    Should Be Equal As Integers    ${rc}    ${0}
+    Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s
     Should Be Equal As Integers    ${rc}    ${0}
     [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
@@ -208,8 +207,7 @@ Clean Up Test Project
     IF    ${isvc_delete} == ${TRUE}
         FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
               Log    Deleting ${isvc_name}
-              ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${test_ns}
-              Should Be Equal As Integers    ${rc}    ${0}
+              Delete InfereceService    isvc_name=${isvc_name}    namespace=${test_ns}
         END
     ELSE
         Log To Console     InferenceService Delete option not provided by user
@@ -427,7 +425,7 @@ Set Project And Runtime
     [Arguments]    ${namespace}
     Set Up Test OpenShift Project    test_ns=${namespace}
     Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
-    ...    region=us-east-2    namespace= ${namespace}
+    ...    region=us-east-2    namespace=${namespace}
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}
 

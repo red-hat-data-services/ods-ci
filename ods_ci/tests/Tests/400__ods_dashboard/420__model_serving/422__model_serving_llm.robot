@@ -152,7 +152,7 @@ Verify User Can Set The Minimum Number Of Replicas For A Model
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=2
-    
+
 
 Verify User Can Autoscale Using Concurrency
     [Tags]    ODS-2377    WatsonX
@@ -199,7 +199,7 @@ Install Model Serving Stack Dependencies
         Deploy Service Mesh CRs
         Install Serverless Stack
         Deploy Serverless CRs
-        Configure KNative Gateways        
+        Configure KNative Gateways
     END
     Load Expected Responses
 

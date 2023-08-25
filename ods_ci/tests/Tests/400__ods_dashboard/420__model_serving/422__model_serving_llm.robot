@@ -12,7 +12,7 @@ ${DEFAULT_OP_NS}=    openshift-operators
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
-${SERVERLESS_NS}=    openshift-serverless    
+${SERVERLESS_NS}=    openshift-serverless
 ${SERVERLESS_CR_NS}=    knative-serving
 ${SERVERLESS_KNATIVECR_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio.yaml
 ${SERVERLESS_GATEWAYS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/gateways.yaml
@@ -90,6 +90,56 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
     ...    isvc_names=${models_names}
 
+Verify Model Upgrade Using Canaray Rollout
+    [Tags]    ODS-2372    WatsonX
+    [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
+    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
+    ...    region=us-east-2   namespace=canary-model-upgrade
+    ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_name}
+    Compile And Query LLM model   isvc_name=${flan_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_name=${model_name}
+    ...    namespace=canary-model-upgrade
+    Log To Console    Applying Canary Tarffic for Model Upgrade
+    Compile And Query LLM Model   isvc_name=${flan_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    model_name=${model_name}
+    ...    canaryTrafficPercent=20
+    ...    namespace=canary-model-upgrade
+#    ...    multiple_query=YES
+    Log To Console    Remove Canary Tarffic For Model Upgrade
+    Compile And Query LLM Model    isvc_name=${flan_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_name=${model_name}
+    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    namespace=canary-model-upgrade
+    [Teardown]   Clean Up Test Project    test_ns=canary-model-upgrade
+    ...    isvc_names=${models_names}
+
+Verify Model Pods Are Deleted When No Inference Service Is Present
+    [Tags]    ODS-2373    WatsonX
+    [Setup]    Set Project And Runtime    namespace=no-infer-kserve
+    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
+    ...    region=us-east-2
+    ...    namespace=no-infer-kserve
+    ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_name}
+    Compile And Query LLM Model   isvc_name=${flan_isvc_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_name=${model_name}
+    ...    namespace=no-infer-kserve
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${flan_isvc_name} -n no-infer-kserve
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s
+    Should Be Equal As Integers    ${rc}    ${0}
+    [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
+    ...    isvc_names=${models_names}   isvc_delete=${FALSE}
 
 *** Keywords ***
 Install Model Serving Stack Dependencies
@@ -105,11 +155,15 @@ Install Model Serving Stack Dependencies
     Load Expected Responses
 
 Clean Up Test Project
-    [Arguments]    ${test_ns}    ${isvc_names}
-    FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
-        Log    Deleting ${isvc_name}
-        ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${test_ns}
-        Should Be Equal As Integers    ${rc}    ${0}
+    [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}
+    IF    ${isvc_delete} == ${TRUE}
+        FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
+              Log    Deleting ${isvc_name}
+              ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${test_ns}
+              Should Be Equal As Integers    ${rc}    ${0}
+        END
+    ELSE
+        Log To Console     InferenceService Delete option not provided by user
     END
     Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
     ...    servicemesh_ns=${SERVICEMESH_CR_NS}
@@ -233,7 +287,7 @@ Install Serverless Stack
     Wait For Pods To Be Ready    label_selector=name=knative-operator
     ...    namespace=${SERVERLESS_NS}
 
-Deploy Serverless CRs 
+Deploy Serverless CRs
     [Documentation]    Deploys the CustomResources for Serverless operator
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_CR_NS}
     Add Peer Authentication    namespace=${SERVERLESS_CR_NS}
@@ -269,7 +323,7 @@ Configure KNative Gateways
     ${exists}=    Run Keyword And Return Status
     ...    Directory Should Exist    ${base_dir}
     IF    ${exists} == ${FALSE}
-        Create Directory    ${base_dir}        
+        Create Directory    ${base_dir}
     END
     ${rc}    ${domain_name}=    Run And Return Rc And Output
     ...    oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}' | awk -F'.' '{print $(NF-1)"."$NF}'
@@ -295,12 +349,12 @@ Configure KNative Gateways
 
 Set Up Test OpenShift Project
     [Documentation]    Creates a test namespace and track it under ServiceMesh
-    [Arguments]    ${test_ns}   
+    [Arguments]    ${test_ns}
     ${rc}    ${out}=    Run And Return Rc And Output    oc get project ${test_ns}
     IF    "${rc}" == "${0}"
         Log    message=OpenShift Project ${test_ns} already present. Skipping project setup...
         ...    level=WARN
-        RETURN 
+        RETURN
     END
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${test_ns}
     Should Be Equal As Numbers    ${rc}    ${0}
@@ -315,7 +369,7 @@ Deploy Caikit Serving Runtime
     IF    "${rc}" == "${0}"
         Log    message=ServingRuntime caikit-runtime in ${namespace} NS already present. Skipping runtime setup...
         ...    level=WARN
-        RETURN 
+        RETURN
     END
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${CAIKIT_FILEPATH} -n ${namespace}
@@ -338,7 +392,7 @@ Create Secret For S3-Like Buckets
     IF    "${rc}" == "${0}"
         Log    message=Secret ${name} in ${namespace} NS already present. Skipping secret setup...
         ...    level=WARN
-        RETURN 
+        RETURN
     END
     Copy File     ${BUCKET_SECRET_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     Copy File     ${BUCKET_SA_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
@@ -366,7 +420,7 @@ Create Secret For S3-Like Buckets
 
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
-    [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}
+    [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -375,6 +429,13 @@ Compile Inference Service YAML
     ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    IF   '${canaryTrafficPercent}' == '${EMPTY}'
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    sed -i '/canaryTrafficPercent/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ELSE
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    sed -i 's/{{CanaryTrafficPercent}}/${canaryTrafficPercent}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    END
 
 Model Response Should Match The Expectation
     [Documentation]    Checks that the actual model response matches the expected answer.
@@ -410,4 +471,27 @@ Query Models And Check Responses Multiple Times
             ...    query_idx=0
         END
     END
-    
+
+Compile And Query LLM model
+    [Arguments]    ${isvc_name}     ${model_storage_uri}    ${model_name}
+    ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
+    ...            ${multiple_query}=${EMPTY}
+    Compile Inference Service YAML    isvc_name=${isvc_name}
+    ...    sa_name=${sa_name}
+    ...    model_storage_uri=${model_storage_uri}
+    ...    canaryTrafficPercent=${canaryTrafficPercent}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
+    ...    namespace=${namespace}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
+    ${header}=    Set Variable    'mm-model-id: ${model_name}'
+    IF   '${multiple_query}' != '${EMPTY}'
+          Query Models And Check Responses Multiple Times    models_names=${models_name}    n_times=10
+    ELSE
+          ${res}=      Query Model With GRPCURL   host=${host}    port=443
+          ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+          ...    json_body=${body}    json_header=${header}
+          ...    insecure=${TRUE}
+    END

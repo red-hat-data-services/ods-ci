@@ -155,6 +155,23 @@ Verify User Can Set The Minimum Number Of Replicas For A Model
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=2
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ${rev_id}=    Scale Number Of Replicas    n_replicas=3    model_name=${model_name}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${TEST_NS}    exp_replicas=3
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ${rev_id}=    Scale Number Of Replicas    n_replicas=1    model_name=${model_name}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${TEST_NS}    exp_replicas=1
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    [Teardown]   Clean Up Test Project    test_ns=${TEST_NS}
+    ...    isvc_names=${models_names}
 
 
 Verify User Can Autoscale Using Concurrency

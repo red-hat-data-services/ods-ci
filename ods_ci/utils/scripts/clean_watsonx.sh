@@ -24,7 +24,7 @@ sm_csv_name=$(oc get csv -n openshift-operators -oname | grep servicemeshoperato
 oc delete $sm_csv_name -n openshift-operators
 
 sl_csv_name=$(oc get csv -n openshift-serverless -oname | grep serverless-operator)
-oc delete $sm_csv_name -n openshift-serverless
+oc delete $sl_csv_name -n openshift-serverless
 
 oc delete OperatorGroup serverless-operators -n openshift-serverless
 

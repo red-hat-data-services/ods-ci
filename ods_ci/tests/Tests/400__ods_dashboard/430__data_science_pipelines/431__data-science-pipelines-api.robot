@@ -53,7 +53,7 @@ End To End Pipeline Workflow Via Api
     ${pipeline_id}    Create Pipeline    ${URL_TEST_PIPELINE_RUN_YAML}
     ${run_id}    Create Run    ${pipeline_id}
     ${run_status}    Check Run Status    ${run_id}
-    Should Be True    '${run_status}' == 'Completed'    Pipeline run doesn't have Completed status
+    Should Be True    ${run_status}    Pipeline run doesn't have a status that means success. Check the logs
     DataSciencePipelinesAPI.Delete Runs    ${run_id}
     DataSciencePipelinesAPI.Delete Pipeline    ${pipeline_id}
     [Teardown]    Remove Pipeline Project    ${project}

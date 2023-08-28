@@ -90,11 +90,16 @@ Check IF URL On The Page Is Commercial
      END
 
 Is RHODS Version Greater Or Equal Than
+    [Documentation]    Returns True if:
+    ...    - RHODS version is greater or equal than ${target}
+    ...    - RHODS version is 1.18.x (needed for testing odh-nightlies)
+    ...    - ${PRODUCT}=ODH
     [Arguments]  ${target}
+    IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
     ${ver} =  Get RHODS version
     ${ver} =  Fetch From Left  ${ver}  -
+    IF  "1.18" in "${ver}"  RETURN     ${TRUE}
     ${comparison} =  GTE  ${ver}  ${target}
-    # Returns True or False
     RETURN  ${comparison}
 
 Move To Installed Operator Page Tab in Openshift

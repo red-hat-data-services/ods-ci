@@ -65,7 +65,7 @@ Export Variables From File
     [Documentation]     Export variables from file with lines format of: variable=value
     [Arguments]   ${variables_file}
     ${file_data} = 	Get File 	${variables_file}
-    @{list} =    Split to lines  ${file_data}     
+    @{list} =    Split to lines  ${file_data}
     FOR    ${line}     IN    @{list}
         Log     ${line}
         ${line} =    Remove String    ${line}    export
@@ -92,14 +92,19 @@ CSS Property Value Should Be
         Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
     END
 
+#robocop: disable: line-too-long
 Get RHODS Version
-    [Documentation]    Return RHODS version number.
+    [Documentation]    Return RHODS/ODH operator version number.
     ...    Will fetch version only if $RHODS_VERSION was not already set, or $force_fetch is True.
     [Arguments]    ${force_fetch}=False
     IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
-        ${RHODS_VERSION}=  Run  oc get csv -n redhat-ods-operator | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
+        IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
+            ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "rhods-operator" | awk '{print $1}' | sed 's/rhods-operator.//'
+        ELSE
+            ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}'
+        END
     END
-    Log  ${RHODS_VERSION}
+    Log  Product:${PRODUCT} Version:${RHODS_VERSION}
     RETURN  ${RHODS_VERSION}
 
 Get Cluster ID
@@ -192,7 +197,7 @@ Skip If RHODS Version Greater Or Equal Than
     END
 
 Skip If RHODS Is Self-Managed
-    [Documentation]    Skips test if RHODS is installed as Self-managed
+    [Documentation]    Skips test if RHODS is installed as Self-managed or PRODUCT=ODH
     [Arguments]    ${msg}=${EMPTY}
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    "${msg}" != "${EMPTY}"
@@ -218,7 +223,8 @@ Run Keyword If RHODS Is Managed
     IF    ${is_self_managed} == False    Run Keyword    ${name}    @{arguments}
 
 Run Keyword If RHODS Is Self-Managed
-    [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Self-Managed
+    [Documentation]    Runs keyword ${name} using  @{arguments}
+    ...    if RHODS is Self-Managed or PRODUCT=ODH
     [Arguments]    ${name}    @{arguments}
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    ${is_self_managed} == True    Run Keyword    ${name}    @{arguments}

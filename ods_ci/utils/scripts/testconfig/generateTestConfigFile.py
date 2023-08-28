@@ -107,7 +107,7 @@ def change_component_state(components):
     for component in components_list:
         comp, state = component.split(":")
         component_states[comp] = True if state.lower() == "true" else False
-    
+
     return component_states
 
 
@@ -219,6 +219,11 @@ def generate_test_config_file(
     data["STARBURST"]["OBS_TOKEN_URL"] = config_data["STARBURST"]["OBS_TOKEN_URL"]
     data["DEFAULT_NOTIFICATION_EMAIL"] = config_data["DEFAULT_NOTIFICATION_EMAIL"]
     data["RHM_TOKEN"] = config_data["RHM_TOKEN"]
+    data["PRODUCT"] = config_data["PRODUCT"]
+    data["APPLICATIONS_NAMESPACE"] = config_data["APPLICATIONS_NAMESPACE"]
+    data["MONITORING_NAMESPACE"] = config_data["MONITORING_NAMESPACE"]
+    data["OPERATOR_NAMESPACE"] = config_data["OPERATOR_NAMESPACE"]
+    data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
 
     if components:
         data["COMPONENTS"] = change_component_state(components)

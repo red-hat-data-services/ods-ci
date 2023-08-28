@@ -141,7 +141,7 @@ Python Version Check
   ${vers} =  Get Substring  ${output}  0  3
   ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
   IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"
-  
+
 
 Maybe Select Kernel
   ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
@@ -161,7 +161,7 @@ Clean Up Server
     Maybe Close Popup
     ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
     ${container_name_nb} =  Get Substring  ${notebook_pod_name}  start=0  end=-2
-    ${ls_server} =  Run Command In Container    rhods-notebooks    ${notebook_pod_name}    ls    ${container_name_nb}
+    ${ls_server} =  Run Command In Container    ${NOTEBOOKS_NAMESPACE}    ${notebook_pod_name}    ls    ${container_name_nb}
     #${ls_server} =  Run Command In Container    redhat-ods-applications    ${notebook_pod_name}    ls    ${container_name_nb}
     Should Match    "${ls_server}"    "${EMPTY}"
 
@@ -203,11 +203,11 @@ Clean Up User Notebook
   IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
 
       # Delete all files and folders in /opt/app-root/src/  (excluding hidden files/folders)
       # Note: rm -fr /opt/app-root/src/ or rm -fr /opt/app-root/src/* didn't work properly so we ended up using find
-      ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
+      ${output} =  Run   oc exec ${notebook_pod_name} -n ${NOTEBOOKS_NAMESPACE} -- find /opt/app-root/src/ -not -path '*/\.*' -not -path '/opt/app-root/src/' -exec rm -rv {} +
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)
@@ -223,9 +223,9 @@ Delete Folder In User Notebook
   IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
-      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=rhods-notebooks
+      OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
 
-      ${output} =  Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- rm -fr /opt/app-root/src/${folder}
+      ${output} =  Run   oc exec ${notebook_pod_name} -n ${NOTEBOOKS_NAMESPACE} -- rm -fr /opt/app-root/src/${folder}
       Log  ${output}
   ELSE
       Fail  msg=This command requires ${admin_username} to be connected to the cluster (oc login ...)

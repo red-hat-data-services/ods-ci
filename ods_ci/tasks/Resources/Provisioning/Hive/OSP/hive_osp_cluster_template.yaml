@@ -97,7 +97,7 @@ items:
 - apiVersion: hive.openshift.io/v1
   kind: ClusterImageSet
   metadata:
-    name: rhods-imageset-ocp-${infrastructure_configurations}[ocp_version]
+    name: ${infrastructure_configurations}[image_set]
     namespace: ${infrastructure_configurations}[hive_claim_ns]
   spec:
     releaseImage: quay.io/openshift-release-dev/ocp-release:${infrastructure_configurations}[ocp_version]-x86_64

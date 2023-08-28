@@ -34,9 +34,11 @@ and its upstream project, [Open Data Hub](https://opendatahub.io/).
      # Running a specific test via tag
      sh ods_ci/run_robot_test.sh --include ODS-XYZ
 
-     # Running a specific test via tag on Open Data Hub:
-     # We need to overwrite some global variables with --test-variable
-     # and some local variables with --variablefile
+     # Running tests in Open Data Hub:
+     # You need to set accordingly the PRODUCT, APPLICATIONS_NAMESPACE, MONITORING_NAMESPACE,
+     # OPERATOR_NAMESPACE and NOTEBOOKS_NAMESPACE in test-variables.yaml (or pass them as parameters
+     # when launching the tests) and overwrite some local variables used in the test suites
+     # adding --variablefile ./ods_ci/test-variables-odh-overwrite.yml
      sh ods_ci/run_robot_test.sh \
       --test-variable PRODUCT:ODH \
       --test-variable APPLICATIONS_NAMESPACE:opendatahub \
@@ -44,7 +46,7 @@ and its upstream project, [Open Data Hub](https://opendatahub.io/).
       --test-variable OPERATOR_NAMESPACE:openshift-operators \
       --test-variable NOTEBOOKS_NAMESPACE:opendatahub \
       --extra-robot-args '--variablefile ./ods_ci/test-variables-odh-overwrite.yml' \
-      --include XYZ
+      --include OpenDataHub
    ```
 
    * This run_robot_test.sh is a wrapper for creating the python virtual environment and running the Robot Framework CLI.

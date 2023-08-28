@@ -48,6 +48,7 @@ RHOSi Setup
     ...                The suggested usage of this keyword is to call it inside all the Suite Setup keywords.
     ...                Do Not extend this keyword for high-level setup, e.g., don't open browser
     Protect Sensitive Variables In Keywords
+    Required Global Variables Should Exist
     Initialize Global Variables
     Run Keyword If RHODS Is Managed
     ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
@@ -71,3 +72,11 @@ Initialize Global Variables
     [Arguments]    ${force_fetch}=False
     ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
     Set Global Variable   ${RHODS_VERSION}
+
+Required Global Variables Should Exist
+    [Documentation]   Fails if new required global variables are not set
+    Variable Should Exist    ${PRODUCT}
+    Variable Should Exist    ${APPLICATIONS_NAMESPACE}
+    Variable Should Exist    ${MONITORING_NAMESPACE}
+    Variable Should Exist    ${OPERATOR_NAMESPACE}
+    Variable Should Exist    ${NOTEBOOKS_NAMESPACE}

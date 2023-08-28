@@ -92,13 +92,13 @@ Check IF URL On The Page Is Commercial
 Is RHODS Version Greater Or Equal Than
     [Documentation]    Returns True if:
     ...    - RHODS version is greater or equal than ${target}
-    ...    - RHODS version is 1.18 (needed for testing odh-nightlies)
+    ...    - RHODS version is 1.18.x (needed for testing odh-nightlies)
     ...    - ${PRODUCT}=ODH
     [Arguments]  ${target}
     IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
     ${ver} =  Get RHODS version
     ${ver} =  Fetch From Left  ${ver}  -
-    IF  "${ver}" == "1.18"  RETURN     ${TRUE}
+    IF  "1.18" in "${ver}"  RETURN     ${TRUE}
     ${comparison} =  GTE  ${ver}  ${target}
     RETURN  ${comparison}
 

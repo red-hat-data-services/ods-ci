@@ -145,10 +145,6 @@ Verify That CUDA Build Chain Succeeds
     ...       Tier1
     ...       OpenDataHub
     ...       ODS-316    ODS-481
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==False
-        Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
-    END
     Verify Image Can Be Spawned    image=pytorch  size=Small
     ...    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}

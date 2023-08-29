@@ -37,6 +37,12 @@ ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
+${SKIP_PREREQS_INSTALL}=    ${FALSE}
+${MODELS_BUCKET}=    ${S3.BUCKET_3}
+${FLAN_MODEL_S3_DIR}=    flan-t5-small
+${BLOOM_MODEL_S3_DIR}=    bloom-560m
+${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
+${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 
 
 *** Test Cases ***
@@ -51,7 +57,7 @@ Verify User Can Serve And Query A Model
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -63,6 +69,7 @@ Verify User Can Serve And Query A Model
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=1
     [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
     ...    isvc_names=${models_names}
 
@@ -74,12 +81,12 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
     Compile Inference Service YAML    isvc_name=${model_one_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    model_storage_uri=${BLOOM_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
@@ -98,13 +105,13 @@ Verify Model Upgrade Using Canaray Rollout
     ${models_names}=    Create List    ${model_name}
     Compile And Query LLM model   isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
     ...    namespace=canary-model-upgrade
     Log To Console    Applying Canary Tarffic for Model Upgrade
     Compile And Query LLM Model   isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    model_name=${model_name}
     ...    canaryTrafficPercent=20
     ...    namespace=canary-model-upgrade
@@ -113,7 +120,7 @@ Verify Model Upgrade Using Canaray Rollout
     Compile And Query LLM Model    isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_name=${model_name}
-    ...    model_storage_uri=s3://ods-ci-wisdom/bloom-560m/
+    ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    namespace=canary-model-upgrade
     [Teardown]   Clean Up Test Project    test_ns=canary-model-upgrade
     ...    isvc_names=${models_names}
@@ -126,15 +133,46 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ${models_names}=    Create List    ${model_name}
     Compile And Query LLM Model   isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
     ...    namespace=no-infer-kserve
-    ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${flan_isvc_name} -n no-infer-kserve
-    Should Be Equal As Integers    ${rc}    ${0}
+    Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s
     Should Be Equal As Integers    ${rc}    ${0}
     [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
+
+Verify User Can Change The Minimum Number Of Replicas For A Model
+    [Tags]    ODS-2376    WatsonX
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_name}
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    ...    min_replicas=2
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${TEST_NS}    exp_replicas=2
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ${rev_id}=    Scale Number Of Replicas    n_replicas=3    model_name=${model_name}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${TEST_NS}    exp_replicas=3
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ${rev_id}=    Scale Number Of Replicas    n_replicas=1    model_name=${model_name}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    ...    namespace=${TEST_NS}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${TEST_NS}    exp_replicas=1
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    [Teardown]   Clean Up Test Project    test_ns=${TEST_NS}
+    ...    isvc_names=${models_names}
+
 
 Verify User Can Autoscale Using Concurrency
     [Tags]    ODS-2377    WatsonX
@@ -176,11 +214,13 @@ Install Model Serving Stack Dependencies
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
     RHOSi Setup
-    Install Service Mesh Stack
-    Deploy Service Mesh CRs
-    Install Serverless Stack
-    Deploy Serverless CRs
-    Configure KNative Gateways
+    IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
+        Install Service Mesh Stack
+        Deploy Service Mesh CRs
+        Install Serverless Stack
+        Deploy Serverless CRs
+        Configure KNative Gateways
+    END
     Load Expected Responses
 
 Clean Up Test Project
@@ -188,8 +228,7 @@ Clean Up Test Project
     IF    ${isvc_delete} == ${TRUE}
         FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
               Log    Deleting ${isvc_name}
-              ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${test_ns}
-              Should Be Equal As Integers    ${rc}    ${0}
+              Delete InfereceService    isvc_name=${isvc_name}    namespace=${test_ns}
         END
     ELSE
         Log To Console     InferenceService Delete option not provided by user
@@ -406,8 +445,8 @@ Deploy Caikit Serving Runtime
 Set Project And Runtime
     [Arguments]    ${namespace}
     Set Up Test OpenShift Project    test_ns=${namespace}
-    Create Secret For S3-Like Buckets    endpoint=s3.us-east-2.amazonaws.com/
-    ...    region=us-east-2    namespace= ${namespace}
+    Create Secret For S3-Like Buckets    endpoint=${MODELS_BUCKET.ENDPOINT}
+    ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}
 
@@ -425,6 +464,7 @@ Create Secret For S3-Like Buckets
     END
     Copy File     ${BUCKET_SECRET_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     Copy File     ${BUCKET_SA_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
+    ${endpoint}=    Replace String   ${endpoint}    https://    ${EMPTY}
     ${endpoint_escaped}=    Escape String Chars    str=${endpoint}
     ${accesskey_escaped}=    Escape String Chars    str=${access_key}
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -455,6 +495,8 @@ Compile Inference Service YAML
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{INFERENCE_SERVICE_NAME}}/${isvc_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{MIN_REPLICAS}}/${min_replicas}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output

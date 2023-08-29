@@ -1681,6 +1681,7 @@ referencing = ">=0.28.0"
 name = "keystoneauth1"
 version = "5.3.0"
 description = "Authentication Library for OpenStack Identity"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -5319,4 +5320,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "314da19990173712c2a1f2b0c23b8db08b6df68bec3645fa6cca11879a94e8cd"
+content-hash = "dd466640a5e817956ac670b20d37a35ca4afb44ad969bf75b8c9224813c0e80e"

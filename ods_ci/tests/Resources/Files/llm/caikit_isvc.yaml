@@ -8,6 +8,9 @@ metadata:
   name: {{INFERENCE_SERVICE_NAME}}
 spec:
   predictor:
+    scaleMetric: concurrency
+    minReplicas: {{MIN_REPLICAS}}
+    scaleTarget: {{SCALE_TARGET}}
     canaryTrafficPercent: {{CanaryTrafficPercent}}
     serviceAccountName: {{SA_NAME}}
     model:

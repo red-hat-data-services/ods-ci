@@ -136,6 +136,43 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
 
+Verify User Can Autoscale Using Concurrency
+    [Tags]    ODS-XXX    WatsonX
+    [Setup]    Set Project And Runtime    namespace=autoscale-con
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${model_name}=    Create List    ${flan_model_name}
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    auto_scale=True
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=autoscale-con
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=autoscale-con
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-con
+    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
+    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
+    ${cmd} =     Set Variable     grpcurl -d
+    ${cmd} =    Catenate   ${cmd} ${body}
+    ${cmd} =    Catenate   ${cmd} -H ${header}
+    ${cmd} =    Catenate   ${cmd} -insecure
+    ${cmd} =    Catenate   ${cmd}  ${host}:443
+    ${cmd} =    Catenate   ${cmd}  "caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+    FOR    ${index}    IN RANGE    30
+            ${rc}  ${response}=   	Run And Return Rc And Output    ${cmd}&
+            Run Keyword And Continue On Failure  Should Be Equal As Integers     ${rc}  ${0}
+    END
+    @{pod_lists}=    Oc Get    kind=Pod    namespace=autoscale-con
+        ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ${count}=    Get Length   ${pod_lists}
+    IF   ${count} > ${1}
+         Log      Autoscale Using Concurrency is completed.Model Pod has been scaled up from 1 to $count
+    ELSE
+         FAIL     msg= Autoscale Using Concurrency has failed and Model pod has not been scaled up
+    END
+    [Teardown]   Clean Up Test Project    test_ns=autoscale-con
+    ...    isvc_names=${model_name}
+
 *** Keywords ***
 Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
@@ -416,6 +453,7 @@ Create Secret For S3-Like Buckets
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
+    ...            ${min_replicas}=1   ${scaleTarget}=1   ${auto_scale}=${NONE}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -424,6 +462,17 @@ Compile Inference Service YAML
     ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    sed -i 's/{{MIN_REPLICAS}}/${min_replicas}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    IF   '${auto_scale}' == '${NONE}'
+          ${rc}    ${out}=    Run And Return Rc And Output
+          ...    sed -i '/scaleMetric/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+          ${rc}    ${out}=    Run And Return Rc And Output
+          ...    sed -i '/scaleTarget/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ELSE
+          ${rc}    ${out}=    Run And Return Rc And Output
+          ...    sed -i 's/{{SCALE_TARGET}}/${scaleTarget}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    END
     IF   '${canaryTrafficPercent}' == '${EMPTY}'
         ${rc}    ${out}=    Run And Return Rc And Output
         ...    sed -i '/canaryTrafficPercent/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml

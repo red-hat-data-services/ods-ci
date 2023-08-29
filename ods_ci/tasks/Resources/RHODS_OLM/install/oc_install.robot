@@ -155,7 +155,7 @@ Apply DataScienceCluster CustomResource
         TRY
             Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
         EXCEPT
-            Log To Console    ${cmp} - False
+            Log To Console    ${cmp} - Removed
         END
     END
     Create DataScienceCluster CustomResource Using Test Variables
@@ -184,11 +184,11 @@ Create DataScienceCluster CustomResource Using Test Variables
     Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    $cmp not in $COMPONENTS
-            Run    sed -i 's/<${cmp}_value>/false/' ${file_path}dsc_apply.yml
-        ELSE IF    ${COMPONENTS.${cmp}} == ${True}
-            Run    sed -i 's/<${cmp}_value>/true/' ${file_path}dsc_apply.yml
-        ELSE IF    ${COMPONENTS.${cmp}} == ${False}
-            Run    sed -i 's/<${cmp}_value>/false/' ${file_path}dsc_apply.yml
+            Run    sed -i 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+        ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
+            Run    sed -i 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+        ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
+            Run    sed -i 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
         END
     END
 
@@ -208,4 +208,8 @@ Is Component Enabled
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while getting component status
-    RETURN    ${output}
+    IF    '${output}' == 'Managed'
+        RETURN    true
+    ELSE IF    '${output}' == 'Removed'
+        RETURN    false
+    END

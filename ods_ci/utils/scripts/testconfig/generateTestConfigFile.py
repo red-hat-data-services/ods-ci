@@ -106,7 +106,7 @@ def change_component_state(components):
     components_list = components.split(",")
     for component in components_list:
         comp, state = component.split(":")
-        component_states[comp] = True if state.lower() == "true" else False
+        component_states[comp] = "Managed" if state.lower() == "managed" else "Removed"
 
     return component_states
 

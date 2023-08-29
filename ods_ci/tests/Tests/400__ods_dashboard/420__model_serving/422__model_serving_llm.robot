@@ -152,18 +152,15 @@ Verify User Can Autoscale Using Concurrency
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-con
     ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    ${cmd} =     Set Variable     grpcurl -d
-    ${cmd} =    Catenate   ${cmd} ${body}
-    ${cmd} =    Catenate   ${cmd} -H ${header}
-    ${cmd} =    Catenate   ${cmd} -insecure
-    ${cmd} =    Catenate   ${cmd}  ${host}:443
-    ${cmd} =    Catenate   ${cmd}  "caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+
     FOR    ${index}    IN RANGE    30
-            ${rc}  ${response}=   	Run And Return Rc And Output    ${cmd}&
-            Run Keyword And Continue On Failure  Should Be Equal As Integers     ${rc}  ${0}
+           Query Model With GRPCURL   host=${host}    port=443
+           ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+           ...    json_body=${body}    json_header=${header}
+           ...    insecure=${TRUE}     background=${TRUE}
     END
     @{pod_lists}=    Oc Get    kind=Pod    namespace=autoscale-con
-        ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ${count}=    Get Length   ${pod_lists}
     IF   ${count} > ${1}
          Log      Autoscale Using Concurrency is completed.Model Pod has been scaled up from 1 to $count
@@ -453,7 +450,7 @@ Create Secret For S3-Like Buckets
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
-    ...            ${min_replicas}=1   ${scaleTarget}=1   ${scaleMetric}=concurrency ${auto_scale}=${NONE}
+    ...            ${min_replicas}=1   ${scaleTarget}=1   ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output

@@ -110,6 +110,7 @@ def change_component_state(components):
         component_states[comp] = "Managed" if state.lower() == "managed" else "Removed"
         print(component_states[comp])
 
+    print(component_states)
     return component_states
 
 
@@ -231,6 +232,8 @@ def generate_test_config_file(
         print("Setting components")
         print(components)
         data["COMPONENTS"] = change_component_state(components)
+    print("After setting components")
+    print(data["COMPONENTS"])
 
     # Login to test cluster using oc command
     oc_login(
@@ -279,6 +282,7 @@ def main():
         components=args.components,
 
     )
+    print("Done generating config file")
 
 
 if __name__ == "__main__":

@@ -275,3 +275,17 @@ Get KServe Inference Host Via CLI
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
+
+Scale Number Of Replicas
+    [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
+    ${rc}    ${old_revision_id}=    Run And Return Rc And Output
+    ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch InferenceService ${model_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/predictor/minReplicas', 'value': ${n_replicas}}]"
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${old_revision_id}
+
+Delete InfereceService
+    [Arguments]    ${isvc_name}    ${namespace}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}

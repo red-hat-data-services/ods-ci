@@ -126,7 +126,7 @@ Fetch Odh-deployer Pod Logs
     &{odhdeployer_pod_info}=    Fetch Odh-deployer Pod Info
     ${odhdeployer_pod_logs}=    Oc Get Pod Logs
     ...                         name=${odhdeployer_pod_info.metadata.name}
-    ...                         namespace=redhat-ods-operator
+    ...                         namespace=${OPERATOR_NAMESPACE}
     ...                         container=rhods-deployer
     RETURN    ${odhdeployer_pod_Logs}
 

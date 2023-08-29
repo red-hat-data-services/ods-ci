@@ -97,8 +97,8 @@ Verify POD Status
     [Tags]  Upgrade
     Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60
     Log  Verified ${APPLICATIONS_NAMESPACE}  console=yes
-    Wait For Pods Status  namespace=redhat-ods-operator  timeout=60
-    Log  Verified redhat-ods-operator  console=yes
+    Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=60
+    Log  Verified ${OPERATOR_NAMESPACE}  console=yes
     Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=60
     Log  Verified ${MONITORING_NAMESPACE}  console=yes
     Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}

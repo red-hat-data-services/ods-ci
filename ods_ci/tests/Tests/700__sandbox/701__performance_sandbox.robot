@@ -13,7 +13,7 @@ Suite Setup     Performance Suite Setup
 ${NAMESPACE}     openshift-kube-apiserver
 ${LABEL_SELECTOR}     app=openshift-kube-apiserver
 ${MEMORY_THRESHOLD}    102400
-${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads redhat-ods-operator:rhods-operator --workloads ${APPLICATIONS_NAMESPACE}:rhods-dashboard --workloads ${APPLICATIONS_NAMESPACE}:notebook-controller-deployment --workloads ${APPLICATIONS_NAMESPACE}:odh-notebook-controller-manager --workloads ${APPLICATIONS_NAMESPACE}:modelmesh-controller --workloads ${APPLICATIONS_NAMESPACE}:etcd --workloads ${APPLICATIONS_NAMESPACE}:odh-model-controller --workloads ${MONITORING_NAMESPACE}:blackbox-exporter --workloads ${MONITORING_NAMESPACE}:rhods-prometheus-operator --workloads ${MONITORING_NAMESPACE}:prometheus <<< y   #robocop:disable
+${PERF_CODE}    go run setup/main.go --users 2000 --default 2000  --custom 0 --username "user" --workloads ${OPERATOR_NAMESPACE}:rhods-operator --workloads ${APPLICATIONS_NAMESPACE}:rhods-dashboard --workloads ${APPLICATIONS_NAMESPACE}:notebook-controller-deployment --workloads ${APPLICATIONS_NAMESPACE}:odh-notebook-controller-manager --workloads ${APPLICATIONS_NAMESPACE}:modelmesh-controller --workloads ${APPLICATIONS_NAMESPACE}:etcd --workloads ${APPLICATIONS_NAMESPACE}:odh-model-controller --workloads ${MONITORING_NAMESPACE}:blackbox-exporter --workloads ${MONITORING_NAMESPACE}:rhods-prometheus-operator --workloads ${MONITORING_NAMESPACE}:prometheus <<< y   #robocop:disable
 ${ISV_DATA}    ${{ {'pachyderm':['pachyderm','stable']} }}
 
 *** Test Cases ***
@@ -41,8 +41,8 @@ Capture And Validate Memory Utilization Of Openshift API Server POD
                Append To List    ${memory_value}    ${m_value}
         END
         Run Keyword And Continue On Failure   RHODS Performance Result Validation     ${memory_value}
-        ${pod_names}    Get POD Names    redhat-ods-operator    name=rhods-operator
-        Run Keyword And Continue On Failure    Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-operator  #robocop: disable
+        ${pod_names}    Get POD Names    ${OPERATOR_NAMESPACE}    name=rhods-operator
+        Run Keyword And Continue On Failure    Verify Containers Have Zero Restarts    ${pod_names}    ${OPERATOR_NAMESPACE}  #robocop: disable
     END
 
 RHODS Performance Result Validation

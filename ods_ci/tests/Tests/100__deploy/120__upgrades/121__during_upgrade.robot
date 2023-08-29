@@ -30,12 +30,12 @@ Upgrade RHODS
     [Documentation]    Appprove the install plan for the upgrade
     [Tags]  ODS-1766
     ...     Upgrade
-    ${return_code}    ${output}    Run And Return Rc And Output   oc patch installplan $(oc get installplans -n redhat-ods-operator | grep -v NAME | awk '{print $1}') -n redhat-ods-operator --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'   #robocop:disable
+    ${return_code}    ${output}    Run And Return Rc And Output   oc patch installplan $(oc get installplans -n ${OPERATOR_NAMESPACE} | grep -v NAME | awk '{print $1}') -n ${OPERATOR_NAMESPACE} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'   #robocop:disable
     Should Be Equal As Integers    ${return_code}     0   msg=Error while upgradeing RHODS
     Sleep  10s      reason=wait for ten second until operator goes into init state
-    ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n redhat-ods-operator -l name=rhods-operator --no-headers --output='custom-columns=STATUS:.status.phase'    #robocop:disable
+    ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n ${OPERATOR_NAMESPACE} -l name=rhods-operator --no-headers --output='custom-columns=STATUS:.status.phase'    #robocop:disable
     Should Contain    ${output}    Pending
-    OpenShiftLibrary.Wait For Pods Status  namespace=redhat-ods-operator  timeout=300
+    OpenShiftLibrary.Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=300
 
 TensorFlow Image Test
     [Documentation]   Run basic tensorflow notebook during upgrade

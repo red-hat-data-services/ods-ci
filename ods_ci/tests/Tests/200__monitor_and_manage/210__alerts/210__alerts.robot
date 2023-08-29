@@ -119,7 +119,7 @@ Verify Alerts Are Not Fired After Multiple JupyterHub Rollouts
     ...    RHODS JupyterHub Probe Success Burn Rate
     ...    alert-duration=120
 
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
 
     FOR    ${counter}    IN RANGE    10
         Rollout JupyterHub
@@ -156,7 +156,7 @@ Verify Alerts Are Fired When Jupyter Is Down    # robocop: disable:too-long-test
     ...    RHODS JupyterHub Probe Success Burn Rate
     ...    alert-duration=120
 
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
     ODS.Scale DeploymentConfig    ${APPLICATIONS_NAMESPACE}    jupyterhub    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -191,7 +191,7 @@ Verify Alerts Are Fired When Traefik Is Down    # robocop: disable:too-long-test
     ...    RHODS JupyterHub Probe Success Burn Rate
     ...    alert-duration=120
 
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    traefik-proxy    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -223,7 +223,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     ...    SLOs-haproxy_backend_http_responses_total
     ...    RHODS Dashboard Route Error Burn Rate
 
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -269,7 +269,7 @@ Verify Alert "Kubeflow notebook controller pod is not running" Is Fired When Kub
     ...    RHODS Notebook controllers
     ...    Kubeflow notebook controller pod is not running
 
-    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -301,7 +301,7 @@ Verify Alert "ODH notebook controller pod is not running" Is Fired When ODH Cont
     ...    RHODS Notebook controllers
     ...    ODH notebook controller pod is not running
 
-    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                     replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                     replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -650,7 +650,7 @@ Check Particular Text Is Present In Rhods-operator's Log
     Open OCP Console
     Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
     Maybe Skip Tour
-    ${val_result}=  Get Pod Logs From UI  namespace=redhat-ods-operator
+    ${val_result}=  Get Pod Logs From UI  namespace=${OPERATOR_NAMESPACE}
     ...                                   pod_search_term=rhods-operator
     ...                                   container_button_id=rhods-deployer-link
     Log  ${val_result}

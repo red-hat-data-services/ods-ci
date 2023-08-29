@@ -236,7 +236,7 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ...       ODS-313
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${APPLICATIONS_NAMESPACE}
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${MONITORING_NAMESPACE}
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-operator
+    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${OPERATOR_NAMESPACE}
 
 Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
@@ -271,7 +271,7 @@ Verify RHODS Display Name and Version
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1862
-    ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    label_selector=olm.copiedFrom=redhat-ods-operator
+    ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    label_selector=olm.copiedFrom=${OPERATOR_NAMESPACE}
     ${rhods_csv_name}     Set Variable     ${rhods_csv_detail[0]['metadata']['name']}
     ${rhods_version}      Set Variable       ${rhods_csv_detail[0]['spec']['version']}
     ${rhods_displayname}  Set Variable       ${rhods_csv_detail[0]['spec']['displayName']}

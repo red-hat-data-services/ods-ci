@@ -18,7 +18,7 @@ Suite Teardown    RHOSi Teardown
 
 
 *** Variables ***
-${namespace}           redhat-ods-operator
+${namespace}           ${OPERATOR_NAMESPACE}
 ${regex_pattern}       level=([Ee]rror).*|([Ff]ailed) to list .*
 
 

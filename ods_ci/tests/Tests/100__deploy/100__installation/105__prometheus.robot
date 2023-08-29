@@ -45,7 +45,7 @@ Fetch Prometheus Pods Info
     ...        None
     ...    Returns:
     ...        prometheus_pods_info(list(dict)): Prometheus pods selected by label and namespace
-    @{prometheus_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-monitoring    label_selector=deployment=prometheus
+    @{prometheus_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=${MONITORING_NAMESPACE}    label_selector=deployment=prometheus
     RETURN    @{prometheus_pods_info}
 
 Fetch Prometheus Deployments Info
@@ -54,7 +54,7 @@ Fetch Prometheus Deployments Info
     ...        None
     ...    Returns:
     ...        prometheus_deployments(list(dict)): Prometheus deployments selected by label and namespace
-    @{prometheus_deployments_info} =    Oc Get    kind=Deployment    api_version=v1    namespace=redhat-ods-monitoring
+    @{prometheus_deployments_info} =    Oc Get    kind=Deployment    api_version=v1    namespace=${MONITORING_NAMESPACE}
     ...    label_selector=app=prometheus
     RETURN    @{prometheus_deployments_info}
 
@@ -64,7 +64,7 @@ Fetch Prometheus Services Info
     ...        None
     ...    Returns:
     ...        prometheus_services_info(list(dict)): Prometheus services selected by name and namespace
-    @{prometheus_services_info} =    Oc Get    kind=Service    api_version=v1    name=prometheus    namespace=redhat-ods-monitoring
+    @{prometheus_services_info} =    Oc Get    kind=Service    api_version=v1    name=prometheus    namespace=${MONITORING_NAMESPACE}
     RETURN    @{prometheus_services_info}
 
 Fetch Prometheus Routes Info
@@ -74,12 +74,12 @@ Fetch Prometheus Routes Info
     ...    Returns:
     ...        prometheus_routes_info(list(dict)): Prometheus routes selected by name and namespace
     @{prometheus_routes_info} =    Oc Get    kind=Route    api_version=route.openshift.io/v1    name=prometheus
-    ...    namespace=redhat-ods-monitoring
+    ...    namespace=${MONITORING_NAMESPACE}
     RETURN    @{prometheus_routes_info}
 
 Verify Prometheus ReplicaSets Info
     [Documentation]    Fetches and verifies information from Prometheus replicasets
-    @{prometheus_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=redhat-ods-monitoring
+    @{prometheus_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=${MONITORING_NAMESPACE}
     ...    label_selector=deployment=prometheus
     OpenShift Resource Field Value Should Be Equal As Strings
     ...    status.readyReplicas    1    @{prometheus_replicasets_info}

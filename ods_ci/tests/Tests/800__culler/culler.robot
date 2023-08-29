@@ -77,7 +77,7 @@ Verify That "Stop Idle Notebook" Setting Is Not Overwritten After Restart Of Ope
     [Tags]    Tier2
     ...       ODS-1607
     Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
-    Oc Delete    kind=Pod     namespace=redhat-ods-operator    label_selector=name=rhods-operator
+    Oc Delete    kind=Pod     namespace=${OPERATOR_NAMESPACE}    label_selector=name=rhods-operator
     sleep   5    msg=waiting time for the operator pod to be replaced with new one
     Reload Page
     Wait Until Page Contains Element    xpath://input[@id="culler-timeout-unlimited"]

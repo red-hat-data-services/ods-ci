@@ -40,7 +40,7 @@ Restore Default Deployment Sizes
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      blackbox-exporter                  replicas=1
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      grafana                            replicas=2
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      prometheus                         replicas=1
-    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                     replicas=1    sleep-time=30s
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                     replicas=1    sleep-time=30s
 
 Verify "Usage Data Collection" Key
     [Documentation]    Verifies that "Usage Data Collection" is using the expected segment.io key
@@ -145,11 +145,11 @@ RHODS Namespaces Should Not Exist
     Verify Project Does Not Exists  rhods-notebook
     Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
     Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
-    Verify Project Does Not Exists  redhat-ods-operator
+    Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
 
 Get Notification Email From Addon-Managed-Odh-Parameters Secret
     [Documentation]    Gets email form addon-managed-odh-parameters secret
-    ${resp} =    Oc Get  kind=Secret  namespace=redhat-ods-operator  name=addon-managed-odh-parameters
+    ${resp} =    Oc Get  kind=Secret  namespace=${OPERATOR_NAMESPACE}  name=addon-managed-odh-parameters
     ${resp} =  Evaluate  dict(${resp[0]["metadata"]["annotations"]["kubectl.kubernetes.io/last-applied-configuration"]})
     RETURN  ${resp["stringData"]["notification-email"]}
 

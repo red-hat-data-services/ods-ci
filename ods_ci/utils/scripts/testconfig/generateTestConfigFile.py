@@ -233,7 +233,7 @@ def generate_test_config_file(
         print(components)
         data["COMPONENTS"] = change_component_state(components)
     print("After setting components")
-    print(data["COMPONENTS"])
+    print(data)
 
     # Login to test cluster using oc command
     oc_login(
@@ -241,6 +241,7 @@ def generate_test_config_file(
         data["OCP_ADMIN_USER"]["USERNAME"],
         data["OCP_ADMIN_USER"]["PASSWORD"],
     )
+    print("After oc login")
 
     if bool(set_prometheus_config):
         # Get prometheus token for test cluster

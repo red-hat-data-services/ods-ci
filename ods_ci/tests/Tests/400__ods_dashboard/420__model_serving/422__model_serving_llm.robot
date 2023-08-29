@@ -453,7 +453,7 @@ Create Secret For S3-Like Buckets
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
-    ...            ${min_replicas}=1   ${scaleTarget}=1   ${auto_scale}=${NONE}
+    ...            ${min_replicas}=1   ${scaleTarget}=1   ${scaleMetric}=concurrency ${auto_scale}=${NONE}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -472,6 +472,8 @@ Compile Inference Service YAML
     ELSE
           ${rc}    ${out}=    Run And Return Rc And Output
           ...    sed -i 's/{{SCALE_TARGET}}/${scaleTarget}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+          ${rc}    ${out}=    Run And Return Rc And Output
+          ...    sed -i 's/{{SCALE_METRIC}}/${scaleMetric}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     END
     IF   '${canaryTrafficPercent}' == '${EMPTY}'
         ${rc}    ${out}=    Run And Return Rc And Output

@@ -23,7 +23,7 @@ Force Tags          JupyterHub
 
 
 *** Variables ***
-${NAMESPACE}        rhods-notebooks
+${NAMESPACE}        ${NOTEBOOKS_NAMESPACE}
 @{NOTEBOOK_SIZE}    Small    Medium
 ${DEFAULT_SIZE}     {"limits":{"cpu":"2","memory":"8gi"},"requests":{"cpu":"1","memory":"8gi"}}
 ${CUSTOME_SIZE}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","memory":"6gi"}}

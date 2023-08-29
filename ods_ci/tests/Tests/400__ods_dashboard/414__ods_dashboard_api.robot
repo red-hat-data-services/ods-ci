@@ -27,7 +27,7 @@ ${QUICKSTARTS_ENDPOINT}=        api/quickstarts
 ${SEGMENT_KEY_ENDPOINT}=        api/segment-key
 ${GPU_ENDPOINT}=        api/gpu
 
-${NOTEBOOK_NS}=          rhods-notebooks
+${NOTEBOOK_NS}=          ${NOTEBOOKS_NAMESPACE}
 ${DASHBOARD_NS}=         redhat-ods-applications
 ${NOTEBOOK_USERNAME}=    ""
 ${CM_ENDPOINT_PT0}=         api/envs/configmap

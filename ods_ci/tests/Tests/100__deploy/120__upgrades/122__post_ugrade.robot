@@ -53,7 +53,7 @@ Verify Culler is Enabled
 Verify Notebook Has Not Restarted
     [Documentation]    Verify Notbook pod has not restarted after the upgrade
     [Tags]  Upgrade
-    ${return_code}    ${new_timestamp}    Run And Return Rc And Output   oc get pod -n rhods-notebooks jupyter-nb-ldap-2dadmin2-0 --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'   #robocop:disable
+    ${return_code}    ${new_timestamp}    Run And Return Rc And Output   oc get pod -n ${NOTEBOOKS_NAMESPACE} jupyter-nb-ldap-2dadmin2-0 --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'   #robocop:disable
     Should Be Equal As Integers    ${return_code}     0
     Should Be Equal   ${timestamp}      ${new_timestamp}    msg=Running notebook pod has restarted
 
@@ -101,7 +101,7 @@ Verify POD Status
     Log  Verified redhat-ods-operator  console=yes
     Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=60
     Log  Verified redhat-ods-monitoring  console=yes
-    Oc Get  kind=Namespace  field_selector=metadata.name=rhods-notebooks
+    Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log  "Verified rhods-notebook"
 
 

@@ -162,7 +162,7 @@ Check If Server Pod Still Exists
     ...    in order to confirm that it still exists and wasn't deleted
     ...    by the notebook culler.
     ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
+    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
 
 Spawn Server And Run Notebook Which Will Not Keep Server Active
     [Documentation]    This keyword spawns a server, then clones a Git Repo and runs a notebook
@@ -186,7 +186,7 @@ Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
     FOR  ${index}  IN RANGE  ${loop_control}
         ${culled} =  Run Keyword And Return Status  Run Keyword And Expect Error
         ...    Pods not found in search  OpenShiftLibrary.Search Pods
-        ...    ${notebook_pod_name}  namespace=rhods-notebooks
+        ...    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
         Exit For Loop If  ${culled}==True
         Sleep  30s
         ${drift} =  Evaluate  ${drift}+${30}

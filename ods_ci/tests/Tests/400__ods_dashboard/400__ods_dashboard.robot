@@ -24,7 +24,7 @@ Test Teardown     Dashboard Test Teardown
 @{BUILD_CONFIGS}                        11.4.2-cuda-s2i-base-ubi8    11.4.2-cuda-s2i-core-ubi8
 ...                                     11.4.2-cuda-s2i-py38-ubi8    11.4.2-cuda-s2i-thoth-ubi8-py38
 ...                                     s2i-minimal-gpu-cuda-11.4.2-notebook  s2i-pytorch-gpu-cuda-11.4.2-notebook
-...                                     s2i-tensorflow-gpu-cuda-11.4.2-notebook
+...                                     tensorflow-gpu-cuda-11.4.2-notebook
 @{BUILDS_TO_BE_CHECKED}                 cuda-s2i-base    cuda-s2i-core    cuda-s2i-py    cuda-s2i-thoth
 ...                                     minimal    pytorch  tensorflow
 ${openvino_appname}           ovms
@@ -169,12 +169,12 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
     ${failed_build_name}=  Provoke Image Build Failure    namespace=redhat-ods-applications
-    ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
+    ...    build_name_includes=tensorflow    build_config_name=tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
     Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
     Verify Notifications After Build Is Complete
     Verify RHODS Notification After Logging Out
-    [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=s2i-tensorflow-gpu-cuda-11.4.2-notebook
+    [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=tensorflow-gpu-cuda-11.4.2-notebook
 
 Verify Favorite Resource Cards
     [Tags]    ODS-389    ODS-384

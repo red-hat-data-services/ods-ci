@@ -46,20 +46,20 @@ Plugin Testing Suite Setup
 
 Plugin Testing Suite Teardown
    SeleniumLibrary.Close All Browsers
-   Run Keyword And Return Status    Run   oc delete pod ${notebook_pod_name} -n rhods-notebooks
+   Run Keyword And Return Status    Run   oc delete pod ${notebook_pod_name} -n ${NOTEBOOKS_NAMESPACE}
 
 Gather Notebook data
    ${notebook_data}             Create Dictionary          s2i-minimal-notebook=${s2i-minimal-notebook}       s2i-generic-data-science-notebook=${s2i-generic-data-science-notebook}
    ...                          tensorflow=${tensorflow}       pytorch=${pytorch}
    Set Suite Variable     ${notebook_data}
-   Run Keyword And Return Status    Run   oc delete pod ${notebook_pod_name} -n rhods-notebooks
+   Run Keyword And Return Status    Run   oc delete pod ${notebook_pod_name} -n ${NOTEBOOKS_NAMESPACE}
 
 Get the List of Plugins from RHODS notebook images
   FOR  ${image}  IN  @{notebook_images}
       Spawn Notebook With Arguments  image=${image}   size=Small
       #${notebook_pod_name}         Get User Notebook Pod Name         ${TEST_USER.USERNAME}
       ${temp_data}      Get Install Plugin list from JupyterLab
-      ${py_version}    Run   oc exec ${notebook_pod_name} -n rhods-notebooks -- python --version
+      ${py_version}    Run   oc exec ${notebook_pod_name} -n ${NOTEBOOKS_NAMESPACE} -- python --version
       ${python_image}           Split String From Right	  ${py_version}  	.    1
       Append To List           ${temp_data}         ${python_image}[0]
       Log    ${temp_data}

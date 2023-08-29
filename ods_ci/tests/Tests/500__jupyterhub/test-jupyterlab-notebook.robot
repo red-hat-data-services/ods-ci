@@ -82,7 +82,7 @@ Refine Notebook Controller Routes
     Run Keyword And Ignore Error   Spawn Notebook With Arguments
     ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
     ${user_name} =    Set Variable    jupyter-nb-${safe_username}
-    Run  oc delete notebook ${user_name} -n rhods-notebooks
+    Run  oc delete notebook ${user_name} -n ${NOTEBOOKS_NAMESPACE}
     Wait Until Page Contains    Server unavailable or unreachable       timeout=120
     ${ele}    Get WebElement   //button[.="Restart"]
     Execute Javascript    arguments[0].click();     ARGUMENTS    ${ele}
@@ -98,7 +98,7 @@ Spawn Jupyter Notebook When Notebook CR Is Deleted
     Run Keyword And Ignore Error    Spawn Notebook With Arguments
     ${safe_username} =   Get Safe Username    ${TEST_USER.USERNAME}
     ${user_name} =    Set Variable    jupyter-nb-${safe_username}
-    Run  oc delete notebook ${user_name} -n rhods-notebooks
+    Run  oc delete notebook ${user_name} -n ${NOTEBOOKS_NAMESPACE}
     Close Browser
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
@@ -120,7 +120,7 @@ Get Previously Selected Notebook Image Details
     ${user_name} =    Set Variable    jupyter-nb-${safe_username}
     # The TC using this kw only cares about the image:tag information, let's get that
     # directly
-    ${user_data} =  Run  oc get notebook ${user_name} -o yaml -n rhods-notebooks | yq '.spec.template.spec.containers[0].image' | xargs basename
+    ${user_data} =  Run  oc get notebook ${user_name} -o yaml -n ${NOTEBOOKS_NAMESPACE} | yq '.spec.template.spec.containers[0].image' | xargs basename
     ${notfound} =  Run Keyword And Return Status  Should Be Equal As Strings  ${user_data}  null
     IF  ${notfound}==True
       ${user_data} =  Set Variable  minimal-gpu:default

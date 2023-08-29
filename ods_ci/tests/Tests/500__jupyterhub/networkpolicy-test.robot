@@ -47,7 +47,7 @@ Open Browser And Start Notebook As First User
     ${first_browser_id} =    Set Variable    ${old_browser}[0]
     Set Suite Variable    ${first_browser_id}
     ${pod_name} =    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
-    ${pod_ip} =    Run    oc get pod ${pod_name} -o jsonpath='{.status.podIP}' -n rhods-notebooks
+    ${pod_ip} =    Run    oc get pod ${pod_name} -o jsonpath='{.status.podIP}' -n ${NOTEBOOKS_NAMESPACE}
     Set Suite Variable    ${pod_ip}
     ${pod_login_name} =    Get User CR Notebook Name    ${TEST_USER.USERNAME}
     Set Suite Variable    ${pod_login_name}
@@ -71,7 +71,7 @@ Open Browser And Start Notebook As Second User With Env Vars
 Run Additional Notebook Cells
     [Documentation]    Finalize attack notebook cells
     ${pod_name_user2} =    Get User Notebook Pod Name    ${TEST_USER_2.USERNAME}
-    ${pod_ip_user2} =    Run    oc get pod ${pod_name_user2} -o jsonpath='{.status.podIP}' -n rhods-notebooks
+    ${pod_ip_user2} =    Run    oc get pod ${pod_name_user2} -o jsonpath='{.status.podIP}' -n ${NOTEBOOKS_NAMESPACE}
     ${tmp} =    Run Cell And Get Output    my_pod_ip='${pod_ip_user2}'
     ${tmp2} =    Run Cell And Get Output    server_ips = scan_pods()
     ${out1} =    Run Cell And Get Output    check_jupyter_logins(server_ips)

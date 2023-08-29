@@ -137,7 +137,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
 
 Verify User Can Autoscale Using Concurrency
-    [Tags]    ODS-XXX    WatsonX
+    [Tags]    ODS-2377    WatsonX
     [Setup]    Set Project And Runtime    namespace=autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Create List    ${flan_model_name}

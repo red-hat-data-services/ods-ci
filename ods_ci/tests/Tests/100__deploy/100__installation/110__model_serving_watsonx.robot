@@ -9,7 +9,7 @@ Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robo
 
 
 *** Variables ***
-${KSERVE_NS}=    kserve    # will be replaced by redhat-ods-applications
+${KSERVE_NS}=    kserve    # will be replaced by ${APPLICATIONS_NAMESPACE}
 
 *** Test Cases ***
 Verify KServe Is Shipped

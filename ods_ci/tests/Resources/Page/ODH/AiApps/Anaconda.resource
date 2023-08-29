@@ -75,7 +75,7 @@ Get Connect Button Status
 Check Anaconda CE Image Build Status
     [Documentation]    Checks the ACE's image build status
     [Arguments]    ${target_status}
-    ${ace_build_status}=    Get Build Status    namespace=redhat-ods-applications
+    ${ace_build_status}=    Get Build Status    namespace=${APPLICATIONS_NAMESPACE}
     ...    build_search_term=minimal-notebook-anaconda
     IF    "${ace_build_status}" == "Failed"
     ...    Fail    the Anaconda image build has failed
@@ -85,8 +85,8 @@ Check Anaconda CE Image Build Status
 Remove Anaconda Component
     [Documentation]    Teardown for ACE test suite
     Remove Anaconda Components For Validation
-    Delete BuildConfig Using Name    redhat-ods-applications    s2i-minimal-notebook-anaconda
-    Delete ImageStream Using Name    redhat-ods-applications    s2i-minimal-notebook-anaconda
+    Delete BuildConfig Using Name    ${APPLICATIONS_NAMESPACE}    s2i-minimal-notebook-anaconda
+    Delete ImageStream Using Name    ${APPLICATIONS_NAMESPACE}    s2i-minimal-notebook-anaconda
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
@@ -94,9 +94,9 @@ Remove Anaconda Component
 
 Remove Anaconda Components For Validation
     [Documentation]    Teardown for ACE test suite
-    Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result
-    Delete Pods Using Label Selector    redhat-ods-applications    component.opendatahub.io/name=anaconda-ce
-    Delete Data From Secrets Using Name    redhat-ods-applications    anaconda-ce-access    {"data":null}
+    Delete ConfigMap Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-validation-result
+    Delete Pods Using Label Selector    ${APPLICATIONS_NAMESPACE}    component.opendatahub.io/name=anaconda-ce
+    Delete Data From Secrets Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-access    {"data":null}
 
 
 Anaconda Activation Should Have Failed

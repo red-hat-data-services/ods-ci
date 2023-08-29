@@ -67,7 +67,7 @@ Verify User Is Able to Activate Anaconda Professional
   Open OCP Console
   Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
   Maybe Skip Tour
-  ${val_result}=  Get Pod Logs From UI  namespace=redhat-ods-applications
+  ${val_result}=  Get Pod Logs From UI  namespace=${APPLICATIONS_NAMESPACE}
   ...                                   pod_search_term=anaconda-ce-periodic-validator-job-custom-run
   Log  ${val_result}
   Should Be Equal  ${val_result[0]}  ${VAL_SUCCESS_MSG}
@@ -100,7 +100,7 @@ Anaconda Suite Setup
 
 Verify Anaconda In Kfdef
     [Documentation]  Verifies if Anaconda is present in Kfdef
-    ${res}=  Oc Get  kind=KfDef  namespace=redhat-ods-applications
+    ${res}=  Oc Get  kind=KfDef  namespace=${APPLICATIONS_NAMESPACE}
     @{applications_names}=    Create List
     FOR     ${kfdef}    IN    @{res}
         FOR    ${application}    IN    @{kfdef['spec']['applications']}

@@ -34,9 +34,9 @@ Scale DeploymentConfig
 
 Restore Default Deployment Sizes
     [Documentation]    Restores the default sizes to all deployments in ODS
-    ODS.Scale Deployment    redhat-ods-applications    notebook-controller-deployment     replicas=1
-    ODS.Scale Deployment    redhat-ods-applications    odh-notebook-controller-manager    replicas=1
-    ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard                    replicas=2
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment     replicas=1
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=1
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard                    replicas=2
     ODS.Scale Deployment    redhat-ods-monitoring      blackbox-exporter                  replicas=1
     ODS.Scale Deployment    redhat-ods-monitoring      grafana                            replicas=2
     ODS.Scale Deployment    redhat-ods-monitoring      prometheus                         replicas=1
@@ -52,7 +52,7 @@ Get "Usage Data Collection" Key
     [Documentation]    Returns the segment.io key used for usage data collection
 
     ${rc}    ${usage_data_collection_key_base64}=    Run And Return Rc And Output
-    ...    oc get secret odh-segment-key -n redhat-ods-applications -o jsonpath='{.data.segmentKey}'
+    ...    oc get secret odh-segment-key -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.data.segmentKey}'
     Should Be Equal As Integers    ${rc}    0    msg=odh-segment-key secret not found or not having the right format
 
     ${usage_data_collection_key}=    Evaluate
@@ -64,7 +64,7 @@ Is Usage Data Collection Enabled
     [Documentation]    Returns a boolean with the value of configmap odh-segment-key-config > segmentKeyEnabled
     ...    which can be seen also in ODS Dashboard > Cluster Settings > "Usage Data Collection"
     ${usage_data_collection_enabled}=    Run
-    ...    oc get configmap odh-segment-key-config -n redhat-ods-applications -o jsonpath='{.data.segmentKeyEnabled}'
+    ...    oc get configmap odh-segment-key-config -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.data.segmentKeyEnabled}'
     ${usage_data_collection_enabled}=    Convert To Boolean    ${usage_data_collection_enabled}
     RETURN    ${usage_data_collection_enabled}
 
@@ -101,7 +101,7 @@ Apply Access Groups Settings
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}
-    ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n redhat-ods-applications --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
+    ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
     Should Be Equal As Integers	${return_code}	 0    msg=Pathc failed
 
 Set Default Access Groups Settings
@@ -144,7 +144,7 @@ RHODS Namespaces Should Not Exist
     [Documentation]     Checks if the RHODS namespace do not exist on openshift
     Verify Project Does Not Exists  rhods-notebook
     Verify Project Does Not Exists  redhat-ods-monitoring
-    Verify Project Does Not Exists  redhat-ods-applications
+    Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
     Verify Project Does Not Exists  redhat-ods-operator
 
 Get Notification Email From Addon-Managed-Odh-Parameters Secret
@@ -231,7 +231,7 @@ OpenShift Resource Component Should Contain Field
 Verify RHODS Dashboard CR Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
     [Arguments]        &{exp_values}
-    ${config_cr}=  Oc Get  kind=OdhDashboardConfig  namespace=redhat-ods-applications  name=odh-dashboard-config
+    ${config_cr}=  Oc Get  kind=OdhDashboardConfig  namespace=${APPLICATIONS_NAMESPACE}  name=odh-dashboard-config
     FOR    ${json_path}    IN    @{exp_values.keys()}
         ${value}=    Extract Value From JSON Path    json_dict=${config_cr[0]}
         ...    path=${json_path}
@@ -385,7 +385,7 @@ Fetch Cluster Worker Nodes Info
 
 Delete RHODS Config Map
     [Documentation]    Deletes the given config map. It assumes the namespace is
-    ...                redhat-ods-applications, but can be changed using the
+    ...                ${APPLICATIONS_NAMESPACE}, but can be changed using the
     ...                corresponding argument
-    [Arguments]     ${name}  ${namespace}=redhat-ods-applications
+    [Arguments]     ${name}  ${namespace}=${APPLICATIONS_NAMESPACE}
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}

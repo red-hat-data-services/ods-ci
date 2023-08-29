@@ -99,7 +99,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     Wait Until RHODS Dashboard Jupyter Is Visible
     Verify Anaconda Service Is Enabled Based On Version
     Close All Browsers
-    Delete ConfigMap Using Name    redhat-ods-applications    anaconda-ce-validation-result
+    Delete ConfigMap Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-validation-result
     Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
@@ -153,7 +153,7 @@ Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
     ...       ODS-307
     ...       Tier1
     Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
-    Wait Until All Builds Are Complete  namespace=redhat-ods-applications
+    Wait Until All Builds Are Complete  namespace=${APPLICATIONS_NAMESPACE}
     RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
 
 Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
@@ -164,14 +164,14 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...       FlakyTest
     Skip If RHODS Version Greater Or Equal Than    1.20.0    CUDA build chain removed in v1.20
     Clear Dashboard Notifications
-    ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
-    Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
-    ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
-    ${failed_build_name}=  Provoke Image Build Failure    namespace=redhat-ods-applications
+    ${build_name}=  Search Last Build  namespace=${APPLICATIONS_NAMESPACE}    build_name_includes=pytorch
+    Delete Build    namespace=${APPLICATIONS_NAMESPACE}    build_name=${build_name}
+    ${new_buildname}=  Start New Build    namespace=${APPLICATIONS_NAMESPACE}    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}    build_name=${new_buildname}   expected_status=Running
+    ${failed_build_name}=  Provoke Image Build Failure    namespace=${APPLICATIONS_NAMESPACE}
     ...    build_name_includes=tensorflow    build_config_name=tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${newbuild_name}     expected_status=Complete
+    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}    build_name=${newbuild_name}     expected_status=Complete
     Verify Notifications After Build Is Complete
     Verify RHODS Notification After Logging Out
     [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=tensorflow-gpu-cuda-11.4.2-notebook
@@ -213,11 +213,11 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
     ...       Execution-Time-Over-30m
     ...       AutomationBug
     ...       FlakyTest
-    Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=redhat-ods-applications
-    ${last_cuda_build}=  Start New Build    namespace=redhat-ods-applications    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
+    Delete Multiple Builds  @{BUILDS_TO_BE_DELETED}  namespace=${APPLICATIONS_NAMESPACE}
+    ${last_cuda_build}=  Start New Build    namespace=${APPLICATIONS_NAMESPACE}    buildconfig=11.4.2-cuda-s2i-thoth-ubi8-py38
     Verify Notification Saying Notebook Builds Not Started
     Clear Dashboard Notifications
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${last_cuda_build}  expected_status=Complete
+    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}    build_name=${last_cuda_build}  expected_status=Complete
     Remove Values From List    ${IMAGES}  CUDA
     Verify Notification Saying Notebook Builds Not Started
     RHODS Notification Drawer Should Contain    message=Notebook images are building
@@ -298,8 +298,8 @@ Verify Dashboard Pod Is Not Getting Restarted
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-374
-    ${pod_names}    Get POD Names    redhat-ods-applications    app=rhods-dashboard
-    Verify Containers Have Zero Restarts    ${pod_names}    redhat-ods-applications
+    ${pod_names}    Get POD Names    ${APPLICATIONS_NAMESPACE}    app=rhods-dashboard
+    Verify Containers Have Zero Restarts    ${pod_names}    ${APPLICATIONS_NAMESPACE}
 
 Verify Switcher to Masterhead
     [Tags]    ODS-771
@@ -328,7 +328,7 @@ Restore Group ConfigMap And Check Logs Do Not Change
     [Arguments]   ${cm_yaml}
     ${clean_yaml}=    Clean Resource YAML Before Creating It    ${cm_yaml}
     Log    ${clean_yaml}
-    OpenShiftLibrary.Oc Create    kind=ConfigMap    src=${clean_yaml}   namespace=redhat-ods-applications
+    OpenShiftLibrary.Oc Create    kind=ConfigMap    src=${clean_yaml}   namespace=${APPLICATIONS_NAMESPACE}
     ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
     Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
 
@@ -509,9 +509,9 @@ Remove Items From Favorites
     Close Browser
 
 RHODS Dahsboard Pod Should Contain OauthProxy Container
-    ${list_of_pods} =    Search Pod    namespace=redhat-ods-applications    pod_start_with=rhods-dashboard
+    ${list_of_pods} =    Search Pod    namespace=${APPLICATIONS_NAMESPACE}    pod_start_with=rhods-dashboard
     FOR    ${pod_name}    IN   @{list_of_pods}
-        ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=redhat-ods-applications
+        ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=${APPLICATIONS_NAMESPACE}
         List Should Contain Value    ${container_name}    oauth-proxy
     END
 
@@ -602,7 +602,7 @@ Verify RHODS Notification After Logging Out
 Restart Failed Build and Close Browser
     [Documentation]     Deletes failed build and starts new build , Closes All Browsers
     [Arguments]     ${failed_build_name}  ${build_config}
-    Delete Failed Build And Start New One  namespace=redhat-ods-applications  failed_build_name=${failed_build_name}  build_config_name=${build_config}
+    Delete Failed Build And Start New One  namespace=${APPLICATIONS_NAMESPACE}  failed_build_name=${failed_build_name}  build_config_name=${build_config}
     Dashboard Test Teardown
 
 Verify Notifications After Build Is Complete
@@ -624,7 +624,7 @@ Wait Until Remaining Builds Are Complete And Close Browser
     [Documentation]     Waits Until Remaining builds have Status as Complete and Closes Browser
     Go To  url=${OCP_CONSOLE_URL}
     Login To Openshift  ${OCP_ADMIN_USER.USERNAME}  ${OCP_ADMIN_USER.PASSWORD}  ${OCP_ADMIN_USER.AUTH_TYPE}
-    Rebuild Missing Or Failed Builds  builds=${BUILDS_TO_BE_CHECKED}  build_configs=${BUILD_CONFIGS}  namespace=redhat-ods-applications
+    Rebuild Missing Or Failed Builds  builds=${BUILDS_TO_BE_CHECKED}  build_configs=${BUILD_CONFIGS}  namespace=${APPLICATIONS_NAMESPACE}
     Dashboard Test Teardown
 
 Verify Operator Is Added On ODS Dashboard

@@ -57,7 +57,7 @@ Fetch JupyterHub DB Pods Info
     ...        None
     ...    Returns:
     ...        jupyterhub_db_pod_info(list(dict)): JupyterHub DB Pods information
-    @{jupyterhub_db_pods_info}=    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-applications
+    @{jupyterhub_db_pods_info}=    Oc Get    kind=Pod    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=deployment=jupyterhub-db-1
     RETURN    @{jupyterhub_db_pods_info}
 
@@ -67,7 +67,7 @@ Fetch JupyterHub DB Services Info
     ...        None
     ...    Returns:
     ...        jupyterhubdb_services_info(list(dict): JupyterHub DB Services information
-    @{jupyterhub_db_services_info}=    Oc Get    kind=Service   api_version=v1    name=jupyterhub-db    namespace=redhat-ods-applications
+    @{jupyterhub_db_services_info}=    Oc Get    kind=Service   api_version=v1    name=jupyterhub-db    namespace=${APPLICATIONS_NAMESPACE}
     RETURN    @{jupyterhub_db_services_info}
 
 Fetch JupyterHub DB ReplicationControllers Info
@@ -76,7 +76,7 @@ Fetch JupyterHub DB ReplicationControllers Info
     ...        None
     ...    Returns:
     ...        jupyterhubdb_replicationcontrollers_info(list(dict)): JupyterHub DB ReplicationControllers information
-    @{jupyterhub_db_replicationcontrollers_info} =    Oc Get    kind=ReplicationController    api_version=v1    namespace=redhat-ods-applications
+    @{jupyterhub_db_replicationcontrollers_info} =    Oc Get    kind=ReplicationController    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}
     ...    name=jupyterhub-db-1
     RETURN    @{jupyterhub_db_replicationcontrollers_info}
 
@@ -86,7 +86,7 @@ Fetch JupyterHub RDS Secret Info
     ...        None
     ...    Returns:
     ...        jupyterhub_rds_secret(dict): JupyterHub RDS Secret information
-    @{resources_info_list}=    Oc Get    kind=Secret    api_version=v1    namespace=redhat-ods-applications
+    @{resources_info_list}=    Oc Get    kind=Secret    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}
     ...    name=jupyterhub-rds-secret
      &{jupyterhub_rds_secret_info}=    Set Variable    ${resources_info_list}[0]
     RETURN    &{jupyterhub_rds_secret_info}

@@ -81,7 +81,7 @@ Verify PyTorch Image GPU Workload
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
 
 Verify Previous PyTorch Notebook Image With GPU
-    [Documentation]    Runs a workload after spawning the N-1 PyTorch Notebook 
+    [Documentation]    Runs a workload after spawning the N-1 PyTorch Notebook
     [Tags]    Tier2    LiveTesting
     ...       Resources-GPU
     ...       ODS-2129
@@ -98,7 +98,7 @@ Verify PyTorch Image Suite Setup
     [Documentation]    Suite Setup, spawns pytorch image
     ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
     IF    ${version_check}==False
-       Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+       Wait Until All Builds Are Complete    namespace=${APPLICATIONS_NAMESPACE}    build_timeout=45m
     END
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard

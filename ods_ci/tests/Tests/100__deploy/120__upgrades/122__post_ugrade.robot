@@ -45,7 +45,7 @@ Verify RHODS User Groups
 Verify Culler is Enabled
     [Documentation]    Verify Culler Configuration after the upgrade
     [Tags]  Upgrade
-    ${status}    Check If ConfigMap Exists   redhat-ods-applications     notebook-controller-culler-config
+    ${status}    Check If ConfigMap Exists   ${APPLICATIONS_NAMESPACE}     notebook-controller-culler-config
     IF    '${status}' != 'PASS'
          Fail    msg=Culler has been diabled after the upgrade
     END
@@ -60,7 +60,7 @@ Verify Notebook Has Not Restarted
 Verify Custom Image Is Present
    [Tags]  Upgrade
    [Documentation]    Verify Custom Noteboook is not deleted after the upgrade
-   ${status}  Run Keyword And Return Status     Oc Get    kind=ImageStream   namespace=redhat-ods-applications
+   ${status}  Run Keyword And Return Status     Oc Get    kind=ImageStream   namespace=${APPLICATIONS_NAMESPACE}
    ...   field_selector=metadata.name==byon-upgrade
    IF    not ${status}   Fail    Notebook image is deleted after the upgrade
    [Teardown]  Delete OOTB Image
@@ -95,8 +95,8 @@ Resetting Pod Toleration Via UI
 Verify POD Status
     [Documentation]    Verify all the pods are up and running
     [Tags]  Upgrade
-    Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
-    Log  Verified redhat-ods-applications  console=yes
+    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60
+    Log  Verified ${APPLICATIONS_NAMESPACE}  console=yes
     Wait For Pods Status  namespace=redhat-ods-operator  timeout=60
     Log  Verified redhat-ods-operator  console=yes
     Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=60
@@ -118,7 +118,7 @@ Dashboard Test Teardown
 
 Get Dashboard Config Data
     [Documentation]  Get OdhDashboardConfig CR data
-    ${payload}    Oc Get  kind=OdhDashboardConfig  namespace=redhat-ods-applications
+    ${payload}    Oc Get  kind=OdhDashboardConfig  namespace=${APPLICATIONS_NAMESPACE}
     ...    field_selector=metadata.name==odh-dashboard-config
     Set Suite Variable    ${payload}   #robocop:disable
 
@@ -129,7 +129,7 @@ Set Default Users
     Upgrade Test Teardown
 Delete OOTB Image
    [Documentation]  Delete the Custom notbook create
-   ${status}  Run Keyword And Return Status     Oc Delete  kind=ImageStream  name=byon-upgrade  namespace=redhat-ods-applications  #robocop:disable
+   ${status}  Run Keyword And Return Status     Oc Delete  kind=ImageStream  name=byon-upgrade  namespace=${APPLICATIONS_NAMESPACE}  #robocop:disable
    IF    not ${status}   Fail    Notebook image is deleted after the upgrade
    Upgrade Test Teardown
 

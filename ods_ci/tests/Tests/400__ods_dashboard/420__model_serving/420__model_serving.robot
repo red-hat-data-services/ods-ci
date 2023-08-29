@@ -26,7 +26,7 @@ ${RUNTIME_NAME}=    Model Serving Test
 *** Test Cases ***
 Verify Model Serving Installation
     [Documentation]    Verifies that the core components of model serving have been
-    ...    deployed in the redhat-ods-applications namespace
+    ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace
     [Tags]    Smoke
     ...       Tier1
     ...       OpenDataHub

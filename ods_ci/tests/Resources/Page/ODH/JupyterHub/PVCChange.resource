@@ -8,10 +8,10 @@ Library         OpenShiftLibrary
 Check If PVC Change Is Permanent
     [Documentation]   Check if PVC changes are not reverted back
     [Arguments]    ${PVC_SIZE}
-    ${size}    Get PVC Size    redhat-ods-applications
+    ${size}    Get PVC Size    ${APPLICATIONS_NAMESPACE}
     Change PVC Size From ConfigMap     ${PVC_SIZE}
     Sleep    15s
-    ${new_size}    Get PVC Size    redhat-ods-applications
+    ${new_size}    Get PVC Size    ${APPLICATIONS_NAMESPACE}
     IF  ${new_size} == ${PVC_SIZE}[:-2]
         Should Not Be Equal As Strings    '${size}'    '${new_size}'
     ELSE
@@ -37,7 +37,7 @@ PVC Size Test Teardown
     [Documentation]    PVC change teardown
     SeleniumLibrary.Close All Browsers
     Change PVC Size From ConfigMap     20Gi
-    Run Keyword And Ignore Error     Delete Pods Using Label Selector    redhat-ods-applications    app=notebook-controller
+    Run Keyword And Ignore Error     Delete Pods Using Label Selector    ${APPLICATIONS_NAMESPACE}    app=notebook-controller
 
 May Be Delete PVC
     [Documentation]    Delete PVC from openshift

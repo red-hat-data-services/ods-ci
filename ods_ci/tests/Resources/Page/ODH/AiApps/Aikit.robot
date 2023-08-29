@@ -14,7 +14,7 @@ Remove AIKIT Operator
 Uninstall AIKIT Operator
     [Documentation]    Uninstall intel aikit operator and it's realted component
     [Arguments]    ${cr_kind}=AIKitContainer    ${cr_name}=intel-aikit-container
-    ...            ${cr_ns}=redhat-ods-applications
+    ...            ${cr_ns}=${APPLICATIONS_NAMESPACE}
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
     Oc Delete    kind=${cr_kind}  name=${cr_name}  namespace=${cr_ns}

@@ -45,8 +45,8 @@ Verify Notebook Controller Deployment
     [Documentation]    Verifies RHODS Notebook Controller deployment
     [Tags]    Sanity
     ...       ODS-546  ODS-294  ODS-1250  ODS-237
-    @{NBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=notebook-controller
-    @{ONBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=odh-notebook-controller
+    @{NBC} =  Oc Get    kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=notebook-controller
+    @{ONBC} =  Oc Get    kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=odh-notebook-controller
     ${containerNames} =  Create List  manager
     Verify Deployment  ${NBC}  1  1  ${containerNames}
     Verify Deployment  ${ONBC}  1  1  ${containerNames}
@@ -134,8 +134,8 @@ Verify Oath-Proxy Image Is A CPaaS Built Image
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-666
-    ${pod} =    Find First Pod By Name  namespace=redhat-ods-applications   pod_start_with=rhods-dashboard-
-    Container Image Url Should Contain      redhat-ods-applications     ${pod}      oauth-proxy
+    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_start_with=rhods-dashboard-
+    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      oauth-proxy
     ...     registry.redhat.io/openshift4/ose-oauth-proxy
 
 Verify That CUDA Build Chain Succeeds
@@ -234,7 +234,7 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ...       ODS-554
     ...       ODS-556
     ...       ODS-313
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-applications
+    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${APPLICATIONS_NAMESPACE}
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-monitoring
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-operator
 
@@ -254,7 +254,7 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
     ...     configmap in openshift
     ...     ProductBug:RHODS-4308
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data":null}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data":null}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications   Enabled
@@ -303,8 +303,8 @@ Verify RHODS Notebooks Network Policies
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back
     [Documentation]    Delete Dashboard Pods And Wait Them To Be Back
-    Oc Delete    kind=Pod     namespace=redhat-ods-applications    label_selector=app=rhods-dashboard
-    OpenShiftLibrary.Wait For Pods Status    namespace=redhat-ods-applications  label_selector=app=rhods-dashboard  timeout=120
+    Oc Delete    kind=Pod     namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=rhods-dashboard
+    OpenShiftLibrary.Wait For Pods Status    namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=rhods-dashboard  timeout=120
 
 Test Setup For Rhods Dashboard
     [Documentation]    Test Setup for Rhods Dashboard
@@ -314,7 +314,7 @@ Test Setup For Rhods Dashboard
 
 Test Teardown For Configmap Changed On RHODS Dashboard
     [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
 
@@ -349,9 +349,9 @@ Verify BlackboxExporter Includes Oauth Proxy
 
 Verify Errors In Jupyterhub Logs
     [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs
-    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications  label_selector=app=jupyterhub
+    @{pods} =    Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=jupyterhub
     FOR    ${pod}    IN    @{pods}
-        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=redhat-ods-applications
+        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=${APPLICATIONS_NAMESPACE}
         ...    container=${pod['spec']['containers'][0]['name']}
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
     END
@@ -384,7 +384,7 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ${project_pods_info}=    Fetch Project Pods Info    ${project}
     FOR    ${pod_info}    IN    @{project_pods_info}
         Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
-        IF    "${project}" == "redhat-ods-applications"
+        IF    "${project}" == "${APPLICATIONS_NAMESPACE}"
             IF    "cuda-s2i" in "${pod_info['metadata']['name']}"
             ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
             IF    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"

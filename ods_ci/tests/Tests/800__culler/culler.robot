@@ -26,7 +26,7 @@ Verify Default Culler Timeout
     Disable Notebook Culler
     # When disabled the cm doesn't exist, expect error
     ${configmap} =  Run Keyword And Expect Error  STARTS: ResourceOperationFailed: Get failed
-    ...    OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config    namespace=redhat-ods-applications
+    ...    OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config    namespace=${APPLICATIONS_NAMESPACE}
     Close Browser
 
 Verify Culler Timeout Can Be Updated
@@ -98,7 +98,7 @@ Spawn Minimal Image
 Get Notebook Culler Pod Name
     [Documentation]    Finds the current culler pod and returns the name
     ${culler_pod} =  OpenShiftLibrary.Oc Get  kind=Pod
-    ...    label_selector=component.opendatahub.io/name=kf-notebook-controller  namespace=redhat-ods-applications
+    ...    label_selector=component.opendatahub.io/name=kf-notebook-controller  namespace=${APPLICATIONS_NAMESPACE}
     ${culler_pod_name} =  Set Variable  ${culler_pod[0]}[metadata][name]
     Log  ${culler_pod}
     Log  ${culler_pod_name}
@@ -117,14 +117,14 @@ Get And Verify Notebook Culler Timeout
 Get Notebook Culler Timeout From Configmap
     [Documentation]    Gets the current culler timeout from configmap
     ${current_timeout} =  OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config
-    ...    namespace=redhat-ods-applications  fields=['data.CULL_IDLE_TIME']
+    ...    namespace=${APPLICATIONS_NAMESPACE}  fields=['data.CULL_IDLE_TIME']
     ${current_timeout} =  Set Variable  ${current_timeout[0]['data.CULL_IDLE_TIME']}
     RETURN  ${current_timeout}
 
 Get Notebook Culler Timeout From Culler Pod
     [Documentation]    Gets the current culler timeout from culler pod
     ${CULLER_POD} =  Get Notebook Culler Pod Name
-    ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -n redhat-ods-applications -- printenv CULL_IDLE_TIME  # robocop: disable
+    ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -n ${APPLICATIONS_NAMESPACE} -- printenv CULL_IDLE_TIME  # robocop: disable
     RETURN  ${culler_env_timeout}
 
 Teardown

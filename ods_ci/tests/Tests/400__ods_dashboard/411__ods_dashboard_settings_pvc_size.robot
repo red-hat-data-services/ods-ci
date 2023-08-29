@@ -22,7 +22,7 @@ Test Setup      PVC Size Test Setup
 
 
 *** Variables ***
-${NAMESPACE}    redhat-ods-applications
+${NAMESPACE}    ${APPLICATIONS_NAMESPACE}
 ${S_SIZE}       15
 ${SIZE_CODE}    import subprocess;
 ...    int(subprocess.check_output(['df','-h', '/opt/app-root/src']).split()[8].decode('utf-8')[:-1])

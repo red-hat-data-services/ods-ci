@@ -660,5 +660,5 @@ Check Particular Text Is Present In Rhods-operator's Log
 Verify Alertmanager Receiver For Critical Alerts
     [Documentation]     Receiver value should be equal to ${receiver}
     [Arguments]         ${receiver}
-    ${result} =    Run    oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.routes[] | select(.match.severity == "critical") | .receiver'
+    ${result} =    Run    oc get configmap alertmanager -n ${MONITORING_NAMESPACE} -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.routes[] | select(.match.severity == "critical") | .receiver'
     Should Be Equal    "${receiver}"    ${result}    msg=Alertmanager has an unexpected receiver for critical alerts

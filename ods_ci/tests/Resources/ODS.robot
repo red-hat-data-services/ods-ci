@@ -37,9 +37,9 @@ Restore Default Deployment Sizes
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment     replicas=1
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=1
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard                    replicas=2
-    ODS.Scale Deployment    redhat-ods-monitoring      blackbox-exporter                  replicas=1
-    ODS.Scale Deployment    redhat-ods-monitoring      grafana                            replicas=2
-    ODS.Scale Deployment    redhat-ods-monitoring      prometheus                         replicas=1
+    ODS.Scale Deployment    ${MONITORING_NAMESPACE}      blackbox-exporter                  replicas=1
+    ODS.Scale Deployment    ${MONITORING_NAMESPACE}      grafana                            replicas=2
+    ODS.Scale Deployment    ${MONITORING_NAMESPACE}      prometheus                         replicas=1
     ODS.Scale Deployment    redhat-ods-operator        rhods-operator                     replicas=1    sleep-time=30s
 
 Verify "Usage Data Collection" Key
@@ -143,7 +143,7 @@ Wait Until RHODS Uninstallation Is Completed
 RHODS Namespaces Should Not Exist
     [Documentation]     Checks if the RHODS namespace do not exist on openshift
     Verify Project Does Not Exists  rhods-notebook
-    Verify Project Does Not Exists  redhat-ods-monitoring
+    Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
     Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
     Verify Project Does Not Exists  redhat-ods-operator
 
@@ -156,7 +156,7 @@ Get Notification Email From Addon-Managed-Odh-Parameters Secret
 Notification Email In Alertmanager ConfigMap Should Be
     [Documentation]    Check expected email is present in Alertmanager
     [Arguments]        ${email_to_check}
-    ${resp} =    Run  oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.receivers[] | select(.name == "user-notifications") | .email_configs[0].to'
+    ${resp} =    Run  oc get configmap alertmanager -n ${MONITORING_NAMESPACE} -o jsonpath='{.data.alertmanager\\.yml}' | yq '.receivers[] | select(.name == "user-notifications") | .email_configs[0].to'
     Should Be Equal As Strings    "${email_to_check}"    ${resp}
 
 Email In Addon-Managed-Odh-Parameters Secret Should Be
@@ -246,22 +246,22 @@ Verify Default Access Groups Settings
 
 Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
-    ${grafana_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
+    ${grafana_port_forwarding_process} =  Start Process   oc -n ${MONITORING_NAMESPACE} port-forward $(oc get pods -n ${MONITORING_NAMESPACE} | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
     RETURN    ${grafana_port_forwarding_process}
 
 Enable Access To Prometheus Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Prometheus Using OpenShift Port-Forwarding
-    ${promethues_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep prometheus | awk '{print $1}') 9090  shell=True  # robocop: disable
+    ${promethues_port_forwarding_process} =  Start Process   oc -n ${MONITORING_NAMESPACE} port-forward $(oc get pods -n ${MONITORING_NAMESPACE} | grep prometheus | awk '{print $1}') 9090  shell=True  # robocop: disable
     RETURN    ${promethues_port_forwarding_process}
 
 Enable Access To Alert Manager Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Alert Manager Using OpenShift Port-Forwarding
-    ${alertmanager_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep prometheus | awk '{print $1}') 9093   shell=True  # robocop: disable
+    ${alertmanager_port_forwarding_process} =  Start Process   oc -n ${MONITORING_NAMESPACE} port-forward $(oc get pods -n ${MONITORING_NAMESPACE} | grep prometheus | awk '{print $1}') 9093   shell=True  # robocop: disable
     RETURN    ${alertmanager_port_forwarding_process}
 
 Get Grafana Url
     [Documentation]  Returns Grafana URL
-    ${grafana_url} =    Run    oc get routes/grafana -n redhat-ods-monitoring -o json | jq -r '.spec.host'
+    ${grafana_url} =    Run    oc get routes/grafana -n ${MONITORING_NAMESPACE} -o json | jq -r '.spec.host'
     RETURN    ${grafana_url}
 
 Verify CPU And Memory Requests And Limits Are Defined For Pod

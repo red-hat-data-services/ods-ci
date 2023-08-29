@@ -99,8 +99,8 @@ Verify POD Status
     Log  Verified ${APPLICATIONS_NAMESPACE}  console=yes
     Wait For Pods Status  namespace=redhat-ods-operator  timeout=60
     Log  Verified redhat-ods-operator  console=yes
-    Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=60
-    Log  Verified redhat-ods-monitoring  console=yes
+    Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=60
+    Log  Verified ${MONITORING_NAMESPACE}  console=yes
     Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log  "Verified rhods-notebook"
 

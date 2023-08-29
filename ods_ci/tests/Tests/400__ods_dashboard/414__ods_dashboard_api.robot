@@ -808,7 +808,7 @@ Create A Dummy Secret In Dashboard Namespace
 Create A Dummy Secret Outside Dashboard Namespace
     [Documentation]     Creates a dummy secret ouside dashboard namespace to use in tests to avoid getting sensitive secrets
     # OpenshiftLibrary.Oc Create      kind=Secret    namespace=${DASHBOARD_NS}   src={"data": {"secret_key": "super_dummy_secret"}}
-    Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n redhat-ods-monitoring
+    Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n ${MONITORING_NAMESPACE}
 
 Create A Dummy ConfigMap In Dashboard Namespace
     [Documentation]     Creates a dummy secret to use in tests to avoid getting sensitive secrets
@@ -818,17 +818,17 @@ Create A Dummy ConfigMap In Dashboard Namespace
 Create A Dummy ConfigMap Outside Dashboard Namespace
     [Documentation]     Creates a dummy secret ouside dashboard namespace to use in tests to avoid getting sensitive secrets
     # OpenshiftLibrary.Oc Create      kind=Secret    namespace=${DASHBOARD_NS}   src={"data": {"secret_key": "super_dummy_secret"}}
-    Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n redhat-ods-monitoring
+    Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n ${MONITORING_NAMESPACE}
 
 Delete Dummy Secrets
     [Documentation]     Deletes the dummy secret created during tests
     OpenshiftLibrary.Oc Delete    kind=Secret  namespace=${DASHBOARD_NS}  name=${DUMMY_SECRET_NAME}
-    OpenshiftLibrary.Oc Delete    kind=Secret  namespace=redhat-ods-monitoring  name=${DUMMY_SECRET_NAME}
+    OpenshiftLibrary.Oc Delete    kind=Secret  namespace=${MONITORING_NAMESPACE}  name=${DUMMY_SECRET_NAME}
 
 Delete Dummy ConfigMaps
     [Documentation]     Deletes the dummy secret created during tests
     OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=${DASHBOARD_NS}  name=${DUMMY_CM_NAME}
-    OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-monitoring  name=${DUMMY_CM_NAME}
+    OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=${MONITORING_NAMESPACE}  name=${DUMMY_CM_NAME}
 
 Delete Test Notebooks CRs And PVCs From CLI
     [Documentation]     Stops all the notebook servers spanwed during a test by

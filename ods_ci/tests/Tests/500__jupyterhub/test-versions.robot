@@ -42,7 +42,7 @@ Verify Libraries in Cuda Image
 Verify Libraries in SDS Image
     [Documentation]    Verifies libraries in Standard Data Science image
     [Tags]    Sanity
-    Verify List Of Libraries In Image    s2i-generic-data-science-notebook    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}
+    Verify List Of Libraries In Image    science-notebook    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}
     ...    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in PyTorch Image

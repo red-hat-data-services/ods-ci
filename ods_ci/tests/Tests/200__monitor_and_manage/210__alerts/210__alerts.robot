@@ -464,7 +464,7 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     ${authorization_required} =    Is Service Account Authorization Required
     IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
-    Spawn Notebook With Arguments    image=s2i-generic-data-science-notebook
+    Spawn Notebook With Arguments    image=science-notebook
     Clone Git Repository And Run    ${notebook_repo}    ${notebook_path}
     Sleep    5s
 

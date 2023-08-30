@@ -12,7 +12,7 @@ Suite Teardown   Plugin Testing Suite Teardown
 Force Tags       JupyterHub
 
 *** Variables ***
-@{notebook_images}             minimal-notebook    s2i-generic-data-science-notebook    tensorflow   pytorch
+@{notebook_images}             minimal-notebook    science-notebook    tensorflow   pytorch
 @{s2i-minimal-notebook}      @jupyterlab/git      nbdime-jupyterlab     Python 3.8
 @{s2i-generic-data-science-notebook}   @jupyterlab/git      @jupyter-widgets/jupyterlab-manager    jupyterlab_requirements   nbdime-jupyterlab   jupyterlab-plotly   jupyterlab-s3-browser   @bokeh/jupyter_bokeh   @jupyter-server/resource-usage  @krassowski/jupyterlab-lsp   @elyra/metadata-extension  @elyra/python-editor-extension  @elyra/theme-extension   Python 3.8
 @{tensorflow}   @jupyterlab/git   @jupyter-widgets/jupyterlab-manager   jupyterlab-s3-browser   nbdime-jupyterlab  jupyterlab-plotly  @jupyter-server/resource-usage   @krassowski/jupyterlab-lsp   @bokeh/jupyter_bokeh   @elyra/metadata-extension   @elyra/python-editor-extension   @elyra/theme-extension    Python 3.8

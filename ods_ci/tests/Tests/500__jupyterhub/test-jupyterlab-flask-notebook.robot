@@ -31,7 +31,7 @@ Can Login to Jupyterhub
 Can Spawn Notebook
   [Tags]  Tier2
   Fix Spawner Status
-  Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
+  Spawn Notebook With Arguments  image=science-notebook
 
 Can Run Flask Test Notebook
   [Tags]  Tier2

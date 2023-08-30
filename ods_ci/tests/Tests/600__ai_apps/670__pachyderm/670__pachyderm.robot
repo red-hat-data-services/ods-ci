@@ -32,7 +32,7 @@ Verify Pachyderm Pipeline Can Be Created
     Go To RHODS Dashboard
     Verify Service Is Enabled    Pachyderm
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=s2i-generic-data-science-notebook
+    Spawn Notebook With Arguments  image=science-notebook
     Create Pachyderm Pipeline Using JupyterLab     ${pachctl_version}
     Verify Pipeline Pod Creation
     [Teardown]  Delete Pipeline And Stop JupyterLab Server

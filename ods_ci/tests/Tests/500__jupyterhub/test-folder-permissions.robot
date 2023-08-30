@@ -13,7 +13,7 @@ Suite Teardown      End Web Test
 
 
 *** Variables ***
-@{LIST_OF_IMAGES} =    minimal-notebook    s2i-generic-data-science-notebook
+@{LIST_OF_IMAGES} =    minimal-notebook    science-notebook
 ...                    pytorch    tensorflow    minimal-gpu
 @{EXPECTED_PERMISSIONS} =       0775    0    1001
 @{FOLDER_TO_CHECK} =            /opt/app-root/lib    /opt/app-root/share

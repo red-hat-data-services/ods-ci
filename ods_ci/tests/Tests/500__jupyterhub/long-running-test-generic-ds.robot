@@ -33,4 +33,4 @@ Launch JupyterLab
     ${authorization_required} =    Is Service Account Authorization Required
     IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
-    Spawn Notebooks And Set S3 Credentials    image=s2i-generic-data-science-notebook
+    Spawn Notebooks And Set S3 Credentials    image=science-notebook

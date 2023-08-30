@@ -47,7 +47,7 @@ Can Spawn Notebook
     ...     Tier1
     ...     ODS-1808
     Fix Spawner Status
-    Select Notebook Image  s2i-generic-data-science-notebook
+    Select Notebook Image  science-notebook
     Select Notebook Image  minimal-notebook
     Select Container Size  Small
     Remove All Spawner Environment Variables

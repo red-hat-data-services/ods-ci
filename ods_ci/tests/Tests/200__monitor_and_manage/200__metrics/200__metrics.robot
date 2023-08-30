@@ -153,7 +153,7 @@ Run Jupyter Notebook For 5 Minutes
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
-    Iterative Image Test    s2i-generic-data-science-notebook    https://github.com/lugi0/minimal-nb-image-test
+    Iterative Image Test    science-notebook    https://github.com/lugi0/minimal-nb-image-test
     ...    minimal-nb-image-test/minimal-nb.ipynb
 
 #robocop: disable:too-many-calls-in-keyword

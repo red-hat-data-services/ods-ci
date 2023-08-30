@@ -26,7 +26,6 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The Kfp_tekton
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-2203
-    ...         RunThisTest
 
     End To End Pipeline Workflow Using Kfp_tekton
     ...    username=${TEST_USER.USERNAME}

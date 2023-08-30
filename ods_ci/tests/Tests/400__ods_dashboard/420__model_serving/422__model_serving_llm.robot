@@ -232,6 +232,14 @@ Verify User Can Validate Scale To Zero
     ...    namespace=autoscale-zero
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
+    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+    ...    json_body=${body}    json_header=${header}
+    ...    insecure=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=autoscale-zero
+    Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=autoscale-zero
     [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
     ...    isvc_names=${model_name}
 

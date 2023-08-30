@@ -2,11 +2,15 @@
 # Prerequisite: Clone https://github.com/RedHatQE/pylero.git
 # Install pylero.
 # Doc: https://github.com/RedHatQE/pylero#readme
-
 import argparse
 import os
 import ssl
 
+from pylero.exceptions import PyleroLibException
+from pylero.plan import Plan
+from pylero.test_run import TestRun
+
+# pylint: disable=W0212
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
@@ -103,12 +107,11 @@ def create_testplan(project_id, release_testplan, build_testplan):
     """
     Creates release test plan and build test plan
     """
-    from pylero.plan import Plan
 
     release_testplan_id = release_testplan.replace(".", "_")
     build_testplan_id = build_testplan.replace(".", "_")
     rst_res = Plan.search("id:{}".format(release_testplan_id))
-    if rst_res == []:
+    if not rst_res:
         Plan.create(release_testplan_id, release_testplan, project_id, None, "release")
     else:
         print("release test plan {} already exists".format(release_testplan))
@@ -118,7 +121,7 @@ def create_testplan(project_id, release_testplan, build_testplan):
         plan.update()
 
     btp_res = Plan.search("id:{}".format(build_testplan_id))
-    if btp_res == []:
+    if not btp_res:
         res = Plan.create(
             build_testplan_id,
             build_testplan,
@@ -143,13 +146,12 @@ def create_testrun(project_id, testrun_name, build_testplan):
     Creates test run and adds plannedin version to the
     tes run.
     """
-    from pylero.test_run import TestRun
-
     build_testplan_id = build_testplan.replace(".", "_")
     try:
         TestRun(project_id=project_id, test_run_id=testrun_name)
         print("test run {} already exists".format(testrun_name))
-    except:
+    # pylint: disable=W0612
+    except PyleroLibException as _:
         TestRun.create(project_id, testrun_name, "Build Acceptance type", testrun_name)
     tr = TestRun(project_id=project_id, test_run_id=testrun_name)
     tr.plannedin = build_testplan_id

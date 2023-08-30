@@ -14,10 +14,10 @@ def clone_config_repo(**kwargs):
     """
     Helper function to clone git repo
     """
-    if "git_username" not in kwargs.keys():
+    if "git_username" not in kwargs:
         kwargs["git_username"] = ""
 
-    if "git_password" not in kwargs.keys():
+    if "git_password" not in kwargs:
         kwargs["git_password"] = ""
 
     try:
@@ -25,7 +25,7 @@ def clone_config_repo(**kwargs):
             shutil.rmtree(kwargs["repo_dir"])
         os.makedirs(kwargs["repo_dir"])
         print("git repo dir '%s' created successfully" % kwargs["repo_dir"])
-    except OSError as error:
+    except OSError as _:
         print("git repo dir '%s' can not be created." % kwargs["repo_dir"])
         return False
 
@@ -50,11 +50,11 @@ def read_yaml(filename):
     Reads the given config file and returns the contents of file in dict format
     """
     try:
-        with open(filename, "r") as fh:
+        with open(filename, "r", encoding="utf-8") as fh:
             return yaml.safe_load(fh)
-    except OSError as error:
+    except OSError as _:
         return None
-          
+
 
 def execute_command(cmd):
     """
@@ -80,7 +80,7 @@ def execute_command(cmd):
                         break
                 sys.stdout.flush()
                 return output
-    except:
+    except subprocess.CalledProcessError as _:
         return None
 
 
@@ -116,9 +116,9 @@ def render_template(search_path, template_file, output_file, replace_vars):
         templateEnv = jinja2.Environment(loader=templateLoader)
         template = templateEnv.get_template(template_file)
         outputText = template.render(replace_vars)
-        with open(output_file, "w") as fh:
+        with open(output_file, "w", encoding="utf-8") as fh:
             fh.write(outputText)
-    except:
+    except OSError as _:
         print(
             "Failed to render template and create json " "file {}".format(output_file)
         )
@@ -130,10 +130,10 @@ def read_data_from_json(filename):
     Helper to read Json file
     """
     try:
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data
-    except:
+    except OSError as _:
         return None
 
 
@@ -141,7 +141,7 @@ def write_data_in_json(filename, data):
     """
     Helper to write JSON file
     """
-    with open(filename, "w") as convert_file:
+    with open(filename, "w", encoding="utf-8") as convert_file:
         convert_file.write(json.dumps(data))
 
 

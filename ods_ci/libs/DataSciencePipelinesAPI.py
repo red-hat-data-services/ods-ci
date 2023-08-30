@@ -1,3 +1,4 @@
+# pylint: disable=C0103
 import base64
 import json
 import os
@@ -25,7 +26,7 @@ class DataSciencePipelinesAPI:
         while deployment_count != 1 and count < 30:
             deployments = []
             response, _ = self.run_oc(
-                f"oc get deployment -n openshift-operators openshift-pipelines-operator -o json"
+                "oc get deployment -n openshift-operators openshift-pipelines-operator -o json"
             )
             try:
                 response = json.loads(response)
@@ -42,10 +43,12 @@ class DataSciencePipelinesAPI:
             count += 1
         # https://github.com/opendatahub-io/odh-dashboard/issues/1673
         # It is possible to start the Pipeline Server without pipelineruns.tekton.dev CRD
-        pipeline_run_crd_count = self.count_pods("oc get crd pipelineruns.tekton.dev", 1)
+        pipeline_run_crd_count = self.count_pods(
+            "oc get crd pipelineruns.tekton.dev", 1
+        )
         assert pipeline_run_crd_count == 1
         return self.count_running_pods(
-            f"oc get pods -n openshift-operators -l name=openshift-pipelines-operator -o json",
+            "oc get pods -n openshift-operators -l name=openshift-pipelines-operator -o json",
             "openshift-pipelines-operator",
             "Running",
             1,
@@ -68,6 +71,7 @@ class DataSciencePipelinesAPI:
             headers={"Authorization": f"Basic {basic_value}"},
             verify=False,
             allow_redirects=False,
+            timeout=10_000,
         )
         url_with_token = response.headers["Location"]
         access_token_key = "access_token="
@@ -129,12 +133,12 @@ class DataSciencePipelinesAPI:
         print("Creating a pipeline from data science pipelines stack")
         test_pipeline_run_yaml, _ = self.do_get(url_test_pipeline_run_yaml)
         filename = "test_pipeline_run_yaml.yaml"
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(test_pipeline_run_yaml)
-        with open(filename, "rb") as f:
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(test_pipeline_run_yaml)
+        with open(filename, "rb") as file:
             response, _ = self.do_upload(
                 f"https://{self.route}/apis/v1beta1/pipelines/upload",
-                files={"uploadfile": f},
+                files={"uploadfile": file},
                 headers={"Authorization": f"Bearer {self.sa_token}"},
             )
         os.remove(filename)
@@ -157,7 +161,7 @@ class DataSciencePipelinesAPI:
                 "Authorization": f"Bearer {self.sa_token}",
                 "Content-Type": "application/json",
             },
-            json={
+            json_data={
                 "name": "test-pipeline-run",
                 "pipeline_spec": {"pipeline_id": f"{pipeline_id}"},
             },
@@ -190,12 +194,12 @@ class DataSciencePipelinesAPI:
                     run_status = run_json["run"]["status"]
             except JSONDecodeError:
                 print(response, status)
-                pass
+
             print(f"Checking run status: {run_status}")
-            if run_status == 'Failed':
+            if run_status == "Failed":
                 break
             # https://github.com/tektoncd/pipeline/blob/main/docs/pipelineruns.md#monitoring-execution-status
-            if run_status == "Completed" or run_status == "Succeeded":
+            if run_status in ["Completed", "Succeeded"]:
                 run_finished_ok = True
                 break
             time.sleep(1)
@@ -245,18 +249,19 @@ class DataSciencePipelinesAPI:
             f"http://{self.route}/{url}",
             headers={"Authorization": f"Bearer {self.sa_token}"},
             verify=False,
+            timeout=10_000,
         )
         assert response.status_code == 200
         return response.url
 
     def count_pods(self, oc_command, pod_criteria, timeout=30):
-        oc_command = f'{oc_command} --no-headers'
+        oc_command = f"{oc_command} --no-headers"
         pod_count = 0
         count = 0
         while pod_count != pod_criteria and count < timeout:
             bash_str, _ = self.run_oc(oc_command)
             # | wc -l is returning an empty string
-            pod_count = sum(1 for line in bash_str.split('\n') if line.strip())
+            pod_count = sum(1 for line in bash_str.split("\n") if line.strip())
             if pod_count >= pod_criteria:
                 break
             time.sleep(1)
@@ -294,28 +299,38 @@ class DataSciencePipelinesAPI:
         response = response[host_begin_index:]
         host = response[: response.index(":")]
         # host[4:] means that we need to remove '.api' from the url
-        return f"https://oauth-openshift.apps.{host[4:]}/oauth/authorize?response_type=token&client_id=openshift-challenging-client"
+        return (
+            f"https://oauth-openshift.apps.{host[4:]}/oauth/authorize?response_type=token&client_id=openshift"
+            f"-challenging-client"
+        )
 
     def get_default_storage(self):
         result, _ = self.run_oc("oc get storageclass -A -o json")
         result = json.loads(result)
-        for storage_class in result['items']:
-            if 'annotations' in storage_class['metadata']:
-                if storage_class['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] == 'true':
-                    break
-        return storage_class['metadata']['name']
+        storage_class_name = ""
+        for storage_class in result["items"]:
+            if "annotations" in storage_class["metadata"]:
+                if (
+                    storage_class["metadata"]["annotations"][
+                        "storageclass.kubernetes.io/is-default-class"
+                    ]
+                    == "true"
+                ):
+                    storage_class_name = storage_class["metadata"]["name"]
+                break
+        return storage_class_name
 
     def run_oc(self, command):
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        return self.byte_to_str(output), error
+        with subprocess.Popen(command.split(), stdout=subprocess.PIPE) as process:
+            output, error = process.communicate()
+            return self.byte_to_str(output), error
 
     def do_get(self, url, headers=None):
         response = requests.get(url, headers=headers, verify=False)
         return self.byte_to_str(response.content), response.status_code
 
-    def do_post(self, url, headers, json):
-        response = requests.post(url, headers=headers, json=json, verify=False)
+    def do_post(self, url, headers, json_data):
+        response = requests.post(url, headers=headers, json=json_data, verify=False)
         return self.byte_to_str(response.content), response.status_code
 
     def do_upload(self, url, files, headers=None):

@@ -1,7 +1,7 @@
-from util import execute_command
-from logging import log
-from time import sleep
 import sys
+from time import sleep
+
+from ods_ci.utils.scripts.util import execute_command
 
 
 def create_account_roles():
@@ -29,7 +29,7 @@ def rosa_create_cluster(
     rosa_version,
     sts=True,
 ):
-    if sts == True:
+    if sts is True:
         cmd_rosa_create_cluster = [
             "rosa",
             "create",
@@ -119,11 +119,11 @@ def rosa_create_cluster(
     print("ret = {}".format(ret))
 
 
-def rosa_describe(cluster_name, filter=""):
+def rosa_describe(cluster_name, filter_data=""):
     """Describes cluster and returns cluster info"""
     cmd = "rosa describe cluster --cluster {}".format(cluster_name)
-    if filter != "":
-        cmd += " " + filter
+    if filter_data != "":
+        cmd += " " + filter_data
     ret = execute_command(cmd)
     if ret is None:
         print("rosa describe for cluster " "{} failed".format(cluster_name))
@@ -134,7 +134,9 @@ def rosa_describe(cluster_name, filter=""):
 def get_rosa_cluster_state(cluster_name):
     """Gets osd cluster state"""
 
-    cluster_state = rosa_describe(cluster_name, filter="--output json | jq -r '.state'")
+    cluster_state = rosa_describe(
+        cluster_name, filter_data="--output json | jq -r '.state'"
+    )
     if cluster_state is None:
         print(
             "Unable to retrieve cluster state for "
@@ -158,7 +160,7 @@ def wait_for_osd_cluster_to_be_ready(cluster_name, timeout=7200):
             print("{} is in ready state".format(cluster_name))
             check_flag = True
             break
-        elif cluster_state == "error":
+        if cluster_state == "error":
             print("{} is in error state. Hence " "exiting!!".format(cluster_name))
             sys.exit(1)
 

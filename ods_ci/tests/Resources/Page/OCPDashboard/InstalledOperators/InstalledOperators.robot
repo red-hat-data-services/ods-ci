@@ -99,7 +99,7 @@ Is RHODS Version Greater Or Equal Than
     ${ver} =  Get RHODS version
     ${ver} =  Fetch From Left  ${ver}  -
     IF  "1.18" in "${ver}"  RETURN     ${TRUE}
-    ${comparison} =  GTE  ${ver}  ${target}
+    ${comparison} =  Greater Or Equal Than  ${ver}  ${target}
     RETURN  ${comparison}
 
 Move To Installed Operator Page Tab in Openshift

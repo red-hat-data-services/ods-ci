@@ -3,37 +3,41 @@ import os
 import shutil
 import sys
 
-from python_terraform import *
+from python_terraform import IsFlagged, IsNotFlagged, Terraform
+
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import render_template
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../../")
-from logger import log
-from util import render_template
-
-"""
-Class for Openstack Terraform Provisioner
-"""
 
 
+# pylint: disable=R0902
 class OpenstackTerraformProvisioner:
-    def __init__(self, args={}):
+    """
+    Class for Openstack Terraform Provisioner
+    """
+
+    # pylint: disable=W0102
+    def __init__(self, arguments={}):
         # Initialize instance variables
-        self.cloud_name = args.get("cloud_name")
-        self.vm_name = args.get("vm_name")
-        self.vm_user = args.get("vm_user")
-        self.vm_private_key = args.get("vm_private_key")
-        self.image_name = args.get("image_name")
-        self.flavor_name = args.get("flavor_name")
-        self.key_pair = args.get("key_pair")
-        self.network_name = args.get("network_name")
-        self.auth_url = args.get("auth_url")
-        self.project_id = args.get("project_id")
-        self.project_name = args.get("project_name")
-        self.username = args.get("username")
-        self.password = args.get("password")
-        self.user_domain_name = args.get("user_domain_name")
-        self.interface = args.get("interface")
-        self.identity_api_version = args.get("identity_api_version")
+        self.region_name = None
+        self.cloud_name = arguments.get("cloud_name")
+        self.vm_name = arguments.get("vm_name")
+        self.vm_user = arguments.get("vm_user")
+        self.vm_private_key = arguments.get("vm_private_key")
+        self.image_name = arguments.get("image_name")
+        self.flavor_name = arguments.get("flavor_name")
+        self.key_pair = arguments.get("key_pair")
+        self.network_name = arguments.get("network_name")
+        self.auth_url = arguments.get("auth_url")
+        self.project_id = arguments.get("project_id")
+        self.project_name = arguments.get("project_name")
+        self.username = arguments.get("username")
+        self.password = arguments.get("password")
+        self.user_domain_name = arguments.get("user_domain_name")
+        self.interface = arguments.get("interface")
+        self.identity_api_version = arguments.get("identity_api_version")
         self.working_dir = dir_path
 
     def create_instance(self):
@@ -52,7 +56,7 @@ class OpenstackTerraformProvisioner:
             },
         )
         tf.init()
-        ret, out, err = tf.apply(
+        ret, _, err = tf.apply(
             no_color=IsFlagged,
             input=False,
             refresh=False,
@@ -60,7 +64,7 @@ class OpenstackTerraformProvisioner:
             skip_plan=True,
         )
         if ret != 0:
-            log.error("Failed to create instance! {}".format(err))
+            log.error("Failed to create instance! %s", err)
             sys.exit(1)
 
     def delete_instance(self):
@@ -77,14 +81,14 @@ class OpenstackTerraformProvisioner:
             },
         )
         tf.init()
-        ret, out, err = tf.destroy(
+        ret, _, err = tf.destroy(
             capture_output="yes",
             no_color=IsNotFlagged,
             force=IsNotFlagged,
             auto_approve=True,
         )
         if ret != 0:
-            log.error("Failed to delete instance! {}".format(err))
+            log.error("Failed to delete instance! %s", err)
             sys.exit(1)
 
     def set_config(self):

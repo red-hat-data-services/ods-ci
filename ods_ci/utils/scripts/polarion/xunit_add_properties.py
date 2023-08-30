@@ -1,12 +1,16 @@
 """Inserts properties from a config file into a xunit format XML file"""
+# pylint: disable=E0401
 import argparse
 import codecs
+import os
 import xml.etree.ElementTree as et
 from copy import deepcopy
 from xml.dom import minidom
 import os
 from junitparser import JUnitXml, TestCase, TestSuite, Failure, Error, Skipped
+
 import yaml
+from junitparser import JUnitXml, TestCase, TestSuite
 
 
 def parse_args():
@@ -92,6 +96,7 @@ def get_results(xml_obj):
     return results
 
 
+# pylint: disable=R0914
 def add_testcase_properties(xml_obj, tcconfig=None):
     """add properties to testcases"""
     if xml_obj.tag == "testsuites":
@@ -120,11 +125,11 @@ def add_testcase_properties(xml_obj, tcconfig=None):
             testcase.insert(0, tcproperties)
         else:
             xml_obj_testsuite = xml_obj.find("./testsuite")
-            for i in range(len(polarion_id) - 1):
+            for _ in range(len(polarion_id) - 1):
                 xml_obj_testsuite.append(deepcopy(testcase))
             multile_test_ids[testcase.get("name")] = polarion_id
 
-    for key in multile_test_ids.keys():
+    for key, _ in multile_test_ids:
         for index, testcase in enumerate(
             xml_obj.findall(expression + "[@name='" + key + "']")
         ):
@@ -224,7 +229,7 @@ def main():
     restructure_xml_for_polarion(args.xunit_xml_file, xunit_xml_file_restructured)
 
     root = parse_xml(xunit_xml_file_restructured)
-    with open(args.config_file) as config:
+    with open(args.config_file, encoding="utf-8") as config:
         testsuite_config = yaml.safe_load(config)
 
     tc_config = get_polarion_id(parse_xml(args.robot_result_xml_file))

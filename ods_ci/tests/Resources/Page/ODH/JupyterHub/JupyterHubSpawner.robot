@@ -582,7 +582,7 @@ Verify Image Can Be Spawned
 Verify Library Version Is Greater Than
     [Arguments]     ${library}      ${target}
     ${ver} =  Run Cell And Get Output   !pip show ${library} | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s.%s", b[1], b[2], b[3]}'
-    ${comparison} =  GTE  ${ver}  ${target}
+    ${comparison} =  Greater Or Equal Than  ${ver}  ${target}
     IF  ${comparison}==False
         Run Keyword And Continue On Failure     FAIL    Library Version Is Smaller Than Expected
     END

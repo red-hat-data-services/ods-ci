@@ -93,7 +93,7 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     Add And Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
     ${updated_version} =  Run Cell And Get Output  !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'
-    ${res} =      GT    ${updated_version}.0    ${version}[1].0
+    ${res} =      Greater Than    ${updated_version}.0    ${version}[1].0
     IF   not ${res}    Fail
     [Teardown]    Clean Up Server
 

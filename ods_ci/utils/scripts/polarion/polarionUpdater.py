@@ -1,8 +1,6 @@
 # Script to update ods-ci test results in polarion
-
 import argparse
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -10,10 +8,10 @@ import uuid
 
 import yaml
 
+from ods_ci.utils.scripts.util import clone_config_repo, read_yaml
+
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
-
-from util import clone_config_repo, read_yaml
 
 POLARION_URL = "https://polarion.engineering.redhat.com/polarion/import/xunit"
 PYLERO_REPO = "https://github.com/RedHatQE/pylero.git"
@@ -88,20 +86,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def generate_polarion_config(config_template, config_data, testrun_title):
+def generate_polarion_config(config_template, testrun_title):
     """
     Generates test config file dynamically by
      substituting the values in a template file.
     """
     shutil.copy(config_template, ".")
     config_file = os.path.basename(config_template)
-    with open(config_file, "r") as fh:
+    with open(config_file, "r", encoding="utf-8") as fh:
         data = yaml.safe_load(fh)
 
     data["testrun_info"]["polarion-testrun-title"] = testrun_title
     data["testrun_info"]["polarion-testrun-id"] = testrun_title
 
-    with open(config_file, "w") as yaml_file:
+    with open(config_file, "w", encoding="utf-8") as yaml_file:
         yaml_file.write(yaml.dump(data, default_flow_style=False, sort_keys=False))
 
 
@@ -117,8 +115,8 @@ def main():
 
     polarion_config_file = "polarion_config.yml"
     filename = SCRIPT_DIR + polarion_config_file
-    config_data = read_yaml(filename)
-    generate_polarion_config(filename, config_data, args.testrun_title)
+    read_yaml(filename)
+    generate_polarion_config(filename, args.testrun_title)
 
     # Installs pylero
     cmd = "pip3 install pylero/."

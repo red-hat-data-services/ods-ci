@@ -1,27 +1,33 @@
-import argparse, sys, os
+import argparse
+import os
+import sys
 
-dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path + "/../")
-from logger import log
-from awsOps import aws_configure
-from rosaOps import (
-    rosa_create_cluster,
+from ods_ci.utils.scripts.awsOps import aws_configure
+
+# pylint: disable=C0411
+from rosaOps import (  # isort:skip
     create_account_roles,
+    rosa_create_cluster,
     wait_for_osd_cluster_to_be_ready,
 )
 
 
+dir_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(dir_path + "/../")
+
+
 class RosaClusterManager:
-    def __init__(self, args={}):
-        self.aws_access_key_id = args.get("aws_access_key_id")
-        self.aws_secret_access_key = args.get("aws_secret_access_key")
-        self.aws_region = args.get("aws_region")
-        self.profile = args.get("profile")
-        self.cluster_name = args.get("cluster_name")
-        self.compute_nodes = args.get("compute_nodes")
-        self.compute_machine_type = args.get("compute_machine_type")
-        self.rosa_version = args.get("rosa_version")
-        self.channel_name = args.get("channel_name")
+    # pylint: disable=W0102
+    def __init__(self, arguments={}):
+        self.aws_access_key_id = arguments.get("aws_access_key_id")
+        self.aws_secret_access_key = arguments.get("aws_secret_access_key")
+        self.aws_region = arguments.get("aws_region")
+        self.profile = arguments.get("profile")
+        self.cluster_name = arguments.get("cluster_name")
+        self.compute_nodes = arguments.get("compute_nodes")
+        self.compute_machine_type = arguments.get("compute_machine_type")
+        self.rosa_version = arguments.get("rosa_version")
+        self.channel_name = arguments.get("channel_name")
 
     def create_rosa_cluster(self):
         print(

@@ -1,9 +1,16 @@
-from robot.api import logger
+import ast
+import decimal
+import numbers
+import random
+import re
+from pathlib import Path
+
+import requests
 from robot.libraries.BuiltIn import BuiltIn
+from robotlibcore import keyword
 from semver import VersionInfo
 
 from ods_ci.utils.scripts.ocm.ocm import OpenshiftClusterManager
-from robotlibcore import keyword
 
 
 class Helpers:
@@ -19,7 +26,7 @@ class Helpers:
         return rows
 
     @keyword
-    def gt(self, version, target):
+    def greater_than(self, version, target):
         """Returns True if the version > target
         and otherwise False including if an exception is thrown"""
         try:
@@ -32,7 +39,7 @@ class Helpers:
             return False
 
     @keyword
-    def gte(self, version, target):
+    def greater_or_equal_than(self, version, target):
         """Returns True if the SemVer version >= target
         and otherwise False including if an exception is thrown"""
         try:
@@ -65,7 +72,7 @@ class Helpers:
         ocm_client = OpenshiftClusterManager()
         # to manipulate ocm_describe on line 45
         ocm_client.cluster_name = cluster_identifier
-        cluster_name = ocm_client.ocm_describe(filter="--json | jq -r '.name'")
+        cluster_name = ocm_client.ocm_describe(filter_value="--json | jq -r '.name'")
         cluster_name = cluster_name.strip("\n")
         return cluster_name
 
@@ -101,9 +108,9 @@ class Helpers:
     @keyword
     def convert_to_hours_and_minutes(self, seconds):
         """Converts seconds in hours and minutes"""
-        m, s = divmod(int(seconds), 60)
-        h, m = divmod(m, 60)
-        return h, m
+        minutes, seconds = divmod(int(seconds), 60)
+        hours, minutes = divmod(minutes, 60)
+        return hours, minutes
 
     @keyword
     def install_isv_by_name(self, operator_name, channel, source="certified-operators"):
@@ -124,7 +131,7 @@ class Helpers:
     @keyword
     def parse_file_for_tolerations(self, filename):
         tolerations = []
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             content = f.readlines()
         saving = False
         for line in content:
@@ -136,7 +143,7 @@ class Helpers:
             elif line.startswith("Events:"):
                 break
             else:
-                if saving == True:
+                if saving:
                     tolerations.append(line.strip())
                     print(line)
                     print(tolerations)
@@ -145,13 +152,15 @@ class Helpers:
         return tolerations
 
     @keyword
-    def install_managed_starburst_addon(self, email_address, license, cluster_name):
+    def install_managed_starburst_addon(
+        self, email_address, licence_data, cluster_name
+    ):
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.notification_email = email_address
-        license_escaped = license.replace('"', '\\"')
+        license_escaped = licence_data.replace('"', '\\"')
         result = ocm_client.install_managed_starburst_addon(
-            license=license_escaped, exit_on_failure=False
+            licence_data=license_escaped, exit_on_failure=False
         )
         if not result:
             self.BuiltIn.fail(
@@ -167,12 +176,7 @@ class Helpers:
     @keyword
     def inference_comparison(self, expected, received, threshold=0.00001):
         try:
-            import ast
-            import decimal
-            import numbers
-            import re
-
-            model_name = re.compile("^[\S]+__isvc-[\w\d]+$")
+            model_name = re.compile(r"^\S+__isvc-[\\w\d]+$")
 
             # Cast from string to python type
             expected = ast.literal_eval(expected)
@@ -191,6 +195,8 @@ class Helpers:
                         )
                 elif isinstance(expected, list):
                     # if current element is a list, compare each value 1 by 1
+                    # pylint: disable=R1736
+                    # pylint: disable=W0622
                     for id, _ in enumerate(expected):
                         _inference_object_comparison(
                             expected[id], received[id], threshold
@@ -213,7 +219,7 @@ class Helpers:
                     # if element is model name, don't care about ID
                     result_ex = model_name.match(expected)
                     result_rec = model_name.match(received)
-                    if result_ex != None and result_rec != None:
+                    if result_ex is not None and result_rec is not None:
                         if expected.split("__")[0] != received.split("__")[0]:
                             failures.append([expected, received])
                     # else compare values are equal
@@ -225,13 +231,14 @@ class Helpers:
             if len(failures) > 0:
                 return False, failures
             return True, failures
-        except Exception as e:
+        # pylint: disable=W0718
+        except Exception as exception:
             return False, [
                 ["exception thrown during comparison"],
                 ["expected", expected],
                 ["received", received],
                 ["threshold", threshold],
-                ["exception", e],
+                ["exception", exception],
             ]
 
     @keyword
@@ -239,15 +246,12 @@ class Helpers:
         self,
         endpoint,
         name="image",
+        # pylint: disable=W0102
         value_range=[0, 255],
+        # pylint: disable=W0102
         shape={"B": 1, "C": 3, "H": 512, "W": 512},
         no_requests=100,
     ):
-        import os
-        import random
-        import requests
-        from pathlib import Path
-
         for _ in range(no_requests):
             data_img = [
                 random.randrange(value_range[0], value_range[1])
@@ -276,16 +280,20 @@ class Helpers:
                     headers=headers,
                     data=data,
                     verify="openshift_ca.crt",
+                    timeout=10_000,
                 )
             else:
-                response = requests.post(endpoint, headers=headers, data=data)
+                response = requests.post(
+                    endpoint, headers=headers, data=data, timeout=10_000
+                )
         return response.status_code, response.text
 
     @keyword
     def process_resource_list(self, filename_in, filename_out=None):
+        # pylint: disable=W1401
         """
         Tries to remove pseudorandom substring from openshift resource names using a regex.
-        This portion of the regex: -\b(?:[a-z]+\d|\d+[a-z])[a-z0-9]*\b tries to find an
+        This portion of the regex: - \b(?:[a-z]+\d|\d+[a-z])[a-z0-9]*\b tries to find an
         alphanumeric string of any length preceded by a `-`, while the second part of the regex
         i.e. -\b[a-z]{5}$\b, tries to find substrings of length 5 with only alphabetic characters
         at the end of the string, or with only numbers, preceded by a `-`.
@@ -294,17 +302,15 @@ class Helpers:
         resource list as well as the runtime list are both processed this way, this should
         not cause an issue.
         """
-        import re
-
         regex = re.compile(r"-\b(?:[a-z]+\d|\d+[a-z])[a-z0-9]*\b|-\b[a-z0-9]{5}$\b")
         out = []
-        with open(filename_in, "r") as f:
-            for line in f:
+        with open(filename_in, "r", encoding="utf-8") as file:
+            for line in file:
                 spaces = line.count(" ")
                 resource_name = line.split()[1]
                 resource_name = regex.sub(repl="", string=resource_name)
                 out.append(line.split()[0] + " " * spaces + resource_name + "\n")
-        if filename_out == None:
+        if filename_out is None:
             filename_out = filename_in.split(".")[0] + "_processed.txt"
-        with open(filename_out, "w") as outfile:
+        with open(filename_out, "w", encoding="utf-8") as outfile:
             outfile.write("".join(str(l) for l in out))

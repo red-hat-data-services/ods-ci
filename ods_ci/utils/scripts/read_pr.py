@@ -1,4 +1,5 @@
 import glob
+import subprocess
 
 
 class ReadPR:
@@ -68,7 +69,7 @@ class ReadPR:
         return all_tags_file
 
     def search_content(self, filename, content):
-        with open(filename, "r") as fp:
+        with open(filename, "r", encoding="utf-8") as fp:
             # read all lines in a list
             lines = fp.readlines()
             found_content = False
@@ -161,15 +162,13 @@ class ReadPR:
         file_path = file_path.split(" ")[-1]
         file_name = f"../../../{file_path[2:]}"
         if file_path.startswith("b/"):
-            with open(file_name) as f:
+            with open(file_name, encoding="utf-8") as f:
                 lines = f.readlines()
             return file_name, lines
         else:
             raise ValueError(f"cannot find the path starting with b/ -> {file_path}")
 
     def get_diff(self, target="git diff upstream/master"):
-        import subprocess
-
         output = subprocess.getoutput(target)
         return output.split("\n")
 

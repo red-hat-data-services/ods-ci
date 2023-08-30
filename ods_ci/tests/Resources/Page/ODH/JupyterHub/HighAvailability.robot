@@ -56,8 +56,8 @@ Verify JupyterHub Deployment
         # Grab x.y.z version of jupyterhub
         ${jh_version} =    Run  oc -n ${APPLICATIONS_NAMESPACE} exec ${pod.metadata.name} -c jupyterhub -- pip show jupyterhub | grep Version: | awk '{split($0,a); print a[2]}'
         # 1.5 <= ${jh_version} < 2.0
-        ${min} =    GTE    ${jh_version}    1.5.0
-        ${max} =    GTE    1.9.99    ${jh_version}
+        ${min} =    Greater Or Equal Than    ${jh_version}    1.5.0
+        ${max} =    Greater Or Equal Than    1.9.99    ${jh_version}
         IF  ${min}==False or ${max}==False
             Fail    msg=JH version ${jh_version} is wrong (should be >=1.5,<2.0)
         END

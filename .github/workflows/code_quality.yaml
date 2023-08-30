@@ -81,3 +81,19 @@ jobs:
                isort $file --check --diff
             fi
           done
+  pylint:
+    name: pylint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install pylint
+        run: pip install pylint
+
+      - name: Run pylint on utils
+        run: pylint --rcfile pylintrc ods_ci/utils
+
+      - name: Run pylint on libs
+        run: pylint --rcfile pylintrc ods_ci/libs

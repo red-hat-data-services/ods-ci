@@ -5,28 +5,29 @@ import shutil
 import subprocess
 import sys
 
-import pexpect
 import yaml
+
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import execute_command
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
-from logger import log
-from util import execute_command
-
-"""
-Class for Openshift Installation on AWS
-Pre-requisites to install before executing the script: awscli, openshift-install
-"""
 
 
 class OpenshiftOps:
-    def __init__(self, args={}):
+    """
+    Class for Openshift Installation on AWS
+    Pre-requisites to install before executing the script: awscli, openshift-install
+    """
+
+    # pylint: disable=W0102
+    def __init__(self, arguments={}):
         # Initialize instance variables
-        self.aws_access_key_id = args.get("aws_access_key_id")
-        self.aws_secret_access_key = args.get("aws_secret_access_key")
-        self.install_config_file = args.get("install_config_file")
-        self.aws_region = args.get("aws_region")
-        self.cluster_name = args.get("cluster_name")
+        self.aws_access_key_id = arguments.get("aws_access_key_id")
+        self.aws_secret_access_key = arguments.get("aws_secret_access_key")
+        self.install_config_file = arguments.get("install_config_file")
+        self.aws_region = arguments.get("aws_region")
+        self.cluster_name = arguments.get("cluster_name")
         cwd = os.getcwd()
         self.work_dir = cwd + "/ocp/"
 
@@ -35,14 +36,14 @@ class OpenshiftOps:
         Generates ssh key required for OpenShift Installation
         """
         cmd = "ssh-keygen -t rsa -b 4096 -N '' -f {}/id_rsa".format(self.work_dir)
-        log.info("CMD: {}".format(cmd))
+        log.info("CMD: %s", cmd)
         ret = execute_command(cmd)
         if ret is None:
             log.error("Failed to generate ssh key")
             return None
 
         cmd = 'eval "$(ssh-agent -s)";' + "ssh-add {}/id_rsa".format(self.work_dir)
-        log.info("CMD: {}".format(cmd))
+        log.info("CMD: %s", cmd)
         ret = execute_command(cmd)
         if ret is None:
             log.error("Failed to eval ssh-agent and to add ssh rsa key")
@@ -60,13 +61,13 @@ class OpenshiftOps:
         if ret is None:
             log.error("Failed to add ssh rsa key")
             return None
-        with open(self.install_config_file, "r") as file:
+        with open(self.install_config_file, "r", encoding="utf-8") as file:
             config_data = yaml.safe_load(file)
 
         config_data["sshKey"] = ret
         config_data["metadata"]["name"] = self.cluster_name
 
-        with open(self.install_config_file, "w") as yaml_file:
+        with open(self.install_config_file, "w", encoding="utf-8") as yaml_file:
             yaml_file.write(yaml.dump(config_data, default_flow_style=False))
 
         return True
@@ -96,7 +97,7 @@ class OpenshiftOps:
             "yaml",
         )
 
-        with open("aws.sh", "w") as f:
+        with open("aws.sh", "w", encoding="utf-8") as f:
             f.write(contents)
 
         cmd = "sh aws.sh"
@@ -139,38 +140,35 @@ class OpenshiftOps:
             log.error("Failed to cd to directory where install config is present")
             return None
 
-        process = subprocess.Popen(
+        with subprocess.Popen(
             ["openshift-install", "create", "cluster"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-        )
-        log.info(
-            "Executing openshift-install create cluster command in {}".format(
-                install_config_dir
+        ) as process:
+            log.info(
+                "Executing openshift-install create cluster command in %s",
+                install_config_dir,
             )
-        )
-        log.info("OpenShift Cluster creation is in progress...")
-        returncode = process.wait()
-        if returncode != 0:
-            log.error("Failed to create openshift cluster on AWS")
-            sys.exit(1)
+            log.info("OpenShift Cluster creation is in progress...")
+            returncode = process.wait()
+            if returncode != 0:
+                log.error("Failed to create openshift cluster on AWS")
+                sys.exit(1)
 
-        output = process.stdout.read().decode("utf-8")
-        match = re.search(
-            ".*Access the OpenShift web-console here: (\S+)"
-            '.*Login to the console with user: "(\S+)".*password: "(\S+)".*',
-            output,
-            re.S,
-        )
-        if match is None:
-            log.error(
-                "Unexpected console logs in openshift-install create cluster output"
+            output = process.stdout.read().decode("utf-8")
+            match = re.search(
+                r".*Access the OpenShift web-console here: (\S+).*"
+                r'Login to the console with user: "(\S+)".*password: "(\S+)".*',
+                output,
+                re.S,
             )
-            sys.exit(1)
+            if match is None:
+                log.error(
+                    "Unexpected console logs in openshift-install create cluster output"
+                )
+                sys.exit(1)
 
-        log.info(
-            "OpenShift Cluster {} created successfully !".format(self.cluster_name)
-        )
+        log.info("OpenShift Cluster %s created successfully !", self.cluster_name)
 
         cluster_info = {}
         cluster_info["CLUSTER_NAME"] = self.cluster_name
@@ -180,7 +178,7 @@ class OpenshiftOps:
         cluster_info["OCP_ADMIN_USER"]["USERNAME"] = match.group(2)
         cluster_info["OCP_ADMIN_USER"]["PASSWORD"] = match.group(3)
 
-        with open(config_file, "w") as file:
+        with open(config_file, "w", encoding="utf-8") as file:
             yaml.dump(cluster_info, file)
 
     def openshift_destroy(self):
@@ -195,7 +193,7 @@ class OpenshiftOps:
             sys.exit(1)
 
         cmd = "openshift-install destroy cluster"
-        log.info("CMD: {}".format(cmd))
+        log.info("CMD: %s", cmd)
         ret = execute_command(cmd)
         if ret is None:
             log.error("Failed to destroy openshift cluster")

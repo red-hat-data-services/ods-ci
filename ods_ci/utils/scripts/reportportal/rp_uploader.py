@@ -3,25 +3,26 @@ import json
 import os
 import sys
 
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import execute_command
+
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 
-from logger import log
-from util import execute_command
-
-"""
-Class for Report portal operations
-"""
-
 
 class ReportPortalOperations:
-    def __init__(self, args={}):
+    """
+    Class for Report portal operations
+    """
+
+    # pylint: disable=W0102
+    def __init__(self, arguments={}):
         # Initialize instance variables
-        self.config_file = args.get("config_file")
-        self.payload_dir = args.get("payload_dir")
-        self.service_url = args.get("service_url")
-        self.output_file = args.get("output_file")
-        self.log_path = args.get("log_path")
+        self.config_file = arguments.get("config_file")
+        self.payload_dir = arguments.get("payload_dir")
+        self.service_url = arguments.get("service_url")
+        self.output_file = arguments.get("output_file")
+        self.log_path = arguments.get("log_path")
 
     def write_output_file(self, file_content):
         """
@@ -34,10 +35,10 @@ class ReportPortalOperations:
         try:
             if not os.path.exists(os.path.dirname(output_file)):
                 os.makedirs(os.path.dirname(output_file))
-            with open(output_file, "a") as f:
+            with open(output_file, "a", encoding="utf-8") as f:
                 log.info("Writing content to %s", output_file)
                 f.write(f"{file_content}\n")
-        except Exception as e:
+        except OSError as e:
             log.error("Unable to write output to file due to Exception: %s", e)
 
     def upload_result(self):
@@ -46,7 +47,7 @@ class ReportPortalOperations:
         cmd = "rp_preproc -c {} -d {} " "--service {} -l {}".format(
             self.config_file, self.payload_dir, self.service_url, self.log_path
         )
-        log.info("CMD: {}".format(cmd))
+        log.info("CMD: %s", cmd)
         rp_output = execute_command(cmd)
         rp_output_json = json.dumps(rp_output)
         self.write_output_file(json.dumps(rp_output_json))

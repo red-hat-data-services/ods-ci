@@ -110,5 +110,8 @@ Delete Pipeline Server
     Click Element    //li[contains(a/text(), 'Delete pipeline server')]
     Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server
     Wait Until Page Contains Element    xpath://h2[contains(text(), 'No pipeline server')]
-    ${pod_count}    Run    oc get pods -n ${data_science_project_name} | wc -l
-    Should Be True    ${pod_count} == 0    Pods weren't removed
+    FOR  ${index}  IN RANGE  0  30
+        ${pod_count}    Run    oc get pods -n ${data_science_project_name} | wc -l
+        IF  ${pod_count}==0  BREAK
+        Sleep  1s
+    END

@@ -169,9 +169,9 @@ Apply DataScienceCluster CustomResource
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    $cmp not in $COMPONENTS
             Component Should Not Be Enabled    ${cmp}
-        ELSE IF    ${COMPONENTS.${cmp}} == ${True}
+        ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
             Component Should Be Enabled    ${cmp}
-        ELSE IF    ${COMPONENTS.${cmp}} == ${False}
+        ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
             Component Should Not Be Enabled    ${cmp}
         END
     END

@@ -227,7 +227,6 @@ Verify User Can Autoscale Using Concurrency
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-con
     ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-
     FOR    ${index}    IN RANGE    30
            Query Model With GRPCURL   host=${host}    port=443
            ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}
@@ -281,12 +280,37 @@ Verify User Can Validate Scale To Zero
     [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
     ...    isvc_names=${model_name}
 
+Verify User Can Set Requests And Limits For A Model
+    [Tags]    ODS-XYZ    WatsonX
+    [Setup]    Set Project And Runtime    namespace=hw-res
+    ${test_namespace}=    Set Variable    hw-res
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${model_name}=    Create List    ${flan_model_name}
+    ${requests}=    Create Dictionary    cpu="2"    memory="4Gi"
+    # ...    nvidia.com/gpu="1"
+    ${limits}=    Create Dictionary    cpu="2"    memory="4Gi"
+    # ...    nvidia.com/gpu="1"
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    auto_scale=False
+    ...    requests_dict=${requests}    limits_dict=${limits}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ...    namespace=${test_namespace}
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${model_name}
+
 *** Keywords ***
 Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
-    RHOSi Setup
+    # RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
         Install Service Mesh Stack
         Deploy Service Mesh CRs
@@ -564,6 +588,7 @@ Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
     ...            ${min_replicas}=1   ${scaleTarget}=1   ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
+    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -593,6 +618,28 @@ Compile Inference Service YAML
     ELSE
         ${rc}    ${out}=    Run And Return Rc And Output
         ...    sed -i 's/{{CanaryTrafficPercent}}/${canaryTrafficPercent}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    END
+    IF    ${requests_dict} == &{EMPTY}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    yq -i 'del(.spec.predictor.model.resources.requests)' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ELSE
+        Log    ${requests_dict}
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
+            Log    ${index}- ${resource}:${requests_dict}[${resource}]
+            ${rc}    ${out}=    Run And Return Rc And Output
+            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = ${requests_dict}[${resource}]' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        END
+    END
+    IF    ${limits_dict} == &{EMPTY}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    yq -i 'del(.spec.predictor.model.resources.limits)' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ELSE
+        Log    ${limits_dict}
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
+            Log    ${index}- ${resource}:${limits_dict}[${resource}]
+            ${rc}    ${out}=    Run And Return Rc And Output
+            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = ${requests_dict}[${resource}]' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        END
     END
 
 Model Response Should Match The Expectation

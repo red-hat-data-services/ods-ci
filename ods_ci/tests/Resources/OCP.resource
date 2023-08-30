@@ -123,3 +123,37 @@ Add Secret To Service Account
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch sa ${sa_name} -n ${namespace} -p '{"secrets": [{"name": "${secret_name}"}]}'
     Should Be Equal As Integers    ${rc}    ${0}
+
+Get Pod Hardware Resources And Limits
+    [Arguments]    ${label_selector}    ${namespace}    ${container_name}=${NONE}
+    IF    "${container_name}" == "${NONE}"
+        ${rc}    ${resources}=    Run And Return Rc And Output
+        ...    oc get pods -l ${label_selector} -n ${namespace} -ojson | jq '.items[].spec.containers[] | .resources'
+    ELSE
+        ${rc}    ${resources}=    Run And Return Rc And Output
+        ...    oc get pods -l ${label_selector} -n ${namespace} -ojson | jq '.items[].spec.containers[] | select(.name=="${container_name}") | .resources'
+    END
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${resources}=    Load Json String    ${resources}
+    RETURN    ${resources}
+
+Container Hardware Resources Should Match Expected
+    [Arguments]    ${container_name}    ${pod_label_selector}    ${namespace}    ${exp_requests}=${EMPTY}    ${exp_limits}=${EMPTY}
+    ${resources_dict}=    Get Pod Hardware Resources And Limits    label_selector=${pod_label_selector}
+    ...    namespace=${namespace}    container_name=${container_name}
+    IF    ${exp_requests} == &{EMPTY}
+        Dictionary Should Not Contain Key    ${resources_dict}    requests
+    ELSE
+        ${requests}=    Set Variable    ${resources_dict}[requests]
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{requests.keys()}
+            Should Be Equal As Strings    "${requests}[${resource}]"    ${exp_requests}[${resource}]
+        END
+    END
+    IF    ${exp_limits} == &{EMPTY}
+        Dictionary Should Not Contain Key    ${resources_dict}    limits
+    ELSE
+        ${limits}=    Set Variable    ${resources_dict}[limits]
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{limits.keys()}
+            Should Be Equal As Strings    "${limits}[${resource}]"    ${exp_limits}[${resource}]
+        END
+    END

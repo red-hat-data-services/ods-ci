@@ -228,7 +228,7 @@ Verify User Can Validate Scale To Zero
     ...    insecure=${TRUE}
     Update Scale To Zero For Knative Serving   serving_name=knative-serving
     ...    namespace=knative-serving   status=true
-    ${revision_id}=    Scale Number Of Replicas    n_replicas=0    model_name=${flan_model_name}
+    Scale Number Of Replicas    n_replicas=0    model_name=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero

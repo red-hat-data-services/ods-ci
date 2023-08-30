@@ -172,7 +172,8 @@ Click Minus Button
 
 Query Model With GRPCURL
     [Arguments]    ${host}    ${port}    ${endpoint}    ${json_body}
-    ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    &{args}
+    ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    ${background}=${NONE}
+    ...            &{args}
     ${cmd}=    Set Variable    grpcurl -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
@@ -192,13 +193,18 @@ Query Model With GRPCURL
     END
     ${cmd}=    Catenate    ${cmd}    ${host}:${port}
     ${cmd}=    Catenate    ${cmd}    ${endpoint}
-    ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}
-    # ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT    cwd=${PROTO_DIRPATH}    shell=yes
-    # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
-    Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
-    # Log    ${query_process.stdout}    console=yes
-    Log    ${response}    console=yes
-    # ${json_res}=    Load Json String    ${query_process.stdout}
-    ${json_res}=    Load Json String    ${response}
-    # ...    strict=False
-    RETURN    ${json_res}
+    IF   '${background}' == '${NONE}'
+          ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}
+          # ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT    cwd=${PROTO_DIRPATH}    shell=yes
+          # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
+          Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
+          # Log    ${query_process.stdout}    console=yes
+          Log    ${response}    console=yes
+          # ${json_res}=    Load Json String    ${query_process.stdout}
+          ${json_res}=    Load Json String    ${response}
+          # ...    strict=False
+          RETURN    ${json_res}
+    ELSE
+          ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}&
+          Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
+    END

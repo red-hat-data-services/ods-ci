@@ -289,3 +289,8 @@ Delete InfereceService
     [Arguments]    ${isvc_name}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${namespace}
     Should Be Equal As Integers    ${rc}    ${0}
+
+Update Scale To Zero For Knative Serving
+    [Arguments]    ${serving_name}    ${namespace}    ${status}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc patch KnativeServing ${serving_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/config/autoscaler/enable-scale-to-zero', 'value': '${status}'}]"
+    Should Be Equal As Integers    ${rc}    ${0}

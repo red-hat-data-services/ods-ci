@@ -156,14 +156,14 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=2
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
-    ${rev_id}=    Scale Number Of Replicas    n_replicas=3    model_name=${model_name}
+    ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=3
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
-    ${rev_id}=    Scale Number Of Replicas    n_replicas=1    model_name=${model_name}
+    ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
     ...    namespace=${TEST_NS}
@@ -226,7 +226,7 @@ Verify User Can Validate Scale To Zero
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
-    Scale Number Of Replicas    n_replicas=0    model_name=${flan_model_name}
+    Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero

@@ -276,7 +276,7 @@ Get KServe Inference Host Via CLI
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
 
-Scale Number Of Replicas
+Set Minimum Replicas Number
     [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
     ${rc}    ${old_revision_id}=    Run And Return Rc And Output
     ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'

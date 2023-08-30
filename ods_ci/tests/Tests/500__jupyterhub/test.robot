@@ -48,7 +48,7 @@ Can Spawn Notebook
     ...     ODS-1808
     Fix Spawner Status
     Select Notebook Image  s2i-generic-data-science-notebook
-    Select Notebook Image  s2i-minimal-notebook
+    Select Notebook Image  minimal-notebook
     Select Container Size  Small
     Remove All Spawner Environment Variables
     # Cannot set number of required GPUs on clusters without GPUs anymore

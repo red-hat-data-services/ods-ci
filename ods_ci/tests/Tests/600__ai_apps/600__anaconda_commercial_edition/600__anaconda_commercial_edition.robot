@@ -78,7 +78,7 @@ Verify User Is Able to Activate Anaconda Professional
   Launch JupyterHub Spawner From Dashboard
   Run Keyword And Continue On Failure  Verify Anaconda Element Present Based On Version
   Run Keyword And Continue On Failure  Verify Anaconda Element Enabled Based On Version
-  Spawn Notebook With Arguments  image=s2i-minimal-notebook-anaconda
+  Spawn Notebook With Arguments  image=minimal-notebook-anaconda
   Verify Git Plugin
   Check condarc File Content
   Install Numpy Package Should Fail

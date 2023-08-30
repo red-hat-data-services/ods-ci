@@ -56,7 +56,7 @@ PyTorch Image Workload Test
 *** Keywords ***
 Launch Notebook
     [Documentation]  Launch notebook for the suite
-    [Arguments]   ${notbook_image}=s2i-minimal-notebook   ${username}=${TEST_USER2.USERNAME}   ${password}=${TEST_USER2.PASSWORD}   ${auth_type}=${TEST_USER2.AUTH_TYPE}  #robocop: disable
+    [Arguments]   ${notbook_image}=minimal-notebook   ${username}=${TEST_USER2.USERNAME}   ${password}=${TEST_USER2.PASSWORD}   ${auth_type}=${TEST_USER2.AUTH_TYPE}  #robocop: disable
     Begin Web Test     username=${username}  password=${password}  auth_type=${auth_type}
     Login To RHODS Dashboard    ${username}  ${password}   ${auth_type}
     Wait For RHODS Dashboard To Load

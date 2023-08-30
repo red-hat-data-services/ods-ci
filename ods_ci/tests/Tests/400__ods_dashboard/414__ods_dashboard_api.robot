@@ -793,7 +793,7 @@ Spawn Minimal Python Notebook Server
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=s2i-minimal-notebook
+    Spawn Notebook With Arguments  image=minimal-notebook
     ${cr_name}=   Get User CR Notebook Name    ${username}
     ${status}   ${image_tag_name}=     Run And Return Rc And Output
     ...     oc get Notebook --field-selector=metadata.name=${cr_name} -n ${NOTEBOOK_NS} -o=jsonpath='{.items[0].metadata.annotations.notebooks\\.opendatahub\\.io/last-image-selection}'

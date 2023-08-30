@@ -42,7 +42,7 @@ Open Browser And Start Notebook As First User
     IF    ${authorization_required}    Authorize Jupyterhub Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook
+    Spawn Notebook With Arguments    image=minimal-notebook
     @{old_browser} =    Get Browser Ids
     ${first_browser_id} =    Set Variable    ${old_browser}[0]
     Set Suite Variable    ${first_browser_id}
@@ -65,7 +65,7 @@ Open Browser And Start Notebook As Second User With Env Vars
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     &{first_pod_details} =  Create Dictionary  pod_ip=${pod_ip}  pod_login=${pod_login_name}
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook    username=${TEST_USER_2.USERNAME}
+    Spawn Notebook With Arguments    image=minimal-notebook    username=${TEST_USER_2.USERNAME}
     ...    password=${TEST_USER_2.PASSWORD}    auth_type=${TEST_USER_2.AUTH_TYPE}    envs=&{first_pod_details}
 
 Run Additional Notebook Cells

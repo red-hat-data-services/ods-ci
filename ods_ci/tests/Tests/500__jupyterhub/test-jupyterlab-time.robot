@@ -12,7 +12,7 @@ Suite Teardown      End Web Test
 
 
 *** Variables ***
-@{LIST_OF_IMAGES}       s2i-minimal-notebook    s2i-generic-data-science-notebook
+@{LIST_OF_IMAGES}       minimal-notebook    s2i-generic-data-science-notebook
 ...                     pytorch                 tensorflow    minimal-gpu
 
 ${LIMIT_TIME} =    40

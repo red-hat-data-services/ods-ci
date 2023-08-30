@@ -32,7 +32,7 @@ Open JupyterHub Spawner Page
 Verify Libraries in Minimal Image
     [Documentation]    Verifies libraries in Minimal Python image
     [Tags]    Sanity
-    Verify List Of Libraries In Image    s2i-minimal-notebook    JupyterLab-git ${JupyterLab-git_Version}
+    Verify List Of Libraries In Image    minimal-notebook    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in Cuda Image
     [Documentation]    Verifies libraries in Minimal Python image

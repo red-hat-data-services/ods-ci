@@ -69,8 +69,10 @@ Verify User Can Serve And Query A Model
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
     Query Models And Check Responses Multiple Times    models_names=${models_names}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    namespace=${TEST_NS}
     Query Models And Check Responses Multiple Times    models_names=${models_names}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    namespace=${TEST_NS}
     [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
     ...    isvc_names=${models_names}
 
@@ -95,8 +97,40 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${TEST_NS}
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
+    ...    namespace=${TEST_NS}
     [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
     ...    isvc_names=${models_names}
+
+Verify User Can Deploy Multiple Models In Different Namespaces
+    [Tags]    ODS-2378   WatsonX
+    [Setup]    Run Keywords    Set Project And Runtime    namespace=watsonx-multi1
+    ...        AND
+    ...        Set Project And Runtime    namespace=watsonx-multi2
+    ${model_one_name}=    Set Variable    bloom-560m-caikit
+    ${model_two_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names_ns_1}=    Create List    ${model_one_name}
+    ${models_names_ns_2}=    Create List    ${model_two_name}
+    Compile Inference Service YAML    isvc_name=${model_one_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${BLOOM_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=watsonx-multi1
+    Compile Inference Service YAML    isvc_name=${model_two_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=watsonx-multi2
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    ...    namespace=watsonx-multi1
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    ...    namespace=watsonx-multi2
+    Query Models And Check Responses Multiple Times    models_names=${models_names_ns_1}    n_times=3
+    ...    namespace=watsonx-multi1
+    Query Models And Check Responses Multiple Times    models_names=${models_names_ns_2}    n_times=3
+    ...    namespace=watsonx-multi2
+    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=watsonx-multi1    isvc_names=${models_names_ns_1}
+    ...           AND
+    ...           Clean Up Test Project    test_ns=watsonx-multi2    isvc_names=${models_names_ns_2}
 
 Verify Model Upgrade Using Canaray Rollout
     [Tags]    ODS-2372    WatsonX
@@ -157,6 +191,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=2
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ...    namespace=${TEST_NS}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
@@ -164,6 +199,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=3
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ...    namespace=${TEST_NS}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
@@ -171,6 +207,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=1
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ...    namespace=${TEST_NS}
     [Teardown]   Clean Up Test Project    test_ns=${TEST_NS}
     ...    isvc_names=${models_names}
 
@@ -583,13 +620,13 @@ Model Response Should Match The Expectation
 Query Models And Check Responses Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
-    [Arguments]    ${models_names}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
+    [Arguments]    ${models_names}    ${namespace}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
     ...            ${streamed_response}=${FALSE}
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
         FOR    ${index}    ${model_name}    IN ENUMERATE    @{models_names}
             Log    ${index}: ${model_name}
-            ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_name}   namespace=${TEST_NS}
+            ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_name}   namespace=${namespace}
             ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
             ${header}=    Set Variable    'mm-model-id: ${model_name}'
             ${res}=    Query Model With GRPCURL   host=${host}    port=443

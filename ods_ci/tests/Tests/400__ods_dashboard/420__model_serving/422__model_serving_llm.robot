@@ -226,8 +226,6 @@ Verify User Can Validate Scale To Zero
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
-    Update Scale To Zero For Knative Serving   serving_name=knative-serving
-    ...    namespace=knative-serving   status=true
     Scale Number Of Replicas    n_replicas=0    model_name=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}

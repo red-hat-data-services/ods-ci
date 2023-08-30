@@ -208,7 +208,7 @@ Verify User Can Autoscale Using Concurrency
     ...    isvc_names=${model_name}
 
 Verify User Can Validate Scale To Zero
-    [Tags]    ODS-XXX    WatsonX
+    [Tags]    ODS-2379    WatsonX
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Create List    ${flan_model_name}

@@ -43,6 +43,8 @@ ${FLAN_MODEL_S3_DIR}=    flan-t5-small
 ${BLOOM_MODEL_S3_DIR}=    bloom-560m
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
+${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
+${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
 
 
 *** Test Cases ***
@@ -65,11 +67,10 @@ Verify User Can Serve And Query A Model
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${TEST_NS}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=1
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
     ...    isvc_names=${models_names}
 
@@ -192,7 +193,7 @@ Verify User Can Autoscale Using Concurrency
 
     FOR    ${index}    IN RANGE    30
            Query Model With GRPCURL   host=${host}    port=443
-           ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+           ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}
            ...    json_body=${body}    json_header=${header}
            ...    insecure=${TRUE}     background=${TRUE}
     END
@@ -563,18 +564,27 @@ Model Response Should Match The Expectation
     ...                   - to ensure we are getting an answer from the model (e.g., not an empty text)
     ...                   - to check that we receive the answer from the right model
     ...                when multiple ones are deployed
-    [Arguments]    ${model_response}    ${model_name}    ${query_idx}
-    Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]
-    ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
-    ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}
-    ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
-    ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
-    Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+    [Arguments]    ${model_response}    ${model_name}    ${query_idx}    ${streamed_response}=${FALSE}
+    IF    ${streamed_response} == ${FALSE}
+        Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]
+        ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
+        ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}
+        ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
+        ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
+        Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+    ELSE
+        ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    \\s+    ${EMPTY}
+        ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
+        ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
+        Log    ${cleaned_response_text}
+        Should Be Equal    ${cleaned_response_text}    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][streamed_response_text]
+    END
 
 Query Models And Check Responses Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
-    [Arguments]    ${models_names}    ${n_times}=10
+    [Arguments]    ${models_names}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
+    ...            ${streamed_response}=${FALSE}
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
         FOR    ${index}    ${model_name}    IN ENUMERATE    @{models_names}
@@ -583,12 +593,12 @@ Query Models And Check Responses Multiple Times
             ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
             ${header}=    Set Variable    'mm-model-id: ${model_name}'
             ${res}=    Query Model With GRPCURL   host=${host}    port=443
-            ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+            ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
-            ...    insecure=${TRUE}
+            ...    insecure=${TRUE}    skip_res_json=${streamed_response}
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
-            ...    query_idx=0
+            ...    query_idx=0    streamed_response=${streamed_response}
         END
     END
 

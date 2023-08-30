@@ -173,7 +173,7 @@ Click Minus Button
 Query Model With GRPCURL
     [Arguments]    ${host}    ${port}    ${endpoint}    ${json_body}
     ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    ${background}=${NONE}
-    ...            &{args}
+    ...            ${skip_res_json}=${FALSE}    &{args}
     ${cmd}=    Set Variable    grpcurl -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
@@ -201,9 +201,14 @@ Query Model With GRPCURL
           # Log    ${query_process.stdout}    console=yes
           Log    ${response}    console=yes
           # ${json_res}=    Load Json String    ${query_process.stdout}
-          ${json_res}=    Load Json String    ${response}
-          # ...    strict=False
-          RETURN    ${json_res}
+          IF    ${skip_res_json} == ${TRUE}
+            Log    ${response}
+            RETURN    ${response}
+          ELSE
+            ${json_res}=    Load Json String    ${response}
+            # ...    strict=False
+            RETURN    ${json_res}
+          END
     ELSE
           ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}&
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}

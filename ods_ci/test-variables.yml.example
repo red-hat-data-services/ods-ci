@@ -69,9 +69,15 @@ GITHUB_USER:
   TOKEN: token
 # Components to set as enabled in the operator v2.0 DSC CR
 COMPONENTS:
-  dashboard: true
-  datasciencepipelines: true
-  # Right now only one between modelmesh and kserve can be enabled
-  kserve: false
-  modelmeshserving: true
-  workbenches: true
+  dashboard: Managed
+  datasciencepipelines: Managed
+  kserve: Removed
+  modelmeshserving: Managed
+  workbenches: Removed
+  codeflare: Removed
+  ray: Removed
+PRODUCT: RHODS
+APPLICATIONS_NAMESPACE: redhat-ods-applications
+MONITORING_NAMESPACE: redhat-ods-monitoring
+OPERATOR_NAMESPACE: redhat-ods-operator
+NOTEBOOKS_NAMESPACE: rhods-notebooks

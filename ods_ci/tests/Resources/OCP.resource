@@ -63,17 +63,13 @@ Verify Notebook CR Is Running
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
     ...                 in the cluster (e.g., usually on OSD, ROSA).
-    ...                 Returns ${TRUE} if RHODS Self-Managed is installed (e.g., usually on PSI or baremetal)
+    ...                 Returns ${TRUE} if RHODS Self-Managed is installed or if PRODUCT=ODH
+    IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
     ${is_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
     ...                                                      kind=CatalogSource
     ...                                                      name=addon-managed-odh-catalog
     ...                                                      namespace=redhat-ods-operator
-    IF    ${is_managed} == ${TRUE}
-        ${is_self_managed}=    Set Variable    ${FALSE}
-    ELSE
-        ${is_self_managed}=    Set Variable    ${TRUE}
-    END
-    RETURN    ${is_self_managed}
+    Run Keyword And Return    Evaluate    not ${is_managed}
 
 Get MachineSets
     [Documentation]    Returns a list of machinesets names
@@ -86,7 +82,7 @@ Get MachineSets
 Fetch Openshift CA Bundle
     [Documentation]    Gets the CA bundle defined in the secret `router-certs-defaults` in namespace `openshift-ingress`
     ...    Useful when working with self-managed clusters to verify connections
-    ${rc} =    Run And Return Rc    
+    ${rc} =    Run And Return Rc
     ...    oc get secret -n openshift-ingress router-certs-default -o json | jq '.data."tls.crt"' | sed 's/"//g' | base64 -d > openshift_ca.crt  # robocop: disable
     Should Be Equal As Strings    ${rc}    0
 
@@ -100,12 +96,26 @@ Fetch CA Certificate If RHODS Is Self-Managed
     END
 
 Wait For Pods To Be Ready
-    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s
+    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
     Wait Until Keyword Succeeds    ${timeout}    3s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
+    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    "${exp_replicas}" != "${NONE}"
+        @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
+        ...    label_selector=${label_selector}
+        Length Should Be  ${replicas}  ${exp_replicas}
+    END
+
+Wait For Pods To Be Terminated
+    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s
+    Wait Until Keyword Succeeds    ${timeout}    3s
+    ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
+    ...    status_only=${FALSE}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc wait --for=delete pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     Should Be Equal As Numbers    ${rc}    ${0}
 
 Add Secret To Service Account

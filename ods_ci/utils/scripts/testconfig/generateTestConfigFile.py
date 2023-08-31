@@ -106,8 +106,11 @@ def change_component_state(components):
     components_list = components.split(",")
     for component in components_list:
         comp, state = component.split(":")
-        component_states[comp] = True if state.lower() == "true" else False
-    
+        print(comp, state)
+        component_states[comp] = "Managed" if state.lower() == "managed" else "Removed"
+        print(component_states[comp])
+
+    print(component_states)
     return component_states
 
 
@@ -219,9 +222,18 @@ def generate_test_config_file(
     data["STARBURST"]["OBS_TOKEN_URL"] = config_data["STARBURST"]["OBS_TOKEN_URL"]
     data["DEFAULT_NOTIFICATION_EMAIL"] = config_data["DEFAULT_NOTIFICATION_EMAIL"]
     data["RHM_TOKEN"] = config_data["RHM_TOKEN"]
+    data["PRODUCT"] = config_data["PRODUCT"]
+    data["APPLICATIONS_NAMESPACE"] = config_data["APPLICATIONS_NAMESPACE"]
+    data["MONITORING_NAMESPACE"] = config_data["MONITORING_NAMESPACE"]
+    data["OPERATOR_NAMESPACE"] = config_data["OPERATOR_NAMESPACE"]
+    data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
 
     if components:
+        print("Setting components")
+        print(components)
         data["COMPONENTS"] = change_component_state(components)
+    print("After setting components")
+    print(data)
 
     # Login to test cluster using oc command
     oc_login(
@@ -229,6 +241,7 @@ def generate_test_config_file(
         data["OCP_ADMIN_USER"]["USERNAME"],
         data["OCP_ADMIN_USER"]["PASSWORD"],
     )
+    print("After oc login")
 
     if bool(set_prometheus_config):
         # Get prometheus token for test cluster
@@ -270,6 +283,7 @@ def main():
         components=args.components,
 
     )
+    print("Done generating config file")
 
 
 if __name__ == "__main__":

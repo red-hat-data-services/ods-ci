@@ -291,7 +291,7 @@ Verify User Can Set Requests And Limits For A Model
     ${limits}=    Create Dictionary    cpu=2    memory=4Gi
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    requests_dict=${requests}    limits_dict=${limits}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${test_namespace}
@@ -318,6 +318,30 @@ Verify User Can Set Requests And Limits For A Model
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
+Verify Model Can Be Serverd And Query On A GPU Node
+    [Tags]    ODS-2381    WatsonX    Resource-GPU
+    [Setup]    Set Project And Runtime    namespace=watson-gpu
+    ${test_namespace}=    Set Variable    watson-gpu
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_name}
+    ${requests}=    Create Dictionary    nvidia.com/gpu=1
+    ${limits}=    Create Dictionary    nvidia.com/gpu=1
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    ...    requests_dict=${requests}    limits_dict=${limits}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}  
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=2
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=2
+    ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
+    # check node label: nvidia.com/gpu.present=true
 
 *** Keywords ***
 Install Model Serving Stack Dependencies

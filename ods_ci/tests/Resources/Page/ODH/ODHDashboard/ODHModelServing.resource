@@ -276,7 +276,7 @@ Get KServe Inference Host Via CLI
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
 
-Scale Number Of Replicas
+Set Minimum Replicas Number
     [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
     ${rc}    ${old_revision_id}=    Run And Return Rc And Output
     ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
@@ -288,4 +288,9 @@ Scale Number Of Replicas
 Delete InfereceService
     [Arguments]    ${isvc_name}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
+
+Update Scale To Zero For Knative Serving
+    [Arguments]    ${serving_name}    ${namespace}    ${status}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc patch KnativeServing ${serving_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/config/autoscaler/enable-scale-to-zero', 'value': '${status}'}]"
     Should Be Equal As Integers    ${rc}    ${0}

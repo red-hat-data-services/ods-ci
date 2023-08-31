@@ -98,9 +98,9 @@ Enable Single Component
     ${patch} =    Set Variable    ${PATCH_PREFIX}
     FOR    ${index}    ${cmp}    IN ENUMERATE    @{COMPONENTS}
         IF     "${cmp}"=="${component}"
-            ${sub} =    Change Component Status    component=${cmp}    enable=true    run=${FALSE}
+            ${sub} =    Change Component Status    component=${cmp}    enable=Managed    run=${FALSE}
         ELSE
-            ${sub} =    Change Component Status    component=${cmp}    enable=false    run=${FALSE}
+            ${sub} =    Change Component Status    component=${cmp}    enable=Removed    run=${FALSE}
         END
         IF    ${index} ==0
             ${patch} =    Catenate    SEPARATOR=    ${patch}    ${sub}
@@ -118,19 +118,19 @@ Enable Single Component
 Change Component Status
     [Documentation]    Enables or disables a single component. Can either run the patch command directly (if `run` is
     ...    set to true) or return the patch string to be combined later for a bigger patch command.
-    [Arguments]    ${component}    ${run}=${TRUE}    ${enable}=true
+    [Arguments]    ${component}    ${run}=${TRUE}    ${enable}=Managed
     IF    "${component}" not in @{COMPONENTS}
-        Log    unknown component: ${component}    lvel=WARN
+        Log    unknown component: ${component}    level=WARN
         RETURN
     END
     IF    ${run}==${TRUE}
-        ${command} =    Catenate    SEPARATOR=    ${PATCH_PREFIX}   "${component}":{"enabled": ${enable}}    }}}'
+        ${command} =    Catenate    SEPARATOR=    ${PATCH_PREFIX}   "${component}":{"managementState": ${enable}}    }}}'
         ${return_code}    ${output} =    Run And Return Rc And Output    ${command}
         Log    ${output}
         Should Be Equal As Integers	${return_code}	 0  msg=Error detected while applying DSC CR
         Sleep    30s
     ELSE
-        RETURN    "${component}":{"enabled": ${enable}}
+        RETURN    "${component}":{"managementState": ${enable}}
     END
 
 Get Original Configuration
@@ -148,10 +148,10 @@ Patch DataScienceCluster CustomResource To Original Configuration
     ${len} =    Get Length    ${COMPONENTS}
     ${patch} =    Set Variable    ${PATCH_PREFIX}
     FOR    ${index}    ${cmp}    IN ENUMERATE    @{COMPONENTS}
-        IF    "${ORIGINAL_CONFIGURATION}[${index}]" == "true"
-            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}    enable=true
-        ELSE
-            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}    enable=false
+        IF    "${ORIGINAL_CONFIGURATION}[${index}]" == "Managed"
+            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}    enable=Managed
+        ELSE IF    "${ORIGINAL_CONFIGURATION}[${index}]" == "Removed"
+            ${sub} =    Change Component Status    component=${cmp}    run=${FALSE}    enable=Removed
         END
         IF    ${index} ==0
             ${patch} =    Catenate    SEPARATOR=    ${patch}    ${sub}

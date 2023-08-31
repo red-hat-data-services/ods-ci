@@ -9,14 +9,14 @@ items:
   spec:
     baseDomain: ${infrastructure_configurations}[aws_domain]
     imageSetRef:
-      name: rhods-imageset-ocp-${infrastructure_configurations}[ocp_version] # see line 99
+      name: ${infrastructure_configurations}[image_set] # see line 100
     inventory:
-      - name: ${infrastructure_configurations}[hive_cluster_name]-conf # see line 71
+      - name: ${infrastructure_configurations}[hive_cluster_name]-conf # see line 72
     platform:
       openstack:
         cloud: ${infrastructure_configurations}[osp_cloud_name]
         credentialsSecretRef:
-          name: ${infrastructure_configurations}[hive_cluster_name]-cred # see line 90
+          name: ${infrastructure_configurations}[hive_cluster_name]-cred # see line 91
     installConfigSecretTemplateRef:
       name: ${infrastructure_configurations}[hive_cluster_name]-sec # see line 30
     size: 1

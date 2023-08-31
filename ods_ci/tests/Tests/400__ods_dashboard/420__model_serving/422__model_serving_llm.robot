@@ -3,6 +3,7 @@ Documentation     Collection of tests to validate the model serving stack for La
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
+Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
 # Suite Teardown
 
@@ -281,29 +282,42 @@ Verify User Can Validate Scale To Zero
     ...    isvc_names=${model_name}
 
 Verify User Can Set Requests And Limits For A Model
-    [Tags]    ODS-XYZ    WatsonX
+    [Tags]    ODS-2380    WatsonX
     [Setup]    Set Project And Runtime    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    ${model_name}=    Create List    ${flan_model_name}
-    ${requests}=    Create Dictionary    cpu="2"    memory="4Gi"
-    # ...    nvidia.com/gpu="1"
-    ${limits}=    Create Dictionary    cpu="2"    memory="4Gi"
-    # ...    nvidia.com/gpu="1"
+    ${models_names}=    Create List    ${flan_model_name}
+    ${requests}=    Create Dictionary    cpu=1    memory=2Gi
+    ${limits}=    Create Dictionary    cpu=2    memory=4Gi
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
-    ...    auto_scale=False
     ...    requests_dict=${requests}    limits_dict=${limits}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=1
     ...    namespace=${test_namespace}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
+    ${new_requests}=    Create Dictionary    cpu=2    memory=3Gi
+    Set Model Hardware Resources    model_name=${flan_model_name}    namespace=hw-res
+    ...    requests=${new_requests}    limits=${NONE}
+    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    exp_replicas=1
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
+    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
+
 
 *** Keywords ***
 Install Model Serving Stack Dependencies
@@ -627,7 +641,7 @@ Compile Inference Service YAML
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
             Log    ${index}- ${resource}:${requests_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = ${requests_dict}[${resource}]' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
         END
     END
     IF    ${limits_dict} == &{EMPTY}
@@ -638,7 +652,7 @@ Compile Inference Service YAML
         FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
             Log    ${index}- ${resource}:${limits_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = ${requests_dict}[${resource}]' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
         END
     END
 

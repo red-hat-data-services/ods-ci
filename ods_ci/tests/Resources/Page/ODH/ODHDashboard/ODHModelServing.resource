@@ -277,10 +277,16 @@ Get KServe Inference Host Via CLI
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
 
+Get Current Revision ID
+    [Arguments]    ${model_name}    ${namespace}
+    ${rc}    ${id}=    Run And Return Rc And Output
+    ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${id}
+
 Set Minimum Replicas Number
     [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
-    ${rc}    ${old_revision_id}=    Run And Return Rc And Output
-    ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
+    ${old_revision_id}=    Get Current Revision ID    model_name=${model_name}    namespace=${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch InferenceService ${model_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/predictor/minReplicas', 'value': ${n_replicas}}]"
     Should Be Equal As Integers    ${rc}    ${0}
@@ -294,4 +300,18 @@ Delete InfereceService
 Update Scale To Zero For Knative Serving
     [Arguments]    ${serving_name}    ${namespace}    ${status}
     ${rc}    ${out}=    Run And Return Rc And Output    oc patch KnativeServing ${serving_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/config/autoscaler/enable-scale-to-zero', 'value': '${status}'}]"
+    Should Be Equal As Integers    ${rc}    ${0}
+
+Set Model Hardware Resources
+    [Arguments]    ${model_name}    ${namespace}    ${requests}=&{EMPTY}    ${limits}=&{EMPTY}
+    IF    ${limits} == ${NONE}
+        ${limits}=    Set Variable    null
+    END
+    IF    ${requests} == ${NONE}
+        ${requests}=    Set Variable    null
+    END
+    ${body}=    Set Variable    {"spec":{"predictor": {"model": {"resources": {"requests": ${requests}, "limits": ${limits} }}}}}
+    ${body}=    Replace String    ${body}    '    "
+    Log    ${body}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc patch isvc ${model_name} -n ${namespace} --type=merge -p '${body}'
     Should Be Equal As Integers    ${rc}    ${0}

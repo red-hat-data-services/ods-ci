@@ -138,22 +138,23 @@ Get Pod Hardware Resources And Limits
     RETURN    ${resources}
 
 Container Hardware Resources Should Match Expected
-    [Arguments]    ${container_name}    ${pod_label_selector}    ${namespace}    ${exp_requests}=${EMPTY}    ${exp_limits}=${EMPTY}
+    [Arguments]    ${container_name}    ${pod_label_selector}    ${namespace}
+    ...            ${exp_requests}=${NONE}    ${exp_limits}=${NONE}
     ${resources_dict}=    Get Pod Hardware Resources And Limits    label_selector=${pod_label_selector}
     ...    namespace=${namespace}    container_name=${container_name}
-    IF    ${exp_requests} == &{EMPTY}
+    IF    ${exp_requests} == ${NONE}
         Dictionary Should Not Contain Key    ${resources_dict}    requests
     ELSE
         ${requests}=    Set Variable    ${resources_dict}[requests]
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests.keys()}
-            Should Be Equal As Strings    "${requests}[${resource}]"    ${exp_requests}[${resource}]
+            Should Be Equal As Strings    ${requests}[${resource}]    ${exp_requests}[${resource}]
         END
     END
-    IF    ${exp_limits} == &{EMPTY}
+    IF    ${exp_limits} == ${NONE}
         Dictionary Should Not Contain Key    ${resources_dict}    limits
     ELSE
         ${limits}=    Set Variable    ${resources_dict}[limits]
         FOR    ${index}    ${resource}    IN ENUMERATE    @{limits.keys()}
-            Should Be Equal As Strings    "${limits}[${resource}]"    ${exp_limits}[${resource}]
+            Should Be Equal As Strings    ${limits}[${resource}]    ${exp_limits}[${resource}]
         END
     END

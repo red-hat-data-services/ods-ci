@@ -5,17 +5,17 @@ metadata:
     serving.knative.openshift.io/enablePassthrough: "true"
     sidecar.istio.io/inject: "true"
     sidecar.istio.io/rewriteAppHTTPProbers: "true"
-  name: {{INFERENCE_SERVICE_NAME}}
+  name: ${isvc_name}
 spec:
   predictor:
-    scaleMetric: {{SCALE_METRIC}}
-    minReplicas: {{MIN_REPLICAS}}
-    scaleTarget: {{SCALE_TARGET}}
-    canaryTrafficPercent: {{CanaryTrafficPercent}}
-    minReplicas: {{MIN_REPLICAS}}
-    serviceAccountName: {{SA_NAME}}
+    scaleMetric: ${scaleMetric}
+    minReplicas: ${min_replicas}
+    scaleTarget: ${scaleTarget}
+    canaryTrafficPercent: ${canaryTrafficPercent}
+    minReplicas: ${min_replicas}
+    serviceAccountName: ${sa_name}
     model:
       modelFormat:
         name: caikit
       runtime: caikit-runtime
-      storageUri: {{STORAGE_URI}}
+      storageUri: ${model_storage_uri}

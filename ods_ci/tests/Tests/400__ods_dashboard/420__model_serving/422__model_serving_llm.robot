@@ -156,14 +156,14 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=2
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
-    ${rev_id}=    Scale Number Of Replicas    n_replicas=3    model_name=${model_name}
+    ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${TEST_NS}    exp_replicas=3
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
-    ${rev_id}=    Scale Number Of Replicas    n_replicas=1    model_name=${model_name}
+    ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
     ...    namespace=${TEST_NS}
@@ -172,7 +172,6 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
     [Teardown]   Clean Up Test Project    test_ns=${TEST_NS}
     ...    isvc_names=${models_names}
-
 
 Verify User Can Autoscale Using Concurrency
     [Tags]    ODS-2377    WatsonX
@@ -206,6 +205,42 @@ Verify User Can Autoscale Using Concurrency
          FAIL     msg= Autoscale Using Concurrency has failed and Model pod has not been scaled up
     END
     [Teardown]   Clean Up Test Project    test_ns=autoscale-con
+    ...    isvc_names=${model_name}
+
+Verify User Can Validate Scale To Zero
+    [Tags]    ODS-2379    WatsonX
+    [Setup]    Set Project And Runtime    namespace=autoscale-zero
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${model_name}=    Create List    ${flan_model_name}
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=autoscale-zero
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=autoscale-zero
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-zero
+    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
+    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
+    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+    ...    json_body=${body}    json_header=${header}
+    ...    insecure=${TRUE}
+    Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
+    ...    namespace=autoscale-zero
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=autoscale-zero
+    Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=autoscale-zero
+    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+    ...    json_body=${body}    json_header=${header}
+    ...    insecure=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=autoscale-zero
+    Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=autoscale-zero
+    [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
     ...    isvc_names=${model_name}
 
 *** Keywords ***

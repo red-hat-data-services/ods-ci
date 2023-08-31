@@ -252,7 +252,7 @@ Spawn Notebook With Arguments  # robocop: disable
     ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
     ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
     ...              ${version} controls if the default or previous version is selected (default | previous)
-    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=data-science-notebook  ${size}=Small
+    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=science-notebook  ${size}=Small
     ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}
     ...    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
     ...    ${version}=default    &{envs}
@@ -541,7 +541,7 @@ Fetch Image Tooltip Info
 Spawn Notebooks And Set S3 Credentials
     [Documentation]     Spawn a jupyter notebook server and set the env variables
     ...                 to connect with AWS S3
-    [Arguments]     ${image}=data-science-notebook
+    [Arguments]     ${image}=science-notebook
     Set Log Level    NONE
     &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
     Spawn Notebook With Arguments  image=${image}  envs=&{S3-credentials}
@@ -567,7 +567,7 @@ Handle Bad Gateway Page
 
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
-    [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=data-science-notebook    ${size}=Small
+    [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=science-notebook    ${size}=Small
     ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}
     ...    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
     ...    ${auth_type}=${TEST_USER.AUTH_TYPE}    &{envs}

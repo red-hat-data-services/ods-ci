@@ -208,14 +208,13 @@ Is Component Enabled
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while getting component status
-    TRY
-          IF    "${output}" == "Managed"
-                Log To Console    ${output}
-          END
-    EXCEPT
+    ${n_output} =    Evaluate    '${output}' == ''
+    IF  ${n_output}   
+           Log To Console    ${output}
+    ELSE
          IF    ${output} == "Removed"
                RETURN    true
          ELSE IF    ${output} == "Managed"
-            RETURN    true
-        END
+              RETURN    true
+         END
     END

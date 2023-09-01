@@ -110,7 +110,7 @@ Wait For Pods To Be Ready
     END
 
 Wait For Pods To Be Terminated
-    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s
+    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=180s
     Wait Until Keyword Succeeds    ${timeout}    3s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}

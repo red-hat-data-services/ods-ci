@@ -213,3 +213,10 @@ Query Model With GRPCURL
           ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}&
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
     END
+
+Enable Toleration Feature In KNativeServing
+    [Documentation]    Enables the usage of node tolerations in inference services
+    [Arguments]    ${knative_serving_ns}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch configmap config-features -n ${knative_serving_ns} --type=merge -p '{"data":{"kubernetes.podspec-tolerations": "enabled"}}'
+    Should Be Equal As Integers    ${rc}    ${0}

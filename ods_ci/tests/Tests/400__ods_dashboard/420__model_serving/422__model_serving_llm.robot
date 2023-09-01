@@ -320,8 +320,8 @@ Verify User Can Set Requests And Limits For A Model
 
 Verify Model Can Be Serverd And Query On A GPU Node
     [Tags]    ODS-2381    WatsonX    Resource-GPU
-    [Setup]    Set Project And Runtime    namespace=watson-gpu
-    ${test_namespace}=    Set Variable    watson-gpu
+    [Setup]    Set Project And Runtime    namespace=watsonx-gpu
+    ${test_namespace}=    Set Variable    watsonx-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
@@ -341,7 +341,9 @@ Verify Model Can Be Serverd And Query On A GPU Node
     ...    namespace=${test_namespace}
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=2
     ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
-    # check node label: nvidia.com/gpu.present=true
+    Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
+
 
 *** Keywords ***
 Install Model Serving Stack Dependencies
@@ -519,6 +521,7 @@ Deploy Serverless CRs
     ...    namespace=${SERVERLESS_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=autoscaler
     ...    namespace=${SERVERLESS_CR_NS}
+    Enable Toleration Feature In KNativeServing    knative_serving_ns=${SERVERLESS_CR_NS}
 
 Configure KNative Gateways
     [Documentation]    Sets up the KNative (Serverless) Gateways

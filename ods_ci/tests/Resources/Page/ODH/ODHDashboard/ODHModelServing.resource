@@ -315,3 +315,17 @@ Set Model Hardware Resources
     Log    ${body}
     ${rc}    ${out}=    Run And Return Rc And Output    oc patch isvc ${model_name} -n ${namespace} --type=merge -p '${body}'
     Should Be Equal As Integers    ${rc}    ${0}
+
+Model Pod Should Be Scheduled On A GPU Node
+    [Documentation]    Checks that the pods with the given ${label_selector} are actually scheduled on
+    ...                a GPU node
+    [Arguments]    ${label_selector}    ${namespace}
+    ${pods}=    Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=${label_selector}
+    FOR    ${index}    ${pod}    IN ENUMERATE    @{pods}
+        Log    ${index}: ${pod}[spec][nodeName]
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc get node ${pod}[spec][nodeName] -ojson | jq '.metadata.labels."nvidia.com/gpu.present"'
+        Should Be Equal As Integers    ${rc}    ${0}
+        Should Be Equal As Strings    ${out}    "true"
+    END

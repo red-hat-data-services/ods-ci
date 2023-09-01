@@ -750,6 +750,7 @@ Compile And Query LLM model
     ${header}=    Set Variable    'mm-model-id: ${model_name}'
     IF   '${multiple_query}' != '${EMPTY}'
           Query Models And Check Responses Multiple Times    models_names=${models_name}    n_times=10
+          ...    namespace=${namespace}
     ELSE
           ${res}=      Query Model With GRPCURL   host=${host}    port=443
           ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"

@@ -24,7 +24,7 @@ Verify Alert Manager Is Shipped And Enabled Within ODS
     ...    @{alertmanager_services_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.port.targetPort    alertmanager    @{alertmanager_routes_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.to.name    alertmanager    @{alertmanager_routes_info}
-    OpenShift Resource Field Value Should Match Regexp    spec.host    ^(alertmanager-redhat-ods-monitoring.*)    @{alertmanager_routes_info}
+    OpenShift Resource Field Value Should Match Regexp    spec.host    ^(alertmanager-${MONITORING_NAMESPACE}.*)    @{alertmanager_routes_info}
 
 
 *** Keywords ***
@@ -34,7 +34,7 @@ Fetch Alert Manager Services Info
     ...        None
     ...    Returns:
     ...        alertmanager_services_info(list(dict)): Alert Manager services selected by name and namespace
-    @{alertmanager_services_info} =    Oc Get    kind=Service    api_version=v1    name=alertmanager    namespace=redhat-ods-monitoring
+    @{alertmanager_services_info} =    Oc Get    kind=Service    api_version=v1    name=alertmanager    namespace=${MONITORING_NAMESPACE}
     RETURN    @{alertmanager_services_info}
 
 Fetch Alert Manager Routes Info
@@ -44,5 +44,5 @@ Fetch Alert Manager Routes Info
     ...    Returns:
     ...        alertmanager_routes_info(list(dict)): Alert Manager routes selected by name and namespace
     @{alertmanager_routes_info} =    Oc Get    kind=Route    api_version=route.openshift.io/v1    name=alertmanager
-    ...    namespace=redhat-ods-monitoring
+    ...    namespace=${MONITORING_NAMESPACE}
     RETURN    @{alertmanager_routes_info}

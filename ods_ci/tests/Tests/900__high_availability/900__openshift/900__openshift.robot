@@ -45,7 +45,7 @@ Verify rhods_aggregated_availability Detects Downtime In Component
     ${label_selector}=    Set Variable If
     ...    "${component}" == "combined"    app in (jupyterhub, rhods-dashboard)    app=${component}
     ${component_delete_result} =    Oc Delete    kind=Pod    api_version=v1
-    ...    label_selector=${label_selector}    namespace=redhat-ods-applications
+    ...    label_selector=${label_selector}    namespace=${APPLICATIONS_NAMESPACE}
     ${count}=    Get Length    ${component_delete_result[0]['items']}
     Log    ${count}
     ${component_downtime_start_date}=

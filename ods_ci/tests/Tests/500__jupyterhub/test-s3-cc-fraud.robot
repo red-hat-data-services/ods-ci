@@ -31,7 +31,7 @@ Can Login to Jupyterhub
 Can Spawn Notebook
   [Tags]  Sanity  ODS-902  ODS-904
   Fix Spawner Status
-  Spawn Notebooks And Set S3 Credentials    image=s2i-generic-data-science-notebook
+  Spawn Notebooks And Set S3 Credentials    image=science-notebook
 
 Can Launch Python3 Smoke Test Notebook
   [Tags]  Sanity  ODS-910  ODS-911  ODS-921  ODS-924  ODS-929  ODS-931  ODS-333

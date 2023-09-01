@@ -197,7 +197,7 @@ Run Jupyter Notebook For 5 Minutes
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load
     Iterative Image Test
-    ...    s2i-generic-data-science-notebook
+    ...    science-notebook
     ...    https://github.com/lugi0/minimal-nb-image-test
     ...    minimal-nb-image-test/minimal-nb.ipynb
 

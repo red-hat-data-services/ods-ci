@@ -16,7 +16,7 @@ Suite Teardown         RHOSi Teardown
 
 
 *** Variables ***
-${NAMESPACE}            redhat-ods-applications
+${NAMESPACE}            ${APPLICATIONS_NAMESPACE}
 ${LABEL_SELECTOR}       name=traefik-proxy
 
 

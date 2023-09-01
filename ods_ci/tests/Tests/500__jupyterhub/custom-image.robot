@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation    Testing custom image imports (Adding ImageStream to redhat-ods-applications)
+Documentation    Testing custom image imports (Adding ImageStream to ${APPLICATIONS_NAMESPACE})
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -151,7 +151,7 @@ Create Custom Image
 Get ImageStream Metadata And Check Name
     [Documentation]    Gets the metadata of an ImageStream and checks name of the image
     ${get_metadata} =    OpenShiftLibrary.Oc Get    kind=ImageStream    label_selector=app.kubernetes.io/created-by=byon
-    ...    namespace=redhat-ods-applications
+    ...    namespace=${APPLICATIONS_NAMESPACE}
     FOR     ${imagestream}    IN    @{get_metadata}
       ${image_name} =    Evaluate    $imagestream['metadata']['annotations']['opendatahub.io/notebook-image-name']
       Exit For Loop If    '${image_name}' == '${IMG_NAME}'

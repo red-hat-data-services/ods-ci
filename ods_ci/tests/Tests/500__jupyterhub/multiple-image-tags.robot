@@ -14,7 +14,7 @@ Force Tags       JupyterHub
 
 
 *** Variables ***
-@{IMAGE_LIST}    minimal-notebook    generic-data-science-notebook    tensorflow    pytorch    minimal-gpu
+@{IMAGE_LIST}    minimal-notebook    science-notebook    tensorflow    pytorch    minimal-gpu
 
 
 *** Test Cases ***
@@ -72,17 +72,17 @@ Close Previous Server
 Run Regression Workload On Notebook Image
     [Documentation]    Runs a workload based on the image argument
     [Arguments]    ${image}
-    IF    "${image}"=="minimal-notebook"
+    IF    "minimal-notebook" in "${image}"
         Run Repo And Clean  https://github.com/lugi0/minimal-nb-image-test    minimal-nb-image-test/minimal-nb.ipynb
-    ELSE IF    "${image}"=="generic-data-science-notebook"
+    ELSE IF    "science-notebook" in "${image}"
         Run Repo And Clean  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
-    ELSE IF    "${image}"=="minimal-gpu"
+    ELSE IF    "minimal-gpu" in "${image}"
         ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
         Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
         Run Repo And Clean  https://github.com/lugi0/minimal-nb-image-test    minimal-nb-image-test/minimal-nb.ipynb
-    ELSE IF    "${image}"=="tensorflow"
+    ELSE IF    "tensorflow" in "${image}"
         Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
-    ELSE IF    "${image}"=="pytorch"
+    ELSE IF    "pytorch" in "${image}"
         Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
     ELSE
         Log To Console    Unknown image

@@ -14,6 +14,7 @@ Verify Base User Can Stop A Running Server
     ...                and stop a notebook server
     [Tags]    Smoke
     ...       Tier1
+    ...       OpenDataHub
     ...       ODS-1978
     Launch KFNBC Spawner As Base User
     Launch Notebook And Go Back To Control Panel Window
@@ -37,7 +38,7 @@ Launch Notebook And Go Back To Control Panel Window
     [Documentation]    Spawns a notebook server, opens it in a new tab, and Switches
     ...    back to the dashboard control panel
     ${handle} =    Switch Window    CURRENT
-    Select Notebook Image    s2i-minimal-notebook
+    Select Notebook Image    minimal-notebook
     Select Container Size     Small
     Spawn Notebook    same_tab=${False}
     Switch Window    ${handle}
@@ -54,10 +55,10 @@ Verify That Server Can Be Stopped
         WHILE    not ${stopped}    limit=${timeout}
             ${stopped} =  Run Keyword And Return Status  Run Keyword And Expect Error
             ...    Pods not found in search  OpenShiftLibrary.Search Pods
-            ...    ${notebook_pod_name}  namespace=rhods-notebooks
+            ...    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
             Sleep    1s
         END
     EXCEPT    WHILE loop was aborted    type=start
-        Delete User Notebook CR    ${TEST_USER_3.USERNAME}    
+        Delete User Notebook CR    ${TEST_USER_3.USERNAME}
         Fail    User Notebook pod was not removed within ${timeout}s
     END

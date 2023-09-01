@@ -65,7 +65,7 @@ Test Metric "Rhods_Total_Users" On ODS Prometheus
 
     # Note: the expression ends with "step=1" to obtain the value cor current second
     ${expression} =    Set Variable
-    ...    count(kube_statefulset_replicas{namespace=~"rhods-notebooks", statefulset=~"jupyter-nb-.*"})&step=1
+    ...    count(kube_statefulset_replicas{namespace=~"${NOTEBOOKS_NAMESPACE}", statefulset=~"jupyter-nb-.*"})&step=1
     ${total_users_using_expression} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
     ...    ${expression}
     ${total_users_using_expression} =    Set Variable
@@ -133,7 +133,7 @@ Check Prometheus Alerting Rules
 Read Current CPU Usage
     [Documentation]    Returns list of current cpu usage
     ${expression} =    Set Variable
-    ...    sum(rate(container_cpu_usage_seconds_total{container="",pod=~"jupyter-nb.*",namespace="rhods-notebooks"}[1h]))    # robocop:disable
+    ...    sum(rate(container_cpu_usage_seconds_total{container="",pod=~"jupyter-nb.*",namespace="${NOTEBOOKS_NAMESPACE}"}[1h]))    # robocop:disable
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     IF    ${resp.json()["data"]["result"]} == []
         ${cpu_usage} =    Set Variable    0
@@ -153,7 +153,7 @@ Run Jupyter Notebook For 5 Minutes
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
-    Iterative Image Test    s2i-generic-data-science-notebook    https://github.com/lugi0/minimal-nb-image-test
+    Iterative Image Test    science-notebook    https://github.com/lugi0/minimal-nb-image-test
     ...    minimal-nb-image-test/minimal-nb.ipynb
 
 #robocop: disable:too-many-calls-in-keyword

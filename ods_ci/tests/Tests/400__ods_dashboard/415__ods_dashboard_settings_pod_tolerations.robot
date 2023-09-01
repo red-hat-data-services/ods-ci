@@ -34,7 +34,7 @@ Verify Toleration Is Applied To Pod
     [Tags]  Sanity    Tier1
     ...     ODS-1685
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook
+    Spawn Notebook With Arguments    image=minimal-notebook
     Verify Server Pod Has The Expected Toleration    TestToleration
 
 

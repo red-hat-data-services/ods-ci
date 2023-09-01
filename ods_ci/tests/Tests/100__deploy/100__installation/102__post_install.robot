@@ -45,8 +45,8 @@ Verify Notebook Controller Deployment
     [Documentation]    Verifies RHODS Notebook Controller deployment
     [Tags]    Sanity
     ...       ODS-546  ODS-294  ODS-1250  ODS-237
-    @{NBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=notebook-controller
-    @{ONBC} =  Oc Get    kind=Pod  namespace=redhat-ods-applications  label_selector=app=odh-notebook-controller
+    @{NBC} =  Oc Get    kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=notebook-controller
+    @{ONBC} =  Oc Get    kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=odh-notebook-controller
     ${containerNames} =  Create List  manager
     Verify Deployment  ${NBC}  1  1  ${containerNames}
     Verify Deployment  ${ONBC}  1  1  ${containerNames}
@@ -91,10 +91,10 @@ Verify That Prometheus Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-734
-    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
-    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    prometheus
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
+    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    prometheus
     ...    registry.redhat.io/openshift4/ose-prometheus
-    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    oauth-proxy
+    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    oauth-proxy
     ...    registry.redhat.io/openshift4/ose-oauth-proxy
 
 Verify That Grafana Image Is A CPaaS Built Image
@@ -103,10 +103,10 @@ Verify That Grafana Image Is A CPaaS Built Image
     ...       Tier1
     ...       ODS-736
     Skip If RHODS Version Greater Or Equal Than    version=1.20.0
-    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=grafana-
-    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    grafana
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=grafana-
+    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    grafana
     ...    registry.redhat.io/rhel8/grafana
-    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    auth-proxy
+    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    auth-proxy
     ...    registry.redhat.io/openshift4/ose-oauth-proxy
 
 Verify That Blackbox-exporter Image Is A CPaaS Built Image
@@ -115,8 +115,8 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
     ...       Tier1
     ...       ODS-735
     Skip If RHODS Is Self-Managed
-    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
-    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    blackbox-exporter
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=blackbox-exporter-
+    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    blackbox-exporter
     ...    quay.io/integreatly/prometheus-blackbox-exporter
 
 Verify That Alert Manager Image Is A CPaaS Built Image
@@ -125,8 +125,8 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     ...       Tier1
     ...       ODS-733
     Skip If RHODS Is Self-Managed
-    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
-    Container Image Url Should Contain    redhat-ods-monitoring    ${pod}    alertmanager
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
+    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    alertmanager
     ...    registry.redhat.io/openshift4/ose-prometheus-alertmanager
 
 Verify Oath-Proxy Image Is A CPaaS Built Image
@@ -134,8 +134,8 @@ Verify Oath-Proxy Image Is A CPaaS Built Image
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-666
-    ${pod} =    Find First Pod By Name  namespace=redhat-ods-applications   pod_start_with=rhods-dashboard-
-    Container Image Url Should Contain      redhat-ods-applications     ${pod}      oauth-proxy
+    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_start_with=rhods-dashboard-
+    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      oauth-proxy
     ...     registry.redhat.io/openshift4/ose-oauth-proxy
 
 Verify That CUDA Build Chain Succeeds
@@ -234,9 +234,9 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ...       ODS-554
     ...       ODS-556
     ...       ODS-313
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-applications
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-monitoring
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    redhat-ods-operator
+    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${APPLICATIONS_NAMESPACE}
+    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${MONITORING_NAMESPACE}
+    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${OPERATOR_NAMESPACE}
 
 Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
@@ -254,7 +254,7 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
     ...     configmap in openshift
     ...     ProductBug:RHODS-4308
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data":null}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data":null}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications   Enabled
@@ -271,7 +271,7 @@ Verify RHODS Display Name and Version
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1862
-    ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    label_selector=olm.copiedFrom=redhat-ods-operator
+    ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    label_selector=olm.copiedFrom=${OPERATOR_NAMESPACE}
     ${rhods_csv_name}     Set Variable     ${rhods_csv_detail[0]['metadata']['name']}
     ${rhods_version}      Set Variable       ${rhods_csv_detail[0]['spec']['version']}
     ${rhods_displayname}  Set Variable       ${rhods_csv_detail[0]['spec']['displayName']}
@@ -303,8 +303,8 @@ Verify RHODS Notebooks Network Policies
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back
     [Documentation]    Delete Dashboard Pods And Wait Them To Be Back
-    Oc Delete    kind=Pod     namespace=redhat-ods-applications    label_selector=app=rhods-dashboard
-    OpenShiftLibrary.Wait For Pods Status    namespace=redhat-ods-applications  label_selector=app=rhods-dashboard  timeout=120
+    Oc Delete    kind=Pod     namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=rhods-dashboard
+    OpenShiftLibrary.Wait For Pods Status    namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=rhods-dashboard  timeout=120
 
 Test Setup For Rhods Dashboard
     [Documentation]    Test Setup for Rhods Dashboard
@@ -314,7 +314,7 @@ Test Setup For Rhods Dashboard
 
 Test Teardown For Configmap Changed On RHODS Dashboard
     [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=redhat-ods-applications    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
 
@@ -330,10 +330,10 @@ Verify Authentication Is Required To Access BlackboxExporter
     ...    username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}
     Length Should Be    ${links}    4    msg=Unexpected number of target endpoints in blackbox-exporter
-    ${pod_name} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=prometheus-
+    ${pod_name} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
     FOR    ${link}    IN    @{links}
         ${command} =    Set Variable    curl --silent --insecure ${link}
-        ${output} =    Run Command In Container    namespace=redhat-ods-monitoring    pod_name=${pod_name}
+        ${output} =    Run Command In Container    namespace=${MONITORING_NAMESPACE}    pod_name=${pod_name}
         ...    command=${command}    container_name=prometheus
         Should Contain    ${output}    Log in with OpenShift
         ...    msg=Log in with OpenShift should be required to access blackbox-exporter
@@ -342,23 +342,23 @@ Verify Authentication Is Required To Access BlackboxExporter
 Verify BlackboxExporter Includes Oauth Proxy
     [Documentation]     Verifies the blackbok-exporter inludes 2 containers one for
     ...                 application and second for oauth proxy
-    ${pod} =    Find First Pod By Name    namespace=redhat-ods-monitoring    pod_start_with=blackbox-exporter-
-    @{containers} =    Get Containers    pod_name=${pod}    namespace=redhat-ods-monitoring
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=blackbox-exporter-
+    @{containers} =    Get Containers    pod_name=${pod}    namespace=${MONITORING_NAMESPACE}
     List Should Contain Value    ${containers}    oauth-proxy
     List Should Contain Value    ${containers}    blackbox-exporter
 
 Verify Errors In Jupyterhub Logs
     [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs
-    @{pods} =    Oc Get    kind=Pod    namespace=redhat-ods-applications  label_selector=app=jupyterhub
+    @{pods} =    Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=jupyterhub
     FOR    ${pod}    IN    @{pods}
-        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=redhat-ods-applications
+        ${logs} =    Oc Get Pod Logs    name=${pod['metadata']['name']}   namespace=${APPLICATIONS_NAMESPACE}
         ...    container=${pod['spec']['containers'][0]['name']}
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
     END
 
 Verify Grafana Datasources Have TLS Enabled
     [Documentation]    Verifies TLS Is Enabled in Grafana Datasources
-    ${secret} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=redhat-ods-monitoring
+    ${secret} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=${MONITORING_NAMESPACE}
     ${secret} =  Evaluate  base64.b64decode("${secret[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
     ${secret} =  Evaluate  json.loads('''${secret}''')  json
     IF  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
@@ -384,7 +384,7 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ${project_pods_info}=    Fetch Project Pods Info    ${project}
     FOR    ${pod_info}    IN    @{project_pods_info}
         Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
-        IF    "${project}" == "redhat-ods-applications"
+        IF    "${project}" == "${APPLICATIONS_NAMESPACE}"
             IF    "cuda-s2i" in "${pod_info['metadata']['name']}"
             ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
             IF    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
@@ -401,7 +401,7 @@ Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federatio
 Verify In Rhods-Monitor-Federation App Is
     [Documentation]     Verifies in rhods-monitor-federation, app is showing ${expected_app_name}
     [Arguments]         ${expected_app_name}
-    ${data} =    OpenShiftLibrary.Oc Get    kind=ServiceMonitor   namespace=redhat-ods-monitoring    field_selector=metadata.name==rhods-monitor-federation
+    ${data} =    OpenShiftLibrary.Oc Get    kind=ServiceMonitor   namespace=${MONITORING_NAMESPACE}    field_selector=metadata.name==rhods-monitor-federation
     ${app_name}    Set Variable    ${data[0]['spec']['selector']['matchLabels']['app']}
     Should Be Equal    ${expected_app_name}    ${app_name}
 
@@ -409,7 +409,7 @@ Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     [Documentation]     Replace app to "Prometheus" with "Grafana" in Rhods-Monirot-Federation
     OpenShiftLibrary.Oc Patch    kind=ServiceMonitor
     ...                   src={"spec":{"selector":{"matchLabels": {"app":"grafana"}}}}
-    ...                   name=rhods-monitor-federation   namespace=redhat-ods-monitoring  type=merge
+    ...                   name=rhods-monitor-federation   namespace=${MONITORING_NAMESPACE}  type=merge
 
 Verify Requests Contains Expected Values
     [Documentation]     Verifies cpu and memory requests contain expected values

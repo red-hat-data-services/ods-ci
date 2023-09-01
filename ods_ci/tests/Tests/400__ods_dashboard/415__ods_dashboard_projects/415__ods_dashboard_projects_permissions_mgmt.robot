@@ -19,7 +19,7 @@ ${USER_GROUP_2}=    ds-group-2
 *** Test Cases ***
 Verify User Can Access Permission Tab In Their Owned DS Project
     [Documentation]    Verify user has access to "Permissions" tab in their DS Projects
-    [Tags]    Tier1    Smoke
+    [Tags]    Tier1    Smoke    OpenDataHub
     ...       ODS-2194
     Pass Execution    The Test is executed as part of Suite Setup
 
@@ -59,7 +59,7 @@ Verify User Can Assign Access Permissions To User Groups
     Assign Admin Permissions To Group ${USER_GROUP_2}
     RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_GROUP_1}
-    
+
     RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_GROUP_2}
     Sleep   5s
@@ -90,7 +90,7 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     Launch RHODS Dashboard Session With User C
     Set User Groups For Testing
     Refresh Pages
-    
+
 Project Permissions Mgmt Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
@@ -177,11 +177,11 @@ Restore Permissions Of The Project
     Move To Tab    Permissions
     ${present_a}=    Is ${USER_A} In The Permissions Table
     IF    ${present_a} == ${TRUE}
-        Remove ${USER_A} Permissions        
+        Remove ${USER_A} Permissions
     END
     ${present_c}=    Is ${USER_C} In The Permissions Table
     IF    ${present_c} == ${TRUE}
-        Remove ${USER_C} Permissions        
+        Remove ${USER_C} Permissions
     END
     ${USER_A} Should Not Have Access To ${PRJ_USER_B_TITLE}
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}

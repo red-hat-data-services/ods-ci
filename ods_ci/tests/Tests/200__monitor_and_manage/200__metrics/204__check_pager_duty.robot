@@ -21,7 +21,7 @@ Suite Teardown  RHOSi Teardown
 
 
 *** Variables ***
-${NAMESPACE}            redhat-ods-monitoring
+${NAMESPACE}            ${MONITORING_NAMESPACE}
 ${CONFIGMAP_NAME}         alertmanager
 ${SECRET_NAME}          redhat-rhods-pagerduty
 

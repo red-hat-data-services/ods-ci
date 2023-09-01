@@ -17,7 +17,7 @@ Remove Openvino Operator
 Uninstall Openvino Operator
     [Documentation]    Uninstall openvino operator and it's realted component
     [Arguments]    ${cr_kind}=Notebook    ${cr_name}=v2022.3
-    ...            ${cr_ns}=redhat-ods-applications
+    ...            ${cr_ns}=${APPLICATIONS_NAMESPACE}
     Go To    ${OCP_CONSOLE_URL}
     Maybe Skip Tour
     Move To Installed Operator Page Tab In Openshift    operator_name=${openvino_operator_name}

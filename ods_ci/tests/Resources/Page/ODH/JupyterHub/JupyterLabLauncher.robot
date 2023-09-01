@@ -162,7 +162,7 @@ Clean Up Server
     ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
     ${container_name_nb} =  Get Substring  ${notebook_pod_name}  start=0  end=-2
     ${ls_server} =  Run Command In Container    ${NOTEBOOKS_NAMESPACE}    ${notebook_pod_name}    ls    ${container_name_nb}
-    #${ls_server} =  Run Command In Container    redhat-ods-applications    ${notebook_pod_name}    ls    ${container_name_nb}
+    #${ls_server} =  Run Command In Container    ${APPLICATIONS_NAMESPACE}    ${notebook_pod_name}    ls    ${container_name_nb}
     Should Match    "${ls_server}"    "${EMPTY}"
 
 Get User Notebook Pod Name

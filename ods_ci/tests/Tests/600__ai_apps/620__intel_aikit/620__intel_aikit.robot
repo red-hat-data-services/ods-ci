@@ -13,7 +13,7 @@ Suite Teardown  Intel_Aikit Suite Teardown
 ${intel_aikit_appname}           aikit
 ${intel_aikit_container_name}    Intel® oneAPI AI Analytics Toolkit Container
 ${intel_aikit_operator_name}    Intel® oneAPI AI Analytics Toolkit Operator
-${image_path}                   image-registry.openshift-image-registry.svc:5000/redhat-ods-applications
+${image_path}                   image-registry.openshift-image-registry.svc:5000/${APPLICATIONS_NAMESPACE}
 
 *** Test Cases ***
 Verify Intel AIKIT Is Available In RHODS Dashboard Explore Page
@@ -36,7 +36,7 @@ Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    ...              Check and Launch AIKIT notebook image from RHODS dashboard
    ...              ProductBug: RHODS-2748
    Check And Install Operator in Openshift    ${intel_aikit_container_name}    ${intel_aikit_appname}
-   Create Tabname Instance For Installed Operator        ${intel_aikit_operator_name}      AIKitContainer    redhat-ods-applications
+   Create Tabname Instance For Installed Operator        ${intel_aikit_operator_name}      AIKitContainer    ${APPLICATIONS_NAMESPACE}
    Go To RHODS Dashboard
    Verify Service Is Enabled          ${intel_aikit_container_name}
    Verify JupyterHub Can Spawn AIKIT Notebook

@@ -31,7 +31,7 @@ Verify Dashboard Is Shipped And Enabled Within ODS
     Wait Until Keyword Succeeds    10 times  5s    Verify Dashboard ReplicaSets Info
     OpenShift Resource Field Value Should Be Equal As Strings    spec.port.targetPort    8443    @{dashboard_routes_info}
     OpenShift Resource Field Value Should Be Equal As Strings    spec.to.name    rhods-dashboard    @{dashboard_routes_info}
-    OpenShift Resource Field Value Should Match Regexp    spec.host    dashboard-redhat-ods-applications.*    @{dashboard_routes_info}
+    OpenShift Resource Field Value Should Match Regexp    spec.host    dashboard-${APPLICATIONS_NAMESPACE}.*    @{dashboard_routes_info}
 
 Verify rhods-dashboard ClusterRole Rules
     [Documentation]    Verifies rhods-dashboard ClusterRole rules match expected values
@@ -133,7 +133,7 @@ Fetch Dashboard Pods
     ...        None
     ...    Returns:
     ...        dashboard_pods_info(list(dict)): Dashboard pods selected by label and namespace
-    @{dashboard_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-applications    label_selector=app=rhods-dashboard
+    @{dashboard_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=rhods-dashboard
     RETURN    @{dashboard_pods_info}
 
 Fetch Dashboard Deployments
@@ -142,7 +142,7 @@ Fetch Dashboard Deployments
     ...        None
     ...    Returns:
     ...        dashboard_deployments_info(list(dict)): Dashboard deployments selected by label and namespace
-    @{dashboard_deployments_info} =    Oc Get    kind=Deployment    api_version=v1    namespace=redhat-ods-applications
+    @{dashboard_deployments_info} =    Oc Get    kind=Deployment    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=rhods-dashboard
     RETURN    @{dashboard_deployments_info}
 
@@ -152,7 +152,7 @@ Fetch Dashboard Services
     ...        None
     ...    Returns:
     ...        dashboard_services_info(list(dict)): Dashboard services selected by name and namespace
-    @{dashboard_services_info} =    Oc Get    kind=Service    api_version=v1    name=rhods-dashboard    namespace=redhat-ods-applications
+    @{dashboard_services_info} =    Oc Get    kind=Service    api_version=v1    name=rhods-dashboard    namespace=${APPLICATIONS_NAMESPACE}
     RETURN    @{dashboard_services_info}
 
 Fetch Dashboard Routes
@@ -162,12 +162,12 @@ Fetch Dashboard Routes
     ...    Returns:
     ...        dashboard_routes_info(list(dict)): Dashboard routes selected by name and namespace
     @{dashboard_routes_info} =    Oc Get    kind=Route    api_version=route.openshift.io/v1    name=rhods-dashboard
-    ...    namespace=redhat-ods-applications
+    ...    namespace=${APPLICATIONS_NAMESPACE}
     RETURN    @{dashboard_routes_info}
 
 Verify Dashboard ReplicaSets Info
     [Documentation]    Fetchs and verifies information from Dashboard replicasets
-    @{dashboard_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=redhat-ods-applications
+    @{dashboard_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=rhods-dashboard
     OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas
     ...    ${EXP_DASHBOARD_REPLICAS}    @{dashboard_replicasets_info}
@@ -176,7 +176,7 @@ Verify Dashboard ReplicaSets Info
 
 Verify Dashboard Deployment
     [Documentation]  Verifies RHODS Dashboard deployment
-    @{dashboard} =  Oc Get    kind=Pod    namespace=redhat-ods-applications    api_version=v1
+    @{dashboard} =  Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}    api_version=v1
     ...    label_selector=deployment = rhods-dashboard
     ${containerNames} =    Create List    rhods-dashboard    oauth-proxy
     Verify Deployment    ${dashboard}    ${EXP_DASHBOARD_REPLICAS}    2    ${containerNames}

@@ -56,37 +56,37 @@ Custom Doc Suite Taerdown
 
 Create Custom QuickStart
     [Documentation]     Creates a CRD instance of OdhQuickStarts using a custom yaml
-    Oc Apply    kind=OdhQuickStart    src=${QS_YAML}     namespace=redhat-ods-applications
-    Oc Get      kind=OdhQuickStart    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
+    Oc Apply    kind=OdhQuickStart    src=${QS_YAML}     namespace=${APPLICATIONS_NAMESPACE}
+    Oc Get      kind=OdhQuickStart    label_selector=app=custom-odsci-app  namespace=${APPLICATIONS_NAMESPACE}
 
 Delete Custom Quick Start
     [Documentation]     Deletes the previously created CRD instance for custom Quickstart resource
-    Oc Delete   kind=OdhQuickStart    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
+    Oc Delete   kind=OdhQuickStart    label_selector=app=custom-odsci-app  namespace=${APPLICATIONS_NAMESPACE}
     Close All Browsers
 
 Create Custom How-To
     [Documentation]     Creates a CRD instance of OdhDocument with type "how-to" using a custom yaml
-    Oc Apply    kind=OdhDocument    src=${HOWTO_YAML}     namespace=redhat-ods-applications
-    Oc Get      kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
+    Oc Apply    kind=OdhDocument    src=${HOWTO_YAML}     namespace=${APPLICATIONS_NAMESPACE}
+    Oc Get      kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=${APPLICATIONS_NAMESPACE}
 
 Create Custom Tutorial
     [Documentation]     Creates a CRD instance of OdhDocument with type "how-to" using a custom yaml
-    Oc Apply    kind=OdhDocument    src=${TUTORIAL_YAML}     namespace=redhat-ods-applications
-    Oc Get      kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
+    Oc Apply    kind=OdhDocument    src=${TUTORIAL_YAML}     namespace=${APPLICATIONS_NAMESPACE}
+    Oc Get      kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=${APPLICATIONS_NAMESPACE}
 
 Delete Custom How-To And Tutorial
     [Documentation]     Deletes the previously created CRD instance for custom How To and Tutorial resources
-    Oc Delete   kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
+    Oc Delete   kind=OdhDocument    label_selector=app=custom-odsci-app  namespace=${APPLICATIONS_NAMESPACE}
     Close All Browsers
 
 Create Custom Application
     [Documentation]     Creates a CRD instance of OdhApplication using a custom yaml
-    Oc Apply    kind=OdhApplication    src=${APP_YAML}     namespace=redhat-ods-applications
-    Oc Get      kind=OdhApplication    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
+    Oc Apply    kind=OdhApplication    src=${APP_YAML}     namespace=${APPLICATIONS_NAMESPACE}
+    Oc Get      kind=OdhApplication    label_selector=app=custom-odsci-app  namespace=${APPLICATIONS_NAMESPACE}
 
 Delete Custom Application
     [Documentation]     Deletes the previously created OdhApplication CRD instance for custom Applciation resource
-    Oc Delete   kind=OdhApplication    label_selector=app=custom-odsci-app  namespace=redhat-ods-applications
+    Oc Delete   kind=OdhApplication    label_selector=app=custom-odsci-app  namespace=${APPLICATIONS_NAMESPACE}
     Close All Browsers
 
 Load Expected Test Data

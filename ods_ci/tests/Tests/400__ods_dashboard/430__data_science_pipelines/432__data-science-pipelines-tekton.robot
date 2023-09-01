@@ -15,6 +15,10 @@ Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
 
 
+*** Variables ***
+${PROJECT_NAME}=    pipelineskfptekton1
+
+
 *** Test Cases ***
 Verify Ods Users Can Create And Run A Data Science Pipeline Using The Kfp_tekton Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
@@ -26,16 +30,18 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The Kfp_tekton
     End To End Pipeline Workflow Using Kfp_tekton
     ...    username=${TEST_USER.USERNAME}
     ...    password=${TEST_USER.PASSWORD}
-    ...    project=pipelineskfptekton1
+    ...    project=${PROJECT_NAME}
     ...    python_file=flip_coin.py
     ...    method_name=flipcoin_pipeline
     End To End Pipeline Workflow Using Kfp_tekton
     ...    username=${TEST_USER.USERNAME}
     ...    password=${TEST_USER.PASSWORD}
-    ...    project=pipelineskfptekton1
+    ...    project=${PROJECT_NAME}
     ...    python_file=upload_download.py
     ...    method_name=wire_up_pipeline
     ...    status_check_timeout=160
+    [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
+
 
 *** Keywords ***
 # robocop: disable:line-too-long
@@ -61,3 +67,4 @@ Data Science Pipelines Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Install Red Hat OpenShift Pipelines
+

@@ -54,7 +54,7 @@ Verify JupyterHub Deployment
     FOR  ${index}  IN RANGE  0  ${nPods}
         &{pod} =  Set Variable  ${component}[${index}]
         # Grab x.y.z version of jupyterhub
-        ${jh_version} =    Run  oc -n redhat-ods-applications exec ${pod.metadata.name} -c jupyterhub -- pip show jupyterhub | grep Version: | awk '{split($0,a); print a[2]}'
+        ${jh_version} =    Run  oc -n ${APPLICATIONS_NAMESPACE} exec ${pod.metadata.name} -c jupyterhub -- pip show jupyterhub | grep Version: | awk '{split($0,a); print a[2]}'
         # 1.5 <= ${jh_version} < 2.0
         ${min} =    GTE    ${jh_version}    1.5.0
         ${max} =    GTE    1.9.99    ${jh_version}
@@ -87,7 +87,7 @@ Verify JupyterHub Deployment
     # Check this only if the deployment is correct and the leader is identified
     ${version-check} =  Is RHODS Version Greater Or Equal Than  1.13.0
     IF  ${version-check}==True
-        Verify NPM Version  library=url-parse  expected_version=1.5.10  pod=${leader}  namespace=redhat-ods-applications  container=jupyterhub
+        Verify NPM Version  library=url-parse  expected_version=1.5.10  pod=${leader}  namespace=${APPLICATIONS_NAMESPACE}  container=jupyterhub
         ...    depth=2  prefix=/opt/app-root/lib/python3.8/site-packages/jupyterhub_singleuser_profiles/ui
     END
 
@@ -95,7 +95,7 @@ Wait Until JH Deployment Is Ready
     [Documentation]     Wait Until jupyterhub deployment is completed
     [Arguments]   ${retries}=50
     FOR  ${index}  IN RANGE  0  1+${retries}
-        @{JH} =  Oc Get  kind=Pod  namespace=redhat-ods-applications  label_selector=deploymentconfig = jupyterhub
+        @{JH} =  Oc Get  kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=deploymentconfig = jupyterhub
         ${containerNames} =  Create List  jupyterhub  jupyterhub-ha-sidecar
         ${jh_status}=    Run Keyword And Return Status    Verify JupyterHub Deployment  ${JH}  3  2  ${containerNames}
         Exit For Loop If    $jh_status == True
@@ -108,9 +108,9 @@ Wait Until JH Deployment Is Ready
 
 Rollout JupyterHub
     [Documentation]     Rollouts JupyterHub deployment and wait until it is finished
-    ${current_pods}=    Oc Get    kind=Pod    namespace=redhat-ods-applications     label_selector=app=jupyterhub
+    ${current_pods}=    Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}     label_selector=app=jupyterhub
     ...                 fields=['metadata.name']
-    Start Rollout     dc_name=jupyterhub    namespace=redhat-ods-applications
-    Wait Until Rollout Is Started     previous_pods=${current_pods}     namespace=redhat-ods-applications
+    Start Rollout     dc_name=jupyterhub    namespace=${APPLICATIONS_NAMESPACE}
+    Wait Until Rollout Is Started     previous_pods=${current_pods}     namespace=${APPLICATIONS_NAMESPACE}
     ...                               label_selector=app=jupyterhub
     Wait Until JH Deployment Is Ready

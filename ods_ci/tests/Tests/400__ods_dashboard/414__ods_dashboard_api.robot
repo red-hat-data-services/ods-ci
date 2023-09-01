@@ -27,8 +27,8 @@ ${QUICKSTARTS_ENDPOINT}=        api/quickstarts
 ${SEGMENT_KEY_ENDPOINT}=        api/segment-key
 ${GPU_ENDPOINT}=        api/gpu
 
-${NOTEBOOK_NS}=          rhods-notebooks
-${DASHBOARD_NS}=         redhat-ods-applications
+${NOTEBOOK_NS}=          ${NOTEBOOKS_NAMESPACE}
+${DASHBOARD_NS}=         ${APPLICATIONS_NAMESPACE}
 ${NOTEBOOK_USERNAME}=    ""
 ${CM_ENDPOINT_PT0}=         api/envs/configmap
 ${CM_ENDPOINT_PT1}=         ${CM_ENDPOINT_PT0}/${NOTEBOOK_NS}/jupyterhub-singleuser-profile-
@@ -793,7 +793,7 @@ Spawn Minimal Python Notebook Server
     ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
     ...    browser_options=${BROWSER.OPTIONS}
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=s2i-minimal-notebook
+    Spawn Notebook With Arguments  image=minimal-notebook
     ${cr_name}=   Get User CR Notebook Name    ${username}
     ${status}   ${image_tag_name}=     Run And Return Rc And Output
     ...     oc get Notebook --field-selector=metadata.name=${cr_name} -n ${NOTEBOOK_NS} -o=jsonpath='{.items[0].metadata.annotations.notebooks\\.opendatahub\\.io/last-image-selection}'
@@ -808,7 +808,7 @@ Create A Dummy Secret In Dashboard Namespace
 Create A Dummy Secret Outside Dashboard Namespace
     [Documentation]     Creates a dummy secret ouside dashboard namespace to use in tests to avoid getting sensitive secrets
     # OpenshiftLibrary.Oc Create      kind=Secret    namespace=${DASHBOARD_NS}   src={"data": {"secret_key": "super_dummy_secret"}}
-    Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n redhat-ods-monitoring
+    Run     oc create secret generic ${DUMMY_SECRET_NAME} --from-literal=super_key=super_dummy_secret -n ${MONITORING_NAMESPACE}
 
 Create A Dummy ConfigMap In Dashboard Namespace
     [Documentation]     Creates a dummy secret to use in tests to avoid getting sensitive secrets
@@ -818,17 +818,17 @@ Create A Dummy ConfigMap In Dashboard Namespace
 Create A Dummy ConfigMap Outside Dashboard Namespace
     [Documentation]     Creates a dummy secret ouside dashboard namespace to use in tests to avoid getting sensitive secrets
     # OpenshiftLibrary.Oc Create      kind=Secret    namespace=${DASHBOARD_NS}   src={"data": {"secret_key": "super_dummy_secret"}}
-    Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n redhat-ods-monitoring
+    Run     oc create configmap ${DUMMY_CM_NAME} --from-literal=super_key=super_dummy_cm -n ${MONITORING_NAMESPACE}
 
 Delete Dummy Secrets
     [Documentation]     Deletes the dummy secret created during tests
     OpenshiftLibrary.Oc Delete    kind=Secret  namespace=${DASHBOARD_NS}  name=${DUMMY_SECRET_NAME}
-    OpenshiftLibrary.Oc Delete    kind=Secret  namespace=redhat-ods-monitoring  name=${DUMMY_SECRET_NAME}
+    OpenshiftLibrary.Oc Delete    kind=Secret  namespace=${MONITORING_NAMESPACE}  name=${DUMMY_SECRET_NAME}
 
 Delete Dummy ConfigMaps
     [Documentation]     Deletes the dummy secret created during tests
     OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=${DASHBOARD_NS}  name=${DUMMY_CM_NAME}
-    OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=redhat-ods-monitoring  name=${DUMMY_CM_NAME}
+    OpenshiftLibrary.Oc Delete    kind=ConfigMap  namespace=${MONITORING_NAMESPACE}  name=${DUMMY_CM_NAME}
 
 Delete Test Notebooks CRs And PVCs From CLI
     [Documentation]     Stops all the notebook servers spanwed during a test by

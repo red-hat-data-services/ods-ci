@@ -69,7 +69,7 @@ Server Setup
     RHOSi Setup
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook    size=Small
+    Spawn Notebook With Arguments    image=minimal-notebook    size=Small
 
 Push Some Changes To Repo
     [Documentation]    Make some changes in ${filepath} and push to remote repo

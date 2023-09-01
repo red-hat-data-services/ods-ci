@@ -119,7 +119,7 @@ Verify Alerts Are Not Fired After Multiple JupyterHub Rollouts
     ...    RHODS JupyterHub Probe Success Burn Rate
     ...    alert-duration=120
 
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
 
     FOR    ${counter}    IN RANGE    10
         Rollout JupyterHub
@@ -156,8 +156,8 @@ Verify Alerts Are Fired When Jupyter Is Down    # robocop: disable:too-long-test
     ...    RHODS JupyterHub Probe Success Burn Rate
     ...    alert-duration=120
 
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
-    ODS.Scale DeploymentConfig    redhat-ods-applications    jupyterhub    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
+    ODS.Scale DeploymentConfig    ${APPLICATIONS_NAMESPACE}    jupyterhub    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
@@ -191,8 +191,8 @@ Verify Alerts Are Fired When Traefik Is Down    # robocop: disable:too-long-test
     ...    RHODS JupyterHub Probe Success Burn Rate
     ...    alert-duration=120
 
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
-    ODS.Scale Deployment    redhat-ods-applications    traefik-proxy    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    traefik-proxy    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
@@ -223,8 +223,8 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     ...    SLOs-haproxy_backend_http_responses_total
     ...    RHODS Dashboard Route Error Burn Rate
 
-    ODS.Scale Deployment    redhat-ods-operator    rhods-operator    replicas=0
-    ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
@@ -269,8 +269,8 @@ Verify Alert "Kubeflow notebook controller pod is not running" Is Fired When Kub
     ...    RHODS Notebook controllers
     ...    Kubeflow notebook controller pod is not running
 
-    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                    replicas=0
-    ODS.Scale Deployment    redhat-ods-applications    notebook-controller-deployment    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                    replicas=0
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
@@ -301,8 +301,8 @@ Verify Alert "ODH notebook controller pod is not running" Is Fired When ODH Cont
     ...    RHODS Notebook controllers
     ...    ODH notebook controller pod is not running
 
-    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                     replicas=0
-    ODS.Scale Deployment    redhat-ods-applications    odh-notebook-controller-manager    replicas=0
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                     replicas=0
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=0
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
@@ -330,7 +330,7 @@ Verify Alert "Jupyter image builds are failing" Fires When There Is An Image Bui
 
     Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
 
-    ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
+    ${failed_build_name} =    Provoke Image Build Failure    namespace=${APPLICATIONS_NAMESPACE}
     ...    build_name_includes=tensorflow    build_config_name=s2i-tensorflow-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
 
@@ -339,7 +339,7 @@ Verify Alert "Jupyter image builds are failing" Fires When There Is An Image Bui
     ...    Builds
     ...    Jupyter image builds are failing
 
-    ${build_name} =    Start New Build    namespace=redhat-ods-applications
+    ${build_name} =    Start New Build    namespace=${APPLICATIONS_NAMESPACE}
     ...    buildconfig=s2i-tensorflow-gpu-cuda-11.4.2-notebook
 
     Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
@@ -347,7 +347,7 @@ Verify Alert "Jupyter image builds are failing" Fires When There Is An Image Bui
     ...    Builds
     ...    Jupyter image builds are failing
 
-    Wait Until Build Status Is    namespace=redhat-ods-applications
+    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}
     ...    build_name=${build_name}    expected_status=Complete
 
     Prometheus.Alert Should Not Be Firing    ${RHODS_PROMETHEUS_URL}
@@ -373,7 +373,7 @@ Verify Alert "Jupyter image builds are failing" Fires When There Is An Image Bui
     ...    Builds
     ...    Jupyter image builds are failing
 
-    [Teardown]    Delete Build    namespace=redhat-ods-applications    build_name=${failed_build_name}
+    [Teardown]    Delete Build    namespace=${APPLICATIONS_NAMESPACE}    build_name=${failed_build_name}
 
 Verify Alert "Jupyter Image Builds Are Failing" Fires At Least 20 Minutes When There Is An Image Build Error     # robocop: disable:too-long-test-case
     [Documentation]    Verify that build alert fires at least 20 minutes when there is an image
@@ -384,7 +384,7 @@ Verify Alert "Jupyter Image Builds Are Failing" Fires At Least 20 Minutes When T
 
     Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
 
-    ${failed_build_name} =    Provoke Image Build Failure    namespace=redhat-ods-applications
+    ${failed_build_name} =    Provoke Image Build Failure    namespace=${APPLICATIONS_NAMESPACE}
     ...    build_name_includes=pytorch    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
     ...    container_to_kill=sti-build
 
@@ -405,7 +405,7 @@ Verify Alert "Jupyter Image Builds Are Failing" Fires At Least 20 Minutes When T
     ...    Jupyter image builds are failing
     ...    timeout=15min
 
-    [Teardown]    Delete Failed Build And Start New One    namespace=redhat-ods-applications
+    [Teardown]    Delete Failed Build And Start New One    namespace=${APPLICATIONS_NAMESPACE}
     ...    failed_build_name=${failed_build_name}    build_config_name=s2i-pytorch-gpu-cuda-11.4.2-notebook
 
 Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or Testing
@@ -464,7 +464,7 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     ${authorization_required} =    Is Service Account Authorization Required
     IF    ${authorization_required}    Authorize jupyterhub service account
     Fix Spawner Status
-    Spawn Notebook With Arguments    image=s2i-generic-data-science-notebook
+    Spawn Notebook With Arguments    image=science-notebook
     Clone Git Repository And Run    ${notebook_repo}    ${notebook_path}
     Sleep    5s
 
@@ -650,7 +650,7 @@ Check Particular Text Is Present In Rhods-operator's Log
     Open OCP Console
     Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
     Maybe Skip Tour
-    ${val_result}=  Get Pod Logs From UI  namespace=redhat-ods-operator
+    ${val_result}=  Get Pod Logs From UI  namespace=${OPERATOR_NAMESPACE}
     ...                                   pod_search_term=rhods-operator
     ...                                   container_button_id=rhods-deployer-link
     Log  ${val_result}
@@ -660,5 +660,5 @@ Check Particular Text Is Present In Rhods-operator's Log
 Verify Alertmanager Receiver For Critical Alerts
     [Documentation]     Receiver value should be equal to ${receiver}
     [Arguments]         ${receiver}
-    ${result} =    Run    oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.routes[] | select(.match.severity == "critical") | .receiver'
+    ${result} =    Run    oc get configmap alertmanager -n ${MONITORING_NAMESPACE} -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.routes[] | select(.match.severity == "critical") | .receiver'
     Should Be Equal    "${receiver}"    ${result}    msg=Alertmanager has an unexpected receiver for critical alerts

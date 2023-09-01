@@ -10,11 +10,13 @@ Library             ../../../libs/Helpers.py
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
 
-Force Tags          Smoke    Sanity    JupyterHub
+Force Tags          Smoke    Sanity    JupyterHub      OpenDataHub
+
 
 *** Variables ***
 ${RequirementsFileRepo}=    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main.git
 ${RequirementsFilePath}=    ods-ci-notebooks-main/notebooks/500__jupyterhub/test-minimal-image/
+
 
 *** Test Cases ***
 Open RHODS Dashboard
@@ -33,7 +35,7 @@ Can Login to Jupyterhub
 Can Spawn Notebook
     [Tags]    ODS-901    ODS-903
     Fix Spawner Status
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook
+    Spawn Notebook With Arguments    image=minimal-notebook
 
 Can Launch Python3 Smoke Test Notebook
     [Tags]    ODS-905    ODS-907    ODS-913    ODS-914    ODS-915    ODS-916    ODS-917    ODS-918    ODS-919
@@ -96,8 +98,8 @@ Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     [Teardown]    Clean Up Server
 
 Verify Jupyterlab Server Pods Are Spawned In A Custom Namespace
-    [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (rhods-notebooks)
+    [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (${NOTEBOOKS_NAMESPACE})
     [Tags]    ODS-320
     ${pod_name} =    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
-    Verify Operator Pod Status    namespace=rhods-notebooks    label_selector=statefulset.kubernetes.io/pod-name=${pod_name}
+    Verify Operator Pod Status    namespace=${NOTEBOOKS_NAMESPACE}    label_selector=statefulset.kubernetes.io/pod-name=${pod_name}
     ...    expected_status=Running

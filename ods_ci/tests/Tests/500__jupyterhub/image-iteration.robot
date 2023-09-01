@@ -9,12 +9,12 @@ Force Tags       JupyterHub
 
 *** Variables ***
 #{xyz-n}  image  repo_URL  notebook_path
-@{generic-1}  s2i-generic-data-science-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
-@{generic-2}  s2i-generic-data-science-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
-@{generic-3}  s2i-generic-data-science-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
-@{minimal-1}  s2i-minimal-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
-@{minimal-2}  s2i-minimal-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
-@{minimal-3}  s2i-minimal-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
+@{generic-1}  data-science-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
+@{generic-2}  data-science-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
+@{generic-3}  data-science-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
+@{minimal-1}  minimal-notebook  https://github.com/lugi0/minimal-nb-image-test  minimal-nb-image-test/minimal-nb.ipynb
+@{minimal-2}  minimal-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/CCFraud-clustering.ipynb
+@{minimal-3}  minimal-notebook  https://github.com/lugi0/clustering-notebook  clustering-notebook/customer-segmentation-k-means-analysis.ipynb
 
 ${python_dict}  {'classifiers':[${generic-1}, ${minimal-1}], 'clustering':[${generic-2}, ${generic-3}, ${minimal-2}, ${minimal-3}]}
 

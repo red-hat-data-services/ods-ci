@@ -78,7 +78,7 @@ Verify Component Resources
     Enable Single Component    ${component}
     ${filepath} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
     ${expected} =    Get File    ${filepath}${component}.txt
-    Run    oc get $(oc api-resources --namespaced=true --verbs=list -o name | awk '{printf "%s%s",sep,$0;sep=","}') --ignore-not-found -n redhat-ods-applications -o=custom-columns=KIND:.kind,NAME:.metadata.name | sort -k1,1 -k2,2 | grep -v "PackageManifest\\|Event\\|ClusterServiceVersion" > ${filepath}${component}_runtime.txt  # robocop: disable
+    Run    oc get $(oc api-resources --namespaced=true --verbs=list -o name | awk '{printf "%s%s",sep,$0;sep=","}') --ignore-not-found -n ${APPLICATIONS_NAMESPACE} -o=custom-columns=KIND:.kind,NAME:.metadata.name | sort -k1,1 -k2,2 | grep -v "PackageManifest\\|Event\\|ClusterServiceVersion" > ${filepath}${component}_runtime.txt  # robocop: disable
     Process Resource List    filename_in=${filepath}${component}_runtime.txt
     ...    filename_out=${filepath}${component}_processed.txt
     ${actual} =    Get File    ${filepath}${component}_processed.txt

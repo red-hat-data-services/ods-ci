@@ -39,7 +39,7 @@ Fetch Blackbox Exporter Pods Info
     ...        None
     ...    Returns:
     ...        blackbox_exporter_pods_info(list(dict)): Blackbox Exporter pods selected by label and namespace
-    @{blackbox_exporter_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-monitoring    label_selector=deployment=blackbox-exporter
+    @{blackbox_exporter_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=${MONITORING_NAMESPACE}    label_selector=deployment=blackbox-exporter
     RETURN    @{blackbox_exporter_pods_info}
 
 Fetch Blackbox Exporter Deployments Info
@@ -48,7 +48,7 @@ Fetch Blackbox Exporter Deployments Info
     ...        None
     ...    Returns:
     ...        blackbox_exporter_deployments(list(dict)): Blackbox Exporter deployments selected by label and namespace
-    @{blackbox_exporter_deployments} =    Oc Get    kind=Deployment    api_version=v1    namespace=redhat-ods-monitoring
+    @{blackbox_exporter_deployments} =    Oc Get    kind=Deployment    api_version=v1    namespace=${MONITORING_NAMESPACE}
     ...    label_selector=deployment=blackbox-exporter
     RETURN    @{blackbox_exporter_deployments}
 
@@ -58,12 +58,12 @@ Fetch Blackbox Exporter Services Info
     ...        None
     ...    Returns:
     ...        blackbox_exporter_services_info(list(dict)): Blackbox Exporter services selected by name and namespace
-    @{blackbox_exporter_services_info} =    Oc Get    kind=Service    api_version=v1    name=blackbox-exporter    namespace=redhat-ods-monitoring
+    @{blackbox_exporter_services_info} =    Oc Get    kind=Service    api_version=v1    name=blackbox-exporter    namespace=${MONITORING_NAMESPACE}
     RETURN    @{blackbox_exporter_services_info}
 
 Verify Blackbox Exporter ReplicaSets Info
     [Documentation]    Fetch and verify information from Blackbox Exporter replicasets
-    @{blackbox_exporter_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=redhat-ods-monitoring
+    @{blackbox_exporter_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=${MONITORING_NAMESPACE}
     ...    label_selector=deployment=blackbox-exporter
     OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas    1
     ...    @{blackbox_exporter_replicasets_info}

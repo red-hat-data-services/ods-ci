@@ -15,7 +15,7 @@ Suite Teardown    RHOSi Teardown
 
 
 *** Variables ***
-${NAMESPACE}           redhat-ods-applications
+${NAMESPACE}           ${APPLICATIONS_NAMESPACE}
 ${RESOURCE_KIND}       KfDef
 
 

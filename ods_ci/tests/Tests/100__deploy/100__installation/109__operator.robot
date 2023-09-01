@@ -74,33 +74,33 @@ Verify Clean Up ODS Deployer Post-Migration
         Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
     END
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=blobstorages.integreatly.org     namespace=redhat-ods-applications
+    ...    Oc Get    kind=CustomResourceDefinition    name=blobstorages.integreatly.org     namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=postgres.integreatly.org    namespace=redhat-ods-applications
+    ...    Oc Get    kind=CustomResourceDefinition    name=postgres.integreatly.org    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=redis.integreatly.org    namespace=redhat-ods-applications
+    ...    Oc Get    kind=CustomResourceDefinition    name=redis.integreatly.org    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=postgressnapshots.integreatly.org    namespace=redhat-ods-applications
+    ...    Oc Get    kind=CustomResourceDefinition    name=postgressnapshots.integreatly.org    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=redisnapshots.integreatly.org    namespace=redhat-ods-applications
+    ...    Oc Get    kind=CustomResourceDefinition    name=redisnapshots.integreatly.org    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=ClusterRole    name=cloud-resource-operator-cluster-role    namespace=redhat-ods-applications
+    ...    Oc Get    kind=ClusterRole    name=cloud-resource-operator-cluster-role    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=ClusterRoleBinding    name=cloud-resource-operator-cluster-rolebinding    namespace=redhat-ods-applications
+    ...    Oc Get    kind=ClusterRoleBinding    name=cloud-resource-operator-cluster-rolebinding    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=Role    name=cloud-resource-operator-role    namespace=redhat-ods-applications
+    ...    Oc Get    kind=Role    name=cloud-resource-operator-role    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=RoleBinding    name=cloud-resource-operator-rolebinding    namespace=redhat-ods-applications
+    ...    Oc Get    kind=RoleBinding    name=cloud-resource-operator-rolebinding    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=Role    name=cloud-resource-operator-rds-role    namespace=redhat-ods-applications
+    ...    Oc Get    kind=Role    name=cloud-resource-operator-rds-role    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=RoleBinding    name=cloud-resource-operator-rds-rolebinding    namespace=redhat-ods-applications
+    ...    Oc Get    kind=RoleBinding    name=cloud-resource-operator-rds-rolebinding    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=Deployment    name=cloud-resource-operator    namespace=redhat-ods-applications
+    ...    Oc Get    kind=Deployment    name=cloud-resource-operator    namespace=${APPLICATIONS_NAMESPACE}
     Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=ServiceAccount    name=cloud-resource-operator    namespace=redhat-ods-applications
+    ...    Oc Get    kind=ServiceAccount    name=cloud-resource-operator    namespace=${APPLICATIONS_NAMESPACE}
 
-    ${dashboardConfig} =   Oc Get   kind=OdhDashboardConfig   namespace=redhat-ods-applications  name=odh-dashboard-config
+    ${dashboardConfig} =   Oc Get   kind=OdhDashboardConfig   namespace=${APPLICATIONS_NAMESPACE}  name=odh-dashboard-config
     Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["adminGroups"]}    dedicated-admins
     Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["allowedGroups"]}    system:authenticated
     Should Be True    ${dashboardConfig[0]["spec"]["notebookController"]["enabled"]}
@@ -126,7 +126,7 @@ Fetch Odh-deployer Pod Logs
     &{odhdeployer_pod_info}=    Fetch Odh-deployer Pod Info
     ${odhdeployer_pod_logs}=    Oc Get Pod Logs
     ...                         name=${odhdeployer_pod_info.metadata.name}
-    ...                         namespace=redhat-ods-operator
+    ...                         namespace=${OPERATOR_NAMESPACE}
     ...                         container=rhods-deployer
     RETURN    ${odhdeployer_pod_Logs}
 

@@ -12,7 +12,6 @@ Suite Teardown    Model Serving Suite Teardown
 
 
 *** Variables ***
-${RHODS_NAMESPACE}=    redhat-ods-applications
 ${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
 ${INFERENCE_INPUT_OPENVINO}=    @ods_ci/tests/Resources/Files/openvino-example-input.json
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
@@ -27,9 +26,10 @@ ${RUNTIME_NAME}=    Model Serving Test
 *** Test Cases ***
 Verify Model Serving Installation
     [Documentation]    Verifies that the core components of model serving have been
-    ...    deployed in the redhat-ods-applications namespace
+    ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace
     [Tags]    Smoke
     ...       Tier1
+    ...       OpenDataHub
     ...       ODS-1919
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify odh-model-controller Deployment
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
@@ -138,8 +138,8 @@ Model Serving Suite Setup
 
 Verify Etcd Pod
     [Documentation]    Verifies the correct deployment of the etcd pod in the rhods namespace
-    ${etcd_name} =    Run    oc get pod -l component=model-mesh-etcd -n ${RHODS_NAMESPACE} | grep etcd | awk '{split($0, a); print a[1]}'
-    ${etcd_running} =    Run    oc get pod ${etcd_name} -n ${RHODS_NAMESPACE} | grep 1/1 -o
+    ${etcd_name} =    Run    oc get pod -l component=model-mesh-etcd -n ${APPLICATIONS_NAMESPACE} | grep etcd | awk '{split($0, a); print a[1]}'
+    ${etcd_running} =    Run    oc get pod ${etcd_name} -n ${APPLICATIONS_NAMESPACE} | grep 1/1 -o
     Should Be Equal As Strings    ${etcd_running}    1/1
 
 Verify Serving Service
@@ -150,13 +150,13 @@ Verify Serving Service
 
 Verify ModelMesh Deployment
     [Documentation]    Verifies the correct deployment of modelmesh in the rhods namespace
-    @{modelmesh_controller} =  Oc Get    kind=Pod    namespace=${RHODS_NAMESPACE}    label_selector=control-plane=modelmesh-controller
+    @{modelmesh_controller} =  Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}    label_selector=control-plane=modelmesh-controller
     ${containerNames} =  Create List  manager
     Verify Deployment    ${modelmesh_controller}  3  1  ${containerNames}
 
 Verify odh-model-controller Deployment
     [Documentation]    Verifies the correct deployment of the model controller in the rhods namespace
-    @{odh_model_controller} =  Oc Get    kind=Pod    namespace=${RHODS_NAMESPACE}    label_selector=control-plane=odh-model-controller
+    @{odh_model_controller} =  Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}    label_selector=control-plane=odh-model-controller
     ${containerNames} =  Create List  manager
     Verify Deployment    ${odh_model_controller}  3  1  ${containerNames}
 

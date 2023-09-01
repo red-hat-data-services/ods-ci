@@ -213,7 +213,7 @@ Is Component Enabled
            Log To Console    ${output}
     ELSE
          IF    ${output} == "Removed"
-               RETURN    true
+               RETURN    false
          ELSE IF    ${output} == "Managed"
               RETURN    true
          END

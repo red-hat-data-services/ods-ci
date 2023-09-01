@@ -56,7 +56,7 @@ Verify External Dependency Operators Can Be Deployed
 Verify User Can Serve And Query A Model
     [Tags]    ODS-2341    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    ${test_namespace}=    ${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
@@ -81,7 +81,7 @@ Verify User Can Serve And Query A Model
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Tags]    ODS-2371    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
-    ${test_namespace}=    ${TEST_NS}-multisame
+    ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
@@ -183,7 +183,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Tags]    ODS-2376    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
-    ${test_namespace}=    ${TEST_NS}-reps
+    ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
     Compile Inference Service YAML    isvc_name=${model_name}

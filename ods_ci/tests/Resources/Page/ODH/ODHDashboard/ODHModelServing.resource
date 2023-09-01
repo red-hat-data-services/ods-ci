@@ -255,8 +255,13 @@ Remove Namespace From ServiceMeshMemberRoll
     ${rc}    ${ns_idx}=    Run And Return Rc And Output
     ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'
     Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'remove', 'path': '/spec/members/${ns_idx}'}]"
-    Should Be Equal As Integers    ${rc}    ${0}
+    IF    "${ns_idx}" == "null"
+        Log    message=${namespace} was not in the SMMR..
+        ...    level=WARN
+    ELSE
+        ${rc}    ${out}=    Run And Return Rc And Output    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'remove', 'path': '/spec/members/${ns_idx}'}]"
+        Should Be Equal As Integers    ${rc}    ${0}
+    END
 
 Deploy Model Via CLI
     [Documentation]    Deploys a model using Model Serving feature by applying the InfereceService

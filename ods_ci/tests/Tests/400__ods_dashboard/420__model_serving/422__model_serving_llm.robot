@@ -186,11 +186,11 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    ...    min_replicas=2
+    ...    min_replicas=1
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${TEST_NS}    exp_replicas=2
+    ...    namespace=${TEST_NS}    exp_replicas=1
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
     ...    namespace=${TEST_NS}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
@@ -338,9 +338,9 @@ Verify Model Can Be Serverd And Query On A GPU Node
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
     Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=2
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=2
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=5
     ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
     ...    streamed_response=${TRUE}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
@@ -376,7 +376,8 @@ Clean Up Test Project
     ...    servicemesh_ns=${SERVICEMESH_CR_NS}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
-
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=120s
+    Should Be Equal As Integers    ${rc}    ${0}
 
 Load Expected Responses
     [Documentation]    Loads the json file containing the expected answer for each

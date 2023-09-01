@@ -232,8 +232,6 @@ def generate_test_config_file(
         print("Setting components")
         print(components)
         data["COMPONENTS"] = change_component_state(components)
-    print("After setting components")
-    print(data)
 
     # Login to test cluster using oc command
     oc_login(

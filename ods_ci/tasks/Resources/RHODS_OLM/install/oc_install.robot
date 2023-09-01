@@ -101,8 +101,10 @@ Verify RHODS Installation
     Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=1200
     Log  Verified redhat-ods-monitoring  console=yes
   END
-  Oc Get  kind=Namespace  field_selector=metadata.name=rhods-notebooks
-  Log  "Verified rhods-notebook"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${workbenches}" == "true"  # robocop: disable
+    Oc Get  kind=Namespace  field_selector=metadata.name=rhods-notebooks
+    Log  "Verified rhods-notebook"
+  END
 
 Verify Builds In redhat-ods-applications
   Log  Verifying Builds  console=yes

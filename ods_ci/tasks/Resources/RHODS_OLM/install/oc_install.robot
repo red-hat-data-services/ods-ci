@@ -210,7 +210,7 @@ Is Component Enabled
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while getting component status
     ${n_output} =    Evaluate    '${output}' == ''
     IF  ${n_output}   
-           Log To Console    ${output}
+          RETURN    false
     ELSE
          IF    ${output} == "Removed"
                RETURN    false

@@ -106,8 +106,11 @@ def change_component_state(components):
     components_list = components.split(",")
     for component in components_list:
         comp, state = component.split(":")
-        component_states[comp] = True if state.lower() == "true" else False
+        print(comp, state)
+        component_states[comp] = "Managed" if state.lower() == "managed" else "Removed"
+        print(component_states[comp])
 
+    print(component_states)
     return component_states
 
 
@@ -226,6 +229,8 @@ def generate_test_config_file(
     data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
 
     if components:
+        print("Setting components")
+        print(components)
         data["COMPONENTS"] = change_component_state(components)
 
     # Login to test cluster using oc command
@@ -234,6 +239,7 @@ def generate_test_config_file(
         data["OCP_ADMIN_USER"]["USERNAME"],
         data["OCP_ADMIN_USER"]["PASSWORD"],
     )
+    print("After oc login")
 
     if bool(set_prometheus_config):
         # Get prometheus token for test cluster
@@ -275,6 +281,7 @@ def main():
         components=args.components,
 
     )
+    print("Done generating config file")
 
 
 if __name__ == "__main__":

@@ -69,10 +69,12 @@ Uninstall RHODS V2
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete dscinitialization $(oc get dscinitialization --no-headers | awk '{print $1}')
     Should Be Equal As Integers	${return_code}	 0   msg=Error deleting DSCInitialization CR
-    # The subscription is currently called rhods-operator-dev, will most likely change soon
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription rhods-operator-dev -n redhat-ods-operator
+    ...    oc delete subscription $(oc get subscription -n redhat-ods-operator --no-headers | awk '{print $1}') -n redhat-ods-operator
     Should Be Equal As Integers	${return_code}	 0   msg=Error deleting RHODS subscription
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete operatorgroup $(oc get operatorgroup -n redhat-ods-operator --no-headers | awk '{print $1}') -n redhat-ods-operator
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting operatorgroup
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace
     Verify Project Does Not Exists  redhat-ods-applications
     Verify Project Does Not Exists  redhat-ods-monitoring

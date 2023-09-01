@@ -205,13 +205,13 @@ Component Should Not Be Enabled
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false)
     [Arguments]    ${component}    ${dsc_name}=default
+    ${managed}     Set Variable   Managed
+    ${removed}     Set Variable   Removed
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while getting component status
-    IF    ${output}==${EMPTY}
-         RETURN  false
-    ELSE IF    ${output}=="Managed"
-         RETURN  true
-    ELSE IF    ${output}=="Removed"
-         RETURN  false
+    IF    ${output} == ${managed}
+        RETURN    true
+    ELSE IF    ${output} == ${removed}
+        RETURN    false
     END

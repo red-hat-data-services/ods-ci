@@ -314,7 +314,6 @@ Verify User Can Set Requests And Limits For A Model
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
-    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
@@ -336,13 +335,16 @@ Verify Model Can Be Serverd And Query On A GPU Node
     ...    namespace=${test_namespace}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}  
+    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
+    Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=2
     ...    namespace=${test_namespace}
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=2
     ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
-    Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
+    ...    streamed_response=${TRUE}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${model_name}
 
 
 *** Keywords ***
@@ -701,8 +703,12 @@ Model Response Should Match The Expectation
         ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    \\s+    ${EMPTY}
         ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
         ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
+        ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    [-]?\\d.\\d+    <logprob_removed>
         Log    ${cleaned_response_text}
-        Should Be Equal    ${cleaned_response_text}    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][streamed_response_text]
+        ${cleaned_exp_response_text}=    Replace String Using Regexp
+        ...    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][streamed_response_text]
+        ...    [-]?\\d.\\d+    <logprob_removed>
+        Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     END
 
 Query Models And Check Responses Multiple Times

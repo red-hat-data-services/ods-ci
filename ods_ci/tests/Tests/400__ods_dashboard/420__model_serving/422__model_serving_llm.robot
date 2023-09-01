@@ -56,30 +56,32 @@ Verify External Dependency Operators Can Be Deployed
 Verify User Can Serve And Query A Model
     [Tags]    ODS-2341    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    ${test_namespace}=    ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${TEST_NS}
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
     Query Models And Check Responses Multiple Times    models_names=${models_names}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Query Models And Check Responses Multiple Times    models_names=${models_names}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
-    ...    namespace=${TEST_NS}
-    [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
+    ...    namespace=${test_namespace}
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Tags]    ODS-2371    WatsonX
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
+    ${test_namespace}=    ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
@@ -87,19 +89,19 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
-    ...    namespace=${TEST_NS}
-    [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
+    ...    namespace=${test_namespace}
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In Different Namespaces
@@ -180,7 +182,8 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
 
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Tags]    ODS-2376    WatsonX
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
+    ${test_namespace}=    ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
     Compile Inference Service YAML    isvc_name=${model_name}
@@ -188,28 +191,28 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    min_replicas=1
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${TEST_NS}    exp_replicas=1
+    ...    namespace=${test_namespace}    exp_replicas=1
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${TEST_NS}    exp_replicas=3
+    ...    namespace=${test_namespace}    exp_replicas=3
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${TEST_NS}    exp_replicas=1
+    ...    namespace=${test_namespace}    exp_replicas=1
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
-    ...    namespace=${TEST_NS}
-    [Teardown]   Clean Up Test Project    test_ns=${TEST_NS}
+    ...    namespace=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
 Verify User Can Autoscale Using Concurrency
@@ -376,7 +379,7 @@ Clean Up Test Project
     ...    servicemesh_ns=${SERVICEMESH_CR_NS}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=120s
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s
     Should Be Equal As Integers    ${rc}    ${0}
 
 Load Expected Responses

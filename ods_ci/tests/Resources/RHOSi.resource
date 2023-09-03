@@ -74,6 +74,7 @@ Initialize Global Variables
     [Arguments]    ${force_fetch}=False
     ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
     Set Global Variable   ${RHODS_VERSION}
+    Set Prometheus Variables
 
 Required Global Variables Should Exist
     [Documentation]   Fails if new required global variables are not set

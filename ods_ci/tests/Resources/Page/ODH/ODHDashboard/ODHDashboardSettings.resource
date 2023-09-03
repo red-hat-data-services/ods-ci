@@ -71,7 +71,7 @@ Save Changes In User Management Setting
 AdminGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD
     [Arguments]  @{UIadminGroupsList}
-    ${dashnoardConfig}   Oc Get   kind=OdhDashboardConfig   namespace=redhat-ods-applications  field_selector=metadata.name=odh-dashboard-config
+    ${dashnoardConfig}   Oc Get   kind=OdhDashboardConfig   namespace=${APPLICATIONS_NAMESPACE}  field_selector=metadata.name=odh-dashboard-config
     ${adminGroups}  Set Variable  ${dashnoardConfig[0]["spec"]["groupsConfig"]["adminGroups"]}
     @{adminGroupsList}  Split String  ${adminGroups}  ,
     Lists Should Be Equal      ${UIadminGroupsList}  ${adminGroupsList}
@@ -79,7 +79,7 @@ AdminGroups In OdhDashboardConfig CRD Should Be
 AllowedGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD
     [Arguments]   @{UIallowedGroupList}
-    ${dashnoardConfig}   Oc Get   kind=OdhDashboardConfig   namespace=redhat-ods-applications  field_selector=metadata.name=odh-dashboard-config
+    ${dashnoardConfig}   Oc Get   kind=OdhDashboardConfig   namespace=${APPLICATIONS_NAMESPACE}  field_selector=metadata.name=odh-dashboard-config
     ${allowedGroups}  Set Variable  ${dashnoardConfig[0]["spec"]["groupsConfig"]["allowedGroups"]}
     @{allowedGroupsList}  Split String  ${allowedGroups}  ,
     Lists Should Be Equal      ${UIallowedGroupList}  ${allowedGroupsList}

@@ -8,7 +8,7 @@ Verify that the must-gather image provides RHODS logs and info
       ...      Tier1
       ...      ODS-505
       Get must-gather logs
-      Verify logs for redhat-ods-applications
+      Verify logs for ${APPLICATIONS_NAMESPACE}
       Verify logs for redhat-ods-operator
       Verify logs for redhat-ods-monitoring
       [Teardown]  Cleanup must-gather logs
@@ -26,11 +26,11 @@ Get must-gather logs
       Directory Should Exist    ${must-gather-dir}
       Directory Should Not Be Empty   ${must-gather-dir}
 
-Verify logs for redhat-ods-applications
-      Directory Should Exist    ${namespaces-log-dir}/redhat-ods-applications
-      Directory Should Not Be Empty    ${namespaces-log-dir}/redhat-ods-applications
-      Directory Should Not Be Empty    ${namespaces-log-dir}/redhat-ods-applications/pods
-      ${log-files}=     Run   find ${namespaces-log-dir}/redhat-ods-applications/pods -type f -name "*.log"
+Verify logs for ${APPLICATIONS_NAMESPACE}
+      Directory Should Exist    ${namespaces-log-dir}/${APPLICATIONS_NAMESPACE}
+      Directory Should Not Be Empty    ${namespaces-log-dir}/${APPLICATIONS_NAMESPACE}
+      Directory Should Not Be Empty    ${namespaces-log-dir}/${APPLICATIONS_NAMESPACE}/pods
+      ${log-files}=     Run   find ${namespaces-log-dir}/${APPLICATIONS_NAMESPACE}/pods -type f -name "*.log"
       Should Not Be Equal    ${log-files}  ${EMPTY}
 
 Verify logs for redhat-ods-operator

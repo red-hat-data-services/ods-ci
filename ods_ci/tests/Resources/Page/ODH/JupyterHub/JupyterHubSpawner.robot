@@ -252,7 +252,7 @@ Spawn Notebook With Arguments  # robocop: disable
     ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
     ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
     ...              ${version} controls if the default or previous version is selected (default | previous)
-    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=s2i-generic-data-science-notebook  ${size}=Small
+    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=science-notebook  ${size}=Small
     ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}
     ...    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
     ...    ${version}=default    &{envs}
@@ -312,7 +312,7 @@ Spawn Notebook With Arguments  # robocop: disable
     END
 
 Spawned Image Check
-    [Documentation]    This Keyword checks that the spawned image matches a given image name
+    [Documentation]    This Keyword checks that the spawned image contains a given image name substring
     ...                (Presumably the one the user wanted to spawn)
     [Arguments]    ${image}    ${version}=default
     ${out} =    Run Cell And Get Output    import os; print(os.environ["JUPYTER_IMAGE"].split("/")[-1].split(":")[0])
@@ -387,7 +387,7 @@ Control Panel Is Visible
 
 Handle Control Panel
    [Documentation]  Handles control panel page
-   Wait Until Page Contains     Stop notebook server    timeout=10s
+   Wait Until Page Contains     Stop notebook server    timeout=30s
    Click Button  Stop notebook server
    Wait Until Page Contains Element  xpath://button[.="Stop server"]
    Click Button  xpath://button[.="Stop server"]
@@ -541,7 +541,7 @@ Fetch Image Tooltip Info
 Spawn Notebooks And Set S3 Credentials
     [Documentation]     Spawn a jupyter notebook server and set the env variables
     ...                 to connect with AWS S3
-    [Arguments]     ${image}=s2i-generic-data-science-notebook
+    [Arguments]     ${image}=science-notebook
     Set Log Level    NONE
     &{S3-credentials} =  Create Dictionary  AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}  AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
     Spawn Notebook With Arguments  image=${image}  envs=&{S3-credentials}
@@ -567,7 +567,7 @@ Handle Bad Gateway Page
 
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
-    [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=s2i-generic-data-science-notebook    ${size}=Small
+    [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=science-notebook    ${size}=Small
     ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}
     ...    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
     ...    ${auth_type}=${TEST_USER.AUTH_TYPE}    &{envs}
@@ -658,4 +658,4 @@ Delete User Notebook CR
     EXCEPT
         Fail    Notebook not found/running for ${user}, cannot stop it
     END
-    OpenShiftLibrary.Oc Delete    kind=Notebook    name=${CR_name}    namespace=rhods-notebooks
+    OpenShiftLibrary.Oc Delete    kind=Notebook    name=${CR_name}    namespace=${NOTEBOOKS_NAMESPACE}

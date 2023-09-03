@@ -43,7 +43,7 @@ Fetch Grafana Pods Info
     ...        None
     ...    Returns:
     ...        grafana_pods_info(list(dict)): Grafana pods selected by label and namespace
-    @{grafana_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=redhat-ods-monitoring    label_selector=app=grafana
+    @{grafana_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=${MONITORING_NAMESPACE}    label_selector=app=grafana
     RETURN    @{grafana_pods_info}
 
 Fetch Grafana Deployments Info
@@ -52,7 +52,7 @@ Fetch Grafana Deployments Info
     ...        None
     ...    Returns:
     ...        grafana_deployments(list(dict)): Grafana deployments selected by label and namespace
-    @{grafana_deployments} =    Oc Get    kind=Deployment    api_version=v1    namespace=redhat-ods-monitoring
+    @{grafana_deployments} =    Oc Get    kind=Deployment    api_version=v1    namespace=${MONITORING_NAMESPACE}
     ...    label_selector=app=grafana
     RETURN    @{grafana_deployments}
 
@@ -62,7 +62,7 @@ Fetch Grafana Services Info
     ...        None
     ...    Returns:
     ...        grafana_services_info(list(dict)): Grafana services selected by name and namespace
-    @{grafana_services_info} =    Oc Get    kind=Service    api_version=v1    name=grafana    namespace=redhat-ods-monitoring
+    @{grafana_services_info} =    Oc Get    kind=Service    api_version=v1    name=grafana    namespace=${MONITORING_NAMESPACE}
     RETURN    @{grafana_services_info}
 
 Fetch Grafana Routes Info
@@ -72,12 +72,12 @@ Fetch Grafana Routes Info
     ...    Returns:
     ...        grafana_routes_info(list(dict)): Grafana routes selected by name and namespace
     @{grafana_routes_info} =    Oc Get    kind=Route    api_version=route.openshift.io/v1    name=grafana
-    ...    namespace=redhat-ods-monitoring
+    ...    namespace=${MONITORING_NAMESPACE}
     RETURN    @{grafana_routes_info}
 
 Verify Grafana ReplicaSets Info
     [Documentation]    Fetchs and verifies information for Grafana replicasets
-    @{grafana_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=redhat-ods-monitoring
+    @{grafana_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=${MONITORING_NAMESPACE}
     ...    label_selector=app=grafana
     OpenShift Resource Field Value Should Be Equal As Strings
     ...     status.readyReplicas    2    @{grafana_replicasets_info}

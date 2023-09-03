@@ -11,7 +11,7 @@ Suite Teardown    Model Serving Suite Teardown
 
 
 *** Variables ***
-${RHODS_NAMESPACE}=    redhat-ods-applications
+${RHODS_NAMESPACE}=    ${APPLICATIONS_NAMESPACE}
 ${PRJ_TITLE}=    model-serving-project-gpu
 ${PRJ_DESCRIPTION}=    project used for model serving tests (with GPUs)
 ${MODEL_NAME}=    vehicle-detection
@@ -42,7 +42,7 @@ Verify GPU Model Deployment Via UI
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
     ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
-    ${requests} =    Get Container Requests    namespace=${PRJ_TITLE}    
+    ${requests} =    Get Container Requests    namespace=${PRJ_TITLE}
     ...    label=name=modelmesh-serving-${runtime_pod_name}    container_name=ovms
     Should Contain    ${requests}    "nvidia.com/gpu": "1"
     ${node} =    Get Node Pod Is Running On    namespace=${PRJ_TITLE}    label=name=modelmesh-serving-${runtime_pod_name}

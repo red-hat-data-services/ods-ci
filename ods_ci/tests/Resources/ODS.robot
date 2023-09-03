@@ -34,13 +34,13 @@ Scale DeploymentConfig
 
 Restore Default Deployment Sizes
     [Documentation]    Restores the default sizes to all deployments in ODS
-    ODS.Scale Deployment    redhat-ods-applications    notebook-controller-deployment     replicas=1
-    ODS.Scale Deployment    redhat-ods-applications    odh-notebook-controller-manager    replicas=1
-    ODS.Scale Deployment    redhat-ods-applications    rhods-dashboard                    replicas=2
-    ODS.Scale Deployment    redhat-ods-monitoring      blackbox-exporter                  replicas=1
-    ODS.Scale Deployment    redhat-ods-monitoring      grafana                            replicas=2
-    ODS.Scale Deployment    redhat-ods-monitoring      prometheus                         replicas=1
-    ODS.Scale Deployment    redhat-ods-operator        rhods-operator                     replicas=1    sleep-time=30s
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment     replicas=1
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=1
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard                    replicas=2
+    ODS.Scale Deployment    ${MONITORING_NAMESPACE}      blackbox-exporter                  replicas=1
+    ODS.Scale Deployment    ${MONITORING_NAMESPACE}      grafana                            replicas=2
+    ODS.Scale Deployment    ${MONITORING_NAMESPACE}      prometheus                         replicas=1
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                     replicas=1    sleep-time=30s
 
 Verify "Usage Data Collection" Key
     [Documentation]    Verifies that "Usage Data Collection" is using the expected segment.io key
@@ -52,7 +52,7 @@ Get "Usage Data Collection" Key
     [Documentation]    Returns the segment.io key used for usage data collection
 
     ${rc}    ${usage_data_collection_key_base64}=    Run And Return Rc And Output
-    ...    oc get secret odh-segment-key -n redhat-ods-applications -o jsonpath='{.data.segmentKey}'
+    ...    oc get secret odh-segment-key -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.data.segmentKey}'
     Should Be Equal As Integers    ${rc}    0    msg=odh-segment-key secret not found or not having the right format
 
     ${usage_data_collection_key}=    Evaluate
@@ -64,7 +64,7 @@ Is Usage Data Collection Enabled
     [Documentation]    Returns a boolean with the value of configmap odh-segment-key-config > segmentKeyEnabled
     ...    which can be seen also in ODS Dashboard > Cluster Settings > "Usage Data Collection"
     ${usage_data_collection_enabled}=    Run
-    ...    oc get configmap odh-segment-key-config -n redhat-ods-applications -o jsonpath='{.data.segmentKeyEnabled}'
+    ...    oc get configmap odh-segment-key-config -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.data.segmentKeyEnabled}'
     ${usage_data_collection_enabled}=    Convert To Boolean    ${usage_data_collection_enabled}
     RETURN    ${usage_data_collection_enabled}
 
@@ -101,7 +101,7 @@ Apply Access Groups Settings
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}
-    ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n redhat-ods-applications --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
+    ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
     Should Be Equal As Integers	${return_code}	 0    msg=Pathc failed
 
 Set Default Access Groups Settings
@@ -143,20 +143,20 @@ Wait Until RHODS Uninstallation Is Completed
 RHODS Namespaces Should Not Exist
     [Documentation]     Checks if the RHODS namespace do not exist on openshift
     Verify Project Does Not Exists  rhods-notebook
-    Verify Project Does Not Exists  redhat-ods-monitoring
-    Verify Project Does Not Exists  redhat-ods-applications
-    Verify Project Does Not Exists  redhat-ods-operator
+    Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
+    Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
+    Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
 
 Get Notification Email From Addon-Managed-Odh-Parameters Secret
     [Documentation]    Gets email form addon-managed-odh-parameters secret
-    ${resp} =    Oc Get  kind=Secret  namespace=redhat-ods-operator  name=addon-managed-odh-parameters
+    ${resp} =    Oc Get  kind=Secret  namespace=${OPERATOR_NAMESPACE}  name=addon-managed-odh-parameters
     ${resp} =  Evaluate  dict(${resp[0]["metadata"]["annotations"]["kubectl.kubernetes.io/last-applied-configuration"]})
     RETURN  ${resp["stringData"]["notification-email"]}
 
 Notification Email In Alertmanager ConfigMap Should Be
     [Documentation]    Check expected email is present in Alertmanager
     [Arguments]        ${email_to_check}
-    ${resp} =    Run  oc get configmap alertmanager -n redhat-ods-monitoring -o jsonpath='{.data.alertmanager\\.yml}' | yq '.receivers[] | select(.name == "user-notifications") | .email_configs[0].to'
+    ${resp} =    Run  oc get configmap alertmanager -n ${MONITORING_NAMESPACE} -o jsonpath='{.data.alertmanager\\.yml}' | yq '.receivers[] | select(.name == "user-notifications") | .email_configs[0].to'
     Should Be Equal As Strings    "${email_to_check}"    ${resp}
 
 Email In Addon-Managed-Odh-Parameters Secret Should Be
@@ -231,7 +231,7 @@ OpenShift Resource Component Should Contain Field
 Verify RHODS Dashboard CR Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
     [Arguments]        &{exp_values}
-    ${config_cr}=  Oc Get  kind=OdhDashboardConfig  namespace=redhat-ods-applications  name=odh-dashboard-config
+    ${config_cr}=  Oc Get  kind=OdhDashboardConfig  namespace=${APPLICATIONS_NAMESPACE}  name=odh-dashboard-config
     FOR    ${json_path}    IN    @{exp_values.keys()}
         ${value}=    Extract Value From JSON Path    json_dict=${config_cr[0]}
         ...    path=${json_path}
@@ -246,22 +246,22 @@ Verify Default Access Groups Settings
 
 Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding
-    ${grafana_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
+    ${grafana_port_forwarding_process} =  Start Process   oc -n ${MONITORING_NAMESPACE} port-forward $(oc get pods -n ${MONITORING_NAMESPACE} | grep grafana | awk '{print $1}' | head -n 1) 3001  shell=True  # robocop: disable
     RETURN    ${grafana_port_forwarding_process}
 
 Enable Access To Prometheus Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Prometheus Using OpenShift Port-Forwarding
-    ${promethues_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep prometheus | awk '{print $1}') 9090  shell=True  # robocop: disable
+    ${promethues_port_forwarding_process} =  Start Process   oc -n ${MONITORING_NAMESPACE} port-forward $(oc get pods -n ${MONITORING_NAMESPACE} | grep prometheus | awk '{print $1}') 9090  shell=True  # robocop: disable
     RETURN    ${promethues_port_forwarding_process}
 
 Enable Access To Alert Manager Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Alert Manager Using OpenShift Port-Forwarding
-    ${alertmanager_port_forwarding_process} =  Start Process   oc -n redhat-ods-monitoring port-forward $(oc get pods -n redhat-ods-monitoring | grep prometheus | awk '{print $1}') 9093   shell=True  # robocop: disable
+    ${alertmanager_port_forwarding_process} =  Start Process   oc -n ${MONITORING_NAMESPACE} port-forward $(oc get pods -n ${MONITORING_NAMESPACE} | grep prometheus | awk '{print $1}') 9093   shell=True  # robocop: disable
     RETURN    ${alertmanager_port_forwarding_process}
 
 Get Grafana Url
     [Documentation]  Returns Grafana URL
-    ${grafana_url} =    Run    oc get routes/grafana -n redhat-ods-monitoring -o json | jq -r '.spec.host'
+    ${grafana_url} =    Run    oc get routes/grafana -n ${MONITORING_NAMESPACE} -o json | jq -r '.spec.host'
     RETURN    ${grafana_url}
 
 Verify CPU And Memory Requests And Limits Are Defined For Pod
@@ -385,7 +385,7 @@ Fetch Cluster Worker Nodes Info
 
 Delete RHODS Config Map
     [Documentation]    Deletes the given config map. It assumes the namespace is
-    ...                redhat-ods-applications, but can be changed using the
+    ...                ${APPLICATIONS_NAMESPACE}, but can be changed using the
     ...                corresponding argument
-    [Arguments]     ${name}  ${namespace}=redhat-ods-applications
+    [Arguments]     ${name}  ${namespace}=${APPLICATIONS_NAMESPACE}
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}

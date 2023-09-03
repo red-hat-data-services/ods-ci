@@ -27,8 +27,8 @@ ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
 ${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="workbench-image-version-selection"]
-&{IMAGE_ID_MAPPING}=                 Minimal Python=s2i-minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
-...                                  Standard Data Science=s2i-generic-data-science-notebook    TensorFlow=tensorflow
+&{IMAGE_ID_MAPPING}=                 Minimal Python=minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
+...                                  Standard Data Science=data-science-notebook    TensorFlow=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]

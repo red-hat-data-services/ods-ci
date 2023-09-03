@@ -61,8 +61,8 @@ Check If Pod Exists
     ELSE
         Should Be Equal    ${status}    PASS
     END
-    
-    
+
+
 
 Verify Operator Pod Status
     [Documentation]    Verify Pod status
@@ -189,7 +189,7 @@ Get User Server Node
     [Documentation]    Returns the name of the node on which the user's server pod is running
     [Arguments]    ${username}=${TEST_USER.USERNAME}
     ${pod_name} =    Get User Notebook Pod Name    ${username}
-    ${node_name} =    Run    oc describe Pod ${pod_name} -n rhods-notebooks | grep Node: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"/"); print b[1]}'
+    ${node_name} =    Run    oc describe Pod ${pod_name} -n ${NOTEBOOKS_NAMESPACE} | grep Node: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"/"); print b[1]}'
     RETURN    ${node_name}
 
 Go To Log Tab And Select A Container
@@ -204,7 +204,7 @@ Go To Log Tab And Select A Container
 
 Get Pod Tolerations
     [Documentation]    Returns the list of pod tolerations
-    [Arguments]    ${pod_name}    ${ns}=rhods-notebooks
+    [Arguments]    ${pod_name}    ${ns}=${NOTEBOOKS_NAMESPACE}
     OpenShiftLibrary.Search Pods    ${pod_name}    namespace=${ns}
     ${output} =    Run   oc describe pod ${pod_name} -n ${ns}
     Create File    podspec.txt    ${output}

@@ -101,8 +101,10 @@ Verify RHODS Installation
     Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=1200
     Log  Verified redhat-ods-monitoring  console=yes
   END
-  Oc Get  kind=Namespace  field_selector=metadata.name=rhods-notebooks
-  Log  "Verified rhods-notebook"
+  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta" or "${UPDATE_CHANNEL}" == "odh-nightlies") or "${workbenches}" == "true"  # robocop: disable
+    Oc Get  kind=Namespace  field_selector=metadata.name=rhods-notebooks
+    Log  "Verified rhods-notebook"
+  END
 
 Verify Builds In redhat-ods-applications
   Log  Verifying Builds  console=yes
@@ -208,8 +210,13 @@ Is Component Enabled
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}\[]'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while getting component status
-    IF    ${output} == "Managed"
-        RETURN    true
-    ELSE IF    ${output} == "Removed"
-        RETURN    false
+    ${n_output} =    Evaluate    '${output}' == ''
+    IF  ${n_output}   
+          RETURN    false
+    ELSE
+         IF    ${output} == "Removed"
+               RETURN    false
+         ELSE IF    ${output} == "Managed"
+              RETURN    true
+         END
     END

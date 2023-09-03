@@ -42,12 +42,12 @@ Open Browser And Start Notebook As First User
     IF    ${authorization_required}    Authorize Jupyterhub Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook
+    Spawn Notebook With Arguments    image=minimal-notebook
     @{old_browser} =    Get Browser Ids
     ${first_browser_id} =    Set Variable    ${old_browser}[0]
     Set Suite Variable    ${first_browser_id}
     ${pod_name} =    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
-    ${pod_ip} =    Run    oc get pod ${pod_name} -o jsonpath='{.status.podIP}' -n rhods-notebooks
+    ${pod_ip} =    Run    oc get pod ${pod_name} -o jsonpath='{.status.podIP}' -n ${NOTEBOOKS_NAMESPACE}
     Set Suite Variable    ${pod_ip}
     ${pod_login_name} =    Get User CR Notebook Name    ${TEST_USER.USERNAME}
     Set Suite Variable    ${pod_login_name}
@@ -65,13 +65,13 @@ Open Browser And Start Notebook As Second User With Env Vars
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     &{first_pod_details} =  Create Dictionary  pod_ip=${pod_ip}  pod_login=${pod_login_name}
-    Spawn Notebook With Arguments    image=s2i-minimal-notebook    username=${TEST_USER_2.USERNAME}
+    Spawn Notebook With Arguments    image=minimal-notebook    username=${TEST_USER_2.USERNAME}
     ...    password=${TEST_USER_2.PASSWORD}    auth_type=${TEST_USER_2.AUTH_TYPE}    envs=&{first_pod_details}
 
 Run Additional Notebook Cells
     [Documentation]    Finalize attack notebook cells
     ${pod_name_user2} =    Get User Notebook Pod Name    ${TEST_USER_2.USERNAME}
-    ${pod_ip_user2} =    Run    oc get pod ${pod_name_user2} -o jsonpath='{.status.podIP}' -n rhods-notebooks
+    ${pod_ip_user2} =    Run    oc get pod ${pod_name_user2} -o jsonpath='{.status.podIP}' -n ${NOTEBOOKS_NAMESPACE}
     ${tmp} =    Run Cell And Get Output    my_pod_ip='${pod_ip_user2}'
     ${tmp2} =    Run Cell And Get Output    server_ips = scan_pods()
     ${out1} =    Run Cell And Get Output    check_jupyter_logins(server_ips)

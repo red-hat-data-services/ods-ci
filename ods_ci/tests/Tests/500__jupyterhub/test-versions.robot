@@ -32,7 +32,7 @@ Open JupyterHub Spawner Page
 Verify Libraries in Minimal Image
     [Documentation]    Verifies libraries in Minimal Python image
     [Tags]    Sanity
-    Verify List Of Libraries In Image    s2i-minimal-notebook    JupyterLab-git ${JupyterLab-git_Version}
+    Verify List Of Libraries In Image    minimal-notebook    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in Cuda Image
     [Documentation]    Verifies libraries in Minimal Python image
@@ -42,7 +42,7 @@ Verify Libraries in Cuda Image
 Verify Libraries in SDS Image
     [Documentation]    Verifies libraries in Standard Data Science image
     [Tags]    Sanity
-    Verify List Of Libraries In Image    s2i-generic-data-science-notebook    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}
+    Verify List Of Libraries In Image    science-notebook    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}
     ...    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in PyTorch Image
@@ -94,7 +94,7 @@ Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
     ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
     IF    ${version_check}==False
-       Wait Until All Builds Are Complete    namespace=redhat-ods-applications    build_timeout=45m
+       Wait Until All Builds Are Complete    namespace=${APPLICATIONS_NAMESPACE}    build_timeout=45m
     END
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard

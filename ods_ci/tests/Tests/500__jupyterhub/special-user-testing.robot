@@ -19,6 +19,7 @@ Suite Teardown   End Web Test
 Test Special Usernames
     [Tags]  Smoke
     ...     Tier1
+    ...     OpenDataHub
     ...     ODS-257  ODS-532
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

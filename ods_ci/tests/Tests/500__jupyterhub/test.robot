@@ -47,8 +47,8 @@ Can Spawn Notebook
     ...     Tier1
     ...     ODS-1808
     Fix Spawner Status
-    Select Notebook Image  s2i-generic-data-science-notebook
-    Select Notebook Image  s2i-minimal-notebook
+    Select Notebook Image  science-notebook
+    Select Notebook Image  minimal-notebook
     Select Container Size  Small
     Remove All Spawner Environment Variables
     # Cannot set number of required GPUs on clusters without GPUs anymore
@@ -101,7 +101,7 @@ Verify Message That Image Builds Are In Progress
     ${new_buildname}=  Start New Pytorch Build
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     RHODS Notification Drawer Should Contain  message=Notebook images are building
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Complete
+    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}    build_name=${new_buildname}   expected_status=Complete
     RHODS Notification Drawer Should Contain  message=All notebook image builds are complete
 
 
@@ -112,13 +112,13 @@ JupyterHub Testing Suite Setup
 
 Delete Last Pytorch Build
     [Documentation]     Searches for last build which contains pytorch and deletes it
-    ${build_name}=  Search Last Build  namespace=redhat-ods-applications    build_name_includes=pytorch
-    Delete Build    namespace=redhat-ods-applications    build_name=${build_name}
+    ${build_name}=  Search Last Build  namespace=${APPLICATIONS_NAMESPACE}    build_name_includes=pytorch
+    Delete Build    namespace=${APPLICATIONS_NAMESPACE}    build_name=${build_name}
 
 Start New Pytorch Build
     [Documentation]     Starts new Pytorch build and waits until status is running
-    ${new_buildname}=  Start New Build    namespace=redhat-ods-applications    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
-    Wait Until Build Status Is    namespace=redhat-ods-applications    build_name=${new_buildname}   expected_status=Running
+    ${new_buildname}=  Start New Build    namespace=${APPLICATIONS_NAMESPACE}    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
+    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}    build_name=${new_buildname}   expected_status=Running
     RETURN    ${new_buildname}
 
 Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server

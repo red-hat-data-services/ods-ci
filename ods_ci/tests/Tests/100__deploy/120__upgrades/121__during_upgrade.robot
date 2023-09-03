@@ -21,7 +21,7 @@ Long Running Jupyter Notebook
     [Tags]  Upgrade
     Launch Notebook
     Add And Run JupyterLab Code Cell In Active Notebook  ${CODE}
-    ${return_code}    ${timestamp}    Run And Return Rc And Output   oc get pod -n rhods-notebooks jupyter-nb-ldap-2dadmin2-0 --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'   #robocop:disable
+    ${return_code}    ${timestamp}    Run And Return Rc And Output   oc get pod -n ${NOTEBOOKS_NAMESPACE} jupyter-nb-ldap-2dadmin2-0 --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'   #robocop:disable
     Should Be Equal As Integers    ${return_code}     0
     Set Global Variable    ${timestamp}   #robocop: disable
     Close Browser
@@ -30,12 +30,12 @@ Upgrade RHODS
     [Documentation]    Appprove the install plan for the upgrade
     [Tags]  ODS-1766
     ...     Upgrade
-    ${return_code}    ${output}    Run And Return Rc And Output   oc patch installplan $(oc get installplans -n redhat-ods-operator | grep -v NAME | awk '{print $1}') -n redhat-ods-operator --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'   #robocop:disable
+    ${return_code}    ${output}    Run And Return Rc And Output   oc patch installplan $(oc get installplans -n ${OPERATOR_NAMESPACE} | grep -v NAME | awk '{print $1}') -n ${OPERATOR_NAMESPACE} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'   #robocop:disable
     Should Be Equal As Integers    ${return_code}     0   msg=Error while upgradeing RHODS
     Sleep  10s      reason=wait for ten second until operator goes into init state
-    ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n redhat-ods-operator -l name=rhods-operator --no-headers --output='custom-columns=STATUS:.status.phase'    #robocop:disable
+    ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n ${OPERATOR_NAMESPACE} -l name=rhods-operator --no-headers --output='custom-columns=STATUS:.status.phase'    #robocop:disable
     Should Contain    ${output}    Pending
-    OpenShiftLibrary.Wait For Pods Status  namespace=redhat-ods-operator  timeout=300
+    OpenShiftLibrary.Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=300
 
 TensorFlow Image Test
     [Documentation]   Run basic tensorflow notebook during upgrade
@@ -56,7 +56,7 @@ PyTorch Image Workload Test
 *** Keywords ***
 Launch Notebook
     [Documentation]  Launch notebook for the suite
-    [Arguments]   ${notbook_image}=s2i-minimal-notebook   ${username}=${TEST_USER2.USERNAME}   ${password}=${TEST_USER2.PASSWORD}   ${auth_type}=${TEST_USER2.AUTH_TYPE}  #robocop: disable
+    [Arguments]   ${notbook_image}=minimal-notebook   ${username}=${TEST_USER2.USERNAME}   ${password}=${TEST_USER2.PASSWORD}   ${auth_type}=${TEST_USER2.AUTH_TYPE}  #robocop: disable
     Begin Web Test     username=${username}  password=${password}  auth_type=${auth_type}
     Login To RHODS Dashboard    ${username}  ${password}   ${auth_type}
     Wait For RHODS Dashboard To Load

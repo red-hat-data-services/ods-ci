@@ -18,7 +18,7 @@ Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
-${NAMESPACE}    redhat-ods-operator
+${NAMESPACE}    ${OPERATOR_NAMESPACE}
 ${NUMBER}       1500
 
 
@@ -66,6 +66,6 @@ Basic Dashboard Test Verification
     Close Browser
 Verify Pods Status
     [Documentation]    Verify each pod status in the rhods namespace
-    Wait For Pods Status  namespace=redhat-ods-applications  timeout=60
-    Wait For Pods Status  namespace=redhat-ods-operator  timeout=60
-    Wait For Pods Status  namespace=redhat-ods-monitoring  timeout=60
+    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60
+    Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=60
+    Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=60

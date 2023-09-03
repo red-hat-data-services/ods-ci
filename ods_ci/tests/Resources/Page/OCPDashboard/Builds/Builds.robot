@@ -34,7 +34,7 @@ Dependent Build should not Present
      ...        ELSE    FAIL       Attached Build to Build config is not deleted
 
 Check Image Build Status
-  [Arguments]  ${target_status}     ${build_name}   ${namespace}=redhat-ods-applications
+  [Arguments]  ${target_status}     ${build_name}   ${namespace}=${APPLICATIONS_NAMESPACE}
   ${build_status}=  Get Build Status    namespace=${namespace}  build_search_term=${build_name}
   IF    "${build_status}" == "${target_status}"
   ...    Log   The '${build_name}' image match the expected target status

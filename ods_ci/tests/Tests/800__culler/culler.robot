@@ -26,7 +26,7 @@ Verify Default Culler Timeout
     Disable Notebook Culler
     # When disabled the cm doesn't exist, expect error
     ${configmap} =  Run Keyword And Expect Error  STARTS: ResourceOperationFailed: Get failed
-    ...    OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config    namespace=redhat-ods-applications
+    ...    OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config    namespace=${APPLICATIONS_NAMESPACE}
     Close Browser
 
 Verify Culler Timeout Can Be Updated
@@ -77,7 +77,7 @@ Verify That "Stop Idle Notebook" Setting Is Not Overwritten After Restart Of Ope
     [Tags]    Tier2
     ...       ODS-1607
     Modify Notebook Culler Timeout    ${CUSTOM_CULLER_TIMEOUT}
-    Oc Delete    kind=Pod     namespace=redhat-ods-operator    label_selector=name=rhods-operator
+    Oc Delete    kind=Pod     namespace=${OPERATOR_NAMESPACE}    label_selector=name=rhods-operator
     sleep   5    msg=waiting time for the operator pod to be replaced with new one
     Reload Page
     Wait Until Page Contains Element    xpath://input[@id="culler-timeout-unlimited"]
@@ -93,12 +93,12 @@ Spawn Minimal Image
     [Documentation]    Spawn a minimal image
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=s2i-minimal-notebook  size=Small
+    Spawn Notebook With Arguments  image=minimal-notebook  size=Small
 
 Get Notebook Culler Pod Name
     [Documentation]    Finds the current culler pod and returns the name
     ${culler_pod} =  OpenShiftLibrary.Oc Get  kind=Pod
-    ...    label_selector=component.opendatahub.io/name=kf-notebook-controller  namespace=redhat-ods-applications
+    ...    label_selector=component.opendatahub.io/name=kf-notebook-controller  namespace=${APPLICATIONS_NAMESPACE}
     ${culler_pod_name} =  Set Variable  ${culler_pod[0]}[metadata][name]
     Log  ${culler_pod}
     Log  ${culler_pod_name}
@@ -117,14 +117,14 @@ Get And Verify Notebook Culler Timeout
 Get Notebook Culler Timeout From Configmap
     [Documentation]    Gets the current culler timeout from configmap
     ${current_timeout} =  OpenShiftLibrary.Oc Get  kind=ConfigMap  name=notebook-controller-culler-config
-    ...    namespace=redhat-ods-applications  fields=['data.CULL_IDLE_TIME']
+    ...    namespace=${APPLICATIONS_NAMESPACE}  fields=['data.CULL_IDLE_TIME']
     ${current_timeout} =  Set Variable  ${current_timeout[0]['data.CULL_IDLE_TIME']}
     RETURN  ${current_timeout}
 
 Get Notebook Culler Timeout From Culler Pod
     [Documentation]    Gets the current culler timeout from culler pod
     ${CULLER_POD} =  Get Notebook Culler Pod Name
-    ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -n redhat-ods-applications -- printenv CULL_IDLE_TIME  # robocop: disable
+    ${culler_env_timeout} =  Run  oc exec ${CULLER_POD} -n ${APPLICATIONS_NAMESPACE} -- printenv CULL_IDLE_TIME  # robocop: disable
     RETURN  ${culler_env_timeout}
 
 Teardown
@@ -162,7 +162,7 @@ Check If Server Pod Still Exists
     ...    in order to confirm that it still exists and wasn't deleted
     ...    by the notebook culler.
     ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
-    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=rhods-notebooks
+    OpenShiftLibrary.Search Pods  ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
 
 Spawn Server And Run Notebook Which Will Not Keep Server Active
     [Documentation]    This keyword spawns a server, then clones a Git Repo and runs a notebook
@@ -186,7 +186,7 @@ Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
     FOR  ${index}  IN RANGE  ${loop_control}
         ${culled} =  Run Keyword And Return Status  Run Keyword And Expect Error
         ...    Pods not found in search  OpenShiftLibrary.Search Pods
-        ...    ${notebook_pod_name}  namespace=rhods-notebooks
+        ...    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
         Exit For Loop If  ${culled}==True
         Sleep  30s
         ${drift} =  Evaluate  ${drift}+${30}

@@ -3,6 +3,7 @@ Documentation     Collection of tests to validate the model serving stack for La
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
+Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
 # Suite Teardown
 
@@ -43,6 +44,8 @@ ${FLAN_MODEL_S3_DIR}=    flan-t5-small
 ${BLOOM_MODEL_S3_DIR}=    bloom-560m
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
+${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
+${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
 
 
 *** Test Cases ***
@@ -53,29 +56,32 @@ Verify External Dependency Operators Can Be Deployed
 Verify User Can Serve And Query A Model
     [Tags]    ODS-2341    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${TEST_NS}
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=1
-    [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Tags]    ODS-2371    WatsonX
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
+    ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
@@ -83,19 +89,51 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
-    [Teardown]    Clean Up Test Project    test_ns=${TEST_NS}
+    ...    namespace=${test_namespace}
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
+
+Verify User Can Deploy Multiple Models In Different Namespaces
+    [Tags]    ODS-2378   WatsonX
+    [Setup]    Run Keywords    Set Project And Runtime    namespace=watsonx-multi1
+    ...        AND
+    ...        Set Project And Runtime    namespace=watsonx-multi2
+    ${model_one_name}=    Set Variable    bloom-560m-caikit
+    ${model_two_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names_ns_1}=    Create List    ${model_one_name}
+    ${models_names_ns_2}=    Create List    ${model_two_name}
+    Compile Inference Service YAML    isvc_name=${model_one_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${BLOOM_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=watsonx-multi1
+    Compile Inference Service YAML    isvc_name=${model_two_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=watsonx-multi2
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    ...    namespace=watsonx-multi1
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    ...    namespace=watsonx-multi2
+    Query Models And Check Responses Multiple Times    models_names=${models_names_ns_1}    n_times=3
+    ...    namespace=watsonx-multi1
+    Query Models And Check Responses Multiple Times    models_names=${models_names_ns_2}    n_times=3
+    ...    namespace=watsonx-multi2
+    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=watsonx-multi1    isvc_names=${models_names_ns_1}
+    ...           AND
+    ...           Clean Up Test Project    test_ns=watsonx-multi2    isvc_names=${models_names_ns_2}
 
 Verify Model Upgrade Using Canaray Rollout
     [Tags]    ODS-2372    WatsonX
@@ -144,33 +182,37 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
 
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Tags]    ODS-2376    WatsonX
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
+    ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    ...    min_replicas=2
+    ...    min_replicas=1
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${TEST_NS}    exp_replicas=2
+    ...    namespace=${test_namespace}    exp_replicas=1
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${TEST_NS}    exp_replicas=3
+    ...    namespace=${test_namespace}    exp_replicas=3
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${TEST_NS}
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${TEST_NS}    exp_replicas=1
+    ...    namespace=${test_namespace}    exp_replicas=1
     Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
-    [Teardown]   Clean Up Test Project    test_ns=${TEST_NS}
+    ...    namespace=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
 Verify User Can Autoscale Using Concurrency
@@ -189,10 +231,9 @@ Verify User Can Autoscale Using Concurrency
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-con
     ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-
     FOR    ${index}    IN RANGE    30
            Query Model With GRPCURL   host=${host}    port=443
-           ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+           ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}
            ...    json_body=${body}    json_header=${header}
            ...    insecure=${TRUE}     background=${TRUE}
     END
@@ -243,12 +284,78 @@ Verify User Can Validate Scale To Zero
     [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
     ...    isvc_names=${model_name}
 
+Verify User Can Set Requests And Limits For A Model
+    [Tags]    ODS-2380    WatsonX
+    [Setup]    Set Project And Runtime    namespace=hw-res
+    ${test_namespace}=    Set Variable    hw-res
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    ${requests}=    Create Dictionary    cpu=1    memory=2Gi
+    ${limits}=    Create Dictionary    cpu=2    memory=4Gi
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    ...    requests_dict=${requests}    limits_dict=${limits}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=1
+    ...    namespace=${test_namespace}
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
+    ${new_requests}=    Create Dictionary    cpu=2    memory=3Gi
+    Set Model Hardware Resources    model_name=${flan_model_name}    namespace=hw-res
+    ...    requests=${new_requests}    limits=${NONE}
+    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    exp_replicas=1
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${model_name}
+
+Verify Model Can Be Serverd And Query On A GPU Node
+    [Tags]    ODS-2381    WatsonX    Resource-GPU
+    [Setup]    Set Project And Runtime    namespace=watsonx-gpu
+    ${test_namespace}=    Set Variable    watsonx-gpu
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_name}
+    ${requests}=    Create Dictionary    nvidia.com/gpu=1
+    ${limits}=    Create Dictionary    nvidia.com/gpu=1
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    ...    requests_dict=${requests}    limits_dict=${limits}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
+    Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=5
+    ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
+    ...    streamed_response=${TRUE}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${model_name}
+
+
 *** Keywords ***
 Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
-    RHOSi Setup
+    # RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
         Install Service Mesh Stack
         Deploy Service Mesh CRs
@@ -272,7 +379,8 @@ Clean Up Test Project
     ...    servicemesh_ns=${SERVICEMESH_CR_NS}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
-
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s
+    Should Be Equal As Integers    ${rc}    ${0}
 
 Load Expected Responses
     [Documentation]    Loads the json file containing the expected answer for each
@@ -419,6 +527,7 @@ Deploy Serverless CRs
     ...    namespace=${SERVERLESS_CR_NS}
     Wait For Pods To Be Ready    label_selector=app=autoscaler
     ...    namespace=${SERVERLESS_CR_NS}
+    Enable Toleration Feature In KNativeServing    knative_serving_ns=${SERVERLESS_CR_NS}
 
 Configure KNative Gateways
     [Documentation]    Sets up the KNative (Serverless) Gateways
@@ -526,6 +635,7 @@ Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
     ...            ${min_replicas}=1   ${scaleTarget}=1   ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
+    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
     Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -556,6 +666,28 @@ Compile Inference Service YAML
         ${rc}    ${out}=    Run And Return Rc And Output
         ...    sed -i 's/{{CanaryTrafficPercent}}/${canaryTrafficPercent}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     END
+    IF    ${requests_dict} == &{EMPTY}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    yq -i 'del(.spec.predictor.model.resources.requests)' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ELSE
+        Log    ${requests_dict}
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
+            Log    ${index}- ${resource}:${requests_dict}[${resource}]
+            ${rc}    ${out}=    Run And Return Rc And Output
+            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        END
+    END
+    IF    ${limits_dict} == &{EMPTY}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    yq -i 'del(.spec.predictor.model.resources.limits)' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ELSE
+        Log    ${limits_dict}
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
+            Log    ${index}- ${resource}:${limits_dict}[${resource}]
+            ${rc}    ${out}=    Run And Return Rc And Output
+            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        END
+    END
 
 Model Response Should Match The Expectation
     [Documentation]    Checks that the actual model response matches the expected answer.
@@ -563,32 +695,45 @@ Model Response Should Match The Expectation
     ...                   - to ensure we are getting an answer from the model (e.g., not an empty text)
     ...                   - to check that we receive the answer from the right model
     ...                when multiple ones are deployed
-    [Arguments]    ${model_response}    ${model_name}    ${query_idx}
-    Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]
-    ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
-    ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}
-    ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
-    ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
-    Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+    [Arguments]    ${model_response}    ${model_name}    ${query_idx}    ${streamed_response}=${FALSE}
+    IF    ${streamed_response} == ${FALSE}
+        Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]
+        ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
+        ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}
+        ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
+        ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
+        Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+    ELSE
+        ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    \\s+    ${EMPTY}
+        ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
+        ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
+        ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    [-]?\\d.\\d+    <logprob_removed>
+        Log    ${cleaned_response_text}
+        ${cleaned_exp_response_text}=    Replace String Using Regexp
+        ...    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][streamed_response_text]
+        ...    [-]?\\d.\\d+    <logprob_removed>
+        Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+    END
 
 Query Models And Check Responses Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
-    [Arguments]    ${models_names}    ${n_times}=10
+    [Arguments]    ${models_names}    ${namespace}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
+    ...            ${streamed_response}=${FALSE}
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
         FOR    ${index}    ${model_name}    IN ENUMERATE    @{models_names}
             Log    ${index}: ${model_name}
-            ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_name}   namespace=${TEST_NS}
+            ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_name}   namespace=${namespace}
             ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
             ${header}=    Set Variable    'mm-model-id: ${model_name}'
             ${res}=    Query Model With GRPCURL   host=${host}    port=443
-            ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
+            ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
-            ...    insecure=${TRUE}
+            ...    insecure=${TRUE}    skip_res_json=${streamed_response}
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
-            ...    query_idx=0
+            ...    query_idx=0    streamed_response=${streamed_response}
         END
     END
 
@@ -609,6 +754,7 @@ Compile And Query LLM model
     ${header}=    Set Variable    'mm-model-id: ${model_name}'
     IF   '${multiple_query}' != '${EMPTY}'
           Query Models And Check Responses Multiple Times    models_names=${models_name}    n_times=10
+          ...    namespace=${namespace}
     ELSE
           ${res}=      Query Model With GRPCURL   host=${host}    port=443
           ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"

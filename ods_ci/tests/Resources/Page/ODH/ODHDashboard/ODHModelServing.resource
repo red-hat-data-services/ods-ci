@@ -44,7 +44,7 @@ Open Model Serving Home Page
 
 Serve Model
     [Documentation]    Deploys a model via the Model Serving page (NOT the Model Server section of a DSP)
-    ...    the framework should be either "onnx" or "openvino_ir". 
+    ...    the framework should be either "onnx" or "openvino_ir".
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test
     # TODO: Does not work if there's already a model deployed
@@ -56,7 +56,7 @@ Serve Model
     Select Model Server    ${model_server}
     Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
-    IF    ${existing_data_connection}==${TRUE} 
+    IF    ${existing_data_connection}==${TRUE}
         # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
         # Selected by default, let's skip for now
         Select Existing Data Connection    ${data_connection_name}
@@ -72,7 +72,7 @@ Serve Model
     Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 
 Select Project
-    [Documentation]    Selects a project in the "deploy model" modal. 
+    [Documentation]    Selects a project in the "deploy model" modal.
     ...    If the user has access to a single project or this is being done from within a DSP
     ...    there's no need to do anything but it checks that the project name is the expected one.
     [Arguments]    ${project_name}
@@ -255,8 +255,13 @@ Remove Namespace From ServiceMeshMemberRoll
     ${rc}    ${ns_idx}=    Run And Return Rc And Output
     ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'
     Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'remove', 'path': '/spec/members/${ns_idx}'}]"
-    Should Be Equal As Integers    ${rc}    ${0}
+    IF    "${ns_idx}" == "null"
+        Log    message=${namespace} was not in the SMMR..
+        ...    level=WARN
+    ELSE
+        ${rc}    ${out}=    Run And Return Rc And Output    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'remove', 'path': '/spec/members/${ns_idx}'}]"
+        Should Be Equal As Integers    ${rc}    ${0}
+    END
 
 Deploy Model Via CLI
     [Documentation]    Deploys a model using Model Serving feature by applying the InfereceService
@@ -271,15 +276,22 @@ Deploy Model Via CLI
 Get KServe Inference Host Via CLI
     [Arguments]    ${isvc_name}    ${namespace}
     ${rc}    ${ksvc_host}=    Run And Return Rc And Output
-    ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
+    ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
+    # ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
 
+Get Current Revision ID
+    [Arguments]    ${model_name}    ${namespace}
+    ${rc}    ${id}=    Run And Return Rc And Output
+    ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${id}
+
 Set Minimum Replicas Number
     [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
-    ${rc}    ${old_revision_id}=    Run And Return Rc And Output
-    ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
+    ${old_revision_id}=    Get Current Revision ID    model_name=${model_name}    namespace=${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch InferenceService ${model_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/predictor/minReplicas', 'value': ${n_replicas}}]"
     Should Be Equal As Integers    ${rc}    ${0}
@@ -294,3 +306,31 @@ Update Scale To Zero For Knative Serving
     [Arguments]    ${serving_name}    ${namespace}    ${status}
     ${rc}    ${out}=    Run And Return Rc And Output    oc patch KnativeServing ${serving_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/config/autoscaler/enable-scale-to-zero', 'value': '${status}'}]"
     Should Be Equal As Integers    ${rc}    ${0}
+
+Set Model Hardware Resources
+    [Arguments]    ${model_name}    ${namespace}    ${requests}=&{EMPTY}    ${limits}=&{EMPTY}
+    IF    ${limits} == ${NONE}
+        ${limits}=    Set Variable    null
+    END
+    IF    ${requests} == ${NONE}
+        ${requests}=    Set Variable    null
+    END
+    ${body}=    Set Variable    {"spec":{"predictor": {"model": {"resources": {"requests": ${requests}, "limits": ${limits} }}}}}
+    ${body}=    Replace String    ${body}    '    "
+    Log    ${body}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc patch isvc ${model_name} -n ${namespace} --type=merge -p '${body}'
+    Should Be Equal As Integers    ${rc}    ${0}
+
+Model Pod Should Be Scheduled On A GPU Node
+    [Documentation]    Checks that the pods with the given ${label_selector} are actually scheduled on
+    ...                a GPU node
+    [Arguments]    ${label_selector}    ${namespace}
+    ${pods}=    Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=${label_selector}
+    FOR    ${index}    ${pod}    IN ENUMERATE    @{pods}
+        Log    ${index}: ${pod}[spec][nodeName]
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc get node ${pod}[spec][nodeName] -ojson | jq '.metadata.labels."nvidia.com/gpu.present"'
+        Should Be Equal As Integers    ${rc}    ${0}
+        Should Be Equal As Strings    ${out}    "true"
+    END

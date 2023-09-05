@@ -570,8 +570,8 @@ Set Up Test OpenShift Project
     END
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${test_ns}
     Should Be Equal As Numbers    ${rc}    ${0}
-    Add Peer Authentication    namespace=${test_ns}
-    Add Namespace To ServiceMeshMemberRoll    namespace=${test_ns}
+    # Add Peer Authentication    namespace=${test_ns}
+    # Add Namespace To ServiceMeshMemberRoll    namespace=${test_ns}
 
 Deploy Caikit Serving Runtime
     [Documentation]    Create the ServingRuntime CustomResource in the test ${namespace}.

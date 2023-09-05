@@ -20,7 +20,7 @@ Install RHODS
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
           Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
           Run    sed -i 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
-          Oc Apply   kind=List   src=t${file_path}cs_apply.yaml
+          Oc Apply   kind=List   src=${file_path}cs_apply.yaml
           Remove File    ${file_path}cs_apply.yml
       ELSE
            FAIL    Provided test envrioment and install type is not supported

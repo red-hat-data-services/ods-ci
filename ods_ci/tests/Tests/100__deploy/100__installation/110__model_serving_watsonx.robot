@@ -9,7 +9,8 @@ Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robo
 
 
 *** Variables ***
-${KSERVE_NS}=    kserve    # will be replaced by ${APPLICATIONS_NAMESPACE}
+${KSERVE_NS}=    ${APPLICATIONS_NAMESPACE}
+
 
 *** Test Cases ***
 Verify KServe Is Shipped
@@ -88,7 +89,7 @@ Verify Kserve Deployment
     @{kserve} =  Oc Get    kind=Pod    namespace=${KSERVE_NS}    api_version=v1
     ...    label_selector=app.kubernetes.io/part-of=kserve
     ${containerNames} =    Create List    manager
-    Verify Deployment    ${kserve}    1    1    ${containerNames}
+    Verify Deployment    ${kserve}    4    1    ${containerNames}
 
 ServingRuntime CustomResourceDefinition Should Exist
     [Documentation]    Checks that the ServingRuntime CRD is present

@@ -49,6 +49,7 @@ Verify RHODS Installation
   ...                   timeout=2000
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified redhat-ods-operator  console=yes
+  # remove the following after DSC introduction? can it be removed wrt. to v1 operator?
   IF  "${UPDATE_CHANNEL}" != "stable" and "${UPDATE_CHANNEL}" != "beta"
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
@@ -230,7 +231,7 @@ Is Component Enabled
     Log    ${output}
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while getting component status
     ${n_output} =    Evaluate    '${output}' == ''
-    IF  ${n_output}   
+    IF  ${n_output}
           RETURN    false
     ELSE
          IF    ${output} == "Removed"

@@ -98,7 +98,7 @@ Is RHODS Version Greater Or Equal Than
     IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
     ${ver} =  Get RHODS version
     ${ver} =  Fetch From Left  ${ver}  -
-    #IF  "1.18" in "${ver}"  RETURN     ${TRUE} #we will enable it once odhnightlies is moved to v2 operator
+    IF  "1.18" in "${ver}"  RETURN     ${TRUE}
     ${comparison} =  GTE  ${ver}  ${target}
     RETURN  ${comparison}
 

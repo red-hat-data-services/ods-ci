@@ -58,7 +58,7 @@ Verify RHODS Installation
     IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
         Wait For Pods Numbers  2
         ...                   namespace=${APPLICATIONS_NAMESPACE}
-        ...                   label_selector=app=rhods-dashboard
+        ...                   label_selector=app=odh-dashboard
         ...                   timeout=1200
     ELSE
         Wait For Pods Numbers  5
@@ -102,10 +102,14 @@ Verify RHODS Installation
   END
   # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
-    Wait For Pods Numbers   3
-    ...                   namespace=${MONITORING_NAMESPACE}
-    ...                   label_selector=prometheus=rhods-model-monitoring
-    ...                   timeout=400
+    IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+      Log  No model monitoring in ODH nightlies  console=yes
+    ELSE
+      Wait For Pods Numbers   3
+      ...                   namespace=${MONITORING_NAMESPACE}
+      ...                   label_selector=prometheus=rhods-model-monitoring
+      ...                   timeout=400
+    END
   END
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
     Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60

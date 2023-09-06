@@ -34,6 +34,7 @@ Install RHODS
   END
 
 Verify RHODS Installation
+  # Needs to be removed ASAP
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
     Set Global Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
     Set Global Variable    ${MONITORING_NAMESPACE}    opendatahub
@@ -53,10 +54,18 @@ Verify RHODS Installation
   END
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
-    Wait For Pods Numbers  5
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=rhods-dashboard
-    ...                   timeout=1200
+    # Needs to be removed ASAP
+    IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+        Wait For Pods Numbers  2
+        ...                   namespace=${APPLICATIONS_NAMESPACE}
+        ...                   label_selector=app=rhods-dashboard
+        ...                   timeout=1200
+    ELSE
+        Wait For Pods Numbers  5
+        ...                   namespace=${APPLICATIONS_NAMESPACE}
+        ...                   label_selector=app=rhods-dashboard
+        ...                   timeout=1200
+    END
   END
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"

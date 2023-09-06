@@ -34,6 +34,12 @@ Install RHODS
   END
 
 Verify RHODS Installation
+  IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+    Set Global Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
+    Set Global Variable    ${MONITORING_NAMESPACE}    opendatahub
+    Set Global Variable    ${OPERATOR_NAMESPACE}    redhat-ods-operator
+    Set Global Variable    ${NOTEBOOKS_NAMESPACE}    opendatahub
+  END
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
   Wait For Pods Numbers  1

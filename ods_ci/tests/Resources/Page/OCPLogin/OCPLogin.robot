@@ -1,12 +1,14 @@
 *** Settings ***
 Documentation  Set of Keywords for OCP login
-Library    OperatingSystem
+Library       OperatingSystem
+Resource      ../LoginPage.robot
+
 *** Keywords ***
 Login To OCP
-  Login To Openshift
-  ...  ${OCP_ADMIN_USER.USERNAME}
-  ...  ${OCP_ADMIN_USER.PASSWORD}
-  ...  ${OCP_ADMIN_USER.AUTH_TYPE}
+    Login To Openshift
+    ...  ${OCP_ADMIN_USER.USERNAME}
+    ...  ${OCP_ADMIN_USER.PASSWORD}
+    ...  ${OCP_ADMIN_USER.AUTH_TYPE}
 
 Login To OCP Using API
   [Documentation]   Login to openshitf using username and password

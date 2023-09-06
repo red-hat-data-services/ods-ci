@@ -18,4 +18,4 @@ results/
 __pycache__/
 robocop.log
 infrastructure_configuration.yaml
-ods-ci.log*
+log/

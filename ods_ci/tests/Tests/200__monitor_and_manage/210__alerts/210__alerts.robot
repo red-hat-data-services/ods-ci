@@ -441,7 +441,8 @@ Alerts Suite Teardown
 
 Teardown PVC Alert Test
     [Documentation]    Deletes user notebook files using the new "Clean Up User Notebook"
-    ...    keyword because "End Web Test" doesn't work well when disk is 100% filled
+    ...    keyword because "End Web Test" doesn't work well when disk is 100% fill
+    ...    ed
     Maybe Close Popup
     Run Keyword And Continue On Failure    Open With JupyterLab Menu    File    Close All Tabs
     Maybe Close Popup

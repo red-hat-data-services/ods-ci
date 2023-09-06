@@ -75,7 +75,7 @@ Can Launch Python3 Smoke Test Notebook
     JupyterLab Code Cell Error Output Should Not Be Visible
 
     #Get the text of the last output cell
-    ${output} =    Get Text    (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    ${output} =   Get Text    (//div[contains(@class,"jp-OutputArea-output")])[last()]
     Should Not Match    ${output}    ERROR*
     Should Be Equal As Strings    ${output}
     ...    [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]

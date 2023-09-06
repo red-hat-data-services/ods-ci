@@ -268,7 +268,7 @@ Spawn Notebook With Arguments  # robocop: disable
             ELSE IF  ${gpu_visible}==False and ${gpus}>0
                 IF    ${index} < ${retries}
                     Sleep    30s    reason=Wait for GPU to free up
-                    SeleniumLibrary.Reload Page
+                    Reload Page
                     Wait Until JupyterHub Spawner Is Ready
                     CONTINUE
                 ELSE
@@ -628,12 +628,12 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
         Fix Spawner Status
         Spawn Notebook With Arguments
     END
-    [Teardown]    SeleniumLibrary.Close All Browsers
+    [Teardown]    Close All Browsers
 
 CleanUp JupyterHub For N Users
     [Documentation]    Cleans JupyterHub for N users
     [Arguments]    ${list_of_usernames}
-    SeleniumLibrary.Close All Browsers
+    Close All Browsers
     FOR    ${username}    IN    @{list_of_usernames}
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
@@ -646,7 +646,7 @@ CleanUp JupyterHub For N Users
         #Fix Spawner Status stops the current notebook, handling the different possible states
         Fix Spawner Status
     END
-    [Teardown]    SeleniumLibrary.Close All Browsers
+    [Teardown]    Close All Browsers
 
 Delete User Notebook CR
     [Documentation]    Delete the `Notebook` CR for a specific user

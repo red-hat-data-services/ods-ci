@@ -11,5 +11,5 @@ Login To OCP
 Login To OCP Using API
   [Documentation]   Login to openshitf using username and password
   [Arguments]    ${username}      ${password}
-  ${rc}    ${out}=    Run And Return Rc And Output    oc login $(oc whoami --show-server) -u ${username} -p ${password}  #robocop:diable
+  ${rc}    ${out}=    Run And Return Rc And Output    oc login $(oc whoami --show-server) -u ${username} -p ${password}  #robocop:disable
   Should Be Equal As Integers    ${rc}    ${0}

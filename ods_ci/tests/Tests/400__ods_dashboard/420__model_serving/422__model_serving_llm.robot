@@ -350,7 +350,7 @@ Verify Model Can Be Serverd And Query On A GPU Node
     ...    isvc_names=${model_name}
 
 Verify Non Admin Can Serve And Query A Model
-    [Tags]    ODS-XXX    WatsonX
+    [Tags]    ODS-2326    WatsonX
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test

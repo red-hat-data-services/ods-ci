@@ -4,6 +4,7 @@ Documentation       Applies RHOSi settings to run the test suites
 Library             RPA.RobotLogListener
 Resource            Page/ODH/Monitoring/Monitoring.resource
 Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
+Resource            Page/OCPLogin/OCPLogin.resource
 Resource    Common.robot
 
 
@@ -40,6 +41,7 @@ Resource    Common.robot
 ...                         Get Data Connection Form Values
 ...                         Fill Data Connection Form
 ...                         Create Secret For S3-Like Buckets
+...                         Login To OCP Using API
 
 
 *** Keywords ***

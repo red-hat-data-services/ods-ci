@@ -256,7 +256,7 @@ Clone Git Repository
             FAIL
         END
     ELSE
-        Run Keyword And Continue On Failure    Wait Until Page Contains    Successfully cloned    timeout=60s
+        Run Keyword And Warn On Failure    Wait Until Page Contains    Successfully cloned    timeout=60s
     END
 
 Clone Git Repository And Open
@@ -471,7 +471,7 @@ Clone Repo and Return Error Message
     [Tags]    Private Keyword
     [Arguments]    ${repo_url}
     Clone Repo    ${repo_url}
-    Run Keyword And Continue On Failure    Wait Until Page Contains    Cloning...    timeout=5s
+    Run Keyword And Warn On Failure    Wait Until Page Contains    Cloning...    timeout=5s
     ${err_msg} =    Get Git Clone Error Message
     RETURN    ${err_msg}
 

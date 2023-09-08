@@ -471,7 +471,7 @@ Clone Repo and Return Error Message
     [Tags]    Private Keyword
     [Arguments]    ${repo_url}
     Clone Repo    ${repo_url}
-    Wait Until Page Contains    Cloning...    timeout=5s
+    Run Keyword And Continue On Failure    Wait Until Page Contains    Cloning...    timeout=5s
     ${err_msg} =    Get Git Clone Error Message
     RETURN    ${err_msg}
 

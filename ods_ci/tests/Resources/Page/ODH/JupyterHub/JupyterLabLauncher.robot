@@ -256,7 +256,7 @@ Clone Git Repository
             FAIL
         END
     ELSE
-        Wait Until Page Contains    Successfully cloned    timeout=200s
+        Run Keyword And Continue On Failure    Wait Until Page Contains    Successfully cloned    timeout=60s
     END
 
 Clone Git Repository And Open

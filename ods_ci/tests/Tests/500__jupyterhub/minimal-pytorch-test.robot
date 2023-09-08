@@ -15,7 +15,7 @@ Force Tags       JupyterHub
 
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         pytorch
-${EXPECTED_CUDA_VERSION} =  12.0
+${EXPECTED_CUDA_VERSION} =  12.2
 
 
 *** Test Cases ***

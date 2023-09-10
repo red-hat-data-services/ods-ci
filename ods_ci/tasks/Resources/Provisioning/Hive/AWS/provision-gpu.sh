@@ -20,6 +20,6 @@ jq -r '.spec.template.spec.providerSpec.value.instanceType = "g4dn.xlarge"
 sed -i "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" /tmp/gpu-machineset.json
 
 # Create new machineset
-oc create -f /tmp/gpu-machineset.json -l gpu-machineset=true
+oc create -f /tmp/gpu-machineset.json
 rm /tmp/source-machineset.json
 rm /tmp/gpu-machineset.json

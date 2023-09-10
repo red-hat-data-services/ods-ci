@@ -1,4 +1,4 @@
-#!/bash/bin
+#!/bin/bash
 # Select the first machineset
 SOURCE_MACHINESET=$(oc get machineset -n openshift-machine-api -o name | head -n1)
 

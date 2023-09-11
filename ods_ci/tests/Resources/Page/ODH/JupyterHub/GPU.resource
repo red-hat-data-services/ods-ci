@@ -20,7 +20,7 @@ Verify Pytorch Can See GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
         # TODO: use Install And Import Package In JupyterLab after #202 is merged
-        Run Cell And Check For Errors    !pip install torch==1.8 numpy==1.19    timeout=300s
+        Run Cell And Check For Errors    !pip install torch==1.8 numpy==1.24.4    timeout=300s
     END
     Run Cell And Check Output
     ...    import torch; device = "cuda" if torch.cuda.is_available() else "cpu"; print(f"Using {device} device")

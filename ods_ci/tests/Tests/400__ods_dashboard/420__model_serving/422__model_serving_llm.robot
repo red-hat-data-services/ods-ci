@@ -349,6 +349,31 @@ Verify Model Can Be Serverd And Query On A GPU Node
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
+Verify Non Admin Can Serve And Query A Model
+    [Tags]    ODS-2326    WatsonX
+    [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
+    ...        Set Project And Runtime    namespace=non-admin-test
+    ${test_namespace}=    Set Variable     non-admin-test
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
+    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
+    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}
+    [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
+    ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
 
 *** Keywords ***
 Install Model Serving Stack Dependencies
@@ -570,8 +595,8 @@ Set Up Test OpenShift Project
     END
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${test_ns}
     Should Be Equal As Numbers    ${rc}    ${0}
-    Add Peer Authentication    namespace=${test_ns}
-    Add Namespace To ServiceMeshMemberRoll    namespace=${test_ns}
+    # Add Peer Authentication    namespace=${test_ns}
+    # Add Namespace To ServiceMeshMemberRoll    namespace=${test_ns}
 
 Deploy Caikit Serving Runtime
     [Documentation]    Create the ServingRuntime CustomResource in the test ${namespace}.

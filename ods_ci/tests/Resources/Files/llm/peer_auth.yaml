@@ -6,3 +6,11 @@ metadata:
 spec:
   mtls:
     mode: STRICT
+  portLevelMtls:
+    '3000':
+      mode: PERMISSIVE
+    '8086':
+      mode: PERMISSIVE
+  selector:
+    matchLabels:
+      component: predictor

@@ -13,8 +13,6 @@ robotframework = "^6.0.0"
 robotframework-debuglibrary = ">=2.0.0"
 robotframework-requests = "^0.9.4"
 robotframework-seleniumlibrary = "^6.0.0"
-# Selenium 4.10 breaks compatibility with RF (https://stackoverflow.com/questions/76433782/robotframework-error-typeerror-webdriver-init-got-an-unexpected-keyword)
-# Check back when it can be used
 selenium = "4.11.2"
 robotframework-jupyterlibrary = "^0.4.0"
 robotframework-openshift = {git = "https://git@github.com/red-hat-data-services/robotframework-openshift.git"}

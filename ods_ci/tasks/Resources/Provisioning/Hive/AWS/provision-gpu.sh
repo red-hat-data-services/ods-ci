@@ -6,7 +6,7 @@ SOURCE_MACHINESET=$(oc get machineset -n openshift-machine-api -o name | head -n
 oc get -o json -n openshift-machine-api $SOURCE_MACHINESET  | jq -r > /tmp/source-machineset.json
 
 OLD_MACHINESET_NAME=$(jq '.metadata.name' -r /tmp/source-machineset.json )
-NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/worker-gpu}
+NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
 
 # Change instanceType and delete some stuff
 jq -r '.spec.template.spec.providerSpec.value.instanceType = "g4dn.xlarge"

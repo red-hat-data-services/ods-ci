@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Optional params
+INSTANCE_TYPE=${1:-"g4dn.xlarge"}
+
 # Check if existing machineset with for GPU already exists
 EXISTING_GPU_MACHINESET="$(oc get machineset -A -o jsonpath='{.items[?(@.metadata.labels.gpu-machineset=="true")].metadata.name}')"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
@@ -19,12 +22,12 @@ OLD_MACHINESET_NAME=$(jq '.metadata.name' -r /tmp/source-machineset.json )
 NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
 
 # Change instanceType and delete some stuff
-jq -r '.spec.template.spec.providerSpec.value.instanceType = "g4dn.xlarge"
+jq -r ".spec.template.spec.providerSpec.value.instanceType = \"$INSTANCE_TYPE\"
   | del(.metadata.selfLink)
   | del(.metadata.uid)
   | del(.metadata.creationTimestamp)
   | del(.metadata.resourceVersion)
-  ' /tmp/source-machineset.json > /tmp/gpu-machineset.json
+  " /tmp/source-machineset.json > /tmp/gpu-machineset.json
 
 # Change machineset name
 sed -i "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" /tmp/gpu-machineset.json

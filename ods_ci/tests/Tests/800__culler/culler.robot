@@ -54,7 +54,6 @@ Verify Culler Does Not Kill Active Server
     [Tags]    Tier2
     ...       ODS-1253
     ...       Execution-Time-Over-15m
-    ...       AutomationBug
     Spawn Server And Run Notebook To Keep Server Active For More Than 10 Minutes
     Wait Until Culler Timeout Plus A Drift Window Which By Default Equals 12 Minutes
     Check If Server Pod Still Exists

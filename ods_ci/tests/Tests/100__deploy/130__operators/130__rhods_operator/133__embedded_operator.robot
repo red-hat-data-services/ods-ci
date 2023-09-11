@@ -41,7 +41,7 @@ Install Embedded RHODS
         ${rc} =    Run And Return Rc    oc apply -f ${file_path}operatorgroup_apply.yaml
         IF    ${rc}!=0    Fail
         Remove File    ${file_path}operatorgroup_apply.yaml
-        IF    ${image_url} is not $EMPTY
+        IF    ${image_url} is not ''
             # Custom catalogsource
             Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml

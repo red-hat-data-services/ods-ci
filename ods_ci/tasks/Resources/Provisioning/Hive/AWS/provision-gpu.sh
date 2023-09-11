@@ -4,8 +4,8 @@ set -e
 # Optional params
 INSTANCE_TYPE=${1:-"g4dn.xlarge"}
 
-# Check if existing machineset with for GPU already exists
-EXISTING_GPU_MACHINESET="$(oc get machineset -A -o jsonpath='{.items[?(@.metadata.labels.gpu-machineset=="true")].metadata.name}')"
+# Check if existing machineset GPU already exists
+EXISTING_GPU_MACHINESET="$(oc get machineset -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
   echo "Machine-set for GPU already exists"
   oc get machinesets -A --show-labels

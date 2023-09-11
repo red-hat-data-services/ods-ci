@@ -1,5 +1,6 @@
 *** Settings ***
 Documentation    Collections of keywords to interact with Managed Starburst
+Resource   ../JupyterHub/JupyterLabLauncher.robot
 Library    OperatingSystem
 Library    OpenShiftLibrary
 Library    SeleniumLibrary

@@ -1,5 +1,7 @@
 *** Settings ***
 Documentation  Set of Keywords for GPU support
+Resource    ../../../OCP.resource
+Library     OperatingSystem
 
 
 *** Keywords ***

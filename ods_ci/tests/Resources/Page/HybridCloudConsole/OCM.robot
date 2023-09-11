@@ -1,4 +1,6 @@
 *** Settings ***
+Resource        ../../Common.robot
+
 Library         SeleniumLibrary
 
 

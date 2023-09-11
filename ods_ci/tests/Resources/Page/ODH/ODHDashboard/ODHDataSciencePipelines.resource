@@ -6,7 +6,7 @@ Resource            ../../../Common.robot
 Resource            ../../../Page/ODH/ODHDashboard/ODHDashboard.robot
 Library             DateTime
 Library             ../../../../../libs/DataSciencePipelinesAPI.py
-Resource           ODHDataScienceProject/Pipelines.resource
+Resource            ODHDataScienceProject/Pipelines.resource
 
 
 *** Variables ***

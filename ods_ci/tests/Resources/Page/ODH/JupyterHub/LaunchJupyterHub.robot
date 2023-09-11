@@ -1,4 +1,4 @@
-*** Settings *** 
+*** Settings ***
 Library  JupyterLibrary
 
 *** Keywords ***

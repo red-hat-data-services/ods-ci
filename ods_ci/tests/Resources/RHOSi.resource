@@ -5,7 +5,7 @@ Library             RPA.RobotLogListener
 Resource            Page/ODH/Monitoring/Monitoring.resource
 Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
 Resource            Page/OCPLogin/OCPLogin.resource
-Resource    Common.robot
+Resource            Common.robot
 
 
 *** Variables ***

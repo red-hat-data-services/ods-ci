@@ -1,6 +1,6 @@
 *** Settings ***
 Documentation       Resource file for openvino operator
-
+Resource            ../JupyterHub/JupyterHubSpawner.robot
 Library             SeleniumLibrary
 
 

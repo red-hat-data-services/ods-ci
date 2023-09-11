@@ -1,6 +1,7 @@
 *** Settings ***
 Library         OpenShiftLibrary
 Resource        ../../LoginPage.robot
+Resource        ../../ODH/JupyterHub/LoginJupyterHub.robot
 
 
 *** Variables ***
@@ -44,7 +45,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     ${authorization_required} =  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize jupyterhub service account
     Menu.Navigate To Page    Settings    User management
-    SeleniumLibrary.Wait Until Element Is Visible   //*[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"]  timeout=20
+    Wait Until Element Is Visible   //*[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"]  timeout=20
 
 Remove OpenShift Groups From Data Science User Groups
     [Documentation]   Remove OpenShift Groups From Data Science User Groups From Dashboard

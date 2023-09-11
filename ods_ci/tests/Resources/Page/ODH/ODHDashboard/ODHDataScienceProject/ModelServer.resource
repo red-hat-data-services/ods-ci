@@ -122,8 +122,8 @@ Click GPU Minus Button
 Verify Displayed GPU Count
     [Documentation]    Verifies the number of GPUs displayed in the Model Server table
     [Arguments]    ${server_name}    ${no_gpus}
-    Wait Until PAge Contains Element    xpath://span[.="${server_name}"]
-    ${expanded} =    Run Keyword And Return Status    
+    Wait Until Page Contains Element    xpath://span[.="${server_name}"]
+    ${expanded} =    Run Keyword And Return Status
     ...    Page Should Contain Element    xpath://button[@aria-expanded="true"]/span[.="${server_name}"]
     IF    ${expanded}==False
         Click Element    xpath://button[@aria-expanded="false"]/span[.="${server_name}"]
@@ -173,7 +173,7 @@ Click Minus Button
 Query Model With GRPCURL
     [Arguments]    ${host}    ${port}    ${endpoint}    ${json_body}
     ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    ${background}=${NONE}
-    ...            &{args}
+    ...            ${skip_res_json}=${FALSE}    &{args}
     ${cmd}=    Set Variable    grpcurl -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
@@ -201,10 +201,22 @@ Query Model With GRPCURL
           # Log    ${query_process.stdout}    console=yes
           Log    ${response}    console=yes
           # ${json_res}=    Load Json String    ${query_process.stdout}
-          ${json_res}=    Load Json String    ${response}
-          # ...    strict=False
-          RETURN    ${json_res}
+          IF    ${skip_res_json} == ${TRUE}
+            Log    ${response}
+            RETURN    ${response}
+          ELSE
+            ${json_res}=    Load Json String    ${response}
+            # ...    strict=False
+            RETURN    ${json_res}
+          END
     ELSE
           ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}&
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
     END
+
+Enable Toleration Feature In KNativeServing
+    [Documentation]    Enables the usage of node tolerations in inference services
+    [Arguments]    ${knative_serving_ns}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch configmap config-features -n ${knative_serving_ns} --type=merge -p '{"data":{"kubernetes.podspec-tolerations": "enabled"}}'
+    Should Be Equal As Integers    ${rc}    ${0}

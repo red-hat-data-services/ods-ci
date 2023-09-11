@@ -1,9 +1,12 @@
 *** Settings ***
 Documentation       Queries Prometheus using API calls
+Resource            ../../../Common.robot
 
 Library             Collections
 Library             Process
 Library             RequestsLibrary
+Library             DateTime
+Library             OperatingSystem
 
 
 *** Keywords ***
@@ -133,7 +136,7 @@ Alerts Should Not Be Firing    #robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if any Prometheus alert is in pending or firing state,
     ...  excluding alert with name = ${expected-firing-alert}
     [Arguments]    ${pm_url}    ${pm_token}    ${expected-firing-alert}=${EMPTY}     ${message_prefix}=${EMPTY}
-    
+
     ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
     ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
     @{alerts_firing}=    Create List

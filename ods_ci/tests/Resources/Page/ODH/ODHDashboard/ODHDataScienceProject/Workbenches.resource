@@ -120,9 +120,9 @@ Add Environment Variables In Workbench
                     # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
                     # amount of pixels for the block of elements that gets added.
                     IF    "${add_key_value_text}" == "Add another key / value pair"
-                        SeleniumLibrary.Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,200)  # robocop: disable
+                        Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,200)  # robocop: disable
                     ELSE IF    "${add_key_value_text}" == "Add another variable"
-                        SeleniumLibrary.Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,700)  # robocop: disable
+                        Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,700)  # robocop: disable
                     END
                 END
             END
@@ -382,7 +382,7 @@ Start Workbench Should Fail
     IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
     Run Keyword And Continue On Failure    Wait Until Keyword Succeeds    30 times    2s
     ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
-    SeleniumLibrary.Reload Page
+    Reload Page
     Workbench Should Be Listed    ${workbench_title}
     Wait Until Keyword Succeeds    20 times    2s
     ...    Status Error Icon Should Appear    workbench_title=${workbench_title}

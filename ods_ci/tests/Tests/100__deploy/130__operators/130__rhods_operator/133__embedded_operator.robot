@@ -33,7 +33,7 @@ Install Embedded RHODS
         Fail    Use a clean cluster to run this installation
     END
     IF    "${cluster_type}" == "selfmanaged"
-        ${file_path} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2
+        ${file_path} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
         ${rc} =    Run And Return Rc    oc create ns ${OPERATOR_NAMESPACE}
         IF    ${rc}!=0    Fail
         Copy File    source=${file_path}operatorgroup_template.yaml    destination=${file_path}operatorgroup_apply.yaml

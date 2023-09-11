@@ -1,5 +1,15 @@
 #!/bin/bash
-# Select the first machineset
+set -e
+
+# Check if existing machineset with for GPU already exists
+EXISTING_GPU_MACHINESET="$(oc get machineset -A -o jsonpath='{.items[?(@.metadata.labels.gpu-machineset=="true")].metadata.name}')"
+if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
+  echo "Machine-set for GPU already exists"
+  oc get machinesets -A --show-labels
+  exit 0
+fi
+
+# Select the first machineset as a template for the GPU machineset
 SOURCE_MACHINESET=$(oc get machineset -n openshift-machine-api -o name | head -n1)
 
 # Reformat with jq, for better diff result.
@@ -23,3 +33,6 @@ sed -i "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" /tmp/gpu-machineset.json
 oc apply -f /tmp/gpu-machineset.json
 rm /tmp/source-machineset.json
 rm /tmp/gpu-machineset.json
+
+# Add GPU label to the new machine-set
+oc patch machinesets -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge

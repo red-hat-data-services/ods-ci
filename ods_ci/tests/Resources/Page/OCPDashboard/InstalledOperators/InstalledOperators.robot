@@ -74,7 +74,7 @@ Operator Should Be Uninstalled
 
 Switch To New Tab
     [Arguments]  ${tabname}
-     Click Element        //a[normalize-space(text())="${tabname}"]
+    Click Element        //a[normalize-space(text())="${tabname}"]
 
 Click On Searched Operator
     [Arguments]   ${operator}

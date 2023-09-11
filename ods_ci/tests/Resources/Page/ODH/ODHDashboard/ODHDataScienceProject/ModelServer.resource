@@ -122,8 +122,8 @@ Click GPU Minus Button
 Verify Displayed GPU Count
     [Documentation]    Verifies the number of GPUs displayed in the Model Server table
     [Arguments]    ${server_name}    ${no_gpus}
-    Wait Until PAge Contains Element    xpath://span[.="${server_name}"]
-    ${expanded} =    Run Keyword And Return Status    
+    Wait Until Page Contains Element    xpath://span[.="${server_name}"]
+    ${expanded} =    Run Keyword And Return Status
     ...    Page Should Contain Element    xpath://button[@aria-expanded="true"]/span[.="${server_name}"]
     IF    ${expanded}==False
         Click Element    xpath://button[@aria-expanded="false"]/span[.="${server_name}"]

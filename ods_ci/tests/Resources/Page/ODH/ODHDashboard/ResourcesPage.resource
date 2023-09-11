@@ -1,4 +1,5 @@
 *** Settings ***
+Resource    ../../OCPDashboard/InstalledOperators/InstalledOperators.robot
 Library     SeleniumLibrary
 Library     Collections
 Library     String

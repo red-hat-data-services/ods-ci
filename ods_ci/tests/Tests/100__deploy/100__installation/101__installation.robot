@@ -3,14 +3,13 @@ Documentation    Tests to verify that ODH in Openshift can be
 ...              installed from Dashboard
 Metadata         Version    0.0.1
 Resource         ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource         ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource         ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource         ../../../Resources/Common.robot
 Resource         ../../../Resources/RHOSi.resource
 Resource         ../../../Resources/ODS.robot
 Library          ../../../../utils/scripts/ocm/ocm.py
 Library          ../../../../libs/Helpers.py
-Library         SeleniumLibrary
+Library          SeleniumLibrary
 Suite Setup      Installation Suite Setup
 Suite Teardown   Installation Suite Teardown
 

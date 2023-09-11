@@ -1,3 +1,6 @@
+*** Settings ***
+Resource        ../OCPMenu.robot
+
 *** Keywords ***
 Open Installed Operators Page
   Login to OCP Console

@@ -1,6 +1,5 @@
 *** Settings ***
-#Library  JupyterLibrary
-Resource  JupyterLabLauncher.robot
+Resource  ./JupyterLabLauncher.robot
 Library   JupyterLibrary
 
 *** Keywords ***
@@ -34,6 +33,6 @@ Launch Python3 JupyterLab Smoke Test Notebook
   Capture Page Screenshot
   Add and Run JupyterLab Code Cell  %watermark --iversions
   Capture Page Screenshot
-  
+
   JupyterLab Code Cell Error Output Should Not Be Visible
 

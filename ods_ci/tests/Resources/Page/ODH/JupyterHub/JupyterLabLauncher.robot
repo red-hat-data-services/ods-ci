@@ -6,6 +6,7 @@ Library  OperatingSystem
 Library  Screenshot
 Library  String
 Library  OpenShiftLibrary
+Library  SeleniumLibrary
 
 
 *** Variables ***
@@ -98,7 +99,7 @@ Start JupyterLab Notebook Server
 
 Open JupyterLab Control Panel
   Open With JupyterLab Menu  File  Hub Control Panel
-  SeleniumLibrary.Switch Window    NEW
+  Switch Window    NEW
 
 Stop JupyterLab Notebook Server
   Open JupyterLab Control Panel

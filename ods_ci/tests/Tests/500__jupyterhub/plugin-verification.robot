@@ -45,7 +45,7 @@ Plugin Testing Suite Setup
    Set Suite Variable     ${notebook_pod_name}
 
 Plugin Testing Suite Teardown
-   SeleniumLibrary.Close All Browsers
+   Close All Browsers
    Run Keyword And Return Status    Run   oc delete pod ${notebook_pod_name} -n ${NOTEBOOKS_NAMESPACE}
 
 Gather Notebook data

@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation       Collections of keyword to handle Deployment config objects in OCP
 Library     OpenShiftLibrary
+Library     OperatingSystem
 
 
 *** Keywords ***

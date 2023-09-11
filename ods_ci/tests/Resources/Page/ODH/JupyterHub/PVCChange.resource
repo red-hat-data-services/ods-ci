@@ -35,7 +35,7 @@ Verify PVC Size
 
 PVC Size Test Teardown
     [Documentation]    PVC change teardown
-    SeleniumLibrary.Close All Browsers
+    Close All Browsers
     Change PVC Size From ConfigMap     20Gi
     Run Keyword And Ignore Error     Delete Pods Using Label Selector    ${APPLICATIONS_NAMESPACE}    app=notebook-controller
 

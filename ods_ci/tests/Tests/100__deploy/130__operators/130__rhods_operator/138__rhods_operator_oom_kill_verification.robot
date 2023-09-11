@@ -64,6 +64,7 @@ Basic Dashboard Test Verification
     Spawn Notebook With Arguments
     Fix Spawner Status
     Close Browser
+
 Verify Pods Status
     [Documentation]    Verify each pod status in the rhods namespace
     Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60

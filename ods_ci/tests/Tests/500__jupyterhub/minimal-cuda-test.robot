@@ -55,7 +55,7 @@ Verify Cuda Image Has NVCC Installed
     Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
 
 Verify Previous CUDA Notebook Image With GPU
-    [Documentation]    Runs a workload after spawning the N-1 CUDA Notebook 
+    [Documentation]    Runs a workload after spawning the N-1 CUDA Notebook
     [Tags]    Tier2    LiveTesting
     ...       Resources-GPU
     ...       ODS-2128
@@ -105,5 +105,5 @@ N-1 CUDA Setup
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Sleep    30s    reason=Wait for resources to become available again
-    SeleniumLibrary.Reload Page
+    Reload Page
     Wait Until JupyterHub Spawner Is Ready

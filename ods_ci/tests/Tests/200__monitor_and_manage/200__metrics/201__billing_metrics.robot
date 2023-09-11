@@ -28,7 +28,7 @@ Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
     ...       ODS-173
     Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}    retry_attempts=1
     Metrics.Verify Query Results Dont Contain Data
-    [Teardown]    SeleniumLibrary.Close All Browsers
+    [Teardown]    Close All Browsers
 
 Test Billing Metric (Notebook Cpu Usage) On OpenShift Monitoring
     [Documentation]     Run notebook for 5 min and checks CPU usage is greater than zero
@@ -48,7 +48,7 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     ${value} =    Run OpenShift Metrics Query    query=rhods_total_users
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_total_users
     Should Be Equal    ${value_from_promothues}    ${value}
-    [Teardown]    SeleniumLibrary.Close All Browsers
+    [Teardown]    Close All Browsers
 
 Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     [Documentation]     Verifies the openshift metrics and rhods prometheus showing same rhods_aggregate_availability values
@@ -59,7 +59,7 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     ${value} =    Run OpenShift Metrics Query    query=rhods_aggregate_availability
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_aggregate_availability
     Should Be Equal    ${value_from_promothues}    ${value}
-    [Teardown]    SeleniumLibrary.Close All Browsers
+    [Teardown]    Close All Browsers
 
 Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometheus
     [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing N active users
@@ -111,7 +111,7 @@ Billing Metrics Suite Setup
 
 CleanUp JupyterHub And Close All Browsers
     CleanUp JupyterHub
-    SeleniumLibrary.Close All Browsers
+    Close All Browsers
 
 Test Setup For Matrics Web Test
     [Documentation]     Opens openshift console metrics for metrics test
@@ -125,7 +125,7 @@ Test Setup For Matrics Web Test
 
 Test Teardown For Matrics Web Test
     [Documentation]     Closes all browsers
-    SeleniumLibrary.Close All Browsers
+    Close All Browsers
 
 Run Query On Metrics And Return Value
     [Documentation]    Fires query in metrics through web browser and returns value

@@ -2,7 +2,7 @@
 Documentation    Tasks related to the operator rearchitecture
 Library          String
 Library          OperatingSystem
-Library          ../../../../libs/Helpers.py
+Library          ../../../../../libs/Helpers.py
 Library          Collections
 Resource         ../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Suite Setup      Get Original Configuration

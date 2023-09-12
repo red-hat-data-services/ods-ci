@@ -5,8 +5,7 @@ Library    OperatingSystem
 Library    ../../../../../libs/Helpers.py
 Resource   ../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource   ../../../../../tasks/Resources/RHODS_OLM/pre-tasks/oc_is_operator_installed.robot
-Resource   ../../../../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
-Suite Teardown    Uninstall RHODS V2
+Suite Teardown    Uninstall RHODS V2 Embedded
 
 
 ***Variables***
@@ -119,3 +118,18 @@ V2 CRs Should Not Exist
     ${rc}  ${out} =    Run And Return Rc And Output    oc get dscinitialization ${dsci_name}
     Should Be Equal As Integers    ${rc}    1
     Should Be Equal As Strings    ${out}    Error from server (NotFound): dscinitializations.dscinitialization.opendatahub.io "${dsci_name}" not found  # robocop: disable
+
+Uninstall RHODS V2 Embedded
+    [Documentation]    Keyword to uninstall the version 2 of the RHODS operator in Self-Managed
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete subscription $(oc get subscription -n redhat-ods-operator --no-headers | awk '{print $1}') -n ${OPERATOR_NAMESPACE}  # robocop: disable
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting RHODS subscription
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete operatorgroup $(oc get operatorgroup -n redhat-ods-operator --no-headers | awk '{print $1}') -n ${OPERATOR_NAMESPACE}  # robocop: disable
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting operatorgroup
+    ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace
+    Verify Project Does Not Exists  redhat-ods-applications
+    Verify Project Does Not Exists  redhat-ods-monitoring
+    Verify Project Does Not Exists  rhods-notebooks
+    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE}
+    Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}

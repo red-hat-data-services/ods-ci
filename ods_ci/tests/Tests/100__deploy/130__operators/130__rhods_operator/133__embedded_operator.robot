@@ -5,6 +5,7 @@ Library    OperatingSystem
 Library    ../../../../../libs/Helpers.py
 Resource   ../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource   ../../../../../tasks/Resources/RHODS_OLM/pre-tasks/oc_is_operator_installed.robot
+Resource   ../../../../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
 Suite Teardown    Uninstall RHODS V2 Embedded
 
 

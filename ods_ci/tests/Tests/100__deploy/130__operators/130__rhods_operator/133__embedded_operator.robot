@@ -10,6 +10,8 @@ Resource   ../../../../../tasks/Resources/RHODS_OLM/pre-tasks/oc_is_operator_ins
 ***Variables***
 ${cluster_type}              selfmanaged
 ${image_url}                 ${EMPTY}
+${dsci_name}                 default
+${dsc_name}                  default
 
 
 *** Test Cases ***
@@ -86,10 +88,11 @@ RHODS Embedded Verification
     Log  Verified ${MONITORING_NAMESPACE}  console=yes
     IF    '${NOTEBOOKS_NAMESPACE}'!='${OPERATOR_NAMESPACE}'    Namespace Should Not Exist    ${NOTEBOOKS_NAMESPACE}
     Log  Verified ${NOTEBOOKS_NAMESPACE}  console=yes
+    V2 CRs Should Not Exist    ${dsc_name}    ${dsci_name}
     ${filepath} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
     ${expected} =    Get File    ${filepath}embedded.txt
     Run    oc get $(oc api-resources --namespaced=true --verbs=list -o name | awk '{printf "%s%s",sep,$0;sep=","}') --ignore-not-found -n ${OPERATOR_NAMESPACE} -o=custom-columns=KIND:.kind,NAME:.metadata.name | sort -k1,1 -k2,2 | grep -v "PackageManifest\\|Event\\|ClusterServiceVersion" > ${filepath}embedded_runtime.txt  # robocop: disable
-    Process Resource List    filename_in=${filepath}$embedded_runtime.txt
+    Process Resource List    filename_in=${filepath}embedded_runtime.txt
     ...    filename_out=${filepath}embedded_processed.txt
     ${actual} =    Get File    ${filepath}embedded_processed.txt
     Remove File    ${filepath}embedded_processed.txt
@@ -101,3 +104,12 @@ Namespace Should Not Exist
     ${rc}  ${out} =    Run And Return Rc And Output    oc get namespace ${namespace}
     Should Be Equal As Integers    ${rc}    1
     Should Be Equal As Strings    ${out}    Error from server (NotFound): namespaces "${namespace}" not found
+
+V2 CRs Should Not Exist
+    [Arguments]    ${dsc_name}    ${dsci_name}
+    ${rc}  ${out} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name}
+    Should Be Equal As Integers    ${rc}    1
+    Should Be Equal As Strings    ${out}    Error from server (NotFound): datascienceclusters.datasciencecluster.opendatahub.io "${dsc_name}" not found  # robocop: disable
+    ${rc}  ${out} =    Run And Return Rc And Output    oc get dscinitialization ${dsci_name}
+    Should Be Equal As Integers    ${rc}    1
+    Should Be Equal As Strings    ${out}    Error from server (NotFound): dscinitializations.dscinitialization.opendatahub.io "${dsci_name}" not found  # robocop: disable

@@ -5,6 +5,8 @@ Library    OperatingSystem
 Library    ../../../../../libs/Helpers.py
 Resource   ../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource   ../../../../../tasks/Resources/RHODS_OLM/pre-tasks/oc_is_operator_installed.robot
+Resource   ../../../../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
+Suite Teardown    Uninstall RHODS V2
 
 
 ***Variables***
@@ -90,7 +92,7 @@ RHODS Embedded Verification
     Log  Verified ${NOTEBOOKS_NAMESPACE}  console=yes
     V2 CRs Should Not Exist    ${dsc_name}    ${dsci_name}
     ${filepath} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
-    Run    oc get $(oc api-resources --namespaced=true --verbs=list -o name | awk '{printf "%s%s",sep,$0;sep=","}') --ignore-not-found -n ${OPERATOR_NAMESPACE} -o=custom-columns=KIND:.kind,NAME:.metadata.name | sort -k1,1 -k2,2 | grep -v "PackageManifest\\|Event\\|ClusterServiceVersion" > ${filepath}embedded_runtime.txt  # robocop: disable
+    Run    oc get $(oc api-resources --namespaced=true --verbs=list -o name | awk '{printf "%s%s",sep,$0;sep=","}') --ignore-not-found -n ${OPERATOR_NAMESPACE} -o=custom-columns=KIND:.kind,NAME:.metadata.name | sort -k1,1 -k2,2 | grep -v "PackageManifest\\|Event\\|ClusterServiceVersion|Lease" > ${filepath}embedded_runtime.txt  # robocop: disable
     Process Resource List    filename_in=${filepath}embedded_runtime.txt
     ...    filename_out=${filepath}embedded_processed_runtime.txt
     Process Resource List    filename_in=${filepath}embedded.txt

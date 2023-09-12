@@ -2,8 +2,8 @@ ConfigMap               kube-root-ca.crt
 ConfigMap               openshift-service-ca.crt
 ConfigMap               redhat-ods-operator-manager-config
 Deployment              rhods-operator
-Endpoints               redhat-ods-operator-controller-manager-metrics-service
 EndpointSlice           redhat-ods-operator-controller-manager-metrics-service-jz6l7
+Endpoints               redhat-ods-operator-controller-manager-metrics-service
 InstallPlan             install-tpnlw
 KIND                    NAME
 OperatorCondition       rhods-operator.2.1.0

@@ -54,6 +54,7 @@ class OpenshiftClusterManager:
         self.region = args.get("region")
         self.compute_machine_type = args.get("compute_machine_type")
         self.ocm_cli_binary_url = args.get("ocm_cli_binary_url")
+        self.ocm_verbose_level = args.get("ocm_verbose_level")
         self.num_users_to_create_per_group = args.get("num_users_to_create_per_group")
         self.htpasswd_cluster_admin = args.get("htpasswd_cluster_admin")
         self.htpasswd_cluster_password = args.get("htpasswd_cluster_password")
@@ -188,11 +189,12 @@ class OpenshiftClusterManager:
 
         if self.cloud_provider == "aws":
             cmd = (
-                "ocm create cluster --aws-account-id {} "
+                "ocm create --v={} cluster --aws-account-id {} "
                 "--aws-access-key-id {} --aws-secret-access-key {} "
                 "--ccs --region {} --compute-nodes {} "
                 "--compute-machine-type {} {} {}"
                 "{}".format(
+                    self.ocm_verbose_level,
                     self.aws_account_id,
                     self.aws_access_key_id,
                     self.aws_secret_access_key,
@@ -208,10 +210,11 @@ class OpenshiftClusterManager:
             # Create service account file
             self._create_service_account_file()
             cmd = (
-                "ocm create cluster --provider {} --service-account-file {} "
+                "ocm create --v={} cluster --provider {} --service-account-file {} "
                 "--ccs --region {} --compute-nodes {} "
                 "--compute-machine-type {} {} {}"
                 "{}".format(
+                    self.ocm_verbose_level,
                     self.cloud_provider,
                     self.service_account_file,
                     self.region,
@@ -428,10 +431,11 @@ class OpenshiftClusterManager:
             )
         else:
             cmd = (
-                "/bin/ocm create machinepool --cluster {} "
+                "/bin/ocm --v={} create machinepool --cluster {} "
                 "--instance-type {} --replicas {} "
                 "--taints {} "
                 "{}".format(
+                    self.ocm_verbose_level,
                     self.cluster_name,
                     self.pool_instance_type,
                     self.pool_node_count,
@@ -792,8 +796,9 @@ class OpenshiftClusterManager:
 
         if self.idp_type == "htpasswd":
             cmd = (
-                "ocm create idp -c {} -t {} -n {} --username {} "
+                "ocm create --v={} idp -c {} -t {} -n {} --username {} "
                 "--password {}".format(
+                    self.ocm_verbose_level,
                     self.cluster_name,
                     self.idp_type,
                     self.idp_name,
@@ -913,8 +918,8 @@ class OpenshiftClusterManager:
         ):
             cmd = "oc adm groups add-users {} {}".format(group, user)
         else:
-            cmd = "ocm create user {} --cluster {} " "--group={}".format(
-                user, self.cluster_name, group
+            cmd = "ocm create --v={} user {} --cluster {} " "--group={}".format(
+                self.ocm_verbose_level, user, self.cluster_name, group
             )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
@@ -2234,6 +2239,14 @@ if __name__ == "__main__":
         action="store",
         dest="ocm_cli_binary_url",
         default=ocm_cli_binary_url,
+    )
+    parser.add_argument(
+        "-v",
+        "--ocm-verbose-level",
+        help="ocm logging verbosity level",
+        action="store",
+        dest="ocm_verbose_level",
+        default="0",
     )
     args = parser.parse_args(namespace=ocm_obj)
     if hasattr(args, "func"):

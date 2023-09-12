@@ -46,6 +46,7 @@ Install Embedded RHODS
         IF    ${rc}!=0    Fail
         Remove File    ${file_path}operatorgroup_apply.yaml
         ${image_url_bool} =    Evaluate    '${image_url}' == ''
+        Log    ${image_url}
         IF  ${image_url_bool}
             # Prod build
             Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable

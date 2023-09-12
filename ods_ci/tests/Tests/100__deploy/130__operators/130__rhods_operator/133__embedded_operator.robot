@@ -99,5 +99,5 @@ RHODS Embedded Verification
 Namespace Should Not Exist
     [Arguments]    ${namespace}
     ${rc}  ${out} =    Run And Return Rc And Output    oc get namespace ${namespace}
-    Should Be Equal    ${rc}    1
-    Should Be Equal    ${out}    Error from server (NotFound): namespaces "${namespace}" not found
+    Should Be Equal As Integers    ${rc}    1
+    Should Be Equal As Strings    ${out}    Error from server (NotFound): namespaces "${namespace}" not found

@@ -44,7 +44,7 @@ Install Embedded RHODS
         ${image_url_bool} =    Evaluate    '${image_url}' == ''
         IF  ${image_url_bool}
             # Prod build
-            Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml
+            Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAME>/redhat-operators/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAMESPACE>/openshift-marketplace/' ${file_path}subscription_apply.yaml
@@ -59,7 +59,7 @@ Install Embedded RHODS
             ${rc} =    Run And Return Rc    oc apply -f ${file_path}cs_apply.yaml
             IF    ${rc}!=0    Fail
             Remove File    ${file_path}cs_apply.yaml
-            Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml
+            Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAME>/rhods-catalog-dev/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
@@ -80,11 +80,11 @@ RHODS Embedded Verification
     ...                   timeout=2000
     Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
     Log  Verified ${OPERATOR_NAMESPACE}  console=yes
-    IF    ${APPLICATIONS_NAMESPACE}!=${OPERATOR_NAMESPACE}    Namespace Should Not Exist    ${APPLICATIONS_NAMESPACE}
+    IF    '${APPLICATIONS_NAMESPACE}'!='${OPERATOR_NAMESPACE}'    Namespace Should Not Exist    ${APPLICATIONS_NAMESPACE}  # robocop: disable
     Log  Verified ${APPLICATIONS_NAMESPACE}  console=yes
-    IF    ${MONITORING_NAMESPACE}!=${OPERATOR_NAMESPACE}    Namespace Should Not Exist    ${MONITORING_NAMESPACE}
+    IF    '${MONITORING_NAMESPACE}'!='${OPERATOR_NAMESPACE}'    Namespace Should Not Exist    ${MONITORING_NAMESPACE}
     Log  Verified ${MONITORING_NAMESPACE}  console=yes
-    IF    ${NOTEBOOKS_NAMESPACE}!=${OPERATOR_NAMESPACE}    Namespace Should Not Exist    ${NOTEBOOKS_NAMESPACE}
+    IF    '${NOTEBOOKS_NAMESPACE}'!='${OPERATOR_NAMESPACE}'    Namespace Should Not Exist    ${NOTEBOOKS_NAMESPACE}
     Log  Verified ${NOTEBOOKS_NAMESPACE}  console=yes
     ${filepath} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
     ${expected} =    Get File    ${filepath}embedded.txt

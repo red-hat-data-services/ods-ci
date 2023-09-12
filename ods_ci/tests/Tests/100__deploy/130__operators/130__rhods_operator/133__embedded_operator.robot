@@ -46,7 +46,7 @@ Install Embedded RHODS
             # Prod build
             Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<CS_NANME>/redhat-operators/' ${file_path}subscription_apply.yaml
+            Run    sed -i 's/<CS_NAME>/redhat-operators/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAMESPACE>/openshift-marketplace/' ${file_path}subscription_apply.yaml
             ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
             IF    ${rc}!=0    Fail
@@ -61,7 +61,7 @@ Install Embedded RHODS
             Remove File    ${file_path}cs_apply.yaml
             Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<CS_NANME>/rhods-catalog-dev/' ${file_path}subscription_apply.yaml
+            Run    sed -i 's/<CS_NAME>/rhods-catalog-dev/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
             ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
             IF    ${rc}!=0    Fail

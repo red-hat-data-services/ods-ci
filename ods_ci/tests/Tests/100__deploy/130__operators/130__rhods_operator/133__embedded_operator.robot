@@ -58,9 +58,10 @@ Install Embedded RHODS
             Remove File    ${file_path}subscription_apply.yaml
         ELSE
             # Custom catalogsource
+            ${image_escaped} =    Evaluate    ${image_url}.replace('/','\/')
             Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
-            Run    sed -i 's/<IMAGE_URL>/${image_url}/' ${file_path}cs_apply.yaml
+            Run    sed -i 's/<IMAGE_URL>/${image_escaped}/' ${file_path}cs_apply.yaml
             ${rc} =    Run And Return Rc    oc apply -f ${file_path}cs_apply.yaml
             IF    ${rc}!=0    Fail
             Remove File    ${file_path}cs_apply.yaml

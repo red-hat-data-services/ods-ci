@@ -1,6 +1,7 @@
 *** Settings ***
 Library       OpenShiftLibrary
 Library       OperatingSystem
+Library       Collections
 Resource      ../../../Page/Components/Components.resource
 
 

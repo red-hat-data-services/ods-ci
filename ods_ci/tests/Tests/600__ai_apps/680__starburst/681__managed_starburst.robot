@@ -96,7 +96,7 @@ Verify User Can Query Starburst Using JupyterLab    # robocop: disable
     Run Query And Check Output    query_code=${QUERY_JOIN_PY}
     ...    expected_output=('Customer#[0-9]+'\s?)+
     ...    use_regex=${TRUE}
-    Capture Page Screenshot 
+    Capture Page Screenshot
 
 Verify User Cannot Access Web UI With Invalid License
     [Tags]    MISV-87
@@ -115,7 +115,7 @@ Starburst Setup Suite
 
 Get Original License Secret
     ${current_secret}=    Oc Get    kind=Secret  name=starburst-license  namespace=${STARBURST_CR_DEFAULT_NAMESPACE}
-    Set Suite Variable    ${ORIGINAL_SECRET}    ${current_secret[0]} 
+    Set Suite Variable    ${ORIGINAL_SECRET}    ${current_secret[0]}
 
 Apply Fake Starburst License
     ${new_secret}=    Copy Dictionary    ${ORIGINAL_SECRET}    deepcopy=${TRUE}
@@ -124,7 +124,7 @@ Apply Fake Starburst License
     ${rc}    ${out}=    Run And Return Rc And Output    echo ${new_secret} | oc apply -f -
 
 Restart Coordinator And Workers Pods
-    Oc Delete    kind=Pod   namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  label_selector=role=worker 
+    Oc Delete    kind=Pod   namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  label_selector=role=worker
     Oc Delete    kind=Pod   namespace=${STARBURST_CR_DEFAULT_NAMESPACE}  label_selector=role=coordinator
 
 Starburst Deployment Should Not Be Successful
@@ -132,7 +132,7 @@ Starburst Deployment Should Not Be Successful
     ...    cr_chk_retries=1    cr_chk_retries_interval=10s
     ...    pods_chk_retries=10    pods_chk_retries_interval=10s
     IF    ${status} == ${TRUE}
-        Fail    msg=Coordinator and workers pod should be in error if license is not valid        
+        Fail    msg=Coordinator and workers pod should be in error if license is not valid
     END
 
 Restore Starburst Original License And Verify Deployment

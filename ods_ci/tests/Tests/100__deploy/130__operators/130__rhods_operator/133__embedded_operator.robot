@@ -41,7 +41,17 @@ Install Embedded RHODS
         ${rc} =    Run And Return Rc    oc apply -f ${file_path}operatorgroup_apply.yaml
         IF    ${rc}!=0    Fail
         Remove File    ${file_path}operatorgroup_apply.yaml
-        IF    ${image_url} is not ''
+        ${image_url_bool} =    Evaluate    '${image_url}' == ''
+        IF  ${image_url_bool}
+            # Prod build
+            Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml
+            Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
+            Run    sed -i 's/<CS_NANME>/redhat-operators/' ${file_path}subscription_apply.yaml
+            Run    sed -i 's/<CS_NAMESPACE>/openshift-marketplace/' ${file_path}subscription_apply.yaml
+            ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
+            IF    ${rc}!=0    Fail
+            Remove File    ${file_path}subscription_apply.yaml
+        ELSE
             # Custom catalogsource
             Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
@@ -53,15 +63,6 @@ Install Embedded RHODS
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NANME>/rhods-catalog-dev/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
-            IF    ${rc}!=0    Fail
-            Remove File    ${file_path}subscription_apply.yaml
-        ELSE
-            # Prod build
-            Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml
-            Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<CS_NANME>/redhat-operators/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<CS_NAMESPACE>/openshift-marketplace/' ${file_path}subscription_apply.yaml
             ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
             IF    ${rc}!=0    Fail
             Remove File    ${file_path}subscription_apply.yaml

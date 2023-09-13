@@ -83,6 +83,13 @@ def parse_args():
         action="store_true",
         dest="set_prometheus_config",
     )
+
+    parser.add_argument(
+        "--setDashboardUrl",
+        help="append dashboard Url to config file",
+        action="store_true",
+        dest="set_dashboard_url",
+    )
     parser.add_argument(
         "-s",
         "--skip-git-clone",
@@ -135,9 +142,20 @@ def get_prometheus_url(project):
     return "https://" + prometheus_url.strip("\n")
 
 
+def get_dashboard_url():
+    """
+    Get dashboard url for the open data science.
+    """
+    host_jsonpath = "{.spec.host}"
+    cmd = "oc get route -A -o json  | jq '.items[].spec.host' | grep 'dashboard'"
+
+    dashboard_url = execute_command(cmd)
+    return "https://" + dashboard_url.strip('"').strip("\n")
+
+
 def generate_test_config_file(
     config_template, config_data, test_cluster, set_prometheus_config,
-    components=None
+    set_dashboard_url, components=None
 ):
     """
     Generates test config file dynamically by
@@ -250,6 +268,11 @@ def generate_test_config_file(
         prometheus_url = get_prometheus_url("redhat-ods-monitoring")
         data["RHODS_PROMETHEUS_URL"] = prometheus_url
 
+    if bool(set_dashboard_url):
+        # Get Dashboard url for open data science
+        dashboard_url = get_dashboard_url()
+        data["ODH_DASHBOARD_URL"] = dashboard_url
+
     with open(config_file, "w") as yaml_file:
         yaml_file.write(yaml.dump(data, default_flow_style=False, sort_keys=False))
 
@@ -278,7 +301,7 @@ def main():
     # Generate test config file
     generate_test_config_file(
         args.config_template, config_data, args.test_cluster, args.set_prometheus_config,
-        components=args.components,
+        args.set_dashboard_url, components=args.components,
 
     )
     print("Done generating config file")

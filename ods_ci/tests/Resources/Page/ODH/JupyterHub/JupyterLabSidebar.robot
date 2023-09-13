@@ -2,6 +2,7 @@
 Library  JupyterLibrary
 Library  String
 Library  RequestsLibrary
+Library  Collections
 *** Variables ***
 
 *** Keywords ***

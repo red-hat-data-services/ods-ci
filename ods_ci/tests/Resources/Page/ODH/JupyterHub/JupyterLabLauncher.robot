@@ -6,6 +6,7 @@ Library  OperatingSystem
 Library  Screenshot
 Library  String
 Library  OpenShiftLibrary
+Library  SeleniumLibrary
 
 
 *** Variables ***
@@ -98,7 +99,7 @@ Start JupyterLab Notebook Server
 
 Open JupyterLab Control Panel
   Open With JupyterLab Menu  File  Hub Control Panel
-  SeleniumLibrary.Switch Window    NEW
+  Switch Window    NEW
 
 Stop JupyterLab Notebook Server
   Open JupyterLab Control Panel
@@ -256,7 +257,7 @@ Clone Git Repository
             FAIL
         END
     ELSE
-        Wait Until Page Contains    Successfully cloned    timeout=200s
+        Run Keyword And Warn On Failure    Wait Until Page Contains    Successfully cloned    timeout=60s
     END
 
 Clone Git Repository And Open
@@ -471,7 +472,7 @@ Clone Repo and Return Error Message
     [Tags]    Private Keyword
     [Arguments]    ${repo_url}
     Clone Repo    ${repo_url}
-    Wait Until Page Contains    Cloning...    timeout=5s
+    Run Keyword And Warn On Failure    Wait Until Page Contains    Cloning...    timeout=5s
     ${err_msg} =    Get Git Clone Error Message
     RETURN    ${err_msg}
 

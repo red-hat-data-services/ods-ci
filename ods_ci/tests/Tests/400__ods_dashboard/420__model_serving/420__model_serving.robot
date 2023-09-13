@@ -184,7 +184,7 @@ Model Serving Suite Teardown
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca.crt
-    SeleniumLibrary.Close All Browsers
+    Close All Browsers
     RHOSi Teardown
 
 Clean Up DSP Page
@@ -196,8 +196,8 @@ Clean Up DSP Page
             BREAK
         END
         Delete Data Science Projects From CLI    ${projects}
-        SeleniumLibrary.Reload Page
-        SeleniumLibrary.Wait Until Page Contains    Data science projects
+        Reload Page
+        Wait Until Page Contains    Data science projects
     END
 
 Try Opening Create Server
@@ -206,15 +206,15 @@ Try Opening Create Server
     ...    controls how many retries are made.
     [Arguments]    ${retries}=3
     FOR    ${try}    IN RANGE    0    ${retries}
-        ${status} =    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Create server
+        ${status} =    Run Keyword And Return Status    Page Should Contain    Create server
         IF    ${status}
-            SeleniumLibrary.Click Button    Create server
+            Click Button    Create server
             RETURN
         ELSE
             Clean Up Model Serving Page
             Clean Up DSP Page
             Open Model Serving Home Page
-            SeleniumLibrary.Reload Page
+            Reload Page
             Sleep  5s
         END
     END

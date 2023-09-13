@@ -1,5 +1,7 @@
 *** Settings ***
-Library  SeleniumLibrary
+Resource    ../Components/Menu.robot
+Resource    ../../Common.robot
+Library     SeleniumLibrary
 
 *** Keywords ***
 Open Page

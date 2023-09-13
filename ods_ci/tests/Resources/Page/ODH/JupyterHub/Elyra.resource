@@ -1,5 +1,7 @@
 *** Settings ***
 Documentation    Keywords to interact with Elyra in JupyterLab
+Resource         ../../LoginPage.robot
+Library          SeleniumLibrary
 
 
 *** Variables ***

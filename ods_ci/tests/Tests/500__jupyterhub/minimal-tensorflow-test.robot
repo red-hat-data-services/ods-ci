@@ -16,7 +16,7 @@ Force Tags       JupyterHub
 
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         tensorflow
-${EXPECTED_CUDA_VERSION} =  12.0
+${EXPECTED_CUDA_VERSION} =  12.2
 
 
 *** Test Cases ***
@@ -118,5 +118,5 @@ N-1 Tensorflow Setup
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
     Sleep    30s    reason=Wait for resources to become available again
-    SeleniumLibrary.Reload Page
+    Reload Page
     Wait Until JupyterHub Spawner Is Ready

@@ -1388,6 +1388,23 @@ if __name__ == "__main__":
         description="Script to generate test config file",
     )
 
+    parser.add_argument(
+        "-o",
+        "--ocmclibinaryurl",
+        help="ocm cli binary url",
+        action="store",
+        dest="ocm_cli_binary_url",
+        default=ocm_cli_binary_url,
+    )
+    parser.add_argument(
+        "-v",
+        "--ocm-verbose-level",
+        help="ocm logging verbosity level",
+        action="store",
+        dest="ocm_verbose_level",
+        default="0",
+    )
+
     subparsers = parser.add_subparsers(
         title="Available sub commands", help="Available sub commands"
     )
@@ -2232,22 +2249,6 @@ if __name__ == "__main__":
             )
     create_idp_parser.set_defaults(func=ocm_obj.create_idp)
 
-    parser.add_argument(
-        "-o",
-        "--ocmclibinaryurl",
-        help="ocm cli binary url",
-        action="store",
-        dest="ocm_cli_binary_url",
-        default=ocm_cli_binary_url,
-    )
-    parser.add_argument(
-        "-v",
-        "--ocm-verbose-level",
-        help="ocm logging verbosity level",
-        action="store",
-        dest="ocm_verbose_level",
-        default="0",
-    )
     args = parser.parse_args(namespace=ocm_obj)
     if hasattr(args, "func"):
         args.func()

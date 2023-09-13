@@ -48,7 +48,6 @@ Install Embedded RHODS
         Log    ${out}    console=yes
         Remove File    ${file_path}operatorgroup_apply.yaml
         ${image_url_bool} =    Evaluate    '${image_url}' == ''
-        Log    ${image_url}
         IF  ${image_url_bool}
             # Prod 2.1 build
             Log    Installing prod 2.1 build    console=yes
@@ -105,11 +104,17 @@ RHODS Embedded Verification
     V2 CRs Should Not Exist    ${dsc_name}    ${dsci_name}
     Log  Verified DSC and DSCI CRs  console=yes
     ${filepath} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
+    ${image_url_bool} =    Evaluate    '${image_url}' == ''
+    IF  ${image_url_bool}
+        Process Resource List    filename_in=${filepath}embedded.txt
+        ...    filename_out=${filepath}embedded_processed_expected.txt
+    ELSE
+        Process Resource List    filename_in=${filepath}embedded_cs.txt
+        ...    filename_out=${filepath}embedded_processed_expected.txt
+    END
     Run    oc get $(oc api-resources --namespaced=true --verbs=list -o name | awk '{printf "%s%s",sep,$0;sep=","}') --ignore-not-found -n ${OPERATOR_NAMESPACE} -o=custom-columns=KIND:.kind,NAME:.metadata.name | sort -k1,1 -k2,2 | grep -v "PackageManifest\\|Event\\|ClusterServiceVersion\\|Lease" > ${filepath}embedded_runtime.txt  # robocop: disable
     Process Resource List    filename_in=${filepath}embedded_runtime.txt
     ...    filename_out=${filepath}embedded_processed_runtime.txt
-    Process Resource List    filename_in=${filepath}embedded.txt
-    ...    filename_out=${filepath}embedded_processed_expected.txt
     ${expected} =    Get File    ${filepath}embedded_processed_expected.txt
     ${actual} =    Get File    ${filepath}embedded_processed_runtime.txt
     Remove File    ${filepath}embedded_processed_runtime.txt

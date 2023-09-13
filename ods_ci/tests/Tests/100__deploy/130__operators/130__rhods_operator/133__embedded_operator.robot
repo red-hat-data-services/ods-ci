@@ -78,7 +78,7 @@ Install Embedded RHODS
             Run    sed -i 's/<CS_NAME>/rhods-catalog-dev/' ${file_path}subscription_apply.yaml
             # Might need to be changed to openshift-marketplace in the future
             Run    sed -i 's/<CS_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            ${rc} =    Run And Return Rc And Output    oc apply -f ${file_path}subscription_apply.yaml
+            ${rc}  ${out} =    Run And Return Rc And Output    oc apply -f ${file_path}subscription_apply.yaml
             IF    ${rc}!=0    Fail
             Log    ${out}    console=yes
             Remove File    ${file_path}subscription_apply.yaml

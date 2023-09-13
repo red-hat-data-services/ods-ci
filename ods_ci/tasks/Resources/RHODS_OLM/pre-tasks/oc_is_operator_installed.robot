@@ -36,3 +36,21 @@ Is RHODS Installed
       END
   END
   RETURN  ${result}
+
+Is CodeFlare Installed
+  [Documentation]   Returns if the RHODS CodeFlare operator is currently installed
+  IF  "${cluster_type}" == "selfmanaged"
+      ${result}=  Run Keyword And Return Status
+      ...  Oc Get  kind=Deployment    namespace=openshift-operators
+      ...          label_selector=app.kubernetes.io/name=codeflare-operator
+  ELSE IF  "${cluster_type}" == "managed"
+      ${result}=  Run Keyword And Return Status
+      ...  Oc Get  kind=Deployment  namespace=openshift-operators
+      ...          label_selector=app.kubernetes.io/name=codeflare-operator
+  END
+  RETURN  ${result}
+
+Is CodeFlare Managed
+  [Documentation]   Returns if the RHODS CodeFlare operator should be installed/uninstalled alongside RHODS operator
+  ${isCodeFlareManaged} =    Convert To Boolean    ${MANAGE_CODEFLARE_OPERATOR}
+  RETURN  ${isCodeFlareManaged}

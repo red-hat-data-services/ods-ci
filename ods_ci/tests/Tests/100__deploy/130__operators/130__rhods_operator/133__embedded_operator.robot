@@ -48,16 +48,17 @@ Install Embedded RHODS
         ${image_url_bool} =    Evaluate    '${image_url}' == ''
         Log    ${image_url}
         IF  ${image_url_bool}
-            # Prod build
-            Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
+            # Prod 2.1 build
+            Copy File    source=${file_path}subscription_template_21.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<CS_NAME>/redhat-operators/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<CS_NAMESPACE>/openshift-marketplace/' ${file_path}subscription_apply.yaml
             ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
+            IF    ${rc}!=0    Fail
+            # Approve install since installPlan set to manual approval
+            ${rc} =    Run And Return Rc    oc patch installplan $(oc get installplans -n redhat-ods-operator | grep -v NAME | awk '{print $1}') -n redhat-ods-operator --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'  # robocop: disable
             IF    ${rc}!=0    Fail
             Remove File    ${file_path}subscription_apply.yaml
         ELSE
-            # Custom catalogsource
+            # z-stream releases
             ${image_escaped} =    Escape Forward Slashes    ${image_url}
             Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
@@ -65,9 +66,10 @@ Install Embedded RHODS
             ${rc} =    Run And Return Rc    oc apply -f ${file_path}cs_apply.yaml
             IF    ${rc}!=0    Fail
             Remove File    ${file_path}cs_apply.yaml
-            Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
+            Copy File    source=${file_path}subscription_template_z.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAME>/rhods-catalog-dev/' ${file_path}subscription_apply.yaml
+            # Might need to be changed to openshift-marketplace in the future
             Run    sed -i 's/<CS_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
             ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
             IF    ${rc}!=0    Fail

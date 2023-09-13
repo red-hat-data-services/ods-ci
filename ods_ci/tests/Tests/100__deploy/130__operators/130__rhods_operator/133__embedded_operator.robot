@@ -38,41 +38,49 @@ Install Embedded RHODS
     END
     IF    "${cluster_type}" == "selfmanaged"
         ${file_path} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
-        ${rc} =    Run And Return Rc    oc create ns ${OPERATOR_NAMESPACE}
+        ${rc}  ${out} =    Run And Return Rc And Output    oc create ns ${OPERATOR_NAMESPACE}
         IF    ${rc}!=0    Fail
+        Log    ${out}    console=yes
         Copy File    source=${file_path}operatorgroup_template.yaml    destination=${file_path}operatorgroup_apply.yaml
         Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}operatorgroup_apply.yaml
-        ${rc} =    Run And Return Rc    oc apply -f ${file_path}operatorgroup_apply.yaml
+        ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ${file_path}operatorgroup_apply.yaml
         IF    ${rc}!=0    Fail
+        Log    ${out}    console=yes
         Remove File    ${file_path}operatorgroup_apply.yaml
         ${image_url_bool} =    Evaluate    '${image_url}' == ''
         Log    ${image_url}
         IF  ${image_url_bool}
             # Prod 2.1 build
+            Log    Installing prod 2.1 build    console=yes
             Copy File    source=${file_path}subscription_template_21.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
+            ${rc}  ${out} =    Run And Return Rc And Output    oc apply -f ${file_path}subscription_apply.yaml
             IF    ${rc}!=0    Fail
+            Log    ${out}    console=yes
             # Approve install since installPlan set to manual approval
-            ${rc} =    Run And Return Rc    oc patch installplan $(oc get installplans -n redhat-ods-operator | grep -v NAME | awk '{print $1}') -n redhat-ods-operator --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'  # robocop: disable
+            ${rc}  ${out} =    Run And Return Rc And Output    oc patch installplan $(oc get installplans -n redhat-ods-operator | grep -v NAME | awk '{print $1}') -n redhat-ods-operator --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'  # robocop: disable
             IF    ${rc}!=0    Fail
+            Log    ${out}    console=yes
             Remove File    ${file_path}subscription_apply.yaml
         ELSE
             # z-stream releases
+            Log    Installing z-stream build with IIB ${image_url}    console=yes
             ${image_escaped} =    Escape Forward Slashes    ${image_url}
             Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
             Run    sed -i 's/<IMAGE_URL>/${image_escaped}/' ${file_path}cs_apply.yaml
-            ${rc} =    Run And Return Rc    oc apply -f ${file_path}cs_apply.yaml
+            ${rc}  ${out} =    Run And Return Rc And Output    oc apply -f ${file_path}cs_apply.yaml
             IF    ${rc}!=0    Fail
+            Log    ${out}    console=yes
             Remove File    ${file_path}cs_apply.yaml
             Copy File    source=${file_path}subscription_template_z.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
             Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
             Run    sed -i 's/<CS_NAME>/rhods-catalog-dev/' ${file_path}subscription_apply.yaml
             # Might need to be changed to openshift-marketplace in the future
             Run    sed -i 's/<CS_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            ${rc} =    Run And Return Rc    oc apply -f ${file_path}subscription_apply.yaml
+            ${rc} =    Run And Return Rc And Output    oc apply -f ${file_path}subscription_apply.yaml
             IF    ${rc}!=0    Fail
+            Log    ${out}    console=yes
             Remove File    ${file_path}subscription_apply.yaml
         END
     ELSE

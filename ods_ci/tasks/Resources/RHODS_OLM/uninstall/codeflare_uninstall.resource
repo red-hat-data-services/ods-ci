@@ -2,6 +2,7 @@
 Documentation    RHODS CodeFlare operator uninstallation keywords
 Resource   ../install/oc_install.robot
 Resource   ../../../../tests/Resources/Common.robot
+Resource   ../../../../tests/Resources/Page/Operators/ISVs.resource
 Resource   oc_uninstall.robot
 
 Library    Process
@@ -18,13 +19,11 @@ Uninstalling CodeFlare Operator
 
 Uninstall CodeFlare
     [Documentation]   Removes the RHODS CodeFlare operator subscription and CSV
+    # needs to be deleted first to avoid getting stuck on CodeFlare finalizer
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription rhods-codeflare-operator -n openshift-operators
-    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting CodeFlare subscription
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete csv `oc get csv -n openshift-operators |grep rhods-codeflare-operator |awk '{print $1}'`
-    ...    -n openshift-operators
-    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting CodeFlare CSV
+    ...    oc delete mcads.codeflare.codeflare.dev mcad -n redhat-ods-applications --ignore-not-found
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting CodeFlare MCAD CR
+    Uninstall ISV Operator From OperatorHub Via CLI     rhods-codeflare-operator    openshift-operators
 
 CodeFlare Operator Should Be Uninstalled
     [Documentation]   Verifies and logs that the RHODS CodeFlare operator is uninstalled

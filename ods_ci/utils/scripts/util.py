@@ -61,28 +61,27 @@ def execute_command(cmd):
     Executes command in the local node, and print real-time output
     """
     output = ''
-    with subprocess.Popen(
-            cmd,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-            encoding='utf-8',
-            errors='replace'
-        ) as p:
-            while True:
-                line = p.stdout.readline()
-                if line != '':
-                    output += (line + "\n")
-                    print(line)
-                elif p.poll() != None:
-                    break
-            sys.stdout.flush()
-            exitCode = p.returncode
-            if (exitCode == 0):
+    try:
+        with subprocess.Popen(
+                cmd,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                encoding='utf-8',
+                errors='replace'
+            ) as p:
+                while True:
+                    line = p.stdout.readline()
+                    if line != '':
+                        output += (line + "\n")
+                        print(line)
+                    elif p.poll() != None:
+                        break
+                sys.stdout.flush()
                 return output
-            else:
-                raise Exception(cmd, exitCode, output)
+    except:
+        return None
 
 
 def oc_login(ocp_console_url, username, password, timeout=600):

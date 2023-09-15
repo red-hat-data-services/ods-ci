@@ -54,7 +54,7 @@ class OpenshiftClusterManager:
         self.region = args.get("region")
         self.compute_machine_type = args.get("compute_machine_type")
         self.ocm_cli_binary_url = args.get("ocm_cli_binary_url")
-        self.ocm_verbose_level = args.get("ocm_verbose_level")
+        self.ocm_verbose_level = args.get("ocm_verbose_level","0")
         self.num_users_to_create_per_group = args.get("num_users_to_create_per_group")
         self.htpasswd_cluster_admin = args.get("htpasswd_cluster_admin")
         self.htpasswd_cluster_password = args.get("htpasswd_cluster_password")

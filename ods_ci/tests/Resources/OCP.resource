@@ -68,7 +68,7 @@ Is RHODS Self-Managed
     ${is_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
     ...                                                      kind=CatalogSource
     ...                                                      name=addon-managed-odh-catalog
-    ...                                                      namespace=openshift-marketplace
+    ...                                                      namespace=${OPERATOR_NAMESPACE}
     Run Keyword And Return    Evaluate    not ${is_managed}
 
 Get MachineSets

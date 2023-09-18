@@ -1,15 +1,15 @@
 #!/bin/bash
 # Make changes to gpu install file
 
-GPU_INSTALL_FILE=ods_ci/tasks/Resources/Provisioning/GPU
+GPU_INSTALL_DIR="$(dirname "$0")"
 
 CHANNEL=$(oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.defaultChannel}')
 
 CSVNAME=$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -ojson | jq -r '.status.channels[] | select(.name == "'$CHANNEL'") | .currentCSV')
 
-sed -i -e "0,/v1.11/s//$CHANNEL/g" -e "s/gpu-operator-certified.v1.11.0/$CSVNAME/g"  ${GPU_INSTALL_FILE}/gpu_install.yaml
+sed -i -e "0,/v1.11/s//$CHANNEL/g" -e "s/gpu-operator-certified.v1.11.0/$CSVNAME/g"  ${GPU_INSTALL_DIR}/gpu_install.yaml
 
-oc apply -f ${GPU_INSTALL_FILE}/gpu_install.yaml
+oc apply -f ${GPU_INSTALL_DIR}/gpu_install.yaml
 
 function wait_until_gpu_pods_are_running() {
 
@@ -41,7 +41,7 @@ function wait_until_gpu_pods_are_running() {
 }
 
 wait_until_gpu_pods_are_running
-oc apply -f ${GPU_INSTALL_FILE}/nfd_deploy.yaml
+oc apply -f ${GPU_INSTALL_DIR}/nfd_deploy.yaml
 oc get csv -n nvidia-gpu-operator $CSVNAME -ojsonpath={.metadata.annotations.alm-examples} | jq .[0] > clusterpolicy.json
 oc apply -f clusterpolicy.json
 

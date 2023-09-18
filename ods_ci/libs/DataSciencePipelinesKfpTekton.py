@@ -3,8 +3,6 @@ import importlib
 import json
 import os
 import sys
-from kfp_tekton.compiler.pipeline_utils import TektonPipelineConf
-import kfp_tekton
 from DataSciencePipelinesAPI import DataSciencePipelinesAPI
 from robotlibcore import keyword
 from urllib3.exceptions import MaxRetryError, SSLError
@@ -20,6 +18,16 @@ class DataSciencePipelinesKfpTekton:
         if self.client is None:
             self.api = DataSciencePipelinesAPI()
             self.api.login_and_wait_dsp_route(user, pwd, project, route_name)
+
+            # initialize global environment variables
+            # https://github.com/kubeflow/kfp-tekton/issues/1345
+            default_image = 'registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61'
+            os.environ["DEFAULT_STORAGE_CLASS"] = self.api.get_default_storage()
+            os.environ["TEKTON_BASH_STEP_IMAGE"] = default_image
+            os.environ["TEKTON_COPY_RESULTS_STEP_IMAGE"] = default_image
+            os.environ["CONDITION_IMAGE_NAME"] = default_image
+            import kfp_tekton
+
             # the following fallback it is to simplify the test development
             try:
                 # we assume it is a secured cluster
@@ -81,11 +89,6 @@ class DataSciencePipelinesKfpTekton:
             f"{current_path}/ods_ci/tests/Resources/Files/pipeline-samples/{source_code}"
         )
         pipeline = getattr(my_source, fn)
-        default_image = 'registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61'
-        os.environ["DEFAULT_STORAGE_CLASS"] = self.api.get_default_storage()
-        os.environ["TEKTON_BASH_STEP_IMAGE"] = default_image
-        os.environ["TEKTON_COPY_RESULTS_STEP_IMAGE"] = default_image
-        os.environ["CONDITION_IMAGE_NAME"] = default_image
 
         # create_run_from_pipeline_func will compile the code
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')

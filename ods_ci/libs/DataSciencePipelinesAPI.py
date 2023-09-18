@@ -300,8 +300,9 @@ class DataSciencePipelinesAPI:
         result, _ = self.run_oc("oc get storageclass -A -o json")
         result = json.loads(result)
         for storage_class in result['items']:
-            if storage_class['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] == 'true':
-                break
+            if 'annotations' in storage_class['metadata']:
+                if storage_class['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] == 'true':
+                    break
         return storage_class['metadata']['name']
 
     def run_oc(self, command):

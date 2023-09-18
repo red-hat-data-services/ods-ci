@@ -81,15 +81,18 @@ class DataSciencePipelinesKfpTekton:
             f"{current_path}/ods_ci/tests/Resources/Files/pipeline-samples/{source_code}"
         )
         pipeline = getattr(my_source, fn)
+        default_image = 'registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61'
         os.environ["DEFAULT_STORAGE_CLASS"] = self.api.get_default_storage()
-        pipeline_conf = TektonPipelineConf()
-        pipeline_conf.set_condition_image_name('registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61')
+        os.environ["TEKTON_BASH_STEP_IMAGE"] = default_image
+        os.environ["TEKTON_COPY_RESULTS_STEP_IMAGE"] = default_image
+        os.environ["CONDITION_IMAGE_NAME"] = default_image
+
         # create_run_from_pipeline_func will compile the code
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')
         result = client.create_run_from_pipeline_func(
             pipeline_func=pipeline, arguments={
                 'mlpipeline_minio_artifact_secret': mlpipeline_minio_artifact_secret
-            }, pipeline_conf=pipeline_conf
+            }
         )
         # easy to debug and double check failures
         print(result)
@@ -103,5 +106,4 @@ class DataSciencePipelinesKfpTekton:
     ):
         _, api = self.get_client(user, pwd, project, route_name)
         return api.check_run_status(run_result.run_id, timeout=timeout)
-
 

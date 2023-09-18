@@ -1678,34 +1678,17 @@ urllib3 = ">=1.15"
 
 [[package]]
 name = "kfp-tekton"
-version = "1.5.8"
+version = "1.5.9"
 description = "Tekton Compiler for Kubeflow Pipelines"
 optional = false
 python-versions = ">=3.6.1"
 files = [
-    {file = "kfp-tekton-1.5.8.tar.gz", hash = "sha256:2b74008f73a4ab0c97b2694bbdeaf1b20d3d7cb08b753b6f529176167e98b7e4"},
+    {file = "kfp-tekton-1.5.9.tar.gz", hash = "sha256:62e745dba6a4c56e50b8ef23e7eeeac4d85893dbacf398a53355672b29643722"},
 ]
 
 [package.dependencies]
 kfp = ">=1.8.10,<1.8.23"
-kfp-tekton-server-api = ">=1.5.0"
 PyYAML = ">=6,<7"
-
-[[package]]
-name = "kfp-tekton-server-api"
-version = "1.5.0"
-description = "Kubeflow Pipelines on Tekton API"
-optional = false
-python-versions = "*"
-files = [
-    {file = "kfp-tekton-server-api-1.5.0.tar.gz", hash = "sha256:2765575419a838dc6f513cfd3c9c53ffca8719cdafac49f36a0e1cec3ca65e39"},
-]
-
-[package.dependencies]
-certifi = "*"
-python-dateutil = "*"
-six = ">=1.10"
-urllib3 = ">=1.15"
 
 [[package]]
 name = "korean-lunar-calendar"
@@ -4972,4 +4955,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "86bb99b54abb93c43d2eafc8a6a0c8eec9c84d6076e9f4721806145a1ea217d4"
+content-hash = "b1f38b9dd7db33ad9a28d3f58dd2f0b31beb164ed98c756cc190bfc91f9e9f00"

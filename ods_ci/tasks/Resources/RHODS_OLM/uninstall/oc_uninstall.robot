@@ -39,5 +39,6 @@ Wait Until Project Is Deleted
         ${project_exists}=  Run Keyword and return status
         ...  Oc Get  kind=Namespace  field_selector=metadata.name=${project}
         Exit For Loop If     not ${project_exists}
-
    END
+   IF  ${project_exists}
+   ...  Fail    Project ${project} has not been deleted after ${timeout} attempts!

@@ -661,56 +661,34 @@ Compile Inference Service YAML
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
     ...            ${min_replicas}=1   ${scaleTarget}=1   ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
-    Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{INFERENCE_SERVICE_NAME}}/${isvc_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{MIN_REPLICAS}}/${min_replicas}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{MIN_REPLICAS}}/${min_replicas}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     IF   '${auto_scale}' == '${NONE}'
-          ${rc}    ${out}=    Run And Return Rc And Output
-          ...    sed -i '/scaleMetric/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-          ${rc}    ${out}=    Run And Return Rc And Output
-          ...    sed -i '/scaleTarget/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ELSE
-          ${rc}    ${out}=    Run And Return Rc And Output
-          ...    sed -i 's/{{SCALE_TARGET}}/${scaleTarget}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-          ${rc}    ${out}=    Run And Return Rc And Output
-          ...    sed -i 's/{{SCALE_METRIC}}/${scaleMetric}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        ${scaleTarget}=    Set Variable    ${EMPTY}
+        ${scaleMetric}=    Set Variable    ${EMPTY}
     END
-    IF   '${canaryTrafficPercent}' == '${EMPTY}'
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    sed -i '/canaryTrafficPercent/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ELSE
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    sed -i 's/{{CanaryTrafficPercent}}/${canaryTrafficPercent}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    END
-    IF    ${requests_dict} == &{EMPTY}
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    yq -i 'del(.spec.predictor.model.resources.requests)' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ELSE
-        Log    ${requests_dict}
+    Set Test Variable    ${isvc_name}
+    Set Test Variable    ${min_replicas}
+    Set Test Variable    ${sa_name}
+    Set Test Variable    ${model_storage_uri}
+    Set Test Variable    ${scaleTarget}
+    Set Test Variable    ${scaleMetric}
+    Set Test Variable    ${canaryTrafficPercent}
+    Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    IF    ${requests_dict} != &{EMPTY}
+        Log    Adding predictor model requests to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${requests_dict}    console=True
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
             Log    ${index}- ${resource}:${requests_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
             ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
-    IF    ${limits_dict} == &{EMPTY}
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    yq -i 'del(.spec.predictor.model.resources.limits)' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ELSE
-        Log    ${limits_dict}
+    IF    ${limits_dict} != &{EMPTY}
+        Log    Adding predictor model limits to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${limits_dict}    console=True
         FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
             Log    ${index}- ${resource}:${limits_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
             ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
 

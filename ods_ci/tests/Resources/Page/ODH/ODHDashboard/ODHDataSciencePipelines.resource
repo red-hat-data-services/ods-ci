@@ -74,7 +74,7 @@ Select Pipeline For The Run
 Get Workflow Name From Topology Page
     [Documentation]    Returns the workflow name corresponding to the displayed pipeline.
     ...                The workflow name can be used to retrieve pods, for example
-    ${workflow_name}=    Get Text    xpath://div/div[text()="Workflow name"]/following-sibling::div
+    ${workflow_name}=    Get Text    xpath://div[b/text()='Workflow name']/following-sibling::div
     RETURN    ${workflow_name}
 
 Delete Pipeline Run

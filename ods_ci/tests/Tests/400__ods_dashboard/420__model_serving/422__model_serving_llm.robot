@@ -179,7 +179,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     Should Be Equal As Integers    ${rc}    ${0}
     [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
-    
+
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Tags]    ODS-2376    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
@@ -660,9 +660,10 @@ Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
     ...            ${min_replicas}=1   ${scaleTarget}=1   ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
+    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
     IF   '${auto_scale}' == '${NONE}'
-        ${scaleTarget}    Set Variable    ${EMPTY}
-        ${scaleMetric}    Set Variable    ${EMPTY}
+        ${scaleTarget}=    Set Variable    ${EMPTY}
+        ${scaleMetric}=    Set Variable    ${EMPTY}
     END
     Set Test Variable    ${isvc_name}
     Set Test Variable    ${min_replicas}
@@ -672,6 +673,22 @@ Compile Inference Service YAML
     Set Test Variable    ${scaleMetric}
     Set Test Variable    ${canaryTrafficPercent}
     Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    IF    ${requests_dict} != &{EMPTY}
+        Log    Adding predictor model requests to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${requests_dict}    console=True
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
+            Log    ${index}- ${resource}:${requests_dict}[${resource}]
+            ${rc}    ${out}=    Run And Return Rc And Output
+            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        END
+    END
+    IF    ${limits_dict} != &{EMPTY}
+        Log    Adding predictor model limits to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${limits_dict}    console=True
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
+            Log    ${index}- ${resource}:${limits_dict}[${resource}]
+            ${rc}    ${out}=    Run And Return Rc And Output
+            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        END
+    END
 
 Model Response Should Match The Expectation
     [Documentation]    Checks that the actual model response matches the expected answer.

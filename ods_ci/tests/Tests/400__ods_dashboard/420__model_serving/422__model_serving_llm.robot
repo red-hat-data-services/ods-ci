@@ -679,6 +679,7 @@ Compile Inference Service YAML
             Log    ${index}- ${resource}:${requests_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
             ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
     IF    ${limits_dict} != &{EMPTY}
@@ -687,6 +688,7 @@ Compile Inference Service YAML
             Log    ${index}- ${resource}:${limits_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
             ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
 

@@ -12,7 +12,6 @@ spec:
     minReplicas: ${min_replicas}
     scaleTarget: ${scaleTarget}
     canaryTrafficPercent: ${canaryTrafficPercent}
-    minReplicas: ${min_replicas}
     serviceAccountName: ${sa_name}
     model:
       modelFormat:

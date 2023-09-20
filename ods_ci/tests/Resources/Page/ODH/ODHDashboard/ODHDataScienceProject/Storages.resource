@@ -15,6 +15,7 @@ ${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@aria-label="mount-path-fol
 ${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
 ${STORAGE_ADD_BTN_1_XP}=           ${STORAGE_SECTION_XP}//button[.="Add cluster storage"]
 ${STORAGE_ADD_BTN_2_XP}=           xpath=//footer//button[.="Add storage"]
+${STORAGE_UPDATE_BTN}=             xpath=//footer//button[.="Update"]
 
 
 *** Keywords ***
@@ -69,6 +70,16 @@ Create PersistentVolume Storage
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
 
+Edit PersistentVolume Storage
+    [Documentation]    Edit a PersistenVolume storage in DS Project details page - edits name, description and size only
+    [Arguments]    ${project_title}    ${name}    ${new_name}    ${new_description}    ${new_size}
+    Edit Storage    name=${name}
+    Fill In New PV Data    name=${new_name}    description=${new_description}    size=${new_size}
+    Wait Until Element Is Enabled    ${STORAGE_UPDATE_BTN}
+    Click Button    ${STORAGE_UPDATE_BTN}
+    Wait Until Generic Modal Disappears
+    Wait Until Project Is Open    project_title=${project_title}
+
 Fill In New PV Data
     [Documentation]    Compiles the modal for creating a new PersistenVolume storage in DS Project details page
     [Arguments]    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
@@ -111,8 +122,14 @@ Set Connection Between PV And Workbench
 Delete Storage
     [Documentation]    Deletes a cluster storage from DS Project details page
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    Workbenches.Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=storage    press_cancel=${press_cancel}
+
+Edit Storage
+    [Documentation]    Edits a cluster storage from DS Project details page
+    [Arguments]     ${name}
+    ODHDashboard.Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Edit
+    Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
 
 Get Openshift PVC From Storage
     [Documentation]    Retrieves the PVC resource name from Openshift given the Displayed Name in DS Project details page

@@ -103,7 +103,7 @@ Add Environment Variables In Workbench
     # Broken in 1.33 RC1
     # Use the `Jump to section` links in the page to scroll the section into view
     # Click Element    //a[@href="#environment-variables"]
-    Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,500)
+    Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
     ${n_objects}=    Get Length    ${env_variables}
     FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}    start=1

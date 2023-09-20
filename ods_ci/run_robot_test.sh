@@ -273,22 +273,24 @@ if command -v yq &> /dev/null
                         oc_user=$(yq -er '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}")
                         oc_pass=$(yq -er '.OCP_ADMIN_USER.PASSWORD' "${TEST_VARIABLES_FILE}")
                         oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
+                        retVal=$?
                     else
                         echo "Performing oc login using service account"
                         sa_token=$(oc create token "${SERVICE_ACCOUNT}" -n "${SA_NAMESPACE}" --duration 6h)
                         oc login --token="$sa_token" --server="${oc_host}" --insecure-skip-tls-verify=true
+                        retVal=$?
                         sa_fullname=$(oc whoami)
                         TEST_VARIABLES="${TEST_VARIABLES} --variable SERVICE_ACCOUNT.NAME:${SERVICE_ACCOUNT} --variable SERVICE_ACCOUNT.FULL_NAME:${sa_fullname}"
 
                 fi
 
                 ## no point in going further if the login is not working
-                retVal=$?
                 if [ $retVal -ne 0 ]; then
                     echo "The oc login command seems to have failed"
                     echo "Please review the content of ${TEST_VARIABLES_FILE}"
-                    exit $retVal
+                    exit "${retVal}"
                 fi
+
                 oc cluster-info
                 printf "\nconnected as openshift user ' %s '\n" "$(oc whoami)"
                 echo "since the oc login was successful, continuing."

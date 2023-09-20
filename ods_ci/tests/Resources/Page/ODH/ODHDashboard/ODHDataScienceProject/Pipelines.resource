@@ -46,6 +46,15 @@ Import Pipeline
     [Documentation]    Import a pipeline definition from DS Project details page.
     ...                It expects to receive the relative path starting from ods_ci/
     [Arguments]    ${name}    ${filepath}    ${project_title}    ${description}=${NONE}    ${press_cancel}=${FALSE}
+    # Begin - Workaround for https://github.com/opendatahub-io/data-science-pipelines-operator/issues/349
+    Capture Page Screenshot
+    Reload Page
+    Log     Workaround for data-science-pipelines-operator/issues/349     level=WARN
+    Wait Until Page Contains Element    ${PIPELINES_IMPORT_BTN_XP}     timeout=120
+    Wait Until Page Contains Element    //*[contains(text(), 'To get started, import a pipeline.')]    timeout=120
+    Wait Until Element Is Enabled  ${PIPELINES_IMPORT_BTN_XP}  timeout=120
+    Capture Page Screenshot
+    # End - Workaround
     Element Should Be Enabled    ${PIPELINES_IMPORT_BTN_XP}
     Click Button    ${PIPELINES_IMPORT_BTN_XP}
     Wait Until Generic Modal Appears

@@ -263,15 +263,27 @@ if command -v yq &> /dev/null
                     then
                         oc_host=${api_server}
                     else
-                        oc_host=$(yq -er '.OCP_API_URL' "${TEST_VARIABLES_FILE}")
+                        oc_host=$(yq -er '.OCP_API_URL' "${TEST_VARIABLES_FILE}") || {
+                            echo "Couldn't find '.OCP_API_URL' variable in provided '${TEST_VARIABLES_FILE}'."
+                            echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
+                            exit 1
+                        }
                 fi
 
 
                 if [ -z "${SERVICE_ACCOUNT}" ]
                     then
                         echo "Performing oc login using username and password"
-                        oc_user=$(yq -er '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}")
-                        oc_pass=$(yq -er '.OCP_ADMIN_USER.PASSWORD' "${TEST_VARIABLES_FILE}")
+                        oc_user=$(yq -er '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}") || {
+                            echo "Couldn't find '.OCP_ADMIN_USER.USERNAME' variable in provided '${TEST_VARIABLES_FILE}'."
+                            echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
+                            exit 1
+                        }
+                        oc_pass=$(yq -er '.OCP_ADMIN_USER.PASSWORD' "${TEST_VARIABLES_FILE}") || {
+                            echo "Couldn't find '.OCP_ADMIN_USER.PASSWORD' variable in provided '${TEST_VARIABLES_FILE}'."
+                            echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
+                            exit 1
+                        }
                         oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
                         retVal=$?
                     else

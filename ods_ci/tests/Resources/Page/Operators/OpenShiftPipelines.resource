@@ -29,9 +29,9 @@ Install Red Hat OpenShift Pipelines
     ${oc_version}=    Get OpenShift Version
     ${is_self_managed}=    Is RHODS Self-Managed
     ${platform}=    Fetch Cluster Platform Type
-    IF    ${oc_version} == "4.10"
+    IF    "${oc_version}" == "4.10"
         ${openshift_pipelines_version}=    Set Variable    pipelines-1.8"
-    ELSE IF    ${oc_version} == "4.11"
+    ELSE IF    "${oc_version}" == "4.11"
         ${openshift_pipelines_version}=    Set Variable    pipelines-1.9
     ELSE
         IF    ${is_self_managed} == ${TRUE} and "${platform}" == "AWS"

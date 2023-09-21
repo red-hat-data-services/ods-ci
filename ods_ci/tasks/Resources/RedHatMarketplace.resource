@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation    Collections of keywords to register a cluster to RHM
 Library    OpenShiftLibrary
-Library    ../../venv/lib64/python3.8/site-packages/robot/libraries/OperatingSystem.py
+Library    OperatingSystem
 
 
 *** Variables ***

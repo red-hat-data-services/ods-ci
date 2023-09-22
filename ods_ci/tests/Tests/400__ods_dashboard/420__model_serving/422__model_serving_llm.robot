@@ -772,5 +772,7 @@ Compile And Query LLM model
 
 Run Install Script
     ${rc}=    Run And Return Rc    git clone https://github.com/opendatahub-io/caikit-tgis-serving
+    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}=    Run And Watch Command    TARGET_OPERATOR=rhods CHECK_UWM=false ./scripts/install/kserve-install.sh
     ...    cwd=caikit-tgis-serving/demo/kserve
+    Should Be Equal As Integers    ${rc}    ${0}

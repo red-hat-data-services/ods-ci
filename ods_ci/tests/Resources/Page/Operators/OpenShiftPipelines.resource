@@ -34,7 +34,7 @@ Install Red Hat OpenShift Pipelines
         ${openshift_pipelines_version}=    Set Variable    pipelines-1.8"
     ELSE IF    "4.11" in "${oc_version}"
         ${openshift_pipelines_version}=    Set Variable    pipelines-1.9
-    ELSE IF    "4.12" in "${oc_version}"
+    ELSE IF    "4.12" in "${oc_version}" or "4.13" in "${oc_version}"
         IF    ${is_self_managed} == ${TRUE} and "${platform}" == "AWS"
             ${openshift_pipelines_version}=    Set Variable    pipelines-1.10
         ELSE IF    ${is_self_managed} == ${FALSE} and "${platform}" == "AWS"

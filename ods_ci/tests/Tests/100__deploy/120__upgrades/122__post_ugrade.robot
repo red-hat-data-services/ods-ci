@@ -5,7 +5,11 @@ Resource           ../../../Resources/RHOSi.resource
 Resource           ../../../Resources/ODS.robot
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource           ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Resource           ../../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource           ../../../Resources/Page/LoginPage.robot
 Resource           ../../../Resources/Page/OCPLogin/OCPLogin.robot
@@ -17,6 +21,15 @@ Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
 
 *** Variables ***
 ${S_SIZE}       25
+${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
+${INFERENCE_INPUT_OPENVINO}=    @ods_ci/tests/Resources/Files/openvino-example-input.json
+${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
+${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}
+${PRJ_TITLE}=    model-serving-upgrade
+${PRJ_DESCRIPTION}=    project used for model serving tests
+${MODEL_NAME}=    test-model
+${MODEL_CREATED}=    False
+${RUNTIME_NAME}=    Model Serving Test
 
 
 *** Test Cases ***
@@ -65,6 +78,13 @@ Verify Custom Image Is Present
    IF    not ${status}   Fail    Notebook image is deleted after the upgrade
    [Teardown]  Delete OOTB Image
 
+Verify Disable Runtime Is Present
+    [Documentation]  Disable the Serving runtime using Cli
+    [Tags]  Upgrade
+    ${rn}   Set Variable      ${payload[0]['spec']['templateDisablement']}
+    List Should Contain Value   ${rn}    ovms-gpu
+    [Teardown]  Enable Model Serving Runtime Using CLI   namespace=redhat-ods-applications
+
 Reset PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
     [Tags]  Upgrade
@@ -104,6 +124,16 @@ Verify POD Status
     Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log  "Verified rhods-notebook"
 
+Test Inference Post RHODS Upgrade
+    [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
+    [Tags]  Upgrade
+    [Setup]  Begin Web Test
+    Fetch CA Certificate If RHODS Is Self-Managed
+    Open Model Serving Home Page
+    Verify Model Status    ${MODEL_NAME}    success
+    Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
+    Remove File    openshift_ca.crt
+    [Teardown]   Run   oc delete project ${PRJ_TITLE}
 
 *** Keywords ***
 Dashboard Suite Setup
@@ -127,6 +157,7 @@ Set Default Users
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
     Upgrade Test Teardown
+
 Delete OOTB Image
    [Documentation]  Delete the Custom notbook create
    ${status}  Run Keyword And Return Status     Oc Delete  kind=ImageStream  name=byon-upgrade  namespace=${APPLICATIONS_NAMESPACE}  #robocop:disable

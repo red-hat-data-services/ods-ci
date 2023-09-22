@@ -7,6 +7,7 @@ Verify that the must-gather image provides RHODS logs and info
       [Tags]   Smoke    Sanity
       ...      Tier1
       ...      ODS-505
+      ...      Upgrade
       Get must-gather logs
       Verify logs for ${APPLICATIONS_NAMESPACE}
       Verify logs for redhat-ods-operator

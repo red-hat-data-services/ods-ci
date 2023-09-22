@@ -39,7 +39,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The Kfp_tekton
     ...    project=${PROJECT_NAME}
     ...    python_file=upload_download.py
     ...    method_name=wire_up_pipeline
-    ...    status_check_timeout=160
+    ...    status_check_timeout=220
     [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
 
 

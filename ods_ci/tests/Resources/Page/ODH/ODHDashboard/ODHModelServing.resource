@@ -334,3 +334,17 @@ Model Pod Should Be Scheduled On A GPU Node
         Should Be Equal As Integers    ${rc}    ${0}
         Should Be Equal As Strings    ${out}    "true"
     END
+
+Enable Model Serving Runtime Using CLI
+    [Documentation]  Update OdhDashboardConfig to enable the model runtime
+    [Arguments]    ${namespace}    ${name}=${EMPTY}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch OdhDashboardConfig odh-dashboard-config --type=json -p '[{op: "replace", path: "/spec/templateDisablement", value: [${name}]}]' -n ${namespace}
+    Should Be Equal As Integers    ${rc}         ${0}
+
+Disable Model Serving Runtime Using CLI
+    [Documentation]  Update OdhDashboardConfig to disable the model runtime
+    [Arguments]    ${namespace}    ${name}=ovms-gpu
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch OdhDashboardConfig odh-dashboard-config --type=json -p '[{op: "replace", path: "/spec/templateDisablement", value: ["${name}"]}]' -n ${namespace}
+    Should Be Equal As Integers    ${rc}         ${0}

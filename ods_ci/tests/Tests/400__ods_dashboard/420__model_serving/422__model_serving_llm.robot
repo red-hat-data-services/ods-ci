@@ -39,6 +39,7 @@ ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${SKIP_PREREQS_INSTALL}=    ${FALSE}
+${SCRIPT_BASED_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small
 ${BLOOM_MODEL_S3_DIR}=    bloom-560m
@@ -382,11 +383,15 @@ Install Model Serving Stack Dependencies
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
     # RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
-        Install Service Mesh Stack
-        Deploy Service Mesh CRs
-        Install Serverless Stack
-        Deploy Serverless CRs
-        Configure KNative Gateways
+        IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
+            Install Service Mesh Stack
+            Deploy Service Mesh CRs
+            Install Serverless Stack
+            Deploy Serverless CRs
+            Configure KNative Gateways
+        ELSE
+            Run Install Script
+        END
     END
     Load Expected Responses
 
@@ -764,3 +769,8 @@ Compile And Query LLM model
           ...    json_body=${body}    json_header=${header}
           ...    insecure=${TRUE}
     END
+
+Run Install Script
+    ${rc}=    Run And Return Rc    git clone https://github.com/opendatahub-io/caikit-tgis-serving
+    ${rc}=    Run And Watch Command    TARGET_OPERATOR=rhods CHECK_UWM=false ./scripts/install/kserve-install.sh
+    ...    cwd=caikit-tgis-serving/demo/kserve

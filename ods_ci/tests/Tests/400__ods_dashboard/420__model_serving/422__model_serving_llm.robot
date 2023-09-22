@@ -771,6 +771,8 @@ Compile And Query LLM model
     END
 
 Run Install Script
+    [Documentation]    Install KServe serving stack using
+    ...                https://github.com/opendatahub-io/caikit-tgis-serving/blob/main/demo/kserve/scripts/README.md
     ${rc}=    Run And Return Rc    git clone https://github.com/opendatahub-io/caikit-tgis-serving
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}=    Run And Watch Command    TARGET_OPERATOR=rhods CHECK_UWM=false ./scripts/install/kserve-install.sh

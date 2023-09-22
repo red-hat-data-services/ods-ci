@@ -165,7 +165,7 @@ Verify User Can Access Only Its Owned Projects
     Project Should Be Listed    project_title=${PRJ_A_USER4}
 
 Verify User Can Create A Data Science Project
-    [Tags]    Sanity    Tier1    ODS-1775
+    [Tags]    Smoke    ODS-1775
     [Documentation]    Verifies users can create a DS project
     [Setup]   Launch Data Science Project Main Page
     Open Data Science Projects Home Page
@@ -194,8 +194,8 @@ Verify User Can Edit A Data Science Project
     Should Be Equal As Strings  ${ns_name}  ${ns_newname}
 
 
-Verify User Can Create And Start A Workbench With Ephimeral Storage
-    [Tags]    Sanity    Tier1    ODS-1812
+Verify User Can Create And Start A Workbench With Ephemeral Storage
+    [Tags]    Smoke    ODS-1812
     [Documentation]    Verifies users can create workbench using Ephemeral storage
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
     IF  ${version_check}==True
@@ -272,7 +272,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Stop A Workbench
-    [Tags]    Sanity    Tier1    ODS-1817
+    [Tags]    Smoke    ODS-1817
     [Documentation]    Verifies users can stop a running workbench from project details page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Stop Workbench    workbench_title=${WORKBENCH_3_TITLE}    press_cancel=${TRUE}
@@ -280,7 +280,7 @@ Verify User Can Stop A Workbench
     # add checks on notebook pod is terminated but CR is present
 
 Verify User Can Launch A Workbench
-    [Tags]    Sanity    Tier1    ODS-1815
+    [Tags]    Smoke    ODS-1815
     [Documentation]    Verifies users can launch/open a running workbench from project details page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -504,7 +504,7 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
 
 Verify User Can Delete A Data Science Project
-    [Tags]    Sanity    Tier1    ODS-1784
+    [Tags]    Smoke    ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
     Delete Data Science Project   project_title=${PRJ_TITLE}
     # check workbenches and resources get deleted too

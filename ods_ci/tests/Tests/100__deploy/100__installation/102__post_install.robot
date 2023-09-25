@@ -305,7 +305,7 @@ Verify All The Pods Are Using Image Digest Instead Of Tags
     [Documentation]    Verifies that the all the rhods pods are using image digest
     [Tags]    Smoke
     ...       Tier1
-    ...       ODS-XXX
+    ...       ODS-2406
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get ns -l opendatahub.io/generated-namespace -o jsonpath='{.items[*].metadata.name}' ; echo ; oc get ns -l opendatahub.io/dashboard -o jsonpath='{.items[*].metadata.name}'  # robocop: disable
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting the namespace using label
     ${projects_list} =    Split String    ${output}

@@ -243,10 +243,10 @@ Container Image Url Using Image Digest Instead Of Tags Based On Project Name
            ${return_code}    ${output} =    Run And Return Rc And Output   oc get pods --namespace ${namespace} -o json | grep "\\"image\\"" | cut -d ":" -f2-3 | sort | uniq   # robocop: disable
            Should Be Equal As Integers	 ${return_code}	 0
            ${isEmpty} =    Run Keyword And Return Status    Should Be Empty      ${output}
-           Continue For Loop If   ${isEmpty}
-           ${images} =   Split String    ${output}     ,\n
+           IF  ${isEmpty}   CONTINUE
+           ${images} =    Split String    ${output}     ,\n
            FOR    ${image}    IN    @{images}
-                  ${status}    Run Keyword And Return Status    Should Contain    ${image}    @sha256
+                  ${status} =    Run Keyword And Return Status    Should Contain    ${image}    @sha256
                   IF    not ${status}    Run Keyword And Continue On Failure    Fail      msg=Container image ${image} is not using image digest in namespace ${namespace}    # robocop: disable
            END
     END

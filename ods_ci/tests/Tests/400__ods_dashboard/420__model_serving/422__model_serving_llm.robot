@@ -780,7 +780,6 @@ Run Install Script
     IF    "${SCRIPT_TARGET_OPERATOR}" == "brew"
         ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} BREW_TAG=${SCRIPT_BREW_TAG} CHECK_UWM=false ./scripts/install/kserve-install.sh
         ...    cwd=caikit-tgis-serving/demo/kserve
-
     ELSE
         ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh
         ...    cwd=caikit-tgis-serving/demo/kserve

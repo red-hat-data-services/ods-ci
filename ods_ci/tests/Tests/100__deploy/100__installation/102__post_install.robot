@@ -310,7 +310,6 @@ Verify All The Pods Are Using Image Digest Insted Of Tags
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting the namespace using label
     ${projects_list}    Split String    ${output}
     Append To List    ${projects_list}     ${OPERATOR_NAMESPACE}
-    Append To List   ${projects_list}    openshift-marketplace   #Added for negative test
     Container Image Url Using Image Digest Instead Of Tags Based on Project Name  @{projects_list}
 
 

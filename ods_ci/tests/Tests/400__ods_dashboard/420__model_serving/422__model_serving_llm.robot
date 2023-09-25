@@ -47,6 +47,8 @@ ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
 ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
+${SCRIPT_TARGET_OPERATOR}=    rhods    # rhods or brew
+${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 
 
 *** Test Cases ***
@@ -775,6 +777,13 @@ Run Install Script
     ...                https://github.com/opendatahub-io/caikit-tgis-serving/blob/main/demo/kserve/scripts/README.md
     ${rc}=    Run And Return Rc    git clone https://github.com/opendatahub-io/caikit-tgis-serving
     Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}=    Run And Watch Command    TARGET_OPERATOR=rhods CHECK_UWM=false ./scripts/install/kserve-install.sh
-    ...    cwd=caikit-tgis-serving/demo/kserve
+    IF    "${SCRIPT_TARGET_OPERATOR}" == "brew"
+        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} BREW_TAG=${SCRIPT_BREW_TAG} CHECK_UWM=false ./scripts/install/kserve-install.sh
+        ...    cwd=caikit-tgis-serving/demo/kserve
+
+    ELSE
+        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh
+        ...    cwd=caikit-tgis-serving/demo/kserve
+
+    END
     Should Be Equal As Integers    ${rc}    ${0}

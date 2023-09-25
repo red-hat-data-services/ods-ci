@@ -195,7 +195,7 @@ Verify User Can Edit A Data Science Project
 
 
 Verify User Can Create And Start A Workbench With Ephemeral Storage
-    [Tags]    Smoke    ODS-1812
+    [Tags]    ODS-1812
     [Documentation]    Verifies users can create workbench using Ephemeral storage
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
     IF  ${version_check}==True
@@ -216,7 +216,7 @@ Verify User Can Create And Start A Workbench With Ephemeral Storage
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Sanity    Tier1    ODS-1814
+    [Tags]    Smoke    ODS-1814
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -249,7 +249,7 @@ Verify User Can Create A PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Sanity    Tier1    ODS-1816
+    [Tags]    Smoke    ODS-1816
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -342,7 +342,7 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
 Verify User Can Delete A Workbench
-    [Tags]    Sanity    Tier1    ODS-1813
+    [Tags]    Smoke    ODS-1813
     [Documentation]    Verifies users can delete a workbench
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}

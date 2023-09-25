@@ -16,6 +16,8 @@ Resource            ../../../Resources/Common.robot
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
 
+*** Variables ***
+${OPERATOR_NAMESPACE}      redhat-ods-operator
 
 *** Test Cases ***
 Verify Dashbord has no message with NO Component Found
@@ -298,6 +300,18 @@ Verify RHODS Notebooks Network Policies
     Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
     Log    ${policy_oauth}
     Log    ${expected_policy_oauth}
+
+Verify All The Pods Are Using Image Digest Insted Of Tags
+    [Documentation]    Verifies that the all the rhods pods are using imae digest
+    [Tags]    Smoke
+    ...       Tier1
+    ...       ODS-XXX
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get ns -l opendatahub.io/generated-namespace -o jsonpath='{.items[*].metadata.name}' ; echo ; oc get ns -l opendatahub.io/dashboard -o jsonpath='{.items[*].metadata.name}'  # robocop: disable
+    Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting the namespace using label
+    ${projects_list}    Split String    ${output}
+    Append To List    ${projects_list}     ${OPERATOR_NAMESPACE}
+    Append To List   ${projects_list}    openshift-marketplace   #Added for negative test
+    Container Image Url Using Image Digest Instead Of Tags Based on Project Name  @{projects_list}
 
 
 *** Keywords ***

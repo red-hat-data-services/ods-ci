@@ -16,8 +16,6 @@ Resource            ../../../Resources/Common.robot
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
 
-*** Variables ***
-${OPERATOR_NAMESPACE}      redhat-ods-operator
 
 *** Test Cases ***
 Verify Dashbord has no message with NO Component Found

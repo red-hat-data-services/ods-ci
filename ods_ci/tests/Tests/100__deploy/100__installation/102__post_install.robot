@@ -310,7 +310,7 @@ Verify All The Pods Are Using Image Digest Instead Of Tags
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting the namespace using label
     ${projects_list} =    Split String    ${output}
     Append To List    ${projects_list}     ${OPERATOR_NAMESPACE}
-    Container Image Url Using Image Digest Instead Of Tags Based On Project Name  @{projects_list}
+    Container Image Url Should Use Image Digest Instead Of Tags Based On Project Name  @{projects_list}
 
 
 *** Keywords ***

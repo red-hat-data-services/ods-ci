@@ -236,7 +236,7 @@ Get Instance Type Of Node
     ${type} =    Run    oc get Node -o json ${node} | jq '.metadata.labels["beta.kubernetes.io/instance-type"]'
     RETURN    ${type}
 
-Container Image Url Using Image Digest Instead Of Tags Based On Project Name
+Container Image Url Should Use Image Digest Instead Of Tags Based On Project Name
     [Documentation]   Check all the container images in a namespace are using the image digest
     [Arguments]    @{project_list}
     FOR    ${namespace}    IN    @{project_list}

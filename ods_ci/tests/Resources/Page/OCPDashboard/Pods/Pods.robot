@@ -235,3 +235,18 @@ Get Instance Type Of Node
     [Arguments]    ${node}
     ${type} =    Run    oc get Node -o json ${node} | jq '.metadata.labels["beta.kubernetes.io/instance-type"]'
     RETURN    ${type}
+
+Container Image Url Should Use Image Digest Instead Of Tags Based On Project Name
+    [Documentation]   Check all the container images in a namespace are using the image digest
+    [Arguments]    @{project_list}
+    FOR    ${namespace}    IN    @{project_list}
+           ${return_code}    ${output} =    Run And Return Rc And Output   oc get pods --namespace ${namespace} -o json | grep "\\"image\\"" | cut -d ":" -f2-3 | sort | uniq   # robocop: disable
+           Should Be Equal As Integers	 ${return_code}	 0
+           ${isEmpty} =    Run Keyword And Return Status    Should Be Empty      ${output}
+           IF  ${isEmpty}   CONTINUE
+           ${images} =    Split String    ${output}     ,\n
+           FOR    ${image}    IN    @{images}
+                  ${status} =    Run Keyword And Return Status    Should Contain    ${image}    @sha256
+                  IF    not ${status}    Run Keyword And Continue On Failure    Fail      msg=Container image ${image} is not using image digest in namespace ${namespace}    # robocop: disable
+           END
+    END

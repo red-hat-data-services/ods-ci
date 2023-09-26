@@ -240,8 +240,13 @@ Container Image Url Should Use Image Digest Instead Of Tags Based On Project Nam
     [Documentation]   Check all the container images in a namespace are using the image digest
     [Arguments]    @{project_list}
     FOR    ${namespace}    IN    @{project_list}
-           ${return_code}    ${output} =    Run And Return Rc And Output   oc get pods --namespace ${namespace} -o json | grep "\\"image\\"" | cut -d ":" -f2-3 | sort | uniq   # robocop: disable
-           Should Be Equal As Integers	 ${return_code}	 0
+           IF    "${namespace}" == "${OPERATOR_NAMESPACE}"
+                 ${return_code}    ${output} =    Run And Return Rc And Output   oc get pods --namespace ${namespace} -l name=rhods-operator -o json | grep "\\"image\\"" | cut -d ":" -f2-3 | sort | uniq   # robocop: disable
+                 Should Be Equal As Integers	 ${return_code}	 0
+           ELSE
+                 ${return_code}    ${output} =    Run And Return Rc And Output   oc get pods --namespace ${namespace} -o json | grep "\\"image\\"" | cut -d ":" -f2-3 | sort | uniq   # robocop: disable
+                 Should Be Equal As Integers	 ${return_code}	 0
+           END
            ${isEmpty} =    Run Keyword And Return Status    Should Be Empty      ${output}
            IF  ${isEmpty}   CONTINUE
            ${images} =    Split String    ${output}     ,\n

@@ -43,7 +43,8 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
 
 *** Keywords ***
 End To End Pipeline Workflow Via Api
-    [Documentation]    Create, run and double check the pipeline result using API. In the end, clean the pipeline resources.    # robocop: disable:line-too-long
+    [Documentation]    Create, run and double check the pipeline result using API.
+    ...    In the end, clean the pipeline resources.
     [Arguments]     ${username}    ${password}    ${project}
     Remove Pipeline Project    ${project}
     New Project    ${project}

@@ -20,20 +20,21 @@ Install Red Hat OpenShift Pipelines
     [Documentation]    Install Red Hat OpenShift Pipelines operator depending on
     ...     OpenShift version, platform (AWS/GCP/...) and RHODS flavor (Managed/Self-Managed) with the objective of
     ...     testing all the operator versions without having to test all possible combinations:
-    ...     - OpenShift 4.10:                  OpenShift Pipelines 1.8
-    ...     - OpenShift 4.11:                  OpenShift Pipelines 1.9
-    ...     - OpenShift >= 4.12 (AWS and GCP): OpenShift Pipelines 1.10 / 1.11 (depending on platform and flavor)
-    ...     - OpenShift >= 4.12 (other):       OpenShift Pipelines 1.11
+    ...     - OpenShift 4.10:                      OpenShift Pipelines 1.8
+    ...     - OpenShift 4.11:                      OpenShift Pipelines 1.9
+    ...     - OpenShift 4.12, 4.13 (AWS and GCP):  OpenShift Pipelines 1.10 / 1.11 (depending on platform and flavor)
+    ...     - OpenShift >= 4.12 (OpenStack):       OpenShift Pipelines 1.11
+    ...     - OpenShift 4.14:                      OpenShift Pipelines 1.11
     ...     Note: the complete operator compatiblity matrix is published at
     ...      https://docs.openshift.com/container-platform/4.13/cicd/pipelines/op-release-notes.html
     ${oc_version}=    Get OpenShift Version
     ${is_self_managed}=    Is RHODS Self-Managed
     ${platform}=    Fetch Cluster Platform Type
-    IF    "${oc_version}" == "4.10"
+    IF    "4.10" in "${oc_version}"
         ${openshift_pipelines_version}=    Set Variable    pipelines-1.8"
-    ELSE IF    "${oc_version}" == "4.11"
+    ELSE IF    "4.11" in "${oc_version}"
         ${openshift_pipelines_version}=    Set Variable    pipelines-1.9
-    ELSE
+    ELSE IF    "4.12" in "${oc_version}" or "4.13" in "${oc_version}"
         IF    ${is_self_managed} == ${TRUE} and "${platform}" == "AWS"
             ${openshift_pipelines_version}=    Set Variable    pipelines-1.10
         ELSE IF    ${is_self_managed} == ${FALSE} and "${platform}" == "AWS"
@@ -45,6 +46,8 @@ Install Red Hat OpenShift Pipelines
         ELSE
             ${openshift_pipelines_version}=    Set Variable    pipelines-1.11
         END
+    ELSE
+        ${openshift_pipelines_version}=    Set Variable    pipelines-1.11
     END
     Log    message=Installing OpenShift Pipelines operator: ${openshift_pipelines_version} (${platform} ${oc_version} Self-Managed: ${is_self_managed})
     ...    console=True

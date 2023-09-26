@@ -141,7 +141,7 @@ Verify Oath-Proxy Image Is A CPaaS Built Image
 Verify That CUDA Build Chain Succeeds
     [Documentation]    Check Cuda builds are complete. Verify CUDA (minimal-gpu),
     ...    Pytorch and Tensorflow can be spawned successfully
-    [Tags]    Smoke
+    [Tags]    Sanity
     ...       Tier1
     ...       OpenDataHub
     ...       ODS-316    ODS-481

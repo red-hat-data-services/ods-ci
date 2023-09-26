@@ -15,8 +15,7 @@ Suite Teardown      RHOSi Teardown
 Verify That Administrators Can Access "Cluster Settings"
     [Documentation]    Verifies users in the admin_groups (group "dedicated-admins" since RHODS 1.8.0)
     ...    can access to "Cluster Settings"
-    [Tags]    Tier1
-    ...       Sanity
+    [Tags]    Smoke
     ...       ODS-1216
 
     Open ODS Dashboard With Admin User

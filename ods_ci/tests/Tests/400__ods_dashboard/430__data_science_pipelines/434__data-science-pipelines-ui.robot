@@ -24,7 +24,7 @@ ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Page    # robocop: disable
     [Documentation]    Verifies user are able to create and execute a DS Pipeline leveraging on
     ...                DS Project UI
-    [Tags]    Sanity    Tier1
+    [Tags]    Smoke
     ...       ODS-2206    ODS-2226
     Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}

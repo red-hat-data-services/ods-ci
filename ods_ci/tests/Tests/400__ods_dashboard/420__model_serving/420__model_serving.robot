@@ -71,7 +71,7 @@ Test Inference With Token Authentication
 
 Verify Openvino_IR Model Via UI
     [Documentation]    Test the deployment of an openvino_ir model
-    [Tags]    Sanity    Tier1
+    [Tags]    Smoke
     ...    ODS-2054
     Open Model Serving Home Page
     Try Opening Create Server
@@ -94,7 +94,7 @@ Verify Openvino_IR Model Via UI
 
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
-    [Tags]    Sanity    Tier1
+    [Tags]    Smoke
     ...    ODS-2053
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
 

@@ -54,29 +54,33 @@ def read_yaml(filename):
             return yaml.safe_load(fh)
     except OSError as error:
         return None
+          
 
-
-def execute_command(cmd, get_stderr=False):
+def execute_command(cmd):
     """
-    Executes command in the local node
+    Executes command in the local node, and print real-time output
     """
+    output = ''
     try:
-        process = subprocess.run(
-            cmd,
-            shell=True,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        output = process.stdout
-        if get_stderr:
-            err = process.stderr
-            return output, err
-        return output
+        with subprocess.Popen(
+                cmd,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                encoding='utf-8',
+                errors='replace'
+            ) as p:
+                while True:
+                    line = p.stdout.readline()
+                    if line != '':
+                        output += (line + "\n")
+                        print(line)
+                    elif p.poll() != None:
+                        break
+                sys.stdout.flush()
+                return output
     except:
-        if get_stderr:
-            return None, None
         return None
 
 

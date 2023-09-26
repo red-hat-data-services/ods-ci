@@ -20,8 +20,11 @@ EMAIL_SERVER_USER="None"
 EMAIL_SERVER_PW="None"
 EMAIL_SERVER_SSL=false
 EMAIL_SERVER_UNSECURE=false
+OPEN_REPORT_IN_BROWSER=false
+REPORT_BROWSER="firefox" # Default browser to open reports in
 SUBFOLDER=false
 
+# Please keep this in sync with ./docs/RUN_ARGUMENTS.md file.
 while [ "$#" -gt 0 ]; do
   case $1 in
     --skip-oclogin)
@@ -158,6 +161,15 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
 
+    # If not `false`, then it opens reports in local browser after the tests run.
+    # If `true`, then default browser `REPORT_BROWSER` is used.
+    # You can override the default browser by specifying your own command as a value (e.g.: `--open-report nautilus`).
+    --open-report)
+      shift
+      OPEN_REPORT_IN_BROWSER="${1}"
+      shift
+      ;;
+
     *)
       echo "Unknown command line switch: $1"
       exit 1
@@ -290,7 +302,8 @@ fi
 if [[ ${SKIP_INSTALL} -eq 0 ]]; then
   poetry install
 fi
-source $(poetry env info --path)/bin/activate
+# shellcheck disable=SC1091
+source "$(poetry env info --path)/bin/activate"
 
 #Create a unique directory to store the output for current test run
 if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then
@@ -317,19 +330,30 @@ echo "${exit_status}"
 
 # send test artifacts by email
 if ${EMAIL_REPORT}
- then
-     tar cvzf rf_results.tar.gz ${TEST_ARTIFACT_DIR} &> /dev/null
+  then
+     tar cvzf rf_results.tar.gz "${TEST_ARTIFACT_DIR}" &> /dev/null
      size=$(du -k rf_results.tar.gz | cut -f1)
      if [ "${size}" -gt 20000 ]
         then
             echo "Test results artifacts are too large for email"
             rm rf_results.tar.gz
-            tar cvzf rf_results.tar.gz $(find ${TEST_ARTIFACT_DIR} -regex  '.*\(xml\|html\)$') &> /dev/null
+            tar cvzf rf_results.tar.gz $(find "${TEST_ARTIFACT_DIR}" -regex  '.*\(xml\|html\)$') &> /dev/null
      fi
-     python3 ods_ci/utils/scripts/Sender/send_report.py send_email_report -s ${EMAIL_FROM} -r ${EMAIL_TO} -b "ODS-CI: Run Results" \
-                        -v ${EMAIL_SERVER} -a "rf_results.tar.gz" -u  ${EMAIL_SERVER_USER}  -p  ${EMAIL_SERVER_PW} \
-                        -l ${EMAIL_SERVER_SSL} -d ${EMAIL_SERVER_UNSECURE}
+     python3 ods_ci/utils/scripts/Sender/send_report.py send_email_report -s "${EMAIL_FROM}" -r "${EMAIL_TO}" -b "ODS-CI: Run Results" \
+                        -v "${EMAIL_SERVER}" -a "rf_results.tar.gz" -u "${EMAIL_SERVER_USER}" -p "${EMAIL_SERVER_PW}" \
+                        -l "${EMAIL_SERVER_SSL}" -d "${EMAIL_SERVER_UNSECURE}"
+fi
+
+
+if test "${OPEN_REPORT_IN_BROWSER}" != "false"
+  then
+    if test "${OPEN_REPORT_IN_BROWSER}" != "true"
+      then
+        REPORT_BROWSER="${OPEN_REPORT_IN_BROWSER}"
+    fi
+
+    ${REPORT_BROWSER} "${TEST_ARTIFACT_DIR}" &
 fi
 
 deactivate
-exit ${exit_status}
+exit "${exit_status}"

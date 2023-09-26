@@ -20,5 +20,6 @@
     * ```--email-server-pw```: (optional, depending on the smtp server) password to access smtp server
     * ```--email-server-ssl```* (default: false): if true, it forces the usage of encrypted connection (TLS)
     * ```--email-server-unsecure```* (default: false): no encryption applied, using SMTP unsecure connection
+* ```--open-report``` (default: false): If not `false`, then it opens reports in local browser after the tests run. If set to `true`, then default browser `firefox` is used. You can override the default browser by specifying your own command as a value (e.g.: `--open-report nautilus`).
 
 \* The container uses STARTTLS protocol by default if ```--email-server-ssl and ```--email-server-unsecure are set to false

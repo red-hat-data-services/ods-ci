@@ -10,7 +10,7 @@ Library             ../../../libs/Helpers.py
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
 
-Force Tags          Smoke    Sanity    JupyterHub      OpenDataHub
+Test Tags          Sanity    JupyterHub      OpenDataHub
 
 
 *** Variables ***

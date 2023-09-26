@@ -21,9 +21,16 @@ Uninstall CodeFlare
     [Documentation]   Removes the RHODS CodeFlare operator subscription and CSV
     # needs to be deleted first to avoid getting stuck on CodeFlare finalizer
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete mcads.codeflare.codeflare.dev mcad -n redhat-ods-applications --ignore-not-found
+    ...    oc delete mcads.codeflare.codeflare.dev --all -n redhat-ods-applications --ignore-not-found
     Should Be Equal As Integers	${return_code}	 0   msg=Error deleting CodeFlare MCAD CR
     Uninstall ISV Operator From OperatorHub Via CLI     rhods-codeflare-operator    openshift-operators
+    Uninstall CodeFlare CatalogSource
+
+Uninstall CodeFlare CatalogSource
+    [Documentation]    Removes the CodeFlare cluster-wide catalog source created for managed env, if it exists
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete catalogsource rhods-codeflare-catalog -n openshift-marketplace --ignore-not-found
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting CodeFlare CatalogSource
 
 CodeFlare Operator Should Be Uninstalled
     [Documentation]   Verifies and logs that the RHODS CodeFlare operator is uninstalled

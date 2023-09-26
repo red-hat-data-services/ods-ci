@@ -15,7 +15,7 @@ Installing RHODS Operator ${image_url}
   ...  Install RHODS   ${cluster_type}    ${image_url}
   ${is_codeflare_managed} =    Is CodeFlare Managed
   Log  Will install CodeFlare operator: ${is_codeflare_managed}  console=yes
-  IF  ${is_codeflare_managed}    Installing CodeFlare Operator
+  IF  ${is_codeflare_managed}    Installing CodeFlare Operator  ${cluster_type}  ${image_url}
 
 RHODS Operator Should Be installed
   Verify RHODS Installation

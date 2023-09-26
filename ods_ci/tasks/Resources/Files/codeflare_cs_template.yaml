@@ -1,0 +1,14 @@
+kind: List
+metadata: {}
+apiVersion: v1
+items:
+    -   apiVersion: operators.coreos.com/v1alpha1
+        kind: CatalogSource
+        metadata:
+            name: rhods-codeflare-catalog
+            namespace: openshift-marketplace
+        spec:
+            displayName: Red Hat OpenShift Data Science - CodeFlare
+            publisher: RHODS Development Catalog
+            image: <CODEFLARE_INDEX_IMAGE>
+            sourceType: grpc

@@ -342,7 +342,7 @@ Run And Watch Command
   ...    Output Should Contain: Verify an excpected text to exists in command output.
   ...    Output Should Not Contain: Verify an excpected text to not exists in command output.
   [Arguments]    ${command}    ${timeout}=10 min   ${output_should_contain}=${NONE}    ${output_should_not_contain}=${NONE}
-  ...            ${cwd}=${NONE}
+  ...            ${cwd}=${CURDIR}
   Log    Watching command output: ${command}   console=True
   ${is_test}=    Run keyword And Return Status    Variable Should Exist     ${TEST NAME}
   IF    ${is_test} == ${FALSE}
@@ -351,17 +351,10 @@ Run And Watch Command
   END
   ${process_log} =    Set Variable    ${OUTPUT DIR}/${TEST NAME}.log
   ${temp_log} =    Set Variable    ${TEMPDIR}/${TEST NAME}.log
-  Set Variable    ${process_log}
-  Set Variable    ${temp_log}
   Create File    ${process_log}
   Create File    ${temp_log}
-  IF    "${cwd}" == "${NONE}"
-      ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}
-      ...    stderr=STDOUT
-  ELSE
-      ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}
-      ...    stderr=STDOUT    cwd=${cwd}
-  END
+  ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}
+  ...    stderr=STDOUT    cwd=${cwd}
   Log    Shell process started in the background   console=True
   Wait Until Keyword Succeeds    ${timeout}    10 s
   ...    Check Process Output and Status    ${process_id}    ${process_log}    ${temp_log}

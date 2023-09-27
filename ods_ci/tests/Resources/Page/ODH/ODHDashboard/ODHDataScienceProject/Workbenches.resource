@@ -120,9 +120,9 @@ Add Environment Variables In Workbench
                     # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
                     # amount of pixels for the block of elements that gets added.
                     IF    "${add_key_value_text}" == "Add another key / value pair"
-                        Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,200)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
                     ELSE IF    "${add_key_value_text}" == "Add another variable"
-                        Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,700)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
                     END
                 END
             END

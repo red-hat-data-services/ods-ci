@@ -5,7 +5,7 @@ Is RHODS Installed
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=opendatahub
+          ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
           ...                                              subscription=rhods-operator-dev  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
           ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
@@ -39,7 +39,7 @@ Is RHODS Installed
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=opendatahub
+          ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
           ...                                              subscription=addon-managed-odh  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator
       ELSE

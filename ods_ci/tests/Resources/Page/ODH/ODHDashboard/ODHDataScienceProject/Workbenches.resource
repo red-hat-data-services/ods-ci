@@ -215,6 +215,7 @@ Select Workbench Image Version
 Select Workbench Container Size
     [Documentation]    Selects the container size in the workbench creation page
     [Arguments]     ${size_name}=Small
+    Click Element    //a[@href="#deployment-size"]
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]

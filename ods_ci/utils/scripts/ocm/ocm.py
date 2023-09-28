@@ -417,7 +417,7 @@ class OpenshiftClusterManager:
             self.cluster_name, self.pool_name
         )
         ret = execute_command(cmd)
-        if ret is None:
+        if not ret:
             return False
         return True
 

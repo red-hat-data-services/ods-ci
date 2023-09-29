@@ -207,6 +207,7 @@ Modify Notebook Culler Timeout
 
 Open Dashboard Cluster Settings
     [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
+    [Arguments]    ${settings_page}
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Sleep  1s
@@ -216,5 +217,12 @@ Open Dashboard Cluster Settings
         Click Element  xpath://button[@id="settings"]
     END
     Click Element  xpath://a[.="Cluster settings"]
+    IF    "${settings_page}" == "Notebook images"
+        ${exp_page_title}=    Set Variable    Notebook images settings
+    ELSE IF     "${settings_page}" == "Cluster settings"
+        ${exp_page_title}=    Set Variable    Cluster Settings
+    ELSE IF     "${settings_page}" == "Serving runtimes"
+        ${exp_page_title}=    Set Variable    Serving Runtimes
+    END
     Wait For RHODS Dashboard To Load    expected_page=Cluster Settings
     ...    wait_for_cards=${FALSE}

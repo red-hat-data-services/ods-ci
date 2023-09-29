@@ -158,3 +158,9 @@ Container Hardware Resources Should Match Expected
             Should Be Equal As Strings    ${limits}[${resource}]    ${exp_limits}[${resource}]
         END
     END
+
+Wait Until CRD Exists
+    [Documentation]    Repeatedly searches for the expected CRD. Stops when it finds it
+    [Arguments]    ${crd_fullname}
+    Wait Until Keyword Succeeds    10 times    2s
+    ...    Oc Get    kind=CustomResourceDefinition    name=${crd_fullname}

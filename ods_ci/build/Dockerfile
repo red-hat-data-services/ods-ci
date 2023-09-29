@@ -11,11 +11,13 @@ ENV USE_OCM_IDP=1
 ENV RUN_FROM_CONTAINER=1
 ENV OCM_TOKEN=${OCM_TOKEN}
 ENV OCM_ENV=${OCM_ENV}
+ENV SE_BROWSER_PATH=/usr/bin/chromium-browser
 ARG OC_VERSION=4.13
 ARG OC_CHANNEL=stable
 
 
-RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
+RUN dnf -y update &&\
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
     dnf install -y jq git unzip chromium chromedriver python3-distro httpd-tools &&\
     dnf clean all &&\
     curl --proto "=https" -L https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -o /usr/bin/yq &&\

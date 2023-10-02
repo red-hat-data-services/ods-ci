@@ -319,24 +319,29 @@ Open Workbench
 
 Stop Workbench
     [Documentation]    Stops a workbench from DS Project details page
-    [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
+    [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}    ${from_running}=${TRUE}
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
-    IF    ${is_started} == ${TRUE}
+    ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
+    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
+    IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
         Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
+        ...    from_running=${from_running}
     ELSE
-        Fail   msg=Cannot stop workbench ${workbench_title} because it is not running...
+        Fail   msg=Cannot stop workbench ${workbench_title} because it is not neither running or starting...
     END
 
 Handle Stop Workbench Confirmation Modal
     [Documentation]    Handles modal to stop workbench
-    [Arguments]    ${press_cancel}=${FALSE}
+    [Arguments]    ${press_cancel}=${FALSE}    ${from_running}=${TRUE}
     Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
-    Run Keyword And Continue On Failure
-    ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
-    Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your
+    IF    ${from_running} == ${TRUE}
+        Run Keyword And Continue On Failure
+        ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
+        Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your        
+    END
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
     Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]

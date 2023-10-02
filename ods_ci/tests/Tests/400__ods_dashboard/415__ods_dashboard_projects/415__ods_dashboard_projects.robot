@@ -193,28 +193,6 @@ Verify User Can Edit A Data Science Project
     ${ns_newname}=    Get Openshift Namespace From Data Science Project   project_title=${NEW_PRJ_TITLE}
     Should Be Equal As Strings  ${ns_name}  ${ns_newname}
 
-
-Verify User Can Create And Start A Workbench With Ephemeral Storage
-    [Tags]    ODS-1812
-    [Documentation]    Verifies users can create workbench using Ephemeral storage
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==True
-        Skip     msg=Skipping because ODS-1812 is not applicable to version >= 1.20.0
-    END
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create Workbench    workbench_title=${EMPTY}  workbench_description=${EMPTY}  prj_title=${PRJ_TITLE}
-    ...                 image_name=${NB_IMAGE}   deployment_size=Small  storage=Ephemeral  pv_existent=${NONE}
-    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}  press_cancel=${TRUE}
-    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Ephemeral  pv_existent=${NONE}
-    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
-    Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
-    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
-    Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
-
 Verify User Can Create And Start A Workbench With Existent PV Storage
     [Tags]    Smoke    Sanity    ODS-1814
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume

@@ -53,7 +53,7 @@ ${NEW_PRJ_TITLE}=   ODS-CI DS Project Updated
 Verify Data Science Projects Page Is Accessible
     [Documentation]    Verifies "Data Science Projects" page is accessible from
     ...                the navigation menu on the left
-    [Tags]    Smoke
+    [Tags]    Smoke    Sanity
     ...       Tier1
     ...       ODS-1876
     Open Data Science Projects Home Page
@@ -62,7 +62,7 @@ Verify Data Science Projects Page Is Accessible
 Verify User Can Access Jupyter Launcher From DS Project Page
     [Documentation]    Verifies Data Science Projects home page contains
     ...                a link to Jupyter Spawner and it is working
-    [Tags]    Smoke
+    [Tags]    Smoke    Sanity
     ...       Tier1
     ...       ODS-1877
     Open Data Science Projects Home Page
@@ -73,7 +73,7 @@ Verify User Can Access Jupyter Launcher From DS Project Page
 Verify Workbench Images Have Multiple Versions
     [Documentation]    Verifies that workbench images have an additional
     ...                dropdown which supports N/N-1 image versions.
-    [Tags]    Smoke
+    [Tags]    Smoke    Sanity
     ...       Tier1
     ...       ODS-2131
     Launch Data Science Project Main Page
@@ -165,7 +165,7 @@ Verify User Can Access Only Its Owned Projects
     Project Should Be Listed    project_title=${PRJ_A_USER4}
 
 Verify User Can Create A Data Science Project
-    [Tags]    Smoke    ODS-1775
+    [Tags]    Smoke    Sanity    ODS-1775
     [Documentation]    Verifies users can create a DS project
     [Setup]   Launch Data Science Project Main Page
     Open Data Science Projects Home Page
@@ -216,7 +216,7 @@ Verify User Can Create And Start A Workbench With Ephemeral Storage
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Smoke    ODS-1814
+    [Tags]    Smoke    Sanity    ODS-1814
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -249,7 +249,7 @@ Verify User Can Create A PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Smoke    ODS-1816
+    [Tags]    Smoke    Sanity    ODS-1816
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -272,7 +272,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Stop A Workbench
-    [Tags]    Smoke    ODS-1817
+    [Tags]    Smoke    Sanity    ODS-1817
     [Documentation]    Verifies users can stop a running workbench from project details page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Stop Workbench    workbench_title=${WORKBENCH_3_TITLE}    press_cancel=${TRUE}
@@ -280,7 +280,7 @@ Verify User Can Stop A Workbench
     # add checks on notebook pod is terminated but CR is present
 
 Verify User Can Launch A Workbench
-    [Tags]    Smoke    ODS-1815
+    [Tags]    Smoke    Sanity    ODS-1815
     [Documentation]    Verifies users can launch/open a running workbench from project details page
     Open Data Science Projects Home Page
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -342,7 +342,7 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     ...    image=${NB_IMAGE}    namespace=${ns_name}
 
 Verify User Can Delete A Workbench
-    [Tags]    Smoke    ODS-1813
+    [Tags]    Smoke    Sanity    ODS-1813
     [Documentation]    Verifies users can delete a workbench
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -504,7 +504,7 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
 
 Verify User Can Delete A Data Science Project
-    [Tags]    Smoke    ODS-1784
+    [Tags]    Smoke    Sanity    ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
     Delete Data Science Project   project_title=${PRJ_TITLE}
     # check workbenches and resources get deleted too

@@ -162,5 +162,5 @@ Container Hardware Resources Should Match Expected
 Wait Until CRD Exists
     [Documentation]    Repeatedly searches for the expected CRD. Stops when it finds it
     [Arguments]    ${crd_fullname}
-    Wait Until Keyword Succeeds    10 times    2s
+    Wait Until Keyword Succeeds    15 times    5s
     ...    Oc Get    kind=CustomResourceDefinition    name=${crd_fullname}

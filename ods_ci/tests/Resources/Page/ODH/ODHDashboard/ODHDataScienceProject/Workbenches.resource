@@ -12,10 +12,10 @@ ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
-${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//button[@aria-label="Options menu"]
+${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//div[@id="workbench-image-stream-selection"]/button    # robocop: disable
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li/button
 ${WORKBENCH_IMAGE_ITEM_SPAN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li//span
-${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
+${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button  # Removing the attribute in case it changes like it did for the image dropdown
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button

@@ -62,18 +62,14 @@ Create Workbench
         ...    xpath=//input[contains(@name,"ephemeral")]
     END
     IF    "${storage}" == "Persistent"
-        # The Cluster Storage section is always towards the bottom of the page, so scroll all the way down in the page
-        Execute Javascript    var scrollable = document.getElementsByClassName("pf-c-drawer__content")[1]; scrollable.scrollBy(0,scrollable.scrollHeight);  # robocop : disable
         IF    ${pv_existent} == ${TRUE}
-            # Broken in 1.33 RC1
             # Use the `Jump to section` links in the page to scroll the section into view
-            # Click Element    //a[@href="#cluster-storage"]
+            Click Element    //a[@href="#cluster-storage"]
             Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
             Select An Existent PV   name=${pv_name}
         ELSE IF   ${pv_existent} == ${FALSE}
-            # Broken in 1.33 RC1
             # Use the `Jump to section` links in the page to scroll the section into view
-            # Click Element    //a[@href="#cluster-storage"]
+            Click Element    //a[@href="#cluster-storage"]
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
         ELSE
@@ -100,10 +96,8 @@ Add Environment Variables In Workbench
     ELSE
         ${add_key_value_text}=    Set Variable    Add another variable
     END
-    # Broken in 1.33 RC1
     # Use the `Jump to section` links in the page to scroll the section into view
-    # Click Element    //a[@href="#environment-variables"]
-    Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)
+    Click Element    //a[@href="#environment-variables"]
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
     ${n_objects}=    Get Length    ${env_variables}
     FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}    start=1
@@ -126,7 +120,7 @@ Add Environment Variables In Workbench
                     # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
                     # amount of pixels for the block of elements that gets added.
                     IF    "${add_key_value_text}" == "Add another key / value pair"
-                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,200)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
                     ELSE IF    "${add_key_value_text}" == "Add another variable"
                         Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
                     END
@@ -221,6 +215,7 @@ Select Workbench Image Version
 Select Workbench Container Size
     [Documentation]    Selects the container size in the workbench creation page
     [Arguments]     ${size_name}=Small
+    Click Element    //a[@href="#deployment-size"]
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]

@@ -357,17 +357,22 @@ Run And Watch Command
   ...    Output Should Contain: Verify an excpected text to exists in command output.
   ...    Output Should Not Contain: Verify an excpected text to not exists in command output.
   [Arguments]    ${command}    ${timeout}=10 min   ${output_should_contain}=${NONE}    ${output_should_not_contain}=${NONE}
+  ...            ${cwd}=${CURDIR}
   Log    Watching command output: ${command}   console=True
+  ${is_test}=    Run keyword And Return Status    Variable Should Exist     ${TEST NAME}
+  IF    ${is_test} == ${FALSE}
+    ${incremental}=    Generate Random String    5    [NUMBERS]
+    ${TEST NAME}=    Set Variable    testlogs-${incremental}    
+  END
   ${process_log} =    Set Variable    ${OUTPUT DIR}/${TEST NAME}.log
   ${temp_log} =    Set Variable    ${TEMPDIR}/${TEST NAME}.log
-  Set Test Variable    ${process_log}
-  Set Test Variable    ${temp_log}
   Create File    ${process_log}
   Create File    ${temp_log}
-  ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}    stderr=STDOUT    # robocop: disable
+  ${process_id} =    Start Process    ${command}    shell=True    stdout=${process_log}
+  ...    stderr=STDOUT    cwd=${cwd}
   Log    Shell process started in the background   console=True
   Wait Until Keyword Succeeds    ${timeout}    10 s
-  ...    Check Process Output and Status    ${process_id}
+  ...    Check Process Output and Status    ${process_id}    ${process_log}    ${temp_log}
   ${proc_result} =	    Wait For Process    ${process_id}    timeout=3 secs
   Terminate Process    ${process_id}    kill=true
   Should Be Equal As Integers	    ${proc_result.rc}    0    msg=Error occured while running: ${command}
@@ -383,7 +388,7 @@ Run And Watch Command
 
 Check Process Output and Status
   [Documentation]    Helper keyward for 'Run And Watch Command', to tail proccess and check its status
-  [Arguments]    ${process_id}
+  [Arguments]    ${process_id}    ${process_log}    ${temp_log}
   Log To Console    .    no_newline=true
   ${log_data} = 	Get File 	${process_log}
   ${temp_log_data} = 	Get File 	${temp_log}

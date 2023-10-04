@@ -105,6 +105,7 @@ Starburst Enterprise Suite Setup    # robocop: disable
     ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
     ...    namespace=${NAMESPACE}
     Create Starburst Enteprise License Secret
+    Wait Until CRD Exists    crd_fullname=starburstenterprises.charts.starburstdata.com
     Deploy Custom Resource    kind=StarburstEnterprise    namespace=${namespace}
     ...    filepath=${SEP_CR_FILEPATH}
     Wait Until Operator Pods Are Running    namespace=${NAMESPACE}

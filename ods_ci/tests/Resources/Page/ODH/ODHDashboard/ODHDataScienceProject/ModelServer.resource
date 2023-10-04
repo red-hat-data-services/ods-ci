@@ -135,7 +135,7 @@ Set Model Server Runtime
     [Documentation]    Selects a given Runtime for the model server
     [Arguments]    ${runtime}
     Open Serving runtime Options Menu  # robocop: disable
-    Click Element    xpath://li//button[.="${runtime}"]
+    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//div[text()="${runtime}"]
     # TODO: Implement Custom
 
 Set Model Server Name

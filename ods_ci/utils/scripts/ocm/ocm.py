@@ -61,7 +61,7 @@ class OpenshiftClusterManager:
         self.region = arguments.get("region")
         self.compute_machine_type = arguments.get("compute_machine_type")
         self.ocm_cli_binary_url = arguments.get("ocm_cli_binary_url")
-        self.ocm_verbose_level = args.get("ocm_verbose_level","0")
+        self.ocm_verbose_level = args.get("ocm_verbose_level", "0")
         self.num_users_to_create_per_group = arguments.get(
             "num_users_to_create_per_group"
         )
@@ -528,8 +528,9 @@ class OpenshiftClusterManager:
         addon_state = self.get_addon_state(addon_name)
         if addon_state != "not installed":
             cluster_id = self.get_osd_cluster_id()
-            cmd = "ocm --v={} delete /api/clusters_mgmt/v1/clusters/{}/addons/" "{}".format(
-                self.ocm_verbose_level, cluster_id, addon_name
+            cmd = (
+                "ocm --v={} delete /api/clusters_mgmt/v1/clusters/{}/addons/"
+                "{}".format(self.ocm_verbose_level, cluster_id, addon_name)
             )
             log.info("CMD: %s", cmd)
             ret = execute_command(cmd)
@@ -597,8 +598,9 @@ class OpenshiftClusterManager:
         output_file = output_filename
         self._render_template(template_file, output_file, replace_vars)
         cluster_id = self.get_osd_cluster_id()
-        cmd = "ocm --v={} post /api/clusters_mgmt/v1/clusters/{}/addons " "--body={}".format(
-            self.ocm_verbose_level, cluster_id, output_file
+        cmd = (
+            "ocm --v={} post /api/clusters_mgmt/v1/clusters/{}/addons "
+            "--body={}".format(self.ocm_verbose_level, cluster_id, output_file)
         )
         log.info("CMD: %s", cmd)
         ret = execute_command(cmd)
@@ -890,7 +892,9 @@ class OpenshiftClusterManager:
     def delete_idp(self):
         """Deletes Identity Provider"""
 
-        cmd = "ocm --v={} delete idp -c {} {}".format(self.ocm_verbose_level, self.cluster_name, self.idp_name)
+        cmd = "ocm --v={} delete idp -c {} {}".format(
+            self.ocm_verbose_level, self.cluster_name, self.idp_name
+        )
         log.info("CMD: %s", cmd)
         ret = execute_command(cmd)
         if ret is None:
@@ -1075,7 +1079,9 @@ class OpenshiftClusterManager:
         """Hibernate OSD Cluster"""
 
         cluster_id = self.get_osd_cluster_id()
-        cmd = "ocm --v={} hibernate cluster {}".format(self.ocm_verbose_level, cluster_id)
+        cmd = "ocm --v={} hibernate cluster {}".format(
+            self.ocm_verbose_level, cluster_id
+        )
         log.info("CMD: %s", cmd)
         ret = execute_command(cmd)
         if ret is None:
@@ -1152,7 +1158,9 @@ class OpenshiftClusterManager:
         cluster_id = self.get_osd_cluster_id()
         cmd = (
             "ocm --v={} patch /api/clusters_mgmt/v1/clusters/{}/addons/{} "
-            "--body={}".format(self.ocm_verbose_level, cluster_id, addon_name, output_file)
+            "--body={}".format(
+                self.ocm_verbose_level, cluster_id, addon_name, output_file
+            )
         )
         log.info("CMD: %s", cmd)
         ret = execute_command(cmd)
@@ -1314,7 +1322,9 @@ class OpenshiftClusterManager:
         cluster_id = self.get_osd_cluster_id()
         run_change_channel_cmd = (
             "ocm --v={} patch /api/clusters_mgmt/v1/clusters/{}"
-            " --body {}".format(self.ocm_verbose_level, cluster_id, self.update_ocm_channel_json)
+            " --body {}".format(
+                self.ocm_verbose_level, cluster_id, self.update_ocm_channel_json
+            )
         )
         log.info(run_change_channel_cmd)
         ret = execute_command(run_change_channel_cmd)

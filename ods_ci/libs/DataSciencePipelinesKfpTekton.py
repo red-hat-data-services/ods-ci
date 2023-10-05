@@ -4,8 +4,8 @@ import importlib
 import json
 import os
 import sys
-import kfp_tekton
 
+import kfp_tekton
 from DataSciencePipelinesAPI import DataSciencePipelinesAPI
 from robotlibcore import keyword
 from urllib3.exceptions import MaxRetryError, SSLError

@@ -91,7 +91,9 @@ class DataSciencePipelinesAPI:
             count += 1
 
         assert self.route != "", "Route must not be empty"
-        print(f"Waiting for Data Science Pipeline route to be ready to avoid firing false alerts: {self.route}")
+        print(
+            f"Waiting for Data Science Pipeline route to be ready to avoid firing false alerts: {self.route}"
+        )
         time.sleep(45)
         status = -1
         count = 0

@@ -6,11 +6,9 @@ import os
 import xml.etree.ElementTree as et
 from copy import deepcopy
 from xml.dom import minidom
-import os
-from junitparser import JUnitXml, TestCase, TestSuite, Failure, Error, Skipped
 
 import yaml
-from junitparser import JUnitXml, TestCase, TestSuite
+from junitparser import Error, Failure, JUnitXml, Skipped, TestCase, TestSuite
 
 
 def parse_args():

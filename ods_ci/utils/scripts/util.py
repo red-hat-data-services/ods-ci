@@ -60,26 +60,26 @@ def execute_command(cmd):
     """
     Executes command in the local node, and print real-time output
     """
-    output = ''
+    output = ""
     try:
         with subprocess.Popen(
-                cmd,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                universal_newlines=True,
-                encoding='utf-8',
-                errors='replace'
-            ) as p:
-                while True:
-                    line = p.stdout.readline()
-                    if line != '':
-                        output += (line + "\n")
-                        print(line)
-                    elif p.poll() != None:
-                        break
-                sys.stdout.flush()
-                return output
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            encoding="utf-8",
+            errors="replace",
+        ) as p:
+            while True:
+                line = p.stdout.readline()
+                if line != "":
+                    output += line + "\n"
+                    print(line)
+                elif p.poll() is not None:
+                    break
+            sys.stdout.flush()
+            return output
     except subprocess.CalledProcessError as _:
         return None
 

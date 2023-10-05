@@ -387,7 +387,7 @@ Verify Installed Library Version
 
 Verify Installed Labextension Version
     [Arguments]  ${lib}  ${ver}
-    ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !jupyter labextension list 2>&1 | grep ${lib} | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"v"); printf "%s", b[2]}'  ${ver}  #robocop: disable
+    ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !jupyter labextension list 2>&1 | grep ${lib} | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"v"); printf "%s", b[2]}' | awk '{split($0,c,"."); printf "%s.%s", c[1],c[2]}'  ${ver}  #robocop: disable
     IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected ${lib} at version ${ver}, but ${value}"
     RETURN    ${status}    ${value}
 

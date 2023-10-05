@@ -407,6 +407,23 @@ Check Versions In JupyterLab
         # CUDA version is checked in GPU-specific test cases, we can skip it here.
         ELSE IF  "${libDetail}[0]" == "CUDA"
             CONTINUE
+        ELSE IF  "${libDetail}[0]" == "Elyra"
+            ${status}  ${value} =  Verify Installed Library Version  elyra-code-snippet-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Library Version  elyra-pipeline-editor-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Library Version  elyra-python-editor-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Library Version  elyra-server  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
         ELSE
             ${status}  ${value} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
             IF  '${status}' == 'FAIL'

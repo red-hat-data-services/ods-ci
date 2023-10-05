@@ -61,7 +61,7 @@ class OpenshiftClusterManager:
         self.region = arguments.get("region")
         self.compute_machine_type = arguments.get("compute_machine_type")
         self.ocm_cli_binary_url = arguments.get("ocm_cli_binary_url")
-        self.ocm_verbose_level = args.get("ocm_verbose_level", "0")
+        self.ocm_verbose_level = arguments.get("ocm_verbose_level", "0")
         self.num_users_to_create_per_group = arguments.get(
             "num_users_to_create_per_group"
         )

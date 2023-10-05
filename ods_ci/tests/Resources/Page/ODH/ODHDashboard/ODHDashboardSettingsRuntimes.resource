@@ -45,10 +45,22 @@ Serving Runtime Template Should Be Listed
     ...    //table//tr/td[@data-label="Name"]//div[text()="${displayed_name}"]
     ...    timeout=10s
 
+Delete Serving Runtime Template
+    [Arguments]    ${displayed_name}    ${press_cancel}=${FALSE}
+    ODHDashboard.Click Action From Actions Menu    item_title=${displayed_name}
+    ...    action=Delete
+    Handle Deletion Confirmation Modal    item_title=${displayed_name}    item_type=serving runtime    press_cancel=${press_cancel}
+
+
 Delete Serving Runtime Template From CLI
+    [Arguments]    ${displayed_name}
+    ${resource_name}=    Get OpenShift Template Resource Name By Displayed Name
+    ...    displayed_name=${displayed_name}    fail_on_empty=${TRUE}
+    Oc Delete    kind=Template    name=${resource_name}    namespace=${APPLICATIONS_NAMESPACE}
+
+Get OpenShift Template Resource Name By Displayed Name
     [Arguments]    ${displayed_name}
     ${rc}    ${resource_name}=    Run And Return Rc And Output
     ...    oc get templates -ojson -n redhat-ods-applications | jq '.items[] | select(.objects[].metadata.annotations."openshift.io/display-name"=="${displayed_name}") | .metadata.name' | tr -d '"'
     Should Be Equal As Integers    ${rc}    ${0}
-    Should Not Be Empty    ${resource_name}
-    Oc Delete    kind=Template    name=${resource_name}    namespace=${APPLICATIONS_NAMESPACE}
+    Should Not Be Empty    ${resource_name}    msg=No Templates corresponding to ${displayed_name} Runtime.   

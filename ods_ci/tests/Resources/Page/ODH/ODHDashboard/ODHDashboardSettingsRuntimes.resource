@@ -55,13 +55,16 @@ Delete Serving Runtime Template From CLI
     [Arguments]    ${displayed_name}
     ${resource_name}=    Get OpenShift Template Resource Name By Displayed Name
     ...    displayed_name=${displayed_name}
-    Oc Delete    kind=Template    name=${resource_name}    namespace=${APPLICATIONS_NAMESPACE}
+    IF    "${resource_name}" == "${EMPTY}"
+        Log   No Templates corresponding to ${displayed_name} Runtime.
+    ELSE
+        Oc Delete    kind=Template    name=${resource_name}    namespace=${APPLICATIONS_NAMESPACE}
+    END
 
 Get OpenShift Template Resource Name By Displayed Name
     [Arguments]    ${displayed_name}
     ${rc}    ${resource_name}=    Run And Return Rc And Output
     ...    oc get templates -ojson -n redhat-ods-applications | jq '.items[] | select(.objects[].metadata.annotations."openshift.io/display-name"=="${displayed_name}") | .metadata.name' | tr -d '"'
     Should Be Equal As Integers    ${rc}    ${0}
-    Should Not Be Empty    ${resource_name}    msg=No Templates corresponding to ${displayed_name} Runtime.
     RETURN    ${resource_name}
 

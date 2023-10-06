@@ -42,8 +42,10 @@ ${SKIP_PREREQS_INSTALL}=    ${FALSE}
 ${SCRIPT_BASED_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small
+${FLAN_GRAMMAR_MODEL_S3_DIR}=    flan-t5-large-grammar-synthesis-caikit
 ${BLOOM_MODEL_S3_DIR}=    bloom-560m
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
+${FLAN_GRAMMAR_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_GRAMMAR_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
 ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
@@ -51,7 +53,7 @@ ${SCRIPT_TARGET_OPERATOR}=    rhods    # rhods or brew
 ${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 
 
-*** Test Cases ***
+*** Test Cases ***    
 Verify External Dependency Operators Can Be Deployed
     [Tags]    ODS-2326    WatsonX
     Pass Execution    message=Installation done as part of Suite Setup.
@@ -378,6 +380,28 @@ Verify Non Admin Can Serve And Query A Model
     ...    namespace=${test_namespace}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
+
+Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
+    [Tags]    ODS-XXX    WatsonX    Tier2
+    [Setup]    Set Project And Runtime    namespace=grammar-model
+    ${test_namespace}=    Set Variable     grammar-model
+    ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_GRAMMAR_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    namespace=${test_namespace}    query_idx=1
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}    query_idx=${1}
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}
 
 *** Keywords ***
 Install Model Serving Stack Dependencies
@@ -730,13 +754,13 @@ Query Models And Check Responses Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
     [Arguments]    ${models_names}    ${namespace}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
-    ...            ${streamed_response}=${FALSE}
+    ...            ${streamed_response}=${FALSE}    ${query_idx}=0
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
         FOR    ${index}    ${model_name}    IN ENUMERATE    @{models_names}
             Log    ${index}: ${model_name}
             ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_name}   namespace=${namespace}
-            ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
+            ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
             ${header}=    Set Variable    'mm-model-id: ${model_name}'
             ${res}=    Query Model With GRPCURL   host=${host}    port=443
             ...    endpoint=${endpoint}
@@ -744,7 +768,7 @@ Query Models And Check Responses Multiple Times
             ...    insecure=${TRUE}    skip_res_json=${streamed_response}
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
-            ...    query_idx=0    streamed_response=${streamed_response}
+            ...    streamed_response=${streamed_response}    query_idx=${query_idx}
         END
     END
 

@@ -184,7 +184,13 @@ Get Model Route via UI
 Open ${section} Options Menu
     [Documentation]    Opens the "Options menu" dropdown for different sections
     ...    Valid sections are: "Name", "Model framework (name - version)", "Project"
-    Click Element    xpath://span[.="${section}"]/../../..//button  # Remove attribute which is not present anymore
+    ${optionsmenu}=    Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath://span[.="${section}"]/../../..//button[@aria-label="Options menu"]
+    IF    ${optionsmenu} == ${TRUE}
+        SeleniumLibrary.Click Element    xpath://span[.="${section}"]/../../..//button[@aria-label="Options menu"]  # Remove attribute which is not present anymore
+    ELSE
+        SeleniumLibrary.Click Element    xpath://span[.="${section}"]/../../..//button  # Remove attribute which is not present anymore
+    END
 
 Get Access Token via UI
     [Documentation]    Returns the access token for models deployed in a specific project

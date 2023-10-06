@@ -43,8 +43,8 @@ Open Model Serving Home Page
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model
-    [Documentation]    Deploys a model via the Model Serving page (NOT the Model Server section of a DSP)
-    ...    the framework should be either "onnx" or "openvino_ir".
+    [Documentation]    Deploys a model via the Model Serving page or Model Server section of a DS Project.
+    ...    The framework should be either "onnx" or "openvino_ir".
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test
     # TODO: Does not work if there's already a model deployed
@@ -142,9 +142,8 @@ Set Up New Data Connection
     Input Text    ${S3_BUCKET_DC_INPUT_XP}    ${aws_bucket_name}
 
 Verify Model Status
-    [Documentation]    Checks the reported model status in the Model Serving page in the dashboard.
-    ...    status can be "success" or any other string (which will expect failure status). this does NOT work
-    ...    for the status in the "Model server" section of a DSP.
+    [Documentation]    Checks the reported model status in the Model Serving or DS Project in the dashboard.
+    ...    status can be "success" or any other string (which will expect failure status).
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         Wait Until Keyword Succeeds    120s    5s
@@ -191,8 +190,6 @@ Get Access Token via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
     [Arguments]    ${project_name}    ${service_account_name}=default-name
-    Open Data Science Projects Home Page
-    Project Should Be Listed    ${project_name}
     Open Data Science Project Details Page    ${project_name}
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
     RETURN    ${token}
@@ -209,11 +206,14 @@ Get Model Inference
     ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
+    ...    ${project_title}=${NONE}
     ${self_managed} =    Is RHODS Self-Managed
     ${url}=    Get Model Route via UI    ${model_name}
     ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
     IF    ${token_auth}
-        ${project_title}=    Get Model Project    ${model_name}
+        IF    "${project_title}" == "${NONE}"
+            ${project_title}=    Get Model Project    ${model_name}
+        END
         ${token}=    Get Access Token via UI    ${project_title}
         ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
     END
@@ -227,7 +227,9 @@ Get Model Inference
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
+    ...    ${project_title}=${NONE}
     ${inference_output} =    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
+    ...    project_title=${project_title}
     ${result}    ${list} =    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}
@@ -349,6 +351,16 @@ Disable Model Serving Runtime Using CLI
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch OdhDashboardConfig odh-dashboard-config --type=json -p '[{op: "replace", path: "/spec/templateDisablement", value: ["${name}"]}]' -n ${namespace}
     Should Be Equal As Integers    ${rc}         ${0}
+
+Wait Until Runtime Pod Is Running
+    [Arguments]    ${server_name}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    Log    name=modelmeshserving${runtime_pod_name}
+    Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_pod_name}
+    ...    namespace=${ns_name}    timeout=5s
+    # Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
 
 Create Custom Serving Runtime Using Template By CLI
     [Documentation]  Use Openshift API to create a custome runtime using template CR

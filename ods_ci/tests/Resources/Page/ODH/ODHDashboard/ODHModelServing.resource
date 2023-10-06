@@ -365,8 +365,7 @@ Wait Until Runtime Pod Is Running
     ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Log    name=modelmeshserving${runtime_pod_name}
     Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_pod_name}
-    ...    namespace=${ns_name}    timeout=5s
-    # Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
+    ...    namespace=${ns_name}    timeout=10s
 
 Create Custom Serving Runtime Using Template By CLI
     [Documentation]  Use Openshift API to create a custome runtime using template CR

@@ -55,7 +55,7 @@ Delete Serving Runtime Template
 Delete Serving Runtime Template From CLI
     [Arguments]    ${displayed_name}
     ${resource_name}=    Get OpenShift Template Resource Name By Displayed Name
-    ...    displayed_name=${displayed_name}    fail_on_empty=${TRUE}
+    ...    displayed_name=${displayed_name}
     Oc Delete    kind=Template    name=${resource_name}    namespace=${APPLICATIONS_NAMESPACE}
 
 Get OpenShift Template Resource Name By Displayed Name

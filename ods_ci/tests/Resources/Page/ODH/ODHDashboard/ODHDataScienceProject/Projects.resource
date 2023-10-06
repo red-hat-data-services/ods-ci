@@ -168,7 +168,7 @@ Delete Data Science Project From CLI
     ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
     IF    "${project_k8s_name}" == "${EMPTY}"
         Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}
-        Continue For Loop
+        ...    level=WARN
     ELSE
         Oc Delete    kind=Project   name=${project_k8s_name}
         WHILE    ${TRUE}

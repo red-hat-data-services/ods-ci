@@ -23,10 +23,6 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A 
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
     Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
-    [Teardown]    Run Keywords
-    ...    Delete Serving Runtime Template From CLI    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
-    ...    AND
-    ...    SeleniumLibrary.Close Browser
 
 Verify RHODS Admins Can Delete A Custom Serving Runtime Template
     [Tags]    Smoke    ODS-2279
@@ -73,6 +69,8 @@ Custom Serving Runtime Suite Setup
 
 Custom Serving Runtime Suite Teardown
     Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
+    Delete Serving Runtime Template From CLI    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
+    SeleniumLibrary.Close All Browsers
     RHOSi Teardown
 
 Create Test Serving Runtime Template If Not Exists

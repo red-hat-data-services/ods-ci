@@ -51,7 +51,6 @@ Delete Serving Runtime Template
     ...    action=Delete
     Handle Deletion Confirmation Modal    item_title=${displayed_name}    item_type=serving runtime    press_cancel=${press_cancel}
 
-
 Delete Serving Runtime Template From CLI
     [Arguments]    ${displayed_name}
     ${resource_name}=    Get OpenShift Template Resource Name By Displayed Name
@@ -63,4 +62,6 @@ Get OpenShift Template Resource Name By Displayed Name
     ${rc}    ${resource_name}=    Run And Return Rc And Output
     ...    oc get templates -ojson -n redhat-ods-applications | jq '.items[] | select(.objects[].metadata.annotations."openshift.io/display-name"=="${displayed_name}") | .metadata.name' | tr -d '"'
     Should Be Equal As Integers    ${rc}    ${0}
-    Should Not Be Empty    ${resource_name}    msg=No Templates corresponding to ${displayed_name} Runtime.   
+    Should Not Be Empty    ${resource_name}    msg=No Templates corresponding to ${displayed_name} Runtime.
+    RETURN    ${resource_name}
+

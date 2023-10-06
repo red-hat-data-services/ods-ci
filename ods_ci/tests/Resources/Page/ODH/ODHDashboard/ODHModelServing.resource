@@ -349,3 +349,45 @@ Disable Model Serving Runtime Using CLI
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch OdhDashboardConfig odh-dashboard-config --type=json -p '[{op: "replace", path: "/spec/templateDisablement", value: ["${name}"]}]' -n ${namespace}
     Should Be Equal As Integers    ${rc}         ${0}
+
+Create Custom Serving Runtime Using Template By CLI
+    [Documentation]  Use Openshift API to create a custome runtime using template CR
+    [Arguments]      ${file_path}
+    ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${file_path} -n ${APPLICATIONS_NAMESPACE}
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+
+
+Get Model Runtime Template Resource Name By Runtime Name OR Display Name
+    [Documentation]  Get template name based on runtime name or Display name
+    [Arguments]      ${runtime_name}=${EMPTY}     ${runtime_display_name}=${EMPTY}
+    IF    "${runtime_name}" != ""
+          ${return_code}    ${output}    Run And Return Rc And Output   oc get templates -ojson -n ${APPLICATIONS_NAMESPACE} | jq '.items[] | select(.objects[].metadata."name"=="${runtime_name}") | .metadata.name' | tr -d '"'   #robocop:disable
+          Log To Console    ${output}
+          Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+          RETURN   ${output}
+    ELSE IF   "${runtime_display_name}" != ""
+          ${return_code}    ${output}    Run And Return Rc And Output   oc get templates -ojson -n ${APPLICATIONS_NAMESPACE} | jq '.items[] | select(.objects[].metadata.annotations."openshift.io/display-name"=="${runtime_display_name}") | .metadata.name' | tr -d '"'   #robocop:disable
+          Log To Console    ${output}
+          Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+          RETURN   ${output}
+    ELSE IF   "${runtime_name}" == "" and "${runtime_display_name}" == ""
+         Fail     msg=Kindly provide runtime name or display name
+    END
+
+Delete Serving Runtime Template From CLI By Runtime Name OR Display Name
+    [Documentation]  Delete template name based on runtime name or Display name
+    [Arguments]      ${runtime_name}=${EMPTY}     ${runtime_display_name}=${EMPTY}
+    IF    "${runtime_name}" != ""
+          ${template_name}   Get Model Runtime Template Resource Name By Runtime Name OR Display Name  runtime_name=${runtime_name}
+          ${return_code}    ${output}    Run And Return Rc And Output   oc delete templates ${template_name} -n ${APPLICATIONS_NAMESPACE}  #robocop:disable
+          Log To Console    ${output}
+          Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+    ELSE IF   "${runtime_display_name}" != ""
+          ${template_name}   Get Model Runtime Template Resource Name By Runtime Name OR Display Name  runtime_display_name=${runtime_display_name}
+          ${return_code}    ${output}    Run And Return Rc And Output   oc delete templates ${template_name} -n ${APPLICATIONS_NAMESPACE}  #robocop:disable
+          Log To Console    ${output}
+          Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+    ELSE IF   "${runtime_name}" == "" and "${runtime_display_name}" == ""
+         Fail     msg=Kindly provide runtime name or display name
+    END

@@ -106,6 +106,16 @@ Verify Model Can Be Deployed Via UI For Upgrade
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
     Remove File    openshift_ca.crt
     [Teardown]   Dashboard Test Teardown
+
+Verify User Can Deploy Custom Runtime For Upgrade
+    [Tags]  Upgrade
+    Create Custom Serving Runtime Using Template By CLI   ods_ci/tests/Resources/Files/caikit_runtime_template.yaml
+    Begin Web Test
+    Menu.Navigate To Page    Settings    Serving runtimes
+    Wait Until Page Contains   Add serving runtime    timeout=15s
+    Page Should Contain Element  //tr[@id='caikit-runtime']
+    [Teardown]   Dashboard Test Teardown
+
 *** Keywords ***
 Dashboard Suite Setup
     [Documentation]  Basic suite setup

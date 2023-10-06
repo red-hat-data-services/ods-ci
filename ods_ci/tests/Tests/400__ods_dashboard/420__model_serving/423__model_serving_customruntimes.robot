@@ -74,9 +74,8 @@ Custom Serving Runtime Suite Teardown
     RHOSi Teardown
 
 Create Test Serving Runtime Template If Not Exists
-    ${exists}=    Run Keyword And Return Status
-    ...    Get OpenShift Template Resource Name By Displayed Name    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
-    IF    "${exists}" == "${FALSE}"
+    ${resource_name}=    Get OpenShift Template Resource Name By Displayed Name    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
+    IF    "${resource_name}" == "${EMPTY}"
         Log    message=Creating the necessary Serving Runtime as part of Test Setup.
         Open Dashboard Settings    settings_page=Serving runtimes
         Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}

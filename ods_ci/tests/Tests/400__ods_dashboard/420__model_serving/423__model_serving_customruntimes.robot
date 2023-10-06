@@ -4,8 +4,8 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettingsRuntimes.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Suite Setup       Model Serving Suite Setup
-# Suite Teardown
+Suite Setup       Custom Serving Runtime Suite Setup
+Suite Teardown    Custom Serving Runtime Suite Teardown
 
 
 *** Variables ***
@@ -63,13 +63,17 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
 
 
 *** Keywords ***
-Model Serving Suite Setup
+Custom Serving Runtime Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     RHOSi Setup
     Fetch CA Certificate If RHODS Is Self-Managed
+
+Custom Serving Runtime Suite Teardown
+    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
+    RHOSi Teardown
 
 Create Test Serving Runtime Template If Not Exists
     ${exists}=    Run Keyword And Return Status

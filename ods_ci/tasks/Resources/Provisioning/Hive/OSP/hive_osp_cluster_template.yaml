@@ -9,7 +9,7 @@ items:
   spec:
     baseDomain: ${infrastructure_configurations}[aws_domain]
     imageSetRef:
-      name: ${infrastructure_configurations}[image_set] # see line 100
+      name: ${infrastructure_configurations}[image_set] # see line 100 #fix for 1.32
     inventory:
       - name: ${infrastructure_configurations}[hive_cluster_name]-conf # see line 72
     platform:

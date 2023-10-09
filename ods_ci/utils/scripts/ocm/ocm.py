@@ -119,7 +119,7 @@ class OpenshiftClusterManager:
         if filter != "":
             cmd += " " + filter
         ret = execute_command(cmd)
-        if ret is None:
+        if ret is None or "Error: Can't retrieve cluster for key" in ret:
             log.info("ocm describe for cluster " "{} failed".format(self.cluster_name))
             return None
         return ret

@@ -742,11 +742,11 @@ Model Response Should Match The Expectation
         ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    \\s+    ${EMPTY}
         ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
         ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
-        ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    [-]?\\d.\\d+    <logprob_removed>
+        ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    [-]?\\d.\\d+[e]?[-]?\\d+    <logprob_removed>
         Log    ${cleaned_response_text}
         ${cleaned_exp_response_text}=    Replace String Using Regexp
         ...    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][streamed_response_text]
-        ...    [-]?\\d.\\d+    <logprob_removed>
+        ...    [-]?\\d.\\d+[e]?[-]?\\d+    <logprob_removed>
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     END
 

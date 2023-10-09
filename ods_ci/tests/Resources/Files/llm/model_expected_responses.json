@@ -21,7 +21,7 @@
                 "flan-t5-large-grammar-synthesis-caikit": {
                     "generatedTokenCount":  9,
                     "response_text": "This is a very wrong phrase.",
-                    "streamed_response_text":   "<tbd>"
+                    "streamed_response_text":   "{'details':{'input_token_count':'10'}}{'generated_text':'This','tokens':[{'text':'▁This','logprob':<logprob_removed>}],'details':{'generated_tokens':1}}{'generated_text':'is','tokens':[{'text':'▁is','logprob':<logprob_removed>}],'details':{'generated_tokens':2}}{'generated_text':'','tokens':[{'text':'▁','logprob':<logprob_removed>}],'details':{'generated_tokens':3}}{'generated_text':'a','tokens':[{'text':'a','logprob':<logprob_removed>}],'details':{'generated_tokens':4}}{'generated_text':'very','tokens':[{'text':'▁very','logprob':<logprob_removed>}],'details':{'generated_tokens':5}}{'generated_text':'wrong','tokens':[{'text':'▁wrong','logprob':<logprob_removed>}],'details':{'generated_tokens':6}}{'generated_text':'phrase','tokens':[{'text':'▁phrase','logprob':<logprob_removed>}],'details':{'generated_tokens':7}}{'generated_text':'.','tokens':[{'text':'.','logprob':<logprob_removed>}],'details':{'generated_tokens':8}}{'tokens':[{'text':'</s>','logprob':<logprob_removed>}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':9}}"
                 }
             }
 

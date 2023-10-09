@@ -115,18 +115,18 @@ files = [
 
 [[package]]
 name = "awscli"
-version = "1.29.53"
+version = "1.29.54"
 description = "Universal Command Line Environment for AWS."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "awscli-1.29.53-py3-none-any.whl", hash = "sha256:12206518db29863aee2ee87a6639891e635dd665ca6f937c32285e0de87d2528"},
-    {file = "awscli-1.29.53.tar.gz", hash = "sha256:045069197816f8376be6473f520b660e50285caa83794adcc6b6857b8ebeed22"},
+    {file = "awscli-1.29.54-py3-none-any.whl", hash = "sha256:53531f3625bb5a586c4a8fefac0247e3cc92bb59ddbcad90b61a66efe6b8a788"},
+    {file = "awscli-1.29.54.tar.gz", hash = "sha256:de6e406749d69b1d01602100534a1d72dcd001200d1434296f3f8d2514f8a030"},
 ]
 
 [package.dependencies]
-botocore = "1.31.53"
+botocore = "1.31.54"
 colorama = ">=0.2.5,<0.4.5"
 docutils = ">=0.10,<0.17"
 PyYAML = ">=3.10,<6.1"
@@ -242,14 +242,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.53"
+version = "1.31.54"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.53-py3-none-any.whl", hash = "sha256:aa647f94039d21de97c969df21ce8c5186b68234eb5c53148f0d8bbd708e375d"},
-    {file = "botocore-1.31.53.tar.gz", hash = "sha256:905580ea724d74f11652bab63fcec6bf0d32f1cf8b2963f7388efc0ea406b69b"},
+    {file = "botocore-1.31.54-py3-none-any.whl", hash = "sha256:71fdb337ddcdb6bf378e1211cba9ce754c35f12b1524c7d0c0c147b2310356c7"},
+    {file = "botocore-1.31.54.tar.gz", hash = "sha256:c98e78a9490c4166b205f87912b46770e156bfe7d53bae54ccbd49c68a336ec6"},
 ]
 
 [package.dependencies]
@@ -682,18 +682,6 @@ files = [
 ]
 
 [[package]]
-name = "delayed-assert"
-version = "0.3.6"
-description = "Delayed/soft assertions for python"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "delayed_assert-0.3.6-py3-none-any.whl", hash = "sha256:9987466c4d05c94af21151f27e58a8c13beba176e5f358d16c21b6abd3e6268b"},
-    {file = "delayed_assert-0.3.6.tar.gz", hash = "sha256:0e1c65afae4bae9c57b91c76e38287562924c9964a58c309249790c725c46239"},
-]
-
-[[package]]
 name = "deprecated"
 version = "1.2.14"
 description = "Python @deprecated decorator to deprecate old python classes, functions or methods."
@@ -904,20 +892,20 @@ termcolor = "*"
 
 [[package]]
 name = "flake8"
-version = "5.0.4"
+version = "6.1.0"
 description = "the modular source code checker: pep8 pyflakes and co"
 category = "main"
 optional = false
-python-versions = ">=3.6.1"
+python-versions = ">=3.8.1"
 files = [
-    {file = "flake8-5.0.4-py2.py3-none-any.whl", hash = "sha256:7a1cf6b73744f5806ab95e526f6f0d8c01c66d7bbe349562d22dfca20610b248"},
-    {file = "flake8-5.0.4.tar.gz", hash = "sha256:6fbe320aad8d6b95cec8b8e47bc933004678dc63095be98528b7bdd2a9f510db"},
+    {file = "flake8-6.1.0-py2.py3-none-any.whl", hash = "sha256:ffdfce58ea94c6580c77888a86506937f9a1a227dfcd15f245d694ae20a6b6e5"},
+    {file = "flake8-6.1.0.tar.gz", hash = "sha256:d5b3857f07c030bdb5bf41c7f53799571d75c4491748a3adcd47de929e34cd23"},
 ]
 
 [package.dependencies]
 mccabe = ">=0.7.0,<0.8.0"
-pycodestyle = ">=2.9.0,<2.10.0"
-pyflakes = ">=2.5.0,<2.6.0"
+pycodestyle = ">=2.11.0,<2.12.0"
+pyflakes = ">=3.1.0,<3.2.0"
 
 [[package]]
 name = "fonttools"
@@ -1023,14 +1011,14 @@ files = [
 
 [[package]]
 name = "google-api-core"
-version = "2.11.1"
+version = "2.12.0"
 description = "Google API client core library"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google-api-core-2.11.1.tar.gz", hash = "sha256:25d29e05a0058ed5f19c61c0a78b1b53adea4d9364b464d014fbda941f6d1c9a"},
-    {file = "google_api_core-2.11.1-py3-none-any.whl", hash = "sha256:d92a5a92dc36dd4f4b9ee4e55528a90e432b059f93aee6ad857f9de8cc7ae94a"},
+    {file = "google-api-core-2.12.0.tar.gz", hash = "sha256:c22e01b1e3c4dcd90998494879612c38d0a3411d1f7b679eb89e2abe3ce1f553"},
+    {file = "google_api_core-2.12.0-py3-none-any.whl", hash = "sha256:ec6054f7d64ad13b41e43d96f735acbd763b0f3b695dabaa2d579673f6a6e160"},
 ]
 
 [package.dependencies]
@@ -1525,18 +1513,18 @@ six = "*"
 
 [[package]]
 name = "java-access-bridge-wrapper"
-version = "0.14.1"
+version = "1.0.0"
 description = "Python wrapper for the Windows Java Access Bridge"
 category = "main"
 optional = false
-python-versions = ">=3.6.2,<4.0.0"
+python-versions = ">=3.8.1,<4.0.0"
 files = [
-    {file = "java_access_bridge_wrapper-0.14.1-py3-none-any.whl", hash = "sha256:5e3a5afbb5a42a50d33b355ad74b7fe1e1109c4f7a90c363ec49542fcd605806"},
-    {file = "java_access_bridge_wrapper-0.14.1.tar.gz", hash = "sha256:8ee085b6257b23037e84c0572821e636402b14450ec7d396b0b04ab85ce40476"},
+    {file = "java_access_bridge_wrapper-1.0.0-py3-none-any.whl", hash = "sha256:ecca6061be0775fb3f01ebc857b4160dae4c529e45d0593498f71cb746657a68"},
+    {file = "java_access_bridge_wrapper-1.0.0.tar.gz", hash = "sha256:979c05b9d625240abd55a9ce7aee516a115155ab68d98b42c58840271a9806f6"},
 ]
 
 [package.dependencies]
-pywin32 = {version = ">=300,<304", markers = "python_full_version != \"3.7.6\" and python_full_version != \"3.8.1\" and sys_platform == \"win32\""}
+pywin32 = {version = ">=300,<307", markers = "python_full_version != \"3.8.1\" and sys_platform == \"win32\""}
 
 [[package]]
 name = "jedi"
@@ -2988,14 +2976,14 @@ pyasn1 = ">=0.4.6,<0.6.0"
 
 [[package]]
 name = "pycodestyle"
-version = "2.9.1"
+version = "2.11.0"
 description = "Python style guide checker"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "pycodestyle-2.9.1-py2.py3-none-any.whl", hash = "sha256:d1735fc58b418fd7c5f658d28d943854f8a849b01a5d0a1e6f3f3fdd0166804b"},
-    {file = "pycodestyle-2.9.1.tar.gz", hash = "sha256:2c9607871d58c76354b697b42f5d57e1ada7d261c261efac224b664affdc5785"},
+    {file = "pycodestyle-2.11.0-py2.py3-none-any.whl", hash = "sha256:5d1013ba8dc7895b548be5afb05740ca82454fd899971563d2ef625d090326f8"},
+    {file = "pycodestyle-2.11.0.tar.gz", hash = "sha256:259bcc17857d8a8b3b4a2327324b79e5f020a13c16074670f9c8c8f872ea76d0"},
 ]
 
 [[package]]
@@ -3065,14 +3053,14 @@ email = ["email-validator (>=1.0.3)"]
 
 [[package]]
 name = "pyflakes"
-version = "2.5.0"
+version = "3.1.0"
 description = "passive checker of Python programs"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "pyflakes-2.5.0-py2.py3-none-any.whl", hash = "sha256:4579f67d887f804e67edb544428f264b7b24f435b263c4614f384135cea553d2"},
-    {file = "pyflakes-2.5.0.tar.gz", hash = "sha256:491feb020dca48ccc562a8c0cbe8df07ee13078df59813b83959cbdada312ea3"},
+    {file = "pyflakes-3.1.0-py2.py3-none-any.whl", hash = "sha256:4132f6d49cb4dae6819e5379898f2b8cce3c5f23994194c24b77d5da2e36f774"},
+    {file = "pyflakes-3.1.0.tar.gz", hash = "sha256:a0aae034c444db0071aa077972ba4768d40c830d9539fd45bf4cd3f8f6992efc"},
 ]
 
 [[package]]
@@ -3692,19 +3680,18 @@ rpds-py = ">=0.7.0"
 
 [[package]]
 name = "reportportal-client"
-version = "5.4.0"
-description = "Python client for Report Portal v5."
+version = "5.4.1"
+description = "Python client for ReportPortal v5."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "reportportal-client-5.4.0.tar.gz", hash = "sha256:202f1cab005022159fbcd26b0301b0e3c9a917fdc5fe7a1ac80a700e6a39611f"},
-    {file = "reportportal_client-5.4.0-py2.py3-none-any.whl", hash = "sha256:3948f0d856f9ed5e49b3e4f19af18e58c76b7c0b78694c72725bf413222cfecf"},
+    {file = "reportportal-client-5.4.1.tar.gz", hash = "sha256:a2dc83de11d111334341684b4f6913ed80983634328e4b78bc8cccd0e46f61f0"},
+    {file = "reportportal_client-5.4.1-py2.py3-none-any.whl", hash = "sha256:d58e195bf0a4e92b3ccb424c49cb31dd7ff226b5e25d0b473651cd176ca0a0f0"},
 ]
 
 [package.dependencies]
 aenum = "*"
-delayed-assert = "*"
 requests = ">=2.27.1"
 six = ">=1.16.0"
 
@@ -3866,14 +3853,14 @@ dev = ["pre-commit"]
 
 [[package]]
 name = "robocorp-storage"
-version = "0.3.2"
+version = "1.0.0"
 description = "Robocorp Asset Storage library"
 category = "main"
 optional = false
 python-versions = ">=3.7.2,<4.0.0"
 files = [
-    {file = "robocorp_storage-0.3.2-py3-none-any.whl", hash = "sha256:b315f9a7a8a1f01fd39879422d05ab173f52d40c7d8b23d18f5d447b2b7ed765"},
-    {file = "robocorp_storage-0.3.2.tar.gz", hash = "sha256:f584e3a17d5e92e35655947643e69b6501883ae36a53c17950c76529b193d13b"},
+    {file = "robocorp_storage-1.0.0-py3-none-any.whl", hash = "sha256:6a330b6e4240ab0734549c1e3b85598a319e36e68124a70e7cb1120fb56409a9"},
+    {file = "robocorp_storage-1.0.0.tar.gz", hash = "sha256:98a305998fdfeb1fe481c3357c856f018e22b7fd01e96f27ef3dafe66c3de23c"},
 ]
 
 [package.dependencies]
@@ -4112,14 +4099,14 @@ doc = ["furo", "sphinx", "sphinx-copybutton (==0.5.2)", "sphinx-design"]
 
 [[package]]
 name = "rpaframework"
-version = "26.1.1"
+version = "27.2.0"
 description = "A collection of tools and libraries for RPA"
 category = "main"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = ">=3.8.1,<4.0.0"
 files = [
-    {file = "rpaframework-26.1.1-py3-none-any.whl", hash = "sha256:f6d993805a7a22bf2a946e66b28c318e26822b94c464a5834b91c08b3858da4e"},
-    {file = "rpaframework-26.1.1.tar.gz", hash = "sha256:cca108de38f141ec5f5e56858ae58bb7c34bc53e211d55e53f91711ff7ff0a5c"},
+    {file = "rpaframework-27.2.0-py3-none-any.whl", hash = "sha256:ab4250078436db1b383b2b3ae0aa7b903957ca4306026daf2d016fa8d2e6fe2d"},
+    {file = "rpaframework-27.2.0.tar.gz", hash = "sha256:9099d6d31ac301974133717120d8615e989cc82defd70f9f3e2d3bb4ef19d6d8"},
 ]
 
 [package.dependencies]
@@ -4134,7 +4121,7 @@ holidays = ">=0.21,<0.22"
 htmldocx = ">=0.0.6,<0.0.7"
 hubspot-api-client = ">=4.0.6,<5.0.0"
 importlib-metadata = ">=4.13.0,<5.0.0"
-java-access-bridge-wrapper = "0.14.1"
+java-access-bridge-wrapper = ">=1.0.0,<2.0.0"
 jsonpath-ng = ">=1.5.2,<2.0.0"
 mss = ">=6.0.0,<7.0.0"
 netsuitesdk = ">=1.1.0,<2.0.0"
@@ -4156,17 +4143,17 @@ pywinauto = {version = ">=0.6.8,<0.7.0", markers = "python_full_version != \"3.7
 PyYAML = ">=5.4.1,<7.0.0"
 requests = ">=2.28.1,<3.0.0"
 requests-oauthlib = ">=1.3.1,<2.0.0"
-robocorp-storage = ">=0.3.2,<0.4.0"
+robocorp-storage = ">=1.0.0,<2.0.0"
 robotframework = ">=4.0.0,<4.0.1 || >4.0.1,<6.1.0 || >6.1.0,<7.0.0"
 robotframework-pythonlibcore = ">=4.2.0,<5.0.0"
 robotframework-requests = ">=0.9.1,<0.10.0"
 robotframework-sapguilibrary = {version = ">=1.1,<2.0", markers = "sys_platform == \"win32\""}
 robotframework-seleniumlibrary = ">=6.0.0,<7.0.0"
 robotframework-seleniumtestability = ">=2.0.0,<3.0.0"
-rpaframework-core = "11.0.6"
+rpaframework-core = ">=11.2.0,<12.0.0"
 rpaframework-pdf = ">=7.2.0,<8.0.0"
 rpaframework-windows = {version = ">=7.4.0,<8.0.0", markers = "sys_platform == \"win32\""}
-selenium = "4.11.2"
+selenium = "4.13.0"
 simple_salesforce = ">=1.0.0,<2.0.0"
 smartsheet-python-sdk = ">=3.0.0,<4.0.0"
 tenacity = ">=8.0.1,<9.0.0"
@@ -4179,21 +4166,21 @@ xlwt = ">=1.3.0,<2.0.0"
 
 [[package]]
 name = "rpaframework-core"
-version = "11.0.6"
+version = "11.2.0"
 description = "Core utilities used by RPA Framework"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "rpaframework_core-11.0.6-py3-none-any.whl", hash = "sha256:d2e7fb820a8afb5cf1fad6a43568b883cbfdaafe3e91b845785c39977b1cfed7"},
-    {file = "rpaframework_core-11.0.6.tar.gz", hash = "sha256:41f081f14f8c61fd8afd9c2debc62ea27c1990275f75fa24d500f7373a1355f8"},
+    {file = "rpaframework_core-11.2.0-py3-none-any.whl", hash = "sha256:4a5445bd4b58265b169d0f48118531fb4d460804f4b08a39aa35becbcb9b55cc"},
+    {file = "rpaframework_core-11.2.0.tar.gz", hash = "sha256:1276779c35bfc97b12fc1852f57b62d4e42962b9d0b72ad68f23fa49b1057065"},
 ]
 
 [package.dependencies]
-packaging = ">=21.3,<24"
+packaging = ">=23.1,<24.0"
 pillow = ">=9.1.1,<10.0.0"
 psutil = {version = ">=5.9.0,<6.0.0", markers = "sys_platform == \"win32\""}
-pywin32 = {version = ">=300,<304", markers = "python_full_version != \"3.7.6\" and python_full_version != \"3.8.1\" and sys_platform == \"win32\""}
+pywin32 = {version = ">=300,<304", markers = "python_full_version != \"3.8.1\" and sys_platform == \"win32\""}
 selenium = ">=4.6.1,<5.0.0"
 uiautomation = {version = ">=2.0.15,<3.0.0", markers = "sys_platform == \"win32\""}
 webdriver-manager = "4.0.0"
@@ -4446,14 +4433,14 @@ crt = ["botocore[crt] (>=1.20.29,<2.0a.0)"]
 
 [[package]]
 name = "selenium"
-version = "4.11.2"
+version = "4.13.0"
 description = ""
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "selenium-4.11.2-py3-none-any.whl", hash = "sha256:98e72117b194b3fa9c69b48998f44bf7dd4152c7bd98544911a1753b9f03cc7d"},
-    {file = "selenium-4.11.2.tar.gz", hash = "sha256:9f9a5ed586280a3594f7461eb1d9dab3eac9d91e28572f365e9b98d9d03e02b5"},
+    {file = "selenium-4.13.0-py3-none-any.whl", hash = "sha256:f0f9185c01ae249a321529c4e3aa0edc2a900642e61fdbb76988cd72d2762ece"},
+    {file = "selenium-4.13.0.tar.gz", hash = "sha256:3c413a4f1b8af67824703195e3b1c19cfb1c3186c799efa035d55fd59d6dd59f"},
 ]
 
 [package.dependencies]
@@ -4808,14 +4795,14 @@ files = [
 
 [[package]]
 name = "traitlets"
-version = "5.10.0"
+version = "5.10.1"
 description = "Traitlets Python configuration system"
 category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "traitlets-5.10.0-py3-none-any.whl", hash = "sha256:417745a96681fbb358e723d5346a547521f36e9bd0d50ba7ab368fff5d67aa54"},
-    {file = "traitlets-5.10.0.tar.gz", hash = "sha256:f584ea209240466e66e91f3c81aa7d004ba4cf794990b0c775938a1544217cd1"},
+    {file = "traitlets-5.10.1-py3-none-any.whl", hash = "sha256:07ab9c5bf8a0499fd7b088ba51be899c90ffc936ffc797d7b6907fc516bcd116"},
+    {file = "traitlets-5.10.1.tar.gz", hash = "sha256:db9c4aa58139c3ba850101913915c042bdba86f7c8a0dda1c6f7f92c5da8e542"},
 ]
 
 [package.extras]
@@ -5320,5 +5307,5 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.8"
-content-hash = "fe33c212794704c433b9ae872fdb36539b3c6f2ae8538c3193c1d7002c7fb5ef"
+python-versions = "^3.8.1"
+content-hash = "afef6500d7ebbe143883615003c29778763e7af4d9ceccc51424a970404aa69b"

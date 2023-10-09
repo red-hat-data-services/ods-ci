@@ -135,6 +135,16 @@ Test Inference Post RHODS Upgrade
     Remove File    openshift_ca.crt
     [Teardown]   Run   oc delete project ${PRJ_TITLE}
 
+Verify Custom Runtime Exists After Upgrade
+    [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
+    [Tags]  Upgrade
+    [Setup]  Begin Web Test
+    Menu.Navigate To Page    Settings    Serving runtimes
+    Wait Until Page Contains   Add serving runtime    timeout=15s
+    Page Should Contain Element  //tr[@id='caikit-runtime']
+    Delete Serving Runtime Template From CLI By Runtime Name OR Display Name  runtime_name=caikit-runtime
+    [Teardown]   Dashboard Test Teardown
+
 *** Keywords ***
 Dashboard Suite Setup
     [Documentation]  Basic suite setup

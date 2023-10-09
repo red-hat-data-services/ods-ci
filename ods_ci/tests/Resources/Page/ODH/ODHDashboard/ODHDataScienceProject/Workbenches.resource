@@ -12,10 +12,10 @@ ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
-${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//button[@aria-label="Options menu"]
-${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li/button
-${WORKBENCH_IMAGE_ITEM_SPAN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li//span
-${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
+${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//div[@id="workbench-image-stream-selection"]/button    # robocop: disable
+${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//div[@id="workbench-image-stream-selection"]//li//div
+# ${WORKBENCH_IMAGE_ITEM_SPAN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li//span
+${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button  # Removing the attribute in case it changes like it did for the image dropdown
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
@@ -62,18 +62,14 @@ Create Workbench
         ...    xpath=//input[contains(@name,"ephemeral")]
     END
     IF    "${storage}" == "Persistent"
-        # The Cluster Storage section is always towards the bottom of the page, so scroll all the way down in the page
-        Execute Javascript    var scrollable = document.getElementsByClassName("pf-c-drawer__content")[1]; scrollable.scrollBy(0,scrollable.scrollHeight);  # robocop : disable
         IF    ${pv_existent} == ${TRUE}
-            # Broken in 1.33 RC1
             # Use the `Jump to section` links in the page to scroll the section into view
-            # Click Element    //a[@href="#cluster-storage"]
+            Click Element    //a[@href="#cluster-storage"]
             Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
             Select An Existent PV   name=${pv_name}
         ELSE IF   ${pv_existent} == ${FALSE}
-            # Broken in 1.33 RC1
             # Use the `Jump to section` links in the page to scroll the section into view
-            # Click Element    //a[@href="#cluster-storage"]
+            Click Element    //a[@href="#cluster-storage"]
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
         ELSE
@@ -100,10 +96,8 @@ Add Environment Variables In Workbench
     ELSE
         ${add_key_value_text}=    Set Variable    Add another variable
     END
-    # Broken in 1.33 RC1
     # Use the `Jump to section` links in the page to scroll the section into view
-    # Click Element    //a[@href="#environment-variables"]
-    Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)
+    Click Element    //a[@href="#environment-variables"]
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
     ${n_objects}=    Get Length    ${env_variables}
     FOR    ${idx}   ${env_variable}    IN ENUMERATE    @{env_variables}    start=1
@@ -126,7 +120,7 @@ Add Environment Variables In Workbench
                     # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
                     # amount of pixels for the block of elements that gets added.
                     IF    "${add_key_value_text}" == "Add another key / value pair"
-                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,200)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
                     ELSE IF    "${add_key_value_text}" == "Add another variable"
                         Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
                     END
@@ -177,19 +171,14 @@ Select Workbench Jupyter Image
     [Arguments]     ${image_name}    ${version}=default
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
-    IF    "${image_name}"=="TrustyAI"
-        Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_SPAN_XP}\[text()="TrustyAI"]/..    timeout=10s
-        Click Element    ${WORKBENCH_IMAGE_ITEM_SPAN_XP}\[text()="TrustyAI"]/..
+    Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
+    Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
+    IF    "${version}"=="default"
+        Verify Version Selection Dropdown
+    ELSE IF    "${version}"=="previous"
+        Select Workbench Image Version    ${version}
     ELSE
-        Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
-        Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-        IF    "${version}"=="default"
-            Verify Version Selection Dropdown
-        ELSE IF    "${version}"=="previous"
-            Select Workbench Image Version    ${version}
-        ELSE
-            Fail    ${version} does not exist, use default/previous
-        END
+        Fail    ${version} does not exist, use default/previous
     END
 
 Verify Version Selection Dropdown
@@ -221,6 +210,7 @@ Select Workbench Image Version
 Select Workbench Container Size
     [Documentation]    Selects the container size in the workbench creation page
     [Arguments]     ${size_name}=Small
+    Click Element    //a[@href="#deployment-size"]
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]

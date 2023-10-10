@@ -189,7 +189,7 @@ Set Notebook Culler Timeout
 
 Disable Notebook Culler
     [Documentation]    Disables the culler (i.e. sets the default timeout of 1 year)
-    Open Dashboard Cluster Settings
+    Open Dashboard Settings    settings_page=Cluster settings
     Sleep  5
     ${disabled_field} =  Run Keyword And Return Status  Page Should Contain Element
     ...    xpath://input[@id="hour-input"][@disabled=""]
@@ -201,12 +201,13 @@ Disable Notebook Culler
 Modify Notebook Culler Timeout
     [Documentation]    Modifies the culler timeout via UI
     [Arguments]    ${new_timeout}
-    Open Dashboard Cluster Settings
+    Open Dashboard Settings    settings_page=Cluster settings
     Set Notebook Culler Timeout  ${new_timeout}
     Sleep  10s  msg=Give time for rollout
 
-Open Dashboard Cluster Settings
+Open Dashboard Settings
     [Documentation]    Opens the RHODS dashboard and navigates to the Cluster settings page
+    [Arguments]    ${settings_page}
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Sleep  1s
@@ -215,6 +216,15 @@ Open Dashboard Cluster Settings
     IF  ${settings_hidden}==True
         Click Element  xpath://button[@id="settings"]
     END
-    Click Element  xpath://a[.="Cluster settings"]
-    Wait For RHODS Dashboard To Load    expected_page=Cluster Settings
+    Click Element  xpath://a[.="${settings_page}"]
+    IF    "${settings_page}" == "Notebook images"
+        ${exp_page_title}=    Set Variable    Notebook images settings
+    ELSE IF     "${settings_page}" == "Cluster settings"
+        ${exp_page_title}=    Set Variable    Cluster Settings
+    ELSE IF     "${settings_page}" == "Serving runtimes"
+        ${exp_page_title}=    Set Variable    Serving runtimes
+    ELSE IF     "${settings_page}" == "User management"
+        ${exp_page_title}=    Set Variable    User and group settings
+    END
+    Wait For RHODS Dashboard To Load    expected_page=${exp_page_title}
     ...    wait_for_cards=${FALSE}

@@ -269,7 +269,7 @@ Open Settings And Set Tolerations To
     [Documentation]    Opens the "Cluster Settings" page in RHODS Dashboard
     ...                and set the tolerations settings to the given one
     [Arguments]    ${tolerations_text}
-    Open Dashboard Cluster Settings
+    Open Dashboard Settings    settings_page=Cluster settings
     Set Pod Toleration Via UI    ${tolerations_text}
     Save Changes In Cluster Settings
 
@@ -277,7 +277,7 @@ Open Settings And Disable Tolerations
     [Documentation]    Opens the "Cluster Settings" page in RHODS Dashboard
     ...                and disable the tolerations settings.
     ...                Before disabling the setting, it restores the default value
-    Open Dashboard Cluster Settings
+    Open Dashboard Settings    settings_page=Cluster settings
     Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}
     Disable Pod Toleration Via UI
     Save Changes In Cluster Settings

@@ -658,7 +658,7 @@ Environment Variables Should Be Displayed According To Their Type
     ...                It goes to "Edit workbench" page and compare the environment variables
     ...                settings with the ones which were inserted during workbench creation.
     [Arguments]    ${workbench_title}    ${exp_env_variables}
-    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Click Element    xpath://a[@href="#environment-variables"]
     Sleep   2s
     FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}    start=1

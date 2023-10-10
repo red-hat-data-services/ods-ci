@@ -430,6 +430,11 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    isvc_names=${models_names}
 
 Verify Runtime Upgrade Does Not Affect Deployed Models
+    [Documentation]    Upgrades the caikit runtime inthe same NS where a model
+    ...                is already deployed. The expecation is that the current model
+    ...                must remain unchanged after the runtime upgrade.
+    ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
+    ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
     [Tags]    ODS-2404    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}

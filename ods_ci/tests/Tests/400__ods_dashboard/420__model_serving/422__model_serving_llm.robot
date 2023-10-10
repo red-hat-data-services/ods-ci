@@ -384,7 +384,7 @@ Verify Non Admin Can Serve And Query A Model
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
-    [Tags]    ODS-XXX    WatsonX    Tier2
+    [Tags]    ODS-2441    WatsonX
     [Setup]    Set Project And Runtime    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
@@ -406,7 +406,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    isvc_names=${models_names}
 
 Verify User Can Serve And Query Flan-t5 Large
-    [Tags]    ODS-XXX    WatsonX    Tier2
+    [Tags]    ODS-2434    WatsonX
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large

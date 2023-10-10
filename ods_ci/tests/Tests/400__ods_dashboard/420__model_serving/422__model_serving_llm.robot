@@ -43,9 +43,11 @@ ${SCRIPT_BASED_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small
 ${FLAN_GRAMMAR_MODEL_S3_DIR}=    flan-t5-large-grammar-synthesis-caikit
+${FLAN_LARGE_MODEL_S3_DIR}=    flan-t5-large
 ${BLOOM_MODEL_S3_DIR}=    bloom-560m
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${FLAN_GRAMMAR_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_GRAMMAR_MODEL_S3_DIR}/
+${FLAN_LARGE_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_LARGE_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
 ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
@@ -403,6 +405,29 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
+Verify User Can Serve And Query Flan-t5 Large
+    [Tags]    ODS-XXX    WatsonX    Tier2
+    [Setup]    Set Project And Runtime    namespace=flan-t5-large3
+    ${test_namespace}=    Set Variable     flan-t5-large3
+    ${flan_model_name}=    Set Variable    flan-t5-large
+    ${models_names}=    Create List    ${flan_model_name}
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_LARGE_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    namespace=${test_namespace}    query_idx=${0}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}    query_idx=${0}
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}
+
+
 *** Keywords ***
 Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
@@ -747,6 +772,7 @@ Model Response Should Match The Expectation
         ${cleaned_exp_response_text}=    Replace String Using Regexp
         ...    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][streamed_response_text]
         ...    [-]?\\d.\\d+[e]?[-]?\\d+    <logprob_removed>
+        ${cleaned_exp_response_text}=    Replace String Using Regexp    ${cleaned_exp_response_text}    \\s+    ${EMPTY}
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     END
 

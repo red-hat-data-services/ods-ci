@@ -450,20 +450,16 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     Query Models And Check Responses Multiple Times    models_names=${models_names}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}
-    ${created_at}=    Oc Get    kind=Pod    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    fields=["metadata.creationTimestamp"]
-    ${rc}    ${caikitsha}=    Run And Return Rc And Output
-    ...    oc get pod --selector serving.kserve.io/inferenceservice=${flan_model_name} -n ${test_namespace} -ojson | jq '.items[].spec.containers[].image' | grep caikit-tgis    # robocop: disable
-    ${rev_id}=    Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:fast
+    ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:fast
     ...    model_name=${flan_model_name}   namespace=${test_namespace}
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
-    Wait For Pods To Be Ready    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
-    ${created_at_after}=    Oc Get    kind=Pod    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    fields=["metadata.creationTimestamp"]
-    Should Be Equal As Strings    ${created_at}    ${created_at_after}
-    ${rc}    ${caikitsha_after}=    Run And Return Rc And Output
-    ...    oc get pod --selector serving.kserve.io/inferenceservice=${flan_model_name} -n ${test_namespace} -ojson | jq '.items[].spec.containers[].image' | grep caikit-tgis        # robocop: disable
+    ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Should Be Equal    ${created_at}    ${created_at_after}
     Should Be Equal As Strings    ${caikitsha}    ${caikitsha_after}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -884,8 +880,15 @@ Upgrade Caikit Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given
     ...    ${new_image_url}
     [Arguments]    ${new_image_url}    ${model_name}    ${namespace}
-    ${revision_id}=    Get Current Revision ID    model_name=${model_name}    namespace=${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch ServingRuntime caikit-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"
     Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${revision_id}
+
+Get Model Pods Creation Date And Image URL
+    [Arguments]    ${model_name}    ${namespace}
+    ${created_at}=    Oc Get    kind=Pod    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${namespace}    fields=["metadata.creationTimestamp"]
+    ${rc}    ${caikitsha}=    Run And Return Rc And Output
+    ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -ojson | jq '.items[].spec.containers[].image' | grep caikit-tgis    # robocop: disable
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${created_at}    ${caikitsha}

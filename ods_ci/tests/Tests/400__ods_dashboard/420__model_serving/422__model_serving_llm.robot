@@ -28,7 +28,7 @@ ${KIALI_OP_NAME}=     kiali-ossm
 ${KIALI_SUB_NAME}=    kiali-ossm
 ${JAEGER_OP_NAME}=     jaeger-product
 ${JAEGER_SUB_NAME}=    jaeger-product
-${KSERVE_NS}=    ${OPERATOR_NAMESPACE}    # NS is "kserve" for ODH
+${KSERVE_NS}=    ${APPLICATIONS_NAMESPACE}    # NS is "kserve" for ODH
 ${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime.yaml
 ${TEST_NS}=    watsonx
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
@@ -39,6 +39,7 @@ ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${SKIP_PREREQS_INSTALL}=    ${FALSE}
+${SCRIPT_BASED_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small
 ${BLOOM_MODEL_S3_DIR}=    bloom-560m
@@ -46,6 +47,8 @@ ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
 ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
+${SCRIPT_TARGET_OPERATOR}=    rhods    # rhods or brew
+${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 
 
 *** Test Cases ***
@@ -66,6 +69,7 @@ Verify User Can Serve And Query A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
+    Sleep  5s
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
@@ -382,11 +386,15 @@ Install Model Serving Stack Dependencies
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
     # RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
-        Install Service Mesh Stack
-        Deploy Service Mesh CRs
-        Install Serverless Stack
-        Deploy Serverless CRs
-        Configure KNative Gateways
+        IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
+            Install Service Mesh Stack
+            Deploy Service Mesh CRs
+            Install Serverless Stack
+            Deploy Serverless CRs
+            Configure KNative Gateways
+        ELSE
+            Run Install Script
+        END
     END
     Load Expected Responses
 
@@ -661,56 +669,34 @@ Compile Inference Service YAML
     [Arguments]    ${isvc_name}    ${sa_name}    ${model_storage_uri}    ${canaryTrafficPercent}=${EMPTY}
     ...            ${min_replicas}=1   ${scaleTarget}=1   ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
-    Copy File     ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${model_storage_uri}=    Escape String Chars    str=${model_storage_uri}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{INFERENCE_SERVICE_NAME}}/${isvc_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{MIN_REPLICAS}}/${min_replicas}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{SA_NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{STORAGE_URI}}/${model_storage_uri}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{MIN_REPLICAS}}/${min_replicas}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     IF   '${auto_scale}' == '${NONE}'
-          ${rc}    ${out}=    Run And Return Rc And Output
-          ...    sed -i '/scaleMetric/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-          ${rc}    ${out}=    Run And Return Rc And Output
-          ...    sed -i '/scaleTarget/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ELSE
-          ${rc}    ${out}=    Run And Return Rc And Output
-          ...    sed -i 's/{{SCALE_TARGET}}/${scaleTarget}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-          ${rc}    ${out}=    Run And Return Rc And Output
-          ...    sed -i 's/{{SCALE_METRIC}}/${scaleMetric}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        ${scaleTarget}=    Set Variable    ${EMPTY}
+        ${scaleMetric}=    Set Variable    ${EMPTY}
     END
-    IF   '${canaryTrafficPercent}' == '${EMPTY}'
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    sed -i '/canaryTrafficPercent/d' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ELSE
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    sed -i 's/{{CanaryTrafficPercent}}/${canaryTrafficPercent}/g' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    END
-    IF    ${requests_dict} == &{EMPTY}
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    yq -i 'del(.spec.predictor.model.resources.requests)' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ELSE
-        Log    ${requests_dict}
+    Set Test Variable    ${isvc_name}
+    Set Test Variable    ${min_replicas}
+    Set Test Variable    ${sa_name}
+    Set Test Variable    ${model_storage_uri}
+    Set Test Variable    ${scaleTarget}
+    Set Test Variable    ${scaleMetric}
+    Set Test Variable    ${canaryTrafficPercent}
+    Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    IF    ${requests_dict} != &{EMPTY}
+        Log    Adding predictor model requests to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${requests_dict}    console=True
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
             Log    ${index}- ${resource}:${requests_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
             ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
-    IF    ${limits_dict} == &{EMPTY}
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    yq -i 'del(.spec.predictor.model.resources.limits)' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ELSE
-        Log    ${limits_dict}
+    IF    ${limits_dict} != &{EMPTY}
+        Log    Adding predictor model limits to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${limits_dict}    console=True
         FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
             Log    ${index}- ${resource}:${limits_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
             ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
 
@@ -786,3 +772,18 @@ Compile And Query LLM model
           ...    json_body=${body}    json_header=${header}
           ...    insecure=${TRUE}
     END
+
+Run Install Script
+    [Documentation]    Install KServe serving stack using
+    ...                https://github.com/opendatahub-io/caikit-tgis-serving/blob/main/demo/kserve/scripts/README.md
+    ${rc}=    Run And Return Rc    git clone https://github.com/opendatahub-io/caikit-tgis-serving
+    Should Be Equal As Integers    ${rc}    ${0}
+    IF    "${SCRIPT_TARGET_OPERATOR}" == "brew"
+        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} BREW_TAG=${SCRIPT_BREW_TAG} CHECK_UWM=false ./scripts/install/kserve-install.sh
+        ...    cwd=caikit-tgis-serving/demo/kserve
+    ELSE
+        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh
+        ...    cwd=caikit-tgis-serving/demo/kserve
+
+    END
+    Should Be Equal As Integers    ${rc}    ${0}

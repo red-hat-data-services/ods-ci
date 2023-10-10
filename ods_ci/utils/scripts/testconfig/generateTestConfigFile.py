@@ -150,7 +150,7 @@ def get_dashboard_url():
     cmd = "oc get route -A -o json  | jq '.items[].spec.host' | grep 'dashboard'"
 
     dashboard_url = execute_command(cmd)
-    return "https://" + dashboard_url.strip('"').strip("\n")
+    return "https://" + dashboard_url.strip('\"').strip("\n")
 
 
 def generate_test_config_file(
@@ -271,7 +271,7 @@ def generate_test_config_file(
     if bool(set_dashboard_url):
         # Get Dashboard url for open data science
         dashboard_url = get_dashboard_url()
-        data["ODH_DASHBOARD_URL"] = dashboard_url
+        data["ODH_DASHBOARD_URL"] = dashboard_url.replace('"', '')
 
     with open(config_file, "w") as yaml_file:
         yaml_file.write(yaml.dump(data, default_flow_style=False, sort_keys=False))

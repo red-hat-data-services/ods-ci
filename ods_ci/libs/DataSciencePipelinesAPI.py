@@ -87,8 +87,8 @@ class DataSciencePipelinesAPI:
             count += 1
 
         assert self.route != "", "Route must not be empty"
-        print(f"Waiting for Data Science Pipeline route to be ready: {self.route}")
-        time.sleep(30)
+        print(f"Waiting for Data Science Pipeline route to be ready to avoid firing false alerts: {self.route}")
+        time.sleep(45)
         status = -1
         count = 0
         while status != 200 and count < timeout:
@@ -300,8 +300,9 @@ class DataSciencePipelinesAPI:
         result, _ = self.run_oc("oc get storageclass -A -o json")
         result = json.loads(result)
         for storage_class in result['items']:
-            if storage_class['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] == 'true':
-                break
+            if 'annotations' in storage_class['metadata']:
+                if storage_class['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] == 'true':
+                    break
         return storage_class['metadata']['name']
 
     def run_oc(self, command):

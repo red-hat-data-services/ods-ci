@@ -5,7 +5,7 @@ import xml.etree.ElementTree as et
 from copy import deepcopy
 from xml.dom import minidom
 import os
-from junitparser import JUnitXml, TestCase, TestSuite
+from junitparser import JUnitXml, TestCase, TestSuite, Failure, Error, Skipped
 import yaml
 
 
@@ -191,6 +191,23 @@ def restructure_xml_for_polarion(src_xunit_xml_file, xunit_xml_file_restructured
         tc = TestCase()
         tc.name = suite.name
         tc.time = suite.time
+
+        if not suite.is_passed:
+            if isinstance(suite.result[0], Failure):
+                f = Failure()
+                f.type = suite.result[0].type
+                f.message = suite.result[0].message
+                tc.append(f)
+            elif isinstance(suite.result[0], Error):
+                e = Error()
+                e.type = suite.result[0].type
+                e.message = suite.result[0].message
+                tc.append(e)
+            elif suite.is_skipped:
+                s = Skipped()
+                s.type = suite.result[0].type
+                s.message = suite.result[0].message
+                tc.append(s)
         xml_testsuite.append(tc)
     xml_testsuites.append(xml_testsuite)
     xml_testsuites.write(xunit_xml_file_restructured, pretty=True)

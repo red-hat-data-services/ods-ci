@@ -12,10 +12,10 @@ ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
-${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//button[@aria-label="Options menu"]
-${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li/button
-${WORKBENCH_IMAGE_ITEM_SPAN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li//span
-${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[@aria-label="Options menu"]
+${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//div[@id="workbench-image-stream-selection"]/button    # robocop: disable
+${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//div[@id="workbench-image-stream-selection"]//li//div
+# ${WORKBENCH_IMAGE_ITEM_SPAN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li//span
+${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button  # Removing the attribute in case it changes like it did for the image dropdown
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
@@ -120,9 +120,9 @@ Add Environment Variables In Workbench
                     # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
                     # amount of pixels for the block of elements that gets added.
                     IF    "${add_key_value_text}" == "Add another key / value pair"
-                        Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,200)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
                     ELSE IF    "${add_key_value_text}" == "Add another variable"
-                        Execute Javascript    document.getElementById("dashboard-page-main").scrollBy(0,700)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
                     END
                 END
             END
@@ -171,19 +171,14 @@ Select Workbench Jupyter Image
     [Arguments]     ${image_name}    ${version}=default
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
-    IF    "${image_name}"=="TrustyAI"
-        Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_SPAN_XP}\[text()="TrustyAI"]/..    timeout=10s
-        Click Element    ${WORKBENCH_IMAGE_ITEM_SPAN_XP}\[text()="TrustyAI"]/..
+    Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
+    Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
+    IF    "${version}"=="default"
+        Verify Version Selection Dropdown
+    ELSE IF    "${version}"=="previous"
+        Select Workbench Image Version    ${version}
     ELSE
-        Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
-        Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-        IF    "${version}"=="default"
-            Verify Version Selection Dropdown
-        ELSE IF    "${version}"=="previous"
-            Select Workbench Image Version    ${version}
-        ELSE
-            Fail    ${version} does not exist, use default/previous
-        END
+        Fail    ${version} does not exist, use default/previous
     END
 
 Verify Version Selection Dropdown
@@ -215,6 +210,7 @@ Select Workbench Image Version
 Select Workbench Container Size
     [Documentation]    Selects the container size in the workbench creation page
     [Arguments]     ${size_name}=Small
+    Click Element    //a[@href="#deployment-size"]
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]
@@ -226,6 +222,13 @@ Workbench Should Be Listed
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
     ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/*[div[text()="${workbench_title}"]]
+
+Workbench With Description Should Be Listed
+    [Documentation]    Checks a workbench with particular name and description is listed in the DS Project details page
+    [Arguments]     ${workbench_title}  ${workbench_description}
+    Run keyword And Continue On Failure
+    ...    Wait Until Page Contains Element
+    ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//div[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
 
 Workbench Should Not Be Listed
     [Documentation]    Checks a workbench is not listed in the DS Project details page
@@ -253,10 +256,9 @@ Status Error Icon Should Appear
 
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
-    [Arguments]     ${workbench_title}      ${timeout}=40s    ${status}=${WORKBENCH_STATUS_RUNNING}
-
+    [Arguments]     ${workbench_title}    ${timeout}=60s    ${status}=${WORKBENCH_STATUS_RUNNING}
     Wait Until Page Contains Element
-    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}
+    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}  # robocop: disable
 
 Wait Until Workbench Is Stopped
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
@@ -355,8 +357,14 @@ Click Action From Actions Menu
 Delete Workbench
     [Documentation]    Deletes a workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
-    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
+    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
     Handle Deletion Confirmation Modal    item_title=${workbench_title}    item_type=workbench    press_cancel=${press_cancel}
+
+Edit Workbench
+    [Documentation]    Edits a workbench
+    [Arguments]     ${workbench_title}
+    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
 
 Check Launched Workbench Is The Correct One
     [Documentation]    Checks if the launched workbench is the expected one
@@ -455,7 +463,7 @@ Select Workbench Number Of GPUs
 Edit GPU Number
     [Documentation]    Edit a workbench
     [Arguments]     ${workbench_title}    ${gpus}=1
-    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     ${status}=    Run Keyword And Return Status    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    ${status} == ${FALSE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
@@ -476,7 +484,7 @@ Delete Workbench From CLI
 GPU Dropdown Should Be Disabled
     [Documentation]    Checks if the GPU dropdown is not able editable
     [Arguments]     ${workbench_title}
-    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_GPU_MENU_BTN_XP}
     Element Should Be Disabled    ${WORKBENCH_GPU_MENU_BTN_XP}
 

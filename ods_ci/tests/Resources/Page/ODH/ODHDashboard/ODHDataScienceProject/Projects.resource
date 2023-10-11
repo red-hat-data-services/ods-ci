@@ -401,3 +401,13 @@ Create Data Science Project If Not Exists
         Launch Data Science Project Main Page    username=${username}
         Create Data Science Project    title=${PRJ_TITLE}    description=${description}
     END
+
+Clean Project From Workbench Resources
+    [Documentation]    Deletes resources from a test project to free up
+    ...                resources or re-use titles. 
+    ...                AT THE MOMENT, ONLY WORKBENCH AND PVC DELETION ARE IMPLEMENTED
+    [Arguments]    ${workbench_title}    ${project_title}
+    ...    ${pvc_title}=${workbench_title}
+    Delete Workbench From CLI    workbench_title=${workbench_title}
+    ...    project_title=${project_title}
+    Delete PVC From CLI    pvc_title=${pvc_title}    project_title=${project_title}

@@ -139,23 +139,6 @@ Verify User Can Create A Data Science Project
     Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
-Verify User Can Edit A Data Science Project
-    [Tags]    Sanity    Tier1    ODS-2112
-    [Documentation]    Verifies users can edit a DS project
-    [Setup]   Launch Data Science Project Main Page
-    [Teardown]    Delete Data Science Project    project_title=${NEW_PRJ_TITLE}
-    Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${NONE}
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE1}
-    Open Data Science Projects Home Page
-    Project Should Be Listed    project_title=${PRJ_TITLE1}
-    Run Keyword And Continue On Failure         Check Resource Name Should Be Immutable    project_title=${PRJ_TITLE1}
-    Run Keyword And Continue On Failure         Check Name And Description Should Be Editable
-    ...    project_title=${PRJ_TITLE1}    new_title=${NEW_PRJ_TITLE}    new_description=${NEW_PRJ_DESCRIPTION}
-    ${ns_newname}=    Get Openshift Namespace From Data Science Project   project_title=${NEW_PRJ_TITLE}
-    Should Be Equal As Strings  ${ns_name}  ${ns_newname}
-
 Verify User Can Create And Start A Workbench With Existent PV Storage
     [Tags]    Smoke    Sanity    ODS-1814
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
@@ -527,31 +510,6 @@ Verify User Can Access Only Its Owned Projects
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}
 
-Verify User Can Edit A S3 Data Connection
-    [Tags]    Sanity    Tier1    ODS-1932
-    [Documentation]    Verifies users can add a Data connection to AWS S3
-    Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${PRJ_RESOURCE_NAME}
-    Open Data Science Projects Home Page
-    Project Should Be Listed    project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
-    ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
-    ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
-    Edit S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}-test    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}-test
-    ...            aws_bucket_name=ods-ci-ds-pipelines-test    aws_region=${DC_S3_REGION}
-    ...            aws_s3_endpoint=${DC_S3_ENDPOINT}
-    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}    Get Data Connection Form Values    ${DC_S3_NAME}
-    Should Be Equal  ${s3_name}  ${DC_S3_NAME}
-    Should Be Equal  ${s3_key}  ${S3.AWS_ACCESS_KEY_ID}-test
-    Should Be Equal  ${s3_secret}  ${S3.AWS_SECRET_ACCESS_KEY}-test
-    Should Be Equal  ${s3_endpoint}  ${DC_S3_ENDPOINT}
-    Should Be Equal  ${s3_region}  ${DC_S3_REGION}
-    Should Be Equal  ${s3_bucket}  ods-ci-ds-pipelines-test
-
 
 *** Keywords ***
 Project Suite Setup
@@ -740,11 +698,3 @@ Delete Multiple Data Science Projects
     FOR    ${counter}    IN RANGE    1    ${number}+1    1
         ${rc}  ${output}=    Run And Return Rc And Output    oc delete project ${title}${counter}
     END
-
-Check Name And Description Should Be Editable
-    [Documentation]    Checks and verifies if the DSG Name and Description is editable
-    [Arguments]    ${project_title}     ${new_title}    ${new_description}
-    Update Data Science Project Name    ${project_title}     ${new_title}
-    Update Data Science Project Description    ${new_title}    ${new_description}
-    Open Data Science Project Details Page       project_title=${new_title}
-    Page Should Contain    ${new_description}

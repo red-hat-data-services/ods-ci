@@ -55,7 +55,7 @@ ${SCRIPT_TARGET_OPERATOR}=    rhods    # rhods or brew
 ${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 
 
-*** Test Cases ***    
+*** Test Cases ***
 Verify External Dependency Operators Can Be Deployed
     [Tags]    ODS-2326    WatsonX
     Pass Execution    message=Installation done as part of Suite Setup.
@@ -384,6 +384,7 @@ Verify Non Admin Can Serve And Query A Model
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
+    [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
     [Tags]    ODS-2441    WatsonX
     [Setup]    Set Project And Runtime    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
@@ -406,6 +407,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    isvc_names=${models_names}
 
 Verify User Can Serve And Query Flan-t5 Large
+    [Documentation]    Deploys and queries flan-t5-large model
     [Tags]    ODS-2434    WatsonX
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
@@ -767,7 +769,8 @@ Model Response Should Match The Expectation
         ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    \\s+    ${EMPTY}
         ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
         ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
-        ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    [-]?\\d.\\d+[e]?[-]?\\d+    <logprob_removed>
+        ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}
+        ...    [-]?\\d.\\d+[e]?[-]?\\d+    <logprob_removed>
         Log    ${cleaned_response_text}
         ${cleaned_exp_response_text}=    Replace String Using Regexp
         ...    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][streamed_response_text]

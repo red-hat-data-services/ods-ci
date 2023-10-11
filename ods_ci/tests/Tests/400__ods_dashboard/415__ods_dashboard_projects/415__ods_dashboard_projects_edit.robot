@@ -70,7 +70,7 @@ Verify User Can Edit A Workbench
     Workbench With Description Should Be Listed      workbench_title=${WORKBENCH_TITLE_UPDATED}
     ...                                              workbench_description=${WORKBENCH_DESC_UPDATED}
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE_UPDATED}      status=${WORKBENCH_STATUS_RUNNING}
-    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE_UPDATED}
     ...    project_title=${PRJ_TITLE}    pvc_title=${PV_BASENAME}
 
 Verify User Can Edit A S3 Data Connection

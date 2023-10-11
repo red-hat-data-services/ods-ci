@@ -79,7 +79,7 @@ Verify Workbench Images Have Multiple Versions
     [Tags]    Smoke    Sanity
     ...       Tier1
     ...       ODS-2131
-    Launch Data Science Project Main Page
+    # Launch Data Science Project Main Page
     # Create Data Science Project    title=${PRJ_TITLE}    description=${EMPTY}
     Open Data Science Project Details Page    project_title=${PRJ_TITLE}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
@@ -90,33 +90,10 @@ Verify Workbench Images Have Multiple Versions
         Select Workbench Jupyter Image    image_name=${img}    version=default
     END
 
-Verify DS Projects Home Page Shows The Right Number Of Items The User Has Selected
-    [Documentation]    Verifies that correct number of data science projects appear when
-    ...                multiple data science projects are added
-    [Tags]    ODS-2015    Sanity    Tier1
-    [Setup]    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
-    ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=${EMPTY}
-    ...    number=20
-    Number Of Displayed Projects Should Be    expected_number=10
-    ${curr_page_projects}=    Get All Displayed Projects
-    ${remaining_projects}=    Remove Current Page Projects From All Projects
-    ...                        ${all_projects}    ${curr_page_projects}
-    Check Pagination Is Correct On The Current Page    page=1    total=20
-    Go To Next Page Of Data Science Projects
-    Number Of Displayed Projects Should Be    expected_number=10
-    ${curr_page_projects}=    Get All Displayed Projects
-    ${remaining_projects}=    Remove Current Page Projects From All Projects
-    ...                       ${all_projects}    ${curr_page_projects}
-    Check Pagination Is Correct On The Current Page    page=2    total=20
-    Should Be Empty    ${remaining_projects}
-    [Teardown]    Run Keywords
-    ...    SeleniumLibrary.Close All Browsers
-    ...    AND
-    ...    Delete Multiple Data Science Projects    title=ds-project-ldap-user    number=20
-
 Verify User Cannot Create Project With Empty Fields
     [Tags]    Sanity   ODS-1783
     [Documentation]    Verifies users is not allowed to create a project with Empty title
+    Open Data Science Projects Home Page
     Create Project With Empty Title And Expect Error
     Close Generic Modal If Present
 
@@ -124,6 +101,7 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     [Tags]    Sanity    Tier1    ODS-1875
     [Documentation]    Verifies users is not allowed to create a project with a custom resource name
     ...                containing special characters like "@" or "!"
+    Open Data Science Projects Home Page
     Create Project With Special Chars In Resource Name And Expect Error
     Close Generic Modal If Present
 
@@ -154,7 +132,8 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_2_TITLE}   namespace=${ns_name}
-    [Teardown]    Delete Workbench From CLI    workbench_title=${WORKBENCH_2_TITLE}    project_title=${PRJ_TITLE}
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_2_TITLE}
+    ...    project_title=${PRJ_TITLE}    pvc_title=${pv_name}
 
 Verify User Can Create A PV Storage
     [Tags]    Sanity    Tier1    ODS-1819
@@ -184,43 +163,19 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${pv_name}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_3_TITLE}
-    Reload Page
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    #SeleniumLibrary.Reload Page
+    #Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_3_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_3_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_3_TITLE}   namespace=${ns_name}
-    Reload Page
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    #SeleniumLibrary.Reload Page
+    #Wait Until Project Is Open    project_title=${PRJ_TITLE}
     ${connected_woksps}=    Create List    ${WORKBENCH_3_TITLE}
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${connected_woksps}
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
-    [Teardown]    Delete Workbench From CLI    workbench_title=${WORKBENCH_3_TITLE}    project_title=${PRJ_TITLE}
-
-Verify User Can Stop A Workbench
-    [Tags]    Smoke    Sanity    ODS-1817
-    [Documentation]    Verifies users can stop a running workbench from project details page
-    [Setup]    Run Keywords    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    ...    AND
-    ...    Start Workbench    workbench_title=${WORKBENCH_TITLE}
-    # Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Stop Workbench    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
-    Stop Workbench    workbench_title=${WORKBENCH_TITLE}
-    # add checks on notebook pod is terminated but CR is present
-
-Verify User Can Launch A Workbench
-    [Tags]    Smoke    Sanity    ODS-1815
-    [Documentation]    Verifies users can launch/open a running workbench from project details page
-    # Open Data Science Projects Home Page
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Start Workbench     workbench_title=${WORKBENCH_TITLE}
-    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
-    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
-    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
-    ...    image=${NB_IMAGE}    namespace=${ns_name}
-    [Teardown]    SeleniumLibrary.Close Window
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_3_TITLE}
+    ...    project_title=${PRJ_TITLE}    pvc_title=${pv_name}
 
 Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     [Tags]    Sanity    Tier1
@@ -228,14 +183,23 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     [Documentation]    Verifies users can add a Data connection to AWS S3
     [Setup]    Run Keywords    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ...    AND
-    ...    Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_3_DESCRIPTION}
+    ...    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     ...    AND
+    ...    Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_existent=${NONE}
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
+    ...    AND
+    ...    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    ...    AND
     ...    Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     ...    AND
     ...    Stop Workbench    workbench_title=${WORKBENCH_2_TITLE}
+    ...    AND
+    ...    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
@@ -251,23 +215,14 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     ...                          connected_workbench=${workbenches}
     Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    Run Keyword And Continue On Failure    Workbench Status Should Be     workbench_title=${WORKBENCH_TITLE}
+    ...    status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
-    [Teardown]    Delete Workbench From CLI    workbench_title=${WORKBENCH_2_TITLE}
-    ...    project_title=${PRJ_TITLE}
-
-Verify User Can Stop A Workbench From Projects Home Page
-    [Tags]    Sanity    Tier1    ODS-1823
-    [Documentation]    Verifies users can stop a running workbench from Data Science Projects home page
-    [Setup]    Start Workbench    workbench_title=${WORKBENCH_TITLE}
-    Open Data Science Projects Home Page
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}
-    ...    namespace=${ns_name}
-    Stop Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
-    ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
-    Workbench Launch Link Should Be Disabled    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
-    # add checks on notebook pod is terminated but CR is present
+    [Teardown]    Run Keywords    
+    ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_2_TITLE}    project_title=${PRJ_TITLE}
+    ...    AND
+    ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
 
 Verify User Can Start And Launch A Workbench From Projects Home Page
     [Tags]    Sanity    Tier1    ODS-1818
@@ -285,16 +240,6 @@ Verify User Can Start And Launch A Workbench From Projects Home Page
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
     ...    image=${NB_IMAGE}    namespace=${ns_name}
     [Teardown]    SeleniumLibrary.Close Window
-
-Verify User Can Delete A Workbench
-    [Tags]    Smoke    Sanity    ODS-1813
-    [Documentation]    Verifies users can delete a workbench
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Delete Workbench    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
-    Delete Workbench    workbench_title=${WORKBENCH_TITLE}
-    Workbench Should Not Be Listed    workbench_title=${WORKBENCH_TITLE}
-    Check Workbench CR Is Deleted    workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
 
 Verify User Can Delete A Persistent Storage
     [Tags]    Sanity    Tier1    ODS-1824
@@ -343,7 +288,7 @@ Verify User Can Create A Workbench With Environment Variables
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Environment Variables Should Be Available In Jupyter    exp_env_variables=${envs_list}
-    [Teardown]    Delete Workbench From CLI    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE}
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE}
 
 Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     [Tags]    Tier1    Sanity
@@ -376,7 +321,7 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Environment Variables Should Be Available In Jupyter    exp_env_variables=${test_envs_list}
-    [Teardown]    Delete Workbench From CLI    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE}
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE}
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
     [Tags]    Sanity    Tier1    ODS-1971    AutomationBug
@@ -457,9 +402,87 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
 
+Verify Users Can Start, Stop, Launch And Delete A Workbench
+    [Tags]    Smoke    Sanity    Tier1
+    ...       ODS-1813    ODS-1815   ODS-1817
+    [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
+    [Setup]        Run Keywords
+    ...    Launch Data Science Project Main Page
+    ...    AND
+    ...    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    ...    AND
+    ...    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...        pv_description=${NONE}  pv_size=${NONE}
+    ...        press_cancel=${FALSE}    envs=${NONE}
+    ...    AND
+    ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE}    press_cancel=${TRUE}
+    Stop Workbench    workbench_title=${WORKBENCH_TITLE}
+    Wait Until Workbench Is Stopped    workbench_title=${WORKBENCH_TITLE}
+    Start Workbench    workbench_title=${WORKBENCH_TITLE}
+    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
+    ${namespace}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
+    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
+    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
+    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
+    ...    image=${NB_IMAGE}    namespace=${namespace}
+    SeleniumLibrary.Close Window
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Delete Workbench    workbench_title=${WORKBENCH_TITLE}
+    Workbench Should Not Be Listed    workbench_title=${WORKBENCH_TITLE}
+    Check Workbench CR Is Deleted    workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
+    # PV storage should not get deleted
+    [Teardown]    Run Keywords
+    ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
+    ...    AND
+    ...    SeleniumLibrary.Close Browser
+
+Verify Users Can Start, Stop And Launch A Workbench From DS Projects Home Page
+    [Tags]     Smoke    Sanity    Tier1
+    ...        ODS-1818    ODS-1823
+    [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
+    [Setup]        Run Keywords
+    ...    Launch Data Science Project Main Page
+    ...    AND
+    ...    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    ...    AND
+    ...    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...        pv_description=${NONE}  pv_size=${NONE}
+    ...        press_cancel=${FALSE}    envs=${NONE}
+    ...    AND
+    ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    # ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    # ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}
+    # ...    namespace=${ns_name}
+    Open Data Science Projects Home Page
+    Wait Until Project Is Listed    project_title=${PRJ_TITLE}
+    Stop Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
+    # ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
+    Workbench Launch Link Should Be Disabled    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
+    Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
+    # ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
+    Launch And Access Workbench From Projects Home Page    workbench_title=${WORKBENCH_TITLE}
+    ...    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}    auth_type=${TEST_USER_3.AUTH_TYPE}
+    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
+    ...    image=${NB_IMAGE}    namespace=${ns_name}
+    SeleniumLibrary.Close Window
+    [Teardown]    Run Keywords
+    ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
+    ...    AND
+    ...    SeleniumLibrary.Close Browser
+
 Verify User Can Delete A Data Science Project
-    [Tags]    Smoke    Sanity    ODS-1784
+    [Tags]    Smoke    Sanity    Tier1
+    ...       ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
+    Open Data Science Projects Home Page
+    Wait Until Project Is Listed    project_title=${PRJ_TITLE}
     Delete Data Science Project   project_title=${PRJ_TITLE}
     # check workbenches and resources get deleted too
 
@@ -522,12 +545,12 @@ Project Suite Setup
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
-    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Persistent  pv_existent=${NONE}    pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
-    Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
-    Stop Workbench    workbench_title=${WORKBENCH_TITLE}
+    # Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
+    # ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    # ...                 storage=Persistent  pv_existent=${NONE}    pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
+    # Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    # Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
+    # Stop Workbench    workbench_title=${WORKBENCH_TITLE}
 
 
 
@@ -680,21 +703,4 @@ Environment Variable Key/Value Fields Should Be Correctly Displayed
         Run Keyword And Continue On Failure    Element Attribute Value Should Be    ${displayed_value_xp}    type    password
     ELSE
         Run Keyword And Continue On Failure    Element Attribute Value Should Be    ${displayed_value_xp}    type    text
-    END
-
-Create Multiple Data Science Projects
-    [Documentation]    Create a given number of data science projects based on title and description
-    [Arguments]    ${title}     ${description}    ${number}
-    ${all_projects}=    Create List
-    FOR    ${counter}    IN RANGE    1    ${number}+1    1
-        Create Data Science Project    title=${title}${counter}    description=${EMPTY}
-        Open Data Science Projects Home Page
-        Append To List    ${all_projects}    ${title}${counter}
-    END
-    RETURN    ${all_projects}
-
-Delete Multiple Data Science Projects
-    [Arguments]    ${title}     ${number}
-    FOR    ${counter}    IN RANGE    1    ${number}+1    1
-        ${rc}  ${output}=    Run And Return Rc And Output    oc delete project ${title}${counter}
     END

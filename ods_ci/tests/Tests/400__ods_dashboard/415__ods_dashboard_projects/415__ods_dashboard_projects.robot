@@ -137,7 +137,9 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
 
 Verify User Can Create A PV Storage
     [Tags]    Sanity    Tier1    ODS-1819
+    ...       AutomationBug
     [Documentation]    Verifies users can Create PersistentVolume Storage
+    ...                THIS MUST BE UPDATED TO CHECK WORKBENCH GETS RESTARTED LIKE FOR ODS-1825
     ${pv_name}=    Set Variable    ${PV_BASENAME}-A
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -330,8 +332,16 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop
     ...                1. click "File" > "Log Out" to actually close the login session
     ...                2. click "File" > "Hub Control Panel" to return to project details page
     ...                AutomationBug: JupyterLibrary's log out keyword seems to be broken
-    [Setup]    Start Workbench    workbench_title=${WORKBENCH_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    [Setup]    Run Keywords
+    ...    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    ...    AND
+    ...    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...        pv_description=${NONE}  pv_size=${NONE}
+    ...        press_cancel=${FALSE}    envs=${NONE}
+    ...    AND
+    ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
     Run Keyword And Continue On Failure
     ...    Log In Should Be Requested
@@ -358,25 +368,25 @@ Verify Event Log Is Accessible While Starting A Workbench
     [Tags]    Tier1    Sanity
     ...       ODS-1970
     [Documentation]    Verify user can access event log while starting a workbench
-    [Setup]    Stop Workbench    workbench_title=${WORKBENCH_TITLE}
-    [Teardown]    Stop Workbench    workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    # Create Workbench    workbench_title=${WORKBENCH_6_TITLE}  workbench_description=${WORKBENCH_6_DESCRIPTION}
-    # ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    # ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
-    # ...                 pv_description=${NONE}  pv_size=${NONE}
-    # ...                 press_cancel=${FALSE}    envs=${NONE}
-    Workbench Status Should Be    workbench_title=${WORKBENCH_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_6_TITLE}  workbench_description=${WORKBENCH_6_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...                 pv_description=${NONE}  pv_size=${NONE}
+    ...                 press_cancel=${FALSE}    envs=${NONE}
+    Workbench Status Should Be    workbench_title=${WORKBENCH_6_TITLE}
     ...    status=${WORKBENCH_STATUS_STARTING}
-    Open Notebook Event Log    workbench_title=${WORKBENCH_TITLE}
+    Open Notebook Event Log    workbench_title=${WORKBENCH_6_TITLE}
     Page Should Contain Event Log
-    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_6_TITLE}
     # In 1.31 the progress does not appear to be displayed correctly, instead it moves from 0% to 100% directly
     # Needs more investigation
     Run Keyword And Warn On Failure    Page Should Contain Event Log    expected_progress_text=Pod assigned
     ...    expected_result_text=Success
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_6_TITLE}
+    ...    project_title=${PRJ_TITLE}
 
 Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     [Tags]    Tier1    Sanity

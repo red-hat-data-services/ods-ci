@@ -308,6 +308,7 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Environment Variables Should Be Available In Jupyter    exp_env_variables=${test_envs_list}
     [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE}
+    ...    pvc_title=${WORKBENCH_4_TITLE}-PV
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
     [Tags]    Sanity    Tier1    ODS-1971    AutomationBug
@@ -417,17 +418,16 @@ Verify Users Can Start, Stop, Launch And Delete A Workbench
     Wait Until Workbench Is Stopped    workbench_title=${WORKBENCH_TITLE}
     Start Workbench    workbench_title=${WORKBENCH_TITLE}
     Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
-    ${namespace}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
-    ...    image=${NB_IMAGE}    namespace=${namespace}
-    SeleniumLibrary.Close Window
+    ...    image=${NB_IMAGE}    project_title=${PRJ_TITLE}
+    SeleniumLibrary.Switch Window    title=Red Hat OpenShift Data Science
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Delete Workbench    workbench_title=${WORKBENCH_TITLE}
     Workbench Should Not Be Listed    workbench_title=${WORKBENCH_TITLE}
-    Check Workbench CR Is Deleted    workbench_title=${WORKBENCH_TITLE}   namespace=${ns_name}
+    Check Workbench CR Is Deleted    workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
     # PV storage should not get deleted
     [Teardown]    Run Keywords
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
@@ -464,8 +464,7 @@ Verify Users Can Start, Stop And Launch A Workbench From DS Projects Home Page
     ...    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}    auth_type=${TEST_USER_3.AUTH_TYPE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
-    ...    image=${NB_IMAGE}    namespace=${ns_name}
-    SeleniumLibrary.Close Window
+    ...    image=${NB_IMAGE}    project_title=${PRJ_TITLE}
     [Teardown]    Run Keywords
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
     ...    AND
@@ -595,7 +594,8 @@ Check Corresponding Notebook CR Exists
 
 Check Workbench CR Is Deleted
     [Documentation]    Checks if when a workbench is deleted its Notebook CustomResource gets deleted too
-    [Arguments]    ${workbench_title}   ${namespace}    ${timeout}=10s
+    [Arguments]    ${workbench_title}   ${project_title}    ${timeout}=10s
+    ${namespace}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     ${status}=      Run Keyword And Return Status    Check Corresponding Notebook CR Exists
     ...    workbench_title=${workbench_title}   namespace=${namespace}
     IF    ${status} == ${TRUE}

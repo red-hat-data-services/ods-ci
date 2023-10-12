@@ -373,7 +373,8 @@ Edit Workbench
 
 Check Launched Workbench Is The Correct One
     [Documentation]    Checks if the launched workbench is the expected one
-    [Arguments]     ${workbench_title}      ${image}    ${namespace}
+    [Arguments]     ${workbench_title}    ${image}    ${project_title}
+    ${namespace}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}  namespace=${namespace}
     ${current_url}=     Get Location
     Location Should Contain    ${cr_name}

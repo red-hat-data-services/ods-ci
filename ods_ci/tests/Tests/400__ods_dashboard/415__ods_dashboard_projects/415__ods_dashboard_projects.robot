@@ -139,7 +139,8 @@ Verify User Can Create A PV Storage
     [Tags]    Sanity    Tier1    ODS-1819
     ...       AutomationBug
     [Documentation]    Verifies users can Create PersistentVolume Storage
-    ...                THIS MUST BE UPDATED TO CHECK WORKBENCH GETS RESTARTED LIKE FOR ODS-1825
+    ...                THIS MUST BE UPDATED TO CHECK WORKBENCH GETS RESTARTED LIKE FOR ODS-1825.
+    ...                MAIN GOAL OF THE TEST CASE IS COVERED BY ODS-1814
     ${pv_name}=    Set Variable    ${PV_BASENAME}-A
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -199,7 +200,7 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...    AND
     ...    Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     ...    AND
-    ...    Stop Workbench    workbench_title=${WORKBENCH_2_TITLE}
+    ...    Stop Workbench    workbench_title=${WORKBENCH_2_TITLE}    from_running=${FALSE}
     ...    AND
     ...    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -225,23 +226,6 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_2_TITLE}    project_title=${PRJ_TITLE}
     ...    AND
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
-
-Verify User Can Start And Launch A Workbench From Projects Home Page
-    [Tags]    Sanity    Tier1    ODS-1818
-    [Documentation]    Verifies users can launch/open a running workbench from Data Science Projects home page
-    [Setup]    Stop Workbench    workbench_title=${WORKBENCH_TITLE}
-    Open Data Science Projects Home Page
-    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}
-    ...    namespace=${ns_name}
-    Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
-    ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
-    Launch And Access Workbench From Projects Home Page    workbench_title=${WORKBENCH_TITLE}
-    ...    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}
-    ...    password=${TEST_USER_3.PASSWORD}    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
-    ...    image=${NB_IMAGE}    namespace=${ns_name}
-    [Teardown]    SeleniumLibrary.Close Window
 
 Verify User Can Delete A Persistent Storage
     [Tags]    Sanity    Tier1    ODS-1824

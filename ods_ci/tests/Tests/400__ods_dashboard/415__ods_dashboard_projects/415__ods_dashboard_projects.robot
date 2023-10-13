@@ -251,8 +251,7 @@ Verify User Can Delete A Data Connection
     Delete Data Connection    name=${DC_3_S3_NAME}   press_cancel=${True}
     Delete Data Connection    name=${DC_3_S3_NAME}
     Data Connection Should Not Be Listed    name=${DC_3_S3_NAME}
-    Sleep    3s    reason=It happens that the secrets takes few moments to be removed.
-    Check Data Connection Secret Is Deleted    dc_name=${DC_S3_NAME}    namespace=${ns_name}
+    Check Data Connection Secret Is Deleted    dc_name=${DC_3_S3_NAME}    namespace=${ns_name}
 
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864

@@ -10,7 +10,6 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
-#Test Teardown      Close All Browsers
 
 
 *** Variables ***
@@ -535,26 +534,18 @@ Project Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
-    ## RHOSi Setup
+    RHOSi Setup
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
-    # Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
-    # ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    # ...                 storage=Persistent  pv_existent=${NONE}    pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    # Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
-    # Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
-    # Stop Workbench    workbench_title=${WORKBENCH_TITLE}
-
-
 
 Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
-    Close All Browsers
+    SeleniumLibrary.Close All Browsers
     # Delete All Data Science Projects From CLI
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
-    ## RHOSi Teardown
+    RHOSi Teardown
 
 Set Variables For User Access Test
     [Documentation]    Creates titles for testing projects used in basic access testing

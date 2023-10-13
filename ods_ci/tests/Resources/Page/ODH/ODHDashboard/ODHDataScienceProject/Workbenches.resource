@@ -485,7 +485,18 @@ Delete Workbench From CLI
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
     ...    workbench_title=${workbench_title}  namespace=${ns_name}
+    IF    "${cr_name}" == "${EMPTY}"
+        Log    msg=There is probably no Workbench with Diplay Name equal to ${workbench_title}
+        ...    level=WARN
+    ELSE
     Oc Delete    kind=Notebook  name=${cr_name}  namespace=${ns_name}
+    WHILE    ${TRUE}
+        ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
+            ...    workbench_title=${workbench_title}  namespace=${ns_name}
+        IF    "${cr_name}" == "${EMPTY}"    BREAK
+            Sleep    5s    reason=let's not overload the API
+        END
+    END
 
 GPU Dropdown Should Be Disabled
     [Documentation]    Checks if the GPU dropdown is not able editable

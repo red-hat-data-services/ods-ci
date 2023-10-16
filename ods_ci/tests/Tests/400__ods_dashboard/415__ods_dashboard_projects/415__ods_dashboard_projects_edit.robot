@@ -27,6 +27,11 @@ ${WORKBENCH_DESC_UPDATED}=     ${WORKBENCH_DESCRIPTION} Updated
 ${PV_BASENAME}=                ods-ci-pv
 ${PV_DESCRIPTION}=             ods-ci-pv is a PV created to test DS Projects feature
 ${PV_SIZE}=                    2    # PV sizes are in GB
+${DC_S3_NAME}=                 ods-ci-dc
+${DC_S3_AWS_SECRET_ACCESS_KEY}=    custom dummy secret access key
+${DC_S3_AWS_ACCESS_KEY}=    custom dummy access key id
+${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
+${DC_S3_REGION}=    ods-ci-region
 
 
 *** Test Cases ***
@@ -76,17 +81,18 @@ Verify User Can Edit A S3 Data Connection
     ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
-    Edit S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}-test
+    Edit S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}    new_dc_name=${DC_S3_NAME}-test
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}-test    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}-test
     ...            aws_bucket_name=ods-ci-ds-pipelines-test    aws_region=${DC_S3_REGION}
     ...            aws_s3_endpoint=${DC_S3_ENDPOINT}
-    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}    Get Data Connection Form Values    ${DC_S3_NAME}
+    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}    Get Data Connection Form Values    ${DC_S3_NAME}-test
     Should Be Equal  ${s3_name}  ${DC_S3_NAME}-test
     Should Be Equal  ${s3_key}  ${S3.AWS_ACCESS_KEY_ID}-test
     Should Be Equal  ${s3_secret}  ${S3.AWS_SECRET_ACCESS_KEY}-test
     Should Be Equal  ${s3_endpoint}  ${DC_S3_ENDPOINT}
     Should Be Equal  ${s3_region}  ${DC_S3_REGION}
     Should Be Equal  ${s3_bucket}  ods-ci-ds-pipelines-test
+    SeleniumLibrary.Click Button    ${GENERIC_CANCEL_BTN_XP}
     Delete Data Connection    name=${DC_S3_NAME}-test
 
 

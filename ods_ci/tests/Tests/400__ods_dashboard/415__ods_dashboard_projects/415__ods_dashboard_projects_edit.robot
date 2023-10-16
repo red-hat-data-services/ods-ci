@@ -95,11 +95,12 @@ Project Suite Setup
     [Documentation]    Suite setup steps for testing DS Projects. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
+    Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
-    RHOSi Setup
 
 Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes

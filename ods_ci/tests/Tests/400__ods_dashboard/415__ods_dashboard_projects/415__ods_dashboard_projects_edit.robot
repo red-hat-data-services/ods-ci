@@ -99,6 +99,7 @@ Project Suite Setup
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
+    Open Data Science Projects Home Page
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
 

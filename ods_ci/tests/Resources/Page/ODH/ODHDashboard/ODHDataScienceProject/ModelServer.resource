@@ -87,7 +87,7 @@ Set Server Size
     ...    Can be "Small", "Medium", "Large", "Custom"
     ...    If "Custom", need CPU request/limit and Memory request/limit
     [Arguments]    ${size}
-    Open Model server size Options Menu  # robocop:disable
+    Open Model server size Options Menu
     # Does Not Work for "Custom"
     # //li/button[.="Custom"]
     Click Element    xpath://li//span[.="${size}"]/../../button

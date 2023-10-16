@@ -3,6 +3,7 @@ Documentation      Suite to test Data Science Projects (a.k.a DSG) feature
 Library            SeleniumLibrary
 Library            OpenShiftLibrary
 Resource           ../../../Resources/OCP.resource
+Resource           ../../Common.robot
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource

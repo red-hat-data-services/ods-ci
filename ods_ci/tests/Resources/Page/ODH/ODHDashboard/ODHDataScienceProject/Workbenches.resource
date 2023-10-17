@@ -14,7 +14,6 @@ ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
 ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//div[@id="workbench-image-stream-selection"]/button    # robocop: disable
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//div[@id="workbench-image-stream-selection"]//li//div
-# ${WORKBENCH_IMAGE_ITEM_SPAN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li//span
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button  # Removing the attribute in case it changes like it did for the image dropdown
 ${WORKBENCH_SIZE_SIDE_MENU_BTN}=           xpath=//nav[@aria-label="Jump to section"]//span[text()="Deployment size"]
 ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
@@ -472,17 +471,17 @@ Select Workbench Number Of GPUs
         Wait Until Page Contains Element    xpath=//div[@class and text()=${gpu_type}]
         Click Element    xpath=//div[@class and text()=${gpu_type}]
         # Select number of GPU units
-        ${actual_gpus} =    Get Value   ${WORKBENCH_ACCELERATOR_INPUT_XPATH}
-        ${actual_gpus} =    Convert To Integer    ${actual_gpus}
-        ${gpus} =    Convert To Integer    ${gpus}
+        ${actual_gpus}=    Get Value   ${WORKBENCH_ACCELERATOR_INPUT_XPATH}
+        ${actual_gpus}=    Convert To Integer    ${actual_gpus}
+        ${gpus}=    Convert To Integer    ${gpus}
         WHILE  ${actual_gpus} != ${gpus}
             IF  ${actual_gpus} < ${gpus}
                 Click Element    ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}
             ELSE
                 Click Element    ${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}
             END
-            ${actual_gpus} =    Get Value   ${WORKBENCH_ACCELERATOR_INPUT_XPATH}
-            ${actual_gpus} =    Convert To Integer    ${actual_gpus}
+            ${actual_gpus}=    Get Value   ${WORKBENCH_ACCELERATOR_INPUT_XPATH}
+            ${actual_gpus}=    Convert To Integer    ${actual_gpus}
         END
     END
 

@@ -136,7 +136,7 @@ Verify Displayed GPU Count
     END
     Click Element    ${SERVING_MODEL_SERVERS_SIDE_MENU}
     Sleep  5s      reason=wait for ten second until operator goes into init state
-    ${current_accs} =  Get Text  xpath://span[text()="${server_name}"]/../../../following-sibling::tr//td[@data-label]/div/dl/div[4]/dd/div
+    ${current_accs}=  Get Text  xpath://span[text()="${server_name}"]/../../../following-sibling::tr//td[@data-label]/div/dl/div[4]/dd/div
     Should Match  ${current_accs}  ${no_gpus}
 
 Set Model Server Runtime

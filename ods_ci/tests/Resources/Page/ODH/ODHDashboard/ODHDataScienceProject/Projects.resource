@@ -35,12 +35,15 @@ Is Data Science Projects Page Open
 Open Data Science Project Details Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     [Arguments]     ${project_title}
-    ${is_open}=    Is Data Science Projects Page Open
-    IF    ${is_open} == ${FALSE}
-        Open Data Science Projects Home Page
+    ${is_project_open}=    Is Data Science Project Details Page Open    project_title=${project_title}
+    IF    ${is_project_open} == ${FALSE}
+        ${is_open}=    Is Data Science Projects Page Open
+        IF    ${is_open} == ${FALSE}
+            Open Data Science Projects Home Page
+        END
+        Click Link    ${project_title}
+        Wait Until Project Is Open    project_title=${project_title}
     END
-    Click Link    ${project_title}
-    Wait Until Project Is Open    project_title=${project_title}
 
 Delete Data Science Project
     [Documentation]    Deletes a given DS project. It allows cancelling the operation
@@ -70,6 +73,12 @@ Project Should Not Exist In Openshift
     IF    "${k8s_name}" != "${EMPTY}"
         Fail   msg=The project ${project_title} exists!
     END
+
+Is Data Science Project Details Page Open
+    [Arguments]     ${project_title}
+    ${page_open}=   Run Keyword And Return Status
+    ...    SeleniumLibrary.Page Should Contain Element     xpath=//h1[contains(text(),"${project_title}")]
+    [Return]    ${page_open}   
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
@@ -149,18 +158,23 @@ Delete Data Science Projects From CLI
     ...                 It expects to receive a list of project (i.e,${ocp_projects}) as argument
     [Arguments]     ${ocp_projects}
     FOR   ${displayed_name}    IN  @{ocp_projects}
-        ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
-        ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
-        IF    "${project_k8s_name}" == "${EMPTY}"
-            Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}
-            Continue For Loop
-        ELSE
-            Oc Delete    kind=Project   name=${project_k8s_name}
-            WHILE    ${TRUE}
-                ${exists} =    Run And Return Rc    oc get project ${project_k8s_name}
-                IF    "${exists}" == "1"    BREAK
-                Sleep    5s    reason=let's not overload the API
-            END
+        Delete Data Science Project From CLI    displayed_name=${displayed_name}
+    END
+
+Delete Data Science Project From CLI
+    [Documentation]    Deletes a single DS project usig CLI command
+    [Arguments]     ${displayed_name}
+    ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
+    ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
+    IF    "${project_k8s_name}" == "${EMPTY}"
+        Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}
+        ...    level=WARN
+    ELSE
+        Oc Delete    kind=Project   name=${project_k8s_name}
+        WHILE    ${TRUE}
+            ${exists} =    Run And Return Rc    oc get project ${project_k8s_name}
+            IF    "${exists}" == "1"    BREAK
+            Sleep    5s    reason=let's not overload the API
         END
     END
 
@@ -371,3 +385,14 @@ Move To Tab
     [Documentation]    Open one of the tabs in a DS Project details page (e.g., Permissions)
     [Arguments]    ${tab_title}
     Click Element    xpath://span[text()="${tab_title}"]
+
+Create Data Science Project If Not Exists
+    [Documentation]    If the given ${project_title} DS Project does not exist, it creates one.
+    ...                Useful as test setup.
+    [Arguments]    ${project_title}    ${username}    ${description}=${EMPTY}
+    ${rc}    ${resource_name}=    Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name' | tr -d '"'   # robocop: disable
+    IF    "${resource_name}" == "${EMPTY}"
+        Log    msg=There is no DS Projects with Diplay Name equal to ${project_title}. Creating it now.
+        Launch Data Science Project Main Page    username=${username}
+        Create Data Science Project    title=${PRJ_TITLE}    description=${description}
+    END

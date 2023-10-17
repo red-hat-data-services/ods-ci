@@ -223,6 +223,13 @@ Workbench Should Be Listed
     ...    Wait Until Page Contains Element
     ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/*[div[text()="${workbench_title}"]]
 
+Workbench With Description Should Be Listed
+    [Documentation]    Checks a workbench with particular name and description is listed in the DS Project details page
+    [Arguments]     ${workbench_title}  ${workbench_description}
+    Run keyword And Continue On Failure
+    ...    Wait Until Page Contains Element
+    ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//div[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
+
 Workbench Should Not Be Listed
     [Documentation]    Checks a workbench is not listed in the DS Project details page
     [Arguments]     ${workbench_title}
@@ -350,8 +357,14 @@ Click Action From Actions Menu
 Delete Workbench
     [Documentation]    Deletes a workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
-    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
+    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
     Handle Deletion Confirmation Modal    item_title=${workbench_title}    item_type=workbench    press_cancel=${press_cancel}
+
+Edit Workbench
+    [Documentation]    Edits a workbench
+    [Arguments]     ${workbench_title}
+    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
 
 Check Launched Workbench Is The Correct One
     [Documentation]    Checks if the launched workbench is the expected one
@@ -450,7 +463,7 @@ Select Workbench Number Of GPUs
 Edit GPU Number
     [Documentation]    Edit a workbench
     [Arguments]     ${workbench_title}    ${gpus}=1
-    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     ${status}=    Run Keyword And Return Status    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    ${status} == ${FALSE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
@@ -471,7 +484,7 @@ Delete Workbench From CLI
 GPU Dropdown Should Be Disabled
     [Documentation]    Checks if the GPU dropdown is not able editable
     [Arguments]     ${workbench_title}
-    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_GPU_MENU_BTN_XP}
     Element Should Be Disabled    ${WORKBENCH_GPU_MENU_BTN_XP}
 

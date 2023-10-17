@@ -38,7 +38,7 @@ Edit S3 Data Connection
     [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
-    Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
+    Workbenches.Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
     Fill Data Connection Form    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${S3_DC_EDIT_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
@@ -86,7 +86,7 @@ Get Openshift Secret From Data Connection
 Delete Data Connection
     [Documentation]    Deletes a Data Connection from DS Project details page
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    Click Action From Actions Menu    item_title=${name}    item_type=data connection    action=Delete
+    Workbenches.Click Action From Actions Menu    item_title=${name}    item_type=data connection    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=data connection    press_cancel=${press_cancel}
 
 Fill Data Connection Form
@@ -126,7 +126,7 @@ Fill Data Connection Form
 
 Get Data Connection Form Values
     [Arguments]    ${dc_name}
-    Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
+    Workbenches.Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
     Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
     ${s3_name}   get element attribute    ${S3_NAME_DC_INPUT_XP}      value
     ${s3_key}   get element attribute    ${S3_KEY_DC_INPUT_XP}      value

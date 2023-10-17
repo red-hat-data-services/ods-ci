@@ -10,19 +10,22 @@ Resource            ODHDataScienceProject/Pipelines.resource
 
 
 *** Variables ***
-${DATA_SCIENCE_PIPELINES_APPLICATION_YAML}=    ods_ci/tests/Resources/Files/data-science-pipelines-sample.yaml
+${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}=    ods_ci/tests/Resources/Files
 ${PIPELINES_IMPORT_BTN_FORM_XP}=    xpath://footer/button[text()="Import pipeline"]
 ${PIPELINE_NAME_INPUT_XP}=    id:pipeline-name
 ${PIPELINE_DESC_INPUT_XP}=    id:pipeline-description
 
 *** Keywords ***
+# robocop: disable:line-too-long
 Install DataSciencePipelinesApplication CR
     [Documentation]    Install and verifies that DataSciencePipelinesApplication CRD is installed and working
-    [Arguments]     ${project}
+    [Arguments]     ${project}    ${dsp_file}=data-science-pipelines-sample.yaml    ${assert_install}=True
     Log    ${project}
-    Oc Apply    kind=DataSciencePipelinesApplication    src=${DATA_SCIENCE_PIPELINES_APPLICATION_YAML}     namespace=${project}    # robocop: disable:line-too-long
-    ${generation_value}    Run    oc get datasciencepipelinesapplications -n ${project} -o json | jq '.items[0].metadata.generation'    # robocop: disable:line-too-long
-    Should Be True    ${generation_value} == 1    DataSciencePipelinesApplication created
+    Oc Apply    kind=DataSciencePipelinesApplication    src=${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}/${dsp_file}    namespace=${project}
+    IF    ${assert_install}==True
+        ${generation_value}    Run    oc get datasciencepipelinesapplications -n ${project} -o json | jq '.items[0].metadata.generation'
+        Should Be True    ${generation_value} == 1    DataSciencePipelinesApplication created
+    END
 
 Fill In Pipeline Import Form
     [Documentation]    Compiles the form to create a pipeline.

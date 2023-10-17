@@ -40,6 +40,34 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     Should Start With    ${url}    https
     Remove Pipeline Project    project-redirect-http
 
+Verify DSPO Operator Reconciliation Retry
+    [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
+    [Tags]      Sanity    Tier1
+    ${local_project_name} =    Set Variable    recon-test
+    ${stopped} =    Set Variable    ${False}
+    # limit is 180 because the reconciliation run every 2 minutes
+    ${timeout} =    Set Variable    180
+    New Project    ${local_project_name}
+    Install DataSciencePipelinesApplication CR    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
+    # wait the pod be ready
+    Sleep    15s
+    ${pod_name} =    Run    oc get pods -n redhat-ods-applications | grep data-science-pipelines-operator | awk '{print $1}'
+    Log    ${pod_name}
+    TRY
+        WHILE    not ${stopped}    limit=${timeout}
+            Sleep    1s
+            ${logs} =    Run    oc logs ${pod_name} -n redhat-ods-applications
+            ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
+        END
+    EXCEPT    WHILE loop was aborted    type=start
+        Log    Reconciliation wasn't triggered
+    END
+    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ods_ci/tests/Resources/Files/dummy-storage-creds.yaml
+    IF    ${rc}!=0    Fail
+    # one pod is good when reconciliation finished
+    Wait For Pods Number  1    namespace=${local_project_name}    timeout=30
+    [Teardown]    Remove Pipeline Project    ${local_project_name}
+
 
 *** Keywords ***
 End To End Pipeline Workflow Via Api

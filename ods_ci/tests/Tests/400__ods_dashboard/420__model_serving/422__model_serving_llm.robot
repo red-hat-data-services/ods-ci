@@ -39,6 +39,7 @@ ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${SKIP_PREREQS_INSTALL}=    ${FALSE}
+${SCRIPT_BASED_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small
 ${BLOOM_MODEL_S3_DIR}=    bloom-560m
@@ -46,6 +47,8 @@ ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
 ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
+${SCRIPT_TARGET_OPERATOR}=    rhods    # rhods or brew
+${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 
 
 *** Test Cases ***
@@ -66,6 +69,7 @@ Verify User Can Serve And Query A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
+    Sleep  5s
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
@@ -382,11 +386,15 @@ Install Model Serving Stack Dependencies
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
     # RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
-        Install Service Mesh Stack
-        Deploy Service Mesh CRs
-        Install Serverless Stack
-        Deploy Serverless CRs
-        Configure KNative Gateways
+        IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
+            Install Service Mesh Stack
+            Deploy Service Mesh CRs
+            Install Serverless Stack
+            Deploy Serverless CRs
+            Configure KNative Gateways
+        ELSE
+            Run Install Script
+        END
     END
     Load Expected Responses
 
@@ -764,3 +772,18 @@ Compile And Query LLM model
           ...    json_body=${body}    json_header=${header}
           ...    insecure=${TRUE}
     END
+
+Run Install Script
+    [Documentation]    Install KServe serving stack using
+    ...                https://github.com/opendatahub-io/caikit-tgis-serving/blob/main/demo/kserve/scripts/README.md
+    ${rc}=    Run And Return Rc    git clone https://github.com/opendatahub-io/caikit-tgis-serving
+    Should Be Equal As Integers    ${rc}    ${0}
+    IF    "${SCRIPT_TARGET_OPERATOR}" == "brew"
+        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} BREW_TAG=${SCRIPT_BREW_TAG} CHECK_UWM=false ./scripts/install/kserve-install.sh
+        ...    cwd=caikit-tgis-serving/demo/kserve
+    ELSE
+        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh
+        ...    cwd=caikit-tgis-serving/demo/kserve
+
+    END
+    Should Be Equal As Integers    ${rc}    ${0}

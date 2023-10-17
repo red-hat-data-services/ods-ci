@@ -33,13 +33,14 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The Kfp_tekton
     ...    project=${PROJECT_NAME}
     ...    python_file=flip_coin.py
     ...    method_name=flipcoin_pipeline
+    ...    status_check_timeout=440
     End To End Pipeline Workflow Using Kfp_tekton
     ...    username=${TEST_USER.USERNAME}
     ...    password=${TEST_USER.PASSWORD}
     ...    project=${PROJECT_NAME}
     ...    python_file=upload_download.py
     ...    method_name=wire_up_pipeline
-    ...    status_check_timeout=220
+    ...    status_check_timeout=440
     [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
 
 

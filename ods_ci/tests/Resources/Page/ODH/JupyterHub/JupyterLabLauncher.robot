@@ -385,6 +385,12 @@ Verify Installed Library Version
     IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected ${lib} at version ${ver}, but ${value}"
     RETURN    ${status}    ${value}
 
+Verify Installed Labextension Version
+    [Arguments]  ${lib}  ${ver}
+    ${status}  ${value} =  Run Keyword And Warn On Failure  Run Cell And Check Output  !jupyter labextension list 2>&1 | grep ${lib} | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"v"); printf "%s", b[2]}' | awk '{split($0,c,"."); printf "%s.%s", c[1],c[2]}'  ${ver}  #robocop: disable
+    IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected ${lib} at version ${ver}, but ${value}"
+    RETURN    ${status}    ${value}
+
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
     ${return_status} =    Set Variable    PASS
@@ -407,6 +413,39 @@ Check Versions In JupyterLab
         # CUDA version is checked in GPU-specific test cases, we can skip it here.
         ELSE IF  "${libDetail}[0]" == "CUDA"
             CONTINUE
+        ELSE IF  "${libDetail}[0]" == "Elyra"
+            ${status}  ${value} =  Verify Installed Library Version  elyra-code-snippet-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Library Version  elyra-pipeline-editor-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Library Version  elyra-python-editor-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Library Version  elyra-server  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Labextension Version  elyra/metadata-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Labextension Version  elyra/code-viewer-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Labextension Version  elyra/script-debugger-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+            ${status}  ${value} =  Verify Installed Labextension Version  elyra/theme-extension  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
         ELSE
             ${status}  ${value} =  Verify Installed Library Version  ${libDetail}[0]  ${libDetail}[1]
             IF  '${status}' == 'FAIL'

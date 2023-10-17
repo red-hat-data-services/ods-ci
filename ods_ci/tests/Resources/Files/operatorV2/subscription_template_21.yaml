@@ -1,0 +1,15 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhods-operator
+  namespace: <OPERATOR_NAMESPACE>
+spec:
+  channel: embedded
+  installPlanApproval: Manual
+  name: rhods-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: rhods-operator.2.1.0
+  config:
+     env:
+        - name: "DISABLE_DSC_CONFIG"

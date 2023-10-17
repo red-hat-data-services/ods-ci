@@ -308,3 +308,7 @@ class Helpers:
             filename_out = filename_in.split(".")[0] + "_processed.txt"
         with open(filename_out, "w") as outfile:
             outfile.write("".join(str(l) for l in out))
+
+    @keyword
+    def escape_forward_slashes(self, string_to_escape):
+        return string_to_escape.replace('/','\/')

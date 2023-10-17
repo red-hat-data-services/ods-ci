@@ -92,11 +92,14 @@ Uninstall RHODS V2
     END
 
     ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete subscription $(oc get subscription -n redhat-ods-operator --no-headers | awk '{print $1}') -n ${OPERATOR_NAMESPACE}  # robocop: disable
+    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting RHODS subscription
+    ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n redhat-ods-operator --ignore-not-found
     Should Be Equal As Integers	${return_code}	 0   msg=Error deleting operatorgroup
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace --ignore-not-found
     Verify Project Does Not Exists  redhat-ods-applications
     Verify Project Does Not Exists  redhat-ods-monitoring
     Verify Project Does Not Exists  rhods-notebooks
-    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator --ignore-not-found
-    Verify Project Does Not Exists  redhat-ods-operator
+    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE} --ignore-not-found
+    Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}

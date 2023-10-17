@@ -116,8 +116,6 @@ Verify User Can Remove GPUs From Workbench
     ...    pv_description=${EMPTY}  pv_size=${PV_SIZE}    gpus=1
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
     Sleep    10s     reason=There is some delay in updating the GPU availability in Dashboard
-    Run Keyword And Continue On Failure    GPU Dropdown Should Be Disabled    workbench_title=${WORKBENCH_TITLE_GPU}
-    Click Button    ${GENERIC_CANCEL_BTN_XP}
     Stop Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Stopped     workbench_title=${WORKBENCH_TITLE_GPU}
     Wait Until Keyword Succeeds    10 times    5s

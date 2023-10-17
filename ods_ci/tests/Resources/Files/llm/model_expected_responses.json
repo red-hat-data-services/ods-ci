@@ -11,9 +11,24 @@
                 "bloom-560m-caikit": {
                     "generatedTokenCount":  20,
                     "response_text": "The temperature of water boiling depends on the temperature of the water. The boiling point of water is the"
+                },
+                "flan-t5-large": {
+                    "generatedTokenCount":  7,
+                    "response_text": "212 ° f",
+                    "streamed_response_text":   "{  'details': {    'input_token_count': '8'  }}{  'tokens': [    {      'text': '▁',      'logprob': -1.2747352123260498    }  ],  'details': {    'generated_tokens': 1  }}{  'generated_text': '212',  'tokens': [    {      'text': '212',      'logprob': -1.0382558107376099    }  ],  'details': {    'generated_tokens': 2  }}{  'generated_text': ' ',  'tokens': [    {      'text': '▁',      'logprob': -0.8835393786430359    }  ],  'details': {    'generated_tokens': 3  }}{  'generated_text': '°',  'tokens': [    {      'text': '°',      'logprob': -0.6830151677131653    }  ],  'details': {    'generated_tokens': 4  }}{  'generated_text': ' ',  'tokens': [    {      'text': '▁',      'logprob': -0.8991543650627136    }  ],  'details': {    'generated_tokens': 5  }}{  'generated_text': 'f',  'tokens': [    {      'text': 'f',      'logprob': -0.44153422117233276    }  ],  'details': {    'generated_tokens': 6  }}{  'tokens': [    {      'text': '\u003c/s\u003e',      'logprob': -0.015602776780724525    }  ],  'details': {    'finish_reason': 'EOS_TOKEN',    'generated_tokens': 7  }}"
                 }
             }
 
+        },
+        {
+            "query_text": "This are an very wrong phraxe",
+            "models": {
+                "flan-t5-large-grammar-synthesis-caikit": {
+                    "generatedTokenCount":  9,
+                    "response_text": "This is a very wrong phrase.",
+                    "streamed_response_text":   "{'details':{'input_token_count':'10'}}{'generated_text':'This','tokens':[{'text':'▁This','logprob':<logprob_removed>}],'details':{'generated_tokens':1}}{'generated_text':'is','tokens':[{'text':'▁is','logprob':<logprob_removed>}],'details':{'generated_tokens':2}}{'generated_text':'','tokens':[{'text':'▁','logprob':<logprob_removed>}],'details':{'generated_tokens':3}}{'generated_text':'a','tokens':[{'text':'a','logprob':<logprob_removed>}],'details':{'generated_tokens':4}}{'generated_text':'very','tokens':[{'text':'▁very','logprob':<logprob_removed>}],'details':{'generated_tokens':5}}{'generated_text':'wrong','tokens':[{'text':'▁wrong','logprob':<logprob_removed>}],'details':{'generated_tokens':6}}{'generated_text':'phrase','tokens':[{'text':'▁phrase','logprob':<logprob_removed>}],'details':{'generated_tokens':7}}{'generated_text':'.','tokens':[{'text':'.','logprob':<logprob_removed>}],'details':{'generated_tokens':8}}{'tokens':[{'text':'</s>','logprob':<logprob_removed>}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':9}}"
+                }
+            }
         }
     ]
 }

@@ -42,7 +42,7 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
 
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
-    [Tags]      Sanity    Tier1
+    [Tags]      Sanity    Tier1    ODS-2477
     ${local_project_name} =    Set Variable    recon-test
     New Project    ${local_project_name}
     Install DataSciencePipelinesApplication CR    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
@@ -96,7 +96,7 @@ DSPA Should Reconcile
             ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
         END
     EXCEPT    WHILE loop was aborted    type=start
-        Log    Reconciliation wasn't triggered
+        Fail    msg=Reconciliation wasn't triggered
     END
 
 Data Science Pipelines Suite Setup

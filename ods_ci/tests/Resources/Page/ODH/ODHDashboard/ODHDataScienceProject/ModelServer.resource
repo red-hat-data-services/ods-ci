@@ -20,7 +20,7 @@ ${REPLICAS_MIN_BTN_XP}=         xpath=//div/button[@aria-label="Minus"]
 ${SERVING_RUNTIME_NAME}=        xpath=//input[@id="serving-runtime-name-input"]
 ${SERVING_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
 ${SERVING_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
-${SERVING_ACCELERATOR_LESS_BUTTON_XPATH}=    xpath=${SERVING_INPUT_XPATH}/preceding-sibling::button
+${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}=    xpath=${SERVING_INPUT_XPATH}/preceding-sibling::button
 ${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model servers']
 
@@ -123,7 +123,7 @@ Click GPU Plus Button
 
 Click GPU Minus Button
     [Documentation]    Click the minus button in the GPU selector
-    Click Element    ${SERVING_ACCELERATOR_LESS_BUTTON_XPATH}
+    Click Element    ${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}
 
 Verify Displayed GPU Count
     [Documentation]    Verifies the number of GPUs displayed in the Model Server table
@@ -135,7 +135,7 @@ Verify Displayed GPU Count
         Click Element    xpath://button[@aria-expanded="false"]/span[.="${server_name}"]
     END
     Click Element    ${SERVING_MODEL_SERVERS_SIDE_MENU}
-    Sleep  5s      reason=wait for ten second until operator goes into init state
+    Sleep  5s      reason=Sometimes the number of current Accelerators take a few seconds to update
     ${current_accs}=  Get Text  xpath://span[text()="${server_name}"]/../../../following-sibling::tr//td[@data-label]/div/dl/div[4]/dd/div
     Should Match  ${current_accs}  ${no_gpus}
 

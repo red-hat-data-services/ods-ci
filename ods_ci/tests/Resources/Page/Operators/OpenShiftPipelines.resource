@@ -41,7 +41,7 @@ Install Red Hat OpenShift Pipelines
         ELSE IF    ${is_self_managed} == ${FALSE} and "${platform}" == "GCP"
             ${openshift_pipelines_version}=    Set Variable    pipelines-1.10
         ELSE
-            ${openshift_pipelines_version}=    Set Variable    pipelines-1.11
+            ${openshift_pipelines_version}=    Set Variable    pipelines-1.12
         END
     ELSE IF    "4.14" in "${oc_version}"
         ${openshift_pipelines_version}=    Set Variable    pipelines-1.12

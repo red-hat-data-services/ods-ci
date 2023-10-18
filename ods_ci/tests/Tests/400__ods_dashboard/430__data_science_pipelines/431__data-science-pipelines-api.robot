@@ -56,7 +56,9 @@ Verify DSPO Operator Reconciliation Retry
     TRY
         WHILE    not ${stopped}    limit=${timeout}
             Sleep    1s
-            ${logs} =    Run    oc logs ${pod_name} -n ${APPLICATIONS_NAMESPACE}
+            ${logs}=    Oc Get Pod Logs
+            ...    name=${pod_name}
+            ...    namespace=${APPLICATIONS_NAMESPACE}
             ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
         END
     EXCEPT    WHILE loop was aborted    type=start

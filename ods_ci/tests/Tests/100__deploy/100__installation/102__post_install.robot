@@ -59,20 +59,10 @@ Verify GPU Operator Deployment  # robocop: disable
 
     # Before GPU Node is added to the cluster
     # NS
-    Verify Namespace Status  label=kubernetes.io/metadata.name=redhat-nvidia-gpu-addon
-    # Node-Feature-Discovery Operator
-    Verify Operator Status  label=operators.coreos.com/ose-nfd.redhat-nvidia-gpu-addon
-    ...    operator_name=ose-nfd.*
+    Verify Namespace Status  label=kubernetes.io/metadata.name=nvidia-gpu-operator
     # GPU Operator
-    Verify Operator Status  label=operators.coreos.com/gpu-operator-certified.redhat-nvidia-gpu-addon
+    Verify Operator Status  label=operators.coreos.com/gpu-operator-certified.nvidia-gpu-operator
     ...    operator_name=gpu-operator-certified.v*
-    # nfd-controller-manager
-    Verify Deployment Status  label=operators.coreos.com/ose-nfd.redhat-nvidia-gpu-addon
-    ...    dname=nfd-controller-manager
-    # nfd-master
-    Verify DaemonSet Status  label=app=nfd-master  dsname=nfd-master
-    # nfd-worker
-    Verify DaemonSet Status  label=app=nfd-worker  dsname=nfd-worker
 
     # After GPU Node is added to the cluster
     Verify DaemonSet Status  label=app=gpu-feature-discovery  dsname=gpu-feature-discovery
@@ -84,7 +74,6 @@ Verify GPU Operator Deployment  # robocop: disable
     # Verify DaemonSet Status  label=app=nvidia-driver-daemonset-*  dsname=nvidia-driver-daemonset-*
     Verify DaemonSet Status  label=app=nvidia-node-status-exporter  dsname=nvidia-node-status-exporter
     Verify DaemonSet Status  label=app=nvidia-operator-validator  dsname=nvidia-operator-validator
-    Verify CR Status  crd=NodeFeatureDiscovery  cr_name=ocp-gpu-addon
 
 Verify That Prometheus Image Is A CPaaS Built Image
     [Documentation]    Verifies the images used for prometheus

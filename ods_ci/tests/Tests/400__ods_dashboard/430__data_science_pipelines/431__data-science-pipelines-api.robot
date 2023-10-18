@@ -46,9 +46,8 @@ Verify DSPO Operator Reconciliation Retry
     ${local_project_name} =    Set Variable    recon-test
     New Project    ${local_project_name}
     Install DataSciencePipelinesApplication CR    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
-    # wait the CR be ready
     Wait Until Keyword Succeeds    15 times    1s
-    ...    Run    oc get datasciencepipelinesapplications -n ${local_project_name}
+    ...    Double Check If DSPA Was Created    ${local_project_name}
     DSPA Should Reconcile
     ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ods_ci/tests/Resources/Files/dummy-storage-creds.yaml
     IF    ${rc}!=0    Fail
@@ -74,6 +73,12 @@ End To End Pipeline Workflow Via Api
     DataSciencePipelinesAPI.Delete Runs    ${run_id}
     DataSciencePipelinesAPI.Delete Pipeline    ${pipeline_id}
     [Teardown]    Remove Pipeline Project    ${project}
+
+Double Check If DSPA Was Created
+    [Documentation]    Double check if DSPA was created
+    [Arguments]     ${local_project_name}
+    ${rc}  ${out} =    Run And Return Rc And Output   oc get datasciencepipelinesapplications -n ${local_project_name}
+    IF    ${rc}!=0    Fail
 
 DSPA Should Reconcile
     [Documentation]    DSPA must find an error because not all components were deployed

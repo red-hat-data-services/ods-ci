@@ -51,12 +51,12 @@ Verify DSPO Operator Reconciliation Retry
     Install DataSciencePipelinesApplication CR    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
     # wait the pod be ready
     Sleep    15s
-    ${pod_name} =    Run    oc get pods -n redhat-ods-applications | grep data-science-pipelines-operator | awk '{print $1}'
+    ${pod_name} =    Run    oc get pods -n ${APPLICATIONS_NAMESPACE} | grep data-science-pipelines-operator | awk '{print $1}'
     Log    ${pod_name}
     TRY
         WHILE    not ${stopped}    limit=${timeout}
             Sleep    1s
-            ${logs} =    Run    oc logs ${pod_name} -n redhat-ods-applications
+            ${logs} =    Run    oc logs ${pod_name} -n ${APPLICATIONS_NAMESPACE}
             ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
         END
     EXCEPT    WHILE loop was aborted    type=start

@@ -49,8 +49,9 @@ Verify DSPO Operator Reconciliation Retry
     ${timeout} =    Set Variable    180
     New Project    ${local_project_name}
     Install DataSciencePipelinesApplication CR    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
-    # wait the pod be ready
-    Sleep    15s
+    # wait the CR be ready
+    Wait Until Keyword Succeeds    15 times    1s
+    ...    Run    oc get datasciencepipelinesapplications -n ${local_project_name}
     ${pod_name} =    Run    oc get pods -n ${APPLICATIONS_NAMESPACE} | grep data-science-pipelines-operator | awk '{print $1}'
     Log    ${pod_name}
     TRY

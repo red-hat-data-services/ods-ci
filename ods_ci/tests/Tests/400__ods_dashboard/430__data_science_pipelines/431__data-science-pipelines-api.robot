@@ -44,27 +44,12 @@ Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
     [Tags]      Sanity    Tier1
     ${local_project_name} =    Set Variable    recon-test
-    ${stopped} =    Set Variable    ${False}
-    # limit is 180 because the reconciliation run every 2 minutes
-    ${timeout} =    Set Variable    180
     New Project    ${local_project_name}
     Install DataSciencePipelinesApplication CR    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
     # wait the CR be ready
     Wait Until Keyword Succeeds    15 times    1s
     ...    Run    oc get datasciencepipelinesapplications -n ${local_project_name}
-    ${pod_name} =    Run    oc get pods -n ${APPLICATIONS_NAMESPACE} | grep data-science-pipelines-operator | awk '{print $1}'
-    Log    ${pod_name}
-    TRY
-        WHILE    not ${stopped}    limit=${timeout}
-            Sleep    1s
-            ${logs}=    Oc Get Pod Logs
-            ...    name=${pod_name}
-            ...    namespace=${APPLICATIONS_NAMESPACE}
-            ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
-        END
-    EXCEPT    WHILE loop was aborted    type=start
-        Log    Reconciliation wasn't triggered
-    END
+    DSPA Should Reconcile
     ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ods_ci/tests/Resources/Files/dummy-storage-creds.yaml
     IF    ${rc}!=0    Fail
     # one pod is good when reconciliation finished
@@ -89,6 +74,25 @@ End To End Pipeline Workflow Via Api
     DataSciencePipelinesAPI.Delete Runs    ${run_id}
     DataSciencePipelinesAPI.Delete Pipeline    ${pipeline_id}
     [Teardown]    Remove Pipeline Project    ${project}
+
+DSPA Should Reconcile
+    [Documentation]    DSPA must find an error because not all components were deployed
+    ${stopped} =    Set Variable    ${False}
+    # limit is 180 because the reconciliation run every 2 minutes
+    ${timeout} =    Set Variable    180
+    ${pod_name} =    Run    oc get pods -n ${APPLICATIONS_NAMESPACE} | grep data-science-pipelines-operator | awk '{print $1}'
+    Log    ${pod_name}
+    TRY
+        WHILE    not ${stopped}    limit=${timeout}
+            Sleep    1s
+            ${logs}=    Oc Get Pod Logs
+            ...    name=${pod_name}
+            ...    namespace=${APPLICATIONS_NAMESPACE}
+            ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
+        END
+    EXCEPT    WHILE loop was aborted    type=start
+        Log    Reconciliation wasn't triggered
+    END
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup

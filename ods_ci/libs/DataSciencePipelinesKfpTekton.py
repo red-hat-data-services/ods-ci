@@ -79,7 +79,7 @@ class DataSciencePipelinesKfpTekton:
         self, user, pwd, project, route_name, source_code, fn, current_path=None
     ):
         client, api = self.get_client(user, pwd, project, route_name)
-        mlpipeline_minio_artifact_secret = self.get_secret(api, 'pipelineskfptekton1', 'mlpipeline-minio-artifact')
+        mlpipeline_minio_artifact_secret = self.get_secret(api, project, 'mlpipeline-minio-artifact')
         # the current path is from where you are running the script
         # sh ods_ci/run_robot_test.sh
         # the current_path will be ods-ci
@@ -110,3 +110,7 @@ class DataSciencePipelinesKfpTekton:
         _, api = self.get_client(user, pwd, project, route_name)
         return api.check_run_status(run_result.run_id, timeout=timeout)
 
+
+if __name__ == "__main__":
+    example = DataSciencePipelinesKfpTekton()
+    example.kfp_tekton_create_run_from_pipeline_func('ldap-admin20', 'rhodsPW#1', 'p2', 'ds-pipeline-pipelines-definition', 'upload_download.py', 'wire_up_pipeline', '/home/dlovison/github/rhods/ods-ci')

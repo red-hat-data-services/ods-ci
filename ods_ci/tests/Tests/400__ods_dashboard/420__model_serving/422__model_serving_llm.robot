@@ -453,7 +453,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
     Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:fast
-    ...    model_name=${flan_model_name}   namespace=${test_namespace}
+    ...    namespace=${test_namespace}
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
@@ -879,12 +879,14 @@ Run Install Script
 Upgrade Caikit Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given
     ...    ${new_image_url}
-    [Arguments]    ${new_image_url}    ${model_name}    ${namespace}
+    [Arguments]    ${new_image_url}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch ServingRuntime caikit-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"
     Should Be Equal As Integers    ${rc}    ${0}
 
 Get Model Pods Creation Date And Image URL
+    [Documentation]    Fetches the creation date and the caikit runtime image URL.
+    ...                Useful in upgrade scenarios
     [Arguments]    ${model_name}    ${namespace}
     ${created_at}=    Oc Get    kind=Pod    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${namespace}    fields=["metadata.creationTimestamp"]

@@ -138,7 +138,7 @@ Verify DS Projects Home Page Shows The Right Number Of Items The User Has Select
     ...                multiple data science projects are added
     [Tags]    ODS-2015    Sanity    Tier1
     [Setup]    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
-    ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=${EMPTY}
+    ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=numbered project -
     ...    number=20
     Number Of Displayed Projects Should Be    expected_number=10
     ${curr_page_projects}=    Get All Displayed Projects
@@ -309,7 +309,7 @@ Create Multiple Data Science Projects
     [Arguments]    ${title}     ${description}    ${number}
     ${all_projects}=    Create List
     FOR    ${counter}    IN RANGE    1    ${number}+1    1
-        Create Data Science Project    title=${title}${counter}    description=${EMPTY}
+        Create Data Science Project    title=${title}${counter}    description=${description}-${number}
         Open Data Science Projects Home Page
         Append To List    ${all_projects}    ${title}${counter}
     END

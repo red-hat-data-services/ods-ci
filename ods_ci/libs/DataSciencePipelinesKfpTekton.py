@@ -110,7 +110,3 @@ class DataSciencePipelinesKfpTekton:
         _, api = self.get_client(user, pwd, project, route_name)
         return api.check_run_status(run_result.run_id, timeout=timeout)
 
-
-if __name__ == "__main__":
-    example = DataSciencePipelinesKfpTekton()
-    example.kfp_tekton_create_run_from_pipeline_func('ldap-admin20', 'rhodsPW#1', 'p2', 'ds-pipeline-pipelines-definition', 'upload_download.py', 'wire_up_pipeline', '/home/dlovison/github/rhods/ods-ci')

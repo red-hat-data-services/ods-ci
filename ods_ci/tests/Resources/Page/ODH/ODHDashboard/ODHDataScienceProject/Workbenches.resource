@@ -368,7 +368,7 @@ Delete Workbench
 Edit Workbench
     [Documentation]    Edits a workbench
     [Arguments]     ${workbench_title}
-    Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
 
 Check Launched Workbench Is The Correct One

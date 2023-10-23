@@ -5,7 +5,7 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
 Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
-# Suite Teardown
+Suite Teardown    RHOSi Teardown
 
 
 *** Variables ***
@@ -38,6 +38,8 @@ ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
+${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
+${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
 ${SKIP_PREREQS_INSTALL}=    ${FALSE}
 ${SCRIPT_BASED_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
@@ -464,6 +466,35 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
+Verify User Can Access Model Metrics From UWM
+    [Tags]    ODS-XYZ    WatsonX
+    [Setup]    Set Project And Runtime    namespace=watsonx-metrics    enable_metrics=${TRUE}
+    ${test_namespace}=    Set Variable     watsonx-metrics
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    ${thanos_url}=    Get OpenShift Thanos URL
+    ${token}=    Generate Thanos Token
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=3
+    ...    namespace=${test_namespace}
+    Sleep    5s    reason=Wait for metrics to be updated..
+    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
+    ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m    exp_value=3
+    User Can Fetch Number Of Successful Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
+    ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m    exp_value=3
+    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
+    ...    namespace=${test_namespace}    period=5m    # add pod name?
+    # [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    # ...    isvc_names=${models_names}
+
 
 *** Keywords ***
 Install Model Serving Stack Dependencies
@@ -706,12 +737,18 @@ Deploy Caikit Serving Runtime
     ...    oc apply -f ${CAIKIT_FILEPATH} -n ${namespace}
 
 Set Project And Runtime
-    [Arguments]    ${namespace}
+    [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}
     Set Up Test OpenShift Project    test_ns=${namespace}
     Create Secret For S3-Like Buckets    endpoint=${MODELS_BUCKET.ENDPOINT}
     ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}
+    IF   ${enable_metrics} == ${TRUE}
+        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
+        Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
+    ELSE
+        Log    message=Skipping UserWorkloadMonitoring enablement.
+    END
 
 Create Secret For S3-Like Buckets
     [Documentation]    Configures the cluster to fetch models from a S3-like bucket
@@ -870,9 +907,8 @@ Run Install Script
         ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} BREW_TAG=${SCRIPT_BREW_TAG} CHECK_UWM=false ./scripts/install/kserve-install.sh
         ...    cwd=caikit-tgis-serving/demo/kserve
     ELSE
-        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh
+        ${rc}=    Run And Watch Command    DEPLOY_ODH_OPERATOR=false TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh
         ...    cwd=caikit-tgis-serving/demo/kserve
-
     END
     Should Be Equal As Integers    ${rc}    ${0}
 
@@ -894,3 +930,70 @@ Get Model Pods Creation Date And Image URL
     ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -ojson | jq '.items[].spec.containers[].image' | grep caikit-tgis    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
     RETURN    ${created_at}    ${caikitsha}
+
+User Can Fetch Number Of Requests Over Defined Time
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}    ${period}=30m    ${exp_value}=${EMPTY}
+    ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    tgi_request_count[${period}]
+    Log    ${resp.json()["data"]}
+    ${curr_value}    ${source_namespace}    ${source_model}=
+    ...    Check Last Value, Source Namespace And Model Name From Query Response    response=${resp}    exp_namespace=${namespace}
+    ...    exp_model_name=${model_name}    exp_value=${exp_value}
+
+User Can Fetch Number Of Successful Requests Over Defined Time
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}    ${period}=30m    ${exp_value}=${EMPTY}
+    ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    tgi_request_success[${period}]
+    Log    ${resp.json()["data"]}
+    ${curr_value}    ${source_namespace}    ${source_model}=
+    ...    Check Last Value, Source Namespace And Model Name From Query Response    response=${resp}    exp_namespace=${namespace}
+    ...    exp_model_name=${model_name}    exp_value=${exp_value}
+
+User Can Fetch CPU Utilization
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${namespace}    ${model_name}=${EMPTY}    ${period}=30m    ${exp_value}=${EMPTY}
+    ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    pod:container_cpu_usage:sum{namespace="${namespace}"}[${period}]
+    Log    ${resp.json()["data"]}
+    ${curr_value}    ${source_namespace}    ${source_model}=
+    ...    Check Last Value, Source Namespace And Model Name From Query Response    response=${resp}    exp_namespace=${namespace}
+    ...    exp_model_name=${model_name}    exp_value=${exp_value}
+
+TGI Caikit And Istio Metrics Should Exist
+    [Arguments]    ${thanos_url}    ${thanos_token}
+    ${tgi_metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
+    ...    search_text=tgi
+    Should Not Be Empty    ${tgi_metrics_names}
+    ${tgi_metrics_names}=    Split To Lines    ${tgi_metrics_names}
+    ${caikit_metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
+    ...    search_text=caikit
+    ${caikit_metrics_names}=    Split To Lines    ${caikit_metrics_names}
+    Set Suite Variable    ${CAIKIT_METRICS_NAMES}    ${caikit_metrics_names}
+    ${istio_metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
+    ...    search_text=istio
+    ${istio_metrics_names}=    Split To Lines    ${istio_metrics_names}
+    Set Suite Variable    ${ISTIO_METRICS_NAMES}    ${istio_metrics_names}
+    ${metrics}=    Append To List    ${tgi_metrics_names}    @{caikit_metrics_names}    @{istio_metrics_names}
+    RETURN    ${metrics}
+
+Check Last Value, Source Namespace And Model Name From Query Response
+    [Arguments]    ${response}    ${exp_namespace}    ${exp_model_name}=${EMPTY}    ${exp_value}=${EMPTY}
+    ${json_resp}=    Set Variable    ${response.json()["data"]["result"][0]}
+    ${value_keyname}=    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${json_resp}    value
+    IF    ${value_keyname} == ${TRUE}
+        ${curr_value}=    Set Variable    ${json_resp["value"][-1]}
+    ELSE
+        ${curr_value}=    Set Variable    ${json_resp["values"][-1][-1]}
+    END
+    ${source_namespace}=    Set Variable    ${json_resp["metric"]["namespace"]}
+    ${source_model}=    Set Variable    ${json_resp["metric"]["job"]}
+    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_namespace}    ${namespace}
+    IF    "${model_name}" != "${EMPTY}"
+        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_model}    ${model_name}-metrics
+    END
+    # IF    "${pod_name}" != "${EMPTY}"
+    #     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_model}    ${model_name}-metrics
+    # END
+    IF    "${exp_value}" != "${EMPTY}"
+        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${curr_value}    ${exp_value}
+    ELSE
+        Run Keyword And Continue On Failure    Should Not Be Empty    ${curr_value}
+    END
+    RETURN    ${curr_value}    ${source_namespace}    ${source_model}

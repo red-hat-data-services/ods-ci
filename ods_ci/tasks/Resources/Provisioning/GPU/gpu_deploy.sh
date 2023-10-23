@@ -73,7 +73,7 @@ function rerun_accelerator_migration() {
     dashboard_pods_avail=$(echo $dashboard_pods | cut -c1-1)
     ((remaining_seconds = timeout_seconds - SECONDS))
     echo "Dashboard pods: Available $dashboard_pods_avail out of $dashboard_pods_total ... (timeout in $remaining_seconds seconds)"
-    if [ $dashboard_pods_avail == $dashboard_pods_total ]; then
+    if [ "$dashboard_pods_avail" == "$dashboard_pods_total" ]; then
       break
     else
       sleep $sleep_time

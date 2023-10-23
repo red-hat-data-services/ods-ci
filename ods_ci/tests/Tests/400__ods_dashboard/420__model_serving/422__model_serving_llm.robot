@@ -429,6 +429,41 @@ Verify User Can Serve And Query Flan-t5 Large
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
+Verify Runtime Upgrade Does Not Affect Deployed Models
+    [Documentation]    Upgrades the caikit runtime inthe same NS where a model
+    ...                is already deployed. The expecation is that the current model
+    ...                must remain unchanged after the runtime upgrade.
+    ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
+    ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
+    [Tags]    ODS-2404    WatsonX
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    namespace=${test_namespace}
+    ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:fast
+    ...    namespace=${test_namespace}
+    Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    exp_replicas=1
+    ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
+    ...    namespace=${test_namespace}
+    Should Be Equal    ${created_at}    ${created_at_after}
+    Should Be Equal As Strings    ${caikitsha}    ${caikitsha_after}
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}
+
 
 *** Keywords ***
 Install Model Serving Stack Dependencies
@@ -840,3 +875,22 @@ Run Install Script
 
     END
     Should Be Equal As Integers    ${rc}    ${0}
+
+Upgrade Caikit Runtime Image
+    [Documentation]    Replaces the image URL of the Caikit Runtim with the given
+    ...    ${new_image_url}
+    [Arguments]    ${new_image_url}    ${namespace}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch ServingRuntime caikit-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"
+    Should Be Equal As Integers    ${rc}    ${0}
+
+Get Model Pods Creation Date And Image URL
+    [Documentation]    Fetches the creation date and the caikit runtime image URL.
+    ...                Useful in upgrade scenarios
+    [Arguments]    ${model_name}    ${namespace}
+    ${created_at}=    Oc Get    kind=Pod    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${namespace}    fields=["metadata.creationTimestamp"]
+    ${rc}    ${caikitsha}=    Run And Return Rc And Output
+    ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -ojson | jq '.items[].spec.containers[].image' | grep caikit-tgis    # robocop: disable
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${created_at}    ${caikitsha}

@@ -59,7 +59,7 @@ function rerun_accelerator_migration() {
 
   dashboard_rs=$(oc get rs -n redhat-ods-applications | grep rhods-dashboard- | awk '{print $1;exit}')
   echo "Deleting ReplicaSet $dashboard_rs"
-  if ! oc delete rs $dashboard_rs  -n redhat-ods-applications;
+  if ! oc delete rs "$dashboard_rs"  -n redhat-ods-applications;
     then
       printf "ERROR: When trying to delete the dashboard replica set\n"
       return 1

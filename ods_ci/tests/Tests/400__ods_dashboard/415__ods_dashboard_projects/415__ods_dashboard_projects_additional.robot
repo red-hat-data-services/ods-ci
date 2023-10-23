@@ -101,7 +101,7 @@ Verify User Can Add GPUs To Workbench
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
     Verify Pytorch Can See GPU
-    [Teardown]    Clean Project    workbench_title=${WORKBENCH_TITLE_GPU}
+    [Teardown]    Clean Project And Sleep    workbench_title=${WORKBENCH_TITLE_GPU}
     ...    pvc_title=${PV_NAME_GPU}    project_title=${PRJ_TITLE}
 
 Verify User Can Remove GPUs From Workbench
@@ -130,9 +130,32 @@ Verify User Can Remove GPUs From Workbench
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE_GPU}
     Open New Notebook In Jupyterlab Menu
     Run Keyword And Expect Error    'Using cpu device' does not match 'Using cuda device'    Verify Pytorch Can See GPU
-    [Teardown]    Clean Project    workbench_title=${WORKBENCH_TITLE_GPU}
+    [Teardown]    Clean Project And Sleep    workbench_title=${WORKBENCH_TITLE_GPU}
     ...    pvc_title=${PV_NAME_GPU}    project_title=${PRJ_TITLE}
 
+Verify DS Projects Home Page Shows The Right Number Of Items The User Has Selected
+    [Documentation]    Verifies that correct number of data science projects appear when
+    ...                multiple data science projects are added
+    [Tags]    ODS-2015    Sanity    Tier1
+    [Setup]    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
+    ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=numbered project -
+    ...    number=20
+    Number Of Displayed Projects Should Be    expected_number=10
+    ${curr_page_projects}=    Get All Displayed Projects
+    ${remaining_projects}=    Remove Current Page Projects From All Projects
+    ...                        ${all_projects}    ${curr_page_projects}
+    Check Pagination Is Correct On The Current Page    page=1    total=20
+    Go To Next Page Of Data Science Projects
+    Number Of Displayed Projects Should Be    expected_number=10
+    ${curr_page_projects}=    Get All Displayed Projects
+    ${remaining_projects}=    Remove Current Page Projects From All Projects
+    ...                       ${all_projects}    ${curr_page_projects}
+    Check Pagination Is Correct On The Current Page    page=2    total=20
+    Should Be Empty    ${remaining_projects}
+    [Teardown]    Run Keywords
+    ...    SeleniumLibrary.Close All Browsers
+    ...    AND
+    ...    Delete Multiple Data Science Projects    title=ds-project-ldap-user    number=20
 
 *** Keywords ***
 Project Suite Setup
@@ -202,19 +225,18 @@ Restore Tolerations Settings And Clean Project
     ...    workbench_title=${WORKBENCH_TITLE_TOL_1}    tolerations_text=${TOLERATIONS_2}
     Verify Workbench Does Not Have The Given Tolerations
     ...    workbench_title=${WORKBENCH_TITLE_TOL_2}    tolerations_text=${TOLERATIONS_2}
-    Clean Project    workbench_title=${WORKBENCH_TITLE_TOL_1}
+    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE_TOL_1}
     ...    pvc_title=${PV_NAME_TOL_1}    project_title=${PRJ_TITLE}
-    Clean Project    workbench_title=${WORKBENCH_TITLE_TOL_2}
+    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE_TOL_2}
     ...    pvc_title=${PV_NAME_TOL_2}    project_title=${PRJ_TITLE}
 
-Clean Project
+Clean Project And Sleep
     [Documentation]    Deletes resources from a test project to free up
     ...                resources or re-use titles
     [Arguments]    ${workbench_title}    ${pvc_title}
     ...            ${project_title}
-    Delete Workbench From CLI    workbench_title=${workbench_title}
-    ...    project_title=${project_title}
-    Delete PVC From CLI    pvc_title=${pvc_title}    project_title=${project_title}
+    Clean Project From Workbench Resources    workbench_title=${workbench_title}
+    ...    pvc_title=${pvc_title}    project_title=${project_title}
     Sleep    10s    reason=There is some delay in updating the GPU availability in Dashboard
 
 Verify Workbench Pod Has Limits And Requests For GPU
@@ -281,3 +303,20 @@ Open Settings And Disable Tolerations
     Set Pod Toleration Via UI    ${DEFAULT_TOLERATIONS}
     Disable Pod Toleration Via UI
     Save Changes In Cluster Settings
+
+Create Multiple Data Science Projects
+    [Documentation]    Create a given number of data science projects based on title and description
+    [Arguments]    ${title}     ${description}    ${number}
+    ${all_projects}=    Create List
+    FOR    ${counter}    IN RANGE    1    ${number}+1    1
+        Create Data Science Project    title=${title}${counter}    description=${description}-${number}
+        Open Data Science Projects Home Page
+        Append To List    ${all_projects}    ${title}${counter}
+    END
+    RETURN    ${all_projects}
+
+Delete Multiple Data Science Projects
+    [Arguments]    ${title}     ${number}
+    FOR    ${counter}    IN RANGE    1    ${number}+1    1
+        ${rc}  ${output}=    Run And Return Rc And Output    oc delete project ${title}${counter}
+    END

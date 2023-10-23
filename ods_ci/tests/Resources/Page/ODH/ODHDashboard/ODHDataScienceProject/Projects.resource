@@ -78,7 +78,7 @@ Is Data Science Project Details Page Open
     [Arguments]     ${project_title}
     ${page_open}=   Run Keyword And Return Status
     ...    SeleniumLibrary.Page Should Contain Element     xpath=//h1[contains(text(),"${project_title}")]
-    [Return]    ${page_open}   
+    [Return]    ${page_open}
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
@@ -178,6 +178,7 @@ Delete Data Science Project From CLI
         END
     END
 
+
 Workbench Status Should Be From Projects Home Page
     [Documentation]    Checks the workbench status is the expected one, from the DS Project home page
     [Arguments]     ${workbench_title}      ${status}    ${project_title}
@@ -221,7 +222,11 @@ Stop Workbench From Projects Home Page
     ...                        Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}
     ...                                                                                status=${WORKBENCH_STATUS_RUNNING}
     ...                                                                                project_title=${project_title}
-    IF    ${is_started} == ${TRUE}
+    ${is_starting}=      Run Keyword And Return Status
+    ...                        Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}
+    ...                                                                                status=${WORKBENCH_STATUS_STARTING}
+    ...                                                                                project_title=${project_title}
+    IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
                 ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
@@ -396,3 +401,13 @@ Create Data Science Project If Not Exists
         Launch Data Science Project Main Page    username=${username}
         Create Data Science Project    title=${PRJ_TITLE}    description=${description}
     END
+
+Clean Project From Workbench Resources
+    [Documentation]    Deletes resources from a test project to free up
+    ...                resources or re-use titles. 
+    ...                AT THE MOMENT, ONLY WORKBENCH AND PVC DELETION ARE IMPLEMENTED
+    [Arguments]    ${workbench_title}    ${project_title}
+    ...    ${pvc_title}=${workbench_title}
+    Delete Workbench From CLI    workbench_title=${workbench_title}
+    ...    project_title=${project_title}
+    Delete PVC From CLI    pvc_title=${pvc_title}    project_title=${project_title}

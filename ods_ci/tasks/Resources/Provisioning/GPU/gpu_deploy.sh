@@ -69,8 +69,8 @@ function rerun_accelerator_migration() {
   SECONDS=0
   while [ "$SECONDS" -le "$timeout_seconds" ]; do
     dashboard_pods=$(oc get deployment rhods-dashboard -n redhat-ods-applications | grep rhods-dashboard | awk '{print $2;exit}')
-    dashboard_pods_total=$(echo $dashboard_pods | cut -c3-3)
-    dashboard_pods_avail=$(echo $dashboard_pods | cut -c1-1)
+    dashboard_pods_total=$(echo "$dashboard_pods" | cut -c3-3)
+    dashboard_pods_avail=$(echo "$dashboard_pods" | cut -c1-1)
     ((remaining_seconds = timeout_seconds - SECONDS))
     echo "Dashboard pods: Available $dashboard_pods_avail out of $dashboard_pods_total ... (timeout in $remaining_seconds seconds)"
     if [ "$dashboard_pods_avail" == "$dashboard_pods_total" ]; then

@@ -9,6 +9,9 @@ from urllib3.exceptions import MaxRetryError, SSLError
 
 
 class DataSciencePipelinesKfpTekton:
+
+    base_image = 'registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61'
+
     # init should not have a call to external system, otherwise dry-run will fail
     def __init__(self):
         self.client = None
@@ -21,7 +24,7 @@ class DataSciencePipelinesKfpTekton:
 
             # initialize global environment variables
             # https://github.com/kubeflow/kfp-tekton/issues/1345
-            default_image = 'registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61'
+            default_image = DataSciencePipelinesKfpTekton.base_image
             os.environ["DEFAULT_STORAGE_CLASS"] = self.api.get_default_storage()
             os.environ["TEKTON_BASH_STEP_IMAGE"] = default_image
             os.environ["TEKTON_COPY_RESULTS_STEP_IMAGE"] = default_image

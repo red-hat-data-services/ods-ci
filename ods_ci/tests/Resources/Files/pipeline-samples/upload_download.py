@@ -1,5 +1,6 @@
 """Test pipeline to exercise various data flow mechanisms."""
 import kfp
+from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
 
 
 """Producer"""
@@ -92,18 +93,18 @@ def test_uploaded_artifact(previous_step: kfp.components.InputPath(), file_size_
 """Build the producer component"""
 send_file_op = kfp.components.create_component_from_func(
     send_file,
-    base_image="registry.access.redhat.com/ubi8/python-38",
+    base_image=DataSciencePipelinesKfpTekton.base_image,
 )
 
 """Build the consumer component"""
 receive_file_op = kfp.components.create_component_from_func(
     receive_file,
-    base_image="registry.access.redhat.com/ubi8/python-38",
+    base_image=DataSciencePipelinesKfpTekton.base_image,
 )
 
 test_uploaded_artifact_op = kfp.components.create_component_from_func(
     test_uploaded_artifact,
-    base_image="registry.access.redhat.com/ubi8/python-38",
+    base_image=DataSciencePipelinesKfpTekton.base_image,
     packages_to_install=['minio']
 )
 

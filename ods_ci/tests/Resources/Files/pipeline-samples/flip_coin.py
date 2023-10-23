@@ -14,6 +14,7 @@
 
 # source https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py
 from kfp import components, dsl
+from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
 
 
 def random_num(low: int, high: int) -> int:
@@ -45,13 +46,13 @@ def print_msg(msg: str):
 )
 def flipcoin_pipeline():
     flip_coin_op = components.create_component_from_func(
-        flip_coin, base_image="registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+        flip_coin, base_image=DataSciencePipelinesKfpTekton.base_image
     )
     print_op = components.create_component_from_func(
-        print_msg, base_image="registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+        print_msg, base_image=DataSciencePipelinesKfpTekton.base_image
     )
     random_num_op = components.create_component_from_func(
-        random_num, base_image="registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+        random_num, base_image=DataSciencePipelinesKfpTekton.base_image
     )
 
     flip = flip_coin_op()

@@ -82,7 +82,7 @@ spec:
             _parsed_args = vars(_parser.parse_args())
 
             _outputs = send_file(**_parsed_args)
-          image: registry.access.redhat.com/ubi8/python-38
+          image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
           env:
           - name: ORIG_PR_NAME
             valueFrom:
@@ -136,7 +136,7 @@ spec:
             pipelines.kubeflow.org/cache_enabled: "true"
           annotations:
             pipelines.kubeflow.org/component_spec_digest: '{"name": "Send file", "outputs":
-              [{"name": "outgoingfile"}], "version": "Send file@sha256=0d4ad7ec54eec13c6449b3a1514b4dcac6f65b7fad58319749cb7ca7b3c33d17"}'
+              [{"name": "outgoingfile"}], "version": "Send file@sha256=93f9f9614722f35fa3780b45067ac34abc0d4c56f4cc33249cee6cef0e190b9b"}'
         workspaces:
         - name: send-file
       workspaces:
@@ -191,7 +191,7 @@ spec:
             _parsed_args = vars(_parser.parse_args())
 
             _outputs = receive_file(**_parsed_args)
-          image: registry.access.redhat.com/ubi8/python-38
+          image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
           env:
           - name: ORIG_PR_NAME
             valueFrom:
@@ -248,7 +248,7 @@ spec:
           annotations:
             artifact_outputs: '["saveartifact"]'
             pipelines.kubeflow.org/component_spec_digest: '{"name": "Receive file",
-              "outputs": [{"name": "saveartifact"}], "version": "Receive file@sha256=0e5a4e789616b34d37f1dd67b68b94f4c200f29e383d531b486d16cb0e02a2ac"}'
+              "outputs": [{"name": "saveartifact"}], "version": "Receive file@sha256=9b22e9dbd16c107774680ec84250f31989d53ed914fcd1f252948f90cfea7280"}'
         workspaces:
         - name: receive-file
       workspaces:
@@ -333,7 +333,7 @@ spec:
             _parsed_args = vars(_parser.parse_args())
 
             _outputs = test_uploaded_artifact(**_parsed_args)
-          image: registry.access.redhat.com/ubi8/python-38
+          image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
           env:
           - name: ORIG_PR_NAME
             valueFrom:
@@ -347,7 +347,7 @@ spec:
             pipelines.kubeflow.org/cache_enabled: "true"
           annotations:
             pipelines.kubeflow.org/component_spec_digest: '{"name": "Test uploaded
-              artifact", "outputs": [], "version": "Test uploaded artifact@sha256=705c9f7ea80f9fddd0648dab1af3a365f661d7c55f89bb03a370ec7a6093180a"}'
+              artifact", "outputs": [], "version": "Test uploaded artifact@sha256=18e479efd270f696b831e3b0b94f140a17d57f908613d92491a7223cde89e6c9"}'
         workspaces:
         - name: test-uploaded-artifact
       workspaces:

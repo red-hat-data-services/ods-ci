@@ -97,7 +97,7 @@ class DataSciencePipelinesKfpTekton:
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')
         result = client.create_run_from_pipeline_func(
             pipeline_func=pipeline, arguments={
-                'mlpipeline_minio_artifact_secret': mlpipeline_minio_artifact_secret
+                'mlpipeline_minio_artifact_secret': mlpipeline_minio_artifact_secret["data"]
             }
         )
         # easy to debug and double check failures

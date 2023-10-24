@@ -294,7 +294,7 @@ spec:
                 name_data = previous_step.split('/')
                 object_name = 'artifacts/' + name_data[4] + '/receive-file/saveartifact.tgz'
 
-                mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret)["data"]
+                mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret)
 
                 def inner_decode(my_str):
                     return base64.b64decode(my_str).decode("utf-8")
@@ -305,7 +305,6 @@ spec:
                 secret_key = inner_decode(mlpipeline_minio_artifact_secret["secretkey"])
                 secure = inner_decode(mlpipeline_minio_artifact_secret["secure"])
                 secure = secure.lower() == 'true'
-                print(host, port, access_key, secret_key, secure)
                 client = Minio(
                     f'{host}:{port}',
                     access_key=access_key,
@@ -347,7 +346,7 @@ spec:
             pipelines.kubeflow.org/cache_enabled: "true"
           annotations:
             pipelines.kubeflow.org/component_spec_digest: '{"name": "Test uploaded
-              artifact", "outputs": [], "version": "Test uploaded artifact@sha256=18e479efd270f696b831e3b0b94f140a17d57f908613d92491a7223cde89e6c9"}'
+              artifact", "outputs": [], "version": "Test uploaded artifact@sha256=8949fd0857516c824f4067b8919144c641e93e8da787a638c48290bc6add6614"}'
         workspaces:
         - name: test-uploaded-artifact
       workspaces:

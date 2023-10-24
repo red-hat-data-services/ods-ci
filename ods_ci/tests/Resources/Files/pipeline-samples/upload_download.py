@@ -58,7 +58,7 @@ def test_uploaded_artifact(previous_step: kfp.components.InputPath(), file_size_
     name_data = previous_step.split('/')
     object_name = 'artifacts/' + name_data[4] + '/receive-file/saveartifact.tgz'
 
-    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret)["data"]
+    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret)
 
     def inner_decode(my_str):
         return base64.b64decode(my_str).decode("utf-8")
@@ -69,7 +69,6 @@ def test_uploaded_artifact(previous_step: kfp.components.InputPath(), file_size_
     secret_key = inner_decode(mlpipeline_minio_artifact_secret["secretkey"])
     secure = inner_decode(mlpipeline_minio_artifact_secret["secure"])
     secure = secure.lower() == 'true'
-    print(host, port, access_key, secret_key, secure)
     client = Minio(
         f'{host}:{port}',
         access_key=access_key,

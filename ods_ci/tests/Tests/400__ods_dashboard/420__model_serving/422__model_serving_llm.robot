@@ -467,6 +467,11 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    isvc_names=${models_names}
 
 Verify User Can Access Model Metrics From UWM
+    [Documentation]    Verifies that model metrics are available for users in the
+    ...                OpenShift monitoring system (UserWorkloadMonitoring)
+    ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
+    ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
+    ...                derived metrics.
     [Tags]    ODS-XYZ    WatsonX
     [Setup]    Set Project And Runtime    namespace=watsonx-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     watsonx-metrics
@@ -485,15 +490,21 @@ Verify User Can Access Model Metrics From UWM
     Query Models And Check Responses Multiple Times    models_names=${models_names}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=3
     ...    namespace=${test_namespace}
-    Sleep    5s    reason=Wait for metrics to be updated..
-    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
-    ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m    exp_value=3
+    Wait Until Keyword Succeeds    50 times    5s
+    ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
+    ...    model_name=${flan_model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=3
     User Can Fetch Number Of Successful Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m    exp_value=3
     User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
-    ...    namespace=${test_namespace}    period=5m    # add pod name?
-    # [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    # ...    isvc_names=${models_names}
+    ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
+    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}    query_idx=${0}
+    Wait Until Keyword Succeeds    30 times    5s
+    ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
+    ...    model_name=${flan_model_name}    query_kind=stream    namespace=${test_namespace}    period=5m    exp_value=1
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}
 
 
 *** Keywords ***
@@ -867,6 +878,7 @@ Query Models And Check Responses Multiple Times
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
             ...    insecure=${TRUE}    skip_res_json=${streamed_response}
+            Log    ${res}
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
             ...    streamed_response=${streamed_response}    query_idx=${query_idx}
@@ -932,28 +944,30 @@ Get Model Pods Creation Date And Image URL
     RETURN    ${created_at}    ${caikitsha}
 
 User Can Fetch Number Of Requests Over Defined Time
-    [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}    ${period}=30m    ${exp_value}=${EMPTY}
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}
+    ...           ${query_kind}=single    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    tgi_request_count[${period}]
     Log    ${resp.json()["data"]}
-    ${curr_value}    ${source_namespace}    ${source_model}=
-    ...    Check Last Value, Source Namespace And Model Name From Query Response    response=${resp}    exp_namespace=${namespace}
-    ...    exp_model_name=${model_name}    exp_value=${exp_value}
+    Check Query Response Values    response=${resp}    exp_namespace=${namespace}
+    ...    exp_model_name=${model_name}    exp_query_kind=${query_kind}    exp_value=${exp_value}
 
 User Can Fetch Number Of Successful Requests Over Defined Time
-    [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}    ${period}=30m    ${exp_value}=${EMPTY}
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}
+    ...            ${query_kind}=single    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    tgi_request_success[${period}]
     Log    ${resp.json()["data"]}
-    ${curr_value}    ${source_namespace}    ${source_model}=
-    ...    Check Last Value, Source Namespace And Model Name From Query Response    response=${resp}    exp_namespace=${namespace}
-    ...    exp_model_name=${model_name}    exp_value=${exp_value}
+    Check Query Response Values    response=${resp}    exp_namespace=${namespace}
+    ...    exp_model_name=${model_name}    exp_query_kind=${query_kind}    exp_value=${exp_value}
 
 User Can Fetch CPU Utilization
-    [Arguments]    ${thanos_url}    ${thanos_token}    ${namespace}    ${model_name}=${EMPTY}    ${period}=30m    ${exp_value}=${EMPTY}
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${namespace}    ${model_name}    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    pod:container_cpu_usage:sum{namespace="${namespace}"}[${period}]
+    ${pod_name}=    Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    fields=['metadata.name']
     Log    ${resp.json()["data"]}
-    ${curr_value}    ${source_namespace}    ${source_model}=
-    ...    Check Last Value, Source Namespace And Model Name From Query Response    response=${resp}    exp_namespace=${namespace}
-    ...    exp_model_name=${model_name}    exp_value=${exp_value}
+    Check Query Response Values    response=${resp}    exp_namespace=${namespace}
+    ...    exp_pod_name=${pod_name}[0][metadata.name]    exp_value=${exp_value}
 
 TGI Caikit And Istio Metrics Should Exist
     [Arguments]    ${thanos_url}    ${thanos_token}
@@ -972,9 +986,9 @@ TGI Caikit And Istio Metrics Should Exist
     ${metrics}=    Append To List    ${tgi_metrics_names}    @{caikit_metrics_names}    @{istio_metrics_names}
     RETURN    ${metrics}
 
-Check Last Value, Source Namespace And Model Name From Query Response
-    [Arguments]    ${response}    ${exp_namespace}    ${exp_model_name}=${EMPTY}    ${exp_value}=${EMPTY}
-    ${json_resp}=    Set Variable    ${response.json()["data"]["result"][0]}
+Check Query Response Values
+    [Arguments]    ${response}    ${exp_namespace}    ${exp_model_name}=${EMPTY}    ${exp_query_kind}=${EMPTY}    ${exp_value}=${EMPTY}    ${exp_pod_name}=${EMPTY}
+    ${json_resp}=    Set Variable    ${response.json()["data"]["result"][-1]}
     ${value_keyname}=    Run Keyword And Return Status
     ...    Dictionary Should Contain Key    ${json_resp}    value
     IF    ${value_keyname} == ${TRUE}
@@ -983,17 +997,21 @@ Check Last Value, Source Namespace And Model Name From Query Response
         ${curr_value}=    Set Variable    ${json_resp["values"][-1][-1]}
     END
     ${source_namespace}=    Set Variable    ${json_resp["metric"]["namespace"]}
-    ${source_model}=    Set Variable    ${json_resp["metric"]["job"]}
-    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_namespace}    ${namespace}
-    IF    "${model_name}" != "${EMPTY}"
-        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_model}    ${model_name}-metrics
+    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_namespace}    ${exp_namespace}
+    IF    "${exp_model_name}" != "${EMPTY}"
+        ${source_model}=    Set Variable    ${json_resp["metric"]["job"]}
+        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_model}    ${exp_model_name}-metrics
+        IF    "${exp_query_kind}" != "${EMPTY}"
+            ${source_query_kind}=    Set Variable    ${json_resp["metric"]["kind"]}
+            Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_query_kind}    ${exp_query_kind}
+        END
     END
-    # IF    "${pod_name}" != "${EMPTY}"
-    #     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_model}    ${model_name}-metrics
-    # END
+    IF    "${exp_pod_name}" != "${EMPTY}"
+        ${source_pod}=    Set Variable    ${json_resp["metric"]["pod"]}
+        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_pod}    ${exp_pod_name}
+    END
     IF    "${exp_value}" != "${EMPTY}"
         Run Keyword And Continue On Failure    Should Be Equal As Strings    ${curr_value}    ${exp_value}
     ELSE
         Run Keyword And Continue On Failure    Should Not Be Empty    ${curr_value}
     END
-    RETURN    ${curr_value}    ${source_namespace}    ${source_model}

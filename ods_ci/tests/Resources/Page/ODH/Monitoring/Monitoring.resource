@@ -157,7 +157,6 @@ Get Thanos Metrics List
         ${cmd}=    Catenate    ${cmd}    | jq '.data'
     ELSE
         ${cmd}=    Catenate    ${cmd} | jq '.data[]' | grep ${search_text}
-        # ${cmd}=    Catenate    ${cmd} | jq '.data | to_entries[] | select(.value | contains("${search_text}") )'
     END
     ${rc}    ${out}=    Run And Return Rc And Output    ${cmd} | tr -d '"'
     RETURN    ${out}

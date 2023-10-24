@@ -512,7 +512,7 @@ Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
-    # RHOSi Setup
+    RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
         IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
             Install Service Mesh Stack
@@ -748,6 +748,8 @@ Deploy Caikit Serving Runtime
     ...    oc apply -f ${CAIKIT_FILEPATH} -n ${namespace}
 
 Set Project And Runtime
+    [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
+    ...                creates caikit runtime. This can be used as test setup
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}
     Set Up Test OpenShift Project    test_ns=${namespace}
     Create Secret For S3-Like Buckets    endpoint=${MODELS_BUCKET.ENDPOINT}
@@ -944,6 +946,8 @@ Get Model Pods Creation Date And Image URL
     RETURN    ${created_at}    ${caikitsha}
 
 User Can Fetch Number Of Requests Over Defined Time
+    [Documentation]    Fetches the `tgi_request_count` metric and checks that it reports the expected
+    ...                model information (name, namespace and type of request)
     [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}
     ...           ${query_kind}=single    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    tgi_request_count[${period}]
@@ -952,6 +956,8 @@ User Can Fetch Number Of Requests Over Defined Time
     ...    exp_model_name=${model_name}    exp_query_kind=${query_kind}    exp_value=${exp_value}
 
 User Can Fetch Number Of Successful Requests Over Defined Time
+    [Documentation]    Fetches the `tgi_request_success` metric and checks that it reports the expected
+    ...                model information (name, namespace and type of request) and metric value, given a time window.
     [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}
     ...            ${query_kind}=single    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    tgi_request_success[${period}]
@@ -960,6 +966,8 @@ User Can Fetch Number Of Successful Requests Over Defined Time
     ...    exp_model_name=${model_name}    exp_query_kind=${query_kind}    exp_value=${exp_value}
 
 User Can Fetch CPU Utilization
+    [Documentation]    Fetches the `pod:container_cpu_usage:sum` metric and checks that it reports the expected
+    ...                model information (pod name and namespace)
     [Arguments]    ${thanos_url}    ${thanos_token}    ${namespace}    ${model_name}    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    pod:container_cpu_usage:sum{namespace="${namespace}"}[${period}]
     ${pod_name}=    Oc Get    kind=Pod    namespace=${namespace}
@@ -970,6 +978,8 @@ User Can Fetch CPU Utilization
     ...    exp_pod_name=${pod_name}[0][metadata.name]    exp_value=${exp_value}
 
 TGI Caikit And Istio Metrics Should Exist
+    [Documentation]    Checks that the `tgi_`, `caikit_` and `istio_` metrics exist.
+    ...                Returns the list of metrics names
     [Arguments]    ${thanos_url}    ${thanos_token}
     ${tgi_metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
     ...    search_text=tgi
@@ -987,6 +997,8 @@ TGI Caikit And Istio Metrics Should Exist
     RETURN    ${metrics}
 
 Check Query Response Values
+    [Documentation]    Implements the metric checks for `User Can Fetch Number Of Requests Over Defined Time`
+    ...                `User Can Fetch Number Of Successful Requests Over Defined Time` and `User Can Fetch CPU Utilization`.
     [Arguments]    ${response}    ${exp_namespace}    ${exp_model_name}=${EMPTY}    ${exp_query_kind}=${EMPTY}    ${exp_value}=${EMPTY}    ${exp_pod_name}=${EMPTY}
     ${json_resp}=    Set Variable    ${response.json()["data"]["result"][-1]}
     ${value_keyname}=    Run Keyword And Return Status

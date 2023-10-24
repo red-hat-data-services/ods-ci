@@ -988,11 +988,9 @@ TGI Caikit And Istio Metrics Should Exist
     ${caikit_metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
     ...    search_text=caikit
     ${caikit_metrics_names}=    Split To Lines    ${caikit_metrics_names}
-    Set Suite Variable    ${CAIKIT_METRICS_NAMES}    ${caikit_metrics_names}
     ${istio_metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
     ...    search_text=istio
     ${istio_metrics_names}=    Split To Lines    ${istio_metrics_names}
-    Set Suite Variable    ${ISTIO_METRICS_NAMES}    ${istio_metrics_names}
     ${metrics}=    Append To List    ${tgi_metrics_names}    @{caikit_metrics_names}    @{istio_metrics_names}
     RETURN    ${metrics}
 
@@ -1012,10 +1010,12 @@ Check Query Response Values
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_namespace}    ${exp_namespace}
     IF    "${exp_model_name}" != "${EMPTY}"
         ${source_model}=    Set Variable    ${json_resp["metric"]["job"]}
-        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_model}    ${exp_model_name}-metrics
+        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_model}
+        ...    ${exp_model_name}-metrics
         IF    "${exp_query_kind}" != "${EMPTY}"
             ${source_query_kind}=    Set Variable    ${json_resp["metric"]["kind"]}
-            Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_query_kind}    ${exp_query_kind}
+            Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_query_kind}
+            ...    ${exp_query_kind}
         END
     END
     IF    "${exp_pod_name}" != "${EMPTY}"

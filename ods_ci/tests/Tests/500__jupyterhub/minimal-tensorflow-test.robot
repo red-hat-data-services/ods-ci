@@ -32,7 +32,6 @@ Tensorflow Workload Test
     [Tags]  Sanity
     ...     PLACEHOLDER  # category tags
     ...     ODS-1156
-    ...     AutomationBug
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
@@ -42,7 +41,6 @@ Verify Tensorboard Is Accessible
     [Tags]  Sanity
     ...     PLACEHOLDER
     ...     ODS-1413
-    ...     AutomationBug
     Close Previous Server
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small
     Run Keyword And Ignore Error  Clone Git Repository And Run  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main

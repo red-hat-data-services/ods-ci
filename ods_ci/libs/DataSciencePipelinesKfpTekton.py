@@ -67,6 +67,16 @@ class DataSciencePipelinesKfpTekton:
         )
         return json.loads(secret_json)
 
+    def get_bucket_name(self, api, project):
+        bucket_name, _ = api.run_oc(
+            f"oc get dspa -n {project} pipelines-definition -o json"
+        )
+        objectStorage = json.loads(bucket_name)['spec']['objectStorage']
+        if 'minio' in objectStorage:
+            return objectStorage['minio']['bucket']
+        else:
+            return objectStorage['externalStorage']['bucket']
+
     def import_souce_code(self, path):
         module_name = os.path.basename(path).replace("-", "_")
         spec = importlib.util.spec_from_loader(
@@ -83,6 +93,7 @@ class DataSciencePipelinesKfpTekton:
     ):
         client, api = self.get_client(user, pwd, project, route_name)
         mlpipeline_minio_artifact_secret = self.get_secret(api, project, 'mlpipeline-minio-artifact')
+        bucket_name = self.get_bucket_name(api, project)
         # the current path is from where you are running the script
         # sh ods_ci/run_robot_test.sh
         # the current_path will be ods-ci
@@ -97,7 +108,8 @@ class DataSciencePipelinesKfpTekton:
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')
         result = client.create_run_from_pipeline_func(
             pipeline_func=pipeline, arguments={
-                'mlpipeline_minio_artifact_secret': mlpipeline_minio_artifact_secret["data"]
+                'mlpipeline_minio_artifact_secret': mlpipeline_minio_artifact_secret["data"],
+                'bucket_name': bucket_name
             }
         )
         # easy to debug and double check failures

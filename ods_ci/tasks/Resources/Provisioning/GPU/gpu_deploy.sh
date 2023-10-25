@@ -57,9 +57,9 @@ function rerun_accelerator_migration() {
       return 1
   fi
 
-  dashboard_pod=$(oc get po -n redhat-ods-applications | grep rhods-dashboard- | awk '{print $1;exit}')
+  dashboard_pod=$(oc get po -n redhat-ods-applications -l app=rhods-dashboard -o name | head -n1)
   echo "Deleting pod $dashboard_pod"
-  if ! oc delete po "$dashboard_pod"  -n redhat-ods-applications;
+  if ! oc delete "$dashboard_pod"  -n redhat-ods-applications;
     then
       printf "ERROR: When trying to delete Pod $dashboard_pod \n"
       return 1

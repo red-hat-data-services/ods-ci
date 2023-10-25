@@ -493,9 +493,11 @@ Verify User Can Access Model Metrics From UWM
     Wait Until Keyword Succeeds    50 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=3
-    User Can Fetch Number Of Successful Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
+    Wait Until Keyword Succeeds    20 times    5s
+    ...    User Can Fetch Number Of Successful Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m    exp_value=3
-    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
+    Wait Until Keyword Succeeds    20 times    5s
+    ...    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
     Query Models And Check Responses Multiple Times    models_names=${models_names}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
@@ -947,7 +949,8 @@ Get Model Pods Creation Date And Image URL
 
 User Can Fetch Number Of Requests Over Defined Time
     [Documentation]    Fetches the `tgi_request_count` metric and checks that it reports the expected
-    ...                model information (name, namespace and type of request)
+    ...                model information (name, namespace, pod name and type of request).
+    ...                If ${exp_value} is given, it checks also the metric value
     [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}
     ...           ${query_kind}=single    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    tgi_request_count[${period}]
@@ -957,7 +960,8 @@ User Can Fetch Number Of Requests Over Defined Time
 
 User Can Fetch Number Of Successful Requests Over Defined Time
     [Documentation]    Fetches the `tgi_request_success` metric and checks that it reports the expected
-    ...                model information (name, namespace and type of request) and metric value, given a time window.
+    ...                model information (name, namespace and type of request).
+    ...                If ${exp_value} is given, it checks also the metric value
     [Arguments]    ${thanos_url}    ${thanos_token}    ${model_name}    ${namespace}
     ...            ${query_kind}=single    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    tgi_request_success[${period}]
@@ -967,7 +971,8 @@ User Can Fetch Number Of Successful Requests Over Defined Time
 
 User Can Fetch CPU Utilization
     [Documentation]    Fetches the `pod:container_cpu_usage:sum` metric and checks that it reports the expected
-    ...                model information (pod name and namespace)
+    ...                model information (pod name and namespace).
+    ...                If ${exp_value} is given, it checks also the metric value
     [Arguments]    ${thanos_url}    ${thanos_token}    ${namespace}    ${model_name}    ${period}=30m    ${exp_value}=${EMPTY}
     ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    pod:container_cpu_usage:sum{namespace="${namespace}"}[${period}]
     ${pod_name}=    Oc Get    kind=Pod    namespace=${namespace}
@@ -994,36 +999,68 @@ TGI Caikit And Istio Metrics Should Exist
     ${metrics}=    Append To List    ${tgi_metrics_names}    @{caikit_metrics_names}    @{istio_metrics_names}
     RETURN    ${metrics}
 
-Check Query Response Values
+Check Query Response Values    # robocop:disable
     [Documentation]    Implements the metric checks for `User Can Fetch Number Of Requests Over Defined Time`
     ...                `User Can Fetch Number Of Successful Requests Over Defined Time` and `User Can Fetch CPU Utilization`.
+    ...                It searches among the available metric values for the specific model
     [Arguments]    ${response}    ${exp_namespace}    ${exp_model_name}=${EMPTY}    ${exp_query_kind}=${EMPTY}    ${exp_value}=${EMPTY}    ${exp_pod_name}=${EMPTY}
-    ${json_resp}=    Set Variable    ${response.json()["data"]["result"][-1]}
-    ${value_keyname}=    Run Keyword And Return Status
-    ...    Dictionary Should Contain Key    ${json_resp}    value
-    IF    ${value_keyname} == ${TRUE}
-        ${curr_value}=    Set Variable    ${json_resp["value"][-1]}
-    ELSE
-        ${curr_value}=    Set Variable    ${json_resp["values"][-1][-1]}
-    END
-    ${source_namespace}=    Set Variable    ${json_resp["metric"]["namespace"]}
-    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_namespace}    ${exp_namespace}
-    IF    "${exp_model_name}" != "${EMPTY}"
-        ${source_model}=    Set Variable    ${json_resp["metric"]["job"]}
-        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_model}
-        ...    ${exp_model_name}-metrics
-        IF    "${exp_query_kind}" != "${EMPTY}"
-            ${source_query_kind}=    Set Variable    ${json_resp["metric"]["kind"]}
-            Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_query_kind}
-            ...    ${exp_query_kind}
+    ${json_results}=    Set Variable    ${response.json()["data"]["result"]}
+    FOR    ${index}    ${result}    IN ENUMERATE    @{json_results}
+        Log    ${index}: ${result}
+        ${value_keyname}=    Run Keyword And Return Status
+        ...    Dictionary Should Contain Key    ${result}    value
+        IF    ${value_keyname} == ${TRUE}
+            ${curr_value}=    Set Variable    ${result["value"][-1]}
+        ELSE
+            ${curr_value}=    Set Variable    ${result["values"][-1][-1]}
+        END
+        ${source_namespace}=    Set Variable    ${result["metric"]["namespace"]}
+        ${checked}=    Run Keyword And Return Status    Should Be Equal As Strings    ${source_namespace}    ${exp_namespace}
+        IF    ${checked} == ${FALSE}
+            Continue For Loop
+        ELSE
+            Log    message=Metrics source namespaced succesfully checked. Going to next step.      
+        END
+        IF    "${exp_model_name}" != "${EMPTY}"
+            ${source_model}=    Set Variable    ${result["metric"]["job"]}
+            ${checked}=    Run Keyword And Return Status    Should Be Equal As Strings    ${source_model}
+            ...    ${exp_model_name}-metrics
+            IF    ${checked} == ${FALSE}
+                Continue For Loop
+            ELSE
+                Log    message=Metrics source model succesfully checked. Going to next step.      
+            END
+            IF    "${exp_query_kind}" != "${EMPTY}"
+                ${source_query_kind}=    Set Variable    ${result["metric"]["kind"]}
+                ${checked}=    Run Keyword And Return Status    Should Be Equal As Strings    ${source_query_kind}
+                ...    ${exp_query_kind}
+                IF    ${checked} == ${FALSE}
+                    Continue For Loop
+                ELSE
+                    Log    message=Metrics query kind succesfully checked. Going to next step.      
+                END
+            END
+        END
+        IF    "${exp_pod_name}" != "${EMPTY}"
+            ${source_pod}=    Set Variable    ${result["metric"]["pod"]}
+            ${checked}=    Run Keyword And Return Status    Should Be Equal As Strings    ${source_pod}
+            ...    ${exp_pod_name}
+            IF    ${checked} == ${FALSE}
+                Continue For Loop
+            ELSE
+                Log    message=Metrics source pod succesfully checked. Going to next step.      
+            END
+        END
+        IF    "${exp_value}" != "${EMPTY}"
+            Run Keyword And Continue On Failure    Should Be Equal As Strings    ${curr_value}    ${exp_value}
+        ELSE
+            Run Keyword And Continue On Failure    Should Not Be Empty    ${curr_value}
+        END
+        IF    ${checked} == ${TRUE}
+            Log    message=The desired query result has been found.
+            Exit For Loop
         END
     END
-    IF    "${exp_pod_name}" != "${EMPTY}"
-        ${source_pod}=    Set Variable    ${json_resp["metric"]["pod"]}
-        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${source_pod}    ${exp_pod_name}
-    END
-    IF    "${exp_value}" != "${EMPTY}"
-        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${curr_value}    ${exp_value}
-    ELSE
-        Run Keyword And Continue On Failure    Should Not Be Empty    ${curr_value}
+    IF    ${checked} == ${FALSE}
+        Fail    msg=The metric you are looking for has not been found. Check the query parameter and try again 
     END

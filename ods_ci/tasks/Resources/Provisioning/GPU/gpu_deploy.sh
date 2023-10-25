@@ -44,7 +44,7 @@ function rerun_accelerator_migration() {
 # As we are adding the GPUs after installing the RHODS operator, those GPUs are not discovered automatically.
 # In order to rerun the migration we need to
 # 1. Delete the migration configmap
-# 2. Delete one of the dashboard pods, so the configmap is created again and the migration run again
+# 2. Rollout restart dashboard deployment, so the configmap is created again and the migration run again
 # Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
 
   local timeout_seconds=600
@@ -57,11 +57,10 @@ function rerun_accelerator_migration() {
       return 1
   fi
 
-  dashboard_pod=$(oc get po -n redhat-ods-applications -l app=rhods-dashboard -o name | head -n1)
-  echo "Deleting pod $dashboard_pod"
-  if ! oc delete "$dashboard_pod"  -n redhat-ods-applications;
+  echo "Rollout restart rhods-dashboard deployment"
+  if ! oc rollout restart deployment.apps/rhods-dashboard -n redhat-ods-applications;
     then
-      printf "ERROR: When trying to delete Dashboard Pod\n"
+      printf "ERROR: When trying to rollout restart rhods-dashboard deployment\n"
       return 1
   fi
 

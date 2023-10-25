@@ -41,11 +41,11 @@ function wait_until_gpu_pods_are_running() {
 }
 
 function rerun_accelerator_migration() {
-#As we are adding the GPUs after installing the operator, those GPUs are not discovered automatically.
-#In order to rerun the migration we need to
-#1. Delete the migration configmap
-#2. Delete the dashboard replicaset to trigger new pods
-#Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
+# As we are adding the GPUs after installing the RHODS operator, those GPUs are not discovered automatically.
+# In order to rerun the migration we need to
+# 1. Delete the migration configmap
+# 2. Delete one of the dashboard pods, so the configmap is created again and the migration run again
+# Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
 
   local timeout_seconds=600
   local sleep_time=5
@@ -57,29 +57,14 @@ function rerun_accelerator_migration() {
       return 1
   fi
 
-  dashboard_rs=$(oc get rs -n redhat-ods-applications | grep rhods-dashboard- | awk '{print $1;exit}')
-  echo "Deleting ReplicaSet $dashboard_rs"
-  if ! oc delete rs "$dashboard_rs"  -n redhat-ods-applications;
+  dashboard_pod=$(oc get po -n redhat-ods-applications | grep rhods-dashboard- | awk '{print $1;exit}')
+  echo "Deleting pod $dashboard_pod"
+  if ! oc delete po "$dashboard_pod"  -n redhat-ods-applications;
     then
-      printf "ERROR: When trying to delete the dashboard replica set\n"
+      printf "ERROR: When trying to delete Pod $dashboard_pod \n"
       return 1
   fi
 
-  # Wait until all dashboard pods are ready again
-  SECONDS=0
-  while [ "$SECONDS" -le "$timeout_seconds" ]; do
-    dashboard_pods=$(oc get deployment rhods-dashboard -n redhat-ods-applications | grep rhods-dashboard | awk '{print $2;exit}')
-    dashboard_pods_total=$(echo "$dashboard_pods" | cut -c3-3)
-    dashboard_pods_avail=$(echo "$dashboard_pods" | cut -c1-1)
-    ((remaining_seconds = timeout_seconds - SECONDS))
-    echo "Dashboard pods: Available $dashboard_pods_avail out of $dashboard_pods_total ... (timeout in $remaining_seconds seconds)"
-    if [ "$dashboard_pods_avail" == "$dashboard_pods_total" ]; then
-      break
-    else
-      sleep $sleep_time
-      ((SECONDS+=$sleep_time))
-    fi
-  done
 }
 
 wait_until_gpu_pods_are_running

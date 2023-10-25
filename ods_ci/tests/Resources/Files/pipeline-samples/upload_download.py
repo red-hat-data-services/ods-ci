@@ -49,7 +49,7 @@ def receive_file(
     shutil.copyfile(incomingfile, saveartifact)
 
 
-def test_uploaded_artifact(previous_step: kfp.components.InputPath(), file_size_bytes: int, mlpipeline_minio_artifact_secret: str):
+def test_uploaded_artifact(previous_step: kfp.components.InputPath(), file_size_bytes: int, mlpipeline_minio_artifact_secret: str, bucket_name: str):
     from minio import Minio
     import base64
     import json
@@ -58,7 +58,7 @@ def test_uploaded_artifact(previous_step: kfp.components.InputPath(), file_size_
     name_data = previous_step.split('/')
     object_name = 'artifacts/' + name_data[4] + '/receive-file/saveartifact.tgz'
 
-    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret)["data"]
+    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret)
 
     def inner_decode(my_str):
         return base64.b64decode(my_str).decode("utf-8")
@@ -69,7 +69,6 @@ def test_uploaded_artifact(previous_step: kfp.components.InputPath(), file_size_
     secret_key = inner_decode(mlpipeline_minio_artifact_secret["secretkey"])
     secure = inner_decode(mlpipeline_minio_artifact_secret["secure"])
     secure = secure.lower() == 'true'
-    print(host, port, access_key, secret_key, secure)
     client = Minio(
         f'{host}:{port}',
         access_key=access_key,
@@ -77,7 +76,7 @@ def test_uploaded_artifact(previous_step: kfp.components.InputPath(), file_size_
         secure=secure
     )
 
-    data = client.get_object('mlpipeline', object_name)
+    data = client.get_object(bucket_name, object_name)
     with open('my-testfile', 'wb') as file_data:
         for d in data.stream(32 * 1024):
             file_data.write(d)
@@ -114,7 +113,7 @@ test_uploaded_artifact_op = kfp.components.create_component_from_func(
 @kfp.dsl.pipeline(
     name="Test Data Passing Pipeline 1",
 )
-def wire_up_pipeline(mlpipeline_minio_artifact_secret):
+def wire_up_pipeline(mlpipeline_minio_artifact_secret, bucket_name):
     import json
 
     file_size_mb = 20
@@ -126,6 +125,6 @@ def wire_up_pipeline(mlpipeline_minio_artifact_secret):
         send_file_task.output,
     ).add_pod_annotation(name='artifact_outputs', value=json.dumps(['saveartifact']))
 
-    test_uploaded_artifact_op(receive_file_task.output, file_size_bytes, mlpipeline_minio_artifact_secret)
+    test_uploaded_artifact_op(receive_file_task.output, file_size_bytes, mlpipeline_minio_artifact_secret, bucket_name)
 
 

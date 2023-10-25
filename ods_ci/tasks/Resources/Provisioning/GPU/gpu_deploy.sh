@@ -61,7 +61,7 @@ function rerun_accelerator_migration() {
   echo "Deleting pod $dashboard_pod"
   if ! oc delete "$dashboard_pod"  -n redhat-ods-applications;
     then
-      printf "ERROR: When trying to delete Pod $dashboard_pod \n"
+      printf "ERROR: When trying to delete Dashboard Pod\n"
       return 1
   fi
 

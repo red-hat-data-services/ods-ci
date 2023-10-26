@@ -18,7 +18,7 @@ ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]/
 ${WORKBENCH_SIZE_SIDE_MENU_BTN}=           xpath=//nav[@aria-label="Jump to section"]//span[text()="Deployment size"]
 ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
 ${WORKBENCH_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
-${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}=    xpath=${WORKBENCH_INPUT_XPATH}/preceding-sibling::button
+${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
@@ -346,7 +346,7 @@ Handle Stop Workbench Confirmation Modal
         Run Keyword And Continue On Failure
         ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
         Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your
-        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]     
+        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]
     END
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
     Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]

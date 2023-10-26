@@ -42,6 +42,7 @@ Resource            Common.robot
 ...                         Fill Data Connection Form
 ...                         Create Secret For S3-Like Buckets
 ...                         Login To OCP Using API
+...                         Generate Thanos Token
 
 
 *** Keywords ***

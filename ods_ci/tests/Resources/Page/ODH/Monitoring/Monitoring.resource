@@ -135,3 +135,28 @@ Suite Availability Teardown
     Run Keyword And Warn On Failure    Alerts Should Not Be Firing
     ...    pm_url=${pm_url}    pm_token=${pm_token}    expected-firing-alert=DeadManSnitch
     ...    message_prefix=Suite Trdwn: ${SUITE NAME}:
+
+Get OpenShift Thanos URL
+    [Documentation]    Fetches the thanos URL from the OpenShift cluster
+    ${url}=    Oc Get    kind=Route    name=thanos-querier    namespace=openshift-monitoring
+    ...    fields=['status.ingress[0].host']
+    RETURN   ${url}[0][status.ingress[0].host]
+
+Generate Thanos Token
+    [Documentation]    Fetch user token to access thanos-querier.
+    ${rc}    ${out}=    Run And Return Rc And Output    oc whoami -t
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${out}
+
+Get Thanos Metrics List
+    [Documentation]    Gets the list of metrics available in thanos-querier and their type
+    ...                (e.g., counter, histogram, etc)
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${search_text}=${EMPTY}
+    ${cmd}=    Set Variable    curl -k -H "Authorization: Bearer ${thanos_token}" https://${thanos_url}/api/v1/label/__name__/values
+    IF    "${search_text}" == "${EMPTY}"
+        ${cmd}=    Catenate    ${cmd}    | jq '.data'
+    ELSE
+        ${cmd}=    Catenate    ${cmd} | jq '.data[]' | grep ${search_text}
+    END
+    ${rc}    ${out}=    Run And Return Rc And Output    ${cmd} | tr -d '"'
+    RETURN    ${out}

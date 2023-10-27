@@ -14,8 +14,12 @@ ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
 ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//div[@id="workbench-image-stream-selection"]/button    # robocop: disable
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//div[@id="workbench-image-stream-selection"]//li//div
-# ${WORKBENCH_IMAGE_ITEM_SPAN_XP}=           xpath=//ul[@id="workbench-image-stream-selection"]/li//span
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button  # Removing the attribute in case it changes like it did for the image dropdown
+${WORKBENCH_SIZE_SIDE_MENU_BTN}=           xpath=//nav[@aria-label="Jump to section"]//span[text()="Deployment size"]
+${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
+${WORKBENCH_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
+${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
+${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
@@ -210,9 +214,10 @@ Select Workbench Image Version
 Select Workbench Container Size
     [Documentation]    Selects the container size in the workbench creation page
     [Arguments]     ${size_name}=Small
-    Click Element    //a[@href="#deployment-size"]
+    Wait Until Page Contains Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
+    Click Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
-    Click Button    ${WORKBENCH_SIZE_MENU_BTN_XP}
+    Click Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]
     Click Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]
 
@@ -341,7 +346,7 @@ Handle Stop Workbench Confirmation Modal
         Run Keyword And Continue On Failure
         ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
         Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your
-        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]     
+        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]
     END
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
     Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
@@ -460,11 +465,31 @@ Page Should Contain Event Log
 
 Select Workbench Number Of GPUs
     [Documentation]    Selects the container size in the workbench creation page
-    [Arguments]     ${gpus}
-    Wait Until Page Contains Element    ${WORKBENCH_GPU_MENU_BTN_XP}
-    Click Button    ${WORKBENCH_GPU_MENU_BTN_XP}
-    Wait Until Page Contains Element    ${WORKBENCH_GPU_ITEM_BTN_XP}/self::*[text()="${gpus}"]
-    Click Element    ${WORKBENCH_GPU_ITEM_BTN_XP}/self::*[text()="${gpus}"]
+    [Arguments]     ${gpus}    ${gpu_type}='Nvidia GPU'
+    Wait Until Page Contains Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
+    Click Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
+    Wait Until Page Contains Element    ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}
+    Click Element    ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}
+    IF  "${gpus}" == "0"
+        Click Element    xpath=//a[text()='None']
+    ELSE
+        # Select Accelerator Technology
+        Wait Until Page Contains Element    xpath=//div[@class and text()=${gpu_type}]
+        Click Element    xpath=//div[@class and text()=${gpu_type}]
+        # Select number of GPU units
+        ${actual_gpus}=    Get Value   ${WORKBENCH_ACCELERATOR_INPUT_XPATH}
+        ${actual_gpus}=    Convert To Integer    ${actual_gpus}
+        ${gpus}=    Convert To Integer    ${gpus}
+        WHILE  ${actual_gpus} != ${gpus}
+            IF  ${actual_gpus} < ${gpus}
+                Click Element    ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}
+            ELSE
+                Click Element    ${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}
+            END
+            ${actual_gpus}=    Get Value   ${WORKBENCH_ACCELERATOR_INPUT_XPATH}
+            ${actual_gpus}=    Convert To Integer    ${actual_gpus}
+        END
+    END
 
 Edit GPU Number
     [Documentation]    Edit a workbench
@@ -498,12 +523,6 @@ Delete Workbench From CLI
         END
     END
 
-GPU Dropdown Should Be Disabled
-    [Documentation]    Checks if the GPU dropdown is not able editable
-    [Arguments]     ${workbench_title}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
-    Wait Until Page Contains Element    ${WORKBENCH_GPU_MENU_BTN_XP}
-    Element Should Be Disabled    ${WORKBENCH_GPU_MENU_BTN_XP}
 
 Get Workbench Pod
     [Documentation]    Retrieves info of a workbench pod: namespace, CR resource name and pod definition

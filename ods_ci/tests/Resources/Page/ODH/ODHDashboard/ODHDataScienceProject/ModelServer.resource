@@ -18,11 +18,11 @@ ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET
 ${REPLICAS_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${REPLICAS_MIN_BTN_XP}=         xpath=//div/button[@aria-label="Minus"]
 ${SERVING_RUNTIME_NAME}=        xpath=//input[@id="serving-runtime-name-input"]
-${GPU_SECTION_TITLE}=           xpath=//span[.="Model server GPUs"]
-${GPU_SECTION_INPUT}=           ${GPU_SECTION_TITLE}/../../..//input
-${GPU_SECTION_PLUS}=            ${GPU_SECTION_TITLE}/../../..//button[@aria-label="Plus"]
-${GPU_SECTION_MINUS}=           ${GPU_SECTION_TITLE}/../../..//button[@aria-label="Minus"]
-
+${SERVING_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
+${SERVING_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
+${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}=    xpath=${SERVING_INPUT_XPATH}/preceding-sibling::button
+${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/following-sibling::button
+${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model servers']
 
 *** Keywords ***
 Create Model Server
@@ -42,6 +42,7 @@ Create Model Server
             Log    GPU requested but not available
             Fail
         END
+        Set Accelerator
         Set Number of GPU With Buttons   ${no_gpus}
     END
     IF    ${ext_route}==${TRUE}
@@ -88,13 +89,18 @@ Set Server Size
 
 Verify GPU Selector Is Usable
     [Documentation]    Verifies that the GPU selector is present and enabled
-    Page Should Contain Element    ${GPU_SECTION_TITLE}
-    Element Should Be Enabled    ${GPU_SECTION_INPUT}
+    Page Should Contain Element    ${SERVING_ACCELERATOR_DROPDOWN_XPATH}
+
+Set Accelerator
+    [Documentation]  Set Accelerator
+    [Arguments]    ${accelerator}='Nvidia GPU'
+    Click Element  ${SERVING_ACCELERATOR_DROPDOWN_XPATH}
+    Click Element  xpath=//div[@class and text()=${accelerator}]
 
 Set Number of GPU With Buttons
     [Documentation]    Select the number of GPUs to attach to the model server
     [Arguments]    ${no_gpus}
-    ${current}=    Get Element Attribute    ${GPU_SECTION_INPUT}    value
+    ${current}=    Get Element Attribute    ${SERVING_ACCELERATOR_INPUT_XPATH}    value
     ${difference}=    Evaluate    int(${no_gpus})-int(${current})
     ${op}=    Set Variable    plus
     IF    ${difference}<${0}
@@ -108,16 +114,16 @@ Set Number of GPU With Buttons
             Click GPU Minus Button
         END
     END
-    ${current}=    Get Element Attribute    ${GPU_SECTION_INPUT}    value
+    ${current}=    Get Element Attribute    ${SERVING_ACCELERATOR_INPUT_XPATH}    value
     Should Be Equal As Integers    ${current}    ${no_gpus}
 
 Click GPU Plus Button
     [Documentation]    Click the plus button in the GPU selector
-    Click Element    ${GPU_SECTION_PLUS}
+    Click Element    ${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}
 
 Click GPU Minus Button
     [Documentation]    Click the minus button in the GPU selector
-    Click Element    ${GPU_SECTION_MINUS}
+    Click Element    ${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}
 
 Verify Displayed GPU Count
     [Documentation]    Verifies the number of GPUs displayed in the Model Server table
@@ -128,8 +134,10 @@ Verify Displayed GPU Count
     IF    ${expanded}==False
         Click Element    xpath://button[@aria-expanded="false"]/span[.="${server_name}"]
     END
-    Page Should Contain Element    xpath://span[.="${server_name}"]/../../../..//span[.="Number of GPUs"]
-    Page Should Contain Element    xpath://span[.="${server_name}"]/../../../..//span[.="Number of GPUs"]/../../dd/div[.="${no_gpus}"]
+    Click Element    ${SERVING_MODEL_SERVERS_SIDE_MENU}
+    Sleep  5s      reason=Sometimes the number of current Accelerators take a few seconds to update
+    ${current_accs}=  Get Text  xpath://span[text()="${server_name}"]/../../../following-sibling::tr//td[@data-label]/div/dl/div[4]/dd/div
+    Should Match  ${current_accs}  ${no_gpus}
 
 Set Model Server Runtime
     [Documentation]    Selects a given Runtime for the model server

@@ -40,9 +40,33 @@ function wait_until_gpu_pods_are_running() {
 
 }
 
+function rerun_accelerator_migration() {
+# As we are adding the GPUs after installing the RHODS operator, those GPUs are not discovered automatically.
+# In order to rerun the migration we need to
+# 1. Delete the migration configmap
+# 2. Rollout restart dashboard deployment, so the configmap is created again and the migration run again
+# Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
+
+  echo "Deleting configmap migration-gpu-status"
+  if ! oc delete configmap migration-gpu-status -n redhat-ods-applications;
+    then
+      printf "ERROR: When trying to delete the migration-gpu-status configmap\n"
+      return 1
+  fi
+
+  echo "Rollout restart rhods-dashboard deployment"
+  if ! oc rollout restart deployment.apps/rhods-dashboard -n redhat-ods-applications;
+    then
+      printf "ERROR: When trying to rollout restart rhods-dashboard deployment\n"
+      return 1
+  fi
+
+}
+
 wait_until_gpu_pods_are_running
 oc apply -f ${GPU_INSTALL_DIR}/nfd_deploy.yaml
 oc get csv -n nvidia-gpu-operator $CSVNAME -ojsonpath={.metadata.annotations.alm-examples} | jq .[0] > clusterpolicy.json
 oc apply -f clusterpolicy.json
+rerun_accelerator_migration
 
 

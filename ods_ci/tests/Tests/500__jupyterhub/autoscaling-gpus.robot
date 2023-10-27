@@ -58,7 +58,8 @@ Spawn Notebook And Trigger Autoscale
     ...    of the GPU node.
     Select Notebook Image    ${NOTEBOOK_IMAGE}
     Select Container Size    Small
-    Set Number Of Required GPUs    1
+    Set NVidia GPU Accelerator
+    Set Number Of Required Accelerators    1
     Spawn Notebook    spawner_timeout=20 minutes  expect_autoscaling=${True}
     Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
     ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible

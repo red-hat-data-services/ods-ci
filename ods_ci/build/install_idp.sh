@@ -24,21 +24,8 @@ perform_ocm_login(){
 }
 
 function generate_rand_string(){
-  # sleep 2
-  # date +%s | sha256sum | base64 | head -c 64
-  p_array=()
-  for i in {a..z} {A..Z} {0..9}; 
-    do
-    p_array[$RANDOM]=$i
-  done
-  first=${p_array[-1]}
-  chars='@#$%_+='
-  for el in ${p_array[@]}
-    do
-    p_array[$RANDOM]=${chars:$((RANDOM % ${#chars})):1}
-  done
-  p_array[0]=$first
-  printf %s ${p_array[@]}
+  local length="${1:-64}"
+  cat /dev/urandom | tr -dc "0-9a-zA-Z@#$%_+=" | head -c "${length}"
 }
 
 function generate_rand_user_base_suffix(){
@@ -101,7 +88,7 @@ function generate_users_creds(){
   pw=$(echo $idp | jq -r '.pw')
   if [[ "$pw" =  "<GEN_RAMDOM_PW>" ]]
       then
-          pw=$(generate_rand_string)
+          pw=$(generate_rand_string "64")
             if [ "${RETURN_PW}" -eq 1 ]
               then
                   echo Random $1 pasword: $pw

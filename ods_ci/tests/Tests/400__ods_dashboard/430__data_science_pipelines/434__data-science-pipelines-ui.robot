@@ -13,6 +13,8 @@ Suite Teardown     Pipelines Suite Teardown
 # lower case because it will be the OpenShift project
 ${PRJ_BASE_TITLE}=   dsp
 ${PRJ_DESCRIPTION}=   ${PRJ_BASE_TITLE} is a test project for validating DS Pipelines feature
+${PRJ_TITLE}=    ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
+${PIPELINE_TEST_NAME}=    ${PIPELINE_TEST_BASENAME}-${TEST_USER_3.USERNAME}
 ${DC_NAME}=    ds-pipeline-conn
 ${PIPELINE_TEST_BASENAME}=    iris
 ${PIPELINE_TEST_DESC}=    test pipeline definition
@@ -41,6 +43,8 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    project_title=${PRJ_TITLE}
     ...    filepath=${PIPELINE_TEST_FILEPATH}
     ...    press_cancel=${FALSE}
+    Pipeline Context Menu Should Be Readonly    pipeline_name=${PIPELINE_TEST_NAME}
+    Open Data Science Project Details Page    ${PRJ_TITLE}
     Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
     ...    pipeline_description=${PIPELINE_TEST_DESC}
     Capture Page Screenshot
@@ -105,11 +109,8 @@ Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
 Pipelines Suite Setup    # robocop: disable
     [Documentation]    Sets global test variables, create a DS project and a data connection
     Set Library Search Order    SeleniumLibrary
+    # TODO: Install Pipeline only if it does not already installed
     Install Red Hat OpenShift Pipelines
-    ${prj_title}=    Set Variable    ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
-    ${iris_pipeline_name}=    Set Variable    ${PIPELINE_TEST_BASENAME}-${TEST_USER_3.USERNAME}
-    Set Suite Variable    ${PRJ_TITLE}    ${prj_title}
-    Set Suite Variable    ${PIPELINE_TEST_NAME}    ${iris_pipeline_name}
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}

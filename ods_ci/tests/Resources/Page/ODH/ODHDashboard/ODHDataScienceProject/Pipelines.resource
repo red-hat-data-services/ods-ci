@@ -112,6 +112,24 @@ Click Action From Actions Menu
     Wait Until Page Contains Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]
     Click Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]
 
+Pipeline Context Menu Should Be Readonly
+    [Documentation]   Test Pipeline YAML context menu and verify read only (https://github.com/opendatahub-io/odh-dashboard/issues/1689)
+    [Arguments]    ${pipeline_name}
+    ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
+    Wait Until Element is Visible     //button[contains(text(), "Data Science Pipelines")]          timeout=30
+    Click Button      Data Science Pipelines
+    Click Link      Pipelines
+    Wait Until Element is Visible     //a[text()="${pipeline_name}"]          timeout=30s
+    Click Link      ${pipeline_name}
+    Click Element     //button[@aria-label="Pipeline YAML Tab"]
+    Open Context Menu    //div[contains(@class, 'lines-content')]
+    Click Element     //button[@aria-label="Pipeline YAML Tab"]
+    Press Keys    //div[contains(@class, 'lines-content')]    F1+fold+SPACE+all+ENTER
+    Press Keys    //div[contains(@class, 'lines-content')]    cannot_enter_read_only
+    Wait Until Element Is Visible    //div[@class="pf-c-code-editor pf-m-read-only odh-dashboard__code-editor"]    timeout=10
+    Capture Page Screenshot
+    SeleniumLibrary.Set Selenium Implicit Wait    ${orig wait}
+
 Pipeline Should Be Listed
     [Documentation]    Checks a pipeline is listed in the DS Project details page
     [Arguments]     ${pipeline_name}    ${pipeline_description}

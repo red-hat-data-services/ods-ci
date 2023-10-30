@@ -36,7 +36,7 @@ Verify Admin User Can Access Custom Notebook Settings
 Verify Custom Image Can Be Added
     [Documentation]    Imports the custom image via UI
     ...                Then loads the spawner and tries using the custom img
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity    Tier1    ExcludeOnDisconnected
     ...       ODS-1208    ODS-1365
     Create Custom Image
     Get ImageStream Metadata And Check Name
@@ -58,7 +58,7 @@ Verify Custom Image Can Be Added
 
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity    Tier1    ExcludeOnDisconnected
     ...       ODS-1368
     Sleep  1
     Create Custom Image
@@ -108,6 +108,21 @@ Test Bad Image Import
     #Set Global Variable  ${IMG_URL}  ${IMG_URL}
     #[Teardown]    Custom Image Teardown    cleanup=False
 
+Test Image From Local registry
+    [Documentation]  Try creating a custom image using a local registry URL (i.e. OOTB image)
+    [Tags]    Sanity    Tier1
+    Open Notebook Images Page
+    ${local_url} =    Get Standard Data Science Local Registry URL
+    ${IMG_URL}=    Set Variable    ${local_url}
+    Set Suite Variable    ${IMG_URL}    ${IMG_URL}
+    Create Custom Image
+    Get ImageStream Metadata And Check Name
+    Verify Custom Image Is Listed    ${IMG_NAME}
+    Verify Custom Image Owner  ${IMG_NAME}  ${TEST_USER.USERNAME}
+    Launch JupyterHub Spawner From Dashboard
+    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Small
+    [Teardown]  Custom Image Teardown
+
 
 *** Keywords ***
 
@@ -147,7 +162,6 @@ Create Custom Image
     # Create a unique notebook name for this test run
     ${IMG_NAME} =  Catenate  ${IMG_NAME}  ${curr_date}
     Set Global Variable  ${IMG_NAME}  ${IMG_NAME}
-
     Import New Custom Image    ${IMG_URL}     ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}    packages=${IMG_PACKAGES}
 
@@ -167,3 +181,9 @@ Reset Image Name
     [Documentation]    Helper to reset the global variable img name to default value
     ${IMG_NAME} =  Set Variable  custom-test-image
     Set Global Variable  ${IMG_NAME}  ${IMG_NAME}
+
+Get Standard Data Science Local Registry URL
+    [Documentation]    Fetches the local URL for the SDS image
+    ${registry} =    Run    oc get imagestream s2i-generic-data-science-notebook -n redhat-ods-applications -o json | jq '.status.dockerImageRepository' | sed 's/"//g'  # robocop: disable
+    ${tag} =    Run    oc get imagestream s2i-generic-data-science-notebook -n redhat-ods-applications -o json | jq '.status.tags[-1].tag' | sed 's/"//g'  # robocop: disable
+    RETURN    ${registry}:${tag}

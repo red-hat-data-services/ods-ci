@@ -30,9 +30,8 @@ Verify Tensorflow Image Can Be Spawned
 Tensorflow Workload Test
     [Documentation]    Runs tensorflow workload
     [Tags]  Sanity
-    ...     PLACEHOLDER  # category tags
+    ...     Tier1
     ...     ODS-1156
-    ...     AutomationBug
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
@@ -40,9 +39,8 @@ Tensorflow Workload Test
 Verify Tensorboard Is Accessible
     [Documentation]  Verifies that tensorboard is accessible
     [Tags]  Sanity
-    ...     PLACEHOLDER
+    ...     Tier1
     ...     ODS-1413
-    ...     AutomationBug
     Close Previous Server
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small
     Run Keyword And Ignore Error  Clone Git Repository And Run  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main

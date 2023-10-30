@@ -18,7 +18,12 @@ ${KFNBC_SPAWNER_HEADER_XPATH} =    //h1[.="Start a notebook server"]
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 ${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //label[@for="modal-notebook-container-size"]/../..//button[@aria-label="Options menu"]
-${KFNBC_GPU_DROPDOWN_XPATH} =    //button[contains(@aria-labelledby, "gpu-numbers")]
+${KFNBC_ACCELERATOR_HEADER_XPATH} =    //span[text()='Accelerator']
+${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
+${KFNBC_ACCELERATOR_INPUT_XPATH} =    //input[@aria-label='Number of accelerators']
+${KFNBC_ACCELERATOR_LESS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
+${KFNBC_ACCELERATOR_PLUS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/following-sibling::button
+${KFNBC_MAX_ACCELERATOR_WARNING_XPATH} =    //div[@aria-label='Warning Alert']//h4[contains(text(), 'accelerator detected')]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
@@ -92,26 +97,41 @@ Select Container Size
     Click Element  xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]
     Click Element  xpath://span[.="${container_size}"]/../..
 
-Wait Until GPU Dropdown Exists
-    [Documentation]    Verifies that the dropdown to select the no. of GPUs exists
-    Wait Until Page Contains    Number of GPUs
+Wait Until Accelerator Dropdown Exists
+    [Documentation]    Verifies that the dropdown to select the Accelerator exists
     Page Should Not Contain    All GPUs are currently in use, try again later.
-    Wait Until Page Contains Element    xpath:${KFNBC_GPU_DROPDOWN_XPATH}
-    ...    error=GPU selector is not present in JupyterHub Spawner
+    Wait Until Page Contains Element    xpath:${KFNBC_ACCELERATOR_DROPDOWN_XPATH}
+    ...    error=Accelerator selector is not present in JupyterHub Spawner
 
-Set Number Of Required GPUs
-    [Documentation]  Sets the gpu count based on the ${gpus} argument
-    [Arguments]  ${gpus}
-    Click Element  xpath:${KFNBC_GPU_DROPDOWN_XPATH}
-    Click Element  xpath:${KFNBC_GPU_DROPDOWN_XPATH}/../..//button[.="${gpus}"]
+Set GPU Accelerator
+    [Documentation]  Set Accelerator type
+    [Arguments]  ${accelerator_type}='Nvidia GPU'
+    Click Element  xpath:${KFNBC_ACCELERATOR_DROPDOWN_XPATH}
+    Click Element  xpath://div[@class and text()=${accelerator_type}]
+
+Set Number Of Required Accelerators
+    [Documentation]  Sets the Accelerators count based on the ${accelerators} argument
+    [Arguments]  ${accelerators}
+    ${acc_num} =   Get Value   xpath:${KFNBC_ACCELERATOR_INPUT_XPATH}
+    Log    Actual num of Accelerators: ${acc_num}
+    IF    ${acc_num} != ${accelerators}
+        Input Text  ${KFNBC_ACCELERATOR_INPUT_XPATH}  ${accelerators}
+    END
+
 
 Fetch Max Number Of GPUs In Spawner Page
     [Documentation]    Returns the maximum number of GPUs a user can request from the spawner
-    ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
+    ${gpu_visible} =    Run Keyword And Return Status    Wait Until Accelerator Dropdown Exists
     IF  ${gpu_visible}==True
-       Click Element    xpath:${KFNBC_GPU_DROPDOWN_XPATH}
-       ${maxGPUs} =    Get Text    xpath://li[@class="pf-c-select__menu-wrapper"][last()]/button
-       ${maxGPUs} =    Convert To Integer    ${maxGPUs}
+       Set GPU Accelerator
+       ${max_operator_detected} =  Run Keyword And Return Status    Page Should Contain Element    xpath=${KFNBC_MAX_ACCELERATOR_WARNING_XPATH}
+       WHILE  not ${max_operator_detected}
+          Click Element    xpath:${KFNBC_ACCELERATOR_PLUS_BUTTON_XPATH}
+          ${max_operator_detected} =  Run Keyword And Return Status    Page Should Contain Element    xpath=${KFNBC_MAX_ACCELERATOR_WARNING_XPATH}
+          ${maxGPUs} =    Get Value   xpath:${KFNBC_ACCELERATOR_INPUT_XPATH}
+          ${maxGPUs} =    Convert To Integer    ${maxGPUs}
+          ${maxGPUs} =  Set Variable  ${maxGPUs-1}
+       END
     ELSE
        ${maxGPUs} =    Set Variable    ${0}
     END
@@ -262,9 +282,10 @@ Spawn Notebook With Arguments  # robocop: disable
         IF  ${spawner_ready}==True
             Select Notebook Image    ${image}    ${version}
             Select Container Size  ${size}
-            ${gpu_visible} =    Run Keyword And Return Status    Wait Until GPU Dropdown Exists
+            ${gpu_visible} =    Run Keyword And Return Status    Wait Until Accelerator Dropdown Exists
             IF  ${gpu_visible}==True and ${gpus}>0
-                Set Number Of Required GPUs  ${gpus}
+                Set GPU Accelerator
+                Set Number Of Required Accelerators  ${gpus}
             ELSE IF  ${gpu_visible}==False and ${gpus}>0
                 IF    ${index} < ${retries}
                     Sleep    30s    reason=Wait for GPU to free up

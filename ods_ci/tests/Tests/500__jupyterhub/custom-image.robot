@@ -100,18 +100,11 @@ Test Bad Image Import
     Create Custom Image
     RHODS Notification Drawer Should Contain
     ...  Unable to add notebook image ${IMG_NAME}
-    #### Image does not get imported anymore at all ####
-    #Get ImageStream Metadata And Check Name
-    #Launch JupyterHub Spawner From Dashboard
-    # Imgs imported with a broken/wrong url will be disabled in the spawner
-    #Element Should Be Disabled  xpath://input[contains(@id, "${IMAGESTREAM_NAME}")]
-    #${IMG_URL}=  Set Variable  ${OG_URL}
-    #Set Global Variable  ${IMG_URL}  ${IMG_URL}
-    #[Teardown]    Custom Image Teardown    cleanup=False
 
 Test Image From Local registry
     [Documentation]  Try creating a custom image using a local registry URL (i.e. OOTB image)
     [Tags]    Sanity    Tier1
+    ...       ODS-2470
     Open Notebook Images Page
     ${local_url} =    Get Standard Data Science Local Registry URL
     ${IMG_URL}=    Set Variable    ${local_url}

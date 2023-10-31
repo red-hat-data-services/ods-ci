@@ -75,10 +75,10 @@ Verify User Can Serve And Query A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
@@ -105,13 +105,13 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${model_one_name}
+    Query Model Multiple Times    model_name=${model_one_name}
     ...    n_times=5    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${model_two_name}
+    Query Model Multiple Times    model_name=${model_two_name}
     ...    n_times=10    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${model_one_name}
+    Query Model Multiple Times    model_name=${model_one_name}
     ...    n_times=5    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${model_two_name}
+    Query Model Multiple Times    model_name=${model_two_name}
     ...    n_times=10    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -139,9 +139,9 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    namespace=watsonx-multi1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=watsonx-multi2
-    Query Model And Check Responses Multiple Times    model_name=${model_one_name}    n_times=2
+    Query Model Multiple Times    model_name=${model_one_name}    n_times=2
     ...    namespace=watsonx-multi1
-    Query Model And Check Responses Multiple Times    model_name=${model_two_name}    n_times=2
+    Query Model Multiple Times    model_name=${model_two_name}    n_times=2
     ...    namespace=watsonx-multi2
     [Teardown]    Run Keywords    Clean Up Test Project    test_ns=watsonx-multi1    isvc_names=${models_names_ns_1}
     ...           AND
@@ -150,32 +150,40 @@ Verify User Can Deploy Multiple Models In Different Namespaces
 Verify Model Upgrade Using Canaray Rollout
     [Tags]    ODS-2372    WatsonX
     [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
+    ${test_namespace}=    Set Variable    canary-model-upgrade
     ${isvc_name}=    Set Variable    canary-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
-    ${models_names}=    Create List    ${model_name}
-    Compile And Query LLM model   isvc_name=${isvc_name}
+    ${isvcs_names}=    Create List    ${isvc_name}
+    ${canary_percentage}=    Set Variable    ${30}
+    Compile Deploy And Query LLM model   isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
-    ...    namespace=canary-model-upgrade
+    ...    namespace=${test_namespace}
+    ...    validate_response=${FALSE}
     Log To Console    Applying Canary Tarffic for Model Upgrade
     ${model_name}=    Set Variable    bloom-560m-caikit
     ${models_names}=    Create List    ${model_name}
-    Compile And Query LLM Model   isvc_name=${isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    model_name=${model_name}
-    ...    canaryTrafficPercent=20
-    ...    namespace=canary-model-upgrade
-#    ...    multiple_query=YES
+    ...    canaryTrafficPercent=${canary_percentage}
+    ...    namespace=${test_namespace}
+    ...    validate_response=${FALSE}
+    ...    n_queries=${0}
+    Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${canary_percentage}
+    ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
     Log To Console    Remove Canary Tarffic For Model Upgrade
-    Compile And Query LLM Model    isvc_name=${isvc_name}
+    Compile Deploy And Query LLM model    isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_name=${model_name}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
-    ...    namespace=canary-model-upgrade
-    # [Teardown]   Clean Up Test Project    test_ns=canary-model-upgrade
-    # ...    isvc_names=${models_names}
+    ...    namespace=${test_namespace}
+    Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${100}
+    ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${isvcs_names}
 
 Verify Model Pods Are Deleted When No Inference Service Is Present
     [Tags]    ODS-2373    WatsonX
@@ -183,7 +191,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
-    Compile And Query LLM Model   isvc_name=${flan_isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
@@ -208,7 +216,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
-    Query Model And Check Responses Multiple Times    model_name=${model_name}    n_times=3
+    Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${test_namespace}
@@ -216,7 +224,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=3
-    Query Model And Check Responses Multiple Times    model_name=${model_name}    n_times=3
+    Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}
@@ -224,7 +232,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
-    Query Model And Check Responses Multiple Times    model_name=${model_name}    n_times=3
+    Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -316,7 +324,7 @@ Verify User Can Set Requests And Limits For A Model
     ...    namespace=${test_namespace}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}    n_times=1
+    Query Model Multiple Times    model_name=${flan_model_name}    n_times=1
     ...    namespace=${test_namespace}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -355,9 +363,9 @@ Verify Model Can Be Serverd And Query On A GPU Node
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
     Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${model_name}    n_times=10
+    Query Model Multiple Times    model_name=${model_name}    n_times=10
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${model_name}    n_times=5
+    Query Model Multiple Times    model_name=${model_name}    n_times=5
     ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
     ...    streamed_response=${TRUE}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
@@ -380,10 +388,10 @@ Verify Non Admin Can Serve And Query A Model
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
@@ -403,10 +411,10 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}    query_idx=1
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    query_idx=${1}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
@@ -426,10 +434,10 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    query_idx=${0}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
@@ -453,7 +461,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
@@ -491,7 +499,7 @@ Verify User Can Access Model Metrics From UWM
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=3
     ...    namespace=${test_namespace}
     Wait Until Keyword Succeeds    50 times    5s
@@ -503,7 +511,7 @@ Verify User Can Access Model Metrics From UWM
     Wait Until Keyword Succeeds    20 times    5s
     ...    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
-    Query Model And Check Responses Multiple Times    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    query_idx=${0}
     Wait Until Keyword Succeeds    30 times    5s
@@ -870,11 +878,16 @@ Model Response Should Match The Expectation
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     END
 
-Query Model And Check Responses Multiple Times
+Query Model Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
     [Arguments]    ${model_name}    ${namespace}    ${isvc_name}=${model_name}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
-    ...            ${streamed_response}=${FALSE}    ${query_idx}=0
+    ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}
+    IF    ${validate_response} == ${TRUE}
+        ${skip_json_load_response}=    Set Variable    ${FALSE}
+    ELSE
+        ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
+    END
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
         ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
@@ -883,17 +896,19 @@ Query Model And Check Responses Multiple Times
         ${res}=    Query Model With GRPCURL   host=${host}    port=443
         ...    endpoint=${endpoint}
         ...    json_body=${body}    json_header=${header}
-        ...    insecure=${TRUE}    skip_res_json=${streamed_response}
+        ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
         Log    ${res}
-        Run Keyword And Continue On Failure
-        ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
-        ...    streamed_response=${streamed_response}    query_idx=${query_idx}
+        IF    ${validate_response} == ${TRUE}
+            Run Keyword And Continue On Failure
+            ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
+            ...    streamed_response=${streamed_response}    query_idx=${query_idx}            
+        END
     END
 
-Compile And Query LLM model
-    [Arguments]    ${isvc_name}     ${model_storage_uri}    ${model_name}
+Compile Deploy And Query LLM model
+    [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
-    ...            ${n_queries}=${1}    ${query_idx}=${0}
+    ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
     ${models_names}=    Create List    ${model_name}
     Compile Inference Service YAML    isvc_name=${isvc_name}
     ...    sa_name=${sa_name}
@@ -903,9 +918,9 @@ Compile And Query LLM model
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}
-    Query Model And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=${n_queries}    streamed_response=${FALSE}
-    ...    namespace=${namespace}    query_idx=${query_idx}
+    ...    namespace=${namespace}    query_idx=${query_idx}    validate_response=${validate_response}
 
 Run Install Script
     [Documentation]    Install KServe serving stack using
@@ -1057,3 +1072,25 @@ Check Query Response Values    # robocop:disable
     IF    ${checked} == ${FALSE}
         Fail    msg=The metric you are looking for has not been found. Check the query parameter and try again 
     END
+
+Traffic Should Be Redirected Based On Canary Percentage
+    [Arguments]    ${exp_percentage}    ${isvc_name}    ${model_name}    ${namespace}
+    ${total}=    Set Variable    ${10}
+    ${hits}=    Set Variable    ${0}
+    ${tolerations}=    Set Variable    ${20}
+    FOR    ${counter}    IN RANGE    ${0}    ${10}
+        Log    ${counter}
+        ${status}=    Run Keyword And Return Status
+        ...    Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}    n_times=1
+        ...    namespace=${namespace}
+        IF    ${status} == ${TRUE}
+            ${hits}=    Evaluate    ${hits}+1            
+        END
+    END
+    Log    ${hits}
+    ${actual_percentage}=    Evaluate    (${hits}/${total})*100
+    ${diff}=    Evaluate    abs(${exp_percentage}-${actual_percentage})
+    IF    ${diff} > ${tolerations} or ${actual_percentage} == ${0}
+        Fail    msg=Percentage of traffic redirected to new revision is greater than toleration ${tolerations}%    
+    END   
+    

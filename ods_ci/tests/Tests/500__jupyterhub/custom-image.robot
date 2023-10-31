@@ -39,6 +39,7 @@ Verify Custom Image Can Be Added
     [Tags]    Sanity    Tier1    ExcludeOnDisconnected
     ...       ODS-1208    ODS-1365
     Create Custom Image
+    Sleep    5s    #wait a bit from IS to be created
     Get ImageStream Metadata And Check Name
     Verify Custom Image Is Listed  ${IMG_NAME}
     Verify Custom Image Description  ${IMG_NAME}  ${IMG_DESCRIPTION}

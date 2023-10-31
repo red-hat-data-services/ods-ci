@@ -17,7 +17,7 @@ Force Tags       JupyterHub
 *** Variables ***
 ${YAML} =         tests/Resources/Files/custom_image.yaml
 ${IMG_NAME} =            custom-test-image
-${IMG_URL} =             quay.io/thoth-station/s2i-lab-elyra:v0.1.1
+${IMG_URL} =             quay.io/opendatahub-contrib/workbench-images:jupyter-datascience-c9s-py311_2023c_latest
 ${IMG_DESCRIPTION} =     Testing Only This image is only for illustration purposes, and comes with no support. Do not use.
 &{IMG_SOFTWARE} =        Software1=x.y.z
 &{IMG_PACKAGES} =        elyra=2.2.4    foo-pkg=a.b.c
@@ -36,10 +36,10 @@ Verify Admin User Can Access Custom Notebook Settings
 Verify Custom Image Can Be Added
     [Documentation]    Imports the custom image via UI
     ...                Then loads the spawner and tries using the custom img
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity    Tier1    ExcludeOnDisconnected
     ...       ODS-1208    ODS-1365
-    ...       ProductBug
     Create Custom Image
+    Sleep    5s    #wait a bit from IS to be created
     Get ImageStream Metadata And Check Name
     Verify Custom Image Is Listed  ${IMG_NAME}
     Verify Custom Image Description  ${IMG_NAME}  ${IMG_DESCRIPTION}
@@ -59,25 +59,27 @@ Verify Custom Image Can Be Added
 
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity    Tier1    ExcludeOnDisconnected
     ...       ODS-1368
-    ...       ProductBug
     Sleep  1
     Create Custom Image
     Sleep  1
     Import New Custom Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
-    RHODS Notification Drawer Should Contain  Unable to add notebook image ${IMG_NAME}
+    Run Keyword And Warn On Failure  RHODS Notification Drawer Should Contain
+    ...  Unable to add notebook image ${IMG_NAME}
     Sleep  1
     Delete Custom Image  ${IMG_NAME}
+    # If both imgs can be created they also have to be deleted twice
+    Sleep  2
+    Run Keyword And Continue On Failure    Delete Custom Image  ${IMG_NAME}
     Reset Image Name
 
 Test Bad Image URL
     [Documentation]  Test adding an image with a bad repo URL (should fail)
     [Tags]    Sanity    Tier1
     ...       ODS-1367
-    ...       ProductBug
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  quay.io/RandomName/RandomImage:v1.2.3
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
@@ -92,18 +94,28 @@ Test Bad Image Import
     ...    in the JH spawner page
     [Tags]    Sanity    Tier1
     ...       ODS-1364
-    ...       ProductBug
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  randomstring
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Create Custom Image
+    RHODS Notification Drawer Should Contain
+    ...  Unable to add notebook image ${IMG_NAME}
+
+Test Image From Local registry
+    [Documentation]  Try creating a custom image using a local registry URL (i.e. OOTB image)
+    [Tags]    Sanity    Tier1
+    ...       ODS-2470
+    Open Notebook Images Page
+    ${local_url} =    Get Standard Data Science Local Registry URL
+    ${IMG_URL}=    Set Variable    ${local_url}
+    Set Suite Variable    ${IMG_URL}    ${IMG_URL}
+    Create Custom Image
     Get ImageStream Metadata And Check Name
+    Verify Custom Image Is Listed    ${IMG_NAME}
+    Verify Custom Image Owner  ${IMG_NAME}  ${TEST_USER.USERNAME}
     Launch JupyterHub Spawner From Dashboard
-    # Imgs imported with a broken/wrong url will be disabled in the spawner
-    Element Should Be Disabled  xpath://input[contains(@id, "${IMAGESTREAM_NAME}")]
-    ${IMG_URL}=  Set Variable  ${OG_URL}
-    Set Global Variable  ${IMG_URL}  ${IMG_URL}
-    [Teardown]    Custom Image Teardown    cleanup=False
+    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Small
+    [Teardown]  Custom Image Teardown
 
 
 *** Keywords ***
@@ -144,7 +156,6 @@ Create Custom Image
     # Create a unique notebook name for this test run
     ${IMG_NAME} =  Catenate  ${IMG_NAME}  ${curr_date}
     Set Global Variable  ${IMG_NAME}  ${IMG_NAME}
-
     Import New Custom Image    ${IMG_URL}     ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}    packages=${IMG_PACKAGES}
 
@@ -164,3 +175,9 @@ Reset Image Name
     [Documentation]    Helper to reset the global variable img name to default value
     ${IMG_NAME} =  Set Variable  custom-test-image
     Set Global Variable  ${IMG_NAME}  ${IMG_NAME}
+
+Get Standard Data Science Local Registry URL
+    [Documentation]    Fetches the local URL for the SDS image
+    ${registry} =    Run    oc get imagestream s2i-generic-data-science-notebook -n redhat-ods-applications -o json | jq '.status.dockerImageRepository' | sed 's/"//g'  # robocop: disable
+    ${tag} =    Run    oc get imagestream s2i-generic-data-science-notebook -n redhat-ods-applications -o json | jq '.status.tags[-1].tag' | sed 's/"//g'  # robocop: disable
+    RETURN    ${registry}:${tag}

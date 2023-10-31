@@ -43,7 +43,8 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    project_title=${PRJ_TITLE}
     ...    filepath=${PIPELINE_TEST_FILEPATH}
     ...    press_cancel=${FALSE}
-    Pipeline Context Menu Should Be Readonly    pipeline_name=${PIPELINE_TEST_NAME}
+    Pipeline Context Menu Should Be Working    pipeline_name=${PIPELINE_TEST_NAME}
+    Pipeline Yaml Should Be Readonly    pipeline_name=${PIPELINE_TEST_NAME}
     Open Data Science Project Details Page    ${PRJ_TITLE}
     Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
     ...    pipeline_description=${PIPELINE_TEST_DESC}

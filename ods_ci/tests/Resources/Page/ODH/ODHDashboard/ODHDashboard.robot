@@ -666,6 +666,7 @@ Verify Custom Image Is Listed
     ...    UI with the correct name
     [Arguments]    ${image_name}
     # whitespace after ${image_name} in the xpath is important!
+    Sleep  2s  #wait for page to finish loading
     ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]  # robocop: disable
     IF  ${exists}==False
         Log  ${image_name} not visible in page

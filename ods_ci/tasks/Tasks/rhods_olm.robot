@@ -11,7 +11,7 @@ Library          String
 ${cluster_type}                 selfmanaged
 ${image_url}                    ${EMPTY}
 ${RHODS_OSD_INSTALL_REPO}       None
-@{SUPPORTED_TEST_ENV}           AWS   GCP   PSI
+@{SUPPORTED_TEST_ENV}           AWS   GCP   PSI   ROSA
 ${TEST_ENV}                     AWS
 ${INSTALL_TYPE}                 OperatorHub
 ${UPDATE_CHANNEL}               odh-nightlies

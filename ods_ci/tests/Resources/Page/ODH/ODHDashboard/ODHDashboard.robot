@@ -537,11 +537,12 @@ RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message
     [Arguments]     ${message}
     Click Element    xpath=//*[contains(@class,'notification-badge')]
-    Wait Until Page Contains  text=${message}  timeout=300s
+    Run Keyword And Continue On Failure    Wait Until Page Contains  text=${message}  timeout=10s
     Close Notification Drawer
 
 Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
+    Wait Until Page Contains    Settings
     Page Should Contain    Settings
     Menu.Navigate To Page    Settings    Notebook images
     Wait Until Page Contains    Notebook image settings
@@ -552,11 +553,12 @@ Import New Custom Image
     [Arguments]    ${repo}    ${name}    ${description}    ${software}    ${packages}
     Sleep  1
     Open Custom Image Import Popup
-    Input Text    xpath://input[@id="notebook-image-repository-input"]    ${repo}
-    Input Text    xpath://input[@id="notebook-image-name-input"]    ${name}
-    Input Text    xpath://input[@id="notebook-image-description-input"]    ${description}
-    Add Softwares To Custom Image    ${software}
-    Add Packages To Custom Image    ${packages}
+    Input Text    xpath://input[@id="byon-image-repository-input"]    ${repo}
+    Input Text    xpath://input[@id="byon-image-name-input"]    ${name}
+    Input Text    xpath://input[@id="byon-image-description-input"]    ${description}
+    # No button present anymore?
+    #Add Softwares To Custom Image    ${software}
+    #Add Packages To Custom Image    ${packages}
     Click Element    xpath://button[.="Import"]
 
 Open Custom Image Import Popup
@@ -567,7 +569,7 @@ Open Custom Image Import Popup
     ELSE
         Click Element  xpath://button[.="Import new image"]
     END
-    Wait Until Page Contains    Import Notebook images
+    Wait Until Page Contains    Import notebook images
 
 Add Softwares To Custom Image
     [Documentation]    Loops through a dictionary to add software to the custom img metadata
@@ -618,8 +620,8 @@ Delete Custom Image
     [Documentation]    Deletes a custom image through the dashboard UI.
     ...    Needs an additional check on removed ImageStream
     [Arguments]    ${image_name}
-    Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
-    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-delete-button"]
+    Click Button  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button
+    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//li[@id="${image_name}-delete-button"]  # robocop: disable
     Wait Until Page Contains  Do you wish to permanently delete ${image_name}?
     Click Button  xpath://button[.="Delete"]
 
@@ -650,9 +652,10 @@ Verify Custom Image Description
     [Documentation]    Verifies that the description shown in the dashboard UI
     ...    matches the given one
     [Arguments]    ${image_name}    ${expected_description}
-    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="Description"][.="${expected_description}"]
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  
+    ...  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Description" and .="${expected_description}"]  # robocop: disable
     IF  ${exists}==False
-        ${desc} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="Description"]
+        ${desc} =  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Description"]
         Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
         FAIL
     END
@@ -662,7 +665,9 @@ Verify Custom Image Is Listed
     [Documentation]    Verifies that the custom image is displayed in the dashboard
     ...    UI with the correct name
     [Arguments]    ${image_name}
-    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]
+    # whitespace after ${image_name} in the xpath is important!
+    Sleep  2s  #wait for page to finish loading
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]  # robocop: disable
     IF  ${exists}==False
         Log  ${image_name} not visible in page
         FAIL
@@ -673,9 +678,10 @@ Verify Custom Image Owner
     [Documentation]    Verifies that the user listed for an image in the dahsboard
     ...    UI matches the given one
     [Arguments]    ${image_name}    ${expected_user}
-    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[@data-label="User"][.="${expected_user}"]
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  
+    ...  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="User" and .="${expected_user}"]  # robocop: disable
     IF  ${exists}==False
-        ${user} =  Get Text  xpath://td[.="${image_name}"]/../td[@data-label="User"]
+        ${user} =  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="User"]  # robocop: disable
         Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
         FAIL
     END
@@ -686,7 +692,7 @@ Enable Custom Image
     [Arguments]    ${image_name}
     ${is_enabled} =  # Need to find a check
     IF  ${is_enabled}==False
-        Click Element  xpath://td[.="${image_name}"]/..//input
+        Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../..//input
     END
 
 Disable Custom Image
@@ -694,11 +700,16 @@ Disable Custom Image
     [Arguments]    ${image_name}
     ${is_enabled} =  # Need to find a check
     IF  ${is_enabled}==True
-        Click Element  xpath://td[.="${image_name}"]/..//input
+        Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../..//input
     END
 
 Close Notification Drawer
     [Documentation]    Closes the dashboard notification drawer, if it is open
+    # the notification popup could be present and prevent from closing the drawer, let's check and close if exists
+    ${popup}=  Run Keyword And Return Status  Page Should Contain Element  xpath://div[@aria-label="Danger Alert"]
+    IF  ${popup}==True
+        Click Element    xpath://div[@aria-label="Danger Alert"]//button[contains(@aria-label,"Close Danger alert")]
+    END
     ${closed}=  Run Keyword And Return Status  Page Should Contain Element  ${NOTIFICATION_DRAWER_CLOSED}
     IF  ${closed}==False
         Click Element  ${NOTIFICATION_DRAWER_CLOSE_BTN}

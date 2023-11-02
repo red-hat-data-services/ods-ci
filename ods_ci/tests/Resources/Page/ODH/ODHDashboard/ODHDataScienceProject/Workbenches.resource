@@ -375,6 +375,8 @@ Edit Workbench
     [Arguments]     ${workbench_title}
     Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
+    # Also wait until the workbench name is populated in the text field - let's wait for DOM to finish
+    Wait For Condition    return document.readyState == "complete"    timeout=5s
 
 Check Launched Workbench Is The Correct One
     [Documentation]    Checks if the launched workbench is the expected one

@@ -54,7 +54,9 @@ Verify RHODS Installation
   ${is_codeflare_managed} =     Is CodeFlare Managed
   Log  Will verify CodeFlare operator: ${is_codeflare_managed}  console=yes
   IF  ${is_codeflare_managed}  CodeFlare Operator Should Be Installed
-  Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+  IF  "${UPDATE_CHANNEL}" != "beta"
+      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+  END
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
     # Needs to be removed ASAP

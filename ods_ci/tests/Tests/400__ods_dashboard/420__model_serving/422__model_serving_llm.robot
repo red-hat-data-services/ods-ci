@@ -883,8 +883,8 @@ Query Model Multiple Times
     ...                running ${n_times}. For each loop run it queries all the model in sequence
     [Arguments]    ${model_name}    ${namespace}    ${isvc_name}=${model_name}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
     ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}
-    IF    ${validate_response} == ${TRUE}
-        ${skip_json_load_response}=    Set Variable    ${FALSE}
+    IF    ${validate_response} == ${FALSE}
+        ${skip_json_load_response}=    Set Variable    ${TRUE}
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END

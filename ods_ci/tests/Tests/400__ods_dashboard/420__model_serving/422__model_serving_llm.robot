@@ -1075,10 +1075,10 @@ Check Query Response Values    # robocop:disable
 
 Traffic Should Be Redirected Based On Canary Percentage
     [Arguments]    ${exp_percentage}    ${isvc_name}    ${model_name}    ${namespace}
-    ${total}=    Set Variable    ${10}
+    ${total}=    Set Variable    ${20}
     ${hits}=    Set Variable    ${0}
     ${tolerations}=    Set Variable    ${20}
-    FOR    ${counter}    IN RANGE    ${0}    ${10}
+    FOR    ${counter}    IN RANGE    ${0}    ${total}
         Log    ${counter}
         ${status}=    Run Keyword And Return Status
         ...    Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}    n_times=1

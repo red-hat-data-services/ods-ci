@@ -342,7 +342,7 @@ Verify User Can Set Requests And Limits For A Model
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
-Verify Model Can Be Serverd And Query On A GPU Node
+Verify Model Can Be Served And Query On A GPU Node
     [Tags]    ODS-2381    WatsonX    Resource-GPU
     [Setup]    Set Project And Runtime    namespace=watsonx-gpu
     ${test_namespace}=    Set Variable    watsonx-gpu

@@ -71,7 +71,7 @@ Check A RHODS Family Operator Is Installed
       ${result} =  Run Keyword And Return Status
       ...  Oc Get  kind=ClusterServiceVersion  namespace=${namespace}  name=${current_csv_name}
   ELSE
-      ${result} = Set Variable    False
+      ${result} =  Set Variable    False
   END
   Log   Operator with sub ${subscription} is installed result: ${result}      console=yes
   IF  not ${result}     FAIL    The operator with sub ${subscription} is not installed.

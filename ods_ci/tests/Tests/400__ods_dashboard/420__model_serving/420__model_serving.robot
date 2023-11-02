@@ -75,6 +75,7 @@ Verify Openvino_IR Model Via UI
     ...    ODS-2054
     Open Model Serving Home Page
     Try Opening Create Server
+    Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection

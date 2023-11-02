@@ -6,7 +6,7 @@ Library    OperatingSystem
 
 *** Variables ***
 ${DSC_NAME} =    default
-@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray  # robocop: disable
+@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai  # robocop: disable
 
 
 *** Keywords ***
@@ -54,10 +54,7 @@ Verify RHODS Installation
   ${is_codeflare_managed} =     Is CodeFlare Managed
   Log  Will verify CodeFlare operator: ${is_codeflare_managed}  console=yes
   IF  ${is_codeflare_managed}  CodeFlare Operator Should Be Installed
-
-  IF  "${UPDATE_CHANNEL}" != "stable" and "${UPDATE_CHANNEL}" != "beta"
-      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
-  END
+  Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
     # Needs to be removed ASAP

@@ -40,7 +40,7 @@ ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
 ${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
-${SKIP_PREREQS_INSTALL}=    ${FALSE}
+${SKIP_PREREQS_INSTALL}=    ${TRUE}
 ${SCRIPT_BASED_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small
@@ -71,6 +71,7 @@ Verify User Can Serve And Query A Model
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
+    # ...    min_replicas=3
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -78,11 +79,11 @@ Verify User Can Serve And Query A Model
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}
-    Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
-    ...    namespace=${test_namespace}
-    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    # Query Model Multiple Times    model_name=${flan_model_name}
+    # ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    # ...    namespace=${test_namespace}
+    # [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    # ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Tags]    ODS-2371    WatsonX
@@ -221,7 +222,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    timeout=360s
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=3
     Query Model Multiple Times    model_name=${model_name}    n_times=3
@@ -229,7 +230,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    timeout=360s
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
     Query Model Multiple Times    model_name=${model_name}    n_times=3

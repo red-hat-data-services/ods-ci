@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Collection of tests to validate the model serving stack for Large Language Models (LLM)
+Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM)
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource

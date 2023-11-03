@@ -920,7 +920,6 @@ Compile Deploy And Query LLM model
     [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
     ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
-    ${models_names}=    Create List    ${model_name}
     Compile Inference Service YAML    isvc_name=${isvc_name}
     ...    sa_name=${sa_name}
     ...    model_storage_uri=${model_storage_uri}

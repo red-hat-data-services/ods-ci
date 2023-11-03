@@ -889,7 +889,8 @@ Model Response Should Match The Expectation
 Query Model Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
-    [Arguments]    ${model_name}    ${namespace}    ${isvc_name}=${model_name}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
+    [Arguments]    ${model_name}    ${namespace}    ${isvc_name}=${model_name}
+    ...            ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
     ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}    &{args}
     IF    ${validate_response} == ${FALSE}
         ${skip_json_load_response}=    Set Variable    ${TRUE}

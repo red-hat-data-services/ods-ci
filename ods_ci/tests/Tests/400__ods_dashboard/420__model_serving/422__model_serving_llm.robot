@@ -240,6 +240,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
 Verify User Can Autoscale Using Concurrency
     [Tags]    ODS-2377    WatsonX
     [Setup]    Set Project And Runtime    namespace=autoscale-con
+    ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
@@ -247,27 +248,17 @@ Verify User Can Autoscale Using Concurrency
     ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
     ...    auto_scale=True
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=autoscale-con
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-con
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-con
-    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    FOR    ${index}    IN RANGE    50
-           Query Model With GRPCURL   host=${host}    port=443
-           ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}
-           ...    json_body=${body}    json_header=${header}
-           ...    insecure=${TRUE}     background=${TRUE}
-    END
-    @{pod_lists}=    Oc Get    kind=Pod    namespace=autoscale-con
+    ...    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${flan_model_name}    n_times=10
+    ...    namespace=${test_namespace}    validate_response=${FALSE}    background=${TRUE}
+    Wait For Pods Number    number=1    comparison=GREATER THAN
     ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ${count}=    Get Length   ${pod_lists}
-    IF   ${count} > ${1}
-         Log      Autoscale Using Concurrency is completed.Model Pod has been scaled up from 1 to $count
-    ELSE
-         FAIL     msg= Autoscale Using Concurrency has failed and Model pod has not been scaled up
-    END
-    [Teardown]   Clean Up Test Project    test_ns=autoscale-con
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
 Verify User Can Validate Scale To Zero
@@ -882,21 +873,22 @@ Query Model Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
     [Arguments]    ${model_name}    ${namespace}    ${isvc_name}=${model_name}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
-    ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}
+    ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}    &{args}
     IF    ${validate_response} == ${FALSE}
         ${skip_json_load_response}=    Set Variable    ${TRUE}
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
+    ${header}=    Set Variable    'mm-model-id: ${model_name}'
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
-        ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
-        ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
-        ${header}=    Set Variable    'mm-model-id: ${model_name}'
         ${res}=    Query Model With GRPCURL   host=${host}    port=443
         ...    endpoint=${endpoint}
         ...    json_body=${body}    json_header=${header}
         ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
+        ...    &{args}
         Log    ${res}
         IF    ${validate_response} == ${TRUE}
             Run Keyword And Continue On Failure

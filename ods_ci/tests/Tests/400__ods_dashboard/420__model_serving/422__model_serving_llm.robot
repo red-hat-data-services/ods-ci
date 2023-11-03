@@ -163,7 +163,6 @@ Verify Model Upgrade Using Canaray Rollout
     ...    validate_response=${FALSE}
     Log To Console    Applying Canary Tarffic for Model Upgrade
     ${model_name}=    Set Variable    bloom-560m-caikit
-    ${models_names}=    Create List    ${model_name}
     Compile Deploy And Query LLM model   isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}

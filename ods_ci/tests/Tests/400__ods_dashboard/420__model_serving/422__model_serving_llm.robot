@@ -59,10 +59,14 @@ ${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 
 *** Test Cases ***
 Verify External Dependency Operators Can Be Deployed
+    [Documentation]    Checks the pre-required Operators can be installed
+    ...                and configured
     [Tags]    ODS-2326    WatsonX
     Pass Execution    message=Installation done as part of Suite Setup.
 
 Verify User Can Serve And Query A Model
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    ...                using Kserve and Caikit+TGIS runtime
     [Tags]    ODS-2341    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
@@ -85,6 +89,7 @@ Verify User Can Serve And Query A Model
     ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In The Same Namespace
+    [Documentation]    Checks if user can deploy and query multiple models in the same namespace
     [Tags]    ODS-2371    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
@@ -117,6 +122,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In Different Namespaces
+    [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
     [Tags]    ODS-2378   WatsonX
     [Setup]    Run Keywords    Set Project And Runtime    namespace=watsonx-multi1
     ...        AND
@@ -148,6 +154,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...           Clean Up Test Project    test_ns=watsonx-multi2    isvc_names=${models_names_ns_2}
 
 Verify Model Upgrade Using Canaray Rollout
+    [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
     [Tags]    ODS-2372    WatsonX
     [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
@@ -185,6 +192,8 @@ Verify Model Upgrade Using Canaray Rollout
     ...    isvc_names=${isvcs_names}
 
 Verify Model Pods Are Deleted When No Inference Service Is Present
+    [Documentation]    Checks if model pods gets successfully deleted after
+    ...                deleting the KServe InferenceService object
     [Tags]    ODS-2373    WatsonX
     [Setup]    Set Project And Runtime    namespace=no-infer-kserve
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
@@ -202,6 +211,8 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
 
 Verify User Can Change The Minimum Number Of Replicas For A Model
+    [Documentation]    Checks if user can change the minimum number of replicas
+    ...                of a deployed model
     [Tags]    ODS-2376    WatsonX
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
@@ -237,6 +248,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    isvc_names=${models_names}
 
 Verify User Can Autoscale Using Concurrency
+    [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
     [Tags]    ODS-2377    WatsonX
     [Setup]    Set Project And Runtime    namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
@@ -261,6 +273,7 @@ Verify User Can Autoscale Using Concurrency
     ...    isvc_names=${model_name}
 
 Verify User Can Validate Scale To Zero
+    [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
     [Tags]    ODS-2379    WatsonX
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -297,6 +310,7 @@ Verify User Can Validate Scale To Zero
     ...    isvc_names=${model_name}
 
 Verify User Can Set Requests And Limits For A Model
+    [Documentation]    Checks if user can set HW request and limits on their inference service object
     [Tags]    ODS-2380    WatsonX
     [Setup]    Set Project And Runtime    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
@@ -333,6 +347,8 @@ Verify User Can Set Requests And Limits For A Model
     ...    isvc_names=${model_name}
 
 Verify Model Can Be Served And Query On A GPU Node
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
+    ...                using Kserve and Caikit+TGIS runtime
     [Tags]    ODS-2381    WatsonX    Resource-GPU
     [Setup]    Set Project And Runtime    namespace=watsonx-gpu
     ${test_namespace}=    Set Variable    watsonx-gpu
@@ -362,6 +378,8 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    isvc_names=${model_name}
 
 Verify Non Admin Can Serve And Query A Model
+    [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
+    ...                using Kserve and Caikit+TGIS runtime
     [Tags]    ODS-2326    WatsonX
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    namespace=non-admin-test
@@ -892,11 +910,13 @@ Query Model Multiple Times
         IF    ${validate_response} == ${TRUE}
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
-            ...    streamed_response=${streamed_response}    query_idx=${query_idx}            
+            ...    streamed_response=${streamed_response}    query_idx=${query_idx}
         END
     END
 
 Compile Deploy And Query LLM model
+    [Documentation]    Group together the test steps for preparing, deploying
+    ...                and querying a model
     [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
     ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
@@ -1065,23 +1085,26 @@ Check Query Response Values    # robocop:disable
     END
 
 Traffic Should Be Redirected Based On Canary Percentage
+    [Documentation]    Sends an arbitrary number of queries ${total} and checks the amount of
+    ...                them which gets redirected to the given ${model_name}
+    ...                matches the expected probability ${exp_percentage}.
+    ...                It applies an arbitrary toleration margin of ${toleration}
     [Arguments]    ${exp_percentage}    ${isvc_name}    ${model_name}    ${namespace}
     ${total}=    Set Variable    ${20}
     ${hits}=    Set Variable    ${0}
-    ${tolerations}=    Set Variable    ${20}
+    ${toleration}=    Set Variable    ${20}
     FOR    ${counter}    IN RANGE    ${0}    ${total}
         Log    ${counter}
         ${status}=    Run Keyword And Return Status
         ...    Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}    n_times=1
         ...    namespace=${namespace}
         IF    ${status} == ${TRUE}
-            ${hits}=    Evaluate    ${hits}+1            
+            ${hits}=    Evaluate    ${hits}+1
         END
     END
     Log    ${hits}
     ${actual_percentage}=    Evaluate    (${hits}/${total})*100
     ${diff}=    Evaluate    abs(${exp_percentage}-${actual_percentage})
-    IF    ${diff} > ${tolerations} or ${actual_percentage} == ${0}
-        Fail    msg=Percentage of traffic redirected to new revision is greater than toleration ${tolerations}%    
-    END   
-    
+    IF    ${diff} > ${toleration} or ${actual_percentage} == ${0}
+        Fail    msg=Percentage of traffic redirected to new revision is greater than toleration ${toleration}%
+    END

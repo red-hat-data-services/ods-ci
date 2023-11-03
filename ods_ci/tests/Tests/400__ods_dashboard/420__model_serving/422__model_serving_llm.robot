@@ -344,7 +344,7 @@ Verify User Can Set Requests And Limits For A Model
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${model_name}
+    ...    isvc_names=${models_names}
 
 Verify Model Can Be Served And Query On A GPU Node
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node

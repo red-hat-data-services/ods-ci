@@ -61,9 +61,9 @@ Run OpenShift Metrics Query
     ...    Note: in order to run this keyword OCP_ADMIN_USER.USERNAME needs to
     ...    belong to a group with "view" role in OpenShift
     ...    Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
-    [Arguments]    ${query}    ${retry_attempts}=10    ${return_zero_if_result_empty}=False
+    [Arguments]    ${query}   ${username}  ${password}  ${auth_type}   ${retry_attempts}=10    ${return_zero_if_result_empty}=False
     Open OCP Console
-    LoginPage.Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
+    LoginPage.Login To Openshift    ocp_user_name=${username}   ocp_user_pw=${password}   ocp_user_auth_type=${auth_type}
     OCPMenu.Switch To Administrator Perspective
 
     # In OCP 4.9 metrics are under the Observe menu (it was called Monitoring in 4.8)
@@ -75,8 +75,13 @@ Run OpenShift Metrics Query
         IF    ${menu_monitoring_exists}
             Menu.Navigate To Page    Monitoring    Metrics
         ELSE
-            Fail
-            ...    msg=${OCP_ADMIN_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
+            IF    "${usertype}" == "basic"
+                Fail
+                ...    msg=${TEST_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
+            ELSE
+                Fail
+                ...    msg=${OCP_ADMIN_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
+            END
         END
     END
 

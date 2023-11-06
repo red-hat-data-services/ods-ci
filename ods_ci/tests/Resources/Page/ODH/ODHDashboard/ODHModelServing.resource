@@ -205,7 +205,7 @@ Get Model Route via UI
     ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
     RETURN    ${url}
 
-Get Model Route via CLI
+Get Model Route Via CLI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from CLI.
     [Arguments]    ${model_name}    ${project_name}
     ${rc}    ${out}=    Run And Return Rc And Output    oc get route ${model_name} -n ${project_name} --template={{.spec.host}}{{.spec.path}}
@@ -247,8 +247,8 @@ Get Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}
     ${self_managed} =    Is RHODS Self-Managed
-    ${url}=    Get Model Route via UI    ${model_name}
-    ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
+    ${url}=    Get Model Route via CLI    ${model_name}   ${project_title}
+    ${curl_cmd}=     Set Variable    curl -s ${url} -d @${inference_input}
     IF    ${token_auth}
         IF    "${project_title}" == "${NONE}"
             ${project_title}=    Get Model Project    ${model_name}

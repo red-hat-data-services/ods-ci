@@ -11,6 +11,7 @@ Suite Teardown    RHOSi Teardown
 *** Variables ***
 ${DEFAULT_OP_NS}=    openshift-operators
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
@@ -38,8 +39,8 @@ ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
-${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
-${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
+${UWM_ENABLE_FILEPATH}=    ${RESOURCES_DIRPATH}/uwm_cm_enable.yaml
+${UWM_CONFIG_FILEPATH}=    ${RESOURCES_DIRPATH}/uwm_cm_conf.yaml
 ${SKIP_PREREQS_INSTALL}=    ${FALSE}
 ${SCRIPT_BASED_INSTALL}=    ${FALSE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
@@ -1019,7 +1020,7 @@ Check Query Response Values    # robocop:disable
         IF    ${checked} == ${FALSE}
             Continue For Loop
         ELSE
-            Log    message=Metrics source namespaced succesfully checked. Going to next step.      
+            Log    message=Metrics source namespaced succesfully checked. Going to next step.
         END
         IF    "${exp_model_name}" != "${EMPTY}"
             ${source_model}=    Set Variable    ${result["metric"]["job"]}
@@ -1028,7 +1029,7 @@ Check Query Response Values    # robocop:disable
             IF    ${checked} == ${FALSE}
                 Continue For Loop
             ELSE
-                Log    message=Metrics source model succesfully checked. Going to next step.      
+                Log    message=Metrics source model succesfully checked. Going to next step.
             END
             IF    "${exp_query_kind}" != "${EMPTY}"
                 ${source_query_kind}=    Set Variable    ${result["metric"]["kind"]}
@@ -1037,7 +1038,7 @@ Check Query Response Values    # robocop:disable
                 IF    ${checked} == ${FALSE}
                     Continue For Loop
                 ELSE
-                    Log    message=Metrics query kind succesfully checked. Going to next step.      
+                    Log    message=Metrics query kind succesfully checked. Going to next step.
                 END
             END
         END
@@ -1048,7 +1049,7 @@ Check Query Response Values    # robocop:disable
             IF    ${checked} == ${FALSE}
                 Continue For Loop
             ELSE
-                Log    message=Metrics source pod succesfully checked. Going to next step.      
+                Log    message=Metrics source pod succesfully checked. Going to next step.
             END
         END
         IF    "${exp_value}" != "${EMPTY}"
@@ -1062,5 +1063,5 @@ Check Query Response Values    # robocop:disable
         END
     END
     IF    ${checked} == ${FALSE}
-        Fail    msg=The metric you are looking for has not been found. Check the query parameter and try again 
+        Fail    msg=The metric you are looking for has not been found. Check the query parameter and try again
     END

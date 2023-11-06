@@ -3,7 +3,6 @@ Documentation      Suite to test Data Science Projects (a.k.a DSG) feature
 Library            SeleniumLibrary
 Library            OpenShiftLibrary
 Resource           ../../../Resources/OCP.resource
-Resource           ../../Common.robot
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
@@ -222,7 +221,7 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...    status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
-    [Teardown]    Run Keywords    
+    [Teardown]    Run Keywords
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_2_TITLE}    project_title=${PRJ_TITLE}
     ...    AND
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}

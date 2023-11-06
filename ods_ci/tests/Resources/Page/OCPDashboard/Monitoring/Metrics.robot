@@ -61,9 +61,13 @@ Run OpenShift Metrics Query
     ...    Note: in order to run this keyword OCP_ADMIN_USER.USERNAME needs to
     ...    belong to a group with "view" role in OpenShift
     ...    Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
-    [Arguments]    ${query}    ${retry_attempts}=10    ${return_zero_if_result_empty}=False
+    [Arguments]    ${query}    ${retry_attempts}=10    ${return_zero_if_result_empty}=False   ${usertype}=admin
     Open OCP Console
-    LoginPage.Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
+    IF    "${usertype}" == "basic"
+        LoginPage.Login To Openshift    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ELSE
+        LoginPage.Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
+    END
     OCPMenu.Switch To Administrator Perspective
 
     # In OCP 4.9 metrics are under the Observe menu (it was called Monitoring in 4.8)

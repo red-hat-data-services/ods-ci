@@ -31,7 +31,7 @@ Uninstall RHODS
 Uninstall RHODS In OSD
   Clone OLM Install Repo
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon   #robocop:disable
-  Should Be Equal As Integers ${return_code}   0   msg=Error detected while un-installing RHODS
+  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
   Log To Console   ${output}
 
 Uninstall RHODS In Self Managed Cluster
@@ -54,7 +54,7 @@ Uninstall RHODS In Self Managed Cluster Using CLI
   [Documentation]   UnInstall rhods on self-managedcluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator    timeout=10 min
-  Should Be Equal As Integers ${return_code}   0   msg=Error detected while un-installing RHODS
+  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
 
 Uninstall RHODS In Self Managed Cluster For Operatorhub
   [Documentation]   Uninstall rhods on self-managed cluster for operatorhub installtion
@@ -84,11 +84,11 @@ Uninstall RHODS V2
         IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
           ${return_code}    ${output}    Run And Return Rc And Output
           ...    oc delete clusterserviceversion ${csv_name} -n redhat-ods-operator --ignore-not-found
-          Should Be Equal As Integers ${return_code}   0   msg=Error deleting RHODS CSV ${csv_name}
+          Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS CSV ${csv_name}
         END
         ${return_code}    ${output}    Run And Return Rc And Output
         ...    oc delete subscription ${subscription_name} -n redhat-ods-operator --ignore-not-found
-        Should Be Equal As Integers ${return_code}   0   msg=Error deleting RHODS subscription
+        Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription
     END
 
     IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
@@ -101,7 +101,7 @@ Uninstall RHODS V2
     END
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${OPERATOR_NAMESPACE} --ignore-not-found
-    Should Be Equal As Integers ${return_code}   0   msg=Error deleting operatorgroup
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting operatorgroup
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace --ignore-not-found
     Verify Project Does Not Exists  redhat-ods-applications
     Verify Project Does Not Exists  redhat-ods-monitoring

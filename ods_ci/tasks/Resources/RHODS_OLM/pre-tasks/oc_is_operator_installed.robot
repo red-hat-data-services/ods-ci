@@ -5,9 +5,9 @@ Is RHODS Installed
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
-          ...                                              subscription=rhods-operator-dev  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
+          ...  Check A RHODS Family Operator Is Installed  namespace=openshift-operators
+          ...                                              subscription=rhods-odh-nightly-operator  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=opendatahub  AND
           ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
           ...          field_selector=metadata.name=redhat-operators
       ELSE
@@ -39,9 +39,11 @@ Is RHODS Installed
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
-          ...                                              subscription=addon-managed-odh  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator
+          ...  Check A RHODS Family Operator Is Installed  namespace=openshift-operators
+          ...                                              subscription=rhods-odh-nightly-operator  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=opendatahub  AND
+          ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
+          ...          field_selector=metadata.name=redhat-operators
       ELSE
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
@@ -71,7 +73,7 @@ Check A RHODS Family Operator Is Installed
       ${result} =  Run Keyword And Return Status
       ...  Oc Get  kind=ClusterServiceVersion  namespace=${namespace}  name=${current_csv_name}
   ELSE
-      ${result} =  Set Variable    False
+      ${result} = Set Variable    False
   END
   Log   Operator with sub ${subscription} is installed result: ${result}      console=yes
   IF  not ${result}     FAIL    The operator with sub ${subscription} is not installed.

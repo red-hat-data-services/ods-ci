@@ -31,7 +31,7 @@ Uninstall RHODS
 Uninstall RHODS In OSD
   Clone OLM Install Repo
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon   #robocop:disable
-  Should Be Equal As Integers	${return_code}	 0   msg=Error detected while un-installing RHODS
+  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
   Log To Console   ${output}
 
 Uninstall RHODS In Self Managed Cluster
@@ -54,14 +54,14 @@ Uninstall RHODS In Self Managed Cluster Using CLI
   [Documentation]   UnInstall rhods on self-managedcluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator    timeout=10 min
-  Should Be Equal As Integers	${return_code}	 0   msg=Error detected while un-installing RHODS
+  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
 
 Uninstall RHODS In Self Managed Cluster For Operatorhub
   [Documentation]   Uninstall rhods on self-managed cluster for operatorhub installtion
   ${return_code}    ${output}    Run And Return Rc And Output   oc create configmap delete-self-managed-odh -n redhat-ods-operator
-  Should Be Equal As Integers	${return_code}	 0   msg=Error creation deletion configmap
+  Should Be Equal As Integers ${return_code}   0   msg=Error creation deletion configmap
   ${return_code}    ${output}    Run And Return Rc And Output   oc label configmap/delete-self-managed-odh api.openshift.com/addon-managed-odh-delete=true -n redhat-ods-operator
-  Should Be Equal As Integers	${return_code}	 0   msg=Error observed while adding label to configmap
+  Should Be Equal As Integers ${return_code}   0   msg=Error observed while adding label to configmap
   Verify Project Does Not Exists  redhat-ods-applications
   Verify Project Does Not Exists  redhat-ods-monitoring
   Verify Project Does Not Exists  rhods-notebooks
@@ -71,10 +71,10 @@ Uninstall RHODS V2
     [Documentation]    Keyword to uninstall the version 2 of the RHODS operator in Self-Managed
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete datasciencecluster --all --ignore-not-found
-    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting DataScienceCluster CR
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DataScienceCluster CR
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete dscinitialization --all --ignore-not-found
-    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting DSCInitialization CR
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DSCInitialization CR
 
     ${return_code}    ${subscription_name}    Run And Return Rc And Output
     ...    oc get subscription -n redhat-ods-operator --no-headers | awk '{print $1}'
@@ -84,22 +84,28 @@ Uninstall RHODS V2
         IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
           ${return_code}    ${output}    Run And Return Rc And Output
           ...    oc delete clusterserviceversion ${csv_name} -n redhat-ods-operator --ignore-not-found
-          Should Be Equal As Integers	${return_code}	 0   msg=Error deleting RHODS CSV ${csv_name}
+          Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS CSV ${csv_name}
         END
         ${return_code}    ${output}    Run And Return Rc And Output
         ...    oc delete subscription ${subscription_name} -n redhat-ods-operator --ignore-not-found
-        Should Be Equal As Integers	${return_code}	 0   msg=Error deleting RHODS subscription
+        Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription
     END
 
+    IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+         ${return_code}    ${output}    Run And Return Rc And Output
+         ...    oc delete subscription rhods-odh-nightly-operator -n ${OPERATOR_NAMESPACE}  # robocop: disable
+    ELSE
+         ${return_code}    ${output}    Run And Return Rc And Output
+         ...    oc delete subscription $(oc get subscription -n ${OPERATOR_NAMESPACE} --no-headers | awk '{print $1}') -n ${OPERATOR_NAMESPACE}  # robocop: disable
+         Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription
+    END
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription $(oc get subscription -n redhat-ods-operator --no-headers | awk '{print $1}') -n ${OPERATOR_NAMESPACE}  # robocop: disable
-    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting RHODS subscription
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete operatorgroup --all -n redhat-ods-operator --ignore-not-found
-    Should Be Equal As Integers	${return_code}	 0   msg=Error deleting operatorgroup
+    ...    oc delete operatorgroup --all -n ${OPERATOR_NAMESPACE} --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting operatorgroup
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace --ignore-not-found
     Verify Project Does Not Exists  redhat-ods-applications
     Verify Project Does Not Exists  redhat-ods-monitoring
     Verify Project Does Not Exists  rhods-notebooks
-    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE} --ignore-not-found
-    Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
+    Verify Project Does Not Exists  opendatahub
+    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator --ignore-not-found
+    Verify Project Does Not Exists  redhat-ods-operator

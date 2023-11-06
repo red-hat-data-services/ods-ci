@@ -71,10 +71,10 @@ Uninstall RHODS V2
     [Documentation]    Keyword to uninstall the version 2 of the RHODS operator in Self-Managed
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete datasciencecluster --all --ignore-not-found
-    Should Be Equal As Integers ${return_code}   0   msg=Error deleting DataScienceCluster CR
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DataScienceCluster CR
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete dscinitialization --all --ignore-not-found
-    Should Be Equal As Integers ${return_code}   0   msg=Error deleting DSCInitialization CR
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DSCInitialization CR
 
     ${return_code}    ${subscription_name}    Run And Return Rc And Output
     ...    oc get subscription -n redhat-ods-operator --no-headers | awk '{print $1}'

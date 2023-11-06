@@ -107,7 +107,5 @@ Uninstall RHODS V2
     Verify Project Does Not Exists  redhat-ods-monitoring
     Verify Project Does Not Exists  rhods-notebooks
     Verify Project Does Not Exists  opendatahub
-    IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
-        ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE} --ignore-not-found
-        Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
-    END
+    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator --ignore-not-found
+    Verify Project Does Not Exists  redhat-ods-operator

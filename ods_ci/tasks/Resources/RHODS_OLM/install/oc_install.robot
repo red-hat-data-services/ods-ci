@@ -15,7 +15,12 @@ Install RHODS
   Clone OLM Install Repo
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
-          Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+            IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
+                 Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+            ELSE
+                 Create Catalog Source For Operator
+                 Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
+            END
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
           Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
@@ -27,7 +32,12 @@ Install RHODS
       END
   ELSE IF  "${cluster_type}" == "managed"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
-          Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+           IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
+                Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+           ELSE
+                Create Catalog Source For Operator
+                Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
+           END
       ELSE
           FAIL    Provided test envrioment is not supported
       END
@@ -38,17 +48,19 @@ Verify RHODS Installation
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
     Set Global Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
     Set Global Variable    ${MONITORING_NAMESPACE}    opendatahub
-    Set Global Variable    ${OPERATOR_NAMESPACE}    redhat-ods-operator
+    Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-operators
     Set Global Variable    ${NOTEBOOKS_NAMESPACE}    opendatahub
   END
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
-  Wait For Pods Numbers  1
-  ...                   namespace=${OPERATOR_NAMESPACE}
-  ...                   label_selector=name=rhods-operator
-  ...                   timeout=2000
-  Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
-  Log  Verified redhat-ods-operator  console=yes
+  IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
+       Wait For Pods Numbers  1
+       ...                   namespace=${OPERATOR_NAMESPACE}
+       ...                   label_selector=name=rhods-operator
+       ...                   timeout=2000
+       Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
+       Log  Verified redhat-ods-operator  console=yes
+  END
 
   # The CodeFlare operator verification needs to happen after RHODS operator and before DataScienceCluster is created!
   ${is_codeflare_managed} =     Is CodeFlare Managed
@@ -138,22 +150,22 @@ Verify Builds In redhat-ods-applications
 
 Clone OLM Install Repo
   [Documentation]   Clone OLM git repo
-  ${return_code}    ${output} 	  Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}
+  ${return_code}    ${output}     Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}
   Log To Console    ${output}
-  Should Be Equal As Integers	${return_code}	 0
+  Should Be Equal As Integers   ${return_code}   0
 
 Install RHODS In Self Managed Cluster Using CLI
   [Documentation]   Install rhods on self managed cluster using cli
   [Arguments]     ${cluster_type}     ${image_url}
   ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url}    timeout=20 min
-  Should Be Equal As Integers	${return_code}	 0   msg=Error detected while installing RHODS
+  Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
 
 Install RHODS In Managed Cluster Using CLI
   [Documentation]   Install rhods on managed managed cluster using cli
   [Arguments]     ${cluster_type}     ${image_url}
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url}  #robocop:disable
   Log To Console    ${output}
-  Should Be Equal As Integers	${return_code}	 0  msg=Error detected while installing RHODS
+  Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
 
 Wait For Pods Numbers
   [Documentation]   Wait for number of pod during installtion
@@ -190,7 +202,7 @@ Apply DataScienceCluster CustomResource
     Log To Console    ${yml}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
     Log To Console    ${output}
-    Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while applying DSC CR
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
     Remove File    ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    $cmp not in $COMPONENTS
@@ -233,7 +245,7 @@ Is Component Enabled
     [Arguments]    ${component}    ${dsc_name}=default
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState'  #robocop:disable
     Log    ${output}
-    Should Be Equal As Integers	 ${return_code}	 0  msg=Error detected while getting component status
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component status
     ${n_output} =    Evaluate    '${output}' == ''
     IF  ${n_output}
           RETURN    false
@@ -243,4 +255,22 @@ Is Component Enabled
          ELSE IF    ${output} == "Managed"
               RETURN    true
          END
+    END
+
+Create Catalog Source For Operator
+    [Documentation]    Create Catalog source for odh nightly build
+    [Arguments]    ${file_path}=tasks/Resources/Files/
+    ${return_code}    ${output} =    Run And Return Rc And Output    sed -i "s,image: .*,image: ${image_url},g" ${file_path}/odh_catalogsource.yml
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while making changes to file
+    ${return_code}    ${output} =    Run And Return Rc And Output   oc apply -f ${file_path}/odh_catalogsource.yml
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while apply the catalog
+    Wait for Catalog To Be Ready
+
+Wait for Catalog To Be Ready
+    [Documentation]    Verify catalog is Ready OR NOT
+    [Arguments]    ${namespace}=openshift-marketplace   ${catalog_name}=odh-catalog-dev   ${timeout}=30
+    FOR    ${counter}    IN RANGE    ${timeout}
+           ${return_code}    ${output} =    Run And Return Rc And Output    oc get catalogsources ${catalog_name} -n ${namespace} -o json | jq ."status.connectionState.lastObservedState"
+           Should Be Equal As Integers   ${return_code}  0  msg=Error detected while getting component status
+           IF  ${output} == "READY"   Exit For Loop
     END

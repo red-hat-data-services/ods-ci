@@ -1,0 +1,15 @@
+kind: List
+metadata: {}
+apiVersion: v1
+items:
+    -   apiVersion: operators.coreos.com/v1alpha1
+        kind: Subscription
+        metadata:
+            name: rhods-odh-nightly-operator
+            namespace: openshift-operators
+        spec:
+            channel: odh-nightlies
+            installPlanApproval: Automatic
+            name: rhods-operator
+            source: odh-catalog-dev
+            sourceNamespace: openshift-marketplace

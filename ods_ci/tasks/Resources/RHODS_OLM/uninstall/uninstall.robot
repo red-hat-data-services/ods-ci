@@ -94,7 +94,7 @@ Uninstall RHODS V2
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete subscription rhods-odh-nightly-operator -n openshift-operators --ignore-not-found # robocop: disable
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete -f odh-catalog-dev -n  openshift-operators --ignore-not-found  # robocop: disable
+    ...    oc delete CatalogSource odh-catalog-dev -n openshift-marketplace --ignore-not-found  # robocop: disable
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete subscription $(oc get subscription -n ${OPERATOR_NAMESPACE} --no-headers | awk '{print $1}') -n ${OPERATOR_NAMESPACE} --ignore-not-found  # robocop: disable
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription

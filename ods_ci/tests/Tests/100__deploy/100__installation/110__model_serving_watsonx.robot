@@ -15,8 +15,9 @@ ${KSERVE_NS}=    ${APPLICATIONS_NAMESPACE}
 *** Test Cases ***
 Verify KServe Is Shipped
     [Documentation]    Verify KServe Is Shipped And Enabled Within ODS
-    [Tags]    WatsonX
+    [Tags]    Smoke
     ...       ODS-2325
+    ...       KServe
     @{kserve_pods_info} =    Fetch KServe Pods
     @{kserve_services_info} =    Fetch KServe Controller Services
     @{kserve_wh_services_info} =    Fetch KServe Webhook Services

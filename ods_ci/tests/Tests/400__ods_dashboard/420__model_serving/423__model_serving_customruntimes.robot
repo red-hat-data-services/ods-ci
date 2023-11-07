@@ -35,7 +35,7 @@ Verify RHODS Admins Can Delete A Custom Serving Runtime Template
 Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     [Documentation]    Verifies that a model can be deployed using only the UI.
     ...    At the end of the process, verifies the correct resources have been deployed.
-    [Tags]    Sanity    ODS-2281
+    [Tags]    Sanity    Tier1    ODS-2281    ModelMesh
     [Setup]    Run Keywords
     ...    Create Test Serving Runtime Template If Not Exists
     ...    AND

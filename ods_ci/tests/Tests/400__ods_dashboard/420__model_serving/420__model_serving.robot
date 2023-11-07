@@ -9,7 +9,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject
 Resource          ../../../Resources/OCP.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
-
+Test Tags         ModelMesh
 
 *** Variables ***
 ${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json

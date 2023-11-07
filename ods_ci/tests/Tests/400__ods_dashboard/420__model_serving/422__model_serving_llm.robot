@@ -94,7 +94,7 @@ Verify User Can Serve And Query A Model
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    Sanity    ODS-2371    KServe
+    [Tags]    Sanity    Tier1    ODS-2371    KServe
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
@@ -127,7 +127,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace
 
 Verify User Can Deploy Multiple Models In Different Namespaces
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
-    [Tags]    Sanity    ODS-2378   KServe
+    [Tags]    Sanity    Tier1    ODS-2378   KServe
     [Setup]    Run Keywords    Set Project And Runtime    namespace=singlemodel-multi1
     ...        AND
     ...        Set Project And Runtime    namespace=singlemodel-multi2
@@ -159,7 +159,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces
 
 Verify Model Upgrade Using Canaray Rollout
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
-    [Tags]    Sanity    ODS-2372    KServe
+    [Tags]    Sanity    Tier1    ODS-2372    KServe
     [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
     ${isvc_name}=    Set Variable    canary-caikit
@@ -217,7 +217,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model
-    [Tags]    Sanity    ODS-2376    KServe
+    [Tags]    Sanity    Tier1    ODS-2376    KServe
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -253,7 +253,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
 
 Verify User Can Autoscale Using Concurrency
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
-    [Tags]    Sanity    ODS-2377    KServe
+    [Tags]    Sanity    Tier1    ODS-2377    KServe
     [Setup]    Set Project And Runtime    namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -278,7 +278,7 @@ Verify User Can Autoscale Using Concurrency
 
 Verify User Can Validate Scale To Zero
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
-    [Tags]    Sanity    ODS-2379    KServe
+    [Tags]    Sanity    Tier1    ODS-2379    KServe
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Create List    ${flan_model_name}
@@ -315,7 +315,7 @@ Verify User Can Validate Scale To Zero
 
 Verify User Can Set Requests And Limits For A Model
     [Documentation]    Checks if user can set HW request and limits on their inference service object
-    [Tags]    Sanity    ODS-2380    KServe
+    [Tags]    Sanity    Tier1    ODS-2380    KServe
     [Setup]    Set Project And Runtime    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -353,7 +353,7 @@ Verify User Can Set Requests And Limits For A Model
 Verify Model Can Be Served And Query On A GPU Node
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2381    KServe    Resource-GPU
+    [Tags]    Sanity    Tier1    ODS-2381    KServe    Resource-GPU
     [Setup]    Set Project And Runtime    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -461,7 +461,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...                must remain unchanged after the runtime upgrade.
     ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
     ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
-    [Tags]    Sanity    ODS-2404    KServe
+    [Tags]    Sanity    Tier1    ODS-2404    KServe
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

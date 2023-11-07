@@ -31,7 +31,7 @@ ${JAEGER_OP_NAME}=     jaeger-product
 ${JAEGER_SUB_NAME}=    jaeger-product
 ${KSERVE_NS}=    ${APPLICATIONS_NAMESPACE}    # NS is "kserve" for ODH
 ${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime_{{protocol}}.yaml
-${TEST_NS}=    watsonx
+${TEST_NS}=    singlemodel
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
 ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
 ${USE_BUCKET_HTTPS}=    "1"
@@ -65,15 +65,15 @@ ${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 Verify External Dependency Operators Can Be Deployed
     [Documentation]    Checks the pre-required Operators can be installed
     ...                and configured
-    [Tags]    ODS-2326    WatsonX
+    [Tags]    ODS-2326    KServe
     Pass Execution    message=Installation done as part of Suite Setup.
 
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    ODS-2341    WatsonX
-    [Setup]    Set Project And Runtime    namespace=berto
-    ${test_namespace}=    Set Variable     berto
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
@@ -94,7 +94,7 @@ Verify User Can Serve And Query A Model
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    ODS-2371    WatsonX
+    [Tags]    Sanity    ODS-2371    KServe
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
@@ -127,10 +127,10 @@ Verify User Can Deploy Multiple Models In The Same Namespace
 
 Verify User Can Deploy Multiple Models In Different Namespaces
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
-    [Tags]    ODS-2378   WatsonX
-    [Setup]    Run Keywords    Set Project And Runtime    namespace=watsonx-multi1
+    [Tags]    Sanity    ODS-2378   KServe
+    [Setup]    Run Keywords    Set Project And Runtime    namespace=singlemodel-multi1
     ...        AND
-    ...        Set Project And Runtime    namespace=watsonx-multi2
+    ...        Set Project And Runtime    namespace=singlemodel-multi2
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
     ${models_names_ns_1}=    Create List    ${model_one_name}
@@ -139,27 +139,27 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=watsonx-multi1
+    ...    namespace=singlemodel-multi1
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=watsonx-multi2
+    ...    namespace=singlemodel-multi2
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=watsonx-multi1
+    ...    namespace=singlemodel-multi1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=watsonx-multi2
+    ...    namespace=singlemodel-multi2
     Query Model Multiple Times    model_name=${model_one_name}    n_times=2
-    ...    namespace=watsonx-multi1
+    ...    namespace=singlemodel-multi1
     Query Model Multiple Times    model_name=${model_two_name}    n_times=2
-    ...    namespace=watsonx-multi2
-    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=watsonx-multi1    isvc_names=${models_names_ns_1}
+    ...    namespace=singlemodel-multi2
+    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
     ...           AND
-    ...           Clean Up Test Project    test_ns=watsonx-multi2    isvc_names=${models_names_ns_2}
+    ...           Clean Up Test Project    test_ns=singlemodel-multi2    isvc_names=${models_names_ns_2}
 
 Verify Model Upgrade Using Canaray Rollout
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
-    [Tags]    ODS-2372    WatsonX
+    [Tags]    Sanity    ODS-2372    KServe
     [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
     ${isvc_name}=    Set Variable    canary-caikit
@@ -198,7 +198,7 @@ Verify Model Upgrade Using Canaray Rollout
 Verify Model Pods Are Deleted When No Inference Service Is Present
     [Documentation]    Checks if model pods gets successfully deleted after
     ...                deleting the KServe InferenceService object
-    [Tags]    ODS-2373    WatsonX
+    [Tags]    Tier2    ODS-2373    KServe
     [Setup]    Set Project And Runtime    namespace=no-infer-kserve
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -217,7 +217,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model
-    [Tags]    ODS-2376    WatsonX
+    [Tags]    Sanity    ODS-2376    KServe
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -253,7 +253,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
 
 Verify User Can Autoscale Using Concurrency
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
-    [Tags]    ODS-2377    WatsonX
+    [Tags]    Sanity    ODS-2377    KServe
     [Setup]    Set Project And Runtime    namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -278,7 +278,7 @@ Verify User Can Autoscale Using Concurrency
 
 Verify User Can Validate Scale To Zero
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
-    [Tags]    ODS-2379    WatsonX
+    [Tags]    Sanity    ODS-2379    KServe
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Create List    ${flan_model_name}
@@ -315,7 +315,7 @@ Verify User Can Validate Scale To Zero
 
 Verify User Can Set Requests And Limits For A Model
     [Documentation]    Checks if user can set HW request and limits on their inference service object
-    [Tags]    ODS-2380    WatsonX
+    [Tags]    Sanity    ODS-2380    KServe
     [Setup]    Set Project And Runtime    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -353,9 +353,9 @@ Verify User Can Set Requests And Limits For A Model
 Verify Model Can Be Served And Query On A GPU Node
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    ODS-2381    WatsonX    Resource-GPU
-    [Setup]    Set Project And Runtime    namespace=watsonx-gpu
-    ${test_namespace}=    Set Variable    watsonx-gpu
+    [Tags]    Sanity    ODS-2381    KServe    Resource-GPU
+    [Setup]    Set Project And Runtime    namespace=singlemodel-gpu
+    ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
@@ -384,7 +384,7 @@ Verify Model Can Be Served And Query On A GPU Node
 Verify Non Admin Can Serve And Query A Model
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    ODS-2326    WatsonX
+    [Tags]    Smoke    ODS-2326    KServe
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test
@@ -411,7 +411,7 @@ Verify Non Admin Can Serve And Query A Model
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
-    [Tags]    ODS-2441    WatsonX
+    [Tags]    Tier2    ODS-2441    KServe
     [Setup]    Set Project And Runtime    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
@@ -434,7 +434,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
 
 Verify User Can Serve And Query Flan-t5 Large
     [Documentation]    Deploys and queries flan-t5-large model
-    [Tags]    ODS-2434    WatsonX
+    [Tags]    Tier2    ODS-2434    KServe
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large
@@ -461,7 +461,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...                must remain unchanged after the runtime upgrade.
     ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
     ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
-    [Tags]    ODS-2404    WatsonX
+    [Tags]    Sanity    ODS-2404    KServe
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -496,9 +496,9 @@ Verify User Can Access Model Metrics From UWM
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    ODS-2401    WatsonX
-    [Setup]    Set Project And Runtime    namespace=watsonx-metrics    enable_metrics=${TRUE}
-    ${test_namespace}=    Set Variable     watsonx-metrics
+    [Tags]    Smoke    ODS-2401    KServe
+    [Setup]    Set Project And Runtime    namespace=singlemodel-metrics    enable_metrics=${TRUE}
+    ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     ${thanos_url}=    Get OpenShift Thanos URL

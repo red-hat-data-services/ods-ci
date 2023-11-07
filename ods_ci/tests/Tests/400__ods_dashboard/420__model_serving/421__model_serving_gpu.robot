@@ -8,7 +8,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
-
+Test Tags         ModelMesh
 
 *** Variables ***
 ${RHODS_NAMESPACE}=    ${APPLICATIONS_NAMESPACE}

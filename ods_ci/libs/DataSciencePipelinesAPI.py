@@ -40,9 +40,14 @@ class DataSciencePipelinesAPI:
             deployment_count = len(deployments)
             time.sleep(1)
             count += 1
-        # https://github.com/opendatahub-io/odh-dashboard/issues/1673
-        # It is possible to start the Pipeline Server without pipelineruns.tekton.dev CRD
-        pipeline_run_crd_count = self.count_pods("oc get crd pipelineruns.tekton.dev", 1)
+        pipeline_run_crd_count = 0
+        count = 0
+        while pipeline_run_crd_count < 1 and count < 60:
+            # https://github.com/opendatahub-io/odh-dashboard/issues/1673
+            # It is possible to start the Pipeline Server without pipelineruns.tekton.dev CRD
+            pipeline_run_crd_count = self.count_pods("oc get crd pipelineruns.tekton.dev", 1)
+            time.sleep(1)
+            count += 1
         assert pipeline_run_crd_count == 1
         return self.count_running_pods(
             f"oc get pods -n openshift-operators -l name=openshift-pipelines-operator -o json",

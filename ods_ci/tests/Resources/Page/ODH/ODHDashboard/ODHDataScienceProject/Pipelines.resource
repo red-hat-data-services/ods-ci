@@ -21,8 +21,9 @@ Create Pipeline Server
     ...                It assumes the Data Connection is aleady created
     ...                and you wants to use defaul DB configurations [TEMPORARY]
     [Arguments]    ${dc_name}    ${project_title}
-    Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}
-    Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_XP}
+    # Every 2 mins the frontend updates its cache and the client polls every 30seconds.
+    # So the longest you’d have to wait is 2.5 mins. Set 3 min just to make sure
+    Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}    timeout=180s
     Element Should Be Enabled    ${PIPELINES_SERVER_BTN_XP}
     Click Button    ${PIPELINES_SERVER_BTN_XP}
     Wait Until Generic Modal Appears

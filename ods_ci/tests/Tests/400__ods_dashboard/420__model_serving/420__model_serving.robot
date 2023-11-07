@@ -212,7 +212,11 @@ Try Opening Create Server
             Click Button    Select a project
             RETURN
         ELSE
-            Wait Until Page Contains    Select a project
+            Clean Up Model Serving Page
+            Clean Up DSP Page
+            Open Model Serving Home Page
+            Reload Page
+            Sleep  5s
         END
     END
 

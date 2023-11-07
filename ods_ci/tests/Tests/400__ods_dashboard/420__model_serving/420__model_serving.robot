@@ -207,16 +207,12 @@ Try Opening Create Server
     ...    controls how many retries are made.
     [Arguments]    ${retries}=3
     FOR    ${try}    IN RANGE    0    ${retries}
-        ${status} =    Run Keyword And Return Status    Page Should Contain    Create server
+        ${status} =    Run Keyword And Return Status    Page Should Contain    Select a project
         IF    ${status}
-            Click Button    Create server
+            Click Button    Select a project
             RETURN
         ELSE
-            Clean Up Model Serving Page
-            Clean Up DSP Page
-            Open Model Serving Home Page
-            Reload Page
-            Sleep  5s
+            Wait Until Page Contains    Select a project
         END
     END
 

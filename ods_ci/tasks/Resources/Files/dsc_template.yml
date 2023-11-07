@@ -16,6 +16,8 @@ spec:
       managementState: <modelmeshserving_value>
     ray:
       managementState: <ray_value>
+    trustyai:
+      managementState: <trustyai_value>
     workbenches:
       managementState: <workbenches_value>
 

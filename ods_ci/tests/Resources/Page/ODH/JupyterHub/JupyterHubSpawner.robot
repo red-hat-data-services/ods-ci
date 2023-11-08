@@ -31,7 +31,9 @@ ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Clo
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.9
-${PREVIOUS_PYTHON_VER} =    3.8
+${PREVIOUS_PYTHON_VER} =    3.9
+${DEFAULT_NOTEBOOK_VER} =    2023.2
+${PREVIOUS_NOTEBOOK_VER} =    2023.1
 
 
 *** Keywords ***
@@ -61,7 +63,7 @@ Select Notebook Image
         Verify Version Dropdown Is Present    ${notebook_image}
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
         Click Element
-        ...    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/../input
+        ...    xpath=${KFNBC_IMAGE_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]/../input
     ELSE
         Verify Version Dropdown Is Present    ${notebook_image}
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
@@ -84,8 +86,8 @@ Verify Version Dropdown Is Present
     Page Should Contain Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
     Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
     Wait Until Page Contains Element    xpath=${KFNBC_IMAGE_DROPDOWN}
-    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${DEFAULT_PYTHON_VER}")]
-    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]
+    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
+    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]
     Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
 
 Select Container Size

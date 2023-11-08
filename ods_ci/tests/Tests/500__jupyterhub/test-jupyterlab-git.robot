@@ -130,7 +130,7 @@ Push Changes To Remote
     Open With JupyterLab Menu    Git    Push to Remote
     Wait Until Page Contains    Git credentials required    timeout=200s
     Input Text    xpath=//input[@placeholder="username"]    ${github_username}
-    Input Text    xpath=//input[@placeholder="password / personal access token"]    ${token}
+    Input Text    xpath=//input[@placeholder="personal access token"]    ${token}
     Click Element    xpath=//button[.="OK"]
     Sleep    4s
 

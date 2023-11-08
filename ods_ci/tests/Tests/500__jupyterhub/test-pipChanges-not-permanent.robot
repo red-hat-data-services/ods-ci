@@ -21,7 +21,7 @@ Verify pip Changes not permanent
     Stop JupyterLab Notebook Server
     Capture Page Screenshot
     Fix Spawner Status
-    Spawn Notebook With Arguments
+    Spawn Notebook With Arguments    image=minimal-notebook
     Verify Package Is Not Installed In JupyterLab  paramiko
     Capture Page Screenshot
 
@@ -32,4 +32,4 @@ Test Setup
     Begin Web Test
     Wait for RHODS Dashboard to Load
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments
+    Spawn Notebook With Arguments    image=minimal-notebook

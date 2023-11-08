@@ -91,7 +91,7 @@ Uninstall RHODS V2
         Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription
     END
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete clusterserviceversion opendatahub-operator.1.18.0 -n redhat-ods-operator --ignore-not-found
+    ...    oc delete clusterserviceversion opendatahub-operator.1.18.0 -n openshift-operators --ignore-not-found
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete subscription rhods-odh-nightly-operator -n openshift-operators --ignore-not-found # robocop: disable
     ${return_code}    ${output}    Run And Return Rc And Output

@@ -193,8 +193,8 @@ Verify Version Selection Dropdown
     Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
-    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span[contains(text(), "Python v${DEFAULT_PYTHON_VER}")]
-    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
 
 Select Workbench Image Version
@@ -204,9 +204,9 @@ Select Workbench Image Version
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
     IF    "${version}"=="default"
-        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span[contains(text(), "Python v${DEFAULT_PYTHON_VER}")]/..
+        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]/..
     ELSE IF    "${version}"=="previous"
-        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span[contains(text(), "Python v${PREVIOUS_PYTHON_VER}")]/..
+        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]/..
     ELSE
         Fail    ${version} does not exist, use default/previous
     END

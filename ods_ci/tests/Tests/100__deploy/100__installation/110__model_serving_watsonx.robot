@@ -15,8 +15,7 @@ ${KSERVE_NS}=    ${APPLICATIONS_NAMESPACE}
 *** Test Cases ***
 Verify KServe Is Shipped
     [Documentation]    Verify KServe Is Shipped And Enabled Within ODS
-    [Tags]    Smoke
-    ...       ODS-2325
+    [Tags]    ODS-2325
     ...       KServe
     @{kserve_pods_info} =    Fetch KServe Pods
     @{kserve_services_info} =    Fetch KServe Controller Services

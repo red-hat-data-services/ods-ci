@@ -51,15 +51,26 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     [Teardown]    Close All Browsers
 
 Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
-    [Documentation]     Verifies the openshift metrics and rhods prometheus showing same rhods_aggregate_availability values
-    [Tags]    Sanity
+    [Documentation]     Verifies metric rhods_aggregate_availability exist in OpenShift > Observe > Metrics and
+    ...   in RHODS Prometheus. Verify their value matches
+    [Tags]    Smoke
     ...       ODS-637
     ...       Tier1
+
     Skip If RHODS Is Self-Managed
-    ${value} =    Run OpenShift Metrics Query    query=rhods_aggregate_availability
-    ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_aggregate_availability
-    Should Be Equal    ${value_from_promothues}    ${value}
-    [Teardown]    Close All Browsers
+
+    ${value_openshift_observe} =    Run OpenShift Metrics Query
+    ...    query=rhods_aggregate_availability
+    ...    retry_attempts=1    return_zero_if_result_empty=False
+
+    SeleniumLibrary.Capture Page Screenshot
+
+    Should Not Be Empty    ${value_openshift_observe}
+    ...    msg=Metric rhods_aggregate_availability is empty in OpenShift>Observe>Metrics
+
+    ${value_prometheus} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_aggregate_availability
+    Should Be Equal    ${value_prometheus}    ${value_openshift_observe}
+    [Teardown]    SeleniumLibrary.Close All Browsers
 
 Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometheus
     [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing N active users

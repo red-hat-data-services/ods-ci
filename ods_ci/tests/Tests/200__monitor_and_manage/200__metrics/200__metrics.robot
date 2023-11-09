@@ -8,17 +8,19 @@ Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
 Test Setup          Begin Metrics Web Test
 Test Teardown       End Metrics Web Test
+Test Tags           ExcludeOnODH
 
 
 *** Variables ***
-@{RECORD_GROUPS}    Availability Metrics    SLOs - ODH Dashboard
-...    SLOs - RHODS Operator    Usage Metrics
+@{RECORD_GROUPS}    SLOs - MCAD Controller     SLOs - CodeFlare Operator
+...    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
+...    SLOs - Modelmesh Controller
+...    SLOs - ODH Model Controller
+...    SLOs - RHODS Operator v2
 
-@{ALERT_GROUPS}     Builds    DeadManSnitch    RHODS Notebook controllers
-...    RHODS-PVC-Usage    SLOs-haproxy_backend_http_responses_total    SLOs-probe_success
-
-@{ALERT_GROUPS_120}    DeadManSnitch    RHODS Notebook controllers
-...    RHODS-PVC-Usage    SLOs-haproxy_backend_http_responses_total    SLOs-probe_success
+@{ALERT_GROUPS}     SLOs-probe_success    Distributed Workloads CodeFlare
+...    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines
+...    DeadManSnitch    RHODS operator
 
 
 *** Test Cases ***
@@ -123,12 +125,7 @@ Check Prometheus Recording Rules
 
 Check Prometheus Alerting Rules
     [Documentation]    Verifies alerting rules in prometheus
-    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF    ${version_check}==False
-        Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS}
-    ELSE
-        Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS_120}
-    END
+    Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS}
 
 Read Current CPU Usage
     [Documentation]    Returns list of current cpu usage

@@ -33,10 +33,6 @@ Verify All Alerts Severity
     ...       Tier1
     ...       ODS-1227
 
-    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF    ${version_check}==False
-        Verify "Jupyter Image Builds Are Failing" Alerts Severity And Continue On Failure
-    END
     Verify "DeadManSnitch" Alerts Severity And Continue On Failure
     Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     Verify "ODH Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
@@ -50,12 +46,6 @@ Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-l
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-540
-
-    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF    ${version_check}==False
-        Verify Alert Is Not Firing And Continue On Failure
-        ...    Builds    Jupyter image builds are failing    alert-duration=120
-    END
 
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
@@ -104,114 +94,6 @@ Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
 
     [Teardown]    Teardown PVC Alert Test
 
-Verify Alerts Are Not Fired After Multiple JupyterHub Rollouts
-    [Documentation]    Verifies that alert "RHODS JupyterHub Probe Success Burn Rate" is not fired
-    ...    after triggering multiple Jupyterhub rollouts in a short period of time.
-    [Tags]    Tier3
-    ...       ODS-1591
-    ...       Execution-Time-Over-15m
-
-    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
-
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
-    ...    RHODS JupyterHub Probe Success Burn Rate
-    ...    alert-duration=120
-
-    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
-
-    FOR    ${counter}    IN RANGE    10
-        Rollout JupyterHub
-
-        Prometheus.Alert Should Not Be Firing In The Next Period    ${RHODS_PROMETHEUS_URL}
-        ...    ${RHODS_PROMETHEUS_TOKEN}
-        ...    SLOs-probe_success
-        ...    RHODS JupyterHub Probe Success Burn Rate
-        ...    alert-duration=120
-        ...    period=1m
-    END
-
-    Prometheus.Alert Should Not Be Firing In The Next Period    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
-    ...    RHODS JupyterHub Probe Success Burn Rate
-    ...    alert-duration=120
-    ...    period=5m
-
-    [Teardown]    ODS.Restore Default Deployment Sizes
-
-Verify Alerts Are Fired When Jupyter Is Down    # robocop: disable:too-long-test-case
-    [Documentation]    Verifies that alerts "RHODS JupyterHub Probe Success Burn Rate"
-    ...    is fired when jupyterhub is not working
-    [Tags]    Tier3
-    ...       ODS-1592
-    ...       Execution-Time-Over-15m
-
-    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
-
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
-    ...    RHODS JupyterHub Probe Success Burn Rate
-    ...    alert-duration=120
-
-    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
-    ODS.Scale DeploymentConfig    ${APPLICATIONS_NAMESPACE}    jupyterhub    replicas=0
-
-    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
-    ...    RHODS JupyterHub Probe Success Burn Rate
-    ...    alert-duration=120
-    ...    timeout=22 min
-
-    ODS.Restore Default Deployment Sizes
-
-    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
-    ...    RHODS JupyterHub Probe Success Burn Rate
-    ...    alert-duration=120
-    ...    timeout=5 min
-
-    [Teardown]    ODS.Restore Default Deployment Sizes
-
-Verify Alerts Are Fired When Traefik Is Down    # robocop: disable:too-long-test-case
-    [Documentation]    Verifies that alerts "RHODS JupyterHub Probe Success Burn Rate"
-    ...    is fired when traefik-proxy is not working
-    [Tags]    Tier3
-    ...       ODS-738
-
-    Skip If RHODS Version Greater Or Equal Than    version=1.16.0
-
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
-    ...    RHODS JupyterHub Probe Success Burn Rate
-    ...    alert-duration=120
-
-    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
-    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    traefik-proxy    replicas=0
-
-    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
-    ...    RHODS JupyterHub Probe Success Burn Rate
-    ...    alert-duration=120
-    ...    timeout=60 min
-
-    ODS.Restore Default Deployment Sizes
-
-    Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
-    ...    RHODS JupyterHub Probe Success Burn Rate
-    ...    alert-duration=120
-    ...    timeout=5 min
-
-    [Teardown]    ODS.Restore Default Deployment Sizes
-
 Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" and "RHODS Probe Success Burn Rate"
     ...    are fired when rhods-dashboard is not working
@@ -220,7 +102,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
 
     Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-haproxy_backend_http_responses_total
+    ...    SLOs-haproxy_backend_http_responses_dashboard
     ...    RHODS Dashboard Route Error Burn Rate
 
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
@@ -228,7 +110,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-haproxy_backend_http_responses_total
+    ...    SLOs-haproxy_backend_http_responses_dashboard
     ...    RHODS Dashboard Route Error Burn Rate
     ...    alert-duration=120
     ...    timeout=60 min
@@ -244,7 +126,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
 
     Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-haproxy_backend_http_responses_total
+    ...    SLOs-haproxy_backend_http_responses_dashboard
     ...    RHODS Dashboard Route Error Burn Rate
     ...    alert-duration=120
     ...    timeout=5 min
@@ -505,13 +387,13 @@ Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continu
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" is not firing
     ...    for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate    alert-duration=120
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate    alert-duration=900
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    alert-duration=900
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate    alert-duration=3600
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate    alert-duration=10800
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    alert-duration=10800
 
 Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Probe Success Burn Rate" is not firing
@@ -562,35 +444,13 @@ Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Severity And Continue On F
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate    critical    alert-duration=120
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate   critical    alert-duration=900
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate   critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate   warning    alert-duration=3600
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate   warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Dashboard Route Error Burn Rate    warning    alert-duration=10800
-
-Verify "RHODS Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" is not firing for all alert durations
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    alert-duration=120
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    alert-duration=900
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    alert-duration=3600
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    alert-duration=10800
-
-Verify "RHODS Route Error Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Route Error Burn Rate" severity
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    critical    alert-duration=120
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate   critical    alert-duration=900
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate   warning    alert-duration=3600
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_total    RHODS Route Error Burn Rate    warning    alert-duration=10800
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    warning    alert-duration=10800
 
 Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     [Documentation]    Verifies alert severity for different alert durations

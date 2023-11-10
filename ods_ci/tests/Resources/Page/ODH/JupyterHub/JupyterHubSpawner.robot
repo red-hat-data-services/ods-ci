@@ -63,7 +63,7 @@ Select Notebook Image
         Verify Version Dropdown Is Present    ${notebook_image}
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
         Click Element
-        ...    xpath=${KFNBC_IMAGE_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]/../input
+        ...    xpath=${KFNBC_IMAGE_DROPDOWN}//label//div[contains(string(), "${PREVIOUS_NOTEBOOK_VER}")]/../../input
     ELSE
         Verify Version Dropdown Is Present    ${notebook_image}
         Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
@@ -86,8 +86,8 @@ Verify Version Dropdown Is Present
     Page Should Contain Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
     Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
     Wait Until Page Contains Element    xpath=${KFNBC_IMAGE_DROPDOWN}
-    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
-    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]
+    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//label//div[contains(string(), "${DEFAULT_NOTEBOOK_VER}")]
+    Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//label//div[contains(string(), "${PREVIOUS_NOTEBOOK_VER}")]
     Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
 
 Select Container Size

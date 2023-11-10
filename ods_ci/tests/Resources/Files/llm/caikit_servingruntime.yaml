@@ -12,7 +12,7 @@ spec:
     - name: kserve-container
       image: quay.io/opendatahub/text-generation-inference:stable
       command: ["text-generation-launcher"]
-      args: ["--model-name=/mnt/models/artifacts/"]
+      args: ["--model-name=/mnt/models/artifacts/"] 
       env:
         - name: TRANSFORMERS_CACHE
           value: /tmp/transformers_cache

@@ -93,7 +93,7 @@ Verify GPU Selector Is Usable
 
 Set Accelerator
     [Documentation]  Set Accelerator
-    [Arguments]    ${accelerator}='Nvidia GPU'
+    [Arguments]    ${accelerator}='NVIDIA GPU'
     Click Element  ${SERVING_ACCELERATOR_DROPDOWN_XPATH}
     Click Element  xpath=//div[@class and text()=${accelerator}]
 

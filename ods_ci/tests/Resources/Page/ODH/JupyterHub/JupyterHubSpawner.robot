@@ -107,7 +107,7 @@ Wait Until Accelerator Dropdown Exists
 
 Set GPU Accelerator
     [Documentation]  Set Accelerator type
-    [Arguments]  ${accelerator_type}='Nvidia GPU'
+    [Arguments]  ${accelerator_type}='NVIDIA GPU'
     Click Element  xpath:${KFNBC_ACCELERATOR_DROPDOWN_XPATH}
     Click Element  xpath://div[@class and text()=${accelerator_type}]
 

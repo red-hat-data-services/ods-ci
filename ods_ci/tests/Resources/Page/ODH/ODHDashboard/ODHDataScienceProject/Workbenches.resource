@@ -467,7 +467,7 @@ Page Should Contain Event Log
 
 Select Workbench Number Of GPUs
     [Documentation]    Selects the container size in the workbench creation page
-    [Arguments]     ${gpus}    ${gpu_type}='Nvidia GPU'
+    [Arguments]     ${gpus}    ${gpu_type}='NVIDIA GPU'
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
     Click Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
     Wait Until Page Contains Element    ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}

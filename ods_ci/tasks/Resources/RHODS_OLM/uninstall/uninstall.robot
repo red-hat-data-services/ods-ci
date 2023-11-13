@@ -59,9 +59,9 @@ Uninstall RHODS In Self Managed Cluster Using CLI
 Uninstall RHODS In Self Managed Cluster For Operatorhub
   [Documentation]   Uninstall rhods on self-managed cluster for operatorhub installtion
   ${return_code}    ${output}    Run And Return Rc And Output   oc create configmap delete-self-managed-odh -n redhat-ods-operator
-  Should Be Equal As Integers ${return_code}   0   msg=Error creation deletion configmap
+  Should Be Equal As Integers  ${return_code}   0   msg=Error creation deletion configmap
   ${return_code}    ${output}    Run And Return Rc And Output   oc label configmap/delete-self-managed-odh api.openshift.com/addon-managed-odh-delete=true -n redhat-ods-operator
-  Should Be Equal As Integers ${return_code}   0   msg=Error observed while adding label to configmap
+  Should Be Equal As Integers  ${return_code}   0   msg=Error observed while adding label to configmap
   Verify Project Does Not Exists  redhat-ods-applications
   Verify Project Does Not Exists  redhat-ods-monitoring
   Verify Project Does Not Exists  rhods-notebooks

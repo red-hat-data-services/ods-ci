@@ -555,6 +555,8 @@ Verify User Can Query A Model Using HTTP Calls
     Query Model Multiple Times    model_name=${model_name}    protocol=http
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    query_idx=${0}    validate_response=${FALSE} 
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}
 
 
 *** Keywords ***

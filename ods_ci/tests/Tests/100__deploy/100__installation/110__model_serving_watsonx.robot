@@ -87,12 +87,9 @@ Verify KServe ReplicaSets Info
 Verify Kserve Deployment
     [Documentation]  Verifies RHODS KServe deployment
     @{kserve} =  Oc Get    kind=Pod    namespace=${KSERVE_NS}    api_version=v1
-    ...    label_selector=app.kubernetes.io/part-of=kserve
-    ${containerNames} =    Create List    manager
-    Verify Deployment    ${kserve}    1    1    ${containerNames}
-    @{modelcontroller} =  Oc Get    kind=Pod    namespace=${KSERVE_NS}    api_version=v1
     ...    label_selector=app.opendatahub.io/kserve=true
-    Verify Deployment    ${modelcontroller}    3    1    ${containerNames}
+    ${containerNames} =    Create List    manager
+    Verify Deployment    ${kserve}    4    1    ${containerNames}
 
 ServingRuntime CustomResourceDefinition Should Exist
     [Documentation]    Checks that the ServingRuntime CRD is present

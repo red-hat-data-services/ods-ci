@@ -6,7 +6,7 @@ Resource          ../../../Resources/Page/Operators/ISVs.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
-# Suite Teardown    RHOSi Teardown
+Suite Teardown    RHOSi Teardown
 
 
 *** Variables ***
@@ -41,7 +41,7 @@ ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
 ${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
-${SKIP_PREREQS_INSTALL}=    ${TRUE}
+${SKIP_PREREQS_INSTALL}=    ${FALSE}
 ${SCRIPT_BASED_INSTALL}=    ${TRUE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-caikit
@@ -260,7 +260,7 @@ Verify User Can Autoscale Using Concurrency
     ${model_name}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    auto_scale=True
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${test_namespace}
@@ -564,7 +564,7 @@ Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
-    # RHOSi Setup
+    RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
         IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
             Install Service Mesh Stack

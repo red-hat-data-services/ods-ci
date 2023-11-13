@@ -554,7 +554,7 @@ Verify User Can Query A Model Using HTTP Calls
     # because format of streamed response with http is slightly different from grpc
     Query Model Multiple Times    model_name=${model_name}    protocol=http
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
-    ...    namespace=${test_namespace}    query_idx=${0}    validate_response=${FALSE} 
+    ...    namespace=${test_namespace}    query_idx=${0}    validate_response=${FALSE}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
@@ -909,7 +909,7 @@ Model Response Should Match The Expectation
         # temporarily disabling these lines - will be finalized in later stage due to a different format
         # of streamed reponse when using http protocol instead of grpc
         # ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    data:(\\s+)?"    "
-        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?{    { 
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?{    {
         # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?}    }
         # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?]    ]
         # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?\\[    [
@@ -1009,7 +1009,7 @@ Upgrade Caikit Runtime Image
     ...    ${new_image_url}
     [Arguments]    ${new_image_url}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch ServingRuntime caikit-tgis-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"
+    ...    oc patch ServingRuntime caikit-tgis-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
 
 Get Model Pods Creation Date And Image URL

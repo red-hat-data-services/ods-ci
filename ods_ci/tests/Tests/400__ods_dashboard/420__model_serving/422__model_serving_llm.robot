@@ -6,7 +6,7 @@ Resource          ../../../Resources/Page/Operators/ISVs.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
-Suite Teardown    RHOSi Teardown
+# Suite Teardown    RHOSi Teardown
 
 
 *** Variables ***
@@ -41,7 +41,7 @@ ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
 ${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
-${SKIP_PREREQS_INSTALL}=    ${FALSE}
+${SKIP_PREREQS_INSTALL}=    ${TRUE}
 ${SCRIPT_BASED_INSTALL}=    ${TRUE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-caikit
@@ -72,8 +72,8 @@ Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    ODS-2341    WatsonX
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    ${test_namespace}=    Set Variable     ${TEST_NS}
+    [Setup]    Set Project And Runtime    namespace=berto
+    ${test_namespace}=    Set Variable     berto
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
@@ -550,7 +550,6 @@ Verify User Can Query A Model Using HTTP Calls
     Query Model Multiple Times    model_name=${model_name}    protocol=http
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1    streamed_response=${FALSE}
     ...    namespace=${test_namespace}    query_idx=${0}
-    ...    namespace=${test_namespace}    query_idx=${0}
     # temporarily disabling stream response validation. Need to re-design the expected response json file
     # because format of streamed response with http is slightly different from grpc
     Query Model Multiple Times    model_name=${model_name}    protocol=http
@@ -563,7 +562,7 @@ Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
-    RHOSi Setup
+    # RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
         IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
             Install Service Mesh Stack
@@ -960,7 +959,7 @@ Query Model Multiple Times
             &{args}=       Create Dictionary     url=https://${host}:443/${endpoint}   expected_status=any
             ...             headers=${headers}   json=${payload}    timeout=10  verify=${False}
             ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST
-            ...    return_json=${FALSE}    &{args}
+            ...    skip_res_json=${skip_json_load_response}    &{args}
             Run Keyword And Continue On Failure    Status Should Be  200
         END
         Log    ${res}

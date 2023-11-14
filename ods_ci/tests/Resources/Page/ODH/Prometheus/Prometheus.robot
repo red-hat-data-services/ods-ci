@@ -121,6 +121,9 @@ Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
                     END
                 END
             END
+            IF    ${alert_found}
+                Exit For Loop
+            END
         END
     END
 

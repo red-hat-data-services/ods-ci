@@ -536,7 +536,7 @@ Verify User Can Access Model Metrics From UWM
 Verify User Can Query A Model Using HTTP Calls
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
-    [Tags]    ODS-2501    WatsonX
+    [Tags]    ODS-2501    Smoke
     [Setup]    Set Project And Runtime    namespace=kserve-http    protocol=http
     ${test_namespace}=    Set Variable     kserve-http
     ${model_name}=    Set Variable    flan-t5-small-caikit

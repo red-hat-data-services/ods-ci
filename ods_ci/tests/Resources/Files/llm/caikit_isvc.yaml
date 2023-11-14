@@ -16,5 +16,5 @@ spec:
     model:
       modelFormat:
         name: caikit
-      runtime: caikit-runtime
+      runtime: caikit-tgis-runtime
       storageUri: ${model_storage_uri}

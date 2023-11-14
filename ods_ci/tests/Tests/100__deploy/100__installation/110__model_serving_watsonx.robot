@@ -87,7 +87,7 @@ Verify KServe ReplicaSets Info
 Verify Kserve Deployment
     [Documentation]  Verifies RHODS KServe deployment
     @{kserve} =  Oc Get    kind=Pod    namespace=${KSERVE_NS}    api_version=v1
-    ...    label_selector=app.kubernetes.io/part-of=kserve
+    ...    label_selector=app.opendatahub.io/kserve=true
     ${containerNames} =    Create List    manager
     Verify Deployment    ${kserve}    4    1    ${containerNames}
 

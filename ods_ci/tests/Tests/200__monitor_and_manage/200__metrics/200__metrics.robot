@@ -18,9 +18,10 @@ Test Tags           ExcludeOnODH
 ...    SLOs - ODH Model Controller
 ...    SLOs - RHODS Operator v2
 
-@{ALERT_GROUPS}     SLOs-probe_success    Distributed Workloads CodeFlare
-...    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines
-...    DeadManSnitch    RHODS operator
+@{ALERT_GROUPS}     SLOs-probe_success_codeflare    Distributed Workloads CodeFlare
+...    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
+...    SLOs-probe_success_modelmesh     SLOs-probe_success_dashboard    SLOs-probe_success_workbench
+...    DeadManSnitch
 
 
 *** Test Cases ***

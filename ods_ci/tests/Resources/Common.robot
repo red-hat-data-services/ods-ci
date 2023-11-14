@@ -7,6 +7,7 @@ Library   RequestsLibrary
 Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource  ../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource  RHOSi.resource
 
 
@@ -406,3 +407,9 @@ Escape String Chars
         ${str}=    Replace String   ${str}    ${char}    \\${char}
     END
     RETURN    ${str}
+
+Skip If Component Is Not Enabled
+    [Documentation]    Skips test if ${component_name} is not enabled in DataScienceCluster
+    [Arguments]    ${component_name}
+    ${enabled}=    Is Component Enabled    ${component_name}
+    Skip If    "${enabled}" == "false"

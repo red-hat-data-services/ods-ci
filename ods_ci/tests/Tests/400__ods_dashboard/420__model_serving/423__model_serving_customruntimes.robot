@@ -37,6 +37,8 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     ...    At the end of the process, verifies the correct resources have been deployed.
     [Tags]    Sanity    Tier1    ODS-2281    ModelMesh
     [Setup]    Run Keywords
+    ...    Skip If Component Is Not Enabled    modelmeshserving
+    ...    AND
     ...    Create Test Serving Runtime Template If Not Exists
     ...    AND
     ...    Create Data Science Project If Not Exists    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}

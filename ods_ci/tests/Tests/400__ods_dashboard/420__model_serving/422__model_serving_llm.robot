@@ -4,6 +4,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resou
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
+Resource           ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
 Suite Teardown    RHOSi Teardown
@@ -566,6 +567,8 @@ Install Model Serving Stack Dependencies
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
     RHOSi Setup
+    ${enabled}=    Is Component Enabled    kserve
+    Skip If    "${enabled}" == "false"
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
         IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
             Install Service Mesh Stack

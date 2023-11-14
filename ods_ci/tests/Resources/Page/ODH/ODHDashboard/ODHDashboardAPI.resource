@@ -14,7 +14,7 @@ ${WARN_MSG_500}=    Accepting HTTP code 500 as "allowed". If the user wouldn't h
 Perform Request
     [Documentation]    Generic keyword to perform API call. It implements the log security by
     ...                hiding the oauth proxy data from logs and producing a custom log string.
-    [Arguments]     ${request_type}   &{request_args}
+    [Arguments]     ${request_type}    ${skip_res_json}=${FALSE}   &{request_args}
     &{LOG_DICT}=    Create Dictionary   url=${EMPTY}   headers=${EMPTY}
     ...                                 body=${EMPTY}    status_code=${EMPTY}
     &{LOG_RESP_DICT}=    Create Dictionary   url=${EMPTY}   headers=${EMPTY}   body=${EMPTY}
@@ -29,7 +29,11 @@ Perform Request
     Set To Dictionary    ${LOG_RESP_DICT}      url=${response.url}   headers=${response.headers}   body=${response.text}
     ...                                      status_code=${response.status_code}   reason=${response.reason}
     Log     ${request_type} Response: ${LOG_RESP_DICT}
-    RETURN    ${response.json()}
+    IF    ${skip_res_json} == ${TRUE}
+        RETURN    ${response.text}
+    ELSE
+        RETURN    ${response.json()}
+    END
 
 Perform Dashboard API Endpoint GET Call
     [Documentation]     Runs a GET call to the given API endpoint. Result may change based

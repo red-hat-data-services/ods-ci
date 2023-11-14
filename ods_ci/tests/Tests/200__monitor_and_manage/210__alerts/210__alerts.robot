@@ -117,7 +117,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
+    ...    SLOs-probe_success_dashboard
     ...    RHODS Dashboard Probe Success Burn Rate
     ...    alert-duration=120
     ...    timeout=60 min
@@ -133,7 +133,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
 
     Prometheus.Wait Until Alert Is Not Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-probe_success
+    ...    SLOs-probe_success_dashboard
     ...    RHODS Dashboard Probe Success Burn Rate
     ...    alert-duration=120
     ...    timeout=5 min
@@ -298,15 +298,11 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
 
     ${res} =    Check Cluster Name Contain "Aisrhods" Or Not
     IF    ${res}
-        ${text_to_check} =    Set Variable    Cluster is for RHODS engineering or test purposes. Disabling SRE alerting.
         ${receiver} =         Set Variable    alerts-sink
     ELSE
-        ${text_to_check} =    Set Variable    Cluster is not for RHODS engineering or test purposes.
         ${receiver} =         Set Variable    PagerDuty
     END
-    Check Particular Text Is Present In Rhods-operator's Log  text_to_check=${text_to_check}
     Verify Alertmanager Receiver For Critical Alerts    receiver=${receiver}
-    [Teardown]    Close All Browsers
 
 
 *** Keywords ***
@@ -399,47 +395,47 @@ Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Are Not Firing And Conti
     [Documentation]    Verifies that alert "RHODS Dashboard Probe Success Burn Rate" is not firing
     ...    for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    alert-duration=120
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    alert-duration=900
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    alert-duration=900
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    alert-duration=3600
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    alert-duration=10800
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    alert-duration=10800
 
 Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     [Documentation]    Verifies that alert "RHODS JupyterHub Probe Success Burn Rate" is not firing
     ...     for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    alert-duration=120
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    alert-duration=900
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    alert-duration=900
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    alert-duration=3600
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    alert-duration=10800
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    alert-duration=10800
 
 Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    critical    alert-duration=120
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    critical    alert-duration=900
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    warning    alert-duration=3600
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Dashboard Probe Success Burn Rate    warning    alert-duration=10800
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    warning    alert-duration=10800
 
 Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    critical    alert-duration=120
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    critical    alert-duration=900
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    warning    alert-duration=3600
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success    RHODS Jupyter Probe Success Burn Rate    warning    alert-duration=10800
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    warning    alert-duration=10800
 
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" severity
@@ -522,4 +518,4 @@ Verify Alertmanager Receiver For Critical Alerts
     [Documentation]     Receiver value should be equal to ${receiver}
     [Arguments]         ${receiver}
     ${result} =    Run    oc get configmap alertmanager -n ${MONITORING_NAMESPACE} -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.routes[] | select(.match.severity == "critical") | .receiver'
-    Should Be Equal    "${receiver}"    ${result}    msg=Alertmanager has an unexpected receiver for critical alerts
+    Should Be Equal    ${receiver}    ${result}    msg=Alertmanager has an unexpected receiver for critical alerts

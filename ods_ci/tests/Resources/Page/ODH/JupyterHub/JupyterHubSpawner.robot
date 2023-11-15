@@ -269,6 +269,42 @@ Has Spawn Failed
     ${spawn_status} =  Run Keyword And Return Status  Page Should Contain  Spawn failed
     RETURN  ${spawn_status}
 
+Notebook Expected Ide
+    [Documentation]  Returns type of expected IDE for the given image name.
+    ...              At the moment, there are two IDE types available in the notebook images:
+    ...              JupyterLab and VSCode.
+    ...              Returns type of expected IDE for the given image name as a string.
+    [Arguments]  ${image_name}
+    IF  "${image_name}"=="${EMPTY}"
+        Log  level=ERROR  message=No image name has been provided!
+        RETURN  ${EMPTY}
+    END
+    IF  "${image_name}"=="code-server"
+        RETURN  VSCode
+    ELSE
+        RETURN  JupyterLab
+    END
+
+Wait Notebook To Be Loaded
+    [Documentation]  Waits for the notebook IDE environment to be loaded completely and performs
+    ...              a simple check with the Menu action in the loaded IDE.
+    [Arguments]  ${image_name}  ${version}
+    ${ide}=  Notebook Expected Ide  ${image_name}
+
+    IF  "${ide}"=="VSCode"
+        Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
+        Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
+        Wait Until Page Contains  Do you trust the authors of the files in this folder?
+    ELSE IF  "${ide}"=="JupyterLab"
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Sleep    2s    reason=Wait for a possible popup
+        Maybe Close Popup
+        Open New Notebook In Jupyterlab Menu
+        Spawned Image Check    ${image}    ${version}
+    ELSE
+        Fail    msg=Unknown IDE typ has been resolved: '${ide}'. Please check and fix or implement.
+    END
+
 Spawn Notebook With Arguments  # robocop: disable
     [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
     ...              It will try again ${retries} times (Default: 1) after ${retries_delay} delay (Default: 0 seconds).
@@ -318,11 +354,7 @@ Spawn Notebook With Arguments  # robocop: disable
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
             ${authorization_required} =  Is Service Account Authorization Required
             IF  ${authorization_required}  Authorize jupyterhub service account
-            Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
-            Sleep    2s    reason=Wait for a possible popup
-            Maybe Close Popup
-            Open New Notebook In Jupyterlab Menu
-            Spawned Image Check    ${image}    ${version}
+            Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed
             Exit For Loop If  ${spawn_fail} == False
             Reload Page

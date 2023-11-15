@@ -321,15 +321,23 @@ Start Workbench
 
 Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched
-    [Arguments]    ${username}  ${password}  ${auth_type}
+    [Arguments]    ${username}  ${password}  ${auth_type}    ${expected_ide}=JupyterLab
     Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
     ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
     IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
     ${authorization_required}=  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize Jupyterhub Service Account
-    Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
-    Maybe Close Popup
+    IF  "${expected_ide}"=="VSCode"
+        Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
+        Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
+        Wait Until Page Contains  Do you trust the authors of the files in this folder?
+    ELSE IF  "${expected_ide}"=="JupyterLab"
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Maybe Close Popup
+    ELSE
+        Fail    msg=Unknown IDE typy given: '${expected_ide}'. Please check and fix or implement.
+    END
 
 Launch And Access Workbench
     [Documentation]    Launches a workbench from DS Project details page

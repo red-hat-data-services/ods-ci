@@ -41,6 +41,28 @@ Verify User Can Create A Workbench Using Intel AiKit Image
     ...    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}    auth_type=${TEST_USER_3.AUTH_TYPE}
 
+Verify User Can Create A Workbench Using Code Server Image
+    [Documentation]    Verifies that a workbench can be created using Code Server image
+    [Tags]    Sanity    Tier1
+    Set Test Variable   ${IMG_NAME}    code-server
+    Set Test Variable   ${WORKBENCH_TITLE}    codeServer
+    Set Test Variable   ${PV_NAME}    codeServerPv
+    Set Test Variable   ${PV_DESCRIPTION}    PV for codeServer
+    Go To RHODS Dashboard
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=workbench for testing
+    ...        prj_title=${PRJ_TITLE}    image_name=${IMG_NAME}  version=${NONE}    deployment_size=Small
+    ...        storage=Persistent  pv_name=${PV_NAME}  pv_existent=${FALSE}
+    ...        pv_description=${PV_DESCRIPTION}  pv_size=1
+    ...        press_cancel=${FALSE}    envs=${NONE}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    Open Data Science Projects Home Page
+    Wait Until Project Is Listed    project_title=${PRJ_TITLE}
+    Launch And Access Workbench From Projects Home Page    workbench_title=${WORKBENCH_TITLE}
+    ...    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}    auth_type=${TEST_USER_3.AUTH_TYPE}
+    ...    expected_ide=VSCode
+
 
 *** Keywords ***
 Project Suite Setup

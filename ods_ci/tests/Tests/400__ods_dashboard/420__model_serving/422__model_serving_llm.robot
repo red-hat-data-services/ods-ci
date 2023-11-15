@@ -3,6 +3,7 @@ Documentation     Collection of CLI tests to validate the model serving stack fo
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
+Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
 Suite Teardown    RHOSi Teardown
@@ -29,7 +30,7 @@ ${KIALI_SUB_NAME}=    kiali-ossm
 ${JAEGER_OP_NAME}=     jaeger-product
 ${JAEGER_SUB_NAME}=    jaeger-product
 ${KSERVE_NS}=    ${APPLICATIONS_NAMESPACE}    # NS is "kserve" for ODH
-${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime.yaml
+${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime_{{protocol}}.yaml
 ${TEST_NS}=    watsonx
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
 ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
@@ -41,18 +42,21 @@ ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.
 ${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
 ${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
 ${SKIP_PREREQS_INSTALL}=    ${FALSE}
-${SCRIPT_BASED_INSTALL}=    ${FALSE}
+${SCRIPT_BASED_INSTALL}=    ${TRUE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
-${FLAN_MODEL_S3_DIR}=    flan-t5-small
-${FLAN_GRAMMAR_MODEL_S3_DIR}=    flan-t5-large-grammar-synthesis-caikit
-${FLAN_LARGE_MODEL_S3_DIR}=    flan-t5-large
-${BLOOM_MODEL_S3_DIR}=    bloom-560m
+${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-caikit
+${FLAN_GRAMMAR_MODEL_S3_DIR}=    flan-t5-large-grammar-synthesis-caikit/flan-t5-large-grammar-synthesis-caikit
+${FLAN_LARGE_MODEL_S3_DIR}=    flan-t5-large/flan-t5-large
+${BLOOM_MODEL_S3_DIR}=    bloom-560m/bloom-560m-caikit
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${FLAN_GRAMMAR_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_GRAMMAR_MODEL_S3_DIR}/
 ${FLAN_LARGE_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_LARGE_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
 ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
+${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}=    api/v1/task/text-generation
+${CAIKIT_STREAM_ENDPOINT_HTTP}=    api/v1/task/server-streaming-text-generation
+
 ${SCRIPT_TARGET_OPERATOR}=    rhods    # rhods or brew
 ${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 
@@ -68,8 +72,8 @@ Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    ODS-2341    WatsonX
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    ${test_namespace}=    Set Variable     ${TEST_NS}
+    [Setup]    Set Project And Runtime    namespace=berto
+    ${test_namespace}=    Set Variable     berto
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
@@ -256,7 +260,7 @@ Verify User Can Autoscale Using Concurrency
     ${model_name}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    auto_scale=True
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     ...    namespace=${test_namespace}
@@ -474,7 +478,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    namespace=${test_namespace}
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
-    Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:fast
+    Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:stable
     ...    namespace=${test_namespace}
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -525,6 +529,32 @@ Verify User Can Access Model Metrics From UWM
     Wait Until Keyword Succeeds    30 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=stream    namespace=${test_namespace}    period=5m    exp_value=1
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}
+
+Verify User Can Query A Model Using HTTP Calls
+    [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
+    ...                This tests deploys the runtime enabling HTTP port and send queries to the model
+    [Tags]    ODS-2501    WatsonX
+    [Setup]    Set Project And Runtime    namespace=kserve-http    protocol=http
+    ${test_namespace}=    Set Variable     kserve-http
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_name}
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${model_name}    protocol=http
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1    streamed_response=${FALSE}
+    ...    namespace=${test_namespace}    query_idx=${0}
+    # temporarily disabling stream response validation. Need to re-design the expected response json file
+    # because format of streamed response with http is slightly different from grpc
+    Query Model Multiple Times    model_name=${model_name}    protocol=http
+    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}    query_idx=${0}    validate_response=${FALSE}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
@@ -759,25 +789,28 @@ Set Up Test OpenShift Project
 Deploy Caikit Serving Runtime
     [Documentation]    Create the ServingRuntime CustomResource in the test ${namespace}.
     ...                This must be done before deploying a model which needs Caikit.
-    [Arguments]    ${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc get ServingRuntime caikit-runtime -n ${namespace}
+    [Arguments]    ${namespace}    ${protocol}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get ServingRuntime caikit-tgis-runtime -n ${namespace}
     IF    "${rc}" == "${0}"
-        Log    message=ServingRuntime caikit-runtime in ${namespace} NS already present. Skipping runtime setup...
+        Log    message=ServingRuntime caikit-tgis-runtime in ${namespace} NS already present. Skipping runtime setup...
         ...    level=WARN
         RETURN
     END
+    ${runtime_final_filepath}=    Replace String    string=${CAIKIT_FILEPATH}    search_for={{protocol}}
+    ...    replace_with=${protocol}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -f ${CAIKIT_FILEPATH} -n ${namespace}
+    ...    oc apply -f ${runtime_final_filepath} -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
 
 Set Project And Runtime
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
-    [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}
+    [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${protocol}=grpc
     Set Up Test OpenShift Project    test_ns=${namespace}
     Create Secret For S3-Like Buckets    endpoint=${MODELS_BUCKET.ENDPOINT}
     ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
     # temporary step - caikit will be shipped OOTB
-    Deploy Caikit Serving Runtime    namespace=${namespace}
+    Deploy Caikit Serving Runtime    namespace=${namespace}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
         Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
         Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
@@ -873,6 +906,13 @@ Model Response Should Match The Expectation
         ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     ELSE
+        # temporarily disabling these lines - will be finalized in later stage due to a different format
+        # of streamed reponse when using http protocol instead of grpc
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    data:(\\s+)?"    "
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?{    {
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?}    }
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?]    ]
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?\\[    [
         ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    \\s+    ${EMPTY}
         ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
         ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
@@ -891,22 +931,39 @@ Query Model Multiple Times
     ...                running ${n_times}. For each loop run it queries all the model in sequence
     [Arguments]    ${model_name}    ${namespace}    ${isvc_name}=${model_name}
     ...            ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
-    ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}    &{args}
+    ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}
+    ...            ${protocol}=grpc    &{args}
     IF    ${validate_response} == ${FALSE}
         ${skip_json_load_response}=    Set Variable    ${TRUE}
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
-    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
-    ${header}=    Set Variable    'mm-model-id: ${model_name}'
+    IF    "${protocol}" == "grpc"
+        ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
+        ${header}=    Set Variable    'mm-model-id: ${model_name}'
+    ELSE IF    "${protocol}" == "http"
+        ${body}=    Set Variable    {"model_id": "${model_name}","inputs": "${EXP_RESPONSES}[queries][0][query_text]"}
+        ${headers}=    Create Dictionary     Cookie=${EMPTY}    Content-type=application/json
+    ELSE
+        Fail    msg=The ${protocol} protocol is not supported by ods-ci. Please use either grpc or http.
+    END
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
-        ${res}=    Query Model With GRPCURL   host=${host}    port=443
-        ...    endpoint=${endpoint}
-        ...    json_body=${body}    json_header=${header}
-        ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
-        ...    &{args}
+        IF    "${protocol}" == "grpc"
+            ${res}=    Query Model With GRPCURL   host=${host}    port=443
+            ...    endpoint=${endpoint}
+            ...    json_body=${body}    json_header=${header}
+            ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
+            ...    &{args}
+        ELSE IF    "${protocol}" == "http"
+            ${payload}=     Prepare Payload     body=${body}    str_to_json=${TRUE}
+            &{args}=       Create Dictionary     url=https://${host}:443/${endpoint}   expected_status=any
+            ...             headers=${headers}   json=${payload}    timeout=10  verify=${False}
+            ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST
+            ...    skip_res_json=${skip_json_load_response}    &{args}
+            Run Keyword And Continue On Failure    Status Should Be  200
+        END
         Log    ${res}
         IF    ${validate_response} == ${TRUE}
             Run Keyword And Continue On Failure
@@ -952,7 +1009,7 @@ Upgrade Caikit Runtime Image
     ...    ${new_image_url}
     [Arguments]    ${new_image_url}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch ServingRuntime caikit-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"
+    ...    oc patch ServingRuntime caikit-tgis-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
 
 Get Model Pods Creation Date And Image URL

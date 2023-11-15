@@ -17,9 +17,9 @@ Force Tags          JupyterHub
 *** Variables ***
 @{status_list}      # robocop: disable
 &{package_versions}      # robocop: disable
-${JupyterLab_Version}         v3.5
+${JupyterLab_Version}         v3.6
 ${Notebook_Version}           v6.5
-${JupyterLab-git_Version}     v0.41
+${JupyterLab-git_Version}     v0.42
 
 
 *** Test Cases ***
@@ -35,7 +35,7 @@ Verify Libraries in Minimal Image
     Verify List Of Libraries In Image    minimal-notebook    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in Cuda Image
-    [Documentation]    Verifies libraries in Minimal Python image
+    [Documentation]    Verifies libraries in Cuda image
     [Tags]    Sanity
     Verify List Of Libraries In Image    minimal-gpu    JupyterLab-git ${JupyterLab-git_Version}
 

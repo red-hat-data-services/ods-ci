@@ -204,9 +204,9 @@ Select Workbench Image Version
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
     IF    "${version}"=="default"
-        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]/..
+        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]/../../..
     ELSE IF    "${version}"=="previous"
-        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]/..
+        Click Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]/../../..
     ELSE
         Fail    ${version} does not exist, use default/previous
     END

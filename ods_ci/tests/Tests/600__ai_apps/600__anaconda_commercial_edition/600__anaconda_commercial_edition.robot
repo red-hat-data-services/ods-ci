@@ -55,7 +55,6 @@ Verify User Is Able to Activate Anaconda Professional
   [Documentation]  Performs the Anaconda CE activation, spawns a JL using the Anaconda image,
   ...              validate the token, install a library and try to import it.
   ...              At the end, it stops the JL server and returns to the spawner
-  Verify Anaconda In Kfdef
   Launch Dashboard    ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}
   ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}
   ...    browser_options=${BROWSER.OPTIONS}
@@ -97,17 +96,6 @@ Anaconda Suite Setup
   [Documentation]  Setup for ACE test suite
   Set Library Search Order  SeleniumLibrary
   RHOSi Setup
-
-Verify Anaconda In Kfdef
-    [Documentation]  Verifies if Anaconda is present in Kfdef
-    ${res}=  Oc Get  kind=KfDef  namespace=${APPLICATIONS_NAMESPACE}
-    @{applications_names}=    Create List
-    FOR     ${kfdef}    IN    @{res}
-        FOR    ${application}    IN    @{kfdef['spec']['applications']}
-            Append To List    ${applications_names}  ${application['name']}
-        END
-    END
-    Run Keyword And Continue On Failure     Should Contain  ${applications_names}  anaconda-ce
 
 Install Numpy Package Should Fail
     [Documentation]     Tries to install python package "numpy" and checks

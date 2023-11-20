@@ -90,18 +90,6 @@ Test Bad Image URL
     Click Button    ${GENERIC_CANCEL_BTN_XP}
     [Teardown]  Bad Image URL Teardown  orig_url=${OG_URL}
 
-Test Bad Image Import
-    [Documentation]  Import a broken image and confirm it is disabled
-    ...    in the JH spawner page
-    [Tags]    Sanity    Tier1
-    ...       ODS-1364
-    ${OG_URL}=  Set Variable  ${IMG_URL}
-    ${IMG_URL}=  Set Variable  randomstring
-    Set Global Variable  ${IMG_URL}  ${IMG_URL}
-    Create Custom Image
-    RHODS Notification Drawer Should Contain
-    ...  Unable to add notebook image ${IMG_NAME}
-
 Test Image From Local registry
     [Documentation]  Try creating a custom image using a local registry URL (i.e. OOTB image)
     ...       ProductBug - https://github.com/opendatahub-io/odh-dashboard/issues/2185

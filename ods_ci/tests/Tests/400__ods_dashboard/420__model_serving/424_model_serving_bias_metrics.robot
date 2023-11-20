@@ -15,7 +15,6 @@ Suite Teardown      Bias Metrics Suite Teardown
 
 *** Variables ***
 ${DEFAULT_MONITORING_NS}=            openshift-user-workload-monitoring
-${SETUP_MONITORING}=                 ${TRUE}
 ${PRJ_TITLE}=                        model-serving-project
 ${MODEL_ALPHA}=                      demo-loan-nn-onnx-alpha
 ${MODEL_PATH_ALPHA}=                 trusty/loan_model_alpha.onnx
@@ -36,7 +35,6 @@ Verify Bias Metrics Available In CLI For Models Deployed Prior To Enabling Trust
     ...                 deployed prior to enabling the TrustyAI service
     [Tags]    Smoke
     ...       Tier1   ODS-2482    ODS-2479
-    ...       OpenDataHub
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_ALPHA}    framework=${framework_onnx}    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=${MODEL_PATH_ALPHA}    model_server=${RUNTIME_NAME}
@@ -51,7 +49,7 @@ Verify Bias Metrics Available In CLI For Models Deployed Prior To Enabling Trust
     ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
     Schedule Bias Metrics request via CLI     metricsType=dir   modelId=${modelId}    protectedAttribute="customer_data_input-3"
     ...       favorableOutcome=0   outcomeName="predict"    privilegedAttribute=1.0    unprivilegedAttribute=0.0
-    Verify TrustyAI Metrics Exists In Observe Metrics    trustyai_dir    retry_attempts=2
+    Verify TrustyAI Metrics Exists In Observe Metrics    trustyai_dir    retry_attempts=2    user_type=basic
     Remove TrustyAI Service
 
 *** Keywords ***
@@ -59,12 +57,10 @@ Bias Metrics Suite Setup
     [Documentation]    Setup to configure TrustyAI metrics
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    IF    ${SETUP_MONITORING} == ${TRUE}
-        Log    Enabling and Configuring User Workload Monitoring
-        Enable User Workload Monitoring
-        Configure User Workload Monitoring
-        Verify User Workload Monitoring Configuration
-    END
+    Log    Enabling and Configuring User Workload Monitoring
+    Enable User Workload Monitoring
+    Configure User Workload Monitoring
+    Verify User Workload Monitoring Configuration
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -74,15 +70,12 @@ Bias Metrics Suite Setup
 
 Bias Metrics Suite Teardown
     [Documentation]     Bias Metrics Suite Teardown
-    Remove Data Science Project From CLI   ${PRJ_TITLE}
+    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
     RHOSi Teardown
 
 Verify User Workload Monitoring Configuration
     [Documentation]    Verifies that the ALL monitoring components for user-defined-projects
     ...    are READY in the ${DEFAULT_MONITORING_NS} namespace
-    [Tags]    Smoke
-    ...       Tier1
-    ...       OpenDataHub
     Wait For Pods Status  namespace=${DEFAULT_MONITORING_NS}  timeout=60
     Log  Verified Applications NS: ${DEFAULT_MONITORING_NS}  console=yes
 
@@ -144,8 +137,6 @@ Schedule Bias Metrics request via CLI
     ${curl_cmd}=     Set Variable    curl -sk --location ${TRUSTY_ROUTE}/metrics/${metricsType}/request --header
     ${curl_cmd}=     Catenate    ${curl_cmd}    'Content-Type: application/json'
     ${curl_cmd}=     Catenate    ${curl_cmd}    --data '{"modelId":"${modelId}","protectedAttribute": ${protectedAttribute},"favorableOutcome":  ${favorableOutcome},"outcomeName": ${outcomeName},"privilegedAttribute": ${privilegedAttribute},"unprivilegedAttribute": ${unprivilegedAttribute}}'
-    Log to Console    ${curl_cmd}
-    Log to Console    Run Curl
     ${rc}  ${output}=     Run And Return Rc And Output    ${curl_cmd}
     Should Contain    ${output}    requestId
     Log to Console    ${output}

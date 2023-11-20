@@ -79,8 +79,13 @@ Run OpenShift Metrics Query
         IF    ${menu_monitoring_exists}
             Menu.Navigate To Page    Monitoring    Metrics
         ELSE
-            Fail
-            ...    msg=${OCP_ADMIN_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
+            IF    "${usertype}" == "basic"
+                Fail
+                ...    msg=${TEST_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
+            ELSE
+                Fail
+                ...    msg=${OCP_ADMIN_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
+            END
         END
     END
 

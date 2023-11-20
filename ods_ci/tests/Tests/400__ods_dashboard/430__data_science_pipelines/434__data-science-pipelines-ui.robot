@@ -59,7 +59,6 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     Wait Until Pipeline Last Run Is Started    pipeline_name=${PIPELINE_TEST_NAME}
     ...    timeout=10s
     Wait Until Pipeline Last Run Is Finished    pipeline_name=${PIPELINE_TEST_NAME}
-    ...    timeout=180s
     Pipeline Last Run Should Be    pipeline_name=${PIPELINE_TEST_NAME}
     ...    run_name=${PIPELINE_TEST_RUN_BASENAME}
     Pipeline Last Run Status Should Be    pipeline_name=${PIPELINE_TEST_NAME}
@@ -98,7 +97,6 @@ Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
     Wait Until Pipeline Last Run Is Started    pipeline_name=${PIPELINE_TEST_NAME}
     ...    timeout=10s
     Wait Until Pipeline Last Run Is Finished    pipeline_name=${PIPELINE_TEST_NAME}
-    ...    timeout=180s
     @{pods} =    Oc Get    kind=Pod    namespace=${PRJ_TITLE}
     FOR    ${pod}    IN    @{pods}
         Log    ${pod['metadata']['name']}

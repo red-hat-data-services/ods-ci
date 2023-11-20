@@ -5,7 +5,7 @@ Library    OperatingSystem
 
 
 *** Variables ***
-${DSC_NAME} =    default
+${DSC_NAME} =    default-dsc
 @{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai  # robocop: disable
 
 

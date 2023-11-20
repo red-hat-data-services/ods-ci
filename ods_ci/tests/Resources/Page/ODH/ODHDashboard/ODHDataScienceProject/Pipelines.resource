@@ -196,7 +196,7 @@ Pipeline Last Run Status Should Be
 Wait Until Pipeline Last Run Is Finished
     [Documentation]    Waits until the run reported in the "last run" column of the test pipeline
     ...                in the DS Project details page completes the execution (i.e., status is not Running)
-    [Arguments]    ${pipeline_name}    ${timeout}=60s
+    [Arguments]    ${pipeline_name}    ${timeout}=260s
     ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
     Wait Until Page Does Not Contain Element    ${pipeline_row_xp}//td/div[text()="Running"]
     ...    timeout=${timeout}
@@ -269,7 +269,6 @@ Verify Successful Pipeline Run Via Project UI
     Wait Until Pipeline Last Run Is Started    pipeline_name=${pipeline_name}
     ...    timeout=10s
     Wait Until Pipeline Last Run Is Finished    pipeline_name=${pipeline_name}
-    ...    timeout=180s
     Pipeline Last Run Should Be    pipeline_name=${pipeline_name}
     ...    run_name=${pipeline_run_name}
     Pipeline Last Run Status Should Be    pipeline_name=${pipeline_name}

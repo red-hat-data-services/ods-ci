@@ -97,10 +97,6 @@ Uninstall RHODS V2
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete CatalogSource odh-catalog-dev -n openshift-marketplace --ignore-not-found  # robocop: disable
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription $(oc get subscription -n ${OPERATOR_NAMESPACE} --no-headers | awk '{print $1}') -n ${OPERATOR_NAMESPACE} --ignore-not-found  # robocop: disable
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription
-
-    ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${OPERATOR_NAMESPACE} --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting operatorgroup
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace --ignore-not-found

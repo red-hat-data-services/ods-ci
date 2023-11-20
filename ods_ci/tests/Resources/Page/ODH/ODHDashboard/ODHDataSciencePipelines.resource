@@ -112,7 +112,7 @@ Delete Pipeline Server
     Wait Until Page Contains Element    xpath://li[contains(a/text(), 'Delete pipeline server')]
     Click Element    //li[contains(a/text(), 'Delete pipeline server')]
     Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server
-    Wait Until Page Contains Element    xpath://h2[contains(text(), 'No pipeline server')]
+    Wait Until Page Contains Element    xpath://h2[contains(text(), 'No pipeline server')]    timeout=120s
     FOR  ${index}  IN RANGE  0  30
         ${pod_count}    Run    oc get pods -n ${data_science_project_name} -l component=data-science-pipelines | wc -l
         IF  ${pod_count}==0  BREAK

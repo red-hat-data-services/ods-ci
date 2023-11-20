@@ -13,7 +13,6 @@ Verify TrustyAI Operator Installation
     ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace in ODS
     [Tags]    Smoke
     ...       Tier1    ODS-2481
-    ...       OpenDataHub
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  1 min  10 sec  Verify TrustyAI Deployment
     Wait Until Keyword Succeeds    10 times  5s    Verify TrustyAI ReplicaSets Info
     Wait Until Keyword Succeeds    10 times  5s    Verify TrustyAI Container Names

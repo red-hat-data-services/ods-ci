@@ -181,7 +181,7 @@ Get Model Route via UI
     ${url}=    Get Element Attribute    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
     RETURN    ${url}
 
-Get Model Route via CLI
+Get Model Route Via CLI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from CLI.
     [Arguments]    ${model_name}    ${project_name}
     ${rc}    ${out}=    Run And Return Rc And Output    oc get route ${model_name} -n ${project_name} --template={{.spec.host}}{{.spec.path}}

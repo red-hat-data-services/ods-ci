@@ -112,7 +112,7 @@ Verify One Model Serving Pod Exists
 Send Batch Inference Data to Model
     [Documentation]    Send Batch Inference data to the already deployed model using Curl commands
     [Arguments]        ${model_name}   ${project_name}
-    ${url}=    Get Model Route via CLI    ${model_name}   ${project_name}
+    ${url}=    Get Model Route Via CLI    ${model_name}   ${project_name}
     FOR    ${counter}    IN RANGE    1    5
         ${inference_input}=  Set Variable   ods_ci/tests/Resources/Files/TrustyAI/loan_default_batched/batch_0${counter}.json
         ${inference_output} =    Get Model Inference    ${model_name}    ${inference_input}    token_auth=${FALSE}

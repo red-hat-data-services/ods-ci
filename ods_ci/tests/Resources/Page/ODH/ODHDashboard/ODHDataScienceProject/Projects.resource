@@ -95,7 +95,7 @@ Project Should Be Listed
 Wait Until Project Is Listed
     [Documentation]    Waits until the DS projects appears in the list in DS project Home Page
     [Arguments]     ${project_title}    ${timeout}=30s
-    Wait Until Page Contains Element    xpath=//td/div/a[text()="${project_title}"]
+    Wait Until Page Contains Element    xpath=//div/div/a[text()="${project_title}"]
     ...    timeout=${timeout}
 
 Project Should Not Be Listed

@@ -24,13 +24,15 @@ ${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_
 ${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model servers']
 
+
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0
-    Click Button    Add server
+    Click Element    ${SERVING_MODEL_SERVERS_SIDE_MENU}
+    Click Button    Add model server
     Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
     Set Replicas Number With Buttons    ${no_replicas}
@@ -143,7 +145,7 @@ Set Model Server Runtime
     [Documentation]    Selects a given Runtime for the model server
     [Arguments]    ${runtime}
     Open Serving runtime Options Menu  # robocop: disable
-    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//div[text()="${runtime}"]
+    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//span[text()="${runtime}"]
     # TODO: Implement Custom
 
 Set Model Server Name

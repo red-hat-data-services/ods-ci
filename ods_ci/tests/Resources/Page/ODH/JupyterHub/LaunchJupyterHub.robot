@@ -24,6 +24,6 @@ Launch RHODS Via OCP Application Launcher
     [Documentation]    Uses the Application Launcher in the OCP Web UI to open the
     ...    RHODS Dashboard page.
     Click Element    xpath://button[@aria-label="Application launcher"]
-    Wait Until Page Contains Element    xpath://span[.="Red Hat OpenShift Data Science"]
-    Click Element    xpath://span[.="Red Hat OpenShift Data Science"]/..
+    Wait Until Page Contains Element    xpath://span[.="Red Hat OpenShift AI"]
+    Click Element    xpath://span[.="Red Hat OpenShift AI"]/..
     Switch Window    NEW

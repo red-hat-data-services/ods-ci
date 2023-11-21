@@ -38,7 +38,7 @@ Open Model Serving Home Page
         Sleep    5s
         Reload Page
     END
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Model serving
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Deployed models
     Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 

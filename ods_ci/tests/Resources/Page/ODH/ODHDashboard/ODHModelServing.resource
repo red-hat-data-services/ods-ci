@@ -177,7 +177,7 @@ Get Model Route via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    Page Should Contain Element    xpath://div[.="${model_name} "]
+    Page Should Contain Element    xpath://span[.="${model_name}"]
     ${url}=    Get Element Attribute    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
     RETURN    ${url}
 

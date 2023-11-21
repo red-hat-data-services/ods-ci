@@ -26,7 +26,7 @@ Verify GPU Model Deployment Via UI
     ...    ODS-2214
     Open Model Serving Home Page
     Try Opening Create Server
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}

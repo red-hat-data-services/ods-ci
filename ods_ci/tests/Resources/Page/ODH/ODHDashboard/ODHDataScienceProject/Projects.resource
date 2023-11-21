@@ -22,7 +22,7 @@ Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -404,7 +404,7 @@ Create Data Science Project If Not Exists
 
 Clean Project From Workbench Resources
     [Documentation]    Deletes resources from a test project to free up
-    ...                resources or re-use titles. 
+    ...                resources or re-use titles.
     ...                AT THE MOMENT, ONLY WORKBENCH AND PVC DELETION ARE IMPLEMENTED
     [Arguments]    ${workbench_title}    ${project_title}
     ...    ${pvc_title}=${workbench_title}

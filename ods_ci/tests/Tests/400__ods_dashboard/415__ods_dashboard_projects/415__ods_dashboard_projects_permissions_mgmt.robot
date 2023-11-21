@@ -189,17 +189,17 @@ Restore Permissions Of The Project
 Refresh Pages
     Switch To User    ${USER_A}
     Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
+    Reload RHODS Dashboard Page    expected_page=Data Science Projects
     ...    wait_for_cards=${FALSE}
     Switch To User    ${USER_B}
     Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
+    Reload RHODS Dashboard Page    expected_page=Data Science Projects
     ...    wait_for_cards=${FALSE}
     Wait Until Project Is Listed    project_title=${PRJ_USER_B_TITLE}
     Open Data Science Project Details Page    ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_C}
     Open Data Science Projects Home Page
-    Reload RHODS Dashboard Page    expected_page=Data science projects
+    Reload RHODS Dashboard Page    expected_page=Data Science Projects
     ...    wait_for_cards=${FALSE}
 
 Reload Page If Project ${project_title} Is Not Listed
@@ -208,14 +208,14 @@ Reload Page If Project ${project_title} Is Not Listed
     IF    ${is_listed} == ${FALSE}
         Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list!    # robocop:disable
         ...    level=WARN
-        Reload RHODS Dashboard Page    expected_page=Data science projects
+        Reload RHODS Dashboard Page    expected_page=Data Science Projects
         ...    wait_for_cards=${FALSE}
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${FALSE}
             Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
             ...    level=WARN
-            Reload RHODS Dashboard Page    expected_page=Data science projects
+            Reload RHODS Dashboard Page    expected_page=Data Science Projects
             ...    wait_for_cards=${FALSE}
         END
     END
@@ -226,14 +226,14 @@ Reload Page If Project ${project_title} Is Listed
     IF    ${is_listed} == ${TRUE}
         Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list!    # robocop:disable
         ...    level=WARN
-        Reload RHODS Dashboard Page    expected_page=Data science projects
+        Reload RHODS Dashboard Page    expected_page=Data Science Projects
         ...    wait_for_cards=${FALSE}
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${TRUE}
             Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
             ...    level=WARN
-            Reload RHODS Dashboard Page    expected_page=Data science projects
+            Reload RHODS Dashboard Page    expected_page=Data Science Projects
             ...    wait_for_cards=${FALSE}
         END
     END

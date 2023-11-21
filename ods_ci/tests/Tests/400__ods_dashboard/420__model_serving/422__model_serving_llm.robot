@@ -72,7 +72,7 @@ Verify External Dependency Operators Can Be Deployed
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Smoke    ODS-2341
+    [Tags]    Smoke    Tier1    ODS-2341
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -385,7 +385,7 @@ Verify Model Can Be Served And Query On A GPU Node
 Verify Non Admin Can Serve And Query A Model
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Smoke    ODS-2326
+    [Tags]    Smoke    Tier1    ODS-2326
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test
@@ -497,7 +497,7 @@ Verify User Can Access Model Metrics From UWM
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    Smoke    ODS-2401
+    [Tags]    Smoke    Tier1    ODS-2401
     [Setup]    Set Project And Runtime    namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -536,7 +536,7 @@ Verify User Can Access Model Metrics From UWM
 Verify User Can Query A Model Using HTTP Calls
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
-    [Tags]    ODS-2501    Smoke
+    [Tags]    ODS-2501    Smoke    Tier1
     [Setup]    Set Project And Runtime    namespace=kserve-http    protocol=http
     ${test_namespace}=    Set Variable     kserve-http
     ${model_name}=    Set Variable    flan-t5-small-caikit

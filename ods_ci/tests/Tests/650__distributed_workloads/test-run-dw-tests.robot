@@ -14,9 +14,12 @@ ${DW_JUNIT_FILE}          %{WORKSPACE=.}/junit.xml
 *** Test Cases ***
 Run distributed workloads sanity tests
     [Documentation]   Run tests located in Distributed Workloads repo downstream
-    [Tags]  Sanity
+    [Tags]  ODS-2511
+    ...     Sanity
+    ...     Tier1
 
-    Skip If    "%{OPERATOR_TYPE}" != "RHODS Operator V2"
+    Skip If Component Is Not Enabled    ray
+    Skip If Component Is Not Enabled    codeflare
     DistributedWorkloads.Clone Git Repository    %{DW_GIT_REPO}    %{DW_GIT_REPO_BRANCH}    ${DW_DIR}
     ${test_result}=    Run Distributed Workloads Tests    ${DW_DIR}    ${DW_TEST_RESULT_FILE}    -run '.*Test[RK].*[^r]$' -parallel 1 %{DW_GO_TESTS_PARAMS}
     Install Go Junit Report Tool

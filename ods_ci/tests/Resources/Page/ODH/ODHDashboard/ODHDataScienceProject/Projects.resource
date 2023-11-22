@@ -90,7 +90,7 @@ Wait Until Project Is Open
 Project Should Be Listed
     [Documentation]    Checks a Project is available in DS Project home page
     [Arguments]     ${project_title}
-    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//td/div/a[text()="${project_title}"]
+    Run Keyword And Continue On Failure     Page Should Contain Link    ${project_title}
 
 Wait Until Project Is Listed
     [Documentation]    Waits until the DS projects appears in the list in DS project Home Page
@@ -101,7 +101,7 @@ Wait Until Project Is Listed
 Project Should Not Be Listed
     [Documentation]    Checks a Project is not available in DS Project home page
     [Arguments]     ${project_title}
-    Run Keyword And Continue On Failure     Page Should Not Contain Element    xpath=//td/div/a[text()="${project_title}"]
+    Run Keyword And Continue On Failure     Page Should Not Contain Link    ${project_title}
 
 Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one

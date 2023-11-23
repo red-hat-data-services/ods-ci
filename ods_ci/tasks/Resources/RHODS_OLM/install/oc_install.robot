@@ -66,7 +66,7 @@ Verify RHODS Installation
   ${is_codeflare_managed} =     Is CodeFlare Managed
   Log  Will verify CodeFlare operator: ${is_codeflare_managed}  console=yes
   IF  ${is_codeflare_managed}  CodeFlare Operator Should Be Installed
-  IF  "${cluster_type}" != "managed"
+  IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}

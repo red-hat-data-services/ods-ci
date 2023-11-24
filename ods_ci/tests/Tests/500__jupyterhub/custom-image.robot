@@ -5,6 +5,7 @@ Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource         ../../Resources/RHOSi.resource
 Library          JupyterLibrary
 Library          OpenShiftLibrary
@@ -38,12 +39,13 @@ Verify Custom Image Can Be Added
     ...                Then loads the spawner and tries using the custom img
     [Tags]    Sanity    Tier1    ExcludeOnDisconnected
     ...       ODS-1208    ODS-1365
+    ${CLEANUP}=  Set Variable  False
     Create Custom Image
     Sleep    5s    #wait a bit from IS to be created
     Get ImageStream Metadata And Check Name
     Verify Custom Image Is Listed  ${IMG_NAME}
     Verify Custom Image Description  ${IMG_NAME}  ${IMG_DESCRIPTION}
-    Verify Custom Image Owner  ${IMG_NAME}  ${TEST_USER.USERNAME}
+    Verify Custom Image Provider  ${IMG_NAME}  ${TEST_USER.USERNAME}
     Launch JupyterHub Spawner From Dashboard
 
     # These keywords need to be reworked to function here
@@ -55,26 +57,25 @@ Verify Custom Image Can Be Added
     #Should Match  ${spawner_packages}  ${IMG_PACKAGES}
 
     Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Small
-    [Teardown]  Custom Image Teardown
+    ${CLEANUP}=  Set Variable  True
+    [Teardown]  Custom Image Teardown  cleanup=${CLEANUP}
 
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
+    ...       ProductBug - https://github.com/opendatahub-io/odh-dashboard/issues/2186
     [Tags]    Sanity    Tier1    ExcludeOnDisconnected
     ...       ODS-1368
+    ...       ProductBug
     Sleep  1
     Create Custom Image
     Sleep  1
     Import New Custom Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
-    Run Keyword And Warn On Failure  RHODS Notification Drawer Should Contain
-    ...  Unable to add notebook image ${IMG_NAME}
-    Sleep  1
-    Delete Custom Image  ${IMG_NAME}
-    # If both imgs can be created they also have to be deleted twice
-    Sleep  2
-    Run Keyword And Continue On Failure    Delete Custom Image  ${IMG_NAME}
-    Reset Image Name
+    Wait Until Page Contains    Unable to add notebook image: ${IMG_NAME}
+    # Since the image cannot be created, we need to cancel the modal window now
+    Click Button    ${GENERIC_CANCEL_BTN_XP}
+    [Teardown]  Duplicate Image Teardown
 
 Test Bad Image URL
     [Documentation]  Test adding an image with a bad repo URL (should fail)
@@ -84,27 +85,18 @@ Test Bad Image URL
     ${IMG_URL}=  Set Variable  quay.io/RandomName/RandomImage:v1.2.3
     Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Create Custom Image
-    RHODS Notification Drawer Should Contain  Unable to add notebook image ${IMG_NAME}
-    ${IMG_URL}=  Set Variable  ${OG_URL}
-    Set Global Variable  ${IMG_URL}  ${IMG_URL}
-    Reset Image Name
-
-Test Bad Image Import
-    [Documentation]  Import a broken image and confirm it is disabled
-    ...    in the JH spawner page
-    [Tags]    Sanity    Tier1
-    ...       ODS-1364
-    ${OG_URL}=  Set Variable  ${IMG_URL}
-    ${IMG_URL}=  Set Variable  randomstring
-    Set Global Variable  ${IMG_URL}  ${IMG_URL}
-    Create Custom Image
-    RHODS Notification Drawer Should Contain
-    ...  Unable to add notebook image ${IMG_NAME}
+    Wait Until Page Contains    Invalid repository URL: ${IMG_URL}
+    # Since the image cannot be created, we need to cancel the modal window now
+    Click Button    ${GENERIC_CANCEL_BTN_XP}
+    [Teardown]  Bad Image URL Teardown  orig_url=${OG_URL}
 
 Test Image From Local registry
     [Documentation]  Try creating a custom image using a local registry URL (i.e. OOTB image)
+    ...       ProductBug - https://github.com/opendatahub-io/odh-dashboard/issues/2185
     [Tags]    Sanity    Tier1
     ...       ODS-2470
+    ...       ProductBug
+    ${CLEANUP}=  Set Variable  False
     Open Notebook Images Page
     ${local_url} =    Get Standard Data Science Local Registry URL
     ${IMG_URL}=    Set Variable    ${local_url}
@@ -112,10 +104,11 @@ Test Image From Local registry
     Create Custom Image
     Get ImageStream Metadata And Check Name
     Verify Custom Image Is Listed    ${IMG_NAME}
-    Verify Custom Image Owner  ${IMG_NAME}  ${TEST_USER.USERNAME}
+    Verify Custom Image Provider  ${IMG_NAME}  ${TEST_USER.USERNAME}
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Small
-    [Teardown]  Custom Image Teardown
+    ${CLEANUP}=  Set Variable  True
+    [Teardown]  Custom Image Teardown  cleanup=${CLEANUP}
 
 
 *** Keywords ***
@@ -139,8 +132,34 @@ Custom Image Teardown
     END
     Go To  ${ODH_DASHBOARD_URL}
     Open Notebook Images Page
-    Sleep  1
     Delete Custom Image  ${IMG_NAME}
+    Reset Image Name
+
+Duplicate Image Teardown
+    [Documentation]    Closes the Import image dialog (if present), deletes custom images
+    ...    and resets the global variables
+    ${is_modal}=  Is Generic Modal Displayed
+    IF  ${is_modal} == ${TRUE}
+      Click Button  ${GENERIC_CANCEL_BTN_XP}
+    END
+    Delete Custom Image  ${IMG_NAME}
+    # If both imgs can be created they also have to be deleted twice
+    Sleep  2
+    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[@data-label="Name"]/div/div/div[.="${IMG_NAME} "]  # robocop: disable
+    IF  ${exists}==True
+      Delete Custom Image  ${IMG_NAME}
+    END
+    Reset Image Name
+
+Bad Image URL Teardown
+    [Documentation]    Closes the Import image dialog (if present) and resets the global variables
+    [Arguments]    ${orig_url}
+    ${is_modal}=  Is Generic Modal Displayed
+    IF  ${is_modal} == ${TRUE}
+      Click Button  ${GENERIC_CANCEL_BTN_XP}
+    END
+    ${IMG_URL}=  Set Variable  ${orig_url}
+    Set Global Variable  ${IMG_URL}  ${IMG_URL}
     Reset Image Name
 
 Server Cleanup

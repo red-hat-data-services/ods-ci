@@ -3,6 +3,7 @@ Documentation       Test suite testing ODS Metrics
 Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
+Resource            ../../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Library             DateTime
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
@@ -18,20 +19,25 @@ Test Tags           ExcludeOnODH
 ...    SLOs - ODH Model Controller
 ...    SLOs - RHODS Operator v2
 
-@{ALERT_GROUPS}     SLOs-probe_success_codeflare    Distributed Workloads CodeFlare
-...    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
-...    SLOs-probe_success_modelmesh     SLOs-probe_success_dashboard    SLOs-probe_success_workbench
-...    DeadManSnitch
-
 
 *** Test Cases ***
 Test Existence of Prometheus Alerting Rules
-    [Documentation]    Verifies the prometheus alerting rules
+    [Documentation]    Verifies the prometheus alerting rules for all components
+    ...    Note: kserve and trustyai are disabled because they don't have any alerting rule
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-509
+    ...       robot:recursive-continue-on-failure
     Skip If RHODS Is Self-Managed
-    Check Prometheus Alerting Rules
+    Verify DeadManSnitch Alerting Rules
+    Verify Component Alerting Rules    codeflare               ${CODEFLARE_ALERTING_GROUPS}
+    Verify Component Alerting Rules    dashboard               ${DASHBOARD_ALERTING_GROUPS}
+    Verify Component Alerting Rules    datasciencepipelines    ${DATASCIENCEPIPELINES_ALERTING_GROUPS}
+    #Verify Component Alerting Rules    kserve                  ${KSERVE_ALERTING_GROUPS}
+    Verify Component Alerting Rules    modelmeshserving        ${MODELMESHSERVING_ALERTING_GROUPS}
+    Verify Component Alerting Rules    ray                     ${RAY_ALERTING_GROUPS}
+    #Verify Component Alerting Rules    trustyai                ${TRUSTYAI_ALERTING_GROUPS}
+    Verify Component Alerting Rules    workbenches             ${WORKBENCHES_ALERTING_GROUPS}
 
 Test Existence of Prometheus Recording Rules
     [Documentation]    Verifies the prometheus recording rules
@@ -51,6 +57,7 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
     Run Jupyter Notebook For 5 Minutes
     Wait Until Keyword Succeeds    10 times   30s
     ...    CPU Usage Should Have Increased    ${cpu_usage_before}
+
 
 Test Metric "Rhods_Total_Users" On ODS Prometheus
     [Documentation]    Verifies that metric value for rhods_total_users
@@ -118,15 +125,11 @@ Begin Metrics Web Test
 
 End Metrics Web Test
     [Documentation]    Test Teardown
-    Close All Browsers
+    SeleniumLibrary.Close All Browsers
 
 Check Prometheus Recording Rules
     [Documentation]    Verifies recording rules in prometheus
     Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    record    @{RECORD_GROUPS}
-
-Check Prometheus Alerting Rules
-    [Documentation]    Verifies alerting rules in prometheus
-    Prometheus.Verify Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{ALERT_GROUPS}
 
 Read Current CPU Usage
     [Documentation]    Returns list of current cpu usage

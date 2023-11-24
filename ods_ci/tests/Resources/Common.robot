@@ -232,6 +232,12 @@ Skip If RHODS Is Managed
        Skip If    condition=${is_self_managed}==False    msg=This test is skipped for Managed RHODS
     END
 
+Skip If Component Is Not Enabled
+    [Documentation]    Skips test if ${component_name} is not enabled in DataScienceCluster
+    [Arguments]    ${component_name}
+    ${enabled}=    Is Component Enabled    ${component_name}
+    Skip If    "${enabled}" == "false"    msg=This test is skipped because component ${component_name} is not enabled
+
 Run Keyword If RHODS Is Managed
     [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Managed (Cloud Version)
     [Arguments]    ${name}    @{arguments}
@@ -244,6 +250,12 @@ Run Keyword If RHODS Is Self-Managed
     [Arguments]    ${name}    @{arguments}
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    ${is_self_managed} == True    Run Keyword    ${name}    @{arguments}
+
+Run Keyword If Component Is Enabled
+    [Documentation]    Runs keyword ${name} using  @{arguments} if ${component_name} is enabled
+    [Arguments]    ${component_nane}    ${name}    @{arguments}
+    ${enabled}=    Is Component Enabled    ${component_nane}
+    IF    "${enabled}" == "true"    Run Keyword    ${name}    @{arguments}
 
 Get Domain From Current URL
     [Documentation]    Gets the lowest level domain from the current URL (i.e. everything before the first dot in the URL)
@@ -363,7 +375,7 @@ Run And Watch Command
   ${is_test}=    Run keyword And Return Status    Variable Should Exist     ${TEST NAME}
   IF    ${is_test} == ${FALSE}
     ${incremental}=    Generate Random String    5    [NUMBERS]
-    ${TEST NAME}=    Set Variable    testlogs-${incremental}    
+    ${TEST NAME}=    Set Variable    testlogs-${incremental}
   END
   ${process_log} =    Set Variable    ${OUTPUT DIR}/${TEST NAME}.log
   ${temp_log} =    Set Variable    ${TEMPDIR}/${TEST NAME}.log
@@ -408,8 +420,3 @@ Escape String Chars
     END
     RETURN    ${str}
 
-Skip If Component Is Not Enabled
-    [Documentation]    Skips test if ${component_name} is not enabled in DataScienceCluster
-    [Arguments]    ${component_name}
-    ${enabled}=    Is Component Enabled    ${component_name}
-    Skip If    "${enabled}" == "false"

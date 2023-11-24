@@ -186,7 +186,7 @@ Wait For Pods Numbers
 
 Apply DataScienceCluster CustomResource
     [Documentation]
-    [Arguments]        ${dsc_name}=default
+    [Arguments]        ${dsc_name}=${DSC_NAME}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Log to Console    Requested Configuration:
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
@@ -216,7 +216,7 @@ Apply DataScienceCluster CustomResource
 
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
-    [Arguments]    ${dsc_name}=default
+    [Arguments]    ${dsc_name}=${DSC_NAME}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
     Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
@@ -231,30 +231,31 @@ Create DataScienceCluster CustomResource Using Test Variables
     END
 
 Component Should Be Enabled
-    [Arguments]    ${component}    ${dsc_name}=default
+    [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${status} =    Is Component Enabled    ${component}    ${dsc_name}
     IF    '${status}' != 'true'    Fail
 
 Component Should Not Be Enabled
-    [Arguments]    ${component}    ${dsc_name}=default
+    [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${status} =    Is Component Enabled    ${component}    ${dsc_name}
     IF    '${status}' != 'false'    Fail
 
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false)
-    [Arguments]    ${component}    ${dsc_name}=default
+    [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState'  #robocop:disable
-    Log    ${output}
-    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component status
+    Log    ${component}:${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component ${component} status
     ${n_output} =    Evaluate    '${output}' == ''
     IF  ${n_output}
-          RETURN    false
+        Log       message=Error detected while getting component ${component} status    level=ERROR
+        RETURN    false
     ELSE
-         IF    ${output} == "Removed"
-               RETURN    false
-         ELSE IF    ${output} == "Managed"
-              RETURN    true
-         END
+        IF    ${output} == "Removed"
+            RETURN    false
+        ELSE IF    ${output} == "Managed"
+            RETURN    true
+        END
     END
 
 Create Catalog Source For Operator

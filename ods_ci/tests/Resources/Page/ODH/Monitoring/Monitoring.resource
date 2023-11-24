@@ -2,6 +2,7 @@
 Documentation       Contains ODS Monitoring Keywords
 
 Resource            ../Prometheus/Prometheus.resource
+Resource            ../../../Common.robot
 
 
 *** Variables ***
@@ -10,6 +11,33 @@ ${SUITE_AVAILABILITY_2M}        0
 ${SUITE_AVAILABILITY_15M}       0
 ${SUITE_AVAILABILITY_1H}        0
 ${SUITE_AVAILABILITY_3H}        0
+
+@{RECORD_GROUPS}    SLOs - MCAD Controller     SLOs - CodeFlare Operator
+...    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
+...    SLOs - Modelmesh Controller
+...    SLOs - ODH Model Controller
+...    SLOs - RHODS Operator v2
+
+@{CODEFLARE_ALERTING_GROUPS}                SLOs-probe_success_codeflare    Distributed Workloads CodeFlare
+@{CODEFLARE_RECORDING_GROUPS}               SLOs - MCAD Controller    SLOs - CodeFlare Operator
+@{DASHBOARD_ALERTING_GROUPS}                SLOs-haproxy_backend_http_responses_dashboard   SLOs-probe_success_dashboard
+@{DASHBOARD_RECORDING_GROUPS}               SLOs - ODH Dashboard
+@{DATASCIENCEPIPELINES_ALERTING_GROUPS}     SLOs-haproxy_backend_http_responses_dsp
+...                                         SLOs-probe_success_dsp    RHODS Data Science Pipelines
+@{DATASCIENCEPIPELINES_RECORDING_GROPUS}    SLOs - Data Science Pipelines Operator
+...                                         SLOs - Data Science Pipelines Application
+@{DEADMANSNITCH_ALERTING_GROUPS}            DeadManSnitch
+@{KSERVE_ALERTING_GROUPS}
+@{KSERVE_RECORDING_GROUPS}
+@{MODELMESHSERVING_ALERTING_GROUPS}         SLOs-probe_success_modelmesh    SLOs-probe_success_model_controller
+@{MODELMESHSERVING_RECORDING_GROUPS}        SLOs - Modelmesh Controller    SLOs - ODH Model Controller
+@{RAY_ALERTING_GROUPS}                      Distributed Workloads Kuberay
+@{RAY_RECORDING_GROUPS}
+@{TRUSTYAI_ALERTING_GROUPS}
+@{TRUSTYAI_RECORDING_GROUPS}
+@{WORKBENCHES_ALERTING_GROUPS}              RHODS-PVC-Usage    RHODS Notebook controllers
+...                                         SLOs-probe_success_workbench
+@{WORKBENCHES_RECORDING_GROUPS}             SLOs - Notebook Controller    Usage Metrics    Availability Metrics
 
 
 *** Keywords ***
@@ -160,3 +188,17 @@ Get Thanos Metrics List
     END
     ${rc}    ${out}=    Run And Return Rc And Output    ${cmd} | tr -d '"'
     RETURN    ${out}
+
+Verify DeadManSnitch Alerting Rules
+    [Documentation]    Verifies DeadManSnitch alerting rules in prometheus
+    Prometheus.Verify Rules
+    ...    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{DEADMANSNITCH_ALERTING_GROUPS}
+
+Verify Component Alerting Rules
+    [Documentation]    Verifies alerting rules for a component in prometheus
+    [Arguments]    ${component_name}    ${component_alerting_groups}
+    Run Keyword If Component Is Enabled
+    ...    ${component_name}
+    ...    Prometheus.Verify Rules
+    ...    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert    @{component_alerting_groups}
+

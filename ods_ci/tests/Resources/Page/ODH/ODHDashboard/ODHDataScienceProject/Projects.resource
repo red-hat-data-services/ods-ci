@@ -107,7 +107,7 @@ Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one
     [Arguments]     ${project_title}    ${expected_username}
     Run Keyword And Continue On Failure
-    ...    Page Should Contain Element    xpath=//td[div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
+    ...    Page Should Contain Element    xpath=//td[div/div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}

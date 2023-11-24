@@ -12,14 +12,12 @@ Test Tags           ExcludeOnODH
 
 
 *** Variables ***
-@{RECORD_GROUPS}    SLOs - MCAD Controller     SLOs - CodeFlare Operator
-...    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
+@{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
 ...    SLOs - Modelmesh Controller
 ...    SLOs - ODH Model Controller
 ...    SLOs - RHODS Operator v2
 
-@{ALERT_GROUPS}     SLOs-probe_success_codeflare    Distributed Workloads CodeFlare
-...    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
+@{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
 ...    SLOs-probe_success_modelmesh     SLOs-probe_success_dashboard    SLOs-probe_success_workbench
 ...    DeadManSnitch
 

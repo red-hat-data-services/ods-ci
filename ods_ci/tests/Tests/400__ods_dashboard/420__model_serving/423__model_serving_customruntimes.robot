@@ -17,12 +17,14 @@ ${PRJ_DESCRIPTION}=    ODS-CI DS Project for testing of Custom Serving Runtimes
 ${MODEL_SERVER_NAME}=    ODS-CI CustomServingRuntime Server
 
 
-*** Test Cases ***
+*** Test Cases *** 
 Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A YAML file
     [Tags]    Smoke    ODS-2276
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
+    ...    serving_platform=single
     Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
+    ...    serving_platform=multi
 
 Verify RHODS Admins Can Delete A Custom Serving Runtime Template
     [Tags]    Smoke    ODS-2279
@@ -81,5 +83,7 @@ Create Test Serving Runtime Template If Not Exists
         Log    message=Creating the necessary Serving Runtime as part of Test Setup.
         Open Dashboard Settings    settings_page=Serving runtimes
         Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
-        Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}        
+        ...    serving_platform=multi
+        Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
+        ...    serving_platform=multi
     END

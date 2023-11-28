@@ -52,7 +52,7 @@ Verify That Idle JupyterLab Servers Are Culled In Sandbox Environment After 24h
     ...        Execution-Time-Over-1d
     Spawn Notebook With Arguments
     ${jl_title}     Get Title
-    Switch Window    title=Red Hat OpenShift Data Science
+    Switch Window    title=Red Hat OpenShift AI
     Sleep    24h
     Switch Window     title=${jl_title}
     Wait Until Keyword Succeeds    120    2

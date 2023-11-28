@@ -2,12 +2,17 @@
 Library    String
 Library    OpenShiftLibrary
 Library    OperatingSystem
+Resource          ../../../../tests/Resources/Page/Operators/ISVs.resource
 
 
 *** Variables ***
 ${DSC_NAME} =    default-dsc
 @{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai  # robocop: disable
-
+${SERVERLESS_OP_NAME}=     serverless-operator
+${SERVERLESS_SUB_NAME}=    serverless-operator
+${SERVERLESS_NS}=    openshift-serverless
+${SERVICEMESH_OP_NAME}=     servicemeshoperator
+${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 
 *** Keywords ***
 Install RHODS
@@ -117,6 +122,15 @@ Verify RHODS Installation
     ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
     ...                   timeout=400
   END
+  ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
+  IF    "${kserve}" == "true"
+    Install Kserve Dependencies
+    Wait For Pods Numbers   1
+       ...                   namespace=${APPLICATIONS_NAMESPACE} control-plane
+       ...                   label_selector=control-plane=kserve-controller-manager
+       ...                   timeout=120
+  END
+
   # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
     IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
@@ -274,3 +288,30 @@ Wait for Catalog To Be Ready
            Should Be Equal As Integers   ${return_code}  0  msg=Error detected while getting component status
            IF  ${output} == "READY"   Exit For Loop
     END
+
+Install Kserve Dependencies
+    [Documentation]    Install Dependent Operator For Kserve
+    Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
+    ...    subscription_name=${SERVICEMESH_SUB_NAME}
+    ...    catalog_source_name=redhat-operators
+    Wait Until Operator Subscription Last Condition Is
+    ...    type=CatalogSourcesUnhealthy    status=False
+    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
+    Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
+    ...    namespace=${SERVERLESS_NS}
+    ...    subscription_name=${SERVERLESS_SUB_NAME}
+    ...    catalog_source_name=redhat-operators
+    ...    operator_group_name=serverless-operators
+    ...    operator_group_ns=${SERVERLESS_NS}
+    ...    operator_group_target_ns=${NONE}
+    Wait Until Operator Subscription Last Condition Is
+    ...    type=CatalogSourcesUnhealthy    status=False
+    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+    ...    namespace=${SERVERLESS_NS}
+    Wait For Pods To Be Ready    label_selector=name=knative-openshift
+    ...    namespace=${SERVERLESS_NS}
+    Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
+    ...    namespace=${SERVERLESS_NS}
+    Wait For Pods To Be Ready    label_selector=name=knative-operator
+    ...    namespace=${SERVERLESS_NS}

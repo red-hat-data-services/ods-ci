@@ -73,11 +73,13 @@ Verify RHODS Installation
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
     # Needs to be removed ASAP
     IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+        Log To Console    "Waiting for 2 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-dashboard"
         Wait For Pods Numbers  2
         ...                   namespace=${APPLICATIONS_NAMESPACE}
         ...                   label_selector=app=odh-dashboard
         ...                   timeout=1200
     ELSE
+        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=rhods-dashboard"
         Wait For Pods Numbers  5
         ...                   namespace=${APPLICATIONS_NAMESPACE}
         ...                   label_selector=app=rhods-dashboard
@@ -86,10 +88,12 @@ Verify RHODS Installation
   END
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
+    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=notebook-controller"
     Wait For Pods Numbers  1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app=notebook-controller
     ...                   timeout=400
+    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-notebook-controller"
     Wait For Pods Numbers  1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app=odh-notebook-controller
@@ -97,14 +101,17 @@ Verify RHODS Installation
   END
   ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
+    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
     Wait For Pods Numbers   3
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app=odh-model-controller
     ...                   timeout=400
+    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=component=model-mesh-etcd"
     Wait For Pods Numbers   1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=component=model-mesh-etcd
     ...                   timeout=400
+    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=modelmesh-controller"
     Wait For Pods Numbers   3
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app.kubernetes.io/name=modelmesh-controller
@@ -112,6 +119,7 @@ Verify RHODS Installation
   END
   ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
+    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=data-science-pipelines-operator"
     Wait For Pods Numbers   1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
@@ -122,6 +130,7 @@ Verify RHODS Installation
     IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
       Log  No model monitoring in ODH nightlies  console=yes
     ELSE
+      Log To Console    "Waiting for 3 pods in ${MONITORING_NAMESPACE}, label_selector=prometheus=rhods-model-monitoring"
       Wait For Pods Numbers   3
       ...                   namespace=${MONITORING_NAMESPACE}
       ...                   label_selector=prometheus=rhods-model-monitoring
@@ -129,11 +138,13 @@ Verify RHODS Installation
     END
   END
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
+    Log To Console    "Waiting for pod status in ${APPLICATIONS_NAMESPACE}"
     Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60
     Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
   # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
+    Log To Console    "Waiting for pod status in ${MONITORING_NAMESPACE}"
     Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=1200
     Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
   END

@@ -103,20 +103,15 @@ Set Custom Access Groups
 Check New Access Configuration Works As Expected
     [Documentation]    Checks if the new access configuration (using two custom groups)
     ...                works as expected in JH
-    Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    Launch Dashboard   ocp_user_name=${TEST_USER_4.USERNAME}  ocp_user_pw=${TEST_USER_4.PASSWORD}
+    ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
     ...    expected_page=${NONE}    wait_for_cards=${FALSE}
-    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.20.0
-    IF    ${version_check} == True
-        ${status}=    Run Keyword And Return Status     Launch Jupyter From RHODS Dashboard Link
-        Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${FALSE}
-        Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
-        Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
-    ELSE
-        Launch Jupyter From RHODS Dashboard Link
-        Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=none
-    END
+    ${status}=    Run Keyword And Return Status     Launch Jupyter From RHODS Dashboard Link
+    Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${FALSE}
+    Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
+    Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
+
     Capture Page Screenshot    perm_denied_custom.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER_2.PASSWORD}  ${TEST_USER_2.AUTH_TYPE}

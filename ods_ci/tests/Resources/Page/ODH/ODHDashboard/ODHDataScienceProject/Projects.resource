@@ -22,7 +22,7 @@ Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -95,7 +95,7 @@ Project Should Be Listed
 Wait Until Project Is Listed
     [Documentation]    Waits until the DS projects appears in the list in DS project Home Page
     [Arguments]     ${project_title}    ${timeout}=30s
-    Wait Until Page Contains Element    xpath=//td/div/a[text()="${project_title}"]
+    Wait Until Page Contains Element    xpath=//div/div/a[text()="${project_title}"]
     ...    timeout=${timeout}
 
 Project Should Not Be Listed
@@ -107,7 +107,7 @@ Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one
     [Arguments]     ${project_title}    ${expected_username}
     Run Keyword And Continue On Failure
-    ...    Page Should Contain Element    xpath=//td[div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
+    ...    Page Should Contain Element    xpath=//td[div/div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}
@@ -404,7 +404,7 @@ Create Data Science Project If Not Exists
 
 Clean Project From Workbench Resources
     [Documentation]    Deletes resources from a test project to free up
-    ...                resources or re-use titles. 
+    ...                resources or re-use titles.
     ...                AT THE MOMENT, ONLY WORKBENCH AND PVC DELETION ARE IMPLEMENTED
     [Arguments]    ${workbench_title}    ${project_title}
     ...    ${pvc_title}=${workbench_title}

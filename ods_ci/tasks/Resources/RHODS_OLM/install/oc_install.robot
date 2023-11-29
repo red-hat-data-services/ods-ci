@@ -17,6 +17,7 @@ ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
+  Install Kserve Dependencies
   Clone OLM Install Repo
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
@@ -132,7 +133,6 @@ Verify RHODS Installation
   END
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
-    Install Kserve Dependencies
     Wait For Pods Numbers   1
        ...                   namespace=${APPLICATIONS_NAMESPACE} control-plane
        ...                   label_selector=control-plane=kserve-controller-manager

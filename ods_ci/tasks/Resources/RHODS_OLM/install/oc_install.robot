@@ -291,6 +291,9 @@ Wait for Catalog To Be Ready
 
 Install Kserve Dependencies
     [Documentation]    Install Dependent Operator For Kserve
+    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
+    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
+    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
     ...    subscription_name=${SERVICEMESH_SUB_NAME}
     ...    catalog_source_name=redhat-operators

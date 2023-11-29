@@ -185,7 +185,7 @@ Workbench Status Should Be From Projects Home Page
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...                                                                           namespace=${namespace}
-    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[contains(@for,"${workbench_cr_name}")]]/div//p[text()="${status}"]
+    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[contains(@for,"${workbench_cr_name}")]]/div//p[text()="${status}"]    # robocop: disable
 
 Start Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "start" process from DS Projects home page.
@@ -205,7 +205,7 @@ Start Workbench From Projects Home Page
                 ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
                 ...                                                        namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
+        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -233,10 +233,10 @@ Stop Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
+        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
-        Fail     msg=Cannot stop ${workbench_title} workbench because it is not running.
+        Fail     msg=Cannot stop ${workbench_title} workbench because it is neither starting nor running.
     END
     Wait Until Workbench Is Stopped From Projects Home Page     workbench_title=${workbench_title}
     ...                                                         project_title=${project_title}
@@ -260,7 +260,7 @@ Launch And Access Workbench From Projects Home Page
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
+        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}
@@ -272,14 +272,14 @@ Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
     ${link_status}=    Get Element Attribute
-    ...    xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
+    ...    xpath=//tr[td/div/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
     ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 
 Get All Displayed Projects
     [Documentation]    Gets all the DS projects visible in the DS Projects home page
     ${projects_names}=    Create List
-    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]/div/a
+    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]/div/div/a
     FOR    ${element}    IN    @{elements}
         ${name}=    Get Text    ${element}
         Append To List    ${projects_names}    ${name}

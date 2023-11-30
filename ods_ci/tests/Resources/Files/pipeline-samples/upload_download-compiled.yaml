@@ -371,7 +371,7 @@ spec:
       spec:
         storageClassName: standard-csi
         accessModes:
-        - ReadWriteMany
+        - ReadWriteOnce
         resources:
           requests:
             storage: 2Gi

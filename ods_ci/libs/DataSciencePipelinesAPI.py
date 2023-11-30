@@ -310,6 +310,12 @@ class DataSciencePipelinesAPI:
                     break
         return storage_class['metadata']['name']
 
+    def get_openshift_server(self):
+        return self.run_oc('oc whoami --show-server=true')[0].replace('\n', '')
+
+    def get_openshift_token(self):
+        return self.run_oc('oc whoami --show-token=true')[0].replace('\n', '')
+
     def run_oc(self, command):
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()

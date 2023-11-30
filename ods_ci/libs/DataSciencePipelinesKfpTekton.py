@@ -29,6 +29,8 @@ class DataSciencePipelinesKfpTekton:
             os.environ["TEKTON_BASH_STEP_IMAGE"] = default_image
             os.environ["TEKTON_COPY_RESULTS_STEP_IMAGE"] = default_image
             os.environ["CONDITION_IMAGE_NAME"] = default_image
+            # https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+            os.environ["DEFAULT_ACCESSMODES"] = 'ReadWriteOnce'
             import kfp_tekton
 
             # the following fallback it is to simplify the test development

@@ -134,23 +134,11 @@ Verify RHODS Installation
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
     Wait For Pods Numbers   1
-       ...                   namespace=${APPLICATIONS_NAMESPACE} control-plane
+       ...                   namespace=${APPLICATIONS_NAMESPACE}
        ...                   label_selector=control-plane=kserve-controller-manager
        ...                   timeout=120
   END
 
-  # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
-    IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
-      Log  No model monitoring in ODH nightlies  console=yes
-    ELSE
-      Log To Console    "Waiting for 3 pods in ${MONITORING_NAMESPACE}, label_selector=prometheus=rhods-model-monitoring"
-      Wait For Pods Numbers   3
-      ...                   namespace=${MONITORING_NAMESPACE}
-      ...                   label_selector=prometheus=rhods-model-monitoring
-      ...                   timeout=400
-    END
-  END
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
     Log To Console    "Waiting for pod status in ${APPLICATIONS_NAMESPACE}"
     Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60

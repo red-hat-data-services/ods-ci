@@ -99,7 +99,7 @@ Create Floating IPs
     ${fips_file_to_export} =    Set Variable    ${artifacts_dir}/${cluster_name}.${infrastructure_configurations}[aws_domain].fips
     Export Variables From File    ${fips_file_to_export}
 
-Verify Cluster Is Successfully Provisioned
+Watch Hive Install Log
     [Arguments]    ${namespace}
     ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
     Log To Console    .    no_newline=true
@@ -110,10 +110,13 @@ Verify Cluster Is Successfully Provisioned
     FOR    ${line}    IN    @{new_lines}
         Log To Console    ${line}
     END
+    IF    "fatal msg" in "${install_log_data}"
+        Log    Fatal error occured during OCP install: ${install_log_data}   level='ERROR'    console=True  
+        RETURN
+    END
+    # Create/Update the OCP installer log file, before checking "install completed successfully"
     Create File    ${install_log_file}    ${install_log_data}
     Should Contain    ${install_log_data}    install completed successfully
-    ${result} =    Run Process 	grep 'install completed successfully' ${install_log_file}    shell=yes
-    Should Be True    ${result.rc} == 0
 
 Wait For Cluster To Be Ready
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
@@ -121,19 +124,20 @@ Wait For Cluster To Be Ready
     Set Task Variable    ${install_log_file}    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
     ${result} =    Wait Until Keyword Succeeds    50 min    10 s
-    ...    Verify Cluster Is Successfully Provisioned    ${pool_namespace}
-    IF    ${result} == False    Delete Cluster Configuration
-    IF    ${result} == False    FAIL
-    ...    Cluster provisioning failed. Please look into the logs for more details.
+    ...    Watch Hive Install Log    ${pool_namespace}
 
 Verify Cluster Claim
-    Wait Until Keyword Succeeds    30 min    10 s
-    ...    Confirm Cluster Is Claimed
-
-Confirm Cluster Is Claimed
-    ${status} =    Oc Get    kind=ClusterClaim    name=${claim_name}    namespace=${hive_namespace}
-    Should Be Equal As Strings    ${status[0]['status']['conditions'][0]['reason']}    ClusterClaimed
-
+    Log    Verifying that Cluster Claim '${claim_name}' has been created in Hive namespace '${hive_namespace}'      console=True
+    ${claim_status} =    Oc Get    kind=ClusterClaim    name=${claim_name}    namespace=${hive_namespace}
+    ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
+    ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{ .status.webConsoleURL }'    shell=yes
+    IF    "${claim_status[0]['status']['conditions'][0]['reason']}" != "ClusterClaimed" || ${result.rc} != 0
+        Log    Cluster claim ${claim_name} did not complete successfully - cleaning Hive resources    console=True
+        Delete Cluster Configuration
+        FAIL    Cluster '${cluster_name}' provision failed. Please check OCP Installer log.
+    END
+    Log    Cluster ${cluster_name} created successfully. Web Console: ${result.stdout}     console=True
+    
 Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
     Set Task Variable    ${cluster_kubeconf}    ${artifacts_dir}/kubeconfig
@@ -160,8 +164,10 @@ Save Cluster Credentials
     
 Login To Cluster
     Export Variables From File    ${cluster_details}
-    Create File     ${cluster_kubeconf}
-    ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
+    # Create a temporary kubeconfig from the credentials, before updating the permanent kubeconfig
+    ${temp_kubeconfig} =    Set Variable    ${artifacts_dir}/temp_kubeconfig
+    Create File     ${temp_kubeconfig}
+    ${result} =    Run Process    KUBECONFIG\=${temp_kubeconfig} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc status    shell=yes

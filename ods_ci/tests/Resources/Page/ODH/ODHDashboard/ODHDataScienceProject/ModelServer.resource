@@ -30,7 +30,7 @@ Create Model Server
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0
-    Click Button    Add server
+    SeleniumLibrary.Click Button    Add model server
     Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
     Set Replicas Number With Buttons    ${no_replicas}
@@ -143,7 +143,7 @@ Set Model Server Runtime
     [Documentation]    Selects a given Runtime for the model server
     [Arguments]    ${runtime}
     Open Serving runtime Options Menu  # robocop: disable
-    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//div[text()="${runtime}"]
+    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//*[text()="${runtime}"]
     # TODO: Implement Custom
 
 Set Model Server Name

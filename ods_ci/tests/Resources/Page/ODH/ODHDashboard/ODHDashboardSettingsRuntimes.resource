@@ -84,7 +84,7 @@ Delete Serving Runtime Template From CLI
 Get OpenShift Template Resource Name By Displayed Name
     [Arguments]    ${displayed_name}
     ${rc}    ${resource_name}=    Run And Return Rc And Output
-    ...    oc get templates -ojson -n ${APPLICATIONS_NAMESPACE} | jq '.items[] | select(.objects[].metadata.annotations."openshift.io/display-name"=="${displayed_name}") | .metadata.name' | tr -d '"'
+    ...    oc get templates -ojson -n ${APPLICATIONS_NAMESPACE} | jq '.items[] | select(.objects[].metadata.annotations."openshift.io/display-name"=="${displayed_name}") | .metadata.name' | tr -d '"'    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
     RETURN    ${resource_name}
 

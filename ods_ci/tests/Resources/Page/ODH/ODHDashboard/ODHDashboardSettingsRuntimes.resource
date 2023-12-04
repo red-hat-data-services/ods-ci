@@ -50,15 +50,19 @@ Serving Runtime Template Should Be Listed
     ...    timeout=10s
     Run Keyword And Continue On Failure
     ...    SeleniumLibrary.Wait Until Page Contains Element
-    ...    xpath=//table//tr[td[@data-label="Name"]//div[text()="${displayed_name}"]]/td[@data-label="Serving platforms supported"]
-    ${actual_platform_labels_str}=    SeleniumLibrary.Get Text    xpath=//table//tr[td[@data-label="Name"]//div[text()="${displayed_name}"]]/td[@data-label="Serving platforms supported"]
+    ...    xpath=//table//tr[td[@data-label="Name"]//div[text()="${displayed_name}"]]/td[@data-label="Serving platforms supported"]    # robocop: disable
+    ${actual_platform_labels_str}=    SeleniumLibrary.Get Text
+    ...    xpath=//table//tr[td[@data-label="Name"]//div[text()="${displayed_name}"]]/td[@data-label="Serving platforms supported"]    # robocop: disable
     ${actual_platform_labels}=    Split To Lines    ${actual_platform_labels_str}
     IF    "${serving_platform}" == "both"
         Run Keyword And Continue On Failure    Length Should Be    ${actual_platform_labels}    ${2}
-        ${exp_platform_labels}=    Create List    ${PLATFORM_LABELS_MAPPING}[single]    ${PLATFORM_LABELS_MAPPING}[multi]
-        Run Keyword And Continue On Failure    Lists Should Be Equal    ${actual_platform_labels}    ${exp_platform_labels}
+        ${exp_platform_labels}=    Create List    ${PLATFORM_LABELS_MAPPING}[single]
+        ...    ${PLATFORM_LABELS_MAPPING}[multi]
+        Run Keyword And Continue On Failure    Lists Should Be Equal    ${actual_platform_labels}
+        ...    ${exp_platform_labels}
     ELSE
-        Run Keyword And Continue On Failure    Should Be Equal    ${actual_platform_labels_str}    ${PLATFORM_LABELS_MAPPING}[${serving_platform}]
+        Run Keyword And Continue On Failure    Should Be Equal    ${actual_platform_labels_str}
+        ...    ${PLATFORM_LABELS_MAPPING}[${serving_platform}]
     END
 
 Delete Serving Runtime Template
@@ -87,7 +91,6 @@ Get OpenShift Template Resource Name By Displayed Name
 Select Model Serving Platform
     [Documentation]    Selects which model serving platform the serving runtime could be executed on
     [Arguments]    ${platform}="both"
-    
     ${platform_link_name}=    Set Variable    Single model serving platform
     ${platform_link_name}=    Get From Dictionary    ${PLATFORM_NAMES_MAPPING}    ${platform.lower()}
     SeleniumLibrary.Click Element    css:div#custom-serving-runtime-selection > button

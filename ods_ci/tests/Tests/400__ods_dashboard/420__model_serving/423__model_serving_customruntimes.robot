@@ -33,6 +33,33 @@ Verify RHODS Admins Can Delete A Custom Serving Runtime Template
     Delete Serving Runtime Template    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     ...    press_cancel=${TRUE}
     Delete Serving Runtime Template    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
+ 
+Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Serving Platform
+    [Documentation]    Imports a Custom Serving Runtime for each supported serving platform
+    [Tags]    Sanity    ODS-2542
+    [Setup]    Generate Runtime YAMLs
+    Open Dashboard Settings    settings_page=Serving runtimes
+    ${RUNTIME_BOTH_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_both_model.yaml
+    ${RUNTIME_SINGLE_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_single_model.yaml
+    ${RUNTIME_MULTI_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_multi_model.yaml
+    Upload Serving Runtime Template    runtime_filepath=${RUNTIME_BOTH_FILEPATH}
+    ...    serving_platform=both
+    Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_BOTH_DISPLAYED_NAME}
+    ...    serving_platform=both
+    Upload Serving Runtime Template    runtime_filepath=${RUNTIME_SINGLE_FILEPATH}
+    ...    serving_platform=single
+    Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_SINGLE_DISPLAYED_NAME}
+    ...    serving_platform=single
+    Upload Serving Runtime Template    runtime_filepath=${RUNTIME_MULTI_FILEPATH}
+    ...    serving_platform=multi
+    Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_MULTI_DISPLAYED_NAME}
+    ...    serving_platform=multi
+    [Teardown]    Run Keywords
+    ...    Delete Serving Runtime Template From CLI    displayed_name=${RUNTIME_BOTH_DISPLAYED_NAME}
+    ...    AND
+    ...    Delete Serving Runtime Template From CLI    displayed_name=${RUNTIME_SINGLE_DISPLAYED_NAME}
+    ...    AND
+    ...    Delete Serving Runtime Template From CLI    displayed_name=${RUNTIME_MULTI_DISPLAYED_NAME}
 
 Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     [Documentation]    Verifies that a model can be deployed using only the UI.
@@ -60,7 +87,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     Verify Model Status    ${model_name}    success
     Verify Model Inference    ${model_name}    ${inference_input}    ${exp_inference_output}    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
-
+    
 
 *** Keywords ***
 Custom Serving Runtime Suite Setup
@@ -87,3 +114,34 @@ Create Test Serving Runtime Template If Not Exists
         Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
         ...    serving_platform=multi
     END
+
+Generate Runtime YAMLs
+    [Documentation]    Generates three different Custom Serving Runtime YAML files
+    ...                starting from OVMS one. Each YAML will be used for a different
+    ...                supported serving platform (single model, multi model, both)
+    Set Suite Variable    ${RUNTIME_BOTH_FILEPATH}    ${RESOURCES_DIRPATH}/csr_both_model.yaml
+    Set Suite Variable    ${RUNTIME_SINGLE_FILEPATH}    ${RESOURCES_DIRPATH}/csr_single_model.yaml
+    Set Suite Variable    ${RUNTIME_MULTI_FILEPATH}    ${RESOURCES_DIRPATH}/csr_multi_model.yaml
+    Set Suite Variable    ${RUNTIME_BOTH_DISPLAYED_NAME}    ODS-CI CSR - Both Platforms
+    Set Suite Variable    ${RUNTIME_SINGLE_DISPLAYED_NAME}    ODS-CI CSR - Single model Platform
+    Set Suite Variable    ${RUNTIME_MULTI_DISPLAYED_NAME}    ODS-CI CSR - Multi models Platform
+    Copy File    ${OVMS_RUNTIME_FILEPATH}    ${RUNTIME_BOTH_FILEPATH}
+    Copy File    ${OVMS_RUNTIME_FILEPATH}    ${RUNTIME_SINGLE_FILEPATH}
+    Copy File    ${OVMS_RUNTIME_FILEPATH}    ${RUNTIME_MULTI_FILEPATH}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_BOTH_DISPLAYED_NAME}"' ${RUNTIME_BOTH_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.name = "ods-ci-both"' ${RUNTIME_BOTH_FILEPATH}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_SINGLE_DISPLAYED_NAME}"' ${RUNTIME_SINGLE_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.name = "ods-ci-single"' ${RUNTIME_SINGLE_FILEPATH}
+        ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_MULTI_DISPLAYED_NAME}"' ${RUNTIME_MULTI_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.name = "ods-ci-multi"' ${RUNTIME_MULTI_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+

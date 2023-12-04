@@ -4,6 +4,8 @@ Documentation   Distributed workloads tests
 Resource         ../../../tasks/Resources/RHODS_OLM/install/codeflare_install.resource
 Resource         ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
+Suite Setup       Prepare Distributed Workloads E2E Test Suite
+Suite Teardown    Teardown Distributed Workloads E2E Test Suite
 
 *** Variables ***
 ${DW_DIR}                 distributed-workloads
@@ -17,6 +19,7 @@ Run distributed workloads sanity tests
     [Tags]  ODS-2511
     ...     Sanity
     ...     Tier1
+    ...     DistributedWorkloads
 
     Skip If Component Is Not Enabled    ray
     Skip If Component Is Not Enabled    codeflare
@@ -26,4 +29,29 @@ Run distributed workloads sanity tests
     Convert Go Test Results To Junit    ${DW_TEST_RESULT_FILE}    ${DW_JUNIT_FILE}
     IF    ${test_result} != 0
         FAIL    There were test failures in the Distributed Workloads tests.
+    END
+
+*** Keywords ***
+Prepare Distributed Workloads E2E Test Suite
+    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/ray/managementState" ,"value" : "Managed"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        FAIL    Can not enable ray
+    END
+    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/codeflare/managementState" ,"value" : "Managed"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        FAIL    Can not enable codeflare
+    END
+
+Teardown Distributed Workloads E2E Test Suite
+    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/codeflare/managementState" ,"value" : "Removed"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        FAIL    Can not disable codeflare
+    END
+    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/ray/managementState" ,"value" : "Removed"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        FAIL    Can not disable ray
     END

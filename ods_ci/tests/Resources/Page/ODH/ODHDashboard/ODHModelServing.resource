@@ -70,7 +70,6 @@ Serve Model
         Set Up New Data Connection    dc_name=${data_connection_name}
         Set Folder Path    ${model_path}
     END
-    Sleep    5s
     SeleniumLibrary.Click Button    Deploy
     SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 

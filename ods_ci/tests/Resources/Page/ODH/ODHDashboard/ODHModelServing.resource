@@ -208,6 +208,8 @@ Get Model Project
     [Arguments]    ${model_name}
     Page Should Contain Element    //div[.="${model_name} "]
     ${project_name}=    Get Text    xpath://div[.="${model_name} "]${MS_TABLE_PROJECT}
+    ${tmp_list}=    Text To List    ${project_name}
+    ${project_name}=    Set Variable    ${tmp_list}[0]
     RETURN    ${project_name}
 
 Get Model Inference

@@ -354,7 +354,7 @@ Verify User Can Set Requests And Limits For A Model
 Verify Model Can Be Served And Query On A GPU Node
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2381    Resource-GPU
+    [Tags]    Sanity    Tier1    ODS-2381    Resources-GPU
     [Setup]    Set Project And Runtime    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -590,8 +590,15 @@ Clean Up Test Project
     ELSE
         Log To Console     InferenceService Delete option not provided by user
     END
-    Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
+    ${rc}    ${member_list}=    Run And Return Rc And Output
+    ...    oc get smmr/default -n ${SERVICEMESH_CR_NS} -o json | jq '.spec.members'
+    Should Be Equal As Integers    ${rc}    ${0}
+    IF    "${member_list}" == "null"
+        Log    message=ServiceMeshMemberRoll already cleaned up. Skipping manual deletion
+    ELSE
+        Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
     ...    servicemesh_ns=${SERVICEMESH_CR_NS}
+    END
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s
@@ -814,8 +821,8 @@ Set Project And Runtime
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
-        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
         Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
+        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END

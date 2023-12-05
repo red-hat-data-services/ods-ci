@@ -23,6 +23,7 @@ ${SERVING_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of acce
 ${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model servers']
+${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 
 *** Keywords ***
 Create Model Server
@@ -30,7 +31,7 @@ Create Model Server
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0
-    Click Button    Add server
+    SeleniumLibrary.Click Button    Add model server
     Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
     Set Replicas Number With Buttons    ${no_replicas}
@@ -47,11 +48,14 @@ Create Model Server
     END
     IF    ${ext_route}==${TRUE}
         Enable External Serving Route
-    END
-    IF    ${token}==${TRUE}
-        Enable Token Authentication
-        # Set Service Account name
-        # Add Service Account
+        IF    ${token}==${FALSE}
+            Disable Token Authentication
+        ELSE
+            Log    message=Token Auth should be enabled by default..(from v2.5)
+            SeleniumLibrary.Checkbox Should Be Selected    ${TOKEN_AUTH_CHECKBOX_XP}
+        END
+    ELSE IF    ${token}==${TRUE}
+        Enable Token Authentication            
     END
     Click Button    Add
     Sleep    1s    reason=Sometimes the modal will intercept later clicks even after being closed, wait for a second
@@ -143,7 +147,7 @@ Set Model Server Runtime
     [Documentation]    Selects a given Runtime for the model server
     [Arguments]    ${runtime}
     Open Serving runtime Options Menu  # robocop: disable
-    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//div[text()="${runtime}"]
+    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//*[text()="${runtime}"]
     # TODO: Implement Custom
 
 Set Model Server Name
@@ -157,7 +161,12 @@ Enable External Serving Route
 
 Enable Token Authentication
     [Documentation]    Enables Token authentication to serving route
-    Select Checkbox    xpath://input[@id="alt-form-checkbox-auth"]
+    SeleniumLibrary.Select Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
+    # TODO: change service account name
+
+Disable Token Authentication
+    [Documentation]    Enables Token authentication to serving route
+    SeleniumLibrary.Unselect Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
     # TODO: change service account name
 
 Get Model Serving Access Token via UI

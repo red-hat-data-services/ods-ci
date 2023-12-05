@@ -178,11 +178,11 @@ Model Serving Suite Teardown
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
         Run Keyword And Continue On Failure    Delete Model Via UI    test-model
-        ${projects}=    Create List    ${PRJ_TITLE}
-        Delete Data Science Projects From CLI   ocp_projects=${projects}
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
+    ${projects}=    Create List    ${PRJ_TITLE}
+    Delete Data Science Projects From CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca.crt

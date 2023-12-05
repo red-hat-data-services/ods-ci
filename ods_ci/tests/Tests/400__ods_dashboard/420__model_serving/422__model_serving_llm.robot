@@ -820,8 +820,8 @@ Set Project And Runtime
     # temporary step - caikit will be shipped OOTB
     Deploy Caikit Serving Runtime    namespace=${namespace}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
-        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
         Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
+        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END

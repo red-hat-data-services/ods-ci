@@ -23,6 +23,7 @@ ${SERVING_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of acce
 ${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model servers']
+${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 
 *** Keywords ***
 Create Model Server
@@ -47,11 +48,14 @@ Create Model Server
     END
     IF    ${ext_route}==${TRUE}
         Enable External Serving Route
-    END
-    IF    ${token}==${TRUE}
-        Enable Token Authentication
-        # Set Service Account name
-        # Add Service Account
+        IF    ${token}==${FALSE}
+            Disable Token Authentication
+        ELSE
+            Log    message=Token Auth should be enabled by default..(from v2.5)
+            SeleniumLibrary.Checkbox Should Be Selected    ${TOKEN_AUTH_CHECKBOX_XP}
+        END
+    ELSE IF    ${token}==${TRUE}
+        Enable Token Authentication            
     END
     Click Button    Add
     Sleep    1s    reason=Sometimes the modal will intercept later clicks even after being closed, wait for a second
@@ -157,7 +161,12 @@ Enable External Serving Route
 
 Enable Token Authentication
     [Documentation]    Enables Token authentication to serving route
-    Select Checkbox    xpath://input[@id="alt-form-checkbox-auth"]
+    SeleniumLibrary.Select Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
+    # TODO: change service account name
+
+Disable Token Authentication
+    [Documentation]    Enables Token authentication to serving route
+    SeleniumLibrary.Unselect Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
     # TODO: change service account name
 
 Get Model Serving Access Token via UI

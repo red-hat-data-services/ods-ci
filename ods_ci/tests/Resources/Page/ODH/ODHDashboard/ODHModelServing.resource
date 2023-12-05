@@ -48,7 +48,8 @@ Serve Model
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test
     # TODO: Does not work if there's already a model deployed
-    SeleniumLibrary.Wait Until Page Contains Element    //div[@id="model-server"]//table
+    SeleniumLibrary.Wait Until Page Does Not Contain Element    //article[@id="multi-serving-platform-card"]
+    SeleniumLibrary.Wait Until Page Does Not Contain Element    //article[@id="single-serving-platform-card"]
     SeleniumLibrary.Wait Until Page Contains    Deploy model
     SeleniumLibrary.Click Button    Deploy model
     SeleniumLibrary.Wait Until Page Contains Element    xpath://h1[.="Deploy model"]

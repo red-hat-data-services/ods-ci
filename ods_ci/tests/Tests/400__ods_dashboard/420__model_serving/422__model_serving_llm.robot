@@ -590,8 +590,14 @@ Clean Up Test Project
     ELSE
         Log To Console     InferenceService Delete option not provided by user
     END
-    Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
+    ${rc}    ${member_list}=    Run And Return Rc And Output
+    ...    oc get smmr/default -n ${SERVICEMESH_CR_NS} -o json | jq '.spec.members'
+    IF    "${member_list}" == "null"
+        Log    message=ServiceMeshMemberRoll already cleaned up. Skipping manual deletion
+    ELSE
+        Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
     ...    servicemesh_ns=${SERVICEMESH_CR_NS}
+    END
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s

@@ -7,6 +7,8 @@ Resource        ../../ODH/JupyterHub/LoginJupyterHub.robot
 *** Variables ***
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
 ${GROUP_BTN_XP}=    (//*[@class="pf-c-chip-group"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
+${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
+${MULTI_MODE_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
 
 
 *** Keywords ***

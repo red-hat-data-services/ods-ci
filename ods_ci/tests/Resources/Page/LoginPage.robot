@@ -47,6 +47,8 @@ Login To Openshift
     Input Text  id=inputUsername  ${ocp_user_name}
     Input Text  id=inputPassword  ${ocp_user_pw}
     Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
+    # Wait until the page is loaded completely otherwise it doesn't make sense to skip the tour
+    Wait For Condition    return document.readyState == "complete"    timeout=60s
     Maybe Skip Tour
 
 Log In Should Be Requested

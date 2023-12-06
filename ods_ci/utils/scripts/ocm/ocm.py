@@ -115,7 +115,9 @@ class OpenshiftClusterManager:
 
     def ocm_describe(self, filter=""):
         """Describes cluster and returns cluster info"""
-        cmd = "ocm describe cluster {}".format(self.cluster_name)
+
+        cluster_id = self.get_osd_cluster_id()
+        cmd = "ocm describe cluster {}".format(cluster_id)
         if filter != "":
             cmd += " " + filter
         ret = execute_command(cmd)
@@ -234,14 +236,15 @@ class OpenshiftClusterManager:
     def get_osd_cluster_id(self):
         """Gets osd cluster ID"""
 
-        cluster_name = self.ocm_describe(filter="--json | jq -r '.id'")
-        if cluster_name is None:
+        cmd = "ocm list clusters -p search=\"name = '{}' or id = '{}'\" --columns id --no-headers".format(self.cluster_name, self.cluster_name)
+        ret = execute_command(cmd)
+        if ret is None:
             log.info(
                 "Unable to retrieve cluster ID for "
                 "cluster name {}. EXITING".format(self.cluster_name)
             )
             sys.exit(1)
-        return cluster_name.strip("\n")
+        return ret.strip("\n")
 
     def get_osd_cluster_state(self):
         """Gets osd cluster state"""

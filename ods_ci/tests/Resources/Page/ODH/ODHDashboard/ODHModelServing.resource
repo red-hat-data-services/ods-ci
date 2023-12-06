@@ -336,6 +336,13 @@ Get KServe Inference Host Via CLI
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
 
+Get Kserve Inference Host Via UI
+    [Documentation]
+    [Arguments]    ${model_name}
+    Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]
+    ${endpoint} =    Get Text    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]
+    RETURN    ${endpoint}
+
 Get Current Revision ID
     [Arguments]    ${model_name}    ${namespace}
     ${rc}    ${id}=    Run And Return Rc And Output

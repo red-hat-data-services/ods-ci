@@ -367,7 +367,7 @@ Query Model Multiple Times
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+    ${host}=    Get Kserve Inference Host Via UI    ${model_name}
     IF    "${protocol}" == "grpc"
         ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
         ${header}=    Set Variable    'mm-model-id: ${model_name}'

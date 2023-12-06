@@ -559,6 +559,10 @@ Try Opening Create Server
 
 Clean Up DSP Page
     [Documentation]    Removes all DSP Projects, if any are present
+    ${modal} =    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
+    IF  ${modal}==${TRUE}
+        Click Element    //button[@aria-label="Close"]
+    END
     Open Data Science Projects Home Page
     WHILE    ${TRUE}
         ${projects} =    Get All Displayed Projects

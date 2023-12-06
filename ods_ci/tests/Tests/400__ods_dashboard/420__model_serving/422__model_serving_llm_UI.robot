@@ -87,7 +87,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces Using The UI
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=singlemodel-multi1
     Open Data Science Projects Home Page
-    Set Up Project    namespace=singlemodel-multi2    single_prj=${FALSE}
+    Set Up Project    namespace=singlemodel-multi2    single_prj=${FALSE}    dc_name=kserve-connection-2
     Deploy Kserve Model Via UI    ${model_two_name}    Caikit    kserve-connection
     ...    flan-t5-small/${model_two_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
@@ -299,7 +299,7 @@ Load Expected Responses
 Set Up Project
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
-    [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}
+    [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
     Open Model Serving Home Page
     IF    ${single_prj}==${TRUE}
         Try Opening Create Server
@@ -309,7 +309,7 @@ Set Up Project
         Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     END
     Create Data Science Project    title=${namespace}    description=kserve test project
-    Create S3 Data Connection    project_title=${namespace}    dc_name=kserve-connection
+    Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${S3.BUCKET_3.NAME}    aws_s3_endpoint=${S3.BUCKET_3.ENDPOINT}
     ...            aws_region=${S3.BUCKET_3.REGION}

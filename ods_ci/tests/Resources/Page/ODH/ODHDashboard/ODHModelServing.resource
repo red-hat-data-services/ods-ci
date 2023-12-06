@@ -22,6 +22,8 @@ ${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-c-clipboard-
 ${MS_TABLE_DROPDOWN_TOGGLE}=    /../../td[@class="pf-c-table__action"]//button
 ${MS_TABLE_STATUS_SUCCESS}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-success")]
 ${MS_TABLE_STATUS_FAILURE}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-danger")]
+${KSERVE_MODAL_HEADER}=    //header[@class="pf-c-modal-box__header"]/h1[.="Deploy model"]
+${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
 
 
 *** Keywords ***
@@ -281,6 +283,45 @@ Deploy Model Via CLI
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${out}
 
+Deploy Kserve Model Via UI
+    [Documentation]
+    [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
+    ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
+    #Open modal
+    ${first_deploy} =    Run Keyword And Return Status
+    ...    Page Should Contain Element    xpath=//article[@id="single-serving-platform-card"]
+    IF  ${first_deploy}==${TRUE}
+        Click Button    //article[@id="single-serving-platform-card"]//button[.="Deploy model"]
+    ELSE
+        Click Button    //div[@id="model-server"]//button[.="Deploy model"]
+    END
+    Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
+    Set Model Name   ${model_name}
+    Select Kserve Serving Runtime
+    Select Framework    ${model_framework}
+    Set Replicas Number With Buttons    ${replicas}
+    Set Server Size    ${size}
+    Select Existing Data Connection    ${data_connection}
+    Set Folder Path    ${path}
+    IF    ${no_gpus} > ${0}
+        ${gpu_enabled} =    Run Keyword And Return Status    Verify GPU Selector Is Usable
+        IF    ${gpu_enabled}==False
+            Log    GPU requested but not available
+            Fail
+        END
+        Set Accelerator
+        Set Number of GPU With Buttons   ${no_gpus}
+    END
+    Click Button    Deploy
+    Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
+
+Select Kserve Serving Runtime
+    [Documentation]
+    [Arguments]    ${runtime}=Caikit
+    Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/button
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/ul//span[contains(text(),"${runtime}")]
+
 Get KServe Inference Host Via CLI
     [Arguments]    ${isvc_name}    ${namespace}
     Sleep    5s
@@ -373,7 +414,6 @@ Create Custom Serving Runtime Using Template By CLI
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${file_path} -n ${APPLICATIONS_NAMESPACE}
     Log To Console    ${output}
     Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
-
 
 Get Model Runtime Template Resource Name By Runtime Name OR Display Name
     [Documentation]  Get template name based on runtime name or Display name

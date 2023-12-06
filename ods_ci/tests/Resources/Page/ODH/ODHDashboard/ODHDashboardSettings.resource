@@ -234,40 +234,40 @@ Open Dashboard Settings
 
 Get Checkbox State Of Multi Mode Serving Platforms
     [Documentation]    Checks if  Multi model serving platform is enabled/checked in Cluster setting
-    ${is_checked} =  Run Keyword And Return Status  Checkbox Should Be Selected  ${MULTI_MODE_SERVING_CHECK_BOX}
+    ${is_checked} =  Run Keyword And Return Status  Checkbox Should Be Selected  ${MULTI_MODEL_SERVING_CHECK_BOX}
     [Return]  ${is_checked}
 
 Get Checkbox State Of Single Mode Serving Platforms
     [Documentation]    Checks if  Single model serving platform is enabled/checked in Cluster setting
-    ${is_checked} =  Run Keyword And Return Status  Checkbox Should Be Selected  ${SINGLE_MODE_SERVING_CHECK_BOX}
+    ${is_checked} =  Run Keyword And Return Status  Checkbox Should Be Selected  ${SINGLE_MODEL_SERVING_CHECK_BOX}
     [Return]  ${is_checked}
 
 Click CheckBox Single Mode Serving Platforms
     [Documentation]    Enables Single model serving platform
     ${status}=  Get Checkbox State Of Single Mode serving platforms
     IF  "${status}"=="False"
-        Select Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
+        Select Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
     END
 
 Click CheckBox Multi Mode Serving Platforms
     [Documentation]    Enables Multi Mode serving platforms
     ${status}=  Get Checkbox State Of Multi Mode serving platforms
     IF  "${status}"=="False"
-        Select Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
+        Select Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
     END
 
 UnClick CheckBox Single Mode Serving Platforms
     [Documentation]    Disable checkbox Single Mode serving platforms
     ${status}=  Get Checkbox State Of Single Mode serving platforms
     IF  "${status}"=="True"
-        Unselect Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
+        Unselect Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
     END
 
 UnClick CheckBox Multi Mode Serving Platforms
     [Documentation]    Disable checkbox Multi Mode serving platforms
     ${status}=  Get Checkbox State Of Single Mode serving platforms
     IF  "${status}"=="True"
-        Unselect Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
+        Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
     END
 
 Click Both Model Serving Platforms
@@ -280,26 +280,33 @@ UnClick Both Model Serving Platforms
     UnClick CheckBox Single Mode Serving Platforms
     UnClick CheckBox Multi Mode Serving Platforms
 
-Check IF Single Mode Model Serving Is Disabled From DSC And Cluster Setting
-    [Documentation]    Check single mode model should be disabled from DSC and dashboard
+Check IF Single Model Serving Is Disabled From DSC And Cluster Setting
+    [Documentation]    Check single model should be disabled from DSC and dashboard
     Component Should Not Be Enabled  kserve
     ${status}   Get Checkbox State Of Single Mode Serving Platforms
-    Should Be Equal    ${status}  "False"
+    Should Be Equal As Strings    ${status}  False
+    Element Should Be Disabled    ${SINGLE_MODEL_SERVING_CHECK_BOX}
 
-Check IF Single Mode Model Serving Is Enabled From DSC And Cluster Setting
-    [Documentation]    Check single mode model should be enabled from DSC and dashboard
-    Component Should Be Enabled  kserve
+
+Check IF Single Model Serving Is Enabled From DSC And Cluster Setting
+    [Documentation]    Check single model should be enabled from DSC and dashboard
+    Component Should Not Be Enabled  kserve
     ${status}   Get Checkbox State Of Single Mode Serving Platforms
-    Should Be Equal    ${status}  "True"
+    Should Be Equal As Strings    ${status}  True
+    Element Should Be Disabled    ${SINGLE_MODEL_SERVING_CHECK_BOX}
 
-Check IF Multi Mode Model Serving IS Disabled From DSC And Cluster Setting
-[Documentation]    Check Multi mode model should be disabled from DSC and dashboard
+
+Check IF Multi Model Serving IS Disabled From DSC And Cluster Setting
+    [Documentation]    Check Multi model should be disabled from DSC and dashboard
     Component Should Not Be Enabled  modelmeshserving
-    ${status}   Get Checkbox State Of Single Mode Serving Platforms
-    Should Be Equal    ${status}  "False"
+    ${status}   Get Checkbox State Of Multi Mode Serving Platforms
+    Should Be Equal As Strings    ${status}  False
+    Element Should Be Disabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
 
-Check IF Multi Mode Model Serving IS Enabled From DSC And Cluster Setting
-[Documentation]    Check Multi mode model should be enabled from DSC and dashboard
-    Component Should Be Enabled  modelmeshserving
-    ${status}   Get Checkbox State Of Single Mode Serving Platforms
-    Should Be Equal    ${status}  "True"
+
+Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
+    [Documentation]    Check Multi model should be enabled from DSC and dashboard
+    Component Should Not Be Enabled  modelmeshserving
+    ${status}   Get Checkbox State Of Multi Mode Serving Platforms
+    Should Be Equal    ${status}  True
+    Element Should Be Disabled    ${MULTI_MODEL_SERVING_CHECK_BOX}

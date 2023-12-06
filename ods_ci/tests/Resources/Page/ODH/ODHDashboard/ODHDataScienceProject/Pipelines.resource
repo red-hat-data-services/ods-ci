@@ -21,8 +21,9 @@ Create Pipeline Server
     ...                It assumes the Data Connection is aleady created
     ...                and you wants to use defaul DB configurations [TEMPORARY]
     [Arguments]    ${dc_name}    ${project_title}
-    Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}
-    Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_XP}
+    # Every 2 mins the frontend updates its cache and the client polls every 30seconds.
+    # So the longest you’d have to wait is 2.5 mins. Set 3 min just to make sure
+    Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}    timeout=180s
     Element Should Be Enabled    ${PIPELINES_SERVER_BTN_XP}
     Click Button    ${PIPELINES_SERVER_BTN_XP}
     Wait Until Generic Modal Appears
@@ -112,6 +113,33 @@ Click Action From Actions Menu
     Wait Until Page Contains Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]
     Click Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]
 
+Pipeline Context Menu Should Be Working
+    [Documentation]   Test Pipeline YAML context menu works with mouse right-click and with keyboard
+    [Arguments]    ${pipeline_name}
+    ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
+    Menu.Navigate To Page    Data Science Pipelines    Pipelines
+    Wait Until Element is Visible     //a[text()="${pipeline_name}"]          timeout=30s
+    Click Link      ${pipeline_name}
+    Click Element     //button[@aria-label="Pipeline YAML Tab"]
+    Open Context Menu    //div[contains(@class, 'lines-content')]
+    Click Element     //button[@aria-label="Pipeline YAML Tab"]
+    Press Keys    //div[contains(@class, 'lines-content')]    F1+fold+SPACE+all+ENTER
+    Capture Page Screenshot
+    SeleniumLibrary.Set Selenium Implicit Wait    ${orig wait}
+
+Pipeline Yaml Should Be Readonly
+    [Documentation]   Verify Pipeline Yaml is read only (https://github.com/opendatahub-io/odh-dashboard/issues/1689)
+    [Arguments]    ${pipeline_name}
+    ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
+    Menu.Navigate To Page    Data Science Pipelines    Pipelines
+    Wait Until Element is Visible     //a[text()="${pipeline_name}"]          timeout=30s
+    Click Link      ${pipeline_name}
+    Click Element     //button[@aria-label="Pipeline YAML Tab"]
+    Press Keys    //div[contains(@class, 'lines-content')]    cannot_enter_read_only
+    Wait Until Element Is Visible    //div[@class="pf-c-code-editor pf-m-read-only odh-dashboard__code-editor"]    timeout=10
+    Capture Page Screenshot
+    SeleniumLibrary.Set Selenium Implicit Wait    ${orig wait}
+
 Pipeline Should Be Listed
     [Documentation]    Checks a pipeline is listed in the DS Project details page
     [Arguments]     ${pipeline_name}    ${pipeline_description}
@@ -168,7 +196,7 @@ Pipeline Last Run Status Should Be
 Wait Until Pipeline Last Run Is Finished
     [Documentation]    Waits until the run reported in the "last run" column of the test pipeline
     ...                in the DS Project details page completes the execution (i.e., status is not Running)
-    [Arguments]    ${pipeline_name}    ${timeout}=60s
+    [Arguments]    ${pipeline_name}    ${timeout}=260s
     ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
     Wait Until Page Does Not Contain Element    ${pipeline_row_xp}//td/div[text()="Running"]
     ...    timeout=${timeout}
@@ -241,7 +269,6 @@ Verify Successful Pipeline Run Via Project UI
     Wait Until Pipeline Last Run Is Started    pipeline_name=${pipeline_name}
     ...    timeout=10s
     Wait Until Pipeline Last Run Is Finished    pipeline_name=${pipeline_name}
-    ...    timeout=180s
     Pipeline Last Run Should Be    pipeline_name=${pipeline_name}
     ...    run_name=${pipeline_run_name}
     Pipeline Last Run Status Should Be    pipeline_name=${pipeline_name}

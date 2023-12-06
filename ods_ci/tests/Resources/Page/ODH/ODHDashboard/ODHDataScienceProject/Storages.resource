@@ -14,7 +14,7 @@ ${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@aria-label="mount-path-folder-value"]
 ${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
 ${STORAGE_ADD_BTN_1_XP}=           ${STORAGE_SECTION_XP}//button[.="Add cluster storage"]
-${STORAGE_ADD_BTN_2_XP}=           xpath=//footer/button[.="Add storage"]
+${STORAGE_ADD_BTN_2_XP}=           xpath=//footer//button[.="Add storage"]
 
 
 *** Keywords ***

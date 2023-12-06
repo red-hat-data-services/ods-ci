@@ -15,8 +15,8 @@ ${KSERVE_NS}=    ${APPLICATIONS_NAMESPACE}
 *** Test Cases ***
 Verify KServe Is Shipped
     [Documentation]    Verify KServe Is Shipped And Enabled Within ODS
-    [Tags]    WatsonX
-    ...       ODS-2325
+    [Tags]    ODS-2325
+    ...       KServe
     @{kserve_pods_info} =    Fetch KServe Pods
     @{kserve_services_info} =    Fetch KServe Controller Services
     @{kserve_wh_services_info} =    Fetch KServe Webhook Services
@@ -87,7 +87,7 @@ Verify KServe ReplicaSets Info
 Verify Kserve Deployment
     [Documentation]  Verifies RHODS KServe deployment
     @{kserve} =  Oc Get    kind=Pod    namespace=${KSERVE_NS}    api_version=v1
-    ...    label_selector=app.kubernetes.io/part-of=kserve
+    ...    label_selector=app.opendatahub.io/kserve=true
     ${containerNames} =    Create List    manager
     Verify Deployment    ${kserve}    4    1    ${containerNames}
 

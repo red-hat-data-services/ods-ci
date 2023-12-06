@@ -7,6 +7,7 @@ Library   RequestsLibrary
 Library   ../../libs/Helpers.py
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource  ../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource  RHOSi.resource
 
 
@@ -420,3 +421,10 @@ Configure User Workload Monitoring
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_CONFIG_FILEPATH}
     Log To Console    ${output}
     Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+
+Skip If Component Is Not Enabled
+    [Documentation]    Skips test if ${component_name} is not enabled in DataScienceCluster
+    [Arguments]    ${component_name}
+    ${enabled}=    Is Component Enabled    ${component_name}
+    Skip If    "${enabled}" == "false"
+

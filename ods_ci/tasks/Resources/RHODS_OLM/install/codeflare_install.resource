@@ -1,6 +1,8 @@
 *** Settings ***
 Documentation    RHODS CodeFlare operator installation keywords
 Resource         ../../../../tests/Resources/Common.robot
+Resource         ../install/oc_install.robot
+Resource         ../pre-tasks/oc_is_operator_installed.robot
 Library    String
 Library    OperatingSystem
 Library    OpenShiftLibrary

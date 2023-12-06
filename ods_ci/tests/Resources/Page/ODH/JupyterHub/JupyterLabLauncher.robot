@@ -410,6 +410,16 @@ Check Versions In JupyterLab
             END
         ELSE IF  "${libDetail}[0]" == "Python"
             ${status} =  Python Version Check  ${libDetail}[1]
+        ELSE IF  "${libDetail}[0]" == "Sklearn-onnx"
+            ${status}  ${value} =  Verify Installed Library Version  skl2onnx  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
+        ELSE IF  "${libDetail}[0]" == "MySQL Connector/Python"
+            ${status}  ${value} =  Verify Installed Library Version  mysql-connector-python  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
         # CUDA version is checked in GPU-specific test cases, we can skip it here.
         ELSE IF  "${libDetail}[0]" == "CUDA"
             CONTINUE
@@ -475,7 +485,7 @@ Verify Package Is Not Installed In JupyterLab
     [Documentation]  Check Package is not Installed
     [Arguments]  ${package_name}
     Add And Run JupyterLab Code Cell In Active Notebook  import ${package_name}
-    Wait Until JupyterLab Code Cell Is Not Active
+    Wait Until JupyterLab Code Cell Is Not Active    timeout=10seconds
     ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
     ${output}   Split String     ${output}   \n\n
     Should Match  ${output[-1]}   ModuleNotFoundError: No module named '${package_name}'

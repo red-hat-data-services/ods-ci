@@ -19,17 +19,20 @@ metadata:
     sidecar.istio.io/inject: "false"
     tekton.dev/template: ''
     pipelines.kubeflow.org/big_data_passing_format: $(workspaces.$TASK_NAME.path)/artifacts/$ORIG_PR_NAME/$TASKRUN_NAME/$TASK_PARAM_NAME
-    pipelines.kubeflow.org/pipeline_spec: '{"inputs": [{"name": "mlpipeline_minio_artifact_secret"}],
-      "name": "Test Data Passing Pipeline 1"}'
+    pipelines.kubeflow.org/pipeline_spec: '{"inputs": [{"name": "mlpipeline_minio_artifact_secret"},
+      {"name": "bucket_name"}], "name": "Test Data Passing Pipeline 1"}'
   labels:
     pipelines.kubeflow.org/pipelinename: ''
     pipelines.kubeflow.org/generation: ''
 spec:
   params:
+  - name: bucket_name
+    value: ''
   - name: mlpipeline_minio_artifact_secret
     value: ''
   pipelineSpec:
     params:
+    - name: bucket_name
     - name: mlpipeline_minio_artifact_secret
     tasks:
     - name: send-file
@@ -258,6 +261,8 @@ spec:
       - send-file
     - name: test-uploaded-artifact
       params:
+      - name: bucket_name
+        value: $(params.bucket_name)
       - name: mlpipeline_minio_artifact_secret
         value: $(params.mlpipeline_minio_artifact_secret)
       - name: receive-file-trname
@@ -272,6 +277,8 @@ spec:
           - '20971520'
           - --mlpipeline-minio-artifact-secret
           - $(inputs.params.mlpipeline_minio_artifact_secret)
+          - --bucket-name
+          - $(inputs.params.bucket_name)
           command:
           - sh
           - -c
@@ -285,7 +292,7 @@ spec:
             printf "%s" "$0" > "$program_path"
             python3 -u "$program_path" "$@"
           - |
-            def test_uploaded_artifact(previous_step, file_size_bytes, mlpipeline_minio_artifact_secret):
+            def test_uploaded_artifact(previous_step, file_size_bytes, mlpipeline_minio_artifact_secret, bucket_name):
                 from minio import Minio
                 import base64
                 import json
@@ -312,7 +319,7 @@ spec:
                     secure=secure
                 )
 
-                data = client.get_object('mlpipeline', object_name)
+                data = client.get_object(bucket_name, object_name)
                 with open('my-testfile', 'wb') as file_data:
                     for d in data.stream(32 * 1024):
                         file_data.write(d)
@@ -329,6 +336,7 @@ spec:
             _parser.add_argument("--previous-step", dest="previous_step", type=str, required=True, default=argparse.SUPPRESS)
             _parser.add_argument("--file-size-bytes", dest="file_size_bytes", type=int, required=True, default=argparse.SUPPRESS)
             _parser.add_argument("--mlpipeline-minio-artifact-secret", dest="mlpipeline_minio_artifact_secret", type=str, required=True, default=argparse.SUPPRESS)
+            _parser.add_argument("--bucket-name", dest="bucket_name", type=str, required=True, default=argparse.SUPPRESS)
             _parsed_args = vars(_parser.parse_args())
 
             _outputs = test_uploaded_artifact(**_parsed_args)
@@ -339,6 +347,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.labels['custom.tekton.dev/originalPipelineRun']
         params:
+        - name: bucket_name
         - name: mlpipeline_minio_artifact_secret
         - name: receive-file-trname
         metadata:
@@ -346,7 +355,7 @@ spec:
             pipelines.kubeflow.org/cache_enabled: "true"
           annotations:
             pipelines.kubeflow.org/component_spec_digest: '{"name": "Test uploaded
-              artifact", "outputs": [], "version": "Test uploaded artifact@sha256=8949fd0857516c824f4067b8919144c641e93e8da787a638c48290bc6add6614"}'
+              artifact", "outputs": [], "version": "Test uploaded artifact@sha256=e27a8409f0e705e3d002ccb56fb419d80e701db4b86f601c400b2310d88c956f"}'
         workspaces:
         - name: test-uploaded-artifact
       workspaces:
@@ -362,7 +371,7 @@ spec:
       spec:
         storageClassName: standard-csi
         accessModes:
-        - ReadWriteMany
+        - ReadWriteOnce
         resources:
           requests:
             storage: 2Gi

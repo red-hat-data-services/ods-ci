@@ -143,13 +143,24 @@ Verify That CUDA Build Chain Succeeds
     [Teardown]    CUDA Teardown
 
 Verify That Blackbox-exporter Is Protected With Auth-proxy
-    [Documentation]    Verifies the blackbok-exporter inludes 4 containers one for application,odh-notebook-controller,notebook-controller and data-science-pipelines each
+    [Documentation]    Verifies the blackbok-exporter pod is running the oauht-proxy container. Verify also
+    ...    that all blackbox-exporter targets require authentication.
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1090
+
     Skip If RHODS Is Self-Managed
+
     Verify BlackboxExporter Includes Oauth Proxy
-    Verify Authentication Is Required To Access BlackboxExporter
+
+    Verify Authentication Is Required To Access BlackboxExporter Target
+    ...    target_name=user_facing_endpoints_status_dsp    expected_endpoint_count=1
+
+    Verify Authentication Is Required To Access BlackboxExporter Target
+    ...    target_name=user_facing_endpoints_status_rhods_dashboard    expected_endpoint_count=1
+
+    Verify Authentication Is Required To Access BlackboxExporter Target
+    ...    target_name=user_facing_endpoints_status_workbenches    expected_endpoint_count=2
 
 Verify That "Usage Data Collection" Is Enabled By Default
     [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
@@ -318,25 +329,29 @@ Test Teardown For Configmap Changed On RHODS Dashboard
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
 
-Verify Authentication Is Required To Access BlackboxExporter
-    [Documentation]    Verifies authentication is required to access blackbox exporter. To do so,
+Verify Authentication Is Required To Access BlackboxExporter Target
+    [Documentation]    Verifies authentication is required to access a blackbox exporter target. To do so,
     ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target.
     ...                The test fails if the response is not a prompt to log in with OpenShift
-
+    [Arguments]    ${target_name}    ${expected_endpoint_count}
     @{links} =    Prometheus.Get Target Endpoints
-    ...    target_name=user_facing_endpoints_status
+    ...    target_name=${target_name}
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
     ...    username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}
-    Length Should Be    ${links}    4    msg=Unexpected number of target endpoints in blackbox-exporter
+
+    Length Should Be    ${links}    ${expected_endpoint_count}
+    ...    msg=Unexpected number of endpoints in blackbox-exporter target (target_name:${target_name})
+
     ${pod_name} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
     FOR    ${link}    IN    @{links}
+        Log    link:${link}
         ${command} =    Set Variable    curl --silent --insecure ${link}
         ${output} =    Run Command In Container    namespace=${MONITORING_NAMESPACE}    pod_name=${pod_name}
         ...    command=${command}    container_name=prometheus
         Should Contain    ${output}    Log in with OpenShift
-        ...    msg=Log in with OpenShift should be required to access blackbox-exporter
+        ...    msg=Authentication not present in blackbox-exporter target (target_name:${target_name} link: ${link})
     END
 
 Verify BlackboxExporter Includes Oauth Proxy

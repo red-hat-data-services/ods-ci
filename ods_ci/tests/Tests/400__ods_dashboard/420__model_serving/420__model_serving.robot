@@ -9,7 +9,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject
 Resource          ../../../Resources/OCP.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
-
+Test Tags         ModelMesh
 
 *** Variables ***
 ${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
@@ -42,7 +42,7 @@ Verify Model Can Be Deployed Via UI
     ...    ODS-1921
     Open Model Serving Home Page
     Try Opening Create Server
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -75,7 +75,8 @@ Verify Openvino_IR Model Via UI
     ...    ODS-2054
     Open Model Serving Home Page
     Try Opening Create Server
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Open Data Science Projects Home Page
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -104,7 +105,7 @@ Verify Tensorflow Model Via UI
     ...    ODS-2268
     Open Model Serving Home Page
     Try Opening Create Server
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -131,6 +132,7 @@ Model Serving Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
+    Skip If Component Is Not Enabled    modelmeshserving
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
@@ -176,11 +178,11 @@ Model Serving Suite Teardown
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
         Run Keyword And Continue On Failure    Delete Model Via UI    test-model
-        ${projects}=    Create List    ${PRJ_TITLE}
-        Delete Data Science Projects From CLI   ocp_projects=${projects}
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
+    ${projects}=    Create List    ${PRJ_TITLE}
+    Delete Data Science Projects From CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca.crt
@@ -206,9 +208,9 @@ Try Opening Create Server
     ...    controls how many retries are made.
     [Arguments]    ${retries}=3
     FOR    ${try}    IN RANGE    0    ${retries}
-        ${status} =    Run Keyword And Return Status    Page Should Contain    Create server
+        ${status} =    Run Keyword And Return Status    Page Should Contain    Select a project
         IF    ${status}
-            Click Button    Create server
+            Click Button    Select a project
             RETURN
         ELSE
             Clean Up Model Serving Page

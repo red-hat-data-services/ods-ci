@@ -422,7 +422,7 @@ Verify Users Can Start, Stop, Launch And Delete A Workbench
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
     ...    image=${NB_IMAGE}    project_title=${PRJ_TITLE}
-    SeleniumLibrary.Switch Window    title=Red Hat OpenShift Data Science
+    SeleniumLibrary.Switch Window    title=Red Hat OpenShift AI
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Delete Workbench    workbench_title=${WORKBENCH_TITLE}
     Workbench Should Not Be Listed    workbench_title=${WORKBENCH_TITLE}

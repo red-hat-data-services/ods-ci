@@ -58,7 +58,9 @@ Close Properties Panel
 Save Pipeline Changes
     [Documentation]    Saves changes to the pipeline
     Click Element    xpath=//div[contains(@class, 'save-action')]/button
-    Wait Until Page Contains    Saving started
+    # We can also check that `Saving started` text appears but it usually shows up for a very
+    # short amount of time so let's just check the `Saving completed` only.
+    # Wait Until Page Contains    Saving started
     Wait Until Page Contains    Saving completed
 
 Run Pipeline

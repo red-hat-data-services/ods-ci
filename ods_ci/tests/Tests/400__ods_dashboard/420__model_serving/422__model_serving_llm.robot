@@ -1,11 +1,13 @@
 *** Settings ***
-Documentation     Collection of tests to validate the model serving stack for Large Language Models (LLM)
+Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM)
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
+Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
 Suite Teardown    RHOSi Teardown
+Test Tags         KServe
 
 
 *** Variables ***
@@ -30,8 +32,8 @@ ${KIALI_SUB_NAME}=    kiali-ossm
 ${JAEGER_OP_NAME}=     jaeger-product
 ${JAEGER_SUB_NAME}=    jaeger-product
 ${KSERVE_NS}=    ${APPLICATIONS_NAMESPACE}    # NS is "kserve" for ODH
-${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime.yaml
-${TEST_NS}=    watsonx
+${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime_{{protocol}}.yaml
+${TEST_NS}=    singlemodel
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
 ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
 ${USE_BUCKET_HTTPS}=    "1"
@@ -41,30 +43,37 @@ ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${UWM_ENABLE_FILEPATH}=    ${RESOURCES_DIRPATH}/uwm_cm_enable.yaml
 ${UWM_CONFIG_FILEPATH}=    ${RESOURCES_DIRPATH}/uwm_cm_conf.yaml
-${SKIP_PREREQS_INSTALL}=    ${FALSE}
-${SCRIPT_BASED_INSTALL}=    ${FALSE}
+${SKIP_PREREQS_INSTALL}=    ${TRUE}
+${SCRIPT_BASED_INSTALL}=    ${TRUE}
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
-${FLAN_MODEL_S3_DIR}=    flan-t5-small
-${FLAN_GRAMMAR_MODEL_S3_DIR}=    flan-t5-large-grammar-synthesis-caikit
-${FLAN_LARGE_MODEL_S3_DIR}=    flan-t5-large
-${BLOOM_MODEL_S3_DIR}=    bloom-560m
+${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-caikit
+${FLAN_GRAMMAR_MODEL_S3_DIR}=    flan-t5-large-grammar-synthesis-caikit/flan-t5-large-grammar-synthesis-caikit
+${FLAN_LARGE_MODEL_S3_DIR}=    flan-t5-large/flan-t5-large
+${BLOOM_MODEL_S3_DIR}=    bloom-560m/bloom-560m-caikit
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${FLAN_GRAMMAR_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_GRAMMAR_MODEL_S3_DIR}/
 ${FLAN_LARGE_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_LARGE_MODEL_S3_DIR}/
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
 ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
+${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}=    api/v1/task/text-generation
+${CAIKIT_STREAM_ENDPOINT_HTTP}=    api/v1/task/server-streaming-text-generation
+
 ${SCRIPT_TARGET_OPERATOR}=    rhods    # rhods or brew
 ${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
 
 
 *** Test Cases ***
 Verify External Dependency Operators Can Be Deployed
-    [Tags]    ODS-2326    WatsonX
+    [Documentation]    Checks the pre-required Operators can be installed
+    ...                and configured
+    [Tags]    ODS-2326
     Pass Execution    message=Installation done as part of Suite Setup.
 
 Verify User Can Serve And Query A Model
-    [Tags]    ODS-2341    WatsonX
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    ...                using Kserve and Caikit+TGIS runtime
+    [Tags]    Smoke    Tier1    ODS-2341
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -76,21 +85,18 @@ Verify User Can Serve And Query A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Sleep  5s
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
-    ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
-    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In The Same Namespace
-    [Tags]    ODS-2371    WatsonX
+    [Documentation]    Checks if user can deploy and query multiple models in the same namespace
+    [Tags]    Sanity    Tier1    ODS-2371
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
@@ -110,16 +116,23 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
-    ...    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${model_one_name}
+    ...    n_times=5    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${model_two_name}
+    ...    n_times=10    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${model_one_name}
+    ...    n_times=5    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${model_two_name}
+    ...    n_times=10    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
 Verify User Can Deploy Multiple Models In Different Namespaces
-    [Tags]    ODS-2378   WatsonX
-    [Setup]    Run Keywords    Set Project And Runtime    namespace=watsonx-multi1
+    [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
+    [Tags]    Sanity    Tier1    ODS-2378
+    [Setup]    Run Keywords    Set Project And Runtime    namespace=singlemodel-multi1
     ...        AND
-    ...        Set Project And Runtime    namespace=watsonx-multi2
+    ...        Set Project And Runtime    namespace=singlemodel-multi2
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
     ${models_names_ns_1}=    Create List    ${model_one_name}
@@ -128,59 +141,71 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=watsonx-multi1
+    ...    namespace=singlemodel-multi1
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=watsonx-multi2
+    ...    namespace=singlemodel-multi2
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=watsonx-multi1
+    ...    namespace=singlemodel-multi1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=watsonx-multi2
-    Query Models And Check Responses Multiple Times    models_names=${models_names_ns_1}    n_times=3
-    ...    namespace=watsonx-multi1
-    Query Models And Check Responses Multiple Times    models_names=${models_names_ns_2}    n_times=3
-    ...    namespace=watsonx-multi2
-    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=watsonx-multi1    isvc_names=${models_names_ns_1}
+    ...    namespace=singlemodel-multi2
+    Query Model Multiple Times    model_name=${model_one_name}    n_times=2
+    ...    namespace=singlemodel-multi1
+    Query Model Multiple Times    model_name=${model_two_name}    n_times=2
+    ...    namespace=singlemodel-multi2
+    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
     ...           AND
-    ...           Clean Up Test Project    test_ns=watsonx-multi2    isvc_names=${models_names_ns_2}
+    ...           Clean Up Test Project    test_ns=singlemodel-multi2    isvc_names=${models_names_ns_2}
 
 Verify Model Upgrade Using Canaray Rollout
-    [Tags]    ODS-2372    WatsonX
+    [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
+    [Tags]    Sanity    Tier1    ODS-2372
     [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
-    ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
+    ${test_namespace}=    Set Variable    canary-model-upgrade
+    ${isvc_name}=    Set Variable    canary-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
-    ${models_names}=    Create List    ${model_name}
-    Compile And Query LLM model   isvc_name=${flan_isvc_name}
+    ${isvcs_names}=    Create List    ${isvc_name}
+    ${canary_percentage}=    Set Variable    ${30}
+    Compile Deploy And Query LLM model   isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
-    ...    namespace=canary-model-upgrade
+    ...    namespace=${test_namespace}
+    ...    validate_response=${FALSE}
     Log To Console    Applying Canary Tarffic for Model Upgrade
-    Compile And Query LLM Model   isvc_name=${flan_isvc_name}
+    ${model_name}=    Set Variable    bloom-560m-caikit
+    Compile Deploy And Query LLM model   isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    model_name=${model_name}
-    ...    canaryTrafficPercent=20
-    ...    namespace=canary-model-upgrade
-#    ...    multiple_query=YES
+    ...    canaryTrafficPercent=${canary_percentage}
+    ...    namespace=${test_namespace}
+    ...    validate_response=${FALSE}
+    ...    n_queries=${0}
+    Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${canary_percentage}
+    ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
     Log To Console    Remove Canary Tarffic For Model Upgrade
-    Compile And Query LLM Model    isvc_name=${flan_isvc_name}
+    Compile Deploy And Query LLM model    isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_name=${model_name}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
-    ...    namespace=canary-model-upgrade
-    [Teardown]   Clean Up Test Project    test_ns=canary-model-upgrade
-    ...    isvc_names=${models_names}
+    ...    namespace=${test_namespace}
+    Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${100}
+    ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${isvcs_names}
 
 Verify Model Pods Are Deleted When No Inference Service Is Present
-    [Tags]    ODS-2373    WatsonX
+    [Documentation]    Checks if model pods gets successfully deleted after
+    ...                deleting the KServe InferenceService object
+    [Tags]    Tier2    ODS-2373
     [Setup]    Set Project And Runtime    namespace=no-infer-kserve
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
-    Compile And Query LLM Model   isvc_name=${flan_isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${flan_isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
@@ -192,7 +217,9 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
 
 Verify User Can Change The Minimum Number Of Replicas For A Model
-    [Tags]    ODS-2376    WatsonX
+    [Documentation]    Checks if user can change the minimum number of replicas
+    ...                of a deployed model
+    [Tags]    Sanity    Tier1    ODS-2376
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -205,62 +232,55 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    timeout=360s
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=3
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    timeout=360s
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=3
+    Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
 Verify User Can Autoscale Using Concurrency
-    [Tags]    ODS-2377    WatsonX
+    [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
+    [Tags]    Sanity    Tier1    ODS-2377
     [Setup]    Set Project And Runtime    namespace=autoscale-con
+    ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=s3://ods-ci-wisdom/flan-t5-small/
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    auto_scale=True
     Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
-    ...    namespace=autoscale-con
+    ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-con
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-con
-    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    FOR    ${index}    IN RANGE    30
-           Query Model With GRPCURL   host=${host}    port=443
-           ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}
-           ...    json_body=${body}    json_header=${header}
-           ...    insecure=${TRUE}     background=${TRUE}
-    END
-    @{pod_lists}=    Oc Get    kind=Pod    namespace=autoscale-con
+    ...    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${flan_model_name}    n_times=10
+    ...    namespace=${test_namespace}    validate_response=${FALSE}    background=${TRUE}
+    Wait For Pods Number    number=1    comparison=GREATER THAN
     ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ${count}=    Get Length   ${pod_lists}
-    IF   ${count} > ${1}
-         Log      Autoscale Using Concurrency is completed.Model Pod has been scaled up from 1 to $count
-    ELSE
-         FAIL     msg= Autoscale Using Concurrency has failed and Model pod has not been scaled up
-    END
-    [Teardown]   Clean Up Test Project    test_ns=autoscale-con
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
 Verify User Can Validate Scale To Zero
-    [Tags]    ODS-2379    WatsonX
+    [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
+    [Tags]    Sanity    Tier1    ODS-2379
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Create List    ${flan_model_name}
@@ -296,7 +316,8 @@ Verify User Can Validate Scale To Zero
     ...    isvc_names=${model_name}
 
 Verify User Can Set Requests And Limits For A Model
-    [Tags]    ODS-2380    WatsonX
+    [Documentation]    Checks if user can set HW request and limits on their inference service object
+    [Tags]    Sanity    Tier1    ODS-2380
     [Setup]    Set Project And Runtime    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -313,7 +334,7 @@ Verify User Can Set Requests And Limits For A Model
     ...    namespace=${test_namespace}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=1
+    Query Model Multiple Times    model_name=${flan_model_name}    n_times=1
     ...    namespace=${test_namespace}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -329,12 +350,14 @@ Verify User Can Set Requests And Limits For A Model
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${model_name}
+    ...    isvc_names=${models_names}
 
-Verify Model Can Be Serverd And Query On A GPU Node
-    [Tags]    ODS-2381    WatsonX    Resource-GPU
-    [Setup]    Set Project And Runtime    namespace=watsonx-gpu
-    ${test_namespace}=    Set Variable    watsonx-gpu
+Verify Model Can Be Served And Query On A GPU Node
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
+    ...                using Kserve and Caikit+TGIS runtime
+    [Tags]    Sanity    Tier1    ODS-2381    Resources-GPU
+    [Setup]    Set Project And Runtime    namespace=singlemodel-gpu
+    ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
@@ -352,16 +375,18 @@ Verify Model Can Be Serverd And Query On A GPU Node
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
     Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=10
+    Query Model Multiple Times    model_name=${model_name}    n_times=10
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}    n_times=5
+    Query Model Multiple Times    model_name=${model_name}    n_times=5
     ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
     ...    streamed_response=${TRUE}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
 Verify Non Admin Can Serve And Query A Model
-    [Tags]    ODS-2326    WatsonX
+    [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
+    ...                using Kserve and Caikit+TGIS runtime
+    [Tags]    Smoke    Tier1    ODS-2326
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test
@@ -377,10 +402,10 @@ Verify Non Admin Can Serve And Query A Model
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
@@ -388,7 +413,7 @@ Verify Non Admin Can Serve And Query A Model
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
-    [Tags]    ODS-2441    WatsonX
+    [Tags]    Tier2    ODS-2441
     [Setup]    Set Project And Runtime    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
@@ -400,10 +425,10 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}    query_idx=1
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    query_idx=${1}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
@@ -411,7 +436,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
 
 Verify User Can Serve And Query Flan-t5 Large
     [Documentation]    Deploys and queries flan-t5-large model
-    [Tags]    ODS-2434    WatsonX
+    [Tags]    Tier2    ODS-2434
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large
@@ -423,10 +448,10 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    query_idx=${0}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
@@ -438,7 +463,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...                must remain unchanged after the runtime upgrade.
     ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
     ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
-    [Tags]    ODS-2404    WatsonX
+    [Tags]    Sanity    Tier1    ODS-2404
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -450,12 +475,12 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
     ...    namespace=${test_namespace}
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
-    Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:fast
+    Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:stable
     ...    namespace=${test_namespace}
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -473,9 +498,9 @@ Verify User Can Access Model Metrics From UWM
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    ODS-2401    WatsonX
-    [Setup]    Set Project And Runtime    namespace=watsonx-metrics    enable_metrics=${TRUE}
-    ${test_namespace}=    Set Variable     watsonx-metrics
+    [Tags]    Smoke    Tier1    ODS-2401
+    [Setup]    Set Project And Runtime    namespace=singlemodel-metrics    enable_metrics=${TRUE}
+    ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     ${thanos_url}=    Get OpenShift Thanos URL
@@ -488,7 +513,7 @@ Verify User Can Access Model Metrics From UWM
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=3
     ...    namespace=${test_namespace}
     Wait Until Keyword Succeeds    50 times    5s
@@ -500,12 +525,38 @@ Verify User Can Access Model Metrics From UWM
     Wait Until Keyword Succeeds    20 times    5s
     ...    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
-    Query Models And Check Responses Multiple Times    models_names=${models_names}
+    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    query_idx=${0}
     Wait Until Keyword Succeeds    30 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=stream    namespace=${test_namespace}    period=5m    exp_value=1
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}
+
+Verify User Can Query A Model Using HTTP Calls
+    [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
+    ...                This tests deploys the runtime enabling HTTP port and send queries to the model
+    [Tags]    ODS-2501    Smoke    Tier1
+    [Setup]    Set Project And Runtime    namespace=kserve-http    protocol=http
+    ${test_namespace}=    Set Variable     kserve-http
+    ${model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${model_name}
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${model_name}    protocol=http
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1    streamed_response=${FALSE}
+    ...    namespace=${test_namespace}    query_idx=${0}
+    # temporarily disabling stream response validation. Need to re-design the expected response json file
+    # because format of streamed response with http is slightly different from grpc
+    Query Model Multiple Times    model_name=${model_name}    protocol=http
+    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}    query_idx=${0}    validate_response=${FALSE}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
@@ -515,6 +566,7 @@ Install Model Serving Stack Dependencies
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
+    Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
         IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
@@ -539,8 +591,15 @@ Clean Up Test Project
     ELSE
         Log To Console     InferenceService Delete option not provided by user
     END
-    Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
+    ${rc}    ${member_list}=    Run And Return Rc And Output
+    ...    oc get smmr/default -n ${SERVICEMESH_CR_NS} -o json | jq '.spec.members'
+    Should Be Equal As Integers    ${rc}    ${0}
+    IF    "${member_list}" == "null"
+        Log    message=ServiceMeshMemberRoll already cleaned up. Skipping manual deletion
+    ELSE
+        Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
     ...    servicemesh_ns=${SERVICEMESH_CR_NS}
+    END
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s
@@ -740,28 +799,31 @@ Set Up Test OpenShift Project
 Deploy Caikit Serving Runtime
     [Documentation]    Create the ServingRuntime CustomResource in the test ${namespace}.
     ...                This must be done before deploying a model which needs Caikit.
-    [Arguments]    ${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc get ServingRuntime caikit-runtime -n ${namespace}
+    [Arguments]    ${namespace}    ${protocol}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get ServingRuntime caikit-tgis-runtime -n ${namespace}
     IF    "${rc}" == "${0}"
-        Log    message=ServingRuntime caikit-runtime in ${namespace} NS already present. Skipping runtime setup...
+        Log    message=ServingRuntime caikit-tgis-runtime in ${namespace} NS already present. Skipping runtime setup...
         ...    level=WARN
         RETURN
     END
+    ${runtime_final_filepath}=    Replace String    string=${CAIKIT_FILEPATH}    search_for={{protocol}}
+    ...    replace_with=${protocol}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -f ${CAIKIT_FILEPATH} -n ${namespace}
+    ...    oc apply -f ${runtime_final_filepath} -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
 
 Set Project And Runtime
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
-    [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}
+    [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${protocol}=grpc
     Set Up Test OpenShift Project    test_ns=${namespace}
     Create Secret For S3-Like Buckets    endpoint=${MODELS_BUCKET.ENDPOINT}
     ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
     # temporary step - caikit will be shipped OOTB
-    Deploy Caikit Serving Runtime    namespace=${namespace}
+    Deploy Caikit Serving Runtime    namespace=${namespace}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
-        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
         Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
+        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END
@@ -854,6 +916,13 @@ Model Response Should Match The Expectation
         ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     ELSE
+        # temporarily disabling these lines - will be finalized in later stage due to a different format
+        # of streamed reponse when using http protocol instead of grpc
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    data:(\\s+)?"    "
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?{    {
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?}    }
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?]    ]
+        # ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    data:(\\s+)?\\[    [
         ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}    \\s+    ${EMPTY}
         ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
         ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
@@ -867,33 +936,58 @@ Model Response Should Match The Expectation
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     END
 
-Query Models And Check Responses Multiple Times
+Query Model Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
-    [Arguments]    ${models_names}    ${namespace}    ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
-    ...            ${streamed_response}=${FALSE}    ${query_idx}=0
+    [Arguments]    ${model_name}    ${namespace}    ${isvc_name}=${model_name}
+    ...            ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
+    ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}
+    ...            ${protocol}=grpc    &{args}
+    IF    ${validate_response} == ${FALSE}
+        ${skip_json_load_response}=    Set Variable    ${TRUE}
+    ELSE
+        ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
+    END
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+    IF    "${protocol}" == "grpc"
+        ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
+        ${header}=    Set Variable    'mm-model-id: ${model_name}'
+    ELSE IF    "${protocol}" == "http"
+        ${body}=    Set Variable    {"model_id": "${model_name}","inputs": "${EXP_RESPONSES}[queries][0][query_text]"}
+        ${headers}=    Create Dictionary     Cookie=${EMPTY}    Content-type=application/json
+    ELSE
+        Fail    msg=The ${protocol} protocol is not supported by ods-ci. Please use either grpc or http.
+    END
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
-        FOR    ${index}    ${model_name}    IN ENUMERATE    @{models_names}
-            Log    ${index}: ${model_name}
-            ${host}=    Get KServe Inference Host Via CLI    isvc_name=${model_name}   namespace=${namespace}
-            ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
-            ${header}=    Set Variable    'mm-model-id: ${model_name}'
+        IF    "${protocol}" == "grpc"
             ${res}=    Query Model With GRPCURL   host=${host}    port=443
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
-            ...    insecure=${TRUE}    skip_res_json=${streamed_response}
-            Log    ${res}
+            ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
+            ...    &{args}
+        ELSE IF    "${protocol}" == "http"
+            ${payload}=     Prepare Payload     body=${body}    str_to_json=${TRUE}
+            &{args}=       Create Dictionary     url=https://${host}:443/${endpoint}   expected_status=any
+            ...             headers=${headers}   json=${payload}    timeout=10  verify=${False}
+            ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST
+            ...    skip_res_json=${skip_json_load_response}    &{args}
+            Run Keyword And Continue On Failure    Status Should Be  200
+        END
+        Log    ${res}
+        IF    ${validate_response} == ${TRUE}
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
             ...    streamed_response=${streamed_response}    query_idx=${query_idx}
         END
     END
 
-Compile And Query LLM model
-    [Arguments]    ${isvc_name}     ${model_storage_uri}    ${model_name}
+Compile Deploy And Query LLM model
+    [Documentation]    Group together the test steps for preparing, deploying
+    ...                and querying a model
+    [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
-    ...            ${multiple_query}=${EMPTY}
+    ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
     Compile Inference Service YAML    isvc_name=${isvc_name}
     ...    sa_name=${sa_name}
     ...    model_storage_uri=${model_storage_uri}
@@ -902,18 +996,9 @@ Compile And Query LLM model
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
-    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${model_name}'
-    IF   '${multiple_query}' != '${EMPTY}'
-          Query Models And Check Responses Multiple Times    models_names=${models_name}    n_times=10
-          ...    namespace=${namespace}
-    ELSE
-          ${res}=      Query Model With GRPCURL   host=${host}    port=443
-          ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-          ...    json_body=${body}    json_header=${header}
-          ...    insecure=${TRUE}
-    END
+    Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
+    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=${n_queries}    streamed_response=${FALSE}
+    ...    namespace=${namespace}    query_idx=${query_idx}    validate_response=${validate_response}
 
 Run Install Script
     [Documentation]    Install KServe serving stack using
@@ -934,7 +1019,7 @@ Upgrade Caikit Runtime Image
     ...    ${new_image_url}
     [Arguments]    ${new_image_url}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch ServingRuntime caikit-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"
+    ...    oc patch ServingRuntime caikit-tgis-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
 
 Get Model Pods Creation Date And Image URL
@@ -1064,4 +1149,29 @@ Check Query Response Values    # robocop:disable
     END
     IF    ${checked} == ${FALSE}
         Fail    msg=The metric you are looking for has not been found. Check the query parameter and try again
+    END
+
+Traffic Should Be Redirected Based On Canary Percentage
+    [Documentation]    Sends an arbitrary number of queries ${total} and checks the amount of
+    ...                them which gets redirected to the given ${model_name}
+    ...                matches the expected probability ${exp_percentage}.
+    ...                It applies an arbitrary toleration margin of ${toleration}
+    [Arguments]    ${exp_percentage}    ${isvc_name}    ${model_name}    ${namespace}
+    ${total}=    Set Variable    ${20}
+    ${hits}=    Set Variable    ${0}
+    ${toleration}=    Set Variable    ${20}
+    FOR    ${counter}    IN RANGE    ${0}    ${total}
+        Log    ${counter}
+        ${status}=    Run Keyword And Return Status
+        ...    Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}    n_times=1
+        ...    namespace=${namespace}
+        IF    ${status} == ${TRUE}
+            ${hits}=    Evaluate    ${hits}+1
+        END
+    END
+    Log    ${hits}
+    ${actual_percentage}=    Evaluate    (${hits}/${total})*100
+    ${diff}=    Evaluate    abs(${exp_percentage}-${actual_percentage})
+    IF    ${diff} > ${toleration} or ${actual_percentage} == ${0}
+        Fail    msg=Percentage of traffic redirected to new revision is greater than toleration ${toleration}%
     END

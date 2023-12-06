@@ -22,7 +22,7 @@ Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -90,24 +90,24 @@ Wait Until Project Is Open
 Project Should Be Listed
     [Documentation]    Checks a Project is available in DS Project home page
     [Arguments]     ${project_title}
-    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//td/div/a[text()="${project_title}"]
+    Run Keyword And Continue On Failure     Page Should Contain Link    ${project_title}
 
 Wait Until Project Is Listed
     [Documentation]    Waits until the DS projects appears in the list in DS project Home Page
     [Arguments]     ${project_title}    ${timeout}=30s
-    Wait Until Page Contains Element    xpath=//td/div/a[text()="${project_title}"]
+    Wait Until Page Contains Element    xpath=//div/div/a[text()="${project_title}"]
     ...    timeout=${timeout}
 
 Project Should Not Be Listed
     [Documentation]    Checks a Project is not available in DS Project home page
     [Arguments]     ${project_title}
-    Run Keyword And Continue On Failure     Page Should Not Contain Element    xpath=//td/div/a[text()="${project_title}"]
+    Run Keyword And Continue On Failure     Page Should Not Contain Link    ${project_title}
 
 Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one
     [Arguments]     ${project_title}    ${expected_username}
     Run Keyword And Continue On Failure
-    ...    Page Should Contain Element    xpath=//td[div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
+    ...    Page Should Contain Element    xpath=//td[div/div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
 
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}
@@ -185,7 +185,7 @@ Workbench Status Should Be From Projects Home Page
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...                                                                           namespace=${namespace}
-    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[contains(@for,"${workbench_cr_name}")]]/div//p[text()="${status}"]
+    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[contains(@for,"${workbench_cr_name}")]]/div//p[text()="${status}"]    # robocop: disable
 
 Start Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "start" process from DS Projects home page.
@@ -205,7 +205,7 @@ Start Workbench From Projects Home Page
                 ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
                 ...                                                        namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
+        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -233,10 +233,10 @@ Stop Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
+        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
-        Fail     msg=Cannot stop ${workbench_title} workbench because it is not running.
+        Fail     msg=Cannot stop ${workbench_title} workbench because it is neither starting nor running.
     END
     Wait Until Workbench Is Stopped From Projects Home Page     workbench_title=${workbench_title}
     ...                                                         project_title=${project_title}
@@ -260,7 +260,7 @@ Launch And Access Workbench From Projects Home Page
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
+        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}
@@ -272,14 +272,14 @@ Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
     ${link_status}=    Get Element Attribute
-    ...    xpath=//tr[td/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
+    ...    xpath=//tr[td/div/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
     ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 
 Get All Displayed Projects
     [Documentation]    Gets all the DS projects visible in the DS Projects home page
     ${projects_names}=    Create List
-    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]/div/a
+    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]/div/div/a
     FOR    ${element}    IN    @{elements}
         ${name}=    Get Text    ${element}
         Append To List    ${projects_names}    ${name}
@@ -404,7 +404,7 @@ Create Data Science Project If Not Exists
 
 Clean Project From Workbench Resources
     [Documentation]    Deletes resources from a test project to free up
-    ...                resources or re-use titles. 
+    ...                resources or re-use titles.
     ...                AT THE MOMENT, ONLY WORKBENCH AND PVC DELETION ARE IMPLEMENTED
     [Arguments]    ${workbench_title}    ${project_title}
     ...    ${pvc_title}=${workbench_title}

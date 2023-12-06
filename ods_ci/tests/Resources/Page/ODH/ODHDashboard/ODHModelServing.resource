@@ -38,7 +38,7 @@ Open Model Serving Home Page
         Sleep    5s
         Reload Page
     END
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Model serving
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Deployed models
     Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -48,13 +48,15 @@ Serve Model
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test
     # TODO: Does not work if there's already a model deployed
-    Wait Until Page Contains    Deploy model
-    Click Button    Deploy model
-    Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
+    SeleniumLibrary.Wait Until Page Does Not Contain Element    //article[@id="multi-serving-platform-card"]
+    SeleniumLibrary.Wait Until Page Does Not Contain Element    //article[@id="single-serving-platform-card"]
+    SeleniumLibrary.Wait Until Page Contains    Deploy model
+    SeleniumLibrary.Click Button    Deploy model
+    SeleniumLibrary.Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
-    Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
+    SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
     IF    ${existing_data_connection}==${TRUE}
         # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
@@ -63,13 +65,13 @@ Serve Model
         Set Folder Path    ${model_path}
     ELSE
         # Existing connection radio is selected by default; for now blindly click on new connection radio
-        Click Element    //input[@id="new-data-connection-radio"]
+        SeleniumLibrary.Click Element    //input[@id="new-data-connection-radio"]
         # Select Radio Button    group_name=radiogroup    value=new-data-connection-radio
         Set Up New Data Connection    dc_name=${data_connection_name}
         Set Folder Path    ${model_path}
     END
-    Click Button    Deploy
-    Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
+    SeleniumLibrary.Click Button    Deploy
+    SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 
 Select Project
     [Documentation]    Selects a project in the "deploy model" modal.
@@ -212,6 +214,8 @@ Get Model Project
     [Arguments]    ${model_name}
     Page Should Contain Element    //div[.="${model_name} "]
     ${project_name}=    Get Text    xpath://div[.="${model_name} "]${MS_TABLE_PROJECT}
+    ${tmp_list}=    Text To List    ${project_name}
+    ${project_name}=    Set Variable    ${tmp_list}[0]
     RETURN    ${project_name}
 
 Get Model Inference
@@ -366,13 +370,13 @@ Disable Model Serving Runtime Using CLI
     Should Be Equal As Integers    ${rc}         ${0}
 
 Wait Until Runtime Pod Is Running
-    [Arguments]    ${server_name}    ${project_title}
+    [Arguments]    ${server_name}    ${project_title}    ${timeout}=10s
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     ${runtime_pod_name} =    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
     ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Log    name=modelmeshserving${runtime_pod_name}
     Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_pod_name}
-    ...    namespace=${ns_name}    timeout=10s
+    ...    namespace=${ns_name}    timeout=${timeout}
 
 Create Custom Serving Runtime Using Template By CLI
     [Documentation]  Use Openshift API to create a custome runtime using template CR

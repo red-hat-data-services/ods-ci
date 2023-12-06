@@ -10,7 +10,7 @@ Library       JupyterLibrary
 
 
 *** Variables ***
-${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift Data Science
+${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-c-card'))]
@@ -541,11 +541,12 @@ RHODS Notification Drawer Should Contain
     Close Notification Drawer
 
 Open Notebook Images Page
-    [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Images page
+    [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Image Settings page
     Wait Until Page Contains    Settings
     Page Should Contain    Settings
-    Menu.Navigate To Page    Settings    Notebook images
+    Menu.Navigate To Page    Settings    Notebook image settings
     Wait Until Page Contains    Notebook image settings
+    Wait Until Page Contains    Import new image    # This should assure us that the page content is ready
 
 Import New Custom Image
     [Documentation]    Opens the Custom Image import view and imports an image
@@ -553,7 +554,7 @@ Import New Custom Image
     [Arguments]    ${repo}    ${name}    ${description}    ${software}    ${packages}
     Sleep  1
     Open Custom Image Import Popup
-    Input Text    xpath://input[@id="byon-image-repository-input"]    ${repo}
+    Input Text    xpath://input[@id="byon-image-location-input"]    ${repo}
     Input Text    xpath://input[@id="byon-image-name-input"]    ${name}
     Input Text    xpath://input[@id="byon-image-description-input"]    ${description}
     # No button present anymore?
@@ -563,13 +564,8 @@ Import New Custom Image
 
 Open Custom Image Import Popup
     [Documentation]    Opens the Custom Image import view, using the appropriate button
-    ${first_image} =  Run Keyword And Return Status  Page Should Contain Element  xpath://button[.="Import image"]
-    IF  ${first_image}==True
-        Click Element  xpath://button[.="Import image"]
-    ELSE
-        Click Element  xpath://button[.="Import new image"]
-    END
-    Wait Until Page Contains    Import notebook images
+    Click Element  xpath://button[.="Import new image"]
+    Wait Until Page Contains    Import notebook image
 
 Add Softwares To Custom Image
     [Documentation]    Loops through a dictionary to add software to the custom img metadata
@@ -621,9 +617,9 @@ Delete Custom Image
     ...    Needs an additional check on removed ImageStream
     [Arguments]    ${image_name}
     Click Button  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button
-    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//li[@id="${image_name}-delete-button"]  # robocop: disable
-    Wait Until Page Contains  Do you wish to permanently delete ${image_name}?
-    Click Button  xpath://button[.="Delete"]
+    ${image_name_id} =  Replace String  ${image_name}  ${SPACE}  -
+    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//li[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
+    Handle Deletion Confirmation Modal  ${image_name}  notebook image
 
 Open Edit Menu For Custom Image
     [Documentation]    Opens the edit view for a specific custom image
@@ -674,14 +670,14 @@ Verify Custom Image Is Listed
     END
     RETURN    ${exists}
 
-Verify Custom Image Owner
+Verify Custom Image Provider
     [Documentation]    Verifies that the user listed for an image in the dahsboard
     ...    UI matches the given one
     [Arguments]    ${image_name}    ${expected_user}
     ${exists} =  Run Keyword And Return Status  Page Should Contain Element  
-    ...  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="User" and .="${expected_user}"]  # robocop: disable
+    ...  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Provider" and .="${expected_user}"]  # robocop: disable
     IF  ${exists}==False
-        ${user} =  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="User"]  # robocop: disable
+        ${user} =  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Provider"]  # robocop: disable
         Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
         FAIL
     END

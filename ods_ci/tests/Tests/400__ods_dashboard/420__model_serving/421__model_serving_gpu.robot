@@ -8,7 +8,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
-
+Test Tags         ModelMesh
 
 *** Variables ***
 ${RHODS_NAMESPACE}=    ${APPLICATIONS_NAMESPACE}
@@ -26,7 +26,7 @@ Verify GPU Model Deployment Via UI
     ...    ODS-2214
     Open Model Serving Home Page
     Try Opening Create Server
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data science projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -123,9 +123,9 @@ Try Opening Create Server
     ...    controls how many retries are made.
     [Arguments]    ${retries}=3
     FOR    ${try}    IN RANGE    0    ${retries}
-        ${status} =    Run Keyword And Return Status    Page Should Contain    Create server
+        ${status} =    Run Keyword And Return Status    Page Should Contain    Select a project
         IF    ${status}
-            Click Button    Create server
+            Click Button    Select a project
             RETURN
         ELSE
             Clean Up Model Serving Page

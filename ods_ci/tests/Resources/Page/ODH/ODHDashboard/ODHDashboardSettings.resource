@@ -239,7 +239,7 @@ Get Checkbox State Of Multi Model Serving Platforms
 Get Checkbox State Of Single Model Serving Platforms
     [Documentation]    Checks if  Single model serving platform is enabled/checked in Cluster setting
     ${is_checked} =  Run Keyword And Return Status  Checkbox Should Be Selected  ${SINGLE_MODEL_SERVING_CHECK_BOX}
-    Return  ${is_checked}
+    RETURN  ${is_checked}
 
 Click CheckBox Single Model Serving Platforms
     [Documentation]    Enables Single model serving platform

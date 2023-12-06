@@ -231,38 +231,38 @@ Open Dashboard Settings
     Wait For RHODS Dashboard To Load    expected_page=${exp_page_title}
     ...    wait_for_cards=${FALSE}
 
-Get Checkbox State Of Multi ModelServing Platforms
+Get Checkbox State Of Multi Model Serving Platforms
     [Documentation]    Checks if  Multi model serving platform is enabled/checked in Cluster setting
     ${is_checked} =  Run Keyword And Return Status  Checkbox Should Be Selected  ${MULTI_MODEL_SERVING_CHECK_BOX}
     [Return]  ${is_checked}
 
-Get Checkbox State Of Single ModelServing Platforms
+Get Checkbox State Of Single Model Serving Platforms
     [Documentation]    Checks if  Single model serving platform is enabled/checked in Cluster setting
     ${is_checked} =  Run Keyword And Return Status  Checkbox Should Be Selected  ${SINGLE_MODEL_SERVING_CHECK_BOX}
     [Return]  ${is_checked}
 
-Click CheckBox Single ModelServing Platforms
+Click CheckBox Single Model Serving Platforms
     [Documentation]    Enables Single model serving platform
     ${status}=  Get Checkbox State Of Single Modelserving platforms
     IF  "${status}"=="False"
         Select Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
     END
 
-Click CheckBox Multi ModelServing Platforms
+Click CheckBox Multi Model Serving Platforms
     [Documentation]    Enables Multi Modelserving platforms
     ${status}=  Get Checkbox State Of Multi Modelserving platforms
     IF  "${status}"=="False"
         Select Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
     END
 
-UnClick CheckBox Single ModelServing Platforms
+UnClick CheckBox Single Model Serving Platforms
     [Documentation]    Disable checkbox Single Modelserving platforms
     ${status}=  Get Checkbox State Of Single Modelserving platforms
     IF  "${status}"=="True"
         Unselect Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
     END
 
-UnClick CheckBox Multi ModelServing Platforms
+UnClick CheckBox Multi Model Serving Platforms
     [Documentation]    Disable checkbox Multi Modelserving platforms
     ${status}=  Get Checkbox State Of Single Modelserving platforms
     IF  "${status}"=="True"
@@ -271,18 +271,18 @@ UnClick CheckBox Multi ModelServing Platforms
 
 Click Both Model Serving Platforms
     [Documentation]    Enables Multi Modeland Single Modelserving platforms
-    Click CheckBox Single ModelServing Platforms
-    Click CheckBox Multi ModelServing Platforms
+    Click CheckBox Single Model Serving Platforms
+    Click CheckBox Multi Model Serving Platforms
 
 UnClick Both Model Serving Platforms
     [Documentation]    Disbale Multi Modeland Single Modelserving platforms
-    UnClick CheckBox Single ModelServing Platforms
-    UnClick CheckBox Multi ModelServing Platforms
+    UnClick CheckBox Single Model Serving Platforms
+    UnClick CheckBox Multi Model Serving Platforms
 
 Check IF Single Model Serving Is Disabled From DSC And Cluster Setting
     [Documentation]    Check single model should be disabled from DSC and dashboard
     Component Should Not Be Enabled  kserve
-    ${status}   Get Checkbox State Of Single ModelServing Platforms
+    ${status}   Get Checkbox State Of Single Model Serving Platforms
     Should Be Equal As Strings   ${status}  False
     Element Should Be Disabled    ${SINGLE_MODEL_SERVING_CHECK_BOX}
 
@@ -290,7 +290,7 @@ Check IF Single Model Serving Is Disabled From DSC And Cluster Setting
 Check IF Single Model Serving Is Enabled From DSC And Cluster Setting
     [Documentation]    Check single model should be enabled from DSC and dashboard
     Component Should Not Be Enabled  kserve
-    ${status}   Get Checkbox State Of Single ModelServing Platforms
+    ${status}   Get Checkbox State Of Single Model Serving Platforms
     Should Be Equal As Strings  ${status}  True
     Element Should Be Disabled    ${SINGLE_MODEL_SERVING_CHECK_BOX}
 
@@ -298,7 +298,7 @@ Check IF Single Model Serving Is Enabled From DSC And Cluster Setting
 Check IF Multi Model Serving IS Disabled From DSC And Cluster Setting
     [Documentation]    Check Multi model should be disabled from DSC and dashboard
     Component Should Not Be Enabled  modelmeshserving
-    ${status}   Get Checkbox State Of Multi ModelServing Platforms
+    ${status}   Get Checkbox State Of Multi Model Serving Platforms
     Should Be Equal As Strings    ${status}  False
     Element Should Be Disabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
 
@@ -306,6 +306,6 @@ Check IF Multi Model Serving IS Disabled From DSC And Cluster Setting
 Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
     [Documentation]    Check Multi model should be enabled from DSC and dashboard
     Component Should Not Be Enabled  modelmeshserving
-    ${status}   Get Checkbox State Of Multi ModelServing Platforms
+    ${status}   Get Checkbox State Of Multi Model Serving Platforms
     Should Be Equal    ${status}  True
     Element Should Be Disabled    ${MULTI_MODEL_SERVING_CHECK_BOX}

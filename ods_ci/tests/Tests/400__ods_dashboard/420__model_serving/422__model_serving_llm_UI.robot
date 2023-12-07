@@ -88,7 +88,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces Using The UI
     ...    namespace=singlemodel-multi1
     Open Data Science Projects Home Page
     Set Up Project    namespace=singlemodel-multi2    single_prj=${FALSE}    dc_name=kserve-connection-2
-    Deploy Kserve Model Via UI    ${model_two_name}    Caikit    kserve-connection
+    Deploy Kserve Model Via UI    ${model_two_name}    Caikit    kserve-connection-2
     ...    flan-t5-small/${model_two_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2

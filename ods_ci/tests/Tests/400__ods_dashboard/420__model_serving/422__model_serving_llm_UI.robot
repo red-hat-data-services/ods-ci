@@ -387,7 +387,7 @@ Query Model Multiple Times
             ...    &{args}
         ELSE IF    "${protocol}" == "http"
             ${payload}=     Prepare Payload     body=${body}    str_to_json=${TRUE}
-            &{args}=       Create Dictionary     url=https://${host}:443/${endpoint}   expected_status=any
+            &{args}=       Create Dictionary     url=${host}:443/${endpoint}   expected_status=any
             ...             headers=${headers}   json=${payload}    timeout=10  verify=${False}
             ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST
             ...    skip_res_json=${skip_json_load_response}    &{args}

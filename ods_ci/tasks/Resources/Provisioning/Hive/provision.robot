@@ -32,7 +32,16 @@ Provision Cluster
     ${clustername_exists} =    Does ClusterName Exists
     ${template} =    Select Provisioner Template    ${provider_type}
     IF    ${clustername_exists}
-    ...    FAIL    Cluster name '${cluster_name}' already exists. Please choose a different name.
+        Log    Cluster name '${cluster_name}' already in use - Checking if it has a valid web-console      console=True
+        ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
+        ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{ .status.webConsoleURL }' | grep .    shell=yes
+        IF    ${result.rc} != 0
+            Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources    console=True
+            Delete Cluster Configuration
+        ELSE
+            FAIL    Cluster '${cluster_name}' is already in use, please choose a different name.
+        END
+    END
     Log     Configuring cluster ${cluster_name}    console=True
     Create Provider Resources
 
@@ -110,9 +119,10 @@ Watch Hive Install Log
     FOR    ${line}    IN    @{new_lines}
         Log To Console    ${line}
     END
-    IF    "fatal msg" in "${install_log_data}"
-        Log    Fatal error occured during OCP install: ${install_log_data}   level='ERROR'    console=True  
-        RETURN
+    IF    "fatal msg" in "$install_log_data" 
+        Fatal error    Fatal error occured during OCP install: ${install_log_data}
+    ELSE
+        Log To Console    *    no_newline=true
     END
     # Create/Update the OCP installer log file, before checking "install completed successfully"
     Create File    ${install_log_file}    ${install_log_data}

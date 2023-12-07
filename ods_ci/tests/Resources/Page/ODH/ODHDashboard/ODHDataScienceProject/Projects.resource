@@ -319,9 +319,9 @@ Check Pagination Is Correct On The Current Page
     [Arguments]     ${page}    ${total}
     ${actual_text}=    Get Text    xpath://span[@class="pf-c-options-menu__toggle-text"]
     IF    ${page}==1
-        ${expected_text}=    Set Variable   1 - 10 of ${total}
+        ${expected_text}=    Set Variable   1 - 10 of ${total} items
     ELSE IF    ${page}==2
-        ${expected_text}=    Set Variable   11 - ${total} of ${total}
+        ${expected_text}=    Set Variable   11 - ${total} of ${total} items
     END
     Should Be Equal    ${expected_text}    ${actual_text}
 

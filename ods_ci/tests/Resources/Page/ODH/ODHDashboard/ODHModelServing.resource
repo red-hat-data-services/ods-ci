@@ -296,7 +296,7 @@ Deploy Model Via CLI
 
 Deploy Kserve Model Via UI  #robocop: disable
     [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
-    [Arguments]    ${model_name}    ${data_connection}    ${path}    ${serving_runtime}=Caikit
+    [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
     ${first_deploy}=    Run Keyword And Return Status
     ...    Page Should Contain Element    xpath=//article[@id="single-serving-platform-card"]

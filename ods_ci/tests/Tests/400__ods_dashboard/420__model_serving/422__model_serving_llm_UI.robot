@@ -174,7 +174,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    Smoke    Tier1    ODS-2552
     [Setup]    Run Keywords    Setup Kserve UI Test    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
-    ...        Set Up Project    namespace=non-admin-test
+    ...        Set Up Project    namespace=non-admin-test    single_prj=${FALSE}
     ${test_namespace}=    Set Variable     non-admin-test
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
@@ -189,7 +189,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    protocol=http    validate_response=$FALSE
-    [Teardown]    Clean Up DSP Page
+    [Teardown]    Run Keywords    Clean Up DSP Page    AND    Close Browser    AND    Switch Browser    1
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector Using The UI  # robocop: disable
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model

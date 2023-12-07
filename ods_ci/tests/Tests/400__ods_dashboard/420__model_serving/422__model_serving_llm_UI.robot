@@ -86,14 +86,14 @@ Verify User Can Deploy Multiple Models In Different Namespaces Using The UI
     ...    bloom-560m/${model_one_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=singlemodel-multi1
+    Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${model_one_name}    n_times=2
+    ...    namespace=singlemodel-multi1    protocol=http
     Open Data Science Projects Home Page
     Set Up Project    namespace=singlemodel-multi2    single_prj=${FALSE}    dc_name=kserve-connection-2
     Deploy Kserve Model Via UI    ${model_two_name}    Caikit    kserve-connection-2
     ...    flan-t5-small/${model_two_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2
-    Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${model_one_name}    n_times=2
-    ...    namespace=singlemodel-multi1    protocol=http
     Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${model_two_name}    n_times=2
     ...    namespace=singlemodel-multi2    protocol=http
     [Teardown]    Clean Up DSP Page

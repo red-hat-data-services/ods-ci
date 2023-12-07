@@ -5,7 +5,7 @@ Resource       ./Workbenches.resource
 
 
 *** Variables ***
-${DS_PROJECT_XP}=     xpath=//h1[text()="Data science projects"]
+${DS_PROJECT_XP}=     xpath=//h1[text()="Data Science Projects"]
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
 ${RESOURCE_INPUT_XP}=    xpath=//input[@id="resource-manage-project-modal-name"]

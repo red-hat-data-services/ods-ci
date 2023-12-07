@@ -35,7 +35,7 @@ ${PV_SIZE}=         1
 *** Test Cases ***
 Verify Notebook Tolerations Are Applied To Workbenches
     [Documentation]    Verifies workbenches get the custom tolerations set by
-    ...  admins in "Cluster Settings" page. It checks 3 scenarios:
+    ...  admins in "Cluster settings" page. It checks 3 scenarios:
     ...  -tolerations changes applied to workbench created after the changes (value from null to A)
     ...  -tolerations change applied to existent workbench, after restart (value from null to A)
     ...  -tolerations change applied to existent workbench, after restart (value from A to A)
@@ -286,7 +286,7 @@ Check Limits And Requests For Every Workbench Pod Container
     END
 
 Open Settings And Set Tolerations To
-    [Documentation]    Opens the "Cluster Settings" page in RHODS Dashboard
+    [Documentation]    Opens the "Cluster settings" page in RHODS Dashboard
     ...                and set the tolerations settings to the given one
     [Arguments]    ${tolerations_text}
     Open Dashboard Settings    settings_page=Cluster settings
@@ -294,7 +294,7 @@ Open Settings And Set Tolerations To
     Save Changes In Cluster Settings
 
 Open Settings And Disable Tolerations
-    [Documentation]    Opens the "Cluster Settings" page in RHODS Dashboard
+    [Documentation]    Opens the "Cluster settings" page in RHODS Dashboard
     ...                and disable the tolerations settings.
     ...                Before disabling the setting, it restores the default value
     Open Dashboard Settings    settings_page=Cluster settings

@@ -120,9 +120,16 @@ Select Framework
 
 Select Existing Data Connection
     [Documentation]    Selects an existing data connection in the "deploy model" modal.
-    [Arguments]    ${data_connection_name}
-    Open Name Options Menu
-    Click Element    xpath://li/button[.="${data_connection_name}"]
+    [Arguments]    ${data_connection_name}    ${retries}=1
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        Open Name Options Menu
+        Click Element    xpath://li/button[.="${data_connection_name}"]
+        ${selected} =    Run Keyword And Return Status
+        ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
+        IF  ${selected}==${TRUE}
+            BREAK
+        END
+    END
 
 Set Folder Path
     [Documentation]    Sets the given model path in the "deploy model" modal.

@@ -294,28 +294,27 @@ Deploy Model Via CLI
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${out}
 
-Deploy Kserve Model Via UI
-    [Documentation]
-    [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
+Deploy Kserve Model Via UI  #robocop: disable
+    [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
+    [Arguments]    ${model_name}    ${data_connection}    ${path}    ${serving_runtime}=Caikit
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
-    #Open modal
-    ${first_deploy} =    Run Keyword And Return Status
+    ${first_deploy}=    Run Keyword And Return Status
     ...    Page Should Contain Element    xpath=//article[@id="single-serving-platform-card"]
-    IF  ${first_deploy}==${TRUE}
+    IF  ${first_deploy}
         Click Button    //article[@id="single-serving-platform-card"]//button[.="Deploy model"]
     ELSE
         Click Button    //div[@id="model-server"]//button[.="Deploy model"]
     END
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
-    Select Kserve Serving Runtime
+    Select Kserve Serving Runtime    ${serving_runtime}
     Select Framework    ${model_framework}
     Set Replicas Number With Buttons    ${replicas}
     Set Server Size    ${size}
     Select Existing Data Connection    ${data_connection}
     Set Folder Path    ${path}
     IF    ${no_gpus} > ${0}
-        ${gpu_enabled} =    Run Keyword And Return Status    Verify GPU Selector Is Usable
+        ${gpu_enabled}=    Run Keyword And Return Status    Verify GPU Selector Is Usable
         IF    ${gpu_enabled}==False
             Log    GPU requested but not available
             Fail
@@ -327,7 +326,7 @@ Deploy Kserve Model Via UI
     Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
 
 Select Kserve Serving Runtime
-    [Documentation]
+    [Documentation]    Opens the Runtime dropdown in the deploy modal for kserve models and select the given runtime
     [Arguments]    ${runtime}=Caikit
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/button
@@ -344,7 +343,7 @@ Get KServe Inference Host Via CLI
     RETURN    ${ksvc_host}
 
 Get Kserve Inference Host Via UI
-    [Documentation]
+    [Documentation]    Fetches the host of the model's URL from the Data Science Project UI
     [Arguments]    ${model_name}    ${retries}=1
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]    timeout=30s  #robocop: disable

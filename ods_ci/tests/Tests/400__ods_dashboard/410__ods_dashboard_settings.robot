@@ -35,7 +35,7 @@ Verify That Not Admin Users Can Not Access "Cluster Settings"
     [Teardown]    Dashboard Settings Test Teardown
 
 Verify That "Usage Data Collection" Can Be Set In "Cluster Settings"
-    [Documentation]    Verifies that a user can set the "Usage Data Collection" flag in "Cluster Settings"
+    [Documentation]    Verifies that a user can set the "Usage Data Collection" flag in "Cluster settings"
     [Tags]    Tier1
     ...       Sanity
     ...       ODS-1218

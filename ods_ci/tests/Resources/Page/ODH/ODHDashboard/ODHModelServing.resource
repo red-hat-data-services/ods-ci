@@ -340,7 +340,7 @@ Get Kserve Inference Host Via UI
     [Documentation]
     [Arguments]    ${model_name}    ${retries}=1
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-        Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]  #robocop: disable
+        Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]    timeout=30s  #robocop: disable
         Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Status"]//span[@aria-label="success icon"]
         ...  timeout=30s  #robocop: disable
         ${endpoint} =    Get Element Attribute    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]//input    value  #robocop: disable

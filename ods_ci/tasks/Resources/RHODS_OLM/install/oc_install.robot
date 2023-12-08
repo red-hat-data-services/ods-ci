@@ -307,10 +307,6 @@ Install Kserve Dependencies
     ...    operator_group_name=serverless-operators
     ...    operator_group_ns=${SERVERLESS_NS}
     ...    operator_group_target_ns=${NONE}
-    Wait Until Operator Subscription Last Condition Is
-    ...    type=CatalogSourcesUnhealthy    status=False
-    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
-    ...    namespace=${SERVERLESS_NS}
     Wait For Pods To Be Ready    label_selector=name=knative-openshift
     ...    namespace=${SERVERLESS_NS}
     Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress

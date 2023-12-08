@@ -22,6 +22,8 @@ ${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-c-clipboard-
 ${MS_TABLE_DROPDOWN_TOGGLE}=    /../../td[@class="pf-c-table__action"]//button
 ${MS_TABLE_STATUS_SUCCESS}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-success")]
 ${MS_TABLE_STATUS_FAILURE}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-danger")]
+${KSERVE_MODAL_HEADER}=    //header[@class="pf-c-modal-box__header"]/h1[.="Deploy model"]
+${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
 
 
 *** Keywords ***
@@ -118,9 +120,16 @@ Select Framework
 
 Select Existing Data Connection
     [Documentation]    Selects an existing data connection in the "deploy model" modal.
-    [Arguments]    ${data_connection_name}
-    Open Name Options Menu
-    Click Element    xpath://li/button[.="${data_connection_name}"]
+    [Arguments]    ${data_connection_name}    ${retries}=1
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        Open Name Options Menu
+        Click Element    xpath://li/button[.="${data_connection_name}"]
+        ${selected} =    Run Keyword And Return Status
+        ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
+        IF  ${selected}==${TRUE}
+            BREAK
+        END
+    END
 
 Set Folder Path
     [Documentation]    Sets the given model path in the "deploy model" modal.
@@ -285,6 +294,44 @@ Deploy Model Via CLI
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${out}
 
+Deploy Kserve Model Via UI  #robocop: disable
+    [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
+    [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
+    ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
+    ${first_deploy}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    xpath=//article[@id="single-serving-platform-card"]
+    IF  ${first_deploy}
+        Click Button    //article[@id="single-serving-platform-card"]//button[.="Deploy model"]
+    ELSE
+        Click Button    //div[@id="model-server"]//button[.="Deploy model"]
+    END
+    Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
+    Set Model Name   ${model_name}
+    Select Kserve Serving Runtime    ${serving_runtime}
+    Select Framework    ${model_framework}
+    Set Replicas Number With Buttons    ${replicas}
+    Set Server Size    ${size}
+    Select Existing Data Connection    ${data_connection}
+    Set Folder Path    ${path}
+    IF    ${no_gpus} > ${0}
+        ${gpu_enabled}=    Run Keyword And Return Status    Verify GPU Selector Is Usable
+        IF    ${gpu_enabled}==False
+            Log    GPU requested but not available
+            Fail
+        END
+        Set Accelerator
+        Set Number of GPU With Buttons   ${no_gpus}
+    END
+    Click Button    Deploy
+    Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
+
+Select Kserve Serving Runtime
+    [Documentation]    Opens the Runtime dropdown in the deploy modal for kserve models and select the given runtime
+    [Arguments]    ${runtime}=Caikit
+    Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/button
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/ul//span[contains(text(),"${runtime}")]
+
 Get KServe Inference Host Via CLI
     [Arguments]    ${isvc_name}    ${namespace}
     Sleep    5s
@@ -294,6 +341,22 @@ Get KServe Inference Host Via CLI
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
+
+Get Kserve Inference Host Via UI
+    [Documentation]    Fetches the host of the model's URL from the Data Science Project UI
+    [Arguments]    ${model_name}    ${retries}=1
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]    timeout=30s  #robocop: disable
+        Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Status"]//span[@aria-label="success icon"]
+        ...  timeout=30s  #robocop: disable
+        ${endpoint} =    Get Element Attribute    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]//input    value  #robocop: disable
+        IF  "${endpoint}"!="${EMPTY}"
+            RETURN    ${endpoint}
+        END
+        Reload Page
+    END
+    Log    Failed to get model serving host through the UI
+    Take Screenshot
 
 Get Current Revision ID
     [Arguments]    ${model_name}    ${namespace}
@@ -377,7 +440,6 @@ Create Custom Serving Runtime Using Template By CLI
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${file_path} -n ${APPLICATIONS_NAMESPACE}
     Log To Console    ${output}
     Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
-
 
 Get Model Runtime Template Resource Name By Runtime Name OR Display Name
     [Documentation]  Get template name based on runtime name or Display name

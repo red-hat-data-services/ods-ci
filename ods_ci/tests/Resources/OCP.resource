@@ -138,6 +138,10 @@ Get Pod Hardware Resources And Limits
     RETURN    ${resources}
 
 Container Hardware Resources Should Match Expected
+    [Documentation]    This keyword checks that the requests/limits set in a specific container in a pod contain the
+    ...    requests and limits passed in with `exp_requests` and `exp_limits`. This means that the container might have
+    ...    additional requests/limits set which are not explicitly checked against. If you want to make sure you're
+    ...    checking all attributes you have to explicitly pass them in with `exp_requests/limits`.
     [Arguments]    ${container_name}    ${pod_label_selector}    ${namespace}
     ...            ${exp_requests}=${NONE}    ${exp_limits}=${NONE}
     ${resources_dict}=    Get Pod Hardware Resources And Limits    label_selector=${pod_label_selector}
@@ -146,7 +150,7 @@ Container Hardware Resources Should Match Expected
         Dictionary Should Not Contain Key    ${resources_dict}    requests
     ELSE
         ${requests}=    Set Variable    ${resources_dict}[requests]
-        FOR    ${index}    ${resource}    IN ENUMERATE    @{requests.keys()}
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{exp_requests.keys()}
             Should Be Equal As Strings    ${requests}[${resource}]    ${exp_requests}[${resource}]
         END
     END
@@ -154,7 +158,7 @@ Container Hardware Resources Should Match Expected
         Dictionary Should Not Contain Key    ${resources_dict}    limits
     ELSE
         ${limits}=    Set Variable    ${resources_dict}[limits]
-        FOR    ${index}    ${resource}    IN ENUMERATE    @{limits.keys()}
+        FOR    ${index}    ${resource}    IN ENUMERATE    @{exp_limits.keys()}
             Should Be Equal As Strings    ${limits}[${resource}]    ${exp_limits}[${resource}]
         END
     END

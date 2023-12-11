@@ -146,8 +146,7 @@ Verify User Can Set Requests And Limits For A Model Using The UI  # robocop: dis
 Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    ...                ProductBug: https://issues.redhat.com/browse/RHOAIENG-146
-    [Tags]    Sanity    Tier1    ODS-2523   Resources-GPU    ProductBug
+    [Tags]    Sanity    Tier1    ODS-2523   Resources-GPU
     [Setup]    Set Up Project    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -163,7 +162,7 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${model_name}    n_times=10
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    protocol=http
     Query Model Multiple Times    model_name=${model_name}    n_times=5
     ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}
     ...    streamed_response=${TRUE}    validate_response=${FALSE}    protocol=http

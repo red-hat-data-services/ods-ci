@@ -1,6 +1,7 @@
 *** Settings ***
 Library   Process
 Library   OperatingSystem
+Resource         ../../Resources/Common.robot
 
 *** Test Cases ***
 Verify that the must-gather image provides RHODS logs and info
@@ -11,7 +12,7 @@ Verify that the must-gather image provides RHODS logs and info
       Get must-gather logs
       Verify logs for ${APPLICATIONS_NAMESPACE}
       Verify logs for redhat-ods-operator
-      Verify logs for redhat-ods-monitoring
+      Run Keyword If RHODS Is Managed    Verify logs for redhat-ods-monitoring
       [Teardown]  Cleanup must-gather logs
 
 

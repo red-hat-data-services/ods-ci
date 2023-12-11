@@ -306,7 +306,7 @@ Install Kserve Dependencies
     ...    catalog_source_name=redhat-operators
     ...    operator_group_name=serverless-operators
     ...    operator_group_ns=${SERVERLESS_NS}
-    ...    operator_group_target_ns=${NONE}}
+    ...    operator_group_target_ns=${NONE}
     Wait For Pods To Be Ready    label_selector=name=knative-openshift
     ...    namespace=${SERVERLESS_NS}
     Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress

@@ -110,31 +110,45 @@ Create Floating IPs
 
 Watch Hive Install Log
     [Arguments]    ${namespace}
-    ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
-    Log To Console    .    no_newline=true
-    ${install_log_data} = 	Get File 	${install_log_file}
-    ${last_line_index} =    Get Line Count    ${install_log_data}
-    ${install_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=hive    namespace=${namespace}    
-    @{new_lines} =    Split To Lines    ${install_log_data}    ${last_line_index}
-    FOR    ${line}    IN    @{new_lines}
-        Log To Console    ${line}
+    ${hive_timeout} =    Set Variable    50m
+    WHILE   True    limit=${hive_timeout}    on_limit_message=Hive Install ${hive_timeout} Timeout Exceeded    # robotcode: ignore
+        ${old_log_data} = 	Get File 	${install_log_file}
+        ${last_line_index} =    Get Line Count    ${old_log_data}
+        ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
+        TRY
+            ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=hive    namespace=${namespace}
+        EXCEPT
+            Log To Console    .    no_newline=true
+            Sleep   2s
+            CONTINUE
+        END
+        @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
+        ${lines_count} =    Get length    ${new_lines}
+        IF  ${lines_count} > 0
+            Create File    ${install_log_file}    ${new_log_data}
+            FOR    ${line}    IN    @{new_lines}
+                Log To Console    ${line}
+            END
+            # IF    "fatal msg" in "$new_log_data" 
+            #     Fatal error    Fatal error occured during OCP install: ${new_log_data}
+            # END
+        ELSE
+            Log To Console    .    no_newline=true
+        END
+        ${pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
+        IF    ${pods_status} != 0
+            Log    All Hive pods in ${namespace} have completed    console=True
+            BREAK
+        END
     END
-    IF    "fatal msg" in "$install_log_data" 
-        Fatal error    Fatal error occured during OCP install: ${install_log_data}
-    ELSE
-        Log To Console    *    no_newline=true
-    END
-    # Create/Update the OCP installer log file, before checking "install completed successfully"
-    Create File    ${install_log_file}    ${install_log_data}
-    Should Contain    ${install_log_data}    install completed successfully
+    Should Contain    ${new_log_data}    install completed successfully
 
 Wait For Cluster To Be Ready
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
     Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
     Set Task Variable    ${install_log_file}    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
-    ${result} =    Wait Until Keyword Succeeds    50 min    10 s
-    ...    Watch Hive Install Log    ${pool_namespace}
+    ${result} =    Watch Hive Install Log    ${pool_namespace}
 
 Verify Cluster Claim
     Log    Verifying that Cluster Claim '${claim_name}' has been created in Hive namespace '${hive_namespace}'      console=True

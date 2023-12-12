@@ -102,7 +102,7 @@ Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}
     ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
-    Should Be Equal As Integers	${return_code}	 0    msg=Pathc failed
+    Should Be Equal As Integers	${return_code}	 0    msg=Patch to group settings failed
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map

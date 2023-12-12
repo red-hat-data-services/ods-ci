@@ -79,13 +79,15 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
     [Tags]  ODS-1686
     ...     Tier1
     ...     Sanity
-    Create Group  new-group-test
+    ${new_group_name}=    Set Variable    new-group-test
+    Create Group  ${new_group_name}
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Add OpenShift Groups To Data Science Administrators     new-group-test
+    Add OpenShift Groups To Data Science Administrators     ${new_group_name}
     Save Changes In User Management Setting
-    Delete Group  new-group-test
+    Delete Group    ${new_group_name}
     Reload Page
-    Wait Until Page Contains    Group no longer exist   timeout=20s
+    Wait Until Page Contains    Group error   timeout=20s
+    Wait Until Page Contains    The group ${new_group_name} no longer exists   timeout=20s
 
 
 *** Keywords ***

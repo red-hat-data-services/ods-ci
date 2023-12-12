@@ -49,28 +49,30 @@ Verify If Unauthorized User Can Not Change The Permission
 Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     [Documentation]    Verify unauthorized User Is Not Able To Spawn Jupyter
     ...     Notebook , user should not see a spawner if the user is not in allowed Groups
+    ...     Note: this test configures user access via ODH Dashboard UI in setting appropriate
+    ...     groups in `Settings -> User management` section. There is an another test that changes
+    ...     users/groups via `oc adm groups` command,see: `Verify User Can Set Custom RHODS Groups`
+    ...     in ods_ci/tests/Tests/500__jupyterhub/jupyterhub-user-access.robot
     [Tags]  ODS-1680
     ...     Tier1
     ...     Sanity
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
-    Add OpenShift Groups To Data Science Administrators    rhods-users
-    Add OpenShift Groups To Data Science User Groups       rhods-users
+    Add OpenShift Groups To Data Science Administrators    rhods-admins
+    Add OpenShift Groups To Data Science User Groups       rhods-admins
     Save Changes In User Management Setting
-    AdminGroups In OdhDashboardConfig CRD Should Be        rhods-users
-    AllowedGroups In OdhDashboardConfig CRD Should Be      rhods-users
-    Reload Page
-    ${version_check}=    Is RHODS Version Greater Or Equal Than    1.20.0
-    IF    ${version_check} == True
-        ${status}=    Run Keyword And Return Status     Launch Jupyter From RHODS Dashboard Link
-        Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${FALSE}
-        Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
-        Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
-    ELSE
-        Menu.Navigate To Page    Applications    Enabled
-        Launch Jupyter From RHODS Dashboard Link
-        Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=none
-    END
+    AdminGroups In OdhDashboardConfig CRD Should Be        rhods-admins
+    AllowedGroups In OdhDashboardConfig CRD Should Be      rhods-admins
+    Logout From RHODS Dashboard
+    Login To RHODS Dashboard    ${TEST_USER_4.USERNAME}    ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load    expected_page=${NONE}    wait_for_cards=${FALSE}
+    Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
+    Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
+    # Let's check that we're not allowed to also access the spawner page directly navigating the browser there
+    Go To    ${ODH_DASHBOARD_URL}/notebookController/spawner
+    Wait for RHODS Dashboard to Load    expected_page=${NONE}    wait_for_cards=${FALSE}
+    Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
+    Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
     [Teardown]  Revert Changes To Access Configuration
 
 Verify Automatically Detects a Group Selected Is Removed and Notify the User

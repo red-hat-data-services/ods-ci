@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "ods_ci"}]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.11"
 reportportal-client = "^5.2.5"
 robotframework = "^6"
 robotframework-debuglibrary = ">=2.0.0"
@@ -29,6 +29,7 @@ python-openstackclient = "^6.2.0"
 awscli = "^1.27.100"
 kfp-tekton = "==1.5.9"
 pyyaml = "^6.0.1"
+caikit-nlp-client = ">=0.0.8"
 
 [tool.poetry.group.dev.dependencies]
 robotframework-lsp = ">=1.11.0"

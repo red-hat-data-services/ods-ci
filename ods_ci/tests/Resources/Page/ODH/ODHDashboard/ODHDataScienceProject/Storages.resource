@@ -47,12 +47,46 @@ Storage Size Should Be
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}
     Click Element    ${STORAGE_SECTION_XP}//tr[td//*/div[text()="${name}"]]//button[@aria-label="Details"]
     Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
-    Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div    timeout=45s
-    ${displayed_size}=      Get Text    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div
-    Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    Max ${size}Gi
-    ${rc}  ${oc_object_size}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].spec.resources.requests.storage}'
-    Run Keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
-    ${rc}  ${oc_object_size}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.capacity.storage}'
+
+    ${rc}  ${pvc_status_phase}=    Run And Return Rc And Output
+    ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.phase}'    # robocop: disable
+    Should Be Equal As Integers    ${rc}    0    An error occurred during the check of PVC ${name} .status.phase value!
+    IF    "${pvc_status_phase}" == "Pending"
+        # PVC hasn't been bound yet - only simple text with max storage should be shown
+        ${storage_size_el}=    Set Variable
+        ...    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div    # robocop: disable
+        Wait Until Page Contains Element    ${storage_size_el}    timeout=20s
+        ${displayed_size}=    Get Text    ${storage_size_el}
+        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_size}    Max ${size}Gi
+    ELSE IF    "${pvc_status_phase}" == "Bound"
+        # PVC is now or had been bound already sometime in past - there is:
+        #  - a number stating current usage
+        #  - a bar showing current usage of storage in a graphic manner
+        #  - and finally an acutal storage size number
+        # Note: it may take some time before UI updates the storage
+        #       info WRT cluster usage, look like it does so every 60s
+        ${bound_storage_size_el}=    Set Variable
+        ...    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
+        Wait Until Page Contains Element    ${bound_storage_size_el}    timeout=65s
+        ${displayed_size}=    Get Text    ${bound_storage_size_el}
+        Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
+        ${rc}  ${oc_object_size}=    Run And Return Rc And Output
+        ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.capacity.storage}'    # robocop: disable
+        Should Be Equal As Integers    ${rc}    0
+        ...    An error occurred during the check of PVC ${name} '.status.capacity.storage' value!
+        Run Keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
+    ELSE
+        ${error_msg}=    Catenate    The PVC is in a '${pvc_status_phase}' state which we don't expect for this
+        ...    scenario. We expect either 'Pending' or 'Bound' states here. Please, either complete the
+        ...    implementation or investigate the test failure.
+        Fail    ${error_msg}
+        RETURN    1
+    END
+    # This check is common for both "Pending" and "Bound" states of PVC.
+    ${rc}  ${oc_object_size}=    Run And Return Rc And Output
+    ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].spec.resources.requests.storage}'    # robocop: disable
+    Should Be Equal As Integers    ${rc}    0
+    ...    An error occurred during the check of PVC ${name} '.spec.resources.requests.storage' value!
     Run Keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
 
 Create PersistentVolume Storage

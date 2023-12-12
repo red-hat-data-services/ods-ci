@@ -32,9 +32,9 @@ Provision Cluster
     ${clustername_exists} =    Does ClusterName Exists
     ${template} =    Select Provisioner Template    ${provider_type}
     IF    ${clustername_exists}
-        Log    Cluster name '${cluster_name}' already in use - Checking if it has a valid web-console      console=True
+        Log    Cluster name '${cluster_name}' already exists in Hive pool '${pool_name}' - Checking if it has a valid web-console      console=True
         ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-        ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{ .status.webConsoleURL }' | grep .    shell=yes
+        ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
         IF    ${result.rc} != 0
             Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources    console=True
             Delete Cluster Configuration
@@ -109,8 +109,7 @@ Create Floating IPs
     Export Variables From File    ${fips_file_to_export}
 
 Watch Hive Install Log
-    [Arguments]    ${namespace}
-    ${hive_timeout} =    Set Variable    50m
+    [Arguments]    ${namespace}    ${install_log_file}    ${hive_timeout}=50m
     WHILE   True    limit=${hive_timeout}    on_limit_message=Hive Install ${hive_timeout} Timeout Exceeded    # robotcode: ignore
         ${old_log_data} = 	Get File 	${install_log_file}
         ${last_line_index} =    Get Line Count    ${old_log_data}
@@ -118,10 +117,12 @@ Watch Hive Install Log
         TRY
             ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=hive    namespace=${namespace}
         EXCEPT
+            # Hive container (OCP installer log) is not ready yet
             Log To Console    .    no_newline=true
-            Sleep   2s
+            Sleep   10s
             CONTINUE
         END
+        # Print the new lines that were added to the installer log
         @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
         ${lines_count} =    Get length    ${new_lines}
         IF  ${lines_count} > 0
@@ -129,16 +130,14 @@ Watch Hive Install Log
             FOR    ${line}    IN    @{new_lines}
                 Log To Console    ${line}
             END
-            # IF    "fatal msg" in "$new_log_data" 
-            #     Fatal error    Fatal error occured during OCP install: ${new_log_data}
-            # END
         ELSE
+            ${hive_pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
+            IF    ${hive_pods_status} != 0
+                Log    All Hive pods in ${namespace} have completed    console=True
+                BREAK
+            END
             Log To Console    .    no_newline=true
-        END
-        ${pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
-        IF    ${pods_status} != 0
-            Log    All Hive pods in ${namespace} have completed    console=True
-            BREAK
+            Sleep   10s
         END
     END
     Should Contain    ${new_log_data}    install completed successfully
@@ -146,19 +145,17 @@ Watch Hive Install Log
 Wait For Cluster To Be Ready
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
     Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
-    Set Task Variable    ${install_log_file}    ${artifacts_dir}/${cluster_name}_install.log
+    ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
-    ${result} =    Watch Hive Install Log    ${pool_namespace}
-
-Verify Cluster Claim
-    Log    Verifying that Cluster Claim '${claim_name}' has been created in Hive namespace '${hive_namespace}'      console=True
-    ${claim_status} =    Oc Get    kind=ClusterClaim    name=${claim_name}    namespace=${hive_namespace}
-    ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-    ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{ .status.webConsoleURL }'    shell=yes
-    IF    "${claim_status[0]['status']['conditions'][0]['reason']}" != "ClusterClaimed" || ${result.rc} != 0
-        Log    Cluster claim ${claim_name} did not complete successfully - cleaning Hive resources    console=True
-        Delete Cluster Configuration
-        FAIL    Cluster '${cluster_name}' provision failed. Please check OCP Installer log.
+    Run Keyword And Continue On Failure    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
+    Log    Verifying that Cluster '${cluster_name}' has been created in Hive namespace '${hive_namespace}'      console=True
+    ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
+    IF    ${result.rc} != 0
+        ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json    shell=yes
+        Log    Cluster '${cluster_name}' install completed, but it is not accesible - Cleaning Hive resources    console=True
+        Deprovision Cluster
+        Log    Cluster '${cluster_name}' deployment had errors: ${result.stdout}    console=True    level=ERROR
+        FAIL    Cluster '${cluster_name}' provisioning failed. Please look into the logs for more details.
     END
     Log    Cluster ${cluster_name} created successfully. Web Console: ${result.stdout}     console=True
     
@@ -166,9 +163,8 @@ Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
     Set Task Variable    ${cluster_kubeconf}    ${artifacts_dir}/kubeconfig
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-    ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{ .status.webConsoleURL }'    shell=yes
-    Log    Cluster ${cluster_name} Web Console: ${result.stdout}     console=True
-    Should Be True    ${result.rc} == 0
+    ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.apiURL' --exit-status    shell=yes
+    Should Be True    ${result.rc} == 0    Hive Cluster deployment '${pool_namespace}' does not have a valid API access
     Create File     ${cluster_details}    console=${result.stdout}\n
     ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${pool_namespace}
     ...    namespace=${pool_namespace}    api_version=hive.openshift.io/v1
@@ -188,12 +184,11 @@ Save Cluster Credentials
     
 Login To Cluster
     Export Variables From File    ${cluster_details}
-    # Create a temporary kubeconfig from the credentials, before updating the permanent kubeconfig
-    ${temp_kubeconfig} =    Set Variable    ${artifacts_dir}/temp_kubeconfig
-    Create File     ${temp_kubeconfig}
-    ${result} =    Run Process    KUBECONFIG\=${temp_kubeconfig} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
-    ...    shell=yes
+    Create File     ${cluster_kubeconf}
+    # Test the extracted credentials
+    ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify    shell=yes
     Should Be True    ${result.rc} == 0
+    # Test the kubeconfig file that was also extracted
     ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc status    shell=yes
     Log    ${result.stdout}\n${result.stderr}     console=True
     Should Be True    ${result.rc} == 0

@@ -18,7 +18,7 @@ Installing RHODS Operator ${image_url}
   IF  ${is_codeflare_managed}    Installing CodeFlare Operator
 
 RHODS Operator Should Be installed
-  Verify RHODS Installation
+  Verify RHODS Installation    ${cluster_type}
   ${version} =  Get RHODS Version
   Set Global Variable  ${RHODS_VERSION}  ${version}
   Log  RHODS has been installed  console=yes

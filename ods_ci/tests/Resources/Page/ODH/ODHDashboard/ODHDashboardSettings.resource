@@ -245,20 +245,35 @@ Get Checkbox State Of Single Model Serving Platforms
 
 Select CheckBox Single Model Serving Platforms
     [Documentation]    Enables Single model serving platform
-    Select Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
+    ${status}=  Get Checkbox State Of Single Modelserving platforms
+    IF  "${status}"=="False"
+        Select Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
+        Save Changes In Cluster Settings
+    END
 
-
-Select CheckBox Multi Model Serving Platforms
+Click CheckBox Multi Model Serving Platforms
     [Documentation]    Enables Multi Modelserving platforms
-    Select Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
+    ${status}=  Get Checkbox State Of Multi Modelserving platforms
+    IF  "${status}"=="False"
+        Select Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
+        Save Changes In Cluster Settings
+    END
 
 Deselect CheckBox Single Model Serving Platforms
     [Documentation]    Disable checkbox Single Modelserving platforms
-    Unselect Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
+    ${status}=  Get Checkbox State Of Single Modelserving platforms
+    IF  "${status}"=="True"
+        Unselect Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
+        Save Changes In Cluster Settings
+    END
 
 Deselect CheckBox Multi Model Serving Platforms
     [Documentation]    Disable checkbox Multi Modelserving platforms
-    Unselect Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
+    ${status}=  Get Checkbox State Of Single Modelserving platforms
+    IF  "${status}"=="True"
+        Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
+        Save Changes In Cluster Settings
+    END
 
 Select Both Model Serving Platforms
     [Documentation]    Enables Multi Modeland Single Modelserving platforms

@@ -247,6 +247,7 @@ Click CheckBox Single Model Serving Platforms
     ${status}=  Get Checkbox State Of Single Modelserving platforms
     IF  "${status}"=="False"
         Select Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
+        Save Changes In Cluster Settings
     END
 
 Click CheckBox Multi Model Serving Platforms
@@ -254,6 +255,7 @@ Click CheckBox Multi Model Serving Platforms
     ${status}=  Get Checkbox State Of Multi Modelserving platforms
     IF  "${status}"=="False"
         Select Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
+        Save Changes In Cluster Settings
     END
 
 UnClick CheckBox Single Model Serving Platforms
@@ -261,6 +263,7 @@ UnClick CheckBox Single Model Serving Platforms
     ${status}=  Get Checkbox State Of Single Modelserving platforms
     IF  "${status}"=="True"
         Unselect Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
+        Save Changes In Cluster Settings
     END
 
 UnClick CheckBox Multi Model Serving Platforms
@@ -268,6 +271,7 @@ UnClick CheckBox Multi Model Serving Platforms
     ${status}=  Get Checkbox State Of Single Modelserving platforms
     IF  "${status}"=="True"
         Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
+        Save Changes In Cluster Settings
     END
 
 Click Both Model Serving Platforms

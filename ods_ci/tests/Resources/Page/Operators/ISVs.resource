@@ -128,3 +128,15 @@ Uninstall ISV Operator From OperatorHub Via CLI
     ...    oc get subscription ${subscription_name} -n ${namespace} -ojson | jq '.status.currentCSV' | tr -d '"'    # robocop: disable
     Oc Delete    kind=Subscription    name=${subscription_name}    namespace=${namespace}
     Oc Delete    kind=ClusterServiceVersion    name=${current_csv_name}    namespace=${namespace}
+
+Check If Operator Is Installed Via CLI
+    [Documentation]    Check If Operator Is Installed Via CLI and Return the Status
+    [Arguments]    ${operator_name}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get subscriptions.operators.coreos.com --all-namespaces -o custom-columns="PACKAGE:.spec.name" | awk '$1 == "${operator_name}"'    # robocop: disable
+    ${status}   Run Keyword And Return Status    Should Not Be Empty    ${out}
+    IF    ${status}
+           RETURN   True
+    ELSE
+           RETURN  False
+    END

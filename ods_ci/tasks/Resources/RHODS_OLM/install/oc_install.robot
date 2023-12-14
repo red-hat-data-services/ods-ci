@@ -50,7 +50,6 @@ Install RHODS
   END
 
 Verify RHODS Installation
-  [Arguments]  ${cluster_type}
   # Needs to be removed ASAP
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
     Set Global Variable    ${APPLICATIONS_NAMESPACE}    opendatahub

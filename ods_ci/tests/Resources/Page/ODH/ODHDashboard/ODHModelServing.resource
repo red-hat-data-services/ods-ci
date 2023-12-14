@@ -7,7 +7,7 @@ Library        ../../../../../libs/Helpers.py
 
 
 *** Variables ***
-${MS_HEADER_XP}=     xpath=//h1[text()="Model serving"]
+${MS_HEADER_XP}=     xpath=//h1[text()="Model Serving"]
 ${S3_NAME_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list Name"]
 ${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_ACCESS_KEY_ID"]
 ${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_SECRET_ACCESS_KEY"]
@@ -31,7 +31,7 @@ Open Model Serving Home Page
     [Documentation]    Verifies submenu Settings > "Model Serving" is visible and navigates to page
     Page Should Contain    Model Serving
     Click Link      Model Serving
-    # Replace sleep with better Wait keyword. Confirm if error page has "Model serving" h1 element.
+    # Replace sleep with better Wait keyword. Confirm if error page has "Model Serving" h1 element.
     Sleep    1s
     ${loading_error} =    Run Keyword And Return Status    Page Should Contain    Problem loading model serving page
     IF    ${loading_error}

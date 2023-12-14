@@ -114,7 +114,7 @@ Clean Up DSP Page
         END
         Delete Data Science Projects From CLI    ${projects}
         Reload Page
-        Wait Until Page Contains    Data science projects
+        Wait Until Page Contains    Data Science Projects
     END
 
 Try Opening Create Server

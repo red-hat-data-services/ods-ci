@@ -111,7 +111,9 @@ class DataSciencePipelinesKfpTekton:
         result = client.create_run_from_pipeline_func(
             pipeline_func=pipeline, arguments={
                 'mlpipeline_minio_artifact_secret': mlpipeline_minio_artifact_secret["data"],
-                'bucket_name': bucket_name
+                'bucket_name': bucket_name,
+                'openshift_server': self.api.get_openshift_server(),
+                'openshift_token': self.api.get_openshift_token()
             }
         )
         # easy to debug and double check failures

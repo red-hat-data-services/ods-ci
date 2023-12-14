@@ -117,7 +117,7 @@ Disable Pod Toleration Via UI
     Element Should Be Disabled    xpath://input[@id="toleration-key-input"]
 
 Save Changes In Cluster Settings
-    [Documentation]    Clicks on the "Save changes" button in Cluster Settings and
+    [Documentation]    Clicks on the "Save changes" button in Cluster settings and
     ...    waits until "Cluster settings changes saved" is shown
     Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="false"]    timeout=15s
     Click Button    Save changes
@@ -134,7 +134,7 @@ Save Changes In Cluster Settings
     Sleep  30s
 
 Enable "Usage Data Collection"
-    [Documentation]    Once in Settings > Cluster Settings, enables "Usage Data Collection"
+    [Documentation]    Once in Settings > Cluster settings, enables "Usage Data Collection"
     ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
     ...    ${USAGE_DATA_COLLECTION_XP}
     Set Test Variable    ${is_data_collection_enabled}    #robocop:disable
@@ -144,7 +144,7 @@ Enable "Usage Data Collection"
     END
 
 Disable "Usage Data Collection"
-    [Documentation]    Once in Settings > Cluster Settings, disables "Usage Data Collection"
+    [Documentation]    Once in Settings > Cluster settings, disables "Usage Data Collection"
     ${is_data_collection_enabled}=    Run Keyword And Return Status    Checkbox Should Be Selected
     ...    ${USAGE_DATA_COLLECTION_XP}
     Set Test Variable    ${is_data_collection_enabled}    #robocop:disable
@@ -220,13 +220,13 @@ Open Dashboard Settings
     END
     Click Element  xpath://a[.="${settings_page}"]
     IF    "${settings_page}" == "Notebook images"
-        ${exp_page_title}=    Set Variable    Notebook images settings
+        ${exp_page_title}=    Set Variable    Notebook image settings
     ELSE IF     "${settings_page}" == "Cluster settings"
-        ${exp_page_title}=    Set Variable    Cluster Settings
+        ${exp_page_title}=    Set Variable    Cluster settings
     ELSE IF     "${settings_page}" == "Serving runtimes"
         ${exp_page_title}=    Set Variable    Serving runtimes
     ELSE IF     "${settings_page}" == "User management"
-        ${exp_page_title}=    Set Variable    User and group settings
+        ${exp_page_title}=    Set Variable    User management
     END
     Wait For RHODS Dashboard To Load    expected_page=${exp_page_title}
     ...    wait_for_cards=${FALSE}

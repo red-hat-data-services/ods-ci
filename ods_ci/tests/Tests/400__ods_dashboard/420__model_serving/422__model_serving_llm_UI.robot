@@ -269,14 +269,16 @@ Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
 Verify User With Edit Permission Can Deploy Query And Delete A LLM
     [Documentation]    This test case verifies that a user with Edit permission on a DS Project can still deploy, query
     ...    and delete a LLM served with caikit
-    [Tags]    Sanity    Tier1    ODS-XXXX
+    [Tags]    Sanity    Tier1    ODS-2581
     [Setup]    Set Up Project    namespace=${TEST_NS}-edit-permission
     ${test_namespace}=    Set Variable     ${TEST_NS}-edit-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     Move To Tab    Permissions
     Assign Edit Permissions To User ${TEST_USER_3.USERNAME}
+    Move To Tab    Components
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
     Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -288,19 +290,22 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
     [Teardown]    Clean Up DSP Page
 
 Verify User With Admin Permission Can Deploy Query And Delete A LLM
     [Documentation]    This test case verifies that a user with Admin permission on a DS Project can still deploy, query
     ...    and delete a LLM served with caikit
-    [Tags]    Sanity    Tier1    ODS-XXXX
+    [Tags]    Sanity    Tier1    ODS-2582
     [Setup]    Set Up Project    namespace=${TEST_NS}-admin-permission
     ${test_namespace}=    Set Variable     ${TEST_NS}-admin-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     Move To Tab    Permissions
     Assign Admin Permissions To User ${TEST_USER_3.USERNAME}
+    Move To Tab    Components
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
     Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -312,6 +317,7 @@ Verify User With Admin Permission Can Deploy Query And Delete A LLM
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
     [Teardown]    Clean Up DSP Page
 
 

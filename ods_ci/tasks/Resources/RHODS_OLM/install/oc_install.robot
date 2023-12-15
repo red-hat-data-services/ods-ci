@@ -293,7 +293,7 @@ Install Kserve Dependencies
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    ${is_installed}=   Check If Operator Is Installed Via CLI   servicemeshoperators
+    ${is_installed}=   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
     IF    not ${is_installed}
           Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
           ...    subscription_name=${SERVICEMESH_SUB_NAME}
@@ -304,7 +304,7 @@ Install Kserve Dependencies
     ELSE
           Log To Console    message=ServiceMesh Operator is already installed
     END
-    ${is_installed}=   Check If Operator Is Installed Via CLI   serverless-operators
+    ${is_installed}=   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
     IF    not ${is_installed}
           ${rc}    ${out}=    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
           Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
@@ -314,6 +314,10 @@ Install Kserve Dependencies
           ...    operator_group_name=serverless-operators
           ...    operator_group_ns=${SERVERLESS_NS}
           ...    operator_group_target_ns=${NONE}
+          Wait Until Operator Subscription Last Condition Is
+          ...    type=CatalogSourcesUnhealthy    status=False
+          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+          ...    namespace=${SERVERLESS_NS}
           Wait For Pods To Be Ready    label_selector=name=knative-openshift
           ...    namespace=${SERVERLESS_NS}
           Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress

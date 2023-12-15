@@ -269,7 +269,8 @@ Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
 Verify User With Edit Permission Can Deploy Query And Delete A LLM
     [Documentation]    This test case verifies that a user with Edit permission on a DS Project can still deploy, query
     ...    and delete a LLM served with caikit
-    [Tags]    Sanity    Tier1    ODS-2581
+    ...    ProductBug: https://issues.redhat.com/browse/RHOAIENG-548
+    [Tags]    Sanity    Tier1    ODS-2581    ProductBug
     [Setup]    Set Up Project    namespace=${TEST_NS}-edit-permission
     ${test_namespace}=    Set Variable     ${TEST_NS}-edit-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -279,13 +280,18 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
     Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    Run Keyword And Continue On Failure    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    # Needed because of ProductBug
+    ${modal} =    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
+    IF  ${modal}==${TRUE}
+        Click Element    //button[@aria-label="Close"]
+    END
+    Run Keyword And Continue On Failure    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model Multiple Times    model_name=${flan_model_name}
+    Run Keyword And Continue On Failure    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1
     ...    namespace=${test_namespace}    protocol=http
-    Query Model Multiple Times    model_name=${flan_model_name}
+    Run Keyword And Continue On Failure    Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
     Logout From RHODS Dashboard

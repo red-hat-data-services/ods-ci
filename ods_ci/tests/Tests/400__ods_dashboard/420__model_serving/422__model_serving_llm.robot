@@ -593,7 +593,7 @@ Clean Up Test Project
     ${rc}    ${member_list}=    Run And Return Rc And Output
     ...    oc get smmr/default -n ${SERVICEMESH_CR_NS} -o json | jq '.spec.members'
     Should Be Equal As Integers    ${rc}    ${0}
-    IF    "${member_list}" == "null"
+    IF    $member_list == "null"
         Log    message=ServiceMeshMemberRoll already cleaned up. Skipping manual deletion
     ELSE
         Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}

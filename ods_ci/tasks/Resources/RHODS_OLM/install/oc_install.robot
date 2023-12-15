@@ -144,12 +144,14 @@ Verify RHODS Installation
     Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60
     Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
-  # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
-    Log To Console    "Waiting for pod status in ${MONITORING_NAMESPACE}"
-    Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=1200
-    Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
+
+  # Monitoring stack only deployed for managed, as modelserving monitoring stack is no longer deployed
+  IF  "${cluster_type}" == "managed"
+     Log To Console    "Waiting for pod status in ${MONITORING_NAMESPACE}"
+     Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=600
+     Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
   END
+
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
     Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}

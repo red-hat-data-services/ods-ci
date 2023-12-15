@@ -69,7 +69,7 @@ Save Changes In User Management Setting
     [Documentation]  Save User Management Settings In Dashboard
     Press Keys    None    ESC
     Click Button    Save changes
-    Sleep  60s
+    Sleep    120s    reason=Wait for Dashboard to apply the updated configuration...
 
 AdminGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD

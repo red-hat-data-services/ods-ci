@@ -272,6 +272,8 @@ Add Namespace To ServiceMeshMemberRoll
     Should Be Equal As Integers    ${rc}    ${0}
 
 Namespace Should Be Removed From ServiceMeshMemberRoll
+    [Documentation]    Checks if the given namespace is present in the SMMR.
+    ...                If yes, it fails
     [Arguments]    ${namespace}    ${servicemesh_ns}=istio-system
     ${rc}    ${member_list}=    Run And Return Rc And Output
     ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members'
@@ -280,9 +282,10 @@ Namespace Should Be Removed From ServiceMeshMemberRoll
         Log    message=ServiceMeshMemberRoll already cleaned up
     ELSE
         ${rc}    ${ns_idx}=    Run And Return Rc And Output
-        ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'
+        ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'    # robocop: disable
         Should Be Equal As Integers    ${rc}    ${0}
-        Should Be Equal As Strings    ${ns_idx}    null    msg=${namespace} should have been automatically removed from SMMR
+        Should Be Equal As Strings    ${ns_idx}    null
+        ...    msg=${namespace} should have been automatically removed from SMMR
     END
 
 

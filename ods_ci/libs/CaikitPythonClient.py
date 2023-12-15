@@ -8,7 +8,7 @@ class CaikitPythonClient:
     """keywords to test https://github.com/opendatahub-io/caikit-nlp-client"""
     def __init__(self):
         self.BuiltIn = BuiltIn()
-        self.self.client = None
+        self.client = None
 
     @keyword
     def get_http_client_without_ssl_validation(self, host, port):
@@ -53,3 +53,10 @@ class CaikitPythonClient:
             return  self.client
         else:
             self.BuiltIn.fail("Something went wrong while setting up the connection to the host")
+    
+    @keyword
+    def query_endpoint(self, model_id, query_text, query_type="text", max_new_tokens=None, min_new_tokens=None):
+        if query_type == "text":
+            return self.client.generate_text(model_id, query_text)
+        elif query_type == "stream":
+            return self.client.generate_text_stream(model_id, query_text)

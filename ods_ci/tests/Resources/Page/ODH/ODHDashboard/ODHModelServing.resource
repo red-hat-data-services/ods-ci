@@ -271,18 +271,20 @@ Add Namespace To ServiceMeshMemberRoll
     ...    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'add', 'path': '/spec/members/-', 'value': \"${namespace}\"}]"
     Should Be Equal As Integers    ${rc}    ${0}
 
-Remove Namespace From ServiceMeshMemberRoll
+Namespace Should Be Removed From ServiceMeshMemberRoll
     [Arguments]    ${namespace}    ${servicemesh_ns}=istio-system
-    ${rc}    ${ns_idx}=    Run And Return Rc And Output
-    ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'
+    ${rc}    ${member_list}=    Run And Return Rc And Output
+    ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members'
     Should Be Equal As Integers    ${rc}    ${0}
-    IF    "${ns_idx}" == "null"
-        Log    message=${namespace} was not in the SMMR..
-        ...    level=WARN
+    IF    $member_list == "null"
+        Log    message=ServiceMeshMemberRoll already cleaned up
     ELSE
-        ${rc}    ${out}=    Run And Return Rc And Output    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'remove', 'path': '/spec/members/${ns_idx}'}]"
+        ${rc}    ${ns_idx}=    Run And Return Rc And Output
+        ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'
         Should Be Equal As Integers    ${rc}    ${0}
+        Should Be Equal As Strings    ${ns_idx}    null    msg=${namespace} should have been automatically removed from SMMR
     END
+
 
 Deploy Model Via CLI
     [Documentation]    Deploys a model using Model Serving feature by applying the InfereceService

@@ -147,17 +147,17 @@ Wait For Cluster To Be Ready
     Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
-    Run Keyword And Continue On Failure    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
+    Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
     Log    Verifying that Cluster '${cluster_name}' has been created in Hive namespace '${hive_namespace}'      console=True
     ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
     IF    ${result.rc} != 0
         ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json    shell=yes
-        Log    Cluster '${cluster_name}' install completed, but it is not accesible - Cleaning Hive resources    console=True
+        Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources    console=True
         Deprovision Cluster
         Log    Cluster '${cluster_name}' deployment had errors: ${result.stdout}    console=True    level=ERROR
         FAIL    Cluster '${cluster_name}' provisioning failed. Please look into the logs for more details.
     END
-    Log    Cluster ${cluster_name} created successfully. Web Console: ${result.stdout}     console=True
+    Log    Cluster '${cluster_name}' install completed and accessible at: ${result.stdout}     console=True
     
 Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt

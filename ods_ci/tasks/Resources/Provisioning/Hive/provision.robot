@@ -110,8 +110,12 @@ Verify Cluster Is Successfully Provisioned
     FOR    ${line}    IN    @{new_lines}
         Log To Console    ${line}
     END
-    Create File    ${install_log_file}    ${install_log_data}
+    IF    "level=fatal"    in    "${install_log_data}"
+        Log    Fatal error occured during OCP install: ${install_log_data}   level='ERROR'    console=True  
+        RETURN
+    END
     Should Contain    ${install_log_data}    install completed successfully
+    Create File    ${install_log_file}    ${install_log_data}
     ${result} =    Run Process 	grep 'install completed successfully' ${install_log_file}    shell=yes
     Should Be True    ${result.rc} == 0
 
@@ -127,12 +131,13 @@ Wait For Cluster To Be Ready
     ...    Cluster provisioning failed. Please look into the logs for more details.
 
 Verify Cluster Claim
-    Wait Until Keyword Succeeds    30 min    10 s
-    ...    Confirm Cluster Is Claimed
-
-Confirm Cluster Is Claimed
+    Log    Verifying that Cluster Claim '${claim_name}' has been created in Hive namespace '${hive_namespace}'      console=True
     ${status} =    Oc Get    kind=ClusterClaim    name=${claim_name}    namespace=${hive_namespace}
-    Should Be Equal As Strings    ${status[0]['status']['conditions'][0]['reason']}    ClusterClaimed
+    IF    "${status[0]['status']['conditions'][0]['reason']}" != "ClusterClaimed"
+        Log    Cluster ${cluster_name} claim did not complete successfully - cleaning Hive resources    console=True
+        Deprovision Cluster
+    END
+    
 
 Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
@@ -160,8 +165,10 @@ Save Cluster Credentials
     
 Login To Cluster
     Export Variables From File    ${cluster_details}
-    Create File     ${cluster_kubeconf}
-    ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
+    # Create a temporary kubeconfig from the credentials, before updating the permanent kubeconfig
+    ${temp_kubeconfig} =    Set Variable    ${artifacts_dir}/temp_kubeconfig
+    Create File     ${temp_kubeconfig}
+    ${result} =    Run Process    KUBECONFIG\=${temp_kubeconfig} oc login --username\=${username} --password\=${password} ${api} --insecure-skip-tls-verify
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     ${result} =    Run Process    KUBECONFIG\=${cluster_kubeconf} oc status    shell=yes

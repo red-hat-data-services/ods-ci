@@ -28,11 +28,9 @@ Provision Self-Managed Cluster
     Provision Cluster
     Claim Cluster
     Wait For Cluster To Be Ready
-    Verify Cluster Claim
     Save Cluster Credentials
     Login To Cluster
     Set Cluster Storage
-    [Teardown]  Clean Failed Cluster
 
 Deprovision Self-Managed Cluster
     [Documentation]    Deprovision a self-managed cluster

@@ -34,7 +34,7 @@ Provision Cluster
     IF    ${clustername_exists}
         Log    Cluster name '${cluster_name}' already exists in Hive pool '${pool_name}' - Checking if it has a valid web-console      console=True
         ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-        ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
+        ${result} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
         IF    ${result.rc} != 0
             Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources    console=True
             Delete Cluster Configuration
@@ -148,22 +148,25 @@ Wait For Cluster To Be Ready
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
     Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
-    Log    Verifying that Cluster '${cluster_name}' has been created in Hive namespace '${hive_namespace}'      console=True
-    ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
-    IF    ${result.rc} != 0
-        ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json    shell=yes
+    Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True
+    ${provision_status} =    Run Process 	oc -n ${pool_namespace} wait --for\=condition\=Provisioned\=True cd ${pool_namespace} --timeout\=5m    shell=yes
+    ${web_access} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
+    ${claim_status} =    Run Process 	oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=5m    shell=yes
+    IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${claim_status.rc} != 0
+        ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json    shell=yes
+        ${claim_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
         Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources    console=True
         Deprovision Cluster
-        Log    Cluster '${cluster_name}' deployment had errors: ${result.stdout}    console=True    level=ERROR
+        Log    Cluster '${cluster_name}' deployment had errors: ${\n}${provision_status.stdout}${\n}${claim_status.stdout}    level=ERROR
         FAIL    Cluster '${cluster_name}' provisioning failed. Please look into the logs for more details.
     END
-    Log    Cluster '${cluster_name}' install completed and accessible at: ${result.stdout}     console=True
+    Log    Cluster '${cluster_name}' install completed and accessible at: ${web_access.stdout}     console=True
     
 Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
     Set Task Variable    ${cluster_kubeconf}    ${artifacts_dir}/kubeconfig
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-    ${result} =    Run Process 	oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.apiURL' --exit-status    shell=yes
+    ${result} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.apiURL' --exit-status    shell=yes
     Should Be True    ${result.rc} == 0    Hive Cluster deployment '${pool_namespace}' does not have a valid API access
     Create File     ${cluster_details}    console=${result.stdout}\n
     ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${pool_namespace}
@@ -177,7 +180,7 @@ Save Cluster Credentials
     ${password} = 	Get File 	${artifacts_dir}/password
     Append to File     ${cluster_details}     username=${username}\n
     Append to File     ${cluster_details}     password=${password}\n
-    ${result} =    Run Process 	oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
+    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     RETURN    ${cluster_kubeconf}
@@ -195,10 +198,10 @@ Login To Cluster
 
 Set Cluster Storage
     Log    Update Cluster ${cluster_name} Storage Class     console=True
-    ${result} =    Run Process 	oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
+    ${result} =    Run Process    oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
     ...    shell=yes
     Log    StorageClass standard:\n${result.stdout}\n${result.stderr}     console=True
-    ${result} =    Run Process 	oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard-csi -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+    ${result} =    Run Process    oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard-csi -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
     ...    shell=yes
     Log    StorageClass standard-csi:\n${result.stdout}\n${result.stderr}     console=True
     Run Keyword And Ignore Error    Should Be True    ${result.rc} == 0

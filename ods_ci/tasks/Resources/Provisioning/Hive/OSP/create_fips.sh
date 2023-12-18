@@ -15,7 +15,7 @@ export CLUSTER_NAME=${CLUSTER_NAME,,}
 if [[ -z $CLUSTER_NAME || -z $AWS_DOMAIN || -z $OSP_NETWORK ]] ; then
   echo -e "Some global variables are missing, for example: 
   # export CLUSTER_NAME=${CLUSTER_NAME:-"rhods-qe-007"} # To set the cluster Subdomain (A Record) in AWS. 
-  # export AWS_DOMAIN=${AWS_DOMAIN:-"rhods.ccitredhat.com"} # To set the cluster Domain in AWS.
+  # export AWS_DOMAIN=${AWS_DOMAIN:-"osp.rh-ods.com"} # To set the cluster Domain in AWS.
   # export OSP_NETWORK=${OSP_NETWORK:-"shared_net_5"} # The external network for the new Floating IPs on OSP.
   "
   exit 1

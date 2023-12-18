@@ -7,7 +7,7 @@ items:
     name: {{ hive_cluster_name|default("rhodsaws") }}-pool
     namespace: rhods
   spec:
-    baseDomain: rhods.ccitredhat.com
+    baseDomain: aws.rh-ods.com
     imageSetRef:
       name: {{ image_set|default("rhods-openshift") }}
     platform:
@@ -28,7 +28,7 @@ items:
   stringData:
     install-config.yaml: |
       apiVersion: v1
-      baseDomain: rhods.ccitredhat.com
+      baseDomain: aws.rh-ods.com
       compute:
       - name: worker
         platform:

@@ -31,6 +31,7 @@ Provision Self-Managed Cluster
     Save Cluster Credentials
     Login To Cluster
     Set Cluster Storage
+    Pass Execution    Self-Managed Cluster ${cluster_name} provisionend successfully
 
 Deprovision Self-Managed Cluster
     [Documentation]    Deprovision a self-managed cluster

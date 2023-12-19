@@ -57,6 +57,7 @@ class CaikitPythonClient:
     @keyword
     def query_endpoint(self, model_id, query_text, query_type="text", max_new_tokens=None, min_new_tokens=None):
         if query_type == "text":
-            return self.client.generate_text(model_id, query_text)
+            res = self.client.generate_text(model_id, query_text)
+            return  res.strip()
         elif query_type == "stream":
             return self.client.generate_text_stream(model_id, query_text)

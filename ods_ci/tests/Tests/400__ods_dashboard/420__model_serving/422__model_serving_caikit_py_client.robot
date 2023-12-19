@@ -4,7 +4,7 @@ Library           ../../../../libs/CaikitPythonClient.py
 Suite Setup    Caikit Client Suite Setup
 
 *** Variables ***
-${GPRC_MODEL_DEPLOYED}=    ${TRUE}
+${GPRC_MODEL_DEPLOYED}=    ${FALSE}
 ${HTTP_MODEL_DEPLOYED}=    ${FALSE}
 ${GRPC_MODEL_NS}=    caikit-grpc
 ${HTTP_MODEL_NS}=    caikit-http
@@ -23,7 +23,10 @@ Verify User Can Use GRPC Without TLS Validation
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
 
 Verify User Can Use GRPC With TLS
-    # TO DO
+    [Setup]    GRPC Model Setup
+    ${client} =     CaikitPythonClient.Get Grpc Client With Tls    ${GRPC_HOST}    443    ca_cert_path=openshift_ca_istio_knative.crt
+    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
+    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
 
 Verify User Can Use GRPC With mTLS
     # TO DO
@@ -46,6 +49,7 @@ Caikit Client Suite Setup
     ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][0][models][${ISVC_NAME}][response_text]    \\s+    ${SPACE}
     Set Suite Variable    ${QUERY_TEXT}
     Set Suite Variable    ${QUERY_EXP_RESPONSE}    ${cleaned_exp_response_text}
+    Fetch Knative CA Certificate
 
 GRPC Model Setup
     IF    ${GPRC_MODEL_DEPLOYED} == ${FALSE}

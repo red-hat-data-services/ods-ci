@@ -6,6 +6,7 @@ Resource          ../../../Resources/Page/Operators/ISVs.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
 Library            OpenShiftLibrary
 Suite Setup       Setup Kserve UI Test

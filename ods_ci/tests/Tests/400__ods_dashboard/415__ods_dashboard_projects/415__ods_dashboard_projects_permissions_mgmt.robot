@@ -76,6 +76,24 @@ Verify User Can Assign Access Permissions To User Groups
     Sleep   5s
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
+Verify Project Sharing Does Not Override Dashboard Permissions
+    [Tags]    Tier1    Sanity
+    ...       ODS-2223
+    # [Setup]    Run Keywords  Restore Permissions Of The Project
+    # ...         AND           Set RHODS Admins Group Empty Group     
+    [Setup]    Set RHODS Admins Group Empty Group     
+    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
+    Move To Tab    Permissions
+    Remove User From Group    username=${USER_B}
+    ...    group_name=rhods-users
+    Remove User From Group    username=${USER_C}
+    ...    group_name=rhods-users
+    Assign Admin Permissions To User ${USER_B}
+    Assign Edit Permissions To User ${USER_C}
+    ${USER_B} Should Not Have Access To ${PRJ_USER_B_TITLE}
+    ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
+    [Teardown]    Run Keywords  Set RHODS Admins Group To system:authenticated
+    ...         AND           Set User Groups For Testing
 
 *** Keywords ***
 Project Permissions Mgmt Suite Setup    # robocop: disable

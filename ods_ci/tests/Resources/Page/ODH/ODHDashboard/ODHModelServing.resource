@@ -337,16 +337,6 @@ Select Kserve Serving Runtime
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/button
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/ul//span[contains(text(),"${runtime}")]
 
-Get KServe Inference Host Via CLI
-    [Arguments]    ${isvc_name}    ${namespace}
-    Sleep    5s
-    ${rc}    ${ksvc_host}=    Run And Return Rc And Output
-    ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    # ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    Should Be Equal As Integers    ${rc}    ${0}
-    Should Not Be Empty    ${ksvc_host}
-    RETURN    ${ksvc_host}
-
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI
     [Arguments]    ${model_name}    ${retries}=1
@@ -362,59 +352,6 @@ Get Kserve Inference Host Via UI
     END
     Log    Failed to get model serving host through the UI
     Take Screenshot
-
-Get Current Revision ID
-    [Arguments]    ${model_name}    ${namespace}
-    ${rc}    ${id}=    Run And Return Rc And Output
-    ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
-    Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${id}
-
-Set Minimum Replicas Number
-    [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
-    ${old_revision_id}=    Get Current Revision ID    model_name=${model_name}    namespace=${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch InferenceService ${model_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/predictor/minReplicas', 'value': ${n_replicas}}]"
-    Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${old_revision_id}
-
-Delete InfereceService
-    [Arguments]    ${isvc_name}    ${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${namespace}
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Update Scale To Zero For Knative Serving
-    [Arguments]    ${serving_name}    ${namespace}    ${status}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc patch KnativeServing ${serving_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/config/autoscaler/enable-scale-to-zero', 'value': '${status}'}]"
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Set Model Hardware Resources
-    [Arguments]    ${model_name}    ${namespace}    ${requests}=&{EMPTY}    ${limits}=&{EMPTY}
-    IF    ${limits} == ${NONE}
-        ${limits}=    Set Variable    null
-    END
-    IF    ${requests} == ${NONE}
-        ${requests}=    Set Variable    null
-    END
-    ${body}=    Set Variable    {"spec":{"predictor": {"model": {"resources": {"requests": ${requests}, "limits": ${limits} }}}}}
-    ${body}=    Replace String    ${body}    '    "
-    Log    ${body}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc patch isvc ${model_name} -n ${namespace} --type=merge -p '${body}'
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Model Pod Should Be Scheduled On A GPU Node
-    [Documentation]    Checks that the pods with the given ${label_selector} are actually scheduled on
-    ...                a GPU node
-    [Arguments]    ${label_selector}    ${namespace}
-    ${pods}=    Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=${label_selector}
-    FOR    ${index}    ${pod}    IN ENUMERATE    @{pods}
-        Log    ${index}: ${pod}[spec][nodeName]
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    oc get node ${pod}[spec][nodeName] -ojson | jq '.metadata.labels."nvidia.com/gpu.present"'
-        Should Be Equal As Integers    ${rc}    ${0}
-        Should Be Equal As Strings    ${out}    "true"
-    END
 
 Enable Model Serving Runtime Using CLI
     [Documentation]  Update OdhDashboardConfig to enable the model runtime

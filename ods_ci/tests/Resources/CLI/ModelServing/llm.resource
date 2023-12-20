@@ -466,3 +466,26 @@ Load Expected Responses
     [Arguments]    ${exp_res_filepath}=${EXP_RESPONSES_FILEPATH}
     ${exp_responses}=    Load Json File    ${exp_res_filepath}
     Set Suite Variable    ${EXP_RESPONSES}    ${exp_responses}
+
+Fetch Knative CA Certificate
+    [Documentation]    Gets the CA certificate defined in the secret `knative-serving-cert` in namespace `istio-system`
+    ...                namespace. Useful when working with self-managed clusters to verify connections (TLS)
+    [Arguments]    ${filename}=openshift_ca_istio_knative.crt
+    ${rc} =    Run And Return Rc
+    ...    oc get secret -n istio-system knative-serving-cert -o json | jq '.data."tls.crt"' | sed 's/"//g' | base64 -d > ${filename}    # robocop: disable
+    Should Be Equal As Strings    ${rc}    ${0}
+
+Generate Client Certificates
+    [Documentation]    Generates and self-signes local certificates for the client. It creates:
+    ...                - ${dirpath}/client_certs
+    ...                - ${dirpath}/client_certs/root.crt
+    ...                - ${dirpath}/client_certs/root.key
+    ...                - ${dirpath}/client_certs/sign_req.csr
+    ...                - ${dirpath}/client_certs/private.key
+    ...                - ${dirpath}/client_certs/public.crt
+    [Arguments]    ${dirpath}=${CURDIR}
+    Log    ${CURDIR}
+    Log    ${EXECDIR}
+    ${abs_path}=    Set Variable    ${EXECDIR}/${dirpath}
+    ${rc}    Run and Watch Command    cd ${abs_path} && ${abs_path}/gen_client_certs.sh    timeout=2 min
+    Should Be Equal As Integers  ${rc}   ${0}   msg=Error detected while generating client certificates

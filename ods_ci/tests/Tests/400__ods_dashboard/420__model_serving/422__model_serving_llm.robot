@@ -562,23 +562,6 @@ Install Model Serving Stack Dependencies
     END
     Load Expected Responses
 
-Clean Up Test Project
-    [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}
-    IF    ${isvc_delete} == ${TRUE}
-        FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
-              Log    Deleting ${isvc_name}
-              Delete InfereceService    isvc_name=${isvc_name}    namespace=${test_ns}
-        END
-    ELSE
-        Log To Console     InferenceService Delete option not provided by user
-    END
-    Wait Until Keyword Succeeds    10    1s    Namespace Should Be Removed From ServiceMeshMemberRoll
-    ...    namespace=${test_ns}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
-    Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s
-    Should Be Equal As Integers    ${rc}    ${0}
-
 Install Service Mesh Stack
     [Documentation]    Installs the operators needed for Service Mesh operator purposes
     Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}

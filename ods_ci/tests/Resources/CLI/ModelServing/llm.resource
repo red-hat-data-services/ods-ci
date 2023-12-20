@@ -500,7 +500,6 @@ Generate Client TLS Certificates
 
 Clean Up Test Project
     [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}
-    ...            ${servicemesh_ns}=${SERVICEMESH_CR_NS}
     IF    ${isvc_delete} == ${TRUE}
         FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
               Log    Deleting ${isvc_name}
@@ -509,15 +508,8 @@ Clean Up Test Project
     ELSE
         Log To Console     InferenceService Delete option not provided by user
     END
-    ${rc}    ${member_list}=    Run And Return Rc And Output
-    ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members'
-    Should Be Equal As Integers    ${rc}    ${0}
-    IF    "${member_list}" == "null"
-        Log    message=ServiceMeshMemberRoll already cleaned up. Skipping manual deletion
-    ELSE
-        Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
-    ...    servicemesh_ns=${servicemesh_ns}
-    END
+    Wait Until Keyword Succeeds    10    1s    Namespace Should Be Removed From ServiceMeshMemberRoll
+    ...    namespace=${test_ns}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s

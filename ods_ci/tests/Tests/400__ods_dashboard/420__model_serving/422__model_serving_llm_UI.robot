@@ -18,8 +18,6 @@ Test Tags         KServe
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${TEST_NS}=    singlemodel
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
-${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
-${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-caikit
 ${FLAN_GRAMMAR_MODEL_S3_DIR}=    flan-t5-large-grammar-synthesis-caikit/flan-t5-large-grammar-synthesis-caikit
 ${FLAN_LARGE_MODEL_S3_DIR}=    flan-t5-large/flan-t5-large
@@ -349,30 +347,6 @@ Load Expected Responses
     ${exp_responses}=    Load Json File    ${EXP_RESPONSES_FILEPATH}
     Set Suite Variable    ${EXP_RESPONSES}    ${exp_responses}
 
-Set Up Project
-    [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
-    ...                creates caikit runtime. This can be used as test setup
-    [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
-    Open Model Serving Home Page
-    IF    ${single_prj}
-        Try Opening Create Server
-        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    ELSE
-        Open Data Science Projects Home Page
-        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    END
-    Create Data Science Project    title=${namespace}    description=kserve test project
-    Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=${S3.BUCKET_3.NAME}    aws_s3_endpoint=${S3.BUCKET_3.ENDPOINT}
-    ...            aws_region=${S3.BUCKET_3.REGION}
-    IF   ${enable_metrics}
-        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
-        Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
-    ELSE
-        Log    message=Skipping UserWorkloadMonitoring enablement.
-    END
-
 Model Response Should Match The Expectation  # robocop: disable
     [Documentation]    Checks that the actual model response matches the expected answer.
     ...                The goals are:
@@ -597,40 +571,4 @@ Check Query Response Values    # robocop:disable
     END
     IF    ${checked} == ${FALSE}
         Fail    msg=The metric you are looking for has not been found. Check the query parameter and try again
-    END
-
-Try Opening Create Server
-    [Documentation]    Tries to clean up DSP and Model Serving pages
-    ...    In order to deploy a single model in a new project. ${retries}
-    ...    controls how many retries are made.
-    [Arguments]    ${retries}=3
-    FOR    ${try}    IN RANGE    0    ${retries}
-        ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project
-        IF    ${status}
-            Click Button    Select a project
-            RETURN
-        ELSE
-            Clean Up Model Serving Page
-            Clean Up DSP Page
-            Open Model Serving Home Page
-            Reload Page
-            Sleep  5s
-        END
-    END
-
-Clean Up DSP Page
-    [Documentation]    Removes all DSP Projects, if any are present
-    ${modal} =    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
-    IF  ${modal}==${TRUE}
-        Click Element    //button[@aria-label="Close"]
-    END
-    Open Data Science Projects Home Page
-    WHILE    ${TRUE}
-        ${projects}=    Get All Displayed Projects
-        IF    len(${projects})==0
-            BREAK
-        END
-        Delete Data Science Projects From CLI    ${projects}
-        Reload Page
-        Wait Until Page Contains    Data science projects
     END

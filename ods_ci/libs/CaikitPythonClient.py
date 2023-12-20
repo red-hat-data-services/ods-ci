@@ -42,9 +42,9 @@ class CaikitPythonClient:
         # return  client    
     
     @keyword
-    def get_grpc_client_with_mtls(self, host, port, ca_cert_path, client_cert_path, client_key_path):
-        self.client = GrpcClient(host, port, ca_cert_path=ca_cert_path, client_cert_path=client_cert_path,
-                            client_key_path=client_key_path)
+    def get_grpc_client_with_mtls(self, host, port, ca_cert, client_cert, client_key):
+        self.client = GrpcClient(host, port, ca_cert=ca_cert, client_cert=client_cert,
+                            client_key=client_key)
         self.get_client()
         # return  client
     

@@ -12,19 +12,19 @@ class CaikitPythonClient:
 
     @keyword
     def get_http_client_without_ssl_validation(self, host, port):
-        self.self.client = HttpClient(f"https://{host}:{port}", verify=False)
+        self.client = HttpClient(f"{host}:{port}", verify=False)
         self.get_client()
         # return  client
     
     @keyword
     def get_http_client_with_tls(self, host, port, ca_cert_path):
-        self.client = HttpClient(f"https://{host}:{port}", ca_cert_path=ca_cert_path)
+        self.client = HttpClient(f"{host}:{port}", ca_cert_path=ca_cert_path)
         self.get_client()
         # return  client
         
     @keyword
     def get_http_client_with_mtls(self, host, port, ca_cert_path, client_cert_path, client_key_path):
-        self.client = HttpClient(f"https://{host}:{port}", ca_cert_path=ca_cert_path, client_cert_path=client_cert_path,
+        self.client = HttpClient(f"{host}:{port}", ca_cert_path=ca_cert_path, client_cert_path=client_cert_path,
                             client_key_path=client_key_path)
         self.get_client()
         # return  client

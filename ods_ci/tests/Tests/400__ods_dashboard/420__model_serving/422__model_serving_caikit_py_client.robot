@@ -40,9 +40,13 @@ Verify User Can Use GRPC With mTLS
     ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
 
+Verify User Can Use HTTP Without SSL Validation
+    [Setup]    HTTP Model Setup
+    Log    ${HTTP_HOST}
+    ${client} =     CaikitPythonClient.Get Http Client Without Ssl Validation    ${HTTP_HOST}    443
+    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
+    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
 
-Verify User Can Use HTTP Without TLS
-    # TO DO
 
 Verify User Can Use HTTP With TLS
     # TO DO
@@ -54,6 +58,7 @@ Verify User Can Use HTTP With mTLS
 Caikit Client Suite Setup
     [Documentation]
     # RHOSi Setup
+    Set Library Search Order  SeleniumLibrary
     Load Expected Responses
     ${QUERY_TEXT}=    Set Variable    ${EXP_RESPONSES}[queries][0][query_text]
     ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][0][models][${ISVC_NAME}][response_text]    \\s+    ${SPACE}
@@ -81,4 +86,26 @@ GRPC Model Setup
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${ISVC_NAME}   namespace=${GRPC_MODEL_NS}
     Set Suite Variable    ${GRPC_HOST}    ${host}
 
-# HTTP Model Setup
+HTTP Model Setup
+    [Arguments]    ${user}=${TEST_USER_3.USERNAME}    ${pw}=${TEST_USER_3.PASSWORD}    ${auth}=${TEST_USER_3.AUTH_TYPE}
+    Launch Dashboard    ${user}    ${pw}    ${auth}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    IF    ${HTTP_MODEL_DEPLOYED} == ${FALSE}
+        Set Up Project    namespace=${HTTP_MODEL_NS}    single_prj=${FALSE}
+        Open Data Science Project Details Page    ${HTTP_MODEL_NS}
+        Deploy Kserve Model Via UI    model_name=${ISVC_NAME}    serving_runtime=Caikit
+        ...    data_connection=kserve-connection    path=${MODEL_S3_DIR}
+        Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ISVC_NAME}
+        ...    namespace=${HTTP_MODEL_NS}  
+        Log    ${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}
+        Query Model Multiple Times    model_name=${ISVC_NAME}
+        ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1
+        ...    namespace=${HTTP_MODEL_NS}    protocol=http
+        ...    timeout=20
+        ${HTTP_MODEL_DEPLOYED}=    Set Variable    ${TRUE}
+        # Set Suite Variable    ${HTTP_MODEL_DEPLOYED}    ${TRUE}
+    ELSE
+        Log    message=Skipping model deployment, it was marked as deployed in a previous test
+        Open Data Science Project Details Page    ${HTTP_MODEL_NS}
+    END
+    ${host}=    Get Kserve Inference Host Via UI    ${ISVC_NAME}
+    Set Suite Variable    ${HTTP_HOST}    ${host}

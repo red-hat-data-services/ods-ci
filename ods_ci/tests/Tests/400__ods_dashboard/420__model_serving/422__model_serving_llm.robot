@@ -24,7 +24,6 @@ ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${SERVICEMESH_CONTROLPLANE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/smcp.yaml
 ${SERVICEMESH_ROLL_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/smmr.yaml
 ${SERVICEMESH_PEERAUTH_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/peer_auth.yaml
-${SERVICEMESH_CR_NS}=    istio-system
 ${KIALI_OP_NAME}=     kiali-ossm
 ${KIALI_SUB_NAME}=    kiali-ossm
 ${JAEGER_OP_NAME}=     jaeger-product

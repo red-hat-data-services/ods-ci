@@ -21,6 +21,8 @@ ${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}=    api/v1/task/text-generation
 ${CAIKIT_STREAM_ENDPOINT_HTTP}=    api/v1/task/server-streaming-text-generation
 ${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime_{{protocol}}.yaml
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
+${SERVICEMESH_CR_NS}=    istio-system
+
 
 *** Keywords ***
 Set Up Test OpenShift Project
@@ -208,8 +210,14 @@ Query Model Multiple Times
             ...    &{args}
         ELSE IF    "${protocol}" == "http"
             ${payload}=     Prepare Payload     body=${body}    str_to_json=${TRUE}
-            &{args}=       Create Dictionary     url=https://${host}:443/${endpoint}   expected_status=any
-            ...             headers=${headers}   json=${payload}    timeout=10  verify=${False}
+            Log Dictionary    ${args}
+            Set To Dictionary    ${args}    url=https://${host}:443/${endpoint}   expected_status=any
+            ...             headers=${headers}   json=${payload}    verify=${False}
+            ${is_timeout}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${args}    timeout
+            IF    ${is_timeout} == ${FALSE}
+                Set To Dictionary    ${args}    timeout=10s
+            END
+            Log Dictionary    ${args}
             ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST
             ...    skip_res_json=${skip_json_load_response}    &{args}
             Run Keyword And Continue On Failure    Status Should Be  200
@@ -475,7 +483,7 @@ Fetch Knative CA Certificate
     ...    oc get secret -n istio-system knative-serving-cert -o json | jq '.data."tls.crt"' | sed 's/"//g' | base64 -d > ${filename}    # robocop: disable
     Should Be Equal As Strings    ${rc}    ${0}
 
-Generate Client Certificates
+Generate Client TLS Certificates
     [Documentation]    Generates and self-signes local certificates for the client. It creates:
     ...                - ${dirpath}/client_certs
     ...                - ${dirpath}/client_certs/root.crt
@@ -489,3 +497,28 @@ Generate Client Certificates
     ${abs_path}=    Set Variable    ${EXECDIR}/${dirpath}
     ${rc}    Run and Watch Command    cd ${abs_path} && ${abs_path}/gen_client_certs.sh    timeout=2 min
     Should Be Equal As Integers  ${rc}   ${0}   msg=Error detected while generating client certificates
+
+Clean Up Test Project
+    [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}
+    ...            ${servicemesh_ns}=${SERVICEMESH_CR_NS}
+    IF    ${isvc_delete} == ${TRUE}
+        FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
+              Log    Deleting ${isvc_name}
+              Delete InfereceService    isvc_name=${isvc_name}    namespace=${test_ns}
+        END
+    ELSE
+        Log To Console     InferenceService Delete option not provided by user
+    END
+    ${rc}    ${member_list}=    Run And Return Rc And Output
+    ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members'
+    Should Be Equal As Integers    ${rc}    ${0}
+    IF    "${member_list}" == "null"
+        Log    message=ServiceMeshMemberRoll already cleaned up. Skipping manual deletion
+    ELSE
+        Remove Namespace From ServiceMeshMemberRoll    namespace=${test_ns}
+    ...    servicemesh_ns=${servicemesh_ns}
+    END
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s
+    Should Be Equal As Integers    ${rc}    ${0}

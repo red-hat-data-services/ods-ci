@@ -14,39 +14,39 @@ class CaikitPythonClient:
     def get_http_client_without_ssl_validation(self, host, port):
         self.client = HttpClient(f"{host}:{port}", verify=False)
         self.get_client()
-        # return  client
+        return  self.client
     
     @keyword
     def get_http_client_with_tls(self, host, port, ca_cert_path):
         self.client = HttpClient(f"{host}:{port}", ca_cert_path=ca_cert_path)
         self.get_client()
-        # return  client
+        return  self.client
         
     @keyword
     def get_http_client_with_mtls(self, host, port, ca_cert_path, client_cert_path, client_key_path):
         self.client = HttpClient(f"{host}:{port}", ca_cert_path=ca_cert_path, client_cert_path=client_cert_path,
                             client_key_path=client_key_path)
         self.get_client()
-        # return  client
+        return  self.client
     
     @keyword
     def get_grpc_client_without_ssl_validation(self, host, port):
         self.client = GrpcClient(host, port, verify=False)
         self.get_client()
-        # return  client
+        return  self.client
     
     @keyword
     def get_grpc_client_with_tls(self, host, port, ca_cert_path):
         self.client = GrpcClient(host, port, ca_cert_path=ca_cert_path)
         self.get_client()
-        # return  client    
+        return  self.client    
     
     @keyword
     def get_grpc_client_with_mtls(self, host, port, ca_cert, client_cert, client_key):
         self.client = GrpcClient(host, port, ca_cert=ca_cert, client_cert=client_cert,
                             client_key=client_key)
         self.get_client()
-        # return  client
+        return  self.client
     
     def get_client(self):
         if  self.client:

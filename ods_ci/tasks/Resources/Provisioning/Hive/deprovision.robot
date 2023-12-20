@@ -11,9 +11,6 @@ Set Hive Default Variables
     ${hive_namespace} =    Get Variable Value    ${hive_namespace}    rhods
     Set Suite Variable    ${hive_namespace}
 
-Clean Failed Cluster
-    Run Keyword If Test Failed      Deprovision Cluster
-
 Delete Cluster Configuration
     Log    Deleting cluster ${cluster_name} configuration    console=True
     @{Delete_Cluster} =    Oc Delete    kind=ClusterPool    name=${pool_name}

@@ -12,6 +12,7 @@ ${MODEL_S3_DIR}=    bloom-560m/bloom-560m-caikit
 ${ISVC_NAME}=    bloom-560m-caikit
 ${MODEL_ID}=    ${ISVC_NAME}
 ${STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${MODEL_S3_DIR}/
+${CERTS_BASE_FOLDER}=    ods_ci/tests/Resources/CLI/ModelServing
 
 
 *** Test Cases ***
@@ -27,9 +28,18 @@ Verify User Can Use GRPC With TLS
     ${client} =     CaikitPythonClient.Get Grpc Client With Tls    ${GRPC_HOST}    443    ca_cert_path=openshift_ca_istio_knative.crt
     ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
-
+ 
 Verify User Can Use GRPC With mTLS
-    # TO DO
+    [Setup]    Run Keywords
+    ...    GRPC Model Setup
+    ...    AND
+    ...    Generate Client Certificates    dirpath=${CERTS_BASE_FOLDER}
+    Log    ${GPRC_MODEL_DEPLOYED}
+    ${client} =     CaikitPythonClient.Get Grpc Client With Mtls    ${GRPC_HOST}    443    ca_cert=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
+    ...    client_cert=${CERTS_BASE_FOLDER}/client_certs/public.crt    client_key=${CERTS_BASE_FOLDER}/client_certs/private.key
+    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
+    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
+
 
 Verify User Can Use HTTP Without TLS
     # TO DO
@@ -49,7 +59,7 @@ Caikit Client Suite Setup
     ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][0][models][${ISVC_NAME}][response_text]    \\s+    ${SPACE}
     Set Suite Variable    ${QUERY_TEXT}
     Set Suite Variable    ${QUERY_EXP_RESPONSE}    ${cleaned_exp_response_text}
-    Fetch Knative CA Certificate
+    Fetch Knative CA Certificate    filename=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
 
 GRPC Model Setup
     IF    ${GPRC_MODEL_DEPLOYED} == ${FALSE}
@@ -64,6 +74,7 @@ GRPC Model Setup
         ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
         ...    namespace=${GRPC_MODEL_NS}    validate_response=${FALSE}
         ${GPRC_MODEL_DEPLOYED}=    Set Variable    ${TRUE}
+        # Set Suite Variable    ${GPRC_MODEL_DEPLOYED}    ${TRUE}
     ELSE
         Log    message=Skipping model deployment, it was marked as deployed in a previous test
     END

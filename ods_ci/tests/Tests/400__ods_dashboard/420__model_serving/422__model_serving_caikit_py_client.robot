@@ -25,6 +25,7 @@ ${FILE_TO_UPLOAD}=    ${CERTS_BASE_FOLDER}/${NOTEBOOK_FILENAME}    ${CERTS_BASE_
  
 *** Test Cases ***
 Verify User Can Use Caikit Nlp Client From Workbenches
+    [Tags]    Tier2    ODS-2595
     [Setup]    Run Keywords
     ...    Setup Models
     ...    AND

@@ -1,7 +1,6 @@
-from robot.api import logger
+from caikit_nlp_client import GrpcClient, HttpClient
 from robot.libraries.BuiltIn import BuiltIn
 from robotlibcore import keyword
-from caikit_nlp_client import HttpClient, GrpcClient
 
 
 class CaikitPythonClient:

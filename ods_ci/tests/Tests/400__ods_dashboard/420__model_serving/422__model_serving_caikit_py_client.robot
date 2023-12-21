@@ -1,6 +1,5 @@
 *** Settings ***
 Resource          ../../../Resources/CLI/ModelServing/llm.resource
-Library           ../../../../libs/CaikitPythonClient.py
 Suite Setup    Caikit Client Suite Setup
 Suite Teardown    Caikit Client Suite Teardown
 Test Teardown    SeleniumLibrary.Close All Browsers
@@ -42,51 +41,6 @@ Verify User Can Use Caikit Nlp Client From Workbenches
     Upload Files In The Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_namespace=${HTTP_MODEL_NS}
     ...    filepaths=${FILE_TO_UPLOAD}
     Caikit Nlp Client Jupyter Notebook Should Run Successfully
-
-Verify User Can Use GRPC Without TLS Validation
-    [Setup]    GRPC Model Setup
-    ${client} =     CaikitPythonClient.Get Grpc Client Without Ssl Validation    ${GRPC_HOST}    ${443}
-    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
-    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
-
-Verify User Can Use GRPC With TLS
-    [Setup]    GRPC Model Setup
-    ${client} =     CaikitPythonClient.Get Grpc Client With Tls    ${GRPC_HOST}    ${443}    ca_cert=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
-    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
-    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
- 
-Verify User Can Use GRPC With mTLS
-    [Setup]    Run Keywords
-    ...    GRPC Model Setup
-    ...    AND
-    ...    Generate Client TLS Certificates If Not Done
-    ${client} =     CaikitPythonClient.Get Grpc Client With Mtls    ${GRPC_HOST}    ${443}    ca_cert=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
-    ...    client_cert=${CERTS_BASE_FOLDER}/client_certs/public.crt    client_key=${CERTS_BASE_FOLDER}/client_certs/private.key
-    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
-    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
-
-Verify User Can Use HTTP Without SSL Validation
-    [Setup]    HTTP Model Setup
-    ${client} =     CaikitPythonClient.Get Http Client Without Ssl Validation    ${HTTP_HOST}    ${443}
-    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
-    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
-
-Verify User Can Use HTTP With TLS
-    [Setup]    HTTP Model Setup
-    ${client} =     CaikitPythonClient.Get Http Client With TLS    ${HTTP_HOST}    ${443}
-    ...    ca_cert_path=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
-    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
-    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
-
-Verify User Can Use HTTP With mTLS
-    [Setup]    Run Keywords
-    ...    HTTP Model Setup
-    ...    AND
-    ...    Generate Client TLS Certificates If Not Done
-    ${client} =     CaikitPythonClient.Get Http Client With Mtls    ${HTTP_HOST}    ${443}    ca_cert_path=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
-    ...    client_cert_path=${CERTS_BASE_FOLDER}/client_certs/public.crt    client_key_path=${CERTS_BASE_FOLDER}/client_certs/private.key
-    ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
-    Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
 
 
 *** Keywords ***

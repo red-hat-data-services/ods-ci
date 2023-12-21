@@ -3,6 +3,8 @@ Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Library           ../../../../libs/CaikitPythonClient.py
 Suite Setup    Caikit Client Suite Setup
 Suite Teardown    Caikit Client Suite Teardown
+Test Teardown    SeleniumLibrary.Close All Browsers
+
 
 *** Variables ***
 ${GPRC_MODEL_DEPLOYED}=    ${FALSE}
@@ -19,13 +21,13 @@ ${CERTS_GENERATED}=    ${FALSE}
 *** Test Cases ***
 Verify User Can Use GRPC Without TLS Validation
     [Setup]    GRPC Model Setup
-    ${client} =     CaikitPythonClient.Get Grpc Client Without Ssl Validation    ${GRPC_HOST}    443
+    ${client} =     CaikitPythonClient.Get Grpc Client Without Ssl Validation    ${GRPC_HOST}    ${443}
     ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
 
 Verify User Can Use GRPC With TLS
     [Setup]    GRPC Model Setup
-    ${client} =     CaikitPythonClient.Get Grpc Client With Tls    ${GRPC_HOST}    443    ca_cert=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
+    ${client} =     CaikitPythonClient.Get Grpc Client With Tls    ${GRPC_HOST}    ${443}    ca_cert=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
     ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
  
@@ -34,20 +36,20 @@ Verify User Can Use GRPC With mTLS
     ...    GRPC Model Setup
     ...    AND
     ...    Generate Client TLS Certificates If Not Done
-    ${client} =     CaikitPythonClient.Get Grpc Client With Mtls    ${GRPC_HOST}    443    ca_cert=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
+    ${client} =     CaikitPythonClient.Get Grpc Client With Mtls    ${GRPC_HOST}    ${443}    ca_cert=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
     ...    client_cert=${CERTS_BASE_FOLDER}/client_certs/public.crt    client_key=${CERTS_BASE_FOLDER}/client_certs/private.key
     ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
 
 Verify User Can Use HTTP Without SSL Validation
     [Setup]    HTTP Model Setup
-    ${client} =     CaikitPythonClient.Get Http Client Without Ssl Validation    ${HTTP_HOST}    443
+    ${client} =     CaikitPythonClient.Get Http Client Without Ssl Validation    ${HTTP_HOST}    ${443}
     ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
 
 Verify User Can Use HTTP With TLS
     [Setup]    HTTP Model Setup
-    ${client} =     CaikitPythonClient.Get Http Client With TLS    ${HTTP_HOST}    443
+    ${client} =     CaikitPythonClient.Get Http Client With TLS    ${HTTP_HOST}    ${443}
     ...    ca_cert_path=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
     ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
@@ -57,7 +59,7 @@ Verify User Can Use HTTP With mTLS
     ...    HTTP Model Setup
     ...    AND
     ...    Generate Client TLS Certificates If Not Done
-    ${client} =     CaikitPythonClient.Get Http Client With Mtls    ${HTTP_HOST}    443    ca_cert_path=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
+    ${client} =     CaikitPythonClient.Get Http Client With Mtls    ${HTTP_HOST}    ${443}    ca_cert_path=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
     ...    client_cert_path=${CERTS_BASE_FOLDER}/client_certs/public.crt    client_key_path=${CERTS_BASE_FOLDER}/client_certs/private.key
     ${response}=    CaikitPythonClient.Query Endpoint    ${MODEL_ID}    ${QUERY_TEXT}
     Should Be Equal As Strings    ${response}    ${QUERY_EXP_RESPONSE}
@@ -77,8 +79,18 @@ Caikit Client Suite Setup
 
 Caikit Client Suite Teardown
     ${isvc_names}=    Create List    ${ISVC_NAME}
-    Clean Up Test Project    test_ns=${GRPC_MODEL_NS}    isvc_names=${isvc_names}
-    Clean Up Test Project    test_ns=${HTTP_MODEL_NS}    isvc_names=${isvc_names}
+    ${exists}=    Run And Return Rc    oc get project ${GRPC_MODEL_NS}
+    IF    ${exists} == ${0}
+        Clean Up Test Project    test_ns=${GRPC_MODEL_NS}    isvc_names=${isvc_names}
+    ELSE
+        Log    message=Skipping deletion of ${GRPC_MODEL_NS} project: cannot retrieve it from the cluster
+    END
+    ${exists}=    Run And Return Rc    oc get project ${HTTP_MODEL_NS}
+    IF    ${exists} == ${0}
+        Clean Up Test Project    test_ns=${HTTP_MODEL_NS}    isvc_names=${isvc_names}
+    ELSE
+        Log    message=Skipping deletion of ${HTTP_MODEL_NS} project: cannot retrieve it from the cluster
+    END
     RHOSi Teardown
 
 GRPC Model Setup

@@ -19,7 +19,7 @@ ${NOTEBOOK_FILENAME}=    caikit-py-query.ipynb
 ${CERTS_GENERATED}=    ${FALSE}
 ${WORKBENCH_TITLE}=    caikit-nlp-client-wrk
 ${NB_IMAGE}=        Standard Data Science
-${FILE_TO_UPLOAD}=    ${CERTS_BASE_FOLDER}/${NOTEBOOK_FILENAME}    ${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
+@{FILES_TO_UPLOAD}=    ${CERTS_BASE_FOLDER}/${NOTEBOOK_FILENAME}    ${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
 ...    ${CERTS_BASE_FOLDER}/client_certs/public.crt    ${CERTS_BASE_FOLDER}/client_certs/private.key
 
  
@@ -40,7 +40,7 @@ Verify User Can Use Caikit Nlp Client From Workbenches
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
     Upload Files In The Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_namespace=${HTTP_MODEL_NS}
-    ...    filepaths=${FILE_TO_UPLOAD}
+    ...    filepaths=${FILES_TO_UPLOAD}
     Caikit Nlp Client Jupyter Notebook Should Run Successfully
 
 

@@ -579,3 +579,12 @@ Image Should Be Pinned To A Numeric Version
            Log  level=WARN  message=Image Tag "${image_tag}" is not in the format x.y.z-n or x.y-n or x.y
         END
     END
+
+Open Notebook File In JupyterLab
+    [Documentation]    Opens a given file from Jupyter explorer and waits until the
+    ...                new tab is open and selected
+    [Arguments]    ${filepath}
+    Open With JupyterLab Menu  File  Open from Path…
+    Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${filepath}
+    Click Element  xpath://div[.="Open"]
+    Wait Until ${filepath} JupyterLab Tab Is Selected

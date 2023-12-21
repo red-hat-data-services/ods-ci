@@ -16,9 +16,33 @@ ${ISVC_NAME}=    bloom-560m-caikit
 ${MODEL_ID}=    ${ISVC_NAME}
 ${STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${MODEL_S3_DIR}/
 ${CERTS_BASE_FOLDER}=    ods_ci/tests/Resources/CLI/ModelServing
+${NOTEBOOK_FILENAME}=    caikit-py-query.ipynb
 ${CERTS_GENERATED}=    ${FALSE}
+${WORKBENCH_TITLE}=    caikit-nlp-client-wrk
+${NB_IMAGE}=        Standard Data Science
+${FILE_TO_UPLOAD}=    ${CERTS_BASE_FOLDER}/${NOTEBOOK_FILENAME}    ${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
+...    ${CERTS_BASE_FOLDER}/client_certs/public.crt    ${CERTS_BASE_FOLDER}/client_certs/private.key
 
+ 
 *** Test Cases ***
+Verify User Can Use Caikit Nlp Client From Workbenches
+    [Setup]    Run Keywords
+    ...    Setup Models
+    ...    AND
+    ...    Generate Client TLS Certificates If Not Done
+    Open Data Science Project Details Page       project_title=${HTTP_MODEL_NS}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}    prj_title=${HTTP_MODEL_NS}
+    ...    workbench_description=test caikit-nlp-client    image_name=${NB_IMAGE}   deployment_size=Small
+    ...    storage=Persistent    pv_name=${NONE}  pv_existent=${NONE}    pv_description=${NONE}
+    ...    pv_size=${NONE}    envs=${WORKBENCH_VARS}            
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
+    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
+    Upload Files In The Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_namespace=${HTTP_MODEL_NS}
+    ...    filepaths=${FILE_TO_UPLOAD}
+    Caikit Nlp Client Jupyter Notebook Should Run Successfully
+
 Verify User Can Use GRPC Without TLS Validation
     [Setup]    GRPC Model Setup
     ${client} =     CaikitPythonClient.Get Grpc Client Without Ssl Validation    ${GRPC_HOST}    ${443}
@@ -135,6 +159,16 @@ HTTP Model Setup
     ${host}=    Get Kserve Inference Host Via UI    ${ISVC_NAME}
     Set Suite Variable    ${HTTP_HOST}    ${host}
 
+Setup Models
+    GRPC Model Setup
+    HTTP Model Setup
+    ${env_vars}=    Create Dictionary    MODEL_ID=${ISVC_NAME}
+    ...    HTTP_HOST=${HTTP_HOST}    GRPC_HOST=${GRPC_HOST}    PORT=${443}
+    ...    QUERY_TEXT=${QUERY_TEXT}    EXPECTED_ANSWER=${QUERY_EXP_RESPONSE}
+    ...    k8s_type=Secret  input_type=${KEYVALUE_TYPE}
+    ${workbench_vars}=    Create List   ${env_vars}
+    Set Suite Variable    ${WORKBENCH_VARS}    ${workbench_vars}
+
 Generate Client TLS Certificates If Not Done
     IF    ${CERTS_GENERATED} == ${FALSE}
         ${status}=    Run Keyword And Return Status    Generate Client TLS Certificates    dirpath=${CERTS_BASE_FOLDER}
@@ -146,3 +180,19 @@ Generate Client TLS Certificates If Not Done
     ELSE
         Log    message=Skipping generation of client TLS certs, it was marked as done in a previous test
     END
+
+Upload Files In The Workbench
+    [Arguments]    ${workbench_title}    ${workbench_namespace}    ${filepaths}
+    FOR    ${index}    ${filepath}    IN ENUMERATE    @{filepaths}
+        Log    ${index}: ${filepath}
+        ${rc}    ${out}=    Run And Return Rc And Output    oc cp ${EXECDIR}/${filepath} ${workbench_title}-0:/opt/app-root/src -n ${workbench_namespace}
+        Should Be Equal As Integers    ${rc}    ${0}
+    END
+
+Caikit Nlp Client Jupyter Notebook Should Run Successfully
+    [Arguments]    ${timeout}=120s
+    Open Notebook File In JupyterLab    filepath=${NOTEBOOK_FILENAME}
+    Open With JupyterLab Menu  Run  Run All Cells
+    Wait Until JupyterLab Code Cell Is Not Active  timeout=${timeout}
+    Sleep  1
+    JupyterLab Code Cell Error Output Should Not Be Visible

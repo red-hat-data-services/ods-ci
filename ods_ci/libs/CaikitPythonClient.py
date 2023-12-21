@@ -36,8 +36,8 @@ class CaikitPythonClient:
         return  self.client
     
     @keyword
-    def get_grpc_client_with_tls(self, host, port, ca_cert_path):
-        self.client = GrpcClient(host, port, ca_cert_path=ca_cert_path)
+    def get_grpc_client_with_tls(self, host, port, ca_cert):
+        self.client = GrpcClient(host, port, ca_cert=ca_cert)
         self.get_client()
         return  self.client    
     

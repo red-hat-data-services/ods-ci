@@ -18,7 +18,7 @@ ${CERTS_BASE_FOLDER}=    ods_ci/tests/Resources/CLI/ModelServing
 ${NOTEBOOK_FILENAME}=    caikit-py-query.ipynb
 ${CERTS_GENERATED}=    ${FALSE}
 ${WORKBENCH_TITLE}=    caikit-nlp-client-wrk
-${NB_IMAGE}=        Standard Data Science
+${NB_IMAGE}=        Minimal Python
 @{FILES_TO_UPLOAD}=    ${CERTS_BASE_FOLDER}/${NOTEBOOK_FILENAME}    ${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
 ...    ${CERTS_BASE_FOLDER}/client_certs/public.crt    ${CERTS_BASE_FOLDER}/client_certs/private.key
 

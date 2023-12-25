@@ -21,17 +21,18 @@ oc get -o json -n openshift-machine-api $SOURCE_MACHINESET  | jq -r > /tmp/sourc
 OLD_MACHINESET_NAME=$(jq '.metadata.name' -r /tmp/source-machineset.json )
 NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
 
+
 # Change instanceType and delete some stuff
-jq -r ".spec.template.spec.providerSpec.value.instanceType = \"$INSTANCE_TYPE\"
+jq -r '.spec.template.spec.providerSpec.value.instanceType="$INSTANCE_TYPE"
   | del(.metadata.selfLink)
   | del(.metadata.uid)
   | del(.metadata.creationTimestamp)
   | del(.metadata.resourceVersion)
-  " /tmp/source-machineset.json > /tmp/gpu-machineset.json
+  | .spec.template.spec.taints += [{"effect": "NoSchedule" , "key": "nvidia.com/gpu" , "value": "None"}]
+' /tmp/source-machineset.json > /tmp/gpu-machineset.json
 
 # Change machineset name
 sed -i "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" /tmp/gpu-machineset.json
-
 # Create new machineset
 oc apply -f /tmp/gpu-machineset.json
 rm /tmp/source-machineset.json

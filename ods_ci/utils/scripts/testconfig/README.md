@@ -14,7 +14,7 @@ Python 3.x
 2. Now run the script.
 
 ```
-# python3 utils/scripts/testconfig/generateTestConfigFile.py -u <gitlab_user> -p <gitlab_password> -t modh-qe-4
+# python3 utils/scripts/testconfig/generateTestConfigFile.py -u <gitlab_user> -p <gitlab_password> -r <gitlab_repo> -t modh-qe-4
 ```
 
 In case if you have already cloned config repo(odhcluster.git), then use the command,

@@ -42,7 +42,7 @@ def parse_args():
         help="config git repo for ods-ci tests",
         action="store",
         dest="git_repo",
-        default="https://gitlab.cee.redhat.com/ods/odhcluster.git",
+        required=True,
     )
     parser.add_argument(
         "-b",

@@ -14,9 +14,10 @@ Go To ${group_name} Group Page
     Wait Until Page Contains Element    xpath://h2/span[text()='Users']
 
 Create Group
-    [Documentation]     Creates a user group in OCP
+    [Documentation]     Creates a user group in OCP if it doesn't exist
     [Arguments]   ${group_name}
-    ${res}  ${output}=    Run And Return Rc And Output    oc adm groups new ${group_name}
+    ${res}  ${output}=    Run And Return Rc And Output    
+    ...    oc adm groups new ${group_name} --dry-run=client -o yaml | kubectl apply --validate=false -f -
     # Oc Create  kind=Group   src={"metadata": {"name": "${group_name}"}, "users": null}
     Should Be Equal As Integers    ${res}    0
 

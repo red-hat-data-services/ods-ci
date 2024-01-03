@@ -9,7 +9,7 @@ The infrastructure configuration variables are used to configure the infrastruct
 | `hive_claim_name` | The name of the claim. | `rhods{provider}claim` | `all` |
 | `hive_claim_ns` | The namespace of the claim. | `rhods` | `all` |
 | `image_set` | The image set name to use for the cluster. | `rhods-openshift` | `all` |
-| `aws_domain` | The AWS domain to use for the cluster. | `rhods.ccitredhat.com` | `aws` |
+| `base_domain` | The base domain to use for the cluster. | `""` | `aws` |
 | `worker_node_instance_type` | The instance type to use for the worker nodes. | `m5.xlarge` | `all` |
 | `worker_node_replicas` | The number of worker nodes to create. | `2` | `all` |
 | `master_node_instance_type` | The AWS instance type to use for the master nodes. | `m5.xlarge` | `all` |

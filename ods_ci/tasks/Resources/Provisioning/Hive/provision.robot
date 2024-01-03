@@ -101,11 +101,11 @@ Create Floating IPs
     Create File    ${osp_clouds_yaml}    ${result.stdout}
     File Should Not Be Empty    ${osp_clouds_yaml}
     ${shell_script} =     Catenate
-    ...    ${CURDIR}/OSP/create_fips.sh ${cluster_name} ${infrastructure_configurations}[aws_domain]
+    ...    ${CURDIR}/OSP/create_fips.sh ${cluster_name} ${infrastructure_configurations}[base_domain]
     ...    ${infrastructure_configurations}[osp_network] ${infrastructure_configurations}[osp_cloud_name] ${artifacts_dir}/    
     ${return_code} =    Run and Watch Command    ${shell_script}    output_should_contain=Exporting Floating IPs
     Should Be Equal As Integers	${return_code}	 0   msg=Error creating floating IPs for cluster '${cluster_name}'
-    ${fips_file_to_export} =    Set Variable    ${artifacts_dir}/${cluster_name}.${infrastructure_configurations}[aws_domain].fips
+    ${fips_file_to_export} =    Set Variable    ${artifacts_dir}/${cluster_name}.${infrastructure_configurations}[base_domain].fips
     Export Variables From File    ${fips_file_to_export}
 
 Watch Hive Install Log

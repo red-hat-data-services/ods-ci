@@ -1,12 +1,14 @@
 *** Settings ***
 Documentation    Collection of keywords to interact with Storages
 Resource       ./Projects.resource
+Resource       ../../../../../Resources/ODS.robot
 
 
 *** Variables ***
 ${SAVE_BUTTON}=    xpath://button[@data-id="save-rolebinding-button"]
 ${PERMISSIONS_DROPDOWN}=    xpath://td[@data-label="Permission"]//button[@aria-label="Options menu"]
 ${IS_CLUSTER_ADMIN}=    ${FALSE}
+${CUSTOM_EMPTY_GROUP}=    empty-group
 
 
 *** Keywords ***

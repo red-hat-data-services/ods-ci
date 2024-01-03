@@ -82,7 +82,7 @@ Verify Project Sharing Does Not Override Dashboard Permissions
     # [Setup]    Run Keywords  Restore Permissions Of The Project
     # ...         AND           Set RHODS Admins Group Empty Group
     [Setup]    Set RHODS Admins Group Empty Group     
-    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
+    Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}
     Move To Tab    Permissions
     Remove User From Group    username=${USER_B}
     ...    group_name=rhods-users

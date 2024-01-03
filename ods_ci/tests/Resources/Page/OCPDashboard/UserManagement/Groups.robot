@@ -32,7 +32,7 @@ Add User To Group
     Run    oc adm groups add-users ${group_name} ${username}
 
 Remove User From Group
-    [Documentation]     Add a user to a given OCP user group
+    [Documentation]     Remove a user from a given OCP user group
     [Arguments]  ${username}  ${group_name}
     Run    oc adm groups remove-users ${group_name} ${username}
 

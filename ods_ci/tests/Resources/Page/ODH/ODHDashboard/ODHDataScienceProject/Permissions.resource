@@ -106,37 +106,43 @@ Is ${username} In The Permissions Table
     RETURN    ${present}
 
 Set RHODS Admins Group Empty Group
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    [Documentation]     Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
     ...                 to the given empty group (i.e., with no users)
     Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}
 
 Set RHODS Admins Group To system:authenticated    # robocop:disable
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
-    ...                 to the given empty group (i.e., with no users)
+    [Documentation]     Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
+    ...                 to the system:authenticated group
     Set Access Groups Settings    admins_group=system:authenticated
     ...     users_group=${STANDARD_USERS_GROUP}
 
-Set RHODS Users Group Empty Group
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
-    ...                 to the given empty group (i.e., with no users)
-    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${CUSTOM_EMPTY_GROUP}
-
 Set RHODS Admins Group To Inexistent Group
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    [Documentation]     Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
     ...                 to the given inexistent group
     Set Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
     ...     users_group=${STANDARD_USERS_GROUP}
 
+Set RHODS Users Group Empty Group
+    [Documentation]     Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${CUSTOM_EMPTY_GROUP}
+
+Set RHODS Users Group To rhods-users    # robocop:disable
+    [Documentation]     Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
+    ...                 to the rhods-users group
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...     users_group=${STANDARD_USERS_GROUP}
+
 Set RHODS Users Group To Inexistent Group
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
+    [Documentation]     Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
     ...                 to the given inexistent group
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...     users_group=${CUSTOM_INEXISTENT_GROUP}
 
 Set Default Groups And Check Logs Do Not Change
-    [Documentation]     Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "rhods-groups-config"
+    [Documentation]     Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "odh-dashboard-config"
     ...                 ConfigMap and checks if no new lines are generated in the logs after that.
     [Arguments]     ${delete_group}=${FALSE}
     ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs

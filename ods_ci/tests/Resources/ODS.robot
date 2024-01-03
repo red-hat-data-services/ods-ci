@@ -89,6 +89,7 @@ Set Standard RHODS Groups Variables
         Set Suite Variable    ${STANDARD_ADMINS_GROUP}      rhods-admins
     END
     Set Suite Variable    ${STANDARD_USERS_GROUP}       system:authenticated
+    Set Suite Variable    ${STANDARD_USERS_GROUP}       rhods-users
 
 
 Apply Access Groups Settings

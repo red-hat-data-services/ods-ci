@@ -79,9 +79,9 @@ Verify User Can Assign Access Permissions To User Groups
 Verify Project Sharing Does Not Override Dashboard Permissions
     [Tags]    Tier1    Sanity
     ...       ODS-2223
-    # [Setup]    Run Keywords  Restore Permissions Of The Project
-    # ...         AND           Set RHODS Admins Group Empty Group
-    [Setup]    Set RHODS Admins Group Empty Group     
+    [Setup]    Run Keywords  Restore Permissions Of The Project
+    ...         AND           Set RHODS Users Group To rhods-users
+    # [Setup]    Set RHODS Users Group To rhods-users     
     Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}
     Move To Tab    Permissions
     Remove User From Group    username=${USER_B}
@@ -101,8 +101,8 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     ...                It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    Set Standard RHODS Groups Variables
-    Set Default Access Groups Settings
+    # Set Standard RHODS Groups Variables
+    # Set Default Access Groups Settings
     ${to_delete}=    Create List
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Launch RHODS Dashboard Session With User A

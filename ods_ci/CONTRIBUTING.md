@@ -29,6 +29,9 @@ When contributing to this repository, please first discuss the change you wish t
      git commit -s -m "Add alerts tests"
      ```
 
+Please bear in mind that each commit should contain just the necessary changes and relevant to the particular work.
+Separate parts of works should be either in a separate PRs or in a separate commits at least if that makes sense for your scenario.
+
 - [Create a personal access token in Github](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to be able to push your changes
 
 - Push your changes:  ```git push```
@@ -44,20 +47,6 @@ When contributing to this repository, please first discuss the change you wish t
   git push -f
   ```
 
-- Test your PR in Jenkins using the rhods-ci-pr-test pipeline
-   - https://opendatascience-jenkins-csb-rhods.apps.ocp-c1.prod.psi.redhat.com/job/rhods-ci-pr-test
-   - Log in if required
-   - Build with Parameters (if you don't see this option contact the QE team)
-     - Set the PR id (e.g. 42) in ODS_GIT_REPO_PULL_REQUEST_ID
-     - Select TEST_CLUSTER
-     - Build
-
-- Once finished, add a comment to the PR with the test run results, and a link like in the example below and add the label _Verified_ to the PR using GitHub interface:
-
-  ```
-  https://opendatascience-jenkins-csb-rhods.apps.ocp-c1.prod.psi.redhat.com/job/rhods-ci-pr-test/49/console
-
-  Result: passing except for the Git plugin missing from the minimal image
-  ```
+- Test your PR executing the changed code and other relevant parts which make sense to assure your changes work as expected.
 
 - Participate in the feedback of your PR until is merged

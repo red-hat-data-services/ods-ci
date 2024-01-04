@@ -257,9 +257,11 @@ Verify user can create a workbench with an existing data connection
     [Tags]  Tier1  ODS-2176
     [Documentation]  Verifies users can create a workbench with an existing data connection
 
+    ${data_connection_name}=    Set Variable    aDataConnection
+
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create S3 Data Connection  project_title=${PRJ_TITLE}
-    ...                    dc_name=${DC_S3_NAME}
+    ...                    dc_name=${data_connection_name}
     ...                    aws_access_key=dummy-key
     ...                    aws_secret_access=dummy-secret
     ...                    aws_s3_endpoint=${DC_S3_ENDPOINT}
@@ -267,13 +269,14 @@ Verify user can create a workbench with an existing data connection
     Create Workbench  workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                storage=Persistent  pv_existent=${NONE}  pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    ...                data_connection=${DC_S3_NAME}
+    ...                data_connection=${data_connection_name}
 
     # The Workbench and the Data connection appear on the project details page.
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     # The data connection has the workbench name in the "Connected workbenches" column
     ${workbenches}=    Create Dictionary    ${WORKBENCH_TITLE}=mount-data
-    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    Data Connection Should Be Listed    name=${data_connection_name}    type=${DC_S3_TYPE}
+    ...                connected_workbench=${workbenches}
 
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864

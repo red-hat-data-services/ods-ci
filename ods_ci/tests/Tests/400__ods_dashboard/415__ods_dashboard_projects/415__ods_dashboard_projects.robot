@@ -278,6 +278,9 @@ Verify user can create a workbench with an existing data connection
     Data Connection Should Be Listed    name=${data_connection_name}    type=${DC_S3_TYPE}
     ...                connected_workbench=${workbenches}
 
+    [Teardown]  Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
+    ...                project_title=${PRJ_TITLE}
+
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation

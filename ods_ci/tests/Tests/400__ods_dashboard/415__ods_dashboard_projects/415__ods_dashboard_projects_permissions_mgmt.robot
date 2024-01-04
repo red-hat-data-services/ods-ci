@@ -1,34 +1,40 @@
 *** Settings ***
-Documentation      Suite to test additional scenarios for Data Science Projects (a.k.a DSG) feature
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
-Suite Setup        Project Permissions Mgmt Suite Setup
-Suite Teardown     Project Permissions Mgmt Suite Teardown
+Documentation       Suite to test additional scenarios for Data Science Projects (a.k.a DSG) feature
+
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
+
+Suite Setup         Project Permissions Mgmt Suite Setup
+Suite Teardown      Project Permissions Mgmt Suite Teardown
 
 
 *** Variables ***
-${PRJ_BASE_TITLE}=   ODS-CI DS Project
-${PRJ_DESCRIPTION}=   ${PRJ_BASE_TITLE} is a test project for validating DS Project Sharing feature
-${WORKBENCH_DESCRIPTION}=   a test workbench to check project sharing
-${NB_IMAGE}=        Minimal Python
-${PV_NAME}=         ods-ci-project-sharing
-${PV_DESCRIPTION}=         it is a PV created to test DS Projects Sharing feature
-${PV_SIZE}=         1
-${USER_GROUP_1}=    ds-group-1
-${USER_GROUP_2}=    ds-group-2
+${PRJ_BASE_TITLE}=              ODS-CI DS Project
+${PRJ_DESCRIPTION}=             ${PRJ_BASE_TITLE} is a test project for validating DS Project Sharing feature
+${WORKBENCH_DESCRIPTION}=       a test workbench to check project sharing
+${NB_IMAGE}=                    Minimal Python
+${PV_NAME}=                     ods-ci-project-sharing
+${PV_DESCRIPTION}=              it is a PV created to test DS Projects Sharing feature
+${PV_SIZE}=                     1
+${USER_GROUP_1}=                ds-group-1
+${USER_GROUP_2}=                ds-group-2
+${USER_A}=                      ${TEST_USER_2.USERNAME}
+${USER_B}=                      ${TEST_USER_3.USERNAME}
+${PRJ_USER_B_TITLE}=            ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
+${USER_C}=                      ${TEST_USER_4.USERNAME}
+${PRJ_USER_C_TITLE}=            ${PRJ_BASE_TITLE}-${TEST_USER_4.USERNAME}
+
 
 *** Test Cases ***
 Verify User Can Access Permission Tab In Their Owned DS Project
     [Documentation]    Verify user has access to "Permissions" tab in their DS Projects
-    [Tags]    Tier1    Smoke    OpenDataHub
-    ...       ODS-2194
-    Pass Execution    The Test is executed as part of Suite Setup
+    [Tags]                  Tier1                   Smoke                   OpenDataHub             ODS-2194
+    Pass Execution          The Test is executed as part of Suite Setup
 
 Verify User Can Make Their Owned DS Project Accessible To Other Users    # robocop: disable
     [Documentation]    Verify user can give access permissions for their DS Projects to other users
-    [Tags]    Tier1    Sanity
-    ...       ODS-2201
-    Switch To User    ${USER_B}
-    Move To Tab    Permissions
+    [Tags]                  Tier1                   Sanity                  ODS-2201
+    Switch To User          ${USER_B}
+    Move To Tab             Permissions
     Assign Edit Permissions To User ${USER_C}
     Assign Admin Permissions To User ${USER_A}
     ${USER_C} Should Have Edit Access To ${PRJ_USER_B_TITLE}
@@ -36,69 +42,67 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users    # roboc
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users    # robocop: disable
     [Documentation]    Verify user can modify/remove access permissions for their DS Projects to other users
-    [Tags]    Tier1    Sanity
-    ...       ODS-2202
-    Switch To User    ${USER_B}
-    Move To Tab    Permissions
+    [Tags]                  Tier1                   Sanity                  ODS-2202
+    Switch To User          ${USER_B}
+    Move To Tab             Permissions
     Change ${USER_C} Permissions To Admin
     Change ${USER_A} Permissions To Edit
     Refresh Pages
     ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
     ${USER_A} Should Have Edit Access To ${PRJ_USER_B_TITLE}
-    Switch To User    ${USER_B}
-    Move To Tab    Permissions
+    Switch To User          ${USER_B}
+    Move To Tab             Permissions
     Remove ${USER_C} Permissions
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
 Verify User Can Assign Access Permissions To User Groups
-    [Tags]    Tier1    Sanity
-    ...       ODS-2208
-    [Setup]    Restore Permissions Of The Project
-    Switch To User    ${USER_B}
+    [Tags]                  Tier1                   Sanity                  ODS-2208
+    [Setup]                 Restore Permissions Of The Project
+    Switch To User          ${USER_B}
     Assign Edit Permissions To Group ${USER_GROUP_1}
     Assign Admin Permissions To Group ${USER_GROUP_2}
-    RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_GROUP_1}
+    RoleBinding Should Exist                        project_title=${PRJ_USER_B_TITLE}
+    ...                     subject_name=${USER_GROUP_1}
 
-    RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
-    ...    subject_name=${USER_GROUP_2}
-    Sleep   5s
+    RoleBinding Should Exist                        project_title=${PRJ_USER_B_TITLE}
+    ...                     subject_name=${USER_GROUP_2}
+    Sleep                   5s
     ${USER_A} Should Have Edit Access To ${PRJ_USER_B_TITLE}
     ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
-    Switch To User    ${USER_B}
+    Switch To User          ${USER_B}
     Change ${USER_GROUP_1} Permissions To Admin
     Change ${USER_GROUP_2} Permissions To Edit
-    Sleep   5s
+    Sleep                   5s
     ${USER_A} Should Have Admin Access To ${PRJ_USER_B_TITLE}
     ${USER_C} Should Have Edit Access To ${PRJ_USER_B_TITLE}
-    Switch To User    ${USER_B}
+    Switch To User          ${USER_B}
     Remove ${USER_GROUP_2} Permissions
-    Sleep   5s
+    Sleep                   5s
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
 Verify Project Sharing Does Not Override Dashboard Permissions
-    [Tags]    Tier1    Sanity
-    ...       ODS-2223
-    [Setup]    Run Keywords  Restore Permissions Of The Project
-    ...         AND           Set RHODS Users Group To rhods-users
-    # [Setup]    Set RHODS Users Group To rhods-users     
-    Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}
-    Move To Tab    Permissions
-    Remove User From Group    username=${USER_B}
-    ...    group_name=rhods-users
-    Remove User From Group    username=${USER_C}
-    ...    group_name=rhods-users
+    [Tags]                  Tier1                   Sanity                  ODS-2223
+    [Setup]                 Run Keywords            Restore Permissions Of The Project
+    ...                     AND                     Set RHODS Users Group To rhods-users
+    # [Setup]    Set RHODS Users Group To rhods-users
+    Launch Data Science Project Main Page           username=${TEST_USER.USERNAME}
+    Move To Tab             Permissions
+    Remove User From Group                          username=${USER_B}
+    ...                     group_name=rhods-users
+    Remove User From Group                          username=${USER_C}
+    ...                     group_name=rhods-users
     Assign Admin Permissions To User ${USER_B}
     Assign Edit Permissions To User ${USER_C}
     ${USER_B} Should Not Have Access To ${PRJ_USER_B_TITLE}
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
-    [Teardown]    Run Keywords  Set RHODS Admins Group To system:authenticated
-    ...         AND           Set User Groups For Testing
+    [Teardown]              Run Keywords            Set RHODS Admins Group To system:authenticated
+    ...                     AND                     Set User Groups For Testing
+
 
 *** Keywords ***
 Project Permissions Mgmt Suite Setup    # robocop: disable
     [Documentation]    Suite setup steps for testing DS Projects.
-    ...                It creates some test variables and runs RHOSi setup
+    ...    It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Set Standard RHODS Groups Variables
@@ -113,9 +117,9 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
 
 Project Permissions Mgmt Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
-    ...                all the DS projects created by the tests and run RHOSi teardown
+    ...    all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete Data Science Projects From CLI    ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
     Remove User From Group    username=${USER_A}
     ...    group_name=rhods-users
@@ -140,14 +144,12 @@ Switch To User
     Set Suite Variable    ${IS_CLUSTER_ADMIN}    ${is_cluster_admin}
 
 Launch RHODS Dashboard Session With User A
-    Launch Dashboard    ocp_user_name=${TEST_USER_2.USERNAME}  ocp_user_pw=${TEST_USER_2.PASSWORD}
+    Launch Dashboard    ocp_user_name=${TEST_USER_2.USERNAME}    ocp_user_pw=${TEST_USER_2.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_2.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
-    ...    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
+    ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
     ...    browser_alias=${TEST_USER_2.USERNAME}-session
-    Set Suite Variable    ${USER_A}    ${TEST_USER_2.USERNAME}
 
 Launch RHODS Dashboard Session And Create A DS Project With User B
-    ${PRJ_USER_B_TITLE}=    Set Variable   ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_B_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
@@ -157,11 +159,8 @@ Launch RHODS Dashboard Session And Create A DS Project With User B
     ...    description=${PRJ_DESCRIPTION}
     Permissions Tab Should Be Accessible
     Components Tab Should Be Accessible
-    Set Suite Variable    ${USER_B}    ${TEST_USER_3.USERNAME}
-    Set Suite Variable    ${PRJ_USER_B_TITLE}    ${PRJ_USER_B_TITLE}
 
 Launch RHODS Dashboard Session With User C
-    ${PRJ_USER_C_TITLE}=    Set Variable   ${PRJ_BASE_TITLE}-${TEST_USER_4.USERNAME}
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_C_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
     ...    password=${TEST_USER_4.PASSWORD}
@@ -171,8 +170,6 @@ Launch RHODS Dashboard Session With User C
     ...    description=${PRJ_DESCRIPTION}
     Permissions Tab Should Be Accessible
     Components Tab Should Be Accessible
-    Set Suite Variable    ${USER_C}    ${TEST_USER_4.USERNAME}
-    Set Suite Variable    ${PRJ_USER_C_TITLE}    ${PRJ_USER_C_TITLE}
 
 Set User Groups For Testing
     Create Group    ${USER_GROUP_1}
@@ -196,13 +193,9 @@ Restore Permissions Of The Project
     Switch To User    ${USER_B}
     Move To Tab    Permissions
     ${present_a}=    Is ${USER_A} In The Permissions Table
-    IF    ${present_a} == ${TRUE}
-        Remove ${USER_A} Permissions
-    END
+    IF    ${present_a} == ${TRUE}    Remove ${USER_A} Permissions
     ${present_c}=    Is ${USER_C} In The Permissions Table
-    IF    ${present_c} == ${TRUE}
-        Remove ${USER_C} Permissions
-    END
+    IF    ${present_c} == ${TRUE}    Remove ${USER_C} Permissions
     ${USER_A} Should Not Have Access To ${PRJ_USER_B_TITLE}
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
@@ -226,14 +219,18 @@ Reload Page If Project ${project_title} Is Not Listed
     ${is_listed}=    Run Keyword And Return Status
     ...    Project Should Be Listed    project_title=${project_title}
     IF    ${is_listed} == ${FALSE}
-        Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list!    # robocop:disable
+        # robocop:disable
+        Log
+        ...    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list!
         ...    level=WARN
         Reload RHODS Dashboard Page    expected_page=Data Science Projects
         ...    wait_for_cards=${FALSE}
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${FALSE}
-            Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
+            # robocop:disable
+            Log
+            ...    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list! (2)
             ...    level=WARN
             Reload RHODS Dashboard Page    expected_page=Data Science Projects
             ...    wait_for_cards=${FALSE}
@@ -244,14 +241,18 @@ Reload Page If Project ${project_title} Is Listed
     ${is_listed}=    Run Keyword And Return Status
     ...    Project Should Be Listed    project_title=${project_title}
     IF    ${is_listed} == ${TRUE}
-        Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list!    # robocop:disable
+        # robocop:disable
+        Log
+        ...    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list!
         ...    level=WARN
         Reload RHODS Dashboard Page    expected_page=Data Science Projects
         ...    wait_for_cards=${FALSE}
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${TRUE}
-            Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
+            # robocop:disable
+            Log
+            ...    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list! (2)
             ...    level=WARN
             Reload RHODS Dashboard Page    expected_page=Data Science Projects
             ...    wait_for_cards=${FALSE}

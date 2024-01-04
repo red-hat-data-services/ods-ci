@@ -64,7 +64,7 @@ Create Workbench
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
     END
-    IF    "${data_connection} != ${NONE}"
+    IF    "${data_connection}" != "${NONE}"
         Add Existing Data Connection In Workbench    data_connection=${data_connection}
     END
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0

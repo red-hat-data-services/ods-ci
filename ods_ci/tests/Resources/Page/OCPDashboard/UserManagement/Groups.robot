@@ -24,7 +24,10 @@ Create Group
 Delete Group
     [Documentation]     Deletes a user group in OCP
     [Arguments]   ${group_name}
-    Oc Delete  kind=Group   name=${group_name}
+    ${res}  ${output}=    Run And Return Rc And Output    
+    ...    oc adm groups delete ${group_name} --dry-run=client -o yaml | kubectl apply --validate=false -f -
+    # Oc Delete  kind=Group   name=${group_name}
+    Should Be Equal As Integers    ${res}    0
 
 Add User To Group
     [Documentation]     Add a user to a given OCP user group

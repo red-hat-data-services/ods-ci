@@ -101,7 +101,7 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     ...                It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    # Set Standard RHODS Groups Variables
+    Set Standard RHODS Groups Variables
     # Set Default Access Groups Settings
     ${to_delete}=    Create List
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}

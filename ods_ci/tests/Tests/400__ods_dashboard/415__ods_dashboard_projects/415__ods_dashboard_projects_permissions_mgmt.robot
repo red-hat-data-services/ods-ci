@@ -82,19 +82,24 @@ Verify User Can Assign Access Permissions To User Groups
 
 Verify Project Sharing Does Not Override Dashboard Permissions
     [Tags]                  Tier1                   Sanity                  ODS-2223
-    [Setup]                 Run Keywords            Restore Permissions Of The Project
-    ...                     AND                     Set RHODS Users Group To rhods-users
-    # [Setup]    Set RHODS Users Group To rhods-users
-    Launch Data Science Project Main Page           username=${TEST_USER.USERNAME}
-    Move To Tab             Permissions
-    Remove User From Group                          username=${USER_B}
-    ...                     group_name=rhods-users
-    Remove User From Group                          username=${USER_C}
-    ...                     group_name=rhods-users
-    Assign Admin Permissions To User ${USER_B}
-    Assign Edit Permissions To User ${USER_C}
-    ${USER_B} Should Not Have Access To ${PRJ_USER_B_TITLE}
-    ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
+    # [Setup]                 Run Keywords            Restore Permissions Of The Project
+    # ...                     AND                     Set RHODS Users Group To rhods-users
+    [Setup]                 Set RHODS Users Group To rhods-users
+    # Launch Data Science Project Main Page           username=${TEST_USER.USERNAME}
+    Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
+    ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
+    # Switch To User    ${USER_A}
+    # Open Data Science Projects Home Page
+    Assign Admin Permissions To User ${USER_B} in Project ${PRJ_USER_B_TITLE}
+    Assign Edit Permissions To User ${USER_C} in Project ${PRJ_USER_C_TITLE}
+    Remove User From Group    username=${USER_B}    group_name=rhods-users
+    Remove User From Group    username=${USER_C}    group_name=rhods-users
+    Switch To User    ${USER_B}
+    Wait for RHODS Dashboard to Load    expected_page=${NONE}    wait_for_cards=${FALSE}
+    Page Should Contain    Access permissions needed
+    Switch To User    ${USER_C}
+    Wait for RHODS Dashboard to Load    expected_page=${NONE}    wait_for_cards=${FALSE}
+    Page Should Contain    Access permissions needed
     [Teardown]              Run Keywords            Set RHODS Admins Group To system:authenticated
     ...                     AND                     Set User Groups For Testing
 
@@ -106,7 +111,7 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Set Standard RHODS Groups Variables
-    # Set Default Access Groups Settings
+    Set Default Access Groups Settings
     ${to_delete}=    Create List
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Launch RHODS Dashboard Session With User A
@@ -284,3 +289,10 @@ ${username} Should Not Have Access To ${project_title}
     Project Should Not Be Listed    project_title=${project_title}
     RoleBinding Should Not Exist    project_title=${project_title}
     ...    subject_name=${username}
+
+Assign ${permission_type} Permissions To User ${username} in Project ${project_title}
+    Open Data Science Projects Home Page
+    Wait Until Project Is Listed    project_title=${project_title}
+    Open Data Science Project Details Page    ${project_title}
+    Move To Tab             Permissions
+    Assign ${permission_type} Permissions To User ${username}

@@ -14,6 +14,7 @@
 
 # source https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py
 from kfp import components, dsl
+
 from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
 
 

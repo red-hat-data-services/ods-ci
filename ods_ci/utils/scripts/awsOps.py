@@ -1,8 +1,7 @@
-from util import (
-    execute_command,
-)
 from logging import log
 from time import sleep
+
+from util import execute_command
 
 
 def aws_configure(aws_access_key_id, aws_secret_access_key, aws_region):

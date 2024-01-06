@@ -43,7 +43,7 @@ class ReportPortalOperations:
     def upload_result(self):
         """Uploads test results to report portal"""
 
-        cmd = "rp_preproc -c {} -d {} " "--service {} -l {}".format(
+        cmd = "rp_preproc -c {} -d {} --service {} -l {}".format(
             self.config_file, self.payload_dir, self.service_url, self.log_path
         )
         log.info("CMD: {}".format(cmd))

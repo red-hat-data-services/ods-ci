@@ -1,9 +1,9 @@
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
+from robotlibcore import keyword
 from semver import VersionInfo
 
 from ods_ci.utils.scripts.ocm.ocm import OpenshiftClusterManager
-from robotlibcore import keyword
 
 
 class Helpers:
@@ -136,7 +136,7 @@ class Helpers:
             elif line.startswith("Events:"):
                 break
             else:
-                if saving == True:
+                if saving is True:
                     tolerations.append(line.strip())
                     print(line)
                     print(tolerations)
@@ -213,7 +213,7 @@ class Helpers:
                     # if element is model name, don't care about ID
                     result_ex = model_name.match(expected)
                     result_rec = model_name.match(received)
-                    if result_ex != None and result_rec != None:
+                    if result_ex is not None and result_rec is not None:
                         if expected.split("__")[0] != received.split("__")[0]:
                             failures.append([expected, received])
                     # else compare values are equal
@@ -245,8 +245,9 @@ class Helpers:
     ):
         import os
         import random
-        import requests
         from pathlib import Path
+
+        import requests
 
         for _ in range(no_requests):
             data_img = [
@@ -304,11 +305,11 @@ class Helpers:
                 resource_name = line.split()[1]
                 resource_name = regex.sub(repl="", string=resource_name)
                 out.append(line.split()[0] + " " * spaces + resource_name + "\n")
-        if filename_out == None:
+        if filename_out is None:
             filename_out = filename_in.split(".")[0] + "_processed.txt"
         with open(filename_out, "w") as outfile:
             outfile.write("".join(str(l) for l in out))
 
     @keyword
     def escape_forward_slashes(self, string_to_escape):
-        return string_to_escape.replace('/','\/')
+        return string_to_escape.replace("/", "\/")

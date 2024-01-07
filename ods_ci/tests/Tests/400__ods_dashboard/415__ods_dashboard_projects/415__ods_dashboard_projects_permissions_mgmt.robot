@@ -92,10 +92,11 @@ Verify Project Sharing Does Not Override Dashboard Permissions
     Assign Admin Permissions To User ${USER_B} in Project ${PRJ_USER_B_TITLE}
     Assign Edit Permissions To User ${USER_C} in Project ${PRJ_USER_C_TITLE}
     Remove User From Group    username=${USER_B}    group_name=rhods-users
+    Remove User From Group    username=${USER_B}    group_name=rhods-admins
     Remove User From Group    username=${USER_C}    group_name=rhods-users
+    Remove User From Group    username=${USER_C}    group_name=rhods-admins
     Verify No Permissions For User ${USER_B}
     Verify No Permissions For User ${USER_C}
-    Switch To User    ${USER_B}
     [Teardown]              Run Keywords            Set RHODS Admins Group To system:authenticated
     ...                     AND                     Set User Groups For Testing
 
@@ -217,38 +218,28 @@ Refresh Pages
     ...    wait_for_cards=${FALSE}
 
 Reload Page If Project ${project_title} Is Not Listed
-    ${is_listed}=    Run Keyword And Return Status
-    ...    Project Should Be Listed    project_title=${project_title}
-    IF    ${is_listed} == ${FALSE}
-        Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list!    # robocop:disable
-        ...    level=WARN
-        Reload RHODS Dashboard Page    expected_page=Data Science Projects
-        ...    wait_for_cards=${FALSE}
+    ${is_listed} =    Set Variable    ${FALSE}
+    WHILE   not ${is_listed}    limit=3m    on_limit_message=Timeout exceeded waiting for project ${project_title} to be listed    # robotcode: ignore
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${FALSE}
-            Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
-            ...    level=WARN
+            Log    message=Project ${project_title} is not listed but expected: Reloading DS Project page to refresh project list!    level=WARN
             Reload RHODS Dashboard Page    expected_page=Data Science Projects
             ...    wait_for_cards=${FALSE}
+            Sleep   5s
         END
     END
 
 Reload Page If Project ${project_title} Is Listed
-    ${is_listed}=    Run Keyword And Return Status
-    ...    Project Should Be Listed    project_title=${project_title}
-    IF    ${is_listed} == ${TRUE}
-        Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list!    # robocop:disable
-        ...    level=WARN
-        Reload RHODS Dashboard Page    expected_page=Data Science Projects
-        ...    wait_for_cards=${FALSE}
+    ${is_listed} =    Set Variable    ${TRUE}
+    WHILE   ${is_listed}    limit=3m    on_limit_message=Timeout exceeded waiting for project ${project_title} NOT expected to be listed    # robotcode: ignore
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${TRUE}
-            Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
-            ...    level=WARN
+            Log    message=Project ${project_title} is still listed but NOT expected: Reloading DS Project page to refresh project list!    level=WARN
             Reload RHODS Dashboard Page    expected_page=Data Science Projects
             ...    wait_for_cards=${FALSE}
+            Sleep   5s
         END
     END
 
@@ -287,5 +278,8 @@ Assign ${permission_type} Permissions To User ${username} in Project ${project_t
 
 Verify No Permissions For User ${username}
     Switch To User    ${username}
-    Wait for RHODS Dashboard to Load    expected_page=${NONE}    wait_for_cards=${FALSE}
-    Page Should Contain    Access permissions needed
+    ${permissions_set} =    Set Variable    ${FALSE}
+    WHILE   not ${permissions_set}    limit=3m    on_limit_message=Timeout exceeded waiting for user ${username} permissions to be updated    # robotcode: ignore
+        ${permissions_set}=    Run Keyword And Return Status    Wait Until Page Contains     Access permissions needed    timeout=15
+        IF    ${permissions_set} == ${FALSE}    Reload Page
+    END

@@ -31,7 +31,7 @@ Change ${username} Permissions To ${permission_type}
     Save Permission
 
 Remove ${username} Permissions
-    [Documentation]    Remove the the access to the given user ${username}
+    [Documentation]    Remove the access to the given user ${username}
     ...    from the currently open DS Project in UI
     Permissions.Click Action From Actions Menu    username=${username}
     ...    action=Delete

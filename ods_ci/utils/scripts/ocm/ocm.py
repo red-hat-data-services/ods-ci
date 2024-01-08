@@ -18,8 +18,6 @@ import yaml
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 from logger import log
-
-# fmt: off
 from util import (
     clone_config_repo,
     compare_dicts,
@@ -28,8 +26,6 @@ from util import (
     read_yaml,
     write_data_in_json,
 )
-
-# fmt: on
 
 """
 Class for Openshift Cluster Manager
@@ -1423,10 +1419,12 @@ class OpenshiftClusterManager:
             latest_upgrade_version = ast.literal_eval(latest_upgrade_version)[-1]
             data["version"] = latest_upgrade_version
         write_data_in_json(self.update_policies_json, data)
-        # fmt: off
+
         schedule_cluster_upgrade = (
             "ocm --v={} post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"
-            " --body {}".format(self.ocm_verbose_level, cluster_id, self.update_policies_json)
+            " --body {}".format(
+                self.ocm_verbose_level, cluster_id, self.update_policies_json
+            )
         )
         ret = execute_command(schedule_cluster_upgrade)
         if ret is None:

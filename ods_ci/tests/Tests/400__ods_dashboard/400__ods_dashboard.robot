@@ -5,7 +5,6 @@ Resource          ../../Resources/RHOSi.resource
 Resource          ../../Resources/ODS.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
 Resource          ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource          ../../Resources/Page/LoginPage.robot
 Resource          ../../Resources/Page/OCPLogin/OCPLogin.robot
@@ -397,6 +396,18 @@ Logs Of Dashboard Pods Should Not Contain New Lines
         ...                 Wait Until New Log Lines Are Generated In A Dashboard Pod
         ...                 prev_length=${lengths_dict}[${pod_name}]  pod_name=${pod_name}
         Run Keyword And Continue On Failure     Should Be Equal     ${new_lines_flag}   ${FALSE}
+    END
+
+Set Default Groups And Check Logs Do Not Change
+    [Documentation]    Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "odh-dashboard-config"
+    ...    ConfigMap and checks if no new lines are generated in the logs after that.
+    [Arguments]    ${delete_group}=${FALSE}
+    ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
+    Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
+    IF  "${delete_group}" == "${TRUE}"
+        Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
     END
 
 Favorite Items Should Be Listed First

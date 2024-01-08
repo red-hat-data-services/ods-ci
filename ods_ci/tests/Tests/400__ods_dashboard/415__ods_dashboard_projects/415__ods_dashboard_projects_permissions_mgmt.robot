@@ -84,8 +84,6 @@ Verify User Can Assign Access Permissions To User Groups
 
 Verify Project Sharing Does Not Override Dashboard Permissions
     [Tags]                  Tier1                   Sanity                  ODS-2223
-    # [Setup]                 Run Keywords            Restore Permissions Of The Project
-    # ...                     AND                     Set RHODS Users Group To rhods-users
     [Setup]                 Set RHODS Users Group To rhods-users
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
@@ -95,9 +93,9 @@ Verify Project Sharing Does Not Override Dashboard Permissions
     Remove User From Group    username=${USER_B}    group_name=rhods-admins
     Remove User From Group    username=${USER_C}    group_name=rhods-users
     Remove User From Group    username=${USER_C}    group_name=rhods-admins
-    Verify No Permissions For User ${USER_B}
-    Verify No Permissions For User ${USER_C}
-    [Teardown]              Run Keywords            Set RHODS Admins Group To system:authenticated
+    User ${USER_B} Should Not Be Allowed To Dashboard
+    User ${USER_C} Should Not Be Allowed To Dashboard
+    [Teardown]              Run Keywords            Set Default Access Groups Settings
     ...                     AND                     Set User Groups For Testing
 
 
@@ -229,6 +227,7 @@ Reload Page If Project ${project_title} Is Not Listed
             Sleep   5s
         END
     END
+    [Teardown]    Capture Page Screenshot
 
 Reload Page If Project ${project_title} Is Listed
     ${is_listed} =    Set Variable    ${TRUE}
@@ -242,6 +241,7 @@ Reload Page If Project ${project_title} Is Listed
             Sleep   5s
         END
     END
+    [Teardown]    Capture Page Screenshot
 
 ${username} Should Have Edit Access To ${project_title}
     Switch To User    ${username}
@@ -269,17 +269,11 @@ ${username} Should Not Have Access To ${project_title}
     RoleBinding Should Not Exist    project_title=${project_title}
     ...    subject_name=${username}
 
-Assign ${permission_type} Permissions To User ${username} in Project ${project_title}
-    Open Data Science Projects Home Page
-    Wait Until Project Is Listed    project_title=${project_title}
-    Open Data Science Project Details Page    ${project_title}
-    Move To Tab             Permissions
-    Assign ${permission_type} Permissions To User ${username}
-
-Verify No Permissions For User ${username}
+User ${username} Should Not Be Allowed To Dashboard
     Switch To User    ${username}
     ${permissions_set} =    Set Variable    ${FALSE}
     WHILE   not ${permissions_set}    limit=3m    on_limit_message=Timeout exceeded waiting for user ${username} permissions to be updated    # robotcode: ignore
         ${permissions_set}=    Run Keyword And Return Status    Wait Until Page Contains     Access permissions needed    timeout=15
         IF    ${permissions_set} == ${FALSE}    Reload Page
     END
+    [Teardown]    Capture Page Screenshot

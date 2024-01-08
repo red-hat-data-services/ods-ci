@@ -91,7 +91,6 @@ Set Standard RHODS Groups Variables
     Set Suite Variable    ${STANDARD_SYSTEM_GROUP}    system:authenticated
     Set Suite Variable    ${STANDARD_USERS_GROUP}    rhods-users
 
-
 Apply Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     ...                and rolls out JH to make the changes effecting in Jupyter

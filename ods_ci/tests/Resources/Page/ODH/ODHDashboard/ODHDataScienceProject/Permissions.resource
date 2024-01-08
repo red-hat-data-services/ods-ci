@@ -1,14 +1,12 @@
 *** Settings ***
 Documentation    Collection of keywords to interact with Storages
 Resource       ./Projects.resource
-Resource       ../../../../../Resources/ODS.robot
 
 
 *** Variables ***
 ${SAVE_BUTTON}=    xpath://button[@data-id="save-rolebinding-button"]
 ${PERMISSIONS_DROPDOWN}=    xpath://td[@data-label="Permission"]//button[@aria-label="Options menu"]
 ${IS_CLUSTER_ADMIN}=    ${FALSE}
-${CUSTOM_EMPTY_GROUP}=    empty-group
 
 
 *** Keywords ***
@@ -22,6 +20,13 @@ Assign ${permission_type} Permissions To User ${username}
     Select Permission Type    permission_type=${permission_type}
     Save Permission
 
+Assign ${permission_type} Permissions To User ${username} in Project ${project_title}
+    Open Data Science Projects Home Page
+    Wait Until Project Is Listed    project_title=${project_title}
+    Open Data Science Project Details Page    ${project_title}
+    Move To Tab             Permissions
+    Assign ${permission_type} Permissions To User ${username}
+    
 Change ${username} Permissions To ${permission_type}
     [Documentation]    Change the level of permission ${permission_type} for the given user ${username}
     ...    in the currently open DS Project in UI
@@ -104,51 +109,3 @@ Is ${username} In The Permissions Table
     ${present}=    Run Keyword And Return Status
     ...    Page Should Contain Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]
     RETURN    ${present}
-
-Set RHODS Admins Group Empty Group
-    [Documentation]     Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
-    ...                 to the given empty group (i.e., with no users)
-    Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
-    ...    users_group=${STANDARD_SYSTEM_GROUP}
-
-Set RHODS Admins Group To system:authenticated    # robocop:disable
-    [Documentation]    Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
-    ...    to the system:authenticated group
-    Set Access Groups Settings    admins_group=system:authenticated
-    ...    users_group=${STANDARD_SYSTEM_GROUP}
-
-Set RHODS Admins Group To Inexistent Group
-    [Documentation]    Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
-    ...    to the given inexistent group
-    Set Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
-    ...    users_group=${STANDARD_SYSTEM_GROUP}
-
-Set RHODS Users Group Empty Group
-    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
-    ...    to the given empty group (i.e., with no users)
-    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...    users_group=${CUSTOM_EMPTY_GROUP}
-
-Set RHODS Users Group To rhods-users    # robocop:disable
-    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
-    ...    to the rhods-users group
-    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...    users_group=${STANDARD_USERS_GROUP}
-
-Set RHODS Users Group To Inexistent Group
-    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
-    ...    to the given inexistent group
-    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...    users_group=${CUSTOM_INEXISTENT_GROUP}
-
-Set Default Groups And Check Logs Do Not Change
-    [Documentation]    Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "odh-dashboard-config"
-    ...    ConfigMap and checks if no new lines are generated in the logs after that.
-    [Arguments]    ${delete_group}=${FALSE}
-    ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
-    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...    users_group=${STANDARD_SYSTEM_GROUP}
-    Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
-    IF  "${delete_group}" == "${TRUE}"
-        Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
-    END

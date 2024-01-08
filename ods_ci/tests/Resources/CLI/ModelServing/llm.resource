@@ -415,6 +415,7 @@ Traffic Should Be Redirected Based On Canary Percentage
     END
 
 Get KServe Inference Host Via CLI
+    [Documentation]    Fetches the model URL
     [Arguments]    ${isvc_name}    ${namespace}
     Sleep    5s
     ${rc}    ${ksvc_host}=    Run And Return Rc And Output
@@ -425,6 +426,7 @@ Get KServe Inference Host Via CLI
     RETURN    ${ksvc_host}
 
 Get Current Revision ID
+    [Documentation]    Fetches the knative revision ID for the given model 
     [Arguments]    ${model_name}    ${namespace}
     ${rc}    ${id}=    Run And Return Rc And Output
     ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
@@ -432,6 +434,7 @@ Get Current Revision ID
     RETURN    ${id}
 
 Set Minimum Replicas Number
+    [Documentation]    Sets the minimum number of model replicas in the corresponding InferenceService
     [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
     ${old_revision_id}=    Get Current Revision ID    model_name=${model_name}    namespace=${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -440,11 +443,13 @@ Set Minimum Replicas Number
     RETURN    ${old_revision_id}
 
 Delete InfereceService
+    [Documentation]    Deletes the given InferenceService
     [Arguments]    ${isvc_name}    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${namespace}
     Should Be Equal As Integers    ${rc}    ${0}
 
 Set Model Hardware Resources
+    [Documentation]    Edits the hardware requirements for the given model by patching the corresponding InferenceService
     [Arguments]    ${model_name}    ${namespace}    ${requests}=&{EMPTY}    ${limits}=&{EMPTY}
     IF    ${limits} == ${NONE}
         ${limits}=    Set Variable    null
@@ -503,6 +508,8 @@ Generate Client TLS Certificates
     Should Be Equal As Integers  ${rc}   ${0}   msg=Error detected while generating client certificates
 
 Clean Up Test Project
+    [Documentation]    Deletes the given InferenceServices, check the NS gets removed from ServiceMeshMemberRoll
+    ...                and deletes the DS Project
     [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}
     IF    ${isvc_delete} == ${TRUE}
         FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}

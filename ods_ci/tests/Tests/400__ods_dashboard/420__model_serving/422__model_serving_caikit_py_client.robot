@@ -1,4 +1,6 @@
 *** Settings ***
+Documentation    Test suite to validate caikit-nlp-client library usage with Kserve models
+...              PythonLibrary repo: https://github.com/opendatahub-io/caikit-nlp-client
 Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup    Caikit Client Suite Setup
 Suite Teardown    Caikit Client Suite Teardown
@@ -25,6 +27,9 @@ ${NB_IMAGE}=        Minimal Python
  
 *** Test Cases ***
 Verify User Can Use Caikit Nlp Client From Workbenches
+    [Documentation]    Deploy two KServe models with Caikit+TGIS runtime (one for grpc and one for HTTP protocol),
+    ...                create a workbench and run a Jupyter notebook to query a kserve model
+    ...                using the caikit-nlp-client python library
     [Tags]    Tier2    ODS-2595
     [Setup]    Run Keywords
     ...    Setup Models
@@ -46,7 +51,8 @@ Verify User Can Use Caikit Nlp Client From Workbenches
 
 *** Keywords ***
 Caikit Client Suite Setup
-    [Documentation]
+    [Documentation]    Suite setup which loads the expected model responses, fetch the knative self-signed certificate
+    ...                and run the RHOSi Setup checks
     RHOSi Setup
     Set Library Search Order  SeleniumLibrary
     Load Expected Responses
@@ -57,6 +63,7 @@ Caikit Client Suite Setup
     Fetch Knative CA Certificate    filename=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
 
 Caikit Client Suite Teardown
+    [Documentation]    Suite teardown which cleans up the test DS Projects and run the RHOSi Setup checks
     ${isvc_names}=    Create List    ${ISVC_NAME}
     ${exists}=    Run And Return Rc    oc get project ${GRPC_MODEL_NS}
     IF    ${exists} == ${0}
@@ -73,6 +80,7 @@ Caikit Client Suite Teardown
     RHOSi Teardown
 
 GRPC Model Setup
+    [Documentation]    Test setup for Caikit+TGIS model with gRPC protocol: deploy model and retrieve URL
     IF    ${GPRC_MODEL_DEPLOYED} == ${FALSE}
         Set Project And Runtime    namespace=${GRPC_MODEL_NS}
         Compile Inference Service YAML    isvc_name=${ISVC_NAME}
@@ -92,6 +100,7 @@ GRPC Model Setup
     Set Suite Variable    ${GRPC_HOST}    ${host}
 
 HTTP Model Setup
+    [Documentation]    Test setup for Caikit+TGIS model with HTTP protocol: deploy model and retrieve URL
     [Arguments]    ${user}=${TEST_USER_3.USERNAME}    ${pw}=${TEST_USER_3.PASSWORD}    ${auth}=${TEST_USER_3.AUTH_TYPE}
     Launch Dashboard    ${user}    ${pw}    ${auth}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     IF    ${HTTP_MODEL_DEPLOYED} == ${FALSE}
@@ -115,6 +124,8 @@ HTTP Model Setup
     Set Suite Variable    ${HTTP_HOST}    ${host}
 
 Setup Models
+    [Documentation]    Test setup for Caikit+TGIS models: deploy models and set model details
+    ...                in a dictionary to be used in the workbench
     GRPC Model Setup
     HTTP Model Setup
     ${env_vars}=    Create Dictionary    MODEL_ID=${ISVC_NAME}
@@ -125,6 +136,7 @@ Setup Models
     Set Suite Variable    ${WORKBENCH_VARS}    ${workbench_vars}
 
 Generate Client TLS Certificates If Not Done
+    [Documentation]    Generates a set of keys and a certificate to test model query using mTLS
     IF    ${CERTS_GENERATED} == ${FALSE}
         ${status}=    Run Keyword And Return Status    Generate Client TLS Certificates    dirpath=${CERTS_BASE_FOLDER}
         IF    ${status} == ${TRUE}
@@ -137,6 +149,7 @@ Generate Client TLS Certificates If Not Done
     END
 
 Upload Files In The Workbench
+    [Documentation]    Uploads the working files inside the workbench PVC
     [Arguments]    ${workbench_title}    ${workbench_namespace}    ${filepaths}
     FOR    ${index}    ${filepath}    IN ENUMERATE    @{filepaths}
         Log    ${index}: ${filepath}
@@ -145,6 +158,7 @@ Upload Files In The Workbench
     END
 
 Caikit Nlp Client Jupyter Notebook Should Run Successfully
+    [Documentation]    Runs the test workbench and check if there was no error during execution
     [Arguments]    ${timeout}=120s
     Open Notebook File In JupyterLab    filepath=${NOTEBOOK_FILENAME}
     Open With JupyterLab Menu  Run  Run All Cells

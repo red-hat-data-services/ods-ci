@@ -23,7 +23,7 @@ NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
 
 
 # Change instanceType and delete some stuff
-jq -r '.spec.template.spec.providerSpec.value.instanceType="$INSTANCE_TYPE"
+jq -r --arg INSTANCE_TYPE "$INSTANCE_TYPE" '.spec.template.spec.providerSpec.value.instanceType=$INSTANCE_TYPE
   | del(.metadata.selfLink)
   | del(.metadata.uid)
   | del(.metadata.creationTimestamp)

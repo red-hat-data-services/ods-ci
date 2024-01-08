@@ -37,7 +37,8 @@ Open Model Serving Home Page
     SeleniumLibrary.Click Link      Model Serving
     # Replace sleep with better Wait keyword. Confirm if error page has "Model Serving" h1 element.
     Sleep    1s
-    ${loading_error} =    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Problem loading model serving page
+    ${loading_error}=    Run Keyword And Return Status
+    ...    SeleniumLibrary.Page Should Contain    Problem loading model serving page
     IF    ${loading_error}
         Log    "Page load error encountered"    level=WARN
         SeleniumLibrary.Capture Page Screenshot
@@ -45,7 +46,8 @@ Open Model Serving Home Page
         SeleniumLibrary.Reload Page
     END
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Deployed models
-    SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
+    SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.
+    ...    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model

@@ -152,6 +152,11 @@ Wait For Cluster To Be Ready
     ${provision_status} =    Run Process 	oc -n ${pool_namespace} wait --for\=condition\=Provisioned\=True cd ${pool_namespace} --timeout\=5m    shell=yes
     ${web_access} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
     ${claim_status} =    Run Process 	oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=5m    shell=yes
+    # Workaround for old Hive with Openstack - Cluster is displayed as Resuming even when it is Running
+    IF    "${provider_type}" == "OSP"
+        ${claim_status} =    Run Process 	
+        ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and .reason\=\="Resuming")' --exit-status    shell=yes
+    END
     IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${claim_status.rc} != 0
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json    shell=yes
         ${claim_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes

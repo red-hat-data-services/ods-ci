@@ -11,26 +11,35 @@ sed -i -e "0,/v1.11/s//$CHANNEL/g" -e "s/gpu-operator-certified.v1.11.0/$CSVNAME
 
 oc apply -f ${GPU_INSTALL_DIR}/gpu_install.yaml
 
-function wait_until_gpu_pods_are_running() {
+function wait_until_pod_ready_status() {
 
   local timeout_seconds=1200
   local sleep_time=90
+  local pod_label=$1
+  local namespace=nvidia-gpu-operator
 
   echo "Waiting until gpu pods are in running state..."
 
   SECONDS=0
   while [ "$SECONDS" -le "$timeout_seconds" ]; do
-    pod_status=$(oc get pods -n "nvidia-gpu-operator" | grep gpu-operator | awk 'NR == 1 { print $3 }')
-    if [ "$pod_status" == "Running" ]; then
-      break
+    pod_status=$(oc get pods -lapp=$pod_label -n $namespace -ojsonpath='{range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}{end}' 2>/dev/null || echo "terminated")
+    if [ "$pod_status" == "True" ]; then
+			pod_terminating_status=$(oc get pods -lapp=$pod_label -n $namespace -o jsonpath='{.items[0].metadata.deletionGracePeriodSeconds}' 2>/dev/null || echo "terminated")
+			if [ "${pod_terminating_status}" != "" ]; then
+				echo "pod $pod_label is in terminating state..."
+			else
+				echo "Pod $pod_label is ready"
+				break;
+			fi
     else
       ((remaining_seconds = timeout_seconds - SECONDS))
       echo "GPU installation seems to be still running (timeout in $remaining_seconds seconds)..."
+      oc get pods -n $namespace
       sleep $sleep_time
     fi
   done
 
-  if [ "$pod_status" == "Running" ]; then
+  if [ "$pod_status" == "True" ] ; then
     printf "GPU operator is up and running\n"
     return 0
   else
@@ -63,10 +72,15 @@ function rerun_accelerator_migration() {
 
 }
 
-wait_until_gpu_pods_are_running
+wait_until_pod_ready_status  "gpu-operator"
 oc apply -f ${GPU_INSTALL_DIR}/nfd_deploy.yaml
 oc get csv -n nvidia-gpu-operator $CSVNAME -ojsonpath={.metadata.annotations.alm-examples} | jq .[0] > clusterpolicy.json
 oc apply -f clusterpolicy.json
+wait_until_pod_ready_status "nvidia-device-plugin-daemonset"
+wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
+wait_until_pod_ready_status "nvidia-dcgm-exporter"
+wait_until_pod_ready_status "gpu-feature-discovery"
+wait_until_pod_ready_status "nvidia-operator-validator"
 rerun_accelerator_migration
 
 

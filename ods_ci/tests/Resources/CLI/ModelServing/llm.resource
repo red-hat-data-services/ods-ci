@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation     Collection of keywords to interact with Model Serving feature for LLM (Kserve) via CLI
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
@@ -96,7 +97,7 @@ Create Secret For S3-Like Buckets
     ...    sed -i 's/{{ACCESS_KEY_ID}}/${access_key_id}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{SECRET_ACCESS_KEY}}/${accesskey_escaped}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
-        ${rc}    ${out}=    Run And Return Rc And Output
+    ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{NAME}}/${name}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i 's/{{NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
@@ -109,7 +110,7 @@ Create Secret For S3-Like Buckets
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${model_storage_uri}    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
-    ...            ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1   ${scaleTarget}=1   
+    ...            ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1   ${scaleTarget}=1
     ...            ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
     IF   '${auto_scale}' == '${NONE}'
@@ -125,20 +126,20 @@ Compile Inference Service YAML
     Set Test Variable    ${canaryTrafficPercent}
     Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
     IF    ${requests_dict} != &{EMPTY}
-        Log    Adding predictor model requests to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${requests_dict}    console=True
+        Log    Adding predictor model requests to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${requests_dict}    console=True    # robocop: disable
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
             Log    ${index}- ${resource}:${requests_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml    # robocop: disable
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
     IF    ${limits_dict} != &{EMPTY}
-        Log    Adding predictor model limits to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${limits_dict}    console=True
+        Log    Adding predictor model limits to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${limits_dict}    console=True    # robocop: disable
         FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
             Log    ${index}- ${resource}:${limits_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml    # robocop: disable
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
@@ -151,9 +152,9 @@ Model Response Should Match The Expectation
     ...                when multiple ones are deployed
     [Arguments]    ${model_response}    ${model_name}    ${query_idx}    ${streamed_response}=${FALSE}
     IF    ${streamed_response} == ${FALSE}
-        Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]
+        Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]    # robocop: disable
         ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
-        ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}
+        ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}    # robocop: disable
         ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
         ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
@@ -293,8 +294,8 @@ User Can Fetch CPU Utilization
     [Documentation]    Fetches the `pod:container_cpu_usage:sum` metric and checks that it reports the expected
     ...                model information (pod name and namespace).
     ...                If ${exp_value} is given, it checks also the metric value
-    [Arguments]    ${thanos_url}    ${thanos_token}    ${namespace}    ${model_name}    ${period}=30m    ${exp_value}=${EMPTY}
-    ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    pod:container_cpu_usage:sum{namespace="${namespace}"}[${period}]
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${namespace}    ${model_name}    ${period}=30m    ${exp_value}=${EMPTY}    # robocop: disable
+    ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${thanos_token}    pod:container_cpu_usage:sum{namespace="${namespace}"}[${period}]    # robocop: disable
     ${pod_name}=    Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    fields=['metadata.name']
@@ -321,9 +322,11 @@ TGI Caikit And Istio Metrics Should Exist
 
 Check Query Response Values    # robocop:disable
     [Documentation]    Implements the metric checks for `User Can Fetch Number Of Requests Over Defined Time`
-    ...                `User Can Fetch Number Of Successful Requests Over Defined Time` and `User Can Fetch CPU Utilization`.
-    ...                It searches among the available metric values for the specific model
-    [Arguments]    ${response}    ${exp_namespace}    ${exp_model_name}=${EMPTY}    ${exp_query_kind}=${EMPTY}    ${exp_value}=${EMPTY}    ${exp_pod_name}=${EMPTY}
+    ...                `User Can Fetch Number Of Successful Requests Over Defined Time` and
+    ...                `User Can Fetch CPU Utilization`. It searches among the available metric values
+    ...                for the specific model
+    [Arguments]    ${response}    ${exp_namespace}    ${exp_model_name}=${EMPTY}
+    ...            ${exp_query_kind}=${EMPTY}    ${exp_value}=${EMPTY}    ${exp_pod_name}=${EMPTY}
     ${json_results}=    Set Variable    ${response.json()["data"]["result"]}
     FOR    ${index}    ${result}    IN ENUMERATE    @{json_results}
         Log    ${index}: ${result}
@@ -335,11 +338,12 @@ Check Query Response Values    # robocop:disable
             ${curr_value}=    Set Variable    ${result["values"][-1][-1]}
         END
         ${source_namespace}=    Set Variable    ${result["metric"]["namespace"]}
-        ${checked}=    Run Keyword And Return Status    Should Be Equal As Strings    ${source_namespace}    ${exp_namespace}
+        ${checked}=    Run Keyword And Return Status
+        ...    Should Be Equal As Strings    ${source_namespace}    ${exp_namespace}
         IF    ${checked} == ${FALSE}
             Continue For Loop
         ELSE
-            Log    message=Metrics source namespaced succesfully checked. Going to next step.      
+            Log    message=Metrics source namespaced succesfully checked. Going to next step.
         END
         IF    "${exp_model_name}" != "${EMPTY}"
             ${source_model}=    Set Variable    ${result["metric"]["job"]}
@@ -348,7 +352,7 @@ Check Query Response Values    # robocop:disable
             IF    ${checked} == ${FALSE}
                 Continue For Loop
             ELSE
-                Log    message=Metrics source model succesfully checked. Going to next step.      
+                Log    message=Metrics source model succesfully checked. Going to next step.
             END
             IF    "${exp_query_kind}" != "${EMPTY}"
                 ${source_query_kind}=    Set Variable    ${result["metric"]["kind"]}
@@ -357,7 +361,7 @@ Check Query Response Values    # robocop:disable
                 IF    ${checked} == ${FALSE}
                     Continue For Loop
                 ELSE
-                    Log    message=Metrics query kind succesfully checked. Going to next step.      
+                    Log    message=Metrics query kind succesfully checked. Going to next step.
                 END
             END
         END
@@ -368,7 +372,7 @@ Check Query Response Values    # robocop:disable
             IF    ${checked} == ${FALSE}
                 Continue For Loop
             ELSE
-                Log    message=Metrics source pod succesfully checked. Going to next step.      
+                Log    message=Metrics source pod succesfully checked. Going to next step.
             END
         END
         IF    "${exp_value}" != "${EMPTY}"
@@ -382,7 +386,7 @@ Check Query Response Values    # robocop:disable
         END
     END
     IF    ${checked} == ${FALSE}
-        Fail    msg=The metric you are looking for has not been found. Check the query parameter and try again 
+        Fail    msg=The metric you are looking for has not been found. Check the query parameter and try again
     END
 
 Traffic Should Be Redirected Based On Canary Percentage

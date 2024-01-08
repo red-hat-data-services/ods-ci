@@ -2,6 +2,7 @@
 Documentation   Distributed workloads tests
 
 Resource         ../../../tasks/Resources/RHODS_OLM/install/codeflare_install.resource
+Resource         ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource         ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 Suite Setup       Prepare Distributed Workloads E2E Test Suite
@@ -33,25 +34,9 @@ Run distributed workloads sanity tests
 
 *** Keywords ***
 Prepare Distributed Workloads E2E Test Suite
-    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/ray/managementState" ,"value" : "Managed"}]'
-    ...    shell=true    stderr=STDOUT
-    IF    ${result.rc} != 0
-        FAIL    Can not enable ray
-    END
-    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/codeflare/managementState" ,"value" : "Managed"}]'
-    ...    shell=true    stderr=STDOUT
-    IF    ${result.rc} != 0
-        FAIL    Can not enable codeflare
-    END
+    Enable Component    ray
+    Enable Component    codeflare
 
 Teardown Distributed Workloads E2E Test Suite
-    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/codeflare/managementState" ,"value" : "Removed"}]'
-    ...    shell=true    stderr=STDOUT
-    IF    ${result.rc} != 0
-        FAIL    Can not disable codeflare
-    END
-    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/ray/managementState" ,"value" : "Removed"}]'
-    ...    shell=true    stderr=STDOUT
-    IF    ${result.rc} != 0
-        FAIL    Can not disable ray
-    END
+    Disable Component    codeflare
+    Disable Component    ray

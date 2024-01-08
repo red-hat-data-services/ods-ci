@@ -4,6 +4,7 @@ Suite Setup       Prepare Codeflare E2E Test Suite
 Suite Teardown    Teardown Codeflare E2E Test Suite
 Library           OperatingSystem
 Library           Process
+Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
@@ -66,30 +67,14 @@ Prepare Codeflare E2E Test Suite
         FAIL    Unable to clone Codeflare repo ${CODEFLARE_REPO_URL}:${CODEFLARE_REPO_BRANCH}
     END
     
-    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/ray/managementState" ,"value" : "Managed"}]'
-    ...    shell=true    stderr=STDOUT
-    IF    ${result.rc} != 0
-        FAIL    Can not enable ray
-    END
-    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/codeflare/managementState" ,"value" : "Managed"}]'
-    ...    shell=true    stderr=STDOUT
-    IF    ${result.rc} != 0
-        FAIL    Can not enable codeflare
-    END
+    Enable Component    ray
+    Enable Component    codeflare
     Create Directory    %{WORKSPACE}/codeflare-e2e-logs
     Create Directory    %{WORKSPACE}/codeflare-odh-logs
 
 Teardown Codeflare E2E Test Suite
-    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/codeflare/managementState" ,"value" : "Removed"}]'
-    ...    shell=true    stderr=STDOUT
-    IF    ${result.rc} != 0
-        FAIL    Can not disable codeflare
-    END
-    ${result} =    Run Process    oc patch datascienceclusters.datasciencecluster.opendatahub.io default-dsc --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/ray/managementState" ,"value" : "Removed"}]'
-    ...    shell=true    stderr=STDOUT
-    IF    ${result.rc} != 0
-        FAIL    Can not disable ray
-    END
+    Disable Component    codeflare
+    Disable Component    ray
 
 Run Codeflare E2E Test
     [Arguments]    ${TEST_NAME}

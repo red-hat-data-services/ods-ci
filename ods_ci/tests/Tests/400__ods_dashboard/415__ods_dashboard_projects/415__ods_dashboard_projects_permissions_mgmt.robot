@@ -6,15 +6,21 @@ Suite Teardown     Project Permissions Mgmt Suite Teardown
 
 
 *** Variables ***
-${PRJ_BASE_TITLE}=   ODS-CI DS Project
-${PRJ_DESCRIPTION}=   ${PRJ_BASE_TITLE} is a test project for validating DS Project Sharing feature
-${WORKBENCH_DESCRIPTION}=   a test workbench to check project sharing
-${NB_IMAGE}=        Minimal Python
-${PV_NAME}=         ods-ci-project-sharing
-${PV_DESCRIPTION}=         it is a PV created to test DS Projects Sharing feature
-${PV_SIZE}=         1
-${USER_GROUP_1}=    ds-group-1
-${USER_GROUP_2}=    ds-group-2
+${PRJ_BASE_TITLE}=              ODS-CI DS Project
+${PRJ_DESCRIPTION}=             ${PRJ_BASE_TITLE} is a test project for validating DS Project Sharing feature
+${WORKBENCH_DESCRIPTION}=       a test workbench to check project sharing
+${NB_IMAGE}=                    Minimal Python
+${PV_NAME}=                     ods-ci-project-sharing
+${PV_DESCRIPTION}=              it is a PV created to test DS Projects Sharing feature
+${PV_SIZE}=                     1
+${USER_GROUP_1}=                ds-group-1
+${USER_GROUP_2}=                ds-group-2
+${USER_A}=                      ${TEST_USER_2.USERNAME}
+${USER_B}=                      ${TEST_USER_3.USERNAME}
+${PRJ_USER_B_TITLE}=            ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
+${USER_C}=                      ${TEST_USER_4.USERNAME}
+${PRJ_USER_C_TITLE}=            ${PRJ_BASE_TITLE}-${TEST_USER_4.USERNAME}
+
 
 *** Test Cases ***
 Verify User Can Access Permission Tab In Their Owned DS Project
@@ -76,6 +82,22 @@ Verify User Can Assign Access Permissions To User Groups
     Sleep   5s
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
+Verify Project Sharing Does Not Override Dashboard Permissions
+    [Tags]                  Tier1                   Sanity                  ODS-2223
+    [Setup]                 Set RHODS Users Group To rhods-users
+    Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
+    ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
+    Assign Admin Permissions To User ${USER_B} in Project ${PRJ_USER_B_TITLE}
+    Assign Edit Permissions To User ${USER_C} in Project ${PRJ_USER_C_TITLE}
+    Remove User From Group    username=${USER_B}    group_name=rhods-users
+    Remove User From Group    username=${USER_B}    group_name=rhods-admins
+    Remove User From Group    username=${USER_C}    group_name=rhods-users
+    Remove User From Group    username=${USER_C}    group_name=rhods-admins
+    User ${USER_B} Should Not Be Allowed To Dashboard
+    User ${USER_C} Should Not Be Allowed To Dashboard
+    [Teardown]              Run Keywords            Set Default Access Groups Settings
+    ...                     AND                     Set User Groups For Testing
+
 
 *** Keywords ***
 Project Permissions Mgmt Suite Setup    # robocop: disable
@@ -83,6 +105,8 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     ...                It creates some test variables and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    Set Standard RHODS Groups Variables
+    Set Default Access Groups Settings
     ${to_delete}=    Create List
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Launch RHODS Dashboard Session With User A
@@ -124,10 +148,8 @@ Launch RHODS Dashboard Session With User A
     ...    ocp_user_auth_type=${TEST_USER_2.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     ...    browser_alias=${TEST_USER_2.USERNAME}-session
-    Set Suite Variable    ${USER_A}    ${TEST_USER_2.USERNAME}
 
 Launch RHODS Dashboard Session And Create A DS Project With User B
-    ${PRJ_USER_B_TITLE}=    Set Variable   ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_B_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
@@ -137,11 +159,8 @@ Launch RHODS Dashboard Session And Create A DS Project With User B
     ...    description=${PRJ_DESCRIPTION}
     Permissions Tab Should Be Accessible
     Components Tab Should Be Accessible
-    Set Suite Variable    ${USER_B}    ${TEST_USER_3.USERNAME}
-    Set Suite Variable    ${PRJ_USER_B_TITLE}    ${PRJ_USER_B_TITLE}
 
 Launch RHODS Dashboard Session With User C
-    ${PRJ_USER_C_TITLE}=    Set Variable   ${PRJ_BASE_TITLE}-${TEST_USER_4.USERNAME}
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_C_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
     ...    password=${TEST_USER_4.PASSWORD}
@@ -151,8 +170,6 @@ Launch RHODS Dashboard Session With User C
     ...    description=${PRJ_DESCRIPTION}
     Permissions Tab Should Be Accessible
     Components Tab Should Be Accessible
-    Set Suite Variable    ${USER_C}    ${TEST_USER_4.USERNAME}
-    Set Suite Variable    ${PRJ_USER_C_TITLE}    ${PRJ_USER_C_TITLE}
 
 Set User Groups For Testing
     Create Group    ${USER_GROUP_1}
@@ -176,13 +193,9 @@ Restore Permissions Of The Project
     Switch To User    ${USER_B}
     Move To Tab    Permissions
     ${present_a}=    Is ${USER_A} In The Permissions Table
-    IF    ${present_a} == ${TRUE}
-        Remove ${USER_A} Permissions
-    END
+    IF    ${present_a} == ${TRUE}    Remove ${USER_A} Permissions
     ${present_c}=    Is ${USER_C} In The Permissions Table
-    IF    ${present_c} == ${TRUE}
-        Remove ${USER_C} Permissions
-    END
+    IF    ${present_c} == ${TRUE}    Remove ${USER_C} Permissions
     ${USER_A} Should Not Have Access To ${PRJ_USER_B_TITLE}
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
@@ -203,40 +216,32 @@ Refresh Pages
     ...    wait_for_cards=${FALSE}
 
 Reload Page If Project ${project_title} Is Not Listed
-    ${is_listed}=    Run Keyword And Return Status
-    ...    Project Should Be Listed    project_title=${project_title}
-    IF    ${is_listed} == ${FALSE}
-        Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list!    # robocop:disable
-        ...    level=WARN
-        Reload RHODS Dashboard Page    expected_page=Data Science Projects
-        ...    wait_for_cards=${FALSE}
+    ${is_listed} =    Set Variable    ${FALSE}
+    WHILE   not ${is_listed}    limit=3m    on_limit_message=Timeout exceeded waiting for project ${project_title} to be listed    # robotcode: ignore
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${FALSE}
-            Log    message=Project ${project_title} is not listed as expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
-            ...    level=WARN
+            Log    message=Project ${project_title} is not listed but expected: Reloading DS Project page to refresh project list!    level=WARN
             Reload RHODS Dashboard Page    expected_page=Data Science Projects
             ...    wait_for_cards=${FALSE}
+            Sleep   5s
         END
     END
+    [Teardown]    Capture Page Screenshot
 
 Reload Page If Project ${project_title} Is Listed
-    ${is_listed}=    Run Keyword And Return Status
-    ...    Project Should Be Listed    project_title=${project_title}
-    IF    ${is_listed} == ${TRUE}
-        Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list!    # robocop:disable
-        ...    level=WARN
-        Reload RHODS Dashboard Page    expected_page=Data Science Projects
-        ...    wait_for_cards=${FALSE}
+    ${is_listed} =    Set Variable    ${TRUE}
+    WHILE   ${is_listed}    limit=3m    on_limit_message=Timeout exceeded waiting for project ${project_title} NOT expected to be listed    # robotcode: ignore
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${TRUE}
-            Log    message=Project ${project_title} is still listed as NOT expected: reloading DS Project page to refresh project list! (2)    # robocop:disable
-            ...    level=WARN
+            Log    message=Project ${project_title} is still listed but NOT expected: Reloading DS Project page to refresh project list!    level=WARN
             Reload RHODS Dashboard Page    expected_page=Data Science Projects
             ...    wait_for_cards=${FALSE}
+            Sleep   5s
         END
     END
+    [Teardown]    Capture Page Screenshot
 
 ${username} Should Have Edit Access To ${project_title}
     Switch To User    ${username}
@@ -263,3 +268,12 @@ ${username} Should Not Have Access To ${project_title}
     Project Should Not Be Listed    project_title=${project_title}
     RoleBinding Should Not Exist    project_title=${project_title}
     ...    subject_name=${username}
+
+User ${username} Should Not Be Allowed To Dashboard
+    Switch To User    ${username}
+    ${permissions_set} =    Set Variable    ${FALSE}
+    WHILE   not ${permissions_set}    limit=3m    on_limit_message=Timeout exceeded waiting for user ${username} permissions to be updated    # robotcode: ignore
+        ${permissions_set}=    Run Keyword And Return Status    Wait Until Page Contains     Access permissions needed    timeout=15
+        IF    ${permissions_set} == ${FALSE}    Reload Page
+    END
+    [Teardown]    Capture Page Screenshot

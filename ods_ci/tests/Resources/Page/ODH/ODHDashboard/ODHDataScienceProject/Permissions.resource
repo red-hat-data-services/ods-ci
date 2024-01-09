@@ -20,6 +20,13 @@ Assign ${permission_type} Permissions To User ${username}
     Select Permission Type    permission_type=${permission_type}
     Save Permission
 
+Assign ${permission_type} Permissions To User ${username} in Project ${project_title}
+    Open Data Science Projects Home Page
+    Wait Until Project Is Listed    project_title=${project_title}
+    Open Data Science Project Details Page    ${project_title}
+    Move To Tab             Permissions
+    Assign ${permission_type} Permissions To User ${username}
+    
 Change ${username} Permissions To ${permission_type}
     [Documentation]    Change the level of permission ${permission_type} for the given user ${username}
     ...    in the currently open DS Project in UI
@@ -29,7 +36,7 @@ Change ${username} Permissions To ${permission_type}
     Save Permission
 
 Remove ${username} Permissions
-    [Documentation]    Remove the the access to the given user ${username}
+    [Documentation]    Remove the access to the given user ${username}
     ...    from the currently open DS Project in UI
     Permissions.Click Action From Actions Menu    username=${username}
     ...    action=Delete

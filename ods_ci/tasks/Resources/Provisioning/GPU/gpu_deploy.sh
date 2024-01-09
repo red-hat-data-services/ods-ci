@@ -70,6 +70,12 @@ function rerun_accelerator_migration() {
       return 1
   fi
 
+  echo "Waiting for up to 3 minutes until rhods-dashboard deployment is rolled out"
+  oc rollout status deployment.apps/rhods-dashboard -n redhat-ods-applications --watch --timeout 3m
+
+  echo "Verifying that an AcceleratorProfiles resource was created in redhat-ods-applications"
+  oc describe AcceleratorProfiles -n redhat-ods-applications
+
 }
 
 wait_until_pod_ready_status  "gpu-operator"

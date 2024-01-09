@@ -162,6 +162,8 @@ Caikit Nlp Client Jupyter Notebook Should Run Successfully
     [Arguments]    ${timeout}=120s
     Open Notebook File In JupyterLab    filepath=${NOTEBOOK_FILENAME}
     Open With JupyterLab Menu  Run  Run All Cells
+    Sleep  1
     Wait Until JupyterLab Code Cell Is Not Active  timeout=${timeout}
     Sleep  1
     JupyterLab Code Cell Error Output Should Not Be Visible
+    SeleniumLibrary.Capture Page Screenshot

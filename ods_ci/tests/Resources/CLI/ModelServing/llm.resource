@@ -216,7 +216,7 @@ Query Model Multiple Times
             ...             headers=${headers}   json=${payload}    verify=${False}
             ${is_timeout}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${args}    timeout
             IF    ${is_timeout} == ${FALSE}
-                Set To Dictionary    ${args}    timeout=10s
+                Set To Dictionary    ${args}    timeout=10
             END
             Log Dictionary    ${args}
             ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST

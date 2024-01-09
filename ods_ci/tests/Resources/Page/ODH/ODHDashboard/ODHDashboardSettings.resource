@@ -2,6 +2,7 @@
 Library         OpenShiftLibrary
 Resource        ../../LoginPage.robot
 Resource        ../../ODH/JupyterHub/LoginJupyterHub.robot
+Resource        ../../../ODS.robot
 
 
 *** Variables ***
@@ -9,7 +10,7 @@ ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
 ${GROUP_BTN_XP}=    (//*[@class="pf-c-chip-group"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
 ${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
 ${MULTI_MODE_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
-
+${CUSTOM_EMPTY_GROUP}=    empty-group
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
@@ -306,3 +307,39 @@ Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
     ${status}=   Get Checkbox State Of Multi Model Serving Platforms
     Should Be Equal    ${status}  True
     Element Should Be Enabled     ${MULTI_MODEL_SERVING_CHECK_BOX}
+
+Set RHODS Admins Group Empty Group
+    [Documentation]     Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
+    Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
+
+Set RHODS Admins Group To system:authenticated    # robocop:disable
+    [Documentation]    Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the system:authenticated group
+    Set Access Groups Settings    admins_group=system:authenticated
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
+
+Set RHODS Admins Group To Inexistent Group
+    [Documentation]    Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the given inexistent group
+    Set Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
+
+Set RHODS Users Group Empty Group
+    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the given empty group (i.e., with no users)
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${CUSTOM_EMPTY_GROUP}
+
+Set RHODS Users Group To rhods-users    # robocop:disable
+    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the rhods-users group
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${STANDARD_USERS_GROUP}
+
+Set RHODS Users Group To Inexistent Group
+    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the given inexistent group
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${CUSTOM_INEXISTENT_GROUP}

@@ -18,11 +18,14 @@ import yaml
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 from logger import log
-# fmt: off
-from util import (clone_config_repo, compare_dicts, execute_command,
-                  read_data_from_json, read_yaml, write_data_in_json)
-
-# fmt: on
+from util import (
+    clone_config_repo,
+    compare_dicts,
+    execute_command,
+    read_data_from_json,
+    read_yaml,
+    write_data_in_json,
+)
 
 """
 Class for Openshift Cluster Manager
@@ -54,7 +57,7 @@ class OpenshiftClusterManager:
         self.region = args.get("region")
         self.compute_machine_type = args.get("compute_machine_type")
         self.ocm_cli_binary_url = args.get("ocm_cli_binary_url")
-        self.ocm_verbose_level = args.get("ocm_verbose_level","0")
+        self.ocm_verbose_level = args.get("ocm_verbose_level", "0")
         self.num_users_to_create_per_group = args.get("num_users_to_create_per_group")
         self.htpasswd_cluster_admin = args.get("htpasswd_cluster_admin")
         self.htpasswd_cluster_password = args.get("htpasswd_cluster_password")
@@ -122,7 +125,7 @@ class OpenshiftClusterManager:
             cmd += " " + filter
         ret = execute_command(cmd)
         if ret is None or "Error: Can't retrieve cluster for key" in ret:
-            log.info("ocm describe for cluster " "{} failed".format(self.cluster_name))
+            log.info("ocm describe for cluster {} failed".format(self.cluster_name))
             return None
         return ret
 
@@ -130,9 +133,7 @@ class OpenshiftClusterManager:
         """Checks if cluster exists"""
         ret = self.ocm_describe()
         if ret is None:
-            log.info(
-                "ocm cluster with name " "{} not exists!".format(self.cluster_name)
-            )
+            log.info("ocm cluster with name {} not exists!".format(self.cluster_name))
             return False
         log.info("ocm cluster with name {} exists!".format(self.cluster_name))
         return True
@@ -173,7 +174,7 @@ class OpenshiftClusterManager:
 
         channel_grp = ""
         if self.channel_group != "":
-            if (self.channel_group == "stable") or (self.channel_group == "candidate"):
+            if self.channel_group in ("stable", "candidate"):
                 if version == "":
                     log.error(
                         (
@@ -236,7 +237,9 @@ class OpenshiftClusterManager:
     def get_osd_cluster_id(self):
         """Gets osd cluster ID"""
 
-        cmd = "ocm list clusters -p search=\"name = '{}' or id = '{}'\" --columns id --no-headers".format(self.cluster_name, self.cluster_name)
+        cmd = "ocm list clusters -p search=\"name = '{}' or id = '{}'\" --columns id --no-headers".format(
+            self.cluster_name, self.cluster_name
+        )
         ret = execute_command(cmd)
         if ret is None:
             log.info(
@@ -343,7 +346,7 @@ class OpenshiftClusterManager:
                 break
             elif cluster_state == "error":
                 log.info(
-                    "{} is in error state. Hence " "exiting!!".format(self.cluster_name)
+                    "{} is in error state. Hence exiting!!".format(self.cluster_name)
                 )
                 sys.exit(1)
 
@@ -416,7 +419,7 @@ class OpenshiftClusterManager:
         """Checks if given machine pool name already
         exists in cluster"""
 
-        cmd = "/bin/ocm list machinepools --cluster {} " "| grep -w {}".format(
+        cmd = "/bin/ocm list machinepools --cluster {} | grep -w {}".format(
             self.cluster_name, self.pool_name
         )
         ret = execute_command(cmd)
@@ -526,8 +529,10 @@ class OpenshiftClusterManager:
         addon_state = self.get_addon_state(addon_name)
         if addon_state != "not installed":
             cluster_id = self.get_osd_cluster_id()
-            cmd = "ocm --v={} delete /api/clusters_mgmt/v1/clusters/{}/addons/" "{}".format(
-                self.ocm_verbose_level, cluster_id, addon_name
+            cmd = (
+                "ocm --v={} delete /api/clusters_mgmt/v1/clusters/{}/addons/{}".format(
+                    self.ocm_verbose_level, cluster_id, addon_name
+                )
             )
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
@@ -604,8 +609,10 @@ class OpenshiftClusterManager:
         output_file = output_filename
         self._render_template(template_file, output_file, replace_vars)
         cluster_id = self.get_osd_cluster_id()
-        cmd = "ocm --v={} post /api/clusters_mgmt/v1/clusters/{}/addons " "--body={}".format(
-            self.ocm_verbose_level, cluster_id, output_file
+        cmd = (
+            "ocm --v={} post /api/clusters_mgmt/v1/clusters/{}/addons --body={}".format(
+                self.ocm_verbose_level, cluster_id, output_file
+            )
         )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
@@ -724,9 +731,7 @@ class OpenshiftClusterManager:
                 log.info("redhat-rhoam-smpt secret found!")
             else:
                 failure_flags.append(True)
-                log.info(
-                    "redhat-rhoam-smpt secret " "was not created during installation"
-                )
+                log.info("redhat-rhoam-smpt secret was not created during installation")
                 if exit_on_failure:
                     sys.exit(1)
 
@@ -901,12 +906,14 @@ class OpenshiftClusterManager:
     def delete_idp(self):
         """Deletes Identity Provider"""
 
-        cmd = "ocm --v={} delete idp -c {} {}".format(self.ocm_verbose_level, self.cluster_name, self.idp_name)
+        cmd = "ocm --v={} delete idp -c {} {}".format(
+            self.ocm_verbose_level, self.cluster_name, self.idp_name
+        )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
             log.info(
-                "Failed to delete identity provider of " "type {}".format(self.idp_name)
+                "Failed to delete identity provider of type {}".format(self.idp_name)
             )
 
     def add_user_to_group(self, user="", group="cluster-admins"):
@@ -915,33 +922,29 @@ class OpenshiftClusterManager:
         if user == "":
             user = self.htpasswd_cluster_admin
 
-        if (
-            (group == "rhods-admins")
-            or (group == "rhods-users")
-            or (group == "rhods-noaccess")
-        ):
+        if group in ("rhods-admins", "rhods-users", "rhods-noaccess"):
             cmd = "oc adm groups add-users {} {}".format(group, user)
         else:
-            cmd = "ocm --v={} create user {} --cluster {} " "--group={}".format(
+            cmd = "ocm --v={} create user {} --cluster {} --group={}".format(
                 self.ocm_verbose_level, user, self.cluster_name, group
             )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
-            log.info("Failed to add user {} to group " "{}".format(user, group))
+            log.info("Failed to add user {} to group {}".format(user, group))
 
     def delete_user(self, user="", group="cluster-admins"):
         """Deletes user"""
 
         if user == "":
             user = self.htpasswd_cluster_admin
-        cmd = "ocm --v={} delete user {} --cluster {} " "--group={}".format(
+        cmd = "ocm --v={} delete user {} --cluster {} --group={}".format(
             self.ocm_verbose_level, user, self.cluster_name, group
         )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
-            log.info("Failed to delete user {} of group " "{}".format(user, group))
+            log.info("Failed to delete user {} of group {}".format(user, group))
 
     def create_group(self, group_name):
         """Creates new group"""
@@ -950,7 +953,7 @@ class OpenshiftClusterManager:
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
-            log.info("Failed to add group " "{}".format(group_name))
+            log.info("Failed to add group {}".format(group_name))
 
     def add_users_to_rhods_group(self):
         """Add users to rhods group"""
@@ -1024,8 +1027,12 @@ class OpenshiftClusterManager:
             # Install dependency operators for rhoai deployment
             dependency_operators = ["servicemesh", "serverless"]
             for dependency_operator in dependency_operators:
-                self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
-                self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
+                self.install_openshift_isv(
+                    dependency_operator, "stable", "redhat-operators"
+                )
+                self.wait_for_isv_installation_to_complete(
+                    dependency_operator, namespace="openshift-operators"
+                )
 
             # Deploy rhoai
             self.install_rhods()
@@ -1102,7 +1109,9 @@ class OpenshiftClusterManager:
         """Hibernate OSD Cluster"""
 
         cluster_id = self.get_osd_cluster_id()
-        cmd = "ocm --v={} hibernate cluster {}".format(self.ocm_verbose_level, cluster_id)
+        cmd = "ocm --v={} hibernate cluster {}".format(
+            self.ocm_verbose_level, cluster_id
+        )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
@@ -1179,7 +1188,9 @@ class OpenshiftClusterManager:
         cluster_id = self.get_osd_cluster_id()
         cmd = (
             "ocm --v={} patch /api/clusters_mgmt/v1/clusters/{}/addons/{} "
-            "--body={}".format(self.ocm_verbose_level, cluster_id, addon_name, output_file)
+            "--body={}".format(
+                self.ocm_verbose_level, cluster_id, addon_name, output_file
+            )
         )
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
@@ -1194,7 +1205,6 @@ class OpenshiftClusterManager:
                 return False
         else:
             return ret
-
 
     def install_openshift_isv(
         self, operator_name, channel, source, exit_on_failure=True
@@ -1216,26 +1226,31 @@ class OpenshiftClusterManager:
                 yaml.dump(newdct, f)
 
         if operator_name == "serverless":
-
             replace_vars = {
                 "ISV_NAME": "serverless-operators",
-                "NAMESPACE": "openshift-serverless"
+                "NAMESPACE": "openshift-serverless",
             }
             template_file = "resource.jinja"
             file_path1 = "resource.yaml"
             self._render_template(template_file, file_path1, replace_vars)
 
             def yaml_loader(filepath):
-                with open(filepath,'rb')as file_descriptor:
+                with open(filepath, "rb") as file_descriptor:
                     data = yaml.load(file_descriptor, Loader=yaml.SafeLoader)
                 return data
 
             data1 = yaml_loader(file_path1)
             data2 = yaml_loader(output_file)
             data1.update(data2)
-   
-            with open(output_file, 'w') as yaml_output:
-                yaml.dump(data1, yaml_output, default_flow_style=False, explicit_start=True, allow_unicode=True)
+
+            with open(output_file, "w") as yaml_output:
+                yaml.dump(
+                    data1,
+                    yaml_output,
+                    default_flow_style=False,
+                    explicit_start=True,
+                    allow_unicode=True,
+                )
 
         cmd = "oc apply -f {} ".format(os.path.abspath(output_file))
         ret = execute_command(cmd)
@@ -1373,7 +1388,9 @@ class OpenshiftClusterManager:
         cluster_id = self.get_osd_cluster_id()
         run_change_channel_cmd = (
             "ocm --v={} patch /api/clusters_mgmt/v1/clusters/{}"
-            " --body {}".format(self.ocm_verbose_level, cluster_id, self.update_ocm_channel_json)
+            " --body {}".format(
+                self.ocm_verbose_level, cluster_id, self.update_ocm_channel_json
+            )
         )
         log.info(run_change_channel_cmd)
         ret = execute_command(run_change_channel_cmd)
@@ -1402,10 +1419,12 @@ class OpenshiftClusterManager:
             latest_upgrade_version = ast.literal_eval(latest_upgrade_version)[-1]
             data["version"] = latest_upgrade_version
         write_data_in_json(self.update_policies_json, data)
-        # fmt: off
+
         schedule_cluster_upgrade = (
             "ocm --v={} post /api/clusters_mgmt/v1/clusters/{}/upgrade_policies"
-            " --body {}".format(self.ocm_verbose_level, cluster_id, self.update_policies_json)
+            " --body {}".format(
+                self.ocm_verbose_level, cluster_id, self.update_policies_json
+            )
         )
         ret = execute_command(schedule_cluster_upgrade)
         if ret is None:

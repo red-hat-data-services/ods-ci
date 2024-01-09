@@ -107,6 +107,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def change_component_state(components):
     # Parse and convert the component states argument into a dictionary
     component_states = {}
@@ -150,12 +151,16 @@ def get_dashboard_url():
     cmd = "oc get route -A -o json  | jq '.items[].spec.host' | grep 'dashboard'"
 
     dashboard_url = execute_command(cmd)
-    return "https://" + dashboard_url.strip('\"').strip("\n")
+    return "https://" + dashboard_url.strip('"').strip("\n")
 
 
 def generate_test_config_file(
-    config_template, config_data, test_cluster, set_prometheus_config,
-    set_dashboard_url, components=None
+    config_template,
+    config_data,
+    test_cluster,
+    set_prometheus_config,
+    set_dashboard_url,
+    components=None,
 ):
     """
     Generates test config file dynamically by
@@ -271,7 +276,7 @@ def generate_test_config_file(
     if bool(set_dashboard_url):
         # Get Dashboard url for open data science
         dashboard_url = get_dashboard_url()
-        data["ODH_DASHBOARD_URL"] = dashboard_url.replace('"', '')
+        data["ODH_DASHBOARD_URL"] = dashboard_url.replace('"', "")
 
     with open(config_file, "w") as yaml_file:
         yaml_file.write(yaml.dump(data, default_flow_style=False, sort_keys=False))
@@ -300,9 +305,12 @@ def main():
 
     # Generate test config file
     generate_test_config_file(
-        args.config_template, config_data, args.test_cluster, args.set_prometheus_config,
-        args.set_dashboard_url, components=args.components,
-
+        args.config_template,
+        config_data,
+        args.test_cluster,
+        args.set_prometheus_config,
+        args.set_dashboard_url,
+        components=args.components,
     )
     print("Done generating config file")
 

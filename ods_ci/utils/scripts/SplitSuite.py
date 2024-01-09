@@ -18,7 +18,7 @@ def chunked(lst, nchunk):
 
 
 def fetch_subsuites(parent):
-    children = [child for child in parent.suites]
+    children = list(parent.suites)
     return children
 
 
@@ -70,7 +70,7 @@ class SplitSuite(SuiteVisitor):
         print("Suites names in the suite: ", suite_names)
         num_suite = math.ceil(len(sub_suites_list) / self.parts)
         print("Number of suites per split:", num_suite)
-        chunked_suites = [i for i in chunked(sub_suites_list, num_suite)]
+        chunked_suites = list(chunked(sub_suites_list, num_suite))
         print("Number of chunked suites: ", len(chunked_suites))
         print("Chunked suites: ", chunked_suites)
         suite_to_execute = chunked_suites[self.which_part - 1]

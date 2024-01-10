@@ -62,7 +62,7 @@ Delete Project By Name
   Wait Until Page Contains Element      //input[@data-test-id="item-filter"]
   Input Text    //input[@data-test-id="item-filter"]    ${project_name}
   Sleep     5
-  Click Button      //button[@class="pf-c-dropdown__toggle pf-m-plain"]
+  Click Button      //button[@class="pf-v5-c-dropdown__toggle pf-m-plain"]
   Sleep     5
   Click Button      //button[@data-test-action="Delete Project"]
   Wait Until Page Contains Element      //div[@class="modal-header"]    10

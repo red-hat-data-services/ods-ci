@@ -10,7 +10,7 @@ Test Teardown       Dashboard Test Teardown
 
 *** Variables ***
 ${SB_CARDS_XP}=     //div[@id="starburst"]
-${SB_BETA_DESC}=    //*[@class="pf-c-drawer__panel-main"]//div[@class="pf-c-alert pf-m-inline pf-m-info"]
+${SB_BETA_DESC}=    //*[@class="pf-v5-c-drawer__panel-main"]//div[@class="pf-v5-c-alert pf-m-inline pf-m-info"]
 
 
 *** Test Cases ***

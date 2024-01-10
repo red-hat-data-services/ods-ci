@@ -40,7 +40,7 @@ Login To Openshift
         RETURN
     END
     # If here we need to login
-    Wait Until Element is Visible  xpath://div[@class="pf-c-login"]  timeout=10s
+    Wait Until Element is Visible  xpath://div[@class="pf-v5-c-login"]  timeout=10s
     ${select_auth_type} =  Does Login Require Authentication Type
     IF  ${select_auth_type}  Select Login Authentication Type  ${ocp_user_auth_type}
     Wait Until Page Contains  Log in to your account

@@ -8,7 +8,7 @@ Set Hive Default Variables
     Set Suite Variable    ${claim_name}
     ${conf_name} =    Get Variable Value    ${conf_name}    ${cluster_name}-conf
     Set Suite Variable    ${conf_name}
-    ${hive_namespace} =    Get Variable Value    ${hive_namespace}    rhods
+    ${hive_namespace} =    Get Variable Value    ${hive_namespace}    %{HIVE_NAMESPACE}
     Set Suite Variable    ${hive_namespace}
 
 Delete Cluster Configuration

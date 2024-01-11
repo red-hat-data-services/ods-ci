@@ -1,12 +1,13 @@
 """Inserts properties from a config file into a xunit format XML file"""
 import argparse
 import codecs
+import os
 import xml.etree.ElementTree as et
 from copy import deepcopy
 from xml.dom import minidom
-import os
-from junitparser import JUnitXml, TestCase, TestSuite, Failure, Error, Skipped
+
 import yaml
+from junitparser import Error, Failure, JUnitXml, Skipped, TestCase, TestSuite
 
 
 def parse_args():

@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 # Make changes to gpu install file
 
 GPU_INSTALL_DIR="$(dirname "$0")"
@@ -11,62 +13,52 @@ sed -i -e "0,/v1.11/s//$CHANNEL/g" -e "s/gpu-operator-certified.v1.11.0/$CSVNAME
 
 oc apply -f ${GPU_INSTALL_DIR}/gpu_install.yaml
 
-function wait_until_gpu_pods_are_running() {
-
+function wait_until_pod_ready_status() {
   local timeout_seconds=1200
-  local sleep_time=90
+  local pod_label=$1
+  local namespace=nvidia-gpu-operator
 
-  echo "Waiting until gpu pods are in running state..."
-
-  SECONDS=0
-  while [ "$SECONDS" -le "$timeout_seconds" ]; do
-    pod_status=$(oc get pods -n "nvidia-gpu-operator" | grep gpu-operator | awk 'NR == 1 { print $3 }')
-    if [ "$pod_status" == "Running" ]; then
-      break
-    else
-      ((remaining_seconds = timeout_seconds - SECONDS))
-      echo "GPU installation seems to be still running (timeout in $remaining_seconds seconds)..."
-      sleep $sleep_time
-    fi
-  done
-
-  if [ "$pod_status" == "Running" ]; then
-    printf "GPU operator is up and running\n"
-    return 0
-  else
-    printf "ERROR: Timeout reached while waiting for gpu operator to be in running state\n"
-    return 1
-  fi
-
+  echo "Waiting until GPU pods of '$pod_label' in namespace '$namespace' are in running state..."
+  oc wait --timeout=${timeout_seconds}s --for=condition=ready pod -n $namespace -l app="$pod_label"
 }
 
 function rerun_accelerator_migration() {
-# As we are adding the GPUs after installing the RHODS operator, those GPUs are not discovered automatically.
-# In order to rerun the migration we need to
-# 1. Delete the migration configmap
-# 2. Rollout restart dashboard deployment, so the configmap is created again and the migration run again
-# Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
+  # As we are adding the GPUs after installing the RHODS operator, those GPUs are not discovered automatically.
+  # In order to rerun the migration we need to
+  # 1. Delete the migration configmap
+  # 2. Rollout restart dashboard deployment, so the configmap is created again and the migration run again
+  # Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
 
   echo "Deleting configmap migration-gpu-status"
   if ! oc delete configmap migration-gpu-status -n redhat-ods-applications;
     then
-      printf "ERROR: When trying to delete the migration-gpu-status configmap\n"
+      echo "ERROR: When trying to delete the migration-gpu-status configmap"
       return 1
   fi
 
   echo "Rollout restart rhods-dashboard deployment"
   if ! oc rollout restart deployment.apps/rhods-dashboard -n redhat-ods-applications;
     then
-      printf "ERROR: When trying to rollout restart rhods-dashboard deployment\n"
+      echo "ERROR: When trying to rollout restart rhods-dashboard deployment"
       return 1
   fi
 
+  echo "Waiting for up to 3 minutes until rhods-dashboard deployment is rolled out"
+  oc rollout status deployment.apps/rhods-dashboard -n redhat-ods-applications --watch --timeout 3m
+
+  echo "Verifying that an AcceleratorProfiles resource was created in redhat-ods-applications"
+  oc describe AcceleratorProfiles -n redhat-ods-applications
 }
 
-wait_until_gpu_pods_are_running
+wait_until_pod_ready_status  "gpu-operator"
 oc apply -f ${GPU_INSTALL_DIR}/nfd_deploy.yaml
 oc get csv -n nvidia-gpu-operator $CSVNAME -ojsonpath={.metadata.annotations.alm-examples} | jq .[0] > clusterpolicy.json
 oc apply -f clusterpolicy.json
+wait_until_pod_ready_status "nvidia-device-plugin-daemonset"
+wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
+wait_until_pod_ready_status "nvidia-dcgm-exporter"
+wait_until_pod_ready_status "gpu-feature-discovery"
+wait_until_pod_ready_status "nvidia-operator-validator"
 rerun_accelerator_migration
 
 

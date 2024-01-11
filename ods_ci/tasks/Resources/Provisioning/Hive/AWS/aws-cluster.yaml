@@ -5,9 +5,9 @@ items:
   kind: ClusterPool
   metadata:
     name: {{ hive_cluster_name|default("rhodsaws") }}-pool
-    namespace: rhods
+    namespace: {{ hive_claim_ns }}
   spec:
-    baseDomain: rhods.ccitredhat.com
+    baseDomain: {{ base_domain }}
     imageSetRef:
       name: {{ image_set|default("rhods-openshift") }}
     platform:
@@ -23,12 +23,12 @@ items:
   kind: Secret
   metadata:
     name: aws-sno-install-config
-    namespace: rhods
+    namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:
     install-config.yaml: |
       apiVersion: v1
-      baseDomain: rhods.ccitredhat.com
+      baseDomain: {{ base_domain }}
       compute:
       - name: worker
         platform:
@@ -62,7 +62,7 @@ items:
   kind: Secret
   metadata:
     name: aws-creds
-    namespace: rhods
+    namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:
     aws_access_key_id: {{ AWS_ACCESS_KEY_ID }}
@@ -71,6 +71,6 @@ items:
   kind: ClusterImageSet
   metadata:
     name: {{ image_set|default("rhods-openshift") }}
-    namespace: rhods
+    namespace: {{ hive_claim_ns }}
   spec:
     releaseImage: {{ openshift_image|default("quay.io/openshift-release-dev/ocp-release:4.10.42-x86_64") }}

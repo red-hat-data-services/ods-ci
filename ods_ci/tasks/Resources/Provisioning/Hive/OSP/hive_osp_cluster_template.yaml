@@ -7,7 +7,7 @@ items:
     name: ${infrastructure_configurations}[hive_cluster_name]-pool
     namespace: ${infrastructure_configurations}[hive_claim_ns]
   spec:
-    baseDomain: ${infrastructure_configurations}[aws_domain]
+    baseDomain: ${infrastructure_configurations}[base_domain]
     imageSetRef:
       name: ${infrastructure_configurations}[image_set] # see line 100
     inventory:
@@ -33,7 +33,7 @@ items:
   stringData:
     install-config.yaml: |
       apiVersion: v1
-      baseDomain: ${infrastructure_configurations}[aws_domain]
+      baseDomain: ${infrastructure_configurations}[base_domain]
       compute:
       - name: worker
         platform:

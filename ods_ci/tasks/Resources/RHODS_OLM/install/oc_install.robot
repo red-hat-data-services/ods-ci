@@ -329,3 +329,29 @@ Install Kserve Dependencies
     ELSE
          Log To Console    message=Serverless Operator is already installed
     END
+
+Set Component State
+    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed)
+    [Arguments]    ${component}    ${state}
+    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+    ...    shell=true    stderr=STDOUT
+    IF    $result.stdout == ""
+        FAIL    Can not find datasciencecluster
+    END
+    ${cluster_name} =    Set Variable    ${result.stdout}
+    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${component}/managementState" ,"value" : "${state}"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Can not enable ${component}: ${result.stdout}
+    END
+    Log To Console    Component ${component} state was set to ${state}
+
+Enable Component
+    [Documentation]    Enables a component in Data Science Cluster
+    [Arguments]    ${component}
+    Set Component State    ${component}    Managed
+
+Disable Component
+    [Documentation]    Disable a component in Data Science Cluster
+    [Arguments]    ${component}
+    Set Component State    ${component}    Removed

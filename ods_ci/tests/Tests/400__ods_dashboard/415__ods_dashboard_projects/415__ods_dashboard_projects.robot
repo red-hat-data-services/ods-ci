@@ -221,7 +221,7 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...    status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
-    [Teardown]    Run Keywords    
+    [Teardown]    Run Keywords
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_2_TITLE}    project_title=${PRJ_TITLE}
     ...    AND
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
@@ -252,6 +252,34 @@ Verify User Can Delete A Data Connection
     Delete Data Connection    name=${DC_3_S3_NAME}
     Data Connection Should Not Be Listed    name=${DC_3_S3_NAME}
     Check Data Connection Secret Is Deleted    dc_name=${DC_3_S3_NAME}    namespace=${ns_name}
+
+Verify user can create a workbench with an existing data connection
+    [Tags]  Tier1  ODS-2176
+    [Documentation]  Verifies users can create a workbench with an existing data connection
+
+    ${data_connection_name}=    Set Variable    aDataConnection
+
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create S3 Data Connection  project_title=${PRJ_TITLE}
+    ...                    dc_name=${data_connection_name}
+    ...                    aws_access_key=dummy-key
+    ...                    aws_secret_access=dummy-secret
+    ...                    aws_s3_endpoint=${DC_S3_ENDPOINT}
+    ...                    aws_region=${DC_S3_REGION}
+    Create Workbench  workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                storage=Persistent  pv_existent=${NONE}  pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
+    ...                data_connection=${data_connection_name}
+
+    # The Workbench and the Data connection appear on the project details page.
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    # The data connection has the workbench name in the "Connected workbenches" column
+    ${workbenches}=    Create Dictionary    ${WORKBENCH_TITLE}=mount-data
+    Data Connection Should Be Listed    name=${data_connection_name}    type=${DC_S3_TYPE}
+    ...                connected_workbench=${workbenches}
+
+    [Teardown]  Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
+    ...                project_title=${PRJ_TITLE}
 
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
@@ -371,6 +399,32 @@ Verify Event Log Is Accessible While Starting A Workbench
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_6_TITLE}
     ...    project_title=${PRJ_TITLE}
+
+Verify User Can Cancel Workbench Start From Event Log
+    [Tags]    Sanity    Tier1    ODS-1975
+    [Documentation]    Verify user can cancel workbench start from event log
+
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...        pv_description=${NONE}  pv_size=${NONE}
+    ...        press_cancel=${FALSE}    envs=${NONE}
+
+    Workbench Status Should Be    workbench_title=${WORKBENCH_TITLE}  status=${WORKBENCH_STATUS_STARTING}
+
+    Open Notebook Event Log    workbench_title=${WORKBENCH_TITLE}
+    Page Should Contain Event Log
+    Cancel Workbench Startup From Event Log
+    Wait Until Workbench Is Stopped    workbench_title=${WORKBENCH_TITLE}
+
+    Workbench Status Should Be    workbench_title=${WORKBENCH_TITLE}  status=${WORKBENCH_STATUS_STOPPED}
+
+    Wait Until Keyword Succeeds  5 min  5s
+    ...    Run Keyword And Expect Error  EQUALS:ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Get Workbench Pod    project_title=${PRJ_TITLE}  workbench_title=${WORKBENCH_TITLE}
+
+    [Teardown]  Clean Project From Workbench Resources  workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
 
 Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     [Tags]    Tier1    Sanity

@@ -24,6 +24,8 @@ ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-sel
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
+${WORKBENCH_USE_CONNECTION_CHK_XP}=           xpath=//input[@name="enable-data-connection-checkbox"]
+${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//input[@name="existing-data-connection-type-radio"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting...
@@ -36,6 +38,7 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="wo
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
+${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Data connections"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
 
@@ -47,6 +50,7 @@ Create Workbench
     [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}    ${gpus}=${NONE}
     ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
+    ...             ${data_connection}=${NONE}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
@@ -59,6 +63,9 @@ Create Workbench
     IF    "${envs}" != "${NONE}"
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
+    END
+    IF    "${data_connection}" != "${NONE}"
+        Add Existing Data Connection In Workbench    data_connection=${data_connection}
     END
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
     IF  ${version_check}==True
@@ -138,6 +145,24 @@ Add Environment Variables In Workbench
             Click Button    Add more variables
         END
     END
+
+Add Existing Data Connection In Workbench
+    [Documentation]    Adds the data connection through the workbench creation page
+    [Arguments]    ${data_connection}
+    # Use the `Jump to section` links in the page to scroll the section into view
+    Click Element    //a[@href="#data-connections"]
+    Click Element    ${WORKBENCH_USE_CONNECTION_CHK_XP}
+    # Use the `Jump to section` again to move the expanded form into view
+    Click Element    //a[@href="#data-connections"]
+    Click Element    ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}
+    Select Existing Data Connection    data_connection=${data_connection}
+
+Select Existing Data Connection
+    [Documentation]    Selects the existing data connection in the workbench creation page from a dropdown list
+    [Arguments]    ${data_connection}
+    Click Element    ${ENV_DATA_CONNECTION_SECTION_XP}//div[contains(@class,"pf-c-select")]/button
+    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${data_connection}"]
+    Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${data_connection}"]
 
 Select Environment Variable Types
     [Documentation]    Selects the type of environment variable in the workbench creation page: Secret vs Config Map
@@ -427,6 +452,11 @@ Event Log Should Report The Failure
     [Arguments]    ${exp_progress_text}=${NONE}    ${exp_result_text}=${NONE}
     Page Should Contain Event Log    expected_progress_text=${exp_progress_text}
     ...    expected_result_text=${exp_result_text}
+
+Cancel Workbench Startup From Event Log
+    [Documentation]    Clicks the Cancel button in Workbench statup event log
+    Click Element    ${KFNBC_MODAL_CANCEL_XPATH}
+    Wait Until Generic Modal Disappears
 
 Close Event Log
     [Documentation]    Closes the event log which was previously opened by the robot

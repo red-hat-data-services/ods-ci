@@ -13,17 +13,17 @@ Suite Teardown     Project Suite Teardown
 ${PRJ_TITLE}    ODS-CI DS Project Notebook Images
 ${PRJ_RESOURCE_NAME}    notebook-images-ds-project
 ${PRJ_DESCRIPTION}    ${PRJ_TITLE} is a test project for validating notebook images and shared by multiple tests
-${INTEL_AIKIT_APPNAME}          aikit
-${INTEL_AIKIT_OPERATOR_NAME}    Intel® oneAPI AI Analytics Toolkit Operator
-${IMG_NAME}   oneAPI AI Analytics Toolkit
-${WORKBENCH_TITLE}    aikitwb
-${PV_DESCRIPTION}    PV for AiKit workbench
 
 
 *** Test Cases ***
 Verify user can create a workbench using Intel AiKit image
     [Documentation]    Verifies that a workbench can be created using Intel AiKit image
     [Tags]    ODS-2173    Tier2
+    Set Test Variable   ${INTEL_AIKIT_APPNAME}  aikit
+    Set Test Variable   ${INTEL_AIKIT_OPERATOR_NAME}    Intel® oneAPI AI Analytics Toolkit Operator
+    Set Test Variable   ${IMG_NAME}     oneAPI AI Analytics Toolkit
+    Set Test Variable   ${WORKBENCH_TITLE}      aikitwb
+    Set Test Variable   ${PV_DESCRIPTION}      PV for AiKit workbench
     Check And Install Operator in Openshift    ${INTEL_AIKIT_OPERATOR_NAME}    ${INTEL_AIKIT_APPNAME}
     Create Tabname Instance For Installed Operator        ${INTEL_AIKIT_OPERATOR_NAME}
     ...    AIKitContainer    ${APPLICATIONS_NAMESPACE}
@@ -47,7 +47,7 @@ Project Suite Setup
     [Documentation]    Suite setup steps for testing DS Projects. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    ${to_delete}=    Create List    ${PRJ_TITLE}
+    ${to_delete}    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     RHOSi Setup
     Launch Data Science Project Main Page
@@ -58,6 +58,5 @@ Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    # Delete All Data Science Projects From CLI
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown

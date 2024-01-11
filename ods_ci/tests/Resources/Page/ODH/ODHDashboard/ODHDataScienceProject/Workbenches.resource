@@ -449,6 +449,11 @@ Event Log Should Report The Failure
     Page Should Contain Event Log    expected_progress_text=${exp_progress_text}
     ...    expected_result_text=${exp_result_text}
 
+Cancel Workbench Startup From Event Log
+    [Documentation]    Clicks the Cancel button in Workbench statup event log
+    Click Element    ${KFNBC_MODAL_CANCEL_XPATH}
+    Wait Until Generic Modal Disappears
+
 Close Event Log
     [Documentation]    Closes the event log which was previously opened by the robot
     ${cancel_present}=    Run Keyword And Return Status

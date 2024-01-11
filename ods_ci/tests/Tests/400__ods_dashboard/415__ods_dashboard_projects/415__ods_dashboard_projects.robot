@@ -727,7 +727,7 @@ Environment Variables Should Be Displayed According To Their Type
 
 Environment Variable Type Should Be
     [Arguments]    ${expected_type}    ${var_idx}
-    ${displayed_type}=    Get Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//div[contains(@class,"pf-c-select")]/button//span[contains(@class,'toggle-text')]
+    ${displayed_type}=    Get Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//div[contains(@class,"pf-v5-c-select")]/button//span[contains(@class,'toggle-text')]
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_type}    ${expected_type}
 
 Environment Variable Key/Value Fields Should Be Correctly Displayed

@@ -8,7 +8,8 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resou
 *** Variables ***
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
-${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
+${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc.yaml
+${INFERENCESERVICE_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc_filled.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
@@ -20,7 +21,7 @@ ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTas
 ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
 ${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}=    api/v1/task/text-generation
 ${CAIKIT_STREAM_ENDPOINT_HTTP}=    api/v1/task/server-streaming-text-generation
-${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime_{{protocol}}.yaml
+${CAIKIT_TGIS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
 
@@ -48,7 +49,7 @@ Deploy Caikit Serving Runtime
         ...    level=WARN
         RETURN
     END
-    ${runtime_final_filepath}=    Replace String    string=${CAIKIT_FILEPATH}    search_for={{protocol}}
+    ${runtime_final_filepath}=    Replace String    string=${CAIKIT_TGIS_FILEPATH}    search_for={{protocol}}
     ...    replace_with=${protocol}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${runtime_final_filepath} -n ${namespace}
@@ -109,9 +110,9 @@ Create Secret For S3-Like Buckets
 
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
-    [Arguments]    ${isvc_name}    ${model_storage_uri}    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
-    ...            ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1   ${scaleTarget}=1
-    ...            ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
+    [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
+    ...            ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
+    ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
     IF   '${auto_scale}' == '${NONE}'
         ${scaleTarget}=    Set Variable    ${EMPTY}
@@ -124,22 +125,24 @@ Compile Inference Service YAML
     Set Test Variable    ${scaleTarget}
     Set Test Variable    ${scaleMetric}
     Set Test Variable    ${canaryTrafficPercent}
-    Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Set Test Variable    ${model_format}
+    Set Test Variable    ${serving_runtime}
+    Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${INFERENCESERVICE_FILLED_FILEPATH}
     IF    ${requests_dict} != &{EMPTY}
-        Log    Adding predictor model requests to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${requests_dict}    console=True    # robocop: disable
+        Log    Adding predictor model requests to ${INFERENCESERVICE_FILLED_FILEPATH}: ${requests_dict}    console=True    # robocop: disable
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
             Log    ${index}- ${resource}:${requests_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml    # robocop: disable
+            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
     IF    ${limits_dict} != &{EMPTY}
-        Log    Adding predictor model limits to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${limits_dict}    console=True    # robocop: disable
+        Log    Adding predictor model limits to ${INFERENCESERVICE_FILLED_FILEPATH}: ${limits_dict}    console=True    # robocop: disable
         FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
             Log    ${index}- ${resource}:${limits_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml    # robocop: disable
+            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
@@ -241,7 +244,7 @@ Compile Deploy And Query LLM model
     ...    sa_name=${sa_name}
     ...    model_storage_uri=${model_storage_uri}
     ...    canaryTrafficPercent=${canaryTrafficPercent}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}

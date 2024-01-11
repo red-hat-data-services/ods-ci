@@ -85,7 +85,7 @@ GRPC Model Setup
         Set Project And Runtime    namespace=${GRPC_MODEL_NS}
         Compile Inference Service YAML    isvc_name=${ISVC_NAME}
         ...    model_storage_uri=${STORAGE_URI}
-        Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
         ...    namespace=${GRPC_MODEL_NS}
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ISVC_NAME}
         ...    namespace=${GRPC_MODEL_NS}

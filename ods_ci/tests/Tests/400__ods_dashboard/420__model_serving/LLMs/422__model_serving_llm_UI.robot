@@ -1,13 +1,13 @@
 *** Settings ***
 Documentation     Collection of UI tests to validate the model serving stack for Large Language Models (LLM)
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource          ../../../Resources/OCP.resource
-Resource          ../../../Resources/Page/Operators/ISVs.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource          ../../../Resources/CLI/ModelServing/llm.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource          ../../../../Resources/OCP.resource
+Resource          ../../../../Resources/Page/Operators/ISVs.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource          ../../../../Resources/CLI/ModelServing/llm.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
 Library            OpenShiftLibrary
 Suite Setup       Setup Kserve UI Test
 Suite Teardown    RHOSi Teardown

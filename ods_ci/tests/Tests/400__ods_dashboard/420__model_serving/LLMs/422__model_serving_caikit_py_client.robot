@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation    Test suite to validate caikit-nlp-client library usage with Kserve models
 ...              PythonLibrary repo: https://github.com/opendatahub-io/caikit-nlp-client
-Resource          ../../../Resources/CLI/ModelServing/llm.resource
+Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup    Caikit Client Suite Setup
 Suite Teardown    Caikit Client Suite Teardown
 Test Teardown    SeleniumLibrary.Close All Browsers

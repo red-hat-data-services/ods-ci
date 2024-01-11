@@ -16,7 +16,7 @@ ${PRJ_DESCRIPTION}    ${PRJ_TITLE} is a test project for validating notebook ima
 
 
 *** Test Cases ***
-Verify user can create a workbench using Intel AiKit image
+Verify User Can Create A Workbench Using Intel AiKit Image
     [Documentation]    Verifies that a workbench can be created using Intel AiKit image
     [Tags]    ODS-2173    Tier2
     Set Test Variable   ${INTEL_AIKIT_APPNAME}  aikit

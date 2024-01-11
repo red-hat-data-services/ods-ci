@@ -167,7 +167,7 @@ Delete Data Science Project From CLI
     ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
     ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
     IF    "${project_k8s_name}" == "${EMPTY}"
-        Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}
+        Log    msg=There are probably no DS Projects with Display Name equal to ${displayed_name}
         ...    level=WARN
     ELSE
         Oc Delete    kind=Project   name=${project_k8s_name}

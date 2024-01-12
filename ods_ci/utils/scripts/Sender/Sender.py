@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any
 
 
 class Sender(ABC):
     @abstractmethod
     def prepare_payload(
-        self, text: str = "", attachments: Optional[List[Any]] = None
+        self, text: str = "", attachments: list[Any] | None = None
     ) -> None:
         pass
 

@@ -6,8 +6,9 @@ authors = ["RHODS QE <ods-qe@redhat.com>"]
 readme = "README.md"
 packages = [{include = "ods_ci"}]
 
+# https://python-poetry.org/docs/dependency-specification
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = ">=3.11.5, <3.12.0"
 reportportal-client = "^5.2.5"
 robotframework = "^6"
 robotframework-debuglibrary = ">=2.0.0"
@@ -47,7 +48,7 @@ profile = "black"
 line_length = 88 # align with black's default
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py311"
 line-length = 88 # align with black's default
 
 # https://docs.astral.sh/ruff/rules

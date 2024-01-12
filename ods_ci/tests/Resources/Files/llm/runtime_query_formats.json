@@ -6,7 +6,7 @@
         },
         "http": {
             "header": "Content-type:application/json",
-            "body": "'model_id': '${model_name}','inputs': '${query_text}'"
+            "body": "{'model_id': '${model_name}','inputs': '${query_text}'}"
         },
         "response_fields_map": {
             "response": "",

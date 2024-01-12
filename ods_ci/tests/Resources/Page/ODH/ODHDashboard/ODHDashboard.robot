@@ -15,7 +15,7 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawe
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
 ${RES_CARDS_XP}=  //article[contains(@class, 'pf-v5-c-card')]
-${SAMPLE_APP_CARD_XP}=   //div[@id="pachyderm"]
+${SAMPLE_APP_CARD_XP}=   //*[@id="pachyderm-selectable-card-id"]
 ${HEADER_XP}=  div[@class='pf-v5-c-card__header']
 ${TITLE_XP}=   div[@class='pf-v5-c-card__title']//span
 ${TITLE_XP_OLD}=  div[@class='pf-v5-c-card__title']//div/div[1]

@@ -37,7 +37,7 @@ Fill In Pipeline Import Form
     Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_DESC_INPUT_XP}    ${description}
     ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
-    Choose File    //div[@class="pf-c-file-upload"]//input[@type="file"]    ${pwd}/${filepath}
+    Choose File    //div[contains(@class="-file-upload")]//input[@type="file"]    ${pwd}/${filepath}
     Element Should Be Enabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
 
 Fill In Run Creation Form    # robocop: disable
@@ -69,8 +69,8 @@ Select Pipeline For The Run
     [Documentation]    Selects the given ${pipeline_name} from the pipeline
     ...                dropdown in the Run creation form.
     [Arguments]    ${pipeline_name}
-    Wait Until Page Contains Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-c-dropdown__toggle-text"]/..
-    Click Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-c-dropdown__toggle-text"]/..
+    Wait Until Page Contains Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-v5-c-dropdown__toggle-text"]/..
+    Click Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-v5-c-dropdown__toggle-text"]/..
     Wait Until Page Contains Element    xpath://ul/li/a[text()="${pipeline_name}"]
     Click Element     xpath://ul/li/a[text()="${pipeline_name}"]
 

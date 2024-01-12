@@ -309,7 +309,7 @@ Start Workbench
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
+        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -355,7 +355,7 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
+        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
         ...    from_running=${from_running}
@@ -385,9 +385,9 @@ Handle Stop Workbench Confirmation Modal
 Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${item_title}    ${item_type}    ${action}
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
+    Click Element       xpath=//div[@id="workbenches"]//div[text()="${item_title}"]/ancestor::tr//td/button[@aria-label="Kebab toggle"]
+    Wait Until Page Contains Element       xpath=//div[@id="workbenches"]//div[text()="${item_title}"]/ancestor::tr//td//li//span[text()="${action} ${item_type}"]
+    Click Element       xpath=//div[@id="workbenches"]//div[text()="${item_title}"]/ancestor::tr//td//li//span[text()="${action} ${item_type}"]
 
 Delete Workbench
     [Documentation]    Deletes a workbench

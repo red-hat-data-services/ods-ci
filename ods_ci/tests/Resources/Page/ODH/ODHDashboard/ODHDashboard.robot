@@ -822,7 +822,7 @@ Handle Deletion Confirmation Modal
     IF    "${additional_msg}" != "${NONE}"
         Run Keyword And Continue On Failure    Page Should Contain    ${additional_msg}
     END
-    Run Keyword And Continue On Failure    Page Should Contain    Confirm deletion by typing ${item_title} below:
+    Run Keyword And Continue On Failure    Page Should Contain    Type ${item_title} to confirm deletion.
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${delete_btn_xp}
     Input Text    xpath=//input[@id="delete-modal-input"]    ${item_title}
     Wait Until Element Is Enabled    ${delete_btn_xp}

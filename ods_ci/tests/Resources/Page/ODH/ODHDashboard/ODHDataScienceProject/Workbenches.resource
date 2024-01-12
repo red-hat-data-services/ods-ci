@@ -192,7 +192,7 @@ Select An Existent PV
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
     Wait Until Page Contains Element    xpath=//ul/li/button[text()="${name}"]
-    Wait Until Page Contains Element    xpath=//div[contains(@class,"pf-c-select")]/ul/li/button[text()="${name}"]
+    Wait Until Page Contains Element    xpath=//ul[@aria-label="Persistent storage select"]//button[text()="${name}"]
     Click Element   xpath=//ul/li/button[text()="${name}"]
 
 Select Workbench Jupyter Image

@@ -1,0 +1,38 @@
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: caikit-tgis-runtime
+  labels:
+    opendatahub.io/dashboard: 'true'
+  annotations:
+    description: RHODS Internal Testing
+objects:
+  - apiVersion: serving.kserve.io/v1alpha1
+    kind: ServingRuntime
+    metadata:
+      name: caikit-runtime
+      annotations:
+        openshift.io/display-name: RHODS Internal Caikit Model Server
+      labels:
+        opendatahub.io/dashboard: 'true'
+    spec:
+      containers:
+        - env:
+            - name: RUNTIME_LOCAL_MODELS_DIR
+              value: /mnt/models
+            - name: DTYPE_STR
+              value: float32
+          image: 'quay.io/opendatahub/caikit-tgis-serving:stable'
+          name: kserve-container
+          ports:
+            - containerPort: 8085
+              name: h2c
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 4
+              memory: 8Gi
+      multiModel: false
+      supportedModelFormats:
+        - autoSelect: true
+          name: caikit

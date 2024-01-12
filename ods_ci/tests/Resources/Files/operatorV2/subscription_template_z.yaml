@@ -1,0 +1,13 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhods-operator
+  namespace: <OPERATOR_NAMESPACE>
+spec:
+  channel: embedded
+  name: rhods-operator
+  source: <CS_NAME>
+  sourceNamespace: <CS_NAMESPACE>
+  config:
+     env:
+        - name: "DISABLE_DSC_CONFIG"

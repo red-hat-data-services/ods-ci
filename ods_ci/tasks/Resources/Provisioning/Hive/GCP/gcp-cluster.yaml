@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: List
+items:
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterPool
+  metadata:
+    name: {{ hive_cluster_name|default("rhodsgcp") }}-pool
+    namespace: {{ hive_claim_ns }}
+  spec:
+    baseDomain: {{ base_domain }}
+    imageSetRef:
+      name: {{ image_set|default("rhods-openshift") }}
+    platform:
+      gcp:
+        region: {{ gcp_region|default("us-central1") }}
+        credentialsSecretRef:
+          name: gcp-creds
+    installConfigSecretTemplateRef:
+      name: gcp-sno-install-config
+    size: 0
+    skipMachinePools: true
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: gcp-sno-install-config
+    namespace: {{ hive_claim_ns }}
+  type: Opaque
+  stringData:
+    install-config.yaml: |
+      apiVersion: v1
+      baseDomain: {{ base_domain }}
+      compute:
+      - name: worker
+        platform:
+          gcp:
+            type: {{ worker_node_instance_type|default("custom-8-32768") }}
+        replicas: {{ worker_node_replicas|default("2") }}
+      controlPlane:
+        name: master
+        platform:
+          gcp:
+            type: {{ master_node_instance_type|default("custom-8-32768") }}
+        replicas: {{ master_node_replicas|default("3") }}
+      metadata:
+        name: gcp-sno
+      networking:
+        clusterNetwork:
+        - cidr: 10.128.0.0/14
+          hostPrefix: 23
+        machineNetwork:
+        - cidr: 10.0.0.0/16
+        networkType: {{ ocp_network_type|default("OVNKubernetes") }}
+        serviceNetwork:
+        - 172.30.0.0/16
+      fips: {{ fips_validation|default("false") }}
+      platform:
+        gcp:
+          projectID: {{ gcp_project_id }}
+          region: {{ gcp_region|default("us-central1") }}
+      pullSecret: {{ pull_secret|default("") }}
+      sshKey: {{ ssh_key|default("") }}
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: gcp-creds
+    namespace: {{ hive_claim_ns }}
+  type: Opaque
+  stringData:
+    osServiceAccount.json: |
+      {
+        "type": {{ '\"' + gcp_service_account_type + '\"' }},
+        "project_id": {{ '\"' + gcp_project_id + '\"' }},
+        "private_key_id": {{ '\"' + gcp_private_key_id + '\"' }},
+        "private_key": {{ '\"' + gcp_private_key + '\"' }},
+        "client_email": {{ '\"' + gcp_client_email + '\"' }},
+        "client_id": {{ '\"' + gcp_client_id + '\"' }},
+        "auth_uri": {{ '\"' + gcp_auth_uri + '\"' }},
+        "token_uri": {{ '\"' + gcp_token_uri + '\"' }},
+        "auth_provider_x509_cert_url": {{ '\"' + gcp_auth_provider_x509_cert_url + '\"' }},
+        "client_x509_cert_url": {{ '\"' + gcp_client_x509_cert_url + '\"' }}
+      }
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterImageSet
+  metadata:
+    name: {{ image_set|default("rhods-openshift") }}
+    namespace: {{ hive_claim_ns }}
+  spec:
+    releaseImage: {{ release_image|default("quay.io/openshift-release-dev/ocp-release:4.10.18-x86_64") }}

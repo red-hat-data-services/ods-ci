@@ -1,0 +1,20 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    serving.knative.openshift.io/enablePassthrough: "true"
+    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/rewriteAppHTTPProbers: "true"
+  name: ${isvc_name}
+spec:
+  predictor:
+    scaleMetric: ${scaleMetric}
+    minReplicas: ${min_replicas}
+    scaleTarget: ${scaleTarget}
+    canaryTrafficPercent: ${canaryTrafficPercent}
+    serviceAccountName: ${sa_name}
+    model:
+      modelFormat:
+        name: caikit
+      runtime: caikit-tgis-runtime
+      storageUri: ${model_storage_uri}

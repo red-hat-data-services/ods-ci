@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: odh-catalog-dev
+  namespace: openshift-marketplace
+spec:
+  displayName: Red Hat OpenShift Data Science Build
+  publisher: ODH Development Catalog
+  image: quay.io
+  sourceType: grpc

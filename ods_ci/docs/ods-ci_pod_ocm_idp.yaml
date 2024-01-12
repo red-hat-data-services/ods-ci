@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ods-ci
+  namespace: ods-ci
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    deployment: ods-ci
+  name: ods-ci-ocm
+  namespace: ods-ci
+spec:
+  securityContext:
+    # This is required to make the test-output volume Writable
+    fsGroup: 0
+  serviceAccountName: rhods-test-runner
+  containers:
+    # - image: quay.io/modh/ods-ci:116-mps
+    - image: quay.io/modh/ods-ci:latest
+      imagePullPolicy: IfNotPresent
+      name: ods-ci-testrun
+      serviceAccountName: rhods-test-runner
+      env:
+        # Use this environment variable to pass args to the ods-ci run script in the container
+        - name: OC_HOST
+          value: "https://api.mycluster.abcd.domain.org:1234"
+        - name: SET_ENVIRONMENT
+          value: "1"
+        - name: OCM_ENV
+          value: "staging"                    
+        - name: OCM_TOKEN
+          value: "my-ocm-token"
+        - name: RUN_SCRIPT_ARGS
+          value: "--skip-oclogin false --set-urls-variables true"
+        - name: ROBOT_EXTRA_ARGS
+          value: "-i Smoke --dryrun"
+      volumeMounts:
+          # Mount the test-variables to prevent leaking secure info for the cluster you test against
+        - mountPath: /tmp/ods-ci/test-output
+          name: ods-ci-test-output
+        - mountPath: /tmp/ods-ci/ods_ci/configs/templates/user_config.json
+          name: ods-ci-user-config
+          subPath: user_config.json
+  restartPolicy: Never
+  volumes:
+    # Persistent Volume where we will store the test-output for this pod
+    - name: ods-ci-test-output
+      persistentVolumeClaim:
+        claimName: ods-ci
+    - name: ods-ci-user-config
+      secret:
+        # Specify Secret that has the necessary user_configuration.json
+        secretName: ods-ci-user-config

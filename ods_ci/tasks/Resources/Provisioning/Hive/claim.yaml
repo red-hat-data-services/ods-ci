@@ -1,0 +1,7 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterClaim
+metadata:
+  name: {{ hive_cluster_name }}-claim
+  namespace: {{ hive_claim_ns }}
+spec:
+  clusterPoolName: {{ hive_cluster_name }}-pool

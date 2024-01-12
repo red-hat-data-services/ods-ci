@@ -1,0 +1,15 @@
+kind: List
+metadata: {}
+apiVersion: v1
+items:
+    -   apiVersion: operators.coreos.com/v1alpha1
+        kind: Subscription
+        metadata:
+            name: rhods-codeflare-operator
+            namespace: openshift-operators
+        spec:
+            channel: <UPDATE_CHANNEL>
+            installPlanApproval: Automatic
+            name: rhods-codeflare-operator
+            source: <CATALOG_SOURCE>
+            sourceNamespace: openshift-marketplace

@@ -5,7 +5,7 @@
 #########################################################
 # Excluded rules                                        #
 #########################################################
---exclude could-be-forced-tags
+--exclude could-be-test-tags
 --exclude if-can-be-used
 --exclude todo-in-comment
 #--exclude missing-doc-suite

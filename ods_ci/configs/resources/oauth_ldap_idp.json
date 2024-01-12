@@ -1,0 +1,1 @@
+{"ldap":{"attributes":{"email":[],"id":["dn"],"name":["cn"],"preferredUsername":["uid"]},"insecure":true,"bindDN":"cn=admin,dc=example,dc=org","bindPassword":{"name":"ldap-bind-password"},"url":"ldap://openldap.openldap.svc.cluster.local:1389/dc=example,dc=org?uid"},"mappingMethod":"claim","name":"ldap-provider-qe","type":"LDAP"}

@@ -1,0 +1,83 @@
+BROWSER:
+  NAME: chrome
+  # List of Chrome options - https://peter.sh/experiments/chromium-command-line-switches/
+  # --disable-dev-shm-usage  and --no-sandbox are required for running chromedriver in a container
+  OPTIONS: add_argument("--ignore-certificate-errors");add_argument("window-size=1920,1024");add_argument("--disable-dev-shm-usage");add_argument("--no-sandbox");add_argument('--disable-gpu');add_argument('--headless')
+OCP_CONSOLE_URL: "http://console-openshift-console.apps.my-cluster.test.redhat.com"
+ODH_DASHBOARD_URL: "http://odh-dashboard-opendatahub.apps.my-cluster.test.redhat.com"
+OCP_API_URL: "https://api.my-cluster.test.redhat.com:my-port"
+RHODS_PROMETHEUS_URL: "https://prometheus-redhat-ods-monitoring.apps.my-cluster.test.redhat.com/"
+# RHODS_PROMETHEUS_TOKEN can be obtained running: oc create token prometheus -n redhat-ods-monitoring (you can use --duration=Xs/m/h to specify a duration)#
+RHODS_PROMETHEUS_TOKEN: "prometheus-token"
+TEST_USER:
+  AUTH_TYPE: foo-auth
+  USERNAME: foo-user
+  PASSWORD: foo-passwd
+OCP_ADMIN_USER:
+  AUTH_TYPE: adm-auth
+  USERNAME: adminuser
+  PASSWORD: adminuser-passwd
+TEST_USER_2:
+  AUTH_TYPE: foo-auth
+  USERNAME: foo-user2
+  PASSWORD: foo-passwd2
+TEST_USER_3:
+  AUTH_TYPE: foo-auth
+  USERNAME: foo-user3
+  PASSWORD: foo-passwd3
+TEST_USER_4:
+  AUTH_TYPE: foo-auth
+  USERNAME: foo-user4
+  PASSWORD: foo-passwd4
+SERVICE_ACCOUNT:
+  NAME: <sa_name>
+  FULL_NAME: <sa_full_name>
+  # FULL_NAME in the format of "system:serviceaccount:<namespace>:<sa_name>"
+S3:
+  AWS_ACCESS_KEY_ID: ID-value
+  AWS_SECRET_ACCESS_KEY: Secret-Key
+  AWS_DEFAULT_ENDPOINT:    https://s3.amazonaws.com/
+  AWS_DEFAULT_REGION:    us-east-1
+  BUCKET_1:
+    NAME: my-first-bucket
+    REGION: us-east-2
+    ENDPOINT: https://s3.us-east-2.amazonaws.com/
+  BUCKET_2:
+    NAME: my-second-bucket
+    REGION: my-custom-region
+    ENDPOINT: https://mybuckets.mydomain.com/
+  BUCKET_3:
+    NAME: my-third-bucket
+    REGION: third-region
+    ENDPOINT: https://mybuckets.mydomain.com/
+  BUCKET_4:
+    NAME: my-forth-bucket
+    REGION: wherever-region
+    ENDPOINT: https://mybuckets.mydomain.com/
+  BUCKET_5:
+    NAME: my-fifth-bucket
+    REGION: wherever-region
+    ENDPOINT: https://mybuckets.mydomain.com/
+ANACONDA_CE:
+  ACTIVATION_KEY: license-key
+SSO:
+  USERNAME: rh-sso-account
+  PASSWORD: rh-sso-account-pw
+GITHUB_USER:
+  USERNAME: USER
+  EMAIL: email@gmail.com
+  TOKEN: token
+# Components to set as enabled in the operator v2.0 DSC CR
+COMPONENTS:
+  dashboard: Managed
+  datasciencepipelines: Managed
+  kserve: Removed
+  modelmeshserving: Managed
+  workbenches: Removed
+  codeflare: Removed
+  ray: Removed
+PRODUCT: RHODS
+APPLICATIONS_NAMESPACE: redhat-ods-applications
+MONITORING_NAMESPACE: redhat-ods-monitoring
+OPERATOR_NAMESPACE: redhat-ods-operator
+NOTEBOOKS_NAMESPACE: rhods-notebooks

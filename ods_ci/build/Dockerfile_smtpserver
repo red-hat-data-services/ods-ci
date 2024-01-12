@@ -1,0 +1,5 @@
+FROM quay.io/centos/centos:stream8
+
+RUN yum install -y postfix
+RUN postconf -e 'inet_protocols = ipv4'
+CMD /usr/sbin/postfix -c /etc/postfix start-fg

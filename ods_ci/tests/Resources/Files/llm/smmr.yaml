@@ -1,0 +1,8 @@
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: default
+  namespace: {{SERVICEMESH_CR_NS}}
+spec:
+  members:
+    - {{KSERVE_NS}}

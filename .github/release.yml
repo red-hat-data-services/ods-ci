@@ -1,8 +1,6 @@
 changelog:
   exclude:
     labels:
-      - "needs testing"
-      - ":warning: high priority review"
       - "do not merge"
       - "ignore for release"
     authors:

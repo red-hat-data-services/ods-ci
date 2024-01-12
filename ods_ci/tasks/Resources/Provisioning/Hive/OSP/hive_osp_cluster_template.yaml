@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: List
+items:
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterPool
+  metadata:
+    name: ${infrastructure_configurations}[hive_cluster_name]-pool
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  spec:
+    baseDomain: ${infrastructure_configurations}[base_domain]
+    imageSetRef:
+      name: ${infrastructure_configurations}[image_set] # see line 100
+    inventory:
+      - name: ${infrastructure_configurations}[hive_cluster_name]-conf # see line 72
+    platform:
+      openstack:
+        cloud: ${infrastructure_configurations}[osp_cloud_name]
+        credentialsSecretRef:
+          name: ${infrastructure_configurations}[hive_cluster_name]-cred # see line 91
+    installConfigSecretTemplateRef:
+      name: ${infrastructure_configurations}[hive_cluster_name]-sec # see line 30
+    size: 1
+    maxSize: 1
+    maxConcurrent: 1
+    runningCount: 1
+    skipMachinePools: true
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${infrastructure_configurations}[hive_cluster_name]-sec
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  type: Opaque
+  stringData:
+    install-config.yaml: |
+      apiVersion: v1
+      baseDomain: ${infrastructure_configurations}[base_domain]
+      compute:
+      - name: worker
+        platform:
+          openstack:
+            type: ${infrastructure_configurations}[osp_flavor]
+        replicas: 3
+      controlPlane:
+        name: master
+        platform:
+          openstack:
+            type: ${infrastructure_configurations}[osp_flavor]
+        replicas: 3
+      metadata:
+        name: ${infrastructure_configurations}[hive_cluster_name]-install
+      networking:
+        clusterNetwork:
+        - cidr: 10.128.0.0/14
+          hostPrefix: 23
+        machineNetwork:
+        - cidr: 192.169.0.0/16
+        networkType: ${infrastructure_configurations}[ocp_network_type]
+        serviceNetwork:
+        - 172.30.0.0/16
+      fips: ${infrastructure_configurations}[fips_validation]
+      platform:
+        openstack:
+          cloud: ${infrastructure_configurations}[osp_cloud_name]
+          computeFlavor: m1.large
+          externalDNS: null
+          externalNetwork: ${infrastructure_configurations}[osp_network]
+      pullSecret: '${infrastructure_configurations}[quay_pull_sec]'
+      sshKey: ${infrastructure_configurations}[ssh_key]
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterDeploymentCustomization
+  metadata:
+    name: ${infrastructure_configurations}[hive_cluster_name]-conf
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  spec:
+    installConfigPatches:
+      - op: add
+        path: /platform/openstack/apiFloatingIP
+        value: ${FIP_API}
+      - op: add
+        path: /platform/openstack/ingressFloatingIP
+        value: ${FIP_APPS}
+      - op: add
+        path: /platform/openstack/externalNetwork
+        value: ${infrastructure_configurations}[osp_network]
+      - op: add
+        path: /metadata/name
+        value: ${infrastructure_configurations}[hive_cluster_name]
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${infrastructure_configurations}[hive_cluster_name]-cred
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  type: Opaque
+  data:
+    clouds.yaml: ${infrastructure_configurations}[osp_yaml_encoded]
+    cloud: ${OSP_CLOUD}
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterImageSet
+  metadata:
+    name: ${infrastructure_configurations}[image_set]
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  spec:
+    releaseImage: quay.io/openshift-release-dev/ocp-release:${infrastructure_configurations}[ocp_version]-x86_64

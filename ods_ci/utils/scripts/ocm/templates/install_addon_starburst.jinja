@@ -1,0 +1,23 @@
+{
+  "kind": "Cluster",
+  "href": "/api/clusters_mgmt/v1/clusters/{{ CLUSTER_ID }}",
+  "addon": {
+    "kind": "AddOn",
+    "href": "/api/clusters_mgmt/v1/addons/{{ ADDON_NAME }}",
+    "id": "{{ ADDON_NAME }}"
+    },
+    "parameters": {
+        "items":
+                [
+                  {
+                  "id": "notification-email",
+                   "value": "{{ NOTIFICATION_EMAIL }}"
+                  },
+                  {
+                  "id": "starburst-license",
+                   "value": "{{STARBURST_LICENSE}}"
+                   }
+               ]
+    }
+
+}

@@ -1,0 +1,28 @@
+name: dryrun
+
+on: [pull_request]
+
+jobs:
+  dryrun:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Execute ods-ci dryrun
+        run: |
+          mv ods_ci/test-variables.yml.example ods_ci/test-variables.yml
+          ./ods_ci/run_robot_test.sh --extra-robot-args '--dryrun' --skip-oclogin true --no-output-subfolder true
+
+      - name: Save PR number and artifacts
+        run: |
+          mkdir -p ./pr
+          cp -r ods_ci/test-output ./pr/test-output
+          echo ${{ github.event.number }} > ./pr/NR
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pr
+          path: pr/

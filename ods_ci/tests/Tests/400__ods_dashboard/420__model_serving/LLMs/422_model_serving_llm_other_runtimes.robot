@@ -1,6 +1,6 @@
 *** Settings ***
-Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
-...               These tests leverage on Caikit+TGIS combined Serving Runtime
+Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM)
+...               using different runtimes other than Caikit+TGIS combined, e.g., TGIS Standalone, Caikit standalone
 Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../../Resources/OCP.resource
 Resource          ../../../../Resources/Page/Operators/ISVs.resource
@@ -21,7 +21,7 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 *** Test Cases ***
 Verify User Can Serve And Query A Model With TGIS-Standalone Runtime
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
-    ...                using Kserve and Caikit+TGIS runtime
+    ...                using Kserve and TGIS standalone runtime
     [Tags]    Sanity    Tier1    ODS-XYZ
     [Setup]    Run Keywords    Set Project And Runtime    namespace=${TEST_NS_TGIS}    runtime=${TGIS_RUNTIME_NAME}
     ...        AND

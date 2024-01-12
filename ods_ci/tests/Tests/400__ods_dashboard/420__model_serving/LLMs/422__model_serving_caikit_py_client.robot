@@ -1,5 +1,6 @@
 *** Settings ***
-Documentation    Test suite to validate caikit-nlp-client library usage with Kserve models
+Documentation    Test suite to validate caikit-nlp-client library usage with Kserve models.
+...              These tests leverage on Caikit+TGIS combined Serving Runtime
 ...              PythonLibrary repo: https://github.com/opendatahub-io/caikit-nlp-client
 Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup    Caikit Client Suite Setup

@@ -1,5 +1,6 @@
 *** Settings ***
-Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM)
+Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
+...               These tests leverage on Caikit+TGIS combined Serving Runtime
 Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../../Resources/OCP.resource
 Resource          ../../../../Resources/Page/Operators/ISVs.resource
@@ -50,7 +51,7 @@ Verify External Dependency Operators Can Be Deployed
     ...                and configured
     [Tags]    ODS-2326
     Pass Execution    message=Installation done as part of Suite Setup.
-
+ 
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime

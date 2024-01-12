@@ -201,8 +201,12 @@ Prepare Payload
     Create File From Template    ${RUNTIME_FORMATS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
     Load Runtime Query Formats    filepath=${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
     ${body}=    Replace String    ${RUNTIME_FORMATS}[${runtime}][${protocol}][body]    '    "
-    ${body}=    Set Variable    '${body}'
-    ${header}=    Set Variable    "${RUNTIME_FORMATS}[${runtime}][${protocol}][header]" 
+    ${header}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${protocol}][header]
+    IF    "${protocol}" == "grpc"
+        ${body}=    Set Variable    '${body}'
+        ${header}=    Set Variable  '${header}'
+    END
+    
     IF    "${protocol}" == "http"
         ${dict_header}=    Create Dictionary     Cookie=${EMPTY}
         ${sub_headers}=    Split String    ${header}    separator=${SPACE}
@@ -251,7 +255,7 @@ Query Model Multiple Times
             ...    json_body=${body}    json_header=${header}
             ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
             ...    &{args}
-        ELSE IF    "${protocol}" == "http"
+         ELSE IF    "${protocol}" == "http"
             ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
             Log Dictionary    ${args}
             Set To Dictionary    ${args}    url=https://${host}:443/${endpoint}   expected_status=any

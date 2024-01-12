@@ -2,13 +2,11 @@
     "caikit-tgis-runtime": {
         "grpc": {
             "header": "mm-model-id: ${model_name}",
-            "body": "{'text': '${query_text}'}",
-            "args": ""
+            "body": "{'text': '${query_text}'}"
         },
         "http": {
             "header": "Content-type:application/json",
-            "body": "'model_id': '${model_name}','inputs': '${query_text}'",
-            "args": ""
+            "body": "'model_id': '${model_name}','inputs': '${query_text}'"
         },
         "response_fields_map": {
             "response": "",

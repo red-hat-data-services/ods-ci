@@ -215,12 +215,16 @@ Prepare Payload
         ${header}=    Set Variable    ${dict_header}
     END
     ${args}=    Create Dictionary
-    ${sub_args}=    Split String    ${RUNTIME_FORMATS}[${runtime}][${protocol}][args]    separator=${SPACE}
-    FOR    ${index}    ${arg}    IN ENUMERATE    @{sub_args}
-        Log    ${index}: ${arg}
-        ${pair}=    Split String    ${arg}    separator==
-        Log    ${pair}
-        Set To Dictionary    ${args}    ${pair}[0]=${pair}[1]    
+    ${runtime_args_str}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${protocol}]
+    ${args_flag}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${runtime_args_str}    args
+    IF    ${args_flag}
+        ${sub_args}=    Split String    ${runtime_args_str}    separator=${SPACE}
+        FOR    ${index}    ${arg}    IN ENUMERATE    @{sub_args}
+            Log    ${index}: ${arg}
+            ${pair}=    Split String    ${arg}    separator==
+            Log    ${pair}
+            Set To Dictionary    ${args}    ${pair}[0]=${pair}[1]    
+        END
     END
     RETURN    ${body}    ${header}    ${args}
 

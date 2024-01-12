@@ -14,6 +14,7 @@ ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
+${CARD_BUTTON_XP}=  ..//input[@class="pf-v5-c-radio__input"][@name="odh-explore-selectable-card"]
 ${RES_CARDS_XP}=  //article[contains(@class, 'pf-v5-c-card')]
 ${SAMPLE_APP_CARD_XP}=   //*[@id="pachyderm-selectable-card-id"]
 ${HEADER_XP}=  div[@class='pf-v5-c-card__header']
@@ -210,7 +211,7 @@ Verify Service Provides "Enable" Button In The Explore Page
   Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${app_name} does not have a "Enable" button in ODS Dashboard
 
 Verify Service Provides "Get Started" Button In The Explore Page
-  [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is a "Get Started" button
+  [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the circle next to the title, the sidebar opens and there is a "Get Started" button
   [Arguments]  ${app_name}    ${app_id}=${NONE}
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
@@ -329,7 +330,7 @@ Check Card Badges And Return Titles
 
 Open Get Started Sidebar And Return Status
     [Arguments]  ${card_locator}
-    Click Element  xpath:${card_locator}
+    Click Element  xpath:${card_locator}/${CARD_BUTTON_XP}
     ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
     Sleep  1
     RETURN  ${status}

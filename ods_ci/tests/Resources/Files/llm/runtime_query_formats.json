@@ -1,0 +1,31 @@
+{
+    "caikit-tgis-runtime": {
+        "grpc": {
+            "header": "mm-model-id: ${model_name}",
+            "body": "{'text': '${query_text}'}",
+            "args": ""
+        },
+        "http": {
+            "header": "Content-type:application/json",
+            "body": "'model_id': '${model_name}','inputs': '${query_text}'",
+            "args": ""
+        },
+        "response_fields_map": {
+            "response": "",
+            "response_tokens":  "generated_tokens",
+            "response_text":    "generated_text"
+        }
+    },
+    "tgis-runtime": {
+        "grpc": {
+            "header": "mm-model-id: ${model_name}",
+            "body": "{'requests': [{'text':'${query_text}'}]}",
+            "args": "proto=text-generation-inference/proto/generation.proto"
+        },
+        "response_fields_map": {
+            "response": "responses",
+            "response_tokens":  "generatedTokenCount",
+            "response_text":    "text"
+        }
+    }
+}

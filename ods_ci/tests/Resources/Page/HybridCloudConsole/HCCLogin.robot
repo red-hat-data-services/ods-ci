@@ -9,8 +9,8 @@ Is SSO Login Page Visible
   RETURN  ${login_prompt_visible}
 
 Wait For HCC Splash Page
-   Wait Until Page Contains Element    xpath://span[contains(@class, 'pf-c-spinner')]   timeout=15
-   Wait Until Page Does Not Contain Element    xpath://span[contains(@class, 'pf-c-spinner')]   timeout=20
+   Wait Until Page Contains Element    xpath://span[contains(@class, 'pf-v5-c-spinner')]   timeout=15
+   Wait Until Page Does Not Contain Element    xpath://span[contains(@class, 'pf-v5-c-spinner')]   timeout=20
    Sleep    3
 
 Login To HCC
@@ -69,11 +69,11 @@ Open Cluster By Name
   [Documentation]     Opens the cluster by name from the list of clusters.
   ${cluster_id} =     Get Cluster ID
   ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
-  Wait Until Page Contains Element  //input[@class="pf-c-form-control cluster-list-filter"]
-  Input Text    //input[@class="pf-c-form-control cluster-list-filter"]     ${cluster_name}
+  Wait Until Page Contains Element  //input[@class="pf-v5-c-form-control cluster-list-filter"]
+  Input Text    //input[@class="pf-v5-c-form-control cluster-list-filter"]     ${cluster_name}
   Sleep    1s
-  Wait Until Page Contains Element  //table[@class="pf-c-table pf-m-grid-md"]//a    10
-  Click Link    //table[@class="pf-c-table pf-m-grid-md"]//a
+  Wait Until Page Contains Element  //table[@class="pf-v5-c-table pf-m-grid-md"]//a    10
+  Click Link    //table[@class="pf-v5-c-table pf-m-grid-md"]//a
 
 Maybe Skip OCM Tour
   ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id="pendo-guide-container"]

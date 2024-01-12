@@ -183,7 +183,7 @@ Verify Favorite Resource Cards
     ...                It checks if favorite items are always listed as first regardless
     ...                the view type or sorting
     Click Link    Resources
-    Wait Until Element Is Visible    //div[@class="pf-l-gallery pf-m-gutter odh-learning-paths__gallery"]
+    Wait Until Element Is Visible    //div[@class="pf-v5-l-gallery pf-m-gutter odh-learning-paths__gallery"]
     Sort Resources By    name
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile_ids}
@@ -428,7 +428,7 @@ Verify Star Icons Are Clickable
 Get List Of Ids Of Tiles
     [Documentation]    Returns the list of ids of tiles present in resources page
     ${list_of_ids}=    Get List Of Atrributes
-    ...    xpath=//div[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
+    ...    xpath=//div[@class="pf-v5-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
     RETURN    ${list_of_ids}
 
 Set Item As Favorite

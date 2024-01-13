@@ -385,7 +385,7 @@ Handle Stop Workbench Confirmation Modal
 Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${item_title}    ${item_type}    ${action}
-    Click Element       xpath=//*[text()="ODS-CI Common Prj"]/ancestor::tr//td/button[@aria-label="Kebab toggle"]
+    Click Element       xpath=//*[text()="${item_title}"]/ancestor::tr//td/button[@aria-label="Kebab toggle"]
     Wait Until Page Contains Element       xpath=//*[text()="${item_title}"]/ancestor::tr//td//li//span[text()="${action} ${item_type}"]
     Click Element       xpath=//*[text()="${item_title}"]/ancestor::tr//td//li//span[text()="${action} ${item_type}"]
 

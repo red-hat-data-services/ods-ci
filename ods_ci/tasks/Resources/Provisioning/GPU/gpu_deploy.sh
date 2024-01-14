@@ -33,11 +33,20 @@ function wait_until_pod_ready_status() {
   local timeout_seconds=1200
   local pod_label=$1
   local namespace=nvidia-gpu-operator
-
-  echo "Waiting until GPU pods of '$pod_label' in namespace '$namespace' are in running state..."
-  oc wait --timeout=${timeout_seconds}s --for=condition=ready pod -n $namespace -l app="$pod_label"
+  local timeout=240
+  start_time=$(date +%s)
+  while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
+     pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
+     echo "$pod_status"
+     if [ -n "$pod_status" ]; then
+        echo "Waiting until GPU pods of '$pod_label' in namespace '$namespace' are in running state..."
+        oc wait --timeout="${timeout_seconds}s" --for=condition=ready pod -n "$namespace" -l app="$pod_label"
+        break
+     fi
+     echo "Waiting for pod with label app='$pod_label' to be present..."
+     sleep 5
+  done
 }
-
 
 function rerun_accelerator_migration() {
   # As we are adding the GPUs after installing the RHODS operator, those GPUs are not discovered automatically.
@@ -71,7 +80,6 @@ wait_until_pod_ready_status  "gpu-operator"
 oc apply -f "$GPU_INSTALL_DIR/nfd_deploy.yaml"
 oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
 oc apply -f clusterpolicy.json
-oc wait --timeout=10m --for=condition=ready pod -n nvidia-gpu-operator --all --field-selector=status.phase!='Succeeded'
 wait_until_pod_ready_status "nvidia-device-plugin-daemonset"
 wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
 wait_until_pod_ready_status "nvidia-dcgm-exporter"

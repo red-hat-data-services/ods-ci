@@ -15,15 +15,19 @@ oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
 
 echo "Wait for Nvidia GPU Operator Subscription, InstallPlan and Deployment to complete"
 
-oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator subs nfd
+oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator sub nfd
 
-oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator subs gpu-operator-certified
+oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator sub gpu-operator-certified
 
 oc wait --timeout=3m --for condition=Installed -n nvidia-gpu-operator installplan --all
 
-oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deployment gpu-operator
+oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deploy gpu-operator
 
-oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deployment nfd-controller-manager
+oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deploy nfd-controller-manager
+
+oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpressions[].operator}'=Exists operator nfd.nvidia-gpu-operator
+
+oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpressions[].operator}'=Exists operator gpu-operator-certified.nvidia-gpu-operator
 
 function wait_until_pod_ready_status() {
   local timeout_seconds=1200
@@ -33,6 +37,7 @@ function wait_until_pod_ready_status() {
   echo "Waiting until GPU pods of '$pod_label' in namespace '$namespace' are in running state..."
   oc wait --timeout=${timeout_seconds}s --for=condition=ready pod -n $namespace -l app="$pod_label"
 }
+
 
 function rerun_accelerator_migration() {
   # As we are adding the GPUs after installing the RHODS operator, those GPUs are not discovered automatically.
@@ -66,6 +71,7 @@ wait_until_pod_ready_status  "gpu-operator"
 oc apply -f "$GPU_INSTALL_DIR/nfd_deploy.yaml"
 oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
 oc apply -f clusterpolicy.json
+oc wait --timeout=10m --for=condition=ready pod -n nvidia-gpu-operator --all --field-selector=status.phase!='Succeeded'
 wait_until_pod_ready_status "nvidia-device-plugin-daemonset"
 wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
 wait_until_pod_ready_status "nvidia-dcgm-exporter"

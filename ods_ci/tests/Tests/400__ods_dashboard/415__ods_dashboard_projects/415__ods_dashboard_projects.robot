@@ -449,7 +449,7 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     ...    exp_result_text=FailedScheduling
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
-
+ 
 Verify Users Can Start, Stop, Launch And Delete A Workbench
     [Tags]    Smoke    Sanity    Tier1
     ...       ODS-1813    ODS-1815   ODS-1817
@@ -708,7 +708,7 @@ Environment Variables Should Be Displayed According To Their Type
     ...                It goes to "Edit workbench" page and compare the environment variables
     ...                settings with the ones which were inserted during workbench creation.
     [Arguments]    ${workbench_title}    ${exp_env_variables}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Click Element    xpath://a[@href="#environment-variables"]
     Sleep   2s
     FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}    start=1

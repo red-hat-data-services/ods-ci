@@ -382,23 +382,16 @@ Handle Stop Workbench Confirmation Modal
         Click Button    ${WORKBENCH_STOP_BTN_XP}
     END
 
-Click Action From Actions Menu
-    [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
-    [Arguments]    ${item_title}    ${item_type}    ${action}
-    Click Element       xpath=//*[text()="${item_title}"]/ancestor::tr//td/button[@aria-label="Kebab toggle"]
-    Wait Until Page Contains Element       xpath=//*[text()="${item_title}"]/ancestor::tr//td//li//span[text()="${action} ${item_type}"]
-    Click Element       xpath=//*[text()="${item_title}"]/ancestor::tr//td//li//span[text()="${action} ${item_type}"]
-
 Delete Workbench
     [Documentation]    Deletes a workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
     Handle Deletion Confirmation Modal    item_title=${workbench_title}    item_type=workbench    press_cancel=${press_cancel}
 
 Edit Workbench
     [Documentation]    Edits a workbench
     [Arguments]     ${workbench_title}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     # Also wait until the workbench name is populated in the text field - let's wait for DOM to finish
     Wait For Condition    return document.readyState == "complete"    timeout=5s
@@ -526,7 +519,7 @@ Select Workbench Number Of GPUs
 Edit GPU Number
     [Documentation]    Edit a workbench
     [Arguments]     ${workbench_title}    ${gpus}=1
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     ${status}=    Run Keyword And Return Status    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    ${status} == ${FALSE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}

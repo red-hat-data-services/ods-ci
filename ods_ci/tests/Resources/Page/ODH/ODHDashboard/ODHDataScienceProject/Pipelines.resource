@@ -111,8 +111,8 @@ Click Action From Actions Menu
     [Arguments]    ${pipeline_name}    ${action}
     Wait Until Page Contains Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
     Click Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
-    Wait Until Page Contains Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]//td//li//*[text()="${action}"]    # robocop: disable
-    Click Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]//td//li//*[text()="${action}"]    # robocop: disable
+    Wait Until Page Contains Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]//td//li//button[.//*[contains(text(), '${action}')]]    # robocop: disable
+    Click Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]//td//li//button[.//*[contains(text(), '${action}')]]    # robocop: disable
 
 Pipeline Context Menu Should Be Working
     [Documentation]   Test Pipeline YAML context menu works with mouse right-click and with keyboard

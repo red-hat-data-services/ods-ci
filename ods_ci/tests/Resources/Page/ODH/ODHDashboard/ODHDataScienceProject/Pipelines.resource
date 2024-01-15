@@ -111,8 +111,8 @@ Click Action From Actions Menu
     [Arguments]    ${pipeline_name}    ${action}
     Wait Until Page Contains Element    xpath://table//tr[td[.//a[*[text()="${pipeline_name}"]]]]//button[@aria-label="Kebab toggle"]
     Click Element    xpath://table//tr[td[.//a[*[text()="${pipeline_name}"]]]]//button[@aria-label="Kebab toggle"]
-    Wait Until Page Contains Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-v5-c-table__action')]//div/ul/li/button[.//*[contains(text(), '${action}')]]
-    Click Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-v5-c-table__action')]//div/ul/li/button[.//*[contains(text(), '${action}')]]
+    Wait Until Page Contains Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, '-table__action')]//div/ul/li/button[.//*[contains(text(), '${action}')]]
+    Click Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, '-table__action')]//div/ul/li/button[.//*[contains(text(), '${action}')]]
 
 Pipeline Context Menu Should Be Working
     [Documentation]   Test Pipeline YAML context menu works with mouse right-click and with keyboard

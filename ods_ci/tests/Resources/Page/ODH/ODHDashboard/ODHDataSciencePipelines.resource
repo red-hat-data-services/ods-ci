@@ -37,7 +37,7 @@ Fill In Pipeline Import Form
     Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_DESC_INPUT_XP}    ${description}
     ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
-    Choose File    //div[contains(@class="-file-upload")]//input[@type="file"]    ${pwd}/${filepath}
+    Choose File    //div[contains(@class, "-file-upload")]//input[@type="file"]    ${pwd}/${filepath}
     Element Should Be Enabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
 
 Fill In Run Creation Form    # robocop: disable

@@ -496,7 +496,7 @@ Verify Jupyter Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-size    exp_value=24px
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
-    ...    property=font-family    exp_value=RedHatDisplay
+    ...    property=font-family    exp_value=RedHatText
     ...    operation=contains
 
 Test Setup For Login Page

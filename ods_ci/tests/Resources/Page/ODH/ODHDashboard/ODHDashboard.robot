@@ -841,5 +841,5 @@ Click Action From Actions Menu
     IF    "${item_type}" != "${NONE}"
         ${action}=    Catenate    ${action}    ${item_type}
     END
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]
+    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]    # robocop: disable
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]

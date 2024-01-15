@@ -54,7 +54,7 @@ Delete Data Science Project
         Open Data Science Projects Home Page
     END
     Project Should Be Listed    project_title=${project_title}
-    Workbenches.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
     Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project
     ...                                   press_cancel=${press_cancel}
     ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
@@ -329,7 +329,7 @@ Check Pagination Is Correct On The Current Page
 Check Resource Name Should Be Immutable
     [Documentation]    Checks if the Resource Name is not editable
     [Arguments]     ${project_title}
-    Workbenches.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
     Wait Until Page Contains Element    ${RESOURCE_INPUT_XP}
     Element Should Be Disabled    ${RESOURCE_INPUT_XP}
     Click Button    Cancel
@@ -337,7 +337,7 @@ Check Resource Name Should Be Immutable
 Update Data Science Project Name
     [Documentation]    Updates the existing DSG project name and verifies changes are done
     [Arguments]     ${project_title}    ${new_title}
-    Workbenches.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
     Wait Until Page Contains Element    ${DESCR_INPUT_XP}
     Input Text    ${TITLE_INPUT_XP}    ${new_title}
     Click Button    Update
@@ -347,7 +347,7 @@ Update Data Science Project Name
 Update Data Science Project Description
     [Documentation]    Updates the existing DSG project description
     [Arguments]    ${project_title}    ${new_description}
-    Workbenches.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
     Wait Until Page Contains Element    ${DESCR_INPUT_XP}
     Input Text    ${DESCR_INPUT_XP}    ${new_description}
     Click Button    Update

@@ -449,7 +449,7 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     ...    exp_result_text=FailedScheduling
     Close Event Log
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
- 
+
 Verify Users Can Start, Stop, Launch And Delete A Workbench
     [Tags]    Smoke    Sanity    Tier1
     ...       ODS-1813    ODS-1815   ODS-1817

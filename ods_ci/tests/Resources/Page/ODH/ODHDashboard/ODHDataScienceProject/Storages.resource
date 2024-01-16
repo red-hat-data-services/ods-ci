@@ -46,7 +46,7 @@ Storage Size Should Be
     [Arguments]     ${name}      ${size}    ${namespace}
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}
     Click Element    ${STORAGE_SECTION_XP}//tr[td//*/div[text()="${name}"]]//button[@aria-label="Details"]
-    Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
+    Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[contains(@class, "-table__expandable-row pf-m-expanded")]
 
     ${rc}  ${pvc_status_phase}=    Run And Return Rc And Output
     ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.phase}'    # robocop: disable
@@ -66,7 +66,7 @@ Storage Size Should Be
         # Note: it may take some time before UI updates the storage
         #       info WRT cluster usage, look like it does so every 60s
         ${bound_storage_size_el}=    Set Variable
-        ...    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
+        ...    ${STORAGE_SECTION_XP}//tr[contains(@class, "-table__expandable-row pf-m-expanded")]/td/div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
         Wait Until Page Contains Element    ${bound_storage_size_el}    timeout=65s
         ${displayed_size}=    Get Text    ${bound_storage_size_el}
         Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi

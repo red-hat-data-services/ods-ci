@@ -7,7 +7,7 @@ Resource          ../../../../Resources/Page/Operators/ISVs.resource
 Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Suite Setup
-# Suite Teardown    RHOSi Teardown
+Suite Teardown    RHOSi Teardown
 Test Tags         KServe
 
 
@@ -38,12 +38,12 @@ Verify User Can Serve And Query A Model With TGIS-Standalone Runtime
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${model_name}    runtime=tgis-runtime
-    ...    endpoint=${TGIS_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
-    # temp disabled
-    # Query Model Multiple Times    model_name=${model_name}
-    # ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
-    # ...    namespace=${test_namespace}
+    # streamed response validation temporarily disable - need to rewrite the validation logic
+    Query Model Multiple Times    model_name=${model_name}    runtime=tgis-runtime
+    ...    inference_type=streaming    n_times=1
+    ...    namespace=${test_namespace}    validate_response=${FALSE}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
@@ -52,5 +52,5 @@ Verify User Can Serve And Query A Model With TGIS-Standalone Runtime
 Suite Setup
     [Documentation]
     Skip If Component Is Not Enabled    kserve
-    # RHOSi Setup
+    RHOSi Setup
     Load Expected Responses

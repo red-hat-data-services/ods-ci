@@ -157,9 +157,9 @@ Model Response Should Match The Expectation
     ...                   - to check that we receive the answer from the right model
     ...                when multiple ones are deployed
     [Arguments]    ${model_response}    ${model_name}    ${query_idx}    ${runtime_details}    ${runtime}=caikit-tgis-runtime    ${streamed_response}=${FALSE}
-    ${response_text_field}=    Set Variable    ${runtime_details}[response_fields_map][response_text]
-    ${response_tokens_field}=    Set Variable    ${runtime_details}[response_fields_map][response_tokens]
     IF    ${streamed_response} == ${FALSE}
+        ${response_text_field}=    Set Variable    ${runtime_details}[response_fields_map][response_text]
+        ${response_tokens_field}=    Set Variable    ${runtime_details}[response_fields_map][response_tokens]
         Should Be Equal As Integers    ${model_response}[${response_tokens_field}]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_tokens]    # robocop: disable
         ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[${response_text_field}]    \\s+    ${SPACE}
         ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}    # robocop: disable
@@ -239,9 +239,13 @@ Query Model Multiple Times
     ...                  - all-tokens: it returns the entire generated response text
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
-    ...            ${inference_type}=all-tokens    ${n_times}=10
-    ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}
+    ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
     ...            ${protocol}=grpc    &{args}
+    IF    "${inference_type}" == "streaming"
+        ${streamed_response}=    Set Variable    ${TRUE}
+    ELSE
+        ${streamed_response}=    Set Variable    ${FALSE}
+    END
     IF    ${validate_response} == ${FALSE}
         ${skip_json_load_response}=    Set Variable    ${TRUE}
     ELSE

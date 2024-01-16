@@ -68,10 +68,10 @@ Verify User Can Serve And Query A Model
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -360,8 +360,7 @@ Verify Model Can Be Served And Query On A GPU Node
     Query Model Multiple Times    model_name=${model_name}    n_times=10
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${model_name}    n_times=5
-    ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
-    ...    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}    inference_type=streaming
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
@@ -385,10 +384,10 @@ Verify Non Admin Can Serve And Query A Model
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
@@ -408,10 +407,10 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=1
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${1}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -431,10 +430,10 @@ Verify User Can Serve And Query Flan-t5 Large
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -458,7 +457,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -497,7 +496,7 @@ Verify User Can Access Model Metrics From UWM
     Wait Until Keyword Succeeds    30 times    4s
     ...    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=3
+    ...    inference_type=all-tokens    n_times=3
     ...    namespace=${test_namespace}
     Wait Until Keyword Succeeds    50 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
@@ -509,7 +508,7 @@ Verify User Can Access Model Metrics From UWM
     ...    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     Wait Until Keyword Succeeds    30 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
@@ -533,12 +532,12 @@ Verify User Can Query A Model Using HTTP Calls
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${model_name}    protocol=http
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1    streamed_response=${FALSE}
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     # temporarily disabling stream response validation. Need to re-design the expected response json file
     # because format of streamed response with http is slightly different from grpc
     Query Model Multiple Times    model_name=${model_name}    protocol=http
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}    validate_response=${FALSE}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}

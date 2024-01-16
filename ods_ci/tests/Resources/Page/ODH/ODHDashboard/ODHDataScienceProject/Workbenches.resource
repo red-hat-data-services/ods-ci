@@ -198,16 +198,20 @@ Select An Existent PV
 Select Workbench Jupyter Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
+    Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
     Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-    IF    "${version}"=="default"
-        Verify Version Selection Dropdown
-    ELSE IF    "${version}"=="previous"
-        Select Workbench Image Version    ${version}
-    ELSE
-        Fail    ${version} does not exist, use default/previous
+
+    IF    "${version}" != "${NONE}"
+        IF    "${version}"=="default"
+            Verify Version Selection Dropdown
+        ELSE IF    "${version}"=="previous"
+            Select Workbench Image Version    ${version}
+        ELSE
+            Fail    ${version} does not exist, use default/previous
+        END
     END
 
 Verify Version Selection Dropdown

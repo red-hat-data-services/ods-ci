@@ -32,7 +32,7 @@ Verify GPU Model Deployment Via UI
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
-    ...    no_gpus=1    runtime=OpenVINO Model Server (Supports GPUs)
+    ...    no_gpus=1
     Verify Displayed GPU Count    server_name=${RUNTIME_NAME}    no_gpus=1
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}  # robocop:disable

@@ -19,11 +19,11 @@ ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
 ${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
 ${MS_TABLE_ENDPOINT}=    /../../td[@data-label="Inference endpoint"]
-${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-c-clipboard-copy__group"]/input
-${MS_TABLE_DROPDOWN_TOGGLE}=    /../../td[@class="pf-c-table__action"]//button
-${MS_TABLE_STATUS_SUCCESS}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-success")]
-${MS_TABLE_STATUS_FAILURE}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-danger")]
-${KSERVE_MODAL_HEADER}=    //header[@class="pf-c-modal-box__header"]/h1[.="Deploy model"]
+${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboard-copy"]//input
+${MS_TABLE_DROPDOWN_TOGGLE}=    /../..//td[contains(@class,"pf-v5-c-table__action")]/button
+${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
+${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
+${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml

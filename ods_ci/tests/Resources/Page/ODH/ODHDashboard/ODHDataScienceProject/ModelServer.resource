@@ -18,12 +18,14 @@ ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET
 ${REPLICAS_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${REPLICAS_MIN_BTN_XP}=         xpath=//div/button[@aria-label="Minus"]
 ${SERVING_RUNTIME_NAME}=        xpath=//input[@id="serving-runtime-name-input"]
-${SERVING_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
+${SERVING_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-v5-c-form__group-control']/descendant::button
 ${SERVING_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
 ${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model servers']
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
+${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
+
 
 *** Keywords ***
 Create Model Server
@@ -55,7 +57,7 @@ Create Model Server
             SeleniumLibrary.Checkbox Should Be Selected    ${TOKEN_AUTH_CHECKBOX_XP}
         END
     ELSE IF    ${token}==${TRUE}
-        Enable Token Authentication            
+        Enable Token Authentication
     END
     Click Button    Add
     Sleep    1s    reason=Sometimes the modal will intercept later clicks even after being closed, wait for a second
@@ -63,7 +65,7 @@ Create Model Server
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod
     [Arguments]    ${number}
-    ${current}=    Get Element Attribute    xpath://div[@class="pf-c-number-input"]/div/input    value
+    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
     ${difference}=    Evaluate    int(${number})-int(${current})
     ${op}=    Set Variable    plus
     IF    ${difference}<${0}
@@ -77,7 +79,7 @@ Set Replicas Number With Buttons
             Click Minus Button
         END
     END
-    ${current}=    Get Element Attribute    xpath://div[@class="pf-c-number-input"]/div/input    value
+    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
     Should Be Equal As Integers    ${current}    ${number}
 
 Set Server Size

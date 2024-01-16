@@ -280,7 +280,7 @@ Workbench Launch Link Should Be Disabled
 Get All Displayed Projects
     [Documentation]    Gets all the DS projects visible in the DS Projects home page
     ${projects_names}=    Create List
-    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]/div/div/a
+    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]//a
     FOR    ${element}    IN    @{elements}
         ${name}=    Get Text    ${element}
         Append To List    ${projects_names}    ${name}

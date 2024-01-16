@@ -6,8 +6,8 @@ Resource       ../ODHDataSciencePipelines.resource
 
 *** Variables ***
 ${PIPELINES_SECTION_XP}=    xpath://div[@id="pipelines-projects"]
-${PIPELINES_SERVER_BTN_XP}=    xpath://button[text()="Create a pipeline server"]
-${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath://button[text()="Configure"]
+${PIPELINES_SERVER_BTN_XP}=    xpath://button[text()="Configure pipeline server"]
+${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath://footer/button[text()="Configure pipeline server"]
 ${PIPELINES_IMPORT_BTN_XP}=    xpath://button[text()="Import pipeline"]
 ${CREATE_RUN_BTN_XP}=    xpath://*[text()="Create run"]
 ${RUN_TOPOLOGY_DETAILS_BTN_XP}=    xpath://li//button[text()="Details"]
@@ -39,9 +39,10 @@ Select Data Connection
     [Documentation]    Selects an existing data connection from the dropdown
     ...                in the modal for Pipeline Server creation
     [Arguments]    ${dc_name}
-    Click Element    css:form div span button[aria-label="Options menu"]
-    Wait Until Page Contains Element    xpath://button[text()="${dc_name}"]
-    Click Element    xpath://button[text()="${dc_name}"]
+    Wait Until Page Contains Element    xpath://div[@class="pf-v5-c-form__group"][.//label//*[text()="Access key"]]//div[@data-ouia-component-type="PF5/Dropdown"]
+    Click Element    xpath://div[@class="pf-v5-c-form__group"][.//label//*[text()="Access key"]]//div[@data-ouia-component-type="PF5/Dropdown"]
+    Wait Until Page Contains Element    xpath://button//*[text()="${dc_name}"]
+    Click Element    xpath://button//*[text()="${dc_name}"]
 
 Import Pipeline
     [Documentation]    Import a pipeline definition from DS Project details page.
@@ -52,7 +53,7 @@ Import Pipeline
     Reload Page
     Log     Workaround for data-science-pipelines-operator/issues/349     level=WARN
     Wait Until Page Contains Element    ${PIPELINES_IMPORT_BTN_XP}     timeout=120
-    Wait Until Page Contains Element    //*[contains(text(), 'To get started, import a pipeline.')]    timeout=120
+    Wait Until Page Contains Element    //*[contains(text(), 'No pipelines')]    timeout=120
     Wait Until Element Is Enabled  ${PIPELINES_IMPORT_BTN_XP}  timeout=120
     Capture Page Screenshot
     # End - Workaround
@@ -108,10 +109,10 @@ Create Pipeline Run    # robocop: disable
 Click Action From Actions Menu
     [Documentation]    Click an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_name}    ${action}
-    Wait Until Page Contains Element    xpath://table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div
-    Click Element    xpath://table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div
-    Wait Until Page Contains Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]
-    Click Element    //table//tr[td[*[a[text()='${pipeline_name}']]]]//td[contains(@class, 'pf-c-table__action')]/div/ul/li/button[contains(text(), '${action}')]
+    Wait Until Page Contains Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
+    Click Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
+    Wait Until Page Contains Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]//td//li//button[.//*[contains(text(), '${action}')]]    # robocop: disable
+    Click Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]//td//li//button[.//*[contains(text(), '${action}')]]    # robocop: disable
 
 Pipeline Context Menu Should Be Working
     [Documentation]   Test Pipeline YAML context menu works with mouse right-click and with keyboard
@@ -136,7 +137,7 @@ Pipeline Yaml Should Be Readonly
     Click Link      ${pipeline_name}
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
     Press Keys    //div[contains(@class, 'lines-content')]    cannot_enter_read_only
-    Wait Until Element Is Visible    //div[@class="pf-c-code-editor pf-m-read-only odh-dashboard__code-editor"]    timeout=10
+    Wait Until Element Is Visible    //div[@class="pf-v5-c-code-editor pf-m-read-only odh-dashboard__code-editor"]    timeout=10
     Capture Page Screenshot
     SeleniumLibrary.Set Selenium Implicit Wait    ${orig wait}
 
@@ -215,14 +216,14 @@ Show Pipeline Runs Section
     ...                near the pipeline name to show the sub-section
     [Arguments]    ${pipeline_name}
     ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
-    Click Element    ${pipeline_row_xp}//td[@class="pf-c-table__toggle"]/button
+    Click Element    ${pipeline_row_xp}//button[@aria-label="Details"]
 
 Wait Until Page Contains Run Topology Page
     [Documentation]    Waits until the page containing the run details and its topology
     ...                is rendered on the screen
     [Arguments]    ${run_name}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
-    ...    xpath://h1//div[text()="${run_name}"]    timeout=10s
+    ...    xpath://h1[.//text()="${run_name}"]    timeout=10s
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${RUN_TOPOLOGY_DETAILS_BTN_XP}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element

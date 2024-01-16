@@ -37,7 +37,7 @@ Fill In Pipeline Import Form
     Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_DESC_INPUT_XP}    ${description}
     ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
-    Choose File    //div[@class="pf-c-file-upload"]//input[@type="file"]    ${pwd}/${filepath}
+    Choose File    //div[contains(@class, "-file-upload")]//input[@type="file"]    ${pwd}/${filepath}
     Element Should Be Enabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
 
 Fill In Run Creation Form    # robocop: disable
@@ -69,8 +69,8 @@ Select Pipeline For The Run
     [Documentation]    Selects the given ${pipeline_name} from the pipeline
     ...                dropdown in the Run creation form.
     [Arguments]    ${pipeline_name}
-    Wait Until Page Contains Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-c-dropdown__toggle-text"]/..
-    Click Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-c-dropdown__toggle-text"]/..
+    Wait Until Page Contains Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-v5-c-dropdown__toggle-text"]/..
+    Click Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-v5-c-dropdown__toggle-text"]/..
     Wait Until Page Contains Element    xpath://ul/li/a[text()="${pipeline_name}"]
     Click Element     xpath://ul/li/a[text()="${pipeline_name}"]
 
@@ -112,7 +112,7 @@ Delete Pipeline Server
     Wait Until Page Contains Element    xpath://li[contains(a/text(), 'Delete pipeline server')]
     Click Element    //li[contains(a/text(), 'Delete pipeline server')]
     Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server
-    Wait Until Page Contains Element    xpath://h2[contains(text(), 'No pipeline server')]    timeout=120s
+    Wait Until Page Contains Element    xpath://h3[text()="Enable pipelines"]    timeout=120s
     FOR  ${index}  IN RANGE  0  30
         ${pod_count}    Run    oc get pods -n ${data_science_project_name} -l component=data-science-pipelines | wc -l
         IF  ${pod_count}==0  BREAK

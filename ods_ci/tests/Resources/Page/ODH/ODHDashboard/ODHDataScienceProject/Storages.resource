@@ -145,7 +145,7 @@ Set Connection Between PV And Workbench
 Delete Storage
     [Documentation]    Deletes a cluster storage from DS Project details page
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    Workbenches.Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=storage    press_cancel=${press_cancel}
 
 Get Openshift PVC From Storage

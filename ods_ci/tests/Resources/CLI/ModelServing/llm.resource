@@ -206,7 +206,6 @@ Prepare Payload
         ${body}=    Set Variable    '${body}'
         ${header}=    Set Variable  '${header}'
     END
-    
     IF    "${protocol}" == "http"
         ${dict_header}=    Create Dictionary     Cookie=${EMPTY}
         ${sub_headers}=    Split String    ${header}    separator=${SPACE}
@@ -222,7 +221,7 @@ Prepare Payload
     ${runtime_args_str}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${protocol}]
     ${args_flag}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${runtime_args_str}    args
     IF    ${args_flag}
-        ${sub_args}=    Split String    ${runtime_args_str}    separator=${SPACE}
+        ${sub_args}=    Split String    ${runtime_args_str}[args]    separator=${SPACE}
         FOR    ${index}    ${arg}    IN ENUMERATE    @{sub_args}
             Log    ${index}: ${arg}
             ${pair}=    Split String    ${arg}    separator==

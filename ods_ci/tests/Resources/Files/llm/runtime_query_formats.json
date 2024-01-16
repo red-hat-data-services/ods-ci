@@ -1,29 +1,70 @@
 {
     "caikit-tgis-runtime": {
-        "grpc": {
-            "header": "mm-model-id: ${model_name}",
-            "body": "{'text': '${query_text}'}"
+        "all-tokens": {
+            "grpc": {
+                "endpoint": "caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict",
+                "header": "mm-model-id: ${model_name}",
+                "body": "{'text': '${query_text}'}",
+                "response_fields_map": {
+                    "response": "",
+                    "response_tokens":  "generated_tokens",
+                    "response_text":    "generated_text"
+                }
+            },
+            "http": {
+                "endpoint": "api/v1/task/text-generation",
+                "header": "Content-type:application/json",
+                "body": "{'model_id': '${model_name}','inputs': '${query_text}'}",
+                "response_fields_map": {
+                    "response": "",
+                    "response_tokens":  "generated_tokens",
+                    "response_text":    "generated_text"
+                }
+            }
         },
-        "http": {
-            "header": "Content-type:application/json",
-            "body": "{'model_id': '${model_name}','inputs': '${query_text}'}"
-        },
-        "response_fields_map": {
-            "response": "",
-            "response_tokens":  "generated_tokens",
-            "response_text":    "generated_text"
+        "streaming": {
+            "grpc": {
+                "endpoint": "caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict",
+                "header": "mm-model-id: ${model_name}",
+                "body": "{'text': '${query_text}'}",
+                "response_fields_map": {
+                    "response": ""
+                }
+            },
+            "http": {
+                "endpoint": "api/v1/task/server-streaming-text-generation",
+                "header": "Content-type:application/json",
+                "body": "{'model_id': '${model_name}','inputs': '${query_text}'}",
+                "response_fields_map": {
+                    "response": ""
+                }
+            }
         }
     },
     "tgis-runtime": {
-        "grpc": {
-            "header": "mm-model-id: ${model_name}",
-            "body": "{'requests': [{'text':'${query_text}'}]}",
-            "args": "proto=text-generation-inference/proto/generation.proto"
+        "all-tokens": {
+            "grpc": {
+                "endpoint": "fmaas.GenerationService/Generate",
+                "header": "mm-model-id: ${model_name}",
+                "body": "{'requests': [{'text':'${query_text}'}]}",
+                "args": "proto=text-generation-inference/proto/generation.proto",
+                "response_fields_map": {
+                    "response": "responses",
+                    "response_tokens":  "generatedTokenCount",
+                    "response_text":    "text"
+                }
+            }
         },
-        "response_fields_map": {
-            "response": "responses",
-            "response_tokens":  "generatedTokenCount",
-            "response_text":    "text"
+        "streaming": {
+            "grpc": {
+                "endpoint": "fmaas.GenerationService/GenerateStream",
+                "header": "mm-model-id: ${model_name}",
+                "body": "{'request': [{'text':'${query_text}'}]}",
+                "args": "proto=text-generation-inference/proto/generation.proto",
+                "response_fields_map": {
+                    "response": ""
+                }
+            }
         }
     }
 }

@@ -156,9 +156,9 @@ Model Response Should Match The Expectation
     ...                   - to ensure we are getting an answer from the model (e.g., not an empty text)
     ...                   - to check that we receive the answer from the right model
     ...                when multiple ones are deployed
-    [Arguments]    ${model_response}    ${model_name}    ${query_idx}    ${runtime}=caikit-tgis-runtime    ${streamed_response}=${FALSE}
-    ${response_text_field}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][response_fields_map][response_text]
-    ${response_tokens_field}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][response_fields_map][response_tokens]
+    [Arguments]    ${model_response}    ${model_name}    ${query_idx}    ${runtime_details}    ${runtime}=caikit-tgis-runtime    ${streamed_response}=${FALSE}
+    ${response_text_field}=    Set Variable    ${runtime_details}[response_fields_map][response_text]
+    ${response_tokens_field}=    Set Variable    ${runtime_details}[response_fields_map][response_tokens]
     IF    ${streamed_response} == ${FALSE}
         Should Be Equal As Integers    ${model_response}[${response_tokens_field}]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_tokens]    # robocop: disable
         ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[${response_text_field}]    \\s+    ${SPACE}
@@ -195,13 +195,14 @@ Load Runtime Query Formats
     Set Suite Variable    ${RUNTIME_FORMATS}    ${runtimes}
 
 Prepare Payload
-    [Arguments]    ${runtime}    ${protocol}    ${model_name}    ${query_text}
+    [Arguments]    ${runtime}    ${protocol}    ${inference_type}    ${model_name}    ${query_text}
     Set Test Variable    ${model_name}
     Set Test Variable    ${query_text}
     Create File From Template    ${RUNTIME_FORMATS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
     Load Runtime Query Formats    filepath=${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
-    ${body}=    Replace String    ${RUNTIME_FORMATS}[${runtime}][${protocol}][body]    '    "
-    ${header}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${protocol}][header]
+    ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
+    ${body}=    Replace String    ${runtime_details}[body]    '    "
+    ${header}=    Set Variable    ${runtime_details}[header]
     IF    "${protocol}" == "grpc"
         ${body}=    Set Variable    '${body}'
         ${header}=    Set Variable  '${header}'
@@ -218,7 +219,7 @@ Prepare Payload
         ${header}=    Set Variable    ${dict_header}
     END
     ${args}=    Create Dictionary
-    ${runtime_args_str}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${protocol}]
+    ${runtime_args_str}=    Set Variable    ${runtime_details}
     ${args_flag}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${runtime_args_str}    args
     IF    ${args_flag}
         ${sub_args}=    Split String    ${runtime_args_str}[args]    separator=${SPACE}
@@ -234,8 +235,11 @@ Prepare Payload
 Query Model Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
+    ...                ${inference_type} arguments accepts these 2 values for now:
+    ...                  - all-tokens: it returns the entire generated response text
+    ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
-    ...            ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
+    ...            ${inference_type}=all-tokens    ${n_times}=10
     ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}
     ...            ${protocol}=grpc    &{args}
     IF    ${validate_response} == ${FALSE}
@@ -244,7 +248,11 @@ Query Model Multiple Times
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
-    ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}    model_name=${model_name}    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
+    ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
+    ...    inference_type=${inference_type}    model_name=${model_name}
+    ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
+    ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
+    ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
     Set To Dictionary    ${args}    &{extra_args}
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
@@ -269,14 +277,15 @@ Query Model Multiple Times
             Run Keyword And Continue On Failure    Status Should Be  200
         END
         Log    ${res}
-        ${response_container_field}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][response_fields_map][response]
+        ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
         IF    "${response_container_field}" != "${EMPTY}"
-            # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of complexity.
+            # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
             ${res}=    Set Variable    ${res}[${response_container_field}][0]            
         END
         IF    ${validate_response} == ${TRUE}
             Run Keyword And Continue On Failure
-            ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}    runtime=${runtime}
+            ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
+            ...    runtime_details=${runtime_details}    runtime=${runtime}
             ...    streamed_response=${streamed_response}    query_idx=${query_idx}
         END
     END

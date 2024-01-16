@@ -23,10 +23,6 @@ ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-caikit
 ${FLAN_GRAMMAR_MODEL_S3_DIR}=    flan-t5-large-grammar-synthesis-caikit/flan-t5-large-grammar-synthesis-caikit
 ${FLAN_LARGE_MODEL_S3_DIR}=    flan-t5-large/flan-t5-large
 ${BLOOM_MODEL_S3_DIR}=    bloom-560m/bloom-560m-caikit
-# ${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict  # grpc - not supported
-# ${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict  # grpc
-${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}=    api/v1/task/text-generation
-${CAIKIT_STREAM_ENDPOINT_HTTP}=    api/v1/task/server-streaming-text-generation
 
 
 *** Test Cases ***
@@ -41,10 +37,10 @@ Verify User Can Serve And Query A Model Using The UI
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    protocol=http
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
     Delete Model Via UI    ${flan_model_name}
     [Teardown]    Clean Up DSP Page
@@ -64,13 +60,13 @@ Verify User Can Deploy Multiple Models In The Same Namespace Using The UI  # rob
     ...    flan-t5-small/${model_two_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}
-    Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${model_one_name}
+    Query Model Multiple Times    inference_type=all-tokens    model_name=${model_one_name}
     ...    n_times=5    namespace=${test_namespace}    protocol=http
-    Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${model_two_name}
+    Query Model Multiple Times    inference_type=all-tokens    model_name=${model_two_name}
     ...    n_times=10    namespace=${test_namespace}    protocol=http
-    Query Model Multiple Times    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    model_name=${model_one_name}
+    Query Model Multiple Times    inference_type=streaming    model_name=${model_one_name}
     ...    n_times=5    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
-    Query Model Multiple Times    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    model_name=${model_two_name}
+    Query Model Multiple Times    inference_type=streaming    model_name=${model_two_name}
     ...    n_times=10    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
     [Teardown]    Clean Up DSP Page
 
@@ -84,7 +80,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces Using The UI  # r
     ...    bloom-560m/${model_one_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=singlemodel-multi1
-    Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${model_one_name}
+    Query Model Multiple Times    inference_type=all-tokens    model_name=${model_one_name}
     ...    n_times=2    namespace=singlemodel-multi1    protocol=http
     Open Data Science Projects Home Page
     Set Up Project    namespace=singlemodel-multi2    single_prj=${FALSE}    dc_name=kserve-connection-2
@@ -92,7 +88,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces Using The UI  # r
     ...    flan-t5-small/${model_two_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2
-    Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${model_two_name}
+    Query Model Multiple Times    inference_type=all-tokens    model_name=${model_two_name}
     ...    n_times=2    namespace=singlemodel-multi2    protocol=http
     [Teardown]    Clean Up DSP Page
 
@@ -122,7 +118,7 @@ Verify User Can Set Requests And Limits For A Model Using The UI  # robocop: dis
     ...    namespace=${test_namespace}
     # ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     # ...    namespace=${test_namespace}
-    Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${flan_model_name}
+    Query Model Multiple Times    inference_type=all-tokens    model_name=${flan_model_name}
     ...    n_times=1    namespace=${test_namespace}    protocol=http
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -166,8 +162,8 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     Query Model Multiple Times    model_name=${model_name}    n_times=10
     ...    namespace=${test_namespace}    protocol=http
     Query Model Multiple Times    model_name=${model_name}    n_times=5
-    ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}
-    ...    streamed_response=${TRUE}    validate_response=${FALSE}    protocol=http
+    ...    namespace=${test_namespace}    inference_type=streaming
+    ...    validate_response=${FALSE}    protocol=http
     [Teardown]   Clean Up DSP Page
 
 Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
@@ -185,10 +181,10 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     # ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     # ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    protocol=http
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=http    validate_response=$FALSE
     [Teardown]    Run Keywords    Clean Up DSP Page    AND    Close Browser    AND    Switch Browser    1
 
@@ -203,10 +199,10 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector Using The UI  #
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Sleep    30s
-    Query Model Multiple Times    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    model_name=${flan_model_name}
+    Query Model Multiple Times    inference_type=all-tokens    model_name=${flan_model_name}
     ...    n_times=1    namespace=${test_namespace}    query_idx=${1}    protocol=http
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}    protocol=http
+    ...    inference_type=streaming    n_times=1    protocol=http
     ...    namespace=${test_namespace}    query_idx=${1}    validate_response=${FALSE}
     [Teardown]    Clean Up DSP Page
 
@@ -222,10 +218,10 @@ Verify User Can Serve And Query Flan-t5 Large Using The UI  # robocop: disable
     ...    namespace=${test_namespace}
     Sleep    30s
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}    protocol=http
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}    protocol=http    validate_response=${FALSE}
     [Teardown]    Clean Up DSP Page
 
@@ -247,7 +243,7 @@ Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
     Wait Until Keyword Succeeds    30 times    4s
     ...    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=3
+    ...    inference_type=all-tokens    n_times=3
     ...    namespace=${test_namespace}   protocol=http
     Wait Until Keyword Succeeds    50 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
@@ -260,7 +256,7 @@ Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
     ...    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}    protocol=http    validate_response=${FALSE}
     Wait Until Keyword Succeeds    30 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
@@ -290,10 +286,10 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Run Keyword And Continue On Failure    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Run Keyword And Continue On Failure    Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    protocol=http
     Run Keyword And Continue On Failure    Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
     Run Keyword And Continue On Failure    Delete Model Via UI    ${flan_model_name}
     Logout From RHODS Dashboard
@@ -318,10 +314,10 @@ Verify User With Admin Permission Can Deploy Query And Delete A LLM
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    protocol=http
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
     Delete Model Via UI    ${flan_model_name}
     Logout From RHODS Dashboard

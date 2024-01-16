@@ -17,13 +17,7 @@ ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
 ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
 ${USE_BUCKET_HTTPS}=    "1"
 ${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
-${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
-${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
-${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
-${TGIS_ALLTOKENS_ENDPOINT}=    fmaas.GenerationService/Generate
-${TGIS_STREAM_ENDPOINT}=    fmaas.GenerationService/GenerateStream
-${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}=    api/v1/task/text-generation
-${CAIKIT_STREAM_ENDPOINT_HTTP}=    api/v1/task/server-streaming-text-generation   
+${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml  
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml

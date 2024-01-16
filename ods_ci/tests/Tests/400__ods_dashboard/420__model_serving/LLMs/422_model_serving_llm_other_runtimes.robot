@@ -19,7 +19,7 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 
 
 *** Test Cases ***
-Verify User Can Serve And Query A Model With TGIS-Standalone Runtime
+Verify User Can Serve And Query A Model With TGIS-Standalone Runtime (gRPC)
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone runtime
     [Tags]    Sanity    Tier1    ODS-XYZ
@@ -47,6 +47,9 @@ Verify User Can Serve And Query A Model With TGIS-Standalone Runtime
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
 
+Verify User Can Serve And Query A Model With TGIS-Standalone Runtime (HTTP)
+    # TODO - HTTP not yet supported on TGIS-Standalone runtime
+    Skip
 
 *** Keywords ***
 Suite Setup

@@ -111,7 +111,6 @@ HTTP Model Setup
         ...    data_connection=kserve-connection    path=${MODEL_S3_DIR}
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ISVC_NAME}
         ...    namespace=${HTTP_MODEL_NS}  
-        Log    ${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}
         Query Model Multiple Times    model_name=${ISVC_NAME}    runtime=caikit-tgis-runtime
         ...    inference_type=all-tokens    n_times=1
         ...    namespace=${HTTP_MODEL_NS}    protocol=http

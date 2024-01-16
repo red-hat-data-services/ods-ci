@@ -37,13 +37,16 @@ function wait_until_pod_ready_status() {
   start_time=$(date +%s)
   while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
      pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
-     echo "$pod_status"
-     if [ -n "$pod_status" ]; then
-        echo "Waiting until GPU pods of '$pod_label' in namespace '$namespace' are in running state..."
-        oc wait --timeout="${timeout_seconds}s" --for=condition=ready pod -n "$namespace" -l app="$pod_label"
+     daemon_status="$(oc get daemonset -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
+     if [[ -n "$daemon_status" || -n "$pod_status" ]] ; then
+        echo "Waiting until GPU Pods or Daemonset of '$pod_label' in namespace '$namespace' are in running state..."
+        echo "Pods status: '$pod_status'"
+        echo "Daemonset status: '$daemon_status'"
+        oc wait --timeout="${timeout_seconds}s" --for=condition=ready pod -n "$namespace" -l app="$pod_label" || \
+        oc rollout status --watch --timeout=3m daemonset -n "$namespace" -l app="$pod_label" || continue
         break
      fi
-     echo "Waiting for pod with label app='$pod_label' to be present..."
+     echo "Waiting for Pods or Daemonset with label app='$pod_label' in namespace '$namespace' to be present..."
      sleep 5
   done
 }
@@ -86,5 +89,3 @@ wait_until_pod_ready_status "nvidia-dcgm-exporter"
 wait_until_pod_ready_status "gpu-feature-discovery"
 wait_until_pod_ready_status "nvidia-operator-validator"
 rerun_accelerator_migration
-
-

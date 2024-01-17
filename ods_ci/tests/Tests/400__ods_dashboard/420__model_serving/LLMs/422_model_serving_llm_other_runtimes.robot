@@ -22,7 +22,7 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 Verify User Can Serve And Query A Model With TGIS-Standalone Runtime (gRPC)
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone runtime
-    [Tags]    Sanity    Tier1    ODS-XYZ
+    [Tags]    Sanity    Tier1    ODS-2607
     [Setup]    Run Keywords    Set Project And Runtime    namespace=${TEST_NS_TGIS}    runtime=${TGIS_RUNTIME_NAME}
     ...        AND
     ...        Run    git clone https://github.com/IBM/text-generation-inference/

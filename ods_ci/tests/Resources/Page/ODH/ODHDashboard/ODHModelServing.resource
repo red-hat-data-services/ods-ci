@@ -198,8 +198,9 @@ Get Model Route via UI
     ${route_xpath}=    Set Variable    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}
     ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
     IF    ${loaded} == ${FALSE}
+        Log    message=Model Route was not loaded in UI. Trying refreshing!    level=WARN
         SeleniumLibrary.Reload Page
-        SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s        
+        SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
     END
     ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
     RETURN    ${url}

@@ -243,7 +243,8 @@ Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
     Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
+    Wait Until Keyword Succeeds    30 times    4s
+    ...    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=3
     ...    namespace=${test_namespace}   protocol=http

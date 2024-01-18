@@ -194,8 +194,15 @@ Get Model Route via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    Page Should Contain Element    xpath://div[.="${model_name} "]
-    ${url}=    Get Element Attribute    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
+    SeleniumLibrary.Page Should Contain Element    xpath://div[.="${model_name} "]
+    ${route_xpath}=    Set Variable    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}
+    ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
+    IF    ${loaded} == ${FALSE}
+        Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
+        SeleniumLibrary.Reload Page
+        SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
+    END
+    ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
     RETURN    ${url}
 
 Open ${section} Options Menu

@@ -493,7 +493,8 @@ Verify User Can Access Model Metrics From UWM
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
+    Wait Until Keyword Succeeds    30 times    4s
+    ...    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=3
     ...    namespace=${test_namespace}

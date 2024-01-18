@@ -18,9 +18,9 @@ Open QuickStart Element in Resource Section By Name
     [Documentation]     It opens the element by enabling Quick Start filter in Resources Section of ODS Dashboard.
     [Arguments]     ${element}
     Select Checkbox     //input[@id="quickstart--check-box"]
-    Wait Until Page Contains Element    ${RES_CARDS_XP}\[@id="${element}"]
-    Click Link          ${RES_CARDS_XP}\[@id="${element}"]//a
-    Wait Until Page Contains ELement    //div[@class="pf-c-drawer__panel-main"]     5
+    Wait Until Page Contains Element    xpath=//div[@id="${element}"]//a[text()="Open"]
+    Click Link          xpath=//div[@id="${element}"]//a[text()="Open"]
+    Wait Until Page Contains ELement    //div[@class="pf-v5-c-drawer__panel-main"]     5
 
 Star QuickStart Tour
     Click Button    //button[@data-test="Start button"]
@@ -33,19 +33,19 @@ Get The Count Of QuickStart Steps
 
 Link Text On QuickStart Card Should Be
     [Arguments]     ${element}  ${exp_link_text}
-    Element Text Should Be  ${RES_CARDS_XP}\[@id="${element}"]//a      ${exp_link_text}
+    Element Text Should Be  //div[@id="${element}"]//a      ${exp_link_text}
 
 QuickStart Status Should Be
     [Documentation]     Verifies the label on the item card which shows the progress and closes the sidebar.
     [Arguments]     ${element}  ${progress_string}
     IF  '${progress_string}'=='In Progress'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-purple pf-m-outline"]
+        Element Text Should Be      //div[@id="${element}"]//span[@class="pf-v5-c-label pf-m-purple pf-m-outline"]
         ...    In Progress
     ELSE IF     '${progress_string}'=='Complete'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
+        Element Text Should Be      //div[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
         ...    Complete
     ELSE IF     '${progress_string}'=='Failed'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]
+        Element Text Should Be      //div[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]
         ...    Failed
     END
 

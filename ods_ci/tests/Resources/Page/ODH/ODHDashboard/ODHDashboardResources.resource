@@ -221,7 +221,7 @@ Verify Links Are Not Broken For Each QuickStart
     ${quickStartCount}=   Get Length           ${quickStartElements}
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
-        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-content"]
+        ${versioned_title_xp}=    Set Variable    //div[@class="pf-v5-c-content"]
     ELSE
         ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-card__title odh-card__doc-title"]
     END
@@ -232,7 +232,7 @@ Verify Links Are Not Broken For Each QuickStart
         ${Title}=   Split To Lines    ${Title}
         Log                ${Title[${0}]}    console=yes
         Click Element                 ${quickStartElements[${counter}]}
-        Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
+        Wait Until Element Is Visible  //button[@class='pf-v5-c-wizard__nav-link']
         External URLs Should Not Be Broken
     END
 

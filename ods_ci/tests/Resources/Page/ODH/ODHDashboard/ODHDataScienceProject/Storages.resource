@@ -9,7 +9,7 @@ Resource       Projects.resource
 ${STORAGE_SECTION_XP}=             xpath=//div[@id="cluster-storages"]
 ${STORAGE_NAME_INPUT_XP}=          xpath=//input[@name="create-new-storage-name"]
 ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-description"]
-${STORAGE_SIZE_INPUT_XP}=         xpath=//div/input[contains(@aria-label,"input") or contains(@aria-label,"Input")]
+${STORAGE_SIZE_INPUT_XP}=         xpath=//input[@aria-label="Input"]
 ${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@aria-label="mount-path-folder-value"]
 ${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
@@ -46,7 +46,7 @@ Storage Size Should Be
     [Arguments]     ${name}      ${size}    ${namespace}
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}
     Click Element    ${STORAGE_SECTION_XP}//tr[td//*/div[text()="${name}"]]//button[@aria-label="Details"]
-    Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]
+    Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[contains(@class, "-table__expandable-row pf-m-expanded")]
 
     ${rc}  ${pvc_status_phase}=    Run And Return Rc And Output
     ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.phase}'    # robocop: disable
@@ -66,7 +66,7 @@ Storage Size Should Be
         # Note: it may take some time before UI updates the storage
         #       info WRT cluster usage, look like it does so every 60s
         ${bound_storage_size_el}=    Set Variable
-        ...    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
+        ...    ${STORAGE_SECTION_XP}//tr[contains(@class, "-table__expandable-row pf-m-expanded")]/td/div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
         Wait Until Page Contains Element    ${bound_storage_size_el}    timeout=65s
         ${displayed_size}=    Get Text    ${bound_storage_size_el}
         Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
@@ -145,7 +145,7 @@ Set Connection Between PV And Workbench
 Delete Storage
     [Documentation]    Deletes a cluster storage from DS Project details page
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    Workbenches.Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${name}    item_type=storage    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=storage    press_cancel=${press_cancel}
 
 Get Openshift PVC From Storage

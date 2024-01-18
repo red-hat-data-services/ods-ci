@@ -54,7 +54,7 @@ Delete Data Science Project
         Open Data Science Projects Home Page
     END
     Project Should Be Listed    project_title=${project_title}
-    Workbenches.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
     Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project
     ...                                   press_cancel=${press_cancel}
     ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
@@ -107,7 +107,7 @@ Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one
     [Arguments]     ${project_title}    ${expected_username}
     Run Keyword And Continue On Failure
-    ...    Page Should Contain Element    xpath=//td[div/div/a[text()="${project_title}"]]/small[text()="${expected_username}"]
+    ...    Page Should Contain Element    xpath=//a[text()="${project_title}"]/ancestor::td[@data-label='Name']//small[text()="${expected_username}"]
 
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}
@@ -167,7 +167,7 @@ Delete Data Science Project From CLI
     ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
     ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
     IF    "${project_k8s_name}" == "${EMPTY}"
-        Log    msg=There is probably no DS Projects with Diplay Name equal to ${displayed_name}
+        Log    msg=There are probably no DS Projects with Display Name equal to ${displayed_name}
         ...    level=WARN
     ELSE
         Oc Delete    kind=Project   name=${project_k8s_name}
@@ -185,7 +185,7 @@ Workbench Status Should Be From Projects Home Page
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...                                                                           namespace=${namespace}
-    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//tr[td/div/div/a[text()="${project_title}"]]/td[@data-label="Status"]//div[div/label[contains(@for,"${workbench_cr_name}")]]/div//p[text()="${status}"]    # robocop: disable
+    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Status"]//p[text()="${status}"]    # robocop: disable
 
 Start Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "start" process from DS Projects home page.
@@ -205,7 +205,8 @@ Start Workbench From Projects Home Page
                 ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
                 ...                                                        namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
+        Click Element       xpath=//a[text()="${workbench_title}"]/ancestor::tr//a[text()="${project_title}"]/ancestor::tr//td[@data-label="Status"]//label[@class="pf-v5-c-switch"]    # robocop: disable
+
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -233,7 +234,7 @@ Stop Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td/div//label[contains(@for,"${workbench_cr_name}")]/span[@class="pf-c-switch__toggle"]    # robocop: disable
+        Click Element       xpath=//a[text()="${workbench_title}"]/ancestor::tr//a[text()="${project_title}"]/ancestor::tr//td[@data-label="Status"]//label[@class="pf-v5-c-switch"]    # robocop: disable
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is neither starting nor running.
@@ -260,7 +261,7 @@ Launch And Access Workbench From Projects Home Page
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr[td/div/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]
+        Click Element       xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Workbench"]//a[text()="${workbench_title}"]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}
@@ -272,14 +273,14 @@ Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
     ${link_status}=    Get Element Attribute
-    ...    xpath=//tr[td/div/div/a[text()="${project_title}"]]/td//a[text()="${workbench_title}"]    aria-disabled
+    ...    xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Workbench"]//a[text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
     ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 
 Get All Displayed Projects
     [Documentation]    Gets all the DS projects visible in the DS Projects home page
     ${projects_names}=    Create List
-    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]/div/div/a
+    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]//a
     FOR    ${element}    IN    @{elements}
         ${name}=    Get Text    ${element}
         Append To List    ${projects_names}    ${name}
@@ -317,7 +318,7 @@ Remove Current Page Projects From All Projects
 Check Pagination Is Correct On The Current Page
     [Documentation]    Check the pagination is correct for the Data Science displayed on current page
     [Arguments]     ${page}    ${total}
-    ${actual_text}=    Get Text    xpath://span[@class="pf-c-options-menu__toggle-text"]
+    ${actual_text}=    SeleniumLibrary.Get Text    xpath://button[contains(@class,"-menu-toggle")]
     IF    ${page}==1
         ${expected_text}=    Set Variable   1 - 10 of ${total} items
     ELSE IF    ${page}==2
@@ -328,7 +329,7 @@ Check Pagination Is Correct On The Current Page
 Check Resource Name Should Be Immutable
     [Documentation]    Checks if the Resource Name is not editable
     [Arguments]     ${project_title}
-    Workbenches.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
     Wait Until Page Contains Element    ${RESOURCE_INPUT_XP}
     Element Should Be Disabled    ${RESOURCE_INPUT_XP}
     Click Button    Cancel
@@ -336,7 +337,7 @@ Check Resource Name Should Be Immutable
 Update Data Science Project Name
     [Documentation]    Updates the existing DSG project name and verifies changes are done
     [Arguments]     ${project_title}    ${new_title}
-    Workbenches.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
     Wait Until Page Contains Element    ${DESCR_INPUT_XP}
     Input Text    ${TITLE_INPUT_XP}    ${new_title}
     Click Button    Update
@@ -346,7 +347,7 @@ Update Data Science Project Name
 Update Data Science Project Description
     [Documentation]    Updates the existing DSG project description
     [Arguments]    ${project_title}    ${new_description}
-    Workbenches.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
     Wait Until Page Contains Element    ${DESCR_INPUT_XP}
     Input Text    ${DESCR_INPUT_XP}    ${new_description}
     Click Button    Update

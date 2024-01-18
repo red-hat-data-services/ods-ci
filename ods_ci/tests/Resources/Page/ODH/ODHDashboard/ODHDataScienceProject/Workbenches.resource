@@ -192,22 +192,26 @@ Select An Existent PV
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
     Wait Until Page Contains Element    xpath=//ul/li/button[text()="${name}"]
-    Wait Until Page Contains Element    xpath=//div[contains(@class,"pf-c-select")]/ul/li/button[text()="${name}"]
+    Wait Until Page Contains Element    xpath=//ul[@aria-label="Persistent storage select"]//button[text()="${name}"]
     Click Element   xpath=//ul/li/button[text()="${name}"]
 
 Select Workbench Jupyter Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
+    Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
     Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-    IF    "${version}"=="default"
-        Verify Version Selection Dropdown
-    ELSE IF    "${version}"=="previous"
-        Select Workbench Image Version    ${version}
-    ELSE
-        Fail    ${version} does not exist, use default/previous
+
+    IF    "${version}" != "${NONE}"
+        IF    "${version}"=="default"
+            Verify Version Selection Dropdown
+        ELSE IF    "${version}"=="previous"
+            Select Workbench Image Version    ${version}
+        ELSE
+            Fail    ${version} does not exist, use default/previous
+        END
     END
 
 Verify Version Selection Dropdown
@@ -309,7 +313,7 @@ Start Workbench
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
+        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -355,7 +359,7 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
+        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
         ...    from_running=${from_running}
@@ -382,23 +386,16 @@ Handle Stop Workbench Confirmation Modal
         Click Button    ${WORKBENCH_STOP_BTN_XP}
     END
 
-Click Action From Actions Menu
-    [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
-    [Arguments]    ${item_title}    ${item_type}    ${action}
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
-
 Delete Workbench
     [Documentation]    Deletes a workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
     Handle Deletion Confirmation Modal    item_title=${workbench_title}    item_type=workbench    press_cancel=${press_cancel}
 
 Edit Workbench
     [Documentation]    Edits a workbench
     [Arguments]     ${workbench_title}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     # Also wait until the workbench name is populated in the text field - let's wait for DOM to finish
     Wait For Condition    return document.readyState == "complete"    timeout=5s
@@ -526,7 +523,7 @@ Select Workbench Number Of GPUs
 Edit GPU Number
     [Documentation]    Edit a workbench
     [Arguments]     ${workbench_title}    ${gpus}=1
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     ${status}=    Run Keyword And Return Status    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    ${status} == ${FALSE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}

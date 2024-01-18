@@ -3,6 +3,7 @@ Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
 Resource       ../../../Common.robot
 Resource       ODHDataScienceProject/ModelServer.resource
+Resource       ODHDataScienceProject/DataConnections.resource
 Library        ../../../../../libs/Helpers.py
 
 
@@ -18,30 +19,35 @@ ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
 ${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
 ${MS_TABLE_ENDPOINT}=    /../../td[@data-label="Inference endpoint"]
-${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-c-clipboard-copy__group"]/input
-${MS_TABLE_DROPDOWN_TOGGLE}=    /../../td[@class="pf-c-table__action"]//button
-${MS_TABLE_STATUS_SUCCESS}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-success")]
-${MS_TABLE_STATUS_FAILURE}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-danger")]
-${KSERVE_MODAL_HEADER}=    //header[@class="pf-c-modal-box__header"]/h1[.="Deploy model"]
+${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboard-copy"]//input
+${MS_TABLE_DROPDOWN_TOGGLE}=    /../..//td[contains(@class,"pf-v5-c-table__action")]/button
+${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
+${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
+${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
+${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
+${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
 
 
 *** Keywords ***
 Open Model Serving Home Page
     [Documentation]    Verifies submenu Settings > "Model Serving" is visible and navigates to page
-    Page Should Contain    Model Serving
-    Click Link      Model Serving
+    SeleniumLibrary.Page Should Contain    Model Serving
+    SeleniumLibrary.Click Link      Model Serving
     # Replace sleep with better Wait keyword. Confirm if error page has "Model Serving" h1 element.
     Sleep    1s
-    ${loading_error} =    Run Keyword And Return Status    Page Should Contain    Problem loading model serving page
+    ${loading_error}=    Run Keyword And Return Status
+    ...    SeleniumLibrary.Page Should Contain    Problem loading model serving page
     IF    ${loading_error}
         Log    "Page load error encountered"    level=WARN
-        Capture Page Screenshot
+        SeleniumLibrary.Capture Page Screenshot
         Sleep    5s
-        Reload Page
+        SeleniumLibrary.Reload Page
     END
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Deployed models
-    Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
+    SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.
+    ...    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model
@@ -188,8 +194,15 @@ Get Model Route via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    Page Should Contain Element    xpath://div[.="${model_name} "]
-    ${url}=    Get Element Attribute    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
+    SeleniumLibrary.Page Should Contain Element    xpath://div[.="${model_name} "]
+    ${route_xpath}=    Set Variable    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}
+    ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
+    IF    ${loaded} == ${FALSE}
+        Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
+        SeleniumLibrary.Reload Page
+        SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
+    END
+    ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
     RETURN    ${url}
 
 Open ${section} Options Menu
@@ -337,16 +350,6 @@ Select Kserve Serving Runtime
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/button
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/ul//span[contains(text(),"${runtime}")]
 
-Get KServe Inference Host Via CLI
-    [Arguments]    ${isvc_name}    ${namespace}
-    Sleep    5s
-    ${rc}    ${ksvc_host}=    Run And Return Rc And Output
-    ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    # ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    Should Be Equal As Integers    ${rc}    ${0}
-    Should Not Be Empty    ${ksvc_host}
-    RETURN    ${ksvc_host}
-
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI
     [Arguments]    ${model_name}    ${retries}=1
@@ -362,59 +365,6 @@ Get Kserve Inference Host Via UI
     END
     Log    Failed to get model serving host through the UI
     Take Screenshot
-
-Get Current Revision ID
-    [Arguments]    ${model_name}    ${namespace}
-    ${rc}    ${id}=    Run And Return Rc And Output
-    ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
-    Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${id}
-
-Set Minimum Replicas Number
-    [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
-    ${old_revision_id}=    Get Current Revision ID    model_name=${model_name}    namespace=${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch InferenceService ${model_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/predictor/minReplicas', 'value': ${n_replicas}}]"
-    Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${old_revision_id}
-
-Delete InfereceService
-    [Arguments]    ${isvc_name}    ${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${namespace}
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Update Scale To Zero For Knative Serving
-    [Arguments]    ${serving_name}    ${namespace}    ${status}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc patch KnativeServing ${serving_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/config/autoscaler/enable-scale-to-zero', 'value': '${status}'}]"
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Set Model Hardware Resources
-    [Arguments]    ${model_name}    ${namespace}    ${requests}=&{EMPTY}    ${limits}=&{EMPTY}
-    IF    ${limits} == ${NONE}
-        ${limits}=    Set Variable    null
-    END
-    IF    ${requests} == ${NONE}
-        ${requests}=    Set Variable    null
-    END
-    ${body}=    Set Variable    {"spec":{"predictor": {"model": {"resources": {"requests": ${requests}, "limits": ${limits} }}}}}
-    ${body}=    Replace String    ${body}    '    "
-    Log    ${body}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc patch isvc ${model_name} -n ${namespace} --type=merge -p '${body}'
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Model Pod Should Be Scheduled On A GPU Node
-    [Documentation]    Checks that the pods with the given ${label_selector} are actually scheduled on
-    ...                a GPU node
-    [Arguments]    ${label_selector}    ${namespace}
-    ${pods}=    Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=${label_selector}
-    FOR    ${index}    ${pod}    IN ENUMERATE    @{pods}
-        Log    ${index}: ${pod}[spec][nodeName]
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    oc get node ${pod}[spec][nodeName] -ojson | jq '.metadata.labels."nvidia.com/gpu.present"'
-        Should Be Equal As Integers    ${rc}    ${0}
-        Should Be Equal As Strings    ${out}    "true"
-    END
 
 Enable Model Serving Runtime Using CLI
     [Documentation]  Update OdhDashboardConfig to enable the model runtime
@@ -478,4 +428,64 @@ Delete Serving Runtime Template From CLI By Runtime Name OR Display Name
           Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
     ELSE IF   "${runtime_name}" == "" and "${runtime_display_name}" == ""
          Fail     msg=Kindly provide runtime name or display name
+    END
+
+Clean Up DSP Page
+    [Documentation]    Removes all DSP Projects, if any are present
+    ${modal} =    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
+    IF  ${modal}==${TRUE}
+        Click Element    //button[@aria-label="Close"]
+    END
+    Open Data Science Projects Home Page
+    WHILE    ${TRUE}
+        ${projects}=    Get All Displayed Projects
+        IF    len(${projects})==0
+            BREAK
+        END
+        Delete Data Science Projects From CLI    ${projects}
+        Reload Page
+        Wait Until Page Contains    Data science projects
+    END
+
+Try Opening Create Server
+    [Documentation]    Tries to clean up DSP and Model Serving pages
+    ...    In order to deploy a single model in a new project. ${retries}
+    ...    controls how many retries are made.
+    [Arguments]    ${retries}=3
+    FOR    ${try}    IN RANGE    0    ${retries}
+        ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project
+        IF    ${status}
+            Click Button    Select a project
+            RETURN
+        ELSE
+            Clean Up Model Serving Page
+            Clean Up DSP Page
+            Open Model Serving Home Page
+            Reload Page
+            Sleep  5s
+        END
+    END
+
+Set Up Project
+    [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
+    ...                creates caikit runtime. This can be used as test setup
+    [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
+    Open Model Serving Home Page
+    IF    ${single_prj}
+        Try Opening Create Server
+        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    ELSE
+        Open Data Science Projects Home Page
+        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    END
+    Create Data Science Project    title=${namespace}    description=kserve test project
+    Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=${S3.BUCKET_3.NAME}    aws_s3_endpoint=${S3.BUCKET_3.ENDPOINT}
+    ...            aws_region=${S3.BUCKET_3.REGION}
+    IF   ${enable_metrics}
+        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
+        Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
+    ELSE
+        Log    message=Skipping UserWorkloadMonitoring enablement.
     END

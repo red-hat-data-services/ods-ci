@@ -320,7 +320,7 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
     poetry config --local virtualenvs.in-project true
     ln --symbolic "${virtenv}" ./.venv
   fi
-  poetry --no-interaction install --sync --no-root
+  poetry --no-interaction install --sync
 fi
 # shellcheck disable=SC1091
 source "$(poetry env info --path)/bin/activate"

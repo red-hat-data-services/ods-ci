@@ -318,7 +318,7 @@ Remove Current Page Projects From All Projects
 Check Pagination Is Correct On The Current Page
     [Documentation]    Check the pagination is correct for the Data Science displayed on current page
     [Arguments]     ${page}    ${total}
-    ${actual_text}=    Get Text    xpath://span[@class="pf-c-options-menu__toggle-text"]
+    ${actual_text}=    SeleniumLibrary.Get Text    xpath://button[contains(@class,"-menu-toggle")]
     IF    ${page}==1
         ${expected_text}=    Set Variable   1 - 10 of ${total} items
     ELSE IF    ${page}==2

@@ -1,26 +1,35 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
 metadata:
-  name: caikit-tgis-runtime
+  name: tgis-runtime
 spec:
   multiModel: false
   supportedModelFormats:
-    # Note: this currently *only* supports caikit format models
     - autoSelect: true
-      name: caikit
+      name: pytorch
   containers:
     - name: kserve-container
       image: quay.io/modh/text-generation-inference@sha256:a17a2868644929ee844ceb2778ac3f6db0936824d9b89d11ea7aa059466fcd0b
       command: ["text-generation-launcher"]
-      args: ["--model-name=/mnt/models/artifacts/"] 
-      env:
+      args:
+        - "--model-name=/mnt/models/<model>"
+        - "--port=3000"
+        - "--grpc-port=8033"
+      env:  
         - name: TRANSFORMERS_CACHE
           value: /tmp/transformers_cache
-    - name: transformer-container
-      image: quay.io/modh/caikit-tgis-serving@sha256:ce6b66bb847608dac5eacd7f9123d2a076a06893d7f37f2da5876a8930527513
-      env:
-        - name: RUNTIME_LOCAL_MODELS_DIR
-          value: /mnt/models
+      # resources: # configure as required
+      #   requests:
+      #     cpu: 8
+      #     memory: 16Gi
       ports:
-        - containerPort: 8080
+        - containerPort: 3000
           protocol: TCP
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 3000
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 3000

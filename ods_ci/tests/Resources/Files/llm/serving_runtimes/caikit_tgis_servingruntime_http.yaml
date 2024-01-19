@@ -1,0 +1,26 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  name: caikit-tgis-runtime
+spec:
+  multiModel: false
+  supportedModelFormats:
+    # Note: this currently *only* supports caikit format models
+    - autoSelect: true
+      name: caikit
+  containers:
+    - name: kserve-container
+      image: quay.io/modh/text-generation-inference@sha256:a17a2868644929ee844ceb2778ac3f6db0936824d9b89d11ea7aa059466fcd0b
+      command: ["text-generation-launcher"]
+      args: ["--model-name=/mnt/models/artifacts/"] 
+      env:
+        - name: TRANSFORMERS_CACHE
+          value: /tmp/transformers_cache
+    - name: transformer-container
+      image: quay.io/modh/caikit-tgis-serving@sha256:ce6b66bb847608dac5eacd7f9123d2a076a06893d7f37f2da5876a8930527513
+      env:
+        - name: RUNTIME_LOCAL_MODELS_DIR
+          value: /mnt/models
+      ports:
+        - containerPort: 8080
+          protocol: TCP

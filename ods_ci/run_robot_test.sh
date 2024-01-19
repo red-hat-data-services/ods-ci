@@ -22,7 +22,7 @@ EMAIL_SERVER_SSL=false
 EMAIL_SERVER_UNSECURE=false
 OPEN_REPORT_IN_BROWSER=false
 REPORT_BROWSER="firefox" # Default browser to open reports in
-SUBFOLDER=false
+SUBFOLDER=false 
 
 # Please keep this in sync with ./docs/RUN_ARGUMENTS.md file.
 while [ "$#" -gt 0 ]; do

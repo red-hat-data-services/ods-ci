@@ -49,9 +49,11 @@ Prepare Kuberay E2E Test Suite
         FAIL    Unable to clone Kuberay repo ${DW_REPO_URL}:${DW_REPO_BRANCH}:${DW_DIR}
     END
     Enable Component    ray
+    RHOSi Setup
 
 Teardown Kuberay E2E Test Suite
     Disable Component    ray
+    RHOSi Teardown
 
 Run Kuberay E2E Test
     [Documentation]    Run Kuberay E2E Test

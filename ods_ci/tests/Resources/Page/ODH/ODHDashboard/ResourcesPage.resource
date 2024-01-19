@@ -41,7 +41,7 @@ Number Of Items Should Be
     [Arguments]    ${expected_number}
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
-        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-card__title"]/div[@class="pf-c-content"]
+        ${versioned_title_xp}=    Set Variable    //div[@class="pf-v5-c-card__title"]//div[@class="pf-v5-c-content"]
     ELSE
         ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-card__title odh-card__doc-title"]
     END

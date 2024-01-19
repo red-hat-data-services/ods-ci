@@ -7,7 +7,7 @@ Library             DebugLibrary
 
 Suite Setup         Server Setup
 Suite Teardown      End Web Test
-Force Tags          JupyterHub
+Test Tags          JupyterHub
 
 
 *** Variables ***

@@ -275,7 +275,7 @@ Verify RHODS Display Name and Version
     ${rhods_displayname}  Set Variable       ${rhods_csv_detail[0]['spec']['displayName']}
     ${rhods_version_t}    Split String   ${rhods_csv_name}    .    1
     Should Be Equal       ${rhods_version_t[1]}   ${rhods_version}   msg=RHODS vesrion and label is not consistent
-    Should Be Equal       ${rhods_displayname}   Red Hat OpenShift Data Science  msg=Dieplay name doesn't match
+    Should Be Equal       ${rhods_displayname}   Red Hat OpenShift AI  msg=Dieplay name doesn't match
 
 Verify RHODS Notebooks Network Policies
     [Documentation]    Verifies that the network policies for RHODS Notebooks are present on the cluster

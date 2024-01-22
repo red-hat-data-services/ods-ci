@@ -15,6 +15,6 @@ spec:
     serviceAccountName: ${sa_name}
     model:
       modelFormat:
-        name: caikit
-      runtime: caikit-tgis-runtime
+        name: ${model_format}
+      runtime: ${serving_runtime}
       storageUri: ${model_storage_uri}

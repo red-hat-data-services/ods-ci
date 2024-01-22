@@ -1,7 +1,8 @@
 *** Settings ***
-Documentation    Test suite to validate caikit-nlp-client library usage with Kserve models
+Documentation    Test suite to validate caikit-nlp-client library usage with Kserve models.
+...              These tests leverage on Caikit+TGIS combined Serving Runtime
 ...              PythonLibrary repo: https://github.com/opendatahub-io/caikit-nlp-client
-Resource          ../../../Resources/CLI/ModelServing/llm.resource
+Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup    Caikit Client Suite Setup
 Suite Teardown    Caikit Client Suite Teardown
 Test Teardown    SeleniumLibrary.Close All Browsers
@@ -85,12 +86,12 @@ GRPC Model Setup
         Set Project And Runtime    namespace=${GRPC_MODEL_NS}
         Compile Inference Service YAML    isvc_name=${ISVC_NAME}
         ...    model_storage_uri=${STORAGE_URI}
-        Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+        Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
         ...    namespace=${GRPC_MODEL_NS}
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ISVC_NAME}
         ...    namespace=${GRPC_MODEL_NS}
-        Query Model Multiple Times    model_name=${ISVC_NAME}
-        ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+        Query Model Multiple Times    model_name=${ISVC_NAME}    runtime=caikit-tgis-runtime
+        ...    inference_type=all-tokens    n_times=1    protocol=grpc
         ...    namespace=${GRPC_MODEL_NS}    validate_response=${FALSE}
         Set Suite Variable    ${GPRC_MODEL_DEPLOYED}    ${TRUE}
     ELSE
@@ -110,11 +111,10 @@ HTTP Model Setup
         ...    data_connection=kserve-connection    path=${MODEL_S3_DIR}
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ISVC_NAME}
         ...    namespace=${HTTP_MODEL_NS}  
-        Log    ${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}
-        Query Model Multiple Times    model_name=${ISVC_NAME}
-        ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1
+        Query Model Multiple Times    model_name=${ISVC_NAME}    runtime=caikit-tgis-runtime
+        ...    inference_type=all-tokens    n_times=1
         ...    namespace=${HTTP_MODEL_NS}    protocol=http
-        ...    timeout=20
+        ...    timeout=20    validate_response=${FALSE}
         Set Suite Variable    ${HTTP_MODEL_DEPLOYED}    ${TRUE}
     ELSE
         Log    message=Skipping model deployment, it was marked as deployed in a previous test

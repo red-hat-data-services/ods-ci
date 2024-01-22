@@ -1,9 +1,10 @@
 *** Settings ***
-Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM)
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource          ../../../Resources/OCP.resource
-Resource          ../../../Resources/Page/Operators/ISVs.resource
-Resource          ../../../Resources/CLI/ModelServing/llm.resource
+Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
+...               These tests leverage on Caikit+TGIS combined Serving Runtime
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource          ../../../../Resources/OCP.resource
+Resource          ../../../../Resources/Page/Operators/ISVs.resource
+Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
 Suite Teardown    RHOSi Teardown
@@ -50,7 +51,7 @@ Verify External Dependency Operators Can Be Deployed
     ...                and configured
     [Tags]    ODS-2326
     Pass Execution    message=Installation done as part of Suite Setup.
-
+ 
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
@@ -62,15 +63,15 @@ Verify User Can Serve And Query A Model
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -86,12 +87,12 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     Compile Inference Service YAML    isvc_name=${model_one_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=${test_namespace}
@@ -121,12 +122,12 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     Compile Inference Service YAML    isvc_name=${model_one_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=singlemodel-multi1
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=singlemodel-multi2
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=singlemodel-multi1
@@ -209,7 +210,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    min_replicas=1
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
@@ -245,7 +246,7 @@ Verify User Can Autoscale Using Concurrency
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    auto_scale=True
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -268,7 +269,7 @@ Verify User Can Validate Scale To Zero
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
@@ -309,7 +310,7 @@ Verify User Can Set Requests And Limits For A Model
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    requests_dict=${requests}    limits_dict=${limits}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -347,7 +348,7 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    requests_dict=${requests}    limits_dict=${limits}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
@@ -359,8 +360,7 @@ Verify Model Can Be Served And Query On A GPU Node
     Query Model Multiple Times    model_name=${model_name}    n_times=10
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${model_name}    n_times=5
-    ...    namespace=${test_namespace}    endpoint=${CAIKIT_STREAM_ENDPOINT}
-    ...    streamed_response=${TRUE}
+    ...    namespace=${test_namespace}    inference_type=streaming
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}
 
@@ -376,7 +376,7 @@ Verify Non Admin Can Serve And Query A Model
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -384,10 +384,10 @@ Verify Non Admin Can Serve And Query A Model
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
@@ -402,15 +402,15 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_GRAMMAR_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=1
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${1}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -425,15 +425,15 @@ Verify User Can Serve And Query Flan-t5 Large
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_LARGE_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}
@@ -452,12 +452,12 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=1
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -489,14 +489,14 @@ Verify User Can Access Model Metrics From UWM
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Wait Until Keyword Succeeds    30 times    4s
     ...    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=3
+    ...    inference_type=all-tokens    n_times=3
     ...    namespace=${test_namespace}
     Wait Until Keyword Succeeds    50 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
@@ -508,7 +508,7 @@ Verify User Can Access Model Metrics From UWM
     ...    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
     Query Model Multiple Times    model_name=${flan_model_name}
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     Wait Until Keyword Succeeds    30 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
@@ -527,17 +527,17 @@ Verify User Can Query A Model Using HTTP Calls
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${model_name}    protocol=http
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}    n_times=1    streamed_response=${FALSE}
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     # temporarily disabling stream response validation. Need to re-design the expected response json file
     # because format of streamed response with http is slightly different from grpc
     Query Model Multiple Times    model_name=${model_name}    protocol=http
-    ...    endpoint=${CAIKIT_STREAM_ENDPOINT_HTTP}    n_times=1    streamed_response=${TRUE}
+    ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}    validate_response=${FALSE}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}

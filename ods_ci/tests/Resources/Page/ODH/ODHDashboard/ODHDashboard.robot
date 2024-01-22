@@ -330,7 +330,10 @@ Check Card Badges And Return Titles
 
 Open Get Started Sidebar And Return Status
     [Arguments]  ${card_locator}
-    Click Element  xpath:${card_locator}/${CARD_BUTTON_XP}
+    Wait Until Element Is Visible    xpath:${card_locator}/${CARD_BUTTON_XP}
+    Wait Until Element Is Enabled     xpath:${card_locator}/${CARD_BUTTON_XP}    timeout=20s     error=Element is not clickbale  #robocop : disable
+    ${element}=    Get WebElement    xpath:${card_locator}/${CARD_BUTTON_XP}
+    Execute Javascript    arguments[0].click();     ARGUMENTS    ${element}
     ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
     Sleep  1
     RETURN  ${status}

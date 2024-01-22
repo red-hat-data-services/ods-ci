@@ -8,21 +8,20 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resou
 *** Variables ***
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
-${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_isvc.yaml
+${RUNTIME_FORMATS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats.json
+${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc.yaml
+${INFERENCESERVICE_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc_filled.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
 ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
 ${USE_BUCKET_HTTPS}=    "1"
 ${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
-${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
-${CAIKIT_ALLTOKENS_ENDPOINT}=    caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
-${CAIKIT_STREAM_ENDPOINT}=    caikit.runtime.Nlp.NlpService/ServerStreamingTextGenerationTaskPredict
-${CAIKIT_ALLTOKENS_ENDPOINT_HTTP}=    api/v1/task/text-generation
-${CAIKIT_STREAM_ENDPOINT_HTTP}=    api/v1/task/server-streaming-text-generation
-${CAIKIT_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/caikit_servingruntime_{{protocol}}.yaml
+${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml  
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
+&{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
+...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
 
 
 *** Keywords ***
@@ -38,17 +37,17 @@ Set Up Test OpenShift Project
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${test_ns}
     Should Be Equal As Numbers    ${rc}    ${0}
 
-Deploy Caikit Serving Runtime
+Deploy Serving Runtime
     [Documentation]    Create the ServingRuntime CustomResource in the test ${namespace}.
     ...                This must be done before deploying a model which needs Caikit.
-    [Arguments]    ${namespace}    ${protocol}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc get ServingRuntime caikit-tgis-runtime -n ${namespace}
+    [Arguments]    ${namespace}    ${runtime}    ${protocol}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get ServingRuntime ${runtime} -n ${namespace}
     IF    "${rc}" == "${0}"
-        Log    message=ServingRuntime caikit-tgis-runtime in ${namespace} NS already present. Skipping runtime setup...
+        Log    message=ServingRuntime ${runtime} in ${namespace} NS already present. Skipping runtime setup...
         ...    level=WARN
         RETURN
     END
-    ${runtime_final_filepath}=    Replace String    string=${CAIKIT_FILEPATH}    search_for={{protocol}}
+    ${runtime_final_filepath}=    Replace String    string=${RUNTIME_FLIEPATHS}[${runtime}]    search_for={{protocol}}
     ...    replace_with=${protocol}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${runtime_final_filepath} -n ${namespace}
@@ -57,12 +56,11 @@ Deploy Caikit Serving Runtime
 Set Project And Runtime
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
-    [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${protocol}=grpc
+    [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
     Set Up Test OpenShift Project    test_ns=${namespace}
     Create Secret For S3-Like Buckets    endpoint=${MODELS_BUCKET.ENDPOINT}
     ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
-    # temporary step - caikit will be shipped OOTB
-    Deploy Caikit Serving Runtime    namespace=${namespace}    protocol=${protocol}
+    Deploy Serving Runtime    namespace=${namespace}    runtime=${runtime}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
         Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
         Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
@@ -109,9 +107,9 @@ Create Secret For S3-Like Buckets
 
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
-    [Arguments]    ${isvc_name}    ${model_storage_uri}    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
-    ...            ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1   ${scaleTarget}=1
-    ...            ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
+    [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
+    ...            ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
+    ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
     IF   '${auto_scale}' == '${NONE}'
         ${scaleTarget}=    Set Variable    ${EMPTY}
@@ -124,22 +122,24 @@ Compile Inference Service YAML
     Set Test Variable    ${scaleTarget}
     Set Test Variable    ${scaleMetric}
     Set Test Variable    ${canaryTrafficPercent}
-    Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Set Test Variable    ${model_format}
+    Set Test Variable    ${serving_runtime}
+    Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${INFERENCESERVICE_FILLED_FILEPATH}
     IF    ${requests_dict} != &{EMPTY}
-        Log    Adding predictor model requests to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${requests_dict}    console=True    # robocop: disable
+        Log    Adding predictor model requests to ${INFERENCESERVICE_FILLED_FILEPATH}: ${requests_dict}    console=True    # robocop: disable
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
             Log    ${index}- ${resource}:${requests_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml    # robocop: disable
+            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
     IF    ${limits_dict} != &{EMPTY}
-        Log    Adding predictor model limits to ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml: ${limits_dict}    console=True    # robocop: disable
+        Log    Adding predictor model limits to ${INFERENCESERVICE_FILLED_FILEPATH}: ${limits_dict}    console=True    # robocop: disable
         FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
             Log    ${index}- ${resource}:${limits_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml    # robocop: disable
+            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
@@ -150,10 +150,12 @@ Model Response Should Match The Expectation
     ...                   - to ensure we are getting an answer from the model (e.g., not an empty text)
     ...                   - to check that we receive the answer from the right model
     ...                when multiple ones are deployed
-    [Arguments]    ${model_response}    ${model_name}    ${query_idx}    ${streamed_response}=${FALSE}
+    [Arguments]    ${model_response}    ${model_name}    ${query_idx}    ${runtime_details}    ${runtime}=caikit-tgis-runtime    ${streamed_response}=${FALSE}
     IF    ${streamed_response} == ${FALSE}
-        Should Be Equal As Integers    ${model_response}[generated_tokens]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][generatedTokenCount]    # robocop: disable
-        ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[generated_text]    \\s+    ${SPACE}
+        ${response_text_field}=    Set Variable    ${runtime_details}[response_fields_map][response_text]
+        ${response_tokens_field}=    Set Variable    ${runtime_details}[response_fields_map][response_tokens]
+        Should Be Equal As Integers    ${model_response}[${response_tokens_field}]    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_tokens]    # robocop: disable
+        ${cleaned_response_text}=    Replace String Using Regexp    ${model_response}[${response_text_field}]    \\s+    ${SPACE}
         ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}    # robocop: disable
         ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
         ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
@@ -179,28 +181,77 @@ Model Response Should Match The Expectation
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     END
 
+Load Runtime Query Formats
+    [Documentation]    Loads the json file containing the expected query format for each
+    ...                serving runtime
+    [Arguments]    ${filepath}=${RUNTIME_FORMATS_FILEPATH}
+    ${runtimes}=    Load Json File    ${filepath}
+    Set Suite Variable    ${RUNTIME_FORMATS}    ${runtimes}
+
+Prepare Payload
+    [Arguments]    ${runtime}    ${protocol}    ${inference_type}    ${model_name}    ${query_text}
+    Set Test Variable    ${model_name}
+    Set Test Variable    ${query_text}
+    Create File From Template    ${RUNTIME_FORMATS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
+    Load Runtime Query Formats    filepath=${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
+    ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
+    ${body}=    Replace String    ${runtime_details}[body]    '    "
+    ${header}=    Set Variable    ${runtime_details}[header]
+    IF    "${protocol}" == "grpc"
+        ${body}=    Set Variable    '${body}'
+        ${header}=    Set Variable  '${header}'
+    END
+    IF    "${protocol}" == "http"
+        ${dict_header}=    Create Dictionary     Cookie=${EMPTY}
+        ${sub_headers}=    Split String    ${header}    separator=${SPACE}
+        FOR    ${index}    ${sub_header}    IN ENUMERATE    @{sub_headers}
+            Log    ${index}: ${sub_header}
+            ${pair}=    Split String    ${sub_header}    separator=:
+            Log    ${pair}
+            Set To Dictionary    ${dict_header}    ${pair}[0]=${pair}[1]    
+        END
+        ${header}=    Set Variable    ${dict_header}
+    END
+    ${args}=    Create Dictionary
+    ${runtime_args_str}=    Set Variable    ${runtime_details}
+    ${args_flag}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${runtime_args_str}    args
+    IF    ${args_flag}
+        ${sub_args}=    Split String    ${runtime_args_str}[args]    separator=${SPACE}
+        FOR    ${index}    ${arg}    IN ENUMERATE    @{sub_args}
+            Log    ${index}: ${arg}
+            ${pair}=    Split String    ${arg}    separator==
+            Log    ${pair}
+            Set To Dictionary    ${args}    ${pair}[0]=${pair}[1]    
+        END
+    END
+    RETURN    ${body}    ${header}    ${args}
+
 Query Model Multiple Times
     [Documentation]    Queries and checks the responses of the given models in a loop
     ...                running ${n_times}. For each loop run it queries all the model in sequence
-    [Arguments]    ${model_name}    ${namespace}    ${isvc_name}=${model_name}
-    ...            ${endpoint}=${CAIKIT_ALLTOKENS_ENDPOINT}    ${n_times}=10
-    ...            ${streamed_response}=${FALSE}    ${query_idx}=0    ${validate_response}=${TRUE}
+    ...                ${inference_type} arguments accepts these 2 values for now:
+    ...                  - all-tokens: it returns the entire generated response text
+    ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
+    [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
+    ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
     ...            ${protocol}=grpc    &{args}
+    IF    "${inference_type}" == "streaming"
+        ${streamed_response}=    Set Variable    ${TRUE}
+    ELSE
+        ${streamed_response}=    Set Variable    ${FALSE}
+    END
     IF    ${validate_response} == ${FALSE}
         ${skip_json_load_response}=    Set Variable    ${TRUE}
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
-    IF    "${protocol}" == "grpc"
-        ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][${query_idx}][query_text]"}'
-        ${header}=    Set Variable    'mm-model-id: ${model_name}'
-    ELSE IF    "${protocol}" == "http"
-        ${body}=    Set Variable    {"model_id": "${model_name}","inputs": "${EXP_RESPONSES}[queries][0][query_text]"}
-        ${headers}=    Create Dictionary     Cookie=${EMPTY}    Content-type=application/json
-    ELSE
-        Fail    msg=The ${protocol} protocol is not supported by ods-ci. Please use either grpc or http.
-    END
+    ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
+    ...    inference_type=${inference_type}    model_name=${model_name}
+    ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
+    ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
+    ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
+    Set To Dictionary    ${args}    &{extra_args}
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
         IF    "${protocol}" == "grpc"
@@ -209,11 +260,11 @@ Query Model Multiple Times
             ...    json_body=${body}    json_header=${header}
             ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
             ...    &{args}
-        ELSE IF    "${protocol}" == "http"
-            ${payload}=     Prepare Payload     body=${body}    str_to_json=${TRUE}
+         ELSE IF    "${protocol}" == "http"
+            ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
             Log Dictionary    ${args}
             Set To Dictionary    ${args}    url=https://${host}:443/${endpoint}   expected_status=any
-            ...             headers=${headers}   json=${payload}    verify=${False}
+            ...             headers=${header}   json=${payload}    verify=${False}
             ${is_timeout}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${args}    timeout
             IF    ${is_timeout} == ${FALSE}
                 Set To Dictionary    ${args}    timeout=10
@@ -224,9 +275,15 @@ Query Model Multiple Times
             Run Keyword And Continue On Failure    Status Should Be  200
         END
         Log    ${res}
+        ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
+        IF    "${response_container_field}" != "${EMPTY}"
+            # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
+            ${res}=    Set Variable    ${res}[${response_container_field}][0]            
+        END
         IF    ${validate_response} == ${TRUE}
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
+            ...    runtime_details=${runtime_details}    runtime=${runtime}
             ...    streamed_response=${streamed_response}    query_idx=${query_idx}
         END
     END
@@ -241,7 +298,7 @@ Compile Deploy And Query LLM model
     ...    sa_name=${sa_name}
     ...    model_storage_uri=${model_storage_uri}
     ...    canaryTrafficPercent=${canaryTrafficPercent}
-    Deploy Model Via CLI    isvc_filepath=${LLM_RESOURCES_DIRPATH}/caikit_isvc_filled.yaml
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}

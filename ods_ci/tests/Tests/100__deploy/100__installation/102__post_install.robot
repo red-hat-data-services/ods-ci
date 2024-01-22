@@ -80,22 +80,13 @@ Verify That Prometheus Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-734
+    Skip If RHODS Is Self-Managed
+    Wait For Pods To Be Ready    label_selector=deployment=prometheus
+    ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
     Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    prometheus
     ...    registry.redhat.io/openshift4/ose-prometheus
     Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    oauth-proxy
-    ...    registry.redhat.io/openshift4/ose-oauth-proxy
-
-Verify That Grafana Image Is A CPaaS Built Image
-    [Documentation]    Verifies the images used for grafana
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-736
-    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=grafana-
-    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    grafana
-    ...    registry.redhat.io/rhel8/grafana
-    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    auth-proxy
     ...    registry.redhat.io/openshift4/ose-oauth-proxy
 
 Verify That Blackbox-exporter Image Is A CPaaS Built Image
@@ -104,6 +95,8 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
     ...       Tier1
     ...       ODS-735
     Skip If RHODS Is Self-Managed
+    Wait For Pods To Be Ready    label_selector=deployment=blackbox-exporter
+    ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=blackbox-exporter-
     Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    blackbox-exporter
     ...    quay.io/integreatly/prometheus-blackbox-exporter
@@ -114,6 +107,8 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     ...       Tier1
     ...       ODS-733
     Skip If RHODS Is Self-Managed
+    Wait For Pods To Be Ready    label_selector=deployment=prometheus
+    ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
     Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    alertmanager
     ...    registry.redhat.io/openshift4/ose-prometheus-alertmanager
@@ -123,6 +118,8 @@ Verify Oath-Proxy Image Is A CPaaS Built Image
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-666
+    Wait For Pods To Be Ready    label_selector=app=rhods-dashboard
+    ...    namespace=${APPLICATIONS_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_start_with=rhods-dashboard-
     Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      oauth-proxy
     ...     registry.redhat.io/openshift4/ose-oauth-proxy
@@ -277,7 +274,7 @@ Verify RHODS Display Name and Version
     ${rhods_displayname}  Set Variable       ${rhods_csv_detail[0]['spec']['displayName']}
     ${rhods_version_t}    Split String   ${rhods_csv_name}    .    1
     Should Be Equal       ${rhods_version_t[1]}   ${rhods_version}   msg=RHODS vesrion and label is not consistent
-    Should Be Equal       ${rhods_displayname}   Red Hat OpenShift Data Science  msg=Dieplay name doesn't match
+    Should Be Equal       ${rhods_displayname}   Red Hat OpenShift AI  msg=Dieplay name doesn't match
 
 Verify RHODS Notebooks Network Policies
     [Documentation]    Verifies that the network policies for RHODS Notebooks are present on the cluster

@@ -558,7 +558,7 @@ Fetch Image Tooltip Info
         ${item} =    Get Text    ${xpath_tooltip_items}\[${index}]
         Append To List    ${tmp_list}    ${item}
     END
-    Click Element    xpath://div[@class='pf-v5-c-popover__content']/button[@aria-label="Close"]
+    Click Element    xpath://div[@class='pf-v5-c-popover__close']/button[@aria-label="Close"]
     RETURN    ${tmp_list}
 
 Spawn Notebooks And Set S3 Credentials

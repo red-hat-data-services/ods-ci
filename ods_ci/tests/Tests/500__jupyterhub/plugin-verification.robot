@@ -9,7 +9,7 @@ Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource        ../../Resources/RHOSi.resource
 Suite Setup     Plugin Testing Suite Setup
 Suite Teardown   Plugin Testing Suite Teardown
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 *** Variables ***
 @{notebook_images}             minimal-notebook    science-notebook    tensorflow   pytorch

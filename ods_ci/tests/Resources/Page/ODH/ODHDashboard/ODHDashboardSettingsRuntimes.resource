@@ -5,7 +5,7 @@ Resource       ../../../Common.robot
 
 *** Variables ***
 ${ADD_RUNTIME_BTN_XP}=    //button[text()="Add serving runtime"]
-${SUBMIT_RUNTIME_BTN_XP}=    //button[text()="Add"]
+${SUBMIT_RUNTIME_BTN_XP}=    //button[text()="Create"]
 ${UPLOAD_RUNTIME_BTN_XP}=    //button[text()="Upload files"]
 ${SCRATCH_RUNTIME_BTN_XP}=    //button[text()="Start from scratch"]
 ${EDITOR_RUNTIME_BTN_XP}=    //div[contains(@class, "odh-dashboard__code-editor")]
@@ -23,7 +23,7 @@ Click Add Serving Runtime Template Button
     Run Keyword And Continue On Failure    SeleniumLibrary.Page Should Contain Element    ${UPLOAD_RUNTIME_BTN_XP}
     Run Keyword And Continue On Failure    SeleniumLibrary.Page Should Contain Element    ${SCRATCH_RUNTIME_BTN_XP}
     Run Keyword And Continue On Failure    SeleniumLibrary.Page Should Contain Element    ${EDITOR_RUNTIME_BTN_XP}
-    
+
 Upload Serving Runtime Template
     [Documentation]    Uploads via UI a YAML file containing a custom Serving Runtime definition
     [Arguments]    ${runtime_filepath}    ${serving_platform}

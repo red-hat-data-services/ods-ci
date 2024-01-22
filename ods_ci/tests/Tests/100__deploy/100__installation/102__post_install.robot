@@ -118,9 +118,8 @@ Verify Oath-Proxy Image Is A CPaaS Built Image
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-666
-    Skip If RHODS Is Self-Managed
-    Wait For Pods To Be Ready    label_selector=deployment=prometheus
-    ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
+    Wait For Pods To Be Ready    label_selector=app=rhods-dashboard
+    ...    namespace=${APPLICATIONS_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_start_with=rhods-dashboard-
     Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      oauth-proxy
     ...     registry.redhat.io/openshift4/ose-oauth-proxy

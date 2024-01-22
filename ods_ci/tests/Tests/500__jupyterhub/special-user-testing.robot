@@ -1,5 +1,5 @@
 *** Settings ***
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 Resource         ../../Resources/ODS.robot
 Resource         ../../Resources/Common.robot
 Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot

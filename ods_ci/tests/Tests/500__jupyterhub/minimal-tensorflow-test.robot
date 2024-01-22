@@ -11,7 +11,7 @@ Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Verify Tensorflow Image Suite Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Variables ***

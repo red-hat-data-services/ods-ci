@@ -11,7 +11,7 @@ Library          JupyterLibrary
 Library          OpenShiftLibrary
 Suite Setup      Special User Testing Suite Setup
 Suite Teardown   Close All Browsers
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Variables ***

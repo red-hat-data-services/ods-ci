@@ -11,7 +11,7 @@ Library             JupyterLibrary
 Suite Setup         Load Spawner Page
 Suite Teardown      End Web Test
 
-Force Tags          JupyterHub
+Test Tags          JupyterHub
 
 
 *** Variables ***

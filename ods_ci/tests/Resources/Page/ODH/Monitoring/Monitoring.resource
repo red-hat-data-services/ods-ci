@@ -160,3 +160,10 @@ Get Thanos Metrics List
     END
     ${rc}    ${out}=    Run And Return Rc And Output    ${cmd} | tr -d '"'
     RETURN    ${out}
+
+
+Set Thanos Credentials Variables
+    ${thanos_url}=    Get OpenShift Thanos URL
+    ${token}=    Generate Thanos Token
+    Set Suite Variable    ${THANOS_URL}    ${thanos_url}
+    Set Suite Variable    ${THANOS_TOKEN}    ${token}

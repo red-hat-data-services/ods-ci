@@ -87,10 +87,7 @@ Non-Admin Setup Kserve UI Test
     ${PROJECTS_TO_DELETE}=    Create List    ${TEST_NS}
     Set Suite Variable    ${PROJECTS_TO_DELETE}
     Fetch CA Certificate If RHODS Is Self-Managed
-    ${thanos_url}=    Get OpenShift Thanos URL
-    ${token}=    Generate Thanos Token
-    Set Suite Variable    ${THANOS_URL}    ${thanos_url}
-    Set Suite Variable    ${THANOS_TOKEN}    ${token}
+    Set Thanos Credentials Variables
 
 Non-Admin Teardown Kserve UI Test
     Delete Data Science Project   project_title=${TEST_NS}

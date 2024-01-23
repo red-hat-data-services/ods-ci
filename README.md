@@ -55,6 +55,8 @@ and its upstream project, [Open Data Hub](https://opendatahub.io/).
    * The wrapper script has several arguments and you can find details in the dedicated document file. See [run_args.md](ods_ci/docs/RUN_ARGUMENTS.md)
    * As alternative, you can run any of the test cases by creating the python virual environment, install the packages in [poetry.lock](poetry.lock) and running the `robot` command directly
 
+# Test tiers
+Test tier description is located in [ODS-CI RobotFramework Style Guide doc](https://docs.google.com/document/d/11ZJOPI1uq-0Wl6a2V8fkAv_TQhfzp9t_IjXAheaJxmQ/edit#heading=h.s819p3c5ud7p)
 
 # Contributing
 See [CONTRIBUTING.md](ods_ci/CONTRIBUTING.md)

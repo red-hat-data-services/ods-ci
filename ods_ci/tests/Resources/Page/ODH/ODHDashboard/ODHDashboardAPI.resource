@@ -70,8 +70,6 @@ Perform Dashboard API Endpoint POST Call
     &{args}=       Create Dictionary     url=${ODH_DASHBOARD_URL}/${endpoint}   expected_status=any
     ...             headers=${headers}   json=${payload}    timeout=5  verify=${False}
     ${response}=    Run Keyword And Continue On Failure     Perform Request     POST     &{args}
-    Log    msg= &{args}  level=DEBUG
-    Log    msg= ${response}  level=DEBUG
     IF    ${response} == ${NONE}
         Log    msg=HTTP response is empty. The request may have failed to be performed  level=ERROR
     END

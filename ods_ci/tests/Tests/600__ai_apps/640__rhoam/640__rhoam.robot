@@ -39,7 +39,6 @@ Verify RHOAM Availability Based On RHODS Installation Type
         Verify Service Is Not Available In The Explore Page    OpenShift API Management
     ELSE
         Verify Service Is Available In The Explore Page    OpenShift API Management
-        ...    split_last=${TRUE}
         Verify Service Provides "Get Started" Button In The Explore Page    OpenShift API Management
         ...    app_id=rhoam
     END

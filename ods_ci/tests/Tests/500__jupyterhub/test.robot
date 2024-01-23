@@ -7,7 +7,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Suite Setup      JupyterHub Testing Suite Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Variables ***

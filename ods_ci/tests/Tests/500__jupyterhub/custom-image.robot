@@ -11,7 +11,7 @@ Library          JupyterLibrary
 Library          OpenShiftLibrary
 Suite Setup      Custom Notebook Settings Suite Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 

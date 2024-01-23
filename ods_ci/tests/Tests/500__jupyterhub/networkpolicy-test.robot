@@ -8,7 +8,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
 Library          JupyterLibrary
 Suite Setup      RHOSi Setup
 Suite Teardown   Network Policy Suite Teardown
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Test Cases ***

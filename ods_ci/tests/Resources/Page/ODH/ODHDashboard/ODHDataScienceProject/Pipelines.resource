@@ -13,7 +13,7 @@ ${CREATE_RUN_BTN_XP}=    xpath://*[text()="Create run"]
 ${RUN_TOPOLOGY_DETAILS_BTN_XP}=    xpath://li//button[text()="Details"]
 ${RUN_TOPOLOGY_OUTPUT_BTN_XP}=    xpath://li//button[text()="Run output"]
 ${RUN_TOPOLOGY_XP}=    css:div[data-test-id="topology"]
-
+${PIPELINES_DISABLED_EXC_MARK}=    xpath=//*[@id="page-sidebar"]/div/nav/ul/li[3]/a/div/div[2]
 
 *** Keywords ***
 Create Pipeline Server
@@ -276,3 +276,13 @@ Verify Successful Pipeline Run Via Project UI
     ...    status=Completed
     Pipeline Run Should Be Listed    name=${pipeline_run_name}
     ...    pipeline_name=${pipeline_name}
+
+Verify Pipelines Are Enabled
+   [Documentation]    Verifies the Dashboard enabled pipelines
+   Wait Until Page Contains       Data Science Pipelines
+   Page Should Not Contain Element    ${PIPELINES_DISABLED_EXC_MARK}  timeout=10s
+
+Verify Pipelines Are Disabled
+   [Documentation]    Verifies the Dashboard disabled pipelines
+   Wait Until Page Contains       Data Science Pipelines
+   Page Should Contain Element    ${PIPELINES_DISABLED_EXC_MARK}  timeout=10s

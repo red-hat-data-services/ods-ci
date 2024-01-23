@@ -411,7 +411,7 @@ Check Versions In JupyterLab
         ELSE IF  "${libDetail}[0]" == "Python"
             ${status} =  Python Version Check  ${libDetail}[1]
         # lowercase string is needed as a workaround for the metadata of the tensorflow image
-        ELSE IF  "${libDetail}[0]" == "Sklearn-onnx" or ${libDetail}[0]" == "sklearn-onnx"
+        ELSE IF  "${libDetail}[0]" == "Sklearn-onnx" or "${libDetail}[0]" == "sklearn-onnx"
             ${status}  ${value} =  Verify Installed Library Version  skl2onnx  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL

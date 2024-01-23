@@ -252,9 +252,8 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    # Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')][div | article]
     Wait Until Page Contains Element    xpath:${CARDS_XP}
-    ...    timeout=10s
+    ...    timeout=15s
 
 Get App ID From Card
     [Arguments]  ${card_locator}

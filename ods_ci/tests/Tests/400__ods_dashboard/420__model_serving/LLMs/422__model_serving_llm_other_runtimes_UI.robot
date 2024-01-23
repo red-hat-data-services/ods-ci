@@ -23,7 +23,7 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS Standalone runtime.
-    [Tags]    Sanity    Tier1    ODS-XYZ
+    [Tags]    Sanity    Tier1    ODS-2611
     [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${model_name}=    Set Variable    flan-t5-small-hf

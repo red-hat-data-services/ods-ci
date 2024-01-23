@@ -29,21 +29,6 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
             instascale=False,
         )
     )
-    # workaround for https://github.com/project-codeflare/codeflare-sdk/pull/412
-    cluster_file_name = "/opt/app-root/src/.codeflare/appwrapper/raytest.yaml"
-    # Read in the file
-    with open(cluster_file_name, "r") as file:
-        filedata = file.read()
-
-    # Replace the target string
-    filedata = filedata.replace(
-        "busybox:1.28", "quay.io/project-codeflare/busybox:latest"
-    )
-
-    # Write the file out again
-    with open(cluster_file_name, "w") as file:
-        file.write(filedata)
-    # end workaround
 
     # always clean the resources
     cluster.down()

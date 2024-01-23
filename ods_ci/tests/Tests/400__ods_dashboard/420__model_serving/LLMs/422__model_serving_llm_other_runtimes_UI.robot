@@ -16,12 +16,13 @@ ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-hf
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
+@{SEARCH_METRICS}=    tgi_    istio_
 
 
 *** Test Cases ***
 Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
-    ...                using Kserve and Caikit+TGIS runtime
+    ...                using Kserve and TGIS Standalone runtime.
     [Tags]    Sanity    Tier1    ODS-XYZ
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${model_name}=    Set Variable    flan-t5-small-hf
@@ -29,27 +30,24 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ...    data_connection=kserve-connection    model_framework=pytorch    path=${FLAN_MODEL_S3_DIR}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
-    Query Model Multiple Times    model_name=${model_name}
+    Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    protocol=grpc
-    Query Model Multiple Times    model_name=${model_name}
+    Query Model Multiple Times    model_name=${model_name}        runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1
-    ...    namespace=${test_namespace}    protocol=http    validate_response=$FALSE
+    ...    namespace=${test_namespace}    protocol=grpc    validate_response=${FALSE}
+    Wait Until Keyword Succeeds    30 times    4s
+    ...    Metrics Should Exist In UserWorkloadMonitoring    thanos_url=${THANOS_URL}    thanos_token=${THANOS_TOKEN}
+    ...    search_metrics=${SEARCH_METRICS}
+    Wait Until Keyword Succeeds    50 times    5s
+    ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${THANOS_URL}    thanos_token=${THANOS_TOKEN}
+    ...    model_name=${model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=1
     Delete Model Via UI    ${model_name}
 
 ##Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
 ##    [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
 ##    ...                using Kserve and Caikit+TGIS runtime
 ##    [Tags]    Sanity    Tier1    ODS-XYZ   Resources-GPU
-
-## Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
-##     [Documentation]    Verifies that model metrics are available for users in the
-##     ...                OpenShift monitoring system (UserWorkloadMonitoring)
-##     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
-##     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
-##     ...                derived metrics.
-##     [Tags]    Sanity    Tier1    ODS-XYZ
-
 
 
 *** Keywords ***
@@ -64,7 +62,13 @@ Non-Admin Setup Kserve UI Test
     Load Expected Responses
     Launch Dashboard    ${user}    ${pw}    ${auth}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Set Up Project    namespace=${TEST_NS}    single_prj=${FALSE}
+    ${PROJECTS_TO_DELETE}=    Create List    ${TEST_NS}
+    Set Suite Variable    ${PROJECTS_TO_DELETE}
     Fetch CA Certificate If RHODS Is Self-Managed
+    ${thanos_url}=    Get OpenShift Thanos URL
+    ${token}=    Generate Thanos Token
+    Set Suite Variable    ${THANOS_URL}    ${thanos_url}
+    Set Suite Variable    ${THANOS_TOKEN}    ${token}
 
 Non-Admin Teardown Kserve UI Test
     Delete Data Science Project   project_title=${TEST_NS}

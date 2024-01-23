@@ -67,7 +67,7 @@ Storage Size Should Be
         #       info WRT cluster usage, look like it does so every 60s
         ${bound_storage_size_el}=    Set Variable
         ...    ${STORAGE_SECTION_XP}//tr[contains(@class, "-table__expandable-row pf-m-expanded")]/td/div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
-        Wait Until Page Contains Element    ${bound_storage_size_el}    timeout=65s
+        Wait Until Page Contains Element    ${bound_storage_size_el}    timeout=80s
         ${displayed_size}=    Get Text    ${bound_storage_size_el}
         Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
         ${rc}  ${oc_object_size}=    Run And Return Rc And Output

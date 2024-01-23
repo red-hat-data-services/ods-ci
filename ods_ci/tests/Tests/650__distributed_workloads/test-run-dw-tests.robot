@@ -36,7 +36,9 @@ Run distributed workloads sanity tests
 Prepare Distributed Workloads E2E Test Suite
     Enable Component    ray
     Enable Component    codeflare
+    RHOSi Setup
 
 Teardown Distributed Workloads E2E Test Suite
     Disable Component    codeflare
     Disable Component    ray
+    RHOSi Teardown

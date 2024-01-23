@@ -9,7 +9,7 @@ Library             JupyterLibrary
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
 
-Force Tags          JupyterHub
+Test Tags          JupyterHub
 
 
 *** Test Cases ***

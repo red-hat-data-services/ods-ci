@@ -10,7 +10,7 @@ Resource         ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Library          JupyterLibrary
 Suite Setup      Spawner Suite Setup
 Suite Teardown   Double User Teardown
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Variables ***

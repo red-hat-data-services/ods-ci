@@ -314,7 +314,16 @@ if command -v yq &> /dev/null
 fi
 
 if [[ ${SKIP_INSTALL} -eq 0 ]]; then
-  poetry install
+  virtenv="${HOME}/.local/ods-ci/.venv"
+  if [[ -d "${virtenv}" ]]; then
+    echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
+    poetry config --local virtualenvs.in-project true
+    ln --symbolic "${virtenv}" ./.venv
+  else
+    echo "Pre-created virtual environment has not been found in '${virtenv}'. All dependencies will be installed from scratch."
+  fi
+
+  poetry --no-interaction install --sync
 fi
 # shellcheck disable=SC1091
 source "$(poetry env info --path)/bin/activate"

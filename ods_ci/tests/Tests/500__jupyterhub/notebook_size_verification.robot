@@ -19,7 +19,7 @@ Resource            ../../Resources/RHOSi.resource
 
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown
-Force Tags          JupyterHub
+Test Tags          JupyterHub
 
 
 *** Variables ***

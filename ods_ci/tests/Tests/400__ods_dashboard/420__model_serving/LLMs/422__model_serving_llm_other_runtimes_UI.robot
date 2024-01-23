@@ -1,6 +1,5 @@
 *** Settings ***
-Documentation     Collection of UI tests to validate the model serving stack for Large Language Models (LLM).
-...               These tests leverage on Caikit+TGIS combined Serving Runtime
+Documentation     Collection of UI tests to validate the model serving stack for Large Language Models (LLM)
 Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Resource          ../../../../Resources/CLI/ModelServing/llm.resource
@@ -22,7 +21,7 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 *** Test Cases ***
 Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
-    ...                using Kserve and TGIS Standalone runtime.
+    ...                using Single-model platform and TGIS Standalone runtime.
     [Tags]    Sanity    Tier1    ODS-2611
     [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}
@@ -47,7 +46,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
 
 Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
-    ...                using Kserve and Caikit+TGIS runtime
+    ...                using Single-model platform and TGIS Standalone runtime.
     [Tags]    Sanity    Tier1    ODS-XYZ   Resources-GPU
     [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}

@@ -24,6 +24,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS Standalone runtime.
     [Tags]    Sanity    Tier1    ODS-XYZ
+    [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${model_name}=    Set Variable    flan-t5-small-hf
     Deploy Kserve Model Via UI    model_name=${model_name}    serving_runtime=TGIS Standalone ServingRuntime for KServe (gRPC)
@@ -61,7 +62,7 @@ Non-Admin Setup Kserve UI Test
     # RHOSi Setup
     Load Expected Responses
     Launch Dashboard    ${user}    ${pw}    ${auth}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-    Set Up Project    namespace=${TEST_NS}    single_prj=${FALSE}
+    Set Up Project    namespace=${TEST_NS}    single_prj=${FALSE}    enable_metrics=${TRUE}
     ${PROJECTS_TO_DELETE}=    Create List    ${TEST_NS}
     Set Suite Variable    ${PROJECTS_TO_DELETE}
     Fetch CA Certificate If RHODS Is Self-Managed

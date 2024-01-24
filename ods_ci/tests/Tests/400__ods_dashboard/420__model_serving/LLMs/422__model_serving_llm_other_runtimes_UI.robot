@@ -26,7 +26,8 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${model_name}=    Set Variable    flan-t5-small-hf
-    Deploy Kserve Model Via UI    model_name=${model_name}    serving_runtime=TGIS Standalone ServingRuntime for KServe (gRPC)
+    Deploy Kserve Model Via UI    model_name=${model_name}
+    ...    serving_runtime=TGIS Standalone ServingRuntime for KServe (gRPC)
     ...    data_connection=kserve-connection    model_framework=pytorch    path=${FLAN_MODEL_S3_DIR}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
@@ -37,10 +38,12 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=grpc    validate_response=${FALSE}
     Wait Until Keyword Succeeds    30 times    4s
-    ...    Metrics Should Exist In UserWorkloadMonitoring    thanos_url=${THANOS_URL}    thanos_token=${THANOS_TOKEN}
+    ...    Metrics Should Exist In UserWorkloadMonitoring
+    ...    thanos_url=${THANOS_URL}    thanos_token=${THANOS_TOKEN}
     ...    search_metrics=${SEARCH_METRICS}
     Wait Until Keyword Succeeds    50 times    5s
-    ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${THANOS_URL}    thanos_token=${THANOS_TOKEN}
+    ...    User Can Fetch Number Of Requests Over Defined Time
+    ...    thanos_url=${THANOS_URL}    thanos_token=${THANOS_TOKEN}
     ...    model_name=${model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=1
     Delete Model Via UI    ${model_name}
 

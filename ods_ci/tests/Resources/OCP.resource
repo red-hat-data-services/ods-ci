@@ -180,6 +180,6 @@ Metrics Should Exist In UserWorkloadMonitoring
         ...    search_text=${metric_search_text}
         Should Not Be Empty    ${metrics_names}
         ${metrics_names}=    Split To Lines    ${metrics_names}
-        ${metrics}=    Append To List    ${metrics}    @{metrics_names}
+        Append To List    ${metrics}    @{metrics_names}
     END
     RETURN    ${metrics}

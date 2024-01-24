@@ -33,7 +33,7 @@ ${framework_onnx}=                   onnx - 1
 Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling Trusty Service For Admin User
     [Documentation]    Verifies that the Bias metrics are available in Metrics Console for a model which was
     ...                 deployed prior to enabling the TrustyAI service
-    [Tags]    Smoke
+    [Tags]    Smoke   RunThisTest
     ...       Tier1   ODS-2482    ODS-2479
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection

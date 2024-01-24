@@ -122,18 +122,18 @@ Add Environment Variables In Workbench
                 Log   ${pair_idx}-${key}-${value}
                 Run Keyword And Continue On Failure    Wait Until Page Contains Element
                 ...    xpath=//input[@aria-label="key of item ${pair_idx}"]
-                Input Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//input[@aria-label="key of item ${pair_idx}"]
+                Input Text    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//input[@aria-label="key of item ${pair_idx}"]
                 ...           ${key}
-                Input Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//input[@aria-label="value of item ${pair_idx}"]
+                Input Text    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//input[@aria-label="value of item ${pair_idx}"]
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
-                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
+                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//button[text()="${add_key_value_text}"]
                     # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
                     # amount of pixels for the block of elements that gets added.
                     IF    "${add_key_value_text}" == "Add another key / value pair"
-                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-v5-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
                     ELSE IF    "${add_key_value_text}" == "Add another variable"
-                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-v5-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
                     END
                 END
             END
@@ -168,13 +168,13 @@ Select Environment Variable Types
     [Documentation]    Selects the type of environment variable in the workbench creation page: Secret vs Config Map
     [Arguments]    ${k8s_type}    ${input_type}    ${variable_index}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
-    ...    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${variable_index}]//div[@class="pf-l-stack__item"]/div[contains(@class,"pf-c-select")]/button
-    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${variable_index}]//div[contains(@class,"pf-c-select")]/button
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[@aria-label="Options menu"]
+    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[@aria-label="Options menu"]
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
     Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element    ${ENV_VARIABLES_SECTION_XP}//button[div/span[text()="Select one"]]
-    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${variable_index}]//button[div/span[text()="Select one"]]
+    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[div/span[text()="Select one"]]
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
     Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
 

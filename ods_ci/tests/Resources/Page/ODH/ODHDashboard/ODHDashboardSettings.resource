@@ -7,7 +7,7 @@ Resource        ../../../ODS.robot
 
 *** Variables ***
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
-${GROUP_BTN_XP}=    (//*[@class="pf-c-chip-group"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
+${GROUP_BTN_XP}=    //button[@data-ouia-component-id="Remove"]
 ${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
 ${MULTI_MODE_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
 ${CUSTOM_EMPTY_GROUP}=    empty-group
@@ -16,11 +16,11 @@ ${CUSTOM_EMPTY_GROUP}=    empty-group
 Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
-    Click Button   (//button[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"])[${1}]
+    Click Button   (//button[@aria-label="Options menu"])[${1}]
     FOR    ${admin_group}    IN    @{admin_groups}
-             ${present}=  Run Keyword And Return Status    Element Should Be Visible   //*[@class="pf-c-select__menu-item pf-m-selected" and contains(text(), "${admin_group}")]
+             ${present}=  Run Keyword And Return Status    Element Should Be Visible   //button[@role="option" and text()="${admin_group}" and @aria-selected="true"]
             IF  ${present} != True
-                Click Button    //*[@class="pf-c-select__menu-item"and contains(text(), "${admin_group}")]
+                Click Button    //button[@role="option" and text()="${admin_group}"]
             END
     END
     Press Keys    None    ESC
@@ -28,13 +28,13 @@ Add OpenShift Groups To Data Science Administrators
 Add OpenShift Groups To Data Science User Groups
     [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
-    Click Button    (//button[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"])[${2}]
+    Click Button    (//button[@aria-label="Options menu"])[${2}]
 
     FOR    ${user_group}    IN    @{user_groups}
             ${present}=  Run Keyword And Return Status
-               ...  Element Should Be Visible   //*[@class="pf-c-select__menu-item pf-m-selected" and contains(text(), "${user_group}")]
+               ...  Element Should Be Visible   //button[@role="option" and text()="${user_group}" and @aria-selected="true"]
              IF  ${present} != True
-                Click Element    //*[@class="pf-c-select__menu-item"and contains(text(), "${user_group}")]
+                Click Element    //button[@role="option" and text()="${user_group}"]
              END
     END
     Press Keys    None    ESC
@@ -48,7 +48,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     ${authorization_required} =  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize jupyterhub service account
     Menu.Navigate To Page    Settings    User management
-    Wait Until Element Is Visible   //*[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"]  timeout=20
+    Wait Until Element Is Visible   //button[@aria-label="Options menu"]  timeout=20
 
 Remove OpenShift Groups From Data Science User Groups
     [Documentation]   Remove OpenShift Groups From Data Science User Groups From Dashboard

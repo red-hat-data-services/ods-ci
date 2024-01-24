@@ -71,10 +71,12 @@ Prepare Codeflare E2E Test Suite
     Enable Component    codeflare
     Create Directory    %{WORKSPACE}/codeflare-e2e-logs
     Create Directory    %{WORKSPACE}/codeflare-odh-logs
+    RHOSi Setup
 
 Teardown Codeflare E2E Test Suite
     Disable Component    codeflare
     Disable Component    ray
+    RHOSi Teardown
 
 Run Codeflare E2E Test
     [Arguments]    ${TEST_NAME}

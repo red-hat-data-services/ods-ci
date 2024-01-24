@@ -307,6 +307,7 @@ Launch Data Science Project Main Page
     ...                 browser_alias=${browser_alias}
     Open Data Science Projects Home Page
 
+
 Remove Current Page Projects From All Projects
     [Documentation]    Remove list of currently displayed Data Science projects from list of all projects
     [Arguments]        ${all_projects}    ${curr_page_projects}

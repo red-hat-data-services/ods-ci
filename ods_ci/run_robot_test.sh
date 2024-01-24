@@ -24,6 +24,12 @@ OPEN_REPORT_IN_BROWSER=false
 REPORT_BROWSER="firefox" # Default browser to open reports in
 SUBFOLDER=false
 
+currentpath=$(pwd)
+readonly currentpath
+
+basepath=$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")
+readonly basepath
+
 # Please keep this in sync with ./docs/RUN_ARGUMENTS.md file.
 while [ "$#" -gt 0 ]; do
   case $1 in
@@ -193,7 +199,6 @@ if [[ ! -f "${TEST_VARIABLES_FILE}" ]]; then
   exit 1
 fi
 
-currentpath=$(pwd)
 case "$(uname -s)" in
     Darwin)
          echo "MACOS"
@@ -318,7 +323,7 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
   if [[ -d "${virtenv}" ]]; then
     echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
     poetry config --local virtualenvs.in-project true
-    ln --symbolic "${virtenv}" ./.venv
+    ln --symbolic "${virtenv}" "${basepath}/../.venv"
   else
     echo "Pre-created virtual environment has not been found in '${virtenv}'. All dependencies will be installed from scratch."
   fi

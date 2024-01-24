@@ -168,18 +168,3 @@ Wait Until CRD Exists
     [Arguments]    ${crd_fullname}
     Wait Until Keyword Succeeds    15 times    5s
     ...    Oc Get    kind=CustomResourceDefinition    name=${crd_fullname}
-
-Metrics Should Exist In UserWorkloadMonitoring
-    [Documentation]    Checks that the given ${metrics_searches} exists. It also accepts partial names.
-    ...                Returns the complete list of metrics found with the given search texts
-    [Arguments]    ${thanos_url}    ${thanos_token}    ${search_metrics}
-    ${metrics}=    Create List
-    FOR    ${index}    ${metric_search_text}    IN ENUMERATE    @{search_metrics}
-        Log    ${index}: ${metric_search_text}
-        ${metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
-        ...    search_text=${metric_search_text}
-        Should Not Be Empty    ${metrics_names}
-        ${metrics_names}=    Split To Lines    ${metrics_names}
-        Append To List    ${metrics}    @{metrics_names}
-    END
-    RETURN    ${metrics}

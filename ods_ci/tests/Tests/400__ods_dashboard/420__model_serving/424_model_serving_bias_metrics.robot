@@ -22,10 +22,8 @@ ${MODEL_PATH_ALPHA}=                 trusty/loan_model_alpha.onnx
 ${MODEL_BETA}=                       demo-loan-nn-onnx-beta
 ${MODEL_PATH_BETA}=                  trusty/loan_model_beta.onnx
 ${TRUSTYAI_RESOURCEPATH}=            ods_ci/tests/Resources/Files/TrustyAI
-${TRUSTYAI_CR_FILEPATH}=             ${TRUSTYAI_RESOURCEPATH}/trustyai_crd.yaml
-${MONITORING_CONFIG_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_conf.yaml
-${UWM_CONFIG_FILEPATH}=              ods_ci/tests/Resources/Files/uwm_cm_enable.yaml
-${aws_bucket}=                       rhods-public
+${TRUSTYAI_CR_FILEPATH}=             ${TRUSTYAI_RESOURCEPATH}/trustyai_cr.yaml
+${aws_bucket}=                       ${S3.BUCKET_1.NAME}
 ${RUNTIME_NAME}=                     Model Bias Serving Test
 ${PRJ_DESCRIPTION}=                  Model Bias Project Description
 ${PRJ_DESCRIPTION1}=                 Model Bias Project Description 1
@@ -37,7 +35,6 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
     ...                 deployed prior to enabling the TrustyAI service
     [Tags]    Smoke
     ...       Tier1   ODS-2482    ODS-2479
-    [Teardown]    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -53,9 +50,10 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
     Install And Verify TrustyAI Service     ${PRJ_TITLE}
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Model Is Registered with TrustyAI Service     namespace=${PRJ_TITLE}
     Send Batch Inference Data to Model     model_name=${MODEL_ALPHA}     project_name=${PRJ_TITLE}
-    ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_ALPHA}
+    ${token}=    Generate Thanos Token
+    ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_ALPHA}     token=${token}
     ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
-    Schedule Bias Metrics request via CLI     metricsType=dir   modelId=${modelId}    protectedAttribute="customer_data_input-3"
+    Schedule Bias Metrics request via CLI     metricsType=dir   modelId=${modelId}  token=${token}  protectedAttribute="customer_data_input-3"
     ...       favorableOutcome=0   outcomeName="predict"    privilegedAttribute=1.0    unprivilegedAttribute=0.0
     Verify TrustyAI Metrics Exists In Observe Metrics    trustyai_dir    retry_attempts=2   username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
@@ -64,11 +62,11 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
 Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Service For Basic User
     [Documentation]    Verifies that the Bias metrics are available in Metrics Console for a model
     ...                 deployed after enabling the TrustyAI service
-    [Tags]    Smoke
+    [Tags]    Sanity
     ...       Tier1   ODS-2482    ODS-2476
-    [Teardown]    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE1}
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION1}
+    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE1}
     Install And Verify TrustyAI Service      ${PRJ_TITLE1}
     Create S3 Data Connection    project_title=${PRJ_TITLE1}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -83,18 +81,20 @@ Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Se
     Verify Model Status    ${MODEL_BETA}    success
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Model Is Registered with TrustyAI Service     namespace=${PRJ_TITLE1}
     Send Batch Inference Data to Model     lower_range=6   upper_range=11    model_name=${MODEL_BETA}     project_name=${PRJ_TITLE1}
-    ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_BETA}
+    ${token}=    Generate Thanos Token
+    ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_BETA}    ${token}
     ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
-    Schedule Bias Metrics request via CLI     metricsType=spd   modelId=${modelId}    protectedAttribute="customer_data_input-3"
+    Schedule Bias Metrics request via CLI     metricsType=spd   modelId=${modelId}   token=${token}  protectedAttribute="customer_data_input-3"
     ...       favorableOutcome=0   outcomeName="predict"    privilegedAttribute=1.0    unprivilegedAttribute=0.0
     Verify TrustyAI Metrics Exists In Observe Metrics    trustyai_spd    retry_attempts=2    username=${TEST_USER.USERNAME}
     ...    password=${TEST_USER.PASSWORD}   auth_type=${TEST_USER.AUTH_TYPE}
-    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE1}
 
 *** Keywords ***
 Bias Metrics Suite Setup
     [Documentation]    Setup to configure TrustyAI metrics
     Set Library Search Order    SeleniumLibrary
+    ${to_delete}=    Create List    ${PRJ_TITLE}
+    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     RHOSi Setup
     Enable User Workload Monitoring
     Configure User Workload Monitoring
@@ -103,6 +103,7 @@ Bias Metrics Suite Setup
 
 Bias Metrics Suite Teardown
     [Documentation]     Bias Metrics Suite Teardown
+    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Verify User Workload Monitoring Configuration
@@ -146,7 +147,6 @@ Verify One Model Serving Pod Exists
 Send Batch Inference Data to Model
     [Documentation]    Send Batch Inference data to the already deployed model using Curl commands
     [Arguments]        ${model_name}   ${project_name}    ${lower_range}=1     ${upper_range}=5
-    ${url}=    Get Model Route Via CLI    ${model_name}   ${project_name}
     FOR    ${counter}    IN RANGE    ${lower_range}    ${upper_range}
         ${inference_input}=  Set Variable   ods_ci/tests/Resources/Files/TrustyAI/loan_default_batched/batch_${counter}.json
         ${inference_output} =    Get Model Inference    ${model_name}    ${inference_input}    token_auth=${FALSE}
@@ -157,9 +157,8 @@ Send Batch Inference Data to Model
 Get ModelId For A Deployed Model
     [Documentation]   Curl command to get modelid of the model. The sufffix gets changed by modelmesh
     ...               https://github.com/trustyai-explainability/trustyai-explainability/issues/395
-    [Arguments]       ${model_name}
-    #To Be removed later once modelid doesn't get modified
-    ${curl_cmd}=     Set Variable    curl -sk --location ${TRUSTY_ROUTE}/info | jq '.[0].data.modelId'
+    [Arguments]       ${model_name}    ${token}
+    ${curl_cmd}=     Set Variable    curl -H "Authorization: Bearer ${token}" -sk --location ${TRUSTY_ROUTE}/info | jq '.[0].data.modelId'
     ${rc}  ${output}=     Run And Return Rc And Output    ${curl_cmd}
     ${model_id}=    Set Variable If    '${output}'=='${EMPTY}'    ${model_name}    ${output}
     RETURN    ${model_id}
@@ -167,8 +166,8 @@ Get ModelId For A Deployed Model
 Schedule Bias Metrics request via CLI
     [Documentation]    Schedule a SPD or DIR metrics via CLI
     [Arguments]        ${metricsType}   ${modelId}    ${protectedAttribute}   ${favorableOutcome}    ${outcomeName}
-    ...                ${privilegedAttribute}    ${unprivilegedAttribute}
-    ${curl_cmd}=     Set Variable    curl -sk --location ${TRUSTY_ROUTE}/metrics/${metricsType}/request --header
+    ...                ${privilegedAttribute}    ${unprivilegedAttribute}    ${token}
+    ${curl_cmd}=     Set Variable    curl -k -H "Authorization: Bearer ${token}" ${TRUSTY_ROUTE}/metrics/${metricsType}/request --header
     ${curl_cmd}=     Catenate    ${curl_cmd}    'Content-Type: application/json'
     ${curl_cmd}=     Catenate    ${curl_cmd}    --data '{"modelId":"${modelId}","protectedAttribute": ${protectedAttribute},"favorableOutcome":  ${favorableOutcome},"outcomeName": ${outcomeName},"privilegedAttribute": ${privilegedAttribute},"unprivilegedAttribute": ${unprivilegedAttribute}}'
     ${rc}  ${output}=     Run And Return Rc And Output    ${curl_cmd}
@@ -184,3 +183,4 @@ Verify TrustyAI Metrics Exists In Observe Metrics
     IF    ${metrics_query_results_contain_data}
         Log To Console    Current Fairness Value: ${metrics_value}
     END
+

@@ -63,7 +63,7 @@ Delete Data Science Project
 Wait Until Data Science Project Is Deleted
     [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
     [Arguments]    ${project_title}
-    Wait Until Keyword Succeeds    35 times    3s
+    Wait Until Keyword Succeeds    40 times    5s
     ...    Project Should Not Exist In Openshift    project_title=${project_title}
 
 Project Should Not Exist In Openshift

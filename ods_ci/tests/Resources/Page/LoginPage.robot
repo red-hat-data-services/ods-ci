@@ -45,7 +45,7 @@ Login To Openshift
 
     # Return if page is not the Login page (no login required)
     ${should_login} =    Is Current Domain Equal To    https://oauth-openshift
-    IF  ${should_login}==False    RETURN
+    IF  not ${should_login}    RETURN
 
     # If here we need to login
     Wait Until Element is Visible  xpath://div[@class="pf-c-login"]  timeout=10s

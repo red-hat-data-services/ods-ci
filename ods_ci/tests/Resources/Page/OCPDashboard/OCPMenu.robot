@@ -14,7 +14,7 @@ ${LOADING_INDICATOR_ELEMENT}         xpath=//*[@data-test="loading-indicator"]
 
 *** Keywords ***
 Wait Until OpenShift Console Is Loaded
-  ${expected_text_list} =    Create List    Administrator    Developer
+  ${expected_text_list}=    Create List    Administrator    Developer
   Wait Until Page Contains A String In List    ${expected_text_list}
   Wait Until Element Is Enabled    ${APP_LAUNCHER_ELEMENT}  timeout=60
 

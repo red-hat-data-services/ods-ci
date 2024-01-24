@@ -69,7 +69,7 @@ Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
 
    # Wait until we are in the OpenShift auth page or already in Dashboard
-   ${expected_text_list} =    Create List    Log in with    Data Science Projects
+   ${expected_text_list}=    Create List    Log in with    Data Science Projects
    Wait Until Page Contains A String In List    ${expected_text_list}
 
    ${oauth_prompt_visible} =  Is OpenShift OAuth Login Prompt Visible

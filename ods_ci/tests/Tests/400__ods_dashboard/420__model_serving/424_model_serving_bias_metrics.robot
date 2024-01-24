@@ -36,6 +36,7 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
     [Tags]    Smoke   RunThisTest
     ...       Tier1   ODS-2482    ODS-2479
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${aws_bucket}

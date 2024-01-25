@@ -121,9 +121,7 @@ Launch ${dashboard_app} From RHODS Dashboard Link
       Click Link   xpath:${CARDS_XP}//*[text()='${splits[0]} ']/../..//a
   ELSE
       IF    "${dashboard_app}" == "Jupyter"
-          # Click Link    xpath://div[contains(@class,'pf-v5-l-gallery')]/div[contains(@class,'pf-v5-c-card')]/div[@class="pf-v5-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-v5-c-card__footer")]/a
-          # Workaround for broken 2.6 build
-          Click Link    xpath=//div[@id="jupyter"]//a[@class="odh-card__footer__link"]
+          Click Link    xpath://div[contains(@class,'pf-v5-l-gallery')]/div[contains(@class,'pf-v5-c-card')]/div[@class="pf-v5-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-v5-c-card__footer")]/a
       ELSE
           Click Link    xpath://div[contains(@class,'pf-v5-l-gallery')]/div[contains(@class,'pf-v5-c-card')]/div[@class="pf-v5-c-card__title"]//span[text()="${dashboard_app}"]/../..//div[contains(@class,"pf-v5-c-card__footer")]/a
       END

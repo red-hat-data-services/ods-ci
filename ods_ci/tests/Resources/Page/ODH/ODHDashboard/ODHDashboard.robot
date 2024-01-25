@@ -625,7 +625,7 @@ Delete Custom Image
     [Arguments]    ${image_name}
     Click Button  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button
     ${image_name_id} =  Replace String  ${image_name}  ${SPACE}  -
-    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//li[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
+    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//button[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
     Handle Deletion Confirmation Modal  ${image_name}  notebook image
 
 Open Edit Menu For Custom Image

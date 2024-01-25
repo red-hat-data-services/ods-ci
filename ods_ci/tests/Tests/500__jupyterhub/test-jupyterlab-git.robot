@@ -119,10 +119,14 @@ Commit Changes
         Set Staging Status    ON
     END
     Click Button    xpath=//div[contains(@class, "CommitBox")]//button[.="Commit"]
-    Wait Until Page Contains    Who is committing?    timeout=10s
-    Input Text    xpath=//input[@placeholder="Name"]    ${name}
-    Input Text    xpath=//input[@placeholder="Email"]    ${email_id}
-    Click Element    xpath=//button[.="OK"]
+    ${identity} =    Run Keyword And Return Status    Wait Until Page Contains    Who is committing?    timeout=10s
+    IF  ${identity}
+        Input Text    xpath=//input[@placeholder="Name"]    ${name}
+        Input Text    xpath=//input[@placeholder="Email"]    ${email_id}
+        Click Element    xpath=//button[.="OK"]
+    ELSE
+        Page Should Contain Element    xpath=//button[@title="Disabled: No files are staged for commit"]
+    END
 
 Push Changes To Remote
     [Documentation]    Push changes to remote directory

@@ -95,6 +95,21 @@ CSS Property Value Should Be
         Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
     END
 
+Page Should Contain A String In List
+    [Documentation]    Verifies that page contains at least one of the strings in text_list
+    [Arguments]  ${text_list}
+    FOR    ${text}    IN    @{text_list}
+        ${text_found}=    Run Keyword And Return Status    Page Should Contain   ${text}
+        IF  ${text_found}    RETURN
+    END
+    Fail    Current page doesn't contain any of the strings in: @{text_list}
+
+Wait Until Page Contains A String In List
+    [Documentation]    Waits until page contains at least one of the strings in text_list
+    [Arguments]    ${text_list}    ${retry}=12x    ${retry_interval}=5s
+    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
+    ...    Page Should Contain A String In List     ${text_list}
+
 #robocop: disable: line-too-long
 Get RHODS Version
     [Documentation]    Return RHODS/ODH operator version number.
@@ -428,4 +443,3 @@ Configure User Workload Monitoring
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_CONFIG_FILEPATH}
     Log To Console    ${output}
     Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
-

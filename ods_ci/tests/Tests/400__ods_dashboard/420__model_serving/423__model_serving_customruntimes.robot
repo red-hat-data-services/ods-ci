@@ -94,7 +94,6 @@ Custom Serving Runtime Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     RHOSi Setup
     Fetch CA Certificate If RHODS Is Self-Managed
 

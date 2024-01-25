@@ -501,7 +501,10 @@ Open Metrics Page For The Deployed Model
     [Documentation]    Opens the Metrics for a Deployed model from the Model Serving page by clicking model name
     [Arguments]      ${project_name}   ${model_name}
     Open Model Serving Home Page
-    Select Project    ${project_name}
-    Page Should Contain Element    //div[.="${model_name} "]
-    Click Element  xpath=//div[.="${model_name} "]/a
-    Page Should Contain Element    //div[@data-testid="performance-tab"]
+    Click Element    xpath=//div[contains(text(),'Project')]/ancestor::div[1]/following-sibling::div//button
+    Click Element    //li/a[text()="${project_name}"]
+    Sleep   10s
+    Page Should Contain Element    //a[.="${model_name}"]
+    Click Element  xpath=//a[.="${model_name}"]
+    Sleep    5s    reason=Wait for Metrics Page to open
+    Page Should Contain Element    //button[@data-testid="performance-tab"]

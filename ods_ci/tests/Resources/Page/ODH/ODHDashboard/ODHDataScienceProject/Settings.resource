@@ -14,6 +14,7 @@ ${TRUSTYAI_INSTALL_ALERT_XP}=        xpath=//div[@data-testid="trustyai-service-
 Enable TrustyAI Checkbox
     [Documentation]    Enables TrustyAI Service Checkbox in DS Project Settings page
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    xpath://div[text()='Model bias']
+    Sleep  10s  reason=Wait until Settings page load
     Select Checkbox Using Id    id=trustyai-service-installation
     Wait Until Keyword Succeeds    5 min    30s
     ...    SeleniumLibrary.Checkbox Should Be Selected  xpath=//input[@id="trustyai-service-installation"]

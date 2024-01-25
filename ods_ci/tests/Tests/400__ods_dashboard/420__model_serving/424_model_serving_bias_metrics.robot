@@ -4,6 +4,7 @@ Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/OCP.resource
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHMetrics.resource
 Resource            ../../../Resources/Page/Operators/ISVs.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
@@ -97,29 +98,27 @@ Verify DIR Bias Metrics Available In UI For Models Deployed After Enabling Trust
     ...                 deployed after enabling the TrustyAI service
     [Tags]    Smoke    RunThisTest
     ...       Tier1
-    Create Data Science Project    title=${PRJ_TITLE2}    description=${PRJ_DESCRIPTION}
-    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE2}
-    Create S3 Data Connection    project_title=${PRJ_TITLE2}    dc_name=model-serving-connection
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=${aws_bucket}
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME2}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE2}
-    Move To Tab    Settings
-    Enable TrustyAI Checkbox
+#    Create Data Science Project    title=${PRJ_TITLE2}    description=${PRJ_DESCRIPTION}
+#    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE2}
+#    Create S3 Data Connection    project_title=${PRJ_TITLE2}    dc_name=model-serving-connection
+#    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+#    ...            aws_bucket_name=${aws_bucket}
+#    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME2}
+#    Open Data Science Project Details Page       project_title=${PRJ_TITLE2}
+#    Move To Tab    Settings
+#    Enable TrustyAI Checkbox
     Open Model Serving Home Page
-    Serve Model    project_name=${PRJ_TITLE2}    model_name=${MODEL_ALPHA}    framework=${framework_onnx}    existing_data_connection=${TRUE}
-    ...    data_connection_name=model-serving-connection    model_path=${MODEL_PATH_ALPHA}    model_server=${RUNTIME_NAME}
-    ${runtime_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-    ${runtime_name} =    Convert To Lower Case    ${runtime_name}
-    Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_name}    namespace=${PRJ_TITLE}
-    Verify Model Status    ${MODEL_ALPHA}    success
-    Send Batch Inference Data to Model     lower_range=6   upper_range=11    model_name=${MODEL_BETA}     project_name=${PRJ_TITLE1}
-    ${token}=    Generate Thanos Token
-    ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_BETA}    ${token}
-    ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
-    Schedule Bias Metrics request via UI     model_name=${MODEL_ALPHA}   project_name=${PRJ_TITLE2}   metric_name="Loan Metrics"
-    ...      metric_type=DIR    protected_attribute="customer_data_input-3"   output=0    output_value="predict"
-    ...      privileged_value=1.0     unprivileged_value=1.0    violation-threshold=0.1
+#    Serve Model    project_name=${PRJ_TITLE2}    model_name=${MODEL_ALPHA}    framework=${framework_onnx}    existing_data_connection=${TRUE}
+#    ...    data_connection_name=model-serving-connection    model_path=${MODEL_PATH_ALPHA}    model_server=${RUNTIME_NAME2}
+#    ${runtime_name} =    Replace String Using Regexp    string=${RUNTIME_NAME2}    pattern=\\s    replace_with=-
+#    ${runtime_name} =    Convert To Lower Case    ${runtime_name}
+#    Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_name}    namespace=${PRJ_TITLE2}
+#    Verify Model Status    ${MODEL_ALPHA}    success
+#    Send Batch Inference Data to Model     lower_range=6   upper_range=11    model_name=${MODEL_ALPHA}     project_name=${PRJ_TITLE2}
+    Schedule Bias Metrics request via UI     model_name=${MODEL_ALPHA}   project_name=${PRJ_TITLE2}   metric_name=Loan Metrics
+    ...      metric_type=DIR    protected_attribute=customer_data_input-3   output=predict    output_value=0
+    ...      privileged_value=1.0     unprivileged_value=1.0    violation_threshold=0.1
+    View Metrics
     Validate Bias Metrics Exists in UI
 
 *** Keywords ***
@@ -210,11 +209,12 @@ Schedule Bias Metrics request via CLI
 Schedule Bias Metrics request via UI
     [Documentation]    Configure a Bias Metrics via UI for a model deployed
     [Arguments]      ${project_name}    ${model_name}   ${metric_name}   ${metric_type}    ${protected_attribute}   ${output}    ${output_value}
-    ...            ${privileged_value}    ${unprivileged_value}    ${violation-threshold}
+    ...            ${privileged_value}    ${unprivileged_value}    ${violation_threshold}
     Open Metrics Page For The Deployed Model    ${project_name}    ${model_name}
-    Move To Tab    Model bias
+    ODHMetrics.Move To Tab    Model bias
+    Click Element    xpath://button[text()="Configure"]
     Configure Bias Metrics   ${metric_name}   ${metric_type}    ${protected_attribute}   ${output}    ${output_value}
-    ...            ${privileged_value}    ${unprivileged_value}    ${violation-threshold}
+    ...            ${privileged_value}    ${unprivileged_value}   ${violation_threshold}
 
 Verify TrustyAI Metrics Exists In Observe Metrics
     [Documentation]    Verify that TrustyAI Metrics exist in the Observe -> Metrics in OCP

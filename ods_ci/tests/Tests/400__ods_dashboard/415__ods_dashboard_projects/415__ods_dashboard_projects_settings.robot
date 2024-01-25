@@ -14,13 +14,12 @@ ${TRUSTYAI_CHECKBOX_XP}         //input[@id="trustyai-service-installation"]
 *** Test Cases ***
 Verify User Can Access Settings Tab When TrustyAI Component is Enabled in DSC
     [Documentation]    Verify user can access "Settings" tab in DS Project when TrustyAI component is Enabled
-    [Tags]    Tier1    Smoke   RunThisTest
+    [Tags]    Tier1    Smoke
     Enable Component     trustyai
     Component Should Be Enabled    trustyai
     Move To Tab    Settings
     Page Should Contain Element     xpath:${TRUSTYAI_CHECKBOX_XP}
     Verify TrustyAI Checkbox is Disabled
-    Enable TrustyAI Checkbox
 
 *** Keywords ***
 Project Settings Suite Setup    # robocop: disable

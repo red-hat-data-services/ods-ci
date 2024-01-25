@@ -9,6 +9,7 @@ Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProje
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Resource            ../../../Resources/Page/OCPDashboard/Monitoring/Metrics.robot
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Settings.resource
 Library             OpenShiftLibrary
 Suite Setup         Bias Metrics Suite Setup
 Suite Teardown      Bias Metrics Suite Teardown
@@ -35,7 +36,7 @@ ${framework_onnx}=                   onnx - 1
 Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling Trusty Service For Admin User
     [Documentation]    Verifies that the Bias metrics are available in Metrics Console for a model which was
     ...                 deployed prior to enabling the TrustyAI service
-    [Tags]    Smoke   RunThisTest
+    [Tags]    Smoke
     ...       Tier1   ODS-2482    ODS-2479
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -94,7 +95,7 @@ Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Se
 Verify DIR Bias Metrics Available In UI For Models Deployed After Enabling Trusty Service For Basic User
     [Documentation]    Verifies that the Bias metrics are available in Model Serving screen for a model which was
     ...                 deployed after enabling the TrustyAI service
-    [Tags]    Smoke
+    [Tags]    Smoke    RunThisTest
     ...       Tier1
     Create Data Science Project    title=${PRJ_TITLE2}    description=${PRJ_DESCRIPTION}
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE2}
@@ -102,6 +103,7 @@ Verify DIR Bias Metrics Available In UI For Models Deployed After Enabling Trust
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${aws_bucket}
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME2}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE2}
     Move To Tab    Settings
     Enable TrustyAI Checkbox
     Open Model Serving Home Page
@@ -126,15 +128,15 @@ Bias Metrics Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
-    RHOSi Setup
-    Enable User Workload Monitoring
-    Configure User Workload Monitoring
-    Verify User Workload Monitoring Configuration
+#    RHOSi Setup
+#    Enable User Workload Monitoring
+#    Configure User Workload Monitoring
+#    Verify User Workload Monitoring Configuration
     Launch Data Science Project Main Page
 
 Bias Metrics Suite Teardown
     [Documentation]     Bias Metrics Suite Teardown
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+#    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Verify User Workload Monitoring Configuration

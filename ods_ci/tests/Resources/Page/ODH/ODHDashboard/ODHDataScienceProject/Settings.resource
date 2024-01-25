@@ -18,6 +18,6 @@ Enable TrustyAI Checkbox
 
 Verify TrustyAI Checkbox is Disabled
     [Documentation]   Verified Enables TrustyAI Service Checkbox is disabled DS Project Settings page
-    Run Keyword And Continue On Failure     Wait Until Page Contains Element    xpath://div[text()='Model Bias']
+    Run Keyword And Continue On Failure     Wait Until Page Contains Element    xpath://div[text()='Model bias']
     Page Should Contain Element
     ...    xpath://input[@id="trustyai-service-installation"][@disabled=""]

@@ -17,6 +17,7 @@ Suite Teardown      Bias Metrics Suite Teardown
 ${DEFAULT_MONITORING_NS}=            openshift-user-workload-monitoring
 ${PRJ_TITLE}=                        model-serving-project
 ${PRJ_TITLE1}=                       model-project-test
+${PRJ_TITLE2}=                       model-ui-test
 ${MODEL_ALPHA}=                      demo-loan-nn-onnx-alpha
 ${MODEL_PATH_ALPHA}=                 trusty/loan_model_alpha.onnx
 ${MODEL_BETA}=                       demo-loan-nn-onnx-beta
@@ -25,6 +26,7 @@ ${TRUSTYAI_RESOURCEPATH}=            ods_ci/tests/Resources/Files/TrustyAI
 ${TRUSTYAI_CR_FILEPATH}=             ${TRUSTYAI_RESOURCEPATH}/trustyai_cr.yaml
 ${aws_bucket}=                       ${S3.BUCKET_1.NAME}
 ${RUNTIME_NAME}=                     Model Bias Serving Test
+${RUNTIME_NAME2}=                    Model Bias Serving UI Test
 ${PRJ_DESCRIPTION}=                  Model Bias Project Description
 ${PRJ_DESCRIPTION1}=                 Model Bias Project Description 1
 ${framework_onnx}=                   onnx - 1
@@ -89,6 +91,34 @@ Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Se
     ...       favorableOutcome=0   outcomeName="predict"    privilegedAttribute=1.0    unprivilegedAttribute=0.0
     Verify TrustyAI Metrics Exists In Observe Metrics    trustyai_spd    retry_attempts=2    username=${TEST_USER.USERNAME}
     ...    password=${TEST_USER.PASSWORD}   auth_type=${TEST_USER.AUTH_TYPE}
+
+Verify DIR Bias Metrics Available In UI For Models Deployed After Enabling Trusty Service For Basic User
+    [Documentation]    Verifies that the Bias metrics are available in Model Serving screen for a model which was
+    ...                 deployed after enabling the TrustyAI service
+    [Tags]    Smoke
+    ...       Tier1
+    Create Data Science Project    title=${PRJ_TITLE2}    description=${PRJ_DESCRIPTION}
+    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE2}
+    Create S3 Data Connection    project_title=${PRJ_TITLE2}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=${aws_bucket}
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME2}
+    Move To Tab    Settings
+    Enable TrustyAI Checkbox
+    Open Model Serving Home Page
+    Serve Model    project_name=${PRJ_TITLE2}    model_name=${MODEL_ALPHA}    framework=${framework_onnx}    existing_data_connection=${TRUE}
+    ...    data_connection_name=model-serving-connection    model_path=${MODEL_PATH_ALPHA}    model_server=${RUNTIME_NAME}
+    ${runtime_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+    ${runtime_name} =    Convert To Lower Case    ${runtime_name}
+    Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_name}    namespace=${PRJ_TITLE}
+    Verify Model Status    ${MODEL_ALPHA}    success
+    Send Batch Inference Data to Model     lower_range=6   upper_range=11    model_name=${MODEL_BETA}     project_name=${PRJ_TITLE1}
+    ${token}=    Generate Thanos Token
+    ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_BETA}    ${token}
+    ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
+    Schedule Bias Metrics request via UI     model_name=${MODEL_ALPHA}   project_name=${PRJ_TITLE2}   metric_name="Loan Metrics"
+    ...      ${metric_type}=DIR    ${protected_attribute}   ${output}    ${output_value}
+    ...            ${privileged_value}    ${unprivileged_value}    ${violation-threshold}
 
 *** Keywords ***
 Bias Metrics Suite Setup
@@ -174,6 +204,15 @@ Schedule Bias Metrics request via CLI
     ${rc}  ${output}=     Run And Return Rc And Output    ${curl_cmd}
     Should Contain    ${output}    requestId
     Log to Console    ${output}
+
+Schedule Bias Metrics request via UI
+    [Documentation]    Configure a Bias Metrics via UI for a model deployed
+    [Arguments]      ${project_name}    ${model_name}   ${metric_name}   ${metric_type}    ${protected_attribute}   ${output}    ${output_value}
+    ...            ${privileged_value}    ${unprivileged_value}    ${violation-threshold}
+    Open Metrics Page For The Deployed Model    ${project_name}    ${model_name}
+    Move To Tab    Model bias
+    Configure Bias Metrics   ${metric_name}   ${metric_type}    ${protected_attribute}   ${output}    ${output_value}
+    ...            ${privileged_value}    ${unprivileged_value}    ${violation-threshold}
 
 Verify TrustyAI Metrics Exists In Observe Metrics
     [Documentation]    Verify that TrustyAI Metrics exist in the Observe -> Metrics in OCP

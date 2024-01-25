@@ -496,3 +496,12 @@ Set Up Project
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END
+
+Open Metrics Page For The Deployed Model
+    [Documentation]    Opens the Metrics for a Deployed model from the Model Serving page by clicking model name
+    [Arguments]      ${project_name}   ${model_name}
+    Open Model Serving Home Page
+    Select Project    ${project_name}
+    Page Should Contain Element    //div[.="${model_name} "]
+    Click Element  xpath=//div[.="${model_name} "]/a
+    Page Should Contain Element    //div[@data-testid="performance-tab"]

@@ -109,7 +109,7 @@ Select Model Server
     ...    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
-        Click Element    xpath=//li/button[.="${model_server}"]
+        Click Element    xpath://li/button[.="${model_server}"]
     END
 
 Select Framework
@@ -205,6 +205,13 @@ Get Model Route via UI
     ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
     RETURN    ${url}
 
+Get Model Route Via CLI
+    [Documentation]    Grabs the serving route (URL) of an already deployed model from CLI.
+    [Arguments]    ${model_name}    ${project_name}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get route ${model_name} -n ${project_name} --template={{.spec.host}}{{.spec.path}}
+    Should Be Equal As Integers	${rc}	 0   msg=Error getting model route
+    RETURN    https://${out}/infer
+
 Open ${section} Options Menu
     [Documentation]    Opens the "Options menu" dropdown for different sections
     ...    Valid sections are: "Name", "Model framework (name - version)", "Project"
@@ -241,7 +248,7 @@ Get Model Inference
     ...    ${project_title}=${NONE}
     ${self_managed} =    Is RHODS Self-Managed
     ${url}=    Get Model Route via UI    ${model_name}
-    ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
+    ${curl_cmd}=     Set Variable    curl -s ${url} -d @${inference_input}
     IF    ${token_auth}
         IF    "${project_title}" == "${NONE}"
             ${project_title}=    Get Model Project    ${model_name}

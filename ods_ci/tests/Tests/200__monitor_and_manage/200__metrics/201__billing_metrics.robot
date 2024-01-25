@@ -4,6 +4,7 @@ Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource            ../../../Resources/Page/OCPDashboard/Monitoring/Metrics.robot
 Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
@@ -164,35 +165,6 @@ Skip Test If Previous CPU Usage Is Not Zero
         ...    ${metrics_value} > 0
         ...    The previos CPU usage is not zero. Current CPU usage: ${metrics_value}. Skiping test
     END
-
-Run OpenShift Metrics Query
-    [Documentation]    Runs a query in the Monitoring section of Open Shift
-    ...    Note: in order to run this keyword OCP_ADMIN_USER.USERNAME needs to
-    ...    belong to a group with "view" role in OpenShift
-    ...    Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
-    [Arguments]    ${query}    ${retry_attempts}=10    ${return_zero_if_result_empty}=False
-    Open OCP Console
-    LoginPage.Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
-    OCPMenu.Switch To Administrator Perspective
-
-    # In OCP 4.9 metrics are under the Observe menu (it was called Monitoring in 4.8)
-    ${menu_observe_exists} =    Run Keyword and Return Status    Menu.Page Should Contain Menu    Observe
-    IF    ${menu_observe_exists}
-        Menu.Navigate To Page    Observe    Metrics
-    ELSE
-        ${menu_monitoring_exists} =    Run Keyword and Return Status    Menu.Page Should Contain Menu    Monitoring
-        IF    ${menu_monitoring_exists}
-            Menu.Navigate To Page    Monitoring    Metrics
-        ELSE
-            Fail
-            ...    msg=${OCP_ADMIN_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
-        END
-    END
-
-    Metrics.Verify Page Loaded
-    Metrics.Run Query    ${query}    ${retry_attempts}
-    ${result} =    Metrics.Get Query Results    return_zero_if_result_empty=${return_zero_if_result_empty}
-    RETURN    ${result}
 
 Verify Previus CPU Usage Is Greater Than Zero
     [Documentation]     Verifies the cpu usage is greater than zero

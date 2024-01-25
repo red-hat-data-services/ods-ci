@@ -38,7 +38,6 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
     [Tags]    Smoke   RunThisTest
     ...       Tier1   ODS-2482    ODS-2479
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${aws_bucket}
@@ -117,8 +116,9 @@ Verify DIR Bias Metrics Available In UI For Models Deployed After Enabling Trust
     ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_BETA}    ${token}
     ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
     Schedule Bias Metrics request via UI     model_name=${MODEL_ALPHA}   project_name=${PRJ_TITLE2}   metric_name="Loan Metrics"
-    ...      ${metric_type}=DIR    ${protected_attribute}   ${output}    ${output_value}
-    ...            ${privileged_value}    ${unprivileged_value}    ${violation-threshold}
+    ...      metric_type=DIR    protected_attribute="customer_data_input-3"   output=0    output_value="predict"
+    ...      privileged_value=1.0     unprivileged_value=1.0    violation-threshold=0.1
+    Validate Bias Metrics Exists in UI
 
 *** Keywords ***
 Bias Metrics Suite Setup
@@ -220,6 +220,12 @@ Verify TrustyAI Metrics Exists In Observe Metrics
     ${metrics_value} =    Run OpenShift Metrics Query    query=${model_query}    retry_attempts=${retry_attempts}   username=${username}
     ...   password=${password}   auth_type=${auth_type}
     ${metrics_query_results_contain_data} =    Run Keyword And Return Status    Metrics.Verify Query Results Contain Data
+    IF    ${metrics_query_results_contain_data}
+        Log To Console    Current Fairness Value: ${metrics_value}
+    END
+
+Validate Bias Metrics Exists in UI
+    [Documentation]    Verify that TrustyAI Bias Metrics exist on the Bias Metrics Page
     IF    ${metrics_query_results_contain_data}
         Log To Console    Current Fairness Value: ${metrics_value}
     END

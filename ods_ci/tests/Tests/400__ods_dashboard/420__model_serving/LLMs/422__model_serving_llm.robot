@@ -56,8 +56,8 @@ Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    Sanity    Tier1    ODS-2341
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    ${test_namespace}=    Set Variable     ${TEST_NS}
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
+    ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
@@ -74,7 +74,7 @@ Verify User Can Serve And Query A Model
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
@@ -107,7 +107,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     Query Model Multiple Times    model_name=${model_two_name}
     ...    n_times=10    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Deploy Multiple Models In Different Namespaces
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
@@ -138,8 +138,10 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     Query Model Multiple Times    model_name=${model_two_name}    n_times=2
     ...    namespace=singlemodel-multi2
     [Teardown]    Run Keywords    Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
+    ...           wait_prj_deletion=${FALSE}
     ...           AND
     ...           Clean Up Test Project    test_ns=singlemodel-multi2    isvc_names=${models_names_ns_2}
+    ...           wait_prj_deletion=${FALSE}
 
 Verify Model Upgrade Using Canaray Rollout
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
@@ -177,7 +179,7 @@ Verify Model Upgrade Using Canaray Rollout
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${100}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${isvcs_names}
+    ...    isvc_names=${isvcs_names}    wait_prj_deletion=${FALSE}
 
 Verify Model Pods Are Deleted When No Inference Service Is Present
     [Documentation]    Checks if model pods gets successfully deleted after
@@ -197,6 +199,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     Should Be Equal As Integers    ${rc}    ${0}
     [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
+    ...    wait_prj_deletion=${FALSE}
 
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
@@ -233,7 +236,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Autoscale Using Concurrency
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
@@ -258,7 +261,7 @@ Verify User Can Autoscale Using Concurrency
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Validate Scale To Zero
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
@@ -295,7 +298,7 @@ Verify User Can Validate Scale To Zero
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
     [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
-    ...    isvc_names=${model_name}
+    ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
 
 Verify User Can Set Requests And Limits For A Model
     [Documentation]    Checks if user can set HW request and limits on their inference service object
@@ -332,7 +335,7 @@ Verify User Can Set Requests And Limits For A Model
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify Model Can Be Served And Query On A GPU Node
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
@@ -362,7 +365,7 @@ Verify Model Can Be Served And Query On A GPU Node
     Query Model Multiple Times    model_name=${model_name}    n_times=5
     ...    namespace=${test_namespace}    inference_type=streaming
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${model_name}
+    ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
 
 Verify Non Admin Can Serve And Query A Model
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
@@ -391,6 +394,7 @@ Verify Non Admin Can Serve And Query A Model
     ...    namespace=${test_namespace}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
+    ...        wait_prj_deletion=${FALSE}
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
@@ -413,7 +417,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${1}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Serve And Query Flan-t5 Large
     [Documentation]    Deploys and queries flan-t5-large model
@@ -436,7 +440,7 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify Runtime Upgrade Does Not Affect Deployed Models
     [Documentation]    Upgrades the caikit runtime inthe same NS where a model
@@ -445,8 +449,8 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
     ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
     [Tags]    Sanity    Tier1    ODS-2404
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}
-    ${test_namespace}=    Set Variable     ${TEST_NS}
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}-up
+    ${test_namespace}=    Set Variable     ${TEST_NS}-up
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
@@ -471,7 +475,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     Should Be Equal    ${created_at}    ${created_at_after}
     Should Be Equal As Strings    ${caikitsha}    ${caikitsha_after}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Access Model Metrics From UWM
     [Documentation]    Verifies that model metrics are available for users in the
@@ -514,7 +518,7 @@ Verify User Can Access Model Metrics From UWM
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=stream    namespace=${test_namespace}    period=5m    exp_value=1
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Query A Model Using HTTP Calls
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
@@ -540,7 +544,7 @@ Verify User Can Query A Model Using HTTP Calls
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}    validate_response=${FALSE}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 
 *** Keywords ***

@@ -26,7 +26,7 @@ Assign ${permission_type} Permissions To User ${username} in Project ${project_t
     Open Data Science Project Details Page    ${project_title}
     Move To Tab             Permissions
     Assign ${permission_type} Permissions To User ${username}
-    
+
 Change ${username} Permissions To ${permission_type}
     [Documentation]    Change the level of permission ${permission_type} for the given user ${username}
     ...    in the currently open DS Project in UI
@@ -71,9 +71,9 @@ Assign ${permission_type} Permissions To Group ${group_name}
 Click Action From Actions Menu
     [Documentation]    Click an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${username}    ${action}
-    Click Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]/td[contains(@class,"pf-c-table__action")]/div/button[@aria-label="Actions"]    # robocop: disable
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]/td[contains(@class,"pf-c-table__action")]/div/ul/li/button[text()="${action}"]    # robocop: disable
-    Click Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]/td[contains(@class,"pf-c-table__action")]/div/ul/li/button[text()="${action}"]    # robocop: disable
+    Click Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]//button[@aria-label="Kebab toggle"]    # robocop: disable
+    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]//button[@aria-label="Kebab toggle"]/following-sibling::div//li/button/span/span[text()="${action}"]    # robocop: disable
+    Click Element       xpath=//tr[td[@data-label="Username"]//*[text()="${username}"]]//button[@aria-label="Kebab toggle"]/following-sibling::div//li/button/span/span[text()="${action}"]    # robocop: disable
 
 Get OpenShift RoleBinding
     [Documentation]    Fetch the RoleBinding object defining the level of permission of a

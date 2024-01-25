@@ -355,3 +355,23 @@ Disable Component
     [Documentation]    Disable a component in Data Science Cluster
     [Arguments]    ${component}
     Set Component State    ${component}    Removed
+
+Wait Component Ready
+    [Documentation]    Wait for DSC cluster component to be ready
+    [Arguments]    ${component}
+    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+    ...    shell=true    stderr=STDOUT
+    IF    $result.stdout == ""
+        FAIL    Can not find datasciencecluster
+    END
+    ${cluster_name} =    Set Variable    ${result.stdout}
+    
+    Log To Console    Waiting for ${component} to be ready
+    
+    # oc wait "${cluster_name}" --for=condition\=${component}Ready\=true --timeout\=3m
+    ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=3m
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Timeout waiting for ${component} to be ready
+    END
+    Log To Console    ${component} is ready

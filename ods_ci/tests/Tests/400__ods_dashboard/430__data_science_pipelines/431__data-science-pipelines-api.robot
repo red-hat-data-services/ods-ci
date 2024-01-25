@@ -13,7 +13,7 @@ Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
-${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/opendatahub-io/data-science-pipelines-operator/main/tests/resources/dsp-operator/test-pipeline-run.yaml
+${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/opendatahub-io/data-science-pipelines-operator/main/tests/resources/test-pipeline-run.yaml
 
 
 *** Test Cases ***

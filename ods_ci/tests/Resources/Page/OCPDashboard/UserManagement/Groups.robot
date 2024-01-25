@@ -16,14 +16,14 @@ Go To ${group_name} Group Page
 Create Group
     [Documentation]     Creates a user group in OCP (if it doesn't exist)
     [Arguments]   ${group_name}
-    ${res}  ${output}=    Run And Return Rc And Output    
-    ...    oc adm groups new ${group_name} --dry-run=client -o yaml | kubectl apply --validate=false -f -
+    ${res}  ${output}=    Run And Return Rc And Output
+    ...    oc adm groups new ${group_name} --dry-run=client -o yaml | oc apply --validate=false -f -
     Should Be Equal As Integers    ${res}    0    ${output}
 
 Delete Group
     [Documentation]     Deletes a user group in OCP (if it exists)
     [Arguments]   ${group_name}
-    ${res}  ${output}=    Run And Return Rc And Output    
+    ${res}  ${output}=    Run And Return Rc And Output
     ...    oc delete group ${group_name} --ignore-not-found
     Should Be Equal As Integers    ${res}    0    ${output}
 

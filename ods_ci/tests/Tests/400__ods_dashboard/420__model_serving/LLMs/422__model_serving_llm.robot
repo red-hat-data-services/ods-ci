@@ -241,7 +241,7 @@ Verify User Can Autoscale Using Concurrency
     [Setup]    Set Project And Runtime    namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    ${model_name}=    Create List    ${flan_model_name}
+    ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
@@ -258,7 +258,7 @@ Verify User Can Autoscale Using Concurrency
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${model_name}
+    ...    isvc_names=${models_names}
 
 Verify User Can Validate Scale To Zero
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic

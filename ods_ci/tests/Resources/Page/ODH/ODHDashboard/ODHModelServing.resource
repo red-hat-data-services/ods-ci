@@ -489,8 +489,8 @@ Set Up Project
     ...            aws_bucket_name=${S3.BUCKET_3.NAME}    aws_s3_endpoint=${S3.BUCKET_3.ENDPOINT}
     ...            aws_region=${S3.BUCKET_3.REGION}
     IF   ${enable_metrics}
-        Oc Apply    kind=ConfigMap    src=${MONITORING_CONFIG_FILEPATH}
-        Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
+        Enable User Workload Monitoring
+        Configure User Workload Monitoring
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END

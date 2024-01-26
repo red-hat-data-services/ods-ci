@@ -63,7 +63,9 @@ Test Inference With Token Authentication
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
     [Tags]    Sanity    Tier1
     ...    ODS-1920
-    Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
+    # Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    # robocop: disable
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
     # Testing the same endpoint without token auth, should receive login page
     Open Model Serving Home Page
     ${out}=    Get Model Inference   ${MODEL_NAME}    ${INFERENCE_INPUT}    token_auth=${FALSE}

@@ -9,9 +9,9 @@ ${SUBMIT_RUNTIME_BTN_XP}=    //button[text()="Create"]
 ${UPLOAD_RUNTIME_BTN_XP}=    //button[text()="Upload files"]
 ${SCRATCH_RUNTIME_BTN_XP}=    //button[text()="Start from scratch"]
 ${EDITOR_RUNTIME_BTN_XP}=    //div[contains(@class, "odh-dashboard__code-editor")]
-&{PLATFORM_NAMES_MAPPING}=    single=Single model serving platform    multi=Multi-model serving platform
-...    both=Both single and multi-model serving platforms
-&{PLATFORM_LABELS_MAPPING}=    single=Single model    multi=Multi-model
+&{PLATFORM_NAMES_MAPPING}=    single=Single-model serving platform    multi=Multi-model serving platform
+...    both=Single-model and multi-model serving platforms
+&{PLATFORM_LABELS_MAPPING}=    single=Single-model    multi=Multi-model
 
 
 *** Keywords ***

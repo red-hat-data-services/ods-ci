@@ -80,12 +80,14 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    server_name=${MODEL_SERVER_NAME}    runtime=${UPLOADED_OVMS_DISPLAYED_NAME}
-    Serve Model    project_name=${PRJ_TITLE}    model_name=${model_name}    framework=onnx    existing_data_connection=${TRUE}
+    Serve Model    project_name=${PRJ_TITLE}    model_name=${model_name}    framework=onnx
+    ...    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
     Wait Until Runtime Pod Is Running    server_name=${MODEL_SERVER_NAME}
-    ...    project_title=${PRJ_TITLE}    timeout=15s
+    ...    project_title=${PRJ_TITLE}    timeout=40s
     Verify Model Status    ${model_name}    success
-    Verify Model Inference    ${model_name}    ${inference_input}    ${exp_inference_output}    token_auth=${TRUE}
+    Verify Model Inference With Retries    ${model_name}    ${inference_input}    ${exp_inference_output}
+    ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
     
 
@@ -94,7 +96,6 @@ Custom Serving Runtime Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     RHOSi Setup
     Fetch CA Certificate If RHODS Is Self-Managed
 

@@ -16,8 +16,6 @@ ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
 ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
 ${USE_BUCKET_HTTPS}=    "1"
-${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
-${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml  
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
@@ -62,8 +60,8 @@ Set Project And Runtime
     ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
     Deploy Serving Runtime    namespace=${namespace}    runtime=${runtime}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
-        Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
-        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
+        Enable User Workload Monitoring
+        Configure User Workload Monitoring
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END
@@ -292,6 +290,7 @@ Compile Deploy And Query LLM model
     [Documentation]    Group together the test steps for preparing, deploying
     ...                and querying a model
     [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
+    ...            ${runtime}=caikit-tgis-runtime    ${protocol}=grpc    ${inference_type}=all-tokens
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
     ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
     Compile Inference Service YAML    isvc_name=${isvc_name}
@@ -303,8 +302,9 @@ Compile Deploy And Query LLM model
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}
     Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
-    ...    endpoint=${CAIKIT_ALLTOKENS_ENDPOINT}    n_times=${n_queries}    streamed_response=${FALSE}
-    ...    namespace=${namespace}    query_idx=${query_idx}    validate_response=${validate_response}
+    ...    n_times=${n_queries}    namespace=${namespace}    query_idx=${query_idx}
+    ...    validate_response=${validate_response}    protocol=${protocol}
+    ...    runtime=${runtime}    inference_type=${inference_type}
 
 Upgrade Caikit Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given
@@ -567,7 +567,7 @@ Generate Client TLS Certificates
 Clean Up Test Project
     [Documentation]    Deletes the given InferenceServices, check the NS gets removed from ServiceMeshMemberRoll
     ...                and deletes the DS Project
-    [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}
+    [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}    ${wait_prj_deletion}=${TRUE}
     IF    ${isvc_delete} == ${TRUE}
         FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
               Log    Deleting ${isvc_name}
@@ -580,5 +580,9 @@ Clean Up Test Project
     ...    namespace=${test_ns}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s
-    Should Be Equal As Integers    ${rc}    ${0}
+    IF    ${wait_prj_deletion}
+        ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${test_ns} --timeout=300s
+        Should Be Equal As Integers    ${rc}    ${0}
+    ELSE
+        Log    Project deletion started, but won't wait for it to finish..
+    END

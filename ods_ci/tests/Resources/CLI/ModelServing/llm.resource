@@ -304,6 +304,7 @@ Compile Deploy And Query LLM model
     Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
     ...    n_times=${n_queries}    namespace=${namespace}    query_idx=${query_idx}
     ...    validate_response=${validate_response}    protocol=${protocol}
+    ...    runtime=${runtime}    inference_type=${inference_type}
 
 Upgrade Caikit Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given

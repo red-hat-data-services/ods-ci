@@ -37,7 +37,6 @@ Verify Updating Project With Changes From Git Repository
     [Documentation]    Verifies that changes has been pulled successfully to local repository
     [Tags]    ODS-324
     ...       Sanity    Tier1
-    Set Log Level    TRACE
     Set Staging Status
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
@@ -46,7 +45,6 @@ Verify Updating Project With Changes From Git Repository
     Add And Run JupyterLab Code Cell In Active Notebook    ! mkdir ../folder/
     Sleep    2s
     Open Folder or File    folder
-
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
     Push Some Changes to Repo
@@ -62,7 +60,6 @@ Verify Updating Project With Changes From Git Repository
     Open New Notebook
     ${commit_msg2}=    Get Last Commit Message
     Should Not Be Equal    ${commit_msg2}    ${commit_msg1}
-    Set Log Level    NONE
 
 
 *** Keywords ***
@@ -83,7 +80,9 @@ Push Some Changes To Repo
     Open With JupyterLab Menu    Edit    Delete Cells
     Enter Text In File And Save    code=print("Hi Hello ${commitmsgg}")
     Set Staging Status    status=ON
+    Set Log Level    TRACE
     Commit Changes    commit_message=${commitmsgg}    name=${GITHUB_USER.USERNAME}    email_id=${GITHUB_USER.EMAIL}
+    Set Log Level    NONE
     Push Changes To Remote    github_username=${GITHUB_USER.USERNAME}    token=${GITHUB_USER.TOKEN}
     Set Staging Status    status=OFF
     Close All JupyterLab Tabs

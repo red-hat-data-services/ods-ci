@@ -13,11 +13,11 @@ ${TRUSTYAI_NS}=    ${APPLICATIONS_NAMESPACE}
 Verify TrustyAI Operator Installation
     [Documentation]    Verifies that the TrustyAI operator has been
     ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace in ODS
-    [Tags]    Tier1
-    ...       ODS-2481
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  1 min  10 sec  Verify TrustyAI Operator Deployment
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds    10 times  5s    Verify TrustyAI ReplicaSets Info
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds    10 times  5s    Verify TrustyAI Container Names
+    [Tags]    Tier1    Sanity
+    ...       ODS-2481    robot:recursive-continue-on-failure
+    Wait Until Keyword Succeeds  1 min  10 sec  Verify TrustyAI Operator Deployment
+    Wait Until Keyword Succeeds    10 times  5s    Verify TrustyAI ReplicaSets Info
+    Wait Until Keyword Succeeds    10 times  5s    Verify TrustyAI Container Names
 
 
 *** Keywords ***
@@ -26,7 +26,7 @@ Verify TrustyAI Operator Deployment
     Wait For Pods Number  1
     ...                   namespace=${TRUSTYAI_NS}
     ...                   label_selector=app.kubernetes.io/part-of=trustyai
-    ...                   timeout=300
+    ...                   timeout=200
 
 Verify TrustyAI ReplicaSets Info
     [Documentation]    Fetches and verifies information from TrustyAI replicasets

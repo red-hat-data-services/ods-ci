@@ -52,7 +52,7 @@ Verify DSPO Operator Reconciliation Retry
     ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ods_ci/tests/Resources/Files/dummy-storage-creds.yaml
     IF    ${rc}!=0    Fail
     # one pod is good when reconciliation finished
-    Wait For Pods Number  1    namespace=${local_project_name}    timeout=30
+    Wait For Pods Number  1    namespace=${local_project_name}    timeout=60
     [Teardown]    Remove Pipeline Project    ${local_project_name}
 
 

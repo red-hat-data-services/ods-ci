@@ -109,7 +109,6 @@ Clone Git Repository In Current Folder
 Commit Changes
     [Documentation]    It does the git commit with commit message
     [Arguments]    ${commit_message}    ${name}    ${email_id}
-    Set Log Level    TRACE
     Click Element    xpath=//li[@title="Git"]
     Input Text    xpath=//*[@id="jp-git-sessions"]//input[contains(@placeholder, "Summary")]    ${commit_message}
     Sleep    2s
@@ -127,7 +126,6 @@ Commit Changes
     ELSE
         Page Should Contain Element    xpath=//button[@title="Disabled: No files are staged for commit"]
     END
-    Set Log Level    NONE
 
 Push Changes To Remote
     [Documentation]    Push changes to remote directory

@@ -203,7 +203,8 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
 
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
-    ...                of a deployed model
+    ...                of a deployed model.
+    ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
     [Tags]    Sanity    Tier1    ODS-2376
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps

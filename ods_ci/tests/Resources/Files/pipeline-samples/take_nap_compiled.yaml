@@ -1,0 +1,139 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: take-nap-pipeline
+  annotations:
+    tekton.dev/output_artifacts: '{"take-nap": [{"key": "artifacts/$PIPELINERUN/take-nap/Output.tgz",
+      "name": "take-nap-Output", "path": "/tmp/outputs/Output/data"}]}'
+    tekton.dev/input_artifacts: '{"wake-up": [{"name": "take-nap-Output", "parent_task":
+      "take-nap"}]}'
+    tekton.dev/artifact_bucket: mlpipeline
+    tekton.dev/artifact_endpoint: minio-service.kubeflow:9000
+    tekton.dev/artifact_endpoint_scheme: http://
+    tekton.dev/artifact_items: '{"take-nap": [["Output", "$(results.Output.path)"]],
+      "wake-up": []}'
+    sidecar.istio.io/inject: "false"
+    tekton.dev/template: ''
+    pipelines.kubeflow.org/big_data_passing_format: $(workspaces.$TASK_NAME.path)/artifacts/$ORIG_PR_NAME/$TASKRUN_NAME/$TASK_PARAM_NAME
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "Pipeline that sleeps for
+      15 mins (900 secs)", "inputs": [{"default": "900", "name": "naptime_secs", "optional":
+      true, "type": "Integer"}], "name": "take-nap-pipeline"}'
+  labels:
+    pipelines.kubeflow.org/pipelinename: ''
+    pipelines.kubeflow.org/generation: ''
+spec:
+  params:
+  - name: naptime_secs
+    value: '900'
+  pipelineSpec:
+    params:
+    - name: naptime_secs
+      default: '900'
+    tasks:
+    - name: take-nap
+      params:
+      - name: naptime_secs
+        value: $(params.naptime_secs)
+      taskSpec:
+        steps:
+        - name: main
+          args:
+          - --naptime-secs
+          - $(inputs.params.naptime_secs)
+          - '----output-paths'
+          - $(results.Output.path)
+          command:
+          - sh
+          - -ec
+          - |
+            program_path=$(mktemp)
+            printf "%s" "$0" > "$program_path"
+            python3 -u "$program_path" "$@"
+          - |
+            def take_nap(naptime_secs):
+                """Sleeps for secs"""
+                from time import sleep
+                print(f"Sleeping for {naptime_secs} seconds: Zzzzzz ...")
+                sleep(naptime_secs)
+                return "I'm awake now. Did I snore?"
+
+            def _serialize_str(str_value: str) -> str:
+                if not isinstance(str_value, str):
+                    raise TypeError('Value "{}" has type "{}" instead of str.'.format(
+                        str(str_value), str(type(str_value))))
+                return str_value
+
+            import argparse
+            _parser = argparse.ArgumentParser(prog='Take nap', description='Sleeps for secs')
+            _parser.add_argument("--naptime-secs", dest="naptime_secs", type=int, required=True, default=argparse.SUPPRESS)
+            _parser.add_argument("----output-paths", dest="_output_paths", type=str, nargs=1)
+            _parsed_args = vars(_parser.parse_args())
+            _output_files = _parsed_args.pop("_output_paths", [])
+
+            _outputs = take_nap(**_parsed_args)
+
+            _outputs = [_outputs]
+
+            _output_serializers = [
+                _serialize_str,
+
+            ]
+
+            import os
+            for idx, output_file in enumerate(_output_files):
+                try:
+                    os.makedirs(os.path.dirname(output_file))
+                except OSError:
+                    pass
+                with open(output_file, 'w') as f:
+                    f.write(_output_serializers[idx](_outputs[idx]))
+          image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        params:
+        - name: naptime_secs
+        results:
+        - name: Output
+          type: string
+          description: /tmp/outputs/Output/data
+        metadata:
+          labels:
+            pipelines.kubeflow.org/cache_enabled: "true"
+          annotations:
+            pipelines.kubeflow.org/component_spec_digest: '{"name": "Take nap", "outputs":
+              [{"name": "Output", "type": "String"}], "version": "Take nap@sha256=52531d53ba4bbf34b711a5c7e414aed2745f1a5226b3a41da41773ff06f02f5b"}'
+    - name: wake-up
+      params:
+      - name: take-nap-Output
+        value: $(tasks.take-nap.results.Output)
+      taskSpec:
+        steps:
+        - name: main
+          args:
+          - --message
+          - $(inputs.params.take-nap-Output)
+          command:
+          - sh
+          - -ec
+          - |
+            program_path=$(mktemp)
+            printf "%s" "$0" > "$program_path"
+            python3 -u "$program_path" "$@"
+          - |
+            def wake_up(message):
+                """Wakes up from nap printing a message"""
+                print(message)
+
+            import argparse
+            _parser = argparse.ArgumentParser(prog='Wake up', description='Wakes up from nap printing a message')
+            _parser.add_argument("--message", dest="message", type=str, required=True, default=argparse.SUPPRESS)
+            _parsed_args = vars(_parser.parse_args())
+
+            _outputs = wake_up(**_parsed_args)
+          image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        params:
+        - name: take-nap-Output
+        metadata:
+          labels:
+            pipelines.kubeflow.org/cache_enabled: "true"
+          annotations:
+            pipelines.kubeflow.org/component_spec_digest: '{"name": "Wake up", "outputs":
+              [], "version": "Wake up@sha256=2f4a0d11b0aa66a234d7a97fc285c89fbbec96e07e7d1185428590e2e811be50"}'

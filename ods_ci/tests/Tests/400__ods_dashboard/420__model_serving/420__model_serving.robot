@@ -63,8 +63,9 @@ Test Inference With Token Authentication
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
     [Tags]    Sanity    Tier1
     ...    ODS-1920
-    # Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
-    Run Keyword And Continue On Failure    Verify Model Inference With Retries    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
+    # Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    # robocop: ignore
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
     # Testing the same endpoint without token auth, should receive login page
     Open Model Serving Home Page
     ${out}=    Get Model Inference   ${MODEL_NAME}    ${INFERENCE_INPUT}    token_auth=${FALSE}
@@ -178,9 +179,9 @@ Model Serving Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-    Run Keyword And Continue On Failure    Delete Model Via UI    test-model
+        Run Keyword And Continue On Failure    Delete Model Via UI    test-model
     ELSE
-    Log    Model not deployed, skipping deletion step during teardown    console=true
+        Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
     Delete Data Science Projects From CLI   ocp_projects=${projects}

@@ -282,7 +282,7 @@ Verify Model Inference With Retries
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}
     ...            ${token_auth}=${FALSE}    ${project_title}=${NONE}    ${retries}=${5}
     ${status}=    Run Keyword And Return Status    Verify Model Inference
-        ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
+    ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
     IF    not ${status}
         ${retry}=    Set Variable    ${0}
         WHILE    ${retry} < ${retries}
@@ -291,13 +291,15 @@ Verify Model Inference With Retries
                 ...    level=WARN
             END
             ${status}=    Run Keyword And Return Status    Verify Model Inference
-            ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
-            Exit For Loop If    ${status}
-            ${retry} =    Evaluate    ${retry} + 1
+            ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}
+            ...    ${project_title}
+            IF    ${status}
+                BREAK
+            END
+            ${retry}=    Evaluate    ${retry} + 1
             Sleep    5s
-        END        
+        END
     END
-    
 
 Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.

@@ -85,7 +85,7 @@ Run Codeflare E2E Test
     ...    shell=true
     ...    stderr=STDOUT
     ...    cwd=${CODEFLARE_DIR}
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=30m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-e2e-logs
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
@@ -99,7 +99,7 @@ Run Codeflare ODH Test
     ...    shell=true
     ...    stderr=STDOUT
     ...    cwd=${CODEFLARE_DIR}
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=30m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
     ...    env:ODH_NAMESPACE=${ODH_NAMESPACE}
     ...    env:NOTEBOOK_IMAGE_STREAM_NAME=${NOTEBOOK_IMAGE_STREAM_NAME}

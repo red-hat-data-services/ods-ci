@@ -294,6 +294,7 @@ Verify Model Inference With Retries
             ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
             Exit For Loop If    ${status}
             ${retry} =    Evaluate    ${retry} + 1
+            Sleep    5s
         END        
     END
     

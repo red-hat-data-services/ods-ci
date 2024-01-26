@@ -18,7 +18,7 @@ ${CODEFLARE-SDK_REPO_BRANCH}        %{CODEFLARE-SDK_REPO_BRANCH=main}
 Run TestMNISTRayClusterSDK test
     [Documentation]    Run Go E2E test: TestMNISTRayClusterSDK
     [Tags]  ODS-2544
-    ...     Sanity
+    ...     Sanity    Tier1
     ...     DistributedWorkloads
     ...     Codeflare-sdk
     Run Codeflare-sdk E2E Test    TestMNISTRayClusterSDK

@@ -172,7 +172,7 @@ Remove Spawner Environment Variable
    [Arguments]  ${env_var}
    ${env_check} =  Spawner Environment Variable Exists   ${env_var}
    IF  ${env_check}==True
-      Click Element  xpath://input[contains(@id, "environment-variable-row")][@value="${env_var}"]/../../../../div/button
+      Click Element  xpath://div[@class="odh-notebook-controller__env-var-row" and *//input[contains(@id, "environment-variable-row") and @value="${env_var}"]]//button[@data-id="remove-env-var-button"]    # robocop: disable
    END
 
 Spawner Environment Variable Exists
@@ -558,7 +558,7 @@ Fetch Image Tooltip Info
         ${item} =    Get Text    ${xpath_tooltip_items}\[${index}]
         Append To List    ${tmp_list}    ${item}
     END
-    Click Element    xpath://div[@class='pf-v5-c-popover__content']/button[@aria-label="Close"]
+    Click Element    xpath://div[contains(@class,'popover__close')]/button[@aria-label="Close"]
     RETURN    ${tmp_list}
 
 Spawn Notebooks And Set S3 Credentials

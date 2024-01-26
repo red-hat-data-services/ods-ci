@@ -13,6 +13,8 @@ Resource  RHOSi.resource
 
 *** Variables ***
 @{DEFAULT_CHARS_TO_ESCAPE}=    :    /    .
+${MONITORING_CONFIG_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_conf.yaml
+${UWM_CONFIG_FILEPATH}=              ods_ci/tests/Resources/Files/uwm_cm_enable.yaml
 
 
 *** Keywords ***
@@ -92,6 +94,21 @@ CSS Property Value Should Be
     ELSE
         Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
     END
+
+Page Should Contain A String In List
+    [Documentation]    Verifies that page contains at least one of the strings in text_list
+    [Arguments]  ${text_list}
+    FOR    ${text}    IN    @{text_list}
+        ${text_found}=    Run Keyword And Return Status    Page Should Contain   ${text}
+        IF  ${text_found}    RETURN
+    END
+    Fail    Current page doesn't contain any of the strings in: @{text_list}
+
+Wait Until Page Contains A String In List
+    [Documentation]    Waits until page contains at least one of the strings in text_list
+    [Arguments]    ${text_list}    ${retry}=12x    ${retry_interval}=5s
+    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
+    ...    Page Should Contain A String In List     ${text_list}
 
 #robocop: disable: line-too-long
 Get RHODS Version
@@ -363,7 +380,7 @@ Run And Watch Command
   ${is_test}=    Run keyword And Return Status    Variable Should Exist     ${TEST NAME}
   IF    ${is_test} == ${FALSE}
     ${incremental}=    Generate Random String    5    [NUMBERS]
-    ${TEST NAME}=    Set Variable    testlogs-${incremental}    
+    ${TEST NAME}=    Set Variable    testlogs-${incremental}
   END
   ${process_log} =    Set Variable    ${OUTPUT DIR}/${TEST NAME}.log
   ${temp_log} =    Set Variable    ${TEMPDIR}/${TEST NAME}.log
@@ -413,3 +430,16 @@ Skip If Component Is Not Enabled
     [Arguments]    ${component_name}
     ${enabled}=    Is Component Enabled    ${component_name}
     Skip If    "${enabled}" == "false"
+
+Enable User Workload Monitoring
+    [Documentation]    Enable User Workload Monitoring for the cluster for user-defined-projects
+    ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${MONITORING_CONFIG_FILEPATH}
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+
+Configure User Workload Monitoring
+    [Documentation]    Configure the retention period in User Workload Monitoring for the cluster.
+    ...                This period can be configured for the component as and when needed.
+    ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_CONFIG_FILEPATH}
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file

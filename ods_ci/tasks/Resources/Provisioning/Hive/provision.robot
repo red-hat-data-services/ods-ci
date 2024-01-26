@@ -149,10 +149,15 @@ Wait For Cluster To Be Ready
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
     Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
-    Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True
-    ${provision_status} =    Run Process 	oc -n ${pool_namespace} wait --for\=condition\=Provisioned\=True cd ${pool_namespace} --timeout\=5m    shell=yes
-    ${web_access} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
-    ${claim_status} =    Run Process 	oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=5m    shell=yes
+    Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
+    ${provision_status} =    Run Process
+    ...    oc -n ${pool_namespace} wait --for\=condition\=Provisioned\=True cd ${pool_namespace} --timeout\=10m
+    ...    shell=yes
+    ${web_access} =    Run Process
+    ...    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status
+    ...    shell=yes
+    ${claim_status} =    Run Process
+    ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=10m    shell=yes    # robocop: disable:line-too-long
     # Workaround for old Hive with Openstack - Cluster is displayed as Resuming even when it is Running
     IF    "${provider_type}" == "OSP"
         ${claim_status} =    Run Process 	
@@ -161,9 +166,10 @@ Wait For Cluster To Be Ready
     IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${claim_status.rc} != 0
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json    shell=yes
         ${claim_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
-        Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources    console=True
+        Log    Cluster '${cluster_name}' deployment had errors, see: ${\n}${provision_status.stdout}${\n}${claim_status.stdout}    level=ERROR    # robocop: disable:line-too-long
+        Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources now
+        ...    console=True
         Deprovision Cluster
-        Log    Cluster '${cluster_name}' deployment had errors: ${\n}${provision_status.stdout}${\n}${claim_status.stdout}    level=ERROR
         FAIL    Cluster '${cluster_name}' provisioning failed. Please look into the logs for more details.
     END
     Log    Cluster '${cluster_name}' install completed and accessible at: ${web_access.stdout}     console=True

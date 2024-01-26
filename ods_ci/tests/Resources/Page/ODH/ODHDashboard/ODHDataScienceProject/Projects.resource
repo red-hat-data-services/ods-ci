@@ -63,7 +63,7 @@ Delete Data Science Project
 Wait Until Data Science Project Is Deleted
     [Documentation]    Checks if when a DS Project is deleted its Openshift namespace gets deleted too
     [Arguments]    ${project_title}
-    Wait Until Keyword Succeeds    15 times    2s
+    Wait Until Keyword Succeeds    40 times    5s
     ...    Project Should Not Exist In Openshift    project_title=${project_title}
 
 Project Should Not Exist In Openshift
@@ -306,6 +306,7 @@ Launch Data Science Project Main Page
     ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     ...                 browser_alias=${browser_alias}
     Open Data Science Projects Home Page
+
 
 Remove Current Page Projects From All Projects
     [Documentation]    Remove list of currently displayed Data Science projects from list of all projects

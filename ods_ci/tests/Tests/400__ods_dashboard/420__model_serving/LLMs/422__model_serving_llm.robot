@@ -51,7 +51,7 @@ Verify External Dependency Operators Can Be Deployed
     ...                and configured
     [Tags]    ODS-2326
     Pass Execution    message=Installation done as part of Suite Setup.
- 
+
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime

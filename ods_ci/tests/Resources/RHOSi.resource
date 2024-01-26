@@ -43,6 +43,7 @@ Resource            Common.robot
 ...                         Create Secret For S3-Like Buckets
 ...                         Login To OCP Using API
 ...                         Generate Thanos Token
+...                         Set Thanos Credentials Variables
 
 
 *** Keywords ***

@@ -534,9 +534,11 @@ Verify User Can Delete A Data Science Project
 
 Verify User Can Access Only Its Owned Projects
     [Tags]    Sanity    Tier1    ODS-1868
-    [Documentation]    Verifies each user can access only thei owned projects. Except for
+    [Documentation]    Verifies each user can access only they owned projects. Except for
     ...                cluster and dedicated admins which should be able to fetch all the DS Projects
     [Setup]    Run Keywords
+    ...    SeleniumLibrary.Close All Browsers
+    ...    AND
     ...    Set Variables For User Access Test
     ...    AND
     ...    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}

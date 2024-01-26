@@ -13,7 +13,7 @@ ${CREATE_RUN_BTN_XP}=    xpath://*[text()="Create run"]
 ${RUN_TOPOLOGY_DETAILS_BTN_XP}=    xpath://li//button[text()="Details"]
 ${RUN_TOPOLOGY_OUTPUT_BTN_XP}=    xpath://li//button[text()="Run output"]
 ${RUN_TOPOLOGY_XP}=    css:div[data-test-id="topology"]
-
+${PIPELINES_DISABLED_EXC_MARK}=    xpath=//*[@id="page-sidebar"]/div/nav/ul/li[3]/a/div/div[2]
 
 *** Keywords ***
 Create Pipeline Server
@@ -21,6 +21,7 @@ Create Pipeline Server
     ...                It assumes the Data Connection is aleady created
     ...                and you wants to use defaul DB configurations [TEMPORARY]
     [Arguments]    ${dc_name}    ${project_title}
+    ...            ${aws_s3_ca_bundle}=${NONE}
     # Every 2 mins the frontend updates its cache and the client polls every 30seconds.
     # So the longest you’d have to wait is 2.5 mins. Set 3 min just to make sure
     Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}    timeout=180s
@@ -34,6 +35,29 @@ Create Pipeline Server
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
     ...    timeout-pre-spinner=5s    timeout-spinner=60s
+    ${is_ca_empty}=    Is String Empty    ${aws_s3_ca_bundle}
+    IF    ${is_ca_empty}
+        ${aws_s3_ca_bundle}=    Get Variable Value    ${S3.AWS_CA_BUNDLE}    ${NONE}
+    END
+    ${is_ca_empty}=    Is String Empty    ${aws_s3_ca_bundle}
+    IF    not ${is_ca_empty}
+        Patch Pipeline Server With CA Bundle
+        ...    project_title=${project_title}    aws_s3_ca_bundle=${aws_s3_ca_bundle}
+    END
+
+Patch Pipeline Server With CA Bundle
+    [Documentation]    Patch the underlying dspa resource with CA Bundle
+    ...                The CA Bundle can be obtained from S3.AWS_CA_BUNDLE in test-variables.yml
+    [Arguments]    ${project_title}    ${aws_s3_ca_bundle}
+    ${dc_namespace}=    Get Openshift Namespace From Data Science Project    ${project_title}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc create configmap custom-ca-bundle -n ${dc_namespace} --from-literal=ca-bundle.crt='${aws_s3_ca_bundle}'    # robocop: disable
+    Should Be Equal As Integers    ${rc}    0
+    Log    "${out}"
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch dspa pipelines-definition -n ${dc_namespace} -p '[{"op":"add","path":"/spec/apiServer/cABundle","value":{"configMapKey":"ca-bundle.crt","configMapName":"custom-ca-bundle"}}]' --type json     # robocop: disable
+    Should Be Equal As Integers    ${rc}    0
+    Log    "${out}"
 
 Select Data Connection
     [Documentation]    Selects an existing data connection from the dropdown
@@ -276,3 +300,13 @@ Verify Successful Pipeline Run Via Project UI
     ...    status=Completed
     Pipeline Run Should Be Listed    name=${pipeline_run_name}
     ...    pipeline_name=${pipeline_name}
+
+Verify Pipelines Are Enabled
+   [Documentation]    Verifies the Dashboard enabled pipelines
+   Wait Until Page Contains       Data Science Pipelines
+   Page Should Not Contain Element    ${PIPELINES_DISABLED_EXC_MARK}  timeout=10s
+
+Verify Pipelines Are Disabled
+   [Documentation]    Verifies the Dashboard disabled pipelines
+   Wait Until Page Contains       Data Science Pipelines
+   Page Should Contain Element    ${PIPELINES_DISABLED_EXC_MARK}  timeout=10s

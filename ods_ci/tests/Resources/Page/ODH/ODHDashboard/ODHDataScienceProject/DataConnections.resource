@@ -17,7 +17,7 @@ ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[.="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKET"]
 ${S3_DC_ADD_BTN}=             xpath=//footer/button[.="Add data connection"]
 ${S3_DC_EDIT_BTN}=             xpath=//footer/button[.="Update data connection"]
-${DC_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
+${DC_WORKBENCH_SELECTOR_XP}=         xpath=//ul[@aria-label="Notebook select"]/li
 
 
 *** Keywords ***
@@ -133,7 +133,7 @@ Fill Data Connection Form
         Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
     ELSE
         Run Keyword And Continue On Failure
-        ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
+        ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//button[@aria-label="Options menu"]
         FOR    ${workbench_title}    IN    @{connected_workbench}
             Set Connection Between Data Connection And Workbench    ${workbench_title}
             Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}

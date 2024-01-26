@@ -313,3 +313,13 @@ class Helpers:
     @keyword
     def escape_forward_slashes(self, string_to_escape):
         return string_to_escape.replace("/", "\/")
+
+    @keyword
+    def is_string_empty(self, string):
+        """
+        Check if a given string (including multi-line string) is empty.
+        Robot Framework doesn't properly handle multi-line strings and throws
+            Evaluating expression '"..." == ""' failed:
+            SyntaxError: EOL while scanning string literal (<string>, line 1)
+        """
+        return string is None or string == ""

@@ -80,9 +80,7 @@ Push Some Changes To Repo
     Open With JupyterLab Menu    Edit    Delete Cells
     Enter Text In File And Save    code=print("Hi Hello ${commitmsgg}")
     Set Staging Status    status=ON
-    Set Log Level    TRACE
     Commit Changes    commit_message=${commitmsgg}    name=${GITHUB_USER.USERNAME}    email_id=${GITHUB_USER.EMAIL}
-    Set Log Level    NONE
     Push Changes To Remote    github_username=${GITHUB_USER.USERNAME}    token=${GITHUB_USER.TOKEN}
     Set Staging Status    status=OFF
     Close All JupyterLab Tabs
@@ -111,6 +109,7 @@ Clone Git Repository In Current Folder
 Commit Changes
     [Documentation]    It does the git commit with commit message
     [Arguments]    ${commit_message}    ${name}    ${email_id}
+    Set Log Level    TRACE
     Click Element    xpath=//li[@title="Git"]
     Input Text    xpath=//*[@id="jp-git-sessions"]//input[contains(@placeholder, "Summary")]    ${commit_message}
     Sleep    2s
@@ -128,6 +127,7 @@ Commit Changes
     ELSE
         Page Should Contain Element    xpath=//button[@title="Disabled: No files are staged for commit"]
     END
+    Set Log Level    NONE
 
 Push Changes To Remote
     [Documentation]    Push changes to remote directory

@@ -62,16 +62,17 @@ Verify Custom Image Can Be Added
 
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
-    ...       ProductBug - https://github.com/opendatahub-io/odh-dashboard/issues/2186
+    ...       ProductBug - https://issues.redhat.com/browse/RHOAIENG-1192
     [Tags]    Sanity    Tier1    ExcludeOnDisconnected
     ...       ODS-1368
-    ...       ProductBug
     Sleep  1
     Create Custom Image
     Sleep  1
     Import New Custom Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
+    # Workaround for https://issues.redhat.com/browse/RHOAIENG-1192
+    # To be removed ASAP
     Wait Until Page Contains    Unable to add notebook image: HTTP request failed
     # Since the image cannot be created, we need to cancel the modal window now
     Click Button    ${GENERIC_CANCEL_BTN_XP}

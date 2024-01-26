@@ -26,8 +26,6 @@ ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
-${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
-${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml
 
 
 *** Keywords ***
@@ -491,7 +489,7 @@ Set Up Project
     ...            aws_bucket_name=${S3.BUCKET_3.NAME}    aws_s3_endpoint=${S3.BUCKET_3.ENDPOINT}
     ...            aws_region=${S3.BUCKET_3.REGION}
     IF   ${enable_metrics}
-        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
+        Oc Apply    kind=ConfigMap    src=${MONITORING_CONFIG_FILEPATH}
         Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.

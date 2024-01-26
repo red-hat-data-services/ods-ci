@@ -60,8 +60,8 @@ Set Project And Runtime
     ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
     Deploy Serving Runtime    namespace=${namespace}    runtime=${runtime}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
-        Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
         Oc Apply    kind=ConfigMap    src=${MONITORING_CONFIG_FILEPATH}
+        Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END

@@ -40,7 +40,7 @@ ${CUSTOM_INEXISTENT_GROUP}              inexistent-group
 
 *** Test Cases ***
 Verify That Login Page Is Shown When Reaching The RHODS Page
-    [Tags]      Sanity
+    [Tags]      Sanity    Tier1
     ...         ODS-694
     ...         ODS-355
     [Setup]     Test Setup For Login Page
@@ -52,7 +52,7 @@ Verify Content In RHODS Explore Section
     ...    It compares the actual data with the one registered in a JSON file. The checks are about:
     ...    - Card's details (text, badges, images)
     ...    - Sidebar (titles, links text, links status)
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
@@ -78,7 +78,7 @@ Verify Disabled Cards Can Be Removed
     ...                 only trigger warning when issue happens
     ...                 AutomationBug: implementation is to be refactored after RHOSAK removal
     ...                 for ods-ci
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-1081    ODS-1092
     ...       AutomationBug
     # Enable Custom App
@@ -91,7 +91,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     ...               ProductBug: RHODS-6539
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-1097   ODS-357
     ...       ProductBug
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
@@ -125,7 +125,7 @@ Verify CSS Style Of Getting Started Descriptions
 Verify Documentation Link HTTP Status Code
     [Documentation]    It verifies the documentation link present in question mark and
     ...    also checks the RHODS dcoumentation link present in resource page.
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
     Documentation Links Should Be Equal To The Expected Ones   actual_links=${links}  expected_links=${DOC_LINKS_EXP}

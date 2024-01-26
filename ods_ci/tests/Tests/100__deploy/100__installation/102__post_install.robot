@@ -43,7 +43,7 @@ Verify Traefik Deployment
 
 Verify Notebook Controller Deployment
     [Documentation]    Verifies RHODS Notebook Controller deployment
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-546  ODS-294  ODS-1250  ODS-237
     @{NBC} =  Oc Get    kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=notebook-controller
     @{ONBC} =  Oc Get    kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=odh-notebook-controller
@@ -53,7 +53,7 @@ Verify Notebook Controller Deployment
 
 Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     Resources-GPU  # Not actually needed, but we first need to enable operator install by default
     ...     ODS-1157
 

@@ -10,7 +10,7 @@ Library             ../../../libs/Helpers.py
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
 
-Test Tags          Sanity    JupyterHub      OpenDataHub
+Test Tags          Sanity    JupyterHub      OpenDataHub    Tier1
 
 
 *** Variables ***

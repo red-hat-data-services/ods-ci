@@ -74,6 +74,7 @@ Test Duplicate Image
     # Workaround for https://issues.redhat.com/browse/RHOAIENG-1192
     # To be removed ASAP
     Wait Until Page Contains    Unable to add notebook image: HTTP request failed
+    Log    Unable to add second image with error message "Unable to add notebook image: HTTP request failed" due to RHOAIENG-1192    level=WARN  # robocop: disable
     # Since the image cannot be created, we need to cancel the modal window now
     Click Button    ${GENERIC_CANCEL_BTN_XP}
     [Teardown]  Duplicate Image Teardown

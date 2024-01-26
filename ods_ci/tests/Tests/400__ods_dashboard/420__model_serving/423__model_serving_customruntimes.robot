@@ -36,7 +36,7 @@ Verify RHODS Admins Can Delete A Custom Serving Runtime Template
  
 Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Serving Platform
     [Documentation]    Imports a Custom Serving Runtime for each supported serving platform
-    [Tags]    Sanity    ODS-2542
+    [Tags]    Sanity    ODS-2542    Tier1
     [Setup]    Generate Runtime YAMLs
     Open Dashboard Settings    settings_page=Serving runtimes
     ${RUNTIME_BOTH_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_both_model.yaml

@@ -90,7 +90,7 @@ Verify Workbench Images Have Multiple Versions
     END
 
 Verify User Cannot Create Project With Empty Fields
-    [Tags]    Sanity   ODS-1783
+    [Tags]    Sanity   ODS-1783    Tier1
     [Documentation]    Verifies users is not allowed to create a project with Empty title
     Open Data Science Projects Home Page
     Create Project With Empty Title And Expect Error
@@ -105,7 +105,7 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     Close Generic Modal If Present
 
 Verify User Can Create A Data Science Project
-    [Tags]    Smoke    Sanity    ODS-1775
+    [Tags]    Smoke    Sanity    ODS-1775    Tier1
     [Documentation]    Verifies users can create a DS project
     Open Data Science Projects Home Page
     # Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -117,7 +117,7 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Smoke    Sanity    ODS-1814
+    [Tags]    Smoke    Sanity    ODS-1814    Tier1
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -155,7 +155,7 @@ Verify User Can Create A PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Smoke    Sanity    ODS-1816
+    [Tags]    Smoke    Sanity    ODS-1816    Tier1
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}

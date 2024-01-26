@@ -37,6 +37,7 @@ Verify Updating Project With Changes From Git Repository
     [Documentation]    Verifies that changes has been pulled successfully to local repository
     [Tags]    ODS-324
     ...       Sanity    Tier1
+    Set Log Level    TRACE
     Set Staging Status
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
@@ -61,6 +62,7 @@ Verify Updating Project With Changes From Git Repository
     Open New Notebook
     ${commit_msg2}=    Get Last Commit Message
     Should Not Be Equal    ${commit_msg2}    ${commit_msg1}
+    Set Log Level    NONE
 
 
 *** Keywords ***

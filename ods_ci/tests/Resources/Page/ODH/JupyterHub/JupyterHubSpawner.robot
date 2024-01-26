@@ -144,7 +144,7 @@ Add Spawner Environment Variable
    [Arguments]  ${env_var}  ${env_var_value}
    Click Button  Add more variables
    ${elements} =    Get Element Count    ${KFNBC_ENV_VAR_NAME_PRE}
-   ${rows} =    Set Variable    ${elements}-${1}
+   ${rows} =    Evaluate    $elements-${1}
    Input Text    xpath://input[contains(@id,"-NO KEY-")][1]    ${env_var}
    Element Attribute Value Should Be
    ...    xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"environment-variable-row-${rows}-0-${env_var}")]    value

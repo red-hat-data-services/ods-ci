@@ -246,7 +246,7 @@ Get Model Inference
     ...    ${project_title}=${NONE}
     ${self_managed} =    Is RHODS Self-Managed
     ${url}=    Get Model Route via UI    ${model_name}
-    ${curl_cmd}=     Set Variable    curl -s ${url} -d @${inference_input}
+    ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
     IF    ${token_auth}
         IF    "${project_title}" == "${NONE}"
             ${project_title}=    Get Model Project    ${model_name}

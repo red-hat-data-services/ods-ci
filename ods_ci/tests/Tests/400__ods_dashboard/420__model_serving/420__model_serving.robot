@@ -12,8 +12,8 @@ Suite Teardown    Model Serving Suite Teardown
 Test Tags         ModelMesh
 
 *** Variables ***
-${INFERENCE_INPUT}=    ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
-${INFERENCE_INPUT_OPENVINO}=    ods_ci/tests/Resources/Files/openvino-example-input.json
+${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
+${INFERENCE_INPUT_OPENVINO}=    @ods_ci/tests/Resources/Files/openvino-example-input.json
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
 ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}
 ${PRJ_TITLE}=    model-serving-project

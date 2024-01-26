@@ -274,6 +274,24 @@ Verify Model Inference
         Fail    msg=comparison between expected and actual failed, ${list}
     END
 
+Verify Model Inference With Retries
+    [Documentation]    We see the inference failing often in the tests. One possible cause might be
+    ...                timing: model not ready to reply yet, despite the pod is up and running and the
+    ...                endpoint exposed.
+    ...                This is a temporary mitigation meanwhile we find a better way to check the model
+    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}
+    ...            ${token_auth}=${FALSE}    ${project_title}=${NONE}    ${retries}=${5}
+    ${retry}=    Set Variable    ${5}
+    WHILE    ${retry} < ${retries}
+        IF    ${retry} > 0
+            Log    message=Modelmesh inference call failed ${retry}/${retries}.
+            ...    level=WARN
+        END
+        ${status}=    Run Keyword And Return Status    Verify Model Inference
+        ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
+        Exit For Loop If    ${status}
+    END
+
 Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found

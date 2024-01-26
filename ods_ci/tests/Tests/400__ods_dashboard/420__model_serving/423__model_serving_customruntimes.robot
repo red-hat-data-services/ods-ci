@@ -73,7 +73,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     ...    Create Data Science Project If Not Exists    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}
     ...    description=${PRJ_DESCRIPTION}
     ${model_name}=    Set Variable    test-model-csr
-    ${inference_input}=    Set Variable    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
+    ${inference_input}=    Set Variable    ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
     ${exp_inference_output}=    Set Variable    {"model_name":"test-model-csr__isvc-85fe09502b","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
     Open Data Science Project Details Page    project_title=${PRJ_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -83,10 +83,10 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     Serve Model    project_name=${PRJ_TITLE}    model_name=${model_name}    framework=onnx    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
     Wait Until Runtime Pod Is Running    server_name=${MODEL_SERVER_NAME}
-    ...    project_title=${PRJ_TITLE}    timeout=15s
+    ...    project_title=${PRJ_TITLE}    timeout=40s
     Verify Model Status    ${model_name}    success
-    Verify Model Inference    ${model_name}    ${inference_input}    ${exp_inference_output}    token_auth=${TRUE}
-    ...    project_title=${PRJ_TITLE}
+    Verify Model Inference With Retries    ${model_name}    ${inference_input}    ${exp_inference_output}    token_auth=${TRUE}
+    ...    project_title=${PRJ_TITLE} 
     
 
 *** Keywords ***

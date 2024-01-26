@@ -281,16 +281,22 @@ Verify Model Inference With Retries
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}
     ...            ${token_auth}=${FALSE}    ${project_title}=${NONE}    ${retries}=${5}
-    ${retry}=    Set Variable    ${5}
-    WHILE    ${retry} < ${retries}
-        IF    ${retry} > 0
-            Log    message=Modelmesh inference call failed ${retry}/${retries}.
-            ...    level=WARN
-        END
-        ${status}=    Run Keyword And Return Status    Verify Model Inference
+    ${status}=    Run Keyword And Return Status    Verify Model Inference
         ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
-        Exit For Loop If    ${status}
+    IF    not ${status}
+        ${retry}=    Set Variable    ${0}
+        WHILE    ${retry} < ${retries}
+            IF    ${retry} > 0
+                Log    message=Modelmesh inference call failed ${retry}/${retries}.
+                ...    level=WARN
+            END
+            ${status}=    Run Keyword And Return Status    Verify Model Inference
+            ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
+            Exit For Loop If    ${status}
+            ${retry} =    Evaluate    ${retry} + 1
+        END        
     END
+    
 
 Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.

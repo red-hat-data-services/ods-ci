@@ -269,7 +269,7 @@ Verify User Can Validate Scale To Zero
     [Tags]    Sanity    Tier1    ODS-2379
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    ${model_name}=    Create List    ${flan_model_name}
+    ${models_names}=    Create List    ${flan_model_name}
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
@@ -299,7 +299,7 @@ Verify User Can Validate Scale To Zero
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
     [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
-    ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Set Requests And Limits For A Model
     [Documentation]    Checks if user can set HW request and limits on their inference service object

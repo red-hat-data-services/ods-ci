@@ -15,9 +15,7 @@ ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
 ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
-${USE_BUCKET_HTTPS}=    "1"
-${UWM_ENABLE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_enable.yaml
-${UWM_CONFIG_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/uwm_cm_conf.yaml  
+${USE_BUCKET_HTTPS}=    "1" 
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
@@ -63,7 +61,7 @@ Set Project And Runtime
     Deploy Serving Runtime    namespace=${namespace}    runtime=${runtime}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
         Oc Apply    kind=ConfigMap    src=${UWM_CONFIG_FILEPATH}
-        Oc Apply    kind=ConfigMap    src=${UWM_ENABLE_FILEPATH}
+        Oc Apply    kind=ConfigMap    src=${MONITORING_CONFIG_FILEPATH}
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END

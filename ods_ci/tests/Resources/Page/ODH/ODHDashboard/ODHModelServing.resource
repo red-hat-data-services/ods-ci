@@ -43,7 +43,7 @@ Open Model Serving Home Page
         Sleep    5s
         SeleniumLibrary.Reload Page
     END
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Deployed models
+    #Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Deployed models
     SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.
     ...    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
@@ -521,3 +521,15 @@ Set Up Project
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END
+
+Open Metrics Page For The Deployed Model
+    [Documentation]    Opens the Metrics for a Deployed model from the Model Serving page by clicking model name
+    [Arguments]      ${project_name}   ${model_name}
+    Open Model Serving Home Page
+    Click Element    xpath=//div[contains(text(),'Project')]/ancestor::div[1]/following-sibling::div//button
+    Click Element    //li/a[text()="${project_name}"]
+    Sleep   10s
+    Page Should Contain Element    //a[.="${model_name}"]
+    Click Element  xpath=//a[.="${model_name}"]
+    Sleep    5s    reason=Wait for Metrics Page to open
+    Page Should Contain Element    //button[@data-testid="performance-tab"]

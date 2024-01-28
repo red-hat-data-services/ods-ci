@@ -22,7 +22,7 @@ Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    #Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 

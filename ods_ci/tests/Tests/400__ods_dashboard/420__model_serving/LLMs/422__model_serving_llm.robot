@@ -750,3 +750,4 @@ Run Install Script
         ...    cwd=caikit-tgis-serving/demo/kserve
     END
     Should Be Equal As Integers    ${rc}    ${0}
+

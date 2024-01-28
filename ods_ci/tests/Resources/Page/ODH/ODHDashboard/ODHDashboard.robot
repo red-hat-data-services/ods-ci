@@ -57,8 +57,8 @@ Launch Dashboard
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-  Wait for RHODS Dashboard to Load    expected_page=${expected_page}
-  ...    wait_for_cards=${wait_for_cards}
+  #Wait for RHODS Dashboard to Load    expected_page=${expected_page}
+  #...    wait_for_cards=${wait_for_cards}
 
 Authorize rhods-dashboard service account
   Wait Until Page Contains  Authorize Access

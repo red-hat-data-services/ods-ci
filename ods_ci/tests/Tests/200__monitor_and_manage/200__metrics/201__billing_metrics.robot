@@ -161,8 +161,8 @@ Fire Query On RHODS Prometheus And Return Value
 
 Skip Test If Previous CPU Usage Is Not Zero
     [Documentation]     Skips test if CPU usage is not zero
-    ${metrics_value} =    Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}    ${username}=${OCP_ADMIN_USER.USERNAME}
-    ...     ${password}=${OCP_ADMIN_USER.PASSWORD}   ${auth_type}=${OCP_ADMIN_USER.AUTH_TYPE}
+    ${metrics_value} =    Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}    username=${OCP_ADMIN_USER.USERNAME}
+    ...     password=${OCP_ADMIN_USER.PASSWORD}   auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     ${metrics_query_results_contain_data} =    Run Keyword And Return Status    Metrics.Verify Query Results Contain Data
     IF    ${metrics_query_results_contain_data}
         Log To Console    Current CPU usage: ${metrics_value}
@@ -173,8 +173,8 @@ Skip Test If Previous CPU Usage Is Not Zero
 
 Verify Previus CPU Usage Is Greater Than Zero
     [Documentation]     Verifies the cpu usage is greater than zero
-    ${metrics_value} =    Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}    ${username}=${OCP_ADMIN_USER.USERNAME}
-    ...     ${password}=${OCP_ADMIN_USER.PASSWORD}   ${auth_type}=${OCP_ADMIN_USER.AUTH_TYPE}
+    ${metrics_value} =    Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}    username=${OCP_ADMIN_USER.USERNAME}
+    ...     password=${OCP_ADMIN_USER.PASSWORD}   auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Metrics.Verify Query Results Contain Data
     Capture Page Screenshot
     Should Be True    ${metrics_value} > 0

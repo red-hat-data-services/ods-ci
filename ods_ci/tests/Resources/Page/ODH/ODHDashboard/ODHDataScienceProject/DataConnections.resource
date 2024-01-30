@@ -159,4 +159,4 @@ Get Data Connection Form Values
     ${s3_endpoint}   get element attribute    ${S3_ENDPOINT_DC_INPUT_XP}      value
     ${s3_region}   get element attribute    ${S3_REGION_DC_INPUT_XP}      value
     ${s3_bucket}   get element attribute    ${S3_BUCKET_DC_INPUT_XP}      value
-    [return]    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}
+    RETURN    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}

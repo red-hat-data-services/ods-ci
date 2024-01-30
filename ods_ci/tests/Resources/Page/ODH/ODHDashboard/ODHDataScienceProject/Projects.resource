@@ -30,7 +30,7 @@ Is Data Science Projects Page Open
     [Documentation]    Checks if Data Science Projects home page is open. Returns TRUE or FALSE
     Close Generic Modal If Present
     ${page_open}=   Run Keyword And Return Status   Page Should Contain Element     ${DS_PROJECT_XP}
-    [Return]    ${page_open}
+    RETURN    ${page_open}
 
 Open Data Science Project Details Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
@@ -78,7 +78,7 @@ Is Data Science Project Details Page Open
     [Arguments]     ${project_title}
     ${page_open}=   Run Keyword And Return Status
     ...    SeleniumLibrary.Page Should Contain Element     xpath=//h1[contains(text(),"${project_title}")]
-    [Return]    ${page_open}
+    RETURN    ${page_open}
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
@@ -151,7 +151,7 @@ Get Openshift Namespace From Data Science Project
     [Arguments]     ${project_title}
     ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name'    # robocop: disable
     ${k8s_name}=    Replace String    ${k8s_name}    "    ${EMPTY}
-    [Return]    ${k8s_name}
+    RETURN    ${k8s_name}
 
 Delete Data Science Projects From CLI
     [Documentation]     Deletes the Openshift Projects using OpenshiftLibrary.
@@ -285,7 +285,7 @@ Get All Displayed Projects
         ${name}=    Get Text    ${element}
         Append To List    ${projects_names}    ${name}
     END
-    [Return]   ${projects_names}
+    RETURN   ${projects_names}
 
 Number Of Displayed Projects Should Be
     [Documentation]    Checks the number the DS projects visible in the DS Projects home page is expected

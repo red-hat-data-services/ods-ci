@@ -143,13 +143,14 @@ Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
    [Arguments]  ${env_var}  ${env_var_value}
    Click Button  Add more variables
-   #Input Text  xpath://input[@id="---NO KEY---"]  ${env_var}
-   Input Text  xpath://input[contains(@id,"-NO KEY-")][1]  ${env_var}
-   Element Attribute Value Should Be  xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"-${env_var}")]  value  ${env_var}
-   #Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
-   Input Text  xpath://input[contains(@id, "-${env_var}-value")]  ${env_var_value}
-   #Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}
-   Element Attribute Value Should Be  xpath://input[contains(@id, "-${env_var}-value")]  value  ${env_var_value}
+   ${elements} =    Get Element Count    ${KFNBC_ENV_VAR_NAME_PRE}
+   ${rows} =    Evaluate    $elements-${1}
+   Input Text    xpath://input[contains(@id,"-NO KEY-")][1]    ${env_var}
+   Element Attribute Value Should Be
+   ...    xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"environment-variable-row-${rows}-0-${env_var}")]    value
+   ...    ${env_var}
+   Input Text    xpath://input[contains(@id, "-${env_var}-value")]    ${env_var_value}
+   Element Attribute Value Should Be    xpath://input[contains(@id, "-${env_var}-value")]    value    ${env_var_value}
 
 Remove All Spawner Environment Variables
    [Documentation]  Removes all existing environment variables in the Spawner

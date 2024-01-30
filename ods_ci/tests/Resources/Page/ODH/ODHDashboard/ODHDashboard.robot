@@ -625,14 +625,14 @@ Delete Custom Image
     [Arguments]    ${image_name}
     Click Button  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button
     ${image_name_id} =  Replace String  ${image_name}  ${SPACE}  -
-    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//li[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
+    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//button[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
     Handle Deletion Confirmation Modal  ${image_name}  notebook image
 
 Open Edit Menu For Custom Image
     [Documentation]    Opens the edit view for a specific custom image
     [Arguments]    ${image_name}
     Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
-    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-edit-button"]
+    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//button[@id="${image_name}-edit-button"]
     Wait Until Page Contains  Delete Notebook Image
 
 Expand Custom Image Details

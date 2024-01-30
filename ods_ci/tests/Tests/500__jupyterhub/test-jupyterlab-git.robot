@@ -41,8 +41,11 @@ Verify Updating Project With Changes From Git Repository
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
     Open New Notebook
+    Add And Run JupyterLab Code Cell In Active Notebook    import os;path="/opt/app-root/src/ODS-QE-Github-Test";os.chdir(path)
     ${commit_msg1}=    Get Last Commit Message
-    Add And Run JupyterLab Code Cell In Active Notebook    ! mkdir ../folder/
+    Add And Run JupyterLab Code Cell In Active Notebook    !mkdir ../folder/
+    Add And Run JupyterLab Code Cell In Active Notebook    !git config --global user.name "${GITHUB_USER.USERNAME}"
+    Add And Run JupyterLab Code Cell In Active Notebook    !git config --global user.email ${GITHUB_USER.EMAIL}
     Sleep    2s
     Open Folder or File    folder
     ${randnum}=    Generate Random String    9    [NUMBERS]

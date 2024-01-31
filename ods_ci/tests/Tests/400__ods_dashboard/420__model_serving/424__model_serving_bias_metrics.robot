@@ -55,6 +55,7 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
     ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
     Schedule Bias Metrics request via CLI     metricsType=dir   modelId=${modelId}  token=${token}  protectedAttribute="customer_data_input-3"
     ...       favorableOutcome=0   outcomeName="predict"    privilegedAttribute=1.0    unprivilegedAttribute=0.0
+    Sleep    60s    msg=Wait for Trusty Metrics to be calculated and prometheus scraping to be done
     Verify TrustyAI Metrics Exists In Observe Metrics    trustyai_dir    retry_attempts=2   username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
 
@@ -116,6 +117,7 @@ Install And Verify TrustyAI Service
     [Documentation]    Install TrustyAI service CRD and verify that TrustyAI resources have spun up
     [Arguments]        ${namespace}=${PRJ_TITLE}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${TRUSTYAI_CR_FILEPATH} -n ${namespace}
+    Sleep    60s    msg=Wait for Trusty Route to be created
     ${return_code}    ${output}    Run And Return Rc And Output   oc get route trustyai-service -n ${namespace} --template={{.spec.host}}
     Should Be Equal As Integers    ${return_code}	 0
     Set Suite Variable    ${TRUSTY_ROUTE}    https://${output}

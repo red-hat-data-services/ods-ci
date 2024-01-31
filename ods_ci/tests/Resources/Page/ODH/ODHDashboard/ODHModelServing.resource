@@ -504,7 +504,7 @@ Set Up Project
     [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
     Open Model Serving Home Page
     IF    ${single_prj}
-        Try Opening Create Server        
+        Try Opening Create Server
     END
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects

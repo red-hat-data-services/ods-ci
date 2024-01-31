@@ -492,9 +492,6 @@ Try Opening Create Server
         ELSE
             Clean Up Model Serving Page
             Clean Up DSP Page
-            Open Model Serving Home Page
-            Reload Page
-            Sleep  5s
         END
     END
 

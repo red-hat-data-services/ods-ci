@@ -23,7 +23,12 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Single-model platform and TGIS Standalone runtime.
     [Tags]    Sanity    Tier1    ODS-2611
-    [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
+    [Setup]    Run Keywords
+    ...    Run    git clone https://github.com/IBM/text-generation-inference/
+    ...    AND
+    ...    Configure User Workload Monitoring
+    ...    AND
+    ...    Enable User Workload Monitoring
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${model_name}=    Set Variable    flan-t5-small-hf
     Deploy Kserve Model Via UI    model_name=${model_name}

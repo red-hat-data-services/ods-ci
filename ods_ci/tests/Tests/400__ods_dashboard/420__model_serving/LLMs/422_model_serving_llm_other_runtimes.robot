@@ -24,6 +24,7 @@ Verify User Can Serve And Query A Model With TGIS-Standalone Runtime (gRPC)
     ...                using Kserve and TGIS standalone runtime
     [Tags]    Sanity    Tier1    ODS-2607
     [Setup]    Run Keywords    Set Project And Runtime    namespace=${TEST_NS_TGIS}    runtime=${TGIS_RUNTIME_NAME}
+    ...        enable_metrics=${TRUE}
     ...        AND
     ...        Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS_TGIS}

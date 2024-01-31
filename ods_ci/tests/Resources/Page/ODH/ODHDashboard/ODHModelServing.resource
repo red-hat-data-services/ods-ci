@@ -508,7 +508,7 @@ Set Up Project
         Try Opening Create Server
     END
     Open Data Science Projects Home Page
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${namespace}    description=kserve test project
     Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}

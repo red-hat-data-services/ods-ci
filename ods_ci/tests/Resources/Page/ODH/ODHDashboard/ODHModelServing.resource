@@ -487,6 +487,7 @@ Try Opening Create Server
     FOR    ${try}    IN RANGE    0    ${retries}
         ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project
         IF    ${status}
+            Capture Page Screenshot
             Click Button    Select a project
             RETURN
         ELSE

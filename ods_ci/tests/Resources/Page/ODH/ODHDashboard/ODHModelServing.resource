@@ -492,6 +492,9 @@ Try Opening Create Server
         ELSE
             Clean Up Model Serving Page
             Clean Up DSP Page
+            Open Model Serving Home Page
+            Reload Page
+            Sleep  5s
         END
     END
 
@@ -501,12 +504,10 @@ Set Up Project
     [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
     Open Model Serving Home Page
     IF    ${single_prj}
-        Try Opening Create Server
-        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    ELSE
-        Open Data Science Projects Home Page
-        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+        Try Opening Create Server        
     END
+    Open Data Science Projects Home Page
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${namespace}    description=kserve test project
     Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}

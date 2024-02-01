@@ -24,14 +24,6 @@ Run TestMNISTPyTorchMCAD E2E test
     ...     CodeflareOperator
     Run Codeflare E2E Test    TestMNISTPyTorchMCAD
 
-Run TestMNISTRayClusterSDK E2E test
-    [Documentation]    Run Go E2E test: TestMNISTRayClusterSDK
-    [Tags]  ODS-2544
-    ...     Tier2
-    ...     DistributedWorkloads
-    ...     CodeflareOperator
-    Run Codeflare E2E Test    TestMNISTRayClusterSDK
-
 Run TestMNISTRayJobMCADRayCluster E2E test
     [Documentation]    Run Go E2E test: TestMNISTRayJobMCADRayCluster
     [Tags]  ODS-2545

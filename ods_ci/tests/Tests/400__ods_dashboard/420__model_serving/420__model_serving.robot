@@ -99,9 +99,6 @@ Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
     [Tags]    Sanity
     ...    RHOAIENG-549
-    [Setup]    Clean All Models Of Current User
-    Open Data Science Projects Home Page
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     FOR  ${idx}  IN RANGE  1  6
         ${new_proj} =    Set Variable    ${PRJ_TITLE}${idx}
         Log To Console    Create new DS Project '${new_proj}' for the same Model '${MODEL_NAME}''
@@ -122,6 +119,7 @@ Verify Multiple Projects With Same Model
         Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service    ${new_proj}
         Verify Model Status    ${MODEL_NAME}    success
     END
+    [Teardown]    Clean All Models Of Current User
 
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
@@ -176,7 +174,7 @@ Model Serving Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        Run Keyword And Continue On Failure    Delete Model Via UI    test-model
+        Clean All Models Of Current User
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END

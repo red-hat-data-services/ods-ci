@@ -53,6 +53,7 @@ Serve Model
     ...    The framework should be either "onnx" or "openvino_ir".
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test
+    ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
     # TODO: Does not work if there's already a model deployed
     SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
     SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
@@ -76,9 +77,10 @@ Serve Model
         Set Up New Data Connection    dc_name=${data_connection_name}
         Set Folder Path    ${model_path}
     END
-    Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
+    SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
     SeleniumLibrary.Click Button    Deploy
     SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
+    [TEARDOWN]    SeleniumLibrary.Set Selenium Implicit Wait    ${orig wait}    
 
 Select Project
     [Documentation]    Selects a project in the "deploy model" modal.
@@ -162,11 +164,11 @@ Verify Model Status
     ...    status can be "success" or any other string (which will expect failure status).
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
-        Wait Until Keyword Succeeds    120s    5s
+        Wait Until Keyword Succeeds    3m    5s
         ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
-        Wait Until Keyword Succeeds    120s    5s
+        Wait Until Keyword Succeeds    3m    5s
         ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
@@ -174,13 +176,13 @@ Verify Model Status
 Delete Model Via UI
     [Documentation]    Deletes a deployed model from the Model Serving page in the dashboard.
     [Arguments]    ${model_name}
-    Page Should Contain Element    xpath://div[.="${model_name} "]
+    Wait Until Element Is Visible       xpath://a[contains(text(), '${model_name}')]    timeout=10
     Click Element    xpath://div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}
     Click Element    xpath://div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Delete"]
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
     Input Text    xpath://input[@id="delete-modal-input"]    ${model_name}
     Click Button    Delete deployed model
-    Wait Until Page Does Not Contain Element    xpath://div[.="${model_name} "]    timeout=30s
+    Wait Until Page Does Not Contain Element    xpath://a[contains(text(), '${model_name}')]    timeout=30s
 
 Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
@@ -479,14 +481,15 @@ Clean Up DSP Page
         Click Element    //button[@aria-label="Close"]
     END
     Open Data Science Projects Home Page
-    WHILE    ${TRUE}
-        ${projects}=    Get All Displayed Projects
-        IF    len(${projects})==0
-            BREAK
-        END
+    ${projects}=    Get All Displayed Projects
+    ${projects_count}=    Get length    ${projects}
+    WHILE    ${projects_count} > 0    limit=${projects_count}m    on_limit_message=Timeout exceeded waiting for all DS projects deletion    # robotcode: ignore
         Delete Data Science Projects From CLI    ${projects}
         Reload Page
-        Wait Until Page Contains    Data science projects
+        ${reloaded} =    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains    Data science projects    timeout=30s
+        IF  ${reloaded}==${FALSE}    SeleniumLibrary.Capture Page Screenshot
+        ${projects}=    Get All Displayed Projects
+        ${projects_count}=    Get length    ${projects}
     END
 
 Clean All Models Of Current User

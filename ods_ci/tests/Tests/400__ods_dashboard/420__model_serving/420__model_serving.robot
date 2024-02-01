@@ -41,8 +41,8 @@ Verify Model Can Be Deployed Via UI
     ...    At the end of the process, verifies the correct resources have been deployed.
     [Tags]    Sanity    Tier1
     ...    ODS-1921
-    Open Model Serving Home Page
-    Try Opening Create Server
+    [Setup]    Clean All Models Of Current User
+    Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -76,8 +76,7 @@ Verify Openvino_IR Model Via UI
     [Documentation]    Test the deployment of an openvino_ir model
     [Tags]    Smoke
     ...    ODS-2054
-    Open Model Serving Home Page
-    Try Opening Create Server
+    [Setup]    Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -96,6 +95,34 @@ Verify Openvino_IR Model Via UI
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
 
+Verify Multiple Projects With Same Model
+    [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
+    [Tags]    Sanity
+    ...    RHOAIENG-549
+    [Setup]    Clean All Models Of Current User
+    Open Data Science Projects Home Page
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    FOR  ${idx}  IN RANGE  1  6
+        ${new_proj} =    Set Variable    ${PRJ_TITLE}${idx}
+        Log To Console    Create new DS Project '${new_proj}' for the same Model '${MODEL_NAME}''
+        Open Data Science Projects Home Page
+        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+        Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}
+        Create S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
+        ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+        ...            aws_bucket_name=ods-ci-s3
+        Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
+        Open Model Serving Home Page
+        Serve Model    project_name=${new_proj}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
+        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
+        ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+        ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
+        ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}    project_name=${new_proj}
+        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service    ${new_proj}
+        Verify Model Status    ${MODEL_NAME}    success
+    END
+
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
     [Tags]    Smoke
@@ -106,8 +133,8 @@ Verify Tensorflow Model Via UI
     [Documentation]    Test the deployment of a tensorflow (.pb) model
     [Tags]    Sanity    Tier1
     ...    ODS-2268
-    Open Model Serving Home Page
-    Try Opening Create Server
+    [Setup]    Clean All Models Of Current User
+    Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -161,35 +188,5 @@ Model Serving Suite Teardown
     Close All Browsers
     RHOSi Teardown
 
-Clean Up DSP Page
-    [Documentation]    Removes all DSP Projects, if any are present
-    Open Data Science Projects Home Page
-    WHILE    ${TRUE}
-        ${projects} =    Get All Displayed Projects
-        IF    len(${projects})==0
-            BREAK
-        END
-        Delete Data Science Projects From CLI    ${projects}
-        Reload Page
-        Wait Until Page Contains    Data Science Projects
-    END
 
-Try Opening Create Server
-    [Documentation]    Tries to clean up DSP and Model Serving pages
-    ...    In order to deploy a single model in a new project. ${retries}
-    ...    controls how many retries are made.
-    [Arguments]    ${retries}=3
-    FOR    ${try}    IN RANGE    0    ${retries}
-        ${status} =    Run Keyword And Return Status    Page Should Contain    Select a project
-        IF    ${status}
-            Click Button    Select a project
-            RETURN
-        ELSE
-            Clean Up Model Serving Page
-            Clean Up DSP Page
-            Open Model Serving Home Page
-            Reload Page
-            Sleep  5s
-        END
-    END
 

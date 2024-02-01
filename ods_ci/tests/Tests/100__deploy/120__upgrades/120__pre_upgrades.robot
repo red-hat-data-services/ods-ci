@@ -88,8 +88,8 @@ Verify Model Can Be Deployed Via UI For Upgrade
     ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
     ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Fetch CA Certificate If RHODS Is Self-Managed
-    Open Model Serving Home Page
-    Try Opening Create Server
+    Clean All Models Of Current User
+    Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -130,34 +130,17 @@ Dashboard Test Teardown
     [Documentation]  Basic suite teardown
     Close All Browsers
 
-Try Opening Create Server
-    [Documentation]    Tries to clean up DSP and Model Serving pages
-    ...    In order to deploy a single model in a new project. ${retries}
-    ...    controls how many retries are made.
-    [Arguments]    ${retries}=3
-    FOR    ${try}    IN RANGE    0    ${retries}
-        ${status} =    Run Keyword And Return Status    Page Should Contain    Create server
-        IF    ${status}
-            Click Button    Create server
-            RETURN
-        ELSE
-            Clean Up Model Serving Page
-            Clean Up DSP Page
-            Open Model Serving Home Page
-            Reload Page
-            Sleep  5s
-        END
-    END
+Verify Openvino Deployment
+    [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
+    [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
+    @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
+    ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
+    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
+    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
+    Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
 
-Clean Up DSP Page
-    [Documentation]    Removes all DSP Projects, if any are present
-    Open Data Science Projects Home Page
-    WHILE    ${TRUE}
-        ${projects} =    Get All Displayed Projects
-        IF    len(${projects})==0
-            BREAK
-        END
-        Delete Data Science Projects From CLI    ${projects}
-        Reload Page
-        Wait Until Page Contains    Data Science Projects
-    END
+Verify Serving Service
+    [Documentation]    Verifies the correct deployment of the serving service in the project namespace
+    [Arguments]    ${project_name}=${PRJ_TITLE}
+    ${service} =    Oc Get    kind=Service    namespace=${project_name}    label_selector=modelmesh-service=modelmesh-serving
+    Should Not Be Equal As Strings    Error from server (NotFound): services "modelmesh-serving" not found    ${service}

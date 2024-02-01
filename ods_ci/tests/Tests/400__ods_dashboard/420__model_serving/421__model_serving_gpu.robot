@@ -25,8 +25,8 @@ Verify GPU Model Deployment Via UI
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
     [Tags]    Sanity    Tier1    Resources-GPU
     ...    ODS-2214
-    Open Model Serving Home Page
-    Try Opening Create Server
+    Clean All Models Of Current User
+    Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -107,25 +107,6 @@ Clean Up DSP Page
         Delete Data Science Projects From CLI    ${projects}
         Reload Page
         Wait Until Page Contains    Data Science Projects
-    END
-
-Try Opening Create Server
-    [Documentation]    Tries to clean up DSP and Model Serving pages
-    ...    In order to deploy a single model in a new project. ${retries}
-    ...    controls how many retries are made.
-    [Arguments]    ${retries}=3
-    FOR    ${try}    IN RANGE    0    ${retries}
-        ${status} =    Run Keyword And Return Status    Page Should Contain    Select a project
-        IF    ${status}
-            Click Button    Select a project
-            RETURN
-        ELSE
-            Clean Up Model Serving Page
-            Clean Up DSP Page
-            Open Model Serving Home Page
-            Reload Page
-            Sleep  5s
-        END
     END
 
 Get OpenShift Prometheus Route

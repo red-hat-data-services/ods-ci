@@ -76,6 +76,7 @@ Serve Model
         Set Up New Data Connection    dc_name=${data_connection_name}
         Set Folder Path    ${model_path}
     END
+    Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
     SeleniumLibrary.Click Button    Deploy
     SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 
@@ -179,7 +180,7 @@ Delete Model Via UI
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
     Input Text    xpath://input[@id="delete-modal-input"]    ${model_name}
     Click Button    Delete deployed model
-    Wait Until Page Does Not Contain Element    xpath://div[.="${model_name} "]
+    Wait Until Page Does Not Contain Element    xpath://div[.="${model_name} "]    timeout=30s
 
 Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
@@ -488,11 +489,12 @@ Clean Up DSP Page
         Wait Until Page Contains    Data science projects
     END
 
-Try Opening Create Server
+Clean All Models Of Current User
     [Documentation]    Tries to clean up DSP and Model Serving pages
     ...    In order to deploy a single model in a new project. ${retries}
     ...    controls how many retries are made.
-    [Arguments]    ${retries}=3
+    [Arguments]    ${retries}=5
+    Open Model Serving Home Page
     FOR    ${try}    IN RANGE    0    ${retries}
         ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project
         IF    ${status}
@@ -512,12 +514,11 @@ Set Up Project
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
     [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
-    Open Model Serving Home Page
     IF    ${single_prj}
-        Try Opening Create Server
+        Clean All Models Of Current User
     END
     Open Data Science Projects Home Page
-    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${namespace}    description=kserve test project
     Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}

@@ -41,7 +41,6 @@ Verify Model Can Be Deployed Via UI
     ...    At the end of the process, verifies the correct resources have been deployed.
     [Tags]    Sanity    Tier1
     ...    ODS-1921
-    [Setup]    Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -76,7 +75,6 @@ Verify Openvino_IR Model Via UI
     [Documentation]    Test the deployment of an openvino_ir model
     [Tags]    Smoke
     ...    ODS-2054
-    [Setup]    Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -101,7 +99,7 @@ Verify Multiple Projects With Same Model
     ...    RHOAIENG-549
     FOR  ${idx}  IN RANGE  1  6
         ${new_proj} =    Set Variable    ${PRJ_TITLE}${idx}
-        Log To Console    Create new DS Project '${new_proj}' for the same Model '${MODEL_NAME}''
+        Log To Console    Creating new DS Project '${new_proj}' with the same Model '${MODEL_NAME}''
         Open Data Science Projects Home Page
         Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
         Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}
@@ -119,7 +117,6 @@ Verify Multiple Projects With Same Model
         Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service    ${new_proj}
         Verify Model Status    ${MODEL_NAME}    success
     END
-    [Teardown]    Clean All Models Of Current User
 
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
@@ -131,7 +128,6 @@ Verify Tensorflow Model Via UI
     [Documentation]    Test the deployment of a tensorflow (.pb) model
     [Tags]    Sanity    Tier1
     ...    ODS-2268
-    [Setup]    Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -167,6 +163,7 @@ Model Serving Suite Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch CA Certificate If RHODS Is Self-Managed
+    Run Keyword And Ignore Error    Clean All Models Of Current User
 
 Model Serving Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes

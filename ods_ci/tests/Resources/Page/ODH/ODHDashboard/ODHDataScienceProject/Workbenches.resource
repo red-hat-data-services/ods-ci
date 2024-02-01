@@ -139,7 +139,7 @@ Add Environment Variables In Workbench
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"
             ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
-            Choose File    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//div[@class="pf-c-file-upload"]//input[@type="file"]    ${pwd}/${env_variable}[filepath]
+            Choose File    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${idx}]//div[(contains(@class, "-c-file-upload"))]//input[@type="file"]    ${pwd}/${env_variable}[filepath]  # robocop: disable:line-too-long
         END
         IF    ${n_objects}-${idx} > 0
             Click Button    Add more variables

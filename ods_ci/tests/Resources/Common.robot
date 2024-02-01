@@ -13,8 +13,8 @@ Resource  RHOSi.resource
 
 *** Variables ***
 @{DEFAULT_CHARS_TO_ESCAPE}=    :    /    .
-${MONITORING_CONFIG_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_conf.yaml
-${UWM_CONFIG_FILEPATH}=              ods_ci/tests/Resources/Files/uwm_cm_enable.yaml
+${UWM_CONFIG_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_conf.yaml
+${UWM_ENABLE_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_enable.yaml
 
 
 *** Keywords ***
@@ -433,7 +433,7 @@ Skip If Component Is Not Enabled
 
 Enable User Workload Monitoring
     [Documentation]    Enable User Workload Monitoring for the cluster for user-defined-projects
-    ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${MONITORING_CONFIG_FILEPATH}
+    ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_ENABLE_FILEPATH}
     Log To Console    ${output}
     Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
 

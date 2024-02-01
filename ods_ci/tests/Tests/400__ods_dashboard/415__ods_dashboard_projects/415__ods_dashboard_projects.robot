@@ -729,13 +729,16 @@ Environment Variables Should Be Displayed According To Their Type
 
 Environment Variable Type Should Be
     [Arguments]    ${expected_type}    ${var_idx}
-    ${displayed_type}=    Get Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//div[contains(@class,"pf-v5-c-select")]/button//span[contains(@class,'toggle-text')]
+    ${displayed_type}=    Get Text
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//div[contains(@class,"pf-v5-c-select")]/button//span[contains(@class,'toggle-text')]  # robocop: disable:line-too-long
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_type}    ${expected_type}
 
 Environment Variable Key/Value Fields Should Be Correctly Displayed
     [Arguments]    ${var_idx}    ${var_pair_idx}    ${expected_key}    ${expected_value}    ${type}
-    ${displayed_value_xp}=    Set Variable    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//input[@aria-label="value of item ${var_pair_idx}"]
-    ${displayed_key_xp}=    Set Variable    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//input[@aria-label="key of item ${var_pair_idx}"]
+    ${displayed_value_xp}=    Set Variable
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//input[@aria-label="value of item ${var_pair_idx}"]  # robocop: disable:line-too-long
+    ${displayed_key_xp}=    Set Variable
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//input[@aria-label="key of item ${var_pair_idx}"]  # robocop: disable:line-too-long
     ${displayed_key}=    Get Value    ${displayed_key_xp}
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_key}    ${expected_key}
     ${displayed_val}=    Get Value    ${displayed_value_xp}

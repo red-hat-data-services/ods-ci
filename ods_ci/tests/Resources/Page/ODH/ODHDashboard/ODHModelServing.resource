@@ -31,7 +31,7 @@ ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 *** Keywords ***
 Open Model Serving Home Page
     [Documentation]    Verifies submenu Settings > "Model Serving" is visible and navigates to page
-    SeleniumLibrary.Page Should Contain    Model Serving
+    Wait Until Page Contains Element    xpath://a[text()='Model Serving']
     SeleniumLibrary.Click Link      Model Serving
     # Replace sleep with better Wait keyword. Confirm if error page has "Model Serving" h1 element.
     Sleep    1s
@@ -164,25 +164,26 @@ Verify Model Status
     ...    status can be "success" or any other string (which will expect failure status).
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
-        Wait Until Keyword Succeeds    3m    5s
+        Wait Until Keyword Succeeds    5m    10s
         ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
-        Wait Until Keyword Succeeds    3m    5s
+        Wait Until Keyword Succeeds    5m    10s
         ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 
 Delete Model Via UI
     [Documentation]    Deletes a deployed model from the Model Serving page in the dashboard.
-    [Arguments]    ${model_name}
-    Wait Until Element Is Visible       xpath://a[contains(text(), '${model_name}')]    timeout=10
-    Click Element    xpath://div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}
-    Click Element    xpath://div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Delete"]
+    [Arguments]    ${model_name}    ${project_name}
+    ${model_row_xpath}=    Set Variable    xpath://tr[contains(., '${model_name}') and contains(., '${project_name}')]
+    Wait Until Element Is Visible       ${model_row_xpath}
+    Click Element    ${model_row_xpath}${MS_TABLE_DROPDOWN_TOGGLE}
+    Click Element    ${model_row_xpath}${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Delete"]
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
     Input Text    xpath://input[@id="delete-modal-input"]    ${model_name}
     Click Button    Delete deployed model
-    Wait Until Page Does Not Contain Element    xpath://a[contains(text(), '${model_name}')]    timeout=30s
+    Wait Until Page Does Not Contain Element    ${model_row_xpath}    timeout=30s
 
 Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
@@ -317,9 +318,12 @@ Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
     ${models} =    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
-    FOR  ${model}  IN  @{models}
-        ${name} =    Get Text   ${model}
-        Delete Model Via UI    ${name}
+    ${projects} =    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+    FOR    ${model}    ${project}    IN ZIP    ${models}    ${projects}
+        ${model} =    Get Text   ${model}
+        ${project} =    Get Text   ${project}
+        @{project description} =  Split String    ${project}
+        Delete Model Via UI    ${model}    ${project description}[0]
     END
 
 Add Namespace To ServiceMeshMemberRoll

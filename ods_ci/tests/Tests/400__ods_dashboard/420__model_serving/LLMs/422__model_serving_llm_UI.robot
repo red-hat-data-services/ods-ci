@@ -42,7 +42,7 @@ Verify User Can Serve And Query A Model Using The UI
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
-    Delete Model Via UI    ${flan_model_name}
+    Delete Model Via UI    ${flan_model_name}    ${test_namespace}
     [Teardown]    Clean Up DSP Page
 
 Verify User Can Deploy Multiple Models In The Same Namespace Using The UI  # robocop: disable
@@ -291,7 +291,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Run Keyword And Continue On Failure    Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
-    Run Keyword And Continue On Failure    Delete Model Via UI    ${flan_model_name}
+    Run Keyword And Continue On Failure    Delete Model Via UI    ${flan_model_name}    ${test_namespace}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
@@ -319,7 +319,7 @@ Verify User With Admin Permission Can Deploy Query And Delete A LLM
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
-    Delete Model Via UI    ${flan_model_name}
+    Delete Model Via UI    ${flan_model_name}    ${test_namespace}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}

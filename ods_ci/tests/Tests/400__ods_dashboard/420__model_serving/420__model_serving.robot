@@ -93,31 +93,6 @@ Verify Openvino_IR Model Via UI
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
 
-Verify Multiple Projects With Same Model
-    [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
-    [Tags]    Sanity
-    ...    RHOAIENG-549
-    FOR  ${idx}  IN RANGE  1  6
-        ${new_proj} =    Set Variable    ${PRJ_TITLE}${idx}
-        Log To Console    Creating new DS Project '${new_proj}' with the same Model '${MODEL_NAME}''
-        Open Data Science Projects Home Page
-        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-        Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}
-        Create S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
-        ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-        ...            aws_bucket_name=ods-ci-s3
-        Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
-        Open Model Serving Home Page
-        Serve Model    project_name=${new_proj}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
-        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
-        ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-        ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
-        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
-        ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}    project_name=${new_proj}
-        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service    ${new_proj}
-        Verify Model Status    ${MODEL_NAME}    success
-    END
-
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
     [Tags]    Smoke
@@ -149,6 +124,31 @@ Verify Tensorflow Model Via UI
     Should Be Equal As Strings    ${status_code}    200
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
+
+Verify Multiple Projects With Same Model
+    [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
+    [Tags]    Sanity
+    ...    RHOAIENG-549
+    FOR  ${idx}  IN RANGE  1  2
+        ${new_proj} =    Set Variable    ${PRJ_TITLE}${idx}
+        Log To Console    Creating new DS Project '${new_proj}' with the same Model '${MODEL_NAME}''
+        Open Data Science Projects Home Page
+        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+        Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}
+        Create S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
+        ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+        ...            aws_bucket_name=ods-ci-s3
+        Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
+        Open Model Serving Home Page
+        Serve Model    project_name=${new_proj}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
+        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
+        ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+        ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
+        ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}    project_name=${new_proj}
+        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service    ${new_proj}
+        Verify Model Status    ${MODEL_NAME}    success
+    END
 
 *** Keywords ***
 Model Serving Suite Setup

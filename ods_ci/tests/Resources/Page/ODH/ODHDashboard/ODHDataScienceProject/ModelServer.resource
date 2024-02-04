@@ -59,7 +59,8 @@ Create Model Server
     ELSE IF    ${token}==${TRUE}
         Enable Token Authentication
     END
-    Click Button    Add
+    SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Add")]
+    SeleniumLibrary.Click Button    Add
     Sleep    1s    reason=Sometimes the modal will intercept later clicks even after being closed, wait for a second
 
 Set Replicas Number With Buttons

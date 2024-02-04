@@ -87,7 +87,7 @@ Model Serving Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        Run Keyword And Continue On Failure    Delete Model Via UI    ${MODEL_NAME}
+        Run Keyword And Continue On Failure    Delete Model Via UI    ${MODEL_NAME}    ${PRJ_TITLE}
         ${projects}=    Create List    ${PRJ_TITLE}
         Delete Data Science Projects From CLI   ocp_projects=${projects}
     ELSE

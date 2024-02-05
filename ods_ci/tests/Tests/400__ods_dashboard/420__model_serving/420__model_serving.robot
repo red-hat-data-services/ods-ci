@@ -44,7 +44,7 @@ Verify Model Can Be Deployed Via UI
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    server_name=${RUNTIME_NAME}
@@ -78,7 +78,7 @@ Verify Openvino_IR Model Via UI
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
@@ -106,7 +106,7 @@ Verify Tensorflow Model Via UI
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
@@ -135,7 +135,7 @@ Verify Multiple Projects With Same Model
         Open Data Science Projects Home Page
         Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
         Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
-        Create S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
+        Recreate S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
         Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}

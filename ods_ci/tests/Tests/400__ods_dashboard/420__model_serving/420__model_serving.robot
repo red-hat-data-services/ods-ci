@@ -43,7 +43,7 @@ Verify Model Can Be Deployed Via UI
     ...    ODS-1921
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
@@ -77,7 +77,7 @@ Verify Openvino_IR Model Via UI
     ...    ODS-2054
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
@@ -105,7 +105,7 @@ Verify Tensorflow Model Via UI
     ...    ODS-2268
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
@@ -129,12 +129,12 @@ Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
     [Tags]    Sanity
     ...    RHOAIENG-549
-    FOR  ${idx}  IN RANGE  1  2
+    FOR  ${idx}  IN RANGE  1  6
         ${new_proj} =    Set Variable    ${PRJ_TITLE}${idx}
         Log To Console    Creating new DS Project '${new_proj}' with the same Model '${MODEL_NAME}''
         Open Data Science Projects Home Page
         Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-        Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}
+        Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
         Create S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3

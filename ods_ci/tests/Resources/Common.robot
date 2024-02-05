@@ -313,7 +313,7 @@ Wait Until Generic Modal Disappears
             Wait Until Page Does Not Contain Element    xpath=//*[@id="${id}")]    timeout=${timeout}
         END
     ELSE
-        Log     No Modals on the screen right now..     level=WARN
+        Log     No Models on the screen right now...     level=WARN
     END
 
 Wait Until Generic Modal Appears
@@ -329,7 +329,7 @@ Wait Until Generic Modal Appears
             Wait Until Page Contains Element    xpath=//*[@id="${id}")]    timeout=${timeout}
         END
     ELSE
-        Log     No Modals on the screen right now..     level=WARN
+        Log     No Models on the screen right now...     level=WARN
     END
 
 Close Generic Modal If Present

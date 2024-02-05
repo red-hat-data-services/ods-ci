@@ -110,22 +110,31 @@ Project's Owner Should Be
     ...    Page Should Contain Element    xpath=//a[text()="${project_title}"]/ancestor::td[@data-label='Name']//small[text()="${expected_username}"]
 
 Create Data Science Project
-    [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}
-    [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}
-    Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}
-    Click Button    ${PROJECT_CREATE_BTN_XP}
-    Wait Until Page Contains Element    ${TITLE_INPUT_XP}
-    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
-    Input Text    ${TITLE_INPUT_XP}    ${title}
-    Input Text    ${DESCR_INPUT_XP}    ${description}
-    Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
-    IF    "${resource_name}" != "${NONE}"
-        Clear Element Text    ${RESOURCE_INPUT_XP}
-        Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
+    [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}.
+    ...    Reuse project if already exists: ${reuse_existing}
+    [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}    ${reuse_existing}=${FALSE}
+    IF    ${reuse_existing} == ${TRUE}
+        ${is_exist} =  Run Keyword And Return Status     Wait Until Page Contains Element    xpath://a[text()="${title}"]
     END
-    Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
-    Click Button    ${GENERIC_CREATE_BTN_XP}
-    Wait Until Generic Modal Disappears
+    IF  "${is_exist}" == "${TRUE}"   
+        Log    DS Project '${title}' already exists, reusing project    console=True
+        Click Link      ${title}
+    ELSE
+        Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}
+        Click Button    ${PROJECT_CREATE_BTN_XP}
+        Wait Until Page Contains Element    ${TITLE_INPUT_XP}
+        Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
+        Input Text    ${TITLE_INPUT_XP}    ${title}
+        Input Text    ${DESCR_INPUT_XP}    ${description}
+        Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
+        IF    "${resource_name}" != "${NONE}"
+            Clear Element Text    ${RESOURCE_INPUT_XP}
+            Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
+        END
+        Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
+        Click Button    ${GENERIC_CREATE_BTN_XP}
+        Wait Until Generic Modal Disappears
+    END
     Wait Until Project Is Open    project_title=${title}
     ${open}=    Run Keyword And Return Status    Wait Until Project Is Open    project_title=${title}
     IF    ${open} == ${FALSE}

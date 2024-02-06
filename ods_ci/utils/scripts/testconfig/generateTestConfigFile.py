@@ -252,7 +252,7 @@ def generate_test_config_file(
     data["MONITORING_NAMESPACE"] = config_data["MONITORING_NAMESPACE"]
     data["OPERATOR_NAMESPACE"] = config_data["OPERATOR_NAMESPACE"]
     data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
-    data["OPENSHIFT_PIPELINES_VERSION"] = config_data["OPENSHIFT_PIPELINES_VERSION"]
+    data["OPENSHIFT_PIPELINES_CHANNEL"] = config_data["OPENSHIFT_PIPELINES_CHANNEL"]
 
     if components:
         print("Setting components")

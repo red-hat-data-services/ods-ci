@@ -97,12 +97,20 @@ Fetch CA Certificate If RHODS Is Self-Managed
 
 Wait For Pods To Be Ready
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
+    ...            ${gather_logs}=${TRUE}
     Wait Until Keyword Succeeds    ${timeout}    3s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
-    Should Be Equal As Numbers    ${rc}    ${0}
+    ${pass}=    Run Keyword And Return Status    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${pass} == ${FALSE}
+        ${rc}    ${events}=    Run And Return Rc And Output    oc get events -n ${namespace}
+        Log    ${events}
+        ${rc}    ${podlogs}=    Run And Return Rc And Output    oc logs -f -l ${label_selector} --all-containers
+        Log    ${podlogs}
+        Fail
+    END
     IF    "${exp_replicas}" != "${NONE}"
         @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
         ...    label_selector=${label_selector}

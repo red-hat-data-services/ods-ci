@@ -106,7 +106,7 @@ Wait For Pods To Be Ready
     IF    ${pass} == ${FALSE}
         ${rc}    ${events}=    Run And Return Rc And Output    oc get events -n ${namespace}
         Log    ${events}
-        ${rc}    ${podlogs}=    Run And Return Rc And Output    oc logs -f -l ${label_selector} --all-containers -n ${namespace}
+        ${rc}    ${podlogs}=    Run And Return Rc And Output    oc logs -f -l ${label_selector} --all-containers -n ${namespace}    # robocop: disable
         Log    ${podlogs}
         Fail
     END

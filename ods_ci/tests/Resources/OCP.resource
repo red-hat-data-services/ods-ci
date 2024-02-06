@@ -97,7 +97,6 @@ Fetch CA Certificate If RHODS Is Self-Managed
 
 Wait For Pods To Be Ready
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
-    ...            ${gather_logs}=${TRUE}
     Wait Until Keyword Succeeds    ${timeout}    3s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}

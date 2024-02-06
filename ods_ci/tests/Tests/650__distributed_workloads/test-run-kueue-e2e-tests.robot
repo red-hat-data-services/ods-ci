@@ -10,7 +10,7 @@ Library           OpenShiftLibrary
 *** Variables ***
 ${KUEUE_DIR}            kueue
 ${KUEUE_REPO_URL}       %{KUEUE_REPO_URL=https://github.com/opendatahub-io/kueue.git}
-${KUEUE_REPO_BRANCH}    %{KUEUE_REPO_BRANCH=main}
+${KUEUE_REPO_BRANCH}    %{KUEUE_REPO_BRANCH=dev}
 ${JOB_GO_BIN}           %{WORKSPACE=.}/go-bin
 ${KUBECONFIG}           %{WORKSPACE=.}/kconfig
 ${WORKER_NODE}          ${EMPTY}
@@ -21,12 +21,14 @@ Run E2E test
     [Documentation]    Run ginkgo E2E single cluster test
     [Tags]  Kueue
     ...     DistributedWorkloads
+    ...     Tier2
     Run Kueue E2E Test    e2e_test.go
 
 Run Visibility test
     [Documentation]    Run ginkgo visibilty single cluster test
     [Tags]  Kueue
     ...     DistributedWorkloads
+    ...     Tier2
     Enable Visibility Feature Gate
     Run Kueue E2E Test    visibility_test.go
 

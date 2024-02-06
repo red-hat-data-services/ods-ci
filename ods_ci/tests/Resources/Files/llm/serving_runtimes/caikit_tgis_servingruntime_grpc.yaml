@@ -11,13 +11,19 @@ spec:
   containers:
     - name: kserve-container
       image: quay.io/modh/text-generation-inference@sha256:a17a2868644929ee844ceb2778ac3f6db0936824d9b89d11ea7aa059466fcd0b
+      ## Note: cannot add readiness/liveness probes to this container because knative will refuse them
       command: ["text-generation-launcher"]
-      args: ["--model-name=/mnt/models/artifacts/"] 
+      args: ["--model-name=/mnt/models/artifacts/"]
       env:
         - name: TRANSFORMERS_CACHE
           value: /tmp/transformers_cache
+      # resources: # configure as required
+      #   requests:
+      #     cpu: 8
+      #     memory: 16Gi
     - name: transformer-container
       image: quay.io/modh/caikit-tgis-serving@sha256:ce6b66bb847608dac5eacd7f9123d2a076a06893d7f37f2da5876a8930527513
+      command: ["python", "-m", "caikit.runtime.grpc_server"]
       env:
         - name: RUNTIME_LOCAL_MODELS_DIR
           value: /mnt/models
@@ -25,3 +31,21 @@ spec:
         - containerPort: 8085
           name: h2c
           protocol: TCP
+      readinessProbe:
+        exec:
+          command:
+            - python
+            - -m
+            - caikit_health_probe
+            - readiness
+      livenessProbe:
+        exec:
+          command:
+            - python
+            - -m
+            - caikit_health_probe
+            - liveness
+      # resources: # configure as required
+      #   requests:
+      #     cpu: 8
+      #     memory: 16Gi

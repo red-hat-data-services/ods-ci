@@ -47,7 +47,7 @@ Verify Model Can Be Deployed Via UI
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    server_name=${RUNTIME_NAME}
+    Create Model Server    server_name=${RUNTIME_NAME}    reuse_existing=${TRUE}
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=onnx    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
@@ -81,7 +81,7 @@ Verify Openvino_IR Model Via UI
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    reuse_existing=${TRUE}
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
@@ -109,7 +109,7 @@ Verify Tensorflow Model Via UI
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    reuse_existing=${TRUE}
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=tensorflow    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=inception_resnet_v2.pb
@@ -128,7 +128,7 @@ Verify Tensorflow Model Via UI
 Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
     [Tags]    Sanity
-    ...    RHOAIENG-549
+    ...    RHOAIENG-549    RHOAIENG-2724
     FOR  ${idx}  IN RANGE  1  6
         ${new_proj} =    Set Variable    ${PRJ_TITLE}${idx}
         Log To Console    Creating new DS Project '${new_proj}' with the same Model '${MODEL_NAME}''
@@ -138,10 +138,10 @@ Verify Multiple Projects With Same Model
         Recreate S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
-        Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
+        Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    reuse_existing=${TRUE}
         Open Model Serving Home Page
         Serve Model    project_name=${new_proj}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
-        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
+        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model    reuse_existing=${TRUE}
         ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
         ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
         Run Keyword And Continue On Failure  Wait Until Keyword Succeeds

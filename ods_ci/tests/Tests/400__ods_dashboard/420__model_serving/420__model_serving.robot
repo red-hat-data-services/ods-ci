@@ -19,9 +19,11 @@ ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","mo
 ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}
 ${PRJ_TITLE}=    model-serving-project
 ${PRJ_DESCRIPTION}=    project used for model serving tests
+${MODEL_CREATED}=    ${FALSE}
 ${MODEL_NAME}=    test-model
-${MODEL_CREATED}=    False
 ${RUNTIME_NAME}=    Model Serving Test
+${SECURED_MODEL}=    test-model-secured
+${SECURED_RUNTIME}=    Model Serving With Authentication
 
 
 *** Test Cases ***
@@ -77,11 +79,11 @@ Verify Openvino_IR Model Via UI
     ...    ODS-2054
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    reuse_existing=${TRUE}
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
@@ -89,7 +91,7 @@ Verify Openvino_IR Model Via UI
     ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
-    Set Suite Variable    ${MODEL_CREATED}    True
+    Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
 
@@ -105,11 +107,11 @@ Verify Tensorflow Model Via UI
     ...    ODS-2268
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    reuse_existing=${TRUE}
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=tensorflow    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=inception_resnet_v2.pb
@@ -117,13 +119,49 @@ Verify Tensorflow Model Via UI
     ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
-    Set Suite Variable    ${MODEL_CREATED}    True
+    Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     ${url}=    Get Model Route via UI    ${MODEL_NAME}
     ${status_code}    ${response_text} =    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
+
+Verify Secure Model Can Be Deployed Via UI
+    [Documentation]    Verifies that a model can be deployed using only the UI.
+    ...    At the end of the process, verifies the correct resources have been deployed.
+    [Tags]    Sanity    Tier1
+    ...    ODS-1921    RHOAIENG-2759
+    Open Data Science Projects Home Page
+    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Create Model Server    token=${TRUE}    server_name=${SECURED_RUNTIME}    existing_server=${TRUE}
+    Open Model Serving Home Page
+    Serve Model    project_name=${PRJ_TITLE}    model_name=${SECURED_MODEL}    model_server=${SECURED_RUNTIME}
+    ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection    existing_model=${TRUE}
+    ...    framework=onnx    model_path=mnist-8.onnx
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${SECURED_RUNTIME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
+    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
+    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
+    Verify Model Status    ${SECURED_MODEL}    success
+    Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
+
+Test Inference With Token Authentication
+    [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
+    [Tags]    Sanity    Tier1
+    ...    ODS-1920
+    # Run Keyword And Continue On Failure    Verify Model Inference    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    # robocop: disable
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
+    # Testing the same endpoint without token auth, should receive login page
+    Open Model Serving Home Page
+    ${out}=    Get Model Inference   ${SECURED_MODEL}    ${INFERENCE_INPUT}    token_auth=${FALSE}
+    Should Contain    ${out}    <button type="submit" class="btn btn-lg btn-primary">Log in with OpenShift</button>
 
 Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
@@ -134,14 +172,14 @@ Verify Multiple Projects With Same Model
         Log To Console    Creating new DS Project '${new_proj}' with the same Model '${MODEL_NAME}''
         Open Data Science Projects Home Page
         Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-        Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
+        Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
         Recreate S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
-        Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    reuse_existing=${TRUE}
+        Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
         Open Model Serving Home Page
         Serve Model    project_name=${new_proj}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
-        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model    reuse_existing=${TRUE}
+        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model    existing_model=${TRUE}
         ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
         ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
         Run Keyword And Continue On Failure  Wait Until Keyword Succeeds

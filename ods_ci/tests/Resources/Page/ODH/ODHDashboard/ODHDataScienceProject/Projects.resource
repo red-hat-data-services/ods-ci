@@ -111,9 +111,9 @@ Project's Owner Should Be
 
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}.
-    ...    Reuse project if already exists: ${reuse_existing}
-    [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}    ${reuse_existing}=${FALSE}
-    IF    ${reuse_existing} == ${TRUE}
+    ...    Reuse project if already exists: ${existing_project}
+    [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}    ${existing_project}=${FALSE}
+    IF    ${existing_project} == ${TRUE}
         ${is_exist} =  Run Keyword And Return Status     Wait Until Page Contains Element    xpath://a[text()="${title}"]
     END
     IF  "${is_exist}" == "${TRUE}"   
@@ -291,7 +291,8 @@ Get All Displayed Projects
     ${projects_names}=    Create List
     ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]//a
     FOR    ${element}    IN    @{elements}
-        ${name}=    Get Text    ${element}
+        # Get exact project display name (including trailing spaces)
+        ${name}=    Get Element Attribute    ${element}    textContent
         Append To List    ${projects_names}    ${name}
     END
     [Return]   ${projects_names}

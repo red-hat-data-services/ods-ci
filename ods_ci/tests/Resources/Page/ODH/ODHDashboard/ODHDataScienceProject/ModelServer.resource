@@ -32,8 +32,8 @@ Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
-    ...    ${no_gpus}=0    ${reuse_existing}=${FALSE}
-    IF    ${reuse_existing} == ${TRUE}
+    ...    ${no_gpus}=0    ${existing_server}=${FALSE}
+    IF    ${existing_server} == ${TRUE}
         ${is_exist} =  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
         IF  ${is_exist}    Run Keyword And Return
         ...    Log    Model Server '${server_name}' already exists, reusing server    console=True

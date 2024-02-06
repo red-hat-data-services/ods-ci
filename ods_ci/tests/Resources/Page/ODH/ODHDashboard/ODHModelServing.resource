@@ -52,10 +52,10 @@ Serve Model
     [Documentation]    Deploys a model via the Model Serving page or Model Server section of a DS Project.
     ...    The framework should be either "onnx" or "openvino_ir".
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
-    ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test    ${reuse_existing}=${FALSE}
+    ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test    ${existing_model}=${FALSE}
     ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ') and contains(., '${project_name}')]
     # TODO: Does not work if there's already a model deployed
-    IF    ${reuse_existing} == ${TRUE}
+    IF    ${existing_model} == ${TRUE}
         ${is_exist} =  Run Keyword And Return Status     Wait Until Page Contains Element    ${model_row_xpath}
     END
     IF  "${is_exist}" == "${TRUE}"
@@ -67,24 +67,24 @@ Serve Model
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Contains    Deploy model
         SeleniumLibrary.Click Button    Deploy model
-        SeleniumLibrary.Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
-        Select Project    ${project_name}
-        Set Model Name    ${model_name}
-        Select Model Server    ${model_server}
-        SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
-        Select Framework    ${framework}
-        IF    ${existing_data_connection}==${TRUE}
-            # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
-            # Selected by default, let's skip for now
-            Select Existing Data Connection    ${data_connection_name}
-            Set Folder Path    ${model_path}
-        ELSE
-            # Existing connection radio is selected by default; for now blindly click on new connection radio
-            SeleniumLibrary.Click Element    //input[@id="new-data-connection-radio"]
-            # Select Radio Button    group_name=radiogroup    value=new-data-connection-radio
-            Set Up New Data Connection    dc_name=${data_connection_name}
-            Set Folder Path    ${model_path}
-        END
+    END
+    SeleniumLibrary.Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
+    Select Project    ${project_name}
+    Set Model Name    ${model_name}
+    Select Model Server    ${model_server}
+    SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
+    Select Framework    ${framework}
+    IF    ${existing_data_connection}==${TRUE}
+        # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
+        # Selected by default, let's skip for now
+        Select Existing Data Connection    ${data_connection_name}
+        Set Folder Path    ${model_path}
+    ELSE
+        # Existing connection radio is selected by default; for now blindly click on new connection radio
+        SeleniumLibrary.Click Element    //input[@id="new-data-connection-radio"]
+        # Select Radio Button    group_name=radiogroup    value=new-data-connection-radio
+        Set Up New Data Connection    dc_name=${data_connection_name}
+        Set Folder Path    ${model_path}
     END
     SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
     # Workaround for UI glitch bug RHOAIENG-2724 - Reselect model server and framework

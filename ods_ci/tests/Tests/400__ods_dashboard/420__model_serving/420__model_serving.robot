@@ -167,10 +167,16 @@ Verify odh-model-controller Deployment
 Verify Openvino Deployment
     [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
     [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
-    @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
+    ${pod_selector}=    Set Variable    name=modelmesh-serving-${runtime_name}
+    @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=${pod_selector}
     ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
-    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
+    ${pass}=    Run Keyword And Return Status    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
+    IF    ! ${pass}
+        ${events}    ${podlogs}=    Get Events And Pod Logs    namespace=${project_name}
+        ...    label_selector=${pod_selector}
+        Fail    msg=Model Server deployment failed to get Running by timeout
+    END
+    ${all_ready} =    Run    oc get deployment -n ${project_name} -l ${pod_selector} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
     Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
 
 Model Serving Suite Teardown

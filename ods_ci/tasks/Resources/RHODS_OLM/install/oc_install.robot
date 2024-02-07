@@ -7,7 +7,7 @@ Resource          ../../../../tests/Resources/Page/Operators/ISVs.resource
 
 *** Variables ***
 ${DSC_NAME} =    default-dsc
-@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai  # robocop: disable
+@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai    kueue  # robocop: disable
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless

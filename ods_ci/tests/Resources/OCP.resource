@@ -102,7 +102,14 @@ Wait For Pods To Be Ready
     ...    status_only=${FALSE}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
-    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        ${rc}    ${events}=    Run And Return Rc And Output    oc get events -n ${namespace}
+        Log    ${events}
+        ${rc}    ${podlogs}=    Run And Return Rc And Output
+        ...    oc logs -f -l ${label_selector} --all-containers -n ${namespace}
+        Log    ${podlogs}
+        Fail    msg=Pod is not ready by timeout
+    END
     IF    "${exp_replicas}" != "${NONE}"
         @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
         ...    label_selector=${label_selector}

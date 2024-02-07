@@ -305,6 +305,9 @@ Verify Model Inference With Retries
             ${retry}=    Evaluate    ${retry} + 1
             Sleep    5s
         END
+        IF    not ${status}
+            Fail    msg=Inference operation failed after ${retries+1} attempts
+        END
     END
 
 Clean Up Model Serving Page

@@ -171,7 +171,7 @@ Verify Openvino Deployment
     @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=${pod_selector}
     ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
     ${pass}=    Run Keyword And Return Status    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    IF    ! ${pass}
+    IF    not ${pass}
         ${events}    ${podlogs}=    Get Events And Pod Logs    namespace=${project_name}
         ...    label_selector=${pod_selector}
         Fail    msg=Model Server deployment failed to get Running by timeout

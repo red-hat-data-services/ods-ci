@@ -9,12 +9,12 @@ packages = [{include = "ods_ci"}]
 [tool.poetry.dependencies]
 python = "^3.8.1"
 reportportal-client = "^5.2.5"
-robotframework = "^6"
+robotframework = "^7"
 robotframework-debuglibrary = ">=2.0.0"
 robotframework-requests = "^0.9.4"
 robotframework-seleniumlibrary = "^6.1.1"
 # Selenium has been releasing versions prone to breaking, let's pin to a single release
-selenium = "4.13.0"
+selenium = "4.15.2"
 robotframework-jupyterlibrary = "^0.4.0"
 robotframework-openshift = {git = "https://git@github.com/red-hat-data-services/robotframework-openshift.git"}
 pytest = "^7.2.1"
@@ -23,7 +23,8 @@ Pygments = "^2.14.0"
 requests = "^2.28.2"
 escapism = "^1.0.1"
 semver = "^2"
-rpaframework = "^27.2.0"
+# Placeholder for local testing
+rpaframework = { path = "../rpaframework/packages/main", develop = false }
 pexpect = "^4.8.0"
 python-openstackclient = "^6.2.0"
 awscli = "^1.27.100"

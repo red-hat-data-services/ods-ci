@@ -27,8 +27,9 @@ Install Red Hat OpenShift Pipelines
     Oc Apply    kind=Subscription    src=${REDHAT_OPENSHIFT_PIPELINES_YAML}
     ${pod_count}=    Wait Until OpenShift Pipelines Operator Is Deployed
     Should Be True    ${pod_count} == 1    msg=Error installing OpenShift Pipelines operator
-    ${res}  ${output}=    Run And Return Rc And Output
+    ${rc}  ${output}=    Run And Return Rc And Output
     ...    oc get csv -ojson | jq -r '.items[] | select(.metadata.name | test("openshift-pipelines-operator")) | .spec.version'
+    Should Be Equal As Integers    ${rc}    0
     Log     A OpenShift Pipelines Operator of version ${output} is installed    console=True
 
 

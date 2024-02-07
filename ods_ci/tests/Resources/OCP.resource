@@ -102,7 +102,7 @@ Get Events And Pod Logs
     ${rc}    ${events}=    Run And Return Rc And Output    oc get events -n ${namespace}
     Log    ${events}
     ${rc}    ${podlogs}=    Run And Return Rc And Output
-    ...    oc logs -f -l ${label_selector} --all-containers -n ${namespace}
+    ...    oc logs -l ${label_selector} --all-containers -n ${namespace}
     Log    ${podlogs}
     RETURN    ${events}    ${podlogs}
 

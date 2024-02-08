@@ -104,7 +104,7 @@ Test Inference Without Token Authentication
 Verify Tensorflow Model Via UI
     [Documentation]    Test the deployment of a tensorflow (.pb) model
     [Tags]    Sanity    Tier1
-    ...    ODS-2268
+    ...    ODS-2268    RHOAIENG-2869
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
@@ -167,26 +167,7 @@ Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
     [Tags]    Sanity
     ...    RHOAIENG-549    RHOAIENG-2724
-    FOR  ${idx}  IN RANGE  1  6
-        ${new_proj} =    Set Variable    ${PRJ_TITLE}${idx}
-        Log To Console    Creating new DS Project '${new_proj}' with the same Model '${MODEL_NAME}''
-        Open Data Science Projects Home Page
-        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-        Create Data Science Project    title=${new_proj}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
-        Recreate S3 Data Connection    project_title=${new_proj}    dc_name=model-serving-connection
-        ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-        ...            aws_bucket_name=ods-ci-s3
-        Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
-        Open Model Serving Home Page
-        Serve Model    project_name=${new_proj}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
-        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model    existing_model=${TRUE}
-        ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-        ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
-        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
-        ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}    project_name=${new_proj}
-        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service    ${new_proj}
-        Verify Model Status    ${MODEL_NAME}    success
-    END
+    Create Openvino Models    num_projects=5
 
 *** Keywords ***
 Model Serving Suite Setup
@@ -201,7 +182,70 @@ Model Serving Suite Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch CA Certificate If RHODS Is Self-Managed
-    Run Keyword And Ignore Error    Clean All Models Of Current User
+    # Run Keyword And Ignore Error    Clean All Models Of Current User
+
+Verify Etcd Pod
+    [Documentation]    Verifies the correct deployment of the etcd pod in the rhods namespace
+    ${etcd_name} =    Run    oc get pod -l component=model-mesh-etcd -n ${APPLICATIONS_NAMESPACE} | grep etcd | awk '{split($0, a); print a[1]}'
+    ${etcd_running} =    Run    oc get pod ${etcd_name} -n ${APPLICATIONS_NAMESPACE} | grep 1/1 -o
+    Should Be Equal As Strings    ${etcd_running}    1/1
+
+Verify Serving Service
+    [Documentation]    Verifies the correct deployment of the serving service in the project namespace
+    [Arguments]    ${project_name}=${PRJ_TITLE}
+    ${service} =    Oc Get    kind=Service    namespace=${project_name}    label_selector=modelmesh-service=modelmesh-serving
+    Should Not Be Equal As Strings    Error from server (NotFound): services "modelmesh-serving" not found    ${service}
+
+Verify ModelMesh Deployment
+    [Documentation]    Verifies the correct deployment of modelmesh in the rhods namespace
+    @{modelmesh_controller} =  Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}    label_selector=control-plane=modelmesh-controller
+    ${containerNames} =  Create List  manager
+    Verify Deployment    ${modelmesh_controller}  3  1  ${containerNames}
+
+Verify odh-model-controller Deployment
+    [Documentation]    Verifies the correct deployment of the model controller in the rhods namespace
+    @{odh_model_controller} =  Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}    label_selector=control-plane=odh-model-controller
+    ${containerNames} =  Create List  manager
+    Verify Deployment    ${odh_model_controller}  3  1  ${containerNames}
+
+Verify Openvino Deployment
+    [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
+    [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
+    @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
+    ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
+    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
+    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
+    Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
+
+Create Openvino Models
+    [Documentation]    Create Openvino model in N projects (more than 1 will add index to project name)
+    [Arguments]    ${server_name}=${RUNTIME_NAME}    ${model_name}=${MODEL_NAME}    ${project_name}=${PRJ_TITLE}
+    ...    ${num_projects}=1    ${token}=${FALSE}
+    ${project_postfix}=    Set Variable    ${EMPTY}
+    FOR  ${idx}  IN RANGE  0  ${num_projects}
+        ${new_project}=    Set Variable    ${project_name}${project_postfix}
+        Log To Console    Creating new DS Project '${new_project}' with Model '${model_name}'
+
+        Open Data Science Projects Home Page
+        Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+        Create Data Science Project    title=${new_project}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
+        Recreate S3 Data Connection    project_title=${new_project}    dc_name=model-serving-connection
+        ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+        ...            aws_bucket_name=ods-ci-s3
+
+        Create Model Server    token=${FALSE}    server_name=${server_name}    existing_server=${TRUE}
+        Open Model Serving Home Page
+        Serve Model    project_name=${new_project}    model_name=${model_name}    framework=openvino_ir    existing_data_connection=${TRUE}
+        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model    existing_model=${TRUE}
+        ${runtime_pod_name} =    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
+        ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
+        ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}    project_name=${new_project}
+        Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service    ${new_project}
+        Verify Model Status    ${model_name}    success
+        ${project_postfix} =    Evaluate  ${idx}+1
+    END
+    Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
 
 Model Serving Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes

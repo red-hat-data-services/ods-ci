@@ -20,7 +20,6 @@ ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
 ${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
 ${MS_TABLE_ENDPOINT}=    /../../td[@data-label="Inference endpoint"]
 ${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboard-copy"]//input
-${MS_TABLE_DROPDOWN_TOGGLE}=    /../..//td[contains(@class,"pf-v5-c-table__action")]/button
 ${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
 ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
@@ -50,18 +49,17 @@ Open Model Serving Home Page
 
 Serve Model
     [Documentation]    Deploys a model via the Model Serving page or Model Server section of a DS Project.
-    ...    The framework should be either "onnx" or "openvino_ir".
+    ...    The framework should be either "onnx" or "openvino_ir" or tensorflow. 
+    ...    Can update existing Model, and use existing Connection.
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test    ${existing_model}=${FALSE}
     ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ') and contains(., '${project_name}')]
-    # TODO: Does not work if there's already a model deployed
     IF    ${existing_model} == ${TRUE}
         ${is_exist} =  Run Keyword And Return Status     Wait Until Page Contains Element    ${model_row_xpath}
     END
     IF  "${is_exist}" == "${TRUE}"
         Log    Model '${model_name}' already exists, editing model   console=True
-        Click Element    ${model_row_xpath}${MS_TABLE_DROPDOWN_TOGGLE}
-        Click Element    ${model_row_xpath}${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Edit"]
+        ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
     ELSE     
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
@@ -175,12 +173,12 @@ Verify Model Status
     ...    status can be "success" or any other string (which will expect failure status).
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
-        Wait Until Keyword Succeeds    5m    10s
-        ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
+        SeleniumLibrary.Wait Until Page Contains Element    
+        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
-        Wait Until Keyword Succeeds    5m    10s
-        ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
+        SeleniumLibrary.Wait Until Page Contains Element    
+        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 
@@ -189,8 +187,7 @@ Delete Model Via UI
     [Arguments]    ${model_name}    ${project_name}
     ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ') and contains(., '${project_name}')]
     Wait Until Element Is Visible       ${model_row_xpath}
-    Click Element    ${model_row_xpath}${MS_TABLE_DROPDOWN_TOGGLE}
-    Click Element    ${model_row_xpath}${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Delete"]
+    ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Delete
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
     Input Text    xpath://input[@id="delete-modal-input"]    ${model_name}
     Click Button    Delete deployed model
@@ -199,8 +196,7 @@ Delete Model Via UI
 Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
     [Arguments]    ${model_name}
-    Click Element    //div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}
-    Click Element    //div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Edit"]
+    ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
     Wait Until Page Contains    xpath://h1[.="Deploy model"]
 
 Get Model Route via UI

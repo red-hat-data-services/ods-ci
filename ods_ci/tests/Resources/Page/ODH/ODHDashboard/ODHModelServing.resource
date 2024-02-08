@@ -30,8 +30,7 @@ ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 *** Keywords ***
 Open Model Serving Home Page
     [Documentation]    Verifies submenu Settings > "Model Serving" is visible and navigates to page
-    Wait Until Page Contains Element    xpath://a[text()='Model Serving']
-    SeleniumLibrary.Click Link      Model Serving
+    Navigate To Page    Model Serving
     # Replace sleep with better Wait keyword. Confirm if error page has "Model Serving" h1 element.
     Sleep    1s
     ${loading_error}=    Run Keyword And Return Status

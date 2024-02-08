@@ -180,7 +180,7 @@ Model Serving Suite Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch CA Certificate If RHODS Is Self-Managed
-    # Run Keyword And Ignore Error    Clean All Models Of Current User
+    Run Keyword And Ignore Error    Clean All Models Of Current User
 
 Verify Etcd Pod
     [Documentation]    Verifies the correct deployment of the etcd pod in the rhods namespace

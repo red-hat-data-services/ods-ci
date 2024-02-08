@@ -75,8 +75,6 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     ${model_name}=    Set Variable    test-model-csr
     ${inference_input}=    Set Variable    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
     ${exp_inference_output}=    Set Variable    {"model_name":"test-model-csr__isvc-85fe09502b","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
-    ${runtime_pod_name} =    Replace String Using Regexp    string=${MODEL_SERVER_NAME}    pattern=\\s    replace_with=-
-    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Open Data Science Project Details Page    project_title=${PRJ_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -92,7 +90,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
-    ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
+    ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
     
 
 *** Keywords ***
@@ -101,6 +99,9 @@ Custom Serving Runtime Suite Setup
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${MODEL_SERVER_NAME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    Set Suite Variable    ${RUNTIME_POD_NAME}    ${runtime_pod_name}
     Fetch CA Certificate If RHODS Is Self-Managed
 
 Custom Serving Runtime Suite Teardown

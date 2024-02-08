@@ -41,8 +41,6 @@ Verify Model Can Be Deployed Via UI
     ...    At the end of the process, verifies the correct resources have been deployed.
     [Tags]    Sanity    Tier1
     ...    ODS-1921
-    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Open Model Serving Home Page
     Try Opening Create Server
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
@@ -55,12 +53,12 @@ Verify Model Can Be Deployed Via UI
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=onnx    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
-    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
+    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
-    ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
+    ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
 
 Test Inference With Token Authentication
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
@@ -78,8 +76,6 @@ Verify Openvino_IR Model Via UI
     [Documentation]    Test the deployment of an openvino_ir model
     [Tags]    Smoke
     ...    ODS-2054
-    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Open Model Serving Home Page
     Try Opening Create Server
     Open Data Science Projects Home Page
@@ -93,12 +89,12 @@ Verify Openvino_IR Model Via UI
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
-    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
+    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
-    ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
+    ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
 
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
@@ -110,8 +106,6 @@ Verify Tensorflow Model Via UI
     [Documentation]    Test the deployment of a tensorflow (.pb) model
     [Tags]    Sanity    Tier1
     ...    ODS-2268
-    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Open Model Serving Home Page
     Try Opening Create Server
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
@@ -124,7 +118,7 @@ Verify Tensorflow Model Via UI
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=tensorflow    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=inception_resnet_v2.pb
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
-    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
+    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    True
@@ -133,7 +127,7 @@ Verify Tensorflow Model Via UI
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
-    ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
+    ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
 
 *** Keywords ***
 Model Serving Suite Setup
@@ -142,6 +136,9 @@ Model Serving Suite Setup
     Set Library Search Order    SeleniumLibrary
     Skip If Component Is Not Enabled    modelmeshserving
     RHOSi Setup
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    Set Suite Variable    ${RUNTIME_POD_NAME}    ${runtime_pod_name}
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch CA Certificate If RHODS Is Self-Managed

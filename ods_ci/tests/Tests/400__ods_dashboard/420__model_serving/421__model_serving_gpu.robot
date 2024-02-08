@@ -35,7 +35,6 @@ Verify GPU Model Deployment Via UI
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
     ...    no_gpus=1
     Verify Displayed GPU Count    server_name=${RUNTIME_NAME}    no_gpus=1
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}  # robocop:disable
     ...    data_connection_name=model-serving-connection    model_path=vehicle-detection
     ...    model_server=${RUNTIME_NAME}
@@ -95,19 +94,6 @@ Model Serving Suite Teardown
     END
     Close All Browsers
     RHOSi Teardown
-
-Clean Up DSP Page
-    [Documentation]    Removes all DSP Projects, if any are present
-    Open Data Science Projects Home Page
-    WHILE    ${TRUE}
-        ${projects} =    Get All Displayed Projects
-        IF    len(${projects})==0
-            BREAK
-        END
-        Delete Data Science Projects From CLI    ${projects}
-        Reload Page
-        Wait Until Page Contains    Data Science Projects
-    END
 
 Get OpenShift Prometheus Route
     [Documentation]    Fetches the route for the Prometheus instance of openshift-monitoring

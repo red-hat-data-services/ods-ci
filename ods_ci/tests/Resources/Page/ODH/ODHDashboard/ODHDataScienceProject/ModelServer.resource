@@ -245,3 +245,10 @@ Enable Toleration Feature In KNativeServing
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch configmap config-features -n ${knative_serving_ns} --type=merge -p '{"data":{"kubernetes.podspec-tolerations": "enabled"}}'
     Should Be Equal As Integers    ${rc}    ${0}
+
+Switch Model Serving Project
+    [Documentation]    Switch to an existing project '${project_name}' from Model Serving dropdown list
+    [Arguments]    ${project_name}=All projects
+    Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
+    Wait Until Element is Visible     //ul//a[contains(., '${project_name}')]
+    Click Element     //ul//a[contains(., '${project_name}')]

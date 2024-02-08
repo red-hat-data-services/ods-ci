@@ -112,7 +112,6 @@ Verify Tensorflow Model Via UI
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=tensorflow    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=inception_resnet_v2.pb
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
@@ -139,7 +138,6 @@ Verify Secure Model Can Be Deployed Via UI
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${TRUE}    server_name=${SECURED_RUNTIME}    existing_server=${TRUE}
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${SECURED_MODEL}    model_server=${SECURED_RUNTIME}
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection    existing_model=${TRUE}
     ...    framework=onnx    model_path=mnist-8.onnx
@@ -225,16 +223,13 @@ Create Openvino Models
     FOR  ${idx}  IN RANGE  0  ${num_projects}
         ${new_project}=    Set Variable    ${project_name}${project_postfix}
         Log To Console    Creating new DS Project '${new_project}' with Model '${model_name}'
-
         Open Data Science Projects Home Page
         Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
         Create Data Science Project    title=${new_project}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
         Recreate S3 Data Connection    project_title=${new_project}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
-
         Create Model Server    token=${FALSE}    server_name=${server_name}    existing_server=${TRUE}
-        Open Model Serving Home Page
         Serve Model    project_name=${new_project}    model_name=${model_name}    framework=openvino_ir    existing_data_connection=${TRUE}
         ...    data_connection_name=model-serving-connection    model_path=openvino-example-model    existing_model=${TRUE}
         ${runtime_pod_name} =    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-

@@ -40,7 +40,6 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${aws_bucket}
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_ALPHA}    framework=${framework_onnx}    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=${MODEL_PATH_ALPHA}    model_server=${RUNTIME_NAME}
     ${runtime_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
@@ -73,7 +72,6 @@ Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Se
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${aws_bucket}
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE1}    model_name=${MODEL_BETA}    framework=${framework_onnx}    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=${MODEL_PATH_BETA}    model_server=${RUNTIME_NAME}
     ${runtime_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-

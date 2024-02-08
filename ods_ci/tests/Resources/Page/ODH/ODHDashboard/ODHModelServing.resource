@@ -53,6 +53,8 @@ Serve Model
     ...    Can update existing Model, and use existing Connection.
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test    ${existing_model}=${FALSE}
+    Open Model Serving Home Page
+    Switch Model Serving Project    ${project_name}
     ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ') and contains(., '${project_name}')]
     IF    ${existing_model} == ${TRUE}
         ${is_exist} =  Run Keyword And Return Status     Wait Until Page Contains Element    ${model_row_xpath}
@@ -528,9 +530,9 @@ Set Up Project
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
     [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
-    IF    ${single_prj}
-        Clean All Models Of Current User
-    END
+    # IF    ${single_prj}
+    #     Clean All Models Of Current User
+    # END
     Open Data Science Projects Home Page
     Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${namespace}    description=kserve test project

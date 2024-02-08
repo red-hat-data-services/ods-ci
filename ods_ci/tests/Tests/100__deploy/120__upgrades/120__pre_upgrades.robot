@@ -96,7 +96,6 @@ Verify Model Can Be Deployed Via UI For Upgrade
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds

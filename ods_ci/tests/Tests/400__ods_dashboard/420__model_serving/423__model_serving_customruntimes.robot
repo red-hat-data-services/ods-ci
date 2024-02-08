@@ -79,6 +79,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Create Model Server    server_name=${MODEL_SERVER_NAME}    runtime=${UPLOADED_OVMS_DISPLAYED_NAME}
     Serve Model    project_name=${PRJ_TITLE}    model_name=${model_name}    framework=onnx
     ...    existing_data_connection=${TRUE}
@@ -89,10 +90,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     Verify Model Inference With Retries    ${model_name}    ${inference_input}    ${exp_inference_output}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
-    [Teardown]    Run Keywords
-    ...    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    ...    AND
-    ...    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${ns_name}
+    [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${ns_name}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
     
 

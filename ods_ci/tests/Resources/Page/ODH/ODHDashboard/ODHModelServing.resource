@@ -41,27 +41,28 @@ Open Model Serving Home Page
         Sleep    5s
         SeleniumLibrary.Reload Page
     END
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Deployed models
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Deployed models
     SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.
     ...    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model
     [Documentation]    Deploys a model via the Model Serving page or Model Server section of a DS Project.
-    ...    The framework should be either "onnx" or "openvino_ir" or tensorflow. 
+    ...    The framework should be either "onnx" or "openvino_ir" or tensorflow.
     ...    Can update existing Model, and use existing Connection.
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test    ${existing_model}=${FALSE}
     Open Model Serving Home Page
     Switch Model Serving Project    ${project_name}
-    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ') and contains(., '${project_name}')]
-    IF    ${existing_model} == ${TRUE}
-        ${is_exist} =  Run Keyword And Return Status     Wait Until Page Contains Element    ${model_row_xpath}
+    IF    ${existing_model}
+        ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ') and contains(., '${project_name}')]
+        ${existing_model}=    Run Keyword And Return Status
+        ...    Wait Until Page Contains Element    ${model_row_xpath}
     END
-    IF  "${is_exist}" == "${TRUE}"
+    IF  "${existing_model}" == "${TRUE}"
         Log    Model '${model_name}' already exists, editing model   console=True
         ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
-    ELSE     
+    ELSE
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Contains    Deploy model
@@ -116,7 +117,7 @@ Select Model Server
     [Documentation]    If there are multiple model servers to choose from, this keyword
     ...    Selects the given one
     [Arguments]    ${model_server}
-    ${selectable} =    Run Keyword And Return Status
+    ${selectable}=    Run Keyword And Return Status
     ...    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
@@ -141,7 +142,7 @@ Select Existing Data Connection
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         Open Name Options Menu
         Click Element    xpath://li/button[.="${data_connection_name}"]
-        ${selected} =    Run Keyword And Return Status
+        ${selected}=    Run Keyword And Return Status
         ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
         IF  ${selected}==${TRUE}
             BREAK
@@ -174,19 +175,19 @@ Verify Model Status
     ...    status can be "success" or any other string (which will expect failure status).
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
-        SeleniumLibrary.Wait Until Page Contains Element    
+        SeleniumLibrary.Wait Until Page Contains Element
         ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
-        SeleniumLibrary.Wait Until Page Contains Element    
+        SeleniumLibrary.Wait Until Page Contains Element
         ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 
 Delete Model Via UI
     [Documentation]    Deletes a deployed model from the Model Serving page in the dashboard.
-    [Arguments]    ${model_name}    ${project_name}
-    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ') and contains(., '${project_name}')]
+    [Arguments]    ${model_name}
+    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ')]
     Wait Until Element Is Visible       ${model_row_xpath}
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Delete
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
@@ -204,7 +205,6 @@ Get Model Route via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    SeleniumLibrary.Page Should Contain Element    xpath://div[.="${model_name} "]
     ${route_xpath}=    Set Variable    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}
     ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
     IF    ${loaded} == ${FALSE}
@@ -256,7 +256,7 @@ Get Model Inference
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}
-    ${self_managed} =    Is RHODS Self-Managed
+    ${self_managed}=    Is RHODS Self-Managed
     ${url}=    Get Model Route via UI    ${model_name}
     ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
     IF    ${token_auth}
@@ -270,16 +270,16 @@ Get Model Inference
         Fetch Openshift CA Bundle
         ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
     END
-    ${inference_output} =    Run    ${curl_cmd}
+    ${inference_output}=    Run    ${curl_cmd}
     RETURN    ${inference_output}
 
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}
-    ${inference_output} =    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
+    ${inference_output}=    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
     ...    project_title=${project_title}
-    ${result}    ${list} =    Inference Comparison    ${expected_inference_output}    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}
     IF    ${result}==False
@@ -325,13 +325,14 @@ Verify Model Inference With Retries
 Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
-    ${models} =    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
-    ${projects} =    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+    ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+    ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
     FOR    ${model}    ${project}    IN ZIP    ${models}    ${projects}
-        ${model} =    Get Text   ${model}
-        ${project} =    Get Text   ${project}
-        @{project description} =  Split String    ${project}
-        Delete Model Via UI    ${model}    ${project description}[0]
+        ${model}=    Get Text   ${model}
+        ${project}=    Get Text   ${project}
+        @{project description}=  Split String    ${project}
+        Switch Model Serving Project    ${project description}[0]
+        Delete Model Via UI    ${model}
     END
 
 Add Namespace To ServiceMeshMemberRoll
@@ -413,7 +414,7 @@ Get Kserve Inference Host Via UI
         Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]    timeout=30s  #robocop: disable
         Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Status"]//span[@aria-label="success icon"]
         ...  timeout=30s  #robocop: disable
-        ${endpoint} =    Get Element Attribute    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]//input    value  #robocop: disable
+        ${endpoint}=    Get Element Attribute    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]//input    value  #robocop: disable
         IF  "${endpoint}"!="${EMPTY}"
             RETURN    ${endpoint}
         END
@@ -439,8 +440,8 @@ Disable Model Serving Runtime Using CLI
 Wait Until Runtime Pod Is Running
     [Arguments]    ${server_name}    ${project_title}    ${timeout}=10s
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
-    ${runtime_pod_name} =    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
-    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    ${runtime_pod_name}=    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
+    ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
     Log    name=modelmeshserving${runtime_pod_name}
     Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_pod_name}
     ...    namespace=${ns_name}    timeout=${timeout}
@@ -488,20 +489,22 @@ Delete Serving Runtime Template From CLI By Runtime Name OR Display Name
 
 Clean Up DSP Page
     [Documentation]    Removes all DSP Projects, if any are present
-    ${modal} =    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
+    ${modal}=    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
     IF  ${modal}==${TRUE}
         Click Element    //button[@aria-label="Close"]
     END
     Open Data Science Projects Home Page
     ${projects}=    Get All Displayed Projects
-    ${projects_count}=    Get length    ${projects}
-    WHILE    ${projects_count} > 0    limit=${projects_count}m    on_limit_message=Timeout exceeded waiting for all DS projects deletion    # robotcode: ignore
+    ${projects_count}=    Get Length    ${projects}
+    WHILE    ${projects_count} > 0    limit=${projects_count}m
+    ...    on_limit_message=Timeout exceeded waiting for all DS projects deletion
         Delete Data Science Projects From CLI    ${projects}
         Reload Page
-        ${reloaded} =    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains    Data science projects    timeout=30s
+        ${reloaded}=    Run Keyword And Return Status
+        ...    SeleniumLibrary.Wait Until Page Contains    Data science projects    timeout=30s
         IF  ${reloaded}==${FALSE}    SeleniumLibrary.Capture Page Screenshot
         ${projects}=    Get All Displayed Projects
-        ${projects_count}=    Get length    ${projects}
+        ${projects_count}=    Get Length    ${projects}
     END
 
 Clean All Models Of Current User
@@ -533,7 +536,7 @@ Set Up Project
     #     Clean All Models Of Current User
     # END
     Open Data Science Projects Home Page
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${namespace}    description=kserve test project
     Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}

@@ -22,7 +22,7 @@ Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -69,7 +69,7 @@ Wait Until Data Science Project Is Deleted
 Project Should Not Exist In Openshift
     [Documentation]    Checks a given Project is not present in openshift
     [Arguments]    ${project_title}
-    ${k8s_name} =     Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${k8s_name}=     Get Openshift Namespace From Data Science Project   project_title=${project_title}
     IF    "${k8s_name}" != "${EMPTY}"
         Fail   msg=The project ${project_title} exists!
     END
@@ -113,10 +113,11 @@ Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}.
     ...    Reuse project if already exists: ${existing_project}
     [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}    ${existing_project}=${FALSE}
-    IF    ${existing_project} == ${TRUE}
-        ${is_exist} =  Run Keyword And Return Status     Wait Until Page Contains Element    xpath://a[text()="${title}"]
+    IF    ${existing_project}
+        ${existing_project}=  Run Keyword And Return Status
+        ...    Wait Until Page Contains Element    xpath://a[text()="${title}"]
     END
-    IF  "${is_exist}" == "${TRUE}"   
+    IF    ${existing_project}   
         Log    DS Project '${title}' already exists, reusing project    console=True
         Click Link      ${title}
     ELSE
@@ -181,7 +182,7 @@ Delete Data Science Project From CLI
     ELSE
         Oc Delete    kind=Project   name=${project_k8s_name}
         WHILE    ${TRUE}
-            ${exists} =    Run And Return Rc    oc get project ${project_k8s_name}
+            ${exists}=    Run And Return Rc    oc get project ${project_k8s_name}
             IF    "${exists}" == "1"    BREAK
             Sleep    5s    reason=let's not overload the API
         END

@@ -10,7 +10,7 @@ Navigate To Page
    Wait Until Page Contains    ${menu}   timeout=150
    IF  "${submenu}" == "${NONE}"    Run Keyword And Return
    ...    Click Link    ${menu}
-   ${is_menu_expanded} =    Menu.Is Menu Expanded  ${menu}
+   ${is_menu_expanded}=    Menu.Is Menu Expanded  ${menu}
    IF    "${is_menu_expanded}" == "false"    Menu.Click Menu   ${menu}
    Wait Until Page Contains    ${submenu}
    Menu.Click Submenu    ${submenu}
@@ -28,7 +28,7 @@ Click Submenu
 Is Menu Expanded
    [Arguments]
    ...   ${menu}
-   ${is_menu_expanded} =    Get Element Attribute   //button[text()="${menu}"]   attribute=aria-expanded
+   ${is_menu_expanded}=    Get Element Attribute   //button[text()="${menu}"]   attribute=aria-expanded
    RETURN    ${is_menu_expanded}
 
 Page Should Contain Menu

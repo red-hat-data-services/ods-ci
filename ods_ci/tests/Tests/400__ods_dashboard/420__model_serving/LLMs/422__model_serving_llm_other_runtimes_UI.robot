@@ -50,7 +50,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ...    User Can Fetch Number Of Requests Over Defined Time
     ...    thanos_url=${THANOS_URL}    thanos_token=${THANOS_TOKEN}
     ...    model_name=${model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=1
-    Delete Model Via UI    ${model_name}    ${test_namespace}
+    Delete Model Via UI    ${model_name}
 
 Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
@@ -76,7 +76,7 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     Query Model Multiple Times    model_name=${model_name}    isvc_name=${isvc__name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    protocol=grpc    validate_response=${FALSE}
-    Delete Model Via UI    ${isvc__name}    ${test_namespace}
+    Delete Model Via UI    ${isvc__name}
 
 
 *** Keywords ***

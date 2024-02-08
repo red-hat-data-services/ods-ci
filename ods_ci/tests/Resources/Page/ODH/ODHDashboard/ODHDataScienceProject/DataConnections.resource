@@ -163,20 +163,20 @@ Get Data Connection Form Values
 
 Recreate S3 Data Connection
     [Documentation]    Edit Exisisting Or Create New S3 Data Connection from DS Project details page
-    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    ${new_dc_name}=${dc_name}
+    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     ...            ${aws_s3_ca_bundle}=${NONE}
-    ${is_exist} =  Run Keyword And Return Status
-        ...    Wait Until Page Contains Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${dc_name}"]]
-    IF  "${is_exist}" == "${TRUE}"   
-        Log    Data Connection '${dc_name}' already exists, reusing connection    console=True
+    ${is_exist}=  Run Keyword And Return Status
+    ...    Wait Until Page Contains Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${dc_name}"]]
+    IF  ${is_exist}
+        Log    Data Connection '${dc_name}' already exists, updating connection    console=True
         Edit S3 Data Connection    project_title=${project_title}    dc_name=${dc_name}    new_dc_name=${dc_name}${SPACE}
         ...    aws_access_key=${aws_access_key}    aws_secret_access=${aws_secret_access}
         ...    aws_bucket_name=${aws_bucket_name}    aws_region=${aws_region}    press_cancel=${press_cancel}
         ...    aws_s3_endpoint=${aws_s3_endpoint}    connected_workbench=${connected_workbench}
     ELSE
-        Log    Data Connection '${dc_name}' does not exists, creating a new connection    console=True
+        Log    Data Connection '${dc_name}' does not exist, creating a new connection    console=True
         Create S3 Data Connection    project_title=${project_title}    dc_name=${dc_name}
         ...    aws_access_key=${aws_access_key}    aws_secret_access=${aws_secret_access}
         ...    aws_bucket_name=${aws_bucket_name}    aws_region=${aws_region}    press_cancel=${press_cancel}

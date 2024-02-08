@@ -90,7 +90,7 @@ Verify Model Can Be Deployed Via UI For Upgrade
     Fetch CA Certificate If RHODS Is Self-Managed
     Clean All Models Of Current User
     Open Data Science Projects Home Page
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -132,14 +132,14 @@ Dashboard Test Teardown
 Verify Openvino Deployment
     [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
     [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
-    @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
-    ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
+    @{ovms}=  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
+    ${containerNames}=  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
     Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
+    ${all_ready}=    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
     Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
 
 Verify Serving Service
     [Documentation]    Verifies the correct deployment of the serving service in the project namespace
     [Arguments]    ${project_name}=${PRJ_TITLE}
-    ${service} =    Oc Get    kind=Service    namespace=${project_name}    label_selector=modelmesh-service=modelmesh-serving
+    ${service}=    Oc Get    kind=Service    namespace=${project_name}    label_selector=modelmesh-service=modelmesh-serving
     Should Not Be Equal As Strings    Error from server (NotFound): services "modelmesh-serving" not found    ${service}

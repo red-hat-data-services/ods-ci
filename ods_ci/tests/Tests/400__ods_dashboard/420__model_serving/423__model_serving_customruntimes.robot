@@ -89,7 +89,10 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     Verify Model Inference With Retries    ${model_name}    ${inference_input}    ${exp_inference_output}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
-    [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
+    [Teardown]    Run Keywords
+    ...    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    ...    AND
+    ...    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${ns_name}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
     
 

@@ -37,14 +37,16 @@ Verify GPU Model Deployment Via UI
     Verify Displayed GPU Count    server_name=${RUNTIME_NAME}    no_gpus=1
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}  # robocop:disable
-    ...    data_connection_name=model-serving-connection    model_path=vehicle-detection    model_server=${RUNTIME_NAME}
+    ...    data_connection_name=model-serving-connection    model_path=vehicle-detection
+    ...    model_server=${RUNTIME_NAME}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
     ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     ${requests} =    Get Container Requests    namespace=${PRJ_TITLE}
     ...    label=name=modelmesh-serving-${RUNTIME_POD_NAME}    container_name=ovms
     Should Contain    ${requests}    "nvidia.com/gpu": "1"
-    ${node} =    Get Node Pod Is Running On    namespace=${PRJ_TITLE}    label=name=modelmesh-serving-${RUNTIME_POD_NAME}
+    ${node} =    Get Node Pod Is Running On    namespace=${PRJ_TITLE}
+    ...    label=name=modelmesh-serving-${RUNTIME_POD_NAME}
     ${type} =    Get Instance Type Of Node    ${node}
     Should Be Equal As Strings    ${type}    "g4dn.xlarge"
     Verify Model Status    ${MODEL_NAME}    success

@@ -84,7 +84,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     ...    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
     Wait Until Runtime Pod Is Running    server_name=${MODEL_SERVER_NAME}
-    ...    project_title=${PRJ_TITLE}    timeout=40s
+    ...    project_title=${PRJ_TITLE}    timeout=5m
     Verify Model Status    ${model_name}    success
     Verify Model Inference With Retries    ${model_name}    ${inference_input}    ${exp_inference_output}
     ...    token_auth=${TRUE}

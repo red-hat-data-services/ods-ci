@@ -89,10 +89,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     Verify Model Inference With Retries    ${model_name}    ${inference_input}    ${exp_inference_output}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
-    [Teardown]    Run Keywords
-    ...    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    ...    AND
-    ...    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${ns_name}
+    [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${NAMESPACE}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
     
 
@@ -105,6 +102,8 @@ Custom Serving Runtime Suite Setup
     ${runtime_pod_name} =    Replace String Using Regexp    string=${MODEL_SERVER_NAME}    pattern=\\s    replace_with=-
     ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Set Suite Variable    ${RUNTIME_POD_NAME}    ${runtime_pod_name}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Set Suite Variable    ${NAMESPACE}    ${ns_name}
     Fetch CA Certificate If RHODS Is Self-Managed
 
 Custom Serving Runtime Suite Teardown

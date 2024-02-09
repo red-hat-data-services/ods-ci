@@ -13,7 +13,7 @@ ${CREATE_RUN_BTN_XP}=    xpath://*[text()="Create run"]
 ${RUN_TOPOLOGY_DETAILS_BTN_XP}=    xpath://li//button[text()="Details"]
 ${RUN_TOPOLOGY_OUTPUT_BTN_XP}=    xpath://li//button[text()="Run output"]
 ${RUN_TOPOLOGY_XP}=    css:div[data-test-id="topology"]
-${PIPELINES_DISABLED_EXC_MARK}=    xpath=//*[@id="page-sidebar"]/div/nav/ul/li[3]/a/div/div[2]
+${PIPELINES_DISABLED_EXC_MARK}=    xpath=//*[@id="page-sidebar"]//div/div[2]
 
 *** Keywords ***
 Create Pipeline Server
@@ -145,7 +145,7 @@ Pipeline Context Menu Should Be Working
     Menu.Navigate To Page    Data Science Pipelines    Pipelines
     Wait Until Element is Visible     //h2[text()="${pipeline_name}"]          timeout=30s
     Click Element     //*[@id="pipeline-row-item0"]/div
-    Click Element     //*[@id="dashboard-page-main"]/div/div/div/div/section[2]/table/tbody/tr[2]/td[2]/div/table/tbody/tr/td[2]/h2/a[text()="${pipeline_name}"]
+    Click Element     //*[@id="dashboard-page-main"]//td[2]/h2/a[text()="${pipeline_name}"]
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
     Open Context Menu    //div[contains(@class, 'lines-content')]
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
@@ -160,7 +160,7 @@ Pipeline Yaml Should Be Readonly
     Menu.Navigate To Page    Data Science Pipelines    Pipelines
     Wait Until Element is Visible     //h2[text()="${pipeline_name}"]      timeout=30s
     Click Element     //*[@id="pipeline-row-item0"]/div
-    Click Element     //*[@id="dashboard-page-main"]/div/div/div/div/section[2]/table/tbody/tr[2]/td[2]/div/table/tbody/tr/td[2]/h2/a[text()="${pipeline_name}"]
+    Click Element     //*[@id="dashboard-page-main"]//tr/td[2]/h2/a[text()="${pipeline_name}"]
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
     Press Keys    //div[contains(@class, 'lines-content')]    cannot_enter_read_only
     Wait Until Element Is Visible    //div[@class="pf-v5-c-code-editor pf-m-read-only odh-dashboard__code-editor"]    timeout=10
@@ -172,15 +172,15 @@ Pipeline Should Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[3]/h2[text()="${pipeline_name}"]
+    ...    ${PIPELINES_SECTION_XP}//td[3]/h2[text()="${pipeline_name}"]
     IF    "${pipeline_description}" == ${NONE}
         Run Keyword And Continue On Failure
         ...    Wait Until Page Does Not Contain Element
-        ...        ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[3]/div/p[text()="${pipeline_description}"]    # robocop: disable
+        ...        ${PIPELINES_SECTION_XP}//td[3]/div/p[text()="${pipeline_description}"]    # robocop: disable
     ELSE
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
-        ...        ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[3]/div/p[text()="${pipeline_description}"]  # robocop: disable
+        ...        ${PIPELINES_SECTION_XP}//td[3]/div/p[text()="${pipeline_description}"]    # robocop: disable
     END
 
 Pipeline Should Not Be Listed

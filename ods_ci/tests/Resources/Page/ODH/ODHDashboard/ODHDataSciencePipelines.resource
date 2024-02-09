@@ -73,8 +73,8 @@ Select Pipeline For The Run
     [Arguments]    ${pipeline_name}
     Wait Until Page Contains Element    xpath://*[@id="pipeline-selector"]
     Click Element    xpath://*[@id="pipeline-selector"]
-    Wait Until Page Contains Element    xpath://*[@id="run-section-pipeline"]/div[2]/div/div/div[1]/div/div/ul/div/table/tbody/tr/td[text()="${pipeline_name}"]
-    Click Element     xpath://*[@id="run-section-pipeline"]/div[2]/div/div/div[1]/div/div/ul/div/table/tbody/tr/td[text()="${pipeline_name}"]
+    Wait Until Page Contains Element    xpath://*[@id="run-section-pipeline"]//td[text()="${pipeline_name}"]
+    Click Element     xpath://*[@id="run-section-pipeline"]//td[text()="${pipeline_name}"]
 
 Get Workflow Name From Topology Page
     [Documentation]    Returns the workflow name corresponding to the displayed pipeline.

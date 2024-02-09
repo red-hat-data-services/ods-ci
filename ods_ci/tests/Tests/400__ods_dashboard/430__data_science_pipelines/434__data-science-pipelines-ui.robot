@@ -50,11 +50,11 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    pipeline_description=${PIPELINE_TEST_DESC}
     Capture Page Screenshot
     ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
-    ...    pipeline_name=${PIPELINE_TEST_NAME}    from_actions_menu=${FALSE}    run_type=Immediate
+    ...    pipeline_name=${PIPELINE_TEST_NAME}        run_type=Immediate
     ...    press_cancel=${TRUE}
     Open Data Science Project Details Page    ${PRJ_TITLE}
     ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
-    ...    pipeline_name=${PIPELINE_TEST_NAME}    from_actions_menu=${FALSE}    run_type=Immediate
+    ...    pipeline_name=${PIPELINE_TEST_NAME}        run_type=Immediate
     Open Data Science Project Details Page    ${PRJ_TITLE}
     Wait Until Pipeline Last Run Is Started    pipeline_name=${PIPELINE_TEST_NAME}
     ...    timeout=10s
@@ -88,11 +88,11 @@ Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
     ...    pipeline_description=${PIPELINE_TEST_DESC}
     Capture Page Screenshot
     ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
-    ...    pipeline_name=${PIPELINE_TEST_NAME}    from_actions_menu=${FALSE}    run_type=Immediate
+    ...    pipeline_name=${PIPELINE_TEST_NAME}       run_type=Immediate
     ...    press_cancel=${TRUE}
     Open Data Science Project Details Page    ${PRJ_TITLE}
     ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
-    ...    pipeline_name=${PIPELINE_TEST_NAME}    from_actions_menu=${FALSE}    run_type=Immediate
+    ...    pipeline_name=${PIPELINE_TEST_NAME}        run_type=Immediate
     Open Data Science Project Details Page    ${PRJ_TITLE}
     Wait Until Pipeline Last Run Is Started    pipeline_name=${PIPELINE_TEST_NAME}
     ...    timeout=10s

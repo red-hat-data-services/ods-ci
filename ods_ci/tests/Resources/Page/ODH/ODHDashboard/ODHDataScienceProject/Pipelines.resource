@@ -100,17 +100,13 @@ Create Pipeline Run    # robocop: disable
     ...                - immediate
     ...                - schedule -> this requires to insert additional arguments
     ...                TEMPORARILY SUPPORTING ONLY IMMEDIATE RUNS AND DEFAULT MODEL PARAMS
-    [Arguments]    ${name}    ${pipeline_name}=${NONE}    ${from_actions_menu}=${TRUE}    ${run_type}=Immediate
+    [Arguments]    ${name}    ${pipeline_name}=${NONE}        ${run_type}=Immediate
     ...            ${trigger_type}=Periodic    ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
     ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    ${press_cancel}=${FALSE}    &{model_param}
-    IF    ${from_actions_menu} == ${FALSE}
-        Show Pipeline Runs Section    pipeline_name=${pipeline_name}
-        Wait Until Page Contains Element    ${CREATE_RUN_BTN_XP}
-        Click Element    ${CREATE_RUN_BTN_XP}
-    ELSE
-        Pipelines.Click Action From Actions Menu    pipeline_name=${pipeline_name}
-        ...    action=Create run
-    END
+    Pipelines.Click Action From Actions Menu    pipeline_name=${pipeline_name}
+    ...    action=Create run
+
+
     Wait For RHODS Dashboard To Load    expected_page=Create run
     ...    wait_for_cards=${FALSE}
     Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
@@ -133,10 +129,10 @@ Create Pipeline Run    # robocop: disable
 Click Action From Actions Menu
     [Documentation]    Click an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_name}    ${action}
-    Wait Until Page Contains Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
-    Click Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
-    Wait Until Page Contains Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]//td//li//button[.//*[contains(text(), '${action}')]]    # robocop: disable
-    Click Element    xpath=//tr[td[.//a[.//text()="${pipeline_name}"]]]//td//li//button[.//*[contains(text(), '${action}')]]    # robocop: disable
+    Wait Until Page Contains Element    xpath=//tr[td[.//h2[.//text()="${pipeline_name}"]]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
+    Click Element    xpath=//tr[td[.//h2[.//text()="${pipeline_name}"]]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
+    Wait Until Page Contains Element    xpath=//tr[td[.//h2[.//text()="${pipeline_name}"]]]//td//li//button[.//*[contains(text(), '${action}')]]    # robocop: disable
+    Click Element    xpath=//tr[td[.//h2[.//text()="${pipeline_name}"]]]//td//li//button[.//*[contains(text(), '${action}')]]    # robocop: disable
 
 Pipeline Context Menu Should Be Working
     [Documentation]   Test Pipeline YAML context menu works with mouse right-click and with keyboard
@@ -170,18 +166,9 @@ Pipeline Yaml Should Be Readonly
 Pipeline Should Be Listed
     [Documentation]    Checks a pipeline is listed in the DS Project details page
     [Arguments]     ${pipeline_name}    ${pipeline_description}
-    Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element
-    ...    ${PIPELINES_SECTION_XP}//td[3]/h2[text()="${pipeline_name}"]
-    IF    "${pipeline_description}" == ${NONE}
-        Run Keyword And Continue On Failure
-        ...    Wait Until Page Does Not Contain Element
-        ...        ${PIPELINES_SECTION_XP}//td[3]/div/p[text()="${pipeline_description}"]    # robocop: disable
-    ELSE
-        Run Keyword And Continue On Failure
-        ...    Wait Until Page Contains Element
-        ...        ${PIPELINES_SECTION_XP}//td[3]/div/p[text()="${pipeline_description}"]    # robocop: disable
-    END
+    Log    ${pipeline_description}
+    Wait Until Element is Visible     //h2[text()="${pipeline_name}"]          timeout=30s
+    Wait Until Element is Visible     //p[text()="${pipeline_description}"]
 
 Pipeline Should Not Be Listed
     [Documentation]    Checks a pipeline is not listed in the DS Project details page
@@ -240,9 +227,9 @@ Show Pipeline Runs Section
     ...                The sub-section is hidden and the robot clicks on a toggle button
     ...                near the pipeline name to show the sub-section
     [Arguments]    ${pipeline_name}
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr[2]/td[2]/div/table/tbody/tr/td[2]/h2/a[text()="${pipeline_name}"]    # robocop: disable
-    Click Element     ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[7]/button
-    Click Element     ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[7]/div/div/ul/li[2]/button
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//a[text()="${pipeline_name}"]    # robocop: disable
+    Click Element     ${PIPELINES_SECTION_XP}//tr/td[7]/button
+    Click Element     ${PIPELINES_SECTION_XP}//li[2]/button
 
 Wait Until Page Contains Run Topology Page
     [Documentation]    Waits until the page containing the run details and its topology

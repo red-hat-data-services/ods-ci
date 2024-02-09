@@ -32,7 +32,7 @@ ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"test-model__isvc-8655dc
 ${PRJ_TITLE}=    model-serving-upgrade
 ${PRJ_DESCRIPTION}=    project used for model serving tests
 ${MODEL_NAME}=    test-model
-${MODEL_CREATED}=    False
+${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving Test
 
 *** Test Cases ***
@@ -102,7 +102,7 @@ Verify Model Can Be Deployed Via UI For Upgrade
     ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
-    Set Suite Variable    ${MODEL_CREATED}    True
+    Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
     Remove File    openshift_ca.crt
     [Teardown]   Run Keywords    Dashboard Test Teardown
@@ -128,18 +128,3 @@ Dashboard Suite Setup
 Dashboard Test Teardown
     [Documentation]  Basic suite teardown
     Close All Browsers
-
-Verify Openvino Deployment
-    [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
-    [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
-    @{ovms}=  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
-    ${containerNames}=  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
-    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    ${all_ready}=    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
-    Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
-
-Verify Serving Service
-    [Documentation]    Verifies the correct deployment of the serving service in the project namespace
-    [Arguments]    ${project_name}=${PRJ_TITLE}
-    ${service}=    Oc Get    kind=Service    namespace=${project_name}    label_selector=modelmesh-service=modelmesh-serving
-    Should Not Be Equal As Strings    Error from server (NotFound): services "modelmesh-serving" not found    ${service}

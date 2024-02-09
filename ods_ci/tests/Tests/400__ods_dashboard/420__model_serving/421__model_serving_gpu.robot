@@ -16,7 +16,7 @@ ${RHODS_NAMESPACE}=    ${APPLICATIONS_NAMESPACE}
 ${PRJ_TITLE}=    model-serving-project-gpu
 ${PRJ_DESCRIPTION}=    project used for model serving tests (with GPUs)
 ${MODEL_NAME}=    vehicle-detection
-${MODEL_CREATED}=    False
+${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving GPU Test
 
 
@@ -79,21 +79,6 @@ Model Serving Suite Setup
     Set Suite Variable    ${RUNTIME_POD_NAME}    ${runtime_pod_name}
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-
-Verify Serving Service
-    [Documentation]    Verifies the correct deployment of the serving service in the project namespace
-    [Arguments]    ${project_name}=${PRJ_TITLE}
-    ${service}=    Oc Get    kind=Service    namespace=${project_name}    label_selector=modelmesh-service=modelmesh-serving
-    Should Not Be Equal As Strings    Error from server (NotFound): services "modelmesh-serving" not found    ${service}
-
-Verify Openvino Deployment
-    [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
-    [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
-    @{ovms}=  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
-    ${containerNames}=  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
-    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    ${all_ready}=    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
-    Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
 
 Model Serving Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes

@@ -532,9 +532,9 @@ Set Up Project
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
     [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
-    # IF    ${single_prj}
-    #     Clean All Models Of Current User
-    # END
+    IF    ${single_prj}
+        Clean All Models Of Current User
+    END
     Open Data Science Projects Home Page
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${namespace}    description=kserve test project

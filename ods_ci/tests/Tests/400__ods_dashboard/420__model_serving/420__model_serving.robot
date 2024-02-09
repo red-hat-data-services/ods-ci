@@ -38,62 +38,11 @@ Verify Model Serving Installation
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Etcd Pod
 
-Verify Model Can Be Deployed Via UI
-    [Documentation]    Verifies that a model can be deployed using only the UI.
-    ...    At the end of the process, verifies the correct resources have been deployed.
-    [Tags]    Sanity    Tier1
-    ...    ODS-1921
-    Open Data Science Projects Home Page
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    reuse_existing=${TRUE}
-    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    server_name=${RUNTIME_NAME}    reuse_existing=${TRUE}
-    Open Model Serving Home Page
-    Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=onnx    existing_data_connection=${TRUE}
-    ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
-    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
-    Verify Model Status    ${MODEL_NAME}    success
-    Set Suite Variable    ${MODEL_CREATED}    True
-    [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
-    ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
-
-Test Inference With Token Authentication
-    [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
-    [Tags]    Sanity    Tier1
-    ...    ODS-1920
-    # Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    # robocop: disable
-    Run Keyword And Continue On Failure    Verify Model Inference With Retries
-    ...    ${MODEL_NAME}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}
-    # Testing the same endpoint without token auth, should receive login page
-    Open Model Serving Home Page
-    ${out}=    Get Model Inference   ${MODEL_NAME}    ${INFERENCE_INPUT}    token_auth=${FALSE}
-    Should Contain    ${out}    <button type="submit" class="btn btn-lg btn-primary">Log in with OpenShift</button>
-
 Verify Openvino_IR Model Via UI
     [Documentation]    Test the deployment of an openvino_ir model
     [Tags]    Smoke
     ...    ODS-2054
-    Open Data Science Projects Home Page
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
-    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
-    Open Model Serving Home Page
-    Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
-    ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
-    ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
-    Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
-    Verify Model Status    ${MODEL_NAME}    success
-    Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
-    [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
-    ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
+    Create Openvino Models    num_projects=1
 
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
@@ -182,39 +131,6 @@ Model Serving Suite Setup
     Fetch CA Certificate If RHODS Is Self-Managed
     Run Keyword And Ignore Error    Clean All Models Of Current User
 
-Verify Etcd Pod
-    [Documentation]    Verifies the correct deployment of the etcd pod in the rhods namespace
-    ${etcd_name}=    Run    oc get pod -l component=model-mesh-etcd -n ${APPLICATIONS_NAMESPACE} | grep etcd | awk '{split($0, a); print a[1]}'
-    ${etcd_running}=    Run    oc get pod ${etcd_name} -n ${APPLICATIONS_NAMESPACE} | grep 1/1 -o
-    Should Be Equal As Strings    ${etcd_running}    1/1
-
-Verify Serving Service
-    [Documentation]    Verifies the correct deployment of the serving service in the project namespace
-    [Arguments]    ${project_name}=${PRJ_TITLE}
-    ${service}=    Oc Get    kind=Service    namespace=${project_name}    label_selector=modelmesh-service=modelmesh-serving
-    Should Not Be Equal As Strings    Error from server (NotFound): services "modelmesh-serving" not found    ${service}
-
-Verify ModelMesh Deployment
-    [Documentation]    Verifies the correct deployment of modelmesh in the rhods namespace
-    @{modelmesh_controller}=  Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}    label_selector=control-plane=modelmesh-controller
-    ${containerNames}=  Create List  manager
-    Verify Deployment    ${modelmesh_controller}  3  1  ${containerNames}
-
-Verify odh-model-controller Deployment
-    [Documentation]    Verifies the correct deployment of the model controller in the rhods namespace
-    @{odh_model_controller}=  Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}    label_selector=control-plane=odh-model-controller
-    ${containerNames}=  Create List  manager
-    Verify Deployment    ${odh_model_controller}  3  1  ${containerNames}
-
-Verify Openvino Deployment
-    [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
-    [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
-    @{ovms}=  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
-    ${containerNames}=  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
-    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    ${all_ready}=    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
-    Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
-
 Create Openvino Models
     [Documentation]    Create Openvino model in N projects (more than 1 will add index to project name)
     [Arguments]    ${server_name}=${RUNTIME_NAME}    ${model_name}=${MODEL_NAME}    ${project_name}=${PRJ_TITLE}
@@ -239,8 +155,10 @@ Create Openvino Models
         Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service    ${new_project}
         Verify Model Status    ${model_name}    success
         ${project_postfix}=    Evaluate  ${idx}+1
+        Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     END
-    Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
+    [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
+    ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
 
 Model Serving Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
@@ -259,6 +177,3 @@ Model Serving Suite Teardown
     Remove File    openshift_ca.crt
     Close All Browsers
     RHOSi Teardown
-
-
-

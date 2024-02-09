@@ -120,13 +120,13 @@ Pipelines Suite Setup    # robocop: disable
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-ds-pipelines
-    #RHOSi Setup
+    RHOSi Setup
 
 Pipelines Suite Teardown
     [Documentation]    Deletes the test project which automatically triggers the
     ...                deletion of any pipeline resource contained in it
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
-    #RHOSi Teardown
+    RHOSi Teardown
 
 Verify Pipeline Run Deployment Is Successful    # robocop: disable
     [Documentation]    Verifies the correct deployment of the test pipeline run in the rhods namespace.

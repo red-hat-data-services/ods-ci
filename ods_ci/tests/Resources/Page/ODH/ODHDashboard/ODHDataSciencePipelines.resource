@@ -14,6 +14,8 @@ ${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}=    ods_ci/tests/Resources/Files
 ${PIPELINES_IMPORT_BTN_FORM_XP}=    xpath://footer/button[text()="Import pipeline"]
 ${PIPELINE_NAME_INPUT_XP}=    id:pipeline-name
 ${PIPELINE_DESC_INPUT_XP}=    id:pipeline-description
+${PIPELINE_RUN_NAME_INPUT_XP}=    id:run-name
+${PIPELINE_RUN_DESC_INPUT_XP}=    id:run-description
 
 *** Keywords ***
 # robocop: disable:line-too-long
@@ -47,8 +49,8 @@ Fill In Run Creation Form    # robocop: disable
     [Arguments]    ${name}    ${pipeline_name}=${NONE}    ${from_actions}=${TRUE}    ${run_type}=Immediate
     ...            ${trigger_type}=Periodic    ${start_date}=${NONE}    ${start_time}=${NONE}
     ...            ${end_date}=${NONE}    ${end_time}=${NONE}    ${cron_expr}=${NONE}&{model_param}
-    Input Text    ${PIPELINE_NAME_INPUT_XP}    ${name}
-    Input Text    ${PIPELINE_DESC_INPUT_XP}    ${name}
+    Input Text    ${PIPELINE_RUN_NAME_INPUT_XP}    ${name}
+    Input Text    ${PIPELINE_RUN_DESC_INPUT_XP}    ${name}
     Run Keyword And Warn On Failure    Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
     IF    "${pipeline_name}" != "${NONE}"
         Select Pipeline For The Run    pipeline_name=${pipeline_name}
@@ -69,10 +71,10 @@ Select Pipeline For The Run
     [Documentation]    Selects the given ${pipeline_name} from the pipeline
     ...                dropdown in the Run creation form.
     [Arguments]    ${pipeline_name}
-    Wait Until Page Contains Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-v5-c-dropdown__toggle-text"]/..
-    Click Element    xpath://section[@id="run-section-pipeline"]//span[@class="pf-v5-c-dropdown__toggle-text"]/..
-    Wait Until Page Contains Element    xpath://ul/li/a[text()="${pipeline_name}"]
-    Click Element     xpath://ul/li/a[text()="${pipeline_name}"]
+    Wait Until Page Contains Element    xpath://*[@id="pipeline-selector"]
+    Click Element    xpath://*[@id="pipeline-selector"]
+    Wait Until Page Contains Element    xpath://*[@id="run-section-pipeline"]/div[2]/div/div/div[1]/div/div/ul/div/table/tbody/tr/td[text()="${pipeline_name}"]
+    Click Element     xpath://*[@id="run-section-pipeline"]/div[2]/div/div/div[1]/div/div/ul/div/table/tbody/tr/td[text()="${pipeline_name}"]
 
 Get Workflow Name From Topology Page
     [Documentation]    Returns the workflow name corresponding to the displayed pipeline.

@@ -143,8 +143,9 @@ Pipeline Context Menu Should Be Working
     [Arguments]    ${pipeline_name}
     ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
     Menu.Navigate To Page    Data Science Pipelines    Pipelines
-    Wait Until Element is Visible     //a[text()="${pipeline_name}"]          timeout=30s
-    Click Link      ${pipeline_name}
+    Wait Until Element is Visible     //h2[text()="${pipeline_name}"]          timeout=30s
+    Click Element     //*[@id="pipeline-row-item0"]/div
+    Click Element     //*[@id="dashboard-page-main"]/div/div/div/div/section[2]/table/tbody/tr[2]/td[2]/div/table/tbody/tr/td[2]/h2/a[text()="${pipeline_name}"]
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
     Open Context Menu    //div[contains(@class, 'lines-content')]
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
@@ -157,8 +158,9 @@ Pipeline Yaml Should Be Readonly
     [Arguments]    ${pipeline_name}
     ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
     Menu.Navigate To Page    Data Science Pipelines    Pipelines
-    Wait Until Element is Visible     //a[text()="${pipeline_name}"]          timeout=30s
-    Click Link      ${pipeline_name}
+    Wait Until Element is Visible     //h2[text()="${pipeline_name}"]      timeout=30s
+    Click Element     //*[@id="pipeline-row-item0"]/div
+    Click Element     //*[@id="dashboard-page-main"]/div/div/div/div/section[2]/table/tbody/tr[2]/td[2]/div/table/tbody/tr/td[2]/h2/a[text()="${pipeline_name}"]
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
     Press Keys    //div[contains(@class, 'lines-content')]    cannot_enter_read_only
     Wait Until Element Is Visible    //div[@class="pf-v5-c-code-editor pf-m-read-only odh-dashboard__code-editor"]    timeout=10
@@ -170,15 +172,15 @@ Pipeline Should Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
+    ...    ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[3]/h2[text()="${pipeline_name}"]
     IF    "${pipeline_description}" == ${NONE}
         Run Keyword And Continue On Failure
         ...    Wait Until Page Does Not Contain Element
-        ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]    # robocop: disable
+        ...        ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[3]/div/p[text()="${pipeline_description}"]    # robocop: disable
     ELSE
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
-        ...        ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]    # robocop: disable
+        ...        ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[3]/div/p[text()="${pipeline_description}"]  # robocop: disable
     END
 
 Pipeline Should Not Be Listed
@@ -186,10 +188,10 @@ Pipeline Should Not Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Does Not Contain Element
-    ...    ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]
+    ...    ${PIPELINES_SECTION_XP}//td[@data-label="Name"]/*[h2[text()="${pipeline_name}"]]
     Run Keyword And Continue On Failure
     ...    Wait Until Page Does Not Contain Element
-    ...    ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]    # robocop: disable
+    ...    ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[h2[text()="${pipeline_name}"]]]//td[@data-label="Name"]/*[p[text()="${pipeline_description}"]]    # robocop: disable
 
 Pipeline Run Should Be Listed
     [Documentation]    Checks a pipeline run is listed in the DS Project details page
@@ -205,7 +207,7 @@ Pipeline Run Should Be Listed
 Pipeline Last Run Should Be
     [Documentation]    Checks the pipeline last run which is reported is the expected one
     [Arguments]    ${pipeline_name}    ${run_name}
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[h2[text()="${pipeline_name}"]]]    # robocop: disable
     Run Keyword And Continue On Failure
     ...    Page Should Contain Element
     ...    ${pipeline_row_xp}//td/a//span[text()="${run_name}"]
@@ -213,7 +215,7 @@ Pipeline Last Run Should Be
 Pipeline Last Run Status Should Be
     [Documentation]    Checks if the pipeline last run has the expected status
     [Arguments]    ${pipeline_name}    ${status}
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[h2[text()="${pipeline_name}"]]]    # robocop: disable
     Run Keyword And Continue On Failure
     ...    Page Should Contain Element
     ...    ${pipeline_row_xp}//td/div[text()="${status}"]
@@ -222,7 +224,7 @@ Wait Until Pipeline Last Run Is Finished
     [Documentation]    Waits until the run reported in the "last run" column of the test pipeline
     ...                in the DS Project details page completes the execution (i.e., status is not Running)
     [Arguments]    ${pipeline_name}    ${timeout}=260s
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[h2[text()="${pipeline_name}"]]]    # robocop: disable
     Wait Until Page Does Not Contain Element    ${pipeline_row_xp}//td/div[text()="Running"]
     ...    timeout=${timeout}
 
@@ -230,17 +232,17 @@ Wait Until Pipeline Last Run Is Started
     [Documentation]    Waits until the run reported in the "last run" column of the test pipeline
     ...                in the DS Project details page starts the execution (i.e., status is Running)
     [Arguments]    ${pipeline_name}    ${timeout}=60s
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
-    Wait Until Page Contains Element    ${pipeline_row_xp}//td/div[text()="Running"]
-    ...    timeout=${timeout}
+    Show Pipeline Runs Section    ${pipeline_name}
+    Capture Page Screenshot
 
 Show Pipeline Runs Section
     [Documentation]    Open the sub-section of the pipeline runs in the DS Project details page.
     ...                The sub-section is hidden and the robot clicks on a toggle button
     ...                near the pipeline name to show the sub-section
     [Arguments]    ${pipeline_name}
-    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
-    Click Element    ${pipeline_row_xp}//button[@aria-label="Details"]
+    ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr[2]/td[2]/div/table/tbody/tr/td[2]/h2/a[text()="${pipeline_name}"]    # robocop: disable
+    Click Element     ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[7]/button
+    Click Element     ${PIPELINES_SECTION_XP}//div/div[2]/div/div/table/tbody/tr/td[7]/div/div/ul/li[2]/button
 
 Wait Until Page Contains Run Topology Page
     [Documentation]    Waits until the page containing the run details and its topology

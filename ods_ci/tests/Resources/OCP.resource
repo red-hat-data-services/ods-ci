@@ -95,6 +95,17 @@ Fetch CA Certificate If RHODS Is Self-Managed
         Fetch Openshift CA Bundle
     END
 
+Get Events And Pod Logs
+    [Documentation]    Fetches the namespace events and the pod logs (all containers).
+    ...                It prints and return both items
+    [Arguments]    ${namespace}    ${label_selector}
+    ${rc}    ${events}=    Run And Return Rc And Output    oc get events -n ${namespace}
+    Log    ${events}
+    ${rc}    ${podlogs}=    Run And Return Rc And Output
+    ...    oc logs -l ${label_selector} --all-containers -n ${namespace} --ignore-errors
+    Log    ${podlogs}
+    RETURN    ${events}    ${podlogs}
+
 Wait For Pods To Be Ready
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
     Wait Until Keyword Succeeds    ${timeout}    3s
@@ -103,11 +114,7 @@ Wait For Pods To Be Ready
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     IF    ${rc} != ${0}
-        ${rc}    ${events}=    Run And Return Rc And Output    oc get events -n ${namespace}
-        Log    ${events}
-        ${rc}    ${podlogs}=    Run And Return Rc And Output
-        ...    oc logs -f -l ${label_selector} --all-containers -n ${namespace}
-        Log    ${podlogs}
+        ${events}    ${podlogs}=    Get Events And Pod Logs    ${namespace}    ${label_selector}
         Fail    msg=Pod is not ready by timeout
     END
     IF    "${exp_replicas}" != "${NONE}"

@@ -17,6 +17,7 @@ Resource           ../../../Resources/Common.robot
 Resource           ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource           ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
+Resource           ../../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup        Dashboard Suite Setup
 Suite Teardown     RHOSi Teardown
 
@@ -84,6 +85,8 @@ Verify User Can Disable The Runtime
 Verify Model Can Be Deployed Via UI For Upgrade
     [Tags]  Upgrade
     [Setup]    Begin Web Test
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Fetch CA Certificate If RHODS Is Self-Managed
     Open Model Serving Home Page
     Try Opening Create Server
@@ -96,8 +99,6 @@ Verify Model Can Be Deployed Via UI For Upgrade
     Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=openvino-example-model
-    ${runtime_pod_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds
     ...  5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Serving Service
@@ -105,7 +106,10 @@ Verify Model Can Be Deployed Via UI For Upgrade
     Set Suite Variable    ${MODEL_CREATED}    True
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
     Remove File    openshift_ca.crt
-    [Teardown]   Dashboard Test Teardown
+    [Teardown]   Run Keywords    Dashboard Test Teardown
+    ...    AND
+    ...    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${PRJ_TITLE}
+    ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
 
 Verify User Can Deploy Custom Runtime For Upgrade
     [Tags]  Upgrade
@@ -157,18 +161,3 @@ Clean Up DSP Page
         Reload Page
         Wait Until Page Contains    Data Science Projects
     END
-
-Verify Openvino Deployment
-    [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace
-    [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
-    @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=name=modelmesh-serving-${runtime_name}
-    ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
-    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
-    ${all_ready} =    Run    oc get deployment -n ${project_name} -l name=modelmesh-serving-${runtime_name} | grep ${num_replicas}/${num_replicas} -o  # robocop:disable
-    Should Be Equal As Strings    ${all_ready}    ${num_replicas}/${num_replicas}
-
-Verify Serving Service
-    [Documentation]    Verifies the correct deployment of the serving service in the project namespace
-    [Arguments]    ${project_name}=${PRJ_TITLE}
-    ${service} =    Oc Get    kind=Service    namespace=${project_name}    label_selector=modelmesh-service=modelmesh-serving
-    Should Not Be Equal As Strings    Error from server (NotFound): services "modelmesh-serving" not found    ${service}

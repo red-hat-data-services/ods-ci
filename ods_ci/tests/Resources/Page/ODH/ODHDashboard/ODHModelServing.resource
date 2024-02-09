@@ -271,6 +271,12 @@ Verify Model Inference
     Log    ${result}
     Log    ${list}
     IF    ${result}==False
+        IF    $project_title == $NONE
+            ${rc}    ${project_title}=    Run And Return Rc And Output
+            ...    oc get InferenceServices --all-namespaces -ojson | jq '.items[] | select(.metadata.name=="${model_name}") | .metadata.namespace' | tr -d '"'    # robocop: disable
+        END
+        ${events}    ${podlogs}=    Get Events And Pod Logs    namespace=${project_title}
+        ...    label_selector=modelmesh-service=modelmesh-serving
         Fail    msg=comparison between expected and actual failed, ${list}
     END
 
@@ -298,6 +304,9 @@ Verify Model Inference With Retries
             END
             ${retry}=    Evaluate    ${retry} + 1
             Sleep    5s
+        END
+        IF    not ${status}
+            Fail    msg=Inference operation failed after ${retries+1} attempts
         END
     END
 

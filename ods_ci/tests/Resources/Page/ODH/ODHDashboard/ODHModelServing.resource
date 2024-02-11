@@ -277,6 +277,8 @@ Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}
+    Open Model Serving Home Page
+    Switch Model Serving Project    ${project_title}
     ${inference_output}=    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
     ...    project_title=${project_title}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
@@ -325,14 +327,18 @@ Verify Model Inference With Retries
 Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
-    ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+    Switch Model Serving Project    project_name=All projects
     ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
-    FOR    ${model}    ${project}    IN ZIP    ${models}    ${projects}
-        ${model}=    Get Text   ${model}
+    FOR    ${project}    IN    @{projects}
         ${project}=    Get Text   ${project}
         @{project description}=  Split String    ${project}
         Switch Model Serving Project    ${project description}[0]
-        Delete Model Via UI    ${model}
+        ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+        FOR    ${model}    IN    @{models}
+            ${model}=    Get Text   ${model}
+            Delete Model Via UI    ${model}
+        END
+        Switch Model Serving Project    project_name=All projects
     END
 
 Add Namespace To ServiceMeshMemberRoll
@@ -445,6 +451,14 @@ Wait Until Runtime Pod Is Running
     Log    name=modelmeshserving${runtime_pod_name}
     Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_pod_name}
     ...    namespace=${ns_name}    timeout=${timeout}
+
+Get Modelmesh Events And Logs
+    [Arguments]    ${server_name}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${runtime_pod_name}=    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
+    ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
+    Get Events And Pod Logs    namespace=${ns_name}
+    ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
 
 Create Custom Serving Runtime Using Template By CLI
     [Documentation]  Use Openshift API to create a custome runtime using template CR

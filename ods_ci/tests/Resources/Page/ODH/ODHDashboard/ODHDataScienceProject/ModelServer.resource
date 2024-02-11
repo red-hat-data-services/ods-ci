@@ -249,6 +249,9 @@ Enable Toleration Feature In KNativeServing
 Switch Model Serving Project
     [Documentation]    Switch to an existing project '${project_name}' from Model Serving dropdown list
     [Arguments]    ${project_name}=All projects
+    IF    "${project_name}" == "${NONE}"
+        ${project_name}=    Set Variable    All projects
+    END
     Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
     Wait Until Element Is Visible     //ul//a[contains(., '${project_name}')]
     Click Element     //ul//a[contains(., '${project_name}')]

@@ -306,11 +306,20 @@ Create Catalog Source For Operator
 Wait for Catalog To Be Ready
     [Documentation]    Verify catalog is Ready OR NOT
     [Arguments]    ${namespace}=openshift-marketplace   ${catalog_name}=odh-catalog-dev   ${timeout}=30
-    FOR    ${counter}    IN RANGE    ${timeout}
-           ${return_code}    ${output} =    Run And Return Rc And Output    oc get catalogsources ${catalog_name} -n ${namespace} -o json | jq ."status.connectionState.lastObservedState"
-           Should Be Equal As Integers   ${return_code}  0  msg=Error detected while getting component status
-           IF  ${output} == "READY"   Exit For Loop
-    END
+    Log    Waiting for the '${catalog_name}' CatalogSource in '${namespace}' namespace to be in 'Ready' status state
+    ...    console=yes
+    Wait Until Keyword Succeeds    6 times   10 seconds
+    ...   Catalog Is Ready    ${namespace}   ${catalog_name}
+    Log    CatalogSource '${catalog_name}' in '${namespace}' namespace in 'Ready' status now, let's continue
+    ...    console=yes
+
+Catalog Is Ready
+    [Documentation]   Check whether given CatalogSource is Ready
+    [Arguments]    ${namespace}=openshift-marketplace   ${catalog_name}=odh-catalog-dev
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc get catalogsources ${catalog_name} -n ${namespace} -o json | jq ."status.connectionState.lastObservedState"    # robocop: disable:line-too-long
+    Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
+    Should Be Equal As Strings    "READY"    ${output}
 
 Install Kserve Dependencies
     [Documentation]    Install Dependent Operator For Kserve

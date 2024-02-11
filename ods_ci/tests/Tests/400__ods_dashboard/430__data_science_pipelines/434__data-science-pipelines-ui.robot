@@ -100,6 +100,7 @@ Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
     ...         as this feature is currently disabled.
     [Tags]    Sanity
     ...       Tier1
+    Open Data Science Project Details Page    project_title=${PRJ_TITLE}
     Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}
     Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}

@@ -318,6 +318,7 @@ class DataSciencePipelinesAPI:
                     break
         return storage_class["metadata"]["name"]
 
+    @keyword
     def get_openshift_server(self):
         return self.run_oc("oc whoami --show-server=true")[0].replace("\n", "")
 

@@ -54,6 +54,5 @@ Prepare Data Science Pipelines Operator E2E Test Suite
     END
 
 Teardown Data Science Pipelines Operator E2E Test Suite
-    ${return_code}    ${output}     Run And Return Rc And Output    oc delete project ${DSPANAMESPACE} --force --grace-period=0
-    Log    ${output}
+    Delete Data Science Project From CLI    displayed_name=${DSPANAMESPACE}
     RHOSi Teardown

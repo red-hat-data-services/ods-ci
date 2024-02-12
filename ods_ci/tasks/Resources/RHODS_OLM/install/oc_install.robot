@@ -59,17 +59,10 @@ Wait Until Csv Is Ready
   [Documentation]   Waits some time for given CSV to be in Succeeded status condition
   [Arguments]    ${csv_name}
   Log    Waiting for the '${csv_name}' operator CSV in 'Succeeded' status condition    console=yes
-  Wait Until Keyword Succeeds    6 times   20 seconds
-  ...    Csv Is Ready    ${csv_name}
-  Log    Operator '${csv_name}' CSV is in 'Succeeded' status condition now, let's continue    console=yes
-
-Csv Is Ready
-  [Documentation]   Check whether given CSV to be in Succeeded status condition
-  [Arguments]    ${csv_name}
   ${rc}    ${output} =    Run And Return Rc And Output
-  ...    oc get csv --namespace openshift-operators --output=json | jq --raw-output --exit-status '.items[] | select(.metadata.name | test("${csv_name}")).status.conditions[] | select(.phase == "Succeeded").phase'    # robocop: disable:line-too-long
-  Should Be Equal As Integers    ${rc}    0
-  Should Be Equal As Strings    Succeeded    ${output}
+  ...    oc wait --timeout=3m --for jsonpath='{.status.phase}'=Succeeded csv -n openshift-operators ${csv_name}
+  Should Be Equal As Integers  ${rc}   ${0}   msg=Timeout exceeded waiting for '${csv_name}' CSV to be successful
+  Log    ${output}    console=yes
 
 Verify RHODS Installation
   # Needs to be removed ASAP

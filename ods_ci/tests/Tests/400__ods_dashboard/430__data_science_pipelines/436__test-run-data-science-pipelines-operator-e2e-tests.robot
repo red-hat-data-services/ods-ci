@@ -44,7 +44,7 @@ Prepare Data Science Pipelines Operator E2E Test Suite
     Should Be Equal As Integers	   ${return_code}	 0  msg=Unable to checkout data-science-pipelines-operator
     RHOSi Setup
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${DSPANAMESPACE}
-    Should Be Equal As Integers	${rc}	 0  msg=Cannot create a new project ${DSPANAMESPACE}
+    Should Be Equal As Integers	   ${rc}	 0  msg=Cannot create a new project ${DSPANAMESPACE}
 
 Teardown Data Science Pipelines Operator E2E Test Suite
     ${return_code}    ${output}     Run And Return Rc And Output    oc delete project ${DSPANAMESPACE} --force --grace-period=0

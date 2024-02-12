@@ -29,7 +29,7 @@ Run Data Science Pipelines Operator E2E Test
     Log    ${openshift_api}
     ${return_code}    ${output}    Run And Return Rc And Output    cd ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR} && make integrationtest K8SAPISERVERHOST=${openshift_api} DSPANAMESPACE=${DSPANAMESPACE} KUBECONFIGPATH=${KUBECONFIGPATH}
     Log    ${output}
-    Should Be Equal As Integers	${return_code}	 0  msg= Run Data Science Pipelines Operator E2E Test failed
+    Should Be Equal As Integers	   ${return_code}	 0  msg= Run Data Science Pipelines Operator E2E Test failed
 
 #robocop: disable: line-too-long
 *** Keywords ***
@@ -39,9 +39,9 @@ Prepare Data Science Pipelines Operator E2E Test Suite
     Log    ${output}
     ${return_code}    ${output}     Run And Return Rc And Output    git clone ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_URL} ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR}
     Log    ${output}
-    Should Be Equal As Integers	${return_code}	 0  msg=Unable to clone data-science-pipelines-operator repo ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_URL}:${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_BRANCH}:${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR}
+    Should Be Equal As Integers	   ${return_code}	 0  msg=Unable to clone data-science-pipelines-operator repo ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_URL}:${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_BRANCH}:${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR}
     ${return_code}    ${output}     Run And Return Rc And Output    cd ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR} && git checkout -b it_test ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_BRANCH}
-    Should Be Equal As Integers	${return_code}	 0  msg=Unable to checkout data-science-pipelines-operator
+    Should Be Equal As Integers	   ${return_code}	 0  msg=Unable to checkout data-science-pipelines-operator
     RHOSi Setup
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${DSPANAMESPACE}
     Should Be Equal As Integers	${rc}	 0  msg=Cannot create a new project ${DSPANAMESPACE}

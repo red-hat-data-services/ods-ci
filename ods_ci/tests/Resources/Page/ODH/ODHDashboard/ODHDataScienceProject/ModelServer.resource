@@ -32,7 +32,12 @@ Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
-    ...    ${no_gpus}=0
+    ...    ${no_gpus}=0    ${existing_server}=${FALSE}
+    IF    ${existing_server}
+        ${existing_server}=  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
+        IF  ${existing_server}    Run Keyword And Return
+        ...    Log    Model Server '${server_name}' already exists, reusing server    console=True
+    END
     SeleniumLibrary.Click Button    Add model server
     Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
@@ -40,7 +45,7 @@ Create Model Server
     Set Model Server Runtime    ${runtime}
     Set Server Size    ${server_size}
     IF    ${no_gpus} > ${0}
-        ${gpu_enabled} =    Run Keyword And Return Status    Verify GPU Selector Is Usable
+        ${gpu_enabled}=    Run Keyword And Return Status    Verify GPU Selector Is Usable
         IF    ${gpu_enabled}==False
             Log    GPU requested but not available
             Fail
@@ -59,7 +64,8 @@ Create Model Server
     ELSE IF    ${token}==${TRUE}
         Enable Token Authentication
     END
-    Click Button    Add
+    SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Add")]
+    SeleniumLibrary.Click Button    Add
     Sleep    1s    reason=Sometimes the modal will intercept later clicks even after being closed, wait for a second
 
 Set Replicas Number With Buttons
@@ -135,7 +141,7 @@ Verify Displayed GPU Count
     [Documentation]    Verifies the number of GPUs displayed in the Model Server table
     [Arguments]    ${server_name}    ${no_gpus}
     Wait Until Page Contains Element    xpath://span[.="${server_name}"]
-    ${expanded} =    Run Keyword And Return Status
+    ${expanded}=    Run Keyword And Return Status
     ...    Page Should Contain Element    xpath://button[@aria-expanded="true"]/span[.="${server_name}"]
     IF    ${expanded}==False
         Click Element    xpath://button[@aria-expanded="false"]/span[.="${server_name}"]
@@ -239,3 +245,13 @@ Enable Toleration Feature In KNativeServing
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch configmap config-features -n ${knative_serving_ns} --type=merge -p '{"data":{"kubernetes.podspec-tolerations": "enabled"}}'
     Should Be Equal As Integers    ${rc}    ${0}
+
+Switch Model Serving Project
+    [Documentation]    Switch to an existing project '${project_name}' from Model Serving dropdown list
+    [Arguments]    ${project_name}=All projects
+    IF    "${project_name}" == "${NONE}"
+        ${project_name}=    Set Variable    All projects
+    END
+    Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
+    Wait Until Element Is Visible     //ul//a[contains(., '${project_name}')]
+    Click Element     //ul//a[contains(., '${project_name}')]

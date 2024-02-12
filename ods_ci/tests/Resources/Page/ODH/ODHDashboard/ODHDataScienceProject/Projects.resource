@@ -22,7 +22,7 @@ Open Data Science Projects Home Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -69,7 +69,7 @@ Wait Until Data Science Project Is Deleted
 Project Should Not Exist In Openshift
     [Documentation]    Checks a given Project is not present in openshift
     [Arguments]    ${project_title}
-    ${k8s_name} =     Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${k8s_name}=     Get Openshift Namespace From Data Science Project   project_title=${project_title}
     IF    "${k8s_name}" != "${EMPTY}"
         Fail   msg=The project ${project_title} exists!
     END
@@ -110,22 +110,32 @@ Project's Owner Should Be
     ...    Page Should Contain Element    xpath=//a[text()="${project_title}"]/ancestor::td[@data-label='Name']//small[text()="${expected_username}"]
 
 Create Data Science Project
-    [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}
-    [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}
-    Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}
-    Click Button    ${PROJECT_CREATE_BTN_XP}
-    Wait Until Page Contains Element    ${TITLE_INPUT_XP}
-    Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
-    Input Text    ${TITLE_INPUT_XP}    ${title}
-    Input Text    ${DESCR_INPUT_XP}    ${description}
-    Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
-    IF    "${resource_name}" != "${NONE}"
-        Clear Element Text    ${RESOURCE_INPUT_XP}
-        Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
+    [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}.
+    ...    Reuse project if already exists: ${existing_project}
+    [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}    ${existing_project}=${FALSE}
+    IF    ${existing_project}
+        ${existing_project}=  Run Keyword And Return Status
+        ...    Wait Until Page Contains Element    xpath://a[text()="${title}"]
     END
-    Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
-    Click Button    ${GENERIC_CREATE_BTN_XP}
-    Wait Until Generic Modal Disappears
+    IF    ${existing_project}   
+        Log    DS Project '${title}' already exists, reusing project    console=True
+        Click Link      ${title}
+    ELSE
+        Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}
+        Click Button    ${PROJECT_CREATE_BTN_XP}
+        Wait Until Page Contains Element    ${TITLE_INPUT_XP}
+        Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
+        Input Text    ${TITLE_INPUT_XP}    ${title}
+        Input Text    ${DESCR_INPUT_XP}    ${description}
+        Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
+        IF    "${resource_name}" != "${NONE}"
+            Clear Element Text    ${RESOURCE_INPUT_XP}
+            Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
+        END
+        Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
+        Click Button    ${GENERIC_CREATE_BTN_XP}
+        Wait Until Generic Modal Disappears
+    END
     Wait Until Project Is Open    project_title=${title}
     ${open}=    Run Keyword And Return Status    Wait Until Project Is Open    project_title=${title}
     IF    ${open} == ${FALSE}
@@ -172,7 +182,7 @@ Delete Data Science Project From CLI
     ELSE
         Oc Delete    kind=Project   name=${project_k8s_name}
         WHILE    ${TRUE}
-            ${exists} =    Run And Return Rc    oc get project ${project_k8s_name}
+            ${exists}=    Run And Return Rc    oc get project ${project_k8s_name}
             IF    "${exists}" == "1"    BREAK
             Sleep    5s    reason=let's not overload the API
         END
@@ -282,7 +292,8 @@ Get All Displayed Projects
     ${projects_names}=    Create List
     ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]//a
     FOR    ${element}    IN    @{elements}
-        ${name}=    Get Text    ${element}
+        # Get exact project display name (including trailing spaces)
+        ${name}=    Get Element Attribute    ${element}    textContent
         Append To List    ${projects_names}    ${name}
     END
     [Return]   ${projects_names}

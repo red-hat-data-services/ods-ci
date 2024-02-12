@@ -40,11 +40,10 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${aws_bucket}
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_ALPHA}    framework=${framework_onnx}    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=${MODEL_PATH_ALPHA}    model_server=${RUNTIME_NAME}
-    ${runtime_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-    ${runtime_name} =    Convert To Lower Case    ${runtime_name}
+    ${runtime_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+    ${runtime_name}=    Convert To Lower Case    ${runtime_name}
     Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_name}    namespace=${PRJ_TITLE}
     Verify Model Status    ${MODEL_ALPHA}    success
     Install And Verify TrustyAI Service     ${PRJ_TITLE}
@@ -73,11 +72,10 @@ Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Se
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${aws_bucket}
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE1}    model_name=${MODEL_BETA}    framework=${framework_onnx}    existing_data_connection=${TRUE}
     ...    data_connection_name=model-serving-connection    model_path=${MODEL_PATH_BETA}    model_server=${RUNTIME_NAME}
-    ${runtime_name} =    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-    ${runtime_name} =    Convert To Lower Case    ${runtime_name}
+    ${runtime_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
+    ${runtime_name}=    Convert To Lower Case    ${runtime_name}
     Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_name}    namespace=${PRJ_TITLE1}
     Verify Model Status    ${MODEL_BETA}    success
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Model Is Registered with TrustyAI Service     namespace=${PRJ_TITLE1}
@@ -116,7 +114,7 @@ Verify User Workload Monitoring Configuration
 Install And Verify TrustyAI Service
     [Documentation]    Install TrustyAI service CRD and verify that TrustyAI resources have spun up
     [Arguments]        ${namespace}=${PRJ_TITLE}
-    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${TRUSTYAI_CR_FILEPATH} -n ${namespace}
+    ${return_code}    ${output}=    Run And Return Rc And Output    oc apply -f ${TRUSTYAI_CR_FILEPATH} -n ${namespace}
     Sleep    60s    msg=Wait for Trusty Route to be created
     ${return_code}    ${output}    Run And Return Rc And Output   oc get route trustyai-service -n ${namespace} --template={{.spec.host}}
     Should Be Equal As Integers    ${return_code}	 0
@@ -135,8 +133,8 @@ Verify Model Is Registered with TrustyAI Service
     Wait Until Keyword Succeeds  3 min  20 sec  Verify One Model Serving Pod Exists   ${namespace}    label_selector=modelmesh-service=modelmesh-serving
     ${podname}=    Get Pod Name   ${namespace}    label_selector=modelmesh-service=modelmesh-serving
     Log    Serving Runtime Podname: ${podname}
-    ${MM_PAYLOAD_PROCESSORS_Actual} =  Run  oc get pod ${podname} -n ${namespace} -o json | jq '.spec.containers[0].env[] | select(.name=="MM_PAYLOAD_PROCESSORS") | .value'
-    ${MM_PAYLOAD_PROCESSORS_Actual} =    Strip String    ${MM_PAYLOAD_PROCESSORS_Actual}    characters="
+    ${MM_PAYLOAD_PROCESSORS_Actual}=  Run  oc get pod ${podname} -n ${namespace} -o json | jq '.spec.containers[0].env[] | select(.name=="MM_PAYLOAD_PROCESSORS") | .value'
+    ${MM_PAYLOAD_PROCESSORS_Actual}=    Strip String    ${MM_PAYLOAD_PROCESSORS_Actual}    characters="
     Should Be Equal  ${MM_PAYLOAD_PROCESSORS_Actual.strip()}  ${MM_PAYLOAD_PROCESSORS_Expected.strip()}
 
 Verify One Model Serving Pod Exists
@@ -151,7 +149,7 @@ Send Batch Inference Data to Model
     [Arguments]        ${model_name}   ${project_name}    ${lower_range}=1     ${upper_range}=5
     FOR    ${counter}    IN RANGE    ${lower_range}    ${upper_range}
         ${inference_input}=  Set Variable   @ods_ci/tests/Resources/Files/TrustyAI/loan_default_batched/batch_${counter}.json
-        ${inference_output} =    Get Model Inference    ${model_name}    ${inference_input}    token_auth=${FALSE}
+        ${inference_output}=    Get Model Inference    ${model_name}    ${inference_input}    token_auth=${FALSE}
         ...    project_title=${project_name}
         Should Contain    ${inference_output}    model_name
     END
@@ -179,9 +177,9 @@ Schedule Bias Metrics request via CLI
 Verify TrustyAI Metrics Exists In Observe Metrics
     [Documentation]    Verify that TrustyAI Metrics exist in the Observe -> Metrics in OCP
     [Arguments]        ${model_query}    ${retry_attempts}   ${username}  ${password}  ${auth_type}
-    ${metrics_value} =    Run OpenShift Metrics Query    query=${model_query}    retry_attempts=${retry_attempts}   username=${username}
+    ${metrics_value}=    Run OpenShift Metrics Query    query=${model_query}    retry_attempts=${retry_attempts}   username=${username}
     ...   password=${password}   auth_type=${auth_type}
-    ${metrics_query_results_contain_data} =    Run Keyword And Return Status    Metrics.Verify Query Results Contain Data
+    ${metrics_query_results_contain_data}=    Run Keyword And Return Status    Metrics.Verify Query Results Contain Data
     IF    ${metrics_query_results_contain_data}
         Log To Console    Current Fairness Value: ${metrics_value}
     END

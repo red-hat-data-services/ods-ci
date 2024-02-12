@@ -28,7 +28,7 @@ ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"test-model__isvc-8655dc
 ${PRJ_TITLE}=    model-serving-upgrade
 ${PRJ_DESCRIPTION}=    project used for model serving tests
 ${MODEL_NAME}=    test-model
-${MODEL_CREATED}=    False
+${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving Test
 
 

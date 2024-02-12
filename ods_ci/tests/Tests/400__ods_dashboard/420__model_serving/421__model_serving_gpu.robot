@@ -16,7 +16,7 @@ ${RHODS_NAMESPACE}=    ${APPLICATIONS_NAMESPACE}
 ${PRJ_TITLE}=    model-serving-project-gpu
 ${PRJ_DESCRIPTION}=    project used for model serving tests (with GPUs)
 ${MODEL_NAME}=    vehicle-detection
-${MODEL_CREATED}=    False
+${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving GPU Test
 
 
@@ -25,9 +25,9 @@ Verify GPU Model Deployment Via UI
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
     [Tags]    Sanity    Tier1    Resources-GPU
     ...    ODS-2214
-    Open Model Serving Home Page
-    Try Opening Create Server
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Clean All Models Of Current User
+    Open Data Science Projects Home Page
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -35,7 +35,6 @@ Verify GPU Model Deployment Via UI
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}
     ...    no_gpus=1
     Verify Displayed GPU Count    server_name=${RUNTIME_NAME}    no_gpus=1
-    Open Model Serving Home Page
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir    existing_data_connection=${TRUE}  # robocop:disable
     ...    data_connection_name=model-serving-connection    model_path=vehicle-detection
     ...    model_server=${RUNTIME_NAME}
@@ -62,10 +61,10 @@ Test Inference Load On GPU
     ${url}=    Get Model Route via UI    ${MODEL_NAME}
     Send Random Inference Request     endpoint=${url}    no_requests=100
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0
-    ${prometheus_route} =    Get OpenShift Prometheus Route
-    ${sa_token} =    Get OpenShift Prometheus Service Account Token
-    ${expression} =    Set Variable    DCGM_FI_PROF_GR_ENGINE_ACTIVE
-    ${resp} =    Prometheus.Run Query    ${prometheus_route}    ${sa_token}    ${expression}
+    ${prometheus_route}=    Get OpenShift Prometheus Route
+    ${sa_token}=    Get OpenShift Prometheus Service Account Token
+    ${expression}=    Set Variable    DCGM_FI_PROF_GR_ENGINE_ACTIVE
+    ${resp}=    Prometheus.Run Query    ${prometheus_route}    ${sa_token}    ${expression}
     Log    DCGM_FI_PROF_GR_ENGINE_ACTIVE: ${resp.json()["data"]["result"][0]["value"][-1]}
     Should Be True    ${resp.json()["data"]["result"][0]["value"][-1]} > ${0}
 
@@ -96,46 +95,14 @@ Model Serving Suite Teardown
     Close All Browsers
     RHOSi Teardown
 
-Clean Up DSP Page
-    [Documentation]    Removes all DSP Projects, if any are present
-    Open Data Science Projects Home Page
-    WHILE    ${TRUE}
-        ${projects} =    Get All Displayed Projects
-        IF    len(${projects})==0
-            BREAK
-        END
-        Delete Data Science Projects From CLI    ${projects}
-        Reload Page
-        Wait Until Page Contains    Data Science Projects
-    END
-
-Try Opening Create Server
-    [Documentation]    Tries to clean up DSP and Model Serving pages
-    ...    In order to deploy a single model in a new project. ${retries}
-    ...    controls how many retries are made.
-    [Arguments]    ${retries}=3
-    FOR    ${try}    IN RANGE    0    ${retries}
-        ${status} =    Run Keyword And Return Status    Page Should Contain    Select a project
-        IF    ${status}
-            Click Button    Select a project
-            RETURN
-        ELSE
-            Clean Up Model Serving Page
-            Clean Up DSP Page
-            Open Model Serving Home Page
-            Reload Page
-            Sleep  5s
-        END
-    END
-
 Get OpenShift Prometheus Route
     [Documentation]    Fetches the route for the Prometheus instance of openshift-monitoring
-    ${host} =    Run    oc get route prometheus-k8s -n openshift-monitoring -o json | jq '.status.ingress[].host'
-    ${host} =    Strip String    ${host}    characters="
-    ${route} =    Catenate    SEPARATOR=    https://    ${host}
+    ${host}=    Run    oc get route prometheus-k8s -n openshift-monitoring -o json | jq '.status.ingress[].host'
+    ${host}=    Strip String    ${host}    characters="
+    ${route}=    Catenate    SEPARATOR=    https://    ${host}
     RETURN    ${route}
 
 Get OpenShift Prometheus Service Account Token
     [Documentation]    Returns a token for a service account to be used with Prometheus
-    ${token} =    Run    oc create token prometheus-k8s -n openshift-monitoring --duration 10m
+    ${token}=    Run    oc create token prometheus-k8s -n openshift-monitoring --duration 10m
     RETURN    ${token}

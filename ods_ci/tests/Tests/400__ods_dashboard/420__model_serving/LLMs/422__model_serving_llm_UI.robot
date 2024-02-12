@@ -276,10 +276,10 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Move To Tab    Components
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
     # Needed because of ProductBug
-    ${modal} =    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
+    ${modal}=    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
     IF  ${modal}==${TRUE}
         Click Element    //button[@aria-label="Close"]
     END
@@ -294,7 +294,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Run Keyword And Continue On Failure    Delete Model Via UI    ${flan_model_name}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
     [Teardown]    Clean Up DSP Page
 
 Verify User With Admin Permission Can Deploy Query And Delete A LLM
@@ -309,7 +309,7 @@ Verify User With Admin Permission Can Deploy Query And Delete A LLM
     Move To Tab    Components
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
     Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -322,7 +322,7 @@ Verify User With Admin Permission Can Deploy Query And Delete A LLM
     Delete Model Via UI    ${flan_model_name}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
     [Teardown]    Clean Up DSP Page
 
 

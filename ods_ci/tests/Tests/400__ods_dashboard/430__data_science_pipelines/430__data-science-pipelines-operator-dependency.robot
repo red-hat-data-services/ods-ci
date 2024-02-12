@@ -7,7 +7,7 @@ Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipel
 Resource            ../../../Resources/Page/Operators/OpenShiftPipelines.resource
 Resource            ../../../Resources/Page/Operators/ISVs.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-
+Test Tags          DataSciencePipelines
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
 

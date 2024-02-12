@@ -13,7 +13,6 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
-${RHODS_OPERATOR_NAME}=    rhods-operator
 ${ODH_OPERATOR_NAME}=    opendatahub-operator
 
 *** Keywords ***
@@ -21,13 +20,11 @@ Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
   Install Kserve Dependencies
   Clone OLM Install Repo
-  ${operator_csv_name} =    Set Variable    ${RHODS_OPERATOR_NAME}
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
             IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                  Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
             ELSE
-                 ${operator_csv_name} =    Set Variable    ${ODH_OPERATOR_NAME}
                  Create Catalog Source For Operator
                  Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
             END
@@ -45,7 +42,6 @@ Install RHODS
            IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                 Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
            ELSE
-                ${operator_csv_name} =    Set Variable    ${ODH_OPERATOR_NAME}
                 Create Catalog Source For Operator
                 Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
            END
@@ -53,15 +49,14 @@ Install RHODS
           FAIL    Provided test envrioment is not supported
       END
   END
-  Wait Until Csv Is Ready    ${operator_csv_name}
+  Wait Until All Csv Are Ready
 
-Wait Until Csv Is Ready
-  [Documentation]   Waits some time for given CSV to be in Succeeded status condition
-  [Arguments]    ${csv_name}
-  Log    Waiting for the '${csv_name}' operator CSV in 'Succeeded' status condition    console=yes
+Wait Until All Csv Are Ready
+  [Documentation]   Waiting for all operators CSV to be in 'Succeeded' status phase
+  Log    Waiting for all operators CSV to be in 'Succeeded' status phase    console=yes
   ${rc}    ${output} =    Run And Return Rc And Output
-  ...    oc wait --timeout=3m --for jsonpath='{.status.phase}'=Succeeded csv -n openshift-operators ${csv_name}
-  Should Be Equal As Integers  ${rc}   ${0}   msg=Timeout exceeded waiting for '${csv_name}' CSV to be successful
+  ...    oc wait --timeout=3m --for jsonpath='{.status.phase}'=Succeeded csv -n openshift-operators --all
+  Should Be Equal As Integers  ${rc}   ${0}   msg=Timeout exceeded waiting for operators CSV to be successful
   Log    ${output}    console=yes
 
 Verify RHODS Installation

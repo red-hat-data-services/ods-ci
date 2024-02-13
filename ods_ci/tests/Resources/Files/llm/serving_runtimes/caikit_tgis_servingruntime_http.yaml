@@ -10,7 +10,7 @@ spec:
       name: caikit
   containers:
     - name: kserve-container
-      image: quay.io/modh/text-generation-inference@sha256:a17a2868644929ee844ceb2778ac3f6db0936824d9b89d11ea7aa059466fcd0b
+      image: quay.io/modh/text-generation-inference@sha256:9f18a63cd84b084c3cbf15534f22d5ba6916d9501298abcc03271d26ebf5cdfb
       command: ["text-generation-launcher"]
       args: ["--model-name=/mnt/models/artifacts/"]
       env:
@@ -21,7 +21,7 @@ spec:
       #     cpu: 8
       #     memory: 16Gi
     - name: transformer-container
-      image: quay.io/modh/caikit-tgis-serving@sha256:ce6b66bb847608dac5eacd7f9123d2a076a06893d7f37f2da5876a8930527513
+      image: quay.io/modh/caikit-tgis-serving@sha256:0fd3584362e8780aed922fe124c8829c1c7df9d55590ba2ae76bb6aef0155c1f
       env:
         - name: RUNTIME_LOCAL_MODELS_DIR
           value: /mnt/models

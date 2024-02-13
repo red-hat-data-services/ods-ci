@@ -14,7 +14,7 @@ ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${RHODS_CSV_LABEL}=    olm.copiedFrom\=redhat-ods-operator
-${ODH_CSV_LABEL}=    olm.copiedFrom\=opendatahub-operator
+${ODH_CSV_LABEL}=    operators.coreos.com/rhods-operator.openshift-operators
 
 *** Keywords ***
 Install RHODS

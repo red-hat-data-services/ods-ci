@@ -146,9 +146,9 @@ Wait Until Csv Is Ready
   [Arguments]    ${csv_label}    ${timeout}=3m    ${opeartors_namespace}=openshift-operators
   Log    Waiting ${timeout} for Operator CSV with Label '${csv_label}' to have a 'Succeeded' status phase    console=yes
   ${rc}    ${output} =    Run And Return Rc And Output
-  ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${opeartors_namespace} -l ${csv_label}
+  ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${opeartors_namespace} -l '${csv_label}'
   Should Be Equal As Integers  ${rc}   ${0}
-  ...    msg=${timeout} Timeout exceeded waiting for CSV '${csv_label}' in ${opeartors_namespace} to be successful
+  ...    msg=${timeout} Timeout exceeded waiting for CSV '${csv_label}' in ${opeartors_namespace} to be successful. ${output}
   Log    ${output}    console=yes
 
 Get Cluster ID

@@ -13,21 +13,21 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
-${RHODS_CSV_LABEL}=    olm.copiedFrom\=redhat-ods-operator
-${ODH_CSV_LABEL}=    operators.coreos.com/rhods-operator.openshift-operators
+${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
+${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
   Install Kserve Dependencies
   Clone OLM Install Repo
-  ${operator_csv_label} =    Set Variable    ${RHODS_CSV_LABEL}
+  ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
             IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                  Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
             ELSE
-                 ${operator_csv_label} =    Set Variable    ${ODH_CSV_LABEL}
+                 ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
                  Create Catalog Source For Operator
                  Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
             END
@@ -45,7 +45,7 @@ Install RHODS
            IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                 Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
            ELSE
-                ${operator_csv_label} =    Set Variable    ${ODH_CSV_LABEL}
+                ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
                 Create Catalog Source For Operator
                 Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
            END
@@ -53,7 +53,7 @@ Install RHODS
           FAIL    Provided test envrioment is not supported
       END
   END
-  Wait Until Csv Is Ready    ${operator_csv_label}
+  Wait Until Csv Is Ready    ${csv_display_name}
 
 Verify RHODS Installation
   # Needs to be removed ASAP

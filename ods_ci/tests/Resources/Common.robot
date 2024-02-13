@@ -142,14 +142,18 @@ Get CodeFlare Version
 
 #robocop: disable: line-too-long
 Wait Until Csv Is Ready
-  [Documentation]   Waits ${timeout} for Operator CSV with Label '${csv_label}' to have a 'Succeeded' status phase
-  [Arguments]    ${csv_label}    ${timeout}=3m    ${opeartors_namespace}=openshift-operators
-  Log    Waiting ${timeout} for Operator CSV with Label '${csv_label}' to have a 'Succeeded' status phase    console=yes
-  ${rc}    ${output} =    Run And Return Rc And Output
-  ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${opeartors_namespace} -l '${csv_label}'
-  Should Be Equal As Integers  ${rc}   ${0}
-  ...    msg=${timeout} Timeout exceeded waiting for CSV '${csv_label}' in ${opeartors_namespace} to be successful. ${output}
-  Log    ${output}    console=yes
+  [Documentation]   Waits ${timeout} for Operators CSV '${display_name}' to have status phase 'Succeeded'
+  [Arguments]    ${display_name}    ${timeout}=3m    ${opeartors_namespace}=openshift-operators
+  Log    Waiting ${timeout} for Operator CSV '${display_name}' in ${opeartors_namespace} to have status phase 'Succeeded'    console=yes
+  WHILE   True    limit=${timeout}
+  ...    on_limit_message=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be created
+    ${csv_name}=    Run Process    oc get csv --no-headers | awk '/${display_name}/ {print \$1}'    shell=yes
+    IF    "${csv_name.stdout}" != "${EMPTY}"    BREAK
+  END
+  ${result}=    Run Process
+  ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${opeartors_namespace} ${csv_name.stdout}    shell=yes
+  Should Be Equal As Integers	    ${result.rc}    ${0}    msg=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be ready
+  Log    ${result.stdout}    console=yes
 
 Get Cluster ID
     [Documentation]     Retrieves the ID of the currently connected cluster

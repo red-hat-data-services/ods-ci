@@ -13,7 +13,7 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
-${RHODS_CSV_LABEL}=    olm.copiedFrom\=opendatahub-operator
+${RHODS_CSV_LABEL}=    olm.copiedFrom\=redhat-ods-operator
 ${ODH_CSV_LABEL}=    olm.copiedFrom\=opendatahub-operator
 
 *** Keywords ***
@@ -54,15 +54,6 @@ Install RHODS
       END
   END
   Wait Until Csv Is Ready    ${operator_csv_label}
-
-Wait Until Csv Is Ready
-  [Documentation]   Waits ${timeout} for Operator CSV '${csv_label}' to have 'Succeeded' status phase
-  [Arguments]    ${csv_label}    ${timeout}=3m
-  Log    Waiting for the '${csv_label}' operator CSV in 'Succeeded' status condition    console=yes
-  ${rc}    ${output} =    Run And Return Rc And Output
-  ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n openshift-operators -l ${csv_label}
-  Should Be Equal As Integers  ${rc}   ${0}   msg=Timeout exceeded waiting for '${csv_label}' CSV to be successful
-  Log    ${output}    console=yes
 
 Verify RHODS Installation
   # Needs to be removed ASAP

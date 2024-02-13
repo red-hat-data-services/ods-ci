@@ -140,6 +140,17 @@ Get CodeFlare Version
     Log  Product:${PRODUCT} CodeFlare Version:${CODEFLARE_VERSION}
     RETURN  ${CODEFLARE_VERSION}
 
+#robocop: disable: line-too-long
+Wait Until Csv Is Ready
+  [Documentation]   Waits ${timeout} for Operator CSV with Label '${csv_label}' to have a 'Succeeded' status phase
+  [Arguments]    ${csv_label}    ${timeout}=3m    ${opeartors_namespace}=openshift-operators
+  Log    Waiting ${timeout} for Operator CSV with Label '${csv_label}' to have a 'Succeeded' status phase    console=yes
+  ${rc}    ${output} =    Run And Return Rc And Output
+  ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${opeartors_namespace} -l ${csv_label}
+  Should Be Equal As Integers  ${rc}   ${0}
+  ...    msg=${timeout} Timeout exceeded waiting for CSV '${csv_label}' in ${opeartors_namespace} to be successful
+  Log    ${output}    console=yes
+
 Get Cluster ID
     [Documentation]     Retrieves the ID of the currently connected cluster
     ${cluster_id}=   Run    oc get clusterversion -o json | jq .items[].spec.clusterID

@@ -213,6 +213,10 @@ Get Model Route via UI
         SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
     END
     ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
+    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
+    IF    ${kserve}
+        ${url} =    Catenate    ${url}    /v2/models/${model_name}/infer
+    END
     RETURN    ${url}
 
 Get Model Route Via CLI

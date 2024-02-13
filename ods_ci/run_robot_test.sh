@@ -319,6 +319,7 @@ if command -v yq &> /dev/null
 fi
 
 if [[ ${SKIP_INSTALL} -eq 0 ]]; then
+  # look for pre-created poetry .venv
   virtenv="${HOME}/.local/ods-ci/.venv"
   if [[ -d "${virtenv}" ]]; then
     echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
@@ -326,6 +327,23 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
     ln --symbolic "${virtenv}" "${basepath}/../.venv"
   else
     echo "Pre-created virtual environment has not been found in '${virtenv}'. All dependencies will be installed from scratch."
+  fi
+  # ensure python 3.11
+  python=$(poetry env info --executable)
+  if [[ -n "${python}" ]] && ${python} -c 'import sys; sys.exit(0 if sys.version_info[0:2] == (3, 11) else 1)'; then
+    echo "Python '${python}' will be used"
+  else
+    echo "Python '${python}' is not of the correct version"
+    python311=$(which python3.11)
+    if [[ -n "${python311}" ]]; then
+      echo "Configuring poetry to use Python ${python311}"
+      poetry env use "${python311}"
+    else
+      echo "[ERROR] Python 3.11 was not found!"
+      echo "Install Python 3.11 on your machine. On Fedora, do 'sudo dnf install -y python3.11-devel'"
+      echo "then run 'poetry env use /path/to/python3.11' and then try running robot again"
+      exit 1
+    fi
   fi
 
   poetry --no-interaction install --sync

@@ -5,6 +5,7 @@ Suite Teardown    Teardown Kueue E2E Test Suite
 Library           OperatingSystem
 Library           Process
 Library           OpenShiftLibrary
+Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
@@ -43,10 +44,8 @@ Prepare Kueue E2E Test Suite
         FAIL    Unable to clone kueue repo ${KUEUE_REPO_URL}:${KUEUE_REPO_BRANCH}:${KUEUE_DIR}
     END
 
-    Log To Console    Install the latest development version of kueue ...
-    ${return_code}    ${output}    Run And Return Rc And Output    kubectl apply --server-side -k "github.com/kubernetes-sigs/kueue/config/default?ref=main"
-    Log To Console    ${output}
-    Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing kueue
+    Enable Component    kueue
+    Wait Component Ready    kueue
 
     # Add label instance-type=on-demand on worker node
     Log To Console    Add label on worker node ...
@@ -69,10 +68,7 @@ Prepare Kueue E2E Test Suite
 
 Teardown Kueue E2E Test Suite
     [Documentation]    Teardown Kueue E2E Test Suite
-    Log To Console    Uninstall Kueue ...
-    ${return_code}    ${output}    Run And Return Rc And Output    kubectl delete -k "github.com/kubernetes-sigs/kueue/config/default?ref=main" --ignore-not-found=true
-    Log To Console    ${output}
-    Should Be Equal As Integers   ${return_code}   0  msg=Error detected while uninstalling kueue
+    Disable Component    kueue
 
     # Remove label instance-type=on-demand from worker node
     Log To Console    Remove label from worker node ...

@@ -147,13 +147,12 @@ Wait Until Csv Is Ready
   Log    Waiting ${timeout} for Operator CSV '${display_name}' in ${opeartors_namespace} to have status phase 'Succeeded'    console=yes
   WHILE   True    limit=${timeout}
   ...    on_limit_message=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be created
-    ${csv_name}=    Run Process    oc get csv --no-headers | awk '/${display_name}/ {print \$1}'    shell=yes
-    IF    "${csv_name.stdout}" != "${EMPTY}"    BREAK
+    ${csv_created}=    Run Process    oc get csv --no-headers | awk '/${display_name}/ {print \$1}'    shell=yes
+    IF    "${csv_created.stdout}" == "${EMPTY}"    CONTINUE
+    ${csv_ready}=    Run Process
+    ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${opeartors_namespace} ${csv_created.stdout}    shell=yes
+    IF    ${csv_ready.rc} == ${0}    BREAK
   END
-  ${result}=    Run Process
-  ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${opeartors_namespace} ${csv_name.stdout}    shell=yes
-  Should Be Equal As Integers	    ${result.rc}    ${0}    msg=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be ready
-  Log    ${result.stdout}    console=yes
 
 Get Cluster ID
     [Documentation]     Retrieves the ID of the currently connected cluster

@@ -7,7 +7,17 @@ Suite Teardown  Teardown Settings Accelerator Profiles
 
 
 *** Variables ***
-#TODO: Add variables here
+${ACC_DISPLAY_NAME}=    qe_create_ap_
+${ACC_NAME}=    qecreateap
+${ACC_IDENTIFIER}=    nvidia.com/gpu
+${ACC_DESCRIPTION}=    description example
+${ACC_ENABLED}=    True
+${ACC_TOLERATION_OPERATOR}=    Exists
+${ACC_TOLERATION_EFFECT}=    PreferNoSchedule
+${ACC_TOLERATION_KEY}=    my_key
+${ACC_TOLERATION_VALUE}=    my_value
+${ACC_TOLERATION_SECONDS}=    15
+
 
 
 *** Test Cases ***
@@ -28,13 +38,21 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Click On Create Accelerator profile button
-    Create An Accelerator Profile via UI   qe_create_ap_03   nvidia.com/gpu   description example   True
-    ...                                    tolerations=yes   tol_operator=Exists  tol_effect=PreferNoSchedule
-    ...                                    tol_key=my_key   tol_value=my_value  tol_seconds=15
-    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   qe_create_ap_03
-    Verify Accelerator Profile Values using CLI   qe_create_ap_03   nvidia.com/gpu   description example   True
-    ...                                           tolerations=yes   tol_operator=Exists  tol_effect=PreferNoSchedule
-    ...                                           tol_key=my_key   tol_value=my_value  tol_seconds=15
+    Create An Accelerator Profile via UI   ${ACC_DISPLAY_NAME}01   ${ACC_IDENTIFIER}
+    ...                                    ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
+    ...                                    tol_operator=${ACC_TOLERATION_OPERATOR}
+    ...                                    tol_effect=${ACC_TOLERATION_EFFECT}
+    ...                                    tol_key=${ACC_TOLERATION_KEY}
+    ...                                    tol_value=${ACC_TOLERATION_VALUE}
+    ...                                    tol_seconds=${ACC_TOLERATION_SECONDS}
+    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}01
+    Verify Accelerator Profile Values via CLI   ${ACC_DISPLAY_NAME}01   ${ACC_IDENTIFIER}
+    ...                                         ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
+    ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
+    ...                                         tol_effect=${ACC_TOLERATION_EFFECT}
+    ...                                         tol_key=${ACC_TOLERATION_KEY}
+    ...                                         tol_value=${ACC_TOLERATION_VALUE}
+    ...                                         tol_seconds=${ACC_TOLERATION_SECONDS}
 
 
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
@@ -144,4 +162,4 @@ Setup Settings Accelerator Profiles
 
 Dashboard Settings Accelerator Profiles Test Teardown
     [Documentation]    Test teardown
-    Delete All Accelerator Profiles Which Starts With   qecreateap
+    Delete All Accelerator Profiles Which Starts With   ${ACC_NAME}

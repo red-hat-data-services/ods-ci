@@ -437,7 +437,7 @@ In The Accelerator Profiles Grid There Is An Accelerator Profile With Name
 
     Wait Until Element Is Visible   //table[@id='accelerator-profile-table']//td[@data-label='Name']//span[text()='${name}']  timeout=10
 
-Verify Accelerator Profile Values using CLI
+Verify Accelerator Profile Values via CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it's value match with the expected
     [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
     ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key

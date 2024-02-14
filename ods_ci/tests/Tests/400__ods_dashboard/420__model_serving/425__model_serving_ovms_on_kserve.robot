@@ -12,6 +12,7 @@ Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
 Test Tags         ModelMesh
 
+
 *** Variables ***
 ${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
 ${INFERENCE_INPUT_OPENVINO}=    @ods_ci/tests/Resources/Files/openvino-example-input.json
@@ -28,30 +29,12 @@ ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"${MODEL_NAME}__isvc-865
 
 
 *** Test Cases ***
-# Verify Model Serving Installation
-#     [Documentation]    Verifies that the core components of model serving have been
-#     ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace
-#     [Tags]    Smoke
-#     ...       Tier1
-#     ...       OpenDataHub
-#     ...       ODS-1919
-#     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify odh-model-controller Deployment
-#     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
-#     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Etcd Pod
-
 Verify Openvino_IR Model Via UI
     [Documentation]    Test the deployment of an openvino_ir model
     [Tags]    Smoke
-    ...    ODS-2054
+    ...    ODS-2054    ODS-2053
     Create Openvino Models For Kserve    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}
     ...    project_name=${PRJ_TITLE}   num_projects=1
-    [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
-
-Test Inference Without Token Authentication
-    [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
-    [Tags]    Smoke
-    ...    ODS-2053
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
     [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
@@ -66,17 +49,10 @@ Verify Tensorflow Model Via UI
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    # Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
-    # Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=tensorflow    existing_data_connection=${TRUE}
-    # ...    data_connection_name=model-serving-connection    model_path=inception_resnet_v2.pb    existing_model=${TRUE}
     Deploy Kserve Model Via UI    model_name=${MODEL_NAME}     serving_runtime=OpenVINO Model Server
     ...    data_connection=model-serving-connection    path=tf-kserve    model_framework=tensorflow - 2
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${MODEL_NAME}
     ...    namespace=${PRJ_TITLE}
-    # ${runtime_pod_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
-    # ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
-    # Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
-    # Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     ${url}=    Get Model Route via UI    ${MODEL_NAME}
@@ -96,18 +72,10 @@ Verify Secure Model Can Be Deployed In Same Project
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    # Create Model Server    token=${TRUE}    server_name=${SECURED_RUNTIME}    existing_server=${TRUE}
-    # Serve Model    project_name=${PRJ_TITLE}    model_name=${SECURED_MODEL}    model_server=${SECURED_RUNTIME}
-    #...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection    existing_model=${TRUE}
-    #...    framework=onnx    model_path=mnist-8.onnx
     Deploy Kserve Model Via UI    model_name=${SECURED_MODEL}    serving_runtime=OpenVINO Model Server
     ...    data_connection=model-serving-connection    path=test-dir    model_framework=onnx
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${SECURED_MODEL}
     ...    namespace=${PRJ_TITLE}
-    #${runtime_pod_name}=    Replace String Using Regexp    string=${SECURED_RUNTIME}    pattern=\\s    replace_with=-
-    #${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
-    #Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
-    #Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service
     Verify Model Status    ${SECURED_MODEL}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
@@ -122,11 +90,6 @@ Test Inference With Token Authentication
     Recreate S3 Data Connection    project_title=${SECOND_PROJECT}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    #Create Model Server    token=${TRUE}    server_name=${SECURED_RUNTIME}    existing_server=${TRUE}
-    #Serve Model    project_name=${SECOND_PROJECT}    model_name=${SECURED_MODEL}    model_server=${SECURED_RUNTIME}
-    #...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection    existing_model=${TRUE}
-    #...    framework=onnx    model_path=mnist-8.onnx
-    # Run Keyword And Continue On Failure    Verify Model Inference    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_SECURED_OUTPUT}    token_auth=${TRUE}    # robocop: disable
     Deploy Kserve Model Via UI    model_name=${SECURED_MODEL}    serving_runtime=OpenVINO Model Server
     ...    data_connection=model-serving-connection    path=test-dir    model_framework=onnx
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${SECURED_MODEL}
@@ -171,18 +134,11 @@ Create Openvino Models For Kserve
         Recreate S3 Data Connection    project_title=${new_project}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
-        #Create Model Server    token=${FALSE}    server_name=${server_name}    existing_server=${TRUE}
-        #Serve Model    project_name=${new_project}    model_name=${model_name}    framework=openvino_ir    existing_data_connection=${TRUE}
-        #...    data_connection_name=model-serving-connection    model_path=openvino-example-model    existing_model=${TRUE}
         Deploy Kserve Model Via UI    model_name=${model_name}    serving_runtime=OpenVINO Model Server
         ...    data_connection=model-serving-connection    path=kserve-openvino-test/openvino-example-model
         ...    model_framework=openvino_ir
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
         ...    namespace=${new_project}
-        #${runtime_pod_name}=    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
-        #${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
-        #Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}    project_name=${new_project}
-        #Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    ${new_project}
         Verify Model Status    ${model_name}    success
         ${project_postfix}=    Evaluate  ${idx}+1
         Set Suite Variable    ${MODEL_CREATED}    ${TRUE}

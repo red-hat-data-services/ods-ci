@@ -215,7 +215,7 @@ Get Model Route via UI
     ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
     ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
     IF    ${kserve}
-        ${url} =    Catenate    ${url}    /v2/models/${model_name}/infer
+        ${url} =    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
     END
     RETURN    ${url}
 

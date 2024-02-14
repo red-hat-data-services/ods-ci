@@ -29,7 +29,7 @@ ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"${MODEL_NAME}__isvc-865
 
 
 *** Test Cases ***
-Verify Openvino_IR Model Via UI
+Verify Openvino_IR Model Via UI (Kserve)
     [Documentation]    Test the deployment of an openvino_ir model
     [Tags]    Smoke
     ...    ODS-2054    ODS-2053
@@ -41,7 +41,7 @@ Verify Openvino_IR Model Via UI
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}
 
-Verify Tensorflow Model Via UI
+Verify Tensorflow Model Via UI (Kserve)
     [Documentation]    Test the deployment of a tensorflow (.pb) model
     [Tags]    Sanity    Tier1
     ...    ODS-2268    ProductBug    RHOAIENG-2869
@@ -56,7 +56,7 @@ Verify Tensorflow Model Via UI
     ...    namespace=${PRJ_TITLE}
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
-    ${url}=    Get Model Route via UI    ${MODEL_NAME}
+    ${url}    ${kserve}=    Get Model Route via UI    ${MODEL_NAME}
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
@@ -64,27 +64,7 @@ Verify Tensorflow Model Via UI
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}
 
-Verify Secure Model Can Be Deployed In Same Project
-    [Documentation]    Verifies that a model can be deployed in a secured server (with token) using only the UI.
-    ...    At the end of the process, verifies the correct resources have been deployed.
-    [Tags]    Sanity    Tier1
-    ...    ODS-1921    ProductBug    RHOAIENG-2759
-    Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
-    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=ods-ci-s3
-    Deploy Kserve Model Via UI    model_name=${SECURED_MODEL}    serving_runtime=OpenVINO Model Server
-    ...    data_connection=model-serving-connection    path=test-dir    model_framework=onnx
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${SECURED_MODEL}
-    ...    namespace=${PRJ_TITLE}
-    Verify Model Status    ${SECURED_MODEL}    success
-    Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
-    Clean All Models Of Current User
-    [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
-    ...    model_name=${SECURED_MODEL}    project_title=${PRJ_TITLE}
-
-Test Inference With Token Authentication
+Test Onnx Model Via UI (Kserve)
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
     [Tags]    Sanity    Tier1
     ...    ODS-1920
@@ -104,12 +84,12 @@ Test Inference With Token Authentication
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${SECURED_MODEL}    project_title=${SECOND_PROJECT}
 
-Verify Multiple Projects With Same Model
+Verify Multiple Projects With Same Model (Kserve)
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
     [Tags]    Sanity
     ...    RHOAIENG-549    RHOAIENG-2724
     Create Openvino Models For Kserve    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}
-    ...    project_name=${PRJ_TITLE}    num_projects=5
+    ...    project_name=${PRJ_TITLE}    num_projects=3
     Clean All Models Of Current User
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}

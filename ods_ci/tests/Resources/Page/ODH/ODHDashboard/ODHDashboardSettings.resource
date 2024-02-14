@@ -11,6 +11,14 @@ ${GROUP_BTN_XP}=    (//*[@class="pf-c-chip-group"])//*[@class="pf-c-chip__text" 
 ${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
 ${MULTI_MODE_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
 ${CUSTOM_EMPTY_GROUP}=    empty-group
+${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}=    //button[@data-id="display-accelerator-modal-button"]
+${CREATE_ACCELERATOR_PROFILE_BTN}=    //button[@data-id="create-accelerator-profile"]
+${ACCELERATOR_NAME}=    //input[@id="accelerator-name"]
+${ACCELERATOR_IDENTIFIER}=    //input[@id="accelerator-identifier"]
+${ACCELERATOR_DESCRIPTION}=    //textarea[@id="accelerator-description"]
+${ACCELERATOR_ENABLED_SWITCH}=    //input[@id="accelerator-enabled"]/following-sibling::span
+${ACCELERATOR_ADD_TOLERATION_BTN}=    //button[@data-testid="add-toleration-button"]
+${CREATE_ACCELERATOR_PROFILE_DETAIL_BTN}=    //button[@id="create-button"]
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
@@ -38,6 +46,16 @@ Add OpenShift Groups To Data Science User Groups
              END
     END
     Press Keys    None    ESC
+
+Open ODS Dashboard With Admin User
+    [Documentation]    Opens a browser and logs into ODS Dashboard with a user belonging to the rhods-admins group
+    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ...    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
+
+Open ODS Dashboard With Non Admin User
+    [Documentation]    Opens a browser and logs into ODS Dashboard with a user belonging to the rhods-users group
+    Launch Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
+    ...    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
 
 Launch Dashboard And Check User Management Option Is Available For The User
     [Documentation]  Launch Dashboard And Check User Management Option Is
@@ -343,3 +361,81 @@ Set RHODS Users Group To Inexistent Group
     ...    to the given inexistent group
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...    users_group=${CUSTOM_INEXISTENT_GROUP}
+
+Click On Create Accelerator profile button
+    [Documentation]    Click on the "Add new accelerator profile" (when there is none) or
+    ...                the "Create accelerator profile" (when there is at least 1
+    ...                previously created).
+    ...                view: Settings -> Accelerator profiles
+
+    ${empty_list} =  Run Keyword And Return Status    Wait Until Page Contains Element
+    ...    ${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}  timeout=5s
+    IF  ${empty_list}==True
+        Click Button   ${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}
+    ELSE
+        Click Button   ${CREATE_ACCELERATOR_PROFILE_BTN}
+    END
+
+Create An Accelerator Profile using values
+    [Documentation]    Fill Accelerator Profile values with the ones provided in the arguments and click on
+    ...                create button
+    ...                view: Create Accelerator profile
+    [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
+    ...           ${tolerations}=${EMPTY}
+
+    Wait Until Page Contains Element  ${ACCELERATOR_NAME}  timeout=5s
+    Input Text    ${ACCELERATOR_NAME}    ${name}
+    Input Text    ${ACCELERATOR_IDENTIFIER}    ${identifier}
+    IF    "${description}" != "${EMPTY}"
+        Input Text    ${ACCELERATOR_DESCRIPTION}    ${description}
+    END
+    # By default are enabled
+    IF  ${enabled} != True
+        Click Element    ${ACCELERATOR_ENABLED_SWITCH}
+    END
+    # TODO: Tolerations
+    Click Button    ${CREATE_ACCELERATOR_PROFILE_DETAIL_BTN}
+
+In The Accelerator Profiles Grid There Is An Accelerator Profile With Name
+    [Documentation]    Verify that there is an specific Accelerator Profile in the Grid
+    ...                view: Settings -> Accelerator profiles
+    [Arguments]   ${name}
+
+    Wait Until Element Is Visible   //table[@id='accelerator-profile-table']//td[@data-label='Name']//span[text()='${name}']  timeout=10
+
+Verify Accelerator Profile Values
+    [Documentation]  Verifies that an specific Accelerator Profile exists, and it's value match with the expected
+    [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
+    ...           ${tolerations}=${EMPTY}  ${ns}=redhat-ods-applications
+
+    ${ap_from_oc}=    Run     oc get acceleratorprofile -n ${ns} -o json | jq '.items[] | select(.spec.displayName == "${name}")'
+    ${ap_json}=    Load Json String    ${ap_from_oc}
+    ${ap_spec_dict}=    Get From Dictionary    ${ap_json}    spec
+    ${name_from_spec}=    Get From Dictionary    ${ap_spec_dict}    displayName
+    ${enabled_from_spec}=    Get From Dictionary    ${ap_spec_dict}    enabled
+    ${identifier_from_spec}=    Get From Dictionary    ${ap_spec_dict}    identifier
+    ${tolerations_from_spec}=    Get From Dictionary    ${ap_spec_dict}    tolerations
+    ${bool_enabled}=    Convert To Boolean    ${enabled}
+    Should Be Equal    ${name_from_spec}    ${name}
+    Should Be Equal    ${identifier_from_spec}    ${identifier}
+    Should Be Equal    ${enabled_from_spec}    ${bool_enabled}
+    IF    "${description}" != "${EMPTY}"
+        ${description_from_spec}=    Get From Dictionary    ${ap_spec_dict}    description
+        Should Be Equal    ${description_from_spec}    ${description}
+    END
+    # TODO: Tolerations
+
+Delete All Accelerator Profiles Which Starts With
+    [Documentation]    Delete all accelerator profiles given prefix. That prefix should match with the metadata.name
+    ...                value of the OC Accelerator Profile resource
+    ...                Uses OC
+    [Arguments]   ${ap_prefix}  ${ns}=redhat-ods-applications
+
+    ${ap_str} =    Run     oc get acceleratorprofiles -n ${ns} -o json | jq .items[].metadata.name | grep ${ap_prefix} | tr -d '"'
+    @{ap_list}=    Split String    ${ap_str}    separator=\n
+    Log     List of Accelerator Profiles to be deleted: @{ap_list}    console=yes
+    FOR    ${ap_name}    IN    @{ap_list}
+        ${return_code}    ${output}    Run And Return Rc And Output
+        ...    oc delete acceleratorprofile ${ap_name} -n ${ns}
+        Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Accelerator profile ${ap_name}
+    END

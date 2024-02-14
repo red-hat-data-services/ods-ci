@@ -413,7 +413,7 @@ Wait Component Ready
 
 Add UI Admin Group To Dashboard Admin
     [Documentation]    Add Ui admin group to ODH dashboard admin group
-    ${status} =     Run Keyword And Return Status    Check Group In Cluster    $group_name
+    ${status} =     Run Keyword And Return Status    Check Group In Cluster    odh-ux-admins
     IF    ${status} == ${TRUE}
               ${rc}  ${output}=    Run And Return Rc And Output
               ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"odh-admins,odh-ux-admins"}}}'  #robocop: disable

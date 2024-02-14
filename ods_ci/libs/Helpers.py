@@ -172,7 +172,7 @@ class Helpers:
             import numbers
             import re
 
-            model_name = re.compile("^[\S]+__isvc-[\w\d]+$")
+            model_name = re.compile("^[\S]+(__isvc-)?[\w\d]+$")
 
             # Cast from string to python type
             expected = ast.literal_eval(expected)

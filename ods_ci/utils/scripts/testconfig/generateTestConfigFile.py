@@ -42,7 +42,7 @@ def parse_args():
         help="config git repo for ods-ci tests",
         action="store",
         dest="git_repo",
-        default="https://gitlab.cee.redhat.com/ods/odhcluster.git",
+        required=True,
     )
     parser.add_argument(
         "-b",
@@ -176,6 +176,8 @@ def generate_test_config_file(
     data["S3"]["AWS_SECRET_ACCESS_KEY"] = config_data["S3"]["AWS_SECRET_ACCESS_KEY"]
     data["S3"]["AWS_DEFAULT_ENDPOINT"] = config_data["S3"]["AWS_DEFAULT_ENDPOINT"]
     data["S3"]["AWS_DEFAULT_REGION"] = config_data["S3"]["AWS_DEFAULT_REGION"]
+    if config_data["S3"].get("AWS_CA_BUNDLE"):
+        data["S3"]["AWS_CA_BUNDLE"] = config_data["S3"]["AWS_CA_BUNDLE"]
     data["S3"]["BUCKET_1"]["NAME"] = config_data["S3"]["BUCKET_1"]["NAME"]
     data["S3"]["BUCKET_1"]["REGION"] = config_data["S3"]["BUCKET_1"]["REGION"]
     data["S3"]["BUCKET_1"]["ENDPOINT"] = config_data["S3"]["BUCKET_1"]["ENDPOINT"]
@@ -235,14 +237,7 @@ def generate_test_config_file(
     data["GITHUB_USER"]["TOKEN"] = config_data["GITHUB_USER"]["TOKEN"]
     data["SERVICE_ACCOUNT"]["NAME"] = config_data["SERVICE_ACCOUNT"]["NAME"]
     data["SERVICE_ACCOUNT"]["FULL_NAME"] = config_data["SERVICE_ACCOUNT"]["FULL_NAME"]
-    data["STARBURST"]["LICENSE"] = config_data["STARBURST"]["LICENSE"]
     data["STARBURST"]["LICENSE_ENCODED"] = config_data["STARBURST"]["LICENSE_ENCODED"]
-    data["STARBURST"]["OBS_CLIENT_SECRET"] = config_data["STARBURST"][
-        "OBS_CLIENT_SECRET"
-    ]
-    data["STARBURST"]["OBS_CLIENT_ID"] = config_data["STARBURST"]["OBS_CLIENT_ID"]
-    data["STARBURST"]["OBS_URL"] = config_data["STARBURST"]["OBS_URL"]
-    data["STARBURST"]["OBS_TOKEN_URL"] = config_data["STARBURST"]["OBS_TOKEN_URL"]
     data["DEFAULT_NOTIFICATION_EMAIL"] = config_data["DEFAULT_NOTIFICATION_EMAIL"]
     data["RHM_TOKEN"] = config_data["RHM_TOKEN"]
     data["PRODUCT"] = config_data["PRODUCT"]
@@ -250,6 +245,7 @@ def generate_test_config_file(
     data["MONITORING_NAMESPACE"] = config_data["MONITORING_NAMESPACE"]
     data["OPERATOR_NAMESPACE"] = config_data["OPERATOR_NAMESPACE"]
     data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
+    data["OPENSHIFT_PIPELINES_CHANNEL"] = config_data["OPENSHIFT_PIPELINES_CHANNEL"]
 
     if components:
         print("Setting components")

@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 from os.path import basename
-from typing import Any, List, Optional
+from typing import Any
 
 from Sender import Sender
 
@@ -24,16 +24,16 @@ class EmailSender(Sender):
         self._message = MIMEMultipart()
 
     def prepare_payload(
-        self, text: str = "", attachments: Optional[List[Any]] = None
+        self, text: str = "", attachments: list[Any] | None = None
     ) -> None:
         self._message.attach(MIMEText(text))
         if attachments is not None:
             for filepath in attachments:
                 with open(filepath, "rb") as file:
                     part = MIMEApplication(file.read(), Name=basename(filepath))
-                    part[
-                        "Content-Disposition"
-                    ] = 'attachment; filename="%s"' % basename(filepath)
+                    part["Content-Disposition"] = (
+                        'attachment; filename="%s"' % basename(filepath)
+                    )
                     self._message.attach(part)
 
     def prepare_header(self):
@@ -67,10 +67,10 @@ class EmailSender(Sender):
     def get_sender_address(self) -> str:
         return self._sender_address
 
-    def set_receiver_addresses(self, receiver_addresses: List) -> None:
+    def set_receiver_addresses(self, receiver_addresses: list) -> None:
         self._receiver_addresses = receiver_addresses
 
-    def get_receiver_addresses(self) -> List:
+    def get_receiver_addresses(self) -> list:
         return self._receiver_addresses
 
     def set_subject(self, subject: str) -> None:

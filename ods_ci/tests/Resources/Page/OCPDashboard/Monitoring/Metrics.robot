@@ -3,8 +3,9 @@ Library  SeleniumLibrary
 
 
 *** Variables ***
-${METRICS_QUERY_TEXTAREA}                           xpath=//*[@aria-label='Expression (press Shift+Enter for newlines)']
-${METRICS_QUERY_RESULTS_TABLE_ROW1_VALUE_ELEMENT}   xpath=//td[@data-label='Value']
+${METRICS_QUERY_TEXTAREA}                               xpath=//*[@aria-label='Expression (press Shift+Enter for newlines)']
+${METRICS_QUERY_RESULTS_TABLE_ROW1_VALUE_ELEMENT}       xpath=//td[@data-label='Value']
+${METRICS_QUERY_RESULTS_TABLE_ROW1_VALUE_ELEMENT_XP}    //td[@data-label='Value']
 
 
 *** Keywords ***
@@ -14,7 +15,7 @@ Verify Page Loaded
 
 Verify Query Results Contain Data
   Wait Until Page Contains Element  ${METRICS_QUERY_RESULTS_TABLE_ROW1_VALUE_ELEMENT}  timeout=20  error="Query results don't contain data"
-  ${metrics_query_result_row1_value} =   Get Text  ${METRICS_QUERY_RESULTS_TABLE_ROW1_VALUE_ELEMENT}
+  ${metrics_query_result_row1_value} =   Get Text   xpath:${METRICS_QUERY_RESULTS_TABLE_ROW1_VALUE_ELEMENT_XP}
   Should Be True    '${metrics_query_result_row1_value}' != ''   "Query results don't contain data"
   Should Be True    '${metrics_query_result_row1_value}' != 'None'   "Query results don't contain data"
 
@@ -54,3 +55,32 @@ Get Query Results
         END
     END
     RETURN  ${metrics_query_result_row1_value}
+
+Run OpenShift Metrics Query
+    [Documentation]    Runs a query in the Monitoring section of Open Shift
+    ...    Note: in order to run this keyword OCP_ADMIN_USER.USERNAME needs to
+    ...    belong to a group with "view" role in OpenShift
+    ...    Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
+    [Arguments]    ${query}   ${username}  ${password}  ${auth_type}   ${retry_attempts}=10    ${return_zero_if_result_empty}=False
+    Open OCP Console
+    LoginPage.Login To Openshift    ocp_user_name=${username}   ocp_user_pw=${password}   ocp_user_auth_type=${auth_type}
+    OCPMenu.Switch To Administrator Perspective
+
+    # In OCP 4.9 metrics are under the Observe menu (it was called Monitoring in 4.8)
+    ${menu_observe_exists} =    Run Keyword and Return Status    Menu.Page Should Contain Menu    Observe
+    IF    ${menu_observe_exists}
+        Menu.Navigate To Page    Observe    Metrics
+    ELSE
+        ${menu_monitoring_exists} =    Run Keyword and Return Status    Menu.Page Should Contain Menu    Monitoring
+        IF    ${menu_monitoring_exists}
+            Menu.Navigate To Page    Monitoring    Metrics
+        ELSE
+            Fail  msg=${username} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
+        END
+    END
+
+    Metrics.Verify Page Loaded
+    Metrics.Run Query    ${query}    ${retry_attempts}
+    ${result} =    Metrics.Get Query Results    return_zero_if_result_empty=${return_zero_if_result_empty}
+    RETURN    ${result}
+

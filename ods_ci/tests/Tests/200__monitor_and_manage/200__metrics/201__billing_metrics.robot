@@ -4,6 +4,7 @@ Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource            ../../../Resources/Page/OCPDashboard/Monitoring/Metrics.robot
 Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
@@ -26,7 +27,8 @@ Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-173
-    Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}    retry_attempts=1
+    Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
+    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   retry_attempts=1
     Metrics.Verify Query Results Dont Contain Data
     [Teardown]    Close All Browsers
 
@@ -45,7 +47,8 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     ...       ODS-634
     ...       Tier1
     Skip If RHODS Is Self-Managed
-    ${value} =    Run OpenShift Metrics Query    query=rhods_total_users
+    ${value} =    Run OpenShift Metrics Query    query=rhods_total_users   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
+    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_total_users
     Should Be Equal    ${value_from_promothues}    ${value}
     [Teardown]    Close All Browsers
@@ -60,8 +63,8 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     Skip If RHODS Is Self-Managed
 
     ${value_openshift_observe} =    Run OpenShift Metrics Query
-    ...    query=rhods_aggregate_availability
-    ...    retry_attempts=1    return_zero_if_result_empty=False
+    ...    query=rhods_aggregate_availability   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
+    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    retry_attempts=1    return_zero_if_result_empty=False
 
     SeleniumLibrary.Capture Page Screenshot
 
@@ -79,7 +82,8 @@ Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometh
     ...       Tier1
 
     ${active_users_before} =    Run OpenShift Metrics Query
-    ...    query=cluster:usage:consumption:rhods:active_users
+    ...    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
+    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   query=cluster:usage:consumption:rhods:active_users
     ...    retry_attempts=1    return_zero_if_result_empty=True
 
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
@@ -91,9 +95,9 @@ Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometh
     Sleep    60s    reason=Wait until metrics are available
 
     ${active_users_after} =    Run OpenShift Metrics Query
-    ...    query=cluster:usage:consumption:rhods:active_users
+    ...    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
+    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   query=cluster:usage:consumption:rhods:active_users
     ...    retry_attempts=1    return_zero_if_result_empty=True
-
     ${increase_active_users} =    Evaluate    ${active_users_after}-${active_users_before}
 
     Should Be Equal As Integers    ${expected_increase_active_users}    ${increase_active_users}
@@ -110,7 +114,8 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
     Sleep    60s    reason=Wait until metrics are available
-    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:pod:up
+    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:pod:up   username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
+    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Should Not Be Empty    ${value}    msg=Metrics does not contains value for pod:up query
     [Teardown]    CleanUp JupyterHub For N Users    list_of_usernames=${list_of_usernames}
 
@@ -156,7 +161,8 @@ Fire Query On RHODS Prometheus And Return Value
 
 Skip Test If Previous CPU Usage Is Not Zero
     [Documentation]     Skips test if CPU usage is not zero
-    ${metrics_value} =    Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}
+    ${metrics_value} =    Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}    username=${OCP_ADMIN_USER.USERNAME}
+    ...     password=${OCP_ADMIN_USER.PASSWORD}   auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     ${metrics_query_results_contain_data} =    Run Keyword And Return Status    Metrics.Verify Query Results Contain Data
     IF    ${metrics_query_results_contain_data}
         Log To Console    Current CPU usage: ${metrics_value}
@@ -165,38 +171,10 @@ Skip Test If Previous CPU Usage Is Not Zero
         ...    The previos CPU usage is not zero. Current CPU usage: ${metrics_value}. Skiping test
     END
 
-Run OpenShift Metrics Query
-    [Documentation]    Runs a query in the Monitoring section of Open Shift
-    ...    Note: in order to run this keyword OCP_ADMIN_USER.USERNAME needs to
-    ...    belong to a group with "view" role in OpenShift
-    ...    Example command to assign the role: oc adm policy add-cluster-role-to-group view rhods-admins
-    [Arguments]    ${query}    ${retry_attempts}=10    ${return_zero_if_result_empty}=False
-    Open OCP Console
-    LoginPage.Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
-    OCPMenu.Switch To Administrator Perspective
-
-    # In OCP 4.9 metrics are under the Observe menu (it was called Monitoring in 4.8)
-    ${menu_observe_exists} =    Run Keyword and Return Status    Menu.Page Should Contain Menu    Observe
-    IF    ${menu_observe_exists}
-        Menu.Navigate To Page    Observe    Metrics
-    ELSE
-        ${menu_monitoring_exists} =    Run Keyword and Return Status    Menu.Page Should Contain Menu    Monitoring
-        IF    ${menu_monitoring_exists}
-            Menu.Navigate To Page    Monitoring    Metrics
-        ELSE
-            Fail
-            ...    msg=${OCP_ADMIN_USER.USERNAME} can't see the Observe/Monitoring section in OpenShift Console, please make sure it belongs to a group with "view" role
-        END
-    END
-
-    Metrics.Verify Page Loaded
-    Metrics.Run Query    ${query}    ${retry_attempts}
-    ${result} =    Metrics.Get Query Results    return_zero_if_result_empty=${return_zero_if_result_empty}
-    RETURN    ${result}
-
 Verify Previus CPU Usage Is Greater Than Zero
     [Documentation]     Verifies the cpu usage is greater than zero
-    ${metrics_value} =    Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}
+    ${metrics_value} =    Run OpenShift Metrics Query    ${METRIC_RHODS_CPU}    username=${OCP_ADMIN_USER.USERNAME}
+    ...     password=${OCP_ADMIN_USER.PASSWORD}   auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Metrics.Verify Query Results Contain Data
     Capture Page Screenshot
     Should Be True    ${metrics_value} > 0

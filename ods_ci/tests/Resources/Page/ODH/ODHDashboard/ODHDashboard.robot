@@ -15,7 +15,7 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawe
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
 ${CARD_BUTTON_XP}=  ..//input[@class="pf-v5-c-radio__input"][@name="odh-explore-selectable-card"]
-${RES_CARDS_XP}=  //article[contains(@class, 'pf-v5-c-card')]
+${RES_CARDS_XP}=  //div[contains(@data-ouia-component-type, "Card")]
 ${SAMPLE_APP_CARD_XP}=   //*[@id="pachyderm-selectable-card-id"]
 ${HEADER_XP}=  div[@class='pf-v5-c-card__header']
 ${TITLE_XP}=   div[@class='pf-v5-c-card__title']//span
@@ -67,7 +67,11 @@ Authorize rhods-dashboard service account
 
 Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-   #Wait Until Page Contains  Log in with
+
+   # Wait until we are in the OpenShift auth page or already in Dashboard
+   ${expected_text_list}=    Create List    Log in with    Data Science Projects
+   Wait Until Page Contains A String In List    ${expected_text_list}
+
    ${oauth_prompt_visible} =  Is OpenShift OAuth Login Prompt Visible
    IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
    ${login-required} =  Is OpenShift Login Visible
@@ -252,9 +256,8 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    # Wait Until Page Contains Element    xpath://div[contains(@class,'gallery')][div | article]
     Wait Until Page Contains Element    xpath:${CARDS_XP}
-    ...    timeout=10s
+    ...    timeout=15s
 
 Get App ID From Card
     [Arguments]  ${card_locator}
@@ -330,7 +333,10 @@ Check Card Badges And Return Titles
 
 Open Get Started Sidebar And Return Status
     [Arguments]  ${card_locator}
-    Click Element  xpath:${card_locator}/${CARD_BUTTON_XP}
+    Wait Until Element Is Visible    xpath:${card_locator}/${CARD_BUTTON_XP}
+    Wait Until Element Is Enabled     xpath:${card_locator}/${CARD_BUTTON_XP}    timeout=20s     error=Element is not clickbale  #robocop : disable
+    ${element}=    Get WebElement    xpath:${card_locator}/${CARD_BUTTON_XP}
+    Execute Javascript    arguments[0].click();     ARGUMENTS    ${element}
     ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
     Sleep  1
     RETURN  ${status}
@@ -619,14 +625,14 @@ Delete Custom Image
     [Arguments]    ${image_name}
     Click Button  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button
     ${image_name_id} =  Replace String  ${image_name}  ${SPACE}  -
-    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//li[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
+    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//button[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
     Handle Deletion Confirmation Modal  ${image_name}  notebook image
 
 Open Edit Menu For Custom Image
     [Documentation]    Opens the edit view for a specific custom image
     [Arguments]    ${image_name}
     Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
-    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//li[@id="${image_name}-edit-button"]
+    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//button[@id="${image_name}-edit-button"]
     Wait Until Page Contains  Delete Notebook Image
 
 Expand Custom Image Details

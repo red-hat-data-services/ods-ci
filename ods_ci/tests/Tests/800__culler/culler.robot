@@ -10,7 +10,7 @@ Library          ../../../libs/Helpers.py
 Library          OpenShiftLibrary
 Suite Setup      Set Library Search Order    SeleniumLibrary
 Suite Teardown   Teardown
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Variables ***

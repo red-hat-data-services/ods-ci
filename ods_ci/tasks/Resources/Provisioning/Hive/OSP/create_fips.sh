@@ -90,7 +90,7 @@ echo "Updating DNS records (cluster api's) in AWS Route53"
 RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch \
 '{ "Comment": "Update A record for cluster API", "Changes": 
 [ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "api.'"$CLUSTER_NAME"'.'"$BASE_DOMAIN"'", 
-"Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'"$FIP_API"'" } ] } } ] }' --output json) || rc=$?
+"Type": "A", "TTL":  300, "ResourceRecords": [ { "Value": "'"$FIP_API"'" } ] } } ] }' --output json) || rc=$?
 if [[ -n "$rc" ]] ; then
   echo -e "Failed to update DNS A record in AWS for cluster API. 
   \n Releasing previously allocated floating IP in $OS_CLOUD ($FIP_API)"
@@ -105,7 +105,7 @@ echo "Updating DNS records (cluster ingress) in AWS Route53"
 RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch \
 '{ "Comment": "Update A record for cluster APPS", "Changes": 
 [ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "*.apps.'"$CLUSTER_NAME"'.'"$BASE_DOMAIN"'", 
-"Type": "A", "TTL":  172800, "ResourceRecords": [ { "Value": "'"$FIP_APPS"'" } ] } } ] }' --output json) || rc=$?
+"Type": "A", "TTL":  300, "ResourceRecords": [ { "Value": "'"$FIP_APPS"'" } ] } } ] }' --output json) || rc=$?
 
 if [[ -n "$rc" ]] ; then
   echo -e "Failed to update DNS A record in AWS for cluster APPS. 

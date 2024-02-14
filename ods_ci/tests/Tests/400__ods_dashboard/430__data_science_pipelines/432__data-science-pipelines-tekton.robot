@@ -10,7 +10,7 @@ Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipel
 Library             DateTime
 Library             ../../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../../libs/DataSciencePipelinesKfpTekton.py
-
+Test Tags           DataSciencePipelines
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
 

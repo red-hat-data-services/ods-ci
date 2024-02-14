@@ -24,7 +24,7 @@ ${LABEL_SELECTOR}       name=traefik-proxy
 Verify Traefik Proxy Containers Have Zero Restarts
     [Documentation]    Verify traefik proxy
     ...    container restart
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-1163    ProductBug
     Skip If RHODS Version Greater Or Equal Than    version=1.16.0
     ...    msg=Traefik proxy is removed after KFNBC migration

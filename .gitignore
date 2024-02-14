@@ -19,3 +19,4 @@ __pycache__/
 robocop.log
 infrastructure_configuration.yaml
 log/
+text-generation-inference/

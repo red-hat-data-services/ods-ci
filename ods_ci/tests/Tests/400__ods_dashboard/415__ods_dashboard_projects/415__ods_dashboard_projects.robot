@@ -90,7 +90,7 @@ Verify Workbench Images Have Multiple Versions
     END
 
 Verify User Cannot Create Project With Empty Fields
-    [Tags]    Sanity   ODS-1783
+    [Tags]    Sanity   ODS-1783    Tier1
     [Documentation]    Verifies users is not allowed to create a project with Empty title
     Open Data Science Projects Home Page
     Create Project With Empty Title And Expect Error
@@ -105,7 +105,7 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     Close Generic Modal If Present
 
 Verify User Can Create A Data Science Project
-    [Tags]    Smoke    Sanity    ODS-1775
+    [Tags]    Smoke    Sanity    ODS-1775    Tier1
     [Documentation]    Verifies users can create a DS project
     Open Data Science Projects Home Page
     # Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -117,7 +117,7 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Smoke    Sanity    ODS-1814
+    [Tags]    Smoke    Sanity    ODS-1814    Tier1
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -155,7 +155,7 @@ Verify User Can Create A PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Smoke    Sanity    ODS-1816
+    [Tags]    Smoke    Sanity    ODS-1816    Tier1
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -534,9 +534,11 @@ Verify User Can Delete A Data Science Project
 
 Verify User Can Access Only Its Owned Projects
     [Tags]    Sanity    Tier1    ODS-1868
-    [Documentation]    Verifies each user can access only thei owned projects. Except for
+    [Documentation]    Verifies each user can access only they owned projects. Except for
     ...                cluster and dedicated admins which should be able to fetch all the DS Projects
     [Setup]    Run Keywords
+    ...    SeleniumLibrary.Close All Browsers
+    ...    AND
     ...    Set Variables For User Access Test
     ...    AND
     ...    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
@@ -727,13 +729,16 @@ Environment Variables Should Be Displayed According To Their Type
 
 Environment Variable Type Should Be
     [Arguments]    ${expected_type}    ${var_idx}
-    ${displayed_type}=    Get Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//div[contains(@class,"pf-v5-c-select")]/button//span[contains(@class,'toggle-text')]
+    ${displayed_type}=    Get Text
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//div[contains(@class,"pf-v5-c-select")]/button//span[contains(@class,'toggle-text')]  # robocop: disable:line-too-long
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_type}    ${expected_type}
 
 Environment Variable Key/Value Fields Should Be Correctly Displayed
     [Arguments]    ${var_idx}    ${var_pair_idx}    ${expected_key}    ${expected_value}    ${type}
-    ${displayed_value_xp}=    Set Variable    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//input[@aria-label="value of item ${var_pair_idx}"]
-    ${displayed_key_xp}=    Set Variable    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//input[@aria-label="key of item ${var_pair_idx}"]
+    ${displayed_value_xp}=    Set Variable
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//input[@aria-label="value of item ${var_pair_idx}"]  # robocop: disable:line-too-long
+    ${displayed_key_xp}=    Set Variable
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//input[@aria-label="key of item ${var_pair_idx}"]  # robocop: disable:line-too-long
     ${displayed_key}=    Get Value    ${displayed_key_xp}
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_key}    ${expected_key}
     ${displayed_val}=    Get Value    ${displayed_value_xp}

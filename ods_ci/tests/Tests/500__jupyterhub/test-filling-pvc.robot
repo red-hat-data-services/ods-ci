@@ -7,7 +7,7 @@ Library             DebugLibrary
 
 Suite Setup         Server Setup
 Suite Teardown      End Web Test
-Force Tags          JupyterHub
+Test Tags          JupyterHub
 
 
 *** Variables ***
@@ -26,7 +26,7 @@ ${FILE_NAME}            fill-notebook-pvc-to-complete-100.ipynb
 Verify Users Get Notifications If Storage Capacity Limits Get Exceeded
     [Documentation]    Runs a jupyter notebook to fill the user PVC to 100% and verifies that
     ...    a "No space left on device" OSError and a "File Save Error" dialog are shown
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-539
 
     ${error} =    Run Git Repo And Return Last Cell Error Text    ${LINK_OF_GITHUB}    ${PATH_TO_FILE}

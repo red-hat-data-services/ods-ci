@@ -78,7 +78,7 @@ Verify External Links In Quick Starts Are Not Broken
 Verify Resource Link HTTP Status Code
     [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
     ...                redirects users to working URLs (i.e., http status must be 200)
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-531    ODS-507
     Click Link    Resources
     Sleep    5

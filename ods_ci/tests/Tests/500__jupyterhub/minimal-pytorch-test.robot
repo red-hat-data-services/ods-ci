@@ -10,7 +10,7 @@ Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Verify PyTorch Image Suite Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Variables ***
@@ -21,14 +21,14 @@ ${EXPECTED_CUDA_VERSION} =  12.2
 *** Test Cases ***
 Verify PyTorch Image Can Be Spawned
     [Documentation]    Spawns pytorch image
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     PLACEHOLDER  # category tags
     ...     ODS-1149
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 PyTorch Image Workload Test
     [Documentation]    Runs a pytorch workload
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     PLACEHOLDER  # category tags
     ...     ODS-1150
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
@@ -37,7 +37,7 @@ PyTorch Image Workload Test
 
 Verify Tensorboard Is Accessible
     [Documentation]  Verifies that tensorboard is accessible
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     PLACEHOLDER
     ...     ODS-1414
     Close Previous Server
@@ -50,7 +50,7 @@ Verify Tensorboard Is Accessible
 
 Verify PyTorch Image Can Be Spawned With GPU
     [Documentation]    Spawns PyTorch image with 1 GPU
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     Resources-GPU
     ...     ODS-1145
     Clean Up Server
@@ -61,21 +61,21 @@ Verify PyTorch Image Can Be Spawned With GPU
 
 Verify PyTorch Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     Resources-GPU
     ...     ODS-1146
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
 Verify PyTorch Library Can See GPUs In PyTorch Image
     [Documentation]    Verifies PyTorch can see the GPU
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     Resources-GPU
     ...     ODS-1147
     Verify Pytorch Can See GPU
 
 Verify PyTorch Image GPU Workload
     [Documentation]  Runs a workload on GPUs in PyTorch image
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     Resources-GPU
     ...     ODS-1148
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/fgsm_tutorial.ipynb

@@ -13,6 +13,8 @@ Resource  RHOSi.resource
 
 *** Variables ***
 @{DEFAULT_CHARS_TO_ESCAPE}=    :    /    .
+${UWM_CONFIG_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_conf.yaml
+${UWM_ENABLE_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_enable.yaml
 
 
 *** Keywords ***
@@ -93,6 +95,21 @@ CSS Property Value Should Be
         Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
     END
 
+Page Should Contain A String In List
+    [Documentation]    Verifies that page contains at least one of the strings in text_list
+    [Arguments]  ${text_list}
+    FOR    ${text}    IN    @{text_list}
+        ${text_found}=    Run Keyword And Return Status    Page Should Contain   ${text}
+        IF  ${text_found}    RETURN
+    END
+    Fail    Current page doesn't contain any of the strings in: @{text_list}
+
+Wait Until Page Contains A String In List
+    [Documentation]    Waits until page contains at least one of the strings in text_list
+    [Arguments]    ${text_list}    ${retry}=12x    ${retry_interval}=5s
+    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
+    ...    Page Should Contain A String In List     ${text_list}
+
 #robocop: disable: line-too-long
 Get RHODS Version
     [Documentation]    Return RHODS/ODH operator version number.
@@ -122,6 +139,20 @@ Get CodeFlare Version
     END
     Log  Product:${PRODUCT} CodeFlare Version:${CODEFLARE_VERSION}
     RETURN  ${CODEFLARE_VERSION}
+
+#robocop: disable: line-too-long
+Wait Until Csv Is Ready
+  [Documentation]   Waits ${timeout} for Operators CSV '${display_name}' to have status phase 'Succeeded'
+  [Arguments]    ${display_name}    ${timeout}=3m    ${opeartors_namespace}=openshift-operators
+  Log    Waiting ${timeout} for Operator CSV '${display_name}' in ${opeartors_namespace} to have status phase 'Succeeded'    console=yes
+  WHILE   True    limit=${timeout}
+  ...    on_limit_message=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be created
+    ${csv_created}=    Run Process    oc get csv --no-headers | awk '/${display_name}/ {print \$1}'    shell=yes
+    IF    "${csv_created.stdout}" == "${EMPTY}"    CONTINUE
+    ${csv_ready}=    Run Process
+    ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${opeartors_namespace} ${csv_created.stdout}    shell=yes
+    IF    ${csv_ready.rc} == ${0}    BREAK
+  END
 
 Get Cluster ID
     [Documentation]     Retrieves the ID of the currently connected cluster
@@ -363,7 +394,7 @@ Run And Watch Command
   ${is_test}=    Run keyword And Return Status    Variable Should Exist     ${TEST NAME}
   IF    ${is_test} == ${FALSE}
     ${incremental}=    Generate Random String    5    [NUMBERS]
-    ${TEST NAME}=    Set Variable    testlogs-${incremental}    
+    ${TEST NAME}=    Set Variable    testlogs-${incremental}
   END
   ${process_log} =    Set Variable    ${OUTPUT DIR}/${TEST NAME}.log
   ${temp_log} =    Set Variable    ${TEMPDIR}/${TEST NAME}.log
@@ -413,3 +444,16 @@ Skip If Component Is Not Enabled
     [Arguments]    ${component_name}
     ${enabled}=    Is Component Enabled    ${component_name}
     Skip If    "${enabled}" == "false"
+
+Enable User Workload Monitoring
+    [Documentation]    Enable User Workload Monitoring for the cluster for user-defined-projects
+    ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_ENABLE_FILEPATH}
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+
+Configure User Workload Monitoring
+    [Documentation]    Configure the retention period in User Workload Monitoring for the cluster.
+    ...                This period can be configured for the component as and when needed.
+    ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_CONFIG_FILEPATH}
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file

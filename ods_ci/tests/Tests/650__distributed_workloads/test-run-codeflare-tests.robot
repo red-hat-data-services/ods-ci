@@ -24,14 +24,6 @@ Run TestMNISTPyTorchMCAD E2E test
     ...     CodeflareOperator
     Run Codeflare E2E Test    TestMNISTPyTorchMCAD
 
-Run TestMNISTRayClusterSDK E2E test
-    [Documentation]    Run Go E2E test: TestMNISTRayClusterSDK
-    [Tags]  ODS-2544
-    ...     Tier2
-    ...     DistributedWorkloads
-    ...     CodeflareOperator
-    Run Codeflare E2E Test    TestMNISTRayClusterSDK
-
 Run TestMNISTRayJobMCADRayCluster E2E test
     [Documentation]    Run Go E2E test: TestMNISTRayJobMCADRayCluster
     [Tags]  ODS-2545
@@ -71,10 +63,12 @@ Prepare Codeflare E2E Test Suite
     Enable Component    codeflare
     Create Directory    %{WORKSPACE}/codeflare-e2e-logs
     Create Directory    %{WORKSPACE}/codeflare-odh-logs
+    RHOSi Setup
 
 Teardown Codeflare E2E Test Suite
     Disable Component    codeflare
     Disable Component    ray
+    RHOSi Teardown
 
 Run Codeflare E2E Test
     [Arguments]    ${TEST_NAME}
@@ -83,7 +77,7 @@ Run Codeflare E2E Test
     ...    shell=true
     ...    stderr=STDOUT
     ...    cwd=${CODEFLARE_DIR}
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=30m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-e2e-logs
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
@@ -97,7 +91,7 @@ Run Codeflare ODH Test
     ...    shell=true
     ...    stderr=STDOUT
     ...    cwd=${CODEFLARE_DIR}
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=30m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
     ...    env:ODH_NAMESPACE=${ODH_NAMESPACE}
     ...    env:NOTEBOOK_IMAGE_STREAM_NAME=${NOTEBOOK_IMAGE_STREAM_NAME}

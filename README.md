@@ -5,7 +5,7 @@ and its upstream project, [Open Data Hub](https://opendatahub.io/).
 # Requirements
   1. Linux distribution that supports Selenium automation on top of either a Chromium/Google-Chrome web browser using [ChromeDriver](https://chromedriver.chromium.org) or Firefox web browser using [geckodriver](https://github.com/mozilla/geckodriver):
      * relevant web driver binaries can be downloaded here: [ChromeDriver](https://googlechromelabs.github.io/chrome-for-testing) or [geckodriver](https://github.com/mozilla/geckodriver/releases)
-     * the `ChromeDriver` version must match the installed version of Chromium/Google-Chrome, for `geckodriver` see the release notes for paritcular release
+     * the `ChromeDriver` version must match the installed version of Chromium/Google-Chrome, for `geckodriver` see the release notes for particular release
      * install your web driver so that it's visible by Robot Framework during tests execution, e.g. into `~/.local/bin` path
 
   2. [Poetry](https://python-poetry.org/docs/#installation) tool installed and added to your `$PATH`.
@@ -53,7 +53,7 @@ and its upstream project, [Open Data Hub](https://opendatahub.io/).
 
    * This run_robot_test.sh is a wrapper for creating the python virtual environment and running the Robot Framework CLI.
    * The wrapper script has several arguments and you can find details in the dedicated document file. See [run_args.md](ods_ci/docs/RUN_ARGUMENTS.md)
-   * As alternative, you can run any of the test cases by creating the python virual environment, install the packages in [poetry.lock](poetry.lock) and running the `robot` command directly
+   * As alternative, you can run any of the test cases by creating the python virtual environment, install the packages in [poetry.lock](poetry.lock) and running the `robot` command directly
 
 
 # Contributing

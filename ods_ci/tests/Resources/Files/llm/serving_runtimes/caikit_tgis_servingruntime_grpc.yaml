@@ -11,7 +11,6 @@ spec:
   containers:
     - name: kserve-container
       image: quay.io/modh/text-generation-inference@sha256:9f18a63cd84b084c3cbf15534f22d5ba6916d9501298abcc03271d26ebf5cdfb
-      ## Note: cannot add readiness/liveness probes to this container because knative will refuse them
       command: ["text-generation-launcher"]
       args: ["--model-name=/mnt/models/artifacts/"]
       env:
@@ -21,6 +20,8 @@ spec:
       #   requests:
       #     cpu: 8
       #     memory: 16Gi
+      ## Note: cannot add readiness/liveness probes to this container because knative will refuse them.
+      # multi-container probing will be available after https://github.com/knative/serving/pull/14853 is merged
     - name: transformer-container
       image: quay.io/modh/caikit-tgis-serving@sha256:0fd3584362e8780aed922fe124c8829c1c7df9d55590ba2ae76bb6aef0155c1f
       env:

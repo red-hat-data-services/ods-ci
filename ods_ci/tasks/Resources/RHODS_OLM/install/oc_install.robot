@@ -2,7 +2,8 @@
 Library    String
 Library    OpenShiftLibrary
 Library    OperatingSystem
-Resource          ../../../../tests/Resources/Page/Operators/ISVs.resource
+Resource   ../../../../tests/Resources/Page/Operators/ISVs.resource
+Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.robot
 
 
 *** Variables ***
@@ -13,21 +14,21 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
-${RHODS_OPERATOR_NAME}=    rhods-operator
-${ODH_OPERATOR_NAME}=    opendatahub-operator
+${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
+${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
   Install Kserve Dependencies
   Clone OLM Install Repo
-  ${operator_csv_name} =    Set Variable    ${RHODS_OPERATOR_NAME}
+  ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
             IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                  Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
             ELSE
-                 ${operator_csv_name} =    Set Variable    ${ODH_OPERATOR_NAME}
+                 ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
                  Create Catalog Source For Operator
                  Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
             END
@@ -45,7 +46,7 @@ Install RHODS
            IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                 Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
            ELSE
-                ${operator_csv_name} =    Set Variable    ${ODH_OPERATOR_NAME}
+                ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
                 Create Catalog Source For Operator
                 Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
            END
@@ -53,23 +54,7 @@ Install RHODS
           FAIL    Provided test envrioment is not supported
       END
   END
-  Wait Until Csv Is Ready    ${operator_csv_name}
-
-Wait Until Csv Is Ready
-  [Documentation]   Waits some time for given CSV to be in Succeeded status condition
-  [Arguments]    ${csv_name}
-  Log    Waiting for the '${csv_name}' operator CSV in 'Succeeded' status condition    console=yes
-  Wait Until Keyword Succeeds    6 times   20 seconds
-  ...    Csv Is Ready    ${csv_name}
-  Log    Operator '${csv_name}' CSV is in 'Succeeded' status condition now, let's continue    console=yes
-
-Csv Is Ready
-  [Documentation]   Check whether given CSV to be in Succeeded status condition
-  [Arguments]    ${csv_name}
-  ${rc}    ${output} =    Run And Return Rc And Output
-  ...    oc get csv --namespace openshift-operators --output=json | jq --raw-output --exit-status '.items[] | select(.metadata.name | test("${csv_name}")).status.conditions[] | select(.phase == "Succeeded").phase'    # robocop: disable:line-too-long
-  Should Be Equal As Integers    ${rc}    0
-  Should Be Equal As Strings    Succeeded    ${output}
+  Wait Until Csv Is Ready    ${csv_display_name}
 
 Verify RHODS Installation
   # Needs to be removed ASAP
@@ -106,6 +91,9 @@ Verify RHODS Installation
         ...                   namespace=${APPLICATIONS_NAMESPACE}
         ...                   label_selector=app=odh-dashboard
         ...                   timeout=1200
+        #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
+        Add UI Admin Group To Dashboard Admin
+
     ELSE
         Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=rhods-dashboard"
         Wait For Pods Numbers  5
@@ -396,9 +384,9 @@ Wait Component Ready
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    
+
     Log To Console    Waiting for ${component} to be ready
-    
+
     # oc wait "${cluster_name}" --for=condition\=${component}Ready\=true --timeout\=3m
     ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=3m
     ...    shell=true    stderr=STDOUT
@@ -406,3 +394,12 @@ Wait Component Ready
         FAIL    Timeout waiting for ${component} to be ready
     END
     Log To Console    ${component} is ready
+
+Add UI Admin Group To Dashboard Admin
+    [Documentation]    Add Ui admin group to ODH dashboard admin group
+    ${status} =     Run Keyword And Return Status    Check Group In Cluster    odh-ux-admins
+    IF    ${status} == ${TRUE}
+              ${rc}  ${output}=    Run And Return Rc And Output
+              ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"odh-admins,odh-ux-admins"}}}'  #robocop: disable
+              IF  ${rc} != ${0}     Log    message=Unable to update the admin config   level=WARN
+    END

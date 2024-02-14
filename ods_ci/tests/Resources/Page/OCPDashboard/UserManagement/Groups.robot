@@ -38,14 +38,20 @@ Remove User From Group
     Run    oc adm groups remove-users ${group_name} ${username}
 
 Check User Is In A Group
-    [Documentation]     Check if a user is present in OCP user group using UI
+    [Documentation]     Check if a user is present in OCP user group using CLI
     [Arguments]  ${username}  ${group_name}
     ${users_in_group}=    OpenshiftLibrary.Oc Get    kind=Group   name=${group_name}    fields=['users']
     List Should Contain Value    ${users_in_group}[0][users]    ${username}
 
 Check User Is Not In A Group
-    [Documentation]     Check if a user is not present in OCP user group using UI
+    [Documentation]     Check if a user is not present in OCP user group using CLI
     [Arguments]  ${username}  ${group_name}
     ${users_in_group}=    OpenshiftLibrary.Oc Get    kind=Group   name=${group_name}    fields=['users']
     List Should Not Contain Value    ${users_in_group}[0][users]    ${username}
 
+Check Group In Cluster
+    [Documentation]     Check if a group is present in Openshift cluster
+    [Arguments]  ${group_name}
+    ${res}  ${output}=    Run And Return Rc And Output
+    ...    oc get group ${group_name}
+    Should Be Equal As Integers    ${res}    0    ${output}

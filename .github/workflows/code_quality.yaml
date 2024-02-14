@@ -104,7 +104,12 @@ jobs:
         id: setup-python
         uses: actions/setup-python@v5
         with:
+          python-version: '3.11'
           cache: 'poetry'
+
+      - name: Configure poetry
+        run: |
+          poetry env use "${{ steps.setup-python.outputs.python-path }}"
 
       - run: poetry check --lock
 

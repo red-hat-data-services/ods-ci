@@ -271,12 +271,20 @@ class Helpers:
 
             # This file only exists when running on self-managed clusters
             ca_bundle = Path("openshift_ca.crt")
+            knative_ca_bundle = Path("openshift_ca_istio_knative.crt")
             if ca_bundle.is_file():
                 response = requests.post(
                     endpoint,
                     headers=headers,
                     data=data,
                     verify="openshift_ca.crt",
+                )
+            elif knative_ca_bundle.is_file():
+                response = requests.post(
+                    endpoint,
+                    headers=headers,
+                    data=data,
+                    verify="openshift_ca_istio_knative.crt",
                 )
             else:
                 response = requests.post(endpoint, headers=headers, data=data)

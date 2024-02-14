@@ -37,6 +37,7 @@ Verify Openvino_IR Model Via UI
     ...    project_name=${PRJ_TITLE}   num_projects=1
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
+    Clean All Models Of Current User
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}
 
@@ -59,6 +60,7 @@ Verify Tensorflow Model Via UI
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
+    Clean All Models Of Current User
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}
 
@@ -78,6 +80,7 @@ Verify Secure Model Can Be Deployed In Same Project
     ...    namespace=${PRJ_TITLE}
     Verify Model Status    ${SECURED_MODEL}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
+    Clean All Models Of Current User
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${SECURED_MODEL}    project_title=${PRJ_TITLE}
 
@@ -97,6 +100,7 @@ Test Inference With Token Authentication
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_SECURED_OUTPUT}    token_auth=${FALSE}
     ...    project_title=${SECOND_PROJECT}
+    Clean All Models Of Current User
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${SECURED_MODEL}    project_title=${SECOND_PROJECT}
 
@@ -106,6 +110,7 @@ Verify Multiple Projects With Same Model
     ...    RHOAIENG-549    RHOAIENG-2724
     Create Openvino Models For Kserve    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}
     ...    project_name=${PRJ_TITLE}    num_projects=5
+    Clean All Models Of Current User
     [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}
 

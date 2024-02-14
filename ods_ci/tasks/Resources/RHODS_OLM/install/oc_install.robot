@@ -2,7 +2,8 @@
 Library    String
 Library    OpenShiftLibrary
 Library    OperatingSystem
-Resource          ../../../../tests/Resources/Page/Operators/ISVs.resource
+Resource   ../../../../tests/Resources/Page/Operators/ISVs.resource
+Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.robot
 
 
 *** Variables ***
@@ -106,6 +107,9 @@ Verify RHODS Installation
         ...                   namespace=${APPLICATIONS_NAMESPACE}
         ...                   label_selector=app=odh-dashboard
         ...                   timeout=1200
+        #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
+        Add UI Admin Group To Dashboard Admin
+
     ELSE
         Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=rhods-dashboard"
         Wait For Pods Numbers  5
@@ -396,9 +400,9 @@ Wait Component Ready
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    
+
     Log To Console    Waiting for ${component} to be ready
-    
+
     # oc wait "${cluster_name}" --for=condition\=${component}Ready\=true --timeout\=3m
     ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=3m
     ...    shell=true    stderr=STDOUT
@@ -406,3 +410,12 @@ Wait Component Ready
         FAIL    Timeout waiting for ${component} to be ready
     END
     Log To Console    ${component} is ready
+
+Add UI Admin Group To Dashboard Admin
+    [Documentation]    Add Ui admin group to ODH dashboard admin group
+    ${status} =     Run Keyword And Return Status    Check Group In Cluster    $group_name
+    IF    ${status} == ${TRUE}
+              ${rc}  ${output}=    Run And Return Rc And Output
+              ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"odh-admins,odh-ux-admins"}}}'  #robocop: disable
+              IF  ${rc} != ${0}     Log    message=Unable to update the admin config   level=WARN
+    END

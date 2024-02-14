@@ -341,6 +341,7 @@ Clean Up Model Serving Page
         FOR    ${model}    IN    @{models}
             ${model}=    Get Text   ${model}
             Delete Model Via UI    ${model}
+            Sleep    1s
         END
         Switch Model Serving Project    project_name=All projects
     END

@@ -2,14 +2,15 @@
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource        ../../Resources/ODS.robot
-#Suite Setup     Setup Admin UI
-#Suite Teardown  Teardown Admin UI
 Suite Setup     Setup Settings Accelerator Profiles
 Suite Teardown  Teardown Settings Accelerator Profiles
 
 
-*** Test Cases ***
+*** Variables ***
+#TODO: Add variables here
 
+
+*** Test Cases ***
 
 Verify RHODS "Accelerator Profiles" Administration UI is available for Admin users
     [Documentation]    Verify users in the admin_groups (group "dedicated-admins" since RHODS 1.8.0)
@@ -27,9 +28,13 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Click On Create Accelerator profile button
-    Create An Accelerator Profile using values   qe_create_ap_03   nvidia.com/gpu   description example   True
+    Create An Accelerator Profile via UI   qe_create_ap_03   nvidia.com/gpu   description example   True
+    ...                                    tolerations=yes   tol_operator=Exists  tol_effect=PreferNoSchedule
+    ...                                    tol_key=my_key   tol_value=my_value  tol_seconds=15
     In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   qe_create_ap_03
-    Verify Accelerator Profile Values   qe_create_ap_03   nvidia.com/gpu   description example   True
+    Verify Accelerator Profile Values using CLI   qe_create_ap_03   nvidia.com/gpu   description example   True
+    ...                                           tolerations=yes   tol_operator=Exists  tol_effect=PreferNoSchedule
+    ...                                           tol_key=my_key   tol_value=my_value  tol_seconds=15
 
 
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates

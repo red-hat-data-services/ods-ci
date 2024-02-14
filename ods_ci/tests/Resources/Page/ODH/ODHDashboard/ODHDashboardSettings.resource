@@ -18,7 +18,17 @@ ${ACCELERATOR_IDENTIFIER}=    //input[@id="accelerator-identifier"]
 ${ACCELERATOR_DESCRIPTION}=    //textarea[@id="accelerator-description"]
 ${ACCELERATOR_ENABLED_SWITCH}=    //input[@id="accelerator-enabled"]/following-sibling::span
 ${ACCELERATOR_ADD_TOLERATION_BTN}=    //button[@data-testid="add-toleration-button"]
+${ACCELERATOR_ADD_TOLERATION_MODAL_FORM}=    //div[contains(@id, "pf-modal-part")]//span[text()="Add toleration"]
+${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}=    //div[@data-testid="toleration-operator-select"]/button
 ${CREATE_ACCELERATOR_PROFILE_DETAIL_BTN}=    //button[@id="create-button"]
+${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}=    //label[@for="effect-select"]/parent::*/following::*[1]//button
+${ACCELERATOR_TOLERATION_KEY}=    //input[@id='toleration-key']
+${ACCELERATOR_TOLERATION_VALUE}=    //input[@id='toleration-value']
+${ACCELERATOR_TOLERATION_SECONDS_FOREVER_RADIO}=    //input[@id="forever"]
+${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_RADIO}=    //input[@id="custom-value"]
+${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}=    //div[contains(@class, 'number-input')]//input
+${ACCELERATOR_TOLERATION_ADD_BUTTON}=    //button[@data-testid="modal-submit-button"]
+
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
@@ -376,12 +386,13 @@ Click On Create Accelerator profile button
         Click Button   ${CREATE_ACCELERATOR_PROFILE_BTN}
     END
 
-Create An Accelerator Profile using values
+Create An Accelerator Profile via UI
     [Documentation]    Fill Accelerator Profile values with the ones provided in the arguments and click on
     ...                create button
     ...                view: Create Accelerator profile
     [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
-    ...           ${tolerations}=${EMPTY}
+    ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key
+    ...           ${tol_value}=value  ${tol_seconds}=Forever
 
     Wait Until Page Contains Element  ${ACCELERATOR_NAME}  timeout=5s
     Input Text    ${ACCELERATOR_NAME}    ${name}
@@ -393,7 +404,30 @@ Create An Accelerator Profile using values
     IF  ${enabled} != True
         Click Element    ${ACCELERATOR_ENABLED_SWITCH}
     END
-    # TODO: Tolerations
+    # Tolerations
+    IF    "${tolerations}" != "${EMPTY}"
+        Click Button    ${ACCELERATOR_ADD_TOLERATION_BTN}
+        Wait Until Element Is Visible    ${ACCELERATOR_ADD_TOLERATION_MODAL_FORM}
+        # Select Operator
+        Click Button    ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}
+        Click Element    //div[@data-testid="toleration-operator-select"]//div[text()="${tol_operator}"]
+        # Select Effect
+        Click Button    ${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}
+        Click Element    //label[@for="effect-select"]/parent::*/following::div//*[text()="${tol_effect}"]
+        # Input Key and value
+        Input Text    ${ACCELERATOR_TOLERATION_KEY}    ${tol_key}
+        Input Text    ${ACCELERATOR_TOLERATION_VALUE}    ${tol_value}
+        # Toleration Seconds
+        IF    "${tol_seconds}" != "Forever"
+            Click Element    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_RADIO}
+            Clear Element Text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}
+            Sleep    0.5s
+            Input Text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}   ${tol_seconds}
+        ELSE
+            Click Element    ${ACCELERATOR_TOLERATION_SECONDS_FOREVER_RADIO}
+        END
+        Click Button    ${ACCELERATOR_TOLERATION_ADD_BUTTON}
+    END
     Click Button    ${CREATE_ACCELERATOR_PROFILE_DETAIL_BTN}
 
 In The Accelerator Profiles Grid There Is An Accelerator Profile With Name
@@ -403,10 +437,11 @@ In The Accelerator Profiles Grid There Is An Accelerator Profile With Name
 
     Wait Until Element Is Visible   //table[@id='accelerator-profile-table']//td[@data-label='Name']//span[text()='${name}']  timeout=10
 
-Verify Accelerator Profile Values
+Verify Accelerator Profile Values using CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it's value match with the expected
     [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
-    ...           ${tolerations}=${EMPTY}  ${ns}=redhat-ods-applications
+    ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key
+    ...           ${tol_value}=value  ${tol_seconds}=Forever   ${ns}=redhat-ods-applications
 
     ${ap_from_oc}=    Run     oc get acceleratorprofile -n ${ns} -o json | jq '.items[] | select(.spec.displayName == "${name}")'
     ${ap_json}=    Load Json String    ${ap_from_oc}
@@ -414,16 +449,37 @@ Verify Accelerator Profile Values
     ${name_from_spec}=    Get From Dictionary    ${ap_spec_dict}    displayName
     ${enabled_from_spec}=    Get From Dictionary    ${ap_spec_dict}    enabled
     ${identifier_from_spec}=    Get From Dictionary    ${ap_spec_dict}    identifier
-    ${tolerations_from_spec}=    Get From Dictionary    ${ap_spec_dict}    tolerations
     ${bool_enabled}=    Convert To Boolean    ${enabled}
     Should Be Equal    ${name_from_spec}    ${name}
     Should Be Equal    ${identifier_from_spec}    ${identifier}
     Should Be Equal    ${enabled_from_spec}    ${bool_enabled}
+    # Description
     IF    "${description}" != "${EMPTY}"
         ${description_from_spec}=    Get From Dictionary    ${ap_spec_dict}    description
         Should Be Equal    ${description_from_spec}    ${description}
     END
-    # TODO: Tolerations
+    # Tolerations
+    IF    "${tolerations}" != "${EMPTY}"
+        ${tolerations_from_spec}=    Get From Dictionary    ${ap_spec_dict}    tolerations
+        ${tol_operator_retrieved}=    Get From Dictionary    ${tolerations_from_spec}[0]    operator
+        Should Be Equal    ${tol_operator_retrieved}    ${tol_operator}
+        ${tol_key_retrieved}=    Get From Dictionary    ${tolerations_from_spec}[0]    key
+        Should Be Equal    ${tol_key_retrieved}    ${tol_key}
+        ${tol_value_retrieved}=    Get From Dictionary    ${tolerations_from_spec}[0]    value
+        Should Be Equal    ${tol_value_retrieved}    ${tol_value}
+        # Effect
+        ${tol_effect_retrieved}=    Get From Dictionary    ${tolerations_from_spec}[0]    effect
+        IF    "${tol_effect}" == "None"
+            Should Be Equal    ${tol_effect_retrieved}    ""
+        ELSE
+            Should Be Equal    ${tol_effect_retrieved}    ${tol_effect}
+        END
+        # Toleration Seconds
+        IF    "${tol_seconds}" != "Forever"
+            ${tol_seconds_retrieved}=    Get From Dictionary    ${tolerations_from_spec}[0]    tolerationSeconds
+            Should Be Equal    "${tol_seconds_retrieved}"    "${tol_seconds}"
+        END
+    END
 
 Delete All Accelerator Profiles Which Starts With
     [Documentation]    Delete all accelerator profiles given prefix. That prefix should match with the metadata.name

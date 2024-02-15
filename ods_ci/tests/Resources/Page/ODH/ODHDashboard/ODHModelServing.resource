@@ -216,7 +216,7 @@ Get Model Route via UI
     ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
     ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
     IF    ${kserve}
-        ${url} =    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
+        ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
     END
     RETURN    ${url}    ${kserve}
 
@@ -274,7 +274,7 @@ Get Model Inference
     IF  ${kserve}
         Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
         ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca_istio_knative.crt
-    ELSE IF  ${self_managed}==${TRUE}
+    ELSE IF  ${self_managed}
         Fetch Openshift CA Bundle
         ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
     END
@@ -470,9 +470,11 @@ Get Modelmesh Events And Logs
     ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
 
 Get Kserve Events And Logs
+    [Documentation]    Fetches the events in a given namespace, as well as the logs from all the containers in all the
+    ...    pods labelled as part of Kserve.
     [Arguments]    ${model_name}    ${project_title}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
-    #${model_name}=    Remove String    ${model_name}    -
+    # ${model_name}=    Remove String    ${model_name}    -
     ${model_name}=    Convert To Lower Case    ${model_name}
     Get Events And Pod Logs    namespace=${ns_name}
     ...    label_selector=serving.kserve.io/inferenceservice=${model_name}

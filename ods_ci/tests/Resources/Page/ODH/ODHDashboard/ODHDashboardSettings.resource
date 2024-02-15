@@ -13,6 +13,9 @@ ${MULTI_MODE_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-ena
 ${CUSTOM_EMPTY_GROUP}=    empty-group
 ${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}=    //button[@data-id="display-accelerator-modal-button"]
 ${CREATE_ACCELERATOR_PROFILE_BTN}=    //button[@data-id="create-accelerator-profile"]
+${EDIT_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//span[text()='Edit']/ancestor::button
+${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}=    //table[@id='accelerator-profile-table']//td[@data-label='Name']
+${ACCELERATOR_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/accelerator
 ${ACCELERATOR_NAME}=    //input[@id="accelerator-name"]
 ${ACCELERATOR_IDENTIFIER}=    //input[@id="accelerator-identifier"]
 ${ACCELERATOR_DESCRIPTION}=    //textarea[@id="accelerator-description"]
@@ -20,14 +23,17 @@ ${ACCELERATOR_ENABLED_SWITCH}=    //input[@id="accelerator-enabled"]/following-s
 ${ACCELERATOR_ADD_TOLERATION_BTN}=    //button[@data-testid="add-toleration-button"]
 ${ACCELERATOR_ADD_TOLERATION_MODAL_FORM}=    //div[contains(@id, "pf-modal-part")]//span[text()="Add toleration"]
 ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}=    //div[@data-testid="toleration-operator-select"]/button
-${CREATE_ACCELERATOR_PROFILE_DETAIL_BTN}=    //button[@id="create-button"]
+${CREATE_OR_UPDATE_ACCELERATOR_PROFILE_DETAIL_BTN}=    //button[@id="create-button"]
 ${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}=    //label[@for="effect-select"]/parent::*/following::*[1]//button
 ${ACCELERATOR_TOLERATION_KEY}=    //input[@id='toleration-key']
 ${ACCELERATOR_TOLERATION_VALUE}=    //input[@id='toleration-value']
 ${ACCELERATOR_TOLERATION_SECONDS_FOREVER_RADIO}=    //input[@id="forever"]
 ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_RADIO}=    //input[@id="custom-value"]
 ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}=    //div[contains(@class, 'number-input')]//input
-${ACCELERATOR_TOLERATION_ADD_BUTTON}=    //button[@data-testid="modal-submit-button"]
+${ACCELERATOR_TOLERATION_ADD_OR_UPDATE_BUTTON}=    //button[@data-testid="modal-submit-button"]
+${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}=    //section[@aria-label="Tolerations"]//table//button[@aria-label="Kebab toggle"][1]
+${ACCELERATOR_EDIT_TOLERATION_EDIT_MENU}=    //section[@aria-label="Tolerations"]//table//button[@aria-label="Kebab toggle"][1]/following::div//span[text()="Edit"]
+${ACCELERATOR_EDIT_TOLERATION_MODAL_FORM}=    //div[contains(@id, "pf-modal-part")]//span[text()="Edit toleration"]
 
 
 *** Keywords ***
@@ -386,7 +392,23 @@ Click On Create Accelerator profile button
         Click Button   ${CREATE_ACCELERATOR_PROFILE_BTN}
     END
 
-Create An Accelerator Profile via UI
+Click On Edit Accelerator profile
+    [Documentation]    Click on the the 3 dots button and then on the "Edit" button of an specific Accelerator Profile
+    ...                from the grid
+    ...                view: Settings -> Accelerator profiles
+    [Arguments]   ${name}
+    Wait Until Page Contains Element    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
+    Click Button    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
+    Wait Until Page Contains Element    ${EDIT_ACCELERATOR_PROFILE_BTN}
+    Click Button    ${EDIT_ACCELERATOR_PROFILE_BTN}
+
+Create An Accelerator Profile Via CLI
+    [Documentation]    Create an instance of Accelerator Profile using OC
+    [Arguments]   ${name}  ${ns}=redhat-ods-applications
+
+    Run    oc create -f ${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml -n ${ns}
+
+Create An Accelerator Profile Via UI
     [Documentation]    Fill Accelerator Profile values with the ones provided in the arguments and click on
     ...                create button
     ...                view: Create Accelerator profile
@@ -420,22 +442,73 @@ Create An Accelerator Profile via UI
         # Toleration Seconds
         IF    "${tol_seconds}" != "Forever"
             Click Element    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_RADIO}
-            Clear Element Text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}
-            Sleep    0.5s
-            Input Text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}   ${tol_seconds}
+            Clear element and input text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}   ${tol_seconds}
         ELSE
             Click Element    ${ACCELERATOR_TOLERATION_SECONDS_FOREVER_RADIO}
         END
-        Click Button    ${ACCELERATOR_TOLERATION_ADD_BUTTON}
+        Click Button    ${ACCELERATOR_TOLERATION_ADD_OR_UPDATE_BUTTON}
     END
-    Click Button    ${CREATE_ACCELERATOR_PROFILE_DETAIL_BTN}
+    Click Button    ${CREATE_OR_UPDATE_ACCELERATOR_PROFILE_DETAIL_BTN}
+
+Modify The Accelerator Profile
+    [Documentation]    Modify Accelerator Profile values with the ones provided in the arguments and click on
+    ...                "Update acccelerator profile" button
+    ...                view: Create Accelerator profile
+    [Arguments]   ${original_display_name}  ${display_name}=${EMPTY}  ${identifier}=${EMPTY}  ${description}=${EMPTY}
+    ...           ${enabled}=${EMPTY}  ${tolerations}=${EMPTY}  ${tol_operator}=${EMPTY}  ${tol_effect}=${EMPTY}
+    ...           ${tol_key}=${EMPTY}  ${tol_value}=${EMPTY}  ${tol_seconds}=${EMPTY}
+
+    Wait Until Element Is Visible   //h1[text()="Edit ${original_display_name}"]  timeout=10
+    IF    "${display_name}" != "${EMPTY}"
+        Clear element and input text    ${ACCELERATOR_NAME}    ${display_name}
+    END
+    IF    "${identifier}" != "${EMPTY}"
+        Clear element and input text    ${ACCELERATOR_IDENTIFIER}    ${identifier}
+    END
+    IF    "${description}" != "${EMPTY}"
+        Clear element and input text    ${ACCELERATOR_DESCRIPTION}    ${description}
+    END
+    # Click always, as there is no way from the UI to obtain the status of the switch,
+    IF    "${enabled}" != "${EMPTY}"
+        Click Element    ${ACCELERATOR_ENABLED_SWITCH}
+    END
+    IF    "${tolerations}" != "${EMPTY}"
+        Click Button    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}
+        Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_EDIT_MENU}    timeout=10
+        Click Element    ${ACCELERATOR_EDIT_TOLERATION_EDIT_MENU}
+        Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_MODAL_FORM}    timeout=10
+        IF    "${tol_operator}" != "${EMPTY}"
+            Click Button    ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}
+            Click Element    //div[@data-testid="toleration-operator-select"]//div[text()="${tol_operator}"]
+        END
+        IF    "${tol_effect}" != "${EMPTY}"
+            Click Button    ${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}
+            Click Element    //label[@for="effect-select"]/parent::*/following::div//*[text()="${tol_effect}"]
+        END
+        IF    "${tol_key}" != "${EMPTY}"
+            Clear element and input text    ${ACCELERATOR_TOLERATION_KEY}    ${tol_key}
+        END
+        IF    "${tol_value}" != "${EMPTY}"
+            Clear element and input text    ${ACCELERATOR_TOLERATION_VALUE}    ${tol_value}
+        END
+        IF    "${tol_seconds}" != "${EMPTY}"
+            IF    "${tol_seconds}" != "Forever"
+                Click Element    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_RADIO}
+                Clear element and input text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}   ${tol_seconds}
+            ELSE
+                Click Element    ${ACCELERATOR_TOLERATION_SECONDS_FOREVER_RADIO}
+            END
+        END
+        Click Button    ${ACCELERATOR_TOLERATION_ADD_OR_UPDATE_BUTTON}
+    END
+    Click Button    ${CREATE_OR_UPDATE_ACCELERATOR_PROFILE_DETAIL_BTN}
 
 In The Accelerator Profiles Grid There Is An Accelerator Profile With Name
     [Documentation]    Verify that there is an specific Accelerator Profile in the Grid
     ...                view: Settings -> Accelerator profiles
-    [Arguments]   ${name}
+    [Arguments]    ${display_name}
 
-    Wait Until Element Is Visible   //table[@id='accelerator-profile-table']//td[@data-label='Name']//span[text()='${name}']  timeout=10
+    Wait Until Element Is Visible   ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//span[text()='${display_name}']  timeout=10
 
 Verify Accelerator Profile Values via CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it's value match with the expected
@@ -480,6 +553,7 @@ Verify Accelerator Profile Values via CLI
             Should Be Equal    "${tol_seconds_retrieved}"    "${tol_seconds}"
         END
     END
+
 
 Delete All Accelerator Profiles Which Starts With
     [Documentation]    Delete all accelerator profiles given prefix. That prefix should match with the metadata.name

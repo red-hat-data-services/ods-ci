@@ -457,3 +457,11 @@ Configure User Workload Monitoring
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_CONFIG_FILEPATH}
     Log To Console    ${output}
     Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+
+#TODO: Apply it in all cases in the project
+Clear element and input text
+    [Documentation]    Clear and input text element, wait .5 seconds and input new text on it
+    [Arguments]    ${element_xpath}    ${new_text}
+            Clear Element Text    ${element_xpath}
+            Sleep    0.5s
+            Input Text    ${element_xpath}    ${new_text}

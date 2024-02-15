@@ -274,6 +274,40 @@ Wait Until Pipeline Server Is Deployed
     Wait Until Keyword Succeeds    10 times    10s
     ...    Verify Pipeline Server Deployments    project_title=${project_title}
 
+Open Pipeline Detail
+    [Documentation]    Open the Pipeline detail
+    [Arguments]    ${pipeline_name}
+    Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
+    Click Element    xpath=//button[text()='Data Science Pipelines']
+    Wait Until Page Contains Element    xpath=//a[text()='Pipelines']
+    Click Element    xpath=//a[text()='Pipelines']
+    Wait Until Page Contains Element    xpath=//h2[text()='${pipeline_name}']
+    Click Element    xpath=//button[@id='pipeline-row-item0']
+    Wait Until Page Contains Element    xpath=//a[text()='${pipeline_name}']
+    Click Element    xpath=//a[text()='${pipeline_name}']
+    Wait Until Page Contains Element    xpath=//div[@data-test-id='topology']
+    Capture Page Screenshot
+
+Open Pipeline Run
+    [Documentation]    Open the Pipeline detail
+    [Arguments]    ${pipeline_run_name}
+    Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
+    Click Element    xpath=//button[text()='Data Science Pipelines']
+    Wait Until Page Contains Element    xpath=//a[text()='Runs']
+    Click Element    xpath=//a[text()='Runs']
+    Wait Until Page Contains Element    xpath=//span[text()='Triggered']
+    Click Element    xpath=//span[text()='Triggered']
+    Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']
+    Click Element    xpath=//span[text()='${pipeline_run_name}']
+    Wait Until Page Contains Element    xpath=//div[@data-test-id='topology']
+
+Verify Pipeline Run Is Completed
+    [Documentation]    Open the Pipeline detail and wait for the Completed Status
+    [Arguments]    ${pipeline_run_name}
+    Open Pipeline Run    ${pipeline_run_name}
+    Wait Until Page Contains Element    //span[@class='pf-v5-c-label__text' and text()='Completed']    timeout=10m
+    Capture Page Screenshot
+
 # TODO: we need to replace this keyword for a similar one checking in Data Science Pipelines > Runs
 #Verify Successful Pipeline Run Via Project UI
 #    [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state

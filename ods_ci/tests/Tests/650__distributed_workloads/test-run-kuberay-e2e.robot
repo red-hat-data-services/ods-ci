@@ -61,6 +61,9 @@ Run Kuberay E2E Test
     [Arguments]    ${test_name}
     Log To Console    Running Kuberay E2E test: ${test_name}
     ${result} =    Run Process    go test -timeout 30m -parallel 1 -v ./test/e2e -run ${test_name}
+    ...    env:KUBERAY_TEST_TIMEOUT_SHORT=2m
+    ...    env:KUBERAY_TEST_TIMEOUT_MEDIUM=7m
+    ...    env:KUBERAY_TEST_TIMEOUT_LONG=10m
     ...    env:KUBERAY_TEST_RAY_IMAGE=quay.io/project-codeflare/ray:latest-py39-cu118
     ...    shell=true
     ...    stderr=STDOUT

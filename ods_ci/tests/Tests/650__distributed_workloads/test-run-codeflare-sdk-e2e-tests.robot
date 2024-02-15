@@ -52,6 +52,8 @@ Run Codeflare-sdk E2E Test
     ...    shell=true
     ...    stderr=STDOUT
     ...    cwd=${CODEFLARE-SDK_DIR}
+    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
+    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-sdk-e2e-logs
     Log To Console    ${result.stdout}

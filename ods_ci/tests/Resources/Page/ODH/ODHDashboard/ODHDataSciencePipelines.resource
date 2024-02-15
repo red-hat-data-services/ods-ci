@@ -131,3 +131,37 @@ Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     ...    Bug: RHOAIENG-2931
     Run Keyword And Ignore Error       Wait Until Page Contains    Error displaying pipelines    timeout=60s
     Run Keyword And Warn On Failure    Page Should Not Contain     Error displaying pipelines
+
+Open Pipeline Detail
+    [Documentation]    Open the Pipeline detail
+    [Arguments]    ${pipeline_name}
+    Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
+    Click Element    xpath=//button[text()='Data Science Pipelines']
+    Wait Until Page Contains Element    xpath=//a[text()='Pipelines']
+    Click Element    xpath=//a[text()='Pipelines']
+    Wait Until Page Contains Element    xpath=//h2[text()='${pipeline_name}']
+    Click Element    xpath=//button[@id='pipeline-row-item0']
+    Wait Until Page Contains Element    xpath=//a[text()='${pipeline_name}']
+    Click Element    xpath=//a[text()='${pipeline_name}']
+    Wait Until Page Contains Element    xpath=//div[@data-test-id='topology']
+    Capture Page Screenshot
+
+Open Pipeline Run
+    [Documentation]    Open the Pipeline detail
+    [Arguments]    ${pipeline_run_name}
+    Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
+    Click Element    xpath=//button[text()='Data Science Pipelines']
+    Wait Until Page Contains Element    xpath=//a[text()='Runs']
+    Click Element    xpath=//a[text()='Runs']
+    Wait Until Page Contains Element    xpath=//span[text()='Triggered']
+    Click Element    xpath=//span[text()='Triggered']
+    Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']
+    Click Element    xpath=//span[text()='${pipeline_run_name}']
+    Wait Until Page Contains Element    xpath=//div[@data-test-id='topology']
+
+Verify Pipeline Run Is Completed
+    [Documentation]    Open the Pipeline detail and wait for the Completed Status
+    [Arguments]    ${pipeline_run_name}
+    Open Pipeline Run    ${pipeline_run_name}
+    Wait Until Page Contains Element    //span[@class='pf-v5-c-label__text' and text()='Completed']    timeout=10m
+    Capture Page Screenshot

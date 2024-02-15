@@ -147,7 +147,7 @@ Open Pipeline Detail
     Capture Page Screenshot
 
 Open Pipeline Run
-    [Documentation]    Open the Pipeline detail
+    [Documentation]    Open the Pipeline Run detail
     [Arguments]    ${pipeline_run_name}
     Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
     Click Element    xpath=//button[text()='Data Science Pipelines']

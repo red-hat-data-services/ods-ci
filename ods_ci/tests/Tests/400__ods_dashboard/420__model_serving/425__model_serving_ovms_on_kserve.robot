@@ -145,7 +145,6 @@ OVMS On Kserve Suite Teardown
     Delete Data Science Projects From CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
-    Remove File    openshift_ca.crt
     Remove File    openshift_ca_istio_knative.crt
     SeleniumLibrary.Close All Browsers
     RHOSi Teardown

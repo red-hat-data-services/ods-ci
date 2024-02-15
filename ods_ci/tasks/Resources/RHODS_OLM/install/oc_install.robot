@@ -8,7 +8,7 @@ Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.r
 
 *** Variables ***
 ${DSC_NAME} =    default-dsc
-@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai    kueue  # robocop: disable
+@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai  # robocop: disable
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless

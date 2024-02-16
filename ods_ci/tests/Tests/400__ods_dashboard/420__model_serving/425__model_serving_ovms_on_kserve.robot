@@ -59,6 +59,9 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     ${url}    ${kserve}=    Get Model Route via UI    ${MODEL_NAME}
+    IF  ${kserve}
+        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+    END
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
@@ -124,6 +127,9 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)
     Verify Model Status    ${MODEL_NAME_GPU}    success
     Set Suite Variable    ${MODEL_CREATED}    True
     ${url}    ${kserve}=    Get Model Route via UI    ${MODEL_NAME_GPU}
+    IF  ${kserve}
+        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+    END
     Send Random Inference Request     endpoint=${url}    no_requests=100
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0
     ${prometheus_route}=    Get OpenShift Prometheus Route

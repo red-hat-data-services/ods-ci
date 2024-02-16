@@ -8,7 +8,7 @@ Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.r
 
 *** Variables ***
 ${DSC_NAME} =    default-dsc
-@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai    kueue  # robocop: disable
+@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai  # robocop: disable
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
@@ -396,9 +396,12 @@ Wait Component Ready
     Log To Console    ${component} is ready
 
 Add UI Admin Group To Dashboard Admin
-    [Documentation]    Add Ui admin group to ODH dashboard admin group
+    [Documentation]    Add UI admin group to ODH dashboard admin group [only for odh-nightly]
     ${status} =     Run Keyword And Return Status    Check Group In Cluster    odh-ux-admins
     IF    ${status} == ${TRUE}
+              ${rc}  ${output}=    Run And Return Rc And Output
+              ...   oc wait --for=condition=ready pod -l app=odh-dashboard -n ${APPLICATIONS_NAMESPACE} --timeout=300  #robocop: disable
+              IF  ${rc} != ${0}     Log    message=Dashboard Pod is not up and running   level=ERROR
               ${rc}  ${output}=    Run And Return Rc And Output
               ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"odh-admins,odh-ux-admins"}}}'  #robocop: disable
               IF  ${rc} != ${0}     Log    message=Unable to update the admin config   level=WARN

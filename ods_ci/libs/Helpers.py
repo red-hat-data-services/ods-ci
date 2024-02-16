@@ -172,7 +172,7 @@ class Helpers:
             import numbers
             import re
 
-            model_name = re.compile("^[\S]+__isvc-[\w\d]+$")
+            model_name = re.compile("^[\S]+(__isvc-)?[\w\d]+$")
 
             # Cast from string to python type
             expected = ast.literal_eval(expected)
@@ -271,12 +271,20 @@ class Helpers:
 
             # This file only exists when running on self-managed clusters
             ca_bundle = Path("openshift_ca.crt")
+            knative_ca_bundle = Path("openshift_ca_istio_knative.crt")
             if ca_bundle.is_file():
                 response = requests.post(
                     endpoint,
                     headers=headers,
                     data=data,
                     verify="openshift_ca.crt",
+                )
+            elif knative_ca_bundle.is_file():
+                response = requests.post(
+                    endpoint,
+                    headers=headers,
+                    data=data,
+                    verify="openshift_ca_istio_knative.crt",
                 )
             else:
                 response = requests.post(endpoint, headers=headers, data=data)

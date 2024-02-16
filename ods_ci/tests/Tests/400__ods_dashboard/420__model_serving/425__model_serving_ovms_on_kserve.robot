@@ -114,12 +114,12 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}
     ...    namespace=${PRJ_TITLE_GPU}
     Verify Displayed GPU Count In Single Model Serving    model_name=${MODEL_NAME_GPU}    no_gpus=1
-    ${requests} =    Get Container Requests    namespace=${PRJ_TITLE_GPU}
+    ${requests}=    Get Container Requests    namespace=${PRJ_TITLE_GPU}
     ...    label=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}    container_name=kserve-container
     Should Contain    ${requests}    "nvidia.com/gpu": "1"
-    ${node} =    Get Node Pod Is Running On    namespace=${PRJ_TITLE_GPU}
+    ${node}=    Get Node Pod Is Running On    namespace=${PRJ_TITLE_GPU}
     ...    label=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}
-    ${type} =    Get Instance Type Of Node    ${node}
+    ${type}=    Get Instance Type Of Node    ${node}
     Should Be Equal As Strings    ${type}    "g4dn.xlarge"
     Verify Model Status    ${MODEL_NAME_GPU}    success
     Set Suite Variable    ${MODEL_CREATED}    True

@@ -1,0 +1,33 @@
+apiVersion: dashboard.opendatahub.io/v1
+kind: AcceleratorProfile
+metadata:
+  generation: 1
+  managedFields:
+    - apiVersion: dashboard.opendatahub.io/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:metadata':
+          'f:annotations':
+            .: {}
+            'f:opendatahub.io/modified-date': {}
+        'f:spec':
+          .: {}
+          'f:description': {}
+          'f:displayName': {}
+          'f:enabled': {}
+          'f:identifier': {}
+          'f:tolerations': {}
+      manager: unknown
+      operation: Update
+  name: qecreateap4
+  namespace: redhat-ods-applications
+spec:
+  description: description example
+  displayName: qe_create_ap_4
+  enabled: true
+  identifier: nvidia.com/gpu
+  tolerations:
+    - effect: NoSchedule
+      key: key
+      operator: Exists
+      value: value

@@ -14,6 +14,7 @@ ${CUSTOM_EMPTY_GROUP}=    empty-group
 ${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}=    //button[@data-id="display-accelerator-modal-button"]
 ${CREATE_ACCELERATOR_PROFILE_BTN}=    //button[@data-id="create-accelerator-profile"]
 ${EDIT_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//span[text()='Edit']/ancestor::button
+${DELETE_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//span[text()='Delete']/ancestor::button
 ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}=    //table[@id='accelerator-profile-table']//td[@data-label='Name']
 ${ACCELERATOR_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/accelerator
 ${ACCELERATOR_NAME}=    //input[@id="accelerator-name"]
@@ -34,6 +35,9 @@ ${ACCELERATOR_TOLERATION_ADD_OR_UPDATE_BUTTON}=    //button[@data-testid="modal-
 ${ACCELERATOR_EDIT_NAV_MENU_TOLERATIONS}=    //nav[@aria-label="Jump to section"]//span[text()="Tolerations"]
 ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}=    //section[@aria-label="Tolerations"]//table//button[@aria-label="Kebab toggle"]
 ${ACCELERATOR_EDIT_TOLERATION_MODAL_FORM}=    //div[contains(@id, "pf-modal-part")]//span[text()="Edit toleration"]
+${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}=    //span[text()='Disable accelerator profile']/ancestor::header/following::footer/button[text()='Disable']
+${ACCELERATOR_DELETE_MODAL_DELETE_BUTTON}=    //span[text()='Delete accelerator profile?']/ancestor::header/following::footer/button[text()='Delete']
+${ACCELERATOR_DELETE_MODAL_INPUT}=    //input[@id="delete-modal-input"]
 
 
 *** Keywords ***
@@ -383,7 +387,6 @@ Click On Create Accelerator profile button
     ...                the "Create accelerator profile" (when there is at least 1
     ...                previously created).
     ...                view: Settings -> Accelerator profiles
-
     ${empty_list} =  Run Keyword And Return Status    Wait Until Page Contains Element
     ...    ${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}  timeout=5s
     IF  ${empty_list}==True
@@ -402,10 +405,37 @@ Click On Edit Accelerator profile
     Wait Until Page Contains Element    ${EDIT_ACCELERATOR_PROFILE_BTN}
     Click Button    ${EDIT_ACCELERATOR_PROFILE_BTN}
 
+
+Click On Enable Accelerator Profile
+    [Documentation]    Click on the the Enable switch from an specific Accelerator Profile
+    ...                view: Settings -> Accelerator profiles
+    [Arguments]   ${name}
+    Wait Until Page Contains Element    //input[@id='${name}-enable-switch']/following-sibling::span
+    Click Element    //input[@id='${name}-enable-switch']/following-sibling::span
+
+Disable Accelerator Profile
+    [Documentation]    Disable an specific Accelerator Profile from the Grid
+    ...                view: Settings -> Accelerator profiles
+    [Arguments]   ${name}
+    Click On Enable Accelerator Profile    ${name}
+    Wait Until Page Contains Element    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
+    Click Button    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
+
+Delete Accelerator Profile
+    [Documentation]    Delete an specific Accelerator Profile from the Grid
+    ...                view: Settings -> Accelerator profiles
+    [Arguments]   ${name}
+    Wait Until Page Contains Element    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
+    Click Button    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
+    Wait Until Page Contains Element    ${DELETE_ACCELERATOR_PROFILE_BTN}
+    Click Button    ${DELETE_ACCELERATOR_PROFILE_BTN}
+    Wait Until Page Contains Element    ${ACCELERATOR_DELETE_MODAL_INPUT}
+    Input Text    ${ACCELERATOR_DELETE_MODAL_INPUT}    ${name}
+    Click Button    ${ACCELERATOR_DELETE_MODAL_DELETE_BUTTON}
+
 Create An Accelerator Profile Via CLI
     [Documentation]    Create an instance of Accelerator Profile using OC
     [Arguments]   ${name}  ${ns}=redhat-ods-applications
-
     Run    oc create -f ${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml -n ${ns}
 
 Create An Accelerator Profile Via UI
@@ -415,7 +445,6 @@ Create An Accelerator Profile Via UI
     [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
     ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key
     ...           ${tol_value}=value  ${tol_seconds}=Forever
-
     Wait Until Page Contains Element  ${ACCELERATOR_NAME}  timeout=5s
     Input Text    ${ACCELERATOR_NAME}    ${name}
     Input Text    ${ACCELERATOR_IDENTIFIER}    ${identifier}
@@ -457,7 +486,6 @@ Modify The Accelerator Profile
     [Arguments]   ${original_display_name}  ${display_name}=${EMPTY}  ${identifier}=${EMPTY}  ${description}=${EMPTY}
     ...           ${enabled}=${EMPTY}  ${tolerations}=${EMPTY}  ${tol_operator}=${EMPTY}  ${tol_effect}=${EMPTY}
     ...           ${tol_key}=${EMPTY}  ${tol_value}=${EMPTY}  ${tol_seconds}=${EMPTY}
-
     Wait Until Element Is Visible   //h1[text()="Edit ${original_display_name}"]  timeout=10
     IF    "${display_name}" != "${EMPTY}"
         Clear element and input text    ${ACCELERATOR_NAME}    ${display_name}
@@ -473,9 +501,10 @@ Modify The Accelerator Profile
         Click Element    ${ACCELERATOR_ENABLED_SWITCH}
     END
     IF    "${tolerations}" != "${EMPTY}"
-        Click Button    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}[1]
-        Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}[1]/following::div//span[text()="Edit"]    timeout=10
-        Click Element    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}[1]/following::div//span[text()="Edit"]
+        ${first_kebab}=    Catenate    SEPARATOR=    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}    [1]
+        Click Button    ${first_kebab}
+        Wait Until Element Is Visible    ${first_kebab}/following::div//span[text()="Edit"]    timeout=10
+        Click Element    ${first_kebab}/following::div//span[text()="Edit"]
         Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_MODAL_FORM}    timeout=10
         IF    "${tol_operator}" != "${EMPTY}"
             Click Button    ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}
@@ -507,7 +536,6 @@ Delete Accelerator Profile Tolerations
     [Documentation]    Delete Tolerarions from an Accelerator Profile and click on "Update acccelerator profile" button
     ...                view: Edit Accelerator profile
     [Arguments]   ${display_name}
-
     Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}
     Click Element     ${ACCELERATOR_EDIT_NAV_MENU_TOLERATIONS}
     ${tolerations_num}=  Get Element Count  ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}
@@ -523,32 +551,39 @@ In The Accelerator Profiles Grid There Is An Accelerator Profile With Name
     [Documentation]    Verify that there is an specific Accelerator Profile in the Grid
     ...                view: Settings -> Accelerator profiles
     [Arguments]    ${display_name}
-
     Wait Until Element Is Visible   ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//span[text()='${display_name}']  timeout=10
 
 Get Accelerator Profile Spec Values via CLI
     [Documentation]  Get Spec fields from an specific Accelerator Profile Instance
     [Arguments]   ${display_name}    ${ns}=redhat-ods-applications
-
     ${ap_from_oc}=    Run     oc get acceleratorprofile -n ${ns} -o json | jq '.items[] | select(.spec.displayName == "${display_name}")'
     ${ap_json}=    Load Json String    ${ap_from_oc}
     ${ap_spec_dict}=    Get From Dictionary    ${ap_json}    spec
     RETURN    ${ap_spec_dict}
 
+Can Not Get Accelerator Profile Via CLI
+    [Documentation]  Get Spec fields from an specific Accelerator Profile Instance
+    [Arguments]   ${name}    ${ns}=redhat-ods-applications
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get acceleratorprofile ${name} -n ${ns}
+    Should Be Equal    "${rc}"    "1"
+    Should Contain    ${out}    "${name}" not found
+
 Verify Accelerator Profile Values via CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it's value match with the expected
-    [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
+    [Arguments]   ${name}  ${identifier}=${EMPTY}  ${description}=${EMPTY}  ${enabled}=True
     ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key
     ...           ${tol_value}=value  ${tol_seconds}=Forever   ${ns}=redhat-ods-applications
-
     ${ap_spec_dict}=    Get Accelerator Profile Spec Values via CLI    ${name}    ${ns}
     ${name_from_spec}=    Get From Dictionary    ${ap_spec_dict}    displayName
     ${enabled_from_spec}=    Get From Dictionary    ${ap_spec_dict}    enabled
-    ${identifier_from_spec}=    Get From Dictionary    ${ap_spec_dict}    identifier
     ${bool_enabled}=    Convert To Boolean    ${enabled}
     Should Be Equal    ${name_from_spec}    ${name}
-    Should Be Equal    ${identifier_from_spec}    ${identifier}
     Should Be Equal    ${enabled_from_spec}    ${bool_enabled}
+    # Identifier
+    IF    "${description}" != "${EMPTY}"
+        ${identifier_from_spec}=    Get From Dictionary    ${ap_spec_dict}    identifier
+        Should Be Equal    ${identifier_from_spec}    ${identifier}
+    END
     # Description
     IF    "${description}" != "${EMPTY}"
         ${description_from_spec}=    Get From Dictionary    ${ap_spec_dict}    description
@@ -580,7 +615,6 @@ Verify Accelerator Profile Values via CLI
 Verify Accelerator Profile has no tolerations via CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it has no tolerations
     [Arguments]   ${name}    ${ns}=redhat-ods-applications
-
     ${ap_spec_dict}=    Get Accelerator Profile Spec Values via CLI    ${name}    ${ns}
     ${tolerations_from_spec}=    Get From Dictionary    ${ap_spec_dict}    tolerations
     Should Be Empty    ${tolerations_from_spec}
@@ -590,7 +624,6 @@ Delete All Accelerator Profiles Which Starts With
     ...                value of the OC Accelerator Profile resource
     ...                Uses OC
     [Arguments]   ${ap_prefix}  ${ns}=redhat-ods-applications
-
     ${ap_str} =    Run     oc get acceleratorprofiles -n ${ns} -o json | jq .items[].metadata.name | grep ${ap_prefix} | tr -d '"'
     @{ap_list}=    Split String    ${ap_str}    separator=\n
     Log     List of Accelerator Profiles to be deleted: @{ap_list}    console=yes

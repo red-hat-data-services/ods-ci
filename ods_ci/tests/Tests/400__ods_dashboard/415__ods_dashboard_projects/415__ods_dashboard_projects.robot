@@ -155,8 +155,10 @@ Verify User Can Create A PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Smoke    Sanity    ODS-1816    Tier1
+    [Tags]    Smoke    Sanity    ODS-1816    Tier1    ExcludeOnDisconnected
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
+    ...    We skip this test on Disconnected environment because we have a PVs predefined there hardcoded to 100Gi.
+    ...    Since there is a size check in this test, it would fail unless some extra condition to be brought in here.
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}

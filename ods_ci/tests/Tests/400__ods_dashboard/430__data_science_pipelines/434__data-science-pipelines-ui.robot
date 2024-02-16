@@ -70,25 +70,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
     ...    pipeline_name=${PIPELINE_TEST_NAME}     run_type=Immediate
 
-    ## TODO: fix keywords checking job status to use Pipelines > Jobs
-    ## instead of the Projec Details Page
-    SeleniumLibrary.Wait Until Page Contains       Running     timeout=10s
-    SeleniumLibrary.Wait Until Page Contains       Completed   timeout=10m
-
-    # TODO: fix following keywords
-    #    Open Data Science Project Details Page    ${PRJ_TITLE}
-    #    Wait Until Pipeline Last Run Is Started    pipeline_name=${PIPELINE_TEST_NAME}
-    #    ...    timeout=10s
-    #  Wait Until Pipeline Last Run Is Finished    pipeline_name=${PIPELINE_TEST_NAME}
-    #    Pipeline Last Run Should Be    pipeline_name=${PIPELINE_TEST_NAME}
-    #    ...    run_name=${PIPELINE_TEST_RUN_BASENAME}
-    #    Pipeline Last Run Status Should Be    pipeline_name=${PIPELINE_TEST_NAME}
-    #    ...    status=Completed
-    #    Pipeline Run Should Be Listed    name=${PIPELINE_TEST_RUN_BASENAME}
-    #    ...    pipeline_name=${PIPELINE_TEST_NAME}
-
-    #    Verify Pipeline Run Deployment Is Successful    project_title=${PRJ_TITLE}
-    #    ...    workflow_name=${workflow_name}
+    Verify Pipeline Run Is Completed    ${PIPELINE_TEST_RUN_BASENAME}
 
     ODHDataSciencePipelines.Delete Pipeline Run       ${PIPELINE_TEST_RUN_BASENAME}    ${PIPELINE_TEST_NAME}
     ODHDataSciencePipelines.Delete Pipeline           ${PIPELINE_TEST_NAME}

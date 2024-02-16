@@ -382,7 +382,7 @@ Set RHODS Users Group To Inexistent Group
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...    users_group=${CUSTOM_INEXISTENT_GROUP}
 
-Click On Create Accelerator profile button
+Click On Create Accelerator Profile Button
     [Documentation]    Click on the "Add new accelerator profile" (when there is none) or
     ...                the "Create accelerator profile" (when there is at least 1
     ...                previously created).
@@ -395,7 +395,7 @@ Click On Create Accelerator profile button
         Click Button   ${CREATE_ACCELERATOR_PROFILE_BTN}
     END
 
-Click On Edit Accelerator profile
+Click On Edit Accelerator Profile
     [Documentation]    Click on the the 3 dots button and then on the "Edit" button of an specific Accelerator Profile
     ...                from the grid
     ...                view: Settings -> Accelerator profiles
@@ -568,7 +568,7 @@ Can Not Get Accelerator Profile Via CLI
     Should Be Equal    "${rc}"    "1"
     Should Contain    ${out}    "${name}" not found
 
-Verify Accelerator Profile Values via CLI
+Verify Accelerator Profile Values Via CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it's value match with the expected
     [Arguments]   ${name}  ${identifier}=${EMPTY}  ${description}=${EMPTY}  ${enabled}=True
     ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key

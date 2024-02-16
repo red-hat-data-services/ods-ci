@@ -20,14 +20,13 @@ ${ACC_TOLERATION_SECONDS}=    15
 
 
 *** Test Cases ***
-
 Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     [Documentation]    Create an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  ODS-XXX
     ...     Smoke
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
-    Click On Create Accelerator profile button
+    Click On Create Accelerator Profile Button
     Create An Accelerator Profile Via UI   ${ACC_DISPLAY_NAME}01   ${ACC_IDENTIFIER}
     ...                                    ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                    tol_operator=${ACC_TOLERATION_OPERATOR}
@@ -36,14 +35,13 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     ...                                    tol_value=${ACC_TOLERATION_VALUE}
     ...                                    tol_seconds=${ACC_TOLERATION_SECONDS}
     In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}01
-    Verify Accelerator Profile Values via CLI   ${ACC_DISPLAY_NAME}01   ${ACC_IDENTIFIER}
+    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}01   ${ACC_IDENTIFIER}
     ...                                         ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                                         tol_effect=${ACC_TOLERATION_EFFECT}
     ...                                         tol_key=${ACC_TOLERATION_KEY}
     ...                                         tol_value=${ACC_TOLERATION_VALUE}
     ...                                         tol_seconds=${ACC_TOLERATION_SECONDS}
-
 
 Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     [Documentation]    Modify an Accelerator Profile instance from the Administration UI and verify it's content
@@ -52,7 +50,7 @@ Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}2
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
-    Click On Edit Accelerator profile    ${ACC_DISPLAY_NAME}2
+    Click On Edit Accelerator Profile    ${ACC_DISPLAY_NAME}2
     Modify The Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}2
     ...                               display_name=${ACC_DISPLAY_NAME}2_modified
     ...                               identifier=${ACC_IDENTIFIER}_modified
@@ -63,14 +61,13 @@ Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     ...                               tol_value=${ACC_TOLERATION_VALUE}
     ...                               tol_seconds=${ACC_TOLERATION_SECONDS}
     In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}2_modified
-    Verify Accelerator Profile Values via CLI   ${ACC_DISPLAY_NAME}2_modified   ${ACC_IDENTIFIER}_modified
+    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}2_modified   ${ACC_IDENTIFIER}_modified
     ...                                         ${ACC_DESCRIPTION}_modified   tolerations=yes
     ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                                         tol_effect=${ACC_TOLERATION_EFFECT}
     ...                                         tol_key=${ACC_TOLERATION_KEY}
     ...                                         tol_value=${ACC_TOLERATION_VALUE}
     ...                                         tol_seconds=${ACC_TOLERATION_SECONDS}
-
 
 Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Administration UI
     [Documentation]    Delete Tolerations from  an Accelerator Profile instance from the Administration UI and
@@ -80,11 +77,10 @@ Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Admi
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}3
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
-    Click On Edit Accelerator profile    ${ACC_DISPLAY_NAME}3
+    Click On Edit Accelerator Profile    ${ACC_DISPLAY_NAME}3
     Delete Accelerator Profile Tolerations    ${ACC_DISPLAY_NAME}3
     In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}3
     Verify Accelerator Profile has no tolerations via CLI   ${ACC_DISPLAY_NAME}3
-
 
 Disable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
@@ -93,12 +89,12 @@ Disable an Accelerator Profile From The Accelerator Profile Edit View
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}4
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
-    Click On Edit Accelerator profile    ${ACC_DISPLAY_NAME}4
+    Click On Edit Accelerator Profile    ${ACC_DISPLAY_NAME}4
     Modify The Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}4    enabled=False
     In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}4
-    Verify Accelerator Profile Values via CLI   ${ACC_DISPLAY_NAME}4    enabled=False
+    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}4    enabled=False
 
-Disable an Accelerator Profile From The Accelerator Profile Edit View
+Enable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Enable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  ODS-XXX
     ...     Smoke
@@ -108,7 +104,7 @@ Disable an Accelerator Profile From The Accelerator Profile Edit View
     Click On Edit Accelerator Profile    ${ACC_DISPLAY_NAME}5
     Modify The Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}5    enabled=True
     In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}5
-    Verify Accelerator Profile Values via CLI   ${ACC_DISPLAY_NAME}5    enabled=True
+    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}5    enabled=True
 
 Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
@@ -118,7 +114,7 @@ Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Disable Accelerator Profile    ${ACC_NAME}6
-    Verify Accelerator Profile Values via CLI   ${ACC_DISPLAY_NAME}6    enabled=False
+    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}6    enabled=False
 
 Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Enable an An accelerator profile from the Edit Accelerator Profile view
@@ -128,7 +124,7 @@ Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Click On Enable Accelerator Profile    ${ACC_NAME}7
-    Verify Accelerator Profile Values via CLI   ${ACC_DISPLAY_NAME}7    enabled=True
+    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}7    enabled=True
 
 Delete an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Delete an An accelerator profile from the Edit Accelerator Profile view

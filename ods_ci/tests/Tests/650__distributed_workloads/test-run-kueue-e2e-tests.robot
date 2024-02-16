@@ -22,14 +22,12 @@ Run E2E test
     [Documentation]    Run ginkgo E2E single cluster test
     [Tags]  Kueue
     ...     DistributedWorkloads
-    ...     Tier2
     Run Kueue E2E Test    e2e_test.go
 
 Run Visibility test
     [Documentation]    Run ginkgo visibilty single cluster test
     [Tags]  Kueue
     ...     DistributedWorkloads
-    ...     Tier2
     Enable Visibility Feature Gate
     Run Kueue E2E Test    visibility_test.go
 

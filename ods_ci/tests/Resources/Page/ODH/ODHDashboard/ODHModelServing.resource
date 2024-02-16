@@ -4,6 +4,7 @@ Resource       ../../../Page/Components/Components.resource
 Resource       ../../../Common.robot
 Resource       ODHDataScienceProject/ModelServer.resource
 Resource       ODHDataScienceProject/DataConnections.resource
+Resource       ../../../CLI/ModelServing/llm.resource
 Library        ../../../../../libs/Helpers.py
 
 
@@ -213,7 +214,11 @@ Get Model Route via UI
         SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
     END
     ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
-    RETURN    ${url}
+    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
+    IF    ${kserve}
+        ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
+    END
+    RETURN    ${url}    ${kserve}
 
 Get Model Route Via CLI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from CLI.
@@ -257,7 +262,7 @@ Get Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}
     ${self_managed}=    Is RHODS Self-Managed
-    ${url}=    Get Model Route via UI    ${model_name}
+    ${url}    ${kserve}=    Get Model Route via UI    ${model_name}
     ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
     IF    ${token_auth}
         IF    "${project_title}" == "${NONE}"
@@ -266,7 +271,10 @@ Get Model Inference
         ${token}=    Get Access Token via UI    ${project_title}
         ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
     END
-    IF  ${self_managed}==${TRUE}
+    IF  ${kserve}
+        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+        ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca_istio_knative.crt
+    ELSE IF  ${self_managed}
         Fetch Openshift CA Bundle
         ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
     END
@@ -337,6 +345,7 @@ Clean Up Model Serving Page
         FOR    ${model}    IN    @{models}
             ${model}=    Get Text   ${model}
             Delete Model Via UI    ${model}
+            Sleep    1s
         END
         Switch Model Serving Project    project_name=All projects
     END
@@ -459,6 +468,16 @@ Get Modelmesh Events And Logs
     ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
     Get Events And Pod Logs    namespace=${ns_name}
     ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
+
+Get Kserve Events And Logs
+    [Documentation]    Fetches the events in a given namespace, as well as the logs from all the containers in all the
+    ...    pods labelled as part of Kserve.
+    [Arguments]    ${model_name}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    # ${model_name}=    Remove String    ${model_name}    -
+    ${model_name}=    Convert To Lower Case    ${model_name}
+    Get Events And Pod Logs    namespace=${ns_name}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
 
 Create Custom Serving Runtime Using Template By CLI
     [Documentation]  Use Openshift API to create a custome runtime using template CR

@@ -55,9 +55,9 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     ...                                         tol_seconds=${ACC_TOLERATION_SECONDS}
 
 
-Modify A Previously Created Accelerator Profile Using "Accelerator Profiles" Administration UI
-    [Documentation]    Create an Accelerator Profile instance from the Administration UI and verify it's content
-    [Tags]  ODS-WIP
+Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
+    [Documentation]    Modify an Accelerator Profile instance from the Administration UI and verify it's content
+    [Tags]  ODS-WIP-BORRAR
     ...     Smoke
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}2
     Open ODS Dashboard With Admin User
@@ -80,6 +80,20 @@ Modify A Previously Created Accelerator Profile Using "Accelerator Profiles" Adm
     ...                                         tol_key=${ACC_TOLERATION_KEY}
     ...                                         tol_value=${ACC_TOLERATION_VALUE}
     ...                                         tol_seconds=${ACC_TOLERATION_SECONDS}
+
+
+Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Administration UI
+    [Documentation]    Delete Tolerations from  an Accelerator Profile instance from the Administration UI and
+    ...                verify it's content
+    [Tags]  ODS-WIP
+    ...     Smoke
+    [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}3
+    Open ODS Dashboard With Admin User
+    Navigate To Page    Settings    Accelerator profiles
+    Click On Edit Accelerator profile    ${ACC_DISPLAY_NAME}3
+    Delete Accelerator Profile Tolerations    ${ACC_DISPLAY_NAME}3
+    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}3
+    Verify Accelerator Profile has no tolerations via CLI   ${ACC_DISPLAY_NAME}3
 
 #TODO: Disable tolerations, disable  accelerator, shcedule forever, delete accelerator
 *** Keywords ***

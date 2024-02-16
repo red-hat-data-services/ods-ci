@@ -80,7 +80,7 @@ Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Admi
     Click On Edit Accelerator Profile    ${ACC_DISPLAY_NAME}3
     Delete Accelerator Profile Tolerations    ${ACC_DISPLAY_NAME}3
     In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}3
-    Verify Accelerator Profile has no tolerations Via CLI   ${ACC_DISPLAY_NAME}3
+    Verify Accelerator Profile Has No Tolerations Via CLI   ${ACC_DISPLAY_NAME}3
 
 Disable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view

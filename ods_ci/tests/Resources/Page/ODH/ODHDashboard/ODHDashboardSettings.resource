@@ -612,7 +612,7 @@ Verify Accelerator Profile Values Via CLI
         END
     END
 
-Verify Accelerator Profile has no tolerations Via CLI
+Verify Accelerator Profile Has No Tolerations Via CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it has no tolerations
     [Arguments]   ${name}    ${ns}=redhat-ods-applications
     ${ap_spec_dict}=    Get Accelerator Profile Spec Values via CLI    ${name}    ${ns}

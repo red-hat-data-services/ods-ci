@@ -160,7 +160,7 @@ Verify Displayed GPU Count In Single Model Serving
     ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../..//button[@aria-expanded="true"]
     IF    not ${expanded}
         SeleniumLibrary.Click Element
-        ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../..//button[@aria-expanded="true"]
+        ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../..//button[@aria-expanded="false"]
     END
     Sleep    5s    reason=Sometimes the number of current Accelerators take a few seconds to update
     ${current_accs}=    SeleniumLibrary.Get Text

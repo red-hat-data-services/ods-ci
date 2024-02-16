@@ -458,7 +458,6 @@ Configure User Workload Monitoring
     Log To Console    ${output}
     Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
 
-#TODO: Apply it in all cases in the project
 Clear element and input text
     [Documentation]    Clear and input text element, wait .5 seconds and input new text on it
     [Arguments]    ${element_xpath}    ${new_text}

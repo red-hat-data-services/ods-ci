@@ -21,15 +21,6 @@ ${ACC_TOLERATION_SECONDS}=    15
 
 *** Test Cases ***
 
-Verify RHODS "Accelerator Profiles" Administration UI is available for Admin users
-    [Documentation]    Verify users in the admin_groups (group "dedicated-admins" since RHODS 1.8.0)
-    ...                can access to the Accelerator Profiles Administration UI
-    [Tags]  ODS-XXX
-    ...     Smoke
-    Open ODS Dashboard With Admin User
-    Verify Cluster Settings Is Available
-
-
 Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     [Documentation]    Create an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  ODS-XXX

@@ -49,3 +49,10 @@ Check User Is Not In A Group
     ${users_in_group}=    OpenshiftLibrary.Oc Get    kind=Group   name=${group_name}    fields=['users']
     List Should Not Contain Value    ${users_in_group}[0][users]    ${username}
 
+Check Group In Cluster
+    [Documentation]     Check if a group is present in Openshift cluster
+    [Arguments]  ${group_name}
+    ${res}  ${output}=    Run And Return Rc And Output
+    ...    oc get group ${group_name}
+    Should Be Equal As Integers    ${res}    0    ${output}
+

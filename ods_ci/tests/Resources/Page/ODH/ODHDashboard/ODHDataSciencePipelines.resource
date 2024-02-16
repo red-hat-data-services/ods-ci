@@ -159,6 +159,19 @@ Open Pipeline Run
     Click Element    xpath=//span[text()='${pipeline_run_name}']
     Wait Until Page Contains Element    xpath=//div[@data-test-id='topology']
 
+Get Pipeline Run Step Log
+    [Documentation]    Get Pipeline Run Step Log
+    [Arguments]    ${pipeline_run_step}
+    Click Element    xpath=//*[name()='svg']//*[local-name()='g']//*[@class='pf-topology-pipelines__pill-text' and text()='${pipeline_run_step}']
+    Wait Until Page Contains Element    xpath=//button[@data-ouia-component-type='PF5/TabButton' and text()='Logs']
+    Click Element    xpath=//button[@data-ouia-component-type='PF5/TabButton' and text()='Logs']
+    # the logs are full loaded when "The log window displays partial content" the message appeared
+    Wait Until Page Contains Element    xpath=//h2[text()='The log window displays partial content']
+    Capture Page Screenshot
+    ${log_with_tags}=    Get Element Attribute    xpath://div[@class="pf-v5-c-log-viewer__list"]    innerHTML
+    Log    ${log_with_tags}
+    RETURN    ${log_with_tags}
+
 Verify Pipeline Run Is Completed
     [Documentation]    Open the Pipeline detail and wait for the Completed Status
     [Arguments]    ${pipeline_run_name}

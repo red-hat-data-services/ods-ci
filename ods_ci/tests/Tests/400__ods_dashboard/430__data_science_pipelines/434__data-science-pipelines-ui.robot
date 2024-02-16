@@ -71,6 +71,9 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    pipeline_name=${PIPELINE_TEST_NAME}     run_type=Immediate
 
     Verify Pipeline Run Is Completed    ${PIPELINE_TEST_RUN_BASENAME}
+    ${data_prep_log}=    Get Pipeline Run Step Log    data-prep
+    # deterministic: "Initial Dataset:" came from a print inside the python code.
+    Should Contain    ${data_prep_log}    Initial Dataset:
 
     ODHDataSciencePipelines.Delete Pipeline Run       ${PIPELINE_TEST_RUN_BASENAME}    ${PIPELINE_TEST_NAME}
     ODHDataSciencePipelines.Delete Pipeline           ${PIPELINE_TEST_NAME}

@@ -29,7 +29,6 @@ ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"${MODEL_NAME}__isvc-865
 ${PRJ_TITLE_GPU}=    model-serving-project-gpu
 ${PRJ_DESCRIPTION_GPU}=    project used for model serving tests (with GPUs)
 ${MODEL_NAME_GPU}=    vehicle-detection
-${RUNTIME_NAME_GPU}=    Model Serving GPU Test
 
 *** Test Cases ***
 Verify Openvino_IR Model Via UI (OVMS on Kserve)

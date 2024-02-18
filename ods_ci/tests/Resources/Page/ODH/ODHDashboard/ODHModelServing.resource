@@ -546,18 +546,23 @@ Clean All Models Of Current User
     ...    controls how many retries are made.
     [Arguments]    ${retries}=5
     Open Model Serving Home Page
-    FOR    ${try}    IN RANGE    0    ${retries}
-        ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project
-        IF    ${status}
-            Capture Page Screenshot
-            Click Button    Select a project
-            RETURN
-        ELSE
-            Clean Up Model Serving Page
-            Clean Up DSP Page
-            Open Model Serving Home Page
-            Reload Page
-            Sleep  5s
+    ${projects_empty}=    Run Keyword And Return Status    Page Should Contain    No data science projects
+    IF    ${projects_empty}
+        Log    No Data Sciense projects exist, skipping cleanup    console=True
+    ELSE
+        FOR    ${try}    IN RANGE    0    ${retries}
+            ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project
+            IF    ${status}
+                Capture Page Screenshot
+                Click Button    Select a project
+                RETURN
+            ELSE
+                Clean Up Model Serving Page
+                Clean Up DSP Page
+                Open Model Serving Home Page
+                Reload Page
+                Sleep  5s
+            END
         END
     END
 
@@ -566,11 +571,10 @@ Set Up Project
     ...                creates caikit runtime. This can be used as test setup
     [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
     IF    ${single_prj}
-        Clean All Models Of Current User
+        Run Keyword And Continue On Failure    Clean All Models Of Current User
     END
     Open Data Science Projects Home Page
-    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Create Data Science Project    title=${namespace}    description=kserve test project
+    Create Data Science Project    title=${namespace}    description=kserve test project    existing_project=${TRUE}
     Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=${S3.BUCKET_3.NAME}    aws_s3_endpoint=${S3.BUCKET_3.ENDPOINT}

@@ -54,10 +54,7 @@ Click On Edit Accelerator Profile
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
     Search for accelerator profile in grid    ${name}
-    Wait Until Page Contains Element    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
-    Click Button    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
-    Wait Until Page Contains Element    ${EDIT_ACCELERATOR_PROFILE_BTN}
-    Click Button    ${EDIT_ACCELERATOR_PROFILE_BTN}
+    ODHDashboard.Click Action From Actions Menu    ${name}    action=Edit
 
 Click On Enable Accelerator Profile
     [Documentation]    Click on the the Enable switch from an specific Accelerator Profile
@@ -87,10 +84,7 @@ Delete Accelerator Profile
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
     Search for accelerator profile in grid    ${name}
-    Wait Until Page Contains Element    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
-    Click Button    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
-    Wait Until Page Contains Element    ${DELETE_ACCELERATOR_PROFILE_BTN}
-    Click Button    ${DELETE_ACCELERATOR_PROFILE_BTN}
+    ODHDashboard.Click Action From Actions Menu    ${name}    action=Delete
     Wait Until Page Contains Element    ${ACCELERATOR_DELETE_MODAL_INPUT}
     Input Text    ${ACCELERATOR_DELETE_MODAL_INPUT}    ${name}
     Click Button    ${ACCELERATOR_DELETE_MODAL_DELETE_BUTTON}

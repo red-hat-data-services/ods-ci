@@ -7,6 +7,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resou
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup       OVMS On Kserve Suite Setup
@@ -58,10 +59,7 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)
     ...    namespace=${PRJ_TITLE}
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
-    ${url}    ${kserve}=    Get Model Route via UI    ${MODEL_NAME}
-    IF  ${kserve}
-        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    END
+    ${url}=    Get Model Route Via UI    ${MODEL_NAME}
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
@@ -103,7 +101,8 @@ Verify Multiple Projects With Same Model (OVMS on Kserve)
 Verify GPU Model Deployment Via UI (OVMS on Kserve)
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
     [Tags]    Sanity    Tier1    Resources-GPU
-    ...       ODS-XXXX
+    ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355
+    ${requests}=    Create Dictionary    nvidia.com/gpu=1
     Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
@@ -117,19 +116,16 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}
     ...    namespace=${PRJ_TITLE_GPU}
     Verify Displayed GPU Count In Single Model Serving    model_name=${MODEL_NAME_GPU}    no_gpus=1
-    ${requests}=    Get Container Requests    namespace=${PRJ_TITLE_GPU}
-    ...    label=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}    container_name=kserve-container
-    Should Contain    ${requests}    "nvidia.com/gpu": "1"
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}
+    ...    namespace=${PRJ_TITLE_GPU}    exp_requests=${requests}
     ${node}=    Get Node Pod Is Running On    namespace=${PRJ_TITLE_GPU}
     ...    label=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}
     ${type}=    Get Instance Type Of Node    ${node}
     Should Be Equal As Strings    ${type}    "g4dn.xlarge"
     Verify Model Status    ${MODEL_NAME_GPU}    success
     Set Suite Variable    ${MODEL_CREATED}    True
-    ${url}    ${kserve}=    Get Model Route via UI    ${MODEL_NAME_GPU}
-    IF  ${kserve}
-        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    END
+    ${url}=    Get Model Route Via UI    ${MODEL_NAME_GPU}
     Send Random Inference Request     endpoint=${url}    no_requests=100
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0
     ${prometheus_route}=    Get OpenShift Prometheus Route
@@ -152,7 +148,7 @@ OVMS On Kserve Suite Setup
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-    Fetch CA Certificate If RHODS Is Self-Managed
+    Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Clean All Models Of Current User
 
 Create Openvino Models For Kserve
@@ -196,15 +192,3 @@ OVMS On Kserve Suite Teardown
     Remove File    openshift_ca_istio_knative.crt
     SeleniumLibrary.Close All Browsers
     RHOSi Teardown
-
-Get OpenShift Prometheus Route
-    [Documentation]    Fetches the route for the Prometheus instance of openshift-monitoring
-    ${host}=    Run    oc get route prometheus-k8s -n openshift-monitoring -o json | jq '.status.ingress[].host'
-    ${host}=    Strip String    ${host}    characters="
-    ${route}=    Catenate    SEPARATOR=    https://    ${host}
-    RETURN    ${route}
-
-Get OpenShift Prometheus Service Account Token
-    [Documentation]    Returns a token for a service account to be used with Prometheus
-    ${token}=    Run    oc create token prometheus-k8s -n openshift-monitoring --duration 10m
-    RETURN    ${token}

@@ -24,13 +24,6 @@ Run E2E test
     ...     DistributedWorkloads
     Run Kueue E2E Test    e2e_test.go
 
-Run Visibility test
-    [Documentation]    Run ginkgo visibilty single cluster test
-    [Tags]  Kueue
-    ...     DistributedWorkloads
-    Enable Visibility Feature Gate
-    Run Kueue E2E Test    visibility_test.go
-
 
 *** Keywords ***
 Prepare Kueue E2E Test Suite
@@ -85,11 +78,3 @@ Run Kueue E2E Test
     IF    ${result.rc} != 0
         FAIL    failed
     END
-
-Enable Visibility Feature Gate
-    [Documentation]    Enable Visibility Feature Gate
-    ${return_code} =    Run And Return Rc    oc patch deployment kueue-controller-manager -n kueue-system --type 'json' -p '[{"op" : "add" ,"path" : "/spec/template/spec/containers/0/args/-" ,"value" : "--feature-gates=VisibilityOnDemand=true"}]'
-    Should Be Equal As Integers  ${return_code}   0   msg=Visiblity feature gate is not enabled
-
-    ${return_code} =    Run And Return Rc    oc rollout status deployment/kueue-controller-manager -n kueue-system --timeout=3m
-    Should Be Equal As Integers  ${return_code}   0   msg=Kueue rollout failed

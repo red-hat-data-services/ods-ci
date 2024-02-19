@@ -400,7 +400,7 @@ Add UI Admin Group To Dashboard Admin
     ${status} =     Run Keyword And Return Status    Check Group In Cluster    odh-ux-admins
     IF    ${status} == ${TRUE}
               ${rc}  ${output}=    Run And Return Rc And Output
-              ...   oc wait --for=condition=ready pod -l app=odh-dashboard -n ${APPLICATIONS_NAMESPACE} --timeout=300  #robocop: disable
+              ...   oc wait --for=condition=ready pod -l app=odh-dashboard -n ${APPLICATIONS_NAMESPACE} --timeout=400s  #robocop: disable
               IF  ${rc} != ${0}     Log    message=Dashboard Pod is not up and running   level=ERROR
               ${rc}  ${output}=    Run And Return Rc And Output
               ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"odh-admins,odh-ux-admins"}}}'  #robocop: disable

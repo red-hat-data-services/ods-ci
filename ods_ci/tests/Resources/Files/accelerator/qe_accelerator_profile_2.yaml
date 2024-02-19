@@ -1,13 +1,15 @@
+# File to provision an Accelerator Profile instance in test:
+#   "Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI"
 apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
-  name: qecreateap3
+  name: qeacceleratorprofile2
   namespace: redhat-ods-applications
 spec:
   description: description example
-  displayName: qe_create_ap_3
+  displayName: qe_accelerator_profile_2
   enabled: true
-  identifier: nvidia.com/gpu
+  identifier: identifier/identifier
   tolerations:
     - effect: NoSchedule
       key: key

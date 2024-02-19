@@ -7,8 +7,8 @@ Suite Teardown  Teardown Settings Accelerator Profiles
 
 
 *** Variables ***
-${ACC_DISPLAY_NAME}=    qe_create_ap_
-${ACC_NAME}=    qecreateap
+${ACC_DISPLAY_NAME}=    qe_accelerator_profile_
+${ACC_NAME}=    qeacceleratorprofile
 ${ACC_IDENTIFIER}=    nvidia.com/gpu
 ${ACC_DESCRIPTION}=    description example
 ${ACC_ENABLED}=    True
@@ -27,15 +27,15 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Click On Create Accelerator Profile Button
-    Create An Accelerator Profile Via UI   ${ACC_DISPLAY_NAME}01   ${ACC_IDENTIFIER}
+    Create An Accelerator Profile Via UI   ${ACC_DISPLAY_NAME}1   ${ACC_IDENTIFIER}
     ...                                    ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                    tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                                    tol_effect=${ACC_TOLERATION_EFFECT}
     ...                                    tol_key=${ACC_TOLERATION_KEY}
     ...                                    tol_value=${ACC_TOLERATION_VALUE}
     ...                                    tol_seconds=${ACC_TOLERATION_SECONDS}
-    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}01
-    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}01   ${ACC_IDENTIFIER}
+    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}1
+    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}1   ${ACC_IDENTIFIER}
     ...                                         ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                                         tol_effect=${ACC_TOLERATION_EFFECT}

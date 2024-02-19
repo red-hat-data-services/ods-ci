@@ -1,12 +1,13 @@
+# File to provision an Accelerator Profile instance in test:
+#   "Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Administration UI"
 apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
-  generation: 1
-  name: qecreateap6
+  name: qeacceleratorprofile3
   namespace: redhat-ods-applications
 spec:
   description: description example
-  displayName: qe_create_ap_6
+  displayName: qe_accelerator_profile_3
   enabled: true
   identifier: nvidia.com/gpu
   tolerations:

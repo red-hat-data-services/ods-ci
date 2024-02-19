@@ -1,11 +1,13 @@
+# File to provision an Accelerator Profile instance in test:
+#   "Delete an Accelerator Profile From The Grid of the Accelerator Profile View"
 apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
   generation: 1
-  name: qecreateap5
+  name: qeacceleratorprofile8
   namespace: redhat-ods-applications
 spec:
   description: description example
-  displayName: qe_create_ap_5
+  displayName: qe_accelerator_profile_8
   enabled: false
   identifier: nvidia.com/gpu

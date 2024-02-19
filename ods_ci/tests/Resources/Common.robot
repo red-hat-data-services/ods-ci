@@ -458,9 +458,9 @@ Configure User Workload Monitoring
     Log To Console    ${output}
     Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
 
-Clear element and input text
+Clear Element And Input Text
     [Documentation]    Clear and input text element, wait .5 seconds and input new text on it
     [Arguments]    ${element_xpath}    ${new_text}
-            Clear Element Text    ${element_xpath}
-            Sleep    0.5s
-            Input Text    ${element_xpath}    ${new_text}
+        Clear Element Text    ${element_xpath}
+        Sleep    0.5s
+        Input Text    ${element_xpath}    ${new_text}

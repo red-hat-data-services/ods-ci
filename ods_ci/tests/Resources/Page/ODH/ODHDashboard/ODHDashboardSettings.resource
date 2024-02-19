@@ -429,7 +429,7 @@ Search for accelerator profile in grid
     [Arguments]   ${name}
     Wait Until Page Contains Element    ${ACCELERATOR_PROFILE_SEARCH_INPUT}
     Click Element    ${ACCELERATOR_PROFILE_SEARCH_INPUT}
-    Clear element and input text    ${ACCELERATOR_PROFILE_SEARCH_INPUT}   ${name}
+    Clear Element And Input Text    ${ACCELERATOR_PROFILE_SEARCH_INPUT}   ${name}
 
 Delete Accelerator Profile
     [Documentation]    Delete an specific Accelerator Profile from the Grid
@@ -483,7 +483,7 @@ Create An Accelerator Profile Via UI
         # Toleration Seconds
         IF    "${tol_seconds}" != "Forever"
             Click Element    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_RADIO}
-            Clear element and input text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}   ${tol_seconds}
+            Clear Element And Input Text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}   ${tol_seconds}
         ELSE
             Click Element    ${ACCELERATOR_TOLERATION_SECONDS_FOREVER_RADIO}
         END
@@ -500,13 +500,13 @@ Modify The Accelerator Profile
     ...           ${tol_key}=${EMPTY}  ${tol_value}=${EMPTY}  ${tol_seconds}=${EMPTY}
     Wait Until Element Is Visible   //h1[text()="Edit ${original_display_name}"]  timeout=10
     IF    "${display_name}" != "${EMPTY}"
-        Clear element and input text    ${ACCELERATOR_NAME}    ${display_name}
+        Clear Element And Input Text    ${ACCELERATOR_NAME}    ${display_name}
     END
     IF    "${identifier}" != "${EMPTY}"
-        Clear element and input text    ${ACCELERATOR_IDENTIFIER}    ${identifier}
+        Clear Element And Input Text    ${ACCELERATOR_IDENTIFIER}    ${identifier}
     END
     IF    "${description}" != "${EMPTY}"
-        Clear element and input text    ${ACCELERATOR_DESCRIPTION}    ${description}
+        Clear Element And Input Text    ${ACCELERATOR_DESCRIPTION}    ${description}
     END
     # Click always, as there is no way from the UI to obtain the status of the switch,
     IF    "${enabled}" != "${EMPTY}"
@@ -527,15 +527,15 @@ Modify The Accelerator Profile
             Click Element    //label[@for="effect-select"]/parent::*/following::div//*[text()="${tol_effect}"]
         END
         IF    "${tol_key}" != "${EMPTY}"
-            Clear element and input text    ${ACCELERATOR_TOLERATION_KEY}    ${tol_key}
+            Clear Element And Input Text    ${ACCELERATOR_TOLERATION_KEY}    ${tol_key}
         END
         IF    "${tol_value}" != "${EMPTY}"
-            Clear element and input text    ${ACCELERATOR_TOLERATION_VALUE}    ${tol_value}
+            Clear Element And Input Text    ${ACCELERATOR_TOLERATION_VALUE}    ${tol_value}
         END
         IF    "${tol_seconds}" != "${EMPTY}"
             IF    "${tol_seconds}" != "Forever"
                 Click Element    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_RADIO}
-                Clear element and input text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}   ${tol_seconds}
+                Clear Element And Input Text    ${ACCELERATOR_TOLERATION_SECONDS_CUSTOM_VALUE}   ${tol_seconds}
             ELSE
                 Click Element    ${ACCELERATOR_TOLERATION_SECONDS_FOREVER_RADIO}
             END

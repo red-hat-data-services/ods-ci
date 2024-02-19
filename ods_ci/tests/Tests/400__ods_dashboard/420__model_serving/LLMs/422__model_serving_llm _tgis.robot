@@ -26,7 +26,7 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2341
+    [Tags]    Tier1    ODS-2341
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -50,7 +50,7 @@ Verify User Can Serve And Query A Model
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    Sanity    Tier1    ODS-2371
+    [Tags]    Tier1    ODS-2371
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
@@ -84,7 +84,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace
 
 Verify User Can Deploy Multiple Models In Different Namespaces
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
-    [Tags]    Sanity    Tier1    ODS-2378
+    [Tags]    Tier1    ODS-2378
     [Setup]    Run Keywords    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-multi1
     ...        AND
     ...        Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-multi2
@@ -119,7 +119,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces
 
 Verify Model Upgrade Using Canaray Rollout
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
-    [Tags]    Sanity    Tier1    ODS-2372
+    [Tags]    Tier1    ODS-2372
     ...       AutomationBug
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
@@ -180,7 +180,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model.
     ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
-    [Tags]    Sanity    Tier1    ODS-2376
+    [Tags]    Tier1    ODS-2376
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -217,7 +217,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
 
 Verify User Can Autoscale Using Concurrency
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
-    [Tags]    Sanity    Tier1    ODS-2377
+    [Tags]    Tier1    ODS-2377
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -243,7 +243,7 @@ Verify User Can Autoscale Using Concurrency
 
 Verify User Can Validate Scale To Zero
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
-    [Tags]    Sanity    Tier1    ODS-2379    AutomationBug
+    [Tags]    Tier1    ODS-2379    AutomationBug
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
@@ -281,7 +281,7 @@ Verify User Can Validate Scale To Zero
 
 Verify User Can Set Requests And Limits For A Model
     [Documentation]    Checks if user can set HW request and limits on their inference service object
-    [Tags]    Sanity    Tier1    ODS-2380
+    [Tags]    Tier1    ODS-2380
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -320,7 +320,7 @@ Verify User Can Set Requests And Limits For A Model
 Verify Model Can Be Served And Query On A GPU Node
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2381    Resources-GPU
+    [Tags]    Tier1    ODS-2381    Resources-GPU
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -351,7 +351,7 @@ Verify Model Can Be Served And Query On A GPU Node
 Verify Non Admin Can Serve And Query A Model
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2326
+    [Tags]    Tier1    ODS-2326
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test
@@ -432,7 +432,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...                must remain unchanged after the runtime upgrade.
     ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
     ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
-    [Tags]    Sanity    Tier1    ODS-2404
+    [Tags]    Tier1    ODS-2404
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-up
     ${test_namespace}=    Set Variable     ${TEST_NS}-up
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -468,7 +468,7 @@ Verify User Can Access Model Metrics From UWM
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    Sanity    Tier1    ODS-2401
+    [Tags]    Tier1    ODS-2401
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -509,7 +509,7 @@ Verify User Can Access Model Metrics From UWM
 Verify User Can Query A Model Using HTTP Calls
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
-    [Tags]    ODS-2501    Sanity    Tier1    ProductBug
+    [Tags]    ODS-2501    Tier1    ProductBug
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=kserve-http    protocol=http
     ${test_namespace}=    Set Variable     kserve-http
     ${model_name}=    Set Variable    flan-t5-small-caikit

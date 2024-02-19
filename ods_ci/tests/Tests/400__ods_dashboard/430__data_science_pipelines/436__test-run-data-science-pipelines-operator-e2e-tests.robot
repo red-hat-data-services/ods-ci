@@ -1,7 +1,7 @@
 *** Settings ***
-Documentation     Data Science Pipelines Operator E2E tests - https://github.com/opendatahub-io/data-science-pipelines-operator/tree/main/tests
-Suite Setup       Prepare Data Science Pipelines Operator E2E Test Suite
-Suite Teardown    Teardown Data Science Pipelines Operator E2E Test Suite
+Documentation     Data Science Pipelines Operator Integration Tests - https://github.com/opendatahub-io/data-science-pipelines-operator/tree/main/tests
+Suite Setup       Prepare Data Science Pipelines Operator Integration Tests Suite
+Suite Teardown    Teardown Data Science Pipelines Operator Integration Tests Suite
 Library           OperatingSystem
 Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
@@ -19,22 +19,23 @@ ${KUBECONFIGPATH}                                         %{HOME}/.kube/config
 
 #robocop: disable: line-too-long
 *** Test Cases ***
-Run Data Science Pipelines Operator E2E Test
-    [Documentation]    Run Data Science Pipelines Operator E2E Test
+Run Data Science Pipelines Operator Integration Tests
+    [Documentation]    Run Data Science Pipelines Operator Integration Tests
     [Tags]
     ...     Sanity
     ...     DataSciencePipelines
     ...     Tier1
+    ...     ODS-2632
     ${openshift_api}    Get Openshift Server
     Log    ${openshift_api}
     ${return_code}    ${output}    Run And Return Rc And Output    cd ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR} && make integrationtest K8SAPISERVERHOST=${openshift_api} DSPANAMESPACE=${DSPANAMESPACE} KUBECONFIGPATH=${KUBECONFIGPATH}
     Log    ${output}
-    Should Be Equal As Integers	   ${return_code}	 0  msg= Run Data Science Pipelines Operator E2E Test failed
+    Should Be Equal As Integers	   ${return_code}	 0  msg= Run Data Science Pipelines Operator Integration Tests failed
 
 #robocop: disable: line-too-long
 *** Keywords ***
-Prepare Data Science Pipelines Operator E2E Test Suite
-    [Documentation]    Prepare Data Science Pipelines Operator E2E Test Suite
+Prepare Data Science Pipelines Operator Integration Tests Suite
+    [Documentation]    Prepare Data Science Pipelines Operator Integration Tests Suite
     ${return_code}    ${output}     Run And Return Rc And Output    rm -fR ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR}
     Log    ${output}
     ${return_code}    ${output}     Run And Return Rc And Output    git clone ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_URL} ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR}
@@ -46,7 +47,7 @@ Prepare Data Science Pipelines Operator E2E Test Suite
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${DSPANAMESPACE}
     Should Be Equal As Integers	   ${rc}	 0  msg=Cannot create a new project ${DSPANAMESPACE}
 
-Teardown Data Science Pipelines Operator E2E Test Suite
+Teardown Data Science Pipelines Operator Integration Tests Suite
     ${return_code}    ${output}     Run And Return Rc And Output    oc delete project ${DSPANAMESPACE} --force --grace-period=0
     Log    ${output}
     RHOSi Teardown

@@ -401,6 +401,7 @@ Click On Edit Accelerator Profile
     ...                from the grid
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
+    Search for accelerator profile in grid    ${name}
     Wait Until Page Contains Element    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
     Click Button    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
     Wait Until Page Contains Element    ${EDIT_ACCELERATOR_PROFILE_BTN}

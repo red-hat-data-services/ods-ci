@@ -17,6 +17,7 @@ ${EDIT_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//sp
 ${DELETE_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//span[text()='Delete']/ancestor::button
 ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}=    //table[@id='accelerator-profile-table']//td[@data-label='Name']
 ${ACCELERATOR_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/accelerator
+${ACCELERATOR_PROFILE_SEARCH_INPUT}=    //input[@aria-label="Search input"]
 ${ACCELERATOR_NAME}=    //input[@id="accelerator-name"]
 ${ACCELERATOR_IDENTIFIER}=    //input[@id="accelerator-identifier"]
 ${ACCELERATOR_DESCRIPTION}=    //textarea[@id="accelerator-description"]
@@ -421,10 +422,19 @@ Disable Accelerator Profile
     Wait Until Page Contains Element    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
     Click Button    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
 
+Search for accelerator profile in grid
+    [Documentation]    Search for and specific Accelerator Profile in the grid
+    ...                view: Settings -> Accelerator profiles
+    [Arguments]   ${name}
+    Wait Until Page Contains Element    ${ACCELERATOR_PROFILE_SEARCH_INPUT}
+    Click Element    ${ACCELERATOR_PROFILE_SEARCH_INPUT}
+    Clear element and input text    ${ACCELERATOR_PROFILE_SEARCH_INPUT}   ${name}
+
 Delete Accelerator Profile
     [Documentation]    Delete an specific Accelerator Profile from the Grid
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
+    Search for accelerator profile in grid    ${name}
     Wait Until Page Contains Element    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
     Click Button    ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}//*[text()='${name}']/ancestor::tr//button[@aria-label='Kebab toggle']
     Wait Until Page Contains Element    ${DELETE_ACCELERATOR_PROFILE_BTN}
@@ -436,7 +446,8 @@ Delete Accelerator Profile
 Create An Accelerator Profile Via CLI
     [Documentation]    Create an instance of Accelerator Profile using OC
     [Arguments]   ${name}  ${ns}=redhat-ods-applications
-    Run    oc create -f ${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml -n ${ns}
+    ${rc}    ${out}    Run And Return Rc And Output   oc create -f ${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml -n ${ns}
+    Should Be Equal As Integers    ${rc}     0
 
 Create An Accelerator Profile Via UI
     [Documentation]    Fill Accelerator Profile values with the ones provided in the arguments and click on

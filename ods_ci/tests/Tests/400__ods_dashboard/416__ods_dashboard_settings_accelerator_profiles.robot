@@ -1,6 +1,7 @@
 *** Settings ***
 Resource        ../../Resources/Common.robot
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettingsAcceleratorProfiles.resource
 Resource        ../../Resources/ODS.robot
 Suite Setup     Setup Settings Accelerator Profiles
 Suite Teardown  Teardown Settings Accelerator Profiles

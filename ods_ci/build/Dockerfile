@@ -17,7 +17,9 @@ ARG OC_CHANNEL=stable
 
 
 RUN microdnf -y update &&\
-    microdnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
+    curl -OL https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
+    rpm -ivh ./epel-release-latest-9.noarch.rpm &&\
+    rm epel-release-latest-9.noarch.rpm &&\
     microdnf install -y jq git unzip chromium chromedriver httpd-tools gcc \
                    python3.11 python3.11-devel python3.11-pip &&\
     microdnf clean all && rm -rf /var/cache/yum &&\

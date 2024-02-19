@@ -103,6 +103,7 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)
     [Tags]    Sanity    Tier1    Resources-GPU
     ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
+    ${limits}=    Create Dictionary    nvidia.com/gpu=1
     Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
@@ -118,7 +119,7 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)
     Verify Displayed GPU Count In Single Model Serving    model_name=${MODEL_NAME_GPU}    no_gpus=1
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}
-    ...    namespace=${PRJ_TITLE_GPU}    exp_requests=${requests}
+    ...    namespace=${PRJ_TITLE_GPU}    exp_requests=${requests}    exp_limits=${limits}
     ${node}=    Get Node Pod Is Running On    namespace=${PRJ_TITLE_GPU}
     ...    label=serving.kserve.io/inferenceservice=${MODEL_NAME_GPU}
     ${type}=    Get Instance Type Of Node    ${node}

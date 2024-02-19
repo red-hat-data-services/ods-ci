@@ -100,6 +100,7 @@ Create An Accelerator Profile Via UI
     [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
     ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key
     ...           ${tol_value}=value  ${tol_seconds}=Forever
+    Click On Create Accelerator Profile Button
     Wait Until Page Contains Element  ${ACCELERATOR_NAME}  timeout=5s
     Input Text    ${ACCELERATOR_NAME}    ${name}
     Input Text    ${ACCELERATOR_IDENTIFIER}    ${identifier}
@@ -134,13 +135,14 @@ Create An Accelerator Profile Via UI
     END
     Click Button    ${CREATE_OR_UPDATE_ACCELERATOR_PROFILE_DETAIL_BTN}
 
-Modify The Accelerator Profile
+Edit Accelerator Profile
     [Documentation]    Modify Accelerator Profile values with the ones provided in the arguments and click on
     ...                "Update acccelerator profile" button
     ...                view: Edit Accelerator profile
     [Arguments]   ${original_display_name}  ${display_name}=${EMPTY}  ${identifier}=${EMPTY}  ${description}=${EMPTY}
     ...           ${enabled}=${EMPTY}  ${tolerations}=${EMPTY}  ${tol_operator}=${EMPTY}  ${tol_effect}=${EMPTY}
     ...           ${tol_key}=${EMPTY}  ${tol_value}=${EMPTY}  ${tol_seconds}=${EMPTY}
+    Click On Edit Accelerator Profile    ${original_display_name}
     Wait Until Element Is Visible   //h1[text()="Edit ${original_display_name}"]  timeout=10
     IF    "${display_name}" != "${EMPTY}"
         Clear Element And Input Text    ${ACCELERATOR_NAME}    ${display_name}
@@ -191,6 +193,7 @@ Delete Accelerator Profile Tolerations
     [Documentation]    Delete Tolerarions from an Accelerator Profile and click on "Update acccelerator profile" button
     ...                view: Edit Accelerator profile
     [Arguments]   ${display_name}
+    Click On Edit Accelerator Profile    ${display_name}
     Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}
     Click Element     ${ACCELERATOR_EDIT_NAV_MENU_TOLERATIONS}
     ${tolerations_num}=  Get Element Count  ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}

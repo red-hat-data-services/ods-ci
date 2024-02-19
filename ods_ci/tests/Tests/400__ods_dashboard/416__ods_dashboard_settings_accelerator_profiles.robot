@@ -46,7 +46,7 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
 Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     [Documentation]    Modify an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  ODS-XXX
-    ...     Smoke
+    ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}2
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
@@ -73,7 +73,7 @@ Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Admi
     [Documentation]    Delete Tolerations from  an Accelerator Profile instance from the Administration UI and
     ...                verify it's content
     [Tags]  ODS-XXX
-    ...     Smoke
+    ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}3
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
@@ -85,7 +85,7 @@ Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Admi
 Disable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  ODS-XXX
-    ...     Smoke
+    ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}4
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
@@ -97,7 +97,7 @@ Disable an Accelerator Profile From The Accelerator Profile Edit View
 Enable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Enable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  ODS-XXX
-    ...     Smoke
+    ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}5
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
@@ -109,7 +109,7 @@ Enable an Accelerator Profile From The Accelerator Profile Edit View
 Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  ODS-XXX
-    ...     Smoke
+    ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}6
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
@@ -119,7 +119,7 @@ Disable an Accelerator Profile From The Grid of the Accelerator Profile View
 Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Enable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  ODS-XXX
-    ...     Smoke
+    ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}7
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
@@ -129,7 +129,7 @@ Enable an Accelerator Profile From The Grid of the Accelerator Profile View
 Delete an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Delete an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  ODS-XXX
-    ...     Smoke
+    ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}8
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles

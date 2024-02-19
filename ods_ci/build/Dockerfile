@@ -20,7 +20,7 @@ RUN microdnf -y update &&\
     curl -OL https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
     rpm -ivh ./epel-release-latest-9.noarch.rpm &&\
     rm epel-release-latest-9.noarch.rpm &&\
-    microdnf install -y jq git unzip chromium chromedriver httpd-tools gcc \
+    microdnf install -y jq git tar unzip chromium chromedriver httpd-tools gcc \
                    python3.11 python3.11-devel python3.11-pip &&\
     microdnf clean all && rm -rf /var/cache/yum &&\
     python3.11 -m pip install distro &&\

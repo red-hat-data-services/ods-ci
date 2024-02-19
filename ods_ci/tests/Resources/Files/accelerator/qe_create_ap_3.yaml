@@ -1,24 +1,6 @@
 apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
-  generation: 1
-  managedFields:
-    - apiVersion: dashboard.opendatahub.io/v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:metadata':
-          'f:annotations':
-            .: {}
-            'f:opendatahub.io/modified-date': {}
-        'f:spec':
-          .: {}
-          'f:description': {}
-          'f:displayName': {}
-          'f:enabled': {}
-          'f:identifier': {}
-          'f:tolerations': {}
-      manager: unknown
-      operation: Update
   name: qecreateap3
   namespace: redhat-ods-applications
 spec:

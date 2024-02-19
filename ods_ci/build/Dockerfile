@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream9
+FROM quay.io/centos/centos:stream9-minimal
 
 # Use this build arg to set any default test script arguments
 ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
@@ -16,11 +16,12 @@ ARG OC_VERSION=4.13
 ARG OC_CHANNEL=stable
 
 
-RUN dnf -y update &&\
-    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
-    dnf install -y jq git unzip chromium chromedriver httpd-tools gcc \
-                   python3 python3-devel python3-distro python-pip python3.11 python3.11-devel &&\
-    dnf clean all && rm -rf /var/cache/yum &&\
+RUN microdnf -y update &&\
+    microdnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
+    microdnf install -y jq git unzip chromium chromedriver httpd-tools gcc \
+                   python3.11 python3.11-devel python3.11-pip &&\
+    microdnf clean all && rm -rf /var/cache/yum &&\
+    python3.11 -m pip install distro &&\
     curl --proto "=https" -L https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -o /usr/bin/yq &&\
     chmod +x /usr/bin/yq &&\
     curl --proto "=https" -L https://mirror.openshift.com/pub/openshift-v$(echo $OC_VERSION | cut -d'.' -f 1)/x86_64/clients/ocp/$OC_CHANNEL-$OC_VERSION/openshift-client-linux.tar.gz -o $HOME/oc_client.tar.gz && \

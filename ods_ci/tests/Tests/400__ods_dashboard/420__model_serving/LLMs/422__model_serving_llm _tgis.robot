@@ -134,6 +134,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    model_name=${model_name}
     ...    namespace=${test_namespace}
     ...    validate_response=${FALSE}
+    ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
     Log To Console    Applying Canary Tarffic for Model Upgrade
     ${model_name}=    Set Variable    bloom-560m-caikit
     Compile Deploy And Query LLM model   isvc_name=${isvc_name}
@@ -144,6 +145,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    namespace=${test_namespace}
     ...    validate_response=${FALSE}
     ...    n_queries=${0}
+    ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${canary_percentage}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
     Log To Console    Remove Canary Tarffic For Model Upgrade
@@ -160,7 +162,7 @@ Verify Model Upgrade Using Canaray Rollout
 Verify Model Pods Are Deleted When No Inference Service Is Present
     [Documentation]    Checks if model pods gets successfully deleted after
     ...                deleting the KServe InferenceService object
-    [Tags]    Tier2    ODS-2373    AutomationBug
+    [Tags]    Tier2    ODS-2373
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=no-infer-kserve
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -170,6 +172,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
     ...    namespace=no-infer-kserve
+    ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
     Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s
     Should Be Equal As Integers    ${rc}    ${0}

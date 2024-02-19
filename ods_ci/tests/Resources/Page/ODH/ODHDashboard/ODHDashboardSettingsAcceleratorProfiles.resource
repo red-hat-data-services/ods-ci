@@ -85,9 +85,7 @@ Delete Accelerator Profile
     [Arguments]   ${name}
     Search for accelerator profile in grid    ${name}
     ODHDashboard.Click Action From Actions Menu    ${name}    action=Delete
-    Wait Until Page Contains Element    ${ACCELERATOR_DELETE_MODAL_INPUT}
-    Input Text    ${ACCELERATOR_DELETE_MODAL_INPUT}    ${name}
-    Click Button    ${ACCELERATOR_DELETE_MODAL_DELETE_BUTTON}
+    ODHDashboard.Handle Deletion Confirmation Modal  ${name}    item_type=accelerator profile
 
 Create An Accelerator Profile Via CLI
     [Documentation]    Create an instance of Accelerator Profile using OC

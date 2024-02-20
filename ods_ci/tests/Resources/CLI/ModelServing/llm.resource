@@ -273,12 +273,12 @@ Query Model Multiple Times
             Run Keyword And Continue On Failure    Status Should Be  200
         END
         Log    ${res}
-        ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
-        IF    "${response_container_field}" != "${EMPTY}"
-            # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
-            ${res}=    Set Variable    ${res}[${response_container_field}][0]            
-        END
         IF    ${validate_response} == ${TRUE}
+            ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
+            IF    "${response_container_field}" != "${EMPTY}"
+                # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
+                ${res}=    Set Variable    ${res}[${response_container_field}][0]            
+            END
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
             ...    runtime_details=${runtime_details}    runtime=${runtime}

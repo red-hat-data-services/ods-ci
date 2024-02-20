@@ -28,7 +28,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     [Documentation]    Verifies user are able to create and execute a DS Pipeline leveraging on
     ...                DS Project UI
     [Tags]    Smoke
-    ...       ODS-2206    ODS-2226
+    ...       ODS-2206    ODS-2226    ODS-2633
 
     Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}
@@ -74,6 +74,8 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ${data_prep_log}=    Get Pipeline Run Step Log    data-prep
     # deterministic: "Initial Dataset:" came from a print inside the python code.
     Should Contain    ${data_prep_log}    Initial Dataset:
+
+    Verify Data Science Parameter From A Duplicated Run Are The Same From The Compiled File
 
     ODHDataSciencePipelines.Delete Pipeline Run       ${PIPELINE_TEST_RUN_BASENAME}    ${PIPELINE_TEST_NAME}
     ODHDataSciencePipelines.Delete Pipeline           ${PIPELINE_TEST_NAME}
@@ -173,3 +175,10 @@ Verify Pipeline Run Deployment Is Successful    # robocop: disable
     ${containerStatuses}=  Create List        terminated    terminated
     ...    terminated    terminated    terminated
     Verify Deployment    ${valid_model}  1  1  ${containerNames}    ${podStatuses}    ${containerStatuses}
+
+Verify Data Science Parameter From A Duplicated Run Are The Same From The Compiled File
+    [Documentation]    Verify Data Science Parameter From A Duplicated Run Are The Same From The Compiled File
+    ${input_parameters}=    Open Pipeline Run Duplicate Page    ${PIPELINE_TEST_RUN_BASENAME}
+    # look for spec.params inside ${PIPELINE_TEST_FILEPATH} source code
+    Should Contain    ${input_parameters}    model_obc
+    Should Contain    ${input_parameters}    iris-model

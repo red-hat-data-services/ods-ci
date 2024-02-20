@@ -74,6 +74,7 @@ Run Kueue E2E Test
     ...    shell=true    stderr=STDOUT
     ...    env:PATH=%{PATH}:${JOB_GO_BIN}
     ...    env:KUBECONFIG=${KUBECONFIG}
+    ...    env:NAMESPACE=${APPLICATIONS_NAMESPACE}
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    failed

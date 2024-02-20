@@ -290,13 +290,14 @@ Compile Deploy And Query LLM model
     [Documentation]    Group together the test steps for preparing, deploying
     ...                and querying a model
     [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
-    ...            ${runtime}=caikit-tgis-runtime    ${protocol}=grpc    ${inference_type}=all-tokens
+    ...            ${runtime}=caikit-tgis-runtime    ${model_format}=caikit    ${protocol}=grpc    ${inference_type}=all-tokens
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
     ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
     Compile Inference Service YAML    isvc_name=${isvc_name}
-    ...    sa_name=${sa_name}
+    ...    sa_name=${sa_name}    serving_runtime=${runtime}
     ...    model_storage_uri=${model_storage_uri}
     ...    canaryTrafficPercent=${canaryTrafficPercent}
+    ...    model_format=${model_format}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}

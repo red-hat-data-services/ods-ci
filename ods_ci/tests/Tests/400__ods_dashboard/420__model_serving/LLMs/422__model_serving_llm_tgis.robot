@@ -122,7 +122,6 @@ Verify User Can Deploy Multiple Models In Different Namespaces
 Verify Model Upgrade Using Canaray Rollout
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
     [Tags]    Tier1    ODS-2372
-    ...       AutomationBug
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
     ${isvc_name}=    Set Variable    canary-caikit

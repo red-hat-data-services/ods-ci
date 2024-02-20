@@ -465,14 +465,14 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
-    ...    namespace=${test_namespace}
-    Upgrade Caikit Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:stable
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    container=transformer-container
+    Upgrade Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:stable
+    ...    namespace=${test_namespace}    container=transformer-container    runtime=caikit-tgis-runtime
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
     ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    container=transformer-container
     Should Be Equal    ${created_at}    ${created_at_after}
     Should Be Equal As Strings    ${caikitsha}    ${caikitsha_after}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}

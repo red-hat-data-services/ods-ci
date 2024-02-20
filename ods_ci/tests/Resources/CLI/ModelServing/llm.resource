@@ -307,24 +307,28 @@ Compile Deploy And Query LLM model
     ...    validate_response=${validate_response}    protocol=${protocol}
     ...    runtime=${runtime}    inference_type=${inference_type}
 
-Upgrade Caikit Runtime Image
+Upgrade Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given
     ...    ${new_image_url}
-    [Arguments]    ${new_image_url}    ${namespace}
+    [Arguments]    ${new_image_url}    ${namespace}    ${container}    ${runtime}
+    ${rc}    ${container_idx}=    Run And Return Rc And Output
+    ...    oc get ServingRuntime/${runtime} -n ${namespace} -o json | jq '.spec.containers | map(.name == "${container}") | index(true)'    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch ServingRuntime caikit-tgis-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"    # robocop: disable
+    ...    oc patch ServingRuntime ${runtime} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/${container_idx}/image', 'value': '${new_image_url}'}]"    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
 
 Get Model Pods Creation Date And Image URL
     [Documentation]    Fetches the creation date and the caikit runtime image URL.
     ...                Useful in upgrade scenarios
-    [Arguments]    ${model_name}    ${namespace}
+    [Arguments]    ${model_name}    ${namespace}    ${container}
     ${created_at}=    Oc Get    kind=Pod    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${namespace}    fields=["metadata.creationTimestamp"]
-    ${rc}    ${caikitsha}=    Run And Return Rc And Output
-    ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -ojson | jq '.items[].spec.containers[].image' | grep caikit-tgis    # robocop: disable
+    ${rc}    ${container_idx}=    Run And Return Rc And Output
+    ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -o json | jq '.items[].spec.containers | map(.name == "${container}") | index(true)'    # robocop: disable
+    ${rc}    ${image_url}=    Run And Return Rc And Output
+    ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -ojson | jq '.items[].spec.containers[${container_idx}].image'    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${created_at}    ${caikitsha}
+    RETURN    ${created_at}    ${image_url}
 
 User Can Fetch Number Of Requests Over Defined Time
     [Documentation]    Fetches the `tgi_request_count` metric and checks that it reports the expected

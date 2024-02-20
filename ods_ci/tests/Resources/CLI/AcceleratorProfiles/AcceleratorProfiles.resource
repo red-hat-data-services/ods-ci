@@ -21,7 +21,7 @@ Get Accelerator Profile Spec Values via CLI
     ${ap_spec_dict}=    Get From Dictionary    ${ap_json}    spec
     RETURN    ${ap_spec_dict}
 
-Can Not Get Accelerator Profile Via CLI
+Accelerator Profile Should Not Exist
     [Documentation]  Get Spec fields from an specific Accelerator Profile Instance
     [Arguments]   ${name}    ${ns}=redhat-ods-applications
     ${rc}    ${out}=    Run And Return Rc And Output    oc get acceleratorprofile ${name} -n ${ns}

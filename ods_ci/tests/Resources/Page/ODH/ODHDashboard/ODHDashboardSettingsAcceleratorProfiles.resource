@@ -198,7 +198,7 @@ Delete Accelerator Profile Tolerations
     END
     Click Button    ${CREATE_OR_UPDATE_ACCELERATOR_PROFILE_DETAIL_BTN}
 
-In The Accelerator Profiles Grid There Is An Accelerator Profile With Name
+Accelerator Profile Should Be Displayed In The Grid
     [Documentation]    Verify that there is an specific Accelerator Profile in the Grid
     ...                view: Settings -> Accelerator profiles
     [Arguments]    ${display_name}

@@ -35,7 +35,7 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     ...                                    tol_key=${ACC_TOLERATION_KEY}
     ...                                    tol_value=${ACC_TOLERATION_VALUE}
     ...                                    tol_seconds=${ACC_TOLERATION_SECONDS}
-    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}1
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}1
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}1   ${ACC_IDENTIFIER}
     ...                                         ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
@@ -60,7 +60,7 @@ Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     ...                         tol_key=${ACC_TOLERATION_KEY}
     ...                         tol_value=${ACC_TOLERATION_VALUE}
     ...                         tol_seconds=${ACC_TOLERATION_SECONDS}
-    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}2_modified
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}2_modified
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}2_modified   ${ACC_IDENTIFIER}_modified
     ...                                         ${ACC_DESCRIPTION}_modified   tolerations=yes
     ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
@@ -78,7 +78,7 @@ Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Admi
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Delete Accelerator Profile Tolerations    ${ACC_DISPLAY_NAME}3
-    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}3
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}3
     Verify Accelerator Profile Has No Tolerations Via CLI   ${ACC_DISPLAY_NAME}3
 
 Disable an Accelerator Profile From The Accelerator Profile Edit View
@@ -89,7 +89,7 @@ Disable an Accelerator Profile From The Accelerator Profile Edit View
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}4    enabled=False
-    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}4
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}4
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}4    enabled=False
 
 Enable an Accelerator Profile From The Accelerator Profile Edit View
@@ -100,7 +100,7 @@ Enable an Accelerator Profile From The Accelerator Profile Edit View
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}5    enabled=True
-    In The Accelerator Profiles Grid There Is An Accelerator Profile With Name   ${ACC_DISPLAY_NAME}5
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}5
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}5    enabled=True
 
 Disable an Accelerator Profile From The Grid of the Accelerator Profile View
@@ -115,7 +115,7 @@ Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}6    enabled=False
 
 Enable an Accelerator Profile From The Grid of the Accelerator Profile View
-    [Documentation]    Enable an An accelerator profile from the Edit Accelerator Profile view
+    [Documentation]    Enable an An accelerator profile from the Accelerator Profile view
     [Tags]  RHOAIENG-3349
     ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}7
@@ -126,14 +126,14 @@ Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}7    enabled=True
 
 Delete an Accelerator Profile From The Grid of the Accelerator Profile View
-    [Documentation]    Delete an An accelerator profile from the Edit Accelerator Profile view
+    [Documentation]    Delete an An accelerator profile from the Accelerator Profile view
     [Tags]  RHOAIENG-3349
     ...     Sanity
     [Setup]  Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}8
     Open ODS Dashboard With Admin User
     Navigate To Page    Settings    Accelerator profiles
     Delete Accelerator Profile    ${ACC_DISPLAY_NAME}8
-    Can Not Get Accelerator Profile Via CLI   ${ACC_NAME}8
+    Accelerator Profile Should Not Exist   ${ACC_NAME}8
 
 
 *** Keywords ***

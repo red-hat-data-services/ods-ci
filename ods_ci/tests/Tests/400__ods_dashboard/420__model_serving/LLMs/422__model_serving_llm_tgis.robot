@@ -544,3 +544,4 @@ Suite Setup
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses
+    Run    git clone https://github.com/IBM/text-generation-inference/

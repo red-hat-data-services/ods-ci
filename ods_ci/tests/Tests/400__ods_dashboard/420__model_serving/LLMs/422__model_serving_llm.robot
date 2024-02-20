@@ -170,6 +170,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    n_queries=${0}
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${canary_percentage}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
+    ...    model_format=caikit    runtime=caikit-tgi-runtime
     Log To Console    Remove Canary Tarffic For Model Upgrade
     Compile Deploy And Query LLM model    isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
@@ -178,6 +179,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    namespace=${test_namespace}
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${100}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
+    ...    model_format=caikit    runtime=caikit-tgi-runtime
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${isvcs_names}    wait_prj_deletion=${FALSE}
 

@@ -149,14 +149,17 @@ Verify Model Upgrade Using Canaray Rollout
     ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${canary_percentage}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
+    ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
     Log To Console    Remove Canary Tarffic For Model Upgrade
     Compile Deploy And Query LLM model    isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_name=${model_name}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    namespace=${test_namespace}
+    ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${100}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
+    ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${isvcs_names}    wait_prj_deletion=${FALSE}
 

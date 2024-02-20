@@ -6,6 +6,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resou
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
@@ -58,7 +59,7 @@ Test Inference Load On GPU
     [Documentation]    Test the inference load on the GPU after sending random requests to the endpoint
     [Tags]    Sanity    Tier1    Resources-GPU
     ...    ODS-2213
-    ${url}    ${kserve}=    Get Model Route via UI    ${MODEL_NAME}
+    ${url}=    Get Model Route Via UI    ${MODEL_NAME}
     Send Random Inference Request     endpoint=${url}    no_requests=100
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0
     ${prometheus_route}=    Get OpenShift Prometheus Route
@@ -94,15 +95,3 @@ Model Serving Suite Teardown
     END
     Close All Browsers
     RHOSi Teardown
-
-Get OpenShift Prometheus Route
-    [Documentation]    Fetches the route for the Prometheus instance of openshift-monitoring
-    ${host}=    Run    oc get route prometheus-k8s -n openshift-monitoring -o json | jq '.status.ingress[].host'
-    ${host}=    Strip String    ${host}    characters="
-    ${route}=    Catenate    SEPARATOR=    https://    ${host}
-    RETURN    ${route}
-
-Get OpenShift Prometheus Service Account Token
-    [Documentation]    Returns a token for a service account to be used with Prometheus
-    ${token}=    Run    oc create token prometheus-k8s -n openshift-monitoring --duration 10m
-    RETURN    ${token}

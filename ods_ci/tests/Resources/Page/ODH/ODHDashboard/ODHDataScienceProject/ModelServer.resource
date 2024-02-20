@@ -151,6 +151,22 @@ Verify Displayed GPU Count
     ${current_accs}=  Get Text  xpath://span[text()="${server_name}"]/../../../following-sibling::tr//td[@data-label]/div/dl/div[4]/dd/div
     Should Match  ${current_accs}  ${no_gpus}
 
+Verify Displayed GPU Count In Single Model Serving
+    [Documentation]    Verifies the number of GPUs displayed in the Model Server table of single model serving matches
+    ...    the expected value
+    [Arguments]    ${model_name}    ${no_gpus}
+    SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Name"]/div[text()="${model_name}"]
+    ${expanded}=    Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../..//button[@aria-expanded="true"]
+    IF    not ${expanded}
+        SeleniumLibrary.Click Element
+        ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../..//button[@aria-expanded="false"]
+    END
+    Sleep    5s    reason=Sometimes the number of current Accelerators take a few seconds to update
+    ${current_accs}=    SeleniumLibrary.Get Text
+    ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../../../tr[last()]//span[.="Number of accelerators"]/../../dd/div  #robocop: disable
+    Should Match    ${current_accs}    ${no_gpus}
+
 Set Model Server Runtime
     [Documentation]    Selects a given Runtime for the model server
     [Arguments]    ${runtime}

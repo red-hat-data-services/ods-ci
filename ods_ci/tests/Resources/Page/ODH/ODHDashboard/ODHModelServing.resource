@@ -202,7 +202,7 @@ Open Model Edit Modal
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
     Wait Until Page Contains    xpath://h1[.="Deploy model"]
 
-Get Model Route via UI
+Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
@@ -218,7 +218,7 @@ Get Model Route via UI
     IF    ${kserve}
         ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
     END
-    RETURN    ${url}    ${kserve}
+    RETURN    ${url}
 
 Get Model Route Via CLI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from CLI.
@@ -262,7 +262,7 @@ Get Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}
     ${self_managed}=    Is RHODS Self-Managed
-    ${url}    ${kserve}=    Get Model Route via UI    ${model_name}
+    ${url}=    Get Model Route Via UI    ${model_name}
     ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
     IF    ${token_auth}
         IF    "${project_title}" == "${NONE}"

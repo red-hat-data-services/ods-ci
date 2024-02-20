@@ -181,3 +181,15 @@ Metrics Should Exist In UserWorkloadMonitoring
         Append To List    ${metrics}    @{metrics_names}
     END
     RETURN    ${metrics}
+
+Get OpenShift Prometheus Route
+    [Documentation]    Fetches the route for the Prometheus instance of openshift-monitoring
+    ${host}=    Run    oc get route prometheus-k8s -n openshift-monitoring -o json | jq '.status.ingress[].host'
+    ${host}=    Strip String    ${host}    characters="
+    ${route}=    Catenate    SEPARATOR=    https://    ${host}
+    RETURN    ${route}
+
+Get OpenShift Prometheus Service Account Token
+    [Documentation]    Returns a token for a service account to be used with Prometheus
+    ${token}=    Run    oc create token prometheus-k8s -n openshift-monitoring --duration 10m
+    RETURN    ${token}

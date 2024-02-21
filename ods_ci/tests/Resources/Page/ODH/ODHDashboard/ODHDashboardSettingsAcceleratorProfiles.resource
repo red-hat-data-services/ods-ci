@@ -55,7 +55,7 @@ Click On Edit Accelerator Profile
     Search for accelerator profile in grid    ${name}
     ODHDashboard.Click Action From Actions Menu    ${name}    action=Edit
 
-Click On Enable Accelerator Profile
+Click On The Enable Switch From Accelerator Profile
     [Documentation]    Click on the the Enable switch from an specific Accelerator Profile
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
@@ -66,7 +66,7 @@ Disable Accelerator Profile
     [Documentation]    Disable an specific Accelerator Profile from the Grid
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
-    Click On Enable Accelerator Profile    ${name}
+    Click On The Enable Switch From Accelerator Profile    ${name}
     Wait Until Page Contains Element    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
     Click Button    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
 

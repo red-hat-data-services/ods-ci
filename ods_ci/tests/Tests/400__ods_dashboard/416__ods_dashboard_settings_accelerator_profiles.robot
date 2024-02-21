@@ -121,7 +121,7 @@ Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles from Settings
     Search for accelerator profile in grid    ${ACC_DISPLAY_NAME}7
-    Click On Enable Accelerator Profile    ${ACC_NAME}7
+    Click On The Enable Switch From Accelerator Profile    ${ACC_NAME}7
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}7    enabled=True
 
 Delete an Accelerator Profile From The Grid of the Accelerator Profile View

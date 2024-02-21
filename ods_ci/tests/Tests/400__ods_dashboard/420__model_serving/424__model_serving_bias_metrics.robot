@@ -33,8 +33,7 @@ ${framework_onnx}=                   onnx - 1
 Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling Trusty Service For Admin User
     [Documentation]    Verifies that the Bias metrics are available in Metrics Console for a model which was
     ...                 deployed prior to enabling the TrustyAI service
-    [Tags]    Smoke
-    ...       Tier1   ODS-2482    ODS-2479
+    [Tags]    ODS-2482    ODS-2479
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -62,8 +61,7 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
 Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Service For Basic User
     [Documentation]    Verifies that the Bias metrics are available in Metrics Console for a model
     ...                 deployed after enabling the TrustyAI service
-    [Tags]    Sanity
-    ...       Tier1   ODS-2482    ODS-2476
+    [Tags]    ODS-2482    ODS-2476
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION1}
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE1}

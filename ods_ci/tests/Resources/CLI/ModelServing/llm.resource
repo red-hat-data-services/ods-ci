@@ -273,12 +273,12 @@ Query Model Multiple Times
             Run Keyword And Continue On Failure    Status Should Be  200
         END
         Log    ${res}
-        ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
-        IF    "${response_container_field}" != "${EMPTY}"
-            # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
-            ${res}=    Set Variable    ${res}[${response_container_field}][0]            
-        END
         IF    ${validate_response} == ${TRUE}
+            ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
+            IF    "${response_container_field}" != "${EMPTY}"
+                # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
+                ${res}=    Set Variable    ${res}[${response_container_field}][0]            
+            END
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
             ...    runtime_details=${runtime_details}    runtime=${runtime}
@@ -290,13 +290,14 @@ Compile Deploy And Query LLM model
     [Documentation]    Group together the test steps for preparing, deploying
     ...                and querying a model
     [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
-    ...            ${runtime}=caikit-tgis-runtime    ${protocol}=grpc    ${inference_type}=all-tokens
+    ...            ${runtime}=caikit-tgis-runtime    ${model_format}=caikit    ${protocol}=grpc    ${inference_type}=all-tokens
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
     ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
     Compile Inference Service YAML    isvc_name=${isvc_name}
-    ...    sa_name=${sa_name}
+    ...    sa_name=${sa_name}    serving_runtime=${runtime}
     ...    model_storage_uri=${model_storage_uri}
     ...    canaryTrafficPercent=${canaryTrafficPercent}
+    ...    model_format=${model_format}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
@@ -306,24 +307,28 @@ Compile Deploy And Query LLM model
     ...    validate_response=${validate_response}    protocol=${protocol}
     ...    runtime=${runtime}    inference_type=${inference_type}
 
-Upgrade Caikit Runtime Image
+Upgrade Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given
     ...    ${new_image_url}
-    [Arguments]    ${new_image_url}    ${namespace}
+    [Arguments]    ${new_image_url}    ${namespace}    ${container}    ${runtime}
+    ${rc}    ${container_idx}=    Run And Return Rc And Output
+    ...    oc get ServingRuntime/${runtime} -n ${namespace} -o json | jq '.spec.containers | map(.name == "${container}") | index(true)'    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch ServingRuntime caikit-tgis-runtime -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/0/image', 'value': '${new_image_url}'}]"    # robocop: disable
+    ...    oc patch ServingRuntime ${runtime} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/containers/${container_idx}/image', 'value': '${new_image_url}'}]"    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
 
 Get Model Pods Creation Date And Image URL
     [Documentation]    Fetches the creation date and the caikit runtime image URL.
     ...                Useful in upgrade scenarios
-    [Arguments]    ${model_name}    ${namespace}
+    [Arguments]    ${model_name}    ${namespace}    ${container}
     ${created_at}=    Oc Get    kind=Pod    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${namespace}    fields=["metadata.creationTimestamp"]
-    ${rc}    ${caikitsha}=    Run And Return Rc And Output
-    ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -ojson | jq '.items[].spec.containers[].image' | grep caikit-tgis    # robocop: disable
+    ${rc}    ${container_idx}=    Run And Return Rc And Output
+    ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -o json | jq '.items[].spec.containers | map(.name == "${container}") | index(true)'    # robocop: disable
+    ${rc}    ${image_url}=    Run And Return Rc And Output
+    ...    oc get pod --selector serving.kserve.io/inferenceservice=${model_name} -n ${namespace} -ojson | jq '.items[].spec.containers[${container_idx}].image'    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${created_at}    ${caikitsha}
+    RETURN    ${created_at}    ${image_url}
 
 User Can Fetch Number Of Requests Over Defined Time
     [Documentation]    Fetches the `tgi_request_count` metric and checks that it reports the expected
@@ -452,6 +457,7 @@ Traffic Should Be Redirected Based On Canary Percentage
     ...                matches the expected probability ${exp_percentage}.
     ...                It applies an arbitrary toleration margin of ${toleration}
     [Arguments]    ${exp_percentage}    ${isvc_name}    ${model_name}    ${namespace}
+    ...            ${runtime}
     ${total}=    Set Variable    ${20}
     ${hits}=    Set Variable    ${0}
     ${toleration}=    Set Variable    ${20}
@@ -459,7 +465,7 @@ Traffic Should Be Redirected Based On Canary Percentage
         Log    ${counter}
         ${status}=    Run Keyword And Return Status
         ...    Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}    n_times=1
-        ...    namespace=${namespace}
+        ...    namespace=${namespace}    runtime=${runtime}
         IF    ${status} == ${TRUE}
             ${hits}=    Evaluate    ${hits}+1
         END

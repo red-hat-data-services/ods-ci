@@ -263,6 +263,7 @@ Get Model Inference
     ...    ${project_title}=${NONE}
     ${self_managed}=    Is RHODS Self-Managed
     ${url}=    Get Model Route Via UI    ${model_name}
+    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
     ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
     IF    ${token_auth}
         IF    "${project_title}" == "${NONE}"

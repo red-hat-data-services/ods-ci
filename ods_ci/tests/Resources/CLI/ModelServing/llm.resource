@@ -457,7 +457,7 @@ Traffic Should Be Redirected Based On Canary Percentage
     ...                matches the expected probability ${exp_percentage}.
     ...                It applies an arbitrary toleration margin of ${toleration}
     [Arguments]    ${exp_percentage}    ${isvc_name}    ${model_name}    ${namespace}
-    ...            ${model_format}    ${runtime}
+    ...            ${runtime}
     ${total}=    Set Variable    ${20}
     ${hits}=    Set Variable    ${0}
     ${toleration}=    Set Variable    ${20}
@@ -465,7 +465,7 @@ Traffic Should Be Redirected Based On Canary Percentage
         Log    ${counter}
         ${status}=    Run Keyword And Return Status
         ...    Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}    n_times=1
-        ...    namespace=${namespace}    model_format=${model_format}    runtime=${runtime}
+        ...    namespace=${namespace}    runtime=${runtime}
         IF    ${status} == ${TRUE}
             ${hits}=    Evaluate    ${hits}+1
         END

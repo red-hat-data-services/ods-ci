@@ -461,6 +461,6 @@ Configure User Workload Monitoring
 Clear Element And Input Text
     [Documentation]    Clear and input text element, wait .5 seconds and input new text on it
     [Arguments]    ${element_xpath}    ${new_text}
-        Clear Element Text    ${element_xpath}
-        Sleep    0.5s
-        Input Text    ${element_xpath}    ${new_text}
+    Clear Element Text    ${element_xpath}
+    Sleep    0.5s
+    Input Text    ${element_xpath}    ${new_text}

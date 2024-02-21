@@ -147,9 +147,8 @@ Open Pipeline Detail
     Capture Page Screenshot
 
 Open Pipeline Run
-    [Documentation]    Open the Pipeline Run detail. The menu hold a state and if you click twice in the same element,
-    ...    it won't work. Set force_reload equals True
-    [Arguments]    ${pipeline_run_name}    ${force_reload}=${FALSE}
+    [Documentation]    Open the Pipeline Run detail.
+    [Arguments]    ${pipeline_run_name}
     ${present}=  Run Keyword And Return Status    Element Should Be Visible   xpath=//a[text()='Runs']
     # We can run Open Pipeline Run step multiple times. If the menu is expanded, then it will colapse
     IF    ${present} == ${FALSE}
@@ -158,10 +157,6 @@ Open Pipeline Run
         Wait Until Page Contains Element    xpath=//a[text()='Runs']
     END
     Click Element    xpath=//a[text()='Runs']
-    IF    ${force_reload} == ${TRUE}
-        Reload Page
-    END
-    # when reloading the page takes a long time
     Wait Until Page Contains Element    xpath=//span[text()='Triggered']    timeout=30s
     Click Element    xpath=//span[text()='Triggered']
     Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']
@@ -195,7 +190,7 @@ Verify Pipeline Run Is Completed
 Get Pipeline Run Duplicate Parameters
     [Documentation]    Get Pipeline Run Duplicate Parameters
     [Arguments]    ${pipeline_run_name}
-    Open Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}    force_reload=True
+    Open Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Actions')]
     Click Element    xpath://button[contains(span/text(), 'Actions')]
     Wait Until Page Contains Element    xpath://a[@role='menuitem' and text()='Duplicate']

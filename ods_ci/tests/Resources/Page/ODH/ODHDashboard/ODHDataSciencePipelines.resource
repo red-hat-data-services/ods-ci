@@ -192,8 +192,8 @@ Verify Pipeline Run Is Completed
     Capture Page Screenshot
 
 # robocop: disable:line-too-long
-Open Pipeline Run Duplicate Page
-    [Documentation]    Open only the Pipeline Run Duplicate Page
+Get Pipeline Run Duplicate Parameters
+    [Documentation]    Get Pipeline Run Duplicate Parameters
     [Arguments]    ${pipeline_run_name}
     Open Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}    force_reload=True
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Actions')]

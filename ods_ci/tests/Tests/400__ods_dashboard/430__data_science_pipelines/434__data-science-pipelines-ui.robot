@@ -178,7 +178,7 @@ Verify Pipeline Run Deployment Is Successful    # robocop: disable
 
 Verify Data Science Parameter From A Duplicated Run Are The Same From The Compiled File
     [Documentation]    Verify Data Science Parameter From A Duplicated Run Are The Same From The Compiled File
-    ${input_parameters}=    Open Pipeline Run Duplicate Page    ${PIPELINE_TEST_RUN_BASENAME}
+    ${input_parameters}=    Get Pipeline Run Duplicate Parameters    ${PIPELINE_TEST_RUN_BASENAME}
     # look for spec.params inside ${PIPELINE_TEST_FILEPATH} source code
     Should Contain    ${input_parameters}    model_obc
     Should Contain    ${input_parameters}    iris-model

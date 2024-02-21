@@ -20,6 +20,7 @@ ${FLAN_LARGE_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_LARGE_MODEL_S3_DIR
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/artifacts
 ${TEST_NS}=    tgis-standalone
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
+@{SEARCH_METRICS}=    tgi_    istio_
 
 
 *** Test Cases ***
@@ -490,9 +491,11 @@ Verify User Can Access Model Metrics From UWM
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    
     Wait Until Keyword Succeeds    30 times    4s
-    ...    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
+    ...    Metrics Should Exist In UserWorkloadMonitoring
+    ...    thanos_url=${thanos_url}    thanos_token=${token}
+    ...    search_metrics=${SEARCH_METRICS}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=3
     ...    namespace=${test_namespace}

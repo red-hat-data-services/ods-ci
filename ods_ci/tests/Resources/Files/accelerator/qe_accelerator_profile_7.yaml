@@ -7,7 +7,6 @@ metadata:
   name: qeacceleratorprofile7
   namespace: redhat-ods-applications
 spec:
-  description: description example
   displayName: qe_accelerator_profile_7
   enabled: false
   identifier: nvidia.com/gpu

@@ -12,7 +12,7 @@ Suite Teardown  Teardown Settings Accelerator Profiles
 ${ACC_DISPLAY_NAME}=    qe_accelerator_profile_
 ${ACC_NAME}=    qeacceleratorprofile
 ${ACC_IDENTIFIER}=    nvidia.com/gpu
-${ACC_DESCRIPTION}=    description example
+${ACC_DESCRIPTION}=    Accelerator Profile Description
 ${ACC_ENABLED}=    True
 ${ACC_TOLERATION_OPERATOR}=    Exists
 ${ACC_TOLERATION_EFFECT}=    PreferNoSchedule

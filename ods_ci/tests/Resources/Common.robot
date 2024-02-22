@@ -46,6 +46,16 @@ End Web Test
     END
     Close Browser
 
+End Non JupyterLab Web Test
+    [Documentation]  Stops running workbench that was started by logged-in user via the
+    ...              JupyterHub launcher space.
+    Go To  ${ODH_DASHBOARD_URL}
+    Wait for RHODS Dashboard to Load
+    Launch Jupyter From RHODS Dashboard Link
+    Handle Control Panel
+    Capture Page Screenshot
+    Close Browser
+
 Load Json File
     [Arguments]   ${file_path}
     ${j_file}=    Get File    ${file_path}

@@ -268,13 +268,14 @@ Launch And Access Workbench From Projects Home Page
     [Documentation]    Launches a running workbench from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}    ${username}=${TEST_USER_3.USERNAME}
     ...             ${password}=${TEST_USER_3.PASSWORD}    ${auth_type}=${TEST_USER_3.AUTH_TYPE}
+    ...             ${expected_ide}=JupyterLab
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
         Click Element       xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Workbench"]//a[text()="${workbench_title}"]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
-        ...    auth_type=${auth_type}
+        ...    auth_type=${auth_type}    expected_ide=${expected_ide}
     ELSE
         Fail   msg=Cannot Launch And Access Workbench ${workbench_title} because it is not running...
     END

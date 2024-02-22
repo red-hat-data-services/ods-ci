@@ -109,6 +109,7 @@ Custom Serving Runtime Suite Teardown
     Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
     Delete Serving Runtime Template From CLI    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     SeleniumLibrary.Close All Browsers
+    Remove File    openshift_ca.crt
     RHOSi Teardown
 
 Create Test Serving Runtime Template If Not Exists

@@ -26,7 +26,7 @@ Run distributed workloads sanity tests
 
     Skip If Component Is Not Enabled    ray
     Skip If Component Is Not Enabled    codeflare
-    DistributedWorkloads.Clone Git Repository    %{DW_GIT_REPO}    %{DW_GIT_REPO_BRANCH}    ${DW_DIR}
+    DistributedWorkloads.Clone Git Repository    ${DW_GIT_REPO}    ${DW_GIT_REPO_BRANCH}    ${DW_DIR}
     ${test_result}=    Run Distributed Workloads Tests    ${DW_DIR}    ${DW_TEST_RESULT_FILE}    -run '.*Test[RK].*[^r]$' -parallel 1
     Install Go Junit Report Tool
     Convert Go Test Results To Junit    ${DW_TEST_RESULT_FILE}    ${DW_JUNIT_FILE}

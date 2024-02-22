@@ -8,5 +8,6 @@ metadata:
   namespace: redhat-ods-applications
 spec:
   displayName: qe_accelerator_profile_5
+  description: Enable Accelerator Profile from Edit Detail View
   enabled: false
   identifier: nvidia.com/gpu

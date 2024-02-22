@@ -12,7 +12,8 @@ Suite Teardown  Teardown Settings Accelerator Profiles
 ${ACC_DISPLAY_NAME}=    qe_accelerator_profile_
 ${ACC_NAME}=    qeacceleratorprofile
 ${ACC_IDENTIFIER}=    nvidia.com/gpu
-${ACC_DESCRIPTION}=    Accelerator Profile Description
+${ACC_DESCRIPTION}=    Create Accelerator Profile
+${ACC_DESCRIPTION2}=    Modify Accelerator Profile
 ${ACC_ENABLED}=    True
 ${ACC_TOLERATION_OPERATOR}=    Exists
 ${ACC_TOLERATION_EFFECT}=    PreferNoSchedule
@@ -53,7 +54,7 @@ Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}2
     ...                         display_name=${ACC_DISPLAY_NAME}2_modified
     ...                         identifier=${ACC_IDENTIFIER}_modified
-    ...                         description=${ACC_DESCRIPTION}_modified    tolerations=yes
+    ...                         description=${ACC_DESCRIPTION2}_modified    tolerations=yes
     ...                         tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                         tol_effect=${ACC_TOLERATION_EFFECT}
     ...                         tol_key=${ACC_TOLERATION_KEY}
@@ -61,7 +62,7 @@ Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     ...                         tol_seconds=${ACC_TOLERATION_SECONDS}
     Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}2_modified
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}2_modified   ${ACC_IDENTIFIER}_modified
-    ...                                         ${ACC_DESCRIPTION}_modified   tolerations=yes
+    ...                                         ${ACC_DESCRIPTION2}_modified   tolerations=yes
     ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                                         tol_effect=${ACC_TOLERATION_EFFECT}
     ...                                         tol_key=${ACC_TOLERATION_KEY}

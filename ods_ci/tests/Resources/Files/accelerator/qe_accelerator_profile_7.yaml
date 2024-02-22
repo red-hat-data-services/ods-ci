@@ -8,6 +8,7 @@ metadata:
   namespace: redhat-ods-applications
 spec:
   displayName: qe_accelerator_profile_7
+  description: Enable Accelerator Profile from Administration View
   enabled: false
   identifier: nvidia.com/gpu
   tolerations:

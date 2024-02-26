@@ -105,6 +105,28 @@ CSS Property Value Should Be
         Run Keyword And Continue On Failure   Should Be Equal    ${actual_value}    ${exp_value}
     END
 
+Get All Text Under Element
+    [Documentation]    Returns a list of all text content under an element tree, including trailing spaces
+    # This is usefull since Get Text ignores trailing spaces and sibling elements.
+    # The returned list can be evaluated with keyword:    Should Contain    ${text_list}    Text Data
+    [Arguments]   ${parent_element}
+    ${elements}=    Get WebElements    ${parent_element}
+    ${text_list}=    Create List
+    FOR    ${element}    IN    @{elements}
+        ${text}=    Get Element Attribute    ${element}    textContent
+        Append To List    ${text_list}    ${text}
+    END
+    RETURN   ${text_list}
+
+Get All Strings That Contain
+    [Documentation]    Returns new list of strings, for each item in ${list_of_strings} that contains ${substring_to_search}
+    [Arguments]   ${list_of_strings}    ${substring_to_search}
+    ${matched_list}=    Create List
+    FOR    ${str}    IN    @{list_of_strings}
+        IF    "${substring_to_search}" in "${str}"    Append To List    ${matched_list}    ${str}
+    END
+    RETURN   ${matched_list}
+
 Page Should Contain A String In List
     [Documentation]    Verifies that page contains at least one of the strings in text_list
     [Arguments]  ${text_list}

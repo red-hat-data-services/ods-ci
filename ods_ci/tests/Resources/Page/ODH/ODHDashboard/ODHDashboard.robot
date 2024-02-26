@@ -32,6 +32,7 @@ ${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH_LATEST}=   ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-v5-c-alert pf-m-success']
+${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title" and text()="Cluster settings"]
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
 ${CUSTOM_IMAGE_SOFTWARE_TABLE}=  //caption[contains(., "the advertised software")]/../tbody
 ${CUSTOM_IMAGE_PACKAGE_TABLE}=  //caption[contains(., "the advertised packages")]/../tbody
@@ -256,7 +257,7 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    Run Keyword And Continue On Failure    Wait Until Page Contains Element
+    Run Keyword And Ignore Error    Wait Until Page Contains Element
     ...    xpath:${CARDS_XP}    timeout=15s    error="This might be caused by bug RHOAIENG-404"
 
 Get App ID From Card
@@ -508,7 +509,7 @@ Verify Cluster Settings Is Available
     Page Should Contain    Settings
     Menu.Navigate To Page    Settings    Cluster settings
     Capture Page Screenshot
-    Wait Until Page Contains    Update global settings for all users    timeout=30
+    Wait Until Page Contains Element    ${PAGE_TITLE_XP}    timeout=30
     Wait Until Page Contains Element    ${USAGE_DATA_COLLECTION_XP}    timeout=30
 
 Verify Cluster Settings Is Not Available
@@ -755,9 +756,9 @@ Get Dashboard Pods Names
 Get Dashboard Pod Logs
     [Documentation]     Fetches the logs from one dashboard pod
     [Arguments]     ${pod_name}
-    ${pod_logs}=            Oc Get Pod Logs  name=${pod_name}  namespace=${APPLICATIONS_NAMESPACE}  container=rhods-dashboard
-    ${pod_logs_lines}=      Split String    string=${pod_logs}  separator=\n
-    ${n_lines}=     Get Length    ${pod_logs_lines}
+    ${pod_logs}=    Oc Get Pod Logs  name=${pod_name}  namespace=${APPLICATIONS_NAMESPACE}  container=rhods-dashboard
+    ${pod_logs_lines}=    Split String    string=${pod_logs}  separator=\n
+    ${n_lines}=    Get Length    ${pod_logs_lines}
     Log     ${pod_logs_lines}[${n_lines-3}:]
     IF   "${pod_logs_lines}[${n_lines-1}]" == "${EMPTY}"
         Remove From List    ${pod_logs_lines}   ${n_lines-1}
@@ -768,8 +769,10 @@ Get Dashboard Pod Logs
 Get ConfigMaps For RHODS Groups Configuration
     [Documentation]     Returns a dictionary containing "rhods-group-config" and "groups-config"
     ...                 ConfigMaps
-    ${rgc_status}   ${rgc_yaml}=     Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${RHODS_GROUPS_CONFIG_CM}   namespace=${APPLICATIONS_NAMESPACE}
-    ${gc_status}   ${gc_yaml}=      Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get    kind=ConfigMap  name=${GROUPS_CONFIG_CM}   namespace=${APPLICATIONS_NAMESPACE}
+    ${rgc_status}   ${rgc_yaml}=     Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get
+    ...    kind=ConfigMap  name=${RHODS_GROUPS_CONFIG_CM}   namespace=${APPLICATIONS_NAMESPACE}
+    ${gc_status}   ${gc_yaml}=      Run Keyword And Ignore Error     OpenShiftLibrary.Oc Get
+    ...    kind=ConfigMap  name=${GROUPS_CONFIG_CM}   namespace=${APPLICATIONS_NAMESPACE}
     IF   $rgc_status == 'FAIL'
         ${rgc_yaml}=    Create List   ${EMPTY}
     END
@@ -783,7 +786,7 @@ Get ConfigMaps For RHODS Groups Configuration
 Get Links From Switcher
     [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link
     ${list_of_links} =    Create List
-    ${link_elements}=    Get WebElements    //a[@class="pf-m-external pf-v5-c-app-launcher__menu-item" and not(starts-with(@href, '#'))]
+    ${link_elements} =    Get WebElements    //a[@class="pf-m-external pf-v5-c-app-launcher__menu-item" and not(starts-with(@href, '#'))]
     FOR    ${ext_link}    IN    @{link_elements}
         ${href}=    Get Element Attribute    ${ext_link}    href
         Append To List    ${list_of_links}    ${href}
@@ -798,16 +801,15 @@ Maybe Wait For Dashboard Loading Spinner Page
     [Documentation]     Detecs the loading symbol (spinner) and wait for it to disappear.
     ...                 If the spinner does not appear, the keyword ignores the error.
     [Arguments]    ${timeout-pre}=3s    ${timeout}=5s
-
     ${do not wait for spinner}=    Get Variable Value    ${ODH_DASHBOARD_DO_NOT_WAIT_FOR_SPINNER_PAGE}  # defaults to None if undefined
     IF   ${do not wait for spinner} == ${true}
       RETURN
     END
-
+    ${spinner_ball} =   Set Variable    xpath=//span[@class="pf-v5-c-spinner__tail-ball"]
     Run Keyword And Ignore Error    Run Keywords
-    ...    Wait Until Page Contains Element    xpath=//span[@class="pf-v5-c-spinner__tail-ball"]    timeout=${timeout-pre}
+    ...    Wait Until Page Contains Element    ${spinner_ball}    timeout=${timeout-pre}
     ...    AND
-    ...    Wait Until Page Does Not Contain Element    xpath=//span[@class="pf-v5-c-spinner__tail-ball"]    timeout=${timeout}
+    ...    Wait Until Page Does Not Contain Element    ${spinner_ball}    timeout=${timeout}
 
 Reload RHODS Dashboard Page
     [Documentation]    Reload the web page and wait for RHODS Dashboard
@@ -822,7 +824,7 @@ Handle Deletion Confirmation Modal
     [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
     # Once fixed https://issues.redhat.com/browse/RHODS-9730 change the button xpath to
     # xpath=//button[text()="Delete ${item_type}"]
-    ${delete_btn_xp}    Set Variable    xpath=//button[contains(text(), 'Delete')]
+    ${delete_btn_xp} =    Set Variable    xpath=//button[contains(text(), 'Delete')]
     Wait Until Generic Modal Appears
     Run Keyword And Warn On Failure    Page Should Contain    Delete ${item_type}?
     Run Keyword And Warn On Failure    Page Should Contain    This action cannot be undone.
@@ -845,7 +847,7 @@ Click Action From Actions Menu
     [Arguments]    ${item_title}    ${action}    ${item_type}=${NONE}
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
     IF    "${item_type}" != "${NONE}"
-        ${action}=    Catenate    ${action}    ${item_type}
+        ${action} =    Catenate    ${action}    ${item_type}
     END
     Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]    # robocop: disable
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]

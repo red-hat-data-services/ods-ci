@@ -30,7 +30,7 @@ Is Data Science Projects Page Open
     [Documentation]    Checks if Data Science Projects home page is open. Returns TRUE or FALSE
     Close Generic Modal If Present
     ${page_open}=   Run Keyword And Return Status   Page Should Contain Element     ${DS_PROJECT_XP}
-    [Return]    ${page_open}
+    RETURN    ${page_open}
 
 Open Data Science Project Details Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
@@ -78,14 +78,14 @@ Is Data Science Project Details Page Open
     [Arguments]     ${project_title}
     ${page_open}=   Run Keyword And Return Status
     ...    SeleniumLibrary.Page Should Contain Element     xpath=//h1[contains(text(),"${project_title}")]
-    [Return]    ${page_open}
+    RETURN    ${page_open}
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
     [Arguments]     ${project_title}    ${timeout-pre-spinner}=3s    ${timeout-spinner}=5s
-    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
     ...    timeout-pre=${timeout-pre-spinner}    timeout=${timeout-spinner}
+    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30s
 
 Project Should Be Listed
     [Documentation]    Checks a Project is available in DS Project home page
@@ -161,7 +161,7 @@ Get Openshift Namespace From Data Science Project
     [Arguments]     ${project_title}
     ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name'    # robocop: disable
     ${k8s_name}=    Replace String    ${k8s_name}    "    ${EMPTY}
-    [Return]    ${k8s_name}
+    RETURN    ${k8s_name}
 
 Delete Data Science Projects From CLI
     [Documentation]     Deletes the Openshift Projects using OpenshiftLibrary.
@@ -290,14 +290,8 @@ Workbench Launch Link Should Be Disabled
 
 Get All Displayed Projects
     [Documentation]    Gets all the DS projects visible in the DS Projects home page
-    ${projects_names}=    Create List
-    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]//a
-    FOR    ${element}    IN    @{elements}
-        # Get exact project display name (including trailing spaces)
-        ${name}=    Get Element Attribute    ${element}    textContent
-        Append To List    ${projects_names}    ${name}
-    END
-    [Return]   ${projects_names}
+    ${projects_names}=    Get All Text Under Element    xpath=//td[@data-label="Name"]//a
+    RETURN   ${projects_names}
 
 Number Of Displayed Projects Should Be
     [Documentation]    Checks the number the DS projects visible in the DS Projects home page is expected
@@ -424,4 +418,4 @@ Clean Project From Workbench Resources
     ...    ${pvc_title}=${workbench_title}
     Delete Workbench From CLI    workbench_title=${workbench_title}
     ...    project_title=${project_title}
-    Delete PVC From CLI    pvc_title=${pvc_title}    project_title=${project_title}
+    Delete PVC In Project From CLI    pvc_title=${pvc_title}    project_title=${project_title}

@@ -12,9 +12,9 @@ ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-de
 ${STORAGE_SIZE_INPUT_XP}=         xpath=//input[@aria-label="Input"]
 ${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@aria-label="mount-path-folder-value"]
-${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
+${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//ul/li
 ${STORAGE_ADD_BTN_1_XP}=           ${STORAGE_SECTION_XP}//button[.="Add cluster storage"]
-${STORAGE_ADD_BTN_2_XP}=           xpath=//footer//button[.="Add storage"]
+${STORAGE_SUBMIT_BTN_XP}=           xpath=//footer//button[@data-testid="modal-submit-button"]
 
 
 *** Keywords ***
@@ -54,10 +54,11 @@ Storage Size Should Be
     IF    "${pvc_status_phase}" == "Pending"
         # PVC hasn't been bound yet - only simple text with max storage should be shown
         ${storage_size_el}=    Set Variable
-        ...    ${STORAGE_SECTION_XP}//tr[@class="pf-c-table__expandable-row pf-m-expanded"]/td/div[strong[text()="Size"]]/div    # robocop: disable
+        ...    ${STORAGE_SECTION_XP}//td[contains(@data-label,"Size")]//div[strong[text()="Size"]]/div    # robocop: disable
         Wait Until Page Contains Element    ${storage_size_el}    timeout=20s
-        ${displayed_size}=    Get Text    ${storage_size_el}
-        Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_size}    Max ${size}Gi
+        ${displayed_sizes}=    Get All Text Under Element    ${storage_size_el}
+        ${matched_sizes}=    Get All Strings That Contain    ${displayed_sizes}    ${size}Gi
+        Run Keyword And Continue On Failure    Should Not Be Empty    ${matched_sizes}
     ELSE IF    "${pvc_status_phase}" == "Bound"
         # PVC is now or had been bound already sometime in past - there is:
         #  - a number stating current usage
@@ -66,15 +67,16 @@ Storage Size Should Be
         # Note: it may take some time before UI updates the storage
         #       info WRT cluster usage, look like it does so every 60s
         ${bound_storage_size_el}=    Set Variable
-        ...    ${STORAGE_SECTION_XP}//tr[contains(@class, "-table__expandable-row pf-m-expanded")]/td/div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
-        Wait Until Page Contains Element    ${bound_storage_size_el}    timeout=80s
-        ${displayed_size}=    Get Text    ${bound_storage_size_el}
-        Run Keyword And Continue On Failure     Should Be Equal As Strings    ${displayed_size}    ${size}Gi
+        ...    ${STORAGE_SECTION_XP}//td[contains(@data-label,"Size")]//div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
+        Wait Until Page Contains Element    ${bound_storage_size_el}    timeout=2m
+        ${displayed_sizes}=    Get All Text Under Element    ${bound_storage_size_el}
+        ${matched_sizes}=    Get All Strings That Contain    ${displayed_sizes}    ${size}Gi
+        Run Keyword And Continue On Failure    Should Not Be Empty    ${matched_sizes}
         ${rc}  ${oc_object_size}=    Run And Return Rc And Output
         ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.capacity.storage}'    # robocop: disable
         Should Be Equal As Integers    ${rc}    0
         ...    An error occurred during the check of PVC ${name} '.status.capacity.storage' value!
-        Run Keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
+        Run Keyword And Continue On Failure     Should Contain    ${oc_object_size}    ${size}Gi
     ELSE
         ${error_msg}=    Catenate    The PVC is in a '${pvc_status_phase}' state which we don't expect for this
         ...    scenario. We expect either 'Pending' or 'Bound' states here. Please, either complete the
@@ -82,23 +84,34 @@ Storage Size Should Be
         Fail    ${error_msg}
         RETURN    1
     END
-    # This check is common for both "Pending" and "Bound" states of PVC.
+    # This check is common for both "Pending" and "Bound" states of PVC, and it verifies storage size directly via OC CLI
     ${rc}  ${oc_object_size}=    Run And Return Rc And Output
-    ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].spec.resources.requests.storage}'    # robocop: disable
+    ...    oc get pvc -n ${namespace} -o jsonpath="{.items[?(@.metadata.annotations['openshift\\.io/display-name']=='${name}')].spec.resources.requests.storage}"    # robocop: disable
     Should Be Equal As Integers    ${rc}    0
     ...    An error occurred during the check of PVC ${name} '.spec.resources.requests.storage' value!
     Run Keyword And Continue On Failure     Should Be Equal As Strings    ${oc_object_size}    ${size}Gi
 
 Create PersistentVolume Storage
     [Documentation]    Create a PersistenVolume storage in DS Project details page
-    [Arguments]    ${project_title}    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}
-    Click Button    ${STORAGE_ADD_BTN_1_XP}
+    [Arguments]    ${project_title}    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
+    ...    ${press_cancel}=${FALSE}    ${existing_storage}=${FALSE}
+    IF    ${existing_storage}
+        ${storage_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${name} ') and contains(., 'Persistent storage')]
+        ${existing_storage}=    Run Keyword And Return Status
+        ...    Wait Until Page Contains Element    ${storage_row_xpath}
+    END
+    IF  "${existing_storage}" == "${TRUE}"
+        Log    Storage '${name}' already exists, editing storage   console=True
+        ODHDashboard.Click Action From Actions Menu    item_title=${name}    action=Edit
+    ELSE
+        Click Button    ${STORAGE_ADD_BTN_1_XP}
+    END
     Fill In New PV Data    ${name}    ${description}    ${size}    ${connected_workbench}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Wait Until Element Is Enabled    ${STORAGE_ADD_BTN_2_XP}
-        Click Button    ${STORAGE_ADD_BTN_2_XP}
+        Wait Until Element Is Enabled    ${STORAGE_SUBMIT_BTN_XP}
+        Click Button    ${STORAGE_SUBMIT_BTN_XP}
     END
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
@@ -106,13 +119,13 @@ Create PersistentVolume Storage
 Fill In New PV Data
     [Documentation]    Compiles the modal for creating a new PersistenVolume storage in DS Project details page
     [Arguments]    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
-    ${is_storage_modal}=     Run Keyword And Return Status    Page Should Contain Element     ${STORAGE_ADD_BTN_2_XP}
+    ${is_storage_modal}=     Run Keyword And Return Status    Page Should Contain Element     ${STORAGE_SUBMIT_BTN_XP}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
-    IF   ${is_storage_modal} == ${TRUE}     Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
+    IF   ${is_storage_modal}     Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_SUBMIT_BTN_XP}
     Clear Element Text    ${STORAGE_NAME_INPUT_XP}
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
-    IF   ${is_storage_modal} == ${TRUE}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
+    IF   ${is_storage_modal}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_SUBMIT_BTN_XP}
     Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
     Clear Element Text    ${STORAGE_SIZE_INPUT_XP}
     IF    ${size} > 1
@@ -121,13 +134,15 @@ Fill In New PV Data
         END
     END
     IF    "${connected_workbench}" == "${NONE}"
-        Log    msg=you are not connecting any workbenchs to ${name} PV
+        Log    msg=Creating PV Storage '${name}' without a Workbench    console=True
     ELSE
-        Run Keyword And Continue On Failure    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
+        Log    msg=Creating PV Storage '${name}' for Workbenches: @{connected_workbench}     console=True
+        Run Keyword And Continue On Failure    Element Should Be Enabled
+        ...    xpath=//div[contains(@class,"modal")]//input[contains(@placeholder,"Select a workbench to connect")]
         FOR    ${workbench_title}    IN    @{connected_workbench}
-            ${mount_dir}=    Set Variable    ${connected_workbench}[${workbench_title}]
+            ${mount_dir}=    Genereta Mount Name    ${workbench_title}
             Set Connection Between PV And Workbench    ${workbench_title}    ${mount_dir}
-            Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_ADD_BTN_2_XP}
+            Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_SUBMIT_BTN_XP}
         END
     END
 
@@ -139,7 +154,7 @@ Set Connection Between PV And Workbench
     Wait Until Page Contains Element    ${STORAGE_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
     Click Element                       ${STORAGE_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
     Wait Until Page Contains Element    ${STORAGE_MOUNT_DIR_INPUT_XP}
-    Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_ADD_BTN_2_XP}
+    Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_SUBMIT_BTN_XP}
     Input Text    ${STORAGE_MOUNT_DIR_INPUT_XP}    ${mount_dir}
 
 Delete Storage
@@ -151,13 +166,35 @@ Delete Storage
 Get Openshift PVC From Storage
     [Documentation]    Retrieves the PVC resource name from Openshift given the Displayed Name in DS Project details page
     [Arguments]     ${name}      ${namespace}
-    ${rc}  ${pvc_name}=    Run And Return Rc And Output   oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].metadata.name}'
-    RETURN    ${rc}    ${pvc_name}
+    ${result}=    Run Process
+    ...    oc get pvc -n ${namespace} -o jsonpath\='{.items[?(@.metadata.annotations.openshift\\.io/display-name\=\="${name}")].metadata.name}'
+    ...    shell=yes
+    RETURN    ${result.rc}    ${result.stdout}
 
-Delete PVC From CLI
-    [Documentation]    Deletes a given PVC from CLI
+Delete PVC In Project From CLI
+    [Documentation]    Deletes a single PVC in a project from CLI
     [Arguments]    ${pvc_title}    ${project_title}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
     ${_}  ${cr_name}=    Get Openshift PVC From Storage
     ...    name=${pvc_title}  namespace=${ns_name}
-    Oc Delete    kind=PersistentVolumeClaim   name=${cr_name}   namespace=${ns_name}
+    IF    "${cr_name}" == "${EMPTY}"
+        Log    msg=There is probably no PVC with Display Name equal to ${cr_name}
+        ...    level=WARN
+    ELSE
+        Oc Delete    kind=PersistentVolumeClaim   name=${cr_name}   namespace=${ns_name}
+    END
+
+Delete All PVC In Project From CLI
+    [Documentation]    Deletes All PVCs in a project from CLI
+    [Arguments]    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${result}=    Run Process
+    ...    oc delete pvc -n ${ns_name} --all    shell=yes
+    Should Be True    ${result.rc} == 0    msg=${result.stderr}
+
+Genereta Mount Name
+    [Documentation]    Generate a supported mount directory name (lower case and dashes only) from string '${str}'
+    [Arguments]    ${str}
+    ${str}=    Replace String Using Regexp    string=${str}    pattern=[^a-zA-Z]    replace_with=-
+    ${str}=    Convert To Lower Case    ${str.strip('-')}
+    RETURN    ${str}

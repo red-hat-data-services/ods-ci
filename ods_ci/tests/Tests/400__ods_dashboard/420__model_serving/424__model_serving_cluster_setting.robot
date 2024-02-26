@@ -1,16 +1,14 @@
 *** Settings ***
 Documentation    Test cases that verify High Availability for ModelServing CLuster Setting
-
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Suite Setup      Sute Setup
 Suite Teardown   Sute Tierdown
 Test Setup       Tst Setup
-Test Tags         modelservingsetting  ODS-2574  Tier1  Sanity
+Test Tags         modelservingsetting  ODS-2574  Tier1 Sanity
 
 *** Variables ***
 ${project_tittel}=  blank_proj
-
 
 *** Keywords ***
 Sute Setup
@@ -41,7 +39,6 @@ Tst Setup
     ${status} =   Evaluate    '${status_single_mode}' == 'True' or '${status_multi_mode}' == 'True'
     Run Keyword If    '${status}' == 'True'    Save Changes In Cluster Settings
 
-
 Sute Tierdown
     [Documentation]    Delete DS project and select both model serving options
 
@@ -52,7 +49,6 @@ Sute Tierdown
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
     Select Both Model Serving Platforms
     Close Browser
-
 
 *** Test Cases ***
 Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
@@ -79,7 +75,6 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms
     Select CheckBox Multi Model Serving Platforms
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_tittel}
-
     Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
     Wait Until Page Contains Element     //button[contains(text(), 'Add model server')]
 
@@ -92,7 +87,6 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     Select CheckBox Single Model Serving Platforms
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_tittel}
-
     Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
     Wait Until Page Contains Element    //button[contains(text(), 'Deploy model')]
 
@@ -101,6 +95,5 @@ Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after disabling both model serving platforms
     #Case 4
     Open Data Science Project Details Page      ${project_tittel}
-
     Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
     Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]

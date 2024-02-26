@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-service
+spec:
+  ports:
+    - name: minio-client-port
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+  selector:
+    app: minio
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: minio-route
+spec:
+  to:
+    kind: Service
+    name: minio-service
+    weight: 100
+  port:
+    targetPort: ui
+  wildcardPolicy: None
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: minio
+  name: ods-ci-minio
+spec:
+  containers:
+    - args:
+        - server
+        - /data1
+      env:
+        - name: MINIO_ACCESS_KEY
+          value:  ${key}
+        - name: MINIO_SECRET_KEY
+          value: ${pw}
+      image: ${url}
+      imagePullPolicy: Always
+      name: minio

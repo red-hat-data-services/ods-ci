@@ -38,6 +38,7 @@ Resource            Common.robot
 ...                         Login To OCP Using API
 ...                         Generate Thanos Token
 ...                         Set Thanos Credentials Variables
+...                         Generate Minio Random Credentials
 
 
 *** Keywords ***

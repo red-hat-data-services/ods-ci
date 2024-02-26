@@ -5,10 +5,10 @@ Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resour
 Suite Setup      Sute Setup
 Suite Teardown   Sute Tierdown
 Test Setup       Tst Setup
-Test Tags         modelservingsetting  ODS-2574  Tier1 Sanity
+Test Tags         modelservingsetting  ODS-2574  Tier1  Sanity
 
 *** Variables ***
-${project_tittel}=  blank_proj
+${project_tittel}=  BLANKPROJ
 
 *** Keywords ***
 Sute Setup
@@ -41,7 +41,6 @@ Tst Setup
 
 Sute Tierdown
     [Documentation]    Delete DS project and select both model serving options
-
     Delete Data Science Project                 ${project_tittel}
     Wait Until Data Science Project Is Deleted  ${project_tittel}
     Open Dashboard Settings    settings_page=Cluster settings
@@ -53,7 +52,7 @@ Sute Tierdown
 *** Test Cases ***
 Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling both model serving platforms
-    #Case 1
+    #Case 1 
     Open Dashboard Settings    settings_page=Cluster settings
     Reload Page
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
@@ -61,14 +60,13 @@ Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     Select CheckBox Single Model Serving Platforms
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_tittel}
-
     Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
     Wait Until Page Contains Element    //*[contains(text(), "Deploy model")]
     Wait Until Page Contains Element    //*[contains(text(), "Add model server")]
 
 Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling both Multi Model serving platforms
-    #Case 2
+    #Case 2 
     Open Dashboard Settings    settings_page=Cluster settings
     Reload Page
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
@@ -80,8 +78,7 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms
 
 Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling Single Model model serving platforms
-
-    #Case 3
+    #Case 3 
     Open Dashboard Settings    settings_page=Cluster settings
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
     Select CheckBox Single Model Serving Platforms
@@ -93,7 +90,7 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
 
 Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after disabling both model serving platforms
-    #Case 4
+    #Case 4 
     Open Data Science Project Details Page      ${project_tittel}
     Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
     Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]

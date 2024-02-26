@@ -76,9 +76,7 @@ class SplitSuite(SuiteVisitor):
         suite_to_execute = chunked_suites[self.which_part - 1]
 
         try:
-            if len(chunked_suites[self.which_part]) < num_suite and int(
-                self.which_part
-            ) == int(self.parts):
+            if len(chunked_suites[self.which_part]) < num_suite and int(self.which_part) == int(self.parts):
                 suite_to_execute.extend(chunked_suites[self.which_part])
         except IndexError:
             pass

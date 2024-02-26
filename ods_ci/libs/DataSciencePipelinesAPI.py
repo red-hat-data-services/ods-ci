@@ -24,9 +24,7 @@ class DataSciencePipelinesAPI:
         count = 0
         while deployment_count != 1 and count < 30:
             deployments = []
-            response, _ = self.run_oc(
-                "oc get deployment -n openshift-operators openshift-pipelines-operator -o json"
-            )
+            response, _ = self.run_oc("oc get deployment -n openshift-operators openshift-pipelines-operator -o json")
             try:
                 response = json.loads(response)
                 if (
@@ -45,9 +43,7 @@ class DataSciencePipelinesAPI:
         while pipeline_run_crd_count < 1 and count < 60:
             # https://github.com/opendatahub-io/odh-dashboard/issues/1673
             # It is possible to start the Pipeline Server without pipelineruns.tekton.dev CRD
-            pipeline_run_crd_count = self.count_pods(
-                "oc get crd pipelineruns.tekton.dev", 1
-            )
+            pipeline_run_crd_count = self.count_pods("oc get crd pipelineruns.tekton.dev", 1)
             time.sleep(1)
             count += 1
         assert pipeline_run_crd_count == 1
@@ -87,16 +83,12 @@ class DataSciencePipelinesAPI:
         self.route = ""
         count = 0
         while self.route == "" and count < 60:
-            self.route, _ = self.run_oc(
-                f"oc get route -n {project} {route_name} --template={{{{.spec.host}}}}"
-            )
+            self.route, _ = self.run_oc(f"oc get route -n {project} {route_name} --template={{{{.spec.host}}}}")
             time.sleep(1)
             count += 1
 
         assert self.route != "", "Route must not be empty"
-        print(
-            f"Waiting for Data Science Pipeline route to be ready to avoid firing false alerts: {self.route}"
-        )
+        print(f"Waiting for Data Science Pipeline route to be ready to avoid firing false alerts: {self.route}")
         time.sleep(45)
         status = -1
         count = 0
@@ -116,16 +108,12 @@ class DataSciencePipelinesAPI:
 
     @keyword
     def remove_pipeline_project(self, project):
-        print(
-            f"We are removing the project({project}) because we could run the test multiple times"
-        )
+        print(f"We are removing the project({project}) because we could run the test multiple times")
         self.run_oc(f"oc delete project {project} --wait=true --force=true")
         print("Wait because it could be in Terminating status")
         count = 0
         while count < 30:
-            project_status, error = self.run_oc(
-                f"oc get project {project} --template={{{{.status.phase}}}}"
-            )
+            project_status, error = self.run_oc(f"oc get project {project} --template={{{{.status.phase}}}}")
             print(f"Project status: {project_status}")
             print(f"Error message: {error}")
             if project_status == "":
@@ -241,9 +229,7 @@ class DataSciencePipelinesAPI:
 
     @keyword
     def add_role_to_user(self, name, user, project):
-        output, error = self.run_oc(
-            f"oc policy add-role-to-user {name} {user} -n {project} --role-namespace={project}"
-        )
+        output, error = self.run_oc(f"oc policy add-role-to-user {name} {user} -n {project} --role-namespace={project}")
         print(output, "->", error)
 
     @keyword
@@ -271,9 +257,7 @@ class DataSciencePipelinesAPI:
             count += 1
         return pod_count
 
-    def count_running_pods(
-        self, oc_command, name_startswith, status_phase, pod_criteria, timeout=30
-    ):
+    def count_running_pods(self, oc_command, name_startswith, status_phase, pod_criteria, timeout=30):
         pod_count = 0
         count = 0
         while pod_count != pod_criteria and count < timeout:
@@ -309,12 +293,7 @@ class DataSciencePipelinesAPI:
         result = json.loads(result)
         for storage_class in result["items"]:
             if "annotations" in storage_class["metadata"]:
-                if (
-                    storage_class["metadata"]["annotations"][
-                        "storageclass.kubernetes.io/is-default-class"
-                    ]
-                    == "true"
-                ):
+                if storage_class["metadata"]["annotations"]["storageclass.kubernetes.io/is-default-class"] == "true":
                     break
         return storage_class["metadata"]["name"]
 

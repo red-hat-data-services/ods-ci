@@ -4,9 +4,7 @@ from typing import Any
 
 class Sender(ABC):
     @abstractmethod
-    def prepare_payload(
-        self, text: str = "", attachments: list[Any] | None = None
-    ) -> None:
+    def prepare_payload(self, text: str = "", attachments: list[Any] | None = None) -> None:
         pass
 
     @abstractmethod

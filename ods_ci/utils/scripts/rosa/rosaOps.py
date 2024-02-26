@@ -137,10 +137,7 @@ def get_rosa_cluster_state(cluster_name):
 
     cluster_state = rosa_describe(cluster_name, filter="--output json | jq -r '.state'")
     if cluster_state is None:
-        print(
-            "Unable to retrieve cluster state for "
-            "cluster name {}. EXITING".format(cluster_name)
-        )
+        print("Unable to retrieve cluster state for cluster name {}. EXITING".format(cluster_name))
         sys.exit(1)
     cluster_state = cluster_state.strip("\n")
     return cluster_state

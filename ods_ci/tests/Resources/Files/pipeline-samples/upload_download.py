@@ -1,4 +1,5 @@
 """Test pipeline to exercise various data flow mechanisms."""
+
 import kfp
 
 from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
@@ -18,9 +19,7 @@ def send_file(
             f.write(os.urandom(size_in_bytes))
 
     def zip_file(input_file_path, output_zip_path):
-        with zipfile.ZipFile(
-            output_zip_path, "w", compression=zipfile.ZIP_DEFLATED
-        ) as zipf:
+        with zipfile.ZipFile(output_zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
             zipf.write(input_file_path, os.path.basename(input_file_path))
 
     print("starting creating the file...")
@@ -77,9 +76,7 @@ def test_uploaded_artifact(
     secret_key = inner_decode(mlpipeline_minio_artifact_secret["secretkey"])
     secure = inner_decode(mlpipeline_minio_artifact_secret["secure"])
     secure = secure.lower() == "true"
-    client = Minio(
-        f"{host}:{port}", access_key=access_key, secret_key=secret_key, secure=secure
-    )
+    client = Minio(f"{host}:{port}", access_key=access_key, secret_key=secret_key, secure=secure)
 
     data = client.get_object(bucket_name, object_name)
     with open("my-testfile", "wb") as file_data:

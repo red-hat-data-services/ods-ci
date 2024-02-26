@@ -50,9 +50,7 @@ class Helpers:
         ocm_client.cluster_name = cluster_name
         result = ocm_client.install_rhoam_addon(exit_on_failure=False)
         if not result:
-            self.BuiltIn.fail(
-                "Something got wrong while installing RHOAM. Check the logs"
-            )
+            self.BuiltIn.fail("Something got wrong while installing RHOAM. Check the logs")
 
     @keyword
     def uninstall_rhoam_using_addon_flow(self, cluster_name):
@@ -83,20 +81,13 @@ class Helpers:
         ocm_client.uninstall_rhods()
 
     @keyword
-    def update_notification_email_address(
-        self, cluster_name, email_address, addon_name="managed-odh"
-    ):
+    def update_notification_email_address(self, cluster_name, email_address, addon_name="managed-odh"):
         """Update notification email for add-ons using OCM"""
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
-        status = ocm_client.update_notification_email_address(
-            addon_name, email_address, exit_on_failure=False
-        )
+        status = ocm_client.update_notification_email_address(addon_name, email_address, exit_on_failure=False)
         if not status:
-            self.BuiltIn.fail(
-                "Unable to update notification email,"
-                " Check if operator is installed via Add-on"
-            )
+            self.BuiltIn.fail("Unable to update notification email, Check if operator is installed via Add-on")
 
     @keyword
     def convert_to_hours_and_minutes(self, seconds):
@@ -108,17 +99,14 @@ class Helpers:
     @keyword
     def install_isv_by_name(self, operator_name, channel, source="certified-operators"):
         ocm_client = OpenshiftClusterManager()
-        ocm_client.install_openshift_isv(
-            operator_name, channel, source, exit_on_failure=False
-        )
+        ocm_client.install_openshift_isv(operator_name, channel, source, exit_on_failure=False)
         if operator_name == "ovms":
             status = ocm_client.wait_for_isv_installation_to_complete("openvino")
         else:
             status = ocm_client.wait_for_isv_installation_to_complete(operator_name)
         if not status:
             self.BuiltIn.fail(
-                "Unable to install the {} isv, Check if ISV subscription is "
-                "created{}".format(operator_name, status)
+                "Unable to install the {} isv, Check if ISV subscription is created{}".format(operator_name, status)
             )
 
     @keyword
@@ -150,13 +138,9 @@ class Helpers:
         ocm_client.cluster_name = cluster_name
         ocm_client.notification_email = email_address
         license_escaped = license.replace('"', '\\"')
-        result = ocm_client.install_managed_starburst_addon(
-            license=license_escaped, exit_on_failure=False
-        )
+        result = ocm_client.install_managed_starburst_addon(license=license_escaped, exit_on_failure=False)
         if not result:
-            self.BuiltIn.fail(
-                "Something got wrong while installing Managed Starburst. Check the logs"
-            )
+            self.BuiltIn.fail("Something got wrong while installing Managed Starburst. Check the logs")
 
     @keyword
     def uninstall_managed_starburst_using_addon_flow(self, cluster_name):
@@ -186,15 +170,11 @@ class Helpers:
                     if not expected.keys() == received.keys():
                         failures.append([expected.keys(), received.keys()])
                     for k in expected.keys():
-                        _inference_object_comparison(
-                            expected[k], received[k], threshold
-                        )
+                        _inference_object_comparison(expected[k], received[k], threshold)
                 elif isinstance(expected, list):
                     # if current element is a list, compare each value 1 by 1
                     for id, _ in enumerate(expected):
-                        _inference_object_comparison(
-                            expected[id], received[id], threshold
-                        )
+                        _inference_object_comparison(expected[id], received[id], threshold)
                 elif isinstance(expected, numbers.Number):
                     # if current element is a number, compare each value with a rounding threshold
                     if not expected - received <= threshold:
@@ -251,8 +231,7 @@ class Helpers:
 
         for _ in range(no_requests):
             data_img = [
-                random.randrange(value_range[0], value_range[1])
-                for _ in range(shape["C"] * shape["H"] * shape["W"])
+                random.randrange(value_range[0], value_range[1]) for _ in range(shape["C"] * shape["H"] * shape["W"])
             ]
 
             headers = {

@@ -120,6 +120,7 @@ Disable Pod Toleration Via UI
 Save Changes In Cluster Settings
     [Documentation]    Clicks on the "Save changes" button in Cluster settings and
     ...    waits until "Cluster settings changes saved" is shown
+    Scroll Element Into View   xpath://button[.="Save changes"]
     Wait Until Page Contains Element    xpath://button[.="Save changes"][@aria-disabled="false"]    timeout=15s
     Click Button    Save changes
     ${clicked}=    Run Keyword And Return Status
@@ -234,76 +235,68 @@ Open Dashboard Settings
 
 Get Checkbox State Of Multi Model Serving Platforms
     [Documentation]    Checks if  Multi model serving platform is enabled/checked in Cluster setting
-    ${is_checked}=  Run Keyword And Return Status  Checkbox Should Be Selected  ${MULTI_MODEL_SERVING_CHECK_BOX}
+    ${is_checked}=  Run Keyword And Return Status  Checkbox Should Be Selected  ${MULTI_MODE_SERVING_CHECK_BOX}
     RETURN  ${is_checked}
 
 Get Checkbox State Of Single Model Serving Platforms
     [Documentation]    Checks if  Single model serving platform is enabled/checked in Cluster setting
-    ${is_checked}=  Run Keyword And Return Status  Checkbox Should Be Selected  ${SINGLE_MODEL_SERVING_CHECK_BOX}
+    ${is_checked}=  Run Keyword And Return Status  Checkbox Should Be Selected  ${SINGLE_MODE_SERVING_CHECK_BOX}
     RETURN  ${is_checked}
 
-Click CheckBox Single Model Serving Platforms
+Select CheckBox Single Model Serving Platforms
     [Documentation]    Enables Single model serving platform
-    ${status}=  Get Checkbox State Of Single Modelserving platforms
-    IF  "${status}"=="False"
-        Select Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
-        Save Changes In Cluster Settings
-    END
+    Select Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
 
-Click CheckBox Multi Model Serving Platforms
+
+Select CheckBox Multi Model Serving Platforms
     [Documentation]    Enables Multi Modelserving platforms
-    ${status}=  Get Checkbox State Of Multi Modelserving platforms
-    IF  "${status}"=="False"
-        Select Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
-        Save Changes In Cluster Settings
-    END
+    Select Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
 
-UnClick CheckBox Single Model Serving Platforms
+Deselect CheckBox Single Model Serving Platforms
     [Documentation]    Disable checkbox Single Modelserving platforms
-    ${status}=  Get Checkbox State Of Single Modelserving platforms
-    IF  "${status}"=="True"
-        Unselect Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
-        Save Changes In Cluster Settings
-    END
+    Unselect Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
 
-UnClick CheckBox Multi Model Serving Platforms
+Deselect CheckBox Multi Model Serving Platforms
     [Documentation]    Disable checkbox Multi Modelserving platforms
-    ${status}=  Get Checkbox State Of Single Modelserving platforms
-    IF  "${status}"=="True"
-        Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
-        Save Changes In Cluster Settings
-    END
+    Unselect Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
 
-Click Both Model Serving Platforms
+Select Both Model Serving Platforms
     [Documentation]    Enables Multi Modeland Single Modelserving platforms
-    Click CheckBox Single Model Serving Platforms
-    Click CheckBox Multi Model Serving Platforms
+    Select CheckBox Single Model Serving Platforms
+    Select CheckBox Multi Model Serving Platforms
 
-UnClick Both Model Serving Platforms
+Deselect Both Model Serving Platforms
     [Documentation]    Disbale Multi Modeland Single Modelserving platforms
-    UnClick CheckBox Single Model Serving Platforms
-    UnClick CheckBox Multi Model Serving Platforms
+    Deselect CheckBox Single Model Serving Platforms
+    Deselect CheckBox Multi Model Serving Platforms
+
 
 Check IF Single Model Serving Is Disabled From DSC And Cluster Setting
     [Documentation]    Check single model should be disabled from DSC and dashboard
     Component Should Not Be Enabled  kserve
     ${status}=   Get Checkbox State Of Single Model Serving Platforms
-    Should Be Equal As Strings    ${status}  False
-    Element Should Be Disabled    ${SINGLE_MODEL_SERVING_CHECK_BOX}
+    ${false_status}=  BuiltIn.Convert To Boolean   False
+    Should Be Equal As Strings   ${status}   ${false_status}
+    Element Should Be Disabled    ${SINGLE_MODE_SERVING_CHECK_BOX}
+
 
 Check IF Single Model Serving Is Enabled From DSC And Cluster Setting
     [Documentation]    Check single model should be enabled from DSC and dashboard
     Component Should Be Enabled  kserve
     ${status}=   Get Checkbox State Of Single Model Serving Platforms
-    Should Be Equal As Strings   ${status}  True
-    Element Should Be Enabled    ${SINGLE_MODEL_SERVING_CHECK_BOX}
+    ${true_status}=  BuiltIn.Convert To Boolean    True
+    Should Be Equal As Strings   ${status}   ${true_status}
+    Element Should Be Enabled    ${SINGLE_MODE_SERVING_CHECK_BOX}
+
 
 Check IF Multi Model Serving IS Disabled From DSC And Cluster Setting
     [Documentation]    Check Multi model should be disabled from DSC and dashboard
     Component Should Not Be Enabled  modelmeshserving
     ${status}=   Get Checkbox State Of Multi Model Serving Platforms
-    Should Be Equal As Strings    ${status}  False
-    Element Should Be Disabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
+    ${false_status}=  BuiltIn.Convert To Boolean    False
+    Should Be Equal As Strings    ${status}   ${false_status}
+    Element Should Be Disabled    ${MULTI_MODE_SERVING_CHECK_BOX}
+
 
 Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
     [Documentation]    Check Multi model should be enabled from DSC and dashboard
@@ -347,3 +340,6 @@ Set RHODS Users Group To Inexistent Group
     ...    to the given inexistent group
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...    users_group=${CUSTOM_INEXISTENT_GROUP}
+    ${true_status}=  BuiltIn.Convert To Boolean    True
+    Should Be Equal    ${status}  ${true_status}
+    Element Should Be Enabled    ${MULTI_MODE_SERVING_CHECK_BOX}

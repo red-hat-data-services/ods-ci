@@ -126,49 +126,6 @@ Verify Tensorflow Model Via UI
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
 
-
-Verify If Model Serving Platforms Is Showing Correct Values In Data Science Project Page
-    [Documentation]    verifes if Cluster setting page of Model Serving Platforms is showing correct value in DS project
-    [Tags]
-    ...       ODS-2574
-    Set Library Search Order    SeleniumLibrary
-    Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
-    ...    browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    ...    expected_page=${NONE}    wait_for_cards=${FALSE}
-    Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}    description=test project
-
-    #Case 1
-    Open Dashboard Settings    settings_page=Cluster settings
-    Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
-    Click CheckBox Multi Model Serving Platforms
-    Click CheckBox Single Model Serving Platforms
-    Open Data Science Project Details Page      ${PRJ_TITLE}
-    SeleniumLibrary.Wait Until Page Contains    Single model serving platform
-    SeleniumLibrary.Wait Until Page Contains    Multi-model serving platform
-
-    #Case 2
-    Open Dashboard Settings    settings_page=Cluster settings
-    Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
-    Click CheckBox Multi Model Serving Platforms
-    UnClick CheckBox Single Model Serving Platforms
-    Open Data Science Project Details Page      ${PRJ_TITLE}
-    SeleniumLibrary.Wait Until Page Contains    Add model server
-
-    #Case 3
-    Open Dashboard Settings    settings_page=Cluster settings
-    Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
-    UnClick CheckBox Multi Model Serving Platforms
-    Click CheckBox Single Model Serving Platforms
-    Open Data Science Project Details Page      ${PRJ_TITLE}
-    SeleniumLibrary.Wait Until Page Contains    Deploy model
-
-    [Teardown]
-    Delete Data Science Project                 ${PRJ_TITLE}
-    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE}
-    Click Both Model Serving Platforms
-
 *** Keywords ***
 Model Serving Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables

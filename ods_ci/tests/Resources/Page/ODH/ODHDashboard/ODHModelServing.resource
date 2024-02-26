@@ -3,6 +3,8 @@ Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
 Resource       ../../../Common.robot
 Resource       ODHDataScienceProject/ModelServer.resource
+Resource       ODHDataScienceProject/DataConnections.resource
+Resource       ../../../CLI/ModelServing/llm.resource
 Library        ../../../../../libs/Helpers.py
 
 
@@ -18,42 +20,55 @@ ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
 ${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
 ${MS_TABLE_ENDPOINT}=    /../../td[@data-label="Inference endpoint"]
-${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-c-clipboard-copy__group"]/input
-${MS_TABLE_DROPDOWN_TOGGLE}=    /../../td[@class="pf-c-table__action"]//button
-${MS_TABLE_STATUS_SUCCESS}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-success")]
-${MS_TABLE_STATUS_FAILURE}=    //span[contains(@class,"pf-c-icon__content")][contains(@class,"pf-m-danger")]
-${KSERVE_MODAL_HEADER}=    //header[@class="pf-c-modal-box__header"]/h1[.="Deploy model"]
+${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboard-copy"]//input
+${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
+${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
+${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
+${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 
 
 *** Keywords ***
 Open Model Serving Home Page
     [Documentation]    Verifies submenu Settings > "Model Serving" is visible and navigates to page
-    Page Should Contain    Model Serving
-    Click Link      Model Serving
+    Navigate To Page    Model Serving
     # Replace sleep with better Wait keyword. Confirm if error page has "Model Serving" h1 element.
     Sleep    1s
-    ${loading_error} =    Run Keyword And Return Status    Page Should Contain    Problem loading model serving page
+    ${loading_error}=    Run Keyword And Return Status
+    ...    SeleniumLibrary.Page Should Contain    Problem loading model serving page
     IF    ${loading_error}
         Log    "Page load error encountered"    level=WARN
-        Capture Page Screenshot
+        SeleniumLibrary.Capture Page Screenshot
         Sleep    5s
-        Reload Page
+        SeleniumLibrary.Reload Page
     END
-    Wait for RHODS Dashboard to Load    wait_for_cards=${FALSE}    expected_page=Deployed models
-    Wait Until Page Contains    Manage and view the health and performance of your deployed models.    timeout=30
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Deployed models
+    SeleniumLibrary.Wait Until Page Contains    Manage and view the health and performance of your deployed models.
+    ...    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Serve Model
     [Documentation]    Deploys a model via the Model Serving page or Model Server section of a DS Project.
-    ...    The framework should be either "onnx" or "openvino_ir".
+    ...    The framework should be either "onnx" or "openvino_ir" or tensorflow.
+    ...    Can update existing Model, and use existing Connection.
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
-    ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test
-    # TODO: Does not work if there's already a model deployed
-    SeleniumLibrary.Wait Until Page Does Not Contain Element    //article[@id="multi-serving-platform-card"]
-    SeleniumLibrary.Wait Until Page Does Not Contain Element    //article[@id="single-serving-platform-card"]
-    SeleniumLibrary.Wait Until Page Contains    Deploy model
-    SeleniumLibrary.Click Button    Deploy model
+    ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test    ${existing_model}=${FALSE}
+    Open Model Serving Home Page
+    Switch Model Serving Project    ${project_name}
+    IF    ${existing_model}
+        ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ') and contains(., '${project_name}')]
+        ${existing_model}=    Run Keyword And Return Status
+        ...    Wait Until Page Contains Element    ${model_row_xpath}
+    END
+    IF  "${existing_model}" == "${TRUE}"
+        Log    Model '${model_name}' already exists, editing model   console=True
+        ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
+    ELSE
+        SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
+        SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
+        SeleniumLibrary.Wait Until Page Contains    Deploy model
+        SeleniumLibrary.Click Button    Deploy model
+    END
     SeleniumLibrary.Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
@@ -72,6 +87,10 @@ Serve Model
         Set Up New Data Connection    dc_name=${data_connection_name}
         Set Folder Path    ${model_path}
     END
+    SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
+    # Workaround for UI glitch bug RHOAIENG-2724 - Reselect model server and framework
+    Select Model Server    ${model_server}
+    Select Framework    ${framework}
     SeleniumLibrary.Click Button    Deploy
     SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 
@@ -99,11 +118,11 @@ Select Model Server
     [Documentation]    If there are multiple model servers to choose from, this keyword
     ...    Selects the given one
     [Arguments]    ${model_server}
-    ${selectable} =    Run Keyword And Return Status
+    ${selectable}=    Run Keyword And Return Status
     ...    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
-        Click Element    xpath=//li/button[.="${model_server}"]
+        Click Element    xpath://li/button[.="${model_server}"]
     END
 
 Select Framework
@@ -124,7 +143,7 @@ Select Existing Data Connection
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
         Open Name Options Menu
         Click Element    xpath://li/button[.="${data_connection_name}"]
-        ${selected} =    Run Keyword And Return Status
+        ${selected}=    Run Keyword And Return Status
         ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
         IF  ${selected}==${TRUE}
             BREAK
@@ -157,40 +176,56 @@ Verify Model Status
     ...    status can be "success" or any other string (which will expect failure status).
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
-        Wait Until Keyword Succeeds    120s    5s
-        ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
+        SeleniumLibrary.Wait Until Page Contains Element
+        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
-        Wait Until Keyword Succeeds    120s    5s
-        ...    Page Should Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
+        SeleniumLibrary.Wait Until Page Contains Element
+        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 
 Delete Model Via UI
     [Documentation]    Deletes a deployed model from the Model Serving page in the dashboard.
     [Arguments]    ${model_name}
-    Page Should Contain Element    xpath://div[.="${model_name} "]
-    Click Element    xpath://div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}
-    Click Element    xpath://div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Delete"]
+    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ')]
+    Wait Until Element Is Visible       ${model_row_xpath}
+    ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Delete
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
     Input Text    xpath://input[@id="delete-modal-input"]    ${model_name}
     Click Button    Delete deployed model
-    Wait Until Page Does Not Contain Element    xpath://div[.="${model_name} "]
+    Wait Until Page Does Not Contain Element    ${model_row_xpath}    timeout=30s
 
 Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
     [Arguments]    ${model_name}
-    Click Element    //div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}
-    Click Element    //div[.="${model_name} "]${MS_TABLE_DROPDOWN_TOGGLE}/..//button[.="Edit"]
+    ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
     Wait Until Page Contains    xpath://h1[.="Deploy model"]
 
-Get Model Route via UI
+Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    Page Should Contain Element    xpath://div[.="${model_name} "]
-    ${url}=    Get Element Attribute    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}    value
+    ${route_xpath}=    Set Variable    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}
+    ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
+    IF    ${loaded} == ${FALSE}
+        Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
+        SeleniumLibrary.Reload Page
+        SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
+    END
+    ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
+    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
+    IF    ${kserve}
+        ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
+    END
     RETURN    ${url}
+
+Get Model Route Via CLI
+    [Documentation]    Grabs the serving route (URL) of an already deployed model from CLI.
+    [Arguments]    ${model_name}    ${project_name}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get route ${model_name} -n ${project_name} --template={{.spec.host}}{{.spec.path}}
+    Should Be Equal As Integers	${rc}	 0   msg=Error getting model route
+    RETURN    https://${out}/infer
 
 Open ${section} Options Menu
     [Documentation]    Opens the "Options menu" dropdown for different sections
@@ -226,8 +261,9 @@ Get Model Inference
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}
-    ${self_managed} =    Is RHODS Self-Managed
-    ${url}=    Get Model Route via UI    ${model_name}
+    ${self_managed}=    Is RHODS Self-Managed
+    ${url}=    Get Model Route Via UI    ${model_name}
+    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
     ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
     IF    ${token_auth}
         IF    "${project_title}" == "${NONE}"
@@ -236,33 +272,83 @@ Get Model Inference
         ${token}=    Get Access Token via UI    ${project_title}
         ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
     END
-    IF  ${self_managed}==${TRUE}
+    IF  ${kserve}
+        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+        ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca_istio_knative.crt
+    ELSE IF  ${self_managed}
         Fetch Openshift CA Bundle
         ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
     END
-    ${inference_output} =    Run    ${curl_cmd}
+    ${inference_output}=    Run    ${curl_cmd}
     RETURN    ${inference_output}
 
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}
-    ${inference_output} =    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
+    Open Model Serving Home Page
+    Switch Model Serving Project    ${project_title}
+    ${inference_output}=    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
     ...    project_title=${project_title}
-    ${result}    ${list} =    Inference Comparison    ${expected_inference_output}    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}
     IF    ${result}==False
+        IF    $project_title == $NONE
+            ${rc}    ${project_title}=    Run And Return Rc And Output
+            ...    oc get InferenceServices --all-namespaces -ojson | jq '.items[] | select(.metadata.name=="${model_name}") | .metadata.namespace' | tr -d '"'    # robocop: disable
+        END
+        ${events}    ${podlogs}=    Get Events And Pod Logs    namespace=${project_title}
+        ...    label_selector=modelmesh-service=modelmesh-serving
         Fail    msg=comparison between expected and actual failed, ${list}
+    END
+
+Verify Model Inference With Retries
+    [Documentation]    We see the inference failing often in the tests. One possible cause might be
+    ...                timing: model not ready to reply yet, despite the pod is up and running and the
+    ...                endpoint exposed.
+    ...                This is a temporary mitigation meanwhile we find a better way to check the model
+    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}
+    ...            ${token_auth}=${FALSE}    ${project_title}=${NONE}    ${retries}=${5}
+    ${status}=    Run Keyword And Return Status    Verify Model Inference
+    ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
+    IF    not ${status}
+        ${retry}=    Set Variable    ${0}
+        WHILE    ${retry} < ${retries}
+            IF    ${retry} > 0
+                Log    message=Modelmesh inference call failed ${retry}/${retries}.
+                ...    level=WARN
+            END
+            ${status}=    Run Keyword And Return Status    Verify Model Inference
+            ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}
+            ...    ${project_title}
+            IF    ${status}
+                BREAK
+            END
+            ${retry}=    Evaluate    ${retry} + 1
+            Sleep    5s
+        END
+        IF    not ${status}
+            Fail    msg=Inference operation failed after ${retries+1} attempts
+        END
     END
 
 Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
-    ${models} =    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
-    FOR  ${model}  IN  @{models}
-        ${name} =    Get Text   ${model}
-        Delete Model Via UI    ${name}
+    Switch Model Serving Project    project_name=All projects
+    ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+    FOR    ${project}    IN    @{projects}
+        ${project}=    Get Text   ${project}
+        @{project description}=  Split String    ${project}
+        Switch Model Serving Project    ${project description}[0]
+        ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+        FOR    ${model}    IN    @{models}
+            ${model}=    Get Text   ${model}
+            Delete Model Via UI    ${model}
+            Sleep    1s
+        END
+        Switch Model Serving Project    project_name=All projects
     END
 
 Add Namespace To ServiceMeshMemberRoll
@@ -271,18 +357,23 @@ Add Namespace To ServiceMeshMemberRoll
     ...    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'add', 'path': '/spec/members/-', 'value': \"${namespace}\"}]"
     Should Be Equal As Integers    ${rc}    ${0}
 
-Remove Namespace From ServiceMeshMemberRoll
+Namespace Should Be Removed From ServiceMeshMemberRoll
+    [Documentation]    Checks if the given namespace is present in the SMMR.
+    ...                If yes, it fails
     [Arguments]    ${namespace}    ${servicemesh_ns}=istio-system
-    ${rc}    ${ns_idx}=    Run And Return Rc And Output
-    ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'
+    ${rc}    ${member_list}=    Run And Return Rc And Output
+    ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members'
     Should Be Equal As Integers    ${rc}    ${0}
-    IF    "${ns_idx}" == "null"
-        Log    message=${namespace} was not in the SMMR..
-        ...    level=WARN
+    IF    $member_list == "null"
+        Log    message=ServiceMeshMemberRoll already cleaned up
     ELSE
-        ${rc}    ${out}=    Run And Return Rc And Output    oc patch smmr/default -n ${servicemesh_ns} --type='json' -p="[{'op': 'remove', 'path': '/spec/members/${ns_idx}'}]"
+        ${rc}    ${ns_idx}=    Run And Return Rc And Output
+        ...    oc get smmr/default -n ${servicemesh_ns} -o json | jq '.spec.members | map(. == "${namespace}") | index(true)'    # robocop: disable
         Should Be Equal As Integers    ${rc}    ${0}
+        Should Be Equal As Strings    ${ns_idx}    null
+        ...    msg=${namespace} should have been automatically removed from SMMR
     END
+
 
 Deploy Model Via CLI
     [Documentation]    Deploys a model using Model Serving feature by applying the InfereceService
@@ -332,16 +423,6 @@ Select Kserve Serving Runtime
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/button
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/ul//span[contains(text(),"${runtime}")]
 
-Get KServe Inference Host Via CLI
-    [Arguments]    ${isvc_name}    ${namespace}
-    Sleep    5s
-    ${rc}    ${ksvc_host}=    Run And Return Rc And Output
-    ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    # ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    Should Be Equal As Integers    ${rc}    ${0}
-    Should Not Be Empty    ${ksvc_host}
-    RETURN    ${ksvc_host}
-
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI
     [Arguments]    ${model_name}    ${retries}=1
@@ -349,7 +430,7 @@ Get Kserve Inference Host Via UI
         Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]    timeout=30s  #robocop: disable
         Wait Until Page Contains Element    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Status"]//span[@aria-label="success icon"]
         ...  timeout=30s  #robocop: disable
-        ${endpoint} =    Get Element Attribute    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]//input    value  #robocop: disable
+        ${endpoint}=    Get Element Attribute    //td[@data-label="Name"]/div[.="${model_name} "]/../..//td[@data-label="Inference endpoint"]//input    value  #robocop: disable
         IF  "${endpoint}"!="${EMPTY}"
             RETURN    ${endpoint}
         END
@@ -357,59 +438,6 @@ Get Kserve Inference Host Via UI
     END
     Log    Failed to get model serving host through the UI
     Take Screenshot
-
-Get Current Revision ID
-    [Arguments]    ${model_name}    ${namespace}
-    ${rc}    ${id}=    Run And Return Rc And Output
-    ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
-    Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${id}
-
-Set Minimum Replicas Number
-    [Arguments]    ${n_replicas}    ${model_name}    ${namespace}
-    ${old_revision_id}=    Get Current Revision ID    model_name=${model_name}    namespace=${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch InferenceService ${model_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/predictor/minReplicas', 'value': ${n_replicas}}]"
-    Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${old_revision_id}
-
-Delete InfereceService
-    [Arguments]    ${isvc_name}    ${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc delete InferenceService ${isvc_name} -n ${namespace}
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Update Scale To Zero For Knative Serving
-    [Arguments]    ${serving_name}    ${namespace}    ${status}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc patch KnativeServing ${serving_name} -n ${namespace} --type=json -p="[{'op': 'replace', 'path': '/spec/config/autoscaler/enable-scale-to-zero', 'value': '${status}'}]"
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Set Model Hardware Resources
-    [Arguments]    ${model_name}    ${namespace}    ${requests}=&{EMPTY}    ${limits}=&{EMPTY}
-    IF    ${limits} == ${NONE}
-        ${limits}=    Set Variable    null
-    END
-    IF    ${requests} == ${NONE}
-        ${requests}=    Set Variable    null
-    END
-    ${body}=    Set Variable    {"spec":{"predictor": {"model": {"resources": {"requests": ${requests}, "limits": ${limits} }}}}}
-    ${body}=    Replace String    ${body}    '    "
-    Log    ${body}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc patch isvc ${model_name} -n ${namespace} --type=merge -p '${body}'
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Model Pod Should Be Scheduled On A GPU Node
-    [Documentation]    Checks that the pods with the given ${label_selector} are actually scheduled on
-    ...                a GPU node
-    [Arguments]    ${label_selector}    ${namespace}
-    ${pods}=    Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=${label_selector}
-    FOR    ${index}    ${pod}    IN ENUMERATE    @{pods}
-        Log    ${index}: ${pod}[spec][nodeName]
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    oc get node ${pod}[spec][nodeName] -ojson | jq '.metadata.labels."nvidia.com/gpu.present"'
-        Should Be Equal As Integers    ${rc}    ${0}
-        Should Be Equal As Strings    ${out}    "true"
-    END
 
 Enable Model Serving Runtime Using CLI
     [Documentation]  Update OdhDashboardConfig to enable the model runtime
@@ -428,11 +456,29 @@ Disable Model Serving Runtime Using CLI
 Wait Until Runtime Pod Is Running
     [Arguments]    ${server_name}    ${project_title}    ${timeout}=10s
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
-    ${runtime_pod_name} =    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
-    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    ${runtime_pod_name}=    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
+    ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
     Log    name=modelmeshserving${runtime_pod_name}
     Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-${runtime_pod_name}
     ...    namespace=${ns_name}    timeout=${timeout}
+
+Get Modelmesh Events And Logs
+    [Arguments]    ${server_name}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${runtime_pod_name}=    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
+    ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
+    Get Events And Pod Logs    namespace=${ns_name}
+    ...    label_selector=name=modelmesh-serving-${runtime_pod_name}
+
+Get Kserve Events And Logs
+    [Documentation]    Fetches the events in a given namespace, as well as the logs from all the containers in all the
+    ...    pods labelled as part of Kserve.
+    [Arguments]    ${model_name}    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    # ${model_name}=    Remove String    ${model_name}    -
+    ${model_name}=    Convert To Lower Case    ${model_name}
+    Get Events And Pod Logs    namespace=${ns_name}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
 
 Create Custom Serving Runtime Using Template By CLI
     [Documentation]  Use Openshift API to create a custome runtime using template CR
@@ -473,4 +519,70 @@ Delete Serving Runtime Template From CLI By Runtime Name OR Display Name
           Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
     ELSE IF   "${runtime_name}" == "" and "${runtime_display_name}" == ""
          Fail     msg=Kindly provide runtime name or display name
+    END
+
+Clean Up DSP Page
+    [Documentation]    Removes all DSP Projects, if any are present
+    ${modal}=    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
+    IF  ${modal}==${TRUE}
+        Click Element    //button[@aria-label="Close"]
+    END
+    Open Data Science Projects Home Page
+    ${projects}=    Get All Displayed Projects
+    ${projects_count}=    Get Length    ${projects}
+    WHILE    ${projects_count} > 0    limit=${projects_count}m
+    ...    on_limit_message=Timeout exceeded waiting for all DS projects deletion
+        Delete Data Science Projects From CLI    ${projects}
+        Reload Page
+        ${reloaded}=    Run Keyword And Return Status
+        ...    SeleniumLibrary.Wait Until Page Contains    Data science projects    timeout=30s
+        IF  ${reloaded}==${FALSE}    SeleniumLibrary.Capture Page Screenshot
+        ${projects}=    Get All Displayed Projects
+        ${projects_count}=    Get Length    ${projects}
+    END
+
+Clean All Models Of Current User
+    [Documentation]    Tries to clean up DSP and Model Serving pages
+    ...    In order to deploy a single model in a new project. ${retries}
+    ...    controls how many retries are made.
+    [Arguments]    ${retries}=5
+    Open Model Serving Home Page
+    ${projects_empty}=    Run Keyword And Return Status    Page Should Contain    No data science projects
+    IF    ${projects_empty}
+        Log    No Data Sciense projects exist, skipping cleanup    console=True
+    ELSE
+        FOR    ${try}    IN RANGE    0    ${retries}
+            ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project
+            IF    ${status}
+                Capture Page Screenshot
+                Click Button    Select a project
+                RETURN
+            ELSE
+                Clean Up Model Serving Page
+                Clean Up DSP Page
+                Open Model Serving Home Page
+                Reload Page
+                Sleep  5s
+            END
+        END
+    END
+
+Set Up Project
+    [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
+    ...                creates caikit runtime. This can be used as test setup
+    [Arguments]    ${namespace}    ${single_prj}=${TRUE}    ${enable_metrics}=${FALSE}    ${dc_name}=kserve-connection
+    IF    ${single_prj}
+        Run Keyword And Continue On Failure    Clean All Models Of Current User
+    END
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${namespace}    description=kserve test project    existing_project=${TRUE}
+    Create S3 Data Connection    project_title=${namespace}    dc_name=${dc_name}
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=${S3.BUCKET_3.NAME}    aws_s3_endpoint=${S3.BUCKET_3.ENDPOINT}
+    ...            aws_region=${S3.BUCKET_3.REGION}
+    IF   ${enable_metrics}
+        Enable User Workload Monitoring
+        Configure User Workload Monitoring
+    ELSE
+        Log    message=Skipping UserWorkloadMonitoring enablement.
     END

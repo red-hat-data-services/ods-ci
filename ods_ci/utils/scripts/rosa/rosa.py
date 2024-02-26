@@ -1,12 +1,14 @@
-import argparse, sys, os
+import argparse
+import os
+import sys
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
-from logger import log
 from awsOps import aws_configure
+from logger import log
 from rosaOps import (
-    rosa_create_cluster,
     create_account_roles,
+    rosa_create_cluster,
     wait_for_osd_cluster_to_be_ready,
 )
 

@@ -33,6 +33,10 @@ spec:
     - registry.rh-ods.com:8443/openshift4
     source: registry.redhat.io/openshift4
   - mirrors:
+    - registry.rh-ods.com:8443/rhoai
+    source: registry.redhat.io/rhoai
+  # This one is a legacy one and we may want to remove it in the future
+  - mirrors:
     - registry.rh-ods.com:8443/rhods
     source: registry.redhat.io/rhods
   - mirrors:

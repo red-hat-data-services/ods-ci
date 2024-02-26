@@ -41,11 +41,14 @@ Verify Updating Project With Changes From Git Repository
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
     Open New Notebook
+    Add And Run JupyterLab Code Cell In Active Notebook
+    ...    import os;path="/opt/app-root/src/ODS-QE-Github-Test";os.chdir(path)
     ${commit_msg1}=    Get Last Commit Message
-    Add And Run JupyterLab Code Cell In Active Notebook    ! mkdir ../folder/
+    Add And Run JupyterLab Code Cell In Active Notebook    !mkdir ../folder/
+    Add And Run JupyterLab Code Cell In Active Notebook    !git config --global user.name "${GITHUB_USER.USERNAME}"
+    Add And Run JupyterLab Code Cell In Active Notebook    !git config --global user.email ${GITHUB_USER.EMAIL}
     Sleep    2s
     Open Folder or File    folder
-
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
     Push Some Changes to Repo
@@ -119,10 +122,14 @@ Commit Changes
         Set Staging Status    ON
     END
     Click Button    xpath=//div[contains(@class, "CommitBox")]//button[.="Commit"]
-    Wait Until Page Contains    Who is committing?    timeout=10s
-    Input Text    xpath=//input[@placeholder="Name"]    ${name}
-    Input Text    xpath=//input[@placeholder="Email"]    ${email_id}
-    Click Element    xpath=//button[.="OK"]
+    ${identity} =    Run Keyword And Return Status    Wait Until Page Contains    Who is committing?    timeout=10s
+    IF  ${identity}
+        Input Text    xpath=//input[@placeholder="Name"]    ${name}
+        Input Text    xpath=//input[@placeholder="Email"]    ${email_id}
+        Click Element    xpath=//button[.="OK"]
+    ELSE
+        Page Should Contain Element    xpath=//button[@title="Disabled: No files are staged for commit"]
+    END
 
 Push Changes To Remote
     [Documentation]    Push changes to remote directory
@@ -130,7 +137,7 @@ Push Changes To Remote
     Open With JupyterLab Menu    Git    Push to Remote
     Wait Until Page Contains    Git credentials required    timeout=200s
     Input Text    xpath=//input[@placeholder="username"]    ${github_username}
-    Input Text    xpath=//input[@placeholder="password / personal access token"]    ${token}
+    Input Text    xpath=//input[@placeholder="personal access token"]    ${token}
     Click Element    xpath=//button[.="OK"]
     Sleep    4s
 

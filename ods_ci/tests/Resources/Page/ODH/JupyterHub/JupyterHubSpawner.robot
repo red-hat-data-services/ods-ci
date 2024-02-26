@@ -19,7 +19,7 @@ ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 ${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //label[@for="modal-notebook-container-size"]/../..//button[@aria-label="Options menu"]
 ${KFNBC_ACCELERATOR_HEADER_XPATH} =    //span[text()='Accelerator']
-${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
+${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-v5-c-form__group']/descendant::button
 ${KFNBC_ACCELERATOR_INPUT_XPATH} =    //input[@aria-label='Number of accelerators']
 ${KFNBC_ACCELERATOR_LESS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${KFNBC_ACCELERATOR_PLUS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/following-sibling::button
@@ -29,7 +29,7 @@ ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
-${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-c-form__group-control"]
+${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v5-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.9
 ${PREVIOUS_PYTHON_VER} =    3.9
 ${DEFAULT_NOTEBOOK_VER} =    2023.2
@@ -143,13 +143,14 @@ Add Spawner Environment Variable
    [Documentation]  Adds a new environment variables based on the ${env_var} ${env_var_value} arguments
    [Arguments]  ${env_var}  ${env_var_value}
    Click Button  Add more variables
-   #Input Text  xpath://input[@id="---NO KEY---"]  ${env_var}
-   Input Text  xpath://input[contains(@id,"-NO KEY-")][1]  ${env_var}
-   Element Attribute Value Should Be  xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"-${env_var}")]  value  ${env_var}
-   #Input Text  xpath://input[@id="${env_var}-value"]  ${env_var_value}
-   Input Text  xpath://input[contains(@id, "-${env_var}-value")]  ${env_var_value}
-   #Element Attribute Value Should Be  xpath://input[@id="${env_var}-value"]  value  ${env_var_value}
-   Element Attribute Value Should Be  xpath://input[contains(@id, "-${env_var}-value")]  value  ${env_var_value}
+   ${elements} =    Get Element Count    ${KFNBC_ENV_VAR_NAME_PRE}
+   ${rows} =    Evaluate    $elements-${1}
+   Input Text    xpath://input[contains(@id,"-NO KEY-")][1]    ${env_var}
+   Element Attribute Value Should Be
+   ...    xpath:${KFNBC_ENV_VAR_NAME_PRE}//input[contains(@id,"environment-variable-row-${rows}-0-${env_var}")]    value
+   ...    ${env_var}
+   Input Text    xpath://input[contains(@id, "-${env_var}-value")]    ${env_var_value}
+   Element Attribute Value Should Be    xpath://input[contains(@id, "-${env_var}-value")]    value    ${env_var_value}
 
 Remove All Spawner Environment Variables
    [Documentation]  Removes all existing environment variables in the Spawner
@@ -172,7 +173,7 @@ Remove Spawner Environment Variable
    [Arguments]  ${env_var}
    ${env_check} =  Spawner Environment Variable Exists   ${env_var}
    IF  ${env_check}==True
-      Click Element  xpath://input[contains(@id, "environment-variable-row")][@value="${env_var}"]/../../../../div/button
+      Click Element  xpath://div[@class="odh-notebook-controller__env-var-row" and *//input[contains(@id, "environment-variable-row") and @value="${env_var}"]]//button[@data-id="remove-env-var-button"]    # robocop: disable
    END
 
 Spawner Environment Variable Exists
@@ -268,6 +269,42 @@ Has Spawn Failed
     ${spawn_status} =  Run Keyword And Return Status  Page Should Contain  Spawn failed
     RETURN  ${spawn_status}
 
+Notebook Expected Ide
+    [Documentation]  Returns type of expected IDE for the given image name.
+    ...              At the moment, there are two IDE types available in the notebook images:
+    ...              JupyterLab and VSCode.
+    ...              Returns type of expected IDE for the given image name as a string.
+    [Arguments]  ${image_name}
+    IF  "${image_name}"=="${EMPTY}"
+        Log  level=ERROR  message=No image name has been provided!
+        RETURN  ${EMPTY}
+    END
+    IF  "${image_name}"=="code-server"
+        RETURN  VSCode
+    ELSE
+        RETURN  JupyterLab
+    END
+
+Wait Notebook To Be Loaded
+    [Documentation]  Waits for the notebook IDE environment to be loaded completely and performs
+    ...              a simple check with the Menu action in the loaded IDE.
+    [Arguments]  ${image_name}  ${version}
+    ${ide}=  Notebook Expected Ide  ${image_name}
+
+    IF  "${ide}"=="VSCode"
+        Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
+        Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
+        Wait Until Page Contains  Do you trust the authors of the files in this folder?
+    ELSE IF  "${ide}"=="JupyterLab"
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Sleep    2s    reason=Wait for a possible popup
+        Maybe Close Popup
+        Open New Notebook In Jupyterlab Menu
+        Spawned Image Check    ${image}    ${version}
+    ELSE
+        Fail    msg=Unknown IDE typ has been resolved: '${ide}'. Please check and fix or implement.
+    END
+
 Spawn Notebook With Arguments  # robocop: disable
     [Documentation]  Selects required settings and spawns a notebook pod. If it fails due to timeout or other issue
     ...              It will try again ${retries} times (Default: 1) after ${retries_delay} delay (Default: 0 seconds).
@@ -317,11 +354,7 @@ Spawn Notebook With Arguments  # robocop: disable
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
             ${authorization_required} =  Is Service Account Authorization Required
             IF  ${authorization_required}  Authorize jupyterhub service account
-            Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
-            Sleep    2s    reason=Wait for a possible popup
-            Maybe Close Popup
-            Open New Notebook In Jupyterlab Menu
-            Spawned Image Check    ${image}    ${version}
+            Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed
             Exit For Loop If  ${spawn_fail} == False
             Reload Page
@@ -548,7 +581,7 @@ Fetch Image Tooltip Info
     [Documentation]    Fetches libraries in image tooltip text
     [Arguments]    ${img}
     ${xpath_img_tooltip} =    Set Variable    //input[contains(@id, "${img}")]/../label//div[@class=""][.=""]
-    ${xpath_tooltip_items} =    Set Variable    //div[@class='pf-c-popover__body']/p
+    ${xpath_tooltip_items} =    Set Variable    //div[@class='pf-v5-c-popover__body']/p
     @{tmp_list} =    Create List
     Click Element    ${xpath_img_tooltip}
     ${libs} =    Get Element Count    ${xpath_tooltip_items}
@@ -558,7 +591,7 @@ Fetch Image Tooltip Info
         ${item} =    Get Text    ${xpath_tooltip_items}\[${index}]
         Append To List    ${tmp_list}    ${item}
     END
-    Click Element    xpath://div[@class='pf-c-popover__content']/button[@aria-label="Close"]
+    Click Element    xpath://div[contains(@class,'popover__close')]/button[@aria-label="Close"]
     RETURN    ${tmp_list}
 
 Spawn Notebooks And Set S3 Credentials
@@ -617,7 +650,7 @@ Get List Of All Available Container Size
     ${size}    Create List
     #Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
     Click Element  xpath://button[@aria-label="Options menu"][1]
-    ${link_elements}   Get WebElements  xpath://*[@class="pf-c-select__menu-item-main"]
+    ${link_elements}   Get WebElements  xpath://*[@class="pf-v5-c-select__menu-item-main"]
     FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
           ${text}      Get Text    ${ext_link}
           Append To List    ${size}     ${text}

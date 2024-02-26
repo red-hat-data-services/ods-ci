@@ -29,13 +29,7 @@ Resource            Common.robot
 ...                         Perform Dashboard API Endpoint PATCH Call
 ...                         Perform Dashboard API Endpoint POST Call
 ...                         Perform Dashboard API Endpoint DELETE Call
-...                         Check Managed Starburst Addon Is Not Installed
-...                         Delete Managed Starburst CRs
 ...                         Create RedHat Marketplace Secret
-...                         Get Observatorium Token
-...                         Get Original License Secret
-...                         Apply Fake Starburst License
-...                         Restore Starburst Original License And Verify Deployment
 ...                         Create S3 Data Connection
 ...                         Create Starburst Enteprise License Secret
 ...                         Get Data Connection Form Values
@@ -43,6 +37,7 @@ Resource            Common.robot
 ...                         Create Secret For S3-Like Buckets
 ...                         Login To OCP Using API
 ...                         Generate Thanos Token
+...                         Set Thanos Credentials Variables
 
 
 *** Keywords ***

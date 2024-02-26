@@ -90,7 +90,7 @@ Verify Workbench Images Have Multiple Versions
     END
 
 Verify User Cannot Create Project With Empty Fields
-    [Tags]    Sanity   ODS-1783
+    [Tags]    Sanity   ODS-1783    Tier1
     [Documentation]    Verifies users is not allowed to create a project with Empty title
     Open Data Science Projects Home Page
     Create Project With Empty Title And Expect Error
@@ -105,7 +105,7 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     Close Generic Modal If Present
 
 Verify User Can Create A Data Science Project
-    [Tags]    Smoke    Sanity    ODS-1775
+    [Tags]    Smoke    Sanity    ODS-1775    Tier1
     [Documentation]    Verifies users can create a DS project
     Open Data Science Projects Home Page
     # Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -117,7 +117,7 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Smoke    Sanity    ODS-1814
+    [Tags]    Smoke    Sanity    ODS-1814    Tier1
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -155,8 +155,10 @@ Verify User Can Create A PV Storage
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Smoke    Sanity    ODS-1816
+    [Tags]    Smoke    Sanity    ODS-1816    Tier1    ExcludeOnDisconnected
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
+    ...    We skip this test on Disconnected environment because we have a PVs predefined there hardcoded to 100Gi.
+    ...    Since there is a size check in this test, it would fail unless some extra condition to be brought in here.
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
@@ -221,7 +223,7 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...    status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
-    [Teardown]    Run Keywords    
+    [Teardown]    Run Keywords
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_2_TITLE}    project_title=${PRJ_TITLE}
     ...    AND
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
@@ -252,6 +254,34 @@ Verify User Can Delete A Data Connection
     Delete Data Connection    name=${DC_3_S3_NAME}
     Data Connection Should Not Be Listed    name=${DC_3_S3_NAME}
     Check Data Connection Secret Is Deleted    dc_name=${DC_3_S3_NAME}    namespace=${ns_name}
+
+Verify user can create a workbench with an existing data connection
+    [Tags]  Tier1  ODS-2176
+    [Documentation]  Verifies users can create a workbench with an existing data connection
+
+    ${data_connection_name}=    Set Variable    aDataConnection
+
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create S3 Data Connection  project_title=${PRJ_TITLE}
+    ...                    dc_name=${data_connection_name}
+    ...                    aws_access_key=dummy-key
+    ...                    aws_secret_access=dummy-secret
+    ...                    aws_s3_endpoint=${DC_S3_ENDPOINT}
+    ...                    aws_region=${DC_S3_REGION}
+    Create Workbench  workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                storage=Persistent  pv_existent=${NONE}  pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
+    ...                data_connection=${data_connection_name}
+
+    # The Workbench and the Data connection appear on the project details page.
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    # The data connection has the workbench name in the "Connected workbenches" column
+    ${workbenches}=    Create Dictionary    ${WORKBENCH_TITLE}=mount-data
+    Data Connection Should Be Listed    name=${data_connection_name}    type=${DC_S3_TYPE}
+    ...                connected_workbench=${workbenches}
+
+    [Teardown]  Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
+    ...                project_title=${PRJ_TITLE}
 
 Verify User Can Create A Workbench With Environment Variables
     [Tags]    Sanity    Tier1    ODS-1864
@@ -372,6 +402,32 @@ Verify Event Log Is Accessible While Starting A Workbench
     [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_6_TITLE}
     ...    project_title=${PRJ_TITLE}
 
+Verify User Can Cancel Workbench Start From Event Log
+    [Tags]    Sanity    Tier1    ODS-1975
+    [Documentation]    Verify user can cancel workbench start from event log
+
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
+    ...        pv_description=${NONE}  pv_size=${NONE}
+    ...        press_cancel=${FALSE}    envs=${NONE}
+
+    Workbench Status Should Be    workbench_title=${WORKBENCH_TITLE}  status=${WORKBENCH_STATUS_STARTING}
+
+    Open Notebook Event Log    workbench_title=${WORKBENCH_TITLE}
+    Page Should Contain Event Log
+    Cancel Workbench Startup From Event Log
+    Wait Until Workbench Is Stopped    workbench_title=${WORKBENCH_TITLE}
+
+    Workbench Status Should Be    workbench_title=${WORKBENCH_TITLE}  status=${WORKBENCH_STATUS_STOPPED}
+
+    Wait Until Keyword Succeeds  5 min  5s
+    ...    Run Keyword And Expect Error  EQUALS:ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    Get Workbench Pod    project_title=${PRJ_TITLE}  workbench_title=${WORKBENCH_TITLE}
+
+    [Teardown]  Clean Project From Workbench Resources  workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
+
 Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     [Tags]    Tier1    Sanity
     ...       ODS-1973
@@ -480,9 +536,11 @@ Verify User Can Delete A Data Science Project
 
 Verify User Can Access Only Its Owned Projects
     [Tags]    Sanity    Tier1    ODS-1868
-    [Documentation]    Verifies each user can access only thei owned projects. Except for
+    [Documentation]    Verifies each user can access only they owned projects. Except for
     ...                cluster and dedicated admins which should be able to fetch all the DS Projects
     [Setup]    Run Keywords
+    ...    SeleniumLibrary.Close All Browsers
+    ...    AND
     ...    Set Variables For User Access Test
     ...    AND
     ...    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
@@ -654,7 +712,7 @@ Environment Variables Should Be Displayed According To Their Type
     ...                It goes to "Edit workbench" page and compare the environment variables
     ...                settings with the ones which were inserted during workbench creation.
     [Arguments]    ${workbench_title}    ${exp_env_variables}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Click Element    xpath://a[@href="#environment-variables"]
     Sleep   2s
     FOR    ${idx}   ${env_variable_dict}    IN ENUMERATE    @{exp_env_variables}    start=1
@@ -673,13 +731,16 @@ Environment Variables Should Be Displayed According To Their Type
 
 Environment Variable Type Should Be
     [Arguments]    ${expected_type}    ${var_idx}
-    ${displayed_type}=    Get Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//div[contains(@class,"pf-c-select")]/button//span[contains(@class,'toggle-text')]
+    ${displayed_type}=    Get Text
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//div[contains(@class,"pf-v5-c-select")]/button//span[contains(@class,'toggle-text')]  # robocop: disable:line-too-long
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_type}    ${expected_type}
 
 Environment Variable Key/Value Fields Should Be Correctly Displayed
     [Arguments]    ${var_idx}    ${var_pair_idx}    ${expected_key}    ${expected_value}    ${type}
-    ${displayed_value_xp}=    Set Variable    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//input[@aria-label="value of item ${var_pair_idx}"]
-    ${displayed_key_xp}=    Set Variable    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${var_idx}]//input[@aria-label="key of item ${var_pair_idx}"]
+    ${displayed_value_xp}=    Set Variable
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//input[@aria-label="value of item ${var_pair_idx}"]  # robocop: disable:line-too-long
+    ${displayed_key_xp}=    Set Variable
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//input[@aria-label="key of item ${var_pair_idx}"]  # robocop: disable:line-too-long
     ${displayed_key}=    Get Value    ${displayed_key_xp}
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_key}    ${expected_key}
     ${displayed_val}=    Get Value    ${displayed_value_xp}

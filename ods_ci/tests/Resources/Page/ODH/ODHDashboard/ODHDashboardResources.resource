@@ -18,9 +18,9 @@ Open QuickStart Element in Resource Section By Name
     [Documentation]     It opens the element by enabling Quick Start filter in Resources Section of ODS Dashboard.
     [Arguments]     ${element}
     Select Checkbox     //input[@id="quickstart--check-box"]
-    Wait Until Page Contains Element    ${RES_CARDS_XP}\[@id="${element}"]
-    Click Link          ${RES_CARDS_XP}\[@id="${element}"]//a
-    Wait Until Page Contains ELement    //div[@class="pf-c-drawer__panel-main"]     5
+    Wait Until Page Contains Element    ${RES_CARDS_XP}\[@id="${element}"]//a[text()="Open"]
+    Click Link          ${RES_CARDS_XP}\[@id="${element}"]//a[text()="Open"]
+    Wait Until Page Contains ELement    //div[contains(@class, "-c-drawer__panel-main")]     5
 
 Star QuickStart Tour
     Click Button    //button[@data-test="Start button"]
@@ -33,19 +33,19 @@ Get The Count Of QuickStart Steps
 
 Link Text On QuickStart Card Should Be
     [Arguments]     ${element}  ${exp_link_text}
-    Element Text Should Be  ${RES_CARDS_XP}\[@id="${element}"]//a      ${exp_link_text}
+    Element Text Should Be  //div[@id="${element}"]//a      ${exp_link_text}
 
 QuickStart Status Should Be
     [Documentation]     Verifies the label on the item card which shows the progress and closes the sidebar.
     [Arguments]     ${element}  ${progress_string}
     IF  '${progress_string}'=='In Progress'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-purple pf-m-outline"]
+        Element Text Should Be      //div[@id="${element}"]//span[contains(@class, "-c-label pf-m-purple pf-m-outline")]
         ...    In Progress
     ELSE IF     '${progress_string}'=='Complete'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
+        Element Text Should Be      //div[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
         ...    Complete
     ELSE IF     '${progress_string}'=='Failed'
-        Element Text Should Be      ${RES_CARDS_XP}\[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]
+        Element Text Should Be      //div[@id="${element}"]//span[@class="pf-c-label pf-m-red pf-m-outline"]
         ...    Failed
     END
 
@@ -221,7 +221,7 @@ Verify Links Are Not Broken For Each QuickStart
     ${quickStartCount}=   Get Length           ${quickStartElements}
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
     IF  ${version_check}==True
-        ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-content"]
+        ${versioned_title_xp}=    Set Variable    //div[contains(@class, "-c-content")]
     ELSE
         ${versioned_title_xp}=    Set Variable    //div[@class="pf-c-card__title odh-card__doc-title"]
     END
@@ -232,7 +232,7 @@ Verify Links Are Not Broken For Each QuickStart
         ${Title}=   Split To Lines    ${Title}
         Log                ${Title[${0}]}    console=yes
         Click Element                 ${quickStartElements[${counter}]}
-        Wait Until Element Is Visible  //button[@class='pf-c-wizard__nav-link']
+        Wait Until Element Is Visible  //button[contains(@class, "-c-wizard__nav-link")]
         External URLs Should Not Be Broken
     END
 

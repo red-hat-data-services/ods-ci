@@ -13,7 +13,7 @@ Wait Until OCM Cluster Page Is Loaded
 
 Login To OCM
     [Documentation]    Login to the OpenShift Cluster Manager
-    Input Text    //div[@class="pf-c-form__group"]/input    ${SSO.USERNAME}
+    Input Text    //div[@class="pf-v5-c-form__group"]/input    ${SSO.USERNAME}
     Click Button   //*[@id="login-show-step2"]
     Sleep   1s
     Input Text    //*[@id="password"]    ${SSO.PASSWORD}

@@ -29,6 +29,7 @@ Run Distributed Workloads Tests
     ...    go test -v -timeout ${GO_TEST_TIMEOUT} ./integration ${TEST_PARAMETERS} 2>&1 > ${DW_TEST_RESULT_FILE}
     ...    shell=true    cwd=${DW_DIR}/tests    env:ODH_NAMESPACE=redhat-ods-applications
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=${CODEFLARE_TEST_TIMEOUT_LONG}
+    ...    env:CODEFLARE_TEST_RAY_IMAGE=quay.io/project-codeflare/ray:2.5.0-py38-cu116
     Log To Console    ${result.stdout}
     ${test_output}=    Get File    ${DW_TEST_RESULT_FILE}
     Log To Console    ${test_output}

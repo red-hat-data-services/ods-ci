@@ -5,9 +5,9 @@ items:
   kind: ClusterPool
   metadata:
     name: {{ hive_cluster_name|default("rhodsgcp") }}-pool
-    namespace: rhods
+    namespace: {{ hive_claim_ns }}
   spec:
-    baseDomain: gcp.rhods.ccitredhat.com
+    baseDomain: {{ base_domain }}
     imageSetRef:
       name: {{ image_set|default("rhods-openshift") }}
     platform:
@@ -23,12 +23,12 @@ items:
   kind: Secret
   metadata:
     name: gcp-sno-install-config
-    namespace: rhods
+    namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:
     install-config.yaml: |
       apiVersion: v1
-      baseDomain: rhods.ccitredhat.com
+      baseDomain: {{ base_domain }}
       compute:
       - name: worker
         platform:
@@ -63,7 +63,7 @@ items:
   kind: Secret
   metadata:
     name: gcp-creds
-    namespace: rhods
+    namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:
     osServiceAccount.json: |
@@ -83,6 +83,6 @@ items:
   kind: ClusterImageSet
   metadata:
     name: {{ image_set|default("rhods-openshift") }}
-    namespace: rhods
+    namespace: {{ hive_claim_ns }}
   spec:
     releaseImage: {{ release_image|default("quay.io/openshift-release-dev/ocp-release:4.10.18-x86_64") }}

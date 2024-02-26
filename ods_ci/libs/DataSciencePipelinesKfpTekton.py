@@ -3,14 +3,14 @@ import importlib
 import json
 import os
 import sys
+
 from DataSciencePipelinesAPI import DataSciencePipelinesAPI
 from robotlibcore import keyword
 from urllib3.exceptions import MaxRetryError, SSLError
 
 
 class DataSciencePipelinesKfpTekton:
-
-    base_image = 'registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61'
+    base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
 
     # init should not have a call to external system, otherwise dry-run will fail
     def __init__(self):
@@ -30,7 +30,7 @@ class DataSciencePipelinesKfpTekton:
             os.environ["TEKTON_COPY_RESULTS_STEP_IMAGE"] = default_image
             os.environ["CONDITION_IMAGE_NAME"] = default_image
             # https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
-            os.environ["DEFAULT_ACCESSMODES"] = 'ReadWriteOnce'
+            os.environ["DEFAULT_ACCESSMODES"] = "ReadWriteOnce"
             import kfp_tekton
 
             # the following fallback it is to simplify the test development
@@ -53,7 +53,7 @@ class DataSciencePipelinesKfpTekton:
         return self.client, self.api
 
     def get_cert(self, api):
-        cert_json = self.get_secret(api, 'openshift-ingress-operator', 'router-ca')
+        cert_json = self.get_secret(api, "openshift-ingress-operator", "router-ca")
         cert = cert_json["data"]["tls.crt"]
         decoded_cert = base64.b64decode(cert).decode("utf-8")
 
@@ -64,20 +64,18 @@ class DataSciencePipelinesKfpTekton:
         return file_name
 
     def get_secret(self, api, project, name):
-        secret_json, _ = api.run_oc(
-            f"oc get secret -n {project} {name} -o json"
-        )
+        secret_json, _ = api.run_oc(f"oc get secret -n {project} {name} -o json")
         return json.loads(secret_json)
 
     def get_bucket_name(self, api, project):
         bucket_name, _ = api.run_oc(
             f"oc get dspa -n {project} pipelines-definition -o json"
         )
-        objectStorage = json.loads(bucket_name)['spec']['objectStorage']
-        if 'minio' in objectStorage:
-            return objectStorage['minio']['bucket']
+        objectStorage = json.loads(bucket_name)["spec"]["objectStorage"]
+        if "minio" in objectStorage:
+            return objectStorage["minio"]["bucket"]
         else:
-            return objectStorage['externalStorage']['bucket']
+            return objectStorage["externalStorage"]["bucket"]
 
     def import_souce_code(self, path):
         module_name = os.path.basename(path).replace("-", "_")
@@ -94,7 +92,9 @@ class DataSciencePipelinesKfpTekton:
         self, user, pwd, project, route_name, source_code, fn, current_path=None
     ):
         client, api = self.get_client(user, pwd, project, route_name)
-        mlpipeline_minio_artifact_secret = self.get_secret(api, project, 'mlpipeline-minio-artifact')
+        mlpipeline_minio_artifact_secret = self.get_secret(
+            api, project, "mlpipeline-minio-artifact"
+        )
         bucket_name = self.get_bucket_name(api, project)
         # the current path is from where you are running the script
         # sh ods_ci/run_robot_test.sh
@@ -109,12 +109,15 @@ class DataSciencePipelinesKfpTekton:
         # create_run_from_pipeline_func will compile the code
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')
         result = client.create_run_from_pipeline_func(
-            pipeline_func=pipeline, arguments={
-                'mlpipeline_minio_artifact_secret': mlpipeline_minio_artifact_secret["data"],
-                'bucket_name': bucket_name,
-                'openshift_server': self.api.get_openshift_server(),
-                'openshift_token': self.api.get_openshift_token()
-            }
+            pipeline_func=pipeline,
+            arguments={
+                "mlpipeline_minio_artifact_secret": mlpipeline_minio_artifact_secret[
+                    "data"
+                ],
+                "bucket_name": bucket_name,
+                "openshift_server": self.api.get_openshift_server(),
+                "openshift_token": self.api.get_openshift_token(),
+            },
         )
         # easy to debug and double check failures
         print(result)
@@ -128,4 +131,3 @@ class DataSciencePipelinesKfpTekton:
     ):
         _, api = self.get_client(user, pwd, project, route_name)
         return api.check_run_status(run_result.run_id, timeout=timeout)
-

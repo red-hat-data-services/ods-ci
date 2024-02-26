@@ -2,7 +2,8 @@
 Library    String
 Library    OpenShiftLibrary
 Library    OperatingSystem
-Resource          ../../../../tests/Resources/Page/Operators/ISVs.resource
+Resource   ../../../../tests/Resources/Page/Operators/ISVs.resource
+Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.robot
 
 
 *** Variables ***
@@ -13,17 +14,21 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
+${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
+${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
   Install Kserve Dependencies
   Clone OLM Install Repo
+  ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
             IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                  Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
             ELSE
+                 ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
                  Create Catalog Source For Operator
                  Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
             END
@@ -41,6 +46,7 @@ Install RHODS
            IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                 Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
            ELSE
+                ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
                 Create Catalog Source For Operator
                 Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
            END
@@ -48,6 +54,7 @@ Install RHODS
           FAIL    Provided test envrioment is not supported
       END
   END
+  Wait Until Csv Is Ready    ${csv_display_name}
 
 Verify RHODS Installation
   # Needs to be removed ASAP
@@ -84,6 +91,9 @@ Verify RHODS Installation
         ...                   namespace=${APPLICATIONS_NAMESPACE}
         ...                   label_selector=app=odh-dashboard
         ...                   timeout=1200
+        #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
+        Add UI Admin Group To Dashboard Admin
+
     ELSE
         Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=rhods-dashboard"
         Wait For Pods Numbers  5
@@ -144,12 +154,14 @@ Verify RHODS Installation
     Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60
     Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
-  # Monitoring stack not deployed with operator V2, only model serving monitoring stack present
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
-    Log To Console    "Waiting for pod status in ${MONITORING_NAMESPACE}"
-    Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=1200
-    Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
+
+  # Monitoring stack only deployed for managed, as modelserving monitoring stack is no longer deployed
+  IF  "${cluster_type}" == "managed"
+     Log To Console    "Waiting for pod status in ${MONITORING_NAMESPACE}"
+     Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=600
+     Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
   END
+
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
     Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
@@ -282,34 +294,115 @@ Create Catalog Source For Operator
 Wait for Catalog To Be Ready
     [Documentation]    Verify catalog is Ready OR NOT
     [Arguments]    ${namespace}=openshift-marketplace   ${catalog_name}=odh-catalog-dev   ${timeout}=30
-    FOR    ${counter}    IN RANGE    ${timeout}
-           ${return_code}    ${output} =    Run And Return Rc And Output    oc get catalogsources ${catalog_name} -n ${namespace} -o json | jq ."status.connectionState.lastObservedState"
-           Should Be Equal As Integers   ${return_code}  0  msg=Error detected while getting component status
-           IF  ${output} == "READY"   Exit For Loop
-    END
+    Log    Waiting for the '${catalog_name}' CatalogSource in '${namespace}' namespace to be in 'Ready' status state
+    ...    console=yes
+    Wait Until Keyword Succeeds    6 times   10 seconds
+    ...   Catalog Is Ready    ${namespace}   ${catalog_name}
+    Log    CatalogSource '${catalog_name}' in '${namespace}' namespace in 'Ready' status now, let's continue
+    ...    console=yes
+
+Catalog Is Ready
+    [Documentation]   Check whether given CatalogSource is Ready
+    [Arguments]    ${namespace}=openshift-marketplace   ${catalog_name}=odh-catalog-dev
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc get catalogsources ${catalog_name} -n ${namespace} -o json | jq ."status.connectionState.lastObservedState"    # robocop: disable:line-too-long
+    Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
+    Should Be Equal As Strings    "READY"    ${output}
 
 Install Kserve Dependencies
     [Documentation]    Install Dependent Operator For Kserve
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
-    ...    subscription_name=${SERVICEMESH_SUB_NAME}
-    ...    catalog_source_name=redhat-operators
-    Wait Until Operator Subscription Last Condition Is
-    ...    type=CatalogSourcesUnhealthy    status=False
-    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
-    Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
-    ...    namespace=${SERVERLESS_NS}
-    ...    subscription_name=${SERVERLESS_SUB_NAME}
-    ...    catalog_source_name=redhat-operators
-    ...    operator_group_name=serverless-operators
-    ...    operator_group_ns=${SERVERLESS_NS}
-    ...    operator_group_target_ns=${NONE}
-    Wait For Pods To Be Ready    label_selector=name=knative-openshift
-    ...    namespace=${SERVERLESS_NS}
-    Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
-    ...    namespace=${SERVERLESS_NS}
-    Wait For Pods To Be Ready    label_selector=name=knative-operator
-    ...    namespace=${SERVERLESS_NS}
+    ${is_installed}=   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
+    IF    not ${is_installed}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
+          ...    subscription_name=${SERVICEMESH_SUB_NAME}
+          ...    catalog_source_name=redhat-operators
+          Wait Until Operator Subscription Last Condition Is
+          ...    type=CatalogSourcesUnhealthy    status=False
+          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
+    ELSE
+          Log To Console    message=ServiceMesh Operator is already installed
+    END
+    ${is_installed}=   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
+    IF    not ${is_installed}
+          ${rc}    ${out}=    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
+          ...    namespace=${SERVERLESS_NS}
+          ...    subscription_name=${SERVERLESS_SUB_NAME}
+          ...    catalog_source_name=redhat-operators
+          ...    operator_group_name=serverless-operators
+          ...    operator_group_ns=${SERVERLESS_NS}
+          ...    operator_group_target_ns=${NONE}
+          Wait Until Operator Subscription Last Condition Is
+          ...    type=CatalogSourcesUnhealthy    status=False
+          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+          ...    namespace=${SERVERLESS_NS}
+          Wait For Pods To Be Ready    label_selector=name=knative-openshift
+          ...    namespace=${SERVERLESS_NS}
+          Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
+          ...    namespace=${SERVERLESS_NS}
+          Wait For Pods To Be Ready    label_selector=name=knative-operator
+          ...    namespace=${SERVERLESS_NS}
+    ELSE
+         Log To Console    message=Serverless Operator is already installed
+    END
+
+Set Component State
+    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed)
+    [Arguments]    ${component}    ${state}
+    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+    ...    shell=true    stderr=STDOUT
+    IF    $result.stdout == ""
+        FAIL    Can not find datasciencecluster
+    END
+    ${cluster_name} =    Set Variable    ${result.stdout}
+    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${component}/managementState" ,"value" : "${state}"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Can not enable ${component}: ${result.stdout}
+    END
+    Log To Console    Component ${component} state was set to ${state}
+
+Enable Component
+    [Documentation]    Enables a component in Data Science Cluster
+    [Arguments]    ${component}
+    Set Component State    ${component}    Managed
+
+Disable Component
+    [Documentation]    Disable a component in Data Science Cluster
+    [Arguments]    ${component}
+    Set Component State    ${component}    Removed
+
+Wait Component Ready
+    [Documentation]    Wait for DSC cluster component to be ready
+    [Arguments]    ${component}
+    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+    ...    shell=true    stderr=STDOUT
+    IF    $result.stdout == ""
+        FAIL    Can not find datasciencecluster
+    END
+    ${cluster_name} =    Set Variable    ${result.stdout}
+
+    Log To Console    Waiting for ${component} to be ready
+
+    # oc wait "${cluster_name}" --for=condition\=${component}Ready\=true --timeout\=3m
+    ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=3m
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Timeout waiting for ${component} to be ready
+    END
+    Log To Console    ${component} is ready
+
+Add UI Admin Group To Dashboard Admin
+    [Documentation]    Add UI admin group to ODH dashboard admin group [only for odh-nightly]
+    ${status} =     Run Keyword And Return Status    Check Group In Cluster    odh-ux-admins
+    IF    ${status} == ${TRUE}
+              ${rc}  ${output}=    Run And Return Rc And Output
+              ...   oc wait --for=condition=ready pod -l app=odh-dashboard -n ${APPLICATIONS_NAMESPACE} --timeout=400s  #robocop: disable
+              IF  ${rc} != ${0}     Log    message=Dashboard Pod is not up and running   level=ERROR
+              ${rc}  ${output}=    Run And Return Rc And Output
+              ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"odh-admins,odh-ux-admins"}}}'  #robocop: disable
+              IF  ${rc} != ${0}     Log    message=Unable to update the admin config   level=WARN
+    END

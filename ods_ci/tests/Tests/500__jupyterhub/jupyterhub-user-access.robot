@@ -11,7 +11,7 @@ Library          JupyterLibrary
 Library          OpenShiftLibrary
 Suite Setup      Special User Testing Suite Setup
 Suite Teardown   Close All Browsers
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Variables ***
@@ -26,7 +26,12 @@ ${STANDARD_USERS_GROUP}=   system:authenticated
 Verify User Can Set Custom RHODS Groups
     [Documentation]    Tests the JH access level when using custom rhods groups
     ...                different from rhods-admins and rhods-users
-    [Tags]  Sanity
+    ...                Note: this test creates users/groups via `oc adm groups`
+    ...                command. There is an another test that changes users/groups
+    ...                via ODH Dashboard UI in `Settings -> User management` section, see:
+    ...                `Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook` in
+    ...                ods_ci/tests/Tests/400__ods_dashboard/413__ods_dashboard_user_mgmt.robot
+    [Tags]  Sanity    Tier1
     ...     ODS-293    ODS-503
     [Setup]      Set Standard RHODS Groups Variables
     Create Custom Groups

@@ -1,7 +1,8 @@
-from util import execute_command
+import sys
 from logging import log
 from time import sleep
-import sys
+
+from util import execute_command
 
 
 def create_account_roles():
@@ -29,7 +30,7 @@ def rosa_create_cluster(
     rosa_version,
     sts=True,
 ):
-    if sts == True:
+    if sts is True:
         cmd_rosa_create_cluster = [
             "rosa",
             "create",
@@ -126,7 +127,7 @@ def rosa_describe(cluster_name, filter=""):
         cmd += " " + filter
     ret = execute_command(cmd)
     if ret is None:
-        print("rosa describe for cluster " "{} failed".format(cluster_name))
+        print("rosa describe for cluster {} failed".format(cluster_name))
         return None
     return ret
 
@@ -159,13 +160,11 @@ def wait_for_osd_cluster_to_be_ready(cluster_name, timeout=7200):
             check_flag = True
             break
         elif cluster_state == "error":
-            print("{} is in error state. Hence " "exiting!!".format(cluster_name))
+            print("{} is in error state. Hence exiting!!".format(cluster_name))
             sys.exit(1)
 
         sleep(60)
         count += 60
     if not check_flag:
-        print(
-            "{} not in ready state even after 2 hours." " EXITING".format(cluster_name)
-        )
+        print("{} not in ready state even after 2 hours. EXITING".format(cluster_name))
         sys.exit(1)

@@ -63,8 +63,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Get changed files
         id: changed-files
@@ -81,3 +79,41 @@ jobs:
                isort $file --check --diff
             fi
           done
+  ruff:
+    name: ruff
+    runs-on: ubuntu-latest
+    env:
+      poetry_version: '1.7.1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache poetry in ~/.local
+        uses: actions/cache@v3
+        id: cached-home-local
+        with:
+          path: ~/.local
+          key: ${{ runner.os }}-local-${{ env.poetry_version }}
+
+      - name: Install poetry
+        if: steps.cached-home-local.outputs.cache-hit != 'true'
+        run: pip install poetry==${{ env.poetry_version }}
+
+      - name: Set up Python
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'poetry'
+
+      - name: Configure poetry
+        run: |
+          poetry env use "${{ steps.setup-python.outputs.python-path }}"
+
+      - run: poetry check --lock
+
+      - name: Install ruff
+        run: poetry install --only=dev --sync
+
+      - run: poetry run ruff check ods_ci/

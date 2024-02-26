@@ -2,24 +2,25 @@
 Library         OpenShiftLibrary
 Resource        ../../LoginPage.robot
 Resource        ../../ODH/JupyterHub/LoginJupyterHub.robot
+Resource        ../../../ODS.robot
 
 
 *** Variables ***
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
-${GROUP_BTN_XP}=    (//*[@class="pf-c-chip-group"])//*[@class="pf-c-chip__text" ]//following-sibling::button[1]
+${GROUP_BTN_XP}=    //button[@data-ouia-component-id="Remove"]
 ${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
 ${MULTI_MODE_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
-
+${CUSTOM_EMPTY_GROUP}=    empty-group
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
-    Click Button   (//button[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"])[${1}]
+    Click Button   (//button[@aria-label="Options menu"])[${1}]
     FOR    ${admin_group}    IN    @{admin_groups}
-             ${present}=  Run Keyword And Return Status    Element Should Be Visible   //*[@class="pf-c-select__menu-item pf-m-selected" and contains(text(), "${admin_group}")]
+             ${present}=  Run Keyword And Return Status    Element Should Be Visible   //button[@role="option" and text()="${admin_group}" and @aria-selected="true"]
             IF  ${present} != True
-                Click Button    //*[@class="pf-c-select__menu-item"and contains(text(), "${admin_group}")]
+                Click Button    //button[@role="option" and text()="${admin_group}"]
             END
     END
     Press Keys    None    ESC
@@ -27,13 +28,13 @@ Add OpenShift Groups To Data Science Administrators
 Add OpenShift Groups To Data Science User Groups
     [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
-    Click Button    (//button[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"])[${2}]
+    Click Button    (//button[@aria-label="Options menu"])[${2}]
 
     FOR    ${user_group}    IN    @{user_groups}
             ${present}=  Run Keyword And Return Status
-               ...  Element Should Be Visible   //*[@class="pf-c-select__menu-item pf-m-selected" and contains(text(), "${user_group}")]
+               ...  Element Should Be Visible   //button[@role="option" and text()="${user_group}" and @aria-selected="true"]
              IF  ${present} != True
-                Click Element    //*[@class="pf-c-select__menu-item"and contains(text(), "${user_group}")]
+                Click Element    //button[@role="option" and text()="${user_group}"]
              END
     END
     Press Keys    None    ESC
@@ -47,7 +48,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     ${authorization_required} =  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize jupyterhub service account
     Menu.Navigate To Page    Settings    User management
-    Wait Until Element Is Visible   //*[@class="pf-c-button pf-c-select__toggle-button pf-m-plain"]  timeout=20
+    Wait Until Element Is Visible   //button[@aria-label="Options menu"]  timeout=20
 
 Remove OpenShift Groups From Data Science User Groups
     [Documentation]   Remove OpenShift Groups From Data Science User Groups From Dashboard
@@ -69,7 +70,7 @@ Save Changes In User Management Setting
     [Documentation]  Save User Management Settings In Dashboard
     Press Keys    None    ESC
     Click Button    Save changes
-    Sleep  60s
+    Sleep    120s    reason=Wait for Dashboard to apply the updated configuration...
 
 AdminGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD
@@ -304,3 +305,41 @@ Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
     ${true_status}=  BuiltIn.Convert To Boolean    True
     Should Be Equal    ${status}  ${true_status}
     Element Should Be Enabled    ${MULTI_MODE_SERVING_CHECK_BOX}
+    Should Be Equal    ${status}  True
+    Element Should Be Enabled     ${MULTI_MODEL_SERVING_CHECK_BOX}
+
+Set RHODS Admins Group Empty Group
+    [Documentation]     Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
+    ...                 to the given empty group (i.e., with no users)
+    Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
+
+Set RHODS Admins Group To system:authenticated    # robocop:disable
+    [Documentation]    Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the system:authenticated group
+    Set Access Groups Settings    admins_group=system:authenticated
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
+
+Set RHODS Admins Group To Inexistent Group
+    [Documentation]    Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the given inexistent group
+    Set Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
+
+Set RHODS Users Group Empty Group
+    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the given empty group (i.e., with no users)
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${CUSTOM_EMPTY_GROUP}
+
+Set RHODS Users Group To rhods-users    # robocop:disable
+    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the rhods-users group
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${STANDARD_USERS_GROUP}
+
+Set RHODS Users Group To Inexistent Group
+    [Documentation]    Sets the "allowedGroups" field in "odh-dashboard-config" ConfigMap
+    ...    to the given inexistent group
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${CUSTOM_INEXISTENT_GROUP}

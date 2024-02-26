@@ -10,12 +10,6 @@ Library             OperatingSystem
 
 
 *** Keywords ***
-Get Observatorium Token
-    [Documentation]  Returns the token to access observatorium
-    ${data}=    Create Dictionary     grant_type=client_credentials  client_id=${STARBURST.OBS_CLIENT_ID}  client_secret=${STARBURST.OBS_CLIENT_SECRET}
-    ${resp}=     RequestsLibrary.POST  ${STARBURST.OBS_TOKEN_URL}   data=${data}
-    RETURN    ${resp.json()['access_token']}
-
 Run Query
     [Documentation]    Runs a prometheus query, obtaining the current value. More info at:
     ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query

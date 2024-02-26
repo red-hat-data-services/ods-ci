@@ -84,12 +84,12 @@ Set Standard RHODS Groups Variables
     [Documentation]     Sets the RHODS groups name based on RHODS version
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    ${is_self_managed} == False
-        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      dedicated-admins
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}    dedicated-admins
     ELSE
-        Set Suite Variable    ${STANDARD_ADMINS_GROUP}      rhods-admins
+        Set Suite Variable    ${STANDARD_ADMINS_GROUP}    rhods-admins
     END
-    Set Suite Variable    ${STANDARD_USERS_GROUP}       system:authenticated
-
+    Set Suite Variable    ${STANDARD_SYSTEM_GROUP}    system:authenticated
+    Set Suite Variable    ${STANDARD_USERS_GROUP}    rhods-users
 
 Apply Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
@@ -102,12 +102,12 @@ Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}
     ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
-    Should Be Equal As Integers	${return_code}	 0    msg=Pathc failed
+    Should Be Equal As Integers	${return_code}	 0    msg=Patch to group settings failed
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map
     Apply Access Groups Settings     admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}
+    ...     users_group=${STANDARD_SYSTEM_GROUP}
 
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation
@@ -241,7 +241,7 @@ Verify RHODS Dashboard CR Contains Expected Values
 Verify Default Access Groups Settings
     [Documentation]     Verifies that ODS contains the expected default groups settings
     &{exp_values}=  Create Dictionary  spec.groupsConfig.adminGroups=${STANDARD_ADMINS_GROUP}
-    ...    spec.groupsConfig.allowedGroups=${STANDARD_USERS_GROUP}
+    ...    spec.groupsConfig.allowedGroups=${STANDARD_SYSTEM_GROUP}
     Verify RHODS Dashboard CR Contains Expected Values   &{exp_values}
 
 Enable Access To Grafana Using OpenShift Port Forwarding

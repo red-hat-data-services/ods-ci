@@ -40,7 +40,7 @@ ${CUSTOM_INEXISTENT_GROUP}              inexistent-group
 
 *** Test Cases ***
 Verify That Login Page Is Shown When Reaching The RHODS Page
-    [Tags]      Sanity
+    [Tags]      Sanity    Tier1
     ...         ODS-694
     ...         ODS-355
     [Setup]     Test Setup For Login Page
@@ -52,7 +52,7 @@ Verify Content In RHODS Explore Section
     ...    It compares the actual data with the one registered in a JSON file. The checks are about:
     ...    - Card's details (text, badges, images)
     ...    - Sidebar (titles, links text, links status)
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
@@ -78,7 +78,7 @@ Verify Disabled Cards Can Be Removed
     ...                 only trigger warning when issue happens
     ...                 AutomationBug: implementation is to be refactored after RHOSAK removal
     ...                 for ods-ci
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-1081    ODS-1092
     ...       AutomationBug
     # Enable Custom App
@@ -91,7 +91,7 @@ Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
     ...               ProductBug: RHODS-6539
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-1097   ODS-357
     ...       ProductBug
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
@@ -125,7 +125,7 @@ Verify CSS Style Of Getting Started Descriptions
 Verify Documentation Link HTTP Status Code
     [Documentation]    It verifies the documentation link present in question mark and
     ...    also checks the RHODS dcoumentation link present in resource page.
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
     Documentation Links Should Be Equal To The Expected Ones   actual_links=${links}  expected_links=${DOC_LINKS_EXP}
@@ -183,7 +183,7 @@ Verify Favorite Resource Cards
     ...                It checks if favorite items are always listed as first regardless
     ...                the view type or sorting
     Click Link    Resources
-    Wait Until Element Is Visible    //div[@class="pf-l-gallery pf-m-gutter odh-learning-paths__gallery"]
+    Wait Until Element Is Visible    //div[@class="pf-v5-l-gallery pf-m-gutter odh-learning-paths__gallery"]
     Sort Resources By    name
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile_ids}
@@ -388,48 +388,6 @@ Wait Until New Log Lines Are Generated In A Dashboard Pod
     END
     RETURN    ${pod_logs_lines}[${prev_length}:]     ${n_lines}
 
-Set RHODS Admins Group Empty Group
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
-    ...                 to the given empty group (i.e., with no users)
-    Set Access Groups Settings    admins_group=${CUSTOM_EMPTY_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}
-
-Set RHODS Admins Group To system:authenticated    # robocop:disable
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
-    ...                 to the given empty group (i.e., with no users)
-    Set Access Groups Settings    admins_group=system:authenticated
-    ...     users_group=${STANDARD_USERS_GROUP}
-
-Set RHODS Users Group Empty Group
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
-    ...                 to the given empty group (i.e., with no users)
-    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${CUSTOM_EMPTY_GROUP}
-
-Set RHODS Admins Group To Inexistent Group
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
-    ...                 to the given inexistent group
-    Set Access Groups Settings    admins_group=${CUSTOM_INEXISTENT_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}
-
-Set RHODS Users Group To Inexistent Group
-    [Documentation]     Sets the "admins_groups" field in "rhods-groups-config" ConfigMap
-    ...                 to the given inexistent group
-    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${CUSTOM_INEXISTENT_GROUP}
-
-Set Default Groups And Check Logs Do Not Change
-    [Documentation]     Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "rhods-groups-config"
-    ...                 ConfigMap and checks if no new lines are generated in the logs after that.
-    [Arguments]     ${delete_group}=${FALSE}
-    ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
-    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${STANDARD_USERS_GROUP}
-    Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
-    IF  "${delete_group}" == "${TRUE}"
-        Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
-    END
-
 Logs Of Dashboard Pods Should Not Contain New Lines
     [Documentation]     Checks if no new lines are generated in the logs after that.
     [Arguments]     ${lengths_dict}
@@ -438,6 +396,18 @@ Logs Of Dashboard Pods Should Not Contain New Lines
         ...                 Wait Until New Log Lines Are Generated In A Dashboard Pod
         ...                 prev_length=${lengths_dict}[${pod_name}]  pod_name=${pod_name}
         Run Keyword And Continue On Failure     Should Be Equal     ${new_lines_flag}   ${FALSE}
+    END
+
+Set Default Groups And Check Logs Do Not Change
+    [Documentation]    Teardown for ODS-1408 and ODS-1494. It sets the default configuration of "odh-dashboard-config"
+    ...    ConfigMap and checks if no new lines are generated in the logs after that.
+    [Arguments]    ${delete_group}=${FALSE}
+    ${lengths_dict}=    Get Lengths Of Dashboard Pods Logs
+    Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
+    Logs Of Dashboard Pods Should Not Contain New Lines  lengths_dict=${lengths_dict}
+    IF  "${delete_group}" == "${TRUE}"
+        Delete Group    group_name=${CUSTOM_EMPTY_GROUP}
     END
 
 Favorite Items Should Be Listed First
@@ -458,7 +428,7 @@ Verify Star Icons Are Clickable
 Get List Of Ids Of Tiles
     [Documentation]    Returns the list of ids of tiles present in resources page
     ${list_of_ids}=    Get List Of Atrributes
-    ...    xpath=//div[@class="pf-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
+    ...    xpath=//div[@class="pf-v5-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
     RETURN    ${list_of_ids}
 
 Set Item As Favorite
@@ -526,7 +496,7 @@ Verify Jupyter Card CSS Style
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    property=font-size    exp_value=24px
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}/h1
-    ...    property=font-family    exp_value=RedHatDisplay
+    ...    property=font-family    exp_value=RedHatText
     ...    operation=contains
 
 Test Setup For Login Page

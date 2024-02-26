@@ -36,7 +36,7 @@ Verify RHODS Admins Can Delete A Custom Serving Runtime Template
  
 Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Serving Platform
     [Documentation]    Imports a Custom Serving Runtime for each supported serving platform
-    [Tags]    Sanity    ODS-2542
+    [Tags]    Sanity    ODS-2542    Tier1
     [Setup]    Generate Runtime YAMLs
     Open Dashboard Settings    settings_page=Serving runtimes
     ${RUNTIME_BOTH_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_both_model.yaml
@@ -79,14 +79,19 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Create Model Server    server_name=${MODEL_SERVER_NAME}    runtime=${UPLOADED_OVMS_DISPLAYED_NAME}
-    Serve Model    project_name=${PRJ_TITLE}    model_name=${model_name}    framework=onnx    existing_data_connection=${TRUE}
+    Serve Model    project_name=${PRJ_TITLE}    model_name=${model_name}    framework=onnx
+    ...    existing_data_connection=${TRUE}    model_server=${MODEL_SERVER_NAME}
     ...    data_connection_name=model-serving-connection    model_path=mnist-8.onnx
     Wait Until Runtime Pod Is Running    server_name=${MODEL_SERVER_NAME}
-    ...    project_title=${PRJ_TITLE}    timeout=15s
+    ...    project_title=${PRJ_TITLE}    timeout=5m
     Verify Model Status    ${model_name}    success
-    Verify Model Inference    ${model_name}    ${inference_input}    ${exp_inference_output}    token_auth=${TRUE}
+    Verify Model Inference With Retries    ${model_name}    ${inference_input}    ${exp_inference_output}
+    ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
+    [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${ns_name}
+    ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
     
 
 *** Keywords ***
@@ -94,14 +99,17 @@ Custom Serving Runtime Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     RHOSi Setup
+    ${runtime_pod_name} =    Replace String Using Regexp    string=${MODEL_SERVER_NAME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    Set Suite Variable    ${RUNTIME_POD_NAME}    ${runtime_pod_name}
     Fetch CA Certificate If RHODS Is Self-Managed
 
 Custom Serving Runtime Suite Teardown
     Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
     Delete Serving Runtime Template From CLI    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     SeleniumLibrary.Close All Browsers
+    Remove File    openshift_ca.crt
     RHOSi Teardown
 
 Create Test Serving Runtime Template If Not Exists

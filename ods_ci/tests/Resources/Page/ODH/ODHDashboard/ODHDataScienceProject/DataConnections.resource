@@ -17,28 +17,53 @@ ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[.="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKET"]
 ${S3_DC_ADD_BTN}=             xpath=//footer/button[.="Add data connection"]
 ${S3_DC_EDIT_BTN}=             xpath=//footer/button[.="Update data connection"]
-${DC_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]/ul/li
+${DC_WORKBENCH_SELECTOR_XP}=         xpath=//ul[@aria-label="Notebook select"]/li
 
 
 *** Keywords ***
 Create S3 Data Connection
     [Documentation]    Creates a S3 Data Connection from DS Project details page
+    ...    If 'aws_s3_ca_bundle' or 'S3.AWS_CA_BUNDLE' is defined then the underlying secret is patched
     [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
+    ...            ${aws_s3_ca_bundle}=${NONE}
     Click Button    ${DC_ADD_BTN_1_XP}
     Fill Data Connection Form    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${S3_DC_ADD_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
     ...            aws_bucket_name=${aws_bucket_name}
     Wait Until Project Is Open    project_title=${project_title}
+    # Check if there is any CA Bundle
+    # I did not find a better way to check if multi-line string is empty or "NONE"
+    ${length}=    Get Length    "${aws_s3_ca_bundle}"
+    IF    ${length} <= 6
+        ${aws_s3_ca_bundle}=    Get Variable Value    ${S3.AWS_CA_BUNDLE}    ${NONE}
+        ${length}=    Get Length    "${aws_s3_ca_bundle}"
+    END
+    IF    ${length} > 6
+        Patch S3 Data Connection With CA Bundle
+        ...    project_title=${project_title}    dc_name=${dc_name}    aws_s3_ca_bundle=${aws_s3_ca_bundle}
+    END
+
+Patch S3 Data Connection With CA Bundle
+    [Documentation]    Patch the underlying secret of S3 Data Connection With CA Bundle
+    [Arguments]    ${project_title}    ${dc_name}    ${aws_s3_ca_bundle}
+    ${dc_namespace}=    Get Openshift Namespace From Data Science Project    ${project_title}
+    ${rc}    ${cert}=    Run And Return Rc And Output
+    ...    echo -n "${aws_s3_ca_bundle}" | base64 -w0    # robocop: disable
+    Should Be Equal As Strings    ${rc}    0
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc patch secret aws-connection-${dc_name} -n ${dc_namespace} -p '[{"op": "replace", "path": "/data/AWS_CA_BUNDLE", "value" : "${cert}"}]' --type json    # robocop: disable
+    Should Be Equal As Strings    ${rc}    0
+    Log To Console    "${out}"
 
 Edit S3 Data Connection
     [Documentation]    Edits a S3 Data Connection from DS Project details page
     [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}    ${new_dc_name}=${dc_name}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
-    Workbenches.Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
     Fill Data Connection Form    ${project_title}    ${new_dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${S3_DC_EDIT_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
@@ -86,7 +111,7 @@ Get Openshift Secret From Data Connection
 Delete Data Connection
     [Documentation]    Deletes a Data Connection from DS Project details page
     [Arguments]     ${name}    ${press_cancel}=${FALSE}
-    Workbenches.Click Action From Actions Menu    item_title=${name}    item_type=data connection    action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${name}    item_type=data connection    action=Delete
     Handle Deletion Confirmation Modal    item_title=${name}    item_type=data connection    press_cancel=${press_cancel}
 
 Fill Data Connection Form
@@ -108,7 +133,7 @@ Fill Data Connection Form
         Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
     ELSE
         Run Keyword And Continue On Failure
-        ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//div[contains(@class,"pf-c-select")]
+        ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//button[@aria-label="Options menu"]
         FOR    ${workbench_title}    IN    @{connected_workbench}
             Set Connection Between Data Connection And Workbench    ${workbench_title}
             Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}
@@ -126,7 +151,7 @@ Fill Data Connection Form
 
 Get Data Connection Form Values
     [Arguments]    ${dc_name}
-    Workbenches.Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
     Wait Until Page Contains Element    ${S3_NAME_DC_INPUT_XP}
     ${s3_name}   get element attribute    ${S3_NAME_DC_INPUT_XP}      value
     ${s3_key}   get element attribute    ${S3_KEY_DC_INPUT_XP}      value
@@ -135,3 +160,26 @@ Get Data Connection Form Values
     ${s3_region}   get element attribute    ${S3_REGION_DC_INPUT_XP}      value
     ${s3_bucket}   get element attribute    ${S3_BUCKET_DC_INPUT_XP}      value
     [return]    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}
+
+Recreate S3 Data Connection
+    [Documentation]    Edit Exisisting Or Create New S3 Data Connection from DS Project details page
+    [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
+    ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
+    ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
+    ...            ${aws_s3_ca_bundle}=${NONE}
+    ${is_exist}=  Run Keyword And Return Status
+    ...    Wait Until Page Contains Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${dc_name}"]]
+    IF  ${is_exist}
+        Log    Data Connection '${dc_name}' already exists, updating connection    console=True
+        Edit S3 Data Connection    project_title=${project_title}    dc_name=${dc_name}    new_dc_name=${dc_name}${SPACE}
+        ...    aws_access_key=${aws_access_key}    aws_secret_access=${aws_secret_access}
+        ...    aws_bucket_name=${aws_bucket_name}    aws_region=${aws_region}    press_cancel=${press_cancel}
+        ...    aws_s3_endpoint=${aws_s3_endpoint}    connected_workbench=${connected_workbench}
+    ELSE
+        Log    Data Connection '${dc_name}' does not exist, creating a new connection    console=True
+        Create S3 Data Connection    project_title=${project_title}    dc_name=${dc_name}
+        ...    aws_access_key=${aws_access_key}    aws_secret_access=${aws_secret_access}
+        ...    aws_bucket_name=${aws_bucket_name}    aws_region=${aws_region}    press_cancel=${press_cancel}
+        ...    aws_s3_endpoint=${aws_s3_endpoint}    aws_s3_ca_bundle=${aws_s3_ca_bundle}
+        ...    connected_workbench=${connected_workbench}
+    END

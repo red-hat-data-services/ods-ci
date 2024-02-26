@@ -6,7 +6,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Resource         ../../Resources/Common.robot
 Suite Setup      Test Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Test Cases ***
@@ -15,7 +15,7 @@ Verify pip Changes not permanent
     ...   Verify if installed pip changes are permanent
     ...   after stopping and starting notebook
 
-    [Tags]  Sanity
+    [Tags]  Sanity    Tier1
     ...     ODS-909
     Install And Import Package In JupyterLab  paramiko
     Stop JupyterLab Notebook Server

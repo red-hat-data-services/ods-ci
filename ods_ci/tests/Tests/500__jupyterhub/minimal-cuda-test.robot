@@ -8,7 +8,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
 Library          JupyterLibrary
 Suite Setup      Verify CUDA Image Suite Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
+Test Tags       JupyterHub
 
 
 *** Variables ***

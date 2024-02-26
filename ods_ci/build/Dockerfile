@@ -14,23 +14,24 @@ ENV OCM_ENV=${OCM_ENV}
 ENV SE_BROWSER_PATH=/usr/bin/chromium-browser
 ARG OC_VERSION=4.13
 ARG OC_CHANNEL=stable
-
+ARG PYTHON_VERSION=3.11
 
 RUN dnf -y update &&\
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
-    dnf install -y jq git unzip chromium chromedriver python3-distro httpd-tools &&\
-    dnf clean all &&\
+    dnf install -y jq git unzip chromium chromedriver httpd-tools gcc \
+                   python3 python3-devel python3-distro python-pip python${PYTHON_VERSION} python${PYTHON_VERSION}-devel &&\
+    dnf clean all && rm -rf /var/cache/yum &&\
     curl --proto "=https" -L https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -o /usr/bin/yq &&\
     chmod +x /usr/bin/yq &&\
-    curl --proto "=https" -L https://mirror.openshift.com/pub/openshift-v$(echo $OC_VERSION | cut -d'.' -f 1)/x86_64/clients/ocp/$OC_CHANNEL-$OC_VERSION/openshift-client-linux.tar.gz -o $HOME/oc_client.tar.gz && \
-    tar xvf $HOME/oc_client.tar.gz -C /usr/local/bin/ && \
-    rm -rf $HOME/oc_client.tar.gz && rm /usr/local/bin/README.md && chmod 755 /usr/local/bin/oc && oc version --client && \
-    curl --proto "=https" -L https://github.com/openshift-online/ocm-cli/releases/download/v0.1.62/ocm-linux-amd64 -o $HOME/ocm && \
-    mv $HOME/ocm /usr/local/bin/ && chmod 755 /usr/local/bin/ocm && ocm version
+    curl --proto "=https" -L https://mirror.openshift.com/pub/openshift-v$(echo ${OC_VERSION} | cut -d'.' -f 1)/x86_64/clients/ocp/${OC_CHANNEL}-${OC_VERSION}/openshift-client-linux.tar.gz -o ${HOME}/oc_client.tar.gz && \
+    tar xvf ${HOME}/oc_client.tar.gz -C /usr/local/bin/ && \
+    rm -rf ${HOME}/oc_client.tar.gz && rm /usr/local/bin/README.md && chmod 755 /usr/local/bin/oc && oc version --client && \
+    curl --proto "=https" -L https://github.com/openshift-online/ocm-cli/releases/download/v0.1.62/ocm-linux-amd64 -o ${HOME}/ocm && \
+    mv ${HOME}/ocm /usr/local/bin/ && chmod 755 /usr/local/bin/ocm && ocm version
 
-RUN mkdir $HOME/ods-ci
+RUN mkdir ${HOME}/ods-ci
 # Change the WORKDIR so the run script references any files/folders from the root of the repo
-WORKDIR $HOME/ods-ci
+WORKDIR ${HOME}/ods-ci
 
 
 COPY ods_ci/tests ods_ci/tests/
@@ -59,9 +60,10 @@ RUN  chmod +x ods_ci/build/run.sh &&\
 COPY pyproject.toml .
 COPY poetry.lock .
 COPY README.md .
+RUN alternatives --install /usr/local/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
 RUN python3 --version
 RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="${PATH}:$HOME/.local/bin"
+ENV PATH="${PATH}:${HOME}/.local/bin"
 RUN poetry install
 
 RUN chgrp -R 0 . && \

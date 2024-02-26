@@ -7,7 +7,7 @@ Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Suite Setup      JupyterHub Testing Suite Setup
 Suite Teardown   End Web Test
-Force Tags       JupyterHub
+Test Tags        JupyterHub
 
 
 *** Variables ***
@@ -88,22 +88,6 @@ Can Spawn Notebook
     IF  not ${is_launcher_selected}  Open JupyterLab Launcher
     Launch a new JupyterLab Document    kernel=Python 3.9
     Close Other JupyterLab Tabs
-
-Verify Message That Image Builds Are In Progress
-    [Documentation]     Verifies that Image Builds In Progress are Shown In RHODS Dashboard
-    [Tags]      Tier2
-    ...         ODS-460
-    ...         ODS-381
-    ...         ODS-1348
-    ...         FlakyTest
-    Skip If RHODS Version Greater Or Equal Than    1.20.0    CUDA build chain removed in v1.20
-    Delete Last Pytorch Build
-    ${new_buildname}=  Start New Pytorch Build
-    Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}    ocp_user_pw=${TEST_USER.PASSWORD}   ocp_user_auth_type=${TEST_USER.AUTH_TYPE}   dashboard_url=${ODH_DASHBOARD_URL}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    RHODS Notification Drawer Should Contain  message=Notebook images are building
-    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}    build_name=${new_buildname}   expected_status=Complete
-    RHODS Notification Drawer Should Contain  message=All notebook image builds are complete
-
 
 *** Keywords ***
 JupyterHub Testing Suite Setup

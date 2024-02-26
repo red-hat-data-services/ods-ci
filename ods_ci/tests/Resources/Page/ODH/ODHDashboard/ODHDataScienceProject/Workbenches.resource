@@ -24,6 +24,8 @@ ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-sel
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
+${WORKBENCH_USE_CONNECTION_CHK_XP}=           xpath=//input[@name="enable-data-connection-checkbox"]
+${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//input[@name="existing-data-connection-type-radio"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting...
@@ -36,6 +38,7 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="wo
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
+${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Data connections"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
 
@@ -47,6 +50,7 @@ Create Workbench
     [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}    ${gpus}=${NONE}
     ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
+    ...             ${data_connection}=${NONE}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
@@ -59,6 +63,9 @@ Create Workbench
     IF    "${envs}" != "${NONE}"
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
         Add Environment Variables In Workbench    env_variables=${envs_copy}
+    END
+    IF    "${data_connection}" != "${NONE}"
+        Add Existing Data Connection In Workbench    data_connection=${data_connection}
     END
     ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
     IF  ${version_check}==True
@@ -115,41 +122,59 @@ Add Environment Variables In Workbench
                 Log   ${pair_idx}-${key}-${value}
                 Run Keyword And Continue On Failure    Wait Until Page Contains Element
                 ...    xpath=//input[@aria-label="key of item ${pair_idx}"]
-                Input Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//input[@aria-label="key of item ${pair_idx}"]
+                Input Text    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//input[@aria-label="key of item ${pair_idx}"]
                 ...           ${key}
-                Input Text    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//input[@aria-label="value of item ${pair_idx}"]
+                Input Text    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//input[@aria-label="value of item ${pair_idx}"]
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
-                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//button[text()="${add_key_value_text}"]
+                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//button[text()="${add_key_value_text}"]
                     # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
                     # amount of pixels for the block of elements that gets added.
                     IF    "${add_key_value_text}" == "Add another key / value pair"
-                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-v5-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
                     ELSE IF    "${add_key_value_text}" == "Add another variable"
-                        Execute Javascript    document.getElementsByClassName("pf-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
+                        Execute Javascript    document.getElementsByClassName("pf-v5-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
                     END
                 END
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"
             ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
-            Choose File    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${idx}]//div[@class="pf-c-file-upload"]//input[@type="file"]    ${pwd}/${env_variable}[filepath]
+            Choose File    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${idx}]//div[(contains(@class, "-c-file-upload"))]//input[@type="file"]    ${pwd}/${env_variable}[filepath]  # robocop: disable:line-too-long
         END
         IF    ${n_objects}-${idx} > 0
             Click Button    Add more variables
         END
     END
 
+Add Existing Data Connection In Workbench
+    [Documentation]    Adds the data connection through the workbench creation page
+    [Arguments]    ${data_connection}
+    # Use the `Jump to section` links in the page to scroll the section into view
+    Click Element    //a[@href="#data-connections"]
+    Click Element    ${WORKBENCH_USE_CONNECTION_CHK_XP}
+    # Use the `Jump to section` again to move the expanded form into view
+    Click Element    //a[@href="#data-connections"]
+    Click Element    ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}
+    Select Existing Data Connection    data_connection=${data_connection}
+
+Select Existing Data Connection
+    [Documentation]    Selects the existing data connection in the workbench creation page from a dropdown list
+    [Arguments]    ${data_connection}
+    Click Element    ${ENV_DATA_CONNECTION_SECTION_XP}//div[contains(@class,"pf-c-select")]/button
+    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${data_connection}"]
+    Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${data_connection}"]
+
 Select Environment Variable Types
     [Documentation]    Selects the type of environment variable in the workbench creation page: Secret vs Config Map
     [Arguments]    ${k8s_type}    ${input_type}    ${variable_index}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
-    ...    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${variable_index}]//div[@class="pf-l-stack__item"]/div[contains(@class,"pf-c-select")]/button
-    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${variable_index}]//div[contains(@class,"pf-c-select")]/button
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[@aria-label="Options menu"]
+    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[@aria-label="Options menu"]
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
     Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element    ${ENV_VARIABLES_SECTION_XP}//button[div/span[text()="Select one"]]
-    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[@class="pf-l-split"][${variable_index}]//button[div/span[text()="Select one"]]
+    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[div/span[text()="Select one"]]
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
     Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
 
@@ -167,22 +192,26 @@ Select An Existent PV
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
     Wait Until Page Contains Element    xpath=//ul/li/button[text()="${name}"]
-    Wait Until Page Contains Element    xpath=//div[contains(@class,"pf-c-select")]/ul/li/button[text()="${name}"]
+    Wait Until Page Contains Element    xpath=//ul[@aria-label="Persistent storage select"]//button[text()="${name}"]
     Click Element   xpath=//ul/li/button[text()="${name}"]
 
 Select Workbench Jupyter Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
+    Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
     Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-    IF    "${version}"=="default"
-        Verify Version Selection Dropdown
-    ELSE IF    "${version}"=="previous"
-        Select Workbench Image Version    ${version}
-    ELSE
-        Fail    ${version} does not exist, use default/previous
+
+    IF    "${version}" != "${NONE}"
+        IF    "${version}"=="default"
+            Verify Version Selection Dropdown
+        ELSE IF    "${version}"=="previous"
+            Select Workbench Image Version    ${version}
+        ELSE
+            Fail    ${version} does not exist, use default/previous
+        END
     END
 
 Verify Version Selection Dropdown
@@ -284,7 +313,7 @@ Start Workbench
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
+        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -292,15 +321,23 @@ Start Workbench
 
 Access To Workbench
     [Documentation]    Gets access to a workbench from DS Project details page after it got launched
-    [Arguments]    ${username}  ${password}  ${auth_type}
+    [Arguments]    ${username}  ${password}  ${auth_type}    ${expected_ide}=JupyterLab
     Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
     ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
     IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
     ${authorization_required}=  Is Service Account Authorization Required
     IF  ${authorization_required}  Authorize Jupyterhub Service Account
-    Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
-    Maybe Close Popup
+    IF  "${expected_ide}"=="VSCode"
+        Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
+        Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
+        Wait Until Page Contains  Do you trust the authors of the files in this folder?
+    ELSE IF  "${expected_ide}"=="JupyterLab"
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Maybe Close Popup
+    ELSE
+        Fail    msg=Unknown IDE typy given: '${expected_ide}'. Please check and fix or implement.
+    END
 
 Launch And Access Workbench
     [Documentation]    Launches a workbench from DS Project details page
@@ -330,7 +367,7 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//span[@class="pf-c-switch__toggle"]
+        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
         ...    from_running=${from_running}
@@ -357,23 +394,16 @@ Handle Stop Workbench Confirmation Modal
         Click Button    ${WORKBENCH_STOP_BTN_XP}
     END
 
-Click Action From Actions Menu
-    [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
-    [Arguments]    ${item_title}    ${item_type}    ${action}
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/button[@aria-label="Actions"]
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[@class="pf-c-table__action"]/div/ul/li/button[text()="${action} ${item_type}"]
-
 Delete Workbench
     [Documentation]    Deletes a workbench
     [Arguments]     ${workbench_title}    ${press_cancel}=${FALSE}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Delete
     Handle Deletion Confirmation Modal    item_title=${workbench_title}    item_type=workbench    press_cancel=${press_cancel}
 
 Edit Workbench
     [Documentation]    Edits a workbench
     [Arguments]     ${workbench_title}
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     # Also wait until the workbench name is populated in the text field - let's wait for DOM to finish
     Wait For Condition    return document.readyState == "complete"    timeout=5s
@@ -423,6 +453,11 @@ Event Log Should Report The Failure
     [Arguments]    ${exp_progress_text}=${NONE}    ${exp_result_text}=${NONE}
     Page Should Contain Event Log    expected_progress_text=${exp_progress_text}
     ...    expected_result_text=${exp_result_text}
+
+Cancel Workbench Startup From Event Log
+    [Documentation]    Clicks the Cancel button in Workbench statup event log
+    Click Element    ${KFNBC_MODAL_CANCEL_XPATH}
+    Wait Until Generic Modal Disappears
 
 Close Event Log
     [Documentation]    Closes the event log which was previously opened by the robot
@@ -496,7 +531,7 @@ Select Workbench Number Of GPUs
 Edit GPU Number
     [Documentation]    Edit a workbench
     [Arguments]     ${workbench_title}    ${gpus}=1
-    Workbenches.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
+    ODHDashboard.Click Action From Actions Menu    item_title=${workbench_title}    item_type=workbench    action=Edit
     ${status}=    Run Keyword And Return Status    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    ${status} == ${FALSE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}

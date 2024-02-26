@@ -410,10 +410,15 @@ Check Versions In JupyterLab
             END
         ELSE IF  "${libDetail}[0]" == "Python"
             ${status} =  Python Version Check  ${libDetail}[1]
-        ELSE IF  "${libDetail}[0]" == "Sklearn-onnx"
+        # lowercase string is needed as a workaround for the metadata of the tensorflow image
+        # needs to be updated when https://issues.redhat.com/browse/RHOAIENG-2124 is resolved
+        ELSE IF  "${libDetail}[0]" == "Sklearn-onnx" or "${libDetail}[0]" == "sklearn-onnx"
             ${status}  ${value} =  Verify Installed Library Version  skl2onnx  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
               ${return_status} =    Set Variable    FAIL
+            END
+            IF  "${libDetail}[0]" == "sklearn-onnx"
+                Log    Library name "${libDetail}[0]" is in all lowercase    level=WARN
             END
         ELSE IF  "${libDetail}[0]" == "MySQL Connector/Python"
             ${status}  ${value} =  Verify Installed Library Version  mysql-connector-python  ${libDetail}[1]
@@ -579,3 +584,12 @@ Image Should Be Pinned To A Numeric Version
            Log  level=WARN  message=Image Tag "${image_tag}" is not in the format x.y.z-n or x.y-n or x.y
         END
     END
+
+Open Notebook File In JupyterLab
+    [Documentation]    Opens a given file from Jupyter explorer and waits until the
+    ...                new tab is open and selected
+    [Arguments]    ${filepath}
+    Open With JupyterLab Menu  File  Open from Path…
+    Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${filepath}
+    Click Element  xpath://div[.="Open"]
+    Wait Until ${filepath} JupyterLab Tab Is Selected

@@ -160,3 +160,36 @@ Get Thanos Metrics List
     END
     ${rc}    ${out}=    Run And Return Rc And Output    ${cmd} | tr -d '"'
     RETURN    ${out}
+
+Set Thanos Credentials Variables
+    ${thanos_url}=    Get OpenShift Thanos URL
+    ${token}=    Generate Thanos Token
+    Set Suite Variable    ${THANOS_URL}    ${thanos_url}
+    Set Suite Variable    ${THANOS_TOKEN}    ${token}
+
+Metrics Should Exist In UserWorkloadMonitoring
+    [Documentation]    Checks that the given ${metrics_searches} exists. It also accepts partial names.
+    ...                Returns the complete list of metrics found with the given search texts
+    [Arguments]    ${thanos_url}    ${thanos_token}    ${search_metrics}
+    ${metrics}=    Create List
+    FOR    ${index}    ${metric_search_text}    IN ENUMERATE    @{search_metrics}
+        Log    ${index}: ${metric_search_text}
+        ${metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
+        ...    search_text=${metric_search_text}
+        Should Not Be Empty    ${metrics_names}
+        ${metrics_names}=    Split To Lines    ${metrics_names}
+        Append To List    ${metrics}    @{metrics_names}
+    END
+    RETURN    ${metrics}
+
+Get OpenShift Prometheus Route
+    [Documentation]    Fetches the route for the Prometheus instance of openshift-monitoring
+    ${host}=    Run    oc get route prometheus-k8s -n openshift-monitoring -o json | jq '.status.ingress[].host'
+    ${host}=    Strip String    ${host}    characters="
+    ${route}=    Catenate    SEPARATOR=    https://    ${host}
+    RETURN    ${route}
+
+Get OpenShift Prometheus Service Account Token
+    [Documentation]    Returns a token for a service account to be used with Prometheus
+    ${token}=    Run    oc create token prometheus-k8s -n openshift-monitoring --duration 10m
+    RETURN    ${token}

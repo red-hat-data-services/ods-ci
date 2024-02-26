@@ -13,7 +13,7 @@ Test Teardown     Resources Test Teardown
 
 *** Variables ***
 @{LIST_OF_IDS_FOR_COMBINATIONS}         documentation--check-box    Red Hat managed--check-box
-${SUCCESS_STEP}              h3[normalize-space(@class="pf-c-title pf-m-md pfext-quick-start-task-header__title
+${SUCCESS_STEP}              h3[normalize-space(@class="pf-v5-c-title pf-m-md pfext-quick-start-task-header__title
 ...                           pfext-quick-start-task-header__title-success")]
 
 
@@ -78,7 +78,7 @@ Verify External Links In Quick Starts Are Not Broken
 Verify Resource Link HTTP Status Code
     [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
     ...                redirects users to working URLs (i.e., http status must be 200)
-    [Tags]    Sanity
+    [Tags]    Sanity    Tier1
     ...       ODS-531    ODS-507
     Click Link    Resources
     Sleep    5
@@ -296,7 +296,7 @@ Set Expected Items Based On RHODS Type    # robocop: disable
 Validate App Name Is Present On Each Tile
     [Documentation]    Check that each Resource tile contains
     ...    the name of the application
-    ${elements}=    Get WebElements    //article[contains(@class, 'pf-c-card')]//div[@class="pf-c-content"]//small
+    ${elements}=    Get WebElements    //article[contains(@class, 'pf-v5-c-card')]//div[@class="pf-v5-c-content"]//small
     ${len}=    Get Length    ${elements}
     FOR    ${counter}    IN RANGE    ${len}
         ${name}=    Get Text    ${elements}[${counter}]
@@ -340,7 +340,7 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
         Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
         ...    exp_link_text=Restart
         Open QuickStart Element In Resource Section By Name     ${element}
-        Page Should Not Contain         //article[@id="${element}"]//span[@class="pf-c-label pf-m-green pf-m-outline"]
+        Page Should Not Contain         //article[@id="${element}"]//span[@class="pf-v5-c-label pf-m-green pf-m-outline"]
         ${count}=   Get The Count Of QuickStart Steps
         Run Keyword And Continue On Failure     Click Button    //button[@data-testid="qs-drawer-start"]
         Run Keyword And Continue On Failure     Wait Until Page Contains Element
@@ -360,7 +360,7 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
         ...    exp_link_text=Continue
         Run Keyword And Continue On Failure     Click Link      //article[@id="${element}"]//a
         Run Keyword And Continue On Failure     Wait Until Page Contains ELement
-        ...    //div[@class="pf-c-drawer__panel-main"]     5
+        ...    //div[@class="pf-v5-c-drawer__panel-main"]     5
         FOR     ${index}    IN RANGE    ${temp_count}
             Run Keyword And Continue On Failure     Page Should Contain Element
             ...    //div[@class="pfext-quick-start-tasks__list"]//li[${index+1}]//${SUCCESS_STEP}
@@ -368,7 +368,7 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
         Run Keyword And Continue On Failure     Click Button    //button[@data-testid="qs-drawer-side-note-action"]
         FOR     ${index}    IN RANGE    ${count}
             Run Keyword And Continue On Failure     Page Should Contain Element
-            ...    //ul[@class="pf-c-list pfext-quick-start-task-header__list"]/li[${index}+1]
+            ...    //ul[@class="pf-v5-c-list pfext-quick-start-task-header__list"]/li[${index}+1]
         END
         Click Button        //button[@data-testid="qs-drawer-start"]
         FOR     ${index}    IN RANGE    ${count}

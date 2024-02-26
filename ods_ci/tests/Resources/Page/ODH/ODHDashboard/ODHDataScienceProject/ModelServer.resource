@@ -18,19 +18,26 @@ ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET
 ${REPLICAS_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${REPLICAS_MIN_BTN_XP}=         xpath=//div/button[@aria-label="Minus"]
 ${SERVING_RUNTIME_NAME}=        xpath=//input[@id="serving-runtime-name-input"]
-${SERVING_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
+${SERVING_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-v5-c-form__group-control']/descendant::button
 ${SERVING_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
 ${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model servers']
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
+${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
+
 
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
-    ...    ${no_gpus}=0
+    ...    ${no_gpus}=0    ${existing_server}=${FALSE}
+    IF    ${existing_server}
+        ${existing_server}=  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
+        IF  ${existing_server}    Run Keyword And Return
+        ...    Log    Model Server '${server_name}' already exists, reusing server    console=True
+    END
     SeleniumLibrary.Click Button    Add model server
     Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
@@ -38,7 +45,7 @@ Create Model Server
     Set Model Server Runtime    ${runtime}
     Set Server Size    ${server_size}
     IF    ${no_gpus} > ${0}
-        ${gpu_enabled} =    Run Keyword And Return Status    Verify GPU Selector Is Usable
+        ${gpu_enabled}=    Run Keyword And Return Status    Verify GPU Selector Is Usable
         IF    ${gpu_enabled}==False
             Log    GPU requested but not available
             Fail
@@ -55,15 +62,16 @@ Create Model Server
             SeleniumLibrary.Checkbox Should Be Selected    ${TOKEN_AUTH_CHECKBOX_XP}
         END
     ELSE IF    ${token}==${TRUE}
-        Enable Token Authentication            
+        Enable Token Authentication
     END
-    Click Button    Add
+    SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Add")]
+    SeleniumLibrary.Click Button    Add
     Sleep    1s    reason=Sometimes the modal will intercept later clicks even after being closed, wait for a second
 
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod
     [Arguments]    ${number}
-    ${current}=    Get Element Attribute    xpath://div[@class="pf-c-number-input"]/div/input    value
+    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
     ${difference}=    Evaluate    int(${number})-int(${current})
     ${op}=    Set Variable    plus
     IF    ${difference}<${0}
@@ -77,7 +85,7 @@ Set Replicas Number With Buttons
             Click Minus Button
         END
     END
-    ${current}=    Get Element Attribute    xpath://div[@class="pf-c-number-input"]/div/input    value
+    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
     Should Be Equal As Integers    ${current}    ${number}
 
 Set Server Size
@@ -133,7 +141,7 @@ Verify Displayed GPU Count
     [Documentation]    Verifies the number of GPUs displayed in the Model Server table
     [Arguments]    ${server_name}    ${no_gpus}
     Wait Until Page Contains Element    xpath://span[.="${server_name}"]
-    ${expanded} =    Run Keyword And Return Status
+    ${expanded}=    Run Keyword And Return Status
     ...    Page Should Contain Element    xpath://button[@aria-expanded="true"]/span[.="${server_name}"]
     IF    ${expanded}==False
         Click Element    xpath://button[@aria-expanded="false"]/span[.="${server_name}"]
@@ -142,6 +150,22 @@ Verify Displayed GPU Count
     Sleep  5s      reason=Sometimes the number of current Accelerators take a few seconds to update
     ${current_accs}=  Get Text  xpath://span[text()="${server_name}"]/../../../following-sibling::tr//td[@data-label]/div/dl/div[4]/dd/div
     Should Match  ${current_accs}  ${no_gpus}
+
+Verify Displayed GPU Count In Single Model Serving
+    [Documentation]    Verifies the number of GPUs displayed in the Model Server table of single model serving matches
+    ...    the expected value
+    [Arguments]    ${model_name}    ${no_gpus}
+    SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Name"]/div[text()="${model_name}"]
+    ${expanded}=    Run Keyword And Return Status    Page Should Contain Element
+    ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../..//button[@aria-expanded="true"]
+    IF    not ${expanded}
+        SeleniumLibrary.Click Element
+        ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../..//button[@aria-expanded="false"]
+    END
+    Sleep    5s    reason=Sometimes the number of current Accelerators take a few seconds to update
+    ${current_accs}=    SeleniumLibrary.Get Text
+    ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../../../tr[last()]//span[.="Number of accelerators"]/../../dd/div  #robocop: disable
+    Should Match    ${current_accs}    ${no_gpus}
 
 Set Model Server Runtime
     [Documentation]    Selects a given Runtime for the model server
@@ -237,3 +261,13 @@ Enable Toleration Feature In KNativeServing
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc patch configmap config-features -n ${knative_serving_ns} --type=merge -p '{"data":{"kubernetes.podspec-tolerations": "enabled"}}'
     Should Be Equal As Integers    ${rc}    ${0}
+
+Switch Model Serving Project
+    [Documentation]    Switch to an existing project '${project_name}' from Model Serving dropdown list
+    [Arguments]    ${project_name}=All projects
+    IF    "${project_name}" == "${NONE}"
+        ${project_name}=    Set Variable    All projects
+    END
+    Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
+    Wait Until Element Is Visible     //ul//a[contains(., '${project_name}')]
+    Click Element     //ul//a[contains(., '${project_name}')]

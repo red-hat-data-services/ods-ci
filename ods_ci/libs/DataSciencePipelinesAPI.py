@@ -25,7 +25,7 @@ class DataSciencePipelinesAPI:
         while deployment_count != 1 and count < 30:
             deployments = []
             response, _ = self.run_oc(
-                f"oc get deployment -n openshift-operators openshift-pipelines-operator -o json"
+                "oc get deployment -n openshift-operators openshift-pipelines-operator -o json"
             )
             try:
                 response = json.loads(response)
@@ -45,12 +45,14 @@ class DataSciencePipelinesAPI:
         while pipeline_run_crd_count < 1 and count < 60:
             # https://github.com/opendatahub-io/odh-dashboard/issues/1673
             # It is possible to start the Pipeline Server without pipelineruns.tekton.dev CRD
-            pipeline_run_crd_count = self.count_pods("oc get crd pipelineruns.tekton.dev", 1)
+            pipeline_run_crd_count = self.count_pods(
+                "oc get crd pipelineruns.tekton.dev", 1
+            )
             time.sleep(1)
             count += 1
         assert pipeline_run_crd_count == 1
         return self.count_running_pods(
-            f"oc get pods -n openshift-operators -l name=openshift-pipelines-operator -o json",
+            "oc get pods -n openshift-operators -l name=openshift-pipelines-operator -o json",
             "openshift-pipelines-operator",
             "Running",
             1,
@@ -92,7 +94,9 @@ class DataSciencePipelinesAPI:
             count += 1
 
         assert self.route != "", "Route must not be empty"
-        print(f"Waiting for Data Science Pipeline route to be ready to avoid firing false alerts: {self.route}")
+        print(
+            f"Waiting for Data Science Pipeline route to be ready to avoid firing false alerts: {self.route}"
+        )
         time.sleep(45)
         status = -1
         count = 0
@@ -195,12 +199,11 @@ class DataSciencePipelinesAPI:
                     run_status = run_json["run"]["status"]
             except JSONDecodeError:
                 print(response, status)
-                pass
             print(f"Checking run status: {run_status}")
-            if run_status == 'Failed':
+            if run_status == "Failed":
                 break
             # https://github.com/tektoncd/pipeline/blob/main/docs/pipelineruns.md#monitoring-execution-status
-            if run_status == "Completed" or run_status == "Succeeded":
+            if run_status in ("Completed", "Succeeded"):
                 run_finished_ok = True
                 break
             time.sleep(1)
@@ -255,13 +258,13 @@ class DataSciencePipelinesAPI:
         return response.url
 
     def count_pods(self, oc_command, pod_criteria, timeout=30):
-        oc_command = f'{oc_command} --no-headers'
+        oc_command = f"{oc_command} --no-headers"
         pod_count = 0
         count = 0
         while pod_count != pod_criteria and count < timeout:
             bash_str, _ = self.run_oc(oc_command)
             # | wc -l is returning an empty string
-            pod_count = sum(1 for line in bash_str.split('\n') if line.strip())
+            pod_count = sum(1 for line in bash_str.split("\n") if line.strip())
             if pod_count >= pod_criteria:
                 break
             time.sleep(1)
@@ -304,17 +307,23 @@ class DataSciencePipelinesAPI:
     def get_default_storage(self):
         result, _ = self.run_oc("oc get storageclass -A -o json")
         result = json.loads(result)
-        for storage_class in result['items']:
-            if 'annotations' in storage_class['metadata']:
-                if storage_class['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] == 'true':
+        for storage_class in result["items"]:
+            if "annotations" in storage_class["metadata"]:
+                if (
+                    storage_class["metadata"]["annotations"][
+                        "storageclass.kubernetes.io/is-default-class"
+                    ]
+                    == "true"
+                ):
                     break
-        return storage_class['metadata']['name']
+        return storage_class["metadata"]["name"]
 
+    @keyword
     def get_openshift_server(self):
-        return self.run_oc('oc whoami --show-server=true')[0].replace('\n', '')
+        return self.run_oc("oc whoami --show-server=true")[0].replace("\n", "")
 
     def get_openshift_token(self):
-        return self.run_oc('oc whoami --show-token=true')[0].replace('\n', '')
+        return self.run_oc("oc whoami --show-token=true")[0].replace("\n", "")
 
     def run_oc(self, command):
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)

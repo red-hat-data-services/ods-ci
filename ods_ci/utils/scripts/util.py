@@ -54,32 +54,32 @@ def read_yaml(filename):
             return yaml.safe_load(fh)
     except OSError as error:
         return None
-          
+
 
 def execute_command(cmd):
     """
     Executes command in the local node, and print real-time output
     """
-    output = ''
+    output = ""
     try:
         with subprocess.Popen(
-                cmd,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                universal_newlines=True,
-                encoding='utf-8',
-                errors='replace'
-            ) as p:
-                while True:
-                    line = p.stdout.readline()
-                    if line != '':
-                        output += (line + "\n")
-                        print(line)
-                    elif p.poll() != None:
-                        break
-                sys.stdout.flush()
-                return output
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            encoding="utf-8",
+            errors="replace",
+        ) as p:
+            while True:
+                line = p.stdout.readline()
+                if line != "":
+                    output += line + "\n"
+                    print(line)
+                elif p.poll() is not None:
+                    break
+            sys.stdout.flush()
+            return output
     except:
         return None
 
@@ -119,9 +119,7 @@ def render_template(search_path, template_file, output_file, replace_vars):
         with open(output_file, "w") as fh:
             fh.write(outputText)
     except:
-        print(
-            "Failed to render template and create json " "file {}".format(output_file)
-        )
+        print("Failed to render template and create json file {}".format(output_file))
         sys.exit(1)
 
 

@@ -8,12 +8,13 @@ Resource            ../../../Resources/Page/Operators/OpenShiftPipelines.resourc
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library             DateTime
 Library             ../../../../libs/DataSciencePipelinesAPI.py
+Test Tags           DataSciencePipelines
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
-${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/opendatahub-io/data-science-pipelines-operator/main/tests/resources/dsp-operator/test-pipeline-run.yaml
+${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/opendatahub-io/data-science-pipelines-operator/73b95d89536c79c4d34606cf8ea1499bd986a4b6/tests/resources/test-pipeline-run.yaml
 
 
 *** Test Cases ***
@@ -52,7 +53,7 @@ Verify DSPO Operator Reconciliation Retry
     ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ods_ci/tests/Resources/Files/dummy-storage-creds.yaml
     IF    ${rc}!=0    Fail
     # one pod is good when reconciliation finished
-    Wait For Pods Number  1    namespace=${local_project_name}    timeout=30
+    Wait For Pods Number  1    namespace=${local_project_name}    timeout=60
     [Teardown]    Remove Pipeline Project    ${local_project_name}
 
 

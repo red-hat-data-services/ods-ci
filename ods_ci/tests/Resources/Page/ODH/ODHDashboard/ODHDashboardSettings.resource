@@ -245,35 +245,20 @@ Get Checkbox State Of Single Model Serving Platforms
 
 Select CheckBox Single Model Serving Platforms
     [Documentation]    Enables Single model serving platform
-    ${status}=  Get Checkbox State Of Single Modelserving platforms
-    IF  "${status}"=="False"
-        Select Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
-        Save Changes In Cluster Settings
-    END
+    Select Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
 
-Click CheckBox Multi Model Serving Platforms
+
+Select CheckBox Multi Model Serving Platforms
     [Documentation]    Enables Multi Modelserving platforms
-    ${status}=  Get Checkbox State Of Multi Modelserving platforms
-    IF  "${status}"=="False"
-        Select Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
-        Save Changes In Cluster Settings
-    END
+    Select Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
 
 Deselect CheckBox Single Model Serving Platforms
     [Documentation]    Disable checkbox Single Modelserving platforms
-    ${status}=  Get Checkbox State Of Single Modelserving platforms
-    IF  "${status}"=="True"
-        Unselect Checkbox   ${SINGLE_MODEL_SERVING_CHECK_BOX}
-        Save Changes In Cluster Settings
-    END
+    Unselect Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
 
 Deselect CheckBox Multi Model Serving Platforms
     [Documentation]    Disable checkbox Multi Modelserving platforms
-    ${status}=  Get Checkbox State Of Single Modelserving platforms
-    IF  "${status}"=="True"
-        Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
-        Save Changes In Cluster Settings
-    END
+    Unselect Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
 
 Select Both Model Serving Platforms
     [Documentation]    Enables Multi Modeland Single Modelserving platforms
@@ -358,3 +343,6 @@ Set RHODS Users Group To Inexistent Group
     ...    to the given inexistent group
     Set Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...    users_group=${CUSTOM_INEXISTENT_GROUP}
+    ${true_status}=  BuiltIn.Convert To Boolean    True
+    Should Be Equal    ${status}  ${true_status}
+    Element Should Be Enabled    ${MULTI_MODE_SERVING_CHECK_BOX}

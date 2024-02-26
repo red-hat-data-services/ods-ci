@@ -4,6 +4,7 @@ Library            SeleniumLibrary
 Library            OpenShiftLibrary
 Resource           ../../../Resources/OCP.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Suite Setup        Project Suite Setup
@@ -24,9 +25,11 @@ ${WORKBENCH_TITLE}=            ODS-CI Workbench 1
 ${WORKBENCH_TITLE_UPDATED}=    ${WORKBENCH_TITLE} Updated
 ${WORKBENCH_DESCRIPTION}=      ODS-CI Workbench 1 is a test workbench using ${NB_IMAGE} image to test DS Projects feature
 ${WORKBENCH_DESC_UPDATED}=     ${WORKBENCH_DESCRIPTION} Updated
-${PV_BASENAME}=                ods-ci-pv
-${PV_DESCRIPTION}=             ods-ci-pv is a PV created to test DS Projects feature
-${PV_SIZE}=                    2    # PV sizes are in GB
+${PV_BASENAME}=                ods-ci-pv-edit
+${PV_DESCRIPTION}=             ods-ci-pv-edit is a PV created to test DS Projects feature
+# PV size are in GB
+${PV_SIZE}=                    2
+${PV_SIZE2}=                   3
 ${DC_S3_NAME}=                 ods-ci-dc
 ${DC_S3_AWS_SECRET_ACCESS_KEY}=    custom dummy secret access key
 ${DC_S3_AWS_ACCESS_KEY}=    custom dummy access key id
@@ -94,6 +97,29 @@ Verify User Can Edit A S3 Data Connection
     Should Be Equal  ${s3_bucket}  ods-ci-ds-pipelines-test
     SeleniumLibrary.Click Button    ${GENERIC_CANCEL_BTN_XP}
     Delete Data Connection    name=${DC_S3_NAME}-test
+
+Verify User Can Edit A PV Storage in DS project
+    [Documentation]    Verifies user can edit a PV storage name, description and size in DS project
+    ...                ProductBug: https://github.com/opendatahub-io/odh-dashboard/issues/1924
+    ...                            https://github.com/opendatahub-io/odh-dashboard/issues/1565
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-1974
+    ...       ProductBug
+    [Setup]    Open Data Science Project Details Page    project_title=${PRJ_TITLE}
+    ${pv_name}=    Set Variable    ${PV_BASENAME}-A
+    ${pv_new_name}=    Set Variable    ${pv_name}-Updated
+    ${pv_new_description}=    Set Variable    ${PV_DESCRIPTION}-Updated
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
+    Create PersistentVolume Storage    project_title=${PRJ_TITLE}    name=${pv_name}    description=${PV_DESCRIPTION}
+    ...                                size=${PV_SIZE}
+    Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
+    ...                         type=Persistent storage    connected_workbench=${NONE}
+    Edit PersistentVolume Storage    ${PRJ_TITLE}    ${pv_name}    ${pv_new_name}
+    ...                              ${pv_new_description}    ${PV_SIZE2}
+    Storage Should Be Listed    name=${pv_new_name}    description=${pv_new_description}
+    ...                         type=Persistent storage    connected_workbench=${NONE}
+    Storage Size Should Be    name=${pv_new_name}    size=${PV_SIZE2}    namespace=${ns_name}
 
 
 *** Keywords ***

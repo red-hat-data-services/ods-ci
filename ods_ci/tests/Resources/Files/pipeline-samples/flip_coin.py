@@ -46,12 +46,8 @@ def print_msg(msg: str):
     description="Shows how to use dsl.Condition().",
 )
 def flipcoin_pipeline():
-    flip_coin_op = components.create_component_from_func(
-        flip_coin, base_image=DataSciencePipelinesKfpTekton.base_image
-    )
-    print_op = components.create_component_from_func(
-        print_msg, base_image=DataSciencePipelinesKfpTekton.base_image
-    )
+    flip_coin_op = components.create_component_from_func(flip_coin, base_image=DataSciencePipelinesKfpTekton.base_image)
+    print_op = components.create_component_from_func(print_msg, base_image=DataSciencePipelinesKfpTekton.base_image)
     random_num_op = components.create_component_from_func(
         random_num, base_image=DataSciencePipelinesKfpTekton.base_image
     )

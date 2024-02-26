@@ -6,11 +6,7 @@ dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 from awsOps import aws_configure
 from logger import log
-from rosaOps import (
-    create_account_roles,
-    rosa_create_cluster,
-    wait_for_osd_cluster_to_be_ready,
-)
+from rosaOps import create_account_roles, rosa_create_cluster, wait_for_osd_cluster_to_be_ready
 
 
 class RosaClusterManager:
@@ -34,9 +30,7 @@ class RosaClusterManager:
             self.compute_machine_type,
             self.rosa_version,
         )
-        aws_configure(
-            self.aws_access_key_id, self.aws_secret_access_key, self.aws_region
-        )
+        aws_configure(self.aws_access_key_id, self.aws_secret_access_key, self.aws_region)
         create_account_roles()
         rosa_create_cluster(
             self.cluster_name,
@@ -56,9 +50,7 @@ def main():
     )
 
     # Argument parsers for create_cluster
-    subparsers = parser.add_subparsers(
-        title="Available sub commands", help="sub-command help"
-    )
+    subparsers = parser.add_subparsers(title="Available sub commands", help="sub-command help")
     rosaClusterCreate_parser = subparsers.add_parser(
         "create_rosa_cluster",
         help=("create ROSA clusters using openshift installer"),

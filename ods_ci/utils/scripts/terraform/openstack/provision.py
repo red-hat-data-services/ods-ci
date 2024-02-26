@@ -119,9 +119,7 @@ if __name__ == "__main__":
         description="Script to manage instances in Openstack",
     )
 
-    subparsers = parser.add_subparsers(
-        title="Available sub commands", help="sub-command help"
-    )
+    subparsers = parser.add_subparsers(title="Available sub commands", help="sub-command help")
 
     # Argument parsers for create_instance
     create_instance_parser = subparsers.add_parser(
@@ -131,9 +129,7 @@ if __name__ == "__main__":
     )
 
     optional_create_instance_parser = create_instance_parser._action_groups.pop()
-    required_create_instance_parser = create_instance_parser.add_argument_group(
-        "required arguments"
-    )
+    required_create_instance_parser = create_instance_parser.add_argument_group("required arguments")
     create_instance_parser._action_groups.append(optional_create_instance_parser)
     required_create_instance_parser.add_argument(
         "--cloud_name",
@@ -161,8 +157,7 @@ if __name__ == "__main__":
     )
     required_create_instance_parser.add_argument(
         "--key_pair",
-        help="The public key of an OpenSSH key"
-        " pair to be used for access to created instances",
+        help="The public key of an OpenSSH key pair to be used for access to created instances",
         action="store",
         dest="key_pair",
         required=True,
@@ -200,9 +195,7 @@ if __name__ == "__main__":
     )
 
     optional_delete_instance_parser = delete_instance_parser._action_groups.pop()
-    required_delete_instance_parser = delete_instance_parser.add_argument_group(
-        "required arguments"
-    )
+    required_delete_instance_parser = delete_instance_parser.add_argument_group("required arguments")
     delete_instance_parser._action_groups.append(optional_delete_instance_parser)
     required_delete_instance_parser.add_argument(
         "--cloud_name",
@@ -216,8 +209,7 @@ if __name__ == "__main__":
     )
     required_delete_instance_parser.add_argument(
         "--key_pair",
-        help="The public key of an OpenSSH key"
-        " pair to be used for access to created instances",
+        help="The public key of an OpenSSH key pair to be used for access to created instances",
         action="store",
         dest="key_pair",
         required=True,
@@ -255,9 +247,7 @@ if __name__ == "__main__":
     )
 
     optional_set_config_parser = set_config_parser._action_groups.pop()
-    required_set_config_parser = set_config_parser.add_argument_group(
-        "required arguments"
-    )
+    required_set_config_parser = set_config_parser.add_argument_group("required arguments")
     set_config_parser._action_groups.append(optional_set_config_parser)
     required_set_config_parser.add_argument(
         "--cloud_name",

@@ -42,14 +42,18 @@ ruff = "0.1.11"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.black]
+line-length = 120
+target-version = ['py311']
+
 [tool.isort]
 # https://pycqa.github.io/isort/docs/configuration/black_compatibility.html
 profile = "black"
-line_length = 88 # align with black's default
+line_length = 120
 
 [tool.ruff]
 target-version = "py311"
-line-length = 88 # align with black's default
+line-length = 120
 
 # https://docs.astral.sh/ruff/rules
 [tool.ruff.lint]

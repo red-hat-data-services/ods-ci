@@ -32,12 +32,8 @@ def clone_config_repo(**kwargs):
     git_repo_with_credens = kwargs["git_repo"]
     if kwargs["git_username"] != "" and kwargs["git_password"] != "":
         git_credens = "{}:{}".format(kwargs["git_username"], kwargs["git_password"])
-        git_repo_with_credens = re.sub(
-            r"(https://)(.*)", r"\1" + git_credens + "@" + r"\2", kwargs["git_repo"]
-        )
-    cmd = "git clone {} -b {} {}".format(
-        git_repo_with_credens, kwargs["git_branch"], kwargs["repo_dir"]
-    )
+        git_repo_with_credens = re.sub(r"(https://)(.*)", r"\1" + git_credens + "@" + r"\2", kwargs["git_repo"])
+    cmd = "git clone {} -b {} {}".format(git_repo_with_credens, kwargs["git_branch"], kwargs["repo_dir"])
     ret = subprocess.call(cmd, shell=True)
     if ret:
         print("Failed to clone repo {}.".format(kwargs["git_repo"]))
@@ -90,9 +86,7 @@ def oc_login(ocp_console_url, username, password, timeout=600):
     """
     cluster_api_url = ocp_console_url.replace("console-openshift-console.apps", "api")
     cluster_api_url = re.sub(r"/$", "", cluster_api_url) + ":6443"
-    cmd = "oc login -u {} -p {} {} --insecure-skip-tls-verify=true".format(
-        username, password, cluster_api_url
-    )
+    cmd = "oc login -u {} -p {} {} --insecure-skip-tls-verify=true".format(username, password, cluster_api_url)
     count = 0
     chk_flag = 0
     while count <= timeout:

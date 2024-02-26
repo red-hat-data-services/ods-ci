@@ -57,9 +57,7 @@ if __name__ == "__main__":
         description="Script to publish ods-ci results",
     )
 
-    subparsers = parser.add_subparsers(
-        title="Available sub commands", help="sub-command help"
-    )
+    subparsers = parser.add_subparsers(title="Available sub commands", help="sub-command help")
 
     # Argument parsers for sending report by email
     email_sender_parser = subparsers.add_parser(
@@ -73,9 +71,7 @@ if __name__ == "__main__":
         "-s", "--sender-address", help="Send email from", action="store", required=True
     )
 
-    args_email_sender_parser.add_argument(
-        "-r", "--receiver-addresses", help="Send email to", nargs="+", required=True
-    )
+    args_email_sender_parser.add_argument("-r", "--receiver-addresses", help="Send email to", nargs="+", required=True)
 
     args_email_sender_parser.add_argument(
         "-b",

@@ -55,9 +55,13 @@ Set Project And Runtime
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
+    ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY} 
+    ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
     Set Up Test OpenShift Project    test_ns=${namespace}
-    Create Secret For S3-Like Buckets    endpoint=${MODELS_BUCKET.ENDPOINT}
+    Create Secret For S3-Like Buckets    endpoint=${endpoint}
     ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
+    ...    access_key_id=${access_key_id}    access_key=${access_key}
+    ...    verify_ssl=${verify_ssl}
     Deploy Serving Runtime    namespace=${namespace}    runtime=${runtime}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
         Enable User Workload Monitoring
@@ -72,6 +76,7 @@ Create Secret For S3-Like Buckets
     ...            ${namespace}=${TEST_NS}    ${endpoint}=${S3.AWS_DEFAULT_ENDPOINT}
     ...            ${region}=${S3.AWS_DEFAULT_REGION}    ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}
     ...            ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}    ${use_https}=${USE_BUCKET_HTTPS}
+    ...            ${verify_ssl}=${TRUE}
     ${rc}    ${out}=    Run And Return Rc And Output    oc get secret ${name} -n ${namespace}
     IF    "${rc}" == "${0}"
         Log    message=Secret ${name} in ${namespace} NS already present. Skipping secret setup...
@@ -102,6 +107,12 @@ Create Secret For S3-Like Buckets
     Should Be Equal As Integers    ${rc}    ${0}
     Run Keyword And Ignore Error    Run    oc create -f ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml -n ${namespace}
     Add Secret To Service Account    sa_name=${sa_name}    secret_name=${name}    namespace=${namespace}
+    IF    ${verify_ssl}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc annotate secret ${name} -n ${namespace} serving.kserve.io/s3-verifyssl='false' --overwrite
+        Should Be Equal As Integers    ${rc}    ${0}
+    END
+    
 
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model

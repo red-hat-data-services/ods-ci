@@ -163,7 +163,6 @@ Verify Editing Existing Model Deployment
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
-
     Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=openvino-example-model    existing_model=${TRUE}

@@ -803,17 +803,11 @@ class OpenshiftClusterManager:
     def create_idp(self):
         """Creates Identity Provider"""
 
+        cluster_id = self.get_osd_cluster_id()
         if self.idp_type == "htpasswd":
             cmd = (
-                "ocm --v={} create idp -c {} -t {} -n {} --username {} "
-                "--password {}".format(
-                    self.ocm_verbose_level,
-                    self.cluster_name,
-                    self.idp_type,
-                    self.idp_name,
-                    self.htpasswd_cluster_admin,
-                    self.htpasswd_cluster_password,
-                )
+                f"ocm --v={self.ocm_verbose_level} create idp -c {cluster_id} -t {self.idp_type} -n {self.idp_name}"
+                f" --username {self.htpasswd_cluster_admin} --password {self.htpasswd_cluster_password}"
             )
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
@@ -890,11 +884,9 @@ class OpenshiftClusterManager:
             output_file = "create_ldap_idp.json"
             self._render_template(template_file, output_file, replace_vars)
 
-            cluster_id = self.get_osd_cluster_id()
             cmd = (
-                "ocm --v={} post /api/clusters_mgmt/v1/"
-                "clusters/{}/identity_providers "
-                "--body={}".format(self.ocm_verbose_level, cluster_id, output_file)
+                f"ocm --v={self.ocm_verbose_level} post /api/clusters_mgmt/v1/"
+                f"clusters/{cluster_id}/identity_providers --body={output_file}"
             )
             log.info("CMD: {}".format(cmd))
             ret = execute_command(cmd)
@@ -925,9 +917,9 @@ class OpenshiftClusterManager:
         if group in ("rhods-admins", "rhods-users", "rhods-noaccess"):
             cmd = "oc adm groups add-users {} {}".format(group, user)
         else:
-            cmd = "ocm --v={} create user {} --cluster {} --group={}".format(
-                self.ocm_verbose_level, user, self.cluster_name, group
-            )
+            cluster_id = self.get_osd_cluster_id()
+            cmd = f"ocm --v={self.ocm_verbose_level} create user {user} --cluster {cluster_id} --group={group}"
+
         log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
@@ -1331,9 +1323,9 @@ class OpenshiftClusterManager:
             ).split("-")[0]
             if version:
                 osd_versions_dict[".".join(version.split(".")[:2])] = version
-                latest_osd_versions_data[
-                    str(self.osd_major_version)
-                ] = osd_versions_dict
+                latest_osd_versions_data[str(self.osd_major_version)] = (
+                    osd_versions_dict
+                )
         log.info(latest_osd_versions_data)
         return latest_osd_versions_data
 

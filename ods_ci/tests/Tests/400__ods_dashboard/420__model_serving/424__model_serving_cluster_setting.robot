@@ -58,6 +58,7 @@ Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
     Select CheckBox Multi Model Serving Platforms
     Select CheckBox Single Model Serving Platforms
+    Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_tittel}
     Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
@@ -71,6 +72,7 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms
     Reload Page
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
     Select CheckBox Multi Model Serving Platforms
+    Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_tittel}
     Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
@@ -82,6 +84,7 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     Open Dashboard Settings    settings_page=Cluster settings
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
     Select CheckBox Single Model Serving Platforms
+    Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_tittel}
     Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]

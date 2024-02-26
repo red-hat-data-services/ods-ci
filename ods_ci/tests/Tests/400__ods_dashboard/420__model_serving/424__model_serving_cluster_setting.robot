@@ -6,7 +6,7 @@ Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resour
 Suite Setup      Sute Setup
 Suite Teardown   Sute Tierdown
 Test Setup       Tst Setup
-Test Tags         modelservingsetting  ODS-2574  Tier1 Sanity
+Test Tags         modelservingsetting  ODS-2574  Tier1  Sanity
 
 *** Variables ***
 ${project_tittel}=  blank_proj

@@ -9,7 +9,7 @@ Resource        ../../../ODS.robot
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
 ${GROUP_BTN_XP}=    //button[@data-ouia-component-id="Remove"]
 ${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
-${MULTI_MODE_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
+${MULTI_MODEL_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
 ${CUSTOM_EMPTY_GROUP}=    empty-group
 
 *** Keywords ***
@@ -235,7 +235,7 @@ Open Dashboard Settings
 
 Get Checkbox State Of Multi Model Serving Platforms
     [Documentation]    Checks if  Multi model serving platform is enabled/checked in Cluster setting
-    ${is_checked}=  Run Keyword And Return Status  Checkbox Should Be Selected  ${MULTI_MODE_SERVING_CHECK_BOX}
+    ${is_checked}=  Run Keyword And Return Status  Checkbox Should Be Selected  ${MULTI_MODEL_SERVING_CHECK_BOX}
     RETURN  ${is_checked}
 
 Get Checkbox State Of Single Model Serving Platforms
@@ -250,7 +250,7 @@ Select CheckBox Single Model Serving Platforms
 
 Select CheckBox Multi Model Serving Platforms
     [Documentation]    Enables Multi Modelserving platforms
-    Select Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
+    Select Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
 
 Deselect CheckBox Single Model Serving Platforms
     [Documentation]    Disable checkbox Single Modelserving platforms
@@ -258,7 +258,7 @@ Deselect CheckBox Single Model Serving Platforms
 
 Deselect CheckBox Multi Model Serving Platforms
     [Documentation]    Disable checkbox Multi Modelserving platforms
-    Unselect Checkbox   ${MULTI_MODE_SERVING_CHECK_BOX}
+    Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
 
 Select Both Model Serving Platforms
     [Documentation]    Enables Multi Modeland Single Modelserving platforms
@@ -295,7 +295,7 @@ Check IF Multi Model Serving IS Disabled From DSC And Cluster Setting
     ${status}=   Get Checkbox State Of Multi Model Serving Platforms
     ${false_status}=  BuiltIn.Convert To Boolean    False
     Should Be Equal As Strings    ${status}   ${false_status}
-    Element Should Be Disabled    ${MULTI_MODE_SERVING_CHECK_BOX}
+    Element Should Be Disabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
 
 
 Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
@@ -304,7 +304,7 @@ Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
     ${status}=   Get Checkbox State Of Multi Model Serving Platforms
     ${true_status}=  BuiltIn.Convert To Boolean    True
     Should Be Equal    ${status}  ${true_status}
-    Element Should Be Enabled    ${MULTI_MODE_SERVING_CHECK_BOX}
+    Element Should Be Enabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
     Should Be Equal    ${status}  True
     Element Should Be Enabled     ${MULTI_MODEL_SERVING_CHECK_BOX}
 
@@ -345,4 +345,4 @@ Set RHODS Users Group To Inexistent Group
     ...    users_group=${CUSTOM_INEXISTENT_GROUP}
     ${true_status}=  BuiltIn.Convert To Boolean    True
     Should Be Equal    ${status}  ${true_status}
-    Element Should Be Enabled    ${MULTI_MODE_SERVING_CHECK_BOX}
+    Element Should Be Enabled    ${MULTI_MODEL_SERVING_CHECK_BOX}

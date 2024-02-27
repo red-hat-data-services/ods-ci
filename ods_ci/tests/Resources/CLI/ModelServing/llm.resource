@@ -107,7 +107,7 @@ Create Secret For S3-Like Buckets
     Should Be Equal As Integers    ${rc}    ${0}
     Run Keyword And Ignore Error    Run    oc create -f ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml -n ${namespace}
     Add Secret To Service Account    sa_name=${sa_name}    secret_name=${name}    namespace=${namespace}
-    IF    ${verify_ssl}
+    IF    ${verify_ssl} == ${FALSE}
         ${rc}    ${out}=    Run And Return Rc And Output
         ...    oc annotate secret ${name} -n ${namespace} serving.kserve.io/s3-verifyssl='false' --overwrite
         Should Be Equal As Integers    ${rc}    ${0}

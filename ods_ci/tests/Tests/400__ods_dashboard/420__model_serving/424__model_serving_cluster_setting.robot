@@ -2,10 +2,10 @@
 Documentation    Test cases that verify High Availability for ModelServing CLuster Setting
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Suite Setup      Sute Setup
-Suite Teardown   Sute Tierdown
+Suite Setup      Model Serving Clsuetr Setting Suite Setup
+Suite Teardown   Model Serving Clsuetr Setting Suite Teardown
 Test Setup       Model Serving Clsuetr Setting Test Setup
-Test Tags         modelservingsetting  ODS-2574  Tier1  Sanity
+Test Tags        modelservingsetting  ODS-2574  Tier1  Sanity
 
 *** Variables ***
 ${project_title}=  BLANKPROJ

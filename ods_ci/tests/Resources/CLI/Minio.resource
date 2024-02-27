@@ -13,30 +13,41 @@ ${MINIO_SA_FILEPATH}=    ${MINIO_RESOURCES_DIRPATH}/minio_serviceaccount.yaml
 *** Keywords ***
 Deploy MinIO
     [Arguments]    ${minio_image}=quay.io/modh/ods-ci-minio-models:1.0
-    ...            ${namespace}=minio
-    # ${key}    ${pw}=    Generate Minio Random Credentials
-    ${key}=    Set Variable    user
-    ${pw}=    Set Variable    myfakepassword
-    Set Test Variable    ${key}
-    Set Test Variable    ${pw}
-    Set Test Variable    ${url}    ${minio_image}
-    Create File From Template    ${MINIO_POD_FILEPATH}    ${MINIO_RESOURCES_DIRPATH}/minio_filled.yaml
-    # Create File From Template    ${MINIO_SECRET_FILEPATH}    ${MINIO_RESOURCES_DIRPATH}/minio_secret_filled.yaml
-    ${rc}=    Run And Return Rc    oc new-project ${namespace}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${MINIO_RESOURCES_DIRPATH}/minio_filled.yaml -n ${namespace}
-    # Oc Apply    kind=Pod    src=${MINIO_RESOURCES_DIRPATH}/minio_filled.yaml    namespace=${namespace}
-    # Oc Apply    kind=Secret    src=${MINIO_RESOURCES_DIRPATH}/minio_secret_filled.yaml    namespace=${namespace}
-    # Oc Apply    kind=ServiceAccount    src=${MINIO_SA_FILEPATH}    namespace=${namespace}
-    ${route}=    Run And Return Rc And Output    oc get route minio-route -n ${namespace} --template={{.spec.host}}
+    ...            ${namespace}=minio    ${podname}=ods-ci-minio
+    ...            ${service_name}=ods-ci-minio-srv    ${route_name}=ods-ci-minio-route
+    ${exists}=    Run Keyword And Return Status
+    ...    Check If Pod Exists    namespace=${namespace}    label_selector=app=minio    status_only=${FALSE}
+    IF    ${exists}
+        Log    message=Minio pod with name ${podname} in ${namespace} NS already present. Re-using existing one.
+    ELSE
+        ${key}    ${pw}=    Generate Minio Random Credentials
+        Set Test Variable    ${key}
+        Set Test Variable    ${pw}
+        Set Test Variable    ${podname}
+        Set Test Variable    ${minio_image}
+        Set Test Variable    ${service_name}
+        Set Test Variable    ${route_name}
+        Create File From Template    ${MINIO_POD_FILEPATH}    ${MINIO_RESOURCES_DIRPATH}/minio_filled.yaml
+        ${rc}=    Run And Return Rc    oc new-project ${namespace}
+        ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${MINIO_RESOURCES_DIRPATH}/minio_filled.yaml -n ${namespace}
+        Wait For Pods To Be Ready    label_selector=app=minio
+        ...    namespace=${namespace}
+    END
+    ${rc}    ${route}=    Run And Return Rc And Output    oc get route ${route_name} -n ${namespace} --template={{.spec.host}}
+    Should Be Equal As Integers    ${rc}    ${0}
     RETURN    ${route}
 
 Generate Minio Random Credentials
     ${key}=    Generate Random String    chars=[NUMBERS][LETTERS]
-    ${pw}=    Generate Random String    chars=[NUMBERS][LETTERS]
+    ${pw}=    Generate Random String    chars=[NUMBERS][LETTERS]    length=12
     RETURN    ${key}    ${pw}
 
 Get Minio Credentials
     [Arguments]    ${namespace}    ${podname}=ods-ci-minio
-    ${key}=    Set Variable    user
-    ${pw}=    Set Variable    myfakepassword
+    ${rc}    ${key}=    Run And Return Rc And Output
+    ...    oc get pod ${podname} -n ${namespace} -o jsonpath='{range .spec.containers[*].env[?(@.name=="MINIO_ACCESS_KEY")]}{@.value}{end}'    # robocop: disable
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${pw}=    Run And Return Rc And Output
+    ...    oc get pod ${podname} -n ${namespace} -o jsonpath='{range .spec.containers[*].env[?(@.name=="MINIO_SECRET_KEY")]}{@.value}{end}'    # robocop: disable
+    Should Be Equal As Integers    ${rc}    ${0}
     RETURN    ${key}    ${pw}

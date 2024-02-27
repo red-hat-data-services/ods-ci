@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: minio-service
+  name: ${service_name}
 spec:
   ports:
     - name: minio-client-port
@@ -14,14 +14,14 @@ spec:
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: minio-route
+  name: ${route_name}
 spec:
   to:
     kind: Service
-    name: minio-service
+    name: ${service_name}
     weight: 100
   port:
-    targetPort: ui
+    targetPort: minio-client-port
   wildcardPolicy: None
   tls:
     termination: edge
@@ -32,7 +32,7 @@ kind: Pod
 metadata:
   labels:
     app: minio
-  name: ods-ci-minio
+  name: ${podname}
 spec:
   containers:
     - args:
@@ -43,6 +43,6 @@ spec:
           value:  ${key}
         - name: MINIO_SECRET_KEY
           value: ${pw}
-      image: ${url}
+      image: ${minio_image}
       imagePullPolicy: Always
       name: minio

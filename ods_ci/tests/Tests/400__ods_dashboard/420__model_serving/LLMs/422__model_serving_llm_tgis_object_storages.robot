@@ -23,13 +23,11 @@ Verify User Can Serve And Query A Model From Minio
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    Tier1    RHOAIENG-3490
     ${minio_namespace}=    Set Variable    minio-models
-    Deploy MinIO    namespace=${minio_namespace}
-    Wait For Pods To Be Ready    label_selector=app=minio
-    ...    namespace=${minio_namespace}
+    ${minio_endpoint}=    Deploy MinIO    namespace=${minio_namespace}
     ${key}    ${pw}=    Get Minio Credentials    namespace=${minio_namespace}
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-minio
     ...    access_key_id=${key}    access_key=${pw}
-    ...    endpoint=minio-service.${minio_namespace}.svc.cluster.local:9000
+    ...    endpoint=${minio_endpoint}
     ...    verify_ssl=${FALSE}    # temporary
     ${test_namespace}=    Set Variable     ${TEST_NS}-minio
     ${model_name}=    Set Variable    flan-t5-small-hf
@@ -46,17 +44,19 @@ Verify User Can Serve And Query A Model From Minio
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
-    # Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
-    # ...    inference_type=streaming    n_times=1
-    # ...    namespace=${test_namespace}    validate_response=${FALSE}
-    # [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    # ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=streaming    n_times=1
+    ...    namespace=${test_namespace}    validate_response=${FALSE}
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run And Return Rc    oc delete project ${minio_namespace}
 
 
 *** Keywords ***
 Suite Setup
     [Documentation]
     Skip If Component Is Not Enabled    kserve
-    # RHOSi Setup
+    RHOSi Setup
     Load Expected Responses
     Run    git clone https://github.com/IBM/text-generation-inference/

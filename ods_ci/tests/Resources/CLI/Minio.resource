@@ -3,6 +3,7 @@ Documentation       Collcetion of keywords to deploy and remove MinIO storage
 Library             OperatingSystem
 Resource            ../Common.robot
 
+
 *** Variables ***
 ${MINIO_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/minio
 ${MINIO_POD_FILEPATH}=    ${MINIO_RESOURCES_DIRPATH}/minio.yaml
@@ -30,11 +31,13 @@ Deploy MinIO
         Set Test Variable    ${route_name}
         Create File From Template    ${MINIO_POD_FILEPATH}    ${MINIO_RESOURCES_DIRPATH}/minio_filled.yaml
         ${rc}=    Run And Return Rc    oc new-project ${namespace}
-        ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${MINIO_RESOURCES_DIRPATH}/minio_filled.yaml -n ${namespace}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc apply -f ${MINIO_RESOURCES_DIRPATH}/minio_filled.yaml -n ${namespace}
         Wait For Pods To Be Ready    label_selector=app=minio
         ...    namespace=${namespace}
     END
-    ${rc}    ${route}=    Run And Return Rc And Output    oc get route ${route_name} -n ${namespace} --template={{.spec.host}}
+    ${rc}    ${route}=    Run And Return Rc And Output
+    ...    oc get route ${route_name} -n ${namespace} --template={{.spec.host}}
     Should Be Equal As Integers    ${rc}    ${0}
     RETURN    ${route}
 

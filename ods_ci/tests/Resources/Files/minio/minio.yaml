@@ -34,6 +34,7 @@ metadata:
     app: minio
   name: ${podname}
 spec:
+  automountServiceAccountToken: false
   containers:
     - args:
         - server
@@ -46,3 +47,10 @@ spec:
       image: ${minio_image}
       imagePullPolicy: Always
       name: minio
+      resources:
+        limits:
+          cpu: 250m
+          memory: 10Gi
+        requests:
+          cpu: 20m
+          memory: 400Mi

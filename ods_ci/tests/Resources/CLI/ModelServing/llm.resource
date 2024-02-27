@@ -55,7 +55,7 @@ Set Project And Runtime
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
-    ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY} 
+    ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
     Set Up Test OpenShift Project    test_ns=${namespace}
     Create Secret For S3-Like Buckets    endpoint=${endpoint}
@@ -112,7 +112,6 @@ Create Secret For S3-Like Buckets
         ...    oc annotate secret ${name} -n ${namespace} serving.kserve.io/s3-verifyssl='false' --overwrite
         Should Be Equal As Integers    ${rc}    ${0}
     END
-    
 
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model

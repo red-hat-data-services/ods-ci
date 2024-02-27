@@ -1,4 +1,5 @@
 """Inserts properties from a config file into a xunit format XML file"""
+
 import argparse
 import codecs
 import os
@@ -126,9 +127,7 @@ def add_testcase_properties(xml_obj, tcconfig=None):
             multile_test_ids[testcase.get("name")] = polarion_id
 
     for key in multile_test_ids.keys():
-        for index, testcase in enumerate(
-            xml_obj.findall(expression + "[@name='" + key + "']")
-        ):
+        for index, testcase in enumerate(xml_obj.findall(expression + "[@name='" + key + "']")):
             if index < len(multile_test_ids[testcase.get("name")]):
                 tcproperties = et.Element("properties")
                 test_id = ""
@@ -219,9 +218,7 @@ def main():
     args = parse_args()
 
     # Restructure the robot test result xml file
-    xunit_xml_file_restructured = (
-        os.path.dirname(os.path.realpath(__file__)) + "/restructured_xml_file.xml"
-    )
+    xunit_xml_file_restructured = os.path.dirname(os.path.realpath(__file__)) + "/restructured_xml_file.xml"
     restructure_xml_for_polarion(args.xunit_xml_file, xunit_xml_file_restructured)
 
     root = parse_xml(xunit_xml_file_restructured)

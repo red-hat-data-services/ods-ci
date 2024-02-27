@@ -63,9 +63,7 @@ if __name__ == "__main__":
         description="Script to upload results to report portal",
     )
 
-    subparsers = parser.add_subparsers(
-        title="Available sub commands", help="sub-command help"
-    )
+    subparsers = parser.add_subparsers(title="Available sub commands", help="sub-command help")
 
     # Argument parsers for uploading test results to report portal
     upload_result_parser = subparsers.add_parser(
@@ -74,9 +72,7 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    required_upload_result_parser = upload_result_parser.add_argument_group(
-        "required arguments"
-    )
+    required_upload_result_parser = upload_result_parser.add_argument_group("required arguments")
 
     required_upload_result_parser.add_argument(
         "--config-file",

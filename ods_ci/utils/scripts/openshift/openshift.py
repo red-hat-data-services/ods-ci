@@ -144,11 +144,7 @@ class OpenshiftOps:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
-        log.info(
-            "Executing openshift-install create cluster command in {}".format(
-                install_config_dir
-            )
-        )
+        log.info("Executing openshift-install create cluster command in {}".format(install_config_dir))
         log.info("OpenShift Cluster creation is in progress...")
         returncode = process.wait()
         if returncode != 0:
@@ -163,14 +159,10 @@ class OpenshiftOps:
             re.S,
         )
         if match is None:
-            log.error(
-                "Unexpected console logs in openshift-install create cluster output"
-            )
+            log.error("Unexpected console logs in openshift-install create cluster output")
             sys.exit(1)
 
-        log.info(
-            "OpenShift Cluster {} created successfully !".format(self.cluster_name)
-        )
+        log.info("OpenShift Cluster {} created successfully !".format(self.cluster_name))
 
         cluster_info = {}
         cluster_info["CLUSTER_NAME"] = self.cluster_name
@@ -213,9 +205,7 @@ if __name__ == "__main__":
         description="Script to do openshift operations on AWS",
     )
 
-    subparsers = parser.add_subparsers(
-        title="Available sub commands", help="sub-command help"
-    )
+    subparsers = parser.add_subparsers(title="Available sub commands", help="sub-command help")
 
     # Argument parsers for create_cluster
     openshift_install_parser = subparsers.add_parser(
@@ -225,9 +215,7 @@ if __name__ == "__main__":
     )
 
     optional_openshift_install_parser = openshift_install_parser._action_groups.pop()
-    required_openshift_install_parser = openshift_install_parser.add_argument_group(
-        "required arguments"
-    )
+    required_openshift_install_parser = openshift_install_parser.add_argument_group("required arguments")
     openshift_install_parser._action_groups.append(optional_openshift_install_parser)
 
     required_openshift_install_parser.add_argument(
@@ -248,8 +236,7 @@ if __name__ == "__main__":
 
     required_openshift_install_parser.add_argument(
         "--install-config-file",
-        help="Install config file. Note: "
-        "Place this file from where you are running this for now",
+        help="Install config file. Note: Place this file from where you are running this for now",
         action="store",
         dest="install_config_file",
         required=True,

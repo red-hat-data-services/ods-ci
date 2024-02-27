@@ -13,9 +13,6 @@ ${project_title}=  BLANKPROJ
 *** Test Cases ***
 Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling both model serving platforms
-#    Open Dashboard Settings    settings_page=Cluster settings
-    #Reload Page
-#    Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
     Select CheckBox Multi Model Serving Platforms
     Select CheckBox Single Model Serving Platforms
     Capture Page Screenshot
@@ -27,9 +24,6 @@ Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
 
 Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling both Multi Model serving platforms
-#    Open Dashboard Settings    settings_page=Cluster settings
-#    #Reload Page
-#    Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
     Select CheckBox Multi Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
@@ -39,8 +33,6 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms
 
 Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling Single Model model serving platforms
-#    Open Dashboard Settings    settings_page=Cluster settings
-#    Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
     Select CheckBox Single Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
@@ -71,17 +63,17 @@ Model Serving Clsuetr Setting Test Setup
     Open Dashboard Settings    settings_page=Cluster settings
     #Reload Page
     Wait Until Element Is Visible    ${SINGLE_MODE_SERVING_CHECK_BOX}  timeout=300s
-    ${status_single_mode}=  Get Checkbox State Of Single Modelserving platforms
-    IF  "${status_single_mode}"=="True"
+    ${status_single_model}=  Get Checkbox State Of Single Modelserving platforms
+    IF  "${status_single_model}"=="True"
         Unselect Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
     END
 
-    ${status_multi_mode}=  Get Checkbox State Of Multi Modelserving platforms
-    IF  "${status_multi_mode}"=="True"
+    ${status_multi_model}=  Get Checkbox State Of Multi Modelserving platforms
+    IF  "${status_multi_model}"=="True"
         Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
     END
     Capture Page Screenshot
-    ${status} =   Evaluate    '${status_single_mode}' == 'True' or '${status_multi_mode}' == 'True'
+    ${status} =   Evaluate    '${status_single_model}' == 'True' or '${status_multi_model}' == 'True'
     Run Keyword If    '${status}' == 'True'    Save Changes In Cluster Settings
     Reload Page
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20

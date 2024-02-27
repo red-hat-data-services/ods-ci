@@ -21,7 +21,7 @@ Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}
-    Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
+    Click Element     //a[@href="/modelServing"]
     Wait Until Page Contains Element    //*[contains(text(), "Deploy model")]
     Wait Until Page Contains Element    //*[contains(text(), "Add model server")]
 
@@ -34,7 +34,7 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}
-    Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
+    Click Element     //a[@href="/modelServing"]
     Wait Until Page Contains Element     //button[contains(text(), 'Add model server')]
 
 Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
@@ -45,14 +45,14 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}
-    Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
+    Click Element     //a[@href="/modelServing"]
     Wait Until Page Contains Element    //button[contains(text(), 'Deploy model')]
 
 
 Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after disabling both model serving platforms
     Open Data Science Project Details Page      ${project_title}
-    Click Element    //*[contains(@class, 'pf-v5-c-jump-links') and contains(@class, 'pf-v5-c-jump-links__link-text') and contains(., 'Models and model servers')]
+    Click Element     //a[@href="/modelServing"]
     Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]
 
 *** Keywords ***

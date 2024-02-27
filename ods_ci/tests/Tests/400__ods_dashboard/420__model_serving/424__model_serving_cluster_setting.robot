@@ -61,7 +61,6 @@ Model Serving Clsuetr Setting Suite Setup
 Model Serving Clsuetr Setting Test Setup
     [Documentation]    Opens the Dashboard Settings Deselect all the model serving.
     Open Dashboard Settings    settings_page=Cluster settings
-    #Reload Page
     Wait Until Element Is Visible    ${SINGLE_MODE_SERVING_CHECK_BOX}  timeout=300s
     ${status_single_model}=  Get Checkbox State Of Single Modelserving platforms
     IF  "${status_single_model}"=="True"
@@ -84,7 +83,6 @@ Model Serving Clsuetr Setting Suite Teardown
     Delete Data Science Project                 ${project_title}
     Wait Until Data Science Project Is Deleted  ${project_title}
     Open Dashboard Settings    settings_page=Cluster settings
-    #Reload Page
     Wait Until Page Contains Element    //*[contains(text(), "Model serving platforms")]  timeout=20
     Select Both Model Serving Platforms
     Save Changes In Cluster Settings

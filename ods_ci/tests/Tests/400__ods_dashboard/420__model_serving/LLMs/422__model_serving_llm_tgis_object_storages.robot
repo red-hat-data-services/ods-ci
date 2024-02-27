@@ -1,5 +1,6 @@
 *** Settings ***
-Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
+Documentation     Collection of CLI tests to validate fetching models from different object storages
+...               in the scope of model serving stack for Large Language Models (LLM).
 ...               These tests leverage on TGIS Standalone Serving Runtime
 Resource          ../../../../Resources/OCP.resource
 Resource          ../../../../Resources/CLI/ModelServing/llm.resource
@@ -14,13 +15,12 @@ Test Tags         KServe
 ${MODEL_S3_DIR}=    flan-t5-small-hf
 ${TEST_NS}=    tgis-storages
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
-@{SEARCH_METRICS}=    tgi_    istio_
 
   
 *** Test Cases ***
 Verify User Can Serve And Query A Model From Minio
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
-    ...                using Kserve and Caikit+TGIS runtime
+    ...                using Kserve and TGIS runtime fetching models from a MinIO server
     [Tags]    Tier1    RHOAIENG-3490
     ${minio_namespace}=    Set Variable    minio-models
     ${minio_endpoint}=    Deploy MinIO    namespace=${minio_namespace}

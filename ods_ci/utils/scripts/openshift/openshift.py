@@ -34,15 +34,13 @@ class OpenshiftOps:
         """
         Generates ssh key required for OpenShift Installation
         """
-        cmd = "ssh-keygen -t rsa -b 4096 -N '' -f {}/id_rsa".format(self.work_dir)
-        log.info("CMD: {}".format(cmd))
+        cmd = f"ssh-keygen -t rsa -b 4096 -N '' -f {self.work_dir}/id_rsa"
         ret = execute_command(cmd)
         if ret is None:
             log.error("Failed to generate ssh key")
             return None
 
-        cmd = 'eval "$(ssh-agent -s)";' + "ssh-add {}/id_rsa".format(self.work_dir)
-        log.info("CMD: {}".format(cmd))
+        cmd = f'eval "$(ssh-agent -s)"; ssh-add {self.work_dir}/id_rsa'
         ret = execute_command(cmd)
         if ret is None:
             log.error("Failed to eval ssh-agent and to add ssh rsa key")
@@ -162,7 +160,7 @@ class OpenshiftOps:
             log.error("Unexpected console logs in openshift-install create cluster output")
             sys.exit(1)
 
-        log.info("OpenShift Cluster {} created successfully !".format(self.cluster_name))
+        log.info(f"OpenShift Cluster {self.cluster_name} created successfully !")
 
         cluster_info = {}
         cluster_info["CLUSTER_NAME"] = self.cluster_name
@@ -187,7 +185,6 @@ class OpenshiftOps:
             sys.exit(1)
 
         cmd = "openshift-install destroy cluster"
-        log.info("CMD: {}".format(cmd))
         ret = execute_command(cmd)
         if ret is None:
             log.error("Failed to destroy openshift cluster")

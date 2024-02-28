@@ -1173,7 +1173,8 @@ class OpenshiftClusterManager:
         latest_osd_versions_data = {}
         osd_versions_dict = {}
         for candidate_version in range(int(self.osd_minor_version_start), int(self.osd_minor_version_end)):
-            version = (self.get_latest_osd_candidate_version(self.osd_major_version, candidate_version)).split("-")[0]
+            version = (self.get_latest_osd_candidate_version(self.osd_major_version, candidate_version))
+            version = re.sub(r'-candidate\n', '', version.replace('\n\n', ''))
             if version:
                 osd_versions_dict[".".join(version.split(".")[:2])] = version
                 latest_osd_versions_data[str(self.osd_major_version)] = osd_versions_dict

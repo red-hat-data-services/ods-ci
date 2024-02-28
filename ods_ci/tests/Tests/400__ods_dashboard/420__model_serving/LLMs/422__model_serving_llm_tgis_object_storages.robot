@@ -50,9 +50,7 @@ Verify User Can Serve And Query A Model From Minio
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Remove Minio    namespace=${minio_namespace}
-    ...    AND
-    ...    Run And Return Rc    oc delete project ${minio_namespace}
+    ...    Clean Up Minio Namespace    namespace=${minio_namespace}
 
 
 *** Keywords ***

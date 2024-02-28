@@ -59,8 +59,16 @@ Get Minio Credentials
     RETURN    ${key}    ${pw}
 
 Remove Minio
-    [Documentation]    Delete the MinIO objects from the cluster
+    [Documentation]    Deletes the MinIO objects from the cluster
     [Arguments]    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete all -l app=minio -n ${namespace}
     Should Be Equal As Integers    ${rc}    ${0}
-    Wait For Pods To Be Terminated    label_selector=app=minio    namespace=${namespace}
+
+Clean Up Minio Namespace
+    [Documentation]    Removes MinIO objects and delete the OCP namespace
+    [Arguments]    ${namespace}
+    Remove Minio    ${namespace}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait --for=delete namespace ${namespace} --timeout=20s
+    Should Be Equal As Integers    ${rc}    ${0}

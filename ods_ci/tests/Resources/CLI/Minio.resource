@@ -60,5 +60,7 @@ Get Minio Credentials
 
 Remove Minio
     [Documentation]    Delete the MinIO objects from the cluster
-    Log    message=To Be Implemented
-    # for the time being the test using Minio is deleting the NS.
+    [Arguments]    ${namespace}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete all -l app=minio -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
+    Wait For Pods To Be Terminated    label_selector=app=minio    namespace=${namespace}

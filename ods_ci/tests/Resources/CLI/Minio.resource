@@ -14,7 +14,7 @@ ${MINIO_SA_FILEPATH}=    ${MINIO_RESOURCES_DIRPATH}/minio_serviceaccount.yaml
 *** Keywords ***
 Deploy MinIO
     [Documentation]    Deploys MiniIO pod, service and route using the given ${minio_image}
-    [Arguments]    ${minio_image}=quay.io/modh/ods-ci-minio-models:1.0
+    [Arguments]    ${minio_image}=quay.io/modh/ods-ci-minio-models@sha256:801f49a705e827283a9970d2e5a807fec8357f18457abd0f46d9797beabe8160
     ...            ${namespace}=minio    ${podname}=ods-ci-minio
     ...            ${service_name}=ods-ci-minio-srv    ${route_name}=ods-ci-minio-route
     ${exists}=    Run Keyword And Return Status

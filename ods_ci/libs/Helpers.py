@@ -63,7 +63,7 @@ class Helpers:
         ocm_client = OpenshiftClusterManager()
         # to manipulate ocm_describe on line 45
         ocm_client.cluster_name = cluster_identifier
-        cluster_name = ocm_client.ocm_describe(filter="--json | jq -r '.name'")
+        cluster_name = ocm_client.ocm_describe(jq_filter="--json | jq -r '.name'")
         cluster_name = cluster_name.strip("\n")
         return cluster_name
 

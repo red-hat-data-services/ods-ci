@@ -8,6 +8,7 @@ import time
 
 import jinja2
 import yaml
+from logger import log
 
 
 def clone_config_repo(**kwargs):
@@ -58,6 +59,7 @@ def execute_command(cmd):
     """
     output = ""
     try:
+        log.info(f"CMD: {cmd}")
         with subprocess.Popen(
             cmd,
             shell=True,
@@ -71,10 +73,10 @@ def execute_command(cmd):
                 line = p.stdout.readline()
                 if line != "":
                     output += line + "\n"
-                    print(line)
                 elif p.poll() is not None:
                     break
             sys.stdout.flush()
+            log.info(f"OUTPUT: {output}")
             return output
     except:
         return None

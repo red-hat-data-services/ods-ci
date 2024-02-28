@@ -46,7 +46,6 @@ class ReportPortalOperations:
         cmd = "rp_preproc -c {} -d {} --service {} -l {}".format(
             self.config_file, self.payload_dir, self.service_url, self.log_path
         )
-        log.info("CMD: {}".format(cmd))
         rp_output = execute_command(cmd)
         rp_output_json = json.dumps(rp_output)
         self.write_output_file(json.dumps(rp_output_json))

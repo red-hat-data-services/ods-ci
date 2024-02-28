@@ -19,17 +19,18 @@ Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}
     Click Element     //a[@href="#model-server"]
-    Wait Until Page Contains Element    //*[contains(text(), "Deploy model")]
-    Wait Until Page Contains Element    //*[contains(text(), "Add model server")]
+    Wait Until Page Contains Element    //*[@id="single-serving-platform-card"]
+    Wait Until Page Contains Element    //*[@id="multi-serving-platform-card"]
 
 Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms
-    [Documentation]    Verifies that correct values are present in the DS project after enabling both Multi Model serving platforms
+    [Documentation]    Verifies that correct values are present in the DS project after enabling Multi Model serving platforms
     Select CheckBox Multi Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}
     Click Element     //a[@href="#model-server"]
     Wait Until Page Contains Element     //button[contains(text(), 'Add model server')]
+    Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
 
 Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling Single Model model serving platforms
@@ -39,13 +40,15 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     Open Data Science Project Details Page      ${project_title}
     Click Element     //a[@href="#model-server"]
     Wait Until Page Contains Element    //button[contains(text(), 'Deploy model')]
-
+    Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
 
 Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after disabling both model serving platforms
     Open Data Science Project Details Page      ${project_title}
     Click Element     //a[@href="#model-server"]
     Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]
+    Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
+    Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
 
 *** Keywords ***
 Model Serving Clsuetr Setting Suite Setup

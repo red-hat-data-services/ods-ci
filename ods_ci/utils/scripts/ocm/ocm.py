@@ -119,7 +119,7 @@ class OpenshiftClusterManager:
             cmd += f" {jq_filter}"
         ret = execute_command(cmd)
         if ret is None or "Error: Can't retrieve cluster for key" in ret:
-            log.info(f"ocm describe for cluster {self.cluster_name} failed")
+            log.info(f"ocm describe for cluster {self.cluster_name} with id: {cluster_id} failed")
             return None
         return ret
 
@@ -309,7 +309,7 @@ class OpenshiftClusterManager:
         while count <= timeout:
             cluster_state = self.get_osd_cluster_state()
             if cluster_state == "ready":
-                log.info("{} is in ready state".format(self.cluster_name))
+                log.info(f"{self.cluster_name} is in ready state")
                 check_flag = True
                 break
             elif cluster_state == "error":
@@ -343,18 +343,19 @@ class OpenshiftClusterManager:
 
         addon_state = self.get_addon_state(addon_name)
         if addon_state == "not installed":
-            log.info("Addon {} not installed in cluster {}".format(addon_name, self.cluster_name))
+            log.info(f"Addon {addon_name} not installed in cluster {self.cluster_name}")
             return False
-        log.info("Addon {} is installed in cluster {}".format(addon_name, self.cluster_name))
+        log.info(f"Addon {addon_name} is installed in cluster {self.cluster_name}")
         return True
 
     def get_addon_state(self, addon_name="managed-odh"):
         """Gets given addon's state"""
 
-        cmd = "ocm list addons --cluster {} --columns id,state | grep {} ".format(self.cluster_name, addon_name)
+        cluster_id = self.get_osd_cluster_id()
+        cmd = f"ocm list addons --cluster {cluster_id} --columns id,state | grep {addon_name} "
         ret = execute_command(cmd)
         if ret is None:
-            log.info("Failed to get {} addon state for cluster {}".format(addon_name, self.cluster_name))
+            log.info(f"Failed to get {addon_name} addon state for cluster {self.cluster_name}")
             return None
         match = re.search(addon_name + "\s*(.*)", ret)
         if match is None:
@@ -363,10 +364,10 @@ class OpenshiftClusterManager:
         return match.group(1).strip()
 
     def check_if_machine_pool_exists(self):
-        """Checks if given machine pool name already
-        exists in cluster"""
+        """Checks if given machine pool name already exists in cluster"""
 
-        cmd = "/bin/ocm list machinepools --cluster {} | grep -w {}".format(self.cluster_name, self.pool_name)
+        cluster_id = self.get_osd_cluster_id()
+        cmd = f"ocm list machinepools --cluster {cluster_id} | grep -w {self.pool_name}"
         ret = execute_command(cmd)
         if not ret:
             return False
@@ -375,24 +376,15 @@ class OpenshiftClusterManager:
     def add_machine_pool(self):
         """Adds machine pool to the given cluster"""
         if bool(self.reuse_machine_pool) and self.check_if_machine_pool_exists():
-            log.info(
-                "MachinePool with name {} exists in cluster "
-                "{}. Hence "
-                "reusing it".format(self.pool_name, self.cluster_name)
-            )
+            log.info(f"MachinePool with name {self.pool_name} exists in cluster {self.cluster_name}. Hence reusing it")
         else:
-            cmd = (
-                "/bin/ocm --v={} create machinepool --cluster {} "
-                "--instance-type {} --replicas {} "
-                "--taints {} "
-                "{}".format(
-                    self.ocm_verbose_level,
-                    self.cluster_name,
-                    self.pool_instance_type,
-                    self.pool_node_count,
-                    self.taints,
-                    self.pool_name,
-                )
+            cmd = "ocm --v={} create machinepool --cluster {} --instance-type {} --replicas {} --taints {} {}".format(
+                self.ocm_verbose_level,
+                self.cluster_name,
+                self.pool_instance_type,
+                self.pool_node_count,
+                self.taints,
+                self.pool_name,
             )
             ret = execute_command(cmd)
             if ret is None:
@@ -441,7 +433,8 @@ class OpenshiftClusterManager:
     def list_idps(self):
         """Lists IDPs for the cluster"""
 
-        cmd = "ocm list idps --cluster {} --columns name".format(self.cluster_name)
+        cluster_id = self.get_osd_cluster_id()
+        cmd = f"ocm list idps --cluster {cluster_id} --columns name"
         ret = execute_command(cmd)
         if ret is None:
             return []
@@ -688,7 +681,7 @@ class OpenshiftClusterManager:
             # else:
             #    self.wait_for_addon_installation_to_complete(addon_name="managed-starburst")
         else:
-            log.info("managed-api-service is already installed on {}".format(self.cluster_name))
+            log.info(f"managed-api-service is already installed on {self.cluster_name}")
 
     def uninstall_managed_starburst_addon(self, exit_on_failure=True):
         """Uninstalls RHOAM addon"""
@@ -780,7 +773,8 @@ class OpenshiftClusterManager:
     def delete_idp(self):
         """Deletes Identity Provider"""
 
-        cmd = f"ocm --v={self.ocm_verbose_level} delete idp -c {self.cluster_name} {self.idp_name}"
+        cluster_id = self.get_osd_cluster_id()
+        cmd = f"ocm --v={self.ocm_verbose_level} delete idp -c {cluster_id} {self.idp_name}"
         ret = execute_command(cmd)
         if ret is None:
             log.info(f"Failed to delete identity provider of type {self.idp_name}")
@@ -806,7 +800,8 @@ class OpenshiftClusterManager:
 
         if user == "":
             user = self.htpasswd_cluster_admin
-        cmd = f"ocm --v={self.ocm_verbose_level} delete user {user} --cluster {self.cluster_name} --group={group}"
+        cluster_id = self.get_osd_cluster_id()
+        cmd = f"ocm --v={self.ocm_verbose_level} delete user {user} --cluster {cluster_id} --group={group}"
         ret = execute_command(cmd)
         if ret is None:
             log.info(f"Failed to delete user {user} of group {group}")
@@ -933,7 +928,7 @@ class OpenshiftClusterManager:
         cmd = f"ocm --v={self.ocm_verbose_level} delete cluster {cluster_id}"
         ret = execute_command(cmd)
         if ret is None:
-            log.error(f"Failed to delete osd cluster {self.cluster_name}")
+            log.error(f"Failed to delete osd cluster '{self.cluster_name}' with id: {cluster_id}")
             sys.exit(1)
         self.wait_for_osd_cluster_to_get_deleted()
 
@@ -945,7 +940,7 @@ class OpenshiftClusterManager:
         while count <= timeout:
             cluster_exists = self.is_osd_cluster_exists()
             if not cluster_exists:
-                log.info(f"{self.cluster_name} is deleted")
+                log.info(f"Cluster '{self.cluster_name}' was deleted")
                 check_flag = True
                 break
 
@@ -976,14 +971,14 @@ class OpenshiftClusterManager:
         while count <= timeout:
             cluster_state = self.get_osd_cluster_state()
             if cluster_state == "hibernating":
-                log.info("{} is in hibernating state".format(self.cluster_name))
+                log.info(f"{self.cluster_name} is in hibernating state")
                 check_flag = True
                 break
 
             time.sleep(60)
             count += 60
         if not check_flag:
-            log.error(f"{self.cluster_name} not in hibernating state even after 30 mins. EXITING")
+            log.error(f"{self.cluster_name} not in hibernating state even after {timeout / 60} minutes. EXITING")
             sys.exit(1)
 
     def resume_cluster(self):
@@ -1007,14 +1002,14 @@ class OpenshiftClusterManager:
         while count <= timeout:
             cluster_state = self.get_osd_cluster_state()
             if cluster_state == "ready":
-                log.info("{} is in ready state".format(self.cluster_name))
+                log.info(f"{self.cluster_name} is in ready state")
                 check_flag = True
                 break
 
             time.sleep(60)
             count += 60
         if not check_flag:
-            log.error(f"{self.cluster_name} not in ready state even after 30 mins. EXITING")
+            log.error(f"{self.cluster_name} not in ready state even after {timeout / 60} minutes. EXITING")
             sys.exit(1)
 
     def update_notification_email_address(self, addon_name, email_address, exit_on_failure=True):

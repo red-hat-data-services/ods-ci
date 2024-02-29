@@ -108,7 +108,8 @@ Wait for RHODS Dashboard to Load
         ...    timeout=75s
     END
     IF    ${wait_for_cards} == ${TRUE}
-        Wait Until Cards Are Loaded
+        Wait Until Keyword Succeeds    3 times   5 seconds
+    ...   Wait Until Cards Are Loaded
     END
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
@@ -257,8 +258,10 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    Run Keyword And Ignore Error    Wait Until Page Contains Element
-    ...    xpath:${CARDS_XP}    timeout=15s    error="This might be caused by bug RHOAIENG-404"
+    ${status}=    Run Keyword and Return Status    Wait Until Page Contains Element
+    ...    xpath:${CARDS_XP}    timeout=10s
+    IF    not ${status}    Reload Page
+    Should Be True   ${status}   msg=This might be caused by bug RHOAIENG-404
 
 Get App ID From Card
     [Arguments]  ${card_locator}

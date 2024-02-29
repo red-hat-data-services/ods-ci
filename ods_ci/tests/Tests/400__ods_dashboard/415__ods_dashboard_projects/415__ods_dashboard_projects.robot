@@ -538,8 +538,6 @@ Verify User Can Access Only Its Owned Projects
     [Setup]    Run Keywords
     ...    SeleniumLibrary.Close All Browsers
     ...    AND
-    ...    Set Variables For User Access Test
-    ...    AND
     ...    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     Open Data Science Projects Home Page
@@ -588,6 +586,7 @@ Project Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
+    Set Variables For User Access Test
     RHOSi Setup
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     Launch Data Science Project Main Page

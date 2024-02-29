@@ -642,7 +642,8 @@ Open Edit Menu For Custom Image
 Expand Custom Image Details
     [Documentation]    Expands a custom image's row in the dashboard UI
     [Arguments]    ${image_name}
-    ${is_expanded}=  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    ${is_expanded}=  Run Keyword And Return Status
+    ...  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
     IF  ${is_expanded}==False
         Click Button  xpath://td[.="${image_name}"]/../td[1]//button
     END
@@ -650,7 +651,8 @@ Expand Custom Image Details
 Collapse Custom Image Details
     [Documentation]    Collapses a custom image's row in the dashboard UI
     [Arguments]    ${image_name}
-    ${is_expanded}=  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    ${is_expanded}=  Run Keyword And Return Status
+    ...  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
     IF  ${is_expanded}==True
         Click Button  xpath://td[.="${image_name}"]/../td[1]//button
     END

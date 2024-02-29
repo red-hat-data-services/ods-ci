@@ -57,7 +57,7 @@ Delete Data Science Project
     ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
     Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project
     ...                                   press_cancel=${press_cancel}
-    ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
+    ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}    # robocop: disable
     Wait Until Data Science Project Is Deleted    project_title=${project_title}
 
 Wait Until Data Science Project Is Deleted
@@ -107,7 +107,8 @@ Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one
     [Arguments]     ${project_title}    ${expected_username}
     Run Keyword And Continue On Failure
-    ...    Page Should Contain Element    xpath=//a[text()="${project_title}"]/ancestor::td[@data-label='Name']//small[text()="${expected_username}"]
+    ...    Page Should Contain Element
+    ...    xpath=//a[text()="${project_title}"]/ancestor::td[@data-label='Name']//small[text()="${expected_username}"]
 
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}.
@@ -188,7 +189,7 @@ Delete Data Science Project From CLI
         END
     END
 
-
+#robocop: disable: line-too-long
 Workbench Status Should Be From Projects Home Page
     [Documentation]    Checks the workbench status is the expected one, from the DS Project home page
     [Arguments]     ${workbench_title}      ${status}    ${project_title}
@@ -223,6 +224,7 @@ Start Workbench From Projects Home Page
     Wait Until Workbench Is Started From Projects Home Page     workbench_title=${workbench_title}
     ...                                                         project_title=${project_title}
 
+#robocop: disable: line-too-long
 Stop Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "stop" process from DS Projects home page.
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
@@ -313,7 +315,6 @@ Launch Data Science Project Main Page
     ...                 browser_alias=${browser_alias}
     Open Data Science Projects Home Page
 
-
 Remove Current Page Projects From All Projects
     [Documentation]    Remove list of currently displayed Data Science projects from list of all projects
     [Arguments]        ${all_projects}    ${curr_page_projects}
@@ -403,7 +404,8 @@ Create Data Science Project If Not Exists
     [Documentation]    If the given ${project_title} DS Project does not exist, it creates one.
     ...                Useful as test setup.
     [Arguments]    ${project_title}    ${username}    ${description}=${EMPTY}
-    ${rc}    ${resource_name}=    Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name' | tr -d '"'   # robocop: disable
+    ${rc}    ${resource_name}=    Run And Return Rc And Output     
+    ...    oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name' | tr -d '"'   # robocop: disable
     IF    "${resource_name}" == "${EMPTY}"
         Log    msg=There is no DS Projects with Diplay Name equal to ${project_title}. Creating it now.
         Launch Data Science Project Main Page    username=${username}
@@ -418,4 +420,4 @@ Clean Project From Workbench Resources
     ...    ${pvc_title}=${workbench_title}
     Delete Workbench From CLI    workbench_title=${workbench_title}
     ...    project_title=${project_title}
-    Delete PVC In Project From CLI    pvc_title=${pvc_title}    project_title=${project_title}
+    Delete PVC In Project From CLI    pvc_title=${pvc_title}    project_title=${project_title}    # robocop: disable

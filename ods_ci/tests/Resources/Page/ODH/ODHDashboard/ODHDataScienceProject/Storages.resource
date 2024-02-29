@@ -18,6 +18,7 @@ ${STORAGE_SUBMIT_BTN_XP}=           xpath=//footer//button[@data-testid="modal-s
 
 
 *** Keywords ***
+#robocop: disable: line-too-long
 Storage Should Be Listed
     [Documentation]    Checks storage is listed in DS Project details page
     [Arguments]     ${name}   ${description}   ${type}   ${connected_workbench}
@@ -51,7 +52,7 @@ Storage Size Should Be
     ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.phase}'    # robocop: disable
     Should Be Equal As Integers    ${rc}    0    An error occurred during the check of PVC ${name} .status.phase value!
     ${storage_size_xp}=    Set Variable
-    ...    ${STORAGE_SECTION_XP}//tr[td//*/div[text()="${name}"]]/following-sibling::*//td[contains(@data-label,"Size")]//div[strong[text()="Size"]]
+    ...    ${STORAGE_SECTION_XP}//tr[td//*/div[text()="${name}"]]/following-sibling::*//td[contains(@data-label,"Size")]//div[strong[text()="Size"]]    # robocop: disable
     IF    "${pvc_status_phase}" == "Pending"
         # PVC hasn't been bound yet - only simple text with max storage should be shown
         Wait Until Page Contains Element    ${storage_size_xp}    timeout=2m

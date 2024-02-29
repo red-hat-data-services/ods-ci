@@ -98,6 +98,7 @@ Create Workbench
     Wait Until Generic Modal Disappears  timeout=1 minute
     Wait Until Project Is Open    project_title=${prj_title}
 
+#robocop: disable: line-too-long
 Add Environment Variables In Workbench
     [Documentation]    Adds the environment variables through the workbench creation page
     [Arguments]    ${env_variables}

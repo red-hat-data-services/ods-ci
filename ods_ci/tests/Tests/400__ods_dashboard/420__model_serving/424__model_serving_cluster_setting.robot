@@ -2,9 +2,9 @@
 Documentation    Test cases that verify High Availability for ModelServing CLuster Setting
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Suite Setup      Model Serving Clsuetr Setting Suite Setup
-Suite Teardown   Model Serving Clsuetr Setting Suite Teardown
-Test Setup       Model Serving Clsuetr Setting Test Setup
+Suite Setup      Model Serving Cluster Setting Suite Setup
+Suite Teardown   Model Serving Cluster Setting Suite Teardown
+Test Setup       Model Serving Cluster Setting Test Setup
 Test Tags        modelservingsetting  ODS-2574  Tier1  Sanity
 
 *** Variables ***
@@ -51,7 +51,7 @@ Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
     Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
 
 *** Keywords ***
-Model Serving Clsuetr Setting Suite Setup
+Model Serving Cluster Setting Suite Setup
     [Documentation]    Opens the Dashboard Settings and Create DS project
     Set Library Search Order    SeleniumLibrary
     Launch Dashboard   ocp_user_name=${TEST_USER.USERNAME}  ocp_user_pw=${TEST_USER.PASSWORD}
@@ -61,7 +61,7 @@ Model Serving Clsuetr Setting Suite Setup
     Open Data Science Projects Home Page
     Create Data Science Project    title=${project_title}    description=test project
 
-Model Serving Clsuetr Setting Test Setup
+Model Serving Cluster Setting Test Setup
     [Documentation]    Opens the Dashboard Settings Deselect all the model serving.
     Open Dashboard Settings    settings_page=Cluster settings
     Wait Until Element Is Visible    ${SINGLE_MODE_SERVING_CHECK_BOX}  timeout=300s
@@ -81,7 +81,7 @@ Model Serving Clsuetr Setting Test Setup
     Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
 
 
-Model Serving Clsuetr Setting Suite Teardown
+Model Serving Cluster Setting Suite Teardown
     [Documentation]    Delete DS project and select both model serving options
     Delete Data Science Project                 ${project_title}
     Wait Until Data Science Project Is Deleted  ${project_title}

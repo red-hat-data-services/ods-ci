@@ -24,6 +24,22 @@ ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 
 
 *** Test Cases ***
+Verify Pipeline Server Creation When Using Internal Database
+    [Documentation]    Verifies multiple users can create pipeline server
+    [Tags]    Tier2     RunThisTest
+    ...       RHOAIENG-2099
+
+    FOR  ${ITERATION}      IN   RANGE   10
+        Create Pipeline Server    dc_name=${DC_NAME}
+        ...    project_title=${PRJ_TITLE}
+        ${status}=      Run Keyword And Return Status       Wait Until Import Pipeline button is enabled
+        Log     ${ITERATION}  #Iteration which the creation failed
+        Wait Until Page Contains        No pipelines        timeout=7s
+        ODHDataSciencePipelines.Delete Pipeline Server    ${PRJ_TITLE}
+        Exit For Loop If    '${status}'=='FALSE'
+    END
+
+
 Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Page    # robocop: disable
     [Documentation]    Verifies user are able to create and execute a DS Pipeline leveraging on
     ...                DS Project UI

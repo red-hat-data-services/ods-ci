@@ -27,7 +27,7 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     [Documentation]    Create an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  RHOAIENG-3349
     ...     Smoke
-    [Setup]  Open Dashboard And Navigate to Accelerator Profiles from Settings
+    [Setup]  Open Dashboard And Navigate to Accelerator Profiles From Settings
     Create An Accelerator Profile Via UI   ${ACC_DISPLAY_NAME}1   ${ACC_IDENTIFIER}
     ...                                    ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                    tol_operator=${ACC_TOLERATION_OPERATOR}
@@ -50,7 +50,7 @@ Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}2
     ...    AND
-    ...    Open Dashboard And Navigate to Accelerator Profiles from Settings
+    ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}2
     ...                         display_name=${ACC_DISPLAY_NAME}2_modified
     ...                         identifier=${ACC_IDENTIFIER}_modified
@@ -76,7 +76,7 @@ Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Admi
     ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}3
     ...    AND
-    ...    Open Dashboard And Navigate to Accelerator Profiles from Settings
+    ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Delete Accelerator Profile Tolerations    ${ACC_DISPLAY_NAME}3
     Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}3
     Verify Accelerator Profile Has No Tolerations Via CLI   ${ACC_DISPLAY_NAME}3
@@ -87,7 +87,7 @@ Disable an Accelerator Profile From The Accelerator Profile Edit View
     ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}4
     ...    AND
-    ...    Open Dashboard And Navigate to Accelerator Profiles from Settings
+    ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}4    enabled=False
     Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}4
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}4    enabled=False
@@ -98,7 +98,7 @@ Enable an Accelerator Profile From The Accelerator Profile Edit View
     ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}5
     ...    AND
-    ...    Open Dashboard And Navigate to Accelerator Profiles from Settings
+    ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}5    enabled=True
     Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}5
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}5    enabled=True
@@ -109,7 +109,7 @@ Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}6
     ...    AND
-    ...    Open Dashboard And Navigate to Accelerator Profiles from Settings
+    ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Search for accelerator profile in grid    ${ACC_DISPLAY_NAME}6
     Disable Accelerator Profile    ${ACC_NAME}6
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}6    enabled=False
@@ -120,7 +120,7 @@ Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}7
     ...    AND
-    ...    Open Dashboard And Navigate to Accelerator Profiles from Settings
+    ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Search for accelerator profile in grid    ${ACC_DISPLAY_NAME}7
     Click On The Enable Switch From Accelerator Profile    ${ACC_NAME}7
     Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}7    enabled=True
@@ -131,7 +131,7 @@ Delete an Accelerator Profile From The Grid of the Accelerator Profile View
     ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}8
     ...    AND
-    ...    Open Dashboard And Navigate to Accelerator Profiles from Settings
+    ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Delete Accelerator Profile    ${ACC_DISPLAY_NAME}8
     Accelerator Profile Should Not Exist   ${ACC_NAME}8
 
@@ -143,7 +143,7 @@ Teardown Settings Accelerator Profiles
     Dashboard Settings Accelerator Profiles Test Teardown
     RHOSi Teardown
 
-Open Dashboard And Navigate to Accelerator Profiles from Settings
+Open Dashboard And Navigate to Accelerator Profiles From Settings
     [Documentation]    Navigate as an Admin User to the Accelerator Profiles administration view
     ...                Used as a Test Setup
     Open ODS Dashboard With Admin User

@@ -39,7 +39,7 @@ Click On Create Accelerator Profile Button
     ...                the "Create accelerator profile" (when there is at least 1
     ...                previously created).
     ...                view: Settings -> Accelerator profiles
-    ${empty_list} =  Run Keyword And Return Status    Wait Until Page Contains Element
+    ${empty_list}=  Run Keyword And Return Status    Wait Until Page Contains Element
     ...    ${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}  timeout=5s
     IF  ${empty_list}==True
         Click Button   ${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}
@@ -52,7 +52,7 @@ Click On Edit Accelerator Profile
     ...                from the grid
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
-    Search for accelerator profile in grid    ${name}
+    Search For Accelerator Profile In Grid    ${name}
     ODHDashboard.Click Action From Actions Menu    ${name}    action=Edit
 
 Click On The Enable Switch From Accelerator Profile
@@ -70,7 +70,7 @@ Disable Accelerator Profile
     Wait Until Page Contains Element    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
     Click Button    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
 
-Search for accelerator profile in grid
+Search For Accelerator Profile In Grid
     [Documentation]    Search for and specific Accelerator Profile in the grid
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
@@ -82,7 +82,7 @@ Delete Accelerator Profile
     [Documentation]    Delete an specific Accelerator Profile from the Grid
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
-    Search for accelerator profile in grid    ${name}
+    Search For Accelerator Profile In Grid    ${name}
     ODHDashboard.Click Action From Actions Menu    ${name}    action=Delete
     ODHDashboard.Handle Deletion Confirmation Modal  ${name}    item_type=accelerator profile
 
@@ -101,9 +101,7 @@ Create An Accelerator Profile Via UI
         Input Text    ${ACCELERATOR_DESCRIPTION}    ${description}
     END
     # By default are enabled
-    IF  ${enabled} != True
-        Click Element    ${ACCELERATOR_ENABLED_SWITCH}
-    END
+    IF    ${enabled} != True    Click Element    ${ACCELERATOR_ENABLED_SWITCH}
     # Tolerations
     IF    "${tolerations}" != "${EMPTY}"
         Click Button    ${ACCELERATOR_ADD_TOLERATION_BTN}

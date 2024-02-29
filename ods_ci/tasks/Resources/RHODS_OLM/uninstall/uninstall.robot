@@ -3,14 +3,11 @@ Resource   ../install/oc_install.robot
 Resource   ../pre-tasks/oc_is_operator_installed.robot
 Resource   ../../../../tests/Resources/Common.robot
 Resource   oc_uninstall.robot
-Resource   codeflare_uninstall.resource
 Library    Process
 
 
 *** Keywords ***
 Uninstalling RHODS Operator
-  ${is_codeflare_managed} =   Is CodeFlare Managed
-  IF  ${is_codeflare_managed}    Uninstalling CodeFlare Operator
   ${is_operator_installed} =  Is RHODS Installed
   IF  ${is_operator_installed}  Run Keywords
   ...  Log  Uninstalling RHODS operator in ${cluster_type}  console=yes  AND
@@ -45,8 +42,6 @@ Uninstall RHODS In Self Managed Cluster
   END
 
 RHODS Operator Should Be Uninstalled
-  ${is_codeflare_managed} =     Is CodeFlare Managed
-  IF  ${is_codeflare_managed}   CodeFlare Operator Should Be Uninstalled
   Verify RHODS Uninstallation
   Log  RHODS has been uninstalled  console=yes
 

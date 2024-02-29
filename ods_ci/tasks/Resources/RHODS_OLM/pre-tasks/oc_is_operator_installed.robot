@@ -77,15 +77,3 @@ Check A RHODS Family Operator Is Installed
   END
   Log   Operator with sub ${subscription} is installed result: ${result}      console=yes
   IF  not ${result}     FAIL    The operator with sub ${subscription} is not installed.
-
-Is CodeFlare Installed
-  [Documentation]   Returns if the RHODS CodeFlare operator is currently installed
-  ${result} =  Run Keyword And Return Status
-  ...  Check A RHODS Family Operator Is Installed  namespace=openshift-operators  subscription=rhods-codeflare-operator
-  Log   RHODS CodeFlare is installed: ${result}      console=yes
-  RETURN  ${result}
-
-Is CodeFlare Managed
-  [Documentation]   Returns if the RHODS CodeFlare operator should be installed/uninstalled alongside RHODS operator
-  ${isCodeFlareManaged} =    Convert To Boolean    ${MANAGE_CODEFLARE_OPERATOR}
-  RETURN  ${isCodeFlareManaged}

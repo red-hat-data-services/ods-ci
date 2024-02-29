@@ -6,7 +6,7 @@ metadata:
   name: qeacceleratorprofile2
   namespace: redhat-ods-applications
 spec:
-  description: Modify Accelerator Profile
+  description: Test: Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
   displayName: qe_accelerator_profile_2
   enabled: true
   identifier: identifier/identifier

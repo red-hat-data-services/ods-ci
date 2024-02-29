@@ -73,11 +73,11 @@ Login To RHODS Dashboard
    ${expected_text_list}=    Create List    Log in with    Data Science Projects
    Wait Until Page Contains A String In List    ${expected_text_list}
 
-   ${oauth_prompt_visible} =  Is OpenShift OAuth Login Prompt Visible
+   ${oauth_prompt_visible}=  Is OpenShift OAuth Login Prompt Visible
    IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
-   ${login-required} =  Is OpenShift Login Visible
+   ${login-required}=  Is OpenShift Login Visible
    IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-   ${authorize_service_account} =  Is rhods-dashboard Service Account Authorization Required
+   ${authorize_service_account}=  Is rhods-dashboard Service Account Authorization Required
    IF  ${authorize_service_account}  Authorize rhods-dashboard service account
 
 Logout From RHODS Dashboard
@@ -154,7 +154,7 @@ Verify Service Is Enabled
 Verify Service Is Not Enabled
   [Documentation]   Verify the service is not present in Applications > Enabled
   [Arguments]  ${app_name}
-  ${app_is_enabled} =  Run Keyword And Return Status   Verify Service Is Enabled    ${app_name}
+  ${app_is_enabled}=  Run Keyword And Return Status   Verify Service Is Enabled    ${app_name}
   Should Be True   not ${app_is_enabled}   msg=${app_name} should not be enabled in ODS Dashboard
 
 Verify Service Is Available In The Explore Page
@@ -625,7 +625,7 @@ Delete Custom Image
     ...    Needs an additional check on removed ImageStream
     [Arguments]    ${image_name}
     Click Button  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button
-    ${image_name_id} =  Replace String  ${image_name}  ${SPACE}  -
+    ${image_name_id}=  Replace String  ${image_name}  ${SPACE}  -
     Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//button[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
     Handle Deletion Confirmation Modal  ${image_name}  notebook image
 
@@ -639,7 +639,7 @@ Open Edit Menu For Custom Image
 Expand Custom Image Details
     [Documentation]    Expands a custom image's row in the dashboard UI
     [Arguments]    ${image_name}
-    ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    ${is_expanded}=  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
     IF  ${is_expanded}==False
         Click Button  xpath://td[.="${image_name}"]/../td[1]//button
     END
@@ -647,7 +647,7 @@ Expand Custom Image Details
 Collapse Custom Image Details
     [Documentation]    Collapses a custom image's row in the dashboard UI
     [Arguments]    ${image_name}
-    ${is_expanded} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
+    ${is_expanded}=  Run Keyword And Return Status  Page Should Contain Element  xpath://td[.="${image_name}"]/../td[1]/button[@aria-expanded="true"]
     IF  ${is_expanded}==True
         Click Button  xpath://td[.="${image_name}"]/../td[1]//button
     END
@@ -656,10 +656,10 @@ Verify Custom Image Description
     [Documentation]    Verifies that the description shown in the dashboard UI
     ...    matches the given one
     [Arguments]    ${image_name}    ${expected_description}
-    ${exists} =  Run Keyword And Return Status  Page Should Contain Element
+    ${exists}=  Run Keyword And Return Status  Page Should Contain Element
     ...  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Description" and .="${expected_description}"]  # robocop: disable
     IF  ${exists}==False
-        ${desc} =  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Description"]
+        ${desc}=  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Description"]
         Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
         FAIL
     END
@@ -671,7 +671,7 @@ Verify Custom Image Is Listed
     [Arguments]    ${image_name}
     # whitespace after ${image_name} in the xpath is important!
     Sleep  2s  #wait for page to finish loading
-    ${exists} =  Run Keyword And Return Status  Page Should Contain Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]  # robocop: disable
+    ${exists}=  Run Keyword And Return Status  Page Should Contain Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]  # robocop: disable
     IF  ${exists}==False
         Log  ${image_name} not visible in page
         FAIL
@@ -682,10 +682,10 @@ Verify Custom Image Provider
     [Documentation]    Verifies that the user listed for an image in the dahsboard
     ...    UI matches the given one
     [Arguments]    ${image_name}    ${expected_user}
-    ${exists} =  Run Keyword And Return Status  Page Should Contain Element
+    ${exists}=  Run Keyword And Return Status  Page Should Contain Element
     ...  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Provider" and .="${expected_user}"]  # robocop: disable
     IF  ${exists}==False
-        ${user} =  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Provider"]  # robocop: disable
+        ${user}=  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Provider"]  # robocop: disable
         Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
         FAIL
     END
@@ -694,7 +694,7 @@ Verify Custom Image Provider
 Enable Custom Image
     [Documentation]    Enables a custom image (i.e. displayed in JH) [WIP]
     [Arguments]    ${image_name}
-    ${is_enabled} =  # Need to find a check
+    ${is_enabled}=  # Need to find a check
     IF  ${is_enabled}==False
         Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../..//input
     END
@@ -702,7 +702,7 @@ Enable Custom Image
 Disable Custom Image
     [Documentation]    Disables a custom image (i.e. not displayed in JH) [WIP]
     [Arguments]    ${image_name}
-    ${is_enabled} =  # Need to find a check
+    ${is_enabled}=  # Need to find a check
     IF  ${is_enabled}==True
         Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../..//input
     END
@@ -737,7 +737,7 @@ Clear Dashboard Notifications
     [Documentation]     Clears Notifications present in RHODS dashboard
     Click Element    xpath=//*[contains(@class,'notification-badge')]
     Sleep  2s  reason=To avoid Element Not Interactable Exception
-    ${notification_count} =  Get Element Count    class:odh-dashboard__notification-drawer__item-remove
+    ${notification_count}=  Get Element Count    class:odh-dashboard__notification-drawer__item-remove
     FOR    ${index}    IN RANGE    ${notification_count}
         Click Element    xpath=//*[contains(@class,"odh-dashboard__notification-drawer__item-remove")]
     END
@@ -785,8 +785,8 @@ Get ConfigMaps For RHODS Groups Configuration
 
 Get Links From Switcher
     [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link
-    ${list_of_links} =    Create List
-    ${link_elements} =    Get WebElements    //a[@class="pf-m-external pf-v5-c-app-launcher__menu-item" and not(starts-with(@href, '#'))]
+    ${list_of_links}=    Create List
+    ${link_elements}=    Get WebElements    //a[@class="pf-m-external pf-v5-c-app-launcher__menu-item" and not(starts-with(@href, '#'))]
     FOR    ${ext_link}    IN    @{link_elements}
         ${href}=    Get Element Attribute    ${ext_link}    href
         Append To List    ${list_of_links}    ${href}
@@ -805,7 +805,7 @@ Maybe Wait For Dashboard Loading Spinner Page
     IF   ${do not wait for spinner} == ${true}
       RETURN
     END
-    ${spinner_ball} =   Set Variable    xpath=//span[@class="pf-v5-c-spinner__tail-ball"]
+    ${spinner_ball}=   Set Variable    xpath=//span[@class="pf-v5-c-spinner__tail-ball"]
     Run Keyword And Ignore Error    Run Keywords
     ...    Wait Until Page Contains Element    ${spinner_ball}    timeout=${timeout-pre}
     ...    AND
@@ -824,7 +824,7 @@ Handle Deletion Confirmation Modal
     [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
     # Once fixed https://issues.redhat.com/browse/RHODS-9730 change the button xpath to
     # xpath=//button[text()="Delete ${item_type}"]
-    ${delete_btn_xp} =    Set Variable    xpath=//button[contains(text(), 'Delete')]
+    ${delete_btn_xp}=    Set Variable    xpath=//button[contains(text(), 'Delete')]
     Wait Until Generic Modal Appears
     Run Keyword And Warn On Failure    Page Should Contain    Delete ${item_type}?
     Run Keyword And Warn On Failure    Page Should Contain    This action cannot be undone.
@@ -847,7 +847,7 @@ Click Action From Actions Menu
     [Arguments]    ${item_title}    ${action}    ${item_type}=${NONE}
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
     IF    "${item_type}" != "${NONE}"
-        ${action} =    Catenate    ${action}    ${item_type}
+        ${action}=    Catenate    ${action}    ${item_type}
     END
     Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]    # robocop: disable
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]

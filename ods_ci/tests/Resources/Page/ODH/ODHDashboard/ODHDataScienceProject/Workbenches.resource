@@ -430,8 +430,7 @@ Get Openshift Notebook CR From Workbench
 
 Start Workbench Should Fail
     [Documentation]    Checks the workbench fails to start
-    [Arguments]    ${prj_title}    ${workbench_title}
-    Wait Until Project Is Open    project_title=${prj_title}
+    [Arguments]    ${workbench_title}
     ${failed}=    Run Keyword And Return Status
     ...    Wait Until Workbench Is Started     workbench_title=${workbench_title}
     IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...

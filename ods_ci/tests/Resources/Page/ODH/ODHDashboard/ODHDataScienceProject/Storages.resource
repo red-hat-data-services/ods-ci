@@ -57,7 +57,7 @@ Storage Size Should Be
         ...    ${STORAGE_SECTION_XP}//td[contains(@data-label,"Size")]//div[strong[text()="Size"]]/div    # robocop: disable
         Wait Until Page Contains Element    ${storage_size_el}    timeout=20s
         ${displayed_sizes}=    Get All Text Under Element    ${storage_size_el}
-        ${matched_sizes}=    Get All Strings That Contain    ${displayed_sizes}    ${size}Gi
+        ${matched_sizes}=    Get All Strings That Contain    ${displayed_sizes}    Max ${size}Gi
         Run Keyword And Continue On Failure    Should Not Be Empty    ${matched_sizes}
     ELSE IF    "${pvc_status_phase}" == "Bound"
         # PVC is now or had been bound already sometime in past - there is:
@@ -140,7 +140,7 @@ Fill In New PV Data
         Run Keyword And Continue On Failure    Element Should Be Enabled
         ...    xpath=//div[contains(@class,"modal")]//input[contains(@placeholder,"Select a workbench to connect")]
         FOR    ${workbench_title}    IN    @{connected_workbench}
-            ${mount_dir}=    Genereta Mount Name    ${workbench_title}
+            ${mount_dir}=    Generate Mount Name    ${workbench_title}
             Set Connection Between PV And Workbench    ${workbench_title}    ${mount_dir}
             Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_SUBMIT_BTN_XP}
         END
@@ -192,7 +192,7 @@ Delete All PVC In Project From CLI
     ...    oc delete pvc -n ${ns_name} --all    shell=yes
     Should Be True    ${result.rc} == 0    msg=${result.stderr}
 
-Genereta Mount Name
+Generate Mount Name
     [Documentation]    Generate a supported mount directory name (lower case and dashes only) from string '${str}'
     [Arguments]    ${str}
     ${str}=    Replace String Using Regexp    string=${str}    pattern=[^a-zA-Z]    replace_with=-

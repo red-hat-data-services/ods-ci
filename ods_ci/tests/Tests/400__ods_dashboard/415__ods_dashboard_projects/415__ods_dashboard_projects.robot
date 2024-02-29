@@ -143,6 +143,8 @@ Verify User Can Create A PV Storage
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}    press_cancel=${TRUE}
@@ -223,8 +225,6 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     ...                          connected_workbench=${workbenches}
     Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    Run Keyword And Ignore Error    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
-    ...    status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
     [Teardown]    Run Keywords
@@ -441,7 +441,7 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     ...                 press_cancel=${FALSE}    envs=${NONE}
     Workbench Status Should Be    workbench_title=${WORKBENCH_5_TITLE}
     ...    status=${WORKBENCH_STATUS_STARTING}
-    Start Workbench Should Fail    prj_title=${PRJ_TITLE}    workbench_title=${WORKBENCH_5_TITLE}
+    Start Workbench Should Fail    workbench_title=${WORKBENCH_5_TITLE}
     Open Notebook Event Log    workbench_title=${WORKBENCH_5_TITLE}
     ...    exp_preview_text=Insufficient
     Event Log Should Report The Failure    exp_progress_text=Insufficient resources to start

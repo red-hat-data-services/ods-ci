@@ -937,7 +937,7 @@ class OpenshiftClusterManager:
             sys.exit(1)
         self.wait_for_osd_cluster_to_get_deleted()
 
-    def wait_for_osd_cluster_to_get_deleted(self, timeout=3600):
+    def wait_for_osd_cluster_to_get_deleted(self, timeout=5400):
         """Waits for cluster to get deleted"""
 
         count = 0

@@ -76,6 +76,7 @@ class OpenshiftClusterManager:
         self.update_ocm_channel_json = args.get("update_ocm_channel_json")
         self.update_policies_json = args.get("update_policies_json")
         self.service_account_file = "create_gcp_sa_json.json"
+        self.cluster_id = ""
         ocm_env = glob.glob(dir_path + "/../../../ocm.json.*")
         if ocm_env != []:
             os.environ["OCM_CONFIG"] = ocm_env[0]
@@ -109,16 +110,16 @@ class OpenshiftClusterManager:
                 log.error("Failed to give execute permission to ocm cli binary")
                 sys.exit(1)
 
-    def ocm_describe(self, filter=""):
+    def ocm_describe(self, jq_filter=""):
         """Describes cluster and returns cluster info"""
 
         cluster_id = self.get_osd_cluster_id()
-        cmd = "ocm describe cluster {}".format(cluster_id)
-        if filter != "":
-            cmd += " " + filter
+        cmd = f"ocm describe cluster {cluster_id}"
+        if jq_filter:
+            cmd += f" {jq_filter}"
         ret = execute_command(cmd)
         if ret is None or "Error: Can't retrieve cluster for key" in ret:
-            log.info("ocm describe for cluster {} failed".format(self.cluster_name))
+            log.info(f"ocm describe for cluster {self.cluster_name} failed")
             return None
         return ret
 
@@ -126,9 +127,9 @@ class OpenshiftClusterManager:
         """Checks if cluster exists"""
         ret = self.ocm_describe()
         if ret is None:
-            log.info("ocm cluster with name {} not exists!".format(self.cluster_name))
+            log.info(f"ocm cluster with name {self.cluster_name} not exists!")
             return False
-        log.info("ocm cluster with name {} exists!".format(self.cluster_name))
+        log.info(f"ocm cluster with name {self.cluster_name} exists!")
         return True
 
     def osd_cluster_create(self):
@@ -147,8 +148,7 @@ class OpenshiftClusterManager:
                 if self.channel_group == "candidate":
                     chan_grp = "--channel-group {}".format(self.channel_group)
 
-                version_cmd = 'ocm list versions {} | grep -w "'.format(chan_grp) + re.escape(version) + '*"'
-                log.info("CMD: {}".format(version_cmd))
+                version_cmd = f'ocm list versions {chan_grp} | grep -w "{re.escape(version)}*"'
                 versions = execute_command(version_cmd)
                 if versions is not None:
                     version = [ver for ver in versions.split("\n") if ver][-1]
@@ -219,20 +219,22 @@ class OpenshiftClusterManager:
     def get_osd_cluster_id(self):
         """Gets osd cluster ID"""
 
-        cmd = "ocm list clusters -p search=\"name = '{}' or id = '{}'\" --columns id --no-headers".format(
-            self.cluster_name, self.cluster_name
-        )
-        ret = execute_command(cmd)
-        if ret is None:
-            log.error(f"Unable to retrieve cluster ID for cluster name {self.cluster_name}. EXITING")
-            sys.exit(1)
-        return ret.strip("\n")
+        if not self.cluster_id:
+            cmd = "ocm list clusters -p search=\"name = '{}' or id = '{}'\" --columns id --no-headers".format(
+                self.cluster_name, self.cluster_name
+            )
+            cluster_id = execute_command(cmd)
+            if cluster_id in [None, ""]:
+                log.error(f"Unable to retrieve cluster ID for cluster name {self.cluster_name}. EXITING")
+                sys.exit(1)
+            self.cluster_id = cluster_id.strip("\n")
+        return self.cluster_id
 
     def get_osd_cluster_state(self):
         """Gets osd cluster state"""
 
-        cluster_state = self.ocm_describe(filter="--json | jq -r '.state'")
-        if cluster_state is None:
+        cluster_state = self.ocm_describe(jq_filter="--json | jq -r '.state'")
+        if cluster_state in [None, ""]:
             log.error(f"Unable to retrieve cluster state for cluster name {self.cluster_name}. EXITING")
             sys.exit(1)
         return cluster_state.strip("\n")
@@ -240,7 +242,7 @@ class OpenshiftClusterManager:
     def get_osd_cluster_version(self):
         """Gets osd cluster version"""
 
-        cluster_version = self.ocm_describe(filter="--json | jq -r '.version.raw_id'")
+        cluster_version = self.ocm_describe(jq_filter="--json | jq -r '.version.raw_id'")
         if cluster_version is None:
             log.error(f"Unable to retrieve cluster version for cluster name {self.cluster_name}. EXITING")
             sys.exit(1)
@@ -250,8 +252,8 @@ class OpenshiftClusterManager:
         """Gets osd cluster console url"""
 
         filter_str = "--json | jq -r '.console.url'"
-        cluster_console_url = self.ocm_describe(filter=filter_str)
-        if cluster_console_url is None:
+        cluster_console_url = self.ocm_describe(jq_filter=filter_str)
+        if cluster_console_url in [None, ""]:
             log.error(f"Unable to retrieve cluster console url for cluster name {self.cluster_name}. EXITING")
             sys.exit(1)
         return cluster_console_url.strip("\n")
@@ -938,7 +940,6 @@ class OpenshiftClusterManager:
     def wait_for_osd_cluster_to_get_deleted(self, timeout=3600):
         """Waits for cluster to get deleted"""
 
-        cluster_exists = self.is_osd_cluster_exists()
         count = 0
         check_flag = False
         while count <= timeout:
@@ -951,7 +952,7 @@ class OpenshiftClusterManager:
             time.sleep(60)
             count += 60
         if not check_flag:
-            log.error(f"{self.cluster_name} not deleted even after an hour. EXITING")
+            log.error(f"{self.cluster_name} not deleted even after timeout of {timeout / 60} minutes. EXITING")
             sys.exit(1)
 
     def hibernate_cluster(self):
@@ -1356,7 +1357,7 @@ if __name__ == "__main__":
     # Argument parsers for ocm_login
     ocm_login_parser = subparsers.add_parser(
         "ocm_login",
-        help=("Login to OCM using token"),
+        help="Login to OCM using token",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -1384,7 +1385,7 @@ if __name__ == "__main__":
     # Argument parsers for create_cluster
     create_cluster_parser = subparsers.add_parser(
         "create_cluster",
-        help=("Create managed OpenShift Dedicated v4 clusters via OCM."),
+        help="Create managed OpenShift Dedicated v4 clusters via OCM.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -1657,7 +1658,7 @@ if __name__ == "__main__":
     # Argument parsers for delete_cluster
     delete_cluster_parser = subparsers.add_parser(
         "delete_cluster",
-        help=("Delete managed OpenShift Dedicated v4 clusters via OCM."),
+        help="Delete managed OpenShift Dedicated v4 clusters via OCM.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     delete_cluster_parser.add_argument(
@@ -1673,7 +1674,7 @@ if __name__ == "__main__":
     # Argument parsers for hibernate_cluster
     hibernate_cluster_parser = subparsers.add_parser(
         "hibernate_cluster",
-        help=("Hibernates managed OpenShift Dedicated v4 clusters via OCM."),
+        help="Hibernates managed OpenShift Dedicated v4 clusters via OCM.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     hibernate_cluster_parser.add_argument(
@@ -1689,7 +1690,7 @@ if __name__ == "__main__":
     # Argument parsers for resume_cluster
     resume_cluster_parser = subparsers.add_parser(
         "resume_cluster",
-        help=("Resumes managed OpenShift Dedicated v4 clusters via OCM."),
+        help="Resumes managed OpenShift Dedicated v4 clusters via OCM.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     resume_cluster_parser.add_argument(
@@ -1705,7 +1706,7 @@ if __name__ == "__main__":
     # Argument parsers for delete_idp
     delete_idp_parser = subparsers.add_parser(
         "delete_idp",
-        help=("Delete a specific identity provider for a cluster."),
+        help="Delete a specific identity provider for a cluster.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     optional_delete_idp_parser = delete_idp_parser._action_groups.pop()
@@ -1732,7 +1733,7 @@ if __name__ == "__main__":
     # Argument parsers for get_osd_cluster_info
     info_parser = subparsers.add_parser(
         "get_osd_cluster_info",
-        help=("Gets the cluster information"),
+        help="Gets the cluster information",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     optional_info_parser = info_parser._action_groups.pop()
@@ -1752,7 +1753,7 @@ if __name__ == "__main__":
     # Argument parsers for update_osd_cluster_info
     update_info_parser = subparsers.add_parser(
         "update_osd_cluster_info",
-        help=("Updates the cluster information"),
+        help="Updates the cluster information",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     optional_update_info_parser = update_info_parser._action_groups.pop()
@@ -1788,7 +1789,7 @@ if __name__ == "__main__":
     # Argument parsers for install_rhods_addon
     install_rhods_parser = subparsers.add_parser(
         "install_rhods_addon",
-        help=("Install rhods addon cluster."),
+        help="Install rhods addon cluster.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     required_install_rhods_parser = install_rhods_parser.add_argument_group("required arguments")
@@ -1812,7 +1813,7 @@ if __name__ == "__main__":
     # Argument parsers for install_rhods_addon
     install_gpu_parser = subparsers.add_parser(
         "install_gpu_addon",
-        help=("Install gpu addon cluster."),
+        help="Install gpu addon cluster.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     required_install_gpu_parser = install_gpu_parser.add_argument_group("required arguments")
@@ -1829,7 +1830,7 @@ if __name__ == "__main__":
     # Argument parsers for create_cluster
     add_machinepool_parser = subparsers.add_parser(
         "add_machine_pool",
-        help=("Adds machine pool to given cluster via OCM."),
+        help="Adds machine pool to given cluster via OCM.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -1888,7 +1889,7 @@ if __name__ == "__main__":
     # Argument parsers for uninstall_rhods_addon
     uninstall_rhods_parser = subparsers.add_parser(
         "uninstall_rhods_addon",
-        help=("Uninstall rhods addon cluster."),
+        help="Uninstall rhods addon cluster.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     required_uninstall_rhods_parser = uninstall_rhods_parser.add_argument_group("required arguments")
@@ -1905,7 +1906,7 @@ if __name__ == "__main__":
     # Argument parsers for install_rhoam_addon
     install_rhoam_parser = subparsers.add_parser(
         "install_rhoam_addon",
-        help=("Install rhoam addon cluster."),
+        help="Install rhoam addon cluster.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     required_install_rhoam_parser = install_rhoam_parser.add_argument_group("required arguments")
@@ -1922,7 +1923,7 @@ if __name__ == "__main__":
     # Argument parsers for uninstall_rhoam_addon
     uninstall_rhoam_parser = subparsers.add_parser(
         "uninstall_rhoam_addon",
-        help=("Uninstall rhoam addon cluster."),
+        help="Uninstall rhoam addon cluster.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     required_uninstall_rhoam_parser = uninstall_rhoam_parser.add_argument_group("required arguments")
@@ -1939,7 +1940,7 @@ if __name__ == "__main__":
     # Argument parsers for create_idp
     create_idp_parser = subparsers.add_parser(
         "create_idp",
-        help=("Add an Identity providers to determine how users log into the cluster."),
+        help="Add an Identity providers to determine how users log into the cluster.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     optional_create_idp_parser = create_idp_parser._action_groups.pop()

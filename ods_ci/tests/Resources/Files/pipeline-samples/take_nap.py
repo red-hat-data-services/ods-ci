@@ -38,6 +38,4 @@ def take_nap_pipeline(naptime_secs: int = 900):
 if __name__ == "__main__":
     from kfp_tekton.compiler import TektonCompiler
 
-    TektonCompiler().compile(
-        take_nap_pipeline, package_path=__file__.replace(".py", ".yaml")
-    )
+    TektonCompiler().compile(take_nap_pipeline, package_path=__file__.replace(".py", ".yaml"))

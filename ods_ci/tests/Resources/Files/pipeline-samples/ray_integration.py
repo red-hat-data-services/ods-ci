@@ -9,9 +9,7 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration
 
     print("before login")
-    auth = TokenAuthentication(
-        token=openshift_token, server=openshift_server, skip_tls=True
-    )
+    auth = TokenAuthentication(token=openshift_token, server=openshift_server, skip_tls=True)
     auth_return = auth.login()
     print(f'auth_return: "{auth_return}"')
     print("after login")

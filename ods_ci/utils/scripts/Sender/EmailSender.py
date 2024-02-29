@@ -23,17 +23,13 @@ class EmailSender(Sender):
         self._use_unsecure = False
         self._message = MIMEMultipart()
 
-    def prepare_payload(
-        self, text: str = "", attachments: list[Any] | None = None
-    ) -> None:
+    def prepare_payload(self, text: str = "", attachments: list[Any] | None = None) -> None:
         self._message.attach(MIMEText(text))
         if attachments is not None:
             for filepath in attachments:
                 with open(filepath, "rb") as file:
                     part = MIMEApplication(file.read(), Name=basename(filepath))
-                    part["Content-Disposition"] = (
-                        'attachment; filename="%s"' % basename(filepath)
-                    )
+                    part["Content-Disposition"] = 'attachment; filename="%s"' % basename(filepath)
                     self._message.attach(part)
 
     def prepare_header(self):
@@ -56,9 +52,7 @@ class EmailSender(Sender):
             smtp.starttls(context=context)
         if self._server_usr and self._server_pw:
             smtp.login(self._server_usr, self._server_pw)
-        smtp.sendmail(
-            self._sender_address, self._receiver_addresses, self._message.as_string()
-        )
+        smtp.sendmail(self._sender_address, self._receiver_addresses, self._message.as_string())
         smtp.close()
 
     def set_sender_address(self, sender_address: str) -> None:
@@ -79,9 +73,7 @@ class EmailSender(Sender):
     def get_subject(self) -> str:
         return self._subject
 
-    def set_server(
-        self, server: str, use_ssl: bool = False, use_unsecure: bool = False
-    ) -> None:
+    def set_server(self, server: str, use_ssl: bool = False, use_unsecure: bool = False) -> None:
         if ":" in server:
             server = server.split(":")
             self._server = server[0]

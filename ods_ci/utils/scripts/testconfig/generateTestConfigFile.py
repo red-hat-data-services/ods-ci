@@ -93,8 +93,7 @@ def parse_args():
     parser.add_argument(
         "-s",
         "--skip-git-clone",
-        help="If this option is used then "
-        "cloning config git repo for ods-ci tests is skipped.",
+        help="If this option is used then cloning config git repo for ods-ci tests is skipped.",
         action="store_true",
         dest="skip_clone",
     )
@@ -136,9 +135,7 @@ def get_prometheus_url(project):
     Get prometheus url for the cluster.
     """
     host_jsonpath = "{.spec.host}"
-    cmd = "oc get route prometheus -n {} -o jsonpath='{}'".format(
-        project, host_jsonpath
-    )
+    cmd = "oc get route prometheus -n {} -o jsonpath='{}'".format(project, host_jsonpath)
     prometheus_url = execute_command(cmd)
     return "https://" + prometheus_url.strip("\n")
 
@@ -194,30 +191,14 @@ def generate_test_config_file(
     data["S3"]["BUCKET_5"]["REGION"] = config_data["S3"]["BUCKET_5"]["REGION"]
     data["S3"]["BUCKET_5"]["ENDPOINT"] = config_data["S3"]["BUCKET_5"]["ENDPOINT"]
     data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data["ANACONDA_CE"]["ACTIVATION_KEY"]
-    data["OCP_CONSOLE_URL"] = config_data["TEST_CLUSTERS"][test_cluster][
-        "OCP_CONSOLE_URL"
-    ]
-    data["ODH_DASHBOARD_URL"] = config_data["TEST_CLUSTERS"][test_cluster][
-        "ODH_DASHBOARD_URL"
-    ]
-    data["TEST_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster][
-        "TEST_USER"
-    ]["AUTH_TYPE"]
-    data["TEST_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster][
-        "TEST_USER"
-    ]["USERNAME"]
-    data["TEST_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster][
-        "TEST_USER"
-    ]["PASSWORD"]
-    data["OCP_ADMIN_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster][
-        "OCP_ADMIN_USER"
-    ]["AUTH_TYPE"]
-    data["OCP_ADMIN_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster][
-        "OCP_ADMIN_USER"
-    ]["USERNAME"]
-    data["OCP_ADMIN_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster][
-        "OCP_ADMIN_USER"
-    ]["PASSWORD"]
+    data["OCP_CONSOLE_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_CONSOLE_URL"]
+    data["ODH_DASHBOARD_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["ODH_DASHBOARD_URL"]
+    data["TEST_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["AUTH_TYPE"]
+    data["TEST_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["USERNAME"]
+    data["TEST_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["PASSWORD"]
+    data["OCP_ADMIN_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["AUTH_TYPE"]
+    data["OCP_ADMIN_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["USERNAME"]
+    data["OCP_ADMIN_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["PASSWORD"]
     data["SSO"]["USERNAME"] = config_data["SSO"]["USERNAME"]
     data["SSO"]["PASSWORD"] = config_data["SSO"]["PASSWORD"]
     data["RHODS_BUILD"]["PULL_SECRET"] = config_data["RHODS_BUILD"]["PULL_SECRET"]

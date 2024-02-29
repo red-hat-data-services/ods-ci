@@ -10,7 +10,9 @@ from urllib3.exceptions import MaxRetryError, SSLError
 
 
 class DataSciencePipelinesKfpTekton:
-    base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+    base_image = (
+        "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+    )
 
     # init should not have a call to external system, otherwise dry-run will fail
     def __init__(self):
@@ -68,9 +70,7 @@ class DataSciencePipelinesKfpTekton:
         return json.loads(secret_json)
 
     def get_bucket_name(self, api, project):
-        bucket_name, _ = api.run_oc(
-            f"oc get dspa -n {project} pipelines-definition -o json"
-        )
+        bucket_name, _ = api.run_oc(f"oc get dspa -n {project} pipelines-definition -o json")
         objectStorage = json.loads(bucket_name)["spec"]["objectStorage"]
         if "minio" in objectStorage:
             return objectStorage["minio"]["bucket"]
@@ -79,9 +79,7 @@ class DataSciencePipelinesKfpTekton:
 
     def import_souce_code(self, path):
         module_name = os.path.basename(path).replace("-", "_")
-        spec = importlib.util.spec_from_loader(
-            module_name, importlib.machinery.SourceFileLoader(module_name, path)
-        )
+        spec = importlib.util.spec_from_loader(module_name, importlib.machinery.SourceFileLoader(module_name, path))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         sys.modules[module_name] = module
@@ -92,9 +90,7 @@ class DataSciencePipelinesKfpTekton:
         self, user, pwd, project, route_name, source_code, fn, current_path=None
     ):
         client, api = self.get_client(user, pwd, project, route_name)
-        mlpipeline_minio_artifact_secret = self.get_secret(
-            api, project, "mlpipeline-minio-artifact"
-        )
+        mlpipeline_minio_artifact_secret = self.get_secret(api, project, "mlpipeline-minio-artifact")
         bucket_name = self.get_bucket_name(api, project)
         # the current path is from where you are running the script
         # sh ods_ci/run_robot_test.sh
@@ -111,9 +107,7 @@ class DataSciencePipelinesKfpTekton:
         result = client.create_run_from_pipeline_func(
             pipeline_func=pipeline,
             arguments={
-                "mlpipeline_minio_artifact_secret": mlpipeline_minio_artifact_secret[
-                    "data"
-                ],
+                "mlpipeline_minio_artifact_secret": mlpipeline_minio_artifact_secret["data"],
                 "bucket_name": bucket_name,
                 "openshift_server": self.api.get_openshift_server(),
                 "openshift_token": self.api.get_openshift_token(),
@@ -126,8 +120,6 @@ class DataSciencePipelinesKfpTekton:
     # we are calling DataSciencePipelinesAPI because of https://github.com/kubeflow/kfp-tekton/issues/1223
     # Waiting for a backport https://github.com/kubeflow/kfp-tekton/pull/1234
     @keyword
-    def kfp_tekton_wait_for_run_completion(
-        self, user, pwd, project, route_name, run_result, timeout=160
-    ):
+    def kfp_tekton_wait_for_run_completion(self, user, pwd, project, route_name, run_result, timeout=160):
         _, api = self.get_client(user, pwd, project, route_name)
         return api.check_run_status(run_result.run_id, timeout=timeout)

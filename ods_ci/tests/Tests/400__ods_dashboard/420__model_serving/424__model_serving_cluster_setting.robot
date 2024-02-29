@@ -13,6 +13,7 @@ ${project_title}=  BLANKPROJ
 *** Test Cases ***
 Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling both model serving platforms
+    [Tags]  ODS-2574
     Select CheckBox Multi Model Serving Platforms
     Select CheckBox Single Model Serving Platforms
     Capture Page Screenshot
@@ -24,6 +25,7 @@ Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
 
 Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms Only
     [Documentation]    Verifies that correct values are present in the DS project after enabling Multi Model serving platforms only
+    [Tags]  ODS-2574
     Select CheckBox Multi Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
@@ -35,6 +37,7 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms 
 
 Verify Correct Value in DS Project after Enabling Single Model Serving Platforms Only
     [Documentation]    Verifies that correct values are present in the DS project after enabling Single Model model serving platforms only
+    [Tags]  ODS-2574
     Select CheckBox Single Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
@@ -46,6 +49,7 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
 
 Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after disabling both model serving platforms
+    [Tags]  ODS-2574
     Open Data Science Project Details Page      ${project_title}
     Click Element     //a[@href="#model-server"]
     Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]

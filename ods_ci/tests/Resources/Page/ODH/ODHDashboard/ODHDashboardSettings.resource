@@ -283,7 +283,7 @@ Check IF Single Model Serving Is Enabled From DSC And Cluster Setting
     [Documentation]    Check single model should be enabled from DSC and dashboard
     Component Should Be Enabled  kserve
     ${status}=   Get Checkbox State Of Single Model Serving Platforms
-    Should Be Equal As Strings   ${status}   ${True}
+    Should Be Equal As Strings   ${status}   ${TRUE}
     Element Should Be Enabled    ${SINGLE_MODE_SERVING_CHECK_BOX}
 
 
@@ -299,7 +299,7 @@ Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
     [Documentation]    Check Multi model should be enabled from DSC and dashboard
     Component Should Be Enabled  modelmeshserving
     ${status}=   Get Checkbox State Of Multi Model Serving Platforms
-    Should Be Equal    ${status}  ${true_status}
+    Should Be Equal    ${status}  ${TRUE}
     Element Should Be Enabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
     Should Be Equal    ${status}  ${True}
     Element Should Be Enabled     ${MULTI_MODEL_SERVING_CHECK_BOX}

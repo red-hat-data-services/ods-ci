@@ -25,8 +25,8 @@ ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 
 *** Test Cases ***
 Verify Pipeline Server Creation When Using Internal Database
-    [Documentation]    Verifies multiple users can create pipeline server
-    [Tags]    Tier2     RunThisTest
+    [Documentation]     Verifies multiple users can create pipeline server
+    [Tags]    Tier2
     ...       RHOAIENG-2099
 
     FOR  ${ITERATION}      IN   RANGE   10

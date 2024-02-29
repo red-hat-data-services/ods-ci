@@ -1,7 +1,6 @@
 *** Settings ***
 Documentation   Distributed workloads tests
 
-Resource         ../../../tasks/Resources/RHODS_OLM/install/codeflare_install.resource
 Resource         ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource         ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 

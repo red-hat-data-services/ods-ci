@@ -15,11 +15,8 @@ ${RHODS_OSD_INSTALL_REPO}       None
 ${TEST_ENV}                     AWS
 ${INSTALL_TYPE}                 OperatorHub
 ${UPDATE_CHANNEL}               odh-nightlies
-${MANAGE_CODEFLARE_OPERATOR}    False
-${CODEFLARE_UPDATE_CHANNEL}     odh-nightlies
 ${OLM_DIR}                      rhodsolm
 ${RHODS_VERSION}                None
-${CODEFLARE_VERSION}            None
 
 *** Tasks ***
 Can Install RHODS Operator

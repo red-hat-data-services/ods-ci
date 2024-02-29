@@ -34,12 +34,7 @@ class ReadPR:
         for ft in all_tags:
             if ft == "DestructiveTest":
                 destructive_tests.append(self.parse_tag(ft))
-            elif (
-                ft.startswith("Execution-Time-Over")
-                or ft == "Tier3"
-                or ft == "Tier1"
-                or ft == "Sanity"
-            ):
+            elif ft.startswith("Execution-Time-Over") or ft == "Tier3" or ft == "Tier1" or ft == "Sanity":
                 slow_tests.append(self.parse_tag(ft))
             elif ft.startswith("ODS-"):
                 ods_tests.append(self.parse_tag(ft))
@@ -104,9 +99,7 @@ class ReadPR:
                     if "#" in tag:
                         # remove comment
                         tag = tag[: tag.index("#")]
-                    tag_data = tag.replace(" ", self.magic_tag_separator).split(
-                        self.magic_tag_separator
-                    )
+                    tag_data = tag.replace(" ", self.magic_tag_separator).split(self.magic_tag_separator)
                     for tag_it in tag_data:
                         tag_it = tag_it.strip()
                         if len(tag_it) > 0:
@@ -122,9 +115,7 @@ class ReadPR:
         for line in lines:
             if line.startswith("***"):
                 # after each ***
-                self.apply_section_rule(
-                    section_name, section_data, sections_info, file_name
-                )
+                self.apply_section_rule(section_name, section_data, sections_info, file_name)
 
                 if self.keyword_key in line:
                     section_name = self.keyword_key

@@ -46,7 +46,6 @@ class ReportPortalOperations:
         cmd = "rp_preproc -c {} -d {} --service {} -l {}".format(
             self.config_file, self.payload_dir, self.service_url, self.log_path
         )
-        log.info("CMD: {}".format(cmd))
         rp_output = execute_command(cmd)
         rp_output_json = json.dumps(rp_output)
         self.write_output_file(json.dumps(rp_output_json))
@@ -63,9 +62,7 @@ if __name__ == "__main__":
         description="Script to upload results to report portal",
     )
 
-    subparsers = parser.add_subparsers(
-        title="Available sub commands", help="sub-command help"
-    )
+    subparsers = parser.add_subparsers(title="Available sub commands", help="sub-command help")
 
     # Argument parsers for uploading test results to report portal
     upload_result_parser = subparsers.add_parser(
@@ -74,9 +71,7 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    required_upload_result_parser = upload_result_parser.add_argument_group(
-        "required arguments"
-    )
+    required_upload_result_parser = upload_result_parser.add_argument_group("required arguments")
 
     required_upload_result_parser.add_argument(
         "--config-file",

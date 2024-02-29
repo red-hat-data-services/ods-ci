@@ -274,12 +274,12 @@ Notebook Expected Ide
     ...              At the moment, there are two IDE types available in the notebook images:
     ...              JupyterLab and VSCode.
     ...              Returns type of expected IDE for the given image name as a string.
-    [Arguments]  ${image_name}
-    IF  "${image_name}"=="${EMPTY}"
+    [Arguments]  ${image}
+    IF  "${image}"=="${EMPTY}"
         Log  level=ERROR  message=No image name has been provided!
         RETURN  ${EMPTY}
     END
-    IF  "${image_name}"=="code-server"
+    IF  "${image}"=="code-server"
         RETURN  VSCode
     ELSE
         RETURN  JupyterLab
@@ -288,8 +288,8 @@ Notebook Expected Ide
 Wait Notebook To Be Loaded
     [Documentation]  Waits for the notebook IDE environment to be loaded completely and performs
     ...              a simple check with the Menu action in the loaded IDE.
-    [Arguments]  ${image_name}  ${version}
-    ${ide}=  Notebook Expected Ide  ${image_name}
+    [Arguments]  ${image}  ${version}
+    ${ide}=  Notebook Expected Ide  ${image}
 
     IF  "${ide}"=="VSCode"
         Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s

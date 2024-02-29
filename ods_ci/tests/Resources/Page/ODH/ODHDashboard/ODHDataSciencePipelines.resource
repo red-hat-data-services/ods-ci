@@ -147,18 +147,23 @@ Open Pipeline Detail
     Capture Page Screenshot
 
 Open Pipeline Run
-    [Documentation]    Open the Pipeline Run detail
+    [Documentation]    Open the Pipeline Run detail.
     [Arguments]    ${pipeline_run_name}
-    Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
-    Click Element    xpath=//button[text()='Data Science Pipelines']
-    Wait Until Page Contains Element    xpath=//a[text()='Runs']
+    ${present}=  Run Keyword And Return Status    Element Should Be Visible   xpath=//a[text()='Runs']
+    # We can run Open Pipeline Run step multiple times. If the menu is expanded, then it will colapse
+    IF    ${present} == ${FALSE}
+        Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
+        Click Element    xpath=//button[text()='Data Science Pipelines']
+        Wait Until Page Contains Element    xpath=//a[text()='Runs']
+    END
     Click Element    xpath=//a[text()='Runs']
-    Wait Until Page Contains Element    xpath=//span[text()='Triggered']
+    Wait Until Page Contains Element    xpath=//span[text()='Triggered']    timeout=30s
     Click Element    xpath=//span[text()='Triggered']
     Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']
     Click Element    xpath=//span[text()='${pipeline_run_name}']
     Wait Until Page Contains Element    xpath=//div[@data-test-id='topology']
 
+# robocop: disable:line-too-long
 Get Pipeline Run Step Log
     [Documentation]    Get Pipeline Run Step Log
     [Arguments]    ${pipeline_run_step}
@@ -170,6 +175,8 @@ Get Pipeline Run Step Log
     Capture Page Screenshot
     ${log_with_tags}=    Get Element Attribute    xpath://div[@class="pf-v5-c-log-viewer__list"]    innerHTML
     Log    ${log_with_tags}
+    # we close the modal otherwise any othe step in the test case will need to close it
+    Click Element    xpath=//button[@aria-label="Close drawer panel"]
     RETURN    ${log_with_tags}
 
 Verify Pipeline Run Is Completed
@@ -178,3 +185,22 @@ Verify Pipeline Run Is Completed
     Open Pipeline Run    ${pipeline_run_name}
     Wait Until Page Contains Element    //span[@class='pf-v5-c-label__text' and text()='Completed']    timeout=10m
     Capture Page Screenshot
+
+# robocop: disable:line-too-long
+Get Pipeline Run Duplicate Parameters
+    [Documentation]    Get Pipeline Run Duplicate Parameters
+    [Arguments]    ${pipeline_run_name}
+    Open Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}
+    Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Actions')]
+    Click Element    xpath://button[contains(span/text(), 'Actions')]
+    Wait Until Page Contains Element    xpath://a[@role='menuitem' and text()='Duplicate']
+    Click Element    xpath://a[@role='menuitem' and text()='Duplicate']
+    Wait Until Page Contains Element    xpath://div[text()='Pipeline input parameters']
+    Capture Page Screenshot
+    ${input_parameters}=    Get Element Attribute    xpath://div[text()='Pipeline input parameters']/following-sibling::div[1]    innerHTML
+    Log    ${input_parameters}
+    RETURN    ${input_parameters}
+
+
+
+

@@ -256,8 +256,8 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    Wait Until Page Contains Element    xpath:${CARDS_XP}
-    ...    timeout=15s
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element
+    ...    xpath:${CARDS_XP}    timeout=15s    error="This might be caused by bug RHOAIENG-404"
 
 Get App ID From Card
     [Arguments]  ${card_locator}

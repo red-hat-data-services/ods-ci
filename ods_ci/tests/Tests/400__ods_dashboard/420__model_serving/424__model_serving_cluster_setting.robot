@@ -31,7 +31,7 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms 
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}
     Click Element     //a[@href="#model-server"]
-    Wait Until Page Contains Element    //*[@id="multi-serving-platform-card"]
+    Wait Until Page Contains Element    //*[contains(text(), "Multi-model serving enabled")]
     Wait Until Page Contains Element     //button[contains(text(), 'Add model server')]
     Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
 
@@ -44,7 +44,7 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     Open Data Science Project Details Page      ${project_title}
     Click Element     //a[@href="#model-server"]
     Wait Until Page Contains Element    //button[contains(text(), 'Deploy model')]
-    Wait Until Page Contains Element    //*[@id="multi-serving-platform-card"]
+    Wait Until Page Contains Element    //*[contains(text(), "Single-model serving enabled")]
     Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
 
 Verify Correct Value in DS Project after Disabling Both Model Serving Platforms

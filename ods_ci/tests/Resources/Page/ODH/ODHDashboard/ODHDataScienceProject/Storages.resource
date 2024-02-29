@@ -47,16 +47,15 @@ Storage Size Should Be
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}
     Click Element    ${STORAGE_SECTION_XP}//tr[td//*/div[text()="${name}"]]//button[@aria-label="Details"]
     Wait Until Element Is Visible    ${STORAGE_SECTION_XP}//tr[contains(@class, "-table__expandable-row pf-m-expanded")]
-
     ${rc}  ${pvc_status_phase}=    Run And Return Rc And Output
     ...    oc get pvc -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${name}")].status.phase}'    # robocop: disable
     Should Be Equal As Integers    ${rc}    0    An error occurred during the check of PVC ${name} .status.phase value!
+    ${storage_size_xp}=    Set Variable
+    ...    ${STORAGE_SECTION_XP}//tr[td//*/div[text()="${name}"]]/following-sibling::*//td[contains(@data-label,"Size")]//div[strong[text()="Size"]]
     IF    "${pvc_status_phase}" == "Pending"
         # PVC hasn't been bound yet - only simple text with max storage should be shown
-        ${storage_size_el}=    Set Variable
-        ...    ${STORAGE_SECTION_XP}//td[contains(@data-label,"Size")]//div[strong[text()="Size"]]/div    # robocop: disable
-        Wait Until Page Contains Element    ${storage_size_el}    timeout=20s
-        ${displayed_sizes}=    Get All Text Under Element    ${storage_size_el}
+        Wait Until Page Contains Element    ${storage_size_xp}    timeout=2m
+        ${displayed_sizes}=    Get All Text Under Element    ${storage_size_xp}//*
         ${matched_sizes}=    Get All Strings That Contain    ${displayed_sizes}    Max ${size}Gi
         Run Keyword And Continue On Failure    Should Not Be Empty    ${matched_sizes}
     ELSE IF    "${pvc_status_phase}" == "Bound"
@@ -66,10 +65,8 @@ Storage Size Should Be
         #  - and finally an acutal storage size number
         # Note: it may take some time before UI updates the storage
         #       info WRT cluster usage, look like it does so every 60s
-        ${bound_storage_size_el}=    Set Variable
-        ...    ${STORAGE_SECTION_XP}//td[contains(@data-label,"Size")]//div[strong[text()="Size"]]/div/div[3]/div    # robocop: disable
-        Wait Until Page Contains Element    ${bound_storage_size_el}    timeout=2m
-        ${displayed_sizes}=    Get All Text Under Element    ${bound_storage_size_el}
+        Wait Until Page Contains Element    ${storage_size_xp}    timeout=2m
+        ${displayed_sizes}=    Get All Text Under Element    ${storage_size_xp}//*
         ${matched_sizes}=    Get All Strings That Contain    ${displayed_sizes}    ${size}Gi
         Run Keyword And Continue On Failure    Should Not Be Empty    ${matched_sizes}
         ${rc}  ${oc_object_size}=    Run And Return Rc And Output

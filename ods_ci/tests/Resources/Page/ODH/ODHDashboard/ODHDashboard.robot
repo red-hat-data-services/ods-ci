@@ -508,7 +508,7 @@ Verify Cluster Settings Is Available
     Page Should Contain    Settings
     Menu.Navigate To Page    Settings    Cluster settings
     Capture Page Screenshot
-    Wait Until Page Contains    Update global settings for all users    timeout=30
+    Wait Until Page Contains    Manage global settings for all users    timeout=30
     Wait Until Page Contains Element    ${USAGE_DATA_COLLECTION_XP}    timeout=30
 
 Verify Cluster Settings Is Not Available

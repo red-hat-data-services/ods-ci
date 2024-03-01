@@ -10,6 +10,13 @@ Suite Teardown  Teardown Settings Accelerator Profiles
 
 *** Variables ***
 ${ACC_DISPLAY_NAME}=    qe_accelerator_profile_
+${ACC2_DISPLAY_NAME}=    Test: Modify Accelerator Profile 2
+${ACC3_DISPLAY_NAME}=    Test: Delete Tolerations from AP 3
+${ACC4_DISPLAY_NAME}=    Test: Disable AP 4 from Edit Detail View
+${ACC5_DISPLAY_NAME}=    Test: Enable AP 5 from Edit Detail View
+${ACC6_DISPLAY_NAME}=    Test: Disable AP 6 from Administration View
+${ACC7_DISPLAY_NAME}=    Test: Enable AP 7 from Administration View
+${ACC8_DISPLAY_NAME}=    Test: Delete AP 8 from grid
 ${ACC_NAME}=    qeacceleratorprofile
 ${ACC_IDENTIFIER}=    nvidia.com/gpu
 ${ACC_DESCRIPTION}=    Create Accelerator Profile
@@ -23,7 +30,7 @@ ${ACC_TOLERATION_SECONDS}=    15
 
 
 *** Test Cases ***
-Create An Accelerator Profile From "Accelerator Profiles" Administration UI
+Create An Accelerator Profile From Accelerator Profiles Administration UI
     [Documentation]    Create an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  RHOAIENG-3349
     ...     Smoke
@@ -44,15 +51,15 @@ Create An Accelerator Profile From "Accelerator Profiles" Administration UI
     ...                                         tol_value=${ACC_TOLERATION_VALUE}
     ...                                         tol_seconds=${ACC_TOLERATION_SECONDS}
 
-Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
+Modify An Accelerator Profile Using Accelerator Profiles Administration UI
     [Documentation]    Modify an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  RHOAIENG-3349
     ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}2
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
-    Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}2
-    ...                         display_name=${ACC_DISPLAY_NAME}2_modified
+    Edit Accelerator Profile    original_display_name=${ACC2_DISPLAY_NAME}
+    ...                         display_name=${ACC2_DISPLAY_NAME}_modified
     ...                         identifier=${ACC_IDENTIFIER}_modified
     ...                         description=${ACC_DESCRIPTION2}_modified    tolerations=yes
     ...                         tol_operator=${ACC_TOLERATION_OPERATOR}
@@ -60,8 +67,8 @@ Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     ...                         tol_key=${ACC_TOLERATION_KEY}
     ...                         tol_value=${ACC_TOLERATION_VALUE}
     ...                         tol_seconds=${ACC_TOLERATION_SECONDS}
-    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}2_modified
-    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}2_modified   ${ACC_IDENTIFIER}_modified
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC2_DISPLAY_NAME}_modified
+    Verify Accelerator Profile Values Via CLI   ${ACC2_DISPLAY_NAME}_modified   ${ACC_IDENTIFIER}_modified
     ...                                         ${ACC_DESCRIPTION2}_modified   tolerations=yes
     ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                                         tol_effect=${ACC_TOLERATION_EFFECT}
@@ -69,7 +76,7 @@ Modify An Accelerator Profile Using "Accelerator Profiles" Administration UI
     ...                                         tol_value=${ACC_TOLERATION_VALUE}
     ...                                         tol_seconds=${ACC_TOLERATION_SECONDS}
 
-Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Administration UI
+Delete Tolerations from an Accelerator Profile Using Accelerator Profiles Administration UI
     [Documentation]    Delete Tolerations from  an Accelerator Profile instance from the Administration UI and
     ...                verify it's content
     [Tags]  RHOAIENG-3349
@@ -77,9 +84,9 @@ Delete Tolerations from an Accelerator Profile Using "Accelerator Profiles" Admi
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}3
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
-    Delete Accelerator Profile Tolerations    ${ACC_DISPLAY_NAME}3
-    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}3
-    Verify Accelerator Profile Has No Tolerations Via CLI   ${ACC_DISPLAY_NAME}3
+    Delete Accelerator Profile Tolerations    ${ACC3_DISPLAY_NAME}
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC3_DISPLAY_NAME}
+    Verify Accelerator Profile Has No Tolerations Via CLI   ${ACC3_DISPLAY_NAME}
 
 Disable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
@@ -88,9 +95,9 @@ Disable an Accelerator Profile From The Accelerator Profile Edit View
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}4
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
-    Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}4    enabled=False
-    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}4
-    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}4    enabled=False
+    Edit Accelerator Profile    original_display_name=${ACC4DISPLAY_NAME}    enabled=False
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC4_DISPLAY_NAME}
+    Verify Accelerator Profile Values Via CLI   ${ACC4_DISPLAY_NAME}    enabled=False
 
 Enable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Enable an An accelerator profile from the Edit Accelerator Profile view
@@ -99,9 +106,9 @@ Enable an Accelerator Profile From The Accelerator Profile Edit View
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}5
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
-    Edit Accelerator Profile    original_display_name=${ACC_DISPLAY_NAME}5    enabled=True
-    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}5
-    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}5    enabled=True
+    Edit Accelerator Profile    original_display_name=${ACC5_DISPLAY_NAME}    enabled=True
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC5_DISPLAY_NAME}
+    Verify Accelerator Profile Values Via CLI   ${ACC5_DISPLAY_NAME}    enabled=True
 
 Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
@@ -110,9 +117,9 @@ Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}6
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
-    Search for accelerator profile in grid    ${ACC_DISPLAY_NAME}6
+    Search for accelerator profile in grid    ${ACC6_DISPLAY_NAME}
     Disable Accelerator Profile    ${ACC_NAME}6
-    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}6    enabled=False
+    Verify Accelerator Profile Values Via CLI   ${ACC6_DISPLAY_NAME}    enabled=False
 
 Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Enable an An accelerator profile from the Accelerator Profile view
@@ -121,9 +128,9 @@ Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}7
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
-    Search for accelerator profile in grid    ${ACC_DISPLAY_NAME}7
+    Search for accelerator profile in grid    ${ACC7_DISPLAY_NAME}
     Click On The Enable Switch From Accelerator Profile    ${ACC_NAME}7
-    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}7    enabled=True
+    Verify Accelerator Profile Values Via CLI   ${ACC7_DISPLAY_NAME}    enabled=True
 
 Delete an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Delete an An accelerator profile from the Accelerator Profile view
@@ -132,7 +139,7 @@ Delete an Accelerator Profile From The Grid of the Accelerator Profile View
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}8
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
-    Delete Accelerator Profile    ${ACC_DISPLAY_NAME}8
+    Delete Accelerator Profile    ${ACC8_DISPLAY_NAME}
     Accelerator Profile Should Not Exist   ${ACC_NAME}8
 
 

@@ -6,8 +6,8 @@ metadata:
   name: qeacceleratorprofile3
   namespace: redhat-ods-applications
 spec:
-  displayName: qe_accelerator_profile_3
-  description: Delete Tolerations from Accelerator Profile
+  displayName: "Test: Delete Tolerations from AP 3"
+  description: {{ test_name }}
   enabled: true
   identifier: nvidia.com/gpu
   tolerations:

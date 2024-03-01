@@ -7,8 +7,8 @@ metadata:
   name: qeacceleratorprofile7
   namespace: redhat-ods-applications
 spec:
-  displayName: qe_accelerator_profile_7
-  description: Enable Accelerator Profile from Administration View
+  displayName: "Test: Enable AP 7 from Administration View"
+  description: {{ test_name }}
   enabled: false
   identifier: nvidia.com/gpu
   tolerations:

@@ -7,7 +7,7 @@ metadata:
   name: qeacceleratorprofile5
   namespace: redhat-ods-applications
 spec:
-  displayName: qe_accelerator_profile_5
-  description: Enable Accelerator Profile from Edit Detail View
+  displayName: "Test: Enable AP 5 from Edit Detail View"
+  description: {{ test_name }}
   enabled: false
   identifier: nvidia.com/gpu

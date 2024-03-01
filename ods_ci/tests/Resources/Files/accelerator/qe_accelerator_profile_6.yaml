@@ -7,8 +7,8 @@ metadata:
   name: qeacceleratorprofile6
   namespace: redhat-ods-applications
 spec:
-  displayName: qe_accelerator_profile_6
-  description: Disable Accelerator Profile from Administration View
+  displayName: "Test: Disable AP 6 from Administration View"
+  description: {{ test_name }}
   enabled: true
   identifier: nvidia.com/gpu
   tolerations:

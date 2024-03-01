@@ -7,8 +7,8 @@ metadata:
   name: qeacceleratorprofile4
   namespace: redhat-ods-applications
 spec:
-  displayName: qe_accelerator_profile_4
-  description: Disable Accelerator Profile from Edit Detail View
+  displayName: "Test: Disable AP 4 from Edit Detail View"
+  description: {{ test_name }}
   enabled: true
   identifier: nvidia.com/gpu
   tolerations:

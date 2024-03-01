@@ -10,8 +10,10 @@ ${ACCELERATOR_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/accelerator
 Create An Accelerator Profile Via CLI
     [Documentation]    Create an instance of Accelerator Profile using OC
     [Arguments]   ${name}  ${ns}=redhat-ods-applications
-    ${rc}    ${out}=   Run And Return Rc And Output   oc create -f ${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml -n ${ns}
-    Should Be Equal As Integers    ${rc}     0
+    ${status}=    Run Keyword And Return Status    Oc Create    kind=AcceleratorProfile
+    ...    src=${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml    namespace=${ns}
+    ...    template_data={test_name: '${TEST_NAME}'}
+    Should Be Equal As Integers    ${status}     ${TRUE}
 
 Get Accelerator Profile Spec Values Via CLI
     [Documentation]  Get Spec fields from an specific Accelerator Profile Instance

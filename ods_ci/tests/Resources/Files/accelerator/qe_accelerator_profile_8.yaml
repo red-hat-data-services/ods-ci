@@ -7,6 +7,6 @@ metadata:
   name: qeacceleratorprofile8
   namespace: redhat-ods-applications
 spec:
-  displayName: qe_accelerator_profile_8
+  displayName: "Test: Delete AP 8 from grid"
   enabled: false
   identifier: nvidia.com/gpu

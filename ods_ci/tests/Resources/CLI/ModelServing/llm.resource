@@ -20,6 +20,8 @@ ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
+${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
+${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 
 
 *** Keywords ***
@@ -57,11 +59,18 @@ Set Project And Runtime
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
     ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
+    ...            ${download_in_pvc}=${FALSE}    ${model_name}=${NONE}    ${download_timeout}=${NONE}
     Set Up Test OpenShift Project    test_ns=${namespace}
-    Create Secret For S3-Like Buckets    endpoint=${endpoint}
-    ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
-    ...    access_key_id=${access_key_id}    access_key=${access_key}
-    ...    verify_ssl=${verify_ssl}
+    IF    ${download_in_pvc}
+        Create PVC And Download Model From S3    model_name=${model_name}    bucket_name=${MODELS_BUCKET}
+        ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}
+        ...    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}    ${use_https}=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
+    ELSE
+        Create Secret For S3-Like Buckets    endpoint=${endpoint}
+        ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
+        ...    access_key_id=${access_key_id}    access_key=${access_key}
+        ...    verify_ssl=${verify_ssl}
+    END
     Deploy Serving Runtime    namespace=${namespace}    runtime=${runtime}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
         Enable User Workload Monitoring
@@ -216,7 +225,7 @@ Prepare Payload
             Log    ${index}: ${sub_header}
             ${pair}=    Split String    ${sub_header}    separator=:
             Log    ${pair}
-            Set To Dictionary    ${dict_header}    ${pair}[0]=${pair}[1]    
+            Set To Dictionary    ${dict_header}    ${pair}[0]=${pair}[1]
         END
         ${header}=    Set Variable    ${dict_header}
     END
@@ -229,7 +238,7 @@ Prepare Payload
             Log    ${index}: ${arg}
             ${pair}=    Split String    ${arg}    separator==
             Log    ${pair}
-            Set To Dictionary    ${args}    ${pair}[0]=${pair}[1]    
+            Set To Dictionary    ${args}    ${pair}[0]=${pair}[1]
         END
     END
     RETURN    ${body}    ${header}    ${args}
@@ -287,7 +296,7 @@ Query Model Multiple Times
             ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
             IF    "${response_container_field}" != "${EMPTY}"
                 # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
-                ${res}=    Set Variable    ${res}[${response_container_field}][0]            
+                ${res}=    Set Variable    ${res}[${response_container_field}][0]
             END
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
@@ -499,7 +508,7 @@ Get KServe Inference Host Via CLI
     RETURN    ${ksvc_host}
 
 Get Current Revision ID
-    [Documentation]    Fetches the knative revision ID for the given model 
+    [Documentation]    Fetches the knative revision ID for the given model
     [Arguments]    ${model_name}    ${namespace}
     ${rc}    ${id}=    Run And Return Rc And Output
     ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
@@ -602,3 +611,14 @@ Clean Up Test Project
     ELSE
         Log    Project deletion started, but won't wait for it to finish..
     END
+
+Create PVC And Download Model From S3
+    [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
+    ...            ${region}    ${access_key_id}    ${access_key}
+    ...            ${use_https}    ${namespace}    ${downoad_timeout}=300s
+    Create File From Template    ${DOWNLOAD_PVC_FILEPATH}    ${DOWNLOAD_PVC_FILLED_FILEPATH}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PVC_FILLED_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}
+    Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
+    Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
+    ...    timeout=${downoad_timeout}

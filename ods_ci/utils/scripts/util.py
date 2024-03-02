@@ -8,8 +8,7 @@ import time
 
 import jinja2
 import yaml
-
-from ods_ci.utils.scripts.logger import log
+from logger import log
 
 
 def clone_config_repo(**kwargs):

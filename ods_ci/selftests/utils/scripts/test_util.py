@@ -73,7 +73,10 @@ class TestExecuteCommand(unittest.TestCase):
     def test_string_cmd(self):
         assert util.execute_command("echo hello world", print_stdout=False) == "hello world\n"
 
-    def test_list_cmd(self):
+    def test_list_cmd_single_list_item(self):
+        assert util.execute_command(["echo hello world"], print_stdout=False) == "hello world\n"
+
+    def test_list_cmd_multiple_list_items(self):
         # this is surprising, but it's what subprocess.Popen does
         assert util.execute_command(["echo", "hello", "world"], print_stdout=False) == "\n"
 

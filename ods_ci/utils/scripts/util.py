@@ -76,7 +76,7 @@ def execute_command(cmd, print_stdout=True):
                     sys.stdout.flush()
             return "".join(output)
     except Exception as e:
-        log.exception("Starting the subprocess failed", exc_info=e)
+        log.exception(f"Starting the subprocess '{cmd}' failed", exc_info=e)
     return None
 
 

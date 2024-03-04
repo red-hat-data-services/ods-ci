@@ -62,9 +62,9 @@ Set Project And Runtime
     ...            ${download_in_pvc}=${FALSE}    ${model_name}=${NONE}    ${download_timeout}=${NONE}
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
-        Create PVC And Download Model From S3    model_name=${model_name}    bucket_name=${MODELS_BUCKET}
-        ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}
-        ...    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}    ${use_https}=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
+        Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
+        ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
+        ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
         ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
@@ -615,10 +615,20 @@ Clean Up Test Project
 Create PVC And Download Model From S3
     [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
     ...            ${region}    ${access_key_id}    ${access_key}
-    ...            ${use_https}    ${namespace}    ${downoad_timeout}=300s
+    ...            ${use_https}    ${namespace}    ${download_timeout}=300s
+    Set Log Level    NONE
+    Set Test Variable    ${model_name}
+    Set Test Variable    ${bucket_name}
+    Set Test Variable    ${endpoint}
+    Set Test Variable    ${region}
+    Set Test Variable    ${access_key_id}
+    Set Test Variable    ${access_key}
+    Set Test Variable    ${use_https}
+    Set Test Variable    ${namespace}
+    Set Log Level    INFO
     Create File From Template    ${DOWNLOAD_PVC_FILEPATH}    ${DOWNLOAD_PVC_FILLED_FILEPATH}
     ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PVC_FILLED_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
     Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
-    ...    timeout=${downoad_timeout}
+    ...    timeout=${download_timeout}

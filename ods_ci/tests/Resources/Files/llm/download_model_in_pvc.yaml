@@ -14,8 +14,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: download-${model_name}
-labels:
-  name: download-${model_name}
+  labels:
+    name: download-${model_name}
 spec:
   volumes:
     - name: model-volume
@@ -41,7 +41,7 @@ spec:
         - name: AWS_ACCESS_KEY_ID
           value: ${access_key_id}
         - name: AWS_SECRET_ACCESS_KEY
-          value: ${secret_access_key}
+          value: ${access_key}
         - name: BUCKET_NAME
           value: ${bucket_name}
         - name: S3_USE_HTTPS

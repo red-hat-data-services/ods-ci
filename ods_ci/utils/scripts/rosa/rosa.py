@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import sys
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -7,6 +8,7 @@ sys.path.append(dir_path + "/../")
 from awsOps import aws_configure
 from logger import log
 from rosaOps import create_account_roles, rosa_create_cluster, rosa_whoami, wait_for_osd_cluster_to_be_ready
+from util import execute_command
 
 
 class RosaClusterManager:
@@ -21,6 +23,21 @@ class RosaClusterManager:
         self.rosa_version = args.get("rosa_version")
         self.channel_name = args.get("channel_name")
 
+    def set_rosa_version(self):
+        version_match = re.match(r"(\d+\.\d+)\-latest", self.rosa_version)
+        if version_match is None:
+            log.info(f"Using the rosa version given by user: {self.rosa_version}")
+            return
+        log.info(f"User provided {self.rosa_version}, trying to determine the appropriate latest version for ROSA")
+        version = version_match.group(1)
+        latest_version_cmd = (
+            f"rosa list versions --channel-group {self.channel_name} | "
+            f"awk '{{print $1}}' | grep -w '^{re.escape(version)}*' | head -n1"
+        )
+        latest_version = execute_command(latest_version_cmd)
+        self.rosa_version = latest_version.strip()
+        log.info(f"Using the latest rosa version: {self.rosa_version}")
+
     def create_rosa_cluster(self):
         log.info(
             "Creating ROSA cluster with the following details:\n"
@@ -33,6 +50,7 @@ class RosaClusterManager:
         )
         aws_configure(self.aws_access_key_id, self.aws_secret_access_key, self.aws_region, self.aws_profile)
         rosa_whoami()
+        self.set_rosa_version()
         create_account_roles()
         rosa_create_cluster(
             self.cluster_name,
@@ -127,7 +145,7 @@ def main():
         required=True,
         action="store",
         dest="channel_name",
-        help="Channel Group Stable/Candidate",
+        help="Channel Group stable/candidate",
     )
     rosa_cluster_manager = RosaClusterManager()
 

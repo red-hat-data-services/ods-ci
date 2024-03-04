@@ -11,7 +11,7 @@ spec:
     datasciencepipelines:
       managementState: <datasciencepipelines_value>
     kserve:
-      defaultDeploymentMode: RawDeployment
+      defaultDeploymentMode: Serverless
       managementState: <kserve_value>
     modelmeshserving:
       managementState: <modelmeshserving_value>

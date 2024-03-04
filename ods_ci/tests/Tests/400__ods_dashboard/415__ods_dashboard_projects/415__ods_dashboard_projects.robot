@@ -10,7 +10,7 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
-
+Test Tags          Dashboard
 
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI Common Prj
@@ -108,9 +108,6 @@ Verify User Can Create A Data Science Project
     [Tags]    Smoke    Sanity    ODS-1775    Tier1
     [Documentation]    Verifies users can create a DS project
     Open Data Science Projects Home Page
-    # Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    # ...    resource_name=${PRJ_RESOURCE_NAME}
-    # Open Data Science Projects Home Page
     Log    message=DS Project creation covered by the Suite Setup
     Project Should Be Listed    project_title=${PRJ_TITLE}
     Project's Owner Should Be   expected_username=${TEST_USER_3.USERNAME}   project_title=${PRJ_TITLE}
@@ -121,8 +118,8 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
-    ...                               size=${PV_SIZE}    connected_workbench=${NONE}    project_title=${PRJ_TITLE}
+    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
+    ...                               size=${PV_SIZE}    connected_workbench=${NONE}   existing_storage=${TRUE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${TRUE}    pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
@@ -136,23 +133,32 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
 
 Verify User Can Create A PV Storage
     [Tags]    Sanity    Tier1    ODS-1819
-    ...       AutomationBug
     [Documentation]    Verifies users can Create PersistentVolume Storage
     ...                THIS MUST BE UPDATED TO CHECK WORKBENCH GETS RESTARTED LIKE FOR ODS-1825.
     ...                MAIN GOAL OF THE TEST CASE IS COVERED BY ODS-1814
     ${pv_name}=    Set Variable    ${PV_BASENAME}-A
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    ${workbenches}=    Create Dictionary    ${WORKBENCH_TITLE}=mount-data
-    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
-    ...                               size=${PV_SIZE}    connected_workbench=${NONE}     press_cancel=${TRUE}
-    ...                               project_title=${PRJ_TITLE}
-    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
-    ...                               size=${PV_SIZE}    connected_workbench=${workbenches}   project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 storage=Persistent  pv_existent=${NONE}
+    ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
+    ${workbenches}=    Create List    ${WORKBENCH_TITLE}
+    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
+    ...                               size=${PV_SIZE}    connected_workbench=${NONE}    press_cancel=${TRUE}
+    Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
+    ...                               size=${PV_SIZE}    connected_workbench=${workbenches}   existing_storage=${TRUE}
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${workbenches}
     Check Corresponding PersistentVolumeClaim Exists    storage_name=${pv_name}    namespace=${ns_name}
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
+    [Teardown]    Run Keywords
+    ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
+    ...    project_title=${PRJ_TITLE}    pvc_title=${pv_name}
+    ...    AND
+    ...    Delete All PVC In Project From CLI    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
     [Tags]    Smoke    Sanity    ODS-1816    Tier1    ExcludeOnDisconnected
@@ -219,8 +225,6 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     ...                          connected_workbench=${workbenches}
     Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    Run Keyword And Continue On Failure    Workbench Status Should Be     workbench_title=${WORKBENCH_TITLE}
-    ...    status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
     [Teardown]    Run Keywords
@@ -258,9 +262,7 @@ Verify User Can Delete A Data Connection
 Verify user can create a workbench with an existing data connection
     [Tags]  Tier1  ODS-2176
     [Documentation]  Verifies users can create a workbench with an existing data connection
-
     ${data_connection_name}=    Set Variable    aDataConnection
-
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Create S3 Data Connection  project_title=${PRJ_TITLE}
     ...                    dc_name=${data_connection_name}
@@ -276,7 +278,7 @@ Verify user can create a workbench with an existing data connection
     # The Workbench and the Data connection appear on the project details page.
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     # The data connection has the workbench name in the "Connected workbenches" column
-    ${workbenches}=    Create Dictionary    ${WORKBENCH_TITLE}=mount-data
+    ${workbenches}=    Create List    ${WORKBENCH_TITLE}
     Data Connection Should Be Listed    name=${data_connection_name}    type=${DC_S3_TYPE}
     ...                connected_workbench=${workbenches}
 
@@ -310,7 +312,6 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ...       ODS-1883
     [Documentation]    Verify user can set environment varibles in their workbenches by
     ...                uploading a yaml Secret or Config Map file.
-    ...                ProductBug: RHODS-8249
     ${envs_var_secret}=    Create Dictionary    filepath=${ENV_SECRET_FILEPATH}
     ...    k8s_type=Secret  input_type=${UPLOAD_TYPE}
     ${envs_var_cm}=    Create Dictionary    filepath=${ENV_CM_FILEPATH}
@@ -340,43 +341,40 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ...    pvc_title=${WORKBENCH_4_TITLE}-PV
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
-    [Tags]    Sanity    Tier1    ODS-1971    AutomationBug
+    [Tags]    Sanity    Tier1    ODS-1971
     [Documentation]    Verifies user can log out and return to the project from Jupyter notebook.
     ...                Users have 2 options:
     ...                1. click "File" > "Log Out" to actually close the login session
     ...                2. click "File" > "Hub Control Panel" to return to project details page
-    ...                AutomationBug: JupyterLibrary's log out keyword seems to be broken
-    [Setup]    Run Keywords
-    ...    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
-    ...    AND
-    ...    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...        pv_description=${NONE}  pv_size=${NONE}
     ...        press_cancel=${FALSE}    envs=${NONE}
-    ...    AND
-    ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
     Run Keyword And Continue On Failure
     ...    Log In Should Be Requested
     Access To Workbench    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Open JupyterLab Control Panel
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}    timeout-pre-spinner=1m    timeout-spinner=2m
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
     ...    status=${WORKBENCH_STATUS_RUNNING}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
     Run Keyword And Continue On Failure
     ...    Log In Should Not Be Requested
-    Wait Until JupyterLab Is Loaded
+    Wait Until JupyterLab Is Loaded    timeout=2m
     Logout JupyterLab
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}
+    Wait Until Project Is Open    project_title=${PRJ_TITLE}    timeout-pre-spinner=1m    timeout-spinner=2m
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
     ...    status=${WORKBENCH_STATUS_RUNNING}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
     Run Keyword And Continue On Failure
     ...    Log In Should Be Requested
-    [Teardown]    Stop Workbench    workbench_title=${WORKBENCH_TITLE}
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
+    ...    project_title=${PRJ_TITLE}
 
 Verify Event Log Is Accessible While Starting A Workbench
     [Tags]    Tier1    Sanity
@@ -431,7 +429,6 @@ Verify User Can Cancel Workbench Start From Event Log
 Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     [Tags]    Tier1    Sanity
     ...       ODS-1973
-    ...       AutomationBug
     [Documentation]    Verify UI informs users about workbenches failed to start.
     ...                At the moment the test is considering only the scenario where
     ...                the workbench fails for Insufficient resources.
@@ -541,8 +538,6 @@ Verify User Can Access Only Its Owned Projects
     [Setup]    Run Keywords
     ...    SeleniumLibrary.Close All Browsers
     ...    AND
-    ...    Set Variables For User Access Test
-    ...    AND
     ...    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     Open Data Science Projects Home Page
@@ -591,7 +586,9 @@ Project Suite Setup
     Set Library Search Order    SeleniumLibrary
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
+    Set Variables For User Access Test
     RHOSi Setup
+    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
@@ -600,7 +597,6 @@ Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     SeleniumLibrary.Close All Browsers
-    # Delete All Data Science Projects From CLI
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 

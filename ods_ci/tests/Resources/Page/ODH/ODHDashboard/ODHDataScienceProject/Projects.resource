@@ -30,7 +30,7 @@ Is Data Science Projects Page Open
     [Documentation]    Checks if Data Science Projects home page is open. Returns TRUE or FALSE
     Close Generic Modal If Present
     ${page_open}=   Run Keyword And Return Status   Page Should Contain Element     ${DS_PROJECT_XP}
-    [Return]    ${page_open}
+    RETURN    ${page_open}
 
 Open Data Science Project Details Page
     [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
@@ -57,7 +57,7 @@ Delete Data Science Project
     ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Delete
     Handle Deletion Confirmation Modal    item_title=${project_title}    item_type=project
     ...                                   press_cancel=${press_cancel}
-    ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}
+    ...   additional_msg=It will destroy all workbenches, storages, data connections and other resources in ${project_title}    # robocop: disable
     Wait Until Data Science Project Is Deleted    project_title=${project_title}
 
 Wait Until Data Science Project Is Deleted
@@ -78,14 +78,14 @@ Is Data Science Project Details Page Open
     [Arguments]     ${project_title}
     ${page_open}=   Run Keyword And Return Status
     ...    SeleniumLibrary.Page Should Contain Element     xpath=//h1[contains(text(),"${project_title}")]
-    [Return]    ${page_open}
+    RETURN    ${page_open}
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
     [Arguments]     ${project_title}    ${timeout-pre-spinner}=3s    ${timeout-spinner}=5s
-    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
     ...    timeout-pre=${timeout-pre-spinner}    timeout=${timeout-spinner}
+    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30s
 
 Project Should Be Listed
     [Documentation]    Checks a Project is available in DS Project home page
@@ -107,7 +107,8 @@ Project's Owner Should Be
     [Documentation]    Checks if the owner of a DS project is displayed and corresponds to the expected one
     [Arguments]     ${project_title}    ${expected_username}
     Run Keyword And Continue On Failure
-    ...    Page Should Contain Element    xpath=//a[text()="${project_title}"]/ancestor::td[@data-label='Name']//small[text()="${expected_username}"]
+    ...    Page Should Contain Element
+    ...    xpath=//a[text()="${project_title}"]/ancestor::td[@data-label='Name']//small[text()="${expected_username}"]
 
 Create Data Science Project
     [Documentation]    Creates a DS Project with the given ${title}, ${description} and ${resource_name}.
@@ -161,7 +162,7 @@ Get Openshift Namespace From Data Science Project
     [Arguments]     ${project_title}
     ${rc}   ${k8s_name}=     Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name'    # robocop: disable
     ${k8s_name}=    Replace String    ${k8s_name}    "    ${EMPTY}
-    [Return]    ${k8s_name}
+    RETURN    ${k8s_name}
 
 Delete Data Science Projects From CLI
     [Documentation]     Deletes the Openshift Projects using OpenshiftLibrary.
@@ -188,7 +189,7 @@ Delete Data Science Project From CLI
         END
     END
 
-
+#robocop: disable: line-too-long
 Workbench Status Should Be From Projects Home Page
     [Documentation]    Checks the workbench status is the expected one, from the DS Project home page
     [Arguments]     ${workbench_title}      ${status}    ${project_title}
@@ -223,6 +224,7 @@ Start Workbench From Projects Home Page
     Wait Until Workbench Is Started From Projects Home Page     workbench_title=${workbench_title}
     ...                                                         project_title=${project_title}
 
+#robocop: disable: line-too-long
 Stop Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "stop" process from DS Projects home page.
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
@@ -290,14 +292,8 @@ Workbench Launch Link Should Be Disabled
 
 Get All Displayed Projects
     [Documentation]    Gets all the DS projects visible in the DS Projects home page
-    ${projects_names}=    Create List
-    ${elements}=    Get WebElements    xpath=//td[@data-label="Name"]//a
-    FOR    ${element}    IN    @{elements}
-        # Get exact project display name (including trailing spaces)
-        ${name}=    Get Element Attribute    ${element}    textContent
-        Append To List    ${projects_names}    ${name}
-    END
-    [Return]   ${projects_names}
+    ${projects_names}=    Get All Text Under Element    xpath=//td[@data-label="Name"]//a
+    RETURN   ${projects_names}
 
 Number Of Displayed Projects Should Be
     [Documentation]    Checks the number the DS projects visible in the DS Projects home page is expected
@@ -318,7 +314,6 @@ Launch Data Science Project Main Page
     ...                 dashboard_url=${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
     ...                 browser_alias=${browser_alias}
     Open Data Science Projects Home Page
-
 
 Remove Current Page Projects From All Projects
     [Documentation]    Remove list of currently displayed Data Science projects from list of all projects
@@ -409,7 +404,8 @@ Create Data Science Project If Not Exists
     [Documentation]    If the given ${project_title} DS Project does not exist, it creates one.
     ...                Useful as test setup.
     [Arguments]    ${project_title}    ${username}    ${description}=${EMPTY}
-    ${rc}    ${resource_name}=    Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name' | tr -d '"'   # robocop: disable
+    ${rc}    ${resource_name}=    Run And Return Rc And Output     
+    ...    oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name' | tr -d '"'   # robocop: disable
     IF    "${resource_name}" == "${EMPTY}"
         Log    msg=There is no DS Projects with Diplay Name equal to ${project_title}. Creating it now.
         Launch Data Science Project Main Page    username=${username}
@@ -424,4 +420,4 @@ Clean Project From Workbench Resources
     ...    ${pvc_title}=${workbench_title}
     Delete Workbench From CLI    workbench_title=${workbench_title}
     ...    project_title=${project_title}
-    Delete PVC From CLI    pvc_title=${pvc_title}    project_title=${project_title}
+    Delete PVC In Project From CLI    pvc_title=${pvc_title}    project_title=${project_title}    # robocop: disable

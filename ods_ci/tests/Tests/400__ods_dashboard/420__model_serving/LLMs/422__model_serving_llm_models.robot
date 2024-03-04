@@ -27,9 +27,9 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}  
-    ...    storage_size=70Gi  
+    ...    storage_size=70Gi 
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
     ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
@@ -58,7 +58,7 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
 Suite Setup
     [Documentation]
     Skip If Component Is Not Enabled    kserve
-    #RHOSi Setup
+    RHOSi Setup
     Load Expected Responses
     Run    git clone https://github.com/IBM/text-generation-inference/
 

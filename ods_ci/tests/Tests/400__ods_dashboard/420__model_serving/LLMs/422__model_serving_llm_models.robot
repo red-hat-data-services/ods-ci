@@ -13,9 +13,9 @@ Test Tags         KServe
 ${TEST_NS}=    tgis-models
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 ${USE_PVC}=    ${TRUE}
-${DOWNLOAD_IN_PVC}=    ${FALSE}
+${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
-
+${KSERVE_MODE}=    RawDeployment
 
 *** Test Cases ***
 Verify User Can Serve And Query A bigscience/mt0-xxl Model
@@ -29,11 +29,11 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}
+    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    # Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    # ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
     # Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     # ...    inference_type=all-tokens    n_times=1
     # ...    namespace=${test_namespace}    validate_response=${FALSE}    # temp

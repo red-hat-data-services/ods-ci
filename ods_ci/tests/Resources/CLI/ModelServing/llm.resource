@@ -125,7 +125,7 @@ Create Secret For S3-Like Buckets
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
-    ...            ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
+    ...            ${kserve_mode}=Serverless    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
     ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
     IF   '${auto_scale}' == '${NONE}'
@@ -160,6 +160,9 @@ Compile Inference Service YAML
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
 
 Model Response Should Match The Expectation
     [Documentation]    Checks that the actual model response matches the expected answer.

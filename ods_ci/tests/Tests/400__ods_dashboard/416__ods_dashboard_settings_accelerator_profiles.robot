@@ -9,7 +9,7 @@ Suite Teardown  Teardown Settings Accelerator Profiles
 
 
 *** Variables ***
-${ACC_DISPLAY_NAME}=    qe_accelerator_profile_
+${ACC_FILE_NAME}=    qe_accelerator_profile_
 ${ACC2_DISPLAY_NAME}=    Test: Modify Accelerator Profile 2
 ${ACC3_DISPLAY_NAME}=    Test: Delete Tolerations from AP 3
 ${ACC4_DISPLAY_NAME}=    Test: Disable AP 4 from Edit Detail View
@@ -35,15 +35,15 @@ Create An Accelerator Profile From Accelerator Profiles Administration UI
     [Tags]  RHOAIENG-3349
     ...     Smoke
     [Setup]  Open Dashboard And Navigate To Accelerator Profiles From Settings
-    Create An Accelerator Profile Via UI   ${ACC_DISPLAY_NAME}1   ${ACC_IDENTIFIER}
+    Create An Accelerator Profile Via UI   ${ACC_NAME}1   ${ACC_IDENTIFIER}
     ...                                    ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                    tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                                    tol_effect=${ACC_TOLERATION_EFFECT}
     ...                                    tol_key=${ACC_TOLERATION_KEY}
     ...                                    tol_value=${ACC_TOLERATION_VALUE}
     ...                                    tol_seconds=${ACC_TOLERATION_SECONDS}
-    Accelerator Profile Should Be Displayed In The Grid   ${ACC_DISPLAY_NAME}1
-    Verify Accelerator Profile Values Via CLI   ${ACC_DISPLAY_NAME}1   ${ACC_IDENTIFIER}
+    Accelerator Profile Should Be Displayed In The Grid   ${ACC_NAME}1
+    Verify Accelerator Profile Values Via CLI   ${ACC_NAME}1   ${ACC_IDENTIFIER}
     ...                                         ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                         tol_operator=${ACC_TOLERATION_OPERATOR}
     ...                                         tol_effect=${ACC_TOLERATION_EFFECT}
@@ -55,7 +55,7 @@ Modify An Accelerator Profile Using Accelerator Profiles Administration UI
     [Documentation]    Modify an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  RHOAIENG-3349
     ...     Sanity
-    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}2
+    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_FILE_NAME}2
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Edit Accelerator Profile    original_display_name=${ACC2_DISPLAY_NAME}
@@ -81,7 +81,7 @@ Delete Tolerations from an Accelerator Profile Using Accelerator Profiles Admini
     ...                verify it's content
     [Tags]  RHOAIENG-3349
     ...     Sanity
-    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}3
+    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_FILE_NAME}3
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Delete Accelerator Profile Tolerations    ${ACC3_DISPLAY_NAME}
@@ -92,7 +92,7 @@ Disable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  RHOAIENG-3349
     ...     Sanity
-    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}4
+    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_FILE_NAME}4
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Edit Accelerator Profile    original_display_name=${ACC4DISPLAY_NAME}    enabled=False
@@ -103,7 +103,7 @@ Enable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Enable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  RHOAIENG-3349
     ...     Sanity
-    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}5
+    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_FILE_NAME}5
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Edit Accelerator Profile    original_display_name=${ACC5_DISPLAY_NAME}    enabled=True
@@ -114,7 +114,7 @@ Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  RHOAIENG-3349
     ...     Sanity
-    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}6
+    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_FILE_NAME}6
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Search for accelerator profile in grid    ${ACC6_DISPLAY_NAME}
@@ -125,7 +125,7 @@ Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Enable an An accelerator profile from the Accelerator Profile view
     [Tags]  RHOAIENG-3349
     ...     Sanity
-    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}7
+    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_FILE_NAME}7
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Search for accelerator profile in grid    ${ACC7_DISPLAY_NAME}
@@ -136,7 +136,7 @@ Delete an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Delete an An accelerator profile from the Accelerator Profile view
     [Tags]  RHOAIENG-3349
     ...     Sanity
-    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_DISPLAY_NAME}8
+    [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_FILE_NAME}8
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
     Delete Accelerator Profile    ${ACC8_DISPLAY_NAME}

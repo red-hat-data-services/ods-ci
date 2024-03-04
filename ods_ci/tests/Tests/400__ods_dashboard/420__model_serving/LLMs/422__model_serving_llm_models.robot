@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
+Documentation     Collection of CLI tests to validate the model serving stack for different Large Language Models (LLM).
 ...               These tests leverage on TGIS Standalone Serving Runtime
 Resource          ../../../../Resources/OCP.resource
 Resource          ../../../../Resources/CLI/ModelServing/llm.resource

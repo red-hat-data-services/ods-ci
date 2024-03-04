@@ -18,7 +18,8 @@ Create An Accelerator Profile Via CLI
 Get Accelerator Profile Spec Values Via CLI
     [Documentation]  Get Spec fields from an specific Accelerator Profile Instance
     [Arguments]   ${display_name}    ${ns}=redhat-ods-applications
-    ${ap_from_oc}=    Run     oc get acceleratorprofile -n ${ns} -o json | jq '.items[] | select(.spec.displayName == "${display_name}")'
+    ${ap_from_oc}=    Run
+    ...    oc get acceleratorprofile -n ${ns} -o json | jq '.items[] | select(.spec.displayName == "${display_name}")'
     ${ap_json}=    Load Json String    ${ap_from_oc}
     ${ap_spec_dict}=    Get From Dictionary    ${ap_json}    spec
     RETURN    ${ap_spec_dict}

@@ -4,7 +4,7 @@ apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
   generation: 1
-  name: qeacceleratorprofile5
+  name: accelerator-profile-3349-5
   namespace: redhat-ods-applications
 spec:
   displayName: "Test: Enable AP 5 from Edit Detail View"

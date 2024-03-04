@@ -4,7 +4,7 @@ apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
   generation: 1
-  name: qeacceleratorprofile4
+  name: accelerator-profile-3349-4
   namespace: redhat-ods-applications
 spec:
   displayName: "Test: Disable AP 4 from Edit Detail View"

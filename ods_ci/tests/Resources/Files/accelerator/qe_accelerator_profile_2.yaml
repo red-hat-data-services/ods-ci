@@ -3,7 +3,7 @@
 apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
-  name: qeacceleratorprofile2
+  name: accelerator-profile-3349-2
   namespace: redhat-ods-applications
 spec:
   description: {{ test_name }}

@@ -4,7 +4,7 @@ apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
   generation: 1
-  name: qeacceleratorprofile8
+  name: accelerator-profile-3349-8
   namespace: redhat-ods-applications
 spec:
   displayName: "Test: Delete AP 8 from grid"

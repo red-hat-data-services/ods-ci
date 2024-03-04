@@ -4,7 +4,7 @@ apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
   generation: 1
-  name: qeacceleratorprofile6
+  name: accelerator-profile-3349-6
   namespace: redhat-ods-applications
 spec:
   displayName: "Test: Disable AP 6 from Administration View"

@@ -1,0 +1,5 @@
+- op: add #action 
+  path: /spec/containers/0/env/- #resouirce we want to change
+  value:
+    name: MY_PARAM
+    value: "1"

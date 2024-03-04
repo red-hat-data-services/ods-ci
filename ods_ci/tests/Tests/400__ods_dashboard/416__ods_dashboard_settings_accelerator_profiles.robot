@@ -34,7 +34,7 @@ Create An Accelerator Profile From Accelerator Profiles Administration UI
     [Documentation]    Create an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  RHOAIENG-3349
     ...     Smoke
-    [Setup]  Open Dashboard And Navigate to Accelerator Profiles From Settings
+    [Setup]  Open Dashboard And Navigate To Accelerator Profiles From Settings
     Create An Accelerator Profile Via UI   ${ACC_DISPLAY_NAME}1   ${ACC_IDENTIFIER}
     ...                                    ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
     ...                                    tol_operator=${ACC_TOLERATION_OPERATOR}

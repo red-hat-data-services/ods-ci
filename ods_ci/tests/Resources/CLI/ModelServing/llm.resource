@@ -254,7 +254,7 @@ Query Model Multiple Times
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
     ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
-    ...            ${protocol}=grpc    &{args}
+    ...            ${protocol}=grpc    ${host}=${NONE}    ${port}=443    &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
     ELSE
@@ -265,7 +265,10 @@ Query Model Multiple Times
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+    IF    $host is None
+        ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+    END
+    
     ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
     ...    inference_type=${inference_type}    model_name=${model_name}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
@@ -275,7 +278,7 @@ Query Model Multiple Times
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
         IF    "${protocol}" == "grpc"
-            ${res}=    Query Model With GRPCURL   host=${host}    port=443
+            ${res}=    Query Model With GRPCURL   host=${host}    port=${port}
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
             ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
@@ -283,7 +286,7 @@ Query Model Multiple Times
          ELSE IF    "${protocol}" == "http"
             ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
             Log Dictionary    ${args}
-            Set To Dictionary    ${args}    url=https://${host}:443/${endpoint}   expected_status=any
+            Set To Dictionary    ${args}    url=https://${host}:${port}/${endpoint}   expected_status=any
             ...             headers=${header}   json=${payload}    verify=${False}
             ${is_timeout}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${args}    timeout
             IF    ${is_timeout} == ${FALSE}

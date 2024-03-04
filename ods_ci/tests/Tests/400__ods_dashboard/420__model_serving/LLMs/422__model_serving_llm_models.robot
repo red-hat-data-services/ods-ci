@@ -17,6 +17,7 @@ ${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
 ${KSERVE_MODE}=    RawDeployment
 
+
 *** Test Cases ***
 Verify User Can Serve And Query A bigscience/mt0-xxl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
@@ -34,15 +35,17 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
-    # Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
-    # ...    inference_type=all-tokens    n_times=1
-    # ...    namespace=${test_namespace}    validate_response=${FALSE}    # temp
+    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
+    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    host=localhost    port=8033    inference_type=all-tokens    n_times=1    protocol=grpc
+    ...    namespace=${test_namespace}    validate_response=${FALSE}    # temp
     # Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     # ...    inference_type=streaming    n_times=1
     # ...    namespace=${test_namespace}    validate_response=${FALSE}
     # [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     # ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
-
+    [Teardown]    Terminate Process    llm-query-process
 
 *** Keywords ***
 Suite Setup
@@ -70,3 +73,8 @@ Setup Test Variables
         Set Test Variable    ${limits}    &{EMPTY}
     END
     
+Start Port-forwarding
+    [Arguments]    ${namespace}    ${model_name}
+    ${result}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
+    ...    alias=llm-query-process    shell=True
+    #Should Be Equal As Integers    ${result.rc}    ${0}

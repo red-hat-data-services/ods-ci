@@ -22,7 +22,7 @@ ${KSERVE_MODE}=    RawDeployment
 Verify User Can Serve And Query A bigscience/mt0-xxl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Tier1
+    [Tags]    Tier1    RHOAIENG-3477
     Setup Test Variables    model_name=mt0-xxl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}

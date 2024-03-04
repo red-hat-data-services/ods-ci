@@ -157,3 +157,14 @@ skip-magic-trailing-comma = false
 
 docstring-code-format = true
 docstring-code-line-length = "dynamic"
+
+[tool.pytest.ini_options]
+addopts = "-rfEX -p doctest --doctest-modules --strict-markers --import-mode=importlib"
+python_files = ["test_*.py"]
+python_classes = ["Test"]
+python_functions = ["test"]
+testpaths = ["ods_ci/selftests/"]
+xfail_strict = true
+markers = [
+    "slow",
+]

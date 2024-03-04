@@ -1,6 +1,6 @@
 *** Settings ***
 Resource   ODHDashboard.robot
-Resource        ../../LoginPage.robot
+Resource   ../../LoginPage.robot
 Library    RequestsLibrary
 Library    SeleniumLibrary
 

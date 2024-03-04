@@ -87,7 +87,8 @@ Delete All Accelerator Profiles Which Starts With
     ...                value of the OC Accelerator Profile resource
     ...                Uses OC
     [Arguments]   ${ap_prefix}  ${ns}=redhat-ods-applications
-    ${ap_str}=    Run     oc get acceleratorprofiles -n ${ns} -o json | jq .items[].metadata.name | grep ${ap_prefix} | tr -d '"'
+    ${ap_str}=    Run
+    ...    oc get acceleratorprofiles -n ${ns} -o json | jq .items[].metadata.name | grep ${ap_prefix} | tr -d '"'
     @{ap_list}=    Split String    ${ap_str}    separator=\n
     Log     List of Accelerator Profiles to be deleted: @{ap_list}    console=yes
     FOR    ${ap_name}    IN    @{ap_list}

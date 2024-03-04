@@ -9,7 +9,7 @@ ${ACCELERATOR_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/accelerator
 *** Keywords ***
 Create An Accelerator Profile Via CLI
     [Documentation]    Create an instance of Accelerator Profile using OC
-    [Arguments]   ${name}  ${ns}=redhat-ods-applications
+    [Arguments]   ${name}  ${ns}=${APPLICATIONS_NAMESPACE}
     ${status}=    Run Keyword And Return Status    Oc Create    kind=AcceleratorProfile
     ...    src=${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml    namespace=${ns}
     ...    template_data={test_name: '${TEST_NAME}'}
@@ -17,7 +17,7 @@ Create An Accelerator Profile Via CLI
 
 Get Accelerator Profile Spec Values Via CLI
     [Documentation]  Get Spec fields from an specific Accelerator Profile Instance
-    [Arguments]   ${display_name}    ${ns}=redhat-ods-applications
+    [Arguments]   ${display_name}    ${ns}=${APPLICATIONS_NAMESPACE}
     ${ap_from_oc}=    Run
     ...    oc get acceleratorprofile -n ${ns} -o json | jq '.items[] | select(.spec.displayName == "${display_name}")'
     ${ap_json}=    Load Json String    ${ap_from_oc}
@@ -26,7 +26,7 @@ Get Accelerator Profile Spec Values Via CLI
 
 Accelerator Profile Should Not Exist
     [Documentation]  Get Spec fields from an specific Accelerator Profile Instance
-    [Arguments]   ${name}    ${ns}=redhat-ods-applications
+    [Arguments]   ${name}    ${ns}=${APPLICATIONS_NAMESPACE}
     ${rc}    ${out}=    Run And Return Rc And Output    oc get acceleratorprofile ${name} -n ${ns}
     Should Be Equal    "${rc}"    "1"
     Should Contain    ${out}    "${name}" not found
@@ -35,7 +35,7 @@ Verify Accelerator Profile Values Via CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it's value match with the expected
     [Arguments]   ${name}  ${identifier}=${EMPTY}  ${description}=${EMPTY}  ${enabled}=True
     ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key
-    ...           ${tol_value}=value  ${tol_seconds}=Forever   ${ns}=redhat-ods-applications
+    ...           ${tol_value}=value  ${tol_seconds}=Forever   ${ns}=${APPLICATIONS_NAMESPACE}
     ${ap_spec_dict}=    Get Accelerator Profile Spec Values Via CLI    ${name}    ${ns}
     ${name_from_spec}=    Get From Dictionary    ${ap_spec_dict}    displayName
     ${enabled_from_spec}=    Get From Dictionary    ${ap_spec_dict}    enabled
@@ -77,7 +77,7 @@ Verify Accelerator Profile Values Via CLI
 
 Verify Accelerator Profile Has No Tolerations Via CLI
     [Documentation]  Verifies that an specific Accelerator Profile exists, and it has no tolerations
-    [Arguments]   ${name}    ${ns}=redhat-ods-applications
+    [Arguments]   ${name}    ${ns}=${APPLICATIONS_NAMESPACE}
     ${ap_spec_dict}=    Get Accelerator Profile Spec Values Via CLI    ${name}    ${ns}
     ${tolerations_from_spec}=    Get From Dictionary    ${ap_spec_dict}    tolerations
     Should Be Empty    ${tolerations_from_spec}
@@ -86,7 +86,7 @@ Delete All Accelerator Profiles Which Starts With
     [Documentation]    Delete all accelerator profiles given prefix. That prefix should match with the metadata.name
     ...                value of the OC Accelerator Profile resource
     ...                Uses OC
-    [Arguments]   ${ap_prefix}  ${ns}=redhat-ods-applications
+    [Arguments]   ${ap_prefix}  ${ns}=${APPLICATIONS_NAMESPACE}
     ${ap_str}=    Run
     ...    oc get acceleratorprofiles -n ${ns} -o json | jq .items[].metadata.name | grep ${ap_prefix} | tr -d '"'
     @{ap_list}=    Split String    ${ap_str}    separator=\n

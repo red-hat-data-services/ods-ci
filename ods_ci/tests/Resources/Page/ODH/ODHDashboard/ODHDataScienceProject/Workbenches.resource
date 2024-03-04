@@ -98,6 +98,7 @@ Create Workbench
     Wait Until Generic Modal Disappears  timeout=1 minute
     Wait Until Project Is Open    project_title=${prj_title}
 
+#robocop: disable: line-too-long
 Add Environment Variables In Workbench
     [Documentation]    Adds the environment variables through the workbench creation page
     [Arguments]    ${env_variables}
@@ -155,12 +156,12 @@ Add Existing Data Connection In Workbench
     # Use the `Jump to section` again to move the expanded form into view
     Click Element    //a[@href="#data-connections"]
     Click Element    ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}
-    Select Existing Data Connection    data_connection=${data_connection}
+    Select Existing Data Connection In Workbench    data_connection=${data_connection}
 
-Select Existing Data Connection
+Select Existing Data Connection In Workbench
     [Documentation]    Selects the existing data connection in the workbench creation page from a dropdown list
     [Arguments]    ${data_connection}
-    Click Element    ${ENV_DATA_CONNECTION_SECTION_XP}//div[contains(@class,"pf-c-select")]/button
+    Click Element    ${ENV_DATA_CONNECTION_SECTION_XP}//input[contains(@placeholder,"Select a data connection")]
     Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${data_connection}"]
     Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${data_connection}"]
 
@@ -252,10 +253,10 @@ Select Workbench Container Size
 
 Workbench Should Be Listed
     [Documentation]    Checks a workbench is listed in the DS Project details page
-    [Arguments]     ${workbench_title}
+    [Arguments]     ${workbench_title}    ${timeout}=5s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/*[div[text()="${workbench_title}"]]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/*[div[text()="${workbench_title}"]]    timeout=${timeout}
 
 Workbench With Description Should Be Listed
     [Documentation]    Checks a workbench with particular name and description is listed in the DS Project details page
@@ -281,8 +282,6 @@ Workbench Status Should Be
 Status Error Icon Should Appear
     [Documentation]    Checks if the error icon appears on the given workbench
     [Arguments]     ${workbench_title}
-    Reload Page
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Page Should Contain Element
     ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
     Mouse Over    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p//${ERROR_ICON_XP}    # robocop: disable
@@ -356,8 +355,11 @@ Launch And Access Workbench
 Open Workbench
     [Documentation]    Clicks on "open" link for a given workbench
     [Arguments]    ${workbench_title}
-    Click Link       ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
-    Switch Window   NEW
+    ${open_workbench_link}=    Set Variable
+    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
+    Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
+    Click Link    ${open_workbench_link}
+    Switch Window    NEW
 
 Stop Workbench
     [Documentation]    Stops a workbench from DS Project details page
@@ -422,8 +424,10 @@ Check Launched Workbench Is The Correct One
 Get Openshift Notebook CR From Workbench
     [Documentation]    Retrieves name of Notebook CR corresponding to a workbench
     [Arguments]     ${workbench_title}      ${namespace}
-    ${rc}  ${cr_name}=    Run And Return Rc And Output   oc get notebook -n ${namespace} -o jsonpath='{.items[?(@.metadata.annotations.openshift\\.io/display-name=="${workbench_title}")].metadata.name}'
-    RETURN    ${rc}    ${cr_name}
+    ${result}=    Run Process
+    ...    oc get notebook -n ${namespace} -o jsonpath\='{.items[?(@.metadata.annotations.openshift\\.io/display-name\=\="${workbench_title}")].metadata.name}'
+    ...    shell=yes
+    RETURN    ${result.rc}    ${result.stdout}
 
 Start Workbench Should Fail
     [Documentation]    Checks the workbench fails to start
@@ -433,8 +437,7 @@ Start Workbench Should Fail
     IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
     Run Keyword And Continue On Failure    Wait Until Keyword Succeeds    30 times    2s
     ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
-    Reload Page
-    Workbench Should Be Listed    ${workbench_title}
+    Workbench Should Be Listed    ${workbench_title}    timeout=30s
     Wait Until Keyword Succeeds    20 times    2s
     ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
 
@@ -548,18 +551,17 @@ Delete Workbench From CLI
     ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
     ...    workbench_title=${workbench_title}  namespace=${ns_name}
     IF    "${cr_name}" == "${EMPTY}"
-        Log    msg=There is probably no Workbench with Diplay Name equal to ${workbench_title}
+        Log    msg=There is probably no Workbench with Display Name equal to ${workbench_title}
         ...    level=WARN
     ELSE
-    Oc Delete    kind=Notebook  name=${cr_name}  namespace=${ns_name}
-    WHILE    ${TRUE}
-        ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
-            ...    workbench_title=${workbench_title}  namespace=${ns_name}
-        IF    "${cr_name}" == "${EMPTY}"    BREAK
+        Oc Delete    kind=Notebook  name=${cr_name}  namespace=${ns_name}
+        WHILE    ${TRUE}
+            ${_}  ${cr_name}=    Get Openshift Notebook CR From Workbench
+                ...    workbench_title=${workbench_title}  namespace=${ns_name}
+            IF    "${cr_name}" == "${EMPTY}"    BREAK
             Sleep    5s    reason=let's not overload the API
         END
     END
-
 
 Get Workbench Pod
     [Documentation]    Retrieves info of a workbench pod: namespace, CR resource name and pod definition

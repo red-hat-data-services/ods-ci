@@ -53,13 +53,12 @@ def read_yaml(filename):
         return None
 
 
-def execute_command(cmd):
+def execute_command(cmd, print_stdout=True):
     """
     Executes command in the local node, and print real-time output
     """
-    output = ""
+    log.info(f"CMD: {cmd}")
     try:
-        log.info(f"CMD: {cmd}")
         with subprocess.Popen(
             cmd,
             shell=True,
@@ -69,17 +68,16 @@ def execute_command(cmd):
             encoding="utf-8",
             errors="replace",
         ) as p:
-            while True:
-                line = p.stdout.readline()
-                if line != "":
-                    output += line + "\n"
-                elif p.poll() is not None:
-                    break
-            sys.stdout.flush()
-            log.info(f"OUTPUT: {output}")
-            return output
-    except:
-        return None
+            output = []
+            for line in p.stdout:
+                output.append(line)
+                if print_stdout:
+                    print(">:", line, end="")
+                    sys.stdout.flush()
+            return "".join(output)
+    except Exception as e:
+        log.exception(f"Starting the subprocess '{cmd}' failed", exc_info=e)
+    return None
 
 
 def oc_login(ocp_console_url, username, password, timeout=600):

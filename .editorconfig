@@ -10,6 +10,9 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
+[.github/workflows/*.{yml,yaml}]
+indent_size = 2
+
 [*.{py,robot}]
 indent_style = space
 indent_size = 4

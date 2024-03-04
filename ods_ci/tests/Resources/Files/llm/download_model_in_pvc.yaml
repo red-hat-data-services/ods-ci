@@ -8,7 +8,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 100Gi
+      storage: ${storage_size}
 ---
 apiVersion: v1
 kind: Pod

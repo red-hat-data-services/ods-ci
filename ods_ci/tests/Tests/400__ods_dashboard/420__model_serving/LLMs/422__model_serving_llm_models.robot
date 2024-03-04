@@ -26,7 +26,8 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     Setup Test Variables    model_name=mt0-xxl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
-    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}  
+    ...    storage_size=70Gi  
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${storage_uri}
@@ -35,7 +36,7 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    timeout=900s
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
@@ -89,4 +90,3 @@ Start Port-forwarding
     [Arguments]    ${namespace}    ${model_name}
     ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
     ...    alias=llm-query-process    stderr=STDOUT    shell=yes
-

@@ -5,7 +5,7 @@ Resource          ../../../../Resources/OCP.resource
 Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Suite Setup
-# Suite Teardown    RHOSi Teardown
+Suite Teardown    RHOSi Teardown
 Test Tags         KServe
 
 
@@ -17,13 +17,14 @@ ${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
 ${KSERVE_MODE}=    RawDeployment
 
-
+ 
 *** Test Cases ***
 Verify User Can Serve And Query A bigscience/mt0-xxl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    Tier1
     Setup Test Variables    model_name=mt0-xxl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
+    ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    
     Compile Inference Service YAML    isvc_name=${model_name}
@@ -38,14 +39,19 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    host=localhost    port=8033    inference_type=all-tokens    n_times=1    protocol=grpc
-    ...    namespace=${test_namespace}    validate_response=${FALSE}    # temp
-    # Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
-    # ...    inference_type=streaming    n_times=1
-    # ...    namespace=${test_namespace}    validate_response=${FALSE}
-    # [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    # ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
-    [Teardown]    Terminate Process    llm-query-process
+    ...    inference_type=all-tokens    n_times=1    protocol=grpc
+    ...    namespace=${test_namespace}   query_idx=2    validate_response=${TRUE}    # temp
+    ...    port_forwarding=${use_port_forwarding}
+    Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=streaming    n_times=1    protocol=grpc
+    ...    namespace=${test_namespace}    query_idx=2    validate_response=${FALSE}
+    ...    port_forwarding=${use_port_forwarding}
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+
 
 *** Keywords ***
 Suite Setup
@@ -56,7 +62,7 @@ Suite Setup
     Run    git clone https://github.com/IBM/text-generation-inference/
 
 Setup Test Variables
-    [Arguments]    ${model_name}    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}
+    [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}
     Set Test Variable    ${model_name}
     ${models_names}=    Create List    ${model_name}
     Set Test Variable    ${models_names}
@@ -72,9 +78,15 @@ Setup Test Variables
     ELSE
         Set Test Variable    ${limits}    &{EMPTY}
     END
+    IF    "${KSERVE_MODE}" == "RawDeployment"
+        Set Test Variable    ${use_port_forwarding}    ${TRUE}
+    ELSE
+        Set Test Variable    ${use_port_forwarding}    ${FALSE}
+    END
+    
     
 Start Port-forwarding
     [Arguments]    ${namespace}    ${model_name}
-    ${result}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
-    ...    alias=llm-query-process    shell=True
-    #Should Be Equal As Integers    ${result.rc}    ${0}
+    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
+    ...    alias=llm-query-process    stderr=STDOUT    shell=yes
+

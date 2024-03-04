@@ -254,7 +254,7 @@ Query Model Multiple Times
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
     ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
-    ...            ${protocol}=grpc    ${host}=${NONE}    ${port}=443    &{args}
+    ...            ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443    &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
     ELSE
@@ -265,10 +265,16 @@ Query Model Multiple Times
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END
-    IF    $host is None
+    IF    ${port_forwarding}
+        ${host}=    Set Variable    localhost    # temp - we might need to query using service URL
+        ${port}=    Extract Service Port    service_name=${isvc_name}-predictor    protocol=${protocol}    namespace=${namespace}
+        ${insecure}=    Set Variable    ${FALSE}
+        ${plaintext}=    Set Variable    ${TRUE}
+    ELSE
         ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+        ${insecure}=    Set Variable    ${TRUE}
+        ${plaintext}=    Set Variable    ${FALSE}
     END
-    
     ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
     ...    inference_type=${inference_type}    model_name=${model_name}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
@@ -281,7 +287,7 @@ Query Model Multiple Times
             ${res}=    Query Model With GRPCURL   host=${host}    port=${port}
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
-            ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
+            ...    insecure=${insecure}    plaintext=${plaintext}    skip_res_json=${skip_json_load_response}
             ...    &{args}
          ELSE IF    "${protocol}" == "http"
             ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
@@ -638,3 +644,15 @@ Create PVC And Download Model From S3
     Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
     ...    timeout=${download_timeout}
+
+Extract Service Port
+    [Arguments]    ${service_name}    ${namespace}    ${protocol}    
+    IF    "${protocol}" == "grpc"
+        ${port_name}=    Set Variable    h2c
+    ELSE
+        ${port_name}=    Set Variable    ${protocol}
+    END
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.name=="${port_name}")]}{@.targetPort}{end}'
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    RETURN    ${out}

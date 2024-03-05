@@ -292,7 +292,7 @@ Wait for Catalog To Be Ready
     [Arguments]    ${namespace}=openshift-marketplace   ${catalog_name}=odh-catalog-dev   ${timeout}=30
     Log    Waiting for the '${catalog_name}' CatalogSource in '${namespace}' namespace to be in 'Ready' status state
     ...    console=yes
-    Wait Until Keyword Succeeds    6 times   10 seconds
+    Wait Until Keyword Succeeds    12 times   10 seconds
     ...   Catalog Is Ready    ${namespace}   ${catalog_name}
     Log    CatalogSource '${catalog_name}' in '${namespace}' namespace in 'Ready' status now, let's continue
     ...    console=yes

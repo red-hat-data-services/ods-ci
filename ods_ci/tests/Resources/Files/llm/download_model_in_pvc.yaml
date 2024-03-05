@@ -26,7 +26,7 @@ spec:
     - name: fix-volume-permissions
       image: quay.io/quay/busybox@sha256:92f3298bf80a1ba949140d77987f5de081f010337880cd771f7e7fc928f8c74d 
       command: ["sh"]
-      args: ["-c", "mkdir -p /mnt/models/${model_name} && chmod -R 777 /mnt/models"]
+      args: ["-c", "mkdir -p /mnt/models/${model_path} && chmod -R 777 /mnt/models"]
       volumeMounts:
         - mountPath: "/mnt/models/"
           name: model-volume
@@ -35,8 +35,8 @@ spec:
       imagePullPolicy: IfNotPresent
       image: quay.io/modh/kserve-storage-initializer@sha256:330af2d517b17dbf0cab31beba13cdbe7d6f4b9457114dea8f8485a011e3b138
       args:
-        - 's3://$(BUCKET_NAME)/${model_name}'
-        - /mnt/models/${model_name}
+        - 's3://$(BUCKET_NAME)/${model_path}'
+        - /mnt/models/${model_path}
       env:
         - name: AWS_ACCESS_KEY_ID
           value: ${access_key_id}

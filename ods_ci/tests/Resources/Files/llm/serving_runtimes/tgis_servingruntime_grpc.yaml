@@ -18,32 +18,6 @@ spec:
       env:
         - name: TRANSFORMERS_CACHE
           value: /tmp/transformers_cache
-      # resources: # configure as required
-      #   requests:
-      #     cpu: 8
-      #     memory: 16Gi
-
-      ## NOTE: can't use grpc probes with knative-serving <1.12, so we will
-      ## probe the health endpoint for the http server instead
-      # livenessProbe:
-      #   grpc:
-      #     port: 8033
-      # readinessProbe:
-      #   grpc:
-      #     port: 8033
-      readinessProbe: # Use exec probes instad of httpGet since the probes' port gets rewritten to the containerPort
-        exec:
-          command:
-            - curl
-            - localhost:3000/health
-        initialDelaySeconds: 5
-      livenessProbe:
-        exec:
-          command:
-            - curl
-            - localhost:3000/health
-        initialDelaySeconds: 5
-        # periodSeconds: 5
       ports:
         - containerPort: 8033
           name: h2c

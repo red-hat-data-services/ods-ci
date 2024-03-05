@@ -34,6 +34,17 @@
                     "streamed_response_text":   "{'details':{'input_token_count':'10'}}{'generated_text':'This','tokens':[{'text':'▁This','logprob':<logprob_removed>}],'details':{'generated_tokens':1}}{'generated_text':'is','tokens':[{'text':'▁is','logprob':<logprob_removed>}],'details':{'generated_tokens':2}}{'generated_text':'','tokens':[{'text':'▁','logprob':<logprob_removed>}],'details':{'generated_tokens':3}}{'generated_text':'a','tokens':[{'text':'a','logprob':<logprob_removed>}],'details':{'generated_tokens':4}}{'generated_text':'very','tokens':[{'text':'▁very','logprob':<logprob_removed>}],'details':{'generated_tokens':5}}{'generated_text':'wrong','tokens':[{'text':'▁wrong','logprob':<logprob_removed>}],'details':{'generated_tokens':6}}{'generated_text':'phrase','tokens':[{'text':'▁phrase','logprob':<logprob_removed>}],'details':{'generated_tokens':7}}{'generated_text':'.','tokens':[{'text':'.','logprob':<logprob_removed>}],'details':{'generated_tokens':8}}{'tokens':[{'text':'</s>','logprob':<logprob_removed>}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':9}}"
                 }
             }
+        },
+        {
+            "query_text": "Elementary Watson! Translate to French",
+            "models": {
+                "mt0-xxl-hf": {
+                    "response_tokens":  13,
+                    "response_text": "Watson, c'est très simple !",
+                    "streamed_response_text":   "{ 'inputTokenCount': 10 } { 'generatedTokenCount': 1, 'text': 'temperature' } { 'generatedTokenCount': 2, 'text': ' of' } { 'generatedTokenCount': 3, 'text': ' 180' } { 'generatedTokenCount': 4, 'text': ' ' } { 'generatedTokenCount': 5, 'text': '°' } { 'generatedTokenCount': 6, 'text': 'C' } { 'generatedTokenCount': 7, 'stopReason': 'EOS_TOKEN' }"
+                }
+            }
+
         }
     ]
 }

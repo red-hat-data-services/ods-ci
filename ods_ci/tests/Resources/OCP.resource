@@ -115,7 +115,25 @@ Wait For Pods To Be Ready
     ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     IF    ${rc} != ${0}
         ${events}    ${podlogs}=    Get Events And Pod Logs    ${namespace}    ${label_selector}
+
         Fail    msg=Pod is not ready by timeout
+    END
+    IF    "${exp_replicas}" != "${NONE}"
+        @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
+        ...    label_selector=${label_selector}
+        Length Should Be  ${replicas}  ${exp_replicas}
+    END
+
+Wait For Pods To Succeed
+    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
+    Wait Until Keyword Succeeds    ${timeout}    3s
+    ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
+    ...    status_only=${FALSE}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc wait --for=jsonpath='{.status.phase}'=Succeeded pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
+    IF    ${rc} != ${0}
+        ${events}    ${podlogs}=    Get Events And Pod Logs    ${namespace}    ${label_selector}
+        Fail    msg=Pod did not succeed by timeout
     END
     IF    "${exp_replicas}" != "${NONE}"
         @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}

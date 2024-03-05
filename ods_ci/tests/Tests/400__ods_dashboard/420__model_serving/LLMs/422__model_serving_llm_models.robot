@@ -155,6 +155,39 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    ...                using Kserve and TGIS standalone runtime
+    [Tags]    Tier1    RHOAIENG-3479
+    Setup Test Variables    model_name=elyza-japanese-llama-2-7b-instruct-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
+    ...    kserve_mode=${KSERVE_MODE}    model_path=ELYZA-japanese-Llama-2-7b-instruct-hf
+    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
+    ...    storage_size=70Gi    model_path=${model_path}
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${EMPTY}
+    ...    model_storage_uri=${storage_uri}
+    ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    timeout=900s
+    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
+    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=all-tokens    n_times=1    protocol=grpc
+    ...    namespace=${test_namespace}   query_idx=3    validate_response=${TRUE}    # temp
+    ...    port_forwarding=${use_port_forwarding}
+    Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=streaming    n_times=1    protocol=grpc
+    ...    namespace=${test_namespace}    query_idx=2    validate_response=${FALSE}
+    ...    port_forwarding=${use_port_forwarding}
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model

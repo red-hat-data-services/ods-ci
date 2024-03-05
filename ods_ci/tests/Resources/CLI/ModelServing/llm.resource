@@ -20,6 +20,8 @@ ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
+${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
+${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 
 
 *** Keywords ***
@@ -57,11 +59,19 @@ Set Project And Runtime
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
     ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
+    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}    ${download_timeout}=600s
     Set Up Test OpenShift Project    test_ns=${namespace}
-    Create Secret For S3-Like Buckets    endpoint=${endpoint}
-    ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
-    ...    access_key_id=${access_key_id}    access_key=${access_key}
-    ...    verify_ssl=${verify_ssl}
+    IF    ${download_in_pvc}
+        Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
+        ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
+        ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
+        ...    storage_size=${storage_size}
+    ELSE
+        Create Secret For S3-Like Buckets    endpoint=${endpoint}
+        ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
+        ...    access_key_id=${access_key_id}    access_key=${access_key}
+        ...    verify_ssl=${verify_ssl}
+    END
     Deploy Serving Runtime    namespace=${namespace}    runtime=${runtime}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
         Enable User Workload Monitoring
@@ -116,7 +126,7 @@ Create Secret For S3-Like Buckets
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
-    ...            ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
+    ...            ${kserve_mode}=Serverless    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
     ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
     IF   '${auto_scale}' == '${NONE}'
@@ -151,6 +161,9 @@ Compile Inference Service YAML
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
 
 Model Response Should Match The Expectation
     [Documentation]    Checks that the actual model response matches the expected answer.
@@ -216,7 +229,7 @@ Prepare Payload
             Log    ${index}: ${sub_header}
             ${pair}=    Split String    ${sub_header}    separator=:
             Log    ${pair}
-            Set To Dictionary    ${dict_header}    ${pair}[0]=${pair}[1]    
+            Set To Dictionary    ${dict_header}    ${pair}[0]=${pair}[1]
         END
         ${header}=    Set Variable    ${dict_header}
     END
@@ -229,7 +242,7 @@ Prepare Payload
             Log    ${index}: ${arg}
             ${pair}=    Split String    ${arg}    separator==
             Log    ${pair}
-            Set To Dictionary    ${args}    ${pair}[0]=${pair}[1]    
+            Set To Dictionary    ${args}    ${pair}[0]=${pair}[1]
         END
     END
     RETURN    ${body}    ${header}    ${args}
@@ -242,7 +255,7 @@ Query Model Multiple Times
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
     ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
-    ...            ${protocol}=grpc    &{args}
+    ...            ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443    &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
     ELSE
@@ -253,7 +266,16 @@ Query Model Multiple Times
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
     END
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+    IF    ${port_forwarding}
+        ${host}=    Set Variable    localhost    # temp - we might need to query using service URL
+        ${port}=    Extract Service Port    service_name=${isvc_name}-predictor    protocol=${protocol}    namespace=${namespace}
+        ${insecure}=    Set Variable    ${FALSE}
+        ${plaintext}=    Set Variable    ${TRUE}
+    ELSE
+        ${host}=    Get KServe Inference Host Via CLI    isvc_name=${isvc_name}   namespace=${namespace}
+        ${insecure}=    Set Variable    ${TRUE}
+        ${plaintext}=    Set Variable    ${FALSE}
+    END
     ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
     ...    inference_type=${inference_type}    model_name=${model_name}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
@@ -263,15 +285,15 @@ Query Model Multiple Times
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
         Log    ${counter}
         IF    "${protocol}" == "grpc"
-            ${res}=    Query Model With GRPCURL   host=${host}    port=443
+            ${res}=    Query Model With GRPCURL   host=${host}    port=${port}
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
-            ...    insecure=${TRUE}    skip_res_json=${skip_json_load_response}
+            ...    insecure=${insecure}    plaintext=${plaintext}    skip_res_json=${skip_json_load_response}
             ...    &{args}
          ELSE IF    "${protocol}" == "http"
             ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
             Log Dictionary    ${args}
-            Set To Dictionary    ${args}    url=https://${host}:443/${endpoint}   expected_status=any
+            Set To Dictionary    ${args}    url=https://${host}:${port}/${endpoint}   expected_status=any
             ...             headers=${header}   json=${payload}    verify=${False}
             ${is_timeout}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${args}    timeout
             IF    ${is_timeout} == ${FALSE}
@@ -287,7 +309,7 @@ Query Model Multiple Times
             ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
             IF    "${response_container_field}" != "${EMPTY}"
                 # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
-                ${res}=    Set Variable    ${res}[${response_container_field}][0]            
+                ${res}=    Set Variable    ${res}[${response_container_field}][0]
             END
             Run Keyword And Continue On Failure
             ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
@@ -499,7 +521,7 @@ Get KServe Inference Host Via CLI
     RETURN    ${ksvc_host}
 
 Get Current Revision ID
-    [Documentation]    Fetches the knative revision ID for the given model 
+    [Documentation]    Fetches the knative revision ID for the given model
     [Arguments]    ${model_name}    ${namespace}
     ${rc}    ${id}=    Run And Return Rc And Output
     ...    oc get pod -n ${namespace} -l serving.kserve.io/inferenceservice=${model_name} -ojson | jq '.items[0].metadata.labels."serving.knative.dev/revisionUID"' | tr -d '"'
@@ -602,3 +624,38 @@ Clean Up Test Project
     ELSE
         Log    Project deletion started, but won't wait for it to finish..
     END
+
+Create PVC And Download Model From S3
+    [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
+    ...            ${region}    ${access_key_id}    ${access_key}
+    ...            ${use_https}    ${namespace}    ${storage_size}
+    ...            ${download_timeout}=300s
+    Set Log Level    NONE
+    Set Test Variable    ${model_name}
+    Set Test Variable    ${bucket_name}
+    Set Test Variable    ${endpoint}
+    Set Test Variable    ${region}
+    Set Test Variable    ${access_key_id}
+    Set Test Variable    ${access_key}
+    Set Test Variable    ${use_https}
+    Set Test Variable    ${namespace}
+    Set Test Variable    ${storage_size}
+    Set Log Level    INFO
+    Create File From Template    ${DOWNLOAD_PVC_FILEPATH}    ${DOWNLOAD_PVC_FILLED_FILEPATH}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PVC_FILLED_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}
+    Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
+    Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
+    ...    timeout=${download_timeout}
+
+Extract Service Port
+    [Arguments]    ${service_name}    ${namespace}    ${protocol}
+    IF    "${protocol}" == "grpc"
+        ${port_name}=    Set Variable    h2c
+    ELSE
+        ${port_name}=    Set Variable    ${protocol}
+    END
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.name=="${port_name}")]}{@.targetPort}{end}'
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    RETURN    ${out}

@@ -213,8 +213,8 @@ Click Minus Button
 
 Query Model With GRPCURL
     [Arguments]    ${host}    ${port}    ${endpoint}    ${json_body}
-    ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    ${background}=${NONE}
-    ...            ${skip_res_json}=${FALSE}    &{args}
+    ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    ${plaintext}=${FALSE}
+    ...            ${background}=${NONE}    ${skip_res_json}=${FALSE}    &{args}
     ${cmd}=    Set Variable    grpcurl -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
@@ -222,9 +222,9 @@ Query Model With GRPCURL
     IF    ${insecure} == ${TRUE}
         ${cmd}=    Catenate    ${cmd}    -insecure
     END
-    # IF    ${plaintext} == ${TRUE}
-    #     ${cmd}=    Catenate    ${cmd}    -plaintext
-    # END
+    IF    ${plaintext} == ${TRUE}
+        ${cmd}=    Catenate    ${cmd}    -plaintext
+    END
     # IF    "${proto_filepath}" != "${NONE}"
     #     ${cmd}=    Catenate    ${cmd}    -proto ${proto_filepath}
     # END
@@ -235,11 +235,13 @@ Query Model With GRPCURL
     ${cmd}=    Catenate    ${cmd}    ${host}:${port}
     ${cmd}=    Catenate    ${cmd}    ${endpoint}
     IF   '${background}' == '${NONE}'
-          ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}
-          # ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT    cwd=${PROTO_DIRPATH}    shell=yes
+          # ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}
+          ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT  shell=yes
           # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
+          ${rc}=    Set Variable    ${query_process.rc}
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
           # Log    ${query_process.stdout}    console=yes
+          ${response}=    Set Variable    ${query_process.stdout}
           Log    ${response}    console=yes
           # ${json_res}=    Load Json String    ${query_process.stdout}
           IF    ${skip_res_json} == ${TRUE}

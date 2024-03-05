@@ -148,7 +148,7 @@ Compile Inference Service YAML
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
             Log    ${index}- ${resource}:${requests_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
+            ...    yq -i -y '.spec.predictor.model.resources.requests."${resource}" = "${requests_dict}[${resource}]"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
@@ -157,12 +157,12 @@ Compile Inference Service YAML
         FOR    ${index}    ${resource}    IN ENUMERATE    @{limits_dict.keys()}
             Log    ${index}- ${resource}:${limits_dict}[${resource}]
             ${rc}    ${out}=    Run And Return Rc And Output
-            ...    yq -i '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
+            ...    yq -i -y '.spec.predictor.model.resources.limits."${resource}" = "${limits_dict}[${resource}]"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    yq -i '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
+    ...    yq -i -y '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
 
 Model Response Should Match The Expectation
@@ -629,7 +629,7 @@ Create PVC And Download Model From S3
     [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
     ...            ${region}    ${access_key_id}    ${access_key}
     ...            ${use_https}    ${namespace}    ${storage_size}
-    ...            ${download_timeout}=300s
+    ...            ${download_timeout}=500s
     Set Log Level    NONE
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}

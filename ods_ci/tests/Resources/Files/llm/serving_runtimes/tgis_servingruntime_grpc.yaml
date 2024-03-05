@@ -9,7 +9,7 @@ spec:
       name: pytorch
   containers:
     - name: kserve-container
-      image: quay.io/modh/text-generation-inference@sha256:9f18a63cd84b084c3cbf15534f22d5ba6916d9501298abcc03271d26ebf5cdfb
+      image: quay.io/modh/text-generation-inference@sha256:e4d24fd401fd4eb89b49b4ab07e0c08389384d4a672b240e98a03ad7f9ef1c85
       command: ["text-generation-launcher"]
       args:
         - "--model-name=/mnt/models/"

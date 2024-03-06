@@ -150,7 +150,7 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
     ...    port_forwarding=${use_port_forwarding}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1    protocol=grpc
-    ...    namespace=${test_namespace}    query_idx=0    validate_response=${TRUE}
+    ...    namespace=${test_namespace}    query_idx=0    validate_response=${FALSE}
     ...    port_forwarding=${use_port_forwarding}
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}

@@ -22,7 +22,7 @@ ${TEST_NS}=    tgis-standalone
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 @{SEARCH_METRICS}=    tgi_    istio_
 
-
+ 
 *** Test Cases ***
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
@@ -43,6 +43,12 @@ Verify User Can Serve And Query A Model
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=tokenize    n_times=1
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=model-info    n_times=1
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    validate_response=${FALSE}

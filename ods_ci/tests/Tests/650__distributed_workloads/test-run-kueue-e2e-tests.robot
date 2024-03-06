@@ -20,10 +20,16 @@ ${WORKER_NODE}          ${EMPTY}
 *** Test Cases ***
 Run E2E test
     [Documentation]    Run ginkgo E2E single cluster test
+    [Tags]  Kueue
+    ...     DistributedWorkloads
+    Run Kueue E2E Test    e2e_test.go
+
+Run Sanity test
+    [Documentation]    Run ginkgo Sanity test
     [Tags]  Sanity
     ...     Kueue
     ...     DistributedWorkloads
-    Run Kueue E2E Test    e2e_test.go
+    Run Kueue sanity Test    Should run with prebuilt workload
 
 
 *** Keywords ***
@@ -57,7 +63,6 @@ Prepare Kueue E2E Test Suite
         FAIL    Fail to install ginkgo
     END
 
-
 Teardown Kueue E2E Test Suite
     [Documentation]    Teardown Kueue E2E Test Suite
     Disable Component    kueue
@@ -72,6 +77,20 @@ Run Kueue E2E Test
     [Arguments]    ${test_name}
     Log To Console    Running Kueue E2E test: ${test_name}
     ${result} =    Run Process    ginkgo --focus-file\=${test_name} ${KUEUE_DIR}/test/e2e/singlecluster
+    ...    shell=true    stderr=STDOUT
+    ...    env:PATH=%{PATH}:${JOB_GO_BIN}
+    ...    env:KUBECONFIG=${KUBECONFIG}
+    ...    env:NAMESPACE=${APPLICATIONS_NAMESPACE}
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    failed
+    END
+
+Run Kueue Sanity Test
+    [Documentation]    Run Kueue Sanity Test
+    [Arguments]    ${test_name}
+    Log To Console    Running Kueue Sanity test: ${test_name}
+    ${result} =    Run Process    ginkgo --focus "${test_name}" ${KUEUE_DIR}/test/e2e/singlecluster
     ...    shell=true    stderr=STDOUT
     ...    env:PATH=%{PATH}:${JOB_GO_BIN}
     ...    env:KUBECONFIG=${KUBECONFIG}

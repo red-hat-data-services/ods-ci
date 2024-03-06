@@ -4,7 +4,7 @@ apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
   name: accelerator-profile-3349-3
-  namespace: redhat-ods-applications
+  namespace: {{ test_ns }}
 spec:
   displayName: "Test: Delete Tolerations from AP 3"
   description: {{ test_name }}

@@ -5,7 +5,7 @@ kind: AcceleratorProfile
 metadata:
   generation: 1
   name: accelerator-profile-3349-6
-  namespace: redhat-ods-applications
+  namespace: {{ test_ns }}
 spec:
   displayName: "Test: Disable AP 6 from Administration View"
   description: {{ test_name }}

@@ -4,7 +4,7 @@ apiVersion: dashboard.opendatahub.io/v1
 kind: AcceleratorProfile
 metadata:
   name: accelerator-profile-3349-2
-  namespace: redhat-ods-applications
+  namespace: {{ test_ns }}
 spec:
   description: {{ test_name }}
   displayName: "Test: Modify Accelerator Profile 2"

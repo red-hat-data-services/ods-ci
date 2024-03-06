@@ -12,7 +12,7 @@ Create An Accelerator Profile Via CLI
     [Arguments]   ${name}  ${ns}=${APPLICATIONS_NAMESPACE}
     ${status}=    Run Keyword And Return Status    Oc Create    kind=AcceleratorProfile
     ...    src=${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml    namespace=${ns}
-    ...    template_data={test_name: '${TEST_NAME}'}
+    ...    template_data={test_name: '${TEST_NAME}', test_ns: '${ns}'}
     Should Be Equal As Integers    ${status}     ${TRUE}
 
 Get Accelerator Profile Spec Values Via CLI

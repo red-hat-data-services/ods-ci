@@ -5,7 +5,7 @@ kind: AcceleratorProfile
 metadata:
   generation: 1
   name: accelerator-profile-3349-8
-  namespace: redhat-ods-applications
+  namespace: {{ test_ns }}
 spec:
   displayName: "Test: Delete AP 8 from grid"
   enabled: false

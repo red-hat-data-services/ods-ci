@@ -5,7 +5,7 @@ kind: AcceleratorProfile
 metadata:
   generation: 1
   name: accelerator-profile-3349-5
-  namespace: redhat-ods-applications
+  namespace: {{ test_ns }}
 spec:
   displayName: "Test: Enable AP 5 from Edit Detail View"
   description: {{ test_name }}

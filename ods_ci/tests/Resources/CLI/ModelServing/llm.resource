@@ -208,9 +208,9 @@ Model Response Should Be
     ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
     ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
     IF    "${inference_type}" == "model-info"
-        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][${inference_type}_response_text]
-    ELSE
         ${exp_response}=    Set Variable    ${EXP_RESPONSES}[${inference_type}][${model_name}]
+    ELSE
+        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][${inference_type}_response_text]
     END
     ${cleaned_exp_response_text}=    Replace String Using Regexp    ${exp_response}    \\s+    ${SPACE}    # robocop: disable
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${cleaned_response_text}    ${cleaned_exp_response_text}

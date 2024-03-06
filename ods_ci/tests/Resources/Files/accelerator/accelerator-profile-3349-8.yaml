@@ -1,0 +1,12 @@
+# File to provision an Accelerator Profile instance in test:
+#   "Delete an Accelerator Profile From The Grid of the Accelerator Profile View"
+apiVersion: dashboard.opendatahub.io/v1
+kind: AcceleratorProfile
+metadata:
+  generation: 1
+  name: accelerator-profile-3349-8
+  namespace: {{ test_ns }}
+spec:
+  displayName: "Test: Delete AP 8 from grid"
+  enabled: false
+  identifier: nvidia.com/gpu

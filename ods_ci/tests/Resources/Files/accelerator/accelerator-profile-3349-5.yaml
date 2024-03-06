@@ -1,0 +1,13 @@
+# File to provision an Accelerator Profile instance in test:
+#   "Enable an Accelerator Profile From The Accelerator Profile Edit View"
+apiVersion: dashboard.opendatahub.io/v1
+kind: AcceleratorProfile
+metadata:
+  generation: 1
+  name: accelerator-profile-3349-5
+  namespace: {{ test_ns }}
+spec:
+  displayName: "Test: Enable AP 5 from Edit Detail View"
+  description: {{ test_name }}
+  enabled: false
+  identifier: nvidia.com/gpu

@@ -25,17 +25,22 @@ ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 
 *** Test Cases ***
 Verify Pipeline Server Creation When Using Internal Database
-    [Documentation]     Verifies multiple users can create pipeline server.
-    [Tags]    Tier2
+    [Documentation]     Verifies multiple users can create pipeline server
+    [Tags]    Tier2     RunThisTest
     ...       RHOAIENG-2099
 
-    FOR     ${ITERATION}      IN    RANGE   10
+    FOR     ${ITERATION}      IN RANGE    10
         Create Pipeline Server    dc_name=${DC_NAME}
         ...    project_title=${PRJ_TITLE}
-        ${status}=      Run Keyword And Return Status       Wait Until Import Pipeline button is enabled
+        ${status}=      Run Keyword And Return Status       Wait Until Import Pipeline Button Is Enabled
         Log     ${ITERATION}     #Iteration which the creation failed
-        ODHDataSciencePipelines.Delete Pipeline Server    ${PRJ_TITLE}
-        Exit For Loop If    '${status}'=='FALSE'
+        IF      ${status}
+                Navigate To Pipelines Page
+                ODHDataSciencePipelines.Delete Pipeline Server    ${PRJ_TITLE}
+        ELSE
+                Log    Pipeliner Server Creation takes time more than Expected
+        END
+        Exit For Loop If    '${status}'=='${False}'
     END
 
 
@@ -148,11 +153,13 @@ Pipelines Suite Setup    # robocop: disable
     ...            aws_bucket_name=ods-ci-ds-pipelines
     RHOSi Setup
 
+
 Pipelines Suite Teardown
     [Documentation]    Deletes the test project which automatically triggers the
     ...                deletion of any pipeline resource contained in it
     Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
+
 
 Verify Pipeline Run Deployment Is Successful    # robocop: disable
     [Documentation]    Verifies the correct deployment of the test pipeline run in the rhods namespace.

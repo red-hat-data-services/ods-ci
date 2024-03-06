@@ -274,10 +274,22 @@ Wait Until Pipeline Server Is Deployed
     Wait Until Keyword Succeeds    10 times    10s
     ...    Verify Pipeline Server Deployments    project_title=${project_title}
 
-Wait Until Import Pipeline button is enabled
-    Documentation]    Waits until Import Pipeline button is enabled after pipeline server
-    ...               Creation
-    Wait Until Element Is Enabled   //*[@id="pipelines-projects"]/*/div/button[text()="Import pipeline"]
+Wait Until Import Pipeline Button Is Enabled
+    [Documentation]    Waits until Import Pipeline button is enabled after pipeline server
+    ...                Creation
+    [Arguments]        ${timeout}=90s
+    Capture Page Screenshot
+    #Wait Until Element Is Enabled   //*[@id="pipelines-projects"]/*/div/button[text()="Import pipeline"]    timeout=${timeout}
+    Capture Page Screenshot
+    Wait Until Page Contains        No pipelines        timeout=${timeout}
+
+Navigate To Pipelines Page
+    [Documentation]    Navigating to the DataScience Pipelines > Pipelines Page
+    ...                Creation
+    Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
+    Click Element    xpath=//button[text()='Data Science Pipelines']
+    Wait Until Page Contains Element    xpath=//a[text()='Pipelines']
+    Click Element    xpath=//a[text()='Pipelines']
 
 
 

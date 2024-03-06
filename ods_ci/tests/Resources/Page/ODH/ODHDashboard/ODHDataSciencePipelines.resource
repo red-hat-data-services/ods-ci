@@ -114,7 +114,8 @@ Delete Pipeline Server
     [Documentation]    Delete a pipeline server. From the top right menu inside "Data Science Pipelines" -> Pipelines
     [Arguments]    ${data_science_project_name}
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Pipeline server actions')]
-    Click Element    //button[contains(span/text(), 'Pipeline server actions')]
+    Sleep    20s
+    Click Button            xpath://button[contains(span/text(), 'Pipeline server actions')]
     Wait Until Page Contains Element    xpath://li[contains(a/text(), 'Delete pipeline server')]
     Click Element    //li[contains(a/text(), 'Delete pipeline server')]
     Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server

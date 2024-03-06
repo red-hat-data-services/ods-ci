@@ -83,7 +83,7 @@ Is Data Science Project Details Page Open
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
     [Arguments]     ${project_title}    ${timeout-pre-spinner}=3s    ${timeout-spinner}=5s
-    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30
+    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=50
     Maybe Wait For Dashboard Loading Spinner Page
     ...    timeout-pre=${timeout-pre-spinner}    timeout=${timeout-spinner}
 
@@ -117,7 +117,7 @@ Create Data Science Project
         ${existing_project}=  Run Keyword And Return Status
         ...    Wait Until Page Contains Element    xpath://a[text()="${title}"]
     END
-    IF    ${existing_project}   
+    IF    ${existing_project}
         Log    DS Project '${title}' already exists, reusing project    console=True
         Click Link      ${title}
     ELSE

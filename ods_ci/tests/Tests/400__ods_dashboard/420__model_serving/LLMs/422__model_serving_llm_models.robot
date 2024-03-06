@@ -10,7 +10,7 @@ Test Tags         KServe
 
 
 *** Variables ***
-${TEST_NS}=    tgis-models
+${TEST_NS}=    tgismodel
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 ${USE_PVC}=    ${TRUE}
 ${DOWNLOAD_IN_PVC}=    ${TRUE}
@@ -126,7 +126,7 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone runtime
     [Tags]    Tier1    RHOAIENG-3479
-    Setup Test Variables    model_name=elyza-japanese-llama-2-7b-instruct-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
+    Setup Test Variables    model_name=elyza-japanese    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=ELYZA-japanese-Llama-2-7b-instruct-hf
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}

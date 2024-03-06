@@ -14,8 +14,7 @@ ${KUBERAY_REPO_BRANCH}    %{KUBERAY_REPO_BRANCH=master}
 *** Test Cases ***
 Run TestRayJob test
     [Documentation]    Run Go E2E test: TestRayJob
-    [Tags]  Sanity
-    ...     Tier1
+    [Tags]  Tier2
     ...     DistributedWorkloads
     ...     Kuberay
     Skip    "Requires Kuberay 1.1"
@@ -24,15 +23,13 @@ Run TestRayJob test
 Run TestRayJobWithClusterSelector test
     [Documentation]    Run Go E2E test: TestRayJobWithClusterSelector
     [Tags]  Sanity
-    ...     Tier1
     ...     DistributedWorkloads
     ...     Kuberay
     Run Kuberay E2E Test    TestRayJobWithClusterSelector
 
 Run TestRayJobSuspend test
     [Documentation]    Run Go E2E test: TestRayJobSuspend
-    [Tags]  Sanity
-    ...     Tier1
+    [Tags]  Tier2
     ...     DistributedWorkloads
     ...     Kuberay
     Skip    "Requires Kuberay 1.1"

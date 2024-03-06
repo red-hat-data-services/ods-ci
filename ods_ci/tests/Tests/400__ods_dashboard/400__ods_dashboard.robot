@@ -231,7 +231,7 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    ...         ODS-1491
    ...         Tier1
    ...         ProductBug
-   Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
+   Check And Install Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
    Close All Browsers
    Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
    Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
@@ -617,14 +617,14 @@ Uninstall Operator And Check Enabled Page Is Rendering
 Check And Uninstall Operator In Openshift
     [Documentation]     it checks operator is uninstalled if not then uninstall it
     [Arguments]       ${operator_name}    ${operator_appname}   ${dashboard_app_id}   ${expected_number_operator}=2
-    ${status}       Check If Operator Is Already Installed In Opneshift    ${operator_name}
+    ${status}       Check If Operator Is Already Installed In Openshift    ${operator_name}
     IF  ${status}
         Open OperatorHub
         ${actual_no_of_operator}    Get The Number of Operator Available    ${operator_appname}
         IF  ${actual_no_of_operator} == ${expected_number_operator}
             Uninstall Operator    ${operator_name}
         ELSE
-            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Opearatorhub
+            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Operatorhub
 
         END
     END

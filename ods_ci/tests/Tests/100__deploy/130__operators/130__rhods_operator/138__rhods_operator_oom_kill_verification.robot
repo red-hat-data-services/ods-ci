@@ -50,7 +50,7 @@ Create Namespace In Openshift
     Log    ${temp_count}
 
 Delete Namespace From Openshift
-    [Documentation]    Delete dummy namespace from opneshift
+    [Documentation]    Delete dummy namespace from openshift
     [Arguments]    ${number}=${NUMBER}
     ${delete_namespace}    Run    oc delete namespace --selector testuser=testuser
     ${temp_count}    Run    oc get namespace | wc -l

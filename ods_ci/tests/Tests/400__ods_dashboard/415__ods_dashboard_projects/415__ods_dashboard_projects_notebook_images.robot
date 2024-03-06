@@ -24,7 +24,7 @@ Verify User Can Create A Workbench Using Intel AiKit Image
     Set Test Variable   ${IMG_NAME}     oneAPI AI Analytics Toolkit
     Set Test Variable   ${WORKBENCH_TITLE}      aikitwb
     Set Test Variable   ${PV_DESCRIPTION}      PV for AiKit workbench
-    Check And Install Operator in Openshift    ${INTEL_AIKIT_OPERATOR_NAME}    ${INTEL_AIKIT_APPNAME}
+    Check And Install Operator In Openshift    ${INTEL_AIKIT_OPERATOR_NAME}    ${INTEL_AIKIT_APPNAME}
     Create Tabname Instance For Installed Operator        ${INTEL_AIKIT_OPERATOR_NAME}
     ...    AIKitContainer    ${APPLICATIONS_NAMESPACE}
     Go To RHODS Dashboard

@@ -34,7 +34,7 @@ Verify Openvino Operator Can Be Installed Using OpenShift Console
    ...      ODS-1085
    [Documentation]  This Test Case Installed Openvino operator in Openshift cluster
    ...               and Check and Launch Openvino notebook image from RHODS dashboard
-   Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
+   Check And Install Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}
    Create Tabname Instance For Installed Operator        ${openvino_operator_name}       Notebook    ${APPLICATIONS_NAMESPACE}
    Wait Until Keyword Succeeds    1200      1   Check Image Build Status    Complete        openvino-notebook
    Go To RHODS Dashboard

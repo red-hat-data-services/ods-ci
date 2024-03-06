@@ -629,7 +629,7 @@ Create PVC And Download Model From S3
     [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
     ...            ${region}    ${access_key_id}    ${access_key}
     ...            ${use_https}    ${namespace}    ${storage_size}
-    ...            ${download_timeout}=300s
+    ...            ${download_timeout}=500s
     Set Log Level    NONE
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}

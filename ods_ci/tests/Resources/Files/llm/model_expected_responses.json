@@ -6,12 +6,14 @@
                 "flan-t5-small-caikit": {
                     "response_tokens":  5,
                     "response_text": "74 degrees F",
-                    "streamed_response_text":   "{'details':{'input_token_count':'8'}}{'tokens':[{'text':'▁','logprob':-1.6961838006973267}],'details':{'generated_tokens':1}}{'generated_text':'74','tokens':[{'text':'74','logprob':-3.250730037689209}],'details':{'generated_tokens':2}}{'generated_text':'degrees','tokens':[{'text':'▁degrees','logprob':-0.4324559271335602}],'details':{'generated_tokens':3}}{'generated_text':'F','tokens':[{'text':'▁F','logprob':-1.361091136932373}],'details':{'generated_tokens':4}}{'tokens':[{'text':'\u003c/s\u003e','logprob':-0.010431881994009018}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':5}}"
+                    "streamed_response_text":   "{'details':{'input_token_count':'8'}}{'tokens':[{'text':'▁','logprob':-1.6961838006973267}],'details':{'generated_tokens':1}}{'generated_text':'74','tokens':[{'text':'74','logprob':-3.250730037689209}],'details':{'generated_tokens':2}}{'generated_text':'degrees','tokens':[{'text':'▁degrees','logprob':-0.4324559271335602}],'details':{'generated_tokens':3}}{'generated_text':'F','tokens':[{'text':'▁F','logprob':-1.361091136932373}],'details':{'generated_tokens':4}}{'tokens':[{'text':'\u003c/s\u003e','logprob':-0.010431881994009018}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':5}}",
+                    "tokenize_response_text": "{ 'responses': [ { 'tokenCount': 8, 'tokens': [ '▁At', '▁what', '▁temperature', '▁does', '▁water', '▁boil', '?', '\u003c/s\u003e' ] } ] }"
                 },
                 "flan-t5-small-hf": {
                     "response_tokens":  5,
                     "response_text": "74 degrees F",
-                    "streamed_response_text":   "{'details':{'input_token_count':'8'}}{'tokens':[{'text':'▁','logprob':-1.6961838006973267}],'details':{'generated_tokens':1}}{'generated_text':'74','tokens':[{'text':'74','logprob':-3.250730037689209}],'details':{'generated_tokens':2}}{'generated_text':'degrees','tokens':[{'text':'▁degrees','logprob':-0.4324559271335602}],'details':{'generated_tokens':3}}{'generated_text':'F','tokens':[{'text':'▁F','logprob':-1.361091136932373}],'details':{'generated_tokens':4}}{'tokens':[{'text':'\u003c/s\u003e','logprob':-0.010431881994009018}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':5}}"
+                    "streamed_response_text":   "{'details':{'input_token_count':'8'}}{'tokens':[{'text':'▁','logprob':-1.6961838006973267}],'details':{'generated_tokens':1}}{'generated_text':'74','tokens':[{'text':'74','logprob':-3.250730037689209}],'details':{'generated_tokens':2}}{'generated_text':'degrees','tokens':[{'text':'▁degrees','logprob':-0.4324559271335602}],'details':{'generated_tokens':3}}{'generated_text':'F','tokens':[{'text':'▁F','logprob':-1.361091136932373}],'details':{'generated_tokens':4}}{'tokens':[{'text':'\u003c/s\u003e','logprob':-0.010431881994009018}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':5}}",
+                    "tokenize_response_text": "{ 'responses': [ { 'tokenCount': 8, 'tokens': [ '▁At', '▁what', '▁temperature', '▁does', '▁water', '▁boil', '?', '\u003c/s\u003e' ] } ] }"
                 },
                 "bloom-560m-caikit": {
                     "response_tokens":  20,
@@ -45,7 +47,8 @@
                 "mt0-xxl-hf": {
                     "response_tokens":  13,
                     "response_text": "Watson, c'est très simple !",
-                    "streamed_response_text":   "{ 'inputTokenCount': 10 } { 'generatedTokenCount': 1, 'text': 'temperature' } { 'generatedTokenCount': 2, 'text': ' of' } { 'generatedTokenCount': 3, 'text': ' 180' } { 'generatedTokenCount': 4, 'text': ' ' } { 'generatedTokenCount': 5, 'text': '°' } { 'generatedTokenCount': 6, 'text': 'C' } { 'generatedTokenCount': 7, 'stopReason': 'EOS_TOKEN' }"
+                    "streamed_response_text":   "{ 'inputTokenCount': 10 } { 'generatedTokenCount': 1, 'text': 'temperature' } { 'generatedTokenCount': 2, 'text': ' of' } { 'generatedTokenCount': 3, 'text': ' 180' } { 'generatedTokenCount': 4, 'text': ' ' } { 'generatedTokenCount': 5, 'text': '°' } { 'generatedTokenCount': 6, 'text': 'C' } { 'generatedTokenCount': 7, 'stopReason': 'EOS_TOKEN' }",
+                    "tokenize_response_text": ""
                 }
             }
 
@@ -95,13 +98,19 @@
         {
             "query_text": "桜の木についての話を書く",
             "models": {
-                "elyza-japanese-llama-2-7b-instruct-hf": {
+                "elyza-japanese": {
                     "response_tokens":  20,
                     "response_text": "。\n桜の木は、桜の花が咲くと",
-                    "streamed_response_text":   "{ 'inputTokenCount': 16 } { 'generatedTokenCount': 2, 'text': '。' } { 'generatedTokenCount': 5, 'text': '\n' } { 'generatedTokenCount': 6, 'text': '桜' } { 'generatedTokenCount': 7, 'text': 'の' } { 'generatedTokenCount': 8, 'text': '木' } { 'generatedTokenCount': 9, 'text': 'は' } { 'generatedTokenCount': 12, 'text': '、' } { 'generatedTokenCount': 13, 'text': '桜' } { 'generatedTokenCount': 14, 'text': 'の' } { 'generatedTokenCount': 15, 'text': '花' } { 'generatedTokenCount': 18, 'text': 'が' } { 'generatedTokenCount': 19, 'text': '咲' } { 'generatedTokenCount': 20, 'text': 'くと', 'stopReason': 'MAX_TOKENS' }"
-
+                    "streamed_response_text":   "{ 'inputTokenCount': 16 } { 'generatedTokenCount': 2, 'text': '。' } { 'generatedTokenCount': 5, 'text': '\n' } { 'generatedTokenCount': 6, 'text': '桜' } { 'generatedTokenCount': 7, 'text': 'の' } { 'generatedTokenCount': 8, 'text': '木' } { 'generatedTokenCount': 9, 'text': 'は' } { 'generatedTokenCount': 12, 'text': '、' } { 'generatedTokenCount': 13, 'text': '桜' } { 'generatedTokenCount': 14, 'text': 'の' } { 'generatedTokenCount': 15, 'text': '花' } { 'generatedTokenCount': 18, 'text': 'が' } { 'generatedTokenCount': 19, 'text': '咲' } { 'generatedTokenCount': 20, 'text': 'くと', 'stopReason': 'MAX_TOKENS' }",
+                    "tokenize_response_text": ""
                 }
             }
         }
-    ]
+    ],
+    "model-info": {
+        "flan-t5-small-hf": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 512, 'maxNewTokens': 511 }",
+        "flan-t5-small-caikit": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 512, 'maxNewTokens': 511 }",
+        "mt0-xxl-hf": "",
+        "elyza-japanese" : ""
+    }
 }

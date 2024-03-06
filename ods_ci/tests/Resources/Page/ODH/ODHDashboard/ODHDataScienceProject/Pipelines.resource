@@ -274,6 +274,13 @@ Wait Until Pipeline Server Is Deployed
     Wait Until Keyword Succeeds    10 times    10s
     ...    Verify Pipeline Server Deployments    project_title=${project_title}
 
+Wait Until Import Pipeline button is enabled
+    Documentation]    Waits until Import Pipeline button is enabled after pipeline server
+    ...               Creation
+    Wait Until Element Is Enabled   //*[@id="pipelines-projects"]/*/div/button[text()="Import pipeline"]
+
+
+
 # TODO: we need to replace this keyword for a similar one checking in Data Science Pipelines > Runs
 #Verify Successful Pipeline Run Via Project UI
 #    [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state

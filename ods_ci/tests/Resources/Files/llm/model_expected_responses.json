@@ -64,7 +64,7 @@
         {
             "query_text": "桜の木についての話を書く",
             "models": {
-                "elyza-japanese-llama-2-7b-instruct-hf": {
+                "elyza-japanese": {
                     "response_tokens":  20,
                     "response_text": "。\n桜の木は、桜の花が咲くと",
                     "streamed_response_text":   "{ 'inputTokenCount': 16 } { 'generatedTokenCount': 2, 'text': '。' } { 'generatedTokenCount': 5, 'text': '\n' } { 'generatedTokenCount': 6, 'text': '桜' } { 'generatedTokenCount': 7, 'text': 'の' } { 'generatedTokenCount': 8, 'text': '木' } { 'generatedTokenCount': 9, 'text': 'は' } { 'generatedTokenCount': 12, 'text': '、' } { 'generatedTokenCount': 13, 'text': '桜' } { 'generatedTokenCount': 14, 'text': 'の' } { 'generatedTokenCount': 15, 'text': '花' } { 'generatedTokenCount': 18, 'text': 'が' } { 'generatedTokenCount': 19, 'text': '咲' } { 'generatedTokenCount': 20, 'text': 'くと', 'stopReason': 'MAX_TOKENS' }"

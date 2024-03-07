@@ -141,7 +141,7 @@ Delete Tabname Instance For Installed Operator
     Wait Until Element Is Enabled   //button[contains(text(),"Delete")]
     Click Button    Delete
 
-Check If Operator Is Already Installed In Openshift
+Check If Operator Is Already Installed In Opneshift
     [Documentation]   This keyword verify if operator is already installed and return the status
     [Arguments]    ${operator_name}
     Open Installed Operators Page
@@ -154,14 +154,14 @@ Check And Install Operator In Openshift
     [Documentation]   This keyword verify if operator is already installed or not
     ...               If not installed it matched the no of operator present and installs the operator
     [Arguments]       ${operator_name}    ${operator_appname}   ${expected_number_operator}=2
-    ${status}       Check If Operator Is Already Installed In Openshift    ${operator_name}
+    ${status}       Check If Operator Is Already Installed In Opneshift    ${operator_name}
     IF  not ${status}
         Open OperatorHub
         ${actual_no_of_operator}    Get The Number of Operator Available    ${operator_appname}
         IF  ${actual_no_of_operator} == ${expected_number_operator}
             Install Operator      ${operator_appname}
         ELSE
-            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Operatorhub
+            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Opearatorhub
 
         END
     END

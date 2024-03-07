@@ -45,7 +45,7 @@ Pachyderm Suite Setup
     Open OCP Console
     Login to OCP
     Wait Until OpenShift Console Is Loaded
-    Check And Install Operator In Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
+    Check And Install Operator in Openshift    ${pachyderm_container_name}    ${pachyderm_appname}
     Run    oc new-project ${pachyderm_ns}
     Create Pachyderm AWS-Secret
     Create Tabname Instance For Installed Operator        ${pachyderm_container_name}   ${pachyderm_container_name}     ${pachyderm_appname}

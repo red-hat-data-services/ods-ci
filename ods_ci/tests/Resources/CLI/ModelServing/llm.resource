@@ -62,10 +62,17 @@ Set Project And Runtime
     ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}    ${model_path}=${NONE}    ${download_timeout}=600s
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
-        Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
-        ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
-        ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
-        ...    storage_size=${storage_size}    model_path=${model_path}
+       IF    ${model_path} == ${NONE}
+             Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
+             ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
+             ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
+             ...    storage_size=${storage_size}    model_path=${model_name}
+       ELSE
+              Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
+             ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
+             ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
+             ...    storage_size=${storage_size}    model_path=${model_path}
+       END
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
         ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}

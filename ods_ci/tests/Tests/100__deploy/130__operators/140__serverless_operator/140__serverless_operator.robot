@@ -95,22 +95,3 @@ Check For Errors On Operator Logs
     ELSE
         Log    message=No ERROR logs found on Pod.    level=INFO
     END
-
-Extract Errors From Logs
-    [Documentation]    Given Pod Logs it retrieves only the ERROR level ones.
-    [Arguments]    ${logs}
-    ${log_splits}=    Split String    string=${logs}    separator=.
-    ${value}=    Set Variable    ${logs}
-    FOR    ${idx}    ${split}    IN ENUMERATE    @{log_splits}  start=1
-        Log    ${idx} - ${split}
-        ${present}=    Run Keyword And Return Status
-        ...    Should Contain    ${split}    ERROR
-        IF    ${present}
-            ${value}=    Set Variable    ${value["${split}"]}
-            Log    message=No ERROR logs found on Pod.    level=WARN
-        ELSE
-            ${value}=    Set Variable    ${EMPTY}
-            Log    message=No ERROR logs found on Pod.    level=INFO
-            BREAK
-        END
-    END

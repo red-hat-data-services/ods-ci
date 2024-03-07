@@ -59,12 +59,12 @@ End Non JupyterLab Web Test
 Load Json File
     [Arguments]   ${file_path}
     ${j_file}=    Get File    ${file_path}
-    ${obj}=    Evaluate    json.loads('''${j_file}''')    json
+    ${obj}=    Evaluate    json.loads(r'''${j_file}''')    json
     RETURN    ${obj}
 
 Load Json String
     [Arguments]     ${json_string}
-    ${obj}=     Evaluate  json.loads("""${json_string}""")
+    ${obj}=     Evaluate  json.loads(r"""${json_string}""")
     RETURN    ${obj}
 
 Create File From Template

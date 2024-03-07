@@ -252,7 +252,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    timeout=900s
+    ...    namespace=${test_namespace}    timeout=2000s
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}

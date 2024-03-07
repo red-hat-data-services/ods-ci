@@ -606,6 +606,7 @@ Clean Up Test Project
     [Documentation]    Deletes the given InferenceServices, check the NS gets removed from ServiceMeshMemberRoll
     ...                and deletes the DS Project
     [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}    ${wait_prj_deletion}=${TRUE}
+    ...            ${kserve_mode}=Serverless
     IF    ${isvc_delete} == ${TRUE}
         FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
               Log    Deleting ${isvc_name}
@@ -614,8 +615,10 @@ Clean Up Test Project
     ELSE
         Log To Console     InferenceService Delete option not provided by user
     END
-    Wait Until Keyword Succeeds    10    1s    Namespace Should Be Removed From ServiceMeshMemberRoll
-    ...    namespace=${test_ns}
+    IF    "${kserve_mode}"=="Serverless"
+           Wait Until Keyword Succeeds    10    1s    Namespace Should Be Removed From ServiceMeshMemberRoll
+           ...    namespace=${test_ns}
+    END
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
     IF    ${wait_prj_deletion}

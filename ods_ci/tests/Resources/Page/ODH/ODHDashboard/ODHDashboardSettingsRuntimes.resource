@@ -92,6 +92,6 @@ Select Model Serving Platform
     [Documentation]    Selects which model serving platform the serving runtime could be executed on
     [Arguments]    ${platform}="both"
     ${platform_link_name}=    Get From Dictionary    ${PLATFORM_NAMES_MAPPING}    ${platform.lower()}
-    SeleniumLibrary.Click Element    css:div#custom-serving-runtime-selection > button
+    SeleniumLibrary.Click Element    xpath://div[@data-testid="custom-serving-runtime-selection"]//button
     SeleniumLibrary.Wait Until Page Contains Element    xpath://a[text()="${platform_link_name}"]
     SeleniumLibrary.Click Link    ${platform_link_name}

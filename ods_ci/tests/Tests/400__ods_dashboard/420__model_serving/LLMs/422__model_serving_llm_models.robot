@@ -50,6 +50,7 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
@@ -85,6 +86,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Model
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
@@ -120,6 +122,7 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
@@ -154,6 +157,7 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
@@ -189,9 +193,10 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
-    
+
 Verify User Can Serve And Query A google/flan-ul-2 Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
@@ -224,6 +229,7 @@ Verify User Can Serve And Query A google/flan-ul-2 Model
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 

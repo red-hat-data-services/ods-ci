@@ -242,7 +242,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}

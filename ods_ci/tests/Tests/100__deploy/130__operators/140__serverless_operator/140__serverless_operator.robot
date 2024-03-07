@@ -21,8 +21,8 @@ Validate DSC creates all Serverless CRs
     ...    of Serverless Custom Resources
     [Tags]  Operator    ODS-2600
     Assign Vars According To Product    ${PRODUCT}
-    Check And Install Operator in Openshift    ${OPERATOR_APPNAME}    ${OPERATOR_NAME}
     Check And Install Operator in Openshift    ${SERVERLESS_APPNAME}    ${SERVERLESS_OPERATOR_NAME}
+    Check And Install Operator in Openshift    ${OPERATOR_APPNAME}    ${OPERATOR_NAME}
     Is Resource Present     KnativeServing    knative-serving     ${KNATIVESERVING_NS}
     Check Status     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
     Is Resource Present     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}

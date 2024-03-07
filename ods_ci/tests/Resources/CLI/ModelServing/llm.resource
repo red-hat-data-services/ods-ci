@@ -59,13 +59,13 @@ Set Project And Runtime
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
     ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
-    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}    ${download_timeout}=600s
+    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}    ${model_path}=${NONE}    ${download_timeout}=600s
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
         Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
         ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
         ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
-        ...    storage_size=${storage_size}
+        ...    storage_size=${storage_size}    model_path=${model_path}
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
         ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
@@ -629,7 +629,7 @@ Create PVC And Download Model From S3
     [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
     ...            ${region}    ${access_key_id}    ${access_key}
     ...            ${use_https}    ${namespace}    ${storage_size}
-    ...            ${download_timeout}=500s
+    ...            ${model_path}    ${download_timeout}=500s
     Set Log Level    NONE
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}
@@ -640,6 +640,7 @@ Create PVC And Download Model From S3
     Set Test Variable    ${use_https}
     Set Test Variable    ${namespace}
     Set Test Variable    ${storage_size}
+    Set Test Variable    ${model_path}
     Set Log Level    INFO
     Create File From Template    ${DOWNLOAD_PVC_FILEPATH}    ${DOWNLOAD_PVC_FILLED_FILEPATH}
     ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PVC_FILLED_FILEPATH}

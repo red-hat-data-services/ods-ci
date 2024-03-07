@@ -150,7 +150,7 @@ Check If Operator Is Already Installed In Opneshift
     IF  ${status}   Log To Console    Operator "${operator_name}" is already installed
     RETURN  ${status}
 
-Check And Install Operator In Openshift
+Check And Install Operator in Openshift
     [Documentation]   This keyword verify if operator is already installed or not
     ...               If not installed it matched the no of operator present and installs the operator
     [Arguments]       ${operator_name}    ${operator_appname}   ${expected_number_operator}=2

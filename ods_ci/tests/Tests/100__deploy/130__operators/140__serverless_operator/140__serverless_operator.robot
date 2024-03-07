@@ -9,32 +9,32 @@ Suite Teardown   Suite Teardown
 
 
 *** Variables ***
-${RHOAI_APPNAME}  Red Hat OpenShift AI
-${RHOAI_OPERATOR_NAME}    Red Hat OpenShift AI
-${KSERVE_APPNAME}  Red Hat OpenShift Serverless
-${KSERVE_OPERATOR_NAME}    Red Hat OpenShift Serverless
+${SERVERLESS_APPNAME}  Red Hat OpenShift Serverless
+${SERVERLESS_OPERATOR_NAME}    Red Hat OpenShift Serverless
 ${KNATIVESERVING_NS}    knative-serving
-${RHOAI_OPERATOR_NS}    redhat-ods-operator
+${ISTIO_NS}     istio-system
 
 
 *** Test Cases ***
 Validate DSC creates all Serverless CRs
     [Documentation]  The purpose of this Test Case is to validate the creation
-    ...    of KServe Custom Resources
+    ...    of Serverless Custom Resources
     [Tags]  Operator    ODS-2600
-    Check And Install Operator In Openshift    ${RHOAI_APPNAME}    ${RHOAI_OPERATOR_NAME}
-    Check And Install Operator In Openshift    ${KSERVE_APPNAME}    ${KSERVE_OPERATOR_NAME}
+    Assign Vars According To Product    ${PRODUCT}
+    Check And Install Operator in Openshift    ${OPERATOR_APPNAME}    ${OPERATOR_NAME}
+    Check And Install Operator in Openshift    ${SERVERLESS_APPNAME}    ${SERVERLESS_OPERATOR_NAME}
     Is Resource Present     KnativeServing    knative-serving     ${KNATIVESERVING_NS}
     Check Status     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
     Is Resource Present     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
     Is Resource Present     Gateway    knative-local-gateway     ${KNATIVESERVING_NS}
-    Is Resource Present     Service    knative-local-gateway     istio-system
+    Is Resource Present     Service    knative-local-gateway     ${ISTIO_NS}
     Is Resource Present     deployment    controller     ${KNATIVESERVING_NS}
-    Check Pods Number    ${KNATIVESERVING_NS}    app.kubernetes.io/component=controller
+    Wait For Pods Numbers  2    namespace=${KNATIVESERVING_NS}
+    ...    label_selector=app.kubernetes.io/component=controller    timeout=120
     ${pod_names}=    Get Pod Names    ${KNATIVESERVING_NS}    app.kubernetes.io/component=controller
     Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
-    ${podname}=    Get Pod Name   ${RHOAI_OPERATOR_NS}    label_selector=name=rhods-operator
-    Check For Errors On Operator Logs    ${podname}    ${RHOAI_OPERATOR_NS}
+    ${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    label_selector=name=rhods-operator
+    Check For Errors On Operator Logs    ${podname}    ${OPERATOR_NAMESPACE}
     Check DSC Conditions    ${KNATIVESERVING_NS}    default-dsc
 
 
@@ -48,6 +48,19 @@ Suite Teardown
     [Documentation]    Suite Teardown
     Close All Browsers
     RHOSi Teardown
+
+Assign Vars According To Product
+    [Documentation]    Assign vars related to product
+    [Arguments]    ${product}
+    IF    "${product}" == "RHODS"
+        Set Suite Variable    ${OPERATOR_APPNAME}     Red Hat OpenShift AI
+        Set Suite Variable    ${OPERATOR_NAME}    Red Hat OpenShift AI
+        Set Suite Variable    ${OPERATOR_NAMESPACE}    redhat-ods-operator
+    ELSE IF    "${product}" == "ODH"
+        Set Suite Variable    ${OPERATOR_APPNAME}  Open Data Hub Operator
+        Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator
+        Set Suite Variable    ${OPERATOR_NAMESPACE}    openshift-operators
+    END
 
 Is Resource Present
     [Documentation]    Check CR
@@ -64,19 +77,11 @@ Check Status
     Log    ${status}    console=True
     Should Be Equal    ${status}    ${expected_status}   msg=${resource} is not in Ready status
 
-Check Pods Number
-    [Documentation]    Checks number of Pods
-    [Arguments]    ${namespace}    ${label_selector}
-    ${return_code}    ${output}    Run And Return Rc And Output    oc get pod -n ${namespace} -l app.kubernetes.io/component=controller | tail -n +2 | wc -l    # robocop: disable
-    Should Be Equal As Integers    ${return_code}     ${0}
-    Should Not Be Empty    ${output}
-    Log To Console  pods ${label_selector} created
-
 Check DSC Conditions
     [Documentation]    Checks that all conditions Reconciled Succesfully
     [Arguments]    ${namespace}    ${dsc_name}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --timeout=3m --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsc ${dsc_name}    # robocop: disable
+    ...    oc get DataScienceCluster ${dsc_name} -n ${namespace} -o jsonpath='{.status.conditions[].reason}'
     Should Be Equal As Integers    ${rc}     ${0}
     Log    ${out}    console=${out}
 

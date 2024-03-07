@@ -35,7 +35,7 @@ Verify Intel AIKIT Operator Can Be Installed Using OpenShift Console
    [Documentation]  This Test Case Installed Intel AIKIT operator in Openshift cluster
    ...              Check and Launch AIKIT notebook image from RHODS dashboard
    ...              ProductBug: RHODS-2748
-   Check And Install Operator In Openshift    ${intel_aikit_container_name}    ${intel_aikit_appname}
+   Check And Install Operator in Openshift    ${intel_aikit_container_name}    ${intel_aikit_appname}
    Create Tabname Instance For Installed Operator        ${intel_aikit_operator_name}      AIKitContainer    ${APPLICATIONS_NAMESPACE}
    Go To RHODS Dashboard
    Verify Service Is Enabled          ${intel_aikit_container_name}

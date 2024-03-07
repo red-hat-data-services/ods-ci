@@ -19,6 +19,7 @@ ${NOTEBOOK_IMAGE_STREAM_NAME}   %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-sc
 Run TestMNISTPyTorchMCAD E2E test
     [Documentation]    Run Go E2E test: TestMNISTPyTorchMCAD
     [Tags]  ODS-2543
+    ...     Sanity
     ...     Tier2
     ...     DistributedWorkloads
     ...     CodeflareOperator

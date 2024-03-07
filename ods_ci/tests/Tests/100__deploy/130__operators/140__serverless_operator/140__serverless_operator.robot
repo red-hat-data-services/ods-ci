@@ -55,11 +55,9 @@ Assign Vars According To Product
     IF    "${product}" == "RHODS"
         Set Suite Variable    ${OPERATOR_APPNAME}     Red Hat OpenShift AI
         Set Suite Variable    ${OPERATOR_NAME}    Red Hat OpenShift AI
-        Set Suite Variable    ${OPERATOR_NAMESPACE}    redhat-ods-operator
     ELSE IF    "${product}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  Open Data Hub Operator
         Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator
-        Set Suite Variable    ${OPERATOR_NAMESPACE}    openshift-operators
     END
 
 Is Resource Present

@@ -59,7 +59,7 @@ Set Project And Runtime
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
     ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
-    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}    ${model_path}=${NONE}    ${download_timeout}=600s
+    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}    ${model_path}=${model_name}    ${download_timeout}=600s
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
         Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
@@ -203,14 +203,14 @@ Model Response Should Match The Expectation
     END
 
 Model Response Should Be
-    [Arguments]    ${response}    ${model_name}    ${inference_type}    ${query_idx}=${0}
+    [Arguments]    ${response}    ${model_name}    ${inference_type}    ${runtime}    ${query_idx}=${0}
     ${cleaned_response_text}=    Replace String Using Regexp    ${response}    \\s+    ${SPACE}
     ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
     ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
     IF    "${inference_type}" == "model-info"
-        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[${inference_type}][${model_name}]
+        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[${inference_type}][${model_name}][${runtime}]
     ELSE
-        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][${inference_type}_response_text]
+        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][${runtime}][${inference_type}_response_text]
     END
     ${cleaned_exp_response_text}=    Replace String Using Regexp    ${exp_response}    \\s+    ${SPACE}    # robocop: disable
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${cleaned_response_text}    ${cleaned_exp_response_text}
@@ -321,7 +321,7 @@ Query Model Multiple Times
         IF    ${validate_response} == ${TRUE}
             IF    ${string_check_only}
                 Model Response Should Be    response=${res}    model_name=${model_name}    inference_type=${inference_type}
-                ...    query_idx=${query_idx}
+                ...    runtime=${runtime}    query_idx=${query_idx}
             ELSE
                 ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
                 IF    "${response_container_field}" != "${EMPTY}"

@@ -58,6 +58,11 @@
                     "response_tokens":  6,
                     "response_text": "Wie alt sind Sie?",
                     "streamed_response_text":   "{ 'inputTokenCount': 11 } { 'generatedTokenCount': 1, 'text': 'Wie' } { 'generatedTokenCount': 2, 'text': ' alt' } { 'generatedTokenCount': 3, 'text': ' sind' } { 'generatedTokenCount': 4, 'text': ' Sie' } { 'generatedTokenCount': 5, 'text': '?' } { 'generatedTokenCount': 6, 'stopReason': 'EOS_TOKEN' }"
+                },
+                "flan-ul2-hf": {
+                    "response_tokens":  6,
+                    "response_text": "Wie alt sind Sie?",
+                    "streamed_response_text":   "{ 'inputTokenCount': 11 } { 'generatedTokenCount': 1, 'text': 'Wie' } { 'generatedTokenCount': 2, 'text': ' alt' } { 'generatedTokenCount': 3, 'text': ' sind' } { 'generatedTokenCount': 4, 'text': ' Sie' } { 'generatedTokenCount': 5, 'text': '?' } { 'generatedTokenCount': 6, 'stopReason': 'EOS_TOKEN' }"
                 }
             }
         },

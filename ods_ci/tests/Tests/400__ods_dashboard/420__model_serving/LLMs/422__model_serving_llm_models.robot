@@ -237,6 +237,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=80Gi   model_path=${model_path}
+    ${requests}=    Create Dictionary    memory=130Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}

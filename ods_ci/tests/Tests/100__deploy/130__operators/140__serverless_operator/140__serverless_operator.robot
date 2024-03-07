@@ -35,7 +35,7 @@ Validate DSC creates all Serverless CRs
     Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
     ${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    label_selector=name=rhods-operator
     Check For Errors On Operator Logs    ${podname}    ${OPERATOR_NAMESPACE}
-    Check DSC Conditions    ${KNATIVESERVING_NS}    default-dsc
+    Read DSC Conditions    ${KNATIVESERVING_NS}    default-dsc
 
 
 *** Keywords ***
@@ -77,8 +77,8 @@ Check Status
     Log    ${status}    console=True
     Should Be Equal    ${status}    ${expected_status}   msg=${resource} is not in Ready status
 
-Check DSC Conditions
-    [Documentation]    Checks that all conditions Reconciled Succesfully
+Read DSC Conditions
+    [Documentation]    Reads all DSC conditions
     [Arguments]    ${namespace}    ${dsc_name}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc get DataScienceCluster ${dsc_name} -n ${namespace} -o jsonpath='{.status.conditions[].reason}'

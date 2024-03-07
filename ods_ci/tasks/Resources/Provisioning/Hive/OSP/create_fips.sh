@@ -8,13 +8,15 @@ export BASE_DOMAIN=${2:-$BASE_DOMAIN}
 export OSP_NETWORK=${3:-$OSP_NETWORK}
 export OSP_CLOUD=${4:-openstack}
 export OUTPUT_DIR=${5:-.${CLUSTER_NAME}_conf}
+export AWS_ACCESS_KEY_ID=${6:-$AWS_ACCESS_KEY_ID}
+export AWS_SECRET_ACCESS_KEY=${7:-$AWS_SECRET_ACCESS_KEY}
 
 # Cluster name should be converted to lowercase
-export CLUSTER_NAME=${CLUSTER_NAME,,} 
+export CLUSTER_NAME=${CLUSTER_NAME,,}
 
 if [[ -z $CLUSTER_NAME || -z $BASE_DOMAIN || -z $OSP_NETWORK ]] ; then
-  echo -e "Some global variables are missing, for example: 
-  # export CLUSTER_NAME=${CLUSTER_NAME:-"rhods-qe-007"} # To set the cluster Subdomain (A Record) in AWS. 
+  echo -e "Some global variables are missing, for example:
+  # export CLUSTER_NAME=${CLUSTER_NAME:-"rhods-qe-007"} # To set the cluster Subdomain (A Record) in AWS.
   # export BASE_DOMAIN=${BASE_DOMAIN:-"rhods.ccitredhat.com"} # To set the cluster Domain in AWS.
   # export OSP_NETWORK=${OSP_NETWORK:-"shared_net_5"} # The external network for the new Floating IPs on OSP.
   "
@@ -88,11 +90,11 @@ fi
 
 echo "Updating DNS records (cluster api's) in AWS Route53"
 RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch \
-'{ "Comment": "Update A record for cluster API", "Changes": 
-[ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "api.'"$CLUSTER_NAME"'.'"$BASE_DOMAIN"'", 
+'{ "Comment": "Update A record for cluster API", "Changes":
+[ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "api.'"$CLUSTER_NAME"'.'"$BASE_DOMAIN"'",
 "Type": "A", "TTL":  300, "ResourceRecords": [ { "Value": "'"$FIP_API"'" } ] } } ] }' --output json) || rc=$?
 if [[ -n "$rc" ]] ; then
-  echo -e "Failed to update DNS A record in AWS for cluster API. 
+  echo -e "Failed to update DNS A record in AWS for cluster API.
   \n Releasing previously allocated floating IP in $OS_CLOUD ($FIP_API)"
   openstack floating ip delete "$FIP_API"
   exit ${rc:+$rc}
@@ -103,12 +105,12 @@ aws route53 wait resource-record-sets-changed --id "$(echo "$RESPONSE" | jq -r '
 
 echo "Updating DNS records (cluster ingress) in AWS Route53"
 RESPONSE=$(aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch \
-'{ "Comment": "Update A record for cluster APPS", "Changes": 
-[ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "*.apps.'"$CLUSTER_NAME"'.'"$BASE_DOMAIN"'", 
+'{ "Comment": "Update A record for cluster APPS", "Changes":
+[ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "*.apps.'"$CLUSTER_NAME"'.'"$BASE_DOMAIN"'",
 "Type": "A", "TTL":  300, "ResourceRecords": [ { "Value": "'"$FIP_APPS"'" } ] } } ] }' --output json) || rc=$?
 
 if [[ -n "$rc" ]] ; then
-  echo -e "Failed to update DNS A record in AWS for cluster APPS. 
+  echo -e "Failed to update DNS A record in AWS for cluster APPS.
   \n Releasing previously allocated floating IP in $OS_CLOUD ($FIP_APPS)"
   openstack floating ip delete "$FIP_APPS"
   exit ${rc:+$rc}

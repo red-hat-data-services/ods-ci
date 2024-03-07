@@ -21,7 +21,6 @@ items:
       name: ${infrastructure_configurations}[hive_cluster_name]-sec # see line 30
     size: 1
     maxSize: 1
-    maxConcurrent: 1
     runningCount: 1
     skipMachinePools: true
 - apiVersion: v1
@@ -61,7 +60,7 @@ items:
       platform:
         openstack:
           cloud: ${infrastructure_configurations}[osp_cloud_name]
-          computeFlavor: m1.large
+          computeFlavor: g.standard.xxl
           externalDNS: null
           externalNetwork: ${infrastructure_configurations}[osp_network]
       pullSecret: '${infrastructure_configurations}[quay_pull_sec]'

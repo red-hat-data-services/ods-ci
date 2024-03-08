@@ -202,6 +202,19 @@ Model Response Should Match The Expectation
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     END
 
+Model Response Should Be
+    [Arguments]    ${response}    ${model_name}    ${inference_type}    ${runtime}    ${query_idx}=${0}
+    ${cleaned_response_text}=    Replace String Using Regexp    ${response}    \\s+    ${SPACE}
+    ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
+    ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
+    IF    "${inference_type}" == "model-info"
+        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[${inference_type}][${model_name}][${runtime}]
+    ELSE
+        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][${runtime}][${inference_type}_response_text]
+    END
+    ${cleaned_exp_response_text}=    Replace String Using Regexp    ${exp_response}    \\s+    ${SPACE}    # robocop: disable
+    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${cleaned_response_text}    ${cleaned_exp_response_text}
+
 Load Runtime Query Formats
     [Documentation]    Loads the json file containing the expected query format for each
     ...                serving runtime
@@ -255,13 +268,13 @@ Query Model Multiple Times
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
     ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
-    ...            ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443    &{args}
+    ...            ${string_check_only}=${FALSE}    ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443    &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
     ELSE
         ${streamed_response}=    Set Variable    ${FALSE}
     END
-    IF    ${validate_response} == ${FALSE}
+    IF    ${validate_response} == ${FALSE} or ${string_check_only}
         ${skip_json_load_response}=    Set Variable    ${TRUE}
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
@@ -306,15 +319,20 @@ Query Model Multiple Times
         END
         Log    ${res}
         IF    ${validate_response} == ${TRUE}
-            ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
-            IF    "${response_container_field}" != "${EMPTY}"
-                # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
-                ${res}=    Set Variable    ${res}[${response_container_field}][0]
+            IF    ${string_check_only}
+                Model Response Should Be    response=${res}    model_name=${model_name}    inference_type=${inference_type}
+                ...    runtime=${runtime}    query_idx=${query_idx}
+            ELSE
+                ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
+                IF    "${response_container_field}" != "${EMPTY}"
+                    # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
+                    ${res}=    Set Variable    ${res}[${response_container_field}][0]
+                END
+                Run Keyword And Continue On Failure
+                ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
+                ...    runtime_details=${runtime_details}    runtime=${runtime}
+                ...    streamed_response=${streamed_response}    query_idx=${query_idx}
             END
-            Run Keyword And Continue On Failure
-            ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
-            ...    runtime_details=${runtime_details}    runtime=${runtime}
-            ...    streamed_response=${streamed_response}    query_idx=${query_idx}
         END
     END
 

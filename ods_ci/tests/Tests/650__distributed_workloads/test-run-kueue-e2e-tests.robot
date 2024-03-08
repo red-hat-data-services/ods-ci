@@ -20,7 +20,8 @@ ${WORKER_NODE}          ${EMPTY}
 *** Test Cases ***
 Run E2E test
     [Documentation]    Run ginkgo E2E single cluster test
-    [Tags]  Kueue
+    [Tags]  Tier2
+    ...     Kueue
     ...     DistributedWorkloads
     Run Kueue E2E Test    e2e_test.go
 

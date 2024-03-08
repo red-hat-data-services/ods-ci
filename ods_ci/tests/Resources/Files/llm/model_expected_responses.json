@@ -99,7 +99,7 @@
                     "streamed_response_text":   "{ 'inputTokenCount': 16 } { 'generatedTokenCount': 2, 'text': '。' } { 'generatedTokenCount': 5, 'text': '\n' } { 'generatedTokenCount': 6, 'text': '桜' } { 'generatedTokenCount': 7, 'text': 'の' } { 'generatedTokenCount': 8, 'text': '木' } { 'generatedTokenCount': 9, 'text': 'は' } { 'generatedTokenCount': 12, 'text': '、' } { 'generatedTokenCount': 13, 'text': '桜' } { 'generatedTokenCount': 14, 'text': 'の' } { 'generatedTokenCount': 15, 'text': '花' } { 'generatedTokenCount': 18, 'text': 'が' } { 'generatedTokenCount': 19, 'text': '咲' } { 'generatedTokenCount': 20, 'text': 'くと', 'stopReason': 'MAX_TOKENS' }",
                     "tgis-runtime":{
                         "tokenize_response_text": "{   'responses': [     {       'tokenCount': 16,       'tokens': [         '\u003cs\u003e',         '▁',         '\u003c0xE6\u003e',         '\u003c0xA1\u003e',         '\u003c0x9C\u003e',         'の',         '木',         'に',         'つ',         'い',         'て',         'の',         '話',         'を',         '書',         'く'       ]     }   ] }"
-                    }                
+                    }
                 }
             }
         },

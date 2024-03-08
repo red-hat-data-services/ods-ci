@@ -66,8 +66,7 @@ Set Project And Runtime
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
         Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
-        ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
-        ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
+        ...    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
         ...    storage_size=${storage_size}    model_path=${model_path}
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
@@ -671,17 +670,13 @@ Clean Up Test Project
     END
 
 Create PVC And Download Model From S3
-    [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
-    ...            ${region}    ${access_key_id}    ${access_key}
+    [Arguments]    ${model_name}    ${bucket_name}
     ...            ${use_https}    ${namespace}    ${storage_size}
     ...            ${model_path}    ${download_timeout}=500s
     Set Log Level    NONE
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}
-    Set Test Variable    ${endpoint}
-    Set Test Variable    ${region}
-    Set Test Variable    ${access_key_id}
-    Set Test Variable    ${access_key}
+    # AWS variables defined in the Setup Test Variables
     Set Test Variable    ${use_https}
     Set Test Variable    ${namespace}
     Set Test Variable    ${storage_size}
@@ -716,10 +711,7 @@ Download Prompts Weights In PVC
     Set Test Variable    ${prompts_path}
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}
-    # Set Test Variable    ${endpoint}
-    # Set Test Variable    ${region}
-    # Set Test Variable    ${access_key_id}
-    # Set Test Variable    ${access_key}
+    # AWS variables defined in the Setup Test Variables
     Set Test Variable    ${use_https}
     Set Test Variable    ${namespace}
     Set Test Variable    ${storage_size}

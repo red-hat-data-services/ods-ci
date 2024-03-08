@@ -320,7 +320,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
 Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone runtime
-    [Tags]    Tier1    RHOAIENG-3483
+    [Tags]    RHOAIENG-3483
     Setup Test Variables    model_name=llama-2-13b-chat    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Llama-2-13b-chat-hf
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}

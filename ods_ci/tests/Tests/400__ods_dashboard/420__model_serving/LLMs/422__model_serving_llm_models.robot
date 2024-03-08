@@ -339,11 +339,11 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
     ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
-    ...    namespace=${test_namespace}   query_idx=1   validate_response=${TRUE}    # temp
+    ...    namespace=${test_namespace}   query_idx=0   validate_response=${TRUE}    # temp
     ...    port_forwarding=${use_port_forwarding}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1    protocol=grpc
-    ...    namespace=${test_namespace}    query_idx=1    validate_response=${FALSE}
+    ...    namespace=${test_namespace}    query_idx=0    validate_response=${FALSE}
     ...    port_forwarding=${use_port_forwarding}
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}

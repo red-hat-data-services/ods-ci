@@ -80,6 +80,16 @@
 
                 }
             }
+        },
+        {
+            "query_text": "write a python function to print the numbers from 1 to 10",
+            "models": {
+                "codellama-34b-instruct-hf": {
+                    "response_tokens": 20,
+                    "response_text": "0.\n\n\ndef print_numbers(n):\n    for i in range(1",
+                    "streamed_response_text": "{'inputTokenCount':16}{'generatedTokenCount':2,'text':'0'}{'generatedTokenCount':3,'text':'.'}{'generatedTokenCount':4,'text':''}{'generatedTokenCount':5,'text':''}{'generatedTokenCount':6,'text':'de'}{'generatedTokenCount':7,'text':'fprin'}{'generatedTokenCount':8,'text':'t'}{'generatedTokenCount':9,'text':'_number'}{'generatedTokenCount':10,'text':'s'}{'generatedTokenCount':11,'text':'('}{'generatedTokenCount':12,'text':'n)'}{'generatedTokenCount':13,'text':':'}{'generatedTokenCount':14,'text':''}{'generatedTokenCount':15,'text':'fo'}{'generatedTokenCount':16,'text':'r'}{'generatedTokenCount':17,'text':'ii'}{'generatedTokenCount':18,'text':'nrang'}{'generatedTokenCount':19,'text':'e'}{'generatedTokenCount':20,'text':'(1','stopReason':'MAX_TOKENS'}"
+                }
+            }
         }
     ]
 }

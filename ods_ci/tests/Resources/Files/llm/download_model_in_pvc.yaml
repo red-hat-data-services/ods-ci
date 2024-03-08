@@ -4,7 +4,7 @@ metadata:
   name: ${model_name}-claim
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   volumeMode: Filesystem
   resources:
     requests:
@@ -24,7 +24,7 @@ spec:
   restartPolicy: Never
   initContainers:
     - name: fix-volume-permissions
-      image: quay.io/quay/busybox@sha256:92f3298bf80a1ba949140d77987f5de081f010337880cd771f7e7fc928f8c74d
+      image: quay.io/quay/busybox@sha256:92f3298bf80a1ba949140d77987f5de081f010337880cd771f7e7fc928f8c74d 
       command: ["sh"]
       args: ["-c", "mkdir -p /mnt/models/${model_path} && chmod -R 777 /mnt/models"]
       volumeMounts:

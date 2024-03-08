@@ -669,6 +669,8 @@ Create PVC And Download Model From S3
     Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
     ...    timeout=${download_timeout}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete pods -l name=download-${model_name} -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
 
 Extract Service Port
     [Arguments]    ${service_name}    ${namespace}    ${protocol}

@@ -6,7 +6,7 @@ Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Suite Setup
 Suite Teardown    RHOSi Teardown
-Test Tags         KServe
+Test Tags         KServe-LLM
 
 
 *** Variables ***
@@ -22,7 +22,7 @@ ${KSERVE_MODE}=    RawDeployment
 Verify User Can Serve And Query A bigscience/mt0-xxl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    I-KServe    RHOAIENG-3477
+    [Tags]    RHOAIENG-3477
     Setup Test Variables    model_name=mt0-xxl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
@@ -65,7 +65,7 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
 Verify User Can Serve And Query A google/flan-t5-xl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    I-KServe    RHOAIENG-3480
+    [Tags]    RHOAIENG-3480
     Setup Test Variables    model_name=flan-t5-xl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     ${test_namespace}=   Set Variable    flant5xl-google
@@ -109,7 +109,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Model
 Verify User Can Serve And Query A google/flan-t5-xxl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    I-KServe    RHOAIENG-3481
+    [Tags]    RHOAIENG-3481
     Setup Test Variables    model_name=flan-t5-xxl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     ${test_namespace}=   Set Variable    flant5xxl-google
@@ -153,7 +153,7 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model
 Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone runtime
-    [Tags]    I-KServe    RHOAIENG-3479
+    [Tags]    RHOAIENG-3479
     Setup Test Variables    model_name=elyza-japanese    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=ELYZA-japanese-Llama-2-7b-instruct-hf
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
@@ -196,7 +196,7 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
 Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                (mpt-7b-instruct2) using Kserve and TGIS runtime
-    [Tags]    I-KServe    RHOAIENG-4201
+    [Tags]    RHOAIENG-4201
     Setup Test Variables    model_name=mpt-7b-instruct2    use_pvc=${USE_PVC}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}
     ${test_namespace}=   Set Variable    mpt-7b-instruct2-ibm
@@ -240,7 +240,7 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
 Verify User Can Serve And Query A google/flan-ul-2 Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    I-KServe    RHOAIENG-3482
+    [Tags]    RHOAIENG-3482
     Setup Test Variables    model_name=flan-ul2-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}   model_path=flan-ul2-hf
     ${test_namespace}=   Set Variable    flan-ul2-google
@@ -284,7 +284,7 @@ Verify User Can Serve And Query A google/flan-ul-2 Model
 Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    I-KServe    RHOAIENG-4200
+    [Tags]    RHOAIENG-4200
     Setup Test Variables    model_name=codellama-34b-instruct-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}   model_path=codellama-34b-instruct-hf
     ${test_namespace}=   Set Variable    codellama-34b

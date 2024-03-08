@@ -117,6 +117,32 @@
                     "streamed_response_text": "{'inputTokenCount':16}{'generatedTokenCount':2,'text':'0'}{'generatedTokenCount':3,'text':'.'}{'generatedTokenCount':4,'text':''}{'generatedTokenCount':5,'text':''}{'generatedTokenCount':6,'text':'de'}{'generatedTokenCount':7,'text':'fprin'}{'generatedTokenCount':8,'text':'t'}{'generatedTokenCount':9,'text':'_number'}{'generatedTokenCount':10,'text':'s'}{'generatedTokenCount':11,'text':'('}{'generatedTokenCount':12,'text':'n)'}{'generatedTokenCount':13,'text':':'}{'generatedTokenCount':14,'text':''}{'generatedTokenCount':15,'text':'fo'}{'generatedTokenCount':16,'text':'r'}{'generatedTokenCount':17,'text':'ii'}{'generatedTokenCount':18,'text':'nrang'}{'generatedTokenCount':19,'text':'e'}{'generatedTokenCount':20,'text':'(1','stopReason':'MAX_TOKENS'}"
                 }
             }
+        },
+        {
+            "query_text": "I am frustrated because of long wait times and unresponsive helpdesk teams, causing delays in issue resolution.",
+            "models": {
+                "flan-t5-xl-hf-ptuned": {
+                    "response_tokens": 2,
+                    "response_text": "complaint",
+                    "streamed_response_text": "{   'inputTokenCount': 24 } {   'generatedTokenCount': 1,   'text': 'complaint' } {   'generatedTokenCount': 2,   'stopReason': 'EOS_TOKEN' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": " { 'responses': [ { 'tokenCount': 24, 'tokens': [ '▁I', '▁am', '▁frustrated', '▁because', '▁of', '▁long', '▁wait', '▁times', '▁and', '▁un', 'responsive', '▁help', 'des', 'k', '▁teams', ',', '▁', 'causing', '▁delays', '▁in', '▁issue', '▁resolution', '.', '</s>' ] } ] } "
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "I am delighted to see how much helpful the helpdesk team is.",
+            "models": {
+                "flan-t5-xl-hf-ptuned": {
+                    "response_tokens": 3,
+                    "response_text": "no complaint",
+                    "streamed_response_text": "{   'inputTokenCount': 16 } {   'generatedTokenCount': 1,   'text': 'no' } {   'generatedTokenCount': 2,   'text': ' complaint' } {   'generatedTokenCount': 3,   'stopReason': 'EOS_TOKEN' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": ""
+                    }
+                }
+            }
         }
     ],
     "model-info": {
@@ -130,6 +156,9 @@
             "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 2048, 'maxNewTokens': 1024 }"
         },
         "flan-t5-xl-hf": {
+            "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 512, 'maxNewTokens': 511 }"
+        },
+        "flan-t5-xl-hf-ptuned": {
             "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 512, 'maxNewTokens': 511 }"
         },
         "flan-t5-xxl-hf": {

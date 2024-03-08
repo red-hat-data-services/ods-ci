@@ -23,6 +23,9 @@ ${SERVICEMESH_CR_NS}=    istio-system
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 
+${DOWNLOAD_PROMPTS_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc.yaml
+${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc_filled.yaml
+
 
 *** Keywords ***
 Set Up Test OpenShift Project
@@ -683,3 +686,27 @@ Extract Service Port
     ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.name=="${port_name}")]}{@.targetPort}{end}'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     RETURN    ${out}
+
+Download Prompts Weights In PVC
+    [Arguments]    ${prompts_path}    ${model_name}    ${bucket_name}
+    ...            ${use_https}    ${namespace}    ${storage_size}
+    ...            ${model_path}    ${download_timeout}=120s
+    Set Log Level    NONE
+    Set Test Variable    ${prompts_path}
+    Set Test Variable    ${model_name}
+    Set Test Variable    ${bucket_name}
+    # Set Test Variable    ${endpoint}
+    # Set Test Variable    ${region}
+    # Set Test Variable    ${access_key_id}
+    # Set Test Variable    ${access_key}
+    Set Test Variable    ${use_https}
+    Set Test Variable    ${namespace}
+    Set Test Variable    ${storage_size}
+    Set Test Variable    ${model_path}
+    Set Log Level    INFO
+    Create File From Template    ${DOWNLOAD_PROMPTS_PVC_FILEPATH}    ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}
+    Wait For Pods To Be Ready    label_selector=name=${model_name}-download-prompts    namespace=${namespace}
+    Wait For Pods To Succeed    label_selector=name=${model_name}-download-prompts    namespace=${namespace}
+    ...    timeout=${download_timeout}

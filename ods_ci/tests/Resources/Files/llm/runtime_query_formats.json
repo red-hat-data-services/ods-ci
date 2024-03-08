@@ -65,6 +65,30 @@
                     "response": ""
                 }
             }
+        },
+        "tokenize": {
+            "grpc": {
+                "endpoint": "fmaas.GenerationService/Tokenize",
+                "header": "mm-model-id: ${model_name}",
+                "body": "{'requests': [{'text':'${query_text}'}], 'return_tokens':'true'}",
+                "args": "proto=text-generation-inference/proto/generation.proto",
+                "response_fields_map": {
+                    "response": "",
+                    "response_tokens":  "",
+                    "response_text":    ""
+                }
+            }
+        },
+        "model-info": {
+            "grpc": {
+                "endpoint": "fmaas.GenerationService/ModelInfo",
+                "header": "",
+                "body": "{'model_id': '${model_name}'}",
+                "args": "proto=text-generation-inference/proto/generation.proto",
+                "response_fields_map": {
+                    "response": ""
+                }
+            }
         }
     }
 }

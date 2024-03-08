@@ -6,13 +6,18 @@
                 "flan-t5-small-caikit": {
                     "response_tokens":  5,
                     "response_text": "74 degrees F",
-                    "streamed_response_text":   "{'details':{'input_token_count':'8'}}{'tokens':[{'text':'▁','logprob':-1.6961838006973267}],'details':{'generated_tokens':1}}{'generated_text':'74','tokens':[{'text':'74','logprob':-3.250730037689209}],'details':{'generated_tokens':2}}{'generated_text':'degrees','tokens':[{'text':'▁degrees','logprob':-0.4324559271335602}],'details':{'generated_tokens':3}}{'generated_text':'F','tokens':[{'text':'▁F','logprob':-1.361091136932373}],'details':{'generated_tokens':4}}{'tokens':[{'text':'\u003c/s\u003e','logprob':-0.010431881994009018}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':5}}"
+                    "streamed_response_text":   "{'details':{'input_token_count':'8'}}{'tokens':[{'text':'▁','logprob':-1.6961838006973267}],'details':{'generated_tokens':1}}{'generated_text':'74','tokens':[{'text':'74','logprob':-3.250730037689209}],'details':{'generated_tokens':2}}{'generated_text':'degrees','tokens':[{'text':'▁degrees','logprob':-0.4324559271335602}],'details':{'generated_tokens':3}}{'generated_text':'F','tokens':[{'text':'▁F','logprob':-1.361091136932373}],'details':{'generated_tokens':4}}{'tokens':[{'text':'\u003c/s\u003e','logprob':-0.010431881994009018}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':5}}",
+                    "tgis-runtime":{
+                        "tokenize_response_text": "{ 'responses': [ { 'tokenCount': 8, 'tokens': [ '▁At', '▁what', '▁temperature', '▁does', '▁water', '▁boil', '?', '\u003c/s\u003e' ] } ] }"
+                    }
                 },
                 "flan-t5-small-hf": {
                     "response_tokens":  5,
                     "response_text": "74 degrees F",
-                    "streamed_response_text":   "{'details':{'input_token_count':'8'}}{'tokens':[{'text':'▁','logprob':-1.6961838006973267}],'details':{'generated_tokens':1}}{'generated_text':'74','tokens':[{'text':'74','logprob':-3.250730037689209}],'details':{'generated_tokens':2}}{'generated_text':'degrees','tokens':[{'text':'▁degrees','logprob':-0.4324559271335602}],'details':{'generated_tokens':3}}{'generated_text':'F','tokens':[{'text':'▁F','logprob':-1.361091136932373}],'details':{'generated_tokens':4}}{'tokens':[{'text':'\u003c/s\u003e','logprob':-0.010431881994009018}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':5}}"
-                },
+                    "streamed_response_text":   "{'details':{'input_token_count':'8'}}{'tokens':[{'text':'▁','logprob':-1.6961838006973267}],'details':{'generated_tokens':1}}{'generated_text':'74','tokens':[{'text':'74','logprob':-3.250730037689209}],'details':{'generated_tokens':2}}{'generated_text':'degrees','tokens':[{'text':'▁degrees','logprob':-0.4324559271335602}],'details':{'generated_tokens':3}}{'generated_text':'F','tokens':[{'text':'▁F','logprob':-1.361091136932373}],'details':{'generated_tokens':4}}{'tokens':[{'text':'\u003c/s\u003e','logprob':-0.010431881994009018}],'details':{'finish_reason':'EOS_TOKEN','generated_tokens':5}}",
+                    "tgis-runtime":{
+                        "tokenize_response_text": "{ 'responses': [ { 'tokenCount': 8, 'tokens': [ '▁At', '▁what', '▁temperature', '▁does', '▁water', '▁boil', '?', '\u003c/s\u003e' ] } ] }"
+                    }                },
                 "bloom-560m-caikit": {
                     "response_tokens":  20,
                     "response_text": "The temperature of water boiling depends on the temperature of the water. The boiling point of water is the"
@@ -25,7 +30,10 @@
                 "mpt-7b-instruct2": {
                     "response_tokens": 20,
                     "response_text": "\nWater boils at 100 degrees Celsius (or 212 degrees Fahrenheit).\nWhat",
-                    "streamed_response_text": "{    'inputTokenCount': 10}{    'generatedTokenCount': 2,    'text': '\n'}{    'generatedTokenCount': 3,    'text': 'I a'}{    'generatedTokenCount': 4,    'text': 'm no'}{    'generatedTokenCount': 5,    'text': 't sur'}{    'generatedTokenCount': 6,    'text': 'e i'}{    'generatedTokenCount': 7,    'text': 'f thi'}{    'generatedTokenCount': 8,    'text': 's i'}{    'generatedTokenCount': 9,    'text': 's th'}{    'generatedTokenCount': 10,    'text': 'e righ'}{    'generatedTokenCount': 11,    'text': 't plac'}{    'generatedTokenCount': 12,    'text': 'e t'}{    'generatedTokenCount': 13,    'text': 'o as'}{    'generatedTokenCount': 14,    'text': 'k thi'}{    'generatedTokenCount': 15,    'text': 's questio'}{    'generatedTokenCount': 16,    'text': 'n'}{    'generatedTokenCount': 17,    'text': ', bu'}{    'generatedTokenCount': 18,    'text': 't '}{    'generatedTokenCount': 19,    'text': 'I a'}{    'generatedTokenCount': 20,    'text': 'm trying',    'stopReason': 'MAX_TOKENS'}"
+                    "streamed_response_text": "{    'inputTokenCount': 10}{    'generatedTokenCount': 2,    'text': '\n'}{    'generatedTokenCount': 3,    'text': 'I a'}{    'generatedTokenCount': 4,    'text': 'm no'}{    'generatedTokenCount': 5,    'text': 't sur'}{    'generatedTokenCount': 6,    'text': 'e i'}{    'generatedTokenCount': 7,    'text': 'f thi'}{    'generatedTokenCount': 8,    'text': 's i'}{    'generatedTokenCount': 9,    'text': 's th'}{    'generatedTokenCount': 10,    'text': 'e righ'}{    'generatedTokenCount': 11,    'text': 't plac'}{    'generatedTokenCount': 12,    'text': 'e t'}{    'generatedTokenCount': 13,    'text': 'o as'}{    'generatedTokenCount': 14,    'text': 'k thi'}{    'generatedTokenCount': 15,    'text': 's questio'}{    'generatedTokenCount': 16,    'text': 'n'}{    'generatedTokenCount': 17,    'text': ', bu'}{    'generatedTokenCount': 18,    'text': 't '}{    'generatedTokenCount': 19,    'text': 'I a'}{    'generatedTokenCount': 20,    'text': 'm trying',    'stopReason': 'MAX_TOKENS'}",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{ 'responses': [ { 'tokenCount': 7, 'tokens': [ 'At', 'Ġwhat', 'Ġtemperature', 'Ġdoes', 'Ġwater', 'Ġboil', '?' ] } ] }"
+                    }
                 }
             }
         },
@@ -45,10 +53,12 @@
                 "mt0-xxl-hf": {
                     "response_tokens":  13,
                     "response_text": "Watson, c'est très simple !",
-                    "streamed_response_text":   "{ 'inputTokenCount': 10 } { 'generatedTokenCount': 1, 'text': 'temperature' } { 'generatedTokenCount': 2, 'text': ' of' } { 'generatedTokenCount': 3, 'text': ' 180' } { 'generatedTokenCount': 4, 'text': ' ' } { 'generatedTokenCount': 5, 'text': '°' } { 'generatedTokenCount': 6, 'text': 'C' } { 'generatedTokenCount': 7, 'stopReason': 'EOS_TOKEN' }"
+                    "streamed_response_text":   "{ 'inputTokenCount': 10 } { 'generatedTokenCount': 1, 'text': 'temperature' } { 'generatedTokenCount': 2, 'text': ' of' } { 'generatedTokenCount': 3, 'text': ' 180' } { 'generatedTokenCount': 4, 'text': ' ' } { 'generatedTokenCount': 5, 'text': '°' } { 'generatedTokenCount': 6, 'text': 'C' } { 'generatedTokenCount': 7, 'stopReason': 'EOS_TOKEN' }",
+                    "tgis-runtime":{
+                        "tokenize_response_text": "{   'responses': [     {       'tokenCount': 9,       'tokens': [         '▁',         'Elementary',         '▁',         'Watson',         '!',         '▁Translate',         '▁to',         '▁French',         '\u003c/s\u003e'       ]     }   ] }"
+                    }
                 }
             }
-
         },
         {
             "query_text": "translate English to German: How old are you?",
@@ -56,17 +66,27 @@
                 "flan-t5-xl-hf": {
                     "response_tokens":  6,
                     "response_text": "Wie alt sind Sie?",
-                    "streamed_response_text":   "{ 'inputTokenCount': 11 } { 'generatedTokenCount': 1, 'text': 'Wie' } { 'generatedTokenCount': 2, 'text': ' alt' } { 'generatedTokenCount': 3, 'text': ' sind' } { 'generatedTokenCount': 4, 'text': ' Sie' } { 'generatedTokenCount': 5, 'text': '?' } { 'generatedTokenCount': 6, 'stopReason': 'EOS_TOKEN' }"
+                    "streamed_response_text":   "{ 'inputTokenCount': 11 } { 'generatedTokenCount': 1, 'text': 'Wie' } { 'generatedTokenCount': 2, 'text': ' alt' } { 'generatedTokenCount': 3, 'text': ' sind' } { 'generatedTokenCount': 4, 'text': ' Sie' } { 'generatedTokenCount': 5, 'text': '?' } { 'generatedTokenCount': 6, 'stopReason': 'EOS_TOKEN' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{   'responses': [     {       'tokenCount': 11,       'tokens': [         '▁translate',         '▁English',         '▁to',         '▁German',         ':',         '▁How',         '▁old',         '▁are',         '▁you',         '?',         '\u003c/s\u003e'       ]     }   ] }"
+                    }
                 },
                 "flan-t5-xxl-hf": {
                     "response_tokens":  6,
                     "response_text": "Wie alt sind Sie?",
-                    "streamed_response_text":   "{ 'inputTokenCount': 11 } { 'generatedTokenCount': 1, 'text': 'Wie' } { 'generatedTokenCount': 2, 'text': ' alt' } { 'generatedTokenCount': 3, 'text': ' sind' } { 'generatedTokenCount': 4, 'text': ' Sie' } { 'generatedTokenCount': 5, 'text': '?' } { 'generatedTokenCount': 6, 'stopReason': 'EOS_TOKEN' }"
+                    "streamed_response_text":   "{ 'inputTokenCount': 11 } { 'generatedTokenCount': 1, 'text': 'Wie' } { 'generatedTokenCount': 2, 'text': ' alt' } { 'generatedTokenCount': 3, 'text': ' sind' } { 'generatedTokenCount': 4, 'text': ' Sie' } { 'generatedTokenCount': 5, 'text': '?' } { 'generatedTokenCount': 6, 'stopReason': 'EOS_TOKEN' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{ 'responses': [ { 'tokenCount': 11, 'tokens': [ '▁translate', '▁English', '▁to', '▁German', ':', '▁How', '▁old', '▁are', '▁you', '?', '\u003c/s\u003e' ] } ] }"
+                    }
                 },
                 "flan-ul2-hf": {
                     "response_tokens":  6,
                     "response_text": "Wie alt sind Sie?",
-                    "streamed_response_text":   "{ 'inputTokenCount': 11 } { 'generatedTokenCount': 1, 'text': 'Wie' } { 'generatedTokenCount': 2, 'text': ' alt' } { 'generatedTokenCount': 3, 'text': ' sind' } { 'generatedTokenCount': 4, 'text': ' Sie' } { 'generatedTokenCount': 5, 'text': '?' } { 'generatedTokenCount': 6, 'stopReason': 'EOS_TOKEN' }"
+                    "streamed_response_text":   "{ 'inputTokenCount': 11 } { 'generatedTokenCount': 1, 'text': 'Wie' } { 'generatedTokenCount': 2, 'text': ' alt' } { 'generatedTokenCount': 3, 'text': ' sind' } { 'generatedTokenCount': 4, 'text': ' Sie' } { 'generatedTokenCount': 5, 'text': '?' } { 'generatedTokenCount': 6, 'stopReason': 'EOS_TOKEN' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{ 'responses': [ { 'tokenCount': 11, 'tokens': [ '▁translate', '▁English', '▁to', '▁German', ':', '▁How', '▁old', '▁are', '▁you', '?', '\u003c/s\u003e' ] } ] }"
+                    }
+
                 }
             }
         },
@@ -76,8 +96,10 @@
                 "elyza-japanese": {
                     "response_tokens":  20,
                     "response_text": "。\n桜の木は、桜の花が咲くと",
-                    "streamed_response_text":   "{ 'inputTokenCount': 16 } { 'generatedTokenCount': 2, 'text': '。' } { 'generatedTokenCount': 5, 'text': '\n' } { 'generatedTokenCount': 6, 'text': '桜' } { 'generatedTokenCount': 7, 'text': 'の' } { 'generatedTokenCount': 8, 'text': '木' } { 'generatedTokenCount': 9, 'text': 'は' } { 'generatedTokenCount': 12, 'text': '、' } { 'generatedTokenCount': 13, 'text': '桜' } { 'generatedTokenCount': 14, 'text': 'の' } { 'generatedTokenCount': 15, 'text': '花' } { 'generatedTokenCount': 18, 'text': 'が' } { 'generatedTokenCount': 19, 'text': '咲' } { 'generatedTokenCount': 20, 'text': 'くと', 'stopReason': 'MAX_TOKENS' }"
-
+                    "streamed_response_text":   "{ 'inputTokenCount': 16 } { 'generatedTokenCount': 2, 'text': '。' } { 'generatedTokenCount': 5, 'text': '\n' } { 'generatedTokenCount': 6, 'text': '桜' } { 'generatedTokenCount': 7, 'text': 'の' } { 'generatedTokenCount': 8, 'text': '木' } { 'generatedTokenCount': 9, 'text': 'は' } { 'generatedTokenCount': 12, 'text': '、' } { 'generatedTokenCount': 13, 'text': '桜' } { 'generatedTokenCount': 14, 'text': 'の' } { 'generatedTokenCount': 15, 'text': '花' } { 'generatedTokenCount': 18, 'text': 'が' } { 'generatedTokenCount': 19, 'text': '咲' } { 'generatedTokenCount': 20, 'text': 'くと', 'stopReason': 'MAX_TOKENS' }",
+                    "tgis-runtime":{
+                        "tokenize_response_text": "{   'responses': [     {       'tokenCount': 16,       'tokens': [         '\u003cs\u003e',         '▁',         '\u003c0xE6\u003e',         '\u003c0xA1\u003e',         '\u003c0x9C\u003e',         'の',         '木',         'に',         'つ',         'い',         'て',         'の',         '話',         'を',         '書',         'く'       ]     }   ] }"
+                    }                
                 }
             }
         },
@@ -91,5 +113,31 @@
                 }
             }
         }
-    ]
+    ],
+    "model-info": {
+        "flan-t5-small-hf": {
+            "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 512, 'maxNewTokens': 511 }"
+        },
+        "flan-t5-small-caikit": {
+            "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 512, 'maxNewTokens': 511 }"
+        },
+        "mt0-xxl-hf": {
+            "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 2048, 'maxNewTokens': 1024 }"
+        },
+        "flan-t5-xl-hf": {
+            "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 512, 'maxNewTokens': 511 }"
+        },
+        "flan-t5-xxl-hf": {
+            "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 2048, 'maxNewTokens': 1024 }"
+        },
+        "flan-ul2-hf": {
+            "tgis-runtime": "{ 'modelKind': 'ENCODER_DECODER', 'maxSequenceLength': 512, 'maxNewTokens': 511 }"
+        },
+        "elyza-japanese" : {
+            "tgis-runtime": "{   'maxSequenceLength': 4096,   'maxNewTokens': 1024 }"
+        },
+        "mpt-7b-instruct2":{
+            "tgis-runtime": "{     'maxSequenceLength': 2048,     'maxNewTokens': 1024   }"
+        }
+    }
 }

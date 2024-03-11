@@ -32,7 +32,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${model_name}=    Set Variable    flan-t5-small-hf
     Deploy Kserve Model Via UI    model_name=${model_name}
-    ...    serving_runtime=TGIS Standalone ServingRuntime for KServe (gRPC)
+    ...    serving_runtime=TGIS Standalone ServingRuntime for KServe
     ...    data_connection=kserve-connection    model_framework=pytorch    path=${FLAN_MODEL_S3_DIR}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
@@ -62,7 +62,7 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     ${model_name}=    Set Variable    flan-t5-small-hf
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
     ${limits}=    Create Dictionary    nvidia.com/gpu=1
-    Deploy Kserve Model Via UI    model_name=${isvc__name}    serving_runtime=TGIS Standalone ServingRuntime for KServe (gRPC)
+    Deploy Kserve Model Via UI    model_name=${isvc__name}    serving_runtime=TGIS Standalone ServingRuntime for KServe
     ...    data_connection=kserve-connection    model_framework=pytorch    path=${FLAN_MODEL_S3_DIR}
     ...    no_gpus=${1}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc__name}

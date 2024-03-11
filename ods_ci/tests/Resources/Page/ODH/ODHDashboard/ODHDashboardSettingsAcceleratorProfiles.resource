@@ -4,7 +4,7 @@ Resource       ../../../Common.robot
 
 
 *** Variables ***
-${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}=    //button[@data-id="display-accelerator-modal-button"]
+${CREATE_ACCELERATOR_PROFILE_EMPTY_LIST_BTN}=    //button[@data-testid="display-accelerator-modal-button"]
 ${CREATE_ACCELERATOR_PROFILE_BTN}=    //button[@data-testid="create-accelerator-profile"]
 ${EDIT_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//span[text()='Edit']/ancestor::button
 ${DELETE_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//span[text()='Delete']/ancestor::button

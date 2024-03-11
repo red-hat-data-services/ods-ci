@@ -18,8 +18,8 @@ Open QuickStart Element in Resource Section By Name
     [Documentation]     It opens the element by enabling Quick Start filter in Resources Section of ODS Dashboard.
     [Arguments]     ${element}
     Select Checkbox     //input[@id="quickstart--check-box"]
-    Wait Until Page Contains Element    ${RES_CARDS_XP}\[@id="${element}"]//a[text()="Open"]
-    Click Link          ${RES_CARDS_XP}\[@id="${element}"]//a[text()="Open"]
+    Wait Until Page Contains Element    //div[@id="${element}"]//button[text()="Open"]
+    Click Button          //div[@id="${element}"]//button[text()="Open"]
     Wait Until Page Contains ELement    //div[contains(@class, "-c-drawer__panel-main")]     5
 
 Star QuickStart Tour
@@ -33,7 +33,7 @@ Get The Count Of QuickStart Steps
 
 Link Text On QuickStart Card Should Be
     [Arguments]     ${element}  ${exp_link_text}
-    Element Text Should Be  //div[@id="${element}"]//a      ${exp_link_text}
+    Element Text Should Be  //div[@id="${element}"]//div[contains(@class, "footer")]/button      ${exp_link_text}
 
 QuickStart Status Should Be
     [Documentation]     Verifies the label on the item card which shows the progress and closes the sidebar.
@@ -110,7 +110,7 @@ Wait for QuickStart to Load
     [Documentation]   Waiting for quick start to visbible
     Wait Until Element Is Visible       xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
     Select Checkbox                         xpath=//*[@id="quickstart--check-box"]
-    ${quickStartElements}=   Get WebElements    xpath=//a[contains(@class,'odh-card__footer__link') and contains(@href,'#')]
+    ${quickStartElements}=   Get WebElements    xpath=//div[contains(@class,'card__footer odh-card__footer')]/button
     RETURN    ${quickStartElements}
 
 Wait Until Resource Page Is Loaded

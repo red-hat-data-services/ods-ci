@@ -555,8 +555,8 @@ Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Image Settings page
     Wait Until Page Contains    Settings
     Page Should Contain    Settings
-    Menu.Navigate To Page    Settings    Notebook image settings
-    Wait Until Page Contains    Notebook image settings
+    Menu.Navigate To Page    Settings    Notebook images
+    Wait Until Page Contains    Notebook images
     Wait Until Page Contains    Import new image    # This should assure us that the page content is ready
 
 Import New Custom Image

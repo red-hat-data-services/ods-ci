@@ -126,7 +126,7 @@
                     "response_text": "complaint",
                     "streamed_response_text": "{   'inputTokenCount': 24 } {   'generatedTokenCount': 1,   'text': 'complaint' } {   'generatedTokenCount': 2,   'stopReason': 'EOS_TOKEN' }",
                     "tgis-runtime": {
-                        "tokenize_response_text": " { 'responses': [ { 'tokenCount': 24, 'tokens': [ '▁I', '▁am', '▁frustrated', '▁because', '▁of', '▁long', '▁wait', '▁times', '▁and', '▁un', 'responsive', '▁help', 'des', 'k', '▁teams', ',', '▁', 'causing', '▁delays', '▁in', '▁issue', '▁resolution', '.', '</s>' ] } ] } "
+                        "tokenize_response_text": "{ 'responses': [ { 'tokenCount': 24, 'tokens': [ '▁I', '▁am', '▁frustrated', '▁because', '▁of', '▁long', '▁wait', '▁times', '▁and', '▁un', 'responsive', '▁help', 'des', 'k', '▁teams', ',', '▁', 'causing', '▁delays', '▁in', '▁issue', '▁resolution', '.', '</s>' ] } ] } "
                     }
                 }
             }

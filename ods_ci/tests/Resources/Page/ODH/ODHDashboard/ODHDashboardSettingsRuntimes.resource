@@ -35,6 +35,7 @@ Upload Serving Runtime Template
     Run Keyword And Continue On Failure    SeleniumLibrary.Wait Until Page Contains Element    //span[text()="kind"]
     Run Keyword And Continue On Failure    SeleniumLibrary.Wait Until Page Contains Element    //span[text()="ServingRuntime"]
     Select Model Serving Platform    platform=${serving_platform}
+    IF    '${serving_platform}'=='single'    Select Runtime API Protocol
     Submit Serving Runtime Template
 
 Submit Serving Runtime Template
@@ -95,3 +96,10 @@ Select Model Serving Platform
     SeleniumLibrary.Click Element    xpath://div[@data-testid="custom-serving-runtime-selection"]//button
     SeleniumLibrary.Wait Until Page Contains Element    xpath://a[text()="${platform_link_name}"]
     SeleniumLibrary.Click Link    ${platform_link_name}
+
+Select Runtime API Protocol
+    [Documentation]    Selects which API protocol for the runtime
+    [Arguments]    ${protocol}=gRPC
+    SeleniumLibrary.Click Element    xpath://div[@data-testid="custom-serving-api-protocol-selection"]//button
+    SeleniumLibrary.Wait Until Page Contains Element    xpath://a[text()="${protocol}"]
+    SeleniumLibrary.Click Link    ${protocol}

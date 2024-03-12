@@ -135,9 +135,9 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    namespace=singlemodel-multi1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_one_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${models_names_ns_1}    model_name=${model_one_name}
     ...    local_port=80    process_alias=llm-one
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_two_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${models_names_ns_2}    model_name=${model_two_name}
     ...    local_port=81        process_alias=llm-two
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi1    port_forwarding=${IS_KSERVE_RAW}
@@ -406,8 +406,9 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=5
     ...    namespace=${test_namespace}    inference_type=streaming    validate_response=${FALSE}
+    ...    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]   Run Keywords
-    ...    Clean Up Test Project    test_ns=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
+    ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
@@ -442,7 +443,7 @@ Verify Non Admin Can Serve And Query A Model
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
-    ...        wait_prj_deletion=${FALSE}
+    ...        wait_prj_deletion=${FALSE}   kserve_mode=${DSC_KSERVE_MODE}
     ...        AND
     ...        Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
@@ -462,7 +463,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=1    port_forwarding=${IS_KSERVE_RAW}
@@ -491,7 +492,7 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}    port_forwarding=${IS_KSERVE_RAW}
@@ -551,7 +552,7 @@ Verify User Can Access Model Metrics From UWM
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    Tier1    ODS-2401
+    [Tags]    Tier1    ODS-2401    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -571,10 +572,9 @@ Verify User Can Access Model Metrics From UWM
     ...    Metrics Should Exist In UserWorkloadMonitoring
     ...    thanos_url=${thanos_url}    thanos_token=${token}
     ...    search_metrics=${SEARCH_METRICS}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=3
-    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
+    ...    namespace=${test_namespace}
     Wait Until Keyword Succeeds    50 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=3
@@ -586,16 +586,12 @@ Verify User Can Access Model Metrics From UWM
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1    validate_response=${FALSE}
-    ...    namespace=${test_namespace}    query_idx=${0}    port_forwarding=${IS_KSERVE_RAW}
+    ...    namespace=${test_namespace}    query_idx=${0}
     Wait Until Keyword Succeeds    30 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=stream    namespace=${test_namespace}    period=5m    exp_value=1
-    [Teardown]    Run Keywords
-    ...    Clean Up Test Project    test_ns=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
-    ...    AND
-    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
-
 Verify User Can Query A Model Using HTTP Calls
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
@@ -637,8 +633,9 @@ Suite Setup
     ELSE
         Set Suite Variable    ${GPU_LIMITS}    &{EMPTY}
     END
-    ${default_kserve_mode}=    Get KServe Default Deployment Mode From DSC
-    IF    "${default_kserve_mode}" == "RawDeployment"
+    ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
+    Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
+    IF    "${dsc_kserve_mode}" == "RawDeployment"
         Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
     ELSE
         Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}

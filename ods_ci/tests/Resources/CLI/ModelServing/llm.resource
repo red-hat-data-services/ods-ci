@@ -178,7 +178,12 @@ Compile Inference Service YAML
         ...    yq -i '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
         Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     ELSE
-        ${mode}=    Get KServe Default Deployment Mode From DSC
+        ${exists}=    Run Keyword And Return Status    Variable Should Exist  ${DSC_KSERVE_MODE}
+        IF    ${exists}    # done in this way because when use non-admin users they cannot fetch DSC
+            ${mode}=    Set Variable    ${DSC_KSERVE_MODE}
+        ELSE
+            ${mode}=    Get KServe Default Deployment Mode From DSC
+        END  
         Log    message=Using defaultDeploymentMode set in the DSC: ${mode}
     END
 
@@ -378,7 +383,7 @@ Compile Deploy And Query LLM model
     ...    model_storage_uri=${model_storage_uri}
     ...    canaryTrafficPercent=${canaryTrafficPercent}
     ...    model_format=${model_format}
-    ...    ${limits_dict}=${limits_dict}
+    ...    limits_dict=${limits_dict}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}

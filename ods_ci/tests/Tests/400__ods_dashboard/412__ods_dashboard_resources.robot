@@ -258,7 +258,7 @@ Set Expected Items Based On RHODS Type    # robocop: disable
     [Documentation]    Sets some required variables depending on if RHODS is
     ...                installed as Self-Managed or Cloud Service
     ${is_self_managed}=    Is RHODS Self-Managed
-    ${n_items}=    Set Variable    48
+    ${n_items}=    Set Variable    49
     ${EXPECTED_ITEMS_FOR_ENABLE}=    Create List    Creating a Jupyter notebook
     ...    Deploying a sample Python application using Flask and OpenShift.
     ...    How to install Python packages on your notebook server
@@ -276,6 +276,7 @@ Set Expected Items Based On RHODS Type    # robocop: disable
     ...    How to view installed packages on your notebook server
     ...    Deploying a sample Python application using Flask and OpenShift.
     ...    Jupyter
+    ...    OpenShift AI tutorial - Fraud detection example
     ...    OpenShift API Management
     ...    Securing a deployed model using Red Hat OpenShift API Management
     @{EXPECTED_ITEMS_FOR_COMBINATIONS}=      Create List

@@ -33,19 +33,14 @@ Verify RHODS Admins Can Delete A Custom Serving Runtime Template
     Delete Serving Runtime Template    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     ...    press_cancel=${TRUE}
     Delete Serving Runtime Template    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
- 
+
 Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Serving Platform
     [Documentation]    Imports a Custom Serving Runtime for each supported serving platform
     [Tags]    Sanity    ODS-2542    Tier1
     [Setup]    Generate Runtime YAMLs
     Open Dashboard Settings    settings_page=Serving runtimes
-    ${RUNTIME_BOTH_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_both_model.yaml
     ${RUNTIME_SINGLE_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_single_model.yaml
     ${RUNTIME_MULTI_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_multi_model.yaml
-    Upload Serving Runtime Template    runtime_filepath=${RUNTIME_BOTH_FILEPATH}
-    ...    serving_platform=both
-    Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_BOTH_DISPLAYED_NAME}
-    ...    serving_platform=both
     Upload Serving Runtime Template    runtime_filepath=${RUNTIME_SINGLE_FILEPATH}
     ...    serving_platform=single
     Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_SINGLE_DISPLAYED_NAME}
@@ -55,8 +50,6 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Servin
     Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_MULTI_DISPLAYED_NAME}
     ...    serving_platform=multi
     [Teardown]    Run Keywords
-    ...    Delete Serving Runtime Template From CLI    displayed_name=${RUNTIME_BOTH_DISPLAYED_NAME}
-    ...    AND
     ...    Delete Serving Runtime Template From CLI    displayed_name=${RUNTIME_SINGLE_DISPLAYED_NAME}
     ...    AND
     ...    Delete Serving Runtime Template From CLI    displayed_name=${RUNTIME_MULTI_DISPLAYED_NAME}
@@ -92,7 +85,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     ...    project_title=${PRJ_TITLE}
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${ns_name}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
-    
+
 
 *** Keywords ***
 Custom Serving Runtime Suite Setup
@@ -126,21 +119,13 @@ Create Test Serving Runtime Template If Not Exists
 Generate Runtime YAMLs
     [Documentation]    Generates three different Custom Serving Runtime YAML files
     ...                starting from OVMS one. Each YAML will be used for a different
-    ...                supported serving platform (single model, multi model, both)
-    Set Suite Variable    ${RUNTIME_BOTH_FILEPATH}    ${RESOURCES_DIRPATH}/csr_both_model.yaml
+    ...                supported serving platform (single model, multi model)
     Set Suite Variable    ${RUNTIME_SINGLE_FILEPATH}    ${RESOURCES_DIRPATH}/csr_single_model.yaml
     Set Suite Variable    ${RUNTIME_MULTI_FILEPATH}    ${RESOURCES_DIRPATH}/csr_multi_model.yaml
-    Set Suite Variable    ${RUNTIME_BOTH_DISPLAYED_NAME}    ODS-CI CSR - Both Platforms
     Set Suite Variable    ${RUNTIME_SINGLE_DISPLAYED_NAME}    ODS-CI CSR - Single model Platform
     Set Suite Variable    ${RUNTIME_MULTI_DISPLAYED_NAME}    ODS-CI CSR - Multi models Platform
-    Copy File    ${OVMS_RUNTIME_FILEPATH}    ${RUNTIME_BOTH_FILEPATH}
     Copy File    ${OVMS_RUNTIME_FILEPATH}    ${RUNTIME_SINGLE_FILEPATH}
     Copy File    ${OVMS_RUNTIME_FILEPATH}    ${RUNTIME_MULTI_FILEPATH}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_BOTH_DISPLAYED_NAME}"' ${RUNTIME_BOTH_FILEPATH}
-    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    yq -i '.metadata.name = "ods-ci-both"' ${RUNTIME_BOTH_FILEPATH}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_SINGLE_DISPLAYED_NAME}"' ${RUNTIME_SINGLE_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}

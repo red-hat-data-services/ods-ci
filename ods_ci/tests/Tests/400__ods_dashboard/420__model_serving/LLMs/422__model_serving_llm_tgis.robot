@@ -88,15 +88,16 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_one_name}
-    ...    local_port=80    process_alias=llm-one
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_two_name}
-    ...    local_port=81        process_alias=llm-two
+    ...    process_alias=llm-one
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=5    namespace=${test_namespace}     port_forwarding=${IS_KSERVE_RAW}
-    Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    n_times=10    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=5    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
+    IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_two_name}
+    ...    process_alias=llm-two
+    Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    n_times=10    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=10    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]    Run Keywords
@@ -136,11 +137,12 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${models_names_ns_1}    model_name=${model_one_name}
-    ...    local_port=80    process_alias=llm-one
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${models_names_ns_2}    model_name=${model_two_name}
-    ...    local_port=81        process_alias=llm-two
+    ...    process_alias=llm-one
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi1    port_forwarding=${IS_KSERVE_RAW}
+    IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${models_names_ns_2}    model_name=${model_two_name}
+    ...    process_alias=llm-two
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi2    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]    Run Keywords    Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
@@ -435,7 +437,7 @@ Verify Non Admin Can Serve And Query A Model
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}

@@ -667,7 +667,7 @@ Clean Up Test Project
     END
     IF    $kserve_mode is None
         ${kserve_mode}=    Get KServe Default Deployment Mode From DSC
-        Log    message=Using defaultDeploymentMode set in the DSC: ${mode}
+        Log    message=Using defaultDeploymentMode set in the DSC: ${kserve_mode}
     END
     IF    "${kserve_mode}"=="Serverless"
            Wait Until Keyword Succeeds    10    1s    Namespace Should Be Removed From ServiceMeshMemberRoll

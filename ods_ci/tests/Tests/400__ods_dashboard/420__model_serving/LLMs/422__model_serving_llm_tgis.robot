@@ -59,7 +59,7 @@ Verify User Can Serve And Query A Model
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
@@ -103,9 +103,9 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-one    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-two    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-two    kill=true
 
 Verify User Can Deploy Multiple Models In Different Namespaces
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
@@ -221,7 +221,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
     ...    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
@@ -267,7 +267,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Autoscale Using Concurrency
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
@@ -375,7 +375,7 @@ Verify User Can Set Requests And Limits For A Model
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify Model Can Be Served And Query On A GPU Node
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
@@ -410,7 +410,7 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    Clean Up Test Project    test_ns=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify Non Admin Can Serve And Query A Model
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
@@ -444,7 +444,7 @@ Verify Non Admin Can Serve And Query A Model
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
     ...        wait_prj_deletion=${FALSE}
     ...        AND
-    ...        Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...        Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
@@ -473,7 +473,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Serve And Query Flan-t5 Large
     [Documentation]    Deploys and queries flan-t5-large model
@@ -501,7 +501,7 @@ Verify User Can Serve And Query Flan-t5 Large
     [Teardown]    Run Keywords    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify Runtime Upgrade Does Not Affect Deployed Models
     [Documentation]    Upgrades the caikit runtime inthe same NS where a model
@@ -543,7 +543,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Access Model Metrics From UWM
     [Documentation]    Verifies that model metrics are available for users in the
@@ -594,7 +594,7 @@ Verify User Can Access Model Metrics From UWM
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
-    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Query A Model Using HTTP Calls
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.

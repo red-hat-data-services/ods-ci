@@ -227,6 +227,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model.
     ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
+    ...                When running on GPUs, it requires 3 GPUs           
     [Tags]    Tier1    ODS-2376
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps

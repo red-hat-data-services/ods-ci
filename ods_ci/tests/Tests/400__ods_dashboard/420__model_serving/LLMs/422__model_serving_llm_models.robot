@@ -487,10 +487,3 @@ Setup Test Variables
     Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
     Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
     Set Log Level    INFO
-
-Start Port-forwarding
-    [Arguments]    ${namespace}    ${model_name}
-    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
-    ...    alias=llm-query-process    stderr=STDOUT    shell=yes
-    Process Should Be Running    ${process}
-    sleep  5s

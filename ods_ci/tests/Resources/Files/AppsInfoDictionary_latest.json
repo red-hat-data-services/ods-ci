@@ -317,7 +317,7 @@
                          "matching": ""
                    },
                    "1": {
-                         "text": "Enabling GPU Support in Openshift Data Science",
+                         "text": "Enabling GPU Support in OpenShift AI",
                          "url": "https://access.redhat.com/documentation/en-us/red_hat_openshift_data_science/1/html/managing_users_and_user_resources/enabling-gpu-support-in-openshift-data-science_user-mgmt",
                          "matching": ""
                    }

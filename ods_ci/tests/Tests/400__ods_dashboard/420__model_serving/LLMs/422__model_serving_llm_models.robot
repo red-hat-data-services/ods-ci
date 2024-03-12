@@ -28,11 +28,12 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=70Gi
+    ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
@@ -72,11 +73,12 @@ Verify User Can Serve And Query A google/flan-t5-xl Model
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=70Gi
+    ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
@@ -116,11 +118,12 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=70Gi
+    ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
@@ -159,11 +162,12 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=70Gi    model_path=${model_path}
+    ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
@@ -203,11 +207,12 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=20Gi
+    ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
@@ -247,11 +252,12 @@ Verify User Can Serve And Query A google/flan-ul-2 Model
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=70Gi   model_path=${model_path}
+    ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
@@ -326,11 +332,12 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
     Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=70Gi    model_path=${model_path}
+    ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
@@ -366,11 +373,12 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model
     ...    bucket_name=${MODELS_BUCKET.NAME}    use_https=${USE_BUCKET_HTTPS}
     ...    storage_size=10Gi    model_path=${model_path}
     ${overlays}=    Create List    prompt-tuned
+    ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
-    ...    limits_dict=${limits}    kserve_mode=${KSERVE_MODE}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     ...    overlays=${overlays}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}

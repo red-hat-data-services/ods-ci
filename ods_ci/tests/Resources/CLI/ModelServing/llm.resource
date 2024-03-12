@@ -9,7 +9,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resou
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${RUNTIME_FORMATS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats.json
-${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc.yaml
+${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/isvc.yaml
 ${INFERENCESERVICE_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc_filled.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
@@ -22,6 +22,9 @@ ${SERVICEMESH_CR_NS}=    istio-system
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
+
+${DOWNLOAD_PROMPTS_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc.yaml
+${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc_filled.yaml
 
 
 *** Keywords ***
@@ -63,8 +66,7 @@ Set Project And Runtime
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
         Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
-        ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
-        ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
+        ...    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
         ...    storage_size=${storage_size}    model_path=${model_path}
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
@@ -128,7 +130,7 @@ Compile Inference Service YAML
     [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
     ...            ${kserve_mode}=Serverless    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
     ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
-    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
+    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}    ${overlays}=${EMPTY}
     IF   '${auto_scale}' == '${NONE}'
         ${scaleTarget}=    Set Variable    ${EMPTY}
         ${scaleMetric}=    Set Variable    ${EMPTY}
@@ -142,7 +144,17 @@ Compile Inference Service YAML
     Set Test Variable    ${canaryTrafficPercent}
     Set Test Variable    ${model_format}
     Set Test Variable    ${serving_runtime}
-    Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${INFERENCESERVICE_FILLED_FILEPATH}
+    IF    len($overlays) > 0
+        FOR    ${index}    ${overlay}    IN ENUMERATE    @{overlays}
+            Log    ${index}: ${overlay}
+            ${rc}    ${out}=    Run And Return Rc And Output
+            ...    oc kustomize ${LLM_RESOURCES_DIRPATH}/serving_runtimes/overlay/${overlay} > ${INFERENCESERVICE_FILLED_FILEPATH}
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+        END
+        Create File From Template    ${INFERENCESERVICE_FILLED_FILEPATH}    ${INFERENCESERVICE_FILLED_FILEPATH}
+    ELSE
+        Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${INFERENCESERVICE_FILLED_FILEPATH}
+    END
     IF    ${requests_dict} != &{EMPTY}
         Log    Adding predictor model requests to ${INFERENCESERVICE_FILLED_FILEPATH}: ${requests_dict}    console=True    # robocop: disable
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
@@ -224,6 +236,7 @@ Load Runtime Query Formats
 
 Prepare Payload
     [Arguments]    ${runtime}    ${protocol}    ${inference_type}    ${model_name}    ${query_text}
+    ...            ${body_params}
     Set Test Variable    ${model_name}
     Set Test Variable    ${query_text}
     Create File From Template    ${RUNTIME_FORMATS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
@@ -231,6 +244,15 @@ Prepare Payload
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
     ${body}=    Replace String    ${runtime_details}[body]    '    "
     ${header}=    Set Variable    ${runtime_details}[header]
+    IF    ${body_params} != &{EMPTY}
+        FOR    ${index}    ${param}    IN ENUMERATE    @{body_params.keys()}
+            Log    ${index}: ${param}
+            ${value}=    Set Variable    ${body_params}[${param}]
+            ${rc}    ${body}=    Run And Return Rc And Output
+            ...    echo '${body}' | jq -c --arg ${param} ${value} '. + {"${param}": "${value}"}'
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${body}
+        END
+    END
     IF    "${protocol}" == "grpc"
         ${body}=    Set Variable    '${body}'
         ${header}=    Set Variable  '${header}'
@@ -268,7 +290,8 @@ Query Model Multiple Times
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
     ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
-    ...            ${string_check_only}=${FALSE}    ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443    &{args}
+    ...            ${string_check_only}=${FALSE}    ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443
+    ...            ${body_params}=&{EMPTY}    &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
     ELSE
@@ -290,7 +313,7 @@ Query Model Multiple Times
         ${plaintext}=    Set Variable    ${FALSE}
     END
     ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
-    ...    inference_type=${inference_type}    model_name=${model_name}
+    ...    inference_type=${inference_type}    model_name=${model_name}    body_params=${body_params}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
     ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
@@ -647,17 +670,13 @@ Clean Up Test Project
     END
 
 Create PVC And Download Model From S3
-    [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
-    ...            ${region}    ${access_key_id}    ${access_key}
+    [Arguments]    ${model_name}    ${bucket_name}
     ...            ${use_https}    ${namespace}    ${storage_size}
     ...            ${model_path}    ${download_timeout}=500s
     Set Log Level    NONE
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}
-    Set Test Variable    ${endpoint}
-    Set Test Variable    ${region}
-    Set Test Variable    ${access_key_id}
-    Set Test Variable    ${access_key}
+    # AWS variables defined in the Setup Test Variables
     Set Test Variable    ${use_https}
     Set Test Variable    ${namespace}
     Set Test Variable    ${storage_size}
@@ -683,3 +702,24 @@ Extract Service Port
     ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.name=="${port_name}")]}{@.targetPort}{end}'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     RETURN    ${out}
+
+Download Prompts Weights In PVC
+    [Arguments]    ${prompts_path}    ${model_name}    ${bucket_name}
+    ...            ${use_https}    ${namespace}    ${storage_size}
+    ...            ${model_path}    ${download_timeout}=120s
+    Set Log Level    NONE
+    Set Test Variable    ${prompts_path}
+    Set Test Variable    ${model_name}
+    Set Test Variable    ${bucket_name}
+    # AWS variables defined in the Setup Test Variables
+    Set Test Variable    ${use_https}
+    Set Test Variable    ${namespace}
+    Set Test Variable    ${storage_size}
+    Set Test Variable    ${model_path}
+    Set Log Level    INFO
+    Create File From Template    ${DOWNLOAD_PROMPTS_PVC_FILEPATH}    ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}
+    Wait For Pods To Be Ready    label_selector=name=${model_name}-download-prompts    namespace=${namespace}
+    Wait For Pods To Succeed    label_selector=name=${model_name}-download-prompts    namespace=${namespace}
+    ...    timeout=${download_timeout}

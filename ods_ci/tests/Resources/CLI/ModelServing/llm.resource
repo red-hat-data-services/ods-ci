@@ -377,7 +377,7 @@ Compile Deploy And Query LLM model
     ...            ${runtime}=caikit-tgis-runtime    ${model_format}=caikit    ${protocol}=grpc    ${inference_type}=all-tokens
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
     ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}    ${limits_dict}=&{EMPTY}
-    ...            ${port_forwarding}=${false}
+    ...            ${port_forwarding}=${FALSE}
     Compile Inference Service YAML    isvc_name=${isvc_name}
     ...    sa_name=${sa_name}    serving_runtime=${runtime}
     ...    model_storage_uri=${model_storage_uri}
@@ -393,6 +393,7 @@ Compile Deploy And Query LLM model
     ...    n_times=${n_queries}    namespace=${namespace}    query_idx=${query_idx}
     ...    validate_response=${validate_response}    protocol=${protocol}
     ...    runtime=${runtime}    inference_type=${inference_type}
+    ...    port_forwarding=${port_forwarding}
 
 Upgrade Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given
@@ -754,8 +755,8 @@ Get KServe Default Deployment Mode From DSC
     RETURN    ${mode}
 
 Start Port-forwarding
-    [Arguments]    ${namespace}    ${model_name}    ${local_port}=80    ${process_alias}=llm-query-process
-    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:${local_port}
+    [Arguments]    ${namespace}    ${model_name}    ${process_alias}=llm-query-process
+    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  5s

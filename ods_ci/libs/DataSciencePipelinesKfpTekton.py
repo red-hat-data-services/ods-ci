@@ -50,24 +50,9 @@ class DataSciencePipelinesKfpTekton:
                     self.client = kfp_tekton.TektonClient(
                         host=f"https://{self.api.route}/",
                         existing_token=self.api.sa_token,
-                        ssl_ca_cert=self.get_cert(self.api),
+                        ssl_ca_cert=self.api.get_cert(),
                     )
         return self.client, self.api
-
-    def get_cert(self, api):
-        cert_json = self.get_secret(api, "openshift-ingress-operator", "router-ca")
-        cert = cert_json["data"]["tls.crt"]
-        decoded_cert = base64.b64decode(cert).decode("utf-8")
-
-        file_name = "/tmp/kft-cert"
-        cert_file = open(file_name, "w")
-        cert_file.write(decoded_cert)
-        cert_file.close()
-        return file_name
-
-    def get_secret(self, api, project, name):
-        secret_json, _ = api.run_oc(f"oc get secret -n {project} {name} -o json")
-        return json.loads(secret_json)
 
     def get_bucket_name(self, api, project):
         bucket_name, _ = api.run_oc(f"oc get dspa -n {project} pipelines-definition -o json")
@@ -90,7 +75,7 @@ class DataSciencePipelinesKfpTekton:
         self, user, pwd, project, route_name, source_code, fn, current_path=None
     ):
         client, api = self.get_client(user, pwd, project, route_name)
-        mlpipeline_minio_artifact_secret = self.get_secret(api, project, "mlpipeline-minio-artifact")
+        mlpipeline_minio_artifact_secret = api.get_secret(project, "mlpipeline-minio-artifact")
         bucket_name = self.get_bucket_name(api, project)
         # the current path is from where you are running the script
         # sh ods_ci/run_robot_test.sh

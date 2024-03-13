@@ -14,7 +14,7 @@ ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
-${CARD_BUTTON_XP}=  ..//input[@class="pf-v5-c-radio__input"][@name="odh-explore-selectable-card"]
+${CARD_BUTTON_XP}=  //input[@class="pf-v5-c-radio__input"][@name="odh-explore-selectable-card"]
 ${RES_CARDS_XP}=  //div[contains(@data-ouia-component-type, "Card")]
 ${SAMPLE_APP_CARD_XP}=   //*[@id="pachyderm-selectable-card-id"]
 ${HEADER_XP}=  div[@class='pf-v5-c-card__header']
@@ -337,9 +337,9 @@ Check Card Badges And Return Titles
 
 Open Get Started Sidebar And Return Status
     [Arguments]  ${card_locator}
-    Wait Until Element Is Visible    xpath:${card_locator}/${CARD_BUTTON_XP}
-    Wait Until Element Is Enabled     xpath:${card_locator}/${CARD_BUTTON_XP}    timeout=20s     error=Element is not clickbale  #robocop : disable
-    ${element}=    Get WebElement    xpath:${card_locator}/${CARD_BUTTON_XP}
+    Wait Until Element Is Visible    xpath:${card_locator}${CARD_BUTTON_XP}
+    Wait Until Element Is Enabled     xpath:${card_locator}${CARD_BUTTON_XP}    timeout=20s     error=Element is not clickbale  #robocop : disable
+    ${element}=    Get WebElement    xpath:${card_locator}${CARD_BUTTON_XP}
     Execute Javascript    arguments[0].click();     ARGUMENTS    ${element}
     ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
     Sleep  1

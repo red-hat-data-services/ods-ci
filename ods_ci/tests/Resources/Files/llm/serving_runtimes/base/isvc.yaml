@@ -14,7 +14,10 @@ spec:
     canaryTrafficPercent: ${canaryTrafficPercent}
     serviceAccountName: ${sa_name}
     model:
+      env: []
+      volumeMounts: []
       modelFormat:
         name: ${model_format}
       runtime: ${serving_runtime}
       storageUri: ${model_storage_uri}
+    volumes: []

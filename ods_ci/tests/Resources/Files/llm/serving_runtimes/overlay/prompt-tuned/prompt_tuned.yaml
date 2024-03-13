@@ -1,0 +1,16 @@
+- op: add
+  path: /spec/predictor/volumes/-
+  value:
+      name: model-volume
+      persistentVolumeClaim: 
+          claimName: ${model_name}-prompts-claim
+- op: add
+  path: /spec/predictor/model/volumeMounts/-
+  value:
+      name: model-volume
+      mountPath: /mnt/prompts/
+- op: add
+  path: /spec/predictor/model/env/-
+  value:
+      name: PREFIX_STORE_PATH
+      value: /mnt/prompts/

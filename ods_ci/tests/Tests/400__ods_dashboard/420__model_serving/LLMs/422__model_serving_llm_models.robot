@@ -438,7 +438,7 @@ Set Default Storage Class In GCP
     [Arguments]    ${default}
     ${rc}=    Run And Return Rc    oc get storageclass ${default}
     IF    ${rc} == ${0}
-        IF    ${default}==ssd-csi
+        IF    "${default}" == "ssd-csi"
             Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
             Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
         ELSE

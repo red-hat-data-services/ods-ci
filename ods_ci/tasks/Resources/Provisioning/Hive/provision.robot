@@ -151,7 +151,7 @@ Wait For Cluster To Be Ready
     Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
     Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
     ${provision_status} =    Run Process
-    ...    oc -n ${pool_namespace} wait --for\=condition\=Provisioned\=True cd ${pool_namespace} --timeout\=10m
+    ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${pool_namespace} --timeout\=15m
     ...    shell=yes
     ${web_access} =    Run Process
     ...    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status

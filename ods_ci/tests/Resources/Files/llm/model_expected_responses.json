@@ -38,7 +38,10 @@
                 "llama-2-13b-chat": {
                     "response_tokens": 20,
                     "response_text": "\n\nWater boils at 100 degrees Celsius or 212",
-                    "streamed_response_text": "{    'inputTokenCount': 10}{    'generatedTokenCount': 2,    'text': '\n'}{    'generatedTokenCount': 3,    'text': 'I a'}{    'generatedTokenCount': 4,    'text': 'm no'}{    'generatedTokenCount': 5,    'text': 't sur'}{    'generatedTokenCount': 6,    'text': 'e i'}{    'generatedTokenCount': 7,    'text': 'f thi'}{    'generatedTokenCount': 8,    'text': 's i'}{    'generatedTokenCount': 9,    'text': 's th'}{    'generatedTokenCount': 10,    'text': 'e righ'}{    'generatedTokenCount': 11,    'text': 't plac'}{    'generatedTokenCount': 12,    'text': 'e t'}{    'generatedTokenCount': 13,    'text': 'o as'}{    'generatedTokenCount': 14,    'text': 'k thi'}{    'generatedTokenCount': 15,    'text': 's questio'}{    'generatedTokenCount': 16,    'text': 'n'}{    'generatedTokenCount': 17,    'text': ', bu'}{    'generatedTokenCount': 18,    'text': 't '}{    'generatedTokenCount': 19,    'text': 'I a'}{    'generatedTokenCount': 20,    'text': 'm trying',    'stopReason': 'MAX_TOKENS'}"
+                    "streamed_response_text": "{    'inputTokenCount': 10}{    'generatedTokenCount': 2,    'text': '\n'}{    'generatedTokenCount': 3,    'text': 'I a'}{    'generatedTokenCount': 4,    'text': 'm no'}{    'generatedTokenCount': 5,    'text': 't sur'}{    'generatedTokenCount': 6,    'text': 'e i'}{    'generatedTokenCount': 7,    'text': 'f thi'}{    'generatedTokenCount': 8,    'text': 's i'}{    'generatedTokenCount': 9,    'text': 's th'}{    'generatedTokenCount': 10,    'text': 'e righ'}{    'generatedTokenCount': 11,    'text': 't plac'}{    'generatedTokenCount': 12,    'text': 'e t'}{    'generatedTokenCount': 13,    'text': 'o as'}{    'generatedTokenCount': 14,    'text': 'k thi'}{    'generatedTokenCount': 15,    'text': 's questio'}{    'generatedTokenCount': 16,    'text': 'n'}{    'generatedTokenCount': 17,    'text': ', bu'}{    'generatedTokenCount': 18,    'text': 't '}{    'generatedTokenCount': 19,    'text': 'I a'}{    'generatedTokenCount': 20,    'text': 'm trying',    'stopReason': 'MAX_TOKENS'}",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{'responses':[{'tokenCount':9,'tokens':['\\u003cs\\u003e','▁At','▁what','▁temperature','▁does','▁water','▁bo','il','?']}]}"
+                    }
                 }
             }
         },
@@ -143,6 +146,9 @@
         },
         "mpt-7b-instruct2":{
             "tgis-runtime": "{     'maxSequenceLength': 2048,     'maxNewTokens': 1024   }"
+        },
+        "llama-2-13b-chat-hf":{
+            "tgis-runtime": "{ 'maxSequenceLength': 4096,'maxNewTokens': 1024}"
         }
     }
 }

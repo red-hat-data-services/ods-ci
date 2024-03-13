@@ -267,7 +267,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     [Documentation]    This test case verifies that a user with Edit permission on a DS Project can still deploy, query
     ...    and delete a LLM served with caikit
     ...    ProductBug: https://issues.redhat.com/browse/RHOAIENG-548
-    [Tags]    Sanity    Tier1    ODS-2581    ProductBug
+    [Tags]    Sanity    Tier1    ODS-2581
     [Setup]    Set Up Project    namespace=${TEST_NS}-edit-permission
     ${test_namespace}=    Set Variable     ${TEST_NS}-edit-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

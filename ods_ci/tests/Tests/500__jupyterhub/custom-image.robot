@@ -97,7 +97,6 @@ Test Image From Local registry
     ...       ProductBug - https://github.com/opendatahub-io/odh-dashboard/issues/2185
     [Tags]    Sanity    Tier1
     ...       ODS-2470
-    ...       ProductBug
     ${CLEANUP}=  Set Variable  False
     Open Notebook Images Page
     ${local_url} =    Get Standard Data Science Local Registry URL

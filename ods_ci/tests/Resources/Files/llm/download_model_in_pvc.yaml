@@ -6,7 +6,6 @@ spec:
   accessModes:
     - ReadWriteOnce
   volumeMode: Filesystem
-  storageClassName: ssd-csi
   resources:
     requests:
       storage: ${storage_size}

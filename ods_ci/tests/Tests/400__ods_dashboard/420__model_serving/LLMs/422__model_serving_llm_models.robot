@@ -5,7 +5,7 @@ Resource          ../../../../Resources/OCP.resource
 Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Suite Setup
-Suite Teardown    RHOSi Teardown
+Suite Teardown    Suite Teardown
 Test Tags         KServe-LLM
 
 
@@ -426,6 +426,28 @@ Suite Setup
     RHOSi Setup
     Load Expected Responses
     Run    git clone https://github.com/IBM/text-generation-inference/
+    Set Default Storage Class In GCP    default=ssd-csi
+
+Suite Teardown
+    Set Default Storage Class In GCP    default=standard-csi
+    RHOSi Teardown
+
+Set Default Storage Class In GCP
+    [Documentation]    If the storage class exists we can assume we are in GCP. We force ssd-csi to be the default class
+    ...    for the duration of this test suite.
+    [Arguments]    ${default}
+    ${rc}=    Run And Return Rc    oc get storageclass ${default}
+    IF    ${rc} == ${0}
+        IF    ${default}==ssd-csi
+            Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
+            Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
+        ELSE
+            Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
+            Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
+        END
+    ELSE
+        Log    Proceeding with default storage class because we're not in GCP
+    END
 
 Setup Test Variables
     [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}

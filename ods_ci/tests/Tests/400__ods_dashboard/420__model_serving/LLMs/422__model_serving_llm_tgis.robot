@@ -358,11 +358,11 @@ Verify User Can Set Requests And Limits For A Model
     ...    namespace=${test_namespace}
     ${label_selector}=    Get Model Pod Label Selector    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
-    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ${new_requests}=    Create Dictionary    cpu=3    memory=3Gi
     Set Model Hardware Resources    model_name=${flan_model_name}    namespace=hw-res
     ...    requests=${new_requests}    limits=${NONE}

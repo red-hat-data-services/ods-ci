@@ -759,4 +759,4 @@ Start Port-forwarding
     ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
-    sleep  5s
+    sleep  7s

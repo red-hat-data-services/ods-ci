@@ -352,6 +352,14 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
     ...    inference_type=streaming    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}    query_idx=0    validate_response=${FALSE}
     ...    port_forwarding=${use_port_forwarding}
+    Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=model-info    n_times=0
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+    ...    port_forwarding=${use_port_forwarding}
+    Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=tokenize    n_times=0    query_idx=0
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+    ...    port_forwarding=${use_port_forwarding}
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}

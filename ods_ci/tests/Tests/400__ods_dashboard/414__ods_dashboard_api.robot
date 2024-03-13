@@ -25,7 +25,7 @@ ${DOCS_ENDPOINT}=        api/docs
 ${GETTING_STARTED_ENDPOINT}=        api/getting-started
 ${QUICKSTARTS_ENDPOINT}=        api/quickstarts
 ${SEGMENT_KEY_ENDPOINT}=        api/segment-key
-${GPU_ENDPOINT}=        api/gpu
+${GPU_ENDPOINT}=        api/accelerators
 
 ${NOTEBOOK_NS}=          ${NOTEBOOKS_NAMESPACE}
 ${DASHBOARD_NS}=         ${APPLICATIONS_NAMESPACE}
@@ -472,9 +472,11 @@ Verify Access To groups-config API Endpoint
 Verify Access To images API Endpoint
     [Documentation]     Verifies the endpoint "images" works as expected
     ...                 based on the permissions of the users who query the endpoint
+    ...                 ProductBug RHOAIENG-4469
     [Tags]    ODS-1724
     ...       Tier1    Sanity
     ...       Security
+    ...       ProductBug
     Perform Dashboard API Endpoint POST Call   endpoint=${IMG_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${IMG_ENDPOINT_BODY}
     Operation Should Be Unauthorized

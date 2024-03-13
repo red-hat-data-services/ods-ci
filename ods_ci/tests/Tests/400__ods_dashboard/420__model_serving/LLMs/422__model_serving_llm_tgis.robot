@@ -251,19 +251,15 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${test_namespace}    timeout=360s
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_replicas=3
-    IF    ${IS_KSERVE_RAW}     Terminate Process    llm-query-process    kill=true
+    Wait For New Replica Set To Be Ready    new_exp_replicas=3    model_name=${model_name}
+    ...    namespace=${test_namespace}    old_rev_id=${rev_id}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${test_namespace}    timeout=360s
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    ${rev_id}=    Set Variable    ${NONE}
+    Wait For New Replica Set To Be Ready    new_exp_replicas=1    model_name=${model_name}
+    ...    namespace=${test_namespace}    old_rev_id=${rev_id}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
@@ -359,16 +355,18 @@ Verify User Can Set Requests And Limits For A Model
     ...    namespace=${test_namespace}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
+    ${label_selector}=    Get Model Pod Label Selector    model_name=${flan_model_name}
+    ...    namespace=${test_namespace}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
-    ${new_requests}=    Create Dictionary    cpu=2    memory=3Gi
+    ${new_requests}=    Create Dictionary    cpu=3    memory=3Gi
     Set Model Hardware Resources    model_name=${flan_model_name}    namespace=hw-res
     ...    requests=${new_requests}    limits=${NONE}
-    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    Wait For Pods To Be Terminated    label_selector=${label_selector}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
@@ -645,3 +643,33 @@ Suite Setup
     ELSE
         Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
     END
+
+Get Model Pod Label Selector
+    [Documentation]    Creates the model pod selector for the tests which performs
+    ...                rollouts of a new model version/configuration. It returns
+    ...                the label selecto to be used to check the old version,
+    ...                e.g., its pods get deleted successfully
+    [Arguments]    ${model_name}    ${namespace}
+    IF    ${IS_KSERVE_RAW}
+        ${rc}  ${hash}=    Run And Return Rc And Output
+        ...    oc get pod -l serving.kserve.io/inferenceservice=${model_name} -ojsonpath='{.items[0].metadata.labels.pod-template-hash}'
+        Should Be Equal As Integers    ${rc}    ${0}    msg=${hash}
+        ${label_selector}=    Set Variable    pod-template-hash=${hash}
+    ELSE
+        ${id}=    Get Current Revision ID    model_name=${model_name}
+        ...    namespace=${namespace}
+        ${label_selector}=    Set Variable    serving.knative.dev/revisionUID=${rev_id}
+    END
+    RETURN    ${label_selector}
+
+Wait For New Replica Set To Be Ready
+    [Documentation]    When the replicas setting is changed, it wait for the new ods to come up
+    ...            In case of Serverless deployment, it wait for old pods to be deleted.
+    [Arguments]    ${new_exp_replicas}    ${model_name}    ${namespace}    ${old_rev_id}=${NONE}
+    IF    not ${IS_KSERVE_RAW}
+        Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${old_rev_id}
+        ...    namespace=${namespace}    timeout=360s        
+    END
+    Wait Until Keyword Succeeds    5 times    5s
+    ...    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${namespace}    exp_replicas=${new_exp_replicas}

@@ -260,7 +260,6 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ${rev_id}=    Set Variable    ${NONE}
     Wait For New Replica Set To Be Ready    new_exp_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}    old_rev_id=${rev_id}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]   Run Keywords

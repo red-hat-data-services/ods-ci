@@ -545,7 +545,7 @@ Check GPU Resources
     FOR    ${counter}    IN RANGE    ${len}
         Page Should Contain Element    xpath:${RES_CARDS_XP}\[@id=${gpu_re_id}[${counter}]]
         IF    ${gpu_re_link}[${counter}] == '#'
-                ${counter}=    Get WebElements   //a[@href=${gpu_re_link}[${counter}]]
+                ${counter}=    Get WebElements   ${RES_CARDS_XP}//button[text()='Open']
                 ${no_of_open_link}=    Get Length    ${counter}
                 IF   ${no_of_open_link} == ${2}   Log   There are two tile with `Open' link
                 ...        ELSE    Fail     Mismatch on the number of GPU tile present with 'Open' link.Please check the RHODS dashboard.  #robocop disable

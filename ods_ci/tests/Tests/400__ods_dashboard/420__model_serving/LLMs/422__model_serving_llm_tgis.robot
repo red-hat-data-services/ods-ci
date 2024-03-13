@@ -257,7 +257,6 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}
-    ${rev_id}=    Set Variable    ${NONE}
     Wait For New Replica Set To Be Ready    new_exp_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}    old_rev_id=${rev_id}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
@@ -655,7 +654,7 @@ Get Model Pod Label Selector
         Should Be Equal As Integers    ${rc}    ${0}    msg=${hash}
         ${label_selector}=    Set Variable    pod-template-hash=${hash}
     ELSE
-        ${id}=    Get Current Revision ID    model_name=${model_name}
+        ${rev_id}=    Get Current Revision ID    model_name=${model_name}
         ...    namespace=${namespace}
         ${label_selector}=    Set Variable    serving.knative.dev/revisionUID=${rev_id}
     END

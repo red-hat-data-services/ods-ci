@@ -136,16 +136,17 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    namespace=singlemodel-multi1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${models_names_ns_1}    model_name=${model_one_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=singlemodel-multi1    model_name=${model_one_name}
     ...    process_alias=llm-one
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi1    port_forwarding=${IS_KSERVE_RAW}
     IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${models_names_ns_2}    model_name=${model_two_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=singlemodel-multi2    model_name=${model_two_name}
     ...    process_alias=llm-two
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi2    port_forwarding=${IS_KSERVE_RAW}
-    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
+    [Teardown]    Run Keywords
+    ...            Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
     ...           wait_prj_deletion=${FALSE}
     ...           AND
     ...           Clean Up Test Project    test_ns=singlemodel-multi2    isvc_names=${models_names_ns_2}
@@ -595,6 +596,7 @@ Verify User Can Access Model Metrics From UWM
     ...    model_name=${flan_model_name}    query_kind=stream    namespace=${test_namespace}    period=5m    exp_value=1
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+
 Verify User Can Query A Model Using HTTP Calls
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model

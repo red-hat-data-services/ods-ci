@@ -353,11 +353,11 @@ Verify User Can Set Requests And Limits For A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
     ${label_selector}=    Get Model Pod Label Selector    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Container Hardware Resources Should Match Expected    container_name=kserve-container

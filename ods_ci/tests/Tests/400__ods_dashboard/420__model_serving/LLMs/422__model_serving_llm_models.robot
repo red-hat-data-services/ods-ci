@@ -320,6 +320,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 

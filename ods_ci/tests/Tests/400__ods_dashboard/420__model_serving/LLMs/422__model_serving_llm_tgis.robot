@@ -309,23 +309,16 @@ Verify User Can Validate Scale To Zero
     ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-zero
-    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
+    ...    namespace=autoscale-zero
     Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
-    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
+    ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}

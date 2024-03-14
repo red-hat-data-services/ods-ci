@@ -61,7 +61,7 @@
                 "mt0-xxl-hf": {
                     "response_tokens":  13,
                     "response_text": "Watson, c'est très simple !",
-                    "streamed_response_text":   "{ 'inputTokenCount': 9 } { 'generatedTokenCount': 2, 'text': 'Watson' } { 'generatedTokenCount': 3, 'text': ',' } { 'generatedTokenCount': 4, 'text': ' c' } { 'generatedTokenCount': 5, 'text': ''' } { 'generatedTokenCount': 6, 'text': 'est' } { 'generatedTokenCount': 7, 'text': ' ' } { 'generatedTokenCount': 8, 'text': 'trè' } { 'generatedTokenCount': 9, 'text': 's' } { 'generatedTokenCount': 10, 'text': ' simple' } { 'generatedTokenCount': 11, 'text': ' ' } { 'generatedTokenCount': 12, 'text': '!' } { 'generatedTokenCount': 13, 'stopReason': 'EOS_TOKEN' }",
+                    "streamed_response_text":   "{ 'inputTokenCount': 9 } { 'generatedTokenCount': 2, 'text': 'Watson' } { 'generatedTokenCount': 3, 'text': ',' } { 'generatedTokenCount': 4, 'text': ' c' } { 'generatedTokenCount': 5, 'text': \"'\" } { 'generatedTokenCount': 6, 'text': 'est' } { 'generatedTokenCount': 7, 'text': ' ' } { 'generatedTokenCount': 8, 'text': 'trè' } { 'generatedTokenCount': 9, 'text': 's' } { 'generatedTokenCount': 10, 'text': ' simple' } { 'generatedTokenCount': 11, 'text': ' ' } { 'generatedTokenCount': 12, 'text': '!' } { 'generatedTokenCount': 13, 'stopReason': 'EOS_TOKEN' }",
                     "tgis-runtime":{
                         "tokenize_response_text": "{   'responses': [     {       'tokenCount': 9,       'tokens': [         '▁',         'Elementary',         '▁',         'Watson',         '!',         '▁Translate',         '▁to',         '▁French',         '\u003c/s\u003e'       ]     }   ] }"
                     }

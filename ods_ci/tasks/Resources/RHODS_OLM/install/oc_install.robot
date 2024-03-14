@@ -387,7 +387,11 @@ Wait Component Ready
     ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=3m
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
-        FAIL    Timeout waiting for ${component} to be ready
+        ${suffix} =  Generate Random String  4  [LOWER]
+        ${result_dsc_get} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o yaml > dsc-${component}-dump-${suffix}.yaml
+        ...    shell=true    stderr=STDOUT
+        IF  ${result_dsc_get.rc} == ${0}     FAIL    Timeout waiting for ${component} to be ready, DSC CR content stored in 'dsc-${component}-dump-${suffix}.yaml'
+        FAIL    Timeout waiting for ${component} to be ready, DSC CR cannot be retrieved
     END
     Log To Console    ${component} is ready
 

@@ -17,6 +17,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ...            ${channel}=stable    ${catalog_source_name}=certified-operators
     ...            ${cs_namespace}=openshift-marketplace    ${operator_group_name}=${NONE}
     ...            ${operator_group_ns}=${NONE}    ${operator_group_target_ns}=${NONE}
+    Log To Console    message=Installing the '${operator_name}' Operator
     IF    "${operator_group_name}" != "${NONE}"
         Create Operator Group    name=${operator_group_name}
         ...    namespace=${operator_group_ns}    target_namespace=${operator_group_target_ns}

@@ -29,7 +29,7 @@ ${BLOOM_MODEL_S3_DIR}=    bloom-560m/bloom-560m-caikit
 Verify User Can Serve And Query A Model Using The UI
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit runtime
-    ...                Intermittently failing: https://issues.redhat.com/browse/RHOAIENG-3148
+    ...                Intermittently failing: RHOAIENG-3148
     [Tags]    Smoke    Tier1    ODS-2519    ODS-2522
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}

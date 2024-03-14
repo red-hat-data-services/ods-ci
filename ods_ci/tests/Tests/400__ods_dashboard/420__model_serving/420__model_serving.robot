@@ -51,7 +51,7 @@ Verify Openvino_IR Model Via UI
 
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
-    ...                Intermittently failing: https://issues.redhat.com/browse/RHOAIENG-3115
+    ...                Intermittently failing: RHOAIENG-3115
     [Tags]    Smoke
     ...       ODS-2053
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}

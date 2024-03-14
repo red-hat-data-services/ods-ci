@@ -40,8 +40,10 @@ Verify Notebook Tolerations Are Applied To Workbenches
     ...  -tolerations change applied to existent workbench, after restart (value from null to A)
     ...  -tolerations change applied to existent workbench, after restart (value from A to A)
     ...  -tolerations get removed from existent workbench, after restart (check in teardown)
+    ...   ProductBug RHOAIENG-4512
     [Tags]    Tier1    Sanity
     ...       ODS-1969    ODS-2057
+    ...       ProductBug
     Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
     ...                 workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small

@@ -128,7 +128,7 @@ Create Secret For S3-Like Buckets
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
-    ...            ${kserve_mode}=Serverless    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
+    ...            ${kserve_mode}=${NONE}    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
     ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
     ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}    ${overlays}=${EMPTY}
     IF   '${auto_scale}' == '${NONE}'
@@ -173,9 +173,20 @@ Compile Inference Service YAML
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    yq -i '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
-    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    IF    $kserve_mode is not None
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    yq -i '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
+        Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    ELSE
+        ${exists}=    Run Keyword And Return Status    Variable Should Exist  ${DSC_KSERVE_MODE}
+        IF    ${exists}    # done in this way because when use non-admin users they cannot fetch DSC
+            ${mode}=    Set Variable    ${DSC_KSERVE_MODE}
+        ELSE
+            ${mode}=    Get KServe Default Deployment Mode From DSC
+        END  
+        Log    message=Using defaultDeploymentMode set in the DSC: ${mode}
+    END
+
 
 Model Response Should Match The Expectation
     [Documentation]    Checks that the actual model response matches the expected answer.
@@ -365,20 +376,24 @@ Compile Deploy And Query LLM model
     [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
     ...            ${runtime}=caikit-tgis-runtime    ${model_format}=caikit    ${protocol}=grpc    ${inference_type}=all-tokens
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
-    ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
+    ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}    ${limits_dict}=&{EMPTY}
+    ...            ${port_forwarding}=${FALSE}
     Compile Inference Service YAML    isvc_name=${isvc_name}
     ...    sa_name=${sa_name}    serving_runtime=${runtime}
     ...    model_storage_uri=${model_storage_uri}
     ...    canaryTrafficPercent=${canaryTrafficPercent}
     ...    model_format=${model_format}
+    ...    limits_dict=${limits_dict}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${namespace}    model_name=${model_name}
     Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
     ...    n_times=${n_queries}    namespace=${namespace}    query_idx=${query_idx}
     ...    validate_response=${validate_response}    protocol=${protocol}
     ...    runtime=${runtime}    inference_type=${inference_type}
+    ...    port_forwarding=${port_forwarding}
 
 Upgrade Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given
@@ -647,7 +662,7 @@ Clean Up Test Project
     [Documentation]    Deletes the given InferenceServices, check the NS gets removed from ServiceMeshMemberRoll
     ...                and deletes the DS Project
     [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}    ${wait_prj_deletion}=${TRUE}
-    ...            ${kserve_mode}=Serverless
+    ...            ${kserve_mode}=${NONE}
     IF    ${isvc_delete} == ${TRUE}
         FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
               Log    Deleting ${isvc_name}
@@ -655,6 +670,10 @@ Clean Up Test Project
         END
     ELSE
         Log To Console     InferenceService Delete option not provided by user
+    END
+    IF    $kserve_mode is None
+        ${kserve_mode}=    Get KServe Default Deployment Mode From DSC
+        Log    message=Using defaultDeploymentMode set in the DSC: ${kserve_mode}
     END
     IF    "${kserve_mode}"=="Serverless"
            Wait Until Keyword Succeeds    10    1s    Namespace Should Be Removed From ServiceMeshMemberRoll
@@ -723,3 +742,21 @@ Download Prompts Weights In PVC
     Wait For Pods To Be Ready    label_selector=name=${model_name}-download-prompts    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=${model_name}-download-prompts    namespace=${namespace}
     ...    timeout=${download_timeout}
+
+Get KServe Default Deployment Mode From DSC
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    ${rc}    ${mode}=    Run And Return Rc And Output
+    ...    oc get dsc ${DSC_NAME} -ojsonpath='{.spec.components.kserve.defaultDeploymentMode}'
+    Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}    msg=${mode}
+    IF    "${mode}" == "${EMPTY}"
+        Log    message=if defaultDeploymentMode is not set, then it means Serverless
+        ${mode}=    Set Variable    Serverless
+    END
+    RETURN    ${mode}
+
+Start Port-forwarding
+    [Arguments]    ${namespace}    ${model_name}    ${process_alias}=llm-query-process
+    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
+    ...    alias=${process_alias}    stderr=STDOUT    shell=yes
+    Process Should Be Running    ${process}
+    sleep  7s

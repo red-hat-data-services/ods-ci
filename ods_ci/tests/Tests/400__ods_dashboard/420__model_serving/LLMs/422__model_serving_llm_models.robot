@@ -320,6 +320,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
@@ -487,10 +488,3 @@ Setup Test Variables
     Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
     Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
     Set Log Level    INFO
-
-Start Port-forwarding
-    [Arguments]    ${namespace}    ${model_name}
-    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
-    ...    alias=llm-query-process    stderr=STDOUT    shell=yes
-    Process Should Be Running    ${process}
-    sleep  5s

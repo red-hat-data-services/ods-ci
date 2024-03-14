@@ -80,7 +80,6 @@ Verify Disabled Cards Can Be Removed
     ...                 for ods-ci
     [Tags]    Sanity    Tier1
     ...       ODS-1081    ODS-1092
-    ...       AutomationBug
     # Enable Custom App
     # Remove Custom App From Dashboard
     Run Keyword And Warn On Failure    Success Message Should Contain    ODS-CI Custom App

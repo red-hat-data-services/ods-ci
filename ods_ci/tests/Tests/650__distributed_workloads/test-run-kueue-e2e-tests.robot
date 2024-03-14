@@ -48,7 +48,7 @@ Prepare Kueue E2E Test Suite
 
     # Add label instance-type=on-demand on worker node
     Log To Console    Add label on worker node ...
-    ${return_code}    ${output}    Run And Return Rc And Output    oc get nodes -o name --selector=node-role.kubernetes.io/worker | tail -n1
+    ${return_code}    ${output}    Run And Return Rc And Output    oc get nodes -o name --selector='node-role.kubernetes.io/worker,node-role.kubernetes.io notin (infra)' | tail -n1
     Set Suite Variable    ${WORKER_NODE}    ${output}
     ${return_code} =    Run And Return Rc    oc label ${WORKER_NODE} instance-type=on-demand
     Should Be Equal As Integers  ${return_code}   0   msg=Fail to label worker node with instance-type=on-demand

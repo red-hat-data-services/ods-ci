@@ -15,6 +15,8 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 ${USE_PVC}=    ${TRUE}
 ${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
+${IBM_CLOUD_PROXY}=    ${FALSE}
+${PROXY_URL}=    TBD
 ${KSERVE_MODE}=    RawDeployment
 
 
@@ -431,6 +433,10 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model
 *** Keywords ***
 Suite Setup
     [Documentation]
+    IF    ${IBM_CLOUD_PROXY}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    export https_proxy=${PROXY_URL}
+    END
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses

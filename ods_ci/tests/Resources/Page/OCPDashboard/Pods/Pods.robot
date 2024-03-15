@@ -54,15 +54,17 @@ Delete Pods Using Label Selector
 Check If Pod Exists
     [Documentation]    Check existence of an openshift pod by label selector
     [Arguments]    ${namespace}    ${label_selector}    ${status_only}=${TRUE}
-    ${status}    ${val}=    Run Keyword And Ignore Error    Oc Get    kind=Pod    namespace=${namespace}
-        ...    label_selector=${label_selector}
-    IF    ${status_only} == ${TRUE}
-        RETURN    ${status}
-    ELSE
-        Should Be Equal    ${status}    PASS
+    # The oc library does not correctly use a proxy when needed. Replace with equivalent `oc` calls and robot code.
+    #${status}    ${val}=    Run Keyword And Ignore Error    Oc Get    kind=Pod    namespace=${namespace}
+    #    ...    label_selector=${label_selector}
+    ${rc}    ${out} =  Run And Return Rc And Output  oc get pod -l ${label_selector} -n ${namespace}
+    IF    '''${out}''' != "No resources found in ${namespace} namespace."
+        RETURN    PASS
     END
-
-
+    IF    ${status_only} == ${TRUE}
+        RETURN    FAIL
+    END
+    Fail
 
 Verify Operator Pod Status
     [Documentation]    Verify Pod status

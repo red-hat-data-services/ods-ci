@@ -1,6 +1,8 @@
 *** Settings ***
 Documentation     Suite for a basic security test of Dashboard APIs. The tests verifies that user
-...               reach endpoints based on their user permissions
+...               reach endpoints based on their user permissions.
+...    Refer to this file https://github.com/opendatahub-io/odh-dashboard/blob/main/frontend/src/types.ts
+...    to read particular API definitions.
 Library           OpenShiftLibrary
 Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
@@ -72,8 +74,8 @@ ${VALIDATE_ISV_RESULT_ENDPOINT}=         api/validate-isv/results?appName=anacon
 ${NB_ENDPOINT_PT0}=      api/notebooks
 ${NB_ENDPOINT_PT1}=      ${NB_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 ${NB_ENDPOINT_PT2}=      /status
-${NB_ENDPOINT_BODY_A}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":{"configMap":{},"secrets":{"super-secre":"my new secret 20!"}},"state":"started"}
-${NB_ENDPOINT_BODY_B}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":{"configMap":{},"secrets":{"super-secre":"my new secret 20!"}},"state":"started","username":"<USERNAME>"}
+${NB_ENDPOINT_BODY_A}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","acceleratorProfile": {"count": 0},"envVars":{"configMap":{},"secrets":{"super-secret":"my new secret 20!"}},"state":"started"}  #robocop: disable:line-too-long
+${NB_ENDPOINT_BODY_B}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","acceleratorProfile": {"count": 0},"envVars":{"configMap":{},"secrets":{"super-secret":"my new secret 20!"}},"state":"started","username":"<USERNAME>"}  #robocop: disable:line-too-long
 ${NB_STOP_ENDPOINT_BODY_A}=    {"state":"stopped"}
 ${NB_STOP_ENDPOINT_BODY_B}=    {"state":"stopped","username": "<USERNAME>"}
 

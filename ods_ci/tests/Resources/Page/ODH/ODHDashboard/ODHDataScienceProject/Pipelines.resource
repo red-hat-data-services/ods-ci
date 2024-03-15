@@ -213,12 +213,27 @@ Pipeline Last Run Status Should Be
     ...    Page Should Contain Element
     ...    ${pipeline_row_xp}//td/div[text()="${status}"]
 
+Pipeline Run Status Should Be
+    [Documentation]    Checks if the pipeline run has the expected status
+    ...                View: Data Science Pipelines -> Runs, Triggered tab
+    [Arguments]    ${pipeline_name}    ${status}=success
+    Run Keyword And Continue On Failure
+    ...    Page Should Contain Element
+    ...    //td[@data-label="Name"]//span[contains(text(), "${pipeline_name}")]/ancestor::tr//td[@data-label="Status"]//span[contains(@class, "${status}")]
+
 Wait Until Pipeline Last Run Is Finished
     [Documentation]    Waits until the run reported in the "last run" column of the test pipeline
     ...                in the DS Project details page completes the execution (i.e., status is not Running)
     [Arguments]    ${pipeline_name}    ${timeout}=260s
     ${pipeline_row_xp}=    Set Variable     ${PIPELINES_SECTION_XP}//tr[td[@data-label="Name"]/*[a[text()="${pipeline_name}"]]]    # robocop: disable
     Wait Until Page Does Not Contain Element    ${pipeline_row_xp}//td/div[text()="Running"]
+    ...    timeout=${timeout}
+
+Wait Until Pipeline Run Is Finished
+    [Documentation]    Waits until a pipeline run has a different text than "-" in the Duration column.
+    ...                View: Data Science Pipelines -> Runs, Triggered tab
+    [Arguments]    ${pipeline_name}    ${timeout}=260s
+    Wait Until Page Does Not Contain Element    //td[@data-label="Name"]//span[contains(text(), "${pipeline_name}")]/ancestor::tr//td[@data-label="Duration" and text()="-"]
     ...    timeout=${timeout}
 
 Wait Until Pipeline Last Run Is Started
@@ -228,6 +243,13 @@ Wait Until Pipeline Last Run Is Started
 
     ${pipeline_row_xp}=    Set Variable    ${PIPELINES_TABLE_XP}/tbody/tr/td/h2[text()="${pipeline_name}"]/../..
     Wait Until Page Contains Element    ${pipeline_row_xp}//td/div[text()="Running"]
+    ...    timeout=${timeout}
+
+Wait Until Pipeline Run Is Started
+    [Documentation]    Waits until a pipeline run has the text "Just now" in the Started column.
+    ...                View: Data Science Pipelines -> Runs, Triggered tab
+    [Arguments]    ${pipeline_name}    ${timeout}=60s
+    Wait Until Page Contains Element    //td[@data-label="Name"]//span[contains(text(), "${pipeline_name}")]/ancestor::tr//td[@data-label="Created"]//time[text()="Just now"]
     ...    timeout=${timeout}
 
 Wait Until Page Contains Run Topology Page
@@ -289,6 +311,19 @@ Wait Until Pipeline Server Is Deployed
 #    ...    status=Completed
 #    Pipeline Run Should Be Listed    name=${pipeline_run_name}
 #    ...    pipeline_name=${pipeline_name}
+
+Verify Successful Pipeline Run Via Pipelines Runs UI
+    [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state
+    ...                View: Data Science Pipelines -> Runs, Triggered tab
+    [Arguments]    ${pipeline_name}
+    Menu.Navigate To Page    Data Science Pipelines    Runs
+    Wait Until Page Contains Element    xpath://span[text()='Triggered']
+    Click Element    //span[text()='Triggered']
+    Wait Until Pipeline Run Is Started    pipeline_name=${pipeline_name}
+    ...    timeout=10s
+    Wait Until Pipeline Run Is Finished    pipeline_name=${pipeline_name}
+    Pipeline Run Status Should Be    pipeline_name=${pipeline_name}
+    ...    status=success
 
 Verify Pipelines Are Enabled
    [Documentation]    Verifies the Dashboard enabled pipelines

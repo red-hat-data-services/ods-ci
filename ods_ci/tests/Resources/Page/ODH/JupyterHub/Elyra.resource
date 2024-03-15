@@ -73,6 +73,7 @@ Run Pipeline
 
 Click Run Button
     [Documentation]    Click the `Run` button in Elyra
+    Sleep    5s    msg=Wait pipeline changes to get saved
     Click Element    xpath=//button[@aria-label="Run Pipeline"]
     Wait Until Page Contains Element    xpath=${ELYRA_DIALOG}
 

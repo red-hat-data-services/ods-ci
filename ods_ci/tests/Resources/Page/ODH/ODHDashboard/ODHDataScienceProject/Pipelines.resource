@@ -2,6 +2,7 @@
 Documentation    Collection of keywords to interact with DS Pipelines
 Resource       Projects.resource
 Resource       ../ODHDataSciencePipelines.resource
+Resource       ../../../Components/Menu.robot
 
 
 *** Variables ***
@@ -278,21 +279,12 @@ Wait Until Import Pipeline Button Is Enabled
     [Documentation]    Waits until Import Pipeline button is enabled after pipeline server
     ...                Creation
     [Arguments]        ${timeout}=90s
-    Capture Page Screenshot
-    #Wait Until Element Is Enabled   //*[@id="pipelines-projects"]/*/div/button[text()="Import pipeline"]    timeout=${timeout}
-    Capture Page Screenshot
     Wait Until Page Contains        No pipelines        timeout=${timeout}
 
 Navigate To Pipelines Page
     [Documentation]    Navigating to the DataScience Pipelines > Pipelines Page
     ...                Creation
-    Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
-    Click Element    xpath=//button[text()='Data Science Pipelines']
-    Wait Until Page Contains Element    xpath=//a[text()='Pipelines']
-    Click Element    xpath=//a[text()='Pipelines']
-    Sleep       8s
-
-
+    Menu.Navigate To Page    menu=Data Science Pipelines    submenu=Pipelines
 
 # TODO: we need to replace this keyword for a similar one checking in Data Science Pipelines > Runs
 #Verify Successful Pipeline Run Via Project UI

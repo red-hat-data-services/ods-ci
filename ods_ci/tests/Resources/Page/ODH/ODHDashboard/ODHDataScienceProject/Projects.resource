@@ -409,7 +409,8 @@ Create Data Science Project If Not Exists
     [Documentation]    If the given ${project_title} DS Project does not exist, it creates one.
     ...                Useful as test setup.
     [Arguments]    ${project_title}    ${username}    ${description}=${EMPTY}
-    ${rc}    ${resource_name}=    Run And Return Rc And Output     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name' | tr -d '"'   # robocop: disable
+    ${rc}    ${resource_name}=    Run And Return Rc And Output
+    ...    oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name' | tr -d '"'   # robocop: disable
     IF    "${resource_name}" == "${EMPTY}"
         Log    msg=There is no DS Projects with Diplay Name equal to ${project_title}. Creating it now.
         Launch Data Science Project Main Page    username=${username}

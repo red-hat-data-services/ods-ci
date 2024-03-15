@@ -5,6 +5,7 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Resource           ../../../Resources/Page/Operators/OpenShiftPipelines.resource
+Resource           ../../../Resources/Page/Components/Menu.robot
 Test Tags          DataSciencePipelines
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
@@ -24,30 +25,52 @@ ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 
 
 *** Test Cases ***
-Verify Pipeline Server Creation When Using Internal Database
-    [Documentation]     Verifies multiple users can create pipeline server
-    [Tags]    Tier2
+# robocop: off=too-many-calls-in-test-case, too-long-test-case, unused-variable
+Verify Pipeline Server Creation Is Successful When Creating Server Multiple Times Secuentially Using Internal Database
+    [Documentation]    Creates pipeline server secuentially 25 times using the internal database and verifies
+    ...    that the process is always succesful, not showing a a spinning circle indefinitely.
+    ...    Logs the average time required to start a pipeline server.
+    [Timeout]    2h
+    [Tags]    Tier2    Execution-Time-Over-1h
     ...       RHOAIENG-2099
 
-    FOR     ${ITERATION}      IN RANGE    20
+    ${iterations}=     Set Variable    100
+    ${prj_server_creation_title}=   Set Variable    ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}-server-creation
 
-        Open Data Science Project Details Page    project_title=${PRJ_TITLE}
-        Create Pipeline Server    dc_name=${DC_NAME}
-        ...    project_title=${PRJ_TITLE}
-        ${status}=      Run Keyword And Return Status       Wait Until Import Pipeline Button Is Enabled
-        Log     ${ITERATION}     #Iteration which the creation failed
+    Menu.Navigate To Page    menu=Data Science Projects
+    Create Data Science Project    title=${prj_server_creation_title}    description=${PRJ_DESCRIPTION}
+
+    Create S3 Data Connection    project_title=${prj_server_creation_title}    dc_name=${DC_NAME}
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-ds-pipelines
+
+    ${total_time}=    Set Variable
+
+    FOR     ${iteration}      IN RANGE    ${iterations}
+
+        Open Data Science Project Details Page    project_title=${prj_server_creation_title}
+
+        ${time1}=    Get Time    format=%H:%M:%S.%f
+        Create Pipeline Server    dc_name=${DC_NAME}    project_title=${prj_server_creation_title}
+        ${status}=      Run Keyword And Return Status       Wait Until Import Pipeline Button Is Enabled   timeout=60s
+
+        ${time2}=    Get Time
+        ${time_spent}=    Subtract Date From Date    ${time2}    ${time1}
+        ${total_time}=    Evaluate    ${total_time} + ${time_spent}
+
         IF      ${status}
                 Navigate To Pipelines Page
-                ODHDataSciencePipelines.Delete Pipeline Server    ${PRJ_TITLE}
-                Wait Until Page Contains Element        xpath=//button[text()='Data Science Pipelines']
-                Click Element       xpath=//button[text()='Data Science Pipelines']
+                ODHDataSciencePipelines.Delete Pipeline Server    ${prj_server_creation_title}
         ELSE
-                Log    Pipeliner Server Creation takes time more than Expected
-                Log     ${ITERATION}
+                Capture Page Screenshot
+                Fail    Pipeline Server couldn't not be created in the expected time
         END
-        Exit For Loop If    '${status}'=='${False}'
     END
 
+    ${average_time}=    Evaluate    ${total_time} / ${iterations}
+    Log    Average Time to start pipeline server:${average_time}
+
+    [Teardown]    Delete Data Science Project         ${prj_server_creation_title}
 
 Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Page    # robocop: disable
     [Documentation]    Verifies user are able to create and execute a DS Pipeline leveraging on

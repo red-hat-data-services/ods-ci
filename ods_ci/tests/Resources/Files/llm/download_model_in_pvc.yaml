@@ -49,7 +49,7 @@ spec:
           value: ${bucket_name}
         - name: S3_USE_HTTPS
           value: ${use_https}
-        - name: S3_ENDPOINT
+        - name: AWS_ENDPOINT_URL
           value: ${endpoint}
         - name: awsAnonymousCredential
           value: 'false'

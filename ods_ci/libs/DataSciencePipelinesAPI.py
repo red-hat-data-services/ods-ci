@@ -238,7 +238,7 @@ class DataSciencePipelinesAPI:
         response = requests.get(
             f"http://{self.route}/{url}",
             headers={"Authorization": f"Bearer {self.sa_token}"},
-            verify=False,
+            verify=self.get_cert()
         )
         assert response.status_code == 200
         return response.url
@@ -310,20 +310,35 @@ class DataSciencePipelinesAPI:
         return self.byte_to_str(output), error
 
     def do_get(self, url, headers=None):
-        response = requests.get(url, headers=headers, verify=False)
+        response = requests.get(url, headers=headers, verify=self.get_cert())
         return self.byte_to_str(response.content), response.status_code
 
     def do_post(self, url, headers, json):
-        response = requests.post(url, headers=headers, json=json, verify=False)
+        response = requests.post(url, headers=headers, json=json, verify=self.get_cert())
         return self.byte_to_str(response.content), response.status_code
 
     def do_upload(self, url, files, headers=None):
-        response = requests.post(url, headers=headers, files=files, verify=False)
+        response = requests.post(url, headers=headers, files=files, verify=self.get_cert())
         return self.byte_to_str(response.content), response.status_code
 
     def do_delete(self, url, headers):
-        response = requests.delete(url, headers=headers, verify=False)
+        response = requests.delete(url, headers=headers, verify=self.get_cert())
         return self.byte_to_str(response.content), response.status_code
 
     def byte_to_str(self, content):
         return content.decode("utf-8", "ignore")
+
+    def get_secret(self, project, name):
+        secret_json, _ = self.run_oc(f"oc get secret -n {project} {name} -o json")
+        return json.loads(secret_json)
+
+    def get_cert(self):
+        cert_json = self.get_secret("openshift-ingress-operator", "router-ca")
+        cert = cert_json["data"]["tls.crt"]
+        decoded_cert = base64.b64decode(cert).decode("utf-8")
+
+        file_name = "/tmp/kft-cert"
+        cert_file = open(file_name, "w")
+        cert_file.write(decoded_cert)
+        cert_file.close()
+        return file_name

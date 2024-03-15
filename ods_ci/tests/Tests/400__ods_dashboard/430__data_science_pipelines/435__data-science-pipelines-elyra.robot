@@ -153,9 +153,6 @@ Run Elyra Hello World Pipeline Test  # robocop: disable
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page
-
-    ## TODO: modify it to use Pipeles > Runs
-#    Verify Successful Pipeline Run Via Project UI   pipeline_run_name=${pipeline_run_name}
-#    ...    pipeline_name=${img} Pipeline    project_name=${PRJ_TITLE}
-
+    Verify Successful Pipeline Run Via Pipelines Runs UI   pipeline_name=${img} Pipeline
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     Stop Workbench    workbench_title=elyra_${img}

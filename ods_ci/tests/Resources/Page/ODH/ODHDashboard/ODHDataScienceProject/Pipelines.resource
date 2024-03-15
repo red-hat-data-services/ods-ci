@@ -296,10 +296,26 @@ Wait Until Pipeline Server Is Deployed
     Wait Until Keyword Succeeds    10 times    10s
     ...    Verify Pipeline Server Deployments    project_title=${project_title}
 
-Verify Successful Pipeline Run Via Project UI
+# TODO: we need to replace this keyword for a similar one checking in Data Science Pipelines > Runs
+#Verify Successful Pipeline Run Via Project UI
+#    [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state
+#    ...    In the DS Project view of a given project
+#    [Arguments]    ${pipeline_run_name}    ${pipeline_name}    ${project_name}
+#    Open Data Science Project Details Page    ${project_name}
+#    Wait Until Pipeline Last Run Is Started    pipeline_name=${pipeline_name}
+#    ...    timeout=10s
+#    Wait Until Pipeline Last Run Is Finished    pipeline_name=${pipeline_name}
+#    Pipeline Last Run Should Be    pipeline_name=${pipeline_name}
+#    ...    run_name=${pipeline_run_name}
+#    Pipeline Last Run Status Should Be    pipeline_name=${pipeline_name}
+#    ...    status=Completed
+#    Pipeline Run Should Be Listed    name=${pipeline_run_name}
+#    ...    pipeline_name=${pipeline_name}
+
+Verify Successful Pipeline Run Via Pipelines Runs UI
     [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state
     ...                View: Data Science Pipelines -> Runs, Triggered tab
-    [Arguments]    ${pipeline_run_name}    ${pipeline_name}    ${project_name}
+    [Arguments]    ${pipeline_name}
     Menu.Navigate To Page    Data Science Pipelines    Runs
     Wait Until Page Contains Element    xpath://span[text()='Triggered']
     Click Element    //span[text()='Triggered']

@@ -26,10 +26,10 @@ ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 *** Test Cases ***
 Verify Pipeline Server Creation When Using Internal Database
     [Documentation]     Verifies multiple users can create pipeline server
-    [Tags]    Tier2     RunThisTest
+    [Tags]    Tier2
     ...       RHOAIENG-2099
 
-    FOR     ${ITERATION}      IN RANGE    10
+    FOR     ${ITERATION}      IN RANGE    20
 
         Open Data Science Project Details Page    project_title=${PRJ_TITLE}
         Create Pipeline Server    dc_name=${DC_NAME}
@@ -39,6 +39,8 @@ Verify Pipeline Server Creation When Using Internal Database
         IF      ${status}
                 Navigate To Pipelines Page
                 ODHDataSciencePipelines.Delete Pipeline Server    ${PRJ_TITLE}
+                Wait Until Page Contains Element        xpath=//button[text()='Data Science Pipelines']
+                Click Element       xpath=//button[text()='Data Science Pipelines']
         ELSE
                 Log    Pipeliner Server Creation takes time more than Expected
                 Log     ${ITERATION}

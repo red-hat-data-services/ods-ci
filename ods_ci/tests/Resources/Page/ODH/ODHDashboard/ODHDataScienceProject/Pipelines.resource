@@ -289,6 +289,7 @@ Navigate To Pipelines Page
     Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
     Click Element    xpath=//button[text()='Data Science Pipelines']
     Wait Until Page Contains Element    xpath=//a[text()='Pipelines']
+    Sleep       8s
     Click Element    xpath=//a[text()='Pipelines']
 
 

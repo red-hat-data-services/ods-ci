@@ -30,6 +30,8 @@ Verify Pipeline Server Creation When Using Internal Database
     ...       RHOAIENG-2099
 
     FOR     ${ITERATION}      IN RANGE    10
+
+        Open Data Science Project Details Page    project_title=${PRJ_TITLE}
         Create Pipeline Server    dc_name=${DC_NAME}
         ...    project_title=${PRJ_TITLE}
         ${status}=      Run Keyword And Return Status       Wait Until Import Pipeline Button Is Enabled
@@ -39,6 +41,7 @@ Verify Pipeline Server Creation When Using Internal Database
                 ODHDataSciencePipelines.Delete Pipeline Server    ${PRJ_TITLE}
         ELSE
                 Log    Pipeliner Server Creation takes time more than Expected
+                Log     ${ITERATION}
         END
         Exit For Loop If    '${status}'=='${False}'
     END

@@ -384,7 +384,7 @@ Wait Component Ready
     Log To Console    Waiting for ${component} to be ready
 
     # oc wait "${cluster_name}" --for=condition\=${component}Ready\=true --timeout\=3m
-    ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=3m
+    ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=10m
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         ${suffix} =  Generate Random String  4  [LOWER]

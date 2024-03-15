@@ -50,8 +50,8 @@ RHOSi Setup
     Protect Sensitive Variables In Keywords
     Required Global Variables Should Exist
     Initialize Global Variables
-    #Run Keyword If RHODS Is Managed
-    #...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
+    Run Keyword If RHODS Is Managed
+    ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
     # TO DO: oc login
 
 RHOSi Teardown

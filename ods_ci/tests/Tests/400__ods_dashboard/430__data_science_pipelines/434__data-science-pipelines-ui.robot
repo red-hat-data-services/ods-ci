@@ -30,8 +30,8 @@ Verify Pipeline Server Creation Is Successful When Creating Server Multiple Time
     [Documentation]    Creates pipeline server secuentially 25 times using the internal database and verifies
     ...    that the process is always succesful, not showing a a spinning circle indefinitely.
     ...    Logs the average time required to start a pipeline server.
-    [Timeout]    2h
-    [Tags]    Tier2    Execution-Time-Over-1h
+    [Timeout]    150m
+    [Tags]    Tier2    Execution-Time-Over-2h
     ...       RHOAIENG-2099
 
     ${iterations}=     Set Variable    100

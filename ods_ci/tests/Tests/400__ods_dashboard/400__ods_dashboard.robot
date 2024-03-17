@@ -299,7 +299,7 @@ Verify Dashboard Pod Is Not Getting Restarted
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-374
-    ${pod_names}    Get POD Names    ${APPLICATIONS_NAMESPACE}    app=rhods-dashboard
+    ${pod_names}    Get POD Names    ${APPLICATIONS_NAMESPACE}    app=${DASHBOARD_APP_NAME}
     Verify Containers Have Zero Restarts    ${pod_names}    ${APPLICATIONS_NAMESPACE}
 
 Verify Switcher to Masterhead
@@ -480,7 +480,7 @@ Remove Items From Favorites
     Close Browser
 
 RHODS Dahsboard Pod Should Contain OauthProxy Container
-    ${list_of_pods} =    Search Pod    namespace=${APPLICATIONS_NAMESPACE}    pod_start_with=rhods-dashboard
+    ${list_of_pods} =    Search Pod    namespace=${APPLICATIONS_NAMESPACE}    pod_regex=${DASHBOARD_APP_NAME}
     FOR    ${pod_name}    IN   @{list_of_pods}
         ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=${APPLICATIONS_NAMESPACE}
         List Should Contain Value    ${container_name}    oauth-proxy

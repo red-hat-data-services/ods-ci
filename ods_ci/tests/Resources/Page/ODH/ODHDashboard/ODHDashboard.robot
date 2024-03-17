@@ -750,7 +750,7 @@ Clear Dashboard Notifications
 
 Get Dashboard Pods Names
     [Documentation]     Retrieves the names of dashboard pods
-    ${dash_pods}=    Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}     label_selector=app=rhods-dashboard
+    ${dash_pods}=    Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}     label_selector=app=${DASHBOARD_APP_NAME}
     ...                        fields=['metadata.name']
     ${names}=   Create List
     FOR    ${pod_name}    IN    @{dash_pods}
@@ -761,7 +761,7 @@ Get Dashboard Pods Names
 Get Dashboard Pod Logs
     [Documentation]     Fetches the logs from one dashboard pod
     [Arguments]     ${pod_name}
-    ${pod_logs}=    Oc Get Pod Logs  name=${pod_name}  namespace=${APPLICATIONS_NAMESPACE}  container=rhods-dashboard
+    ${pod_logs}=    Oc Get Pod Logs  name=${pod_name}  namespace=${APPLICATIONS_NAMESPACE}  container=${DASHBOARD_APP_NAME}
     ${pod_logs_lines}=    Split String    string=${pod_logs}  separator=\n
     ${n_lines}=    Get Length    ${pod_logs_lines}
     Log     ${pod_logs_lines}[${n_lines-3}:]

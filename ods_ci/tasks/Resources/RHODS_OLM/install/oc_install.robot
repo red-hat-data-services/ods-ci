@@ -94,10 +94,10 @@ Verify RHODS Installation
         Add UI Admin Group To Dashboard Admin
 
     ELSE
-        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=rhods-dashboard"
+        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=${DASHBOARD_APP_NAME}"
         Wait For Pods Numbers  5
         ...                   namespace=${APPLICATIONS_NAMESPACE}
-        ...                   label_selector=app=rhods-dashboard
+        ...                   label_selector=app=${DASHBOARD_APP_NAME}
         ...                   timeout=1200
     END
   END

@@ -114,7 +114,7 @@ Wait for QuickStart to Load
     RETURN    ${quickStartElements}
 
 Wait Until Resource Page Is Loaded
-    Wait Until Page Contains Element    xpath://div[contains(@class,'odh-learning-paths__gallery')]
+    Wait Until Page Contains Element    xpath://div[@aria-label="Favoritable card container"]
 
 Get Link Web Elements From Resource Page
     [Documentation]    Returns the link web elements from Resources page which redirects users to

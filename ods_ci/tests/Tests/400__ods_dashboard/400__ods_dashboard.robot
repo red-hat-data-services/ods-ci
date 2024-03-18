@@ -56,6 +56,9 @@ Verify Content In RHODS Explore Section
     [Tags]    Sanity    Tier1
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
     ...       ProductBug
+    ...       AutomationBugOnODH
+    # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
+    # ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
@@ -67,6 +70,9 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1890
+    ...       AutomationBugOnODH
+    # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
+    # ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
@@ -128,6 +134,10 @@ Verify Documentation Link HTTP Status Code
     ...    also checks the RHODS dcoumentation link present in resource page.
     [Tags]    Sanity    Tier1
     ...       ODS-327    ODS-492
+    ...       AutomationBugOnODH
+    # TODO: In ODH the expected Docs links are:
+    # https://opendatahub.io/community
+    # https://opendatahub.io/docs
     ${links}=  Get RHODS Documentation Links From Dashboard
     Documentation Links Should Be Equal To The Expected Ones   actual_links=${links}  expected_links=${DOC_LINKS_EXP}
     Check External Links Status     links=${links}
@@ -145,6 +155,7 @@ Search and Verify GPU Items Appears In Resources Page
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1226
+    ...       ExcludeOnODH
     Search Items In Resources Section    GPU
     Check GPU Resources
 
@@ -163,6 +174,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...       ODS-470  ODS-718
     ...       Execution-Time-Over-30m
     ...       FlakyTest
+    ${failed_build_name}=    Set Variable    ${NONE}
     Skip If RHODS Version Greater Or Equal Than    1.20.0    CUDA build chain removed in v1.20
     Clear Dashboard Notifications
     ${build_name}=  Search Last Build  namespace=${APPLICATIONS_NAMESPACE}    build_name_includes=pytorch
@@ -184,7 +196,7 @@ Verify Favorite Resource Cards
     ...                It checks if favorite items are always listed as first regardless
     ...                the view type or sorting
     Click Link    Resources
-    Wait Until Element Is Visible    //div[@class="pf-v5-l-gallery pf-m-gutter odh-learning-paths__gallery"]
+    Wait Until Resource Page Is Loaded
     Sort Resources By    name
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile_ids}

@@ -734,7 +734,7 @@ RHODS Notification Drawer Should Not Contain
 Sort Resources By
     [Documentation]    Changes the sort of items in resource page
     [Arguments]    ${sort_type}
-    Click Element    //div[@class="pf-v5-c-toolbar__content-section"]/div[2]/div/button
+    Click Button    //*[contains(., "Sort by")]
     Click Button    //button[@data-key="${sort_type}"]
     Sleep    1s
 

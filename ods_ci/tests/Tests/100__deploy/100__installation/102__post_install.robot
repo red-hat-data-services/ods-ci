@@ -267,7 +267,6 @@ Verify RHODS Display Name and Version
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1862
-        
     IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
         ${CSV_DISPLAY} =    Set Variable     Red Hat OpenShift AI
     ELSE

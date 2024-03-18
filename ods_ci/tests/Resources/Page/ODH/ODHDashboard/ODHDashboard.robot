@@ -144,18 +144,18 @@ Launch ${dashboard_app} From RHODS Dashboard Dropdown
 
 Verify Service Is Enabled
   [Documentation]   Verify the service appears in Applications > Enabled
-  [Arguments]  ${app_name}
+  [Arguments]  ${app_name}    ${timeout}=180s
   Menu.Navigate To Page    Applications    Enabled
-  Wait Until Page Contains    Jupyter  timeout=30
-  Wait Until Page Contains    ${app_name}  timeout=180
+  # Jupyter App should always be listed
+  Wait Until Page Contains    Jupyter    timeout=30s
+  Wait Until Page Contains    ${app_name}    timeout=${timeout}
   Page Should Contain Element    xpath://div//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
   Page Should Not Contain Element    xpath://div//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
-
 
 Verify Service Is Not Enabled
   [Documentation]   Verify the service is not present in Applications > Enabled
   [Arguments]  ${app_name}
-  ${app_is_enabled}=  Run Keyword And Return Status   Verify Service Is Enabled    ${app_name}
+  ${app_is_enabled}=  Run Keyword And Return Status   Verify Service Is Enabled    ${app_name}    timeout=10s
   Should Be True   not ${app_is_enabled}   msg=${app_name} should not be enabled in ODS Dashboard
 
 Verify Service Is Available In The Explore Page

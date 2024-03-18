@@ -113,6 +113,7 @@ Delete Pipeline
 Delete Pipeline Server
     [Documentation]    Delete a pipeline server. From the top right menu inside "Data Science Pipelines" -> Pipelines
     [Arguments]    ${data_science_project_name}
+    [Tags]    robot:recursive-continue-on-failure
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Pipeline server actions')]
     Sleep    20s
     Click Button            xpath://button[contains(span/text(), 'Pipeline server actions')]

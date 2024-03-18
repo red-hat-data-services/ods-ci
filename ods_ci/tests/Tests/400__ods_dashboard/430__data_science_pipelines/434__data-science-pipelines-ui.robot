@@ -60,7 +60,8 @@ Verify Pipeline Server Creation Is Successful When Creating Server Multiple Time
 
         IF      ${status}
                 Navigate To Pipelines Page
-                ODHDataSciencePipelines.Delete Pipeline Server    ${prj_server_creation_title}
+                Run Keyword And Ignore Error
+                ...    ODHDataSciencePipelines.Delete Pipeline Server    ${prj_server_creation_title}
         ELSE
                 Capture Page Screenshot
                 Fail    Pipeline Server couldn't not be created in the expected time

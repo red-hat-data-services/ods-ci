@@ -15,9 +15,10 @@
 # source https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py
 from kfp import components, dsl
 
-from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
+from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
+@dsl.component
 def random_num(low: int, high: int) -> int:
     """Generate a random number between low and high."""
     import random
@@ -27,6 +28,7 @@ def random_num(low: int, high: int) -> int:
     return result
 
 
+@dsl.component
 def flip_coin() -> str:
     """Flip a coin and output heads or tails randomly."""
     import random
@@ -36,6 +38,7 @@ def flip_coin() -> str:
     return result
 
 
+@dsl.component
 def print_msg(msg: str):
     """Print a message."""
     print(msg)
@@ -46,23 +49,17 @@ def print_msg(msg: str):
     description="Shows how to use dsl.Condition().",
 )
 def flipcoin_pipeline():
-    flip_coin_op = components.create_component_from_func(flip_coin, base_image=DataSciencePipelinesKfpTekton.base_image)
-    print_op = components.create_component_from_func(print_msg, base_image=DataSciencePipelinesKfpTekton.base_image)
-    random_num_op = components.create_component_from_func(
-        random_num, base_image=DataSciencePipelinesKfpTekton.base_image
-    )
-
-    flip = flip_coin_op()
+    flip = flip_coin()
     with dsl.Condition(flip.output == "heads"):
-        random_num_head = random_num_op(0, 9)
+        random_num_head = random_num(low=0, high=9)
         with dsl.Condition(random_num_head.output > 5):
-            print_op("heads and %s > 5!" % random_num_head.output)
+            print_msg(msg="heads and %s > 5!" % random_num_head.output)
         with dsl.Condition(random_num_head.output <= 5):
-            print_op("heads and %s <= 5!" % random_num_head.output)
+            print_msg(msg="heads and %s <= 5!" % random_num_head.output)
 
     with dsl.Condition(flip.output == "tails"):
-        random_num_tail = random_num_op(10, 19)
+        random_num_tail = random_num(low=10, high=19)
         with dsl.Condition(random_num_tail.output > 15):
-            print_op("tails and %s > 15!" % random_num_tail.output)
+            print_msg(msg="tails and %s > 15!" % random_num_tail.output)
         with dsl.Condition(random_num_tail.output <= 15):
-            print_op("tails and %s <= 15!" % random_num_tail.output)
+            print_msg(msg="tails and %s <= 15!" % random_num_tail.output)

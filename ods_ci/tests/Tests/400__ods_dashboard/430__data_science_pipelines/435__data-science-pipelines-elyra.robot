@@ -11,7 +11,6 @@ Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
-Resource         ../../../Resources/Page/Operators/OpenShiftPipelines.resource
 Library          Screenshot
 Library          DebugLibrary
 Library          JupyterLibrary
@@ -88,7 +87,6 @@ Elyra Pipelines Suite Setup
     [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    Install Red Hat OpenShift Pipelines
 
 Elyra Pipelines SDS Setup
     [Documentation]    Suite Setup, creates DS Project and opens it

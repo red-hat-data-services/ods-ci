@@ -67,6 +67,7 @@ Verify RHODS Installation
     Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-operators
     Set Global Variable    ${NOTEBOOKS_NAMESPACE}    opendatahub
   END
+  Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
   IF  "${UPDATE_CHANNEL}" != "odh-nightlies"

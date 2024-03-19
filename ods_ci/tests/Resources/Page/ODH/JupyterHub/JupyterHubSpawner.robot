@@ -32,8 +32,8 @@ ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v5-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.9
 ${PREVIOUS_PYTHON_VER} =    3.9
-${DEFAULT_NOTEBOOK_VER} =    2023.2
-${PREVIOUS_NOTEBOOK_VER} =    2023.1
+${DEFAULT_NOTEBOOK_VER} =    2024.1
+${PREVIOUS_NOTEBOOK_VER} =    2023.2
 
 
 *** Keywords ***

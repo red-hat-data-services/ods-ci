@@ -7,8 +7,6 @@ Suite Teardown    Suite Teardown
 
 
 *** Variables ***
-${RHOAI_APPNAME}     Red Hat OpenShift AI
-${RHOAI_OPERATOR_NAME}    Red Hat OpenShift AI
 ${RHOAI_OPERATOR_NS}    redhat-ods-operator
 ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    rhods-operator
 ${SERVICE_MESH_OPERATOR_NS}    openshift-operators
@@ -43,7 +41,7 @@ Validate Trusted CA Bundles ConfigMaps
     Check ConfigMap Contains CA Bundle   ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ca-bundle.crt    ${SERVICE_MESH_CR_NS}
 
     Set Custom CA Bundle Value In DSCI   ${CUSTOM_CA_BUNDLE}    ${RHOAI_OPERATOR_NS}
-    Wait Until Keyword Succeeds    3 min    0 sec    
+    Wait Until Keyword Succeeds    3 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
 
     Log    message=Validate Trusted CA Bundle Management State Unmanaged    level=INFO

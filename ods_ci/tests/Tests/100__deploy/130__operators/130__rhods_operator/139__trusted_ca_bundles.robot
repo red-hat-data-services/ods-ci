@@ -99,7 +99,7 @@ Is Resource Present
 Is DSCI In Ready State
     [Documentation]    Checks that DSCI Reconciled Succesfully
     [Arguments]    ${dsci}    ${namespace}
-    ${rc}=    Run And Return Rc 
+    ${rc}=    Run And Return Rc
     ...    oc wait --timeout=3m --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsci ${dsci}
     Should Be Equal As Integers    ${rc}     ${0}    msg=${dsci} not in Ready state
 

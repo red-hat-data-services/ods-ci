@@ -4,6 +4,7 @@ Resource          ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource          ../../Resources/RHOSi.resource
 Resource          ../../Resources/ODS.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource          ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource          ../../Resources/Page/LoginPage.robot
@@ -125,7 +126,8 @@ Verify CSS Style Of Getting Started Descriptions
     ...       ODS-1165
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
-    Open Get Started Sidebar And Return Status    card_locator=${SAMPLE_APP_CARD_XP}
+    ${status}=    Open Get Started Sidebar And Return Status    card_locator=${JUPYTER_CARD_XP}
+    Should Be Equal    ${status}    ${TRUE}
     Capture Page Screenshot    get_started_sidebar.png
     Verify Jupyter Card CSS Style
 
@@ -501,10 +503,9 @@ RHODS Dahsboard Pod Should Contain OauthProxy Container
     END
 
 Verify Jupyter Card CSS Style
-    [Documentation]    Compare the some CSS properties of the Explore page
-    ...    with the expected ones. The expected values change based
-    ...    on the RHODS version
-    CSS Property Value Should Be    locator=//pre
+    [Documentation]    Compare the some CSS properties of the Explore page with the expected ones
+    # Verify that the color of the Jupyter code is gray
+    CSS Property Value Should Be    locator=${EXPLORE_PANEL_XP}//code
     ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
     ...    property=margin-bottom    exp_value=8px

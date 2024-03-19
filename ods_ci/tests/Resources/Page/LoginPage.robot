@@ -44,7 +44,7 @@ Login To Openshift
     Wait Until Page Contains A String In List    ${expected_text_list}
 
     # Return if page is not the Login page (no login required)
-    ${should_login} =    Is Current Domain Equal To    https://oauth-openshift
+    ${should_login} =    Does Current Sub Domain Start With    https://oauth
     IF  not ${should_login}    RETURN
 
     # If here we need to login

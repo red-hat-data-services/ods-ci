@@ -316,8 +316,8 @@ Get Domain From Current URL
     ${domain} =    Fetch From Left    string=${current_url}    marker=.
     RETURN    ${domain}
 
-Is Current Domain Equal To
-    [Documentation]    Compare the lowest level domain to a given string
+Does Current Sub Domain Start With
+    [Documentation]    Check if current sub-domain start with the given String
     ...   and returns True/False
     [Arguments]    ${url}
     ${domain} =    Get Domain From Current URL

@@ -7,6 +7,9 @@ Suite Teardown    Suite Teardown
 
 
 *** Variables ***
+${RHOAI_APPNAME}     Red Hat OpenShift AI
+${RHOAI_OPERATOR_NAME}    Red Hat OpenShift AI
+${RHOAI_OPERATOR_NS}    redhat-ods-operator
 ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    rhods-operator
 ${SERVICE_MESH_OPERATOR_NS}    openshift-operators
 ${SERVICE_MESH_CR_NS}    istio-system
@@ -25,8 +28,6 @@ Validate Trusted CA Bundles ConfigMaps
     ...    odh-trusted-ca-bundle ConfigMaps
     [Tags]    Operator
     ...       ODS-2638
-
-    Assign Vars According To Product    ${PRODUCT}
 
     Log    message=Check that operators are available    level=INFO
 
@@ -81,19 +82,6 @@ Suite Teardown
     Log    message=Suite Teardown.    level=INFO
     RHOSi Teardown
 
-Assign Vars According To Product
-    [Documentation]    Assign variables related to product
-    [Arguments]    ${product}
-    IF    "${product}" == "RHODS"
-        VAR    ${RHOAI_APPNAME}     Red Hat OpenShift AI
-        VAR    ${RHOAI_OPERATOR_NAME}    Red Hat OpenShift AI
-        VAR    ${RHOAI_OPERATOR_NS}    redhat-ods-operator
-    ELSE IF    "${product}" == "ODH"
-        VAR    ${RHOAI_APPNAME}  Open Data Hub Operator
-        VAR    ${RHOAI_OPERATOR_NAME}    Open Data Hub Operator
-        VAR    ${RHOAI_OPERATOR_NS}    openshift-operators
-    END
-
 Is Operator Available
     [Documentation]    Checks if operator is available
     [Arguments]    ${operator_name}    ${namespace}
@@ -111,9 +99,9 @@ Is Resource Present
 Is DSCI In Ready State
     [Documentation]    Checks that DSCI Reconciled Succesfully
     [Arguments]    ${dsci}    ${namespace}
-    ${rc}=    Run And Return Rc
+    ${rc}=    Run And Return Rc 
     ...    oc wait --timeout=3m
-    ...    --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted-n ${namespace} dsci ${dsci}
+    ... --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted-n ${namespace} dsci ${dsci}
     Should Be Equal As Integers    ${rc}     ${0}    msg=${dsci} not in Ready state
 
 Check ConfigMap Contains CA Bundle
@@ -135,7 +123,7 @@ Set Custom CA Bundle Value In DSCI
     [Arguments]    ${custom_ca_bundle_value}    ${namespace}
     ${rc}=     Run And Return Rc
     ...    oc patch DSCInitialization/default-dsci
-    ...    -n ${namespace} -p '{"spec":{"trustedCABundle":{"customCABundle":"${custom_ca_bundle_value}"}}}' --type merge
+    ... -n ${namespace} -p '{"spec":{"trustedCABundle":{"customCABundle":"${custom_ca_bundle_value}"}}}' --type merge
     Should Be Equal    "${rc}"    "0"    msg=Failed to set DSCI Custom CA Bundle value to ${custom_ca_bundle_value}
 
 Set Custom CA Bundle Value On ConfigMap
@@ -143,7 +131,7 @@ Set Custom CA Bundle Value On ConfigMap
     [Arguments]    ${config_map}    ${custom_ca_bundle_value}    ${namespace}
     ${rc}=     Run And Return Rc
     ...    oc patch ConfigMap/${config_map}
-    ...    -n ${namespace} -p '{"data":{"odh-ca-bundle.crt":"${custom_ca_bundle_value}"}}' --type merge
+    ... -n ${namespace} -p '{"data":{"odh-ca-bundle.crt":"${custom_ca_bundle_value}"}}' --type merge
     Should Be Equal    "${rc}"    "0"    msg=Failed to set ${config_map} value ${custom_ca_bundle_value} ${namespace}
 
 Set Trusted CA Bundle Management State
@@ -151,5 +139,5 @@ Set Trusted CA Bundle Management State
     [Arguments]    ${management_state}    ${namespace}
     ${rc}=     Run And Return Rc
     ...    oc patch DSCInitialization/default-dsci
-    ...    -n ${namespace} -p '{"spec":{"trustedCABundle":{"managementState":"${management_state}"}}}' --type merge
+    ... -n ${namespace} -p '{"spec":{"trustedCABundle":{"managementState":"${management_state}"}}}' --type merge
     Should Be Equal    "${rc}"    "0"    msg=Failed update DSCI trustedCABundle managementState to ${management_state}

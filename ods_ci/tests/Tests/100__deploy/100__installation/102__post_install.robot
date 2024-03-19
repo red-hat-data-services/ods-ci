@@ -274,8 +274,8 @@ Verify RHODS Display Name and Version
     END
     ${csv_name} =    Run    oc get csv -n ${OPERATOR_NAMESPACE} --no-headers | awk '/${CSV_DISPLAY}/ {print \$1}'
     ${csv_version} =    Run    oc get csv -n ${OPERATOR_NAMESPACE} --no-headers ${csv_name} -o custom-columns=":spec.version"
-    ${csv_version_t} =    Split String   ${csv_name}    .v    1
-    Should Be Equal       ${csv_version_t[1]}   ${csv_version}
+    ${csv_version_t} =    Split String   ${csv_name}    .    1
+    Should Be Equal       ${csv_version_t[1].replace('v','')}   ${csv_version}
     ...    msg='${csv_name}' name and '${csv_version}' vesrion are not consistent
 
 Verify RHODS Notebooks Network Policies

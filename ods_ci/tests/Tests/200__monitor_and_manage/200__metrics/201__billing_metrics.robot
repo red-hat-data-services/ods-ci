@@ -34,7 +34,7 @@ Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
 
 Test Billing Metric (Notebook Cpu Usage) On OpenShift Monitoring
     [Documentation]     Run notebook for 5 min and checks CPU usage is greater than zero
-    [Tags]    Smoke
+    [Tags]    Sanity
     ...       Tier1
     ...       ODS-175
     Run Jupyter Notebook For 5 Minutes

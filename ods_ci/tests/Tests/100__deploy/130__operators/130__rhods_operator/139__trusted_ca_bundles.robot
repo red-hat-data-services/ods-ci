@@ -5,6 +5,7 @@ Resource    ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Suite Setup    Suite Setup
 Suite Teardown    Suite Teardown
 
+
 *** Variables ***
 ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    rhods-operator
 ${SERVICE_MESH_OPERATOR_NS}    openshift-operators
@@ -41,28 +42,28 @@ Validate Trusted CA Bundles ConfigMaps
     Check ConfigMap Contains CA Bundle   ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ca-bundle.crt    ${SERVICE_MESH_CR_NS}
 
     Set Custom CA Bundle Value In DSCI   ${CUSTOM_CA_BUNDLE}    ${RHOAI_OPERATOR_NS}
-    Wait Until Keyword Succeeds    
-    ...    3 min    0 sec    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
+    Wait Until Keyword Succeeds    3 min    0 sec    
+    ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
 
     Log    message=Validate Trusted CA Bundle Management State Unmanaged    level=INFO
 
     Set Trusted CA Bundle Management State    Unmanaged    ${RHOAI_OPERATOR_NS}
 
-    #Trusted CA BUndle managementStatus 'Unmanaged' should NOT result in bundle being overwirtten by operator
+    # Trusted CA BUndle managementStatus 'Unmanaged' should NOT result in bundle being overwirtten by operator
     Set Custom CA Bundle Value On ConfigMap
     ...    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${SERVICE_MESH_CR_NS}
     # Allow operator time to reconsile
     Sleep    5
-    Wait Until Keyword Succeeds
-    ...    3 min    0 sec    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
+    Wait Until Keyword Succeeds    3 min    0 sec
+    ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
 
     Log    message=Validate Trusted CA Bundle Management State Removed    level=INFO
 
     Set Trusted CA Bundle Management State    Removed    ${RHOAI_OPERATOR_NS}
 
     # Check that odh-trusted-ca-bundle has been 'Removed'
-    Wait Until Keyword Succeeds
-    ...    3 min    0 sec    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${SERVICE_MESH_CR_NS}    ${IS_NOT_PRESENT}
+    Wait Until Keyword Succeeds    3 min    0 sec
+    ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${SERVICE_MESH_CR_NS}    ${IS_NOT_PRESENT}
 
     Log    message=Restore DSCI to original state    level=INFO
     Set Custom CA Bundle Value In DSCI   ''    ${RHOAI_OPERATOR_NS}
@@ -133,22 +134,22 @@ Set Custom CA Bundle Value In DSCI
     [Documentation]    Set Custom CA Bundle Value in DSCI
     [Arguments]    ${custom_ca_bundle_value}    ${namespace}
     ${rc}=     Run And Return Rc
-    ...    oc patch
-    ...    DSCInitialization/default-dsci -n ${namespace} -p '{"spec":{"trustedCABundle":{"customCABundle":"${custom_ca_bundle_value}"}}}' --type merge
+    ...    oc patch DSCInitialization/default-dsci
+    ...    -n ${namespace} -p '{"spec":{"trustedCABundle":{"customCABundle":"${custom_ca_bundle_value}"}}}' --type merge
     Should Be Equal    "${rc}"    "0"    msg=Failed to set DSCI Custom CA Bundle value to ${custom_ca_bundle_value}
 
 Set Custom CA Bundle Value On ConfigMap
     [Documentation]    Set Custom CA Bundle Value in ConfigMap
     [Arguments]    ${config_map}    ${custom_ca_bundle_value}    ${namespace}
     ${rc}=     Run And Return Rc
-    ...    oc patch
-    ...    ConfigMap/${config_map} -n ${namespace} -p '{"data":{"odh-ca-bundle.crt":"${custom_ca_bundle_value}"}}' --type merge
+    ...    oc patch ConfigMap/${config_map}
+    ...    -n ${namespace} -p '{"data":{"odh-ca-bundle.crt":"${custom_ca_bundle_value}"}}' --type merge
     Should Be Equal    "${rc}"    "0"    msg=Failed to set ${config_map} value ${custom_ca_bundle_value} ${namespace}
 
 Set Trusted CA Bundle Management State
     [Documentation]    Change DSCI Management State to one of Managed/Unmanaged/Removed
     [Arguments]    ${management_state}    ${namespace}
     ${rc}=     Run And Return Rc
-    ...    oc patch
-    ...    DSCInitialization/default-dsci -n ${namespace} -p '{"spec":{"trustedCABundle":{"managementState":"${management_state}"}}}' --type merge
+    ...    oc patch DSCInitialization/default-dsci
+    ...    -n ${namespace} -p '{"spec":{"trustedCABundle":{"managementState":"${management_state}"}}}' --type merge
     Should Be Equal    "${rc}"    "0"    msg=Failed update DSCI trustedCABundle managementState to ${management_state}

@@ -9,9 +9,7 @@ Suite Teardown    Suite Teardown
 *** Variables ***
 ${RHOAI_OPERATOR_NS}    redhat-ods-operator
 ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    rhods-operator
-${SERVICE_MESH_OPERATOR_NS}    openshift-operators
-${SERVICE_MESH_CR_NS}    istio-system
-${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    istio-operator
+${TEST_NS}    test-trustedcabundle
 ${DSCI_NAME}    default-dsci
 ${TRUSTED_CA_BUNDLE_CONFIGMAP}    odh-trusted-ca-bundle
 ${CUSTOM_CA_BUNDLE}    test-example-custom-ca-bundle
@@ -27,22 +25,26 @@ Validate Trusted CA Bundles ConfigMaps
     [Tags]    Operator
     ...       ODS-2638
 
-    Log    message=Check that operators are available    level=INFO
-
+    Log    message=Check that operator is available    level=INFO
     Is Operator Available    ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    ${RHOAI_OPERATOR_NS}
-    Is Operator Available    ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    ${SERVICE_MESH_OPERATOR_NS}
+    Is DSCI In Ready State    ${DSCI_NAME}    ${RHOAI_OPERATOR_NS}
 
     Log    message=Validate Trusted CA Bundle Management state Managed    level=INFO
 
-    Is DSCI In Ready State    ${DSCI_NAME}    ${SERVICE_MESH_OPERATOR_NS}
-    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
+    Create Namespace In Openshift    ${TEST_NS}
+    Wait Until Keyword Succeeds    3 min    0 sec
+    ...    Is Resource Present    project    ${TEST_NS}    ${TEST_NS}    ${IS_PRESENT}
+    
+    Wait Until Keyword Succeeds    3 min    0 sec
+    ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_PRESENT}
 
     # Check that ConfigMap contains "ca-bundle.crt"
-    Check ConfigMap Contains CA Bundle   ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ca-bundle.crt    ${SERVICE_MESH_CR_NS}
+    Wait Until Keyword Succeeds    3 min    0 sec
+    ...    Check ConfigMap Contains CA Bundle   ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ca-bundle.crt    ${TEST_NS}
 
     Set Custom CA Bundle Value In DSCI   ${CUSTOM_CA_BUNDLE}    ${RHOAI_OPERATOR_NS}
     Wait Until Keyword Succeeds    3 min    0 sec
-    ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
+    ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${TEST_NS}    ${IS_PRESENT}
 
     Log    message=Validate Trusted CA Bundle Management State Unmanaged    level=INFO
 
@@ -50,11 +52,11 @@ Validate Trusted CA Bundles ConfigMaps
 
     # Trusted CA BUndle managementStatus 'Unmanaged' should NOT result in bundle being overwirtten by operator
     Set Custom CA Bundle Value On ConfigMap
-    ...    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${SERVICE_MESH_CR_NS}
+    ...    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}
     # Allow operator time to reconsile
     Sleep    5
     Wait Until Keyword Succeeds    3 min    0 sec
-    ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
+    ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    ${IS_PRESENT}
 
     Log    message=Validate Trusted CA Bundle Management State Removed    level=INFO
 
@@ -62,11 +64,12 @@ Validate Trusted CA Bundles ConfigMaps
 
     # Check that odh-trusted-ca-bundle has been 'Removed'
     Wait Until Keyword Succeeds    3 min    0 sec
-    ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${SERVICE_MESH_CR_NS}    ${IS_NOT_PRESENT}
+    ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_NOT_PRESENT}
 
     Log    message=Restore DSCI to original state    level=INFO
     Set Custom CA Bundle Value In DSCI   ''    ${RHOAI_OPERATOR_NS}
     Set Trusted CA Bundle Management State    Managed    ${RHOAI_OPERATOR_NS}
+    Delete Namespace From Openshift    ${TEST_NS}
 
 
 *** Keywords ***
@@ -114,6 +117,20 @@ Is CA Bundle Value Present
     ${rc}=     Run And Return Rc
     ...    oc get configmap ${config_map} -n ${namespace} -o yaml | grep ${custom_ca_bundle_value}
     Should Be Equal As Integers    ${rc}    ${expected_result}
+
+Create Namespace In Openshift
+    [Documentation]    Create a new namespace if it does not already exist
+    [Arguments]    ${namespace}
+    ${rc}=     Run And Return Rc    oc get project ${namespace}
+    IF    ${rc} != 0
+        ${rc}=     Run And Return Rc    oc new-project ${namespace}
+        Should Be Equal    "${rc}"    "0"    msg=Failed to create namespace ${namespace}
+    END
+
+Delete Namespace From Openshift
+    [Documentation]    Delete namespace from opneshift
+    [Arguments]    ${namespace}
+    ${rc}=     Run And Return Rc    oc delete project ${namespace}
 
 Set Custom CA Bundle Value In DSCI
     [Documentation]    Set Custom CA Bundle Value in DSCI

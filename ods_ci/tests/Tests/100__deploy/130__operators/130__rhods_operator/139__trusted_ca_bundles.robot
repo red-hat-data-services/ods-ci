@@ -34,7 +34,7 @@ Validate Trusted CA Bundles ConfigMaps
     Create Namespace In Openshift    ${TEST_NS}
     Wait Until Keyword Succeeds    3 min    0 sec
     ...    Is Resource Present    project    ${TEST_NS}    ${TEST_NS}    ${IS_PRESENT}
-    
+
     Wait Until Keyword Succeeds    3 min    0 sec
     ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_PRESENT}
 
@@ -131,6 +131,7 @@ Delete Namespace From Openshift
     [Documentation]    Delete namespace from opneshift
     [Arguments]    ${namespace}
     ${rc}=     Run And Return Rc    oc delete project ${namespace}
+    Should Be Equal    "${rc}"    "0"    msg=Failed to delete namespace ${namespace}
 
 Set Custom CA Bundle Value In DSCI
     [Documentation]    Set Custom CA Bundle Value in DSCI

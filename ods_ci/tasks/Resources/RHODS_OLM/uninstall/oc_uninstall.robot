@@ -20,9 +20,9 @@ Verify RHODS Uninstallation
         ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
         ...       field_selector=metadata.name=self-managed-rhods
   END
-  Verify Project Does Not Exists  redhat-ods-monitoring
-  Verify Project Does Not Exists  redhat-ods-applications
-  Verify Project Does Not Exists  redhat-ods-operator
+  Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
+  Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
+  Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
 
 Verify Project Does Not Exists
   [Arguments]  ${project}

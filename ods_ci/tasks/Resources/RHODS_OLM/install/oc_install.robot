@@ -8,6 +8,7 @@ Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.r
 
 *** Variables ***
 ${DSC_NAME} =    default-dsc
+${DSCI_NAME} =    default-dsci
 @{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai    kueue  # robocop: disable
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
@@ -57,7 +58,7 @@ Install RHODS
           FAIL    Provided test envrioment is not supported
       END
   END
-  Wait Until Csv Is Ready    ${csv_display_name}
+  Wait Until Csv Is Ready    ${OPERATOR_NAME}
 
 Verify RHODS Installation
   # Needs to be removed ASAP
@@ -73,7 +74,7 @@ Verify RHODS Installation
   IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
        Wait For Pods Numbers  1
        ...                   namespace=${OPERATOR_NAMESPACE}
-       ...                   label_selector=name=rhods-operator
+       ...                   label_selector=name=${OPERATOR_NAME}
        ...                   timeout=2000
        Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
        Log  Verified redhat-ods-operator  console=yes
@@ -85,7 +86,7 @@ Verify RHODS Installation
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
     # Needs to be removed ASAP
-    IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+    IF  "${PRODUCT}" == "ODH"
         Log To Console    "Waiting for 2 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-dashboard"
         Wait For Pods Numbers  2
         ...                   namespace=${APPLICATIONS_NAMESPACE}
@@ -143,6 +144,12 @@ Verify RHODS Installation
   END
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
+    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
+    Wait For Pods Numbers   3
+    ...                   namespace=${APPLICATIONS_NAMESPACE}
+    ...                   label_selector=app=odh-model-controller
+    ...                   timeout=400
+    Log To Console    "Waiting for 1 pods in ${APPLICATIONS_NAMESPACE}, label_selector=control-plane=kserve-controller-manager"
     Wait For Pods Numbers   1
        ...                   namespace=${APPLICATIONS_NAMESPACE}
        ...                   label_selector=control-plane=kserve-controller-manager
@@ -182,7 +189,7 @@ Clone OLM Install Repo
 Install RHODS In Self Managed Cluster Using CLI
   [Documentation]   Install rhods on self managed cluster using cli
   [Arguments]     ${cluster_type}     ${image_url}
-  ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url}    timeout=20 min
+  ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -v ${OPERATOR_NAMESPACE}   timeout=20 min
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
 
 Install RHODS In Managed Cluster Using CLI
@@ -208,6 +215,29 @@ Wait For Pods Numbers
   IF    '${status}' == 'False'
         Run Keyword And Continue On Failure    FAIL    Timeout- ${output} pods found with the label selector ${label_selector} in ${namespace} namespace
   END
+
+Apply DSCInitialization CustomResource
+    [Documentation]
+    [Arguments]        ${dsci_name}=${DSCI_NAME}
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Log to Console    Requested Configuration:
+    Create DSCInitialization CustomResource Using Test Variables
+    ${yml} =    Get File    ${file_path}dsci_apply.yml
+    Log To Console    Applying DSCI yaml
+    Log To Console    ${yml}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsci_apply.yml
+    Log To Console    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSCI CR
+    Remove File    ${file_path}dsci_apply.yml
+
+Create DSCInitialization CustomResource Using Test Variables
+    [Documentation]
+    [Arguments]    ${dsci_name}=${DSCI_NAME}
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}dsci_template.yml    destination=${file_path}dsci_apply.yml
+    Run    sed -i 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
+    Run    sed -i 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
 
 Apply DataScienceCluster CustomResource
     [Documentation]

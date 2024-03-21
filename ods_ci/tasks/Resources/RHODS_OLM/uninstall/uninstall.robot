@@ -53,14 +53,14 @@ Uninstall RHODS In Self Managed Cluster Using CLI
 
 Uninstall RHODS In Self Managed Cluster For Operatorhub
   [Documentation]   Uninstall rhods on self-managed cluster for operatorhub installtion
-  ${return_code}    ${output}    Run And Return Rc And Output   oc create configmap delete-self-managed-odh -n redhat-ods-operator
+  ${return_code}    ${output}    Run And Return Rc And Output   oc create configmap delete-self-managed-odh -n ${OPERATOR_NAMESPACE}
   Should Be Equal As Integers  ${return_code}   0   msg=Error creation deletion configmap
-  ${return_code}    ${output}    Run And Return Rc And Output   oc label configmap/delete-self-managed-odh api.openshift.com/addon-managed-odh-delete=true -n redhat-ods-operator
+  ${return_code}    ${output}    Run And Return Rc And Output   oc label configmap/delete-self-managed-odh api.openshift.com/addon-managed-odh-delete=true -n ${OPERATOR_NAMESPACE}
   Should Be Equal As Integers  ${return_code}   0   msg=Error observed while adding label to configmap
-  Verify Project Does Not Exists  redhat-ods-applications
-  Verify Project Does Not Exists  redhat-ods-monitoring
-  Verify Project Does Not Exists  rhods-notebooks
-  ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator
+  Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
+  Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
+  Verify Project Does Not Exists  ${NOTEBOOKS_NAMESPACE}
+  ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE}
 
 Uninstall RHODS V2
     [Documentation]    Keyword to uninstall the version 2 of the RHODS operator in Self-Managed
@@ -72,17 +72,17 @@ Uninstall RHODS V2
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DSCInitialization CR
 
     ${return_code}    ${subscription_name}    Run And Return Rc And Output
-    ...    oc get subscription -n redhat-ods-operator --no-headers | awk '{print $1}'
+    ...    oc get subscription -n ${OPERATOR_NAMESPACE} --no-headers | awk '{print $1}'
     IF  "${return_code}" == "0" and "${subscription_name}" != "${EMPTY}"
         ${return_code}    ${csv_name}    Run And Return Rc And Output
-        ...    oc get subscription ${subscription_name} -n redhat-ods-operator -ojson | jq '.status.currentCSV' | tr -d '"'
+        ...    oc get subscription ${subscription_name} -n ${OPERATOR_NAMESPACE} -ojson | jq '.status.currentCSV' | tr -d '"'
         IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
           ${return_code}    ${output}    Run And Return Rc And Output
-          ...    oc delete clusterserviceversion ${csv_name} -n redhat-ods-operator --ignore-not-found
+          ...    oc delete clusterserviceversion ${csv_name} -n ${OPERATOR_NAMESPACE} --ignore-not-found
           Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS CSV ${csv_name}
         END
         ${return_code}    ${output}    Run And Return Rc And Output
-        ...    oc delete subscription ${subscription_name} -n redhat-ods-operator --ignore-not-found
+        ...    oc delete subscription ${subscription_name} -n ${OPERATOR_NAMESPACE} --ignore-not-found
         Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription
     END
     ${return_code}    ${output}    Run And Return Rc And Output
@@ -95,9 +95,8 @@ Uninstall RHODS V2
     ...    oc delete operatorgroup --all -n ${OPERATOR_NAMESPACE} --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting operatorgroup
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace --ignore-not-found
-    Verify Project Does Not Exists  redhat-ods-applications
-    Verify Project Does Not Exists  redhat-ods-monitoring
-    Verify Project Does Not Exists  rhods-notebooks
-    Verify Project Does Not Exists  opendatahub
-    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator --ignore-not-found
-    Verify Project Does Not Exists  redhat-ods-operator
+    Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
+    Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
+    Verify Project Does Not Exists  ${NOTEBOOKS_NAMESPACE}
+    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE} --ignore-not-found
+    Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}

@@ -5,30 +5,30 @@ Is RHODS Installed
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=openshift-operators
+          ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
           ...                                              subscription=rhods-odh-nightly-operator  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=opendatahub  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
           ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
           ...          field_selector=metadata.name=redhat-operators
       ELSE
           IF  "${INSTALL_TYPE}" == "CLi"
               ${result}=  Run Keyword And Return Status
               ...  Run Keywords
-              ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
+              ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
               ...                                              subscription=rhoai-operator-dev  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
+              ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
+              ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
+              ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
               ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
               ...          field_selector=metadata.name=rhoai-catalog-dev
           ELSE IF  "${INSTALL_TYPE}" == "OperatorHub"
               ${result}=  Run Keyword And Return Status
               ...  Run Keywords
-              ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
-              ...                                              subscription=rhoai-operator  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
+              ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
+              ...                                              subscription=rhods-operator  AND
+              ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
+              ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
+              ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
               ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
               ...          field_selector=metadata.name=redhat-operators
           ELSE

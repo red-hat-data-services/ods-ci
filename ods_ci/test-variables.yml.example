@@ -77,6 +77,7 @@ COMPONENTS:
   codeflare: Removed
   ray: Removed
 PRODUCT: RHODS
+OPERATOR_NAME: rhods-operator
 APPLICATIONS_NAMESPACE: redhat-ods-applications
 MONITORING_NAMESPACE: redhat-ods-monitoring
 OPERATOR_NAMESPACE: redhat-ods-operator

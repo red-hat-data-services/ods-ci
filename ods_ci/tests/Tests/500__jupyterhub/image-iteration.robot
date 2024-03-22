@@ -22,7 +22,7 @@ ${python_dict}  {'classifiers':[${generic-1}, ${minimal-1}], 'clustering':[${gen
 Open RHODS Dashboard
   [Tags]  Sanity    Tier1
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Wait For RHODS Dashboard To Load
 
 Iterative Testing Classifiers
   [Tags]  Sanity  POLARION-ID-Classifiers    Tier1

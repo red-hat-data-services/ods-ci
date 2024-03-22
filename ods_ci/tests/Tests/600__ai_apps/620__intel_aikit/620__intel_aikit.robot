@@ -22,7 +22,7 @@ Verify Intel AIKIT Is Available In RHODS Dashboard Explore Page
   ...     ODS-1017
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Wait For RHODS Dashboard To Load
   Verify Service Is Available In The Explore Page     ${intel_aikit_container_name}
   Verify Service Provides "Get Started" Button In The Explore Page     ${intel_aikit_container_name}
 

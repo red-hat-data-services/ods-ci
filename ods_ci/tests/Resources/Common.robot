@@ -28,7 +28,7 @@ Begin Web Test
     RHOSi Setup
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${username}  ${password}  ${auth_type}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${username}  ${password}  ${auth_type}
     ${authorization_required} =  Is Service Account Authorization Required
@@ -50,7 +50,7 @@ End Non JupyterLab Web Test
     [Documentation]  Stops running workbench that was started by logged-in user via the
     ...              JupyterHub launcher space.
     Go To  ${ODH_DASHBOARD_URL}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
     Handle Control Panel
     Capture Page Screenshot
@@ -308,8 +308,8 @@ Run Keyword If RHODS Is Self-Managed
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    ${is_self_managed} == True    Run Keyword    ${name}    @{arguments}
 
-Get Domain From Current URL
-    [Documentation]    Gets the lowest level domain from the current URL (i.e. everything before the first dot in the URL)
+Get Sub Domain Of Current URL
+    [Documentation]    Gets the sub-domain of the current URL (i.e. everything before the first dot in the URL)
     ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console
     ...    e.g. https://rhods-dashboard-redhat-ods-applications.apps.<cluster>.rhods.ccitredhat.com/ -> https://rhods-dashboard-redhat-ods-applications
     ${current_url} =    Get Location
@@ -320,9 +320,9 @@ Does Current Sub Domain Start With
     [Documentation]    Check if current sub-domain start with the given String
     ...   and returns True/False
     [Arguments]    ${url}
-    ${domain} =    Get Domain From Current URL
-    ${comparison} =    Run Keyword And Return Status    Should Be Equal As Strings
-    ...    ${domain}    ${url}
+    ${subdomain} =    Get Sub Domain Of Current URL
+    ${comparison} =    Run Keyword And Return Status    Should Start With
+    ...    ${subdomain}    ${url}
     RETURN    ${comparison}
 
 Get OAuth Cookie

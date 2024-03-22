@@ -14,7 +14,7 @@ ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
-${CARD_BUTTON_XP}=  //input[@class="pf-v5-c-radio__input"][@name="odh-explore-selectable-card"]
+${CARD_BUTTON_XP}=  //input[@name="odh-explore-selectable-card"]
 ${RES_CARDS_XP}=  //div[contains(@data-ouia-component-type, "Card")]
 ${SAMPLE_APP_CARD_XP}=    //div[contains(@data-testid,"explore-card")]
 ${JUPYTER_CARD_XP}=    //div[@data-testid="explore-card jupyter"]
@@ -34,7 +34,8 @@ ${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH_LATEST}=   ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-v5-c-alert pf-m-success']
-${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title" and text()="Cluster settings"]
+${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title"]
+${CLUSTER_SETTINGS_XP}=  //*[@data-testid="app-page-title" and text()="Cluster settings"]
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
 ${CUSTOM_IMAGE_SOFTWARE_TABLE}=  //caption[contains(., "the advertised software")]/../tbody
 ${CUSTOM_IMAGE_PACKAGE_TABLE}=  //caption[contains(., "the advertised packages")]/../tbody
@@ -60,7 +61,7 @@ Launch Dashboard
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-  Wait for RHODS Dashboard to Load    expected_page=${expected_page}
+  Wait For RHODS Dashboard To Load    expected_page=${expected_page}
   ...    wait_for_cards=${wait_for_cards}
 
 Authorize rhods-dashboard service account
@@ -70,11 +71,9 @@ Authorize rhods-dashboard service account
 
 Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-
    # Wait until we are in the OpenShift auth page or already in Dashboard
    ${expected_text_list}=    Create List    Log in with    Data Science Projects
    Wait Until Page Contains A String In List    ${expected_text_list}
-
    ${oauth_prompt_visible}=  Is OpenShift OAuth Login Prompt Visible
    IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
    ${login-required}=  Is OpenShift Login Visible
@@ -99,20 +98,24 @@ Logout From RHODS Dashboard
     Click Element  xpath://a[.="Log out"]
     Wait Until Page Contains  Log in with OpenShift
 
-Wait for RHODS Dashboard to Load
+Wait For RHODS Dashboard To Load
     [Arguments]  ${dashboard_title}="${ODH_DASHBOARD_PROJECT_NAME}"    ${wait_for_cards}=${TRUE}
     ...          ${expected_page}=Enabled
-
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
-    IF    "${expected_page}" != "${NONE}"
-        Wait Until Page Contains Element    xpath://h1[text()="${expected_page}"]
-        ...    timeout=75s
-    END
+    IF    "${expected_page}" != "${NONE}"    Wait For Dashboard Page Title    ${expected_page}    timeout=75s
     IF    ${wait_for_cards} == ${TRUE}
-        Wait Until Keyword Succeeds    3 times   5 seconds
-    ...   Wait Until Cards Are Loaded
+        Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded
     END
+
+Wait For Dashboard Page Title
+    [Documentation]    Wait until the visible title (h1) of the current Dashboard page is '${page_title}'
+    [Arguments]  ${page_title}    ${timeout}=10s
+    ${page_title_element}=    Set Variable    //*[@data-testid="app-page-title"]
+    Wait Until Element is Visible    ${page_title_element}    timeout=${timeout}
+    # Sometimes the h1 text is inside a child element, thus get it with textContent attribute
+    ${title}=    Get Element Attribute    ${page_title_element}    textContent
+    Should Be Equal    ${title}    ${page_title}
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
@@ -122,7 +125,7 @@ Wait Until RHODS Dashboard ${dashboard_app} Is Visible
 
 Launch ${dashboard_app} From RHODS Dashboard Link
   Menu.Navigate To Page    Applications    Enabled
-  Wait for RHODS Dashboard to Load    wait_for_cards=${TRUE}
+  Wait For RHODS Dashboard To Load    wait_for_cards=${TRUE}
   ...    expected_page=Enabled
   IF    "OpenShift" in $dashboard_app
       ${splits}=    Split String From Right    ${dashboard_app}    max_split=1
@@ -237,7 +240,7 @@ Go To RHODS Dashboard
   [Documentation]   Go to RHOODS dashboard>login  and wait for it to load
   Go To  ${ODH_DASHBOARD_URL}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Wait For RHODS Dashboard To Load
 
 Load Expected Data Of RHODS Explore Section
     ${apps_dict_obj}=  Load Json File  ${APPS_DICT_PATH_LATEST}
@@ -341,9 +344,8 @@ Open Get Started Sidebar And Return Status
     [Arguments]  ${card_locator}
     Wait Until Element Is Visible    xpath:${card_locator}
     Wait Until Element Is Enabled     xpath:${card_locator}    timeout=20s     error=Element is not clickbale  #robocop : disable
-    ${element}=    Get WebElement    xpath:${card_locator}
-    Execute Javascript    arguments[0].click();     ARGUMENTS    ${element}
-    ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
+    Click Element    ${card_locator}
+        ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
     Sleep  1
     RETURN  ${status}
 
@@ -514,7 +516,7 @@ Verify Cluster Settings Is Available
     Page Should Contain    Settings
     Menu.Navigate To Page    Settings    Cluster settings
     Capture Page Screenshot
-    Wait Until Page Contains Element    ${PAGE_TITLE_XP}    timeout=30
+    Wait Until Page Contains Element    ${CLUSTER_SETTINGS_XP}    timeout=30
     Wait Until Page Contains Element    ${USAGE_DATA_COLLECTION_XP}    timeout=30
 
 Verify Cluster Settings Is Not Available

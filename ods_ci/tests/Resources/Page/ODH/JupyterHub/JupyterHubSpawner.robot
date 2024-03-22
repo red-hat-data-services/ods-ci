@@ -675,7 +675,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     FOR    ${username}    IN    @{list_of_usernames}
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-        Wait for RHODS Dashboard to Load
+        Wait For RHODS Dashboard To Load
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
@@ -693,7 +693,7 @@ CleanUp JupyterHub For N Users
     FOR    ${username}    IN    @{list_of_usernames}
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-        Wait for RHODS Dashboard to Load
+        Wait For RHODS Dashboard To Load
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden

@@ -17,7 +17,7 @@ Test Tags       JupyterHub
 *** Test Cases ***
 Open RHODS Dashboard
   [Tags]  Sanity    Tier1
-  Wait for RHODS Dashboard to Load
+  Wait For RHODS Dashboard To Load
 
 Can Launch Jupyterhub
   [Tags]  Sanity    Tier1

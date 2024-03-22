@@ -30,6 +30,6 @@ Verify pip Changes not permanent
 Test Setup
     [Documentation]  Added customized Setup
     Begin Web Test
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=minimal-notebook

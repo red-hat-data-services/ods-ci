@@ -88,9 +88,6 @@ Serve Model
         Set Folder Path    ${model_path}
     END
     SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
-    # Workaround for UI glitch bug RHOAIENG-2724 - Reselect model server and framework
-    Select Model Server    ${model_server}
-    Select Framework    ${framework}
     SeleniumLibrary.Click Button    Deploy
     SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 

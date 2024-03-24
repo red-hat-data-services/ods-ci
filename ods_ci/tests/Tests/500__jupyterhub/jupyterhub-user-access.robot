@@ -120,13 +120,13 @@ Check New Access Configuration Works As Expected
     Capture Page Screenshot    perm_denied_custom.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER_2.PASSWORD}  ${TEST_USER_2.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
     Run Keyword And Continue On Failure   Verify Jupyter Access Level    expected_result=admin
     Capture Page Screenshot    perm_admin_custom.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load    expected_page=Start a notebook server
+    Wait For RHODS Dashboard To Load    expected_page=Start a notebook server
     ...    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure   Verify Jupyter Access Level     expected_result=user
     Capture Page Screenshot    perm_user_custom.png
@@ -142,7 +142,7 @@ Check Standard Access Configuration Works As Expected
     Capture Page Screenshot    perm_admin_std.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_4.USERNAME}  ${TEST_USER_4.PASSWORD}  ${TEST_USER_4.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load    expected_page=Start a notebook server
+    Wait For RHODS Dashboard To Load    expected_page=Start a notebook server
     ...    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=user
     Capture Page Screenshot    perm_user_std.png

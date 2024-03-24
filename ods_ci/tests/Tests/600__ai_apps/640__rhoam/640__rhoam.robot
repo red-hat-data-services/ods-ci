@@ -14,7 +14,7 @@ Verify RHOAM Is Available In RHODS Dashboard Explore Page
   ...       ODS-271
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-  Wait for RHODS Dashboard to Load
+  Wait For RHODS Dashboard To Load
   Verify RHOAM Availability Based On RHODS Installation Type
 
 Verify RHOAM Is Enabled In RHODS After Installation

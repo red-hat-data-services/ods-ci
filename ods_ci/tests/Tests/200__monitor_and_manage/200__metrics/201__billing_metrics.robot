@@ -34,7 +34,7 @@ Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
 
 Test Billing Metric (Notebook Cpu Usage) On OpenShift Monitoring
     [Documentation]     Run notebook for 5 min and checks CPU usage is greater than zero
-    [Tags]    Smoke
+    [Tags]    Sanity
     ...       Tier1
     ...       ODS-175
     Run Jupyter Notebook For 5 Minutes
@@ -184,7 +184,7 @@ Run Jupyter Notebook For 5 Minutes
     [Documentation]     Opens jupyter notebook and run for 5 min
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Iterative Image Test
     ...    science-notebook
     ...    https://github.com/lugi0/minimal-nb-image-test
@@ -215,7 +215,7 @@ CleanUp JupyterHub
     [Documentation]     Cleans JupyterHub
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden

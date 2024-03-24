@@ -67,6 +67,7 @@ Verify RHODS Installation
     Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-operators
     Set Global Variable    ${NOTEBOOKS_NAMESPACE}    opendatahub
   END
+  Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
   IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
@@ -94,10 +95,10 @@ Verify RHODS Installation
         Add UI Admin Group To Dashboard Admin
 
     ELSE
-        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=rhods-dashboard"
+        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=${DASHBOARD_APP_NAME}"
         Wait For Pods Numbers  5
         ...                   namespace=${APPLICATIONS_NAMESPACE}
-        ...                   label_selector=app=rhods-dashboard
+        ...                   label_selector=app=${DASHBOARD_APP_NAME}
         ...                   timeout=1200
     END
   END

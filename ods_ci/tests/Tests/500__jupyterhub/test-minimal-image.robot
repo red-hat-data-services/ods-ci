@@ -20,7 +20,7 @@ ${RequirementsFilePath}=    ods-ci-notebooks-main/notebooks/500__jupyterhub/test
 
 *** Test Cases ***
 Open RHODS Dashboard
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
 
 Can Launch Jupyterhub
     Launch Jupyter From RHODS Dashboard Link

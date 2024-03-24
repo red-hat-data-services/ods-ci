@@ -138,7 +138,7 @@ Provoke Image Build Failure
     Delete Build    namespace=${namespace}    build_name=${build}
     ${failed_build_name} =    Start New Build    namespace=${namespace}
     ...    buildconfig=${build_config_name}
-    ${pod_name} =    Find First Pod By Name    namespace=${namespace}    pod_start_with=${failed_build_name}
+    ${pod_name} =    Find First Pod By Name    namespace=${namespace}    pod_regex=${failed_build_name}
     Wait Until Build Status Is    namespace=${namespace}    build_name=${failed_build_name}
     ...    expected_status=Running
     Wait Until Container Exist  namespace=${namespace}  pod_name=${pod_name}  container_to_check=${container_to_kill}

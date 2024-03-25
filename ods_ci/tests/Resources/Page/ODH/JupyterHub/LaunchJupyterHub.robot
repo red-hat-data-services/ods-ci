@@ -26,10 +26,10 @@ Launch Jupyterhub via Routes
    Sleep  10s
    Switch Window  JupyterHub
 
-Launch RHODS Via OCP Application Launcher
-    [Documentation]    Uses the Application Launcher in the OCP Web UI to open the
-    ...    RHODS Dashboard page.
-    Click Element    xpath://button[@aria-label="Application launcher"]
-    Wait Until Page Contains Element    xpath://span[.="${ODH_DASHBOARD_PROJECT_NAME}"]
-    Click Element    xpath://span[.="${ODH_DASHBOARD_PROJECT_NAME}"]/..
-    Switch Window    NEW
+Launch RHOAI Via OCP Application Launcher
+   [Documentation]    Uses the Application Launcher in the OCP Web UI to open the
+   ...    RHOAI Dashboard page.
+   Click Element    xpath://button[@aria-label="Application launcher"]
+   Wait Until Page Contains Element    xpath://span[.="${ODH_DASHBOARD_PROJECT_NAME}"]
+   Click Element    xpath://span[.="${ODH_DASHBOARD_PROJECT_NAME}"]/..
+   Switch Window    NEW

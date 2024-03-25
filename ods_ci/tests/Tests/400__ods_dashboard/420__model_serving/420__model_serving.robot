@@ -144,7 +144,7 @@ Verify Multiple Projects With Same Model
 Verify Editing Existing Model Deployment
     [Documentation]    Tries editing an existing model deployment to see if the underlying deployment is updated
     [Tags]    Sanity    Tier1
-    ...       ProductBug    RHOAIENG-2869
+    ...       RHOAIENG-2869
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection

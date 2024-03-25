@@ -73,6 +73,7 @@ Initialize Global Variables
     ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
     Set Global Variable   ${RHODS_VERSION}
     Set Prometheus Variables
+    Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
 
 Required Global Variables Should Exist
     [Documentation]   Fails if new required global variables are not set

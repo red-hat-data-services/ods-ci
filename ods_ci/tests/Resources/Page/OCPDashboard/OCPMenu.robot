@@ -49,7 +49,7 @@ Switch To Developer Perspective
 Maybe Skip Tour
     [Documentation]    If we are in the openshift web console, maybe skip the first time
     ...    tour popup given to users, otherwise RETURN.
-    ${should_cont} =    Is Current Domain Equal To    https://console-openshift-console
+    ${should_cont} =    Does Current Sub Domain Start With    https://console-openshift-console
     IF  ${should_cont}==False
         RETURN
     END

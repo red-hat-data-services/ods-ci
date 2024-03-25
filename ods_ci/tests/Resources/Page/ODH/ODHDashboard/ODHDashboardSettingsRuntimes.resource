@@ -16,43 +16,42 @@ ${EDITOR_RUNTIME_BTN_XP}=    //div[contains(@class, "odh-dashboard__code-editor"
 
 *** Keywords ***
 Click Add Serving Runtime Template Button
-    SeleniumLibrary.Wait Until Page Contains Element    ${ADD_RUNTIME_BTN_XP}
-    SeleniumLibrary.Click Element    ${ADD_RUNTIME_BTN_XP}
-    Run Keyword And Continue On Failure    SeleniumLibrary.Page Should Contain    Add a serving runtime
-    Run Keyword And Continue On Failure    SeleniumLibrary.Page Should Contain    Drag a file here, upload files, or start from scratch.
-    Run Keyword And Continue On Failure    SeleniumLibrary.Page Should Contain Element    ${UPLOAD_RUNTIME_BTN_XP}
-    Run Keyword And Continue On Failure    SeleniumLibrary.Page Should Contain Element    ${SCRATCH_RUNTIME_BTN_XP}
-    Run Keyword And Continue On Failure    SeleniumLibrary.Page Should Contain Element    ${EDITOR_RUNTIME_BTN_XP}
+    Wait Until Page Contains Element    ${ADD_RUNTIME_BTN_XP}
+    Click Element    ${ADD_RUNTIME_BTN_XP}
+    Run Keyword And Continue On Failure    Page Should Contain    Add a serving runtime
+    Run Keyword And Continue On Failure    Page Should Contain    Drag a file here, upload files, or start from scratch.
+    Run Keyword And Continue On Failure    Page Should Contain Element    ${UPLOAD_RUNTIME_BTN_XP}
+    Run Keyword And Continue On Failure    Page Should Contain Element    ${SCRATCH_RUNTIME_BTN_XP}
+    Run Keyword And Continue On Failure    Page Should Contain Element    ${EDITOR_RUNTIME_BTN_XP}
 
 Upload Serving Runtime Template
     [Documentation]    Uploads via UI a YAML file containing a custom Serving Runtime definition
     [Arguments]    ${runtime_filepath}    ${serving_platform}
     Click Add Serving Runtime Template Button
-    SeleniumLibrary.Click Element   ${UPLOAD_RUNTIME_BTN_XP}
+    Element Should Be Enabled   ${UPLOAD_RUNTIME_BTN_XP}
     ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
     Should Be Equal As Integers    ${rc}    ${0}
-    SeleniumLibrary.Choose File    ${EDITOR_RUNTIME_BTN_XP}//input[@type="file"]    ${pwd}/${runtime_filepath}
-    Run Keyword And Continue On Failure    SeleniumLibrary.Wait Until Page Contains Element    //span[text()="kind"]
-    Run Keyword And Continue On Failure    SeleniumLibrary.Wait Until Page Contains Element    //span[text()="ServingRuntime"]
+    Choose File    ${EDITOR_RUNTIME_BTN_XP}//input[@type="file"]    ${pwd}/${runtime_filepath}
+    Wait For Dashboard Page Title    Add serving runtime
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element    //span[text()="kind"]
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element    //span[text()="ServingRuntime"]
     Select Model Serving Platform    platform=${serving_platform}
     IF    '${serving_platform}'=='single'    Select Runtime API Protocol
-    Submit Serving Runtime Template
-
-Submit Serving Runtime Template
-    SeleniumLibrary.Click Element    ${SUBMIT_RUNTIME_BTN_XP}
+    Click Element    ${SUBMIT_RUNTIME_BTN_XP}
+    Wait Until Element Is Not Visible   ${SUBMIT_RUNTIME_BTN_XP}
     Wait For RHODS Dashboard To Load    expected_page=Serving runtimes
     ...    wait_for_cards=${FALSE}
 
 Serving Runtime Template Should Be Listed
     [Arguments]    ${displayed_name}    ${serving_platform}
     Run Keyword And Continue On Failure
-    ...    SeleniumLibrary.Wait Until Page Contains Element
+    ...    Wait Until Page Contains Element
     ...    //table//tr/td[@data-label="Name"]//div[text()="${displayed_name}"]
     ...    timeout=10s
     Run Keyword And Continue On Failure
-    ...    SeleniumLibrary.Wait Until Page Contains Element
+    ...    Wait Until Page Contains Element
     ...    xpath=//table//tr[td[@data-label="Name"]//div[text()="${displayed_name}"]]/td[@data-label="Serving platforms supported"]    # robocop: disable
-    ${actual_platform_labels_str}=    SeleniumLibrary.Get Text
+    ${actual_platform_labels_str}=    Get Text
     ...    xpath=//table//tr[td[@data-label="Name"]//div[text()="${displayed_name}"]]/td[@data-label="Serving platforms supported"]    # robocop: disable
     ${actual_platform_labels}=    Split To Lines    ${actual_platform_labels_str}
     IF    "${serving_platform}" == "both"
@@ -93,13 +92,13 @@ Select Model Serving Platform
     [Documentation]    Selects which model serving platform the serving runtime could be executed on
     [Arguments]    ${platform}="both"
     ${platform_link_name}=    Get From Dictionary    ${PLATFORM_NAMES_MAPPING}    ${platform.lower()}
-    SeleniumLibrary.Click Element    xpath://div[@data-testid="custom-serving-runtime-selection"]//button
-    SeleniumLibrary.Wait Until Page Contains Element    xpath://a[text()="${platform_link_name}"]
-    SeleniumLibrary.Click Link    ${platform_link_name}
+    Click Element    xpath://div[@data-testid="custom-serving-runtime-selection"]//button
+    Wait Until Page Contains Element    xpath://a[text()="${platform_link_name}"]
+    Click Link    ${platform_link_name}
 
 Select Runtime API Protocol
     [Documentation]    Selects which API protocol for the runtime
     [Arguments]    ${protocol}=gRPC
-    SeleniumLibrary.Click Element    xpath://div[@data-testid="custom-serving-api-protocol-selection"]//button
-    SeleniumLibrary.Wait Until Page Contains Element    xpath://a[text()="${protocol}"]
-    SeleniumLibrary.Click Link    ${protocol}
+    Click Element    xpath://div[@data-testid="custom-serving-api-protocol-selection"]//button
+    Wait Until Page Contains Element    xpath://a[text()="${protocol}"]
+    Click Link    ${protocol}

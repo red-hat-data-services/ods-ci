@@ -133,7 +133,7 @@ Fetch Dashboard Pods
     ...        None
     ...    Returns:
     ...        dashboard_pods_info(list(dict)): Dashboard pods selected by label and namespace
-    @{dashboard_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=rhods-dashboard
+    @{dashboard_pods_info} =    Oc Get    kind=Pod    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=${DASHBOARD_APP_NAME}
     RETURN    @{dashboard_pods_info}
 
 Fetch Dashboard Deployments
@@ -143,7 +143,7 @@ Fetch Dashboard Deployments
     ...    Returns:
     ...        dashboard_deployments_info(list(dict)): Dashboard deployments selected by label and namespace
     @{dashboard_deployments_info} =    Oc Get    kind=Deployment    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=rhods-dashboard
+    ...    label_selector=app=${DASHBOARD_APP_NAME}
     RETURN    @{dashboard_deployments_info}
 
 Fetch Dashboard Services
@@ -152,7 +152,7 @@ Fetch Dashboard Services
     ...        None
     ...    Returns:
     ...        dashboard_services_info(list(dict)): Dashboard services selected by name and namespace
-    @{dashboard_services_info} =    Oc Get    kind=Service    api_version=v1    name=rhods-dashboard    namespace=${APPLICATIONS_NAMESPACE}
+    @{dashboard_services_info} =    Oc Get    kind=Service    api_version=v1    name=${DASHBOARD_APP_NAME}    namespace=${APPLICATIONS_NAMESPACE}
     RETURN    @{dashboard_services_info}
 
 Fetch Dashboard Routes
@@ -161,14 +161,14 @@ Fetch Dashboard Routes
     ...        None
     ...    Returns:
     ...        dashboard_routes_info(list(dict)): Dashboard routes selected by name and namespace
-    @{dashboard_routes_info} =    Oc Get    kind=Route    api_version=route.openshift.io/v1    name=rhods-dashboard
+    @{dashboard_routes_info} =    Oc Get    kind=Route    api_version=route.openshift.io/v1    name=${DASHBOARD_APP_NAME}
     ...    namespace=${APPLICATIONS_NAMESPACE}
     RETURN    @{dashboard_routes_info}
 
 Verify Dashboard ReplicaSets Info
     [Documentation]    Fetchs and verifies information from Dashboard replicasets
     @{dashboard_replicasets_info} =    Oc Get    kind=ReplicaSet    api_version=v1    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=rhods-dashboard
+    ...    label_selector=app=${DASHBOARD_APP_NAME}
     OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas
     ...    ${EXP_DASHBOARD_REPLICAS}    @{dashboard_replicasets_info}
     OpenShift Resource Field Value Should Be Equal As Strings    status.replicas
@@ -200,6 +200,6 @@ Fetch rhods-dashboard ClusterRole Info
     ...        None
     ...    Returns:
     ...        rhodsdashboard_clusterrole_info(dict): Dictionary containing rhods-dashboard ClusterRole Information
-    @{resources_info_list}=    Oc Get    kind=ClusterRole    api_version=rbac.authorization.k8s.io/v1    name=rhods-dashboard
+    @{resources_info_list}=    Oc Get    kind=ClusterRole    api_version=rbac.authorization.k8s.io/v1    name=${DASHBOARD_APP_NAME}
     &{rhodsdashboard_clusterrole_info} =    Set Variable    ${resources_info_list}[0]
     RETURN    &{rhodsdashboard_clusterrole_info}

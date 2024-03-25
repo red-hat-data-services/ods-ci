@@ -4,6 +4,7 @@ Resource          ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource          ../../Resources/RHOSi.resource
 Resource          ../../Resources/ODS.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource          ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource          ../../Resources/Page/LoginPage.robot
@@ -56,6 +57,9 @@ Verify Content In RHODS Explore Section
     [Tags]    Sanity    Tier1
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
     ...       ProductBug
+    ...       AutomationBugOnODH
+    # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
+    # ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
@@ -67,6 +71,9 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1890
+    ...       AutomationBugOnODH
+    # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
+    # ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
@@ -119,7 +126,8 @@ Verify CSS Style Of Getting Started Descriptions
     ...       ODS-1165
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
-    Open Get Started Sidebar And Return Status    card_locator=${SAMPLE_APP_CARD_XP}
+    ${status}=    Open Get Started Sidebar And Return Status    card_locator=${JUPYTER_CARD_XP}
+    Should Be Equal    ${status}    ${TRUE}
     Capture Page Screenshot    get_started_sidebar.png
     Verify Jupyter Card CSS Style
 
@@ -128,6 +136,10 @@ Verify Documentation Link HTTP Status Code
     ...    also checks the RHODS dcoumentation link present in resource page.
     [Tags]    Sanity    Tier1
     ...       ODS-327    ODS-492
+    ...       AutomationBugOnODH
+    # TODO: In ODH the expected Docs links are:
+    # https://opendatahub.io/community
+    # https://opendatahub.io/docs
     ${links}=  Get RHODS Documentation Links From Dashboard
     Documentation Links Should Be Equal To The Expected Ones   actual_links=${links}  expected_links=${DOC_LINKS_EXP}
     Check External Links Status     links=${links}
@@ -145,6 +157,7 @@ Search and Verify GPU Items Appears In Resources Page
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-1226
+    ...       ExcludeOnODH
     Search Items In Resources Section    GPU
     Check GPU Resources
 
@@ -163,6 +176,7 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
     ...       ODS-470  ODS-718
     ...       Execution-Time-Over-30m
     ...       FlakyTest
+    ${failed_build_name}=    Set Variable    ${NONE}
     Skip If RHODS Version Greater Or Equal Than    1.20.0    CUDA build chain removed in v1.20
     Clear Dashboard Notifications
     ${build_name}=  Search Last Build  namespace=${APPLICATIONS_NAMESPACE}    build_name_includes=pytorch
@@ -179,26 +193,26 @@ Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
 
 Verify Favorite Resource Cards
     [Tags]    ODS-389    ODS-384
-    ...       Tier1
+    ...       Sanity
     [Documentation]    Verifies the item in Resource page can be marked se favorite.
     ...                It checks if favorite items are always listed as first regardless
     ...                the view type or sorting
     Click Link    Resources
-    Wait Until Element Is Visible    //div[@class="pf-v5-l-gallery pf-m-gutter odh-learning-paths__gallery"]
+    Wait Until Resource Page Is Loaded
     Sort Resources By    name
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile_ids}
 
-    ${favorite_ids} =    Get Slice From List    ${list_of_tile_ids}    ${27}    ${48}
+    ${favorite_ids} =    Get Slice From List    ${list_of_tile_ids}    ${2}    ${7}
     Add The Items In Favorites    @{favorite_ids}
 
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
-    Favorite Items Should Be Listed First    ${favorite_ids}    ${list_of_tile_ids}    ${21}
+    Favorite Items Should Be Listed First    ${favorite_ids}    ${list_of_tile_ids}    ${5}
 
     Click Button    //*[@id="list-view"]
     Sleep    0.5s
     ${list_view_tiles} =    Get The List Of Ids of Tiles In List View
-    Favorite Items Should Be Listed First    ${favorite_ids}    ${list_view_tiles}    ${21}
+    Favorite Items Should Be Listed First    ${favorite_ids}    ${list_view_tiles}    ${5}
 
     Click Button    //*[@id="card-view"]
     Sleep    0.5s
@@ -299,7 +313,7 @@ Verify Dashboard Pod Is Not Getting Restarted
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-374
-    ${pod_names}    Get POD Names    ${APPLICATIONS_NAMESPACE}    app=rhods-dashboard
+    ${pod_names}    Get POD Names    ${APPLICATIONS_NAMESPACE}    app=${DASHBOARD_APP_NAME}
     Verify Containers Have Zero Restarts    ${pod_names}    ${APPLICATIONS_NAMESPACE}
 
 Verify Switcher to Masterhead
@@ -429,22 +443,24 @@ Verify Star Icons Are Clickable
 Get List Of Ids Of Tiles
     [Documentation]    Returns the list of ids of tiles present in resources page
     ${list_of_ids}=    Get List Of Atrributes
-    ...    xpath=//div[@class="pf-v5-c-card pf-m-selectable odh-card odh-tourable-card"]    attribute=id
+    ...    xpath=//div[contains(@class, "odh-tourable-card")]    attribute=id
     RETURN    ${list_of_ids}
 
 Set Item As Favorite
     [Documentation]    Add the tiles in favorite
     [Arguments]    ${id}
-    ${not_clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
-    Should Be Equal    ${not_clicked}    odh-dashboard__favorite
-    Click Element    //*[@id="${id}"]/div[1]/span
+    ${card_star_button}=    Set Variable    //*[@id="${id}" and contains(@class, "odh-tourable-card")]//button
+    ${not_clicked} =    Get Element Attribute    ${card_star_button}    aria-label
+    Should Be Equal    ${not_clicked}    not starred
+    Click Element    ${card_star_button}
 
 Remove An Item From Favorite
     [Documentation]    Removes the tiles from favorite
     [Arguments]    ${id}
-    ${clicked} =    Get Element Attribute    //*[@id="${id}"]/div[1]/span    class
-    Should Be Equal    ${clicked}    odh-dashboard__favorite m-is-favorite
-    Click Element    //*[@id="${id}"]/div[1]/span
+    ${card_star_button}=    Set Variable    //*[@id="${id}" and contains(@class, "odh-tourable-card")]//button
+    ${clicked} =    Get Element Attribute    ${card_star_button}    aria-label
+    Should Be Equal    ${clicked}    starred
+    Click Element    ${card_star_button}
 
 Add The Items In Favorites
     [Documentation]    Add the tiles in the favorites
@@ -459,7 +475,7 @@ Favorite Items Should Be Listed First When Sorted By
     [Arguments]    ${list_of_ids_of_favorite}    ${sort_type}
     Sort Resources By    ${sort_type}
     ${new_list_of_tile} =    Get List Of Ids Of Tiles
-    Favorite Items Should Be Listed First    ${list_of_ids_of_favorite}    ${new_list_of_tile}    ${21}
+    Favorite Items Should Be Listed First    ${list_of_ids_of_favorite}    ${new_list_of_tile}    ${5}
 
 Get The List Of Ids of Tiles In List View
     [Documentation]    Returns the list of ids of tiles in list view
@@ -480,17 +496,16 @@ Remove Items From Favorites
     Close Browser
 
 RHODS Dahsboard Pod Should Contain OauthProxy Container
-    ${list_of_pods} =    Search Pod    namespace=${APPLICATIONS_NAMESPACE}    pod_start_with=rhods-dashboard
+    ${list_of_pods} =    Search Pod    namespace=${APPLICATIONS_NAMESPACE}    pod_regex=${DASHBOARD_APP_NAME}
     FOR    ${pod_name}    IN   @{list_of_pods}
         ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=${APPLICATIONS_NAMESPACE}
         List Should Contain Value    ${container_name}    oauth-proxy
     END
 
 Verify Jupyter Card CSS Style
-    [Documentation]    Compare the some CSS properties of the Explore page
-    ...    with the expected ones. The expected values change based
-    ...    on the RHODS version
-    CSS Property Value Should Be    locator=//pre
+    [Documentation]    Compare the some CSS properties of the Explore page with the expected ones
+    # Verify that the color of the Jupyter code is gray
+    CSS Property Value Should Be    locator=${EXPLORE_PANEL_XP}//code
     ...    property=background-color    exp_value=rgba(240, 240, 240, 1)
     CSS Property Value Should Be    locator=${SIDEBAR_TEXT_CONTAINER_XP}//p
     ...    property=margin-bottom    exp_value=8px

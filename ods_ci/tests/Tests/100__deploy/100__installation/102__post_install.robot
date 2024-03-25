@@ -16,7 +16,6 @@ Resource            ../../../Resources/Common.robot
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
 
-
 *** Test Cases ***
 Verify Dashbord has no message with NO Component Found
     [Tags]  Tier3
@@ -83,7 +82,7 @@ Verify That Prometheus Image Is A CPaaS Built Image
     Skip If RHODS Is Self-Managed
     Wait For Pods To Be Ready    label_selector=deployment=prometheus
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
     Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    prometheus
     ...    registry.redhat.io/openshift4/ose-prometheus
     Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    oauth-proxy
@@ -97,7 +96,7 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
     Skip If RHODS Is Self-Managed
     Wait For Pods To Be Ready    label_selector=deployment=blackbox-exporter
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=blackbox-exporter-
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=blackbox-exporter-
     Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    blackbox-exporter
     ...    quay.io/integreatly/prometheus-blackbox-exporter
 
@@ -109,7 +108,7 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     Skip If RHODS Is Self-Managed
     Wait For Pods To Be Ready    label_selector=deployment=prometheus
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
     Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    alertmanager
     ...    registry.redhat.io/openshift4/ose-prometheus-alertmanager
 
@@ -118,9 +117,9 @@ Verify Oath-Proxy Image Is A CPaaS Built Image
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-666
-    Wait For Pods To Be Ready    label_selector=app=rhods-dashboard
+    Wait For Pods To Be Ready    label_selector=app=${DASHBOARD_APP_NAME}
     ...    namespace=${APPLICATIONS_NAMESPACE}    timeout=60s
-    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_start_with=rhods-dashboard-
+    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=${DASHBOARD_APP_NAME}-
     Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      oauth-proxy
     ...     registry.redhat.io/openshift4/ose-oauth-proxy
 
@@ -268,13 +267,16 @@ Verify RHODS Display Name and Version
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1862
-    ${rhods_csv_detail}   Oc Get    kind=ClusterServiceVersion    label_selector=olm.copiedFrom=${OPERATOR_NAMESPACE}
-    ${rhods_csv_name}     Set Variable     ${rhods_csv_detail[0]['metadata']['name']}
-    ${rhods_version}      Set Variable       ${rhods_csv_detail[0]['spec']['version']}
-    ${rhods_displayname}  Set Variable       ${rhods_csv_detail[0]['spec']['displayName']}
-    ${rhods_version_t}    Split String   ${rhods_csv_name}    .    1
-    Should Be Equal       ${rhods_version_t[1]}   ${rhods_version}   msg=RHODS vesrion and label is not consistent
-    Should Be Equal       ${rhods_displayname}   Red Hat OpenShift AI  msg=Dieplay name doesn't match
+    IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
+        ${CSV_DISPLAY} =    Set Variable     Red Hat OpenShift AI
+    ELSE
+        ${CSV_DISPLAY} =    Set Variable     Open Data Hub Operator
+    END
+    ${csv_name} =    Run    oc get csv -n ${OPERATOR_NAMESPACE} --no-headers | awk '/${CSV_DISPLAY}/ {print \$1}'
+    ${csv_version} =    Run    oc get csv -n ${OPERATOR_NAMESPACE} --no-headers ${csv_name} -o custom-columns=":spec.version"
+    ${csv_version_t} =    Split String   ${csv_name}    .    1
+    Should Be Equal       ${csv_version_t[1].replace('v','')}   ${csv_version}
+    ...    msg='${csv_name}' name and '${csv_version}' vesrion are not consistent
 
 Verify RHODS Notebooks Network Policies
     [Documentation]    Verifies that the network policies for RHODS Notebooks are present on the cluster
@@ -311,8 +313,8 @@ Verify All The Pods Are Using Image Digest Instead Of Tags
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back
     [Documentation]    Delete Dashboard Pods And Wait Them To Be Back
-    Oc Delete    kind=Pod     namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=rhods-dashboard
-    OpenShiftLibrary.Wait For Pods Status    namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=rhods-dashboard  timeout=120
+    Oc Delete    kind=Pod     namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=${DASHBOARD_APP_NAME}
+    OpenShiftLibrary.Wait For Pods Status    namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=${DASHBOARD_APP_NAME}  timeout=120
 
 Test Setup For Rhods Dashboard
     [Documentation]    Test Setup for Rhods Dashboard
@@ -341,7 +343,7 @@ Verify Authentication Is Required To Access BlackboxExporter Target
     Length Should Be    ${links}    ${expected_endpoint_count}
     ...    msg=Unexpected number of endpoints in blackbox-exporter target (target_name:${target_name})
 
-    ${pod_name} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=prometheus-
+    ${pod_name} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
     FOR    ${link}    IN    @{links}
         Log    link:${link}
         ${command} =    Set Variable    curl --silent --insecure ${link}
@@ -354,7 +356,7 @@ Verify Authentication Is Required To Access BlackboxExporter Target
 Verify BlackboxExporter Includes Oauth Proxy
     [Documentation]     Verifies the blackbok-exporter inludes 2 containers one for
     ...                 application and second for oauth proxy
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_start_with=blackbox-exporter-
+    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=blackbox-exporter-
     @{containers} =    Get Containers    pod_name=${pod}    namespace=${MONITORING_NAMESPACE}
     List Should Contain Value    ${containers}    oauth-proxy
     List Should Contain Value    ${containers}    blackbox-exporter

@@ -23,7 +23,7 @@ Test Special Usernames
     ...     ODS-257  ODS-532
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
     FOR  ${char}  IN  @{CHARS}
         Login Verify Logout  ldap-special${char}  ${TEST_USER.PASSWORD}  ldap-provider-qe

@@ -74,7 +74,7 @@ Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
     Wait Until Operator Ready    ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
-    Wiat For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
+    Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
     Create Namespace In Openshift    ${TEST_NS}
 
 Suite Teardown
@@ -108,7 +108,7 @@ Is CA Bundle Value Present
     ...    oc get configmap ${config_map} -n ${namespace} -o yaml | grep ${custom_ca_bundle_value}
     Should Be Equal    "${rc}"    "${expected_result}"    msg=${output}
 
-Wiat For DSCI Ready State
+Wait For DSCI Ready State
     [Documentation]    Checks that DSCI reconciled succesfully
     [Arguments]    ${dsci}    ${namespace}
     ${rc}   ${output}=    Run And Return Rc And Output

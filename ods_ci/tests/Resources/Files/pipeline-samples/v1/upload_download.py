@@ -2,7 +2,7 @@
 
 import kfp
 
-from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
+from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 """Producer"""
 
@@ -94,18 +94,18 @@ def test_uploaded_artifact(
 """Build the producer component"""
 send_file_op = kfp.components.create_component_from_func(
     send_file,
-    base_image=DataSciencePipelinesKfpTekton.base_image,
+    base_image=DataSciencePipelinesKfp.base_image,
 )
 
 """Build the consumer component"""
 receive_file_op = kfp.components.create_component_from_func(
     receive_file,
-    base_image=DataSciencePipelinesKfpTekton.base_image,
+    base_image=DataSciencePipelinesKfp.base_image,
 )
 
 test_uploaded_artifact_op = kfp.components.create_component_from_func(
     test_uploaded_artifact,
-    base_image=DataSciencePipelinesKfpTekton.base_image,
+    base_image=DataSciencePipelinesKfp.base_image,
     packages_to_install=["minio"],
 )
 

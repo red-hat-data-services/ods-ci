@@ -1,8 +1,9 @@
 apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
 kind: DataSciencePipelinesApplication
 metadata:
-  name: sample
+  name: dspa
 spec:
+  dspVersion: v2
   objectStorage:
     externalStorage:
       bucket: rhods-dsp-dev

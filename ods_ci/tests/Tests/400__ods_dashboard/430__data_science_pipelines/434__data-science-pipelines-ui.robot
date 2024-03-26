@@ -4,7 +4,6 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Resource           ../../../Resources/Page/Operators/OpenShiftPipelines.resource
 Test Tags          DataSciencePipelines
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
@@ -118,8 +117,6 @@ Verify Pipeline Metadata Pods Are Not Deployed When Running Pipelines
 Pipelines Suite Setup    # robocop: disable
     [Documentation]    Sets global test variables, create a DS project and a data connection
     Set Library Search Order    SeleniumLibrary
-    # TODO: Install Pipeline only if it does not already installed
-    Install Red Hat OpenShift Pipelines
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}

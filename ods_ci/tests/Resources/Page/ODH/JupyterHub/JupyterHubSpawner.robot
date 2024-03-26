@@ -14,7 +14,7 @@ Library   OpenShiftLibrary
 
 
 *** Variables ***
-${KFNBC_SPAWNER_HEADER_XPATH} =    //h1[.="Start a notebook server"]
+${KFNBC_SPAWNER_HEADER_TITLE} =    Start a notebook server
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 ${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //label[@for="modal-notebook-container-size"]/../..//button[@aria-label="Options menu"]
@@ -39,8 +39,8 @@ ${PREVIOUS_NOTEBOOK_VER} =    2023.2
 *** Keywords ***
 JupyterHub Spawner Is Visible
     [Documentation]  Checks if spawner is visibile and returns the status
-    ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain Element
-    ...    xpath:${KFNBC_SPAWNER_HEADER_XPATH}
+    ${spawner_visible} =  Run Keyword And Return Status
+    ...    Wait For Dashboard Page Title    ${KFNBC_SPAWNER_HEADER_TITLE}
     RETURN  ${spawner_visible}
 
 Wait Until JupyterHub Spawner Is Ready

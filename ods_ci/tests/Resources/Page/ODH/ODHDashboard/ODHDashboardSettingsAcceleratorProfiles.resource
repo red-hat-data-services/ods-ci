@@ -134,7 +134,7 @@ Edit Accelerator Profile
     ...           ${enabled}=${EMPTY}  ${tolerations}=${EMPTY}  ${tol_operator}=${EMPTY}  ${tol_effect}=${EMPTY}
     ...           ${tol_key}=${EMPTY}  ${tol_value}=${EMPTY}  ${tol_seconds}=${EMPTY}
     Click On Edit Accelerator Profile    ${original_display_name}
-    Wait Until Element Is Visible   //h1[text()="Edit ${original_display_name}"]  timeout=10
+    Wait For Dashboard Page Title    Edit ${original_display_name}
     IF    "${display_name}" != "${EMPTY}"
         Clear Element And Input Text    ${ACCELERATOR_NAME}    ${display_name}
     END

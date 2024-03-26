@@ -5,7 +5,7 @@ Resource       ./Workbenches.resource
 
 
 *** Variables ***
-${DS_PROJECT_XP}=     xpath=//h1[text()="Data Science Projects"]
+${DS_PROJECT_TITLE}=    Data Science Projects
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
 ${RESOURCE_INPUT_XP}=    xpath=//input[@id="resource-manage-project-modal-name"]
@@ -29,7 +29,7 @@ Open Data Science Projects Home Page
 Is Data Science Projects Page Open
     [Documentation]    Checks if Data Science Projects home page is open. Returns TRUE or FALSE
     Close Generic Modal If Present
-    ${page_open}=   Run Keyword And Return Status   Page Should Contain Element     ${DS_PROJECT_XP}
+    ${page_open}=   Run Keyword And Return Status    Wait For Dashboard Page Title    ${DS_PROJECT_TITLE}
     RETURN    ${page_open}
 
 Open Data Science Project Details Page
@@ -77,7 +77,7 @@ Project Should Not Exist In Openshift
 Is Data Science Project Details Page Open
     [Arguments]     ${project_title}
     ${page_open}=   Run Keyword And Return Status
-    ...    SeleniumLibrary.Page Should Contain Element     xpath=//h1[contains(text(),"${project_title}")]
+    ...    Wait For Dashboard Page Title    ${project_title}
     RETURN    ${page_open}
 
 Wait Until Project Is Open
@@ -85,7 +85,7 @@ Wait Until Project Is Open
     [Arguments]     ${project_title}    ${timeout-pre-spinner}=3s    ${timeout-spinner}=5s
     Maybe Wait For Dashboard Loading Spinner Page
     ...    timeout-pre=${timeout-pre-spinner}    timeout=${timeout-spinner}
-    Wait Until Page Contains Element    xpath=//h1[contains(text(),"${project_title}")]    timeout=30s
+    Wait For Dashboard Page Title    ${project_title}    timeout=30s
 
 Project Should Be Listed
     [Documentation]    Checks a Project is available in DS Project home page

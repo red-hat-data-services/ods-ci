@@ -28,7 +28,7 @@ rpaframework = "^27.2.0"
 pexpect = "^4.8.0"
 python-openstackclient = "^6.2.0"
 awscli = "^1.27.100"
-kfp-tekton = "==1.5.9"
+kfp = "==2.7.0"
 pyyaml = "^6.0.1"
 
 [tool.poetry.group.dev.dependencies]

@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation    Test Cases to verify Serverless installation
+Documentation    Test Cases to verify Trusted CA Bundle support
 Library    Collections
 Resource    ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Suite Setup    Suite Setup

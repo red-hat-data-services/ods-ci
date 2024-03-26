@@ -13,6 +13,7 @@ reportportal-client = "^5.2.5"
 robotframework = "^6"
 robotframework-debuglibrary = ">=2.0.0"
 robotframework-requests = "^0.9.4"
+robotframework-dependencylibrary = "^4.0.1"
 robotframework-seleniumlibrary = "^6.1.1"
 # Selenium has been releasing versions prone to breaking, let's pin to a single release
 selenium = "4.13.0"

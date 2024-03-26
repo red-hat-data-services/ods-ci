@@ -256,8 +256,7 @@ Wait Until Page Contains Run Topology Page
     [Documentation]    Waits until the page containing the run details and its topology
     ...                is rendered on the screen
     [Arguments]    ${run_name}
-    Run Keyword And Continue On Failure    Wait Until Page Contains Element
-    ...    xpath://h1[.//text()="${run_name}"]    timeout=10s
+    Run Keyword And Continue On Failure    Wait For Dashboard Page Title    ${run_name}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${RUN_TOPOLOGY_DETAILS_BTN_XP}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element

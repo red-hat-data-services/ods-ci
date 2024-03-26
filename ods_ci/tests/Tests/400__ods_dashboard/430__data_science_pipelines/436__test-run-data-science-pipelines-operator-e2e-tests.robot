@@ -13,7 +13,7 @@ Library             ../../../../libs/DataSciencePipelinesAPI.py
 # For the initial commit we are hardcoding those environment variables
 ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR}                /tmp/data-science-pipelines-operator
 ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_URL}           https://github.com/opendatahub-io/data-science-pipelines-operator.git
-${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_BRANCH}        c9e336df3e6cc8b8e03af2e951dfa54143790339
+${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_BRANCH}        main
 ${DSPANAMESPACE}                                          dspa-e2e
 ${KUBECONFIGPATH}                                         %{HOME}/.kube/config
 
@@ -41,7 +41,7 @@ Prepare Data Science Pipelines Operator Integration Tests Suite
     ${return_code}    ${output}     Run And Return Rc And Output    git clone ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_URL} ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR}
     Log    ${output}
     Should Be Equal As Integers	   ${return_code}	 0  msg=Unable to clone data-science-pipelines-operator repo ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_URL}:${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_BRANCH}:${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR}
-    ${return_code}    ${output}     Run And Return Rc And Output    cd ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR} && git checkout -b it_test ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_BRANCH}
+    ${return_code}    ${output}     Run And Return Rc And Output    cd ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR} && git checkout -b it_test origin/${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_REPO_BRANCH}
     Should Be Equal As Integers	   ${return_code}	 0  msg=Unable to checkout data-science-pipelines-operator
     RHOSi Setup
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${DSPANAMESPACE}

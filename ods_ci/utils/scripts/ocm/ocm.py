@@ -378,9 +378,10 @@ class OpenshiftClusterManager:
         if bool(self.reuse_machine_pool) and self.check_if_machine_pool_exists():
             log.info(f"MachinePool with name {self.pool_name} exists in cluster {self.cluster_name}. Hence reusing it")
         else:
+            cluster_id = self.get_osd_cluster_id()
             cmd = "ocm --v={} create machinepool --cluster {} --instance-type {} --replicas {} --taints {} {}".format(
                 self.ocm_verbose_level,
-                self.cluster_name,
+                self.cluster_id,
                 self.pool_instance_type,
                 self.pool_node_count,
                 self.taints,

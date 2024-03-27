@@ -1,8 +1,9 @@
 from kfp import dsl
+
 from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
-@dsl.component(packages_to_install=['codeflare-sdk'], base_image=DataSciencePipelinesKfp.base_image)
+@dsl.component(packages_to_install=["codeflare-sdk"], base_image=DataSciencePipelinesKfp.base_image)
 def ray_fn(openshift_server: str, openshift_token: str) -> int:
     import ray
     from codeflare_sdk.cluster.auth import TokenAuthentication

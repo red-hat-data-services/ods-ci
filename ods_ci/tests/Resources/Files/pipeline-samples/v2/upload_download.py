@@ -1,5 +1,6 @@
 """Test pipeline to exercise various data flow mechanisms."""
 import kfp
+
 from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
@@ -45,7 +46,7 @@ def receive_file(
     shutil.copyfile(incomingfile, saveartifact)
 
 
-@kfp.dsl.component(packages_to_install=['minio'], base_image=DataSciencePipelinesKfp.base_image)
+@kfp.dsl.component(packages_to_install=["minio"], base_image=DataSciencePipelinesKfp.base_image)
 def test_uploaded_artifact(
     previous_step: kfp.dsl.InputPath(),
     file_size_bytes: int,
@@ -54,12 +55,13 @@ def test_uploaded_artifact(
 ):
     import base64
     import json
+
     from minio import Minio
 
     def inner_decode(my_str):
         return base64.b64decode(my_str).decode("utf-8")
 
-    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret.replace("\'", "\""))
+    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret.replace("'", '"'))
     host = inner_decode(mlpipeline_minio_artifact_secret["host"])
     port = inner_decode(mlpipeline_minio_artifact_secret["port"])
     access_key = inner_decode(mlpipeline_minio_artifact_secret["accesskey"])
@@ -68,8 +70,8 @@ def test_uploaded_artifact(
     secure = secure.lower() == "true"
     client = Minio(f"{host}:{port}", access_key=access_key, secret_key=secret_key, secure=secure)
 
-    store_object = previous_step.replace(f'/s3/{bucket_name}/', '')
-    print(f'parsing {previous_step} to {store_object} ')
+    store_object = previous_step.replace(f"/s3/{bucket_name}/", "")
+    print(f"parsing {previous_step} to {store_object} ")
     data = client.get_object(bucket_name, store_object)
 
     with open("my-testfile", "wb") as file_data:

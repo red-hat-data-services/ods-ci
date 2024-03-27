@@ -14,11 +14,11 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     auth_return = auth.login()
     print(f'auth_return: "{auth_return}"')
     print("after login")
+    # openshift_oauth is a workaround for RHOAIENG-3981
     cluster = Cluster(
         ClusterConfiguration(
             name="raytest",
-            # namespace must exist, and it is the same from 432__data-science-pipelines-tekton.robot
-            namespace="pipelineskfp1",
+            openshift_oauth=True,
             num_workers=1,
             head_cpus="500m",
             min_memory=1,

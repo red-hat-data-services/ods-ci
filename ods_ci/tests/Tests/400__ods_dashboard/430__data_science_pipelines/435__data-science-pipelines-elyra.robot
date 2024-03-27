@@ -86,7 +86,7 @@ Verify Elyra Pipelines In SDS-Based Images
 Elyra Pipelines Suite Setup
     [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
-    #RHOSi Setup
+    RHOSi Setup
 
 Elyra Pipelines SDS Setup
     [Documentation]    Suite Setup, creates DS Project and opens it
@@ -110,7 +110,7 @@ Elyra Pipelines SDS Teardown
 Elyra Pipelines Suite Teardown
     [Documentation]    Closes the browser and performs RHOSi Teardown
     Close All Browsers
-    #RHOSi Teardown
+    RHOSi Teardown
 
 Verify Hello World Pipeline Elements
     [Documentation]    Verifies that the example pipeline is displayed correctly by Elyra

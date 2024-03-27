@@ -92,9 +92,7 @@ class DataSciencePipelinesAPI:
     def do_http_request(self, url):
         assert self.route != "", "Login First"
         response = requests.get(
-            f"http://{self.route}/{url}",
-            headers={"Authorization": f"Bearer {self.sa_token}"},
-            verify=self.get_cert()
+            f"http://{self.route}/{url}", headers={"Authorization": f"Bearer {self.sa_token}"}, verify=self.get_cert()
         )
         assert response.status_code == 200
         return response.url

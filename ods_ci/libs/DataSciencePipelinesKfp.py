@@ -45,7 +45,11 @@ class DataSciencePipelinesKfp:
                 # we assume it is a cluster with self-signed certs
                 if type(e.reason) == SSLError:
                     # try to retrieve the certificate
-                    self.client = Client(host=f"https://{self.api.route}/", existing_token=self.api.sa_token, ssl_ca_cert=self.api.get_cert())
+                    self.client = Client(
+                        host=f"https://{self.api.route}/",
+                        existing_token=self.api.sa_token,
+                        ssl_ca_cert=self.api.get_cert(),
+                    )
         return self.client, self.api
 
     def get_bucket_name(self, api, project):
@@ -80,10 +84,7 @@ class DataSciencePipelinesKfp:
             f.write(test_pipeline_run_yaml)
         print(f"{pipeline_url} content stored at {pipeline_file}")
         print("create a run from pipeline")
-        response = self.client.create_run_from_pipeline_package(
-            pipeline_file=pipeline_file,
-            arguments=pipeline_params
-        )
+        response = self.client.create_run_from_pipeline_package(pipeline_file=pipeline_file, arguments=pipeline_params)
         print(response)
         return response.run_id
 
@@ -141,11 +142,7 @@ class DataSciencePipelinesKfp:
 
         # create_run_from_pipeline_func will compile the code
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')
-        result = client.create_run_from_pipeline_func(
-            pipeline_func=pipeline,
-            arguments=pipeline_params
-        )
+        result = client.create_run_from_pipeline_func(pipeline_func=pipeline, arguments=pipeline_params)
         # easy to debug and double check failures
         print(result)
         return result.run_id
-

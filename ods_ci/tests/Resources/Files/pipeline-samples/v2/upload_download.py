@@ -1,4 +1,5 @@
 """Test pipeline to exercise various data flow mechanisms."""
+
 import kfp
 
 from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
@@ -90,7 +91,6 @@ def test_uploaded_artifact(
     name="Test Data Passing Pipeline 1",
 )
 def wire_up_pipeline(mlpipeline_minio_artifact_secret: str, bucket_name: str):
-
     file_size_mb = 20
     file_size_bytes = file_size_mb * 1024 * 1024
 
@@ -104,5 +104,5 @@ def wire_up_pipeline(mlpipeline_minio_artifact_secret: str, bucket_name: str):
         previous_step=receive_file_task.output,
         file_size_bytes=file_size_bytes,
         mlpipeline_minio_artifact_secret=mlpipeline_minio_artifact_secret,
-        bucket_name=bucket_name
+        bucket_name=bucket_name,
     )

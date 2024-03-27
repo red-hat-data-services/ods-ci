@@ -30,7 +30,6 @@ Provision Self-Managed Cluster
     Wait For Cluster To Be Ready
     Save Cluster Credentials
     Login To Cluster
-    Set Cluster Storage
     Pass Execution    Self-Managed Cluster ${cluster_name} provisionend successfully
 
 Deprovision Self-Managed Cluster

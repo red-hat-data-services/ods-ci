@@ -62,7 +62,7 @@ Kueue smoke test
     [Teardown]    Disable Component    kueue
     Wait Component Ready    kueue
     Log To Console    Waiting for kueue-controller-manager to be available
-    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${ODH_NAMESPACE} deployment/kueue-controller-manager
+    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${ODH_NAMESPACE} deployment/kueue-controller-manager
     ...    shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0

@@ -9,13 +9,9 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${KUEUE_DIR}            kueue
-${KUEUE_REPO_URL}       %{KUEUE_REPO_URL=https://github.com/opendatahub-io/kueue.git}
-${KUEUE_REPO_BRANCH}    %{KUEUE_REPO_BRANCH=dev}
-${JOB_GO_BIN}           %{WORKSPACE=.}/go-bin
-${KUBECONFIG}           %{WORKSPACE=.}/kconfig
-${WORKER_NODE}          ${EMPTY}
-
+${KUEUE_KUBECONFIG}         %{HOME}/.kube/config
+${WORKER_NODE}              ${EMPTY}
+${KUEUE_RELEASE_ASSETS}     %{KUEUE_RELEASE_ASSETS=https://github.com/opendatahub-io/kueue/releases/latest/download}
 
 *** Test Cases ***
 Run E2E test
@@ -36,11 +32,13 @@ Run Sanity test
 *** Keywords ***
 Prepare Kueue E2E Test Suite
     [Documentation]    Prepare Kueue E2E Test Suite
-    ${result} =    Run Process    git clone -b ${KUEUE_REPO_BRANCH} ${KUEUE_REPO_URL} ${KUEUE_DIR}
-    ...    shell=true    stderr=STDOUT
+    Log To Console    "Downloading compiled test binary e2e-singlecluster"
+    ${result} =    Run Process    curl --location --silent --output e2e-singlecluster ${KUEUE_RELEASE_ASSETS}/e2e-singlecluster && chmod +x e2e-singlecluster
+    ...    shell=true
+    ...    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
-        FAIL    Unable to clone kueue repo ${KUEUE_REPO_URL}:${KUEUE_REPO_BRANCH}:${KUEUE_DIR}
+        FAIL    Unable to retrieve e2e-singlecluster compiled binary
     END
 
     Enable Component    kueue
@@ -53,19 +51,16 @@ Prepare Kueue E2E Test Suite
     ${return_code} =    Run And Return Rc    oc label ${WORKER_NODE} instance-type=on-demand
     Should Be Equal As Integers  ${return_code}   0   msg=Fail to label worker node with instance-type=on-demand
 
-    # Use Go install command to install ginkgo
-    Log To Console    Install ginkgo ...
-    ${result} =    Run Process    go install github.com/onsi/ginkgo/v2/ginkgo
-    ...    shell=true    stderr=STDOUT
-    ...    env:GOBIN=${JOB_GO_BIN}
-    ...    cwd=${KUEUE_DIR}
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Fail to install ginkgo
-    END
-
 Teardown Kueue E2E Test Suite
     [Documentation]    Teardown Kueue E2E Test Suite
+    Log To Console    "Removing test binaries"
+    ${result} =    Run Process    rm -f e2e-singlecluster
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to remove files
+    END
     Disable Component    kueue
 
     # Remove label instance-type=on-demand from worker node
@@ -77,10 +72,9 @@ Run Kueue E2E Test
     [Documentation]    Run Kueue E2E Test
     [Arguments]    ${test_name}
     Log To Console    Running Kueue E2E test: ${test_name}
-    ${result} =    Run Process    ginkgo --focus-file\=${test_name} ${KUEUE_DIR}/test/e2e/singlecluster
+    ${result} =    Run Process    ./e2e-singlecluster -ginkgo.focus-file\=${test_name}
     ...    shell=true    stderr=STDOUT
-    ...    env:PATH=%{PATH}:${JOB_GO_BIN}
-    ...    env:KUBECONFIG=${KUBECONFIG}
+    ...    env:KUBECONFIG=${KUEUE_KUBECONFIG}
     ...    env:NAMESPACE=${APPLICATIONS_NAMESPACE}
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
@@ -91,10 +85,9 @@ Run Kueue Sanity Test
     [Documentation]    Run Kueue Sanity Test
     [Arguments]    ${test_name}
     Log To Console    Running Kueue Sanity test: ${test_name}
-    ${result} =    Run Process    ginkgo --focus "${test_name}" ${KUEUE_DIR}/test/e2e/singlecluster
+    ${result} =    Run Process    ./e2e-singlecluster -ginkgo.focus "${test_name}"
     ...    shell=true    stderr=STDOUT
-    ...    env:PATH=%{PATH}:${JOB_GO_BIN}
-    ...    env:KUBECONFIG=${KUBECONFIG}
+    ...    env:KUBECONFIG=${KUEUE_KUBECONFIG}
     ...    env:NAMESPACE=${APPLICATIONS_NAMESPACE}
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0

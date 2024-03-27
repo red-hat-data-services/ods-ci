@@ -38,7 +38,7 @@ ${DC_NAME} =    elyra-s3
 Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
     [Documentation]    Loads an example Elyra pipeline and confirms the Elyra web UI displays it correctly
     [Tags]    Sanity    Tier1
-    ...       ODS-2197
+    ...       ODS-2197      RunThisTest
     [Setup]    Elyra Pipelines SDS Setup
     Create Workbench    workbench_title=elyra-sds    workbench_description=Elyra test
     ...                 prj_title=${PRJ_TITLE}    image_name=Standard Data Science  deployment_size=Small
@@ -86,7 +86,7 @@ Verify Elyra Pipelines In SDS-Based Images
 Elyra Pipelines Suite Setup
     [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
-    RHOSi Setup
+    #RHOSi Setup
 
 Elyra Pipelines SDS Setup
     [Documentation]    Suite Setup, creates DS Project and opens it
@@ -110,7 +110,7 @@ Elyra Pipelines SDS Teardown
 Elyra Pipelines Suite Teardown
     [Documentation]    Closes the browser and performs RHOSi Teardown
     Close All Browsers
-    RHOSi Teardown
+    #RHOSi Teardown
 
 Verify Hello World Pipeline Elements
     [Documentation]    Verifies that the example pipeline is displayed correctly by Elyra

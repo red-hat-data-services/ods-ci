@@ -12,7 +12,8 @@ ${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_SEC
 ${S3_ENDPOINT_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_S3_ENDPOINT"]
 ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_DEFAULT_REGION"]
 ${DC_SECTION_XP}=             xpath=//div[@id="data-connections"]
-${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}//button[.="Add data connection"]
+${DC_TAB}=                    xpath=//button[.="Data connections"]
+${DC_ADD_BTN_1_XP}=           xpath= //*[@id="data-connections"]/div//button[.="Add data connection"]
 ${DC_ADD_BTN_2_XP}=           xpath=//footer/button[.="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKET"]
 ${S3_DC_ADD_BTN}=             xpath=//footer/button[.="Add data connection"]
@@ -28,6 +29,8 @@ Create S3 Data Connection
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     ...            ${aws_s3_ca_bundle}=${NONE}
+    Click Button    ${DC_TAB}
+    Wait Until Page Contains    Add data connection
     Click Button    ${DC_ADD_BTN_1_XP}
     Fill Data Connection Form    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${S3_DC_ADD_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}

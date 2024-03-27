@@ -8,13 +8,14 @@ Resource       ../ODHDataSciencePipelines.resource
 ${PIPELINES_SECTION_XP}=    xpath://div[@id="pipelines-projects"]
 ${PIPELINES_TABLE_XP}=      xpath://table[@data-testid="pipelines-table"]
 ${PIPELINES_SERVER_BTN_XP}=    xpath://button[text()="Configure pipeline server"]
-${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath://footer/button[text()="Configure pipeline server"]
+${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath=//footer/div//button[text()="Configure pipeline server"]
 ${PIPELINES_IMPORT_BTN_XP}=    xpath://button[text()="Import pipeline"]
 ${CREATE_RUN_BTN_XP}=    xpath://*[text()="Create run"]
 ${RUN_TOPOLOGY_DETAILS_BTN_XP}=    xpath://li//button[text()="Details"]
 ${RUN_TOPOLOGY_OUTPUT_BTN_XP}=    xpath://li//button[text()="Run output"]
 ${RUN_TOPOLOGY_XP}=    css:div[data-test-id="topology"]
 ${PIPELINES_DISABLED_EXC_MARK}=    xpath=//*[@id="page-sidebar"]/div/nav/ul/li[3]/a/div/div[2]
+${PIPELINES_SERVER_TAB}=        xpath=//button[.="Pipelines"]
 
 *** Keywords ***
 Create Pipeline Server
@@ -25,6 +26,8 @@ Create Pipeline Server
     ...            ${aws_s3_ca_bundle}=${NONE}
     # Every 2 mins the frontend updates its cache and the client polls every 30seconds.
     # So the longest you’d have to wait is 2.5 mins. Set 3 min just to make sure
+    Click Button        ${PIPELINES_SERVER_TAB}
+    Wait Until Page Contains    Start by creating a pipeline server
     Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}    timeout=180s
     Element Should Be Enabled    ${PIPELINES_SERVER_BTN_XP}
     Click Button    ${PIPELINES_SERVER_BTN_XP}

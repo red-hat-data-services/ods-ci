@@ -22,8 +22,10 @@ ${TEST_NS}=    tgis-standalone
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 @{SEARCH_METRICS}=    tgi_    istio_
 ${USE_GPU}=    ${FALSE}
+${IBM_CLOUD_PROXY}=    ${FALSE}
+${PROXY_URL}=    TBD
 
-  
+
 *** Test Cases ***
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
@@ -617,6 +619,10 @@ Verify User Can Query A Model Using HTTP Calls
 *** Keywords ***
 Suite Setup
     [Documentation]
+    IF    ${IBM_CLOUD_PROXY}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    export https_proxy=${PROXY_URL}
+    END
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses

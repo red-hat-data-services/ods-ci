@@ -48,9 +48,7 @@ def print_msg(msg: str):
 def flipcoin_pipeline():
     flip_coin_op = components.create_component_from_func(flip_coin, base_image=DataSciencePipelinesKfp.base_image)
     print_op = components.create_component_from_func(print_msg, base_image=DataSciencePipelinesKfp.base_image)
-    random_num_op = components.create_component_from_func(
-        random_num, base_image=DataSciencePipelinesKfp.base_image
-    )
+    random_num_op = components.create_component_from_func(random_num, base_image=DataSciencePipelinesKfp.base_image)
 
     flip = flip_coin_op()
     with dsl.Condition(flip.output == "heads"):

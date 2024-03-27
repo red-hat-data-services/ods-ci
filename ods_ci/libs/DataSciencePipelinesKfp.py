@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import time
+
 from DataSciencePipelinesAPI import DataSciencePipelinesAPI
 from robotlibcore import keyword
 from urllib3.exceptions import MaxRetryError, SSLError
@@ -18,7 +19,7 @@ class DataSciencePipelinesKfp:
         self.client = None
         self.api = None
 
-    def get_client(self, user, pwd, project, route_name='ds-pipeline-dspa'):
+    def get_client(self, user, pwd, project, route_name="ds-pipeline-dspa"):
         if self.client is None:
             self.api = DataSciencePipelinesAPI()
             self.api.login_and_wait_dsp_route(user, pwd, project, route_name)
@@ -44,7 +45,11 @@ class DataSciencePipelinesKfp:
                 # we assume it is a cluster with self-signed certs
                 if type(e.reason) == SSLError:
                     # try to retrieve the certificate
-                    self.client = Client(host=f"https://{self.api.route}/", existing_token=self.api.sa_token, ssl_ca_cert=self.api.get_cert())
+                    self.client = Client(
+                        host=f"https://{self.api.route}/",
+                        existing_token=self.api.sa_token,
+                        ssl_ca_cert=self.api.get_cert(),
+                    )
         return self.client, self.api
 
     def get_bucket_name(self, api, project):
@@ -71,18 +76,15 @@ class DataSciencePipelinesKfp:
 
     @keyword
     def import_run_pipeline(self, pipeline_url, pipeline_params):
-        print(f'pipeline_params({type(pipeline_params)}): {pipeline_params}')
-        print(f'downloading: {pipeline_url}')
+        print(f"pipeline_params({type(pipeline_params)}): {pipeline_params}")
+        print(f"downloading: {pipeline_url}")
         test_pipeline_run_yaml, _ = self.api.do_get(pipeline_url, skip_ssl=True)
         pipeline_file = "/tmp/test_pipeline_run_yaml.yaml"
         with open(pipeline_file, "w", encoding="utf-8") as f:
             f.write(test_pipeline_run_yaml)
-        print(f'{pipeline_url} content stored at {pipeline_file}')
-        print('create a run from pipeline')
-        response = self.client.create_run_from_pipeline_package(
-            pipeline_file=pipeline_file,
-            arguments=pipeline_params
-        )
+        print(f"{pipeline_url} content stored at {pipeline_file}")
+        print("create a run from pipeline")
+        response = self.client.create_run_from_pipeline_package(pipeline_file=pipeline_file, arguments=pipeline_params)
         print(response)
         return response.run_id
 
@@ -109,9 +111,9 @@ class DataSciencePipelinesKfp:
 
     @keyword
     def create_run_from_pipeline_func(
-        self, user, pwd, project, source_code, fn, pipeline_params={}, current_path=None, route_name='ds-pipeline-dspa'
+        self, user, pwd, project, source_code, fn, pipeline_params={}, current_path=None, route_name="ds-pipeline-dspa"
     ):
-        print(f'pipeline_params: {pipeline_params}')
+        print(f"pipeline_params: {pipeline_params}")
         client, api = self.get_client(user, pwd, project, route_name)
         mlpipeline_minio_artifact_secret = api.get_secret(project, "ds-pipeline-s3-dspa")
         bucket_name = self.get_bucket_name(api, project)
@@ -128,23 +130,19 @@ class DataSciencePipelinesKfp:
         # pipeline_params
         # there are some special keys to retrieve argument values dynamically
         # in pipeline v2, we must match the parameters names
-        if 'mlpipeline_minio_artifact_secret' in pipeline_params:
-            pipeline_params['mlpipeline_minio_artifact_secret'] = str(mlpipeline_minio_artifact_secret["data"])
-        if 'bucket_name' in pipeline_params:
-            pipeline_params['bucket_name'] = bucket_name
-        if 'openshift_server' in pipeline_params:
-            pipeline_params['openshift_server'] = self.api.get_openshift_server()
-        if 'openshift_token' in pipeline_params:
-            pipeline_params['openshift_token'] = self.api.get_openshift_token()
-        print(f'pipeline_params modified with dynamic values: {pipeline_params}')
+        if "mlpipeline_minio_artifact_secret" in pipeline_params:
+            pipeline_params["mlpipeline_minio_artifact_secret"] = str(mlpipeline_minio_artifact_secret["data"])
+        if "bucket_name" in pipeline_params:
+            pipeline_params["bucket_name"] = bucket_name
+        if "openshift_server" in pipeline_params:
+            pipeline_params["openshift_server"] = self.api.get_openshift_server()
+        if "openshift_token" in pipeline_params:
+            pipeline_params["openshift_token"] = self.api.get_openshift_token()
+        print(f"pipeline_params modified with dynamic values: {pipeline_params}")
 
         # create_run_from_pipeline_func will compile the code
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')
-        result = client.create_run_from_pipeline_func(
-            pipeline_func=pipeline,
-            arguments=pipeline_params
-        )
+        result = client.create_run_from_pipeline_func(pipeline_func=pipeline, arguments=pipeline_params)
         # easy to debug and double check failures
         print(result)
         return result.run_id
-

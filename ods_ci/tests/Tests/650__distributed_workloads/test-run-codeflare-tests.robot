@@ -19,7 +19,7 @@ Run TestMNISTPyTorchMCAD E2E test
     [Documentation]    Run Go E2E test: TestMNISTPyTorchMCAD
     [Tags]  ODS-2543
     ...     Sanity
-    ...     Tier2
+    ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator
     Run Codeflare E2E Test    TestMNISTPyTorchMCAD
@@ -27,7 +27,7 @@ Run TestMNISTPyTorchMCAD E2E test
 Run TestMNISTRayJobMCADRayCluster E2E test
     [Documentation]    Run Go E2E test: TestMNISTRayJobMCADRayCluster
     [Tags]  ODS-2545
-    ...     Tier2
+    ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator
     Run Codeflare E2E Test    TestMNISTRayJobMCADRayCluster
@@ -35,7 +35,7 @@ Run TestMNISTRayJobMCADRayCluster E2E test
 Run TestMCADRay ODH test
     [Documentation]    Run Go ODH test: TestMCADRay
     [Tags]  ODS-2514
-    ...     Tier2
+    ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator
     Skip    "Skip because of https://issues.redhat.com/browse/RHOAIENG-3981"
@@ -44,7 +44,7 @@ Run TestMCADRay ODH test
 Run TestMnistPyTorchMCAD ODH test
     [Documentation]    Run Go ODH test: TestMnistPyTorchMCAD
     [Tags]  ODS-2515
-    ...     Tier2
+    ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator
     Run Codeflare ODH Test    TestMnistPyTorchMCAD

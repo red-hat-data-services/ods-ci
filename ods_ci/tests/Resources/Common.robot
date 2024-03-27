@@ -2,6 +2,7 @@
 Library   SeleniumLibrary
 Library   JupyterLibrary
 Library   OperatingSystem
+Library   DependencyLibrary
 Library   Process
 Library   RequestsLibrary
 Library   ../../libs/Helpers.py

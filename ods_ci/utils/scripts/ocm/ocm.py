@@ -509,7 +509,6 @@ class OpenshiftClusterManager:
                     p["value"] = "##hidden##"
         return json.dumps(json_dict)
 
-    # noinspection PyInterpreter
     def install_addon(
         self,
         addon_name="managed-odh",

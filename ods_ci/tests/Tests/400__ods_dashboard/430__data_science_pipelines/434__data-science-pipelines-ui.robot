@@ -64,7 +64,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    pipeline_name=${PIPELINE_TEST_NAME}    run_type=Immediate
     ...    press_cancel=${TRUE}
 
-    # FIXME: remove workaround for hardcoded iris-pipeline parameters
+    # FIXME: remove workaround for hardcoded iris-pipeline parameters (related to RHOAIENG-4738)
     # Create run
     Open Data Science Project Details Page    ${PRJ_TITLE}
     ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}

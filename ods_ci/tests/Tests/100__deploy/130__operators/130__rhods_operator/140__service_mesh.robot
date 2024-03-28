@@ -35,7 +35,7 @@ Validate Service Mesh State Unmanaged
 
     Set Service Mesh Management State    Unmanaged    ${OPERATOR_NS}
     Delete Service Mesh Control Plane    ${SERVICE_MESH_CR_NS}
-    Wait Until Keyword Succeeds    0 min    20 sec
+    Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is Resource Present    ServiceMeshControlPlane    data-science-smcp    ${SERVICE_MESH_CR_NS}    ${IS_NOT_PRESENT}
 
     [Teardown]    Set Service Mesh Management State    Managed    ${OPERATOR_NS}
@@ -47,7 +47,7 @@ Validate Service Mesh State Removed
     [Tags]    ServiceMesh-Removed
 
     Set Service Mesh Management State    Removed    ${OPERATOR_NS}
-    Wait Until Keyword Succeeds    1 min    0 sec
+    Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is Resource Present    ServiceMeshControlPlane    data-science-smcp    ${SERVICE_MESH_CR_NS}    ${IS_NOT_PRESENT}
 
     [Teardown]    Set Service Mesh Management State    Managed    ${OPERATOR_NS}

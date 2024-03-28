@@ -1,5 +1,7 @@
 *** Settings ***
 Resource    deprovision.robot
+Resource    ../../../../tests/Resources/Common.robot
+Library    Process
 
 *** Keywords ***
 Claim Cluster
@@ -8,17 +10,29 @@ Claim Cluster
     ...    template_data=${infrastructure_configurations}
 
 Does ClusterName Exists
-    @{clusterpoolname} =    Oc Get   kind=ClusterPool    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
-    Log Many    @{clusterpoolname}
-    Log Many    ${cluster_name}
-    FOR    ${name}    IN    @{clusterpoolname}
-        IF    "${name}[metadata][name]" == "${pool_name}"
-            Log    ${name}[metadata][name]    console=True
-            ${clustername_exists} =    Set Variable    "${name}[metadata][name]"
-            RETURN    ${clustername_exists}
+    [Arguments]    ${use_pool}=${TRUE}
+    IF    ${use_pool}
+        @{clusterpoolname} =    Oc Get   kind=ClusterPool    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        Log Many    @{clusterpoolname}
+        Log Many    ${cluster_name}
+        FOR    ${name}    IN    @{clusterpoolname}
+            IF    "${name}[metadata][name]" == "${pool_name}"
+                Log    ${name}[metadata][name]    console=True
+                ${clustername_exists} =    Set Variable    "${name}[metadata][name]"
+                RETURN    ${clustername_exists}
+            END
         END
+        RETURN    False
+    ELSE
+        ${clusterdeploymentname} =    Oc Get   kind=ClusterDeployment    namespace=${hive_namespace}
+        ...    api_version=hive.openshift.io/v1    fields=['spec.clusterName']
+        Log    ${clusterdeploymentname}
+        Log    ${cluster_name}
+        IF    "${clusterdeploymentname}" == "${cluster_name}"
+            RETURN    ${clusterdeploymentname}
+        END
+        RETURN    False
     END
-    RETURN    False
 
 Get Clusters
     @{clusters} =    Oc Get    kind=ClusterClaim    namespace=${hive_namespace}
@@ -29,21 +43,28 @@ Get Clusters
 Provision Cluster
     Log    Setting cluster ${cluster_name} configuration    console=True
     Should Be True    "${hive_kubeconf}" != "${EMPTY}"
-    ${clustername_exists} =    Does ClusterName Exists
+    ${clustername_exists} =    Does ClusterName Exists    use_pool=${use_cluster_pool}
     ${template} =    Select Provisioner Template    ${provider_type}
-    IF    ${clustername_exists}
+    IF    ${clustername_exists}    Handle Already Existing Cluster
+    Log     Configuring cluster ${cluster_name}    console=True
+    Create Provider Resources
+
+Handle Already Existing Cluster
+    IF    ${use_cluster_pool}
         Log    Cluster name '${cluster_name}' already exists in Hive pool '${pool_name}' - Checking if it has a valid web-console      console=True
         ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
         ${result} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
-        IF    ${result.rc} != 0
-            Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources    console=True
-            Delete Cluster Configuration
-        ELSE
-            FAIL    Cluster '${cluster_name}' is already in use, please choose a different name.
-        END
+    ELSE
+        Log    Cluster name '${cluster_name}' already exists as Hive ClusterDeployment - Checking if it has a valid web-console      console=True
+        ${result} =    Run Process    oc -n ${hive_namespace} get cd ${cluster_name} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes        
     END
-    Log     Configuring cluster ${cluster_name}    console=True
-    Create Provider Resources
+    IF    ${result.rc} != 0
+        Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources    console=True
+        Delete Cluster Configuration
+    ELSE
+        FAIL    Cluster '${cluster_name}' is already in use, please choose a different name.
+    END
+
 
 Create Provider Resources
     Log    Creating Hive resources for cluster ${cluster_name} on ${provider_type} according to: ${template}   console=True
@@ -55,6 +76,11 @@ Create Provider Resources
         ...    template_data=${infrastructure_configurations}
     ELSE IF    "${provider_type}" == "OSP"
         Create Openstack Resources
+    ELSE IF    "${provider_type}" == "IBM"
+        Create IBM CredentialsRequests And Service IDs
+        Create IBM Manifests Secret
+        Oc Apply    kind=List    src=${template}    api_version=v1
+        ...    template_data=${infrastructure_configurations}
     ELSE
         FAIL    Invalid provider name
     END
@@ -70,6 +96,9 @@ Select Provisioner Template
     ELSE IF    "${provider_type}" == "OSP"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/OSP/hive_osp_cluster_template.yaml
         Log    Setting OSP Hive Template ${template}    console=True
+    ELSE IF    "${provider_type}" == "IBM"
+        Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/IBM/ibmcloud-cluster.yaml
+        Log    Setting IBM Hive Template ${template}    console=True
     ELSE
         FAIL    Invalid provider name
     END
@@ -219,3 +248,19 @@ Get Cluster Pool Namespace
     ...    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${hive_pool_name}
     ${pool_namespace} =    Set Variable   ${namespace[0]['metadata']['name']}
     RETURN    ${pool_namespace}
+
+Create IBM CredentialsRequests And Service IDs
+    ${result}=    Run Process    command=mkdir credreqs ; oc adm release extract --cloud=ibmcloud --credentials-requests ${release_image} --to=./credreqs
+    ...    shell=yes
+    Should Be True    ${result.rc} == 0    msg=${result.stderr}
+    Set Log Level    NONE
+    ${result}=    Run Process    command=export IC_API_KEY=${infrastructure_configurations}[ibmcloud_api_key] && ccoctl ibmcloud create-service-id --credentials-requests-dir ./credreqs --name ${cluster_name}
+    ...    shell=yes
+    Set Log Level    INFO
+    Should Be True    ${result.rc} == 0    msg=${result.stderr}
+
+Create IBM Manifests Secret
+    ${result}=    Run Process    command=oc create secret generic ${cluster_name}-manifests -n ${hive_namespace} --from-file=./manifests
+    ...    shell=yes
+    Log    ${result.stderr}
+    Should Be True    ${result.rc} == 0    msg=${result.stderr}

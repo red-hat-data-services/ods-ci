@@ -2,4 +2,5 @@ infrastructure_configurations:
     provider: GCP
     hive_cluster_name: rhodsawstest
     hive_claim_name: rhodsawstestclaim
+    use_cluster_pool: True
     

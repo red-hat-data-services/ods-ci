@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ibmcloud-sno-install-config
+    namespace: {{ hive_claim_ns }}
+  type: Opaque
+  stringData:
+    install-config.yaml: |
+      apiVersion: v1
+      baseDomain: {{ base_domain }}
+      credentialsMode: Manual
+      compute:
+      - name: worker
+        platform:
+          ibmcloud:
+            type: {{ worker_node_instance_type|default("bx2-8x32") }}
+        replicas: {{ worker_node_replicas|default("2") }}
+      controlPlane:
+        name: master
+        platform:
+          ibmcloud:
+            type: {{ master_node_instance_type|default("bx2-4x16") }}
+        replicas: {{ master_node_replicas|default("3") }}
+      metadata:
+        name: {{ hive_cluster_name|default("rhodsibm") }}
+      networking:
+        clusterNetwork:
+        - cidr: 10.128.0.0/14
+          hostPrefix: 23
+        machineNetwork:
+        - cidr: 10.0.0.0/16
+        serviceNetwork:
+        - 172.30.0.0/16
+      fips: {{ fips_validation|default("false") }}
+      platform:
+        ibmcloud:
+          region: {{ ibmcloud_region|default("us-south") }}
+      pullSecret: {{ pull_secret|default("") }}
+      sshKey: {{ ssh_key|default("") }}
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterImageSet
+  metadata:
+    name: {{ image_set|default("rhods-openshift") }}
+    namespace: {{ hive_claim_ns }}
+  spec:
+    releaseImage: {{ release_image|default("quay.io/openshift-release-dev/ocp-release:4.10.18-x86_64") }}
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ibmcloud-creds
+    namespace: {{ hive_claim_ns }}
+  type: Opaque
+  stringData:
+    ibmcloud_api_key: {{ ibmcloud_api_key }}
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterDeployment
+  metadata:
+    name: {{ hive_cluster_name|default("rhodsibm") }}
+    namespace: {{ hive_claim_ns }}
+  spec:
+    baseDomain: {{ base_domain }}
+    clusterName: {{ hive_cluster_name|default("rhodsibm") }}
+    platform:
+      ibmcloud:
+        region: {{ ibmcloud_region|default("us-south") }}
+        credentialsSecretRef:
+          name: ibmcloud-creds
+    provisioning:
+      imageSetRef:
+        name: {{ image_set|default("rhods-openshift") }}
+      installConfigSecretRef:
+        name: ibmcloud-sno-install-config
+      manifestsSecretRef:
+        name: {{ hive_cluster_name|default("rhodsibm") }}-manifests
+    pullSecretRef:
+      name: llmcluster-pull-secret

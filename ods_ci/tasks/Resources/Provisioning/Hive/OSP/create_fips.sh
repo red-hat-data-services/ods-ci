@@ -42,13 +42,6 @@ osp_dashboard="$(openstack catalog show keystone -c endpoints -c name -c type \
 
 echo "Connected to Openstack: ${osp_dashboard}"
 
-echo "Cleaning unused Floating IPs in Openstack Cloud '$OSP_CLOUD' (before creating new IPs in Network '$OSP_NETWORK')"
-openstack floating ip list --status DOWN -c 'Floating IP Address' -f value | xargs -n1 -r --verbose openstack floating ip delete || rc=$?
-if [[ -n "$rc" ]] ; then
-  echo -e "Failure [$rc] cleaning unused floating IPs"
-  exit ${rc:+$rc}
-fi
-
 echo "Allocating a floating IP for cluster's API"
 cmd=(openstack floating ip create --description "$CLUSTER_NAME API" -f value -c floating_ip_address "$OSP_NETWORK")
 echo "${cmd[@]}"

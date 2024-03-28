@@ -16,17 +16,20 @@ ${hive_kubeconf}         %{KUBECONFIG}
 ${cluster_name}          ${infrastructure_configurations}[hive_cluster_name]
 ${hive_namespace}        ${infrastructure_configurations}[hive_claim_ns]
 ${provider_type}         ${infrastructure_configurations}[provider]
+${use_cluster_pool}      ${infrastructure_configurations}[use_cluster_pool]
+${release_image}         ${infrastructure_configurations}[release_image]
 ${claim_name}            ${cluster_name}-claim
 ${pool_name}             ${cluster_name}-pool
 ${conf_name}             ${cluster_name}-conf
 ${artifacts_dir}         ${OUTPUT DIR}
+
 
 *** Tasks ***
 Provision Self-Managed Cluster
     [Documentation]    Provision a self-managed cluster
     [Tags]  self_managed_provision
     Provision Cluster
-    Claim Cluster
+    IF    ${use_cluster_pool}    Claim Cluster
     Wait For Cluster To Be Ready
     Save Cluster Credentials
     Login To Cluster

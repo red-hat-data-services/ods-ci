@@ -9,14 +9,14 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${KUEUE_KUBECONFIG}         %{HOME}/.kube/config
+${KUEUE_KUBECONFIG}         %{WORKSPACE=.}/kconfig
 ${WORKER_NODE}              ${EMPTY}
 ${KUEUE_RELEASE_ASSETS}     %{KUEUE_RELEASE_ASSETS=https://github.com/opendatahub-io/kueue/releases/latest/download}
 
 *** Test Cases ***
 Run E2E test
     [Documentation]    Run ginkgo E2E single cluster test
-    [Tags]  Tier2
+    [Tags]  Tier1
     ...     Kueue
     ...     DistributedWorkloads
     Run Kueue E2E Test    e2e_test.go

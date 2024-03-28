@@ -13,12 +13,12 @@
 # limitations under the License.
 
 # source https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py
-from kfp import components, dsl
+from kfp import dsl
 
 from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
-@dsl.component
+@dsl.component(base_image=DataSciencePipelinesKfp.base_image)
 def random_num(low: int, high: int) -> int:
     """Generate a random number between low and high."""
     import random
@@ -28,7 +28,7 @@ def random_num(low: int, high: int) -> int:
     return result
 
 
-@dsl.component
+@dsl.component(base_image=DataSciencePipelinesKfp.base_image)
 def flip_coin() -> str:
     """Flip a coin and output heads or tails randomly."""
     import random
@@ -38,7 +38,7 @@ def flip_coin() -> str:
     return result
 
 
-@dsl.component
+@dsl.component(base_image=DataSciencePipelinesKfp.base_image)
 def print_msg(msg: str):
     """Print a message."""
     print(msg)
@@ -46,20 +46,20 @@ def print_msg(msg: str):
 
 @dsl.pipeline(
     name="conditional-execution-pipeline",
-    description="Shows how to use dsl.Condition().",
+    description="Shows how to use dsl.If().",
 )
 def flipcoin_pipeline():
     flip = flip_coin()
-    with dsl.Condition(flip.output == "heads"):
+    with dsl.If(flip.output == "heads"):
         random_num_head = random_num(low=0, high=9)
-        with dsl.Condition(random_num_head.output > 5):
+        with dsl.If(random_num_head.output > 5):
             print_msg(msg="heads and %s > 5!" % random_num_head.output)
-        with dsl.Condition(random_num_head.output <= 5):
+        with dsl.If(random_num_head.output <= 5):
             print_msg(msg="heads and %s <= 5!" % random_num_head.output)
 
-    with dsl.Condition(flip.output == "tails"):
+    with dsl.If(flip.output == "tails"):
         random_num_tail = random_num(low=10, high=19)
-        with dsl.Condition(random_num_tail.output > 15):
+        with dsl.If(random_num_tail.output > 15):
             print_msg(msg="tails and %s > 15!" % random_num_tail.output)
-        with dsl.Condition(random_num_tail.output <= 15):
+        with dsl.If(random_num_tail.output <= 15):
             print_msg(msg="tails and %s <= 15!" % random_num_tail.output)

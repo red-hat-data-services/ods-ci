@@ -5,8 +5,8 @@ import sys
 import time
 
 from DataSciencePipelinesAPI import DataSciencePipelinesAPI
+from kfp.client import Client
 from robotlibcore import keyword
-from urllib3.exceptions import MaxRetryError, SSLError
 
 
 class DataSciencePipelinesKfp:
@@ -23,33 +23,11 @@ class DataSciencePipelinesKfp:
         if self.client is None:
             self.api = DataSciencePipelinesAPI()
             self.api.login_and_wait_dsp_route(user, pwd, project, route_name)
-
-            # initialize global environment variables
-            # https://github.com/kubeflow/kfp-tekton/issues/1345
-            default_image = DataSciencePipelinesKfp.base_image
-            os.environ["DEFAULT_STORAGE_CLASS"] = self.api.get_default_storage()
-            os.environ["TEKTON_BASH_STEP_IMAGE"] = default_image
-            os.environ["TEKTON_COPY_RESULTS_STEP_IMAGE"] = default_image
-            os.environ["CONDITION_IMAGE_NAME"] = default_image
-            # https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
-            os.environ["DEFAULT_ACCESSMODES"] = "ReadWriteOnce"
-            from kfp.client import Client
-
-            # the following fallback it is to simplify the test development
-            try:
-                # we assume it is a secured cluster
-                # ssl_ca_cert came from /path/to/python/lib/python3.x/site-packages/certifi/cacert.pem
-                # that certificate is "Mozilla's carefully curated collection of root certificates"
-                self.client = Client(host=f"https://{self.api.route}/", existing_token=self.api.sa_token)
-            except MaxRetryError as e:
-                # we assume it is a cluster with self-signed certs
-                if type(e.reason) == SSLError:
-                    # try to retrieve the certificate
-                    self.client = Client(
-                        host=f"https://{self.api.route}/",
-                        existing_token=self.api.sa_token,
-                        ssl_ca_cert=self.api.get_cert(),
-                    )
+            self.client = Client(
+                host=f"https://{self.api.route}/",
+                existing_token=self.api.sa_token,
+                ssl_ca_cert=self.api.get_cert(),
+            )
         return self.client, self.api
 
     def get_bucket_name(self, api, project):

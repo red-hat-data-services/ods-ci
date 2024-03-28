@@ -200,3 +200,28 @@ Wait Until CRD Exists
     [Arguments]    ${crd_fullname}
     Wait Until Keyword Succeeds    15 times    5s
     ...    Oc Get    kind=CustomResourceDefinition    name=${crd_fullname}
+
+Is Resource Present
+    [Documentation]    Check If Resource Is Present In Namespace
+    [Arguments]    ${resource}    ${resource_name}    ${namespace}    ${expected_result}
+    ${rc}=    Run And Return Rc
+    ...    oc get ${resource} ${resource_name} -n ${namespace}
+    Should Be Equal    "${rc}"    "${expected_result}"    msg=${resource} does not exist in ${namespace}
+
+Create Namespace In Openshift
+    [Documentation]    Create a new namespace if it does not already exist
+    [Arguments]    ${namespace}
+    ${rc}   ${output}=    Run And Return Rc And Output    oc get project ${namespace}
+    IF    ${rc} != 0
+        ${rc}=     Run And Return Rc    oc new-project ${namespace}
+        Should Be Equal    "${rc}"    "0"   msg=${output}
+    END
+
+Delete Namespace From Openshift
+    [Documentation]    Delete namespace from opneshift if it exists
+    [Arguments]    ${namespace}
+    ${rc}   ${output}=    Run And Return Rc And Output    oc get project ${namespace}
+    IF    ${rc} == 0
+        ${rc}   ${output}=    Run And Return Rc And Output    oc delete project ${namespace}
+        Should Be Equal    "${rc}"    "0"   msg=${output}
+    END

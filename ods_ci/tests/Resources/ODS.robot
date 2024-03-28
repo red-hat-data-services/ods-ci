@@ -102,7 +102,7 @@ Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}
     ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
-    Should Be Equal As Integers	${return_code}	 0    msg=Patch to group settings failed
+    Should Be Equal As Integers        ${return_code}   0    msg=Patch to group settings failed
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map
@@ -389,3 +389,17 @@ Delete RHODS Config Map
     ...                corresponding argument
     [Arguments]     ${name}  ${namespace}=${APPLICATIONS_NAMESPACE}
     OpenShiftLibrary.Oc Delete    kind=ConfigMap  name=${name}  namespace=${namespace}
+
+Wait Until Operator Ready
+    [Documentation]    Wait for operator to be available/ready
+    [Arguments]    ${operator_name}    ${namespace}    ${wait_time}=2m
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc wait --timeout=${wait_time} --for condition=available -n ${namespace} deploy/${operator_name}
+    Should Be Equal    "${rc}"    "0"    msg=${output}
+
+Wait For DSCI Ready State
+    [Documentation]    Wait for DSCI to reconciled to be complete
+    [Arguments]    ${dsci}    ${namespace}    ${wait_time}=2m
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsci ${dsci}
+    Should Be Equal    "${rc}"    "0"     msg=${output}

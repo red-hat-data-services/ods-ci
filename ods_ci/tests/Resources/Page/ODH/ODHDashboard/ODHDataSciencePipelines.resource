@@ -11,11 +11,13 @@ Resource            ODHDataScienceProject/Pipelines.resource
 
 *** Variables ***
 ${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}=    ods_ci/tests/Resources/Files
-${PIPELINES_IMPORT_BTN_FORM_XP}=    xpath://footer/button[text()="Import pipeline"]
-${PIPELINE_NAME_INPUT_XP}=          id:pipeline-name
-${PIPELINE_DESC_INPUT_XP}=          id:pipeline-description
-${PIPELINE_RUN_NAME_INPUT_XP}=      id:run-name
-${PIPELINE_RUN_DESC_INPUT_XP}=      id:run-description
+${PIPELINES_IMPORT_BTN_FORM_XP}=               xpath://*[@data-testid="import-button"]
+${PIPELINE_NAME_INPUT_XP}=                     xpath://*[@data-testid="pipeline-name"]
+${PIPELINE_DESC_INPUT_XP}=                     xpath://*[@data-testid="pipeline-description"]
+${PIPELINE_RUN_NAME_INPUT_XP}=                 id:run-name
+${PIPELINE_RUN_DESC_INPUT_XP}=                 id:run-description
+${PIPELINE_RUN_CREATE_BTN_XP}=                 xpath://*[@data-testid="run-page-submit-button"]
+
 
 *** Keywords ***
 # robocop: disable:line-too-long
@@ -51,14 +53,20 @@ Fill In Run Creation Form    # robocop: disable
     ...            ${end_date}=${NONE}    ${end_time}=${NONE}    ${cron_expr}=${NONE}&{model_param}
     Input Text    ${PIPELINE_RUN_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_RUN_DESC_INPUT_XP}    ${name}
-    Run Keyword And Warn On Failure    Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
+    Run Keyword And Warn On Failure    Element Should Be Disabled    ${PIPELINE_RUN_CREATE_BTN_XP}
+
+    # FIXME: temporally harcoding parameters for iris-pipeline.
+    # This is a dirty workaround for RHOAIENG-XXXXX (dashboard not loading default pipeline parameters)
+    Wait Until Element is Visible    //*[@data-testid="neighbors"]/*/*/*/input
+    Input Text                       //*[@data-testid="neighbors"]/*/*/*/input   3
+    Click Element                    //*[@data-testid="radio-standard_scaler-true"]
 
 #    TODO: by fix it to select latest version of ${pipeline_name}
 #    IF    "${pipeline_name}" != "${NONE}"
 #        Select Pipeline For The Run    pipeline_name=${pipeline_name}
 #    END
 
-    Element Should Be Enabled    ${GENERIC_CREATE_BTN_XP}
+    Element Should Be Enabled    ${PIPELINE_RUN_CREATE_BTN_XP}
     # select run_type
     # set options based on run_type
     # change model param if required
@@ -83,19 +91,20 @@ Select Pipeline For The Run
 Get Workflow Name From Topology Page
     [Documentation]    Returns the workflow name corresponding to the displayed pipeline.
     ...                The workflow name can be used to retrieve pods, for example
-    ${workflow_name}=    Get Text    xpath://div[b/text()='Workflow name']/following-sibling::div
+    ${workflow_name}=    Get Text    xpath://*[@data-testid="detail-item-Workflow name"]/dd[@data-testid="detail-item-value"]/div
     RETURN    ${workflow_name}
 
-Delete Pipeline Run
+Archive Pipeline Run
     [Documentation]    Delete a pipeline that ran based on name and pipeline. From the left menu select
     ...                "Data Science Pipelines" -> Runs. In the new page, select the tab "Triggered".
     ...                The "Delete Pipeline Run" will search for a line in the grid that match the pipeline name and
     ...                the run name. Based on that, hit the ... Menu in the row and hit Delete drop down menu.
     [Arguments]    ${run_name}    ${pipeline_name}
     Navigate To Page    Data Science Pipelines    Runs
-    Wait Until Page Contains Element    xpath://span[text()='Triggered']
-    Click Element    //span[text()='Triggered']
-    Click Action From Pipeline Run Actions Menu    ${run_name}    Delete
+
+    Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
+    Click Element    xpath=//*[@data-testid="active-runs-tab"]
+    Click Action From Pipeline Run Actions Menu    ${run_name}    Archive
     Handle Deletion Confirmation Modal    ${run_name}    triggered run
     Wait Until Page Contains Element    xpath://h2[contains(text(), 'No triggered runs yet')]
 
@@ -157,8 +166,8 @@ Open Pipeline Run
         Wait Until Page Contains Element    xpath=//a[text()='Runs']
     END
     Click Element    xpath=//a[text()='Runs']
-    Wait Until Page Contains Element    xpath=//span[text()='Triggered']    timeout=30s
-    Click Element    xpath=//span[text()='Triggered']
+    Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
+    Click Element    xpath=//*[@data-testid="active-runs-tab"]
     Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']
     Click Element    xpath=//span[text()='${pipeline_run_name}']
     Wait Until Page Contains Element    xpath=//div[@data-test-id='topology']
@@ -181,9 +190,9 @@ Get Pipeline Run Step Log
 
 Verify Pipeline Run Is Completed
     [Documentation]    Open the Pipeline detail and wait for the Completed Status
-    [Arguments]    ${pipeline_run_name}
+    [Arguments]    ${pipeline_run_name}    ${timeout}=10m
     Open Pipeline Run    ${pipeline_run_name}
-    Wait Until Page Contains Element    //span[@class='pf-v5-c-label__text' and text()='Completed']    timeout=10m
+    Wait Until Page Contains Element    //span[@class='pf-v5-c-label__text' and text()='Succeeded']    timeout=${timeout}
     Capture Page Screenshot
 
 # robocop: disable:line-too-long

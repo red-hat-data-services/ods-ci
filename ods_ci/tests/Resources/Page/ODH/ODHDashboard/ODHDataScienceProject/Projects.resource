@@ -33,7 +33,7 @@ Is Data Science Projects Page Open
     RETURN    ${page_open}
 
 Open Data Science Project Details Page
-    [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
+    [Documentation]    Opens Data Science Project ${project_title}
     [Arguments]     ${project_title}
     ${is_project_open}=    Is Data Science Project Details Page Open    project_title=${project_title}
     IF    ${is_project_open} == ${FALSE}
@@ -118,7 +118,7 @@ Create Data Science Project
         ${existing_project}=  Run Keyword And Return Status
         ...    Wait Until Page Contains Element    xpath://a[text()="${title}"]
     END
-    IF    ${existing_project}   
+    IF    ${existing_project}
         Log    DS Project '${title}' already exists, reusing project    console=True
         Click Link      ${title}
     ELSE
@@ -404,7 +404,7 @@ Create Data Science Project If Not Exists
     [Documentation]    If the given ${project_title} DS Project does not exist, it creates one.
     ...                Useful as test setup.
     [Arguments]    ${project_title}    ${username}    ${description}=${EMPTY}
-    ${rc}    ${resource_name}=    Run And Return Rc And Output     
+    ${rc}    ${resource_name}=    Run And Return Rc And Output
     ...    oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${project_title}")) | .metadata.name' | tr -d '"'   # robocop: disable
     IF    "${resource_name}" == "${EMPTY}"
         Log    msg=There is no DS Projects with Diplay Name equal to ${project_title}. Creating it now.

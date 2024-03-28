@@ -43,6 +43,13 @@ Get Clusters
 Provision Cluster
     Log    Setting cluster ${cluster_name} configuration    console=True
     Should Be True    "${hive_kubeconf}" != "${EMPTY}"
+    ${key_present}=    Run Keyword And Return Status    Dictionary Should Contain Key
+    ...    ${infrastructure_configurations}    use_cluster_pool
+    IF    ${key_present}
+        ${use_cluster_pool}=    Set Variable    ${infrastructure_configurations}[use_cluster_pool]
+    ELSE
+        ${use_cluster_pool}=    Set Variable    ${TRUE}
+    END
     ${clustername_exists} =    Does ClusterName Exists    use_pool=${use_cluster_pool}
     ${template} =    Select Provisioner Template    ${provider_type}
     IF    ${clustername_exists}    Handle Already Existing Cluster

@@ -273,23 +273,23 @@ Verify Pipeline Server Deployments    # robocop: disable
     ${namespace}=    Get Openshift Namespace From Data Science Project
     ...    project_title=${project_title}
     @{persistenceagent}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-persistenceagent-pipelines-definition
+    ...    label_selector=app=ds-pipeline-persistenceagent-dspa
     ${containerNames}=  Create List  ds-pipeline-persistenceagent
     Verify Deployment    ${persistenceagent}  1  1  ${containerNames}
     @{pipeline_definition}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-pipelines-definition
+    ...    label_selector=app=ds-pipeline-dspa
     ${containerNames}=  Create List  oauth-proxy    ds-pipeline-api-server
     Verify Deployment    ${pipeline_definition}  1  2  ${containerNames}
     @{schedule_workflow}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-scheduledworkflow-pipelines-definition
+    ...    label_selector=app=ds-pipeline-scheduledworkflow-dspa
     ${containerNames}=  Create List  ds-pipeline-scheduledworkflow
     Verify Deployment    ${schedule_workflow}  1  1  ${containerNames}
     @{db}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=mariadb-pipelines-definition
+    ...    label_selector=app=mariadb-dspa
     ${containerNames}=  Create List  mariadb
     Verify Deployment    ${db}  1  1  ${containerNames}
     @{all_pods}=  Oc Get    kind=Pod    namespace=${namespace}
-    Run Keyword And Continue On Failure    Length Should Be    ${all_pods}    4
+    Run Keyword And Continue On Failure    Length Should Be    ${all_pods}    7
 
 Wait Until Pipeline Server Is Deployed
     [Documentation]    Waits until all the expected pods of the pipeline server

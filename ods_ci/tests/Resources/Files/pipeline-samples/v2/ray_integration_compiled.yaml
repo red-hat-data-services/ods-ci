@@ -1,0 +1,102 @@
+# PIPELINE DEFINITION
+# Name: ray-integration-test
+# Description: Ray Integration Test
+# Inputs:
+#    openshift_server: str
+#    openshift_token: str
+components:
+  comp-ray-fn:
+    executorLabel: exec-ray-fn
+    inputDefinitions:
+      parameters:
+        openshift_server:
+          parameterType: STRING
+        openshift_token:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        Output:
+          parameterType: NUMBER_INTEGER
+deploymentSpec:
+  executors:
+    exec-ray-fn:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - ray_fn
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'codeflare-sdk'\
+          \ && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef ray_fn(openshift_server: str, openshift_token: str) -> int:\n\
+          \    import ray\n    from codeflare_sdk.cluster.auth import TokenAuthentication\n\
+          \    from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration\n\
+          \n    print(\"before login\")\n    auth = TokenAuthentication(token=openshift_token,\
+          \ server=openshift_server, skip_tls=True)\n    auth_return = auth.login()\n\
+          \    print(f'auth_return: \"{auth_return}\"')\n    print(\"after login\"\
+          )\n    cluster = Cluster(\n        ClusterConfiguration(\n            name=\"\
+          raytest\",\n            # namespace must exist, and it is the same from\
+          \ 432__data-science-pipelines-tekton.robot\n            namespace=\"pipelineskfp1\"\
+          ,\n            num_workers=1,\n            head_cpus=\"500m\",\n       \
+          \     min_memory=1,\n            max_memory=1,\n            num_gpus=0,\n\
+          \            image=\"quay.io/project-codeflare/ray:latest-py39-cu118\",\n\
+          \            instascale=False,\n        )\n    )\n\n    # always clean the\
+          \ resources\n    cluster.down()\n    print(cluster.status())\n    cluster.up()\n\
+          \    cluster.wait_ready()\n    print(cluster.status())\n    print(cluster.details())\n\
+          \n    ray_dashboard_uri = cluster.cluster_dashboard_uri()\n    ray_cluster_uri\
+          \ = cluster.cluster_uri()\n    print(ray_dashboard_uri)\n    print(ray_cluster_uri)\n\
+          \n    # before proceeding make sure the cluster exists and the uri is not\
+          \ empty\n    assert ray_cluster_uri, \"Ray cluster needs to be started and\
+          \ set before proceeding\"\n\n    # reset the ray context in case there's\
+          \ already one.\n    ray.shutdown()\n    # establish connection to ray cluster\n\
+          \    ray.init(address=ray_cluster_uri)\n    print(\"Ray cluster is up and\
+          \ running: \", ray.is_initialized())\n\n    @ray.remote\n    def train_fn():\n\
+          \        return 100\n\n    result = ray.get(train_fn.remote())\n    assert\
+          \ 100 == result\n    ray.shutdown()\n    cluster.down()\n    auth.logout()\n\
+          \    return result\n\n"
+        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+pipelineInfo:
+  description: Ray Integration Test
+  name: ray-integration-test
+root:
+  dag:
+    tasks:
+      ray-fn:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-ray-fn
+        inputs:
+          parameters:
+            openshift_server:
+              componentInputParameter: openshift_server
+            openshift_token:
+              componentInputParameter: openshift_token
+        taskInfo:
+          name: ray-fn
+  inputDefinitions:
+    parameters:
+      openshift_server:
+        parameterType: STRING
+      openshift_token:
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.7.0

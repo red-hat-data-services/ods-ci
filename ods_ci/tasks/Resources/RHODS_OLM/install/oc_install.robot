@@ -81,6 +81,7 @@ Verify RHODS Installation
   END
 
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
+      Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}

@@ -5,7 +5,6 @@ import shutil
 import subprocess
 import sys
 
-import pexpect
 import yaml
 
 dir_path = os.path.dirname(os.path.abspath(__file__))

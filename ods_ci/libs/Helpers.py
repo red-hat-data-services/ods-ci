@@ -1,13 +1,11 @@
 import ast
 import decimal
 import numbers
-import os
 import random
 import re
 from pathlib import Path
 
 import requests
-from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
 from robotlibcore import keyword
 from semver import VersionInfo
@@ -160,7 +158,6 @@ class Helpers:
     @keyword
     def inference_comparison(self, expected, received, threshold=0.00001):
         try:
-
             model_name = re.compile("^[\S]+(__isvc-)?[\w\d]+$")
 
             # Cast from string to python type
@@ -228,7 +225,6 @@ class Helpers:
         shape={"B": 1, "C": 3, "H": 512, "W": 512},
         no_requests=100,
     ):
-
         for _ in range(no_requests):
             data_img = [
                 random.randrange(value_range[0], value_range[1]) for _ in range(shape["C"] * shape["H"] * shape["W"])

@@ -224,6 +224,7 @@ def generate_test_config_file(
     data["PRODUCT"] = config_data["PRODUCT"]
     data["APPLICATIONS_NAMESPACE"] = config_data["APPLICATIONS_NAMESPACE"]
     data["MONITORING_NAMESPACE"] = config_data["MONITORING_NAMESPACE"]
+    data["OPERATOR_NAME"] = config_data["OPERATOR_NAME"]
     data["OPERATOR_NAMESPACE"] = config_data["OPERATOR_NAMESPACE"]
     data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
     data["OPENSHIFT_PIPELINES_CHANNEL"] = config_data["OPENSHIFT_PIPELINES_CHANNEL"]

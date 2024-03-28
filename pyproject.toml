@@ -147,7 +147,6 @@ ignore = [
  # TODO(jdanek)
   "E402", # Module level import not at top of file
   "E721", # Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
-  "F403", # `from python_terraform import *` used; unable to detect undefined names
   "F405", # `IsNotFlagged` may be undefined, or defined from star imports
   "RET507", # Unnecessary `else` after `continue` statement
   "RET508", # Unnecessary `elif` after `break` statement

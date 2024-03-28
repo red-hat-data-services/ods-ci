@@ -12,13 +12,18 @@ Set Hive Default Variables
     Set Suite Variable    ${hive_namespace}
 
 Delete Cluster Configuration
-    Log    Deleting cluster ${cluster_name} configuration    console=True
-    @{Delete_Cluster} =    Oc Delete    kind=ClusterPool    name=${pool_name}
-    ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
-    Log Many    @{Delete_Cluster}
-    ${Delete_Cluster} =    Oc Delete    kind=ClusterDeploymentCustomization    name=${conf_name}
-    ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
-    Log Many    @{Delete_Cluster}
+    IF    ${use_cluster_pool}
+        Log    Deleting cluster ${cluster_name} configuration    console=True
+        @{Delete_Cluster} =    Oc Delete    kind=ClusterPool    name=${pool_name}
+        ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        Log Many    @{Delete_Cluster}
+        ${Delete_Cluster} =    Oc Delete    kind=ClusterDeploymentCustomization    name=${conf_name}
+        ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        Log Many    @{Delete_Cluster}
+    ELSE
+        ${Delete_Cluster} =    Oc Delete    kind=ClusterDeployment    name=${cluster_name}
+        ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+    END
 
 Deprovision Cluster
     ${cluster_claim} =    Run Keyword And Return Status

@@ -76,4 +76,4 @@ items:
       manifestsSecretRef:
         name: {{ hive_cluster_name|default("rhodsibm") }}-manifests
     pullSecretRef:
-      name: llmcluster-pull-secret
+      name: {{ hive_cluster_name|default("rhodsibm") }}-pull-secret

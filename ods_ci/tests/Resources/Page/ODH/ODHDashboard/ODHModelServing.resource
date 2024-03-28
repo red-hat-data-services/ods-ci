@@ -239,7 +239,7 @@ Get Access Token via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
     [Arguments]    ${project_name}    ${service_account_name}=default-name
-    Open Data Science Project Details Page    ${project_name}
+    Open Data Science Project Details Page    ${project_name}    tab_id=model-server
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
     RETURN    ${token}
 

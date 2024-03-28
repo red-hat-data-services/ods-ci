@@ -152,5 +152,5 @@ Run Elyra Hello World Pipeline Test  # robocop: disable
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page
     Verify Successful Pipeline Run Via Pipelines Runs UI   pipeline_name=${img} Pipeline
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Stop Workbench    workbench_title=elyra_${img}

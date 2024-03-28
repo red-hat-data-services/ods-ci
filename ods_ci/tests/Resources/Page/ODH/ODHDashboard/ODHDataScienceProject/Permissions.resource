@@ -23,7 +23,7 @@ Assign ${permission_type} Permissions To User ${username}
 Assign ${permission_type} Permissions To User ${username} in Project ${project_title}
     Open Data Science Projects Home Page
     Wait Until Project Is Listed    project_title=${project_title}
-    Open Data Science Project Details Page    ${project_title}
+    Open Data Science Project Details Page    ${project_title}    tab_id=permissions
     Move To Tab             Permissions
     Assign ${permission_type} Permissions To User ${username}
 

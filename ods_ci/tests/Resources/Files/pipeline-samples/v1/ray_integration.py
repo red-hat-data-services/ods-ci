@@ -1,3 +1,4 @@
+# flake8: noqa: PLC0415  # `import` should be at the top-level of a file
 from kfp import components, dsl
 
 from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp

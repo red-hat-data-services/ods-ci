@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# flake8: noqa
 # source https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py
 from kfp import components, dsl
 

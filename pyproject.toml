@@ -109,7 +109,6 @@ ignore = [
   "N816", # Variable `rotatingHandler` in global scope should not be mixedCase
   "N999", # Invalid module name: 'createPolarionTestRun'
   "PERF401", # Use a list comprehension to create a transformed list
-  "PLC0415", # `import` should be at the top-level of a file
   "PLC1901", # `filter_value != ""` can be simplified to `filter_value` as an empty string is falsey
   "PLR5501", # Use `elif` instead of `else` then `if`, to reduce indentation
   "PLR6201", # Use a `set` literal when testing for membership
@@ -133,7 +132,6 @@ ignore = [
   "F403", # `from python_terraform import *` used; unable to detect undefined names
   "F405", # `IsNotFlagged` may be undefined, or defined from star imports
   "F811", # Redefinition of unused `hide_values_in_op_json` from line 565
-  "F821", # Undefined name `os`
   "RET507", # Unnecessary `else` after `continue` statement
   "RET508", # Unnecessary `elif` after `break` statement
 ]

@@ -1,5 +1,6 @@
 """Test pipeline to exercise various data flow mechanisms."""
 
+# flake8: noqa: PLC0415  # `import` should be at the top-level of a file
 import kfp
 
 from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp

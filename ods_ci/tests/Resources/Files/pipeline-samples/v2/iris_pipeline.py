@@ -1,3 +1,4 @@
+# flake8: noqa: PLC0415  # `import` should be at the top-level of a file
 import kfp
 from kfp import Client, compiler, dsl
 from kfp.dsl import ClassificationMetrics, Dataset, Input, Model, Output

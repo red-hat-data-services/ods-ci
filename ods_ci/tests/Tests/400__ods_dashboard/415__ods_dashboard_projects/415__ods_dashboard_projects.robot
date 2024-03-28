@@ -78,9 +78,7 @@ Verify Workbench Images Have Multiple Versions
     [Tags]    Smoke    Sanity
     ...       Tier1
     ...       ODS-2131
-    # Launch Data Science Project Main Page
-    # Create Data Science Project    title=${PRJ_TITLE}    description=${EMPTY}
-    Open Data Science Project Details Page    project_title=${PRJ_TITLE}
+    Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=workbenches
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}

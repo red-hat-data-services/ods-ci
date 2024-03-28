@@ -12,10 +12,9 @@ ${KUBERAY_RELEASE_ASSETS}     %{KUBERAY_RELEASE_ASSETS=https://github.com/openda
 *** Test Cases ***
 Run TestRayJob test
     [Documentation]    Run Go E2E test: TestRayJob
-    [Tags]  Tier2
+    [Tags]  Tier1
     ...     DistributedWorkloads
     ...     Kuberay
-    Skip    "Requires Kuberay 1.1"
     Run Kuberay E2E Test    "^TestRayJob$"
 
 Run TestRayJobWithClusterSelector test
@@ -27,10 +26,9 @@ Run TestRayJobWithClusterSelector test
 
 Run TestRayJobSuspend test
     [Documentation]    Run Go E2E test: TestRayJobSuspend
-    [Tags]  Tier2
+    [Tags]  Tier1
     ...     DistributedWorkloads
     ...     Kuberay
-    Skip    "Requires Kuberay 1.1"
     Run Kuberay E2E Test    TestRayJobSuspend
     
 

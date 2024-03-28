@@ -36,7 +36,7 @@ Verify User Can Use Caikit Nlp Client From Workbenches
     ...    Setup Models
     ...    AND
     ...    Generate Client TLS Certificates If Not Done
-    Open Data Science Project Details Page       project_title=${HTTP_MODEL_NS}
+    Open Data Science Project Details Page       project_title=${HTTP_MODEL_NS}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    prj_title=${HTTP_MODEL_NS}
     ...    workbench_description=test caikit-nlp-client    image_name=${NB_IMAGE}   deployment_size=Small
     ...    storage=Persistent    pv_name=${NONE}  pv_existent=${NONE}    pv_description=${NONE}
@@ -106,7 +106,7 @@ HTTP Model Setup
     Launch Dashboard    ${user}    ${pw}    ${auth}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     IF    ${HTTP_MODEL_DEPLOYED} == ${FALSE}
         Set Up Project    namespace=${HTTP_MODEL_NS}    single_prj=${FALSE}
-        Open Data Science Project Details Page    ${HTTP_MODEL_NS}
+        Open Data Science Project Details Page    ${HTTP_MODEL_NS}    tab_id=model-server
         Deploy Kserve Model Via UI    model_name=${ISVC_NAME}    serving_runtime=Caikit
         ...    data_connection=kserve-connection    path=${MODEL_S3_DIR}
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ISVC_NAME}
@@ -118,7 +118,7 @@ HTTP Model Setup
         Set Suite Variable    ${HTTP_MODEL_DEPLOYED}    ${TRUE}
     ELSE
         Log    message=Skipping model deployment, it was marked as deployed in a previous test
-        Open Data Science Project Details Page    ${HTTP_MODEL_NS}
+        Open Data Science Project Details Page    ${HTTP_MODEL_NS}    tab_id=model-server
     END
     ${host}=    Get Kserve Inference Host Via UI    ${ISVC_NAME}
     Set Suite Variable    ${HTTP_HOST}    ${host}

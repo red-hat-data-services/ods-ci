@@ -19,7 +19,7 @@ ${SPAWNER_LINK}=        xpath=//*[text()="Launch Jupyter"]
 
 *** Keywords ***
 Open Data Science Projects Home Page
-    [Documentation]    Verifies submenu Settings > "Data Science Projects" is visible
+    [Documentation]    Open "Data Science Projects" page from the sidebar
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
@@ -33,8 +33,9 @@ Is Data Science Projects Page Open
     RETURN    ${page_open}
 
 Open Data Science Project Details Page
-    [Documentation]    Opens Data Science Project ${project_title}
-    [Arguments]     ${project_title}
+    [Documentation]    Open project ${project_title} in the "Data Science Projects" page, and an optional Tab by ID:
+    ...    overview | workbenches | cluster-storages | data-connections | pipelines-projects | model-server | permissions    # robocop: disable
+    [Arguments]     ${project_title}    ${tab_id}=${NONE}
     ${is_project_open}=    Is Data Science Project Details Page Open    project_title=${project_title}
     IF    ${is_project_open} == ${FALSE}
         ${is_open}=    Is Data Science Projects Page Open
@@ -43,6 +44,11 @@ Open Data Science Project Details Page
         END
         Click Link    ${project_title}
         Wait Until Project Is Open    project_title=${project_title}
+    END
+    IF  "${tab_id}" != "${NONE}"
+        Click Button    //button[@role="tab" and @aria-controls="${tab_id}"]
+        Element Should Be Visible   //button[@role="tab" and @aria-controls="${tab_id}" and @aria-selected="true"]
+        Sleep    1s    reason=The tab page needs to load content according to user permissions
     END
 
 Delete Data Science Project

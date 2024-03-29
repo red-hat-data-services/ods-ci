@@ -8,6 +8,7 @@ Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Suite Setup     Intel_Aikit Suite Setup
 Suite Teardown  Intel_Aikit Suite Teardown
+Test Tags       ExcludeOnODH
 
 *** Variables ***
 ${intel_aikit_appname}           aikit

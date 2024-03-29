@@ -5,6 +5,7 @@ Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Suite Setup     IBM Watson Studio Suite Setup
 Suite Teardown  IBM Watson Studio Suite Teardown
+Test Tags       ExcludeOnODH
 
 *** Test Cases ***
 Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page

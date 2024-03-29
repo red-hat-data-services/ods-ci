@@ -7,6 +7,8 @@ Resource            ../../../Resources/RHOSi.resource
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown
 
+Test Tags           ExcludeOnODH
+
 
 *** Variables ***
 ${SB_CARDS_XP}=     //div[@id="starburst"]

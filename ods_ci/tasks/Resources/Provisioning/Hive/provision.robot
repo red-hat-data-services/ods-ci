@@ -45,11 +45,6 @@ Provision Cluster
     Should Be True    "${hive_kubeconf}" != "${EMPTY}"
     ${key_present}=    Run Keyword And Return Status    Dictionary Should Contain Key
     ...    ${infrastructure_configurations}    use_cluster_pool
-    IF    ${key_present}
-        ${use_cluster_pool}=    Set Variable    ${infrastructure_configurations}[use_cluster_pool]
-    ELSE
-        ${use_cluster_pool}=    Set Variable    ${TRUE}
-    END
     ${clustername_exists} =    Does ClusterName Exists    use_pool=${use_cluster_pool}
     ${template} =    Select Provisioner Template    ${provider_type}
     IF    ${clustername_exists}    Handle Already Existing Cluster
@@ -181,30 +176,37 @@ Watch Hive Install Log
     Should Contain    ${new_log_data}    install completed successfully
 
 Wait For Cluster To Be Ready
-    ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-    Set Task Variable    ${pool_namespace}
-    Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
+    IF    ${use_cluster_pool}
+        Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
+    ELSE
+        Log    Watching Hive ClusterDeployment namespace: ${pool_namespace}    console=True
+    END
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
     Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
     Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
     ${provision_status} =    Run Process
-    ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${pool_namespace} --timeout\=15m
+    ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m
     ...    shell=yes
     ${web_access} =    Run Process
-    ...    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status
+    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status
     ...    shell=yes
-    ${claim_status} =    Run Process
-    ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+    IF    ${use_cluster_pool}
+        ${custer_status} =    Run Process
+        ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+    ELSE
+        ${custer_status} =    Run Process
+        ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterdeployment ${clusterdeployment_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+    END
     # Workaround for old Hive with Openstack - Cluster is displayed as Resuming even when it is Running
     # add also support to the new Hive where the Cluster is displayed as Running
     IF    "${provider_type}" == "OSP"
-        ${claim_status} =    Run Process
+        ${custer_status} =    Run Process
         ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and (.reason\=\="Resuming" or .reason\=\="Running"))' --exit-status    shell=yes
     END
     IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${claim_status.rc} != 0
-        ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json    shell=yes
-        ${claim_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
+        ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes
+        ${custer_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
         Log    Cluster '${cluster_name}' deployment had errors, see: ${\n}${provision_status.stdout}${\n}${claim_status.stdout}    level=ERROR    # robocop: disable:line-too-long
         Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources now
         ...    console=True
@@ -216,23 +218,23 @@ Wait For Cluster To Be Ready
 Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
     ${result} =    Run Process
-    ...    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status
+    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status
     ...    shell=yes
     Should Be True    ${result.rc} == 0
-    ...    Hive Cluster deployment '${pool_namespace}' does not have a valid webConsoleURL access
+    ...    Hive Cluster deployment '${clusterdeployment_name}' does not have a valid webConsoleURL access
     Create File     ${cluster_details}    console=${result.stdout}\n
     ${result} =    Run Process
-    ...    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.apiURL' --exit-status
+    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.apiURL' --exit-status
     ...    shell=yes
     Append To File     ${cluster_details}     api=${result.stdout}\n
-    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${artifacts_dir}
+    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     ${username} = 	Get File 	${artifacts_dir}/username
     ${password} = 	Get File 	${artifacts_dir}/password
     Append To File     ${cluster_details}     username=${username}\n
     Append To File     ${cluster_details}     password=${password}\n
-    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
+    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
 

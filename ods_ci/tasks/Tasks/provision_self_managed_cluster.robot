@@ -16,7 +16,6 @@ ${hive_kubeconf}         %{KUBECONFIG}
 ${cluster_name}          ${infrastructure_configurations}[hive_cluster_name]
 ${hive_namespace}        ${infrastructure_configurations}[hive_claim_ns]
 ${provider_type}         ${infrastructure_configurations}[provider]
-${use_cluster_pool}      ${infrastructure_configurations}[use_cluster_pool]
 ${release_image}         ${infrastructure_configurations}[release_image]
 ${claim_name}            ${cluster_name}-claim
 ${pool_name}             ${cluster_name}-pool
@@ -28,6 +27,7 @@ ${artifacts_dir}         ${OUTPUT DIR}
 Provision Self-Managed Cluster
     [Documentation]    Provision a self-managed cluster
     [Tags]  self_managed_provision
+    [Setup]    Set ClusterPool Variables
     Provision Cluster
     IF    ${use_cluster_pool}    Claim Cluster
     Wait For Cluster To Be Ready
@@ -38,7 +38,9 @@ Provision Self-Managed Cluster
 Deprovision Self-Managed Cluster
     [Documentation]    Deprovision a self-managed cluster
     [Tags]    self_managed_deprovision
-    [Setup]   Set Hive Default Variables
+    [Setup]   Run Keywords    Set Hive Default Variables
+    ...    AND
+    ...    Set ClusterPool Variables
     Deprovision Cluster
 
 Add GPU Node To Self-Managed AWS Cluster
@@ -58,3 +60,22 @@ Disconnect Self-Managed Cluster
     [Documentation]    Disconnect a self-managed cluster
     [Tags]    self_managed_disconnect
     Disconnect Cluster
+
+*** Keywords ***
+Set ClusterPool Variables
+    ${key_present}=    Run Keyword And Return Status    Dictionary Should Contain Key
+    ...    ${infrastructure_configurations}    use_cluster_pool
+    IF    ${key_present}
+        Set Task Variable    ${use_cluster_pool}    ${infrastructure_configurations}[use_cluster_pool]
+    ELSE
+        # use ClusterPool as default option
+        Set Task Variable    ${use_cluster_pool}    ${TRUE}
+    END
+    IF    ${use_cluster_pool}
+        ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
+        Set Task Variable    ${pool_namespace}
+        Set Task Variable    ${clusterdeployment_name}    ${pool_namespace}
+    ELSE
+        Set Task Variable    ${pool_namespace}    ${hive_namespace}
+        Set Task Variable    ${clusterdeployment_name}    ${cluster_name}
+    END

@@ -8,6 +8,7 @@ Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Suite Setup     OpenVino Suite Setup
 Suite Teardown  OpenVino Suite Teardown
+Test Tags       ExcludeOnODH
 
 *** Variables ***
 ${openvino_appname}           ovms

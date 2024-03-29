@@ -6,6 +6,7 @@ Resource        ../../../Resources/Page/ODH/AiApps/Rhoam.resource
 Library         SeleniumLibrary
 Suite Setup     RHOAM Suite Setup
 Suite Teardown  RHOAM Suite Teardown
+Test Tags       ExcludeOnODH
 
 
 *** Test Cases ***

@@ -9,6 +9,7 @@ Library         SeleniumLibrary
 Library         OpenShiftLibrary
 Suite Setup     RHOAM Install Suite Setup
 Suite Teardown  RHOAM Suite Teardown
+Test Tags       ExcludeOnODH
 
 
 *** Test Cases ***

@@ -336,7 +336,7 @@ class OpenshiftClusterManager:
             outputText = template.render(replace_vars)
             with open(output_file, "w") as fh:
                 fh.write(outputText)
-        except:
+        except Exception:
             log.error(f"Failed to render template and create json file {output_file}")
             sys.exit(1)
 

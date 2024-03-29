@@ -22,7 +22,7 @@ def capture_logging(level: int | None = None, formatter: logging.Formatter | Non
     Usage example:
 
     >>> with capture_logging(logging.DEBUG, formatter=logging.Formatter("%(message)s")) as string_io:
-    ...     logging.debug('debug message')
+    ...     logging.debug("debug message")
     >>> print(string_io.getvalue(), end="")
     debug message
     """

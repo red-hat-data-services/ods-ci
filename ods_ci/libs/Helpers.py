@@ -99,7 +99,7 @@ class Helpers:
     @keyword
     def convert_to_hours_and_minutes(self, seconds):
         """Converts seconds in hours and minutes"""
-        m, s = divmod(int(seconds), 60)
+        m, _ = divmod(int(seconds), 60)
         h, m = divmod(m, 60)
         return h, m
 

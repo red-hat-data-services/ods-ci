@@ -124,7 +124,6 @@ ignore = [
  # TODO
   "B006", # Do not use mutable data structures for argument defaults
   "COM812", # Trailing comma missing
-  "F841", # Local variable `response` is assigned to but never used
   "FA100", # Missing `from __future__ import annotations`, but uses `typing.Optional`
   "INP001", # File `ods_ci/tests/Resources/Page/ODH/JupyterHub/jupyter-helper.py` is part of an implicit namespace package. Add an `__init__.py`.
   "N806", # Variable `outputText` in function should be lowercase

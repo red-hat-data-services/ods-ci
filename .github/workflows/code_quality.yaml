@@ -82,6 +82,9 @@ jobs:
       - run: poetry run pyright
         if: "!cancelled()"
 
+      - run: poetry run pyright
+        if: "!cancelled()"
+
   selftests:
     name: selftests
     runs-on: ubuntu-latest

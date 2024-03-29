@@ -26,11 +26,15 @@ Delete Cluster Configuration
     END
 
 Deprovision Cluster
-    ${cluster_claim} =    Run Keyword And Return Status
-    ...    Unclaim Cluster    ${claim_name}
+    IF    ${use_cluster_pool}
+        ${cluster_claim} =    Run Keyword And Return Status
+        ...    Unclaim Cluster    ${claim_name}        
+    ELSE
+        ${cluster_claim}=    Set Variable    ${FALSE}
+    END
     ${cluster_deprovision} =    Run Keyword And Return Status
     ...    Delete Cluster Configuration
-    IF    ${cluster_claim} == False
+    IF    ${use_cluster_pool} == True and ${cluster_claim} == False
     ...    Log    Cluster Claim ${claim_name} does not exists. Deleting Configuration   console=True
     IF    ${cluster_deprovision} == False
     ...    Log    Cluster ${cluster_name} has not been deleted. Please do it manually   console=True

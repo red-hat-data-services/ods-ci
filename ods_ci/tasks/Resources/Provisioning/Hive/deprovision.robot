@@ -28,6 +28,8 @@ Delete Cluster Configuration
     ELSE
         ${Delete_Cluster} =    Oc Delete    kind=ClusterDeployment    name=${cluster_name}
         ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        ${rc}  ${out}=    Run And Return Rc And Output    oc wait --for=delete cd/${cluster_name} --timeout 120s
+        Should Be Equal As Integers    ${rc}    ${0}    ${out}
         IF    "${provider_type}" == "IBM"
             Oc Delete    kind=Secret    name=${cluster_name}-manifests    namespace=${hive_namespace}
             ${rc}  ${srv_ids}=    Run And Return Rc And Output

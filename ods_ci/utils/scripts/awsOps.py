@@ -11,6 +11,7 @@ def aws_configure_execute_cmd(aws_key, aws_value, aws_profile):
         log.error(f"Failed to configure {aws_key}")
         return ret
     sleep(1)
+    return None
 
 
 def aws_configure(aws_access_key_id, aws_secret_access_key, aws_region, aws_profile="default"):

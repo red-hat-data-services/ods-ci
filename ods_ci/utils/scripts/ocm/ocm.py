@@ -642,6 +642,7 @@ class OpenshiftClusterManager:
             #    self.wait_for_addon_installation_to_complete(addon_name="managed-api-service")
         else:
             log.info("managed-api-service is already installed on {}".format(self.cluster_name))
+            return None
 
     def uninstall_rhoam_addon(self, exit_on_failure=True):
         """Uninstalls RHOAM addon"""
@@ -676,6 +677,7 @@ class OpenshiftClusterManager:
             #    self.wait_for_addon_installation_to_complete(addon_name="managed-starburst")
         else:
             log.info(f"managed-api-service is already installed on {self.cluster_name}")
+            return None
 
     def uninstall_managed_starburst_addon(self, exit_on_failure=True):
         """Uninstalls RHOAM addon"""
@@ -1192,6 +1194,7 @@ class OpenshiftClusterManager:
         if ret is None:
             log.info("Failed to update the channel to {}".format(self.cluster_name))
             return ret
+        return None
 
     def update_ocm_policy(self):
         """update cluster policy to schedule for upgrade osd"""
@@ -1222,6 +1225,7 @@ class OpenshiftClusterManager:
         if ret is None:
             log.info("Failed  to Update the Upgrade Policy")
             return ret
+        return None
 
 
 if __name__ == "__main__":

@@ -26,6 +26,7 @@ def create_account_roles():
     if ret is None:
         log.error("Failed to Create account roles")
         return ret
+    return None
 
 
 def rosa_create_cluster(
@@ -95,6 +96,7 @@ def rosa_create_cluster(
         return ret
 
     rosa_describe(cluster_name=cluster_name)
+    return None
 
 
 def rosa_describe(cluster_name, jq_filter=""):

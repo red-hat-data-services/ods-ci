@@ -144,7 +144,6 @@ ignore = [
   "UP031", # format specifiers instead of percent format
   "UP032", # Use f-string instead of `format` call
   "UP034", # Avoid extraneous parentheses
-  "W605", # Invalid escape sequence: `\d`
  # TODO(jdanek)
   "E402", # Module level import not at top of file
   "E721", # Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks

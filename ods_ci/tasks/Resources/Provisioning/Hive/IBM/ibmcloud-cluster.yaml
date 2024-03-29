@@ -38,7 +38,7 @@ items:
       platform:
         ibmcloud:
           region: {{ ibmcloud_region|default("us-south") }}
-      pullSecret: {{ pull_secret|default("") }}
+      pullSecret: '{{ pull_secret|default("") }}'
       sshKey: {{ ssh_key|default("") }}
 - apiVersion: hive.openshift.io/v1
   kind: ClusterImageSet
@@ -75,5 +75,5 @@ items:
         name: ibmcloud-sno-install-config
       manifestsSecretRef:
         name: {{ hive_cluster_name|default("rhodsibm") }}-manifests
-    pullSecretRef:
-      name: {{ hive_cluster_name|default("rhodsibm") }}-pull-secret
+    # pullSecretRef:
+    #   name: {{ hive_cluster_name|default("rhodsibm") }}-pull-secret

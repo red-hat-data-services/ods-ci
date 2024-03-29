@@ -36,21 +36,11 @@ pyyaml = "^6.0.1"
 robotframework-lsp = ">=1.11.0"
 robotframework-robocop = "^4.1.0"
 robotframework-tidy = "^4.5.0"
-black = ">20.0.0"
-ruff = "0.1.11"
+ruff = "0.3.4"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 120
-target-version = ['py311']
-
-[tool.isort]
-# https://pycqa.github.io/isort/docs/configuration/black_compatibility.html
-profile = "black"
-line_length = 120
 
 [tool.ruff]
 target-version = "py311"
@@ -94,6 +84,7 @@ select = [
 ignore = [
  # intentionally disabled
   "E203", # space before : (needed for how black formats slicing)
+  "ISC001", # single-line-implicit-string-concatenation (ruff format wants this disabled)
  # various limits and unimportant warnings
   "E501", # Line too long
   "E741", # Ambiguous variable name: `l`
@@ -150,6 +141,7 @@ ignore = [
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+# https://docs.astral.sh/ruff/formatter
 [tool.ruff.format]
 line-ending = "lf"
 quote-style = "double"

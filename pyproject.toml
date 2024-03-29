@@ -134,7 +134,6 @@ ignore = [
   "PERF401", # Use a list comprehension to create a transformed list
   "PLC0415", # `import` should be at the top-level of a file
   "PLC1901", # `filter_value != ""` can be simplified to `filter_value` as an empty string is falsey
-  "PLR5501", # Use `elif` instead of `else` then `if`, to reduce indentation
   "PLR6201", # Use a `set` literal when testing for membership
   "PLR6301", # Method `_render_template` could be a function, class method, or static method
   "PLW1514", # `codecs.open` in text mode without explicit `encoding` argument

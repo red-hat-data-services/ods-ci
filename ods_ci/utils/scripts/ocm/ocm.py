@@ -502,15 +502,6 @@ class OpenshiftClusterManager:
                     p["value"] = "##hidden##"
         return json.dumps(json_dict)
 
-    def hide_values_in_op_json(self, fields, json_str):
-        json_dict = json.loads(json_str)
-        params = json_dict["parameters"]["items"]
-        for field in fields:
-            for p in params:
-                if p["id"] == field:
-                    p["value"] = "##hidden##"
-        return json.dumps(json_dict)
-
     def install_addon(
         self,
         addon_name="managed-odh",

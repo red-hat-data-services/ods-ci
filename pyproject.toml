@@ -152,7 +152,6 @@ ignore = [
   "F401", # `re` imported but unused
   "F403", # `from python_terraform import *` used; unable to detect undefined names
   "F405", # `IsNotFlagged` may be undefined, or defined from star imports
-  "F811", # Redefinition of unused `hide_values_in_op_json` from line 565
   "F821", # Undefined name `os`
   "RET507", # Unnecessary `else` after `continue` statement
   "RET508", # Unnecessary `elif` after `break` statement

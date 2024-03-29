@@ -1,3 +1,8 @@
+*** Settings ***
+Library    OpenShiftLibrary
+Library    OperatingSystem
+
+
 *** Keywords ***
 Set Hive Default Variables
     ${cluster_name} =    Get Variable Value    ${cluster_name}    %{TEST_CLUSTER}
@@ -23,6 +28,22 @@ Delete Cluster Configuration
     ELSE
         ${Delete_Cluster} =    Oc Delete    kind=ClusterDeployment    name=${cluster_name}
         ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        IF    "${provider_type}" == "IBM"
+            Oc Delete    kind=Secret    name=${cluster_name}-manifests    namespace=${hive_namespace}
+            ${rc}  ${srv_ids}=    Run And Return Rc And Output
+            ...    ibmcloud iam service-ids --output json | jq -c '.[] | select(.name | contains("${cluster_name}-openshift-")) | .name' | tr -d '"'    # robocop: disabe
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${srv_ids}
+            ${srv_ids}=    Split To Lines    ${srv_ids}
+            FOR    ${index}    ${srv}    IN ENUMERATE    @{srv_ids}
+                Log    ${index}: ${srv}
+                ${rc}  ${out}=    Run And Return Rc And Output    ibmcloud iam service-id-delete ${srv} -f
+                Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+            END
+            IF    len($srv_ids) == 0
+                Log    message=no Service IDs found on IBM Cloud corresponding to ${cluster_name} cluster. Please check.
+                ...    level=WARN                
+            END
+        END
     END
 
 Deprovision Cluster

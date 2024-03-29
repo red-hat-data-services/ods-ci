@@ -35,8 +35,8 @@ jobs:
           with:
             sarif_file: .sarif.json
             category: robocop
-  ruff:
-    name: ruff
+  python_linters:
+    name: python linters
     runs-on: ubuntu-latest
     env:
       poetry_version: '1.7.1'
@@ -69,8 +69,7 @@ jobs:
 
       - run: poetry check --lock
 
-      - name: Install ruff
-        run: poetry install --sync
+      - run: poetry install --sync
 
       # run all liners in turn and don't fail fast
 
@@ -78,6 +77,9 @@ jobs:
         if: "!cancelled()"
 
       - run: poetry run ruff format ods_ci/ --check --diff
+        if: "!cancelled()"
+
+      - run: poetry run pyright
         if: "!cancelled()"
 
   selftests:

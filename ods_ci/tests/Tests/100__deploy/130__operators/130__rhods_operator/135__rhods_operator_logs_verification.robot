@@ -25,7 +25,6 @@ ${regex_pattern}       level=([Ee]rror).*|([Ff]ailed) to list .*
 *** Test Cases ***
 Verify RHODS Operator log
    [Tags]  Sanity    Tier1
-   ...     ProductBug
    ...     ODS-1007
    #Get the POD name
    ${data}       Run keyword   Oc Get   kind=Pod     namespace=${namespace}   label_selector=name=rhods-operator

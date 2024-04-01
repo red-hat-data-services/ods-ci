@@ -65,12 +65,12 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     AllowedGroups In OdhDashboardConfig CRD Should Be      rhods-admins
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_4.USERNAME}    ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load    expected_page=${NONE}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load    expected_page=${NONE}    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
     Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
     # Let's check that we're not allowed to also access the spawner page directly navigating the browser there
     Go To    ${ODH_DASHBOARD_URL}/notebookController/spawner
-    Wait for RHODS Dashboard to Load    expected_page=${NONE}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load    expected_page=${NONE}    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
     Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
     [Teardown]  Revert Changes To Access Configuration

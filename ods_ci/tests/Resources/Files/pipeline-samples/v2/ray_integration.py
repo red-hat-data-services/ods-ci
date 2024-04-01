@@ -1,8 +1,9 @@
-from kfp import components, dsl
+from kfp import dsl
 
-from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
+from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
+@dsl.component(packages_to_install=["codeflare-sdk"], base_image=DataSciencePipelinesKfp.base_image)
 def ray_fn(openshift_server: str, openshift_token: str) -> int:
     import ray
     from codeflare_sdk.cluster.auth import TokenAuthentication
@@ -13,11 +14,11 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     auth_return = auth.login()
     print(f'auth_return: "{auth_return}"')
     print("after login")
+    # openshift_oauth is a workaround for RHOAIENG-3981
     cluster = Cluster(
         ClusterConfiguration(
             name="raytest",
-            # namespace must exist, and it is the same from 432__data-science-pipelines-tekton.robot
-            namespace="pipelineskfptekton1",
+            openshift_oauth=True,
             num_workers=1,
             head_cpus="500m",
             min_memory=1,
@@ -66,10 +67,5 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     name="Ray Integration Test",
     description="Ray Integration Test",
 )
-def ray_integration(openshift_server, openshift_token):
-    ray_op = components.create_component_from_func(
-        ray_fn,
-        base_image=DataSciencePipelinesKfpTekton.base_image,
-        packages_to_install=["codeflare-sdk"],
-    )
-    ray_op(openshift_server, openshift_token)
+def ray_integration(openshift_server: str, openshift_token: str):
+    ray_fn(openshift_server=openshift_server, openshift_token=openshift_token)

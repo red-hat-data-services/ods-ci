@@ -13,6 +13,7 @@ reportportal-client = "^5.2.5"
 robotframework = "^6"
 robotframework-debuglibrary = ">=2.0.0"
 robotframework-requests = "^0.9.4"
+robotframework-dependencylibrary = "^4.0.1"
 robotframework-seleniumlibrary = "^6.1.1"
 # Selenium has been releasing versions prone to breaking, let's pin to a single release
 selenium = "4.13.0"
@@ -28,28 +29,18 @@ rpaframework = "^27.2.0"
 pexpect = "^4.8.0"
 python-openstackclient = "^6.2.0"
 awscli = "^1.27.100"
-kfp-tekton = "==1.5.9"
+kfp = "==2.7.0"
 pyyaml = "^6.0.1"
 
 [tool.poetry.group.dev.dependencies]
 robotframework-lsp = ">=1.11.0"
 robotframework-robocop = "^4.1.0"
 robotframework-tidy = "^4.5.0"
-black = ">20.0.0"
-ruff = "0.1.11"
+ruff = "0.3.4"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 120
-target-version = ['py311']
-
-[tool.isort]
-# https://pycqa.github.io/isort/docs/configuration/black_compatibility.html
-profile = "black"
-line_length = 120
 
 [tool.ruff]
 target-version = "py311"
@@ -93,6 +84,7 @@ select = [
 ignore = [
  # intentionally disabled
   "E203", # space before : (needed for how black formats slicing)
+  "ISC001", # single-line-implicit-string-concatenation (ruff format wants this disabled)
  # various limits and unimportant warnings
   "E501", # Line too long
   "E741", # Ambiguous variable name: `l`
@@ -149,6 +141,7 @@ ignore = [
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+# https://docs.astral.sh/ruff/formatter
 [tool.ruff.format]
 line-ending = "lf"
 quote-style = "double"

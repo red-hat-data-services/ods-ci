@@ -41,7 +41,7 @@ Verify Two Servers Can Be Spawned
     Sleep    60s
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch JupyterHub Spawner From Dashboard    username=${TEST_USER_2.USERNAME}
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
     ${serial_second} =    Get GPU Serial Number
@@ -66,6 +66,6 @@ Double User Teardown
     Close Browser
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch JupyterHub Spawner From Dashboard
     End Web Test

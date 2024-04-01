@@ -14,7 +14,7 @@ Library   OpenShiftLibrary
 
 
 *** Variables ***
-${KFNBC_SPAWNER_HEADER_XPATH} =    //h1[.="Start a notebook server"]
+${KFNBC_SPAWNER_HEADER_TITLE} =    Start a notebook server
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 ${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //label[@for="modal-notebook-container-size"]/../..//button[@aria-label="Options menu"]
@@ -32,15 +32,15 @@ ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v5-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.9
 ${PREVIOUS_PYTHON_VER} =    3.9
-${DEFAULT_NOTEBOOK_VER} =    2023.2
-${PREVIOUS_NOTEBOOK_VER} =    2023.1
+${DEFAULT_NOTEBOOK_VER} =    2024.1
+${PREVIOUS_NOTEBOOK_VER} =    2023.2
 
 
 *** Keywords ***
 JupyterHub Spawner Is Visible
     [Documentation]  Checks if spawner is visibile and returns the status
-    ${spawner_visible} =  Run Keyword And Return Status  Page Should Contain Element
-    ...    xpath:${KFNBC_SPAWNER_HEADER_XPATH}
+    ${spawner_visible} =  Run Keyword And Return Status
+    ...    Wait For Dashboard Page Title    ${KFNBC_SPAWNER_HEADER_TITLE}
     RETURN  ${spawner_visible}
 
 Wait Until JupyterHub Spawner Is Ready
@@ -675,7 +675,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     FOR    ${username}    IN    @{list_of_usernames}
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-        Wait for RHODS Dashboard to Load
+        Wait For RHODS Dashboard To Load
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
@@ -693,7 +693,7 @@ CleanUp JupyterHub For N Users
     FOR    ${username}    IN    @{list_of_usernames}
         Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${username}
         Login To RHODS Dashboard    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-        Wait for RHODS Dashboard to Load
+        Wait For RHODS Dashboard To Load
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden

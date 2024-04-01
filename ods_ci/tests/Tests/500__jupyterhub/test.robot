@@ -28,9 +28,9 @@ Can Launch Jupyterhub
     ...      Tier1
     ...      ODS-935
     #This keyword will work with accounts that are not cluster admins.
-    Launch RHODS Via OCP Application Launcher
+    Launch RHOAI Via OCP Application Launcher
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait for RHODS Dashboard to Load
+    Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
 
 Can Login To Jupyterhub

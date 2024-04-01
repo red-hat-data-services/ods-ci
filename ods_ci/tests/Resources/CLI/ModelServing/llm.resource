@@ -9,7 +9,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resou
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${RUNTIME_FORMATS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats.json
-${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc.yaml
+${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/isvc.yaml
 ${INFERENCESERVICE_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc_filled.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
@@ -22,6 +22,9 @@ ${SERVICEMESH_CR_NS}=    istio-system
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
+
+${DOWNLOAD_PROMPTS_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc.yaml
+${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc_filled.yaml
 
 
 *** Keywords ***
@@ -63,8 +66,7 @@ Set Project And Runtime
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
         Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
-        ...    endpoint=${MODELS_BUCKET.ENDPOINT}    region=${MODELS_BUCKET.REGION}    access_key_id=${S3.AWS_ACCESS_KEY_ID}
-        ...    access_key=${S3.AWS_SECRET_ACCESS_KEY}    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
+        ...    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
         ...    storage_size=${storage_size}    model_path=${model_path}
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
@@ -126,9 +128,9 @@ Create Secret For S3-Like Buckets
 Compile Inference Service YAML
     [Documentation]    Prepare the Inference Service YAML file in order to deploy a model
     [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
-    ...            ${kserve_mode}=Serverless    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
+    ...            ${kserve_mode}=${NONE}    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
     ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
-    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}
+    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}    ${overlays}=${EMPTY}
     IF   '${auto_scale}' == '${NONE}'
         ${scaleTarget}=    Set Variable    ${EMPTY}
         ${scaleMetric}=    Set Variable    ${EMPTY}
@@ -142,7 +144,17 @@ Compile Inference Service YAML
     Set Test Variable    ${canaryTrafficPercent}
     Set Test Variable    ${model_format}
     Set Test Variable    ${serving_runtime}
-    Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${INFERENCESERVICE_FILLED_FILEPATH}
+    IF    len($overlays) > 0
+        FOR    ${index}    ${overlay}    IN ENUMERATE    @{overlays}
+            Log    ${index}: ${overlay}
+            ${rc}    ${out}=    Run And Return Rc And Output
+            ...    oc kustomize ${LLM_RESOURCES_DIRPATH}/serving_runtimes/overlay/${overlay} > ${INFERENCESERVICE_FILLED_FILEPATH}
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+        END
+        Create File From Template    ${INFERENCESERVICE_FILLED_FILEPATH}    ${INFERENCESERVICE_FILLED_FILEPATH}
+    ELSE
+        Create File From Template    ${INFERENCESERVICE_FILEPATH}    ${INFERENCESERVICE_FILLED_FILEPATH}
+    END
     IF    ${requests_dict} != &{EMPTY}
         Log    Adding predictor model requests to ${INFERENCESERVICE_FILLED_FILEPATH}: ${requests_dict}    console=True    # robocop: disable
         FOR    ${index}    ${resource}    IN ENUMERATE    @{requests_dict.keys()}
@@ -161,9 +173,20 @@ Compile Inference Service YAML
             Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
         END
     END
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    yq -i '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
-    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    IF    $kserve_mode is not None
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    yq -i '.metadata.annotations."serving.kserve.io/deploymentMode" = "${kserve_mode}"' ${INFERENCESERVICE_FILLED_FILEPATH}    # robocop: disable
+        Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+    ELSE
+        ${exists}=    Run Keyword And Return Status    Variable Should Exist  ${DSC_KSERVE_MODE}
+        IF    ${exists}    # done in this way because when use non-admin users they cannot fetch DSC
+            ${mode}=    Set Variable    ${DSC_KSERVE_MODE}
+        ELSE
+            ${mode}=    Get KServe Default Deployment Mode From DSC
+        END  
+        Log    message=Using defaultDeploymentMode set in the DSC: ${mode}
+    END
+
 
 Model Response Should Match The Expectation
     [Documentation]    Checks that the actual model response matches the expected answer.
@@ -202,6 +225,19 @@ Model Response Should Match The Expectation
         Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
     END
 
+Model Response Should Be
+    [Arguments]    ${response}    ${model_name}    ${inference_type}    ${runtime}    ${query_idx}=${0}
+    ${cleaned_response_text}=    Replace String Using Regexp    ${response}    \\s+    ${SPACE}
+    ${rc}    ${cleaned_response_text}=    Run And Return Rc And Output    echo -e '${cleaned_response_text}'
+    ${cleaned_response_text}=    Replace String Using Regexp    ${cleaned_response_text}    "    '
+    IF    "${inference_type}" == "model-info"
+        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[${inference_type}][${model_name}][${runtime}]
+    ELSE
+        ${exp_response}=    Set Variable    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][${runtime}][${inference_type}_response_text]
+    END
+    ${cleaned_exp_response_text}=    Replace String Using Regexp    ${exp_response}    \\s+    ${SPACE}    # robocop: disable
+    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${cleaned_response_text}    ${cleaned_exp_response_text}
+
 Load Runtime Query Formats
     [Documentation]    Loads the json file containing the expected query format for each
     ...                serving runtime
@@ -211,6 +247,7 @@ Load Runtime Query Formats
 
 Prepare Payload
     [Arguments]    ${runtime}    ${protocol}    ${inference_type}    ${model_name}    ${query_text}
+    ...            ${body_params}
     Set Test Variable    ${model_name}
     Set Test Variable    ${query_text}
     Create File From Template    ${RUNTIME_FORMATS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
@@ -218,6 +255,15 @@ Prepare Payload
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
     ${body}=    Replace String    ${runtime_details}[body]    '    "
     ${header}=    Set Variable    ${runtime_details}[header]
+    IF    ${body_params} != &{EMPTY}
+        FOR    ${index}    ${param}    IN ENUMERATE    @{body_params.keys()}
+            Log    ${index}: ${param}
+            ${value}=    Set Variable    ${body_params}[${param}]
+            ${rc}    ${body}=    Run And Return Rc And Output
+            ...    echo '${body}' | jq -c --arg ${param} ${value} '. + {"${param}": "${value}"}'
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${body}
+        END
+    END
     IF    "${protocol}" == "grpc"
         ${body}=    Set Variable    '${body}'
         ${header}=    Set Variable  '${header}'
@@ -255,13 +301,14 @@ Query Model Multiple Times
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
     ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
-    ...            ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443    &{args}
+    ...            ${string_check_only}=${FALSE}    ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443
+    ...            ${body_params}=&{EMPTY}    &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
     ELSE
         ${streamed_response}=    Set Variable    ${FALSE}
     END
-    IF    ${validate_response} == ${FALSE}
+    IF    ${validate_response} == ${FALSE} or ${string_check_only}
         ${skip_json_load_response}=    Set Variable    ${TRUE}
     ELSE
         ${skip_json_load_response}=    Set Variable    ${streamed_response}    # always skip if using streaming endpoint
@@ -277,7 +324,7 @@ Query Model Multiple Times
         ${plaintext}=    Set Variable    ${FALSE}
     END
     ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
-    ...    inference_type=${inference_type}    model_name=${model_name}
+    ...    inference_type=${inference_type}    model_name=${model_name}    body_params=${body_params}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
     ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
@@ -306,15 +353,20 @@ Query Model Multiple Times
         END
         Log    ${res}
         IF    ${validate_response} == ${TRUE}
-            ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
-            IF    "${response_container_field}" != "${EMPTY}"
-                # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
-                ${res}=    Set Variable    ${res}[${response_container_field}][0]
+            IF    ${string_check_only}
+                Model Response Should Be    response=${res}    model_name=${model_name}    inference_type=${inference_type}
+                ...    runtime=${runtime}    query_idx=${query_idx}
+            ELSE
+                ${response_container_field}=    Set Variable    ${runtime_details}[response_fields_map][response]
+                IF    "${response_container_field}" != "${EMPTY}"
+                    # runtimes may support multiple queries per time. Here forcing to use only 1 for sake of simplicity.
+                    ${res}=    Set Variable    ${res}[${response_container_field}][0]
+                END
+                Run Keyword And Continue On Failure
+                ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
+                ...    runtime_details=${runtime_details}    runtime=${runtime}
+                ...    streamed_response=${streamed_response}    query_idx=${query_idx}
             END
-            Run Keyword And Continue On Failure
-            ...    Model Response Should Match The Expectation    model_response=${res}    model_name=${model_name}
-            ...    runtime_details=${runtime_details}    runtime=${runtime}
-            ...    streamed_response=${streamed_response}    query_idx=${query_idx}
         END
     END
 
@@ -324,20 +376,24 @@ Compile Deploy And Query LLM model
     [Arguments]    ${model_storage_uri}    ${model_name}    ${isvc_name}=${model_name}
     ...            ${runtime}=caikit-tgis-runtime    ${model_format}=caikit    ${protocol}=grpc    ${inference_type}=all-tokens
     ...            ${canaryTrafficPercent}=${EMPTY}   ${namespace}=${TEST_NS}  ${sa_name}=${DEFAULT_BUCKET_SA_NAME}
-    ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}
+    ...            ${n_queries}=${1}    ${query_idx}=${0}    ${validate_response}=${TRUE}    ${limits_dict}=&{EMPTY}
+    ...            ${port_forwarding}=${FALSE}
     Compile Inference Service YAML    isvc_name=${isvc_name}
     ...    sa_name=${sa_name}    serving_runtime=${runtime}
     ...    model_storage_uri=${model_storage_uri}
     ...    canaryTrafficPercent=${canaryTrafficPercent}
     ...    model_format=${model_format}
+    ...    limits_dict=${limits_dict}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${namespace}    model_name=${model_name}
     Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
     ...    n_times=${n_queries}    namespace=${namespace}    query_idx=${query_idx}
     ...    validate_response=${validate_response}    protocol=${protocol}
     ...    runtime=${runtime}    inference_type=${inference_type}
+    ...    port_forwarding=${port_forwarding}
 
 Upgrade Runtime Image
     [Documentation]    Replaces the image URL of the Caikit Runtim with the given
@@ -606,7 +662,7 @@ Clean Up Test Project
     [Documentation]    Deletes the given InferenceServices, check the NS gets removed from ServiceMeshMemberRoll
     ...                and deletes the DS Project
     [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}    ${wait_prj_deletion}=${TRUE}
-    ...            ${kserve_mode}=Serverless
+    ...            ${kserve_mode}=${NONE}
     IF    ${isvc_delete} == ${TRUE}
         FOR    ${index}    ${isvc_name}    IN ENUMERATE    @{isvc_names}
               Log    Deleting ${isvc_name}
@@ -614,6 +670,10 @@ Clean Up Test Project
         END
     ELSE
         Log To Console     InferenceService Delete option not provided by user
+    END
+    IF    $kserve_mode is None
+        ${kserve_mode}=    Get KServe Default Deployment Mode From DSC
+        Log    message=Using defaultDeploymentMode set in the DSC: ${kserve_mode}
     END
     IF    "${kserve_mode}"=="Serverless"
            Wait Until Keyword Succeeds    10    1s    Namespace Should Be Removed From ServiceMeshMemberRoll
@@ -629,17 +689,13 @@ Clean Up Test Project
     END
 
 Create PVC And Download Model From S3
-    [Arguments]    ${model_name}    ${bucket_name}    ${endpoint}
-    ...            ${region}    ${access_key_id}    ${access_key}
+    [Arguments]    ${model_name}    ${bucket_name}
     ...            ${use_https}    ${namespace}    ${storage_size}
     ...            ${model_path}    ${download_timeout}=500s
     Set Log Level    NONE
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}
-    Set Test Variable    ${endpoint}
-    Set Test Variable    ${region}
-    Set Test Variable    ${access_key_id}
-    Set Test Variable    ${access_key}
+    # AWS variables defined in the Setup Test Variables
     Set Test Variable    ${use_https}
     Set Test Variable    ${namespace}
     Set Test Variable    ${storage_size}
@@ -651,6 +707,8 @@ Create PVC And Download Model From S3
     Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
     ...    timeout=${download_timeout}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc delete pods -l name=download-${model_name} -n ${namespace}
+    Should Be Equal As Integers    ${rc}    ${0}
 
 Extract Service Port
     [Arguments]    ${service_name}    ${namespace}    ${protocol}
@@ -663,3 +721,42 @@ Extract Service Port
     ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.name=="${port_name}")]}{@.targetPort}{end}'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     RETURN    ${out}
+
+Download Prompts Weights In PVC
+    [Arguments]    ${prompts_path}    ${model_name}    ${bucket_name}
+    ...            ${use_https}    ${namespace}    ${storage_size}
+    ...            ${model_path}    ${download_timeout}=120s
+    Set Log Level    NONE
+    Set Test Variable    ${prompts_path}
+    Set Test Variable    ${model_name}
+    Set Test Variable    ${bucket_name}
+    # AWS variables defined in the Setup Test Variables
+    Set Test Variable    ${use_https}
+    Set Test Variable    ${namespace}
+    Set Test Variable    ${storage_size}
+    Set Test Variable    ${model_path}
+    Set Log Level    INFO
+    Create File From Template    ${DOWNLOAD_PROMPTS_PVC_FILEPATH}    ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}
+    Should Be Equal As Integers    ${rc}    ${0}
+    Wait For Pods To Be Ready    label_selector=name=${model_name}-download-prompts    namespace=${namespace}
+    Wait For Pods To Succeed    label_selector=name=${model_name}-download-prompts    namespace=${namespace}
+    ...    timeout=${download_timeout}
+
+Get KServe Default Deployment Mode From DSC
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    ${rc}    ${mode}=    Run And Return Rc And Output
+    ...    oc get dsc ${DSC_NAME} -ojsonpath='{.spec.components.kserve.defaultDeploymentMode}'
+    Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}    msg=${mode}
+    IF    "${mode}" == "${EMPTY}"
+        Log    message=if defaultDeploymentMode is not set, then it means Serverless
+        ${mode}=    Set Variable    Serverless
+    END
+    RETURN    ${mode}
+
+Start Port-forwarding
+    [Arguments]    ${namespace}    ${model_name}    ${process_alias}=llm-query-process
+    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
+    ...    alias=${process_alias}    stderr=STDOUT    shell=yes
+    Process Should Be Running    ${process}
+    sleep  7s

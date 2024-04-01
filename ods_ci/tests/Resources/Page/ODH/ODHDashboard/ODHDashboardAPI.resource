@@ -24,7 +24,7 @@ Perform Request
     Remove OAuth Token From Header   headers=${response.headers}    token=${request_args}[headers][Cookie]
     Set Log Level    INFO
     Set To Dictionary    ${LOG_DICT}     url=${response.request.url}   headers=${response.request.headers}
-    ...                                 body=${response.request.headers}    status_code=${response.status_code}
+    ...                                 body=${response.request.body}    status_code=${response.status_code}
     Log     ${request_type} Request: ${LOG_DICT}
     Set To Dictionary    ${LOG_RESP_DICT}      url=${response.url}   headers=${response.headers}   body=${response.text}
     ...                                      status_code=${response.status_code}   reason=${response.reason}

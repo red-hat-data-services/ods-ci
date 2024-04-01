@@ -9,7 +9,6 @@ Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipel
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
-Resource            ../../../Resources/Page/Operators/OpenShiftPipelines.resource
 Library             DateTime
 Library             ../../../../libs/DataSciencePipelinesAPI.py
 Test Tags           DataSciencePipelines
@@ -39,12 +38,12 @@ Verify Ods User Can Bind The Route Role
     ...         ${TEST_USER_4.AUTH_TYPE}    ${PROJECT_USER4}
     # due that the projects were created, it is expected a failure in the first request
     ${status}    Login And Wait Dsp Route    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}
-    ...         ${PROJECT_USER4}    ds-pipeline-pipelines-definition    ${1}
+    ...         ${PROJECT_USER4}    ${1}
     Should Be True    ${status} == 403    The user must not have permission to access
     Add Role To User    ds-pipeline-user-access-pipelines-definition    ${TEST_USER_3.USERNAME}    ${PROJECT_USER4}
     # rbac is async and takes some time
     ${status}    Login And Wait Dsp Route    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${PROJECT_USER4}
-    ...         ds-pipeline-pipelines-definition    ${30}
+    ...    ${30}
     Should Be True    ${status} == 200    Rolling Binding Not Working
 
 
@@ -77,5 +76,5 @@ Create A Pipeline Server And Wait For Dsp Route
     ...                          aws_bucket_name=${S3_BUCKET}
     Reload Page
     Create Pipeline Server    dc_name=${project}-dc    project_title=${project}
-    ${status}    Login And Wait Dsp Route    ${user}    ${password}    ${project}    ds-pipeline-pipelines-definition
+    ${status}    Login And Wait Dsp Route    ${user}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long

@@ -2,14 +2,13 @@
 
 import kfp
 
-from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
-
-"""Producer"""
+from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
+@kfp.dsl.component(base_image=DataSciencePipelinesKfp.base_image)
 def send_file(
     file_size_bytes: int,
-    outgoingfile: kfp.components.OutputPath(),
+    outgoingfile: kfp.dsl.OutputPath(),
 ):
     import os
     import zipfile
@@ -26,15 +25,13 @@ def send_file(
     file_path = "/tmp/large_file.txt"
     create_large_file(file_path, file_size_bytes)
     zip_file(file_path, outgoingfile)
-    print("done")
+    print(f"saved: {outgoingfile}")
 
 
-"""Consumer"""
-
-
+@kfp.dsl.component(base_image=DataSciencePipelinesKfp.base_image)
 def receive_file(
-    incomingfile: kfp.components.InputPath(),
-    saveartifact: kfp.components.OutputPath(),
+    incomingfile: kfp.dsl.InputPath(),
+    saveartifact: kfp.dsl.OutputPath(),
 ):
     import os
     import shutil
@@ -50,8 +47,9 @@ def receive_file(
     shutil.copyfile(incomingfile, saveartifact)
 
 
+@kfp.dsl.component(packages_to_install=["minio"], base_image=DataSciencePipelinesKfp.base_image)
 def test_uploaded_artifact(
-    previous_step: kfp.components.InputPath(),
+    previous_step: kfp.dsl.InputPath(),
     file_size_bytes: int,
     mlpipeline_minio_artifact_secret: str,
     bucket_name: str,
@@ -61,15 +59,10 @@ def test_uploaded_artifact(
 
     from minio import Minio
 
-    print(previous_step)
-    name_data = previous_step.split("/")
-    object_name = "artifacts/" + name_data[4] + "/receive-file/saveartifact.tgz"
-
-    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret)
-
     def inner_decode(my_str):
         return base64.b64decode(my_str).decode("utf-8")
 
+    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret.replace("'", '"'))
     host = inner_decode(mlpipeline_minio_artifact_secret["host"])
     port = inner_decode(mlpipeline_minio_artifact_secret["port"])
     access_key = inner_decode(mlpipeline_minio_artifact_secret["accesskey"])
@@ -78,7 +71,10 @@ def test_uploaded_artifact(
     secure = secure.lower() == "true"
     client = Minio(f"{host}:{port}", access_key=access_key, secret_key=secret_key, secure=secure)
 
-    data = client.get_object(bucket_name, object_name)
+    store_object = previous_step.replace(f"/s3/{bucket_name}/", "")
+    print(f"parsing {previous_step} to {store_object} ")
+    data = client.get_object(bucket_name, store_object)
+
     with open("my-testfile", "wb") as file_data:
         for d in data.stream(32 * 1024):
             file_data.write(d)
@@ -91,45 +87,22 @@ def test_uploaded_artifact(
     assert diff == 0
 
 
-"""Build the producer component"""
-send_file_op = kfp.components.create_component_from_func(
-    send_file,
-    base_image=DataSciencePipelinesKfpTekton.base_image,
-)
-
-"""Build the consumer component"""
-receive_file_op = kfp.components.create_component_from_func(
-    receive_file,
-    base_image=DataSciencePipelinesKfpTekton.base_image,
-)
-
-test_uploaded_artifact_op = kfp.components.create_component_from_func(
-    test_uploaded_artifact,
-    base_image=DataSciencePipelinesKfpTekton.base_image,
-    packages_to_install=["minio"],
-)
-
-"""Wire up the pipeline"""
-
-
 @kfp.dsl.pipeline(
     name="Test Data Passing Pipeline 1",
 )
-def wire_up_pipeline(mlpipeline_minio_artifact_secret, bucket_name):
-    import json
-
+def wire_up_pipeline(mlpipeline_minio_artifact_secret: str, bucket_name: str):
     file_size_mb = 20
     file_size_bytes = file_size_mb * 1024 * 1024
 
-    send_file_task = send_file_op(file_size_bytes)
+    send_file_task = send_file(file_size_bytes=file_size_bytes)
 
-    receive_file_task = receive_file_op(
-        send_file_task.output,
-    ).add_pod_annotation(name="artifact_outputs", value=json.dumps(["saveartifact"]))
+    receive_file_task = receive_file(
+        incomingfile=send_file_task.output,
+    )
 
-    test_uploaded_artifact_op(
-        receive_file_task.output,
-        file_size_bytes,
-        mlpipeline_minio_artifact_secret,
-        bucket_name,
+    test_uploaded_artifact(
+        previous_step=receive_file_task.output,
+        file_size_bytes=file_size_bytes,
+        mlpipeline_minio_artifact_secret=mlpipeline_minio_artifact_secret,
+        bucket_name=bucket_name,
     )

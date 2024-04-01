@@ -12,6 +12,7 @@ Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py
 Suite Setup     Anaconda Suite Setup
+Test Tags       ExcludeOnODH
 
 
 *** Test Cases ***

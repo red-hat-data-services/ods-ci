@@ -94,10 +94,9 @@ Test Bad Image URL
 
 Test Image From Local registry
     [Documentation]  Try creating a custom image using a local registry URL (i.e. OOTB image)
-    ...       ProductBug - https://github.com/opendatahub-io/odh-dashboard/issues/2185
+    ...       Issue reported for this test in the past - https://github.com/opendatahub-io/odh-dashboard/issues/2185
     [Tags]    Sanity    Tier1
     ...       ODS-2470
-    ...       ProductBug
     ${CLEANUP}=  Set Variable  False
     Open Notebook Images Page
     ${local_url} =    Get Standard Data Science Local Registry URL

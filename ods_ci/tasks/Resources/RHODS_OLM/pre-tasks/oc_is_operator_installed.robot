@@ -15,17 +15,17 @@ Is RHODS Installed
               ${result}=  Run Keyword And Return Status
               ...  Run Keywords
               ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
-              ...                                              subscription=rhods-operator-dev  AND
+              ...                                              subscription=rhoai-operator-dev  AND
               ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
               ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
               ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
               ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-              ...          field_selector=metadata.name=rhods-catalog-dev
+              ...          field_selector=metadata.name=rhoai-catalog-dev
           ELSE IF  "${INSTALL_TYPE}" == "OperatorHub"
               ${result}=  Run Keyword And Return Status
               ...  Run Keywords
               ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
-              ...                                              subscription=rhods-operator  AND
+              ...                                              subscription=rhoai-operator  AND
               ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
               ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
               ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND

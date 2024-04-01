@@ -15,7 +15,7 @@
 # source https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py
 from kfp import components, dsl
 
-from ods_ci.libs.DataSciencePipelinesKfpTekton import DataSciencePipelinesKfpTekton
+from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
 def random_num(low: int, high: int) -> int:
@@ -46,11 +46,9 @@ def print_msg(msg: str):
     description="Shows how to use dsl.Condition().",
 )
 def flipcoin_pipeline():
-    flip_coin_op = components.create_component_from_func(flip_coin, base_image=DataSciencePipelinesKfpTekton.base_image)
-    print_op = components.create_component_from_func(print_msg, base_image=DataSciencePipelinesKfpTekton.base_image)
-    random_num_op = components.create_component_from_func(
-        random_num, base_image=DataSciencePipelinesKfpTekton.base_image
-    )
+    flip_coin_op = components.create_component_from_func(flip_coin, base_image=DataSciencePipelinesKfp.base_image)
+    print_op = components.create_component_from_func(print_msg, base_image=DataSciencePipelinesKfp.base_image)
+    random_num_op = components.create_component_from_func(random_num, base_image=DataSciencePipelinesKfp.base_image)
 
     flip = flip_coin_op()
     with dsl.Condition(flip.output == "heads"):

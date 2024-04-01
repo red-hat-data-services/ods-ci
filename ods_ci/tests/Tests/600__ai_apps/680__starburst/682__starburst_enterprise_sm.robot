@@ -7,6 +7,7 @@ Resource            ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup          Starburst Enterprise Suite Setup
 Suite Teardown       Starburst Enterprise Suite Teardown
+Test Tags            ExcludeOnODH
 
 
 *** Variables ***

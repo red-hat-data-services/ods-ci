@@ -44,15 +44,17 @@ Verify Openvino_IR Model Via UI
     [Documentation]    Test the deployment of an openvino_ir model
     [Tags]    Smoke
     ...       ODS-2054
-        Create Openvino Models    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}    project_name=${PRJ_TITLE}
+    Create Openvino Models    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}    project_name=${PRJ_TITLE}
     ...    num_projects=1
     [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
     ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
 
 Test Inference Without Token Authentication
     [Documentation]    Test the inference result after having deployed a model that doesn't require Token Authentication
-    [Tags]    Smoke
+    ...                Intermittently failing: RHOAIENG-3115
+    [Tags]    Smoke    FlakyTest
     ...       ODS-2053
+    Depends On Test  Verify Openvino_IR Model Via UI
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
     [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
@@ -143,7 +145,7 @@ Verify Multiple Projects With Same Model
 Verify Editing Existing Model Deployment
     [Documentation]    Tries editing an existing model deployment to see if the underlying deployment is updated
     [Tags]    Sanity    Tier1
-    ...       ProductBug    RHOAIENG-2869
+    ...       RHOAIENG-2869
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection

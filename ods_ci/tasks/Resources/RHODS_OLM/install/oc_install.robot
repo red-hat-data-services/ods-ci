@@ -14,6 +14,9 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
+${AUTHORINO_OP_NAME}=     authorino-operator
+${AUTHORINO_SUB_NAME}=    authorino-operator
+${AUTHORINO_CHANNEL_NAME}=  managed-services
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 
@@ -64,6 +67,7 @@ Verify RHODS Installation
     Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-operators
     Set Global Variable    ${NOTEBOOKS_NAMESPACE}    opendatahub
   END
+  Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
   IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
@@ -91,10 +95,10 @@ Verify RHODS Installation
         Add UI Admin Group To Dashboard Admin
 
     ELSE
-        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=rhods-dashboard"
+        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=${DASHBOARD_APP_NAME}"
         Wait For Pods Numbers  5
         ...                   namespace=${APPLICATIONS_NAMESPACE}
-        ...                   label_selector=app=rhods-dashboard
+        ...                   label_selector=app=${DASHBOARD_APP_NAME}
         ...                   timeout=1200
     END
   END
@@ -306,10 +310,22 @@ Catalog Is Ready
     Should Be Equal As Strings    "READY"    ${output}
 
 Install Kserve Dependencies
-    [Documentation]    Install Dependent Operator For Kserve
+    [Documentation]    Install Dependent Operators For Kserve
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
+    IF    not ${is_installed}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
+          ...    subscription_name=${AUTHORINO_SUB_NAME}
+          ...    channel=${AUTHORINO_CHANNEL_NAME}
+          ...    catalog_source_name=redhat-operators
+          Wait Until Operator Subscription Last Condition Is
+          ...    type=CatalogSourcesUnhealthy    status=False
+          ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
+    ELSE
+          Log To Console    message=Authorino Operator is already installed
+    END
     ${is_installed}=   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
     IF    not ${is_installed}
           Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
@@ -384,10 +400,14 @@ Wait Component Ready
     Log To Console    Waiting for ${component} to be ready
 
     # oc wait "${cluster_name}" --for=condition\=${component}Ready\=true --timeout\=3m
-    ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=3m
+    ${result} =    Run Process    oc wait "${cluster_name}" --for condition\=${component}Ready\=true --timeout\=10m
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
-        FAIL    Timeout waiting for ${component} to be ready
+        ${suffix} =  Generate Random String  4  [LOWER]
+        ${result_dsc_get} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o yaml > dsc-${component}-dump-${suffix}.yaml
+        ...    shell=true    stderr=STDOUT
+        IF  ${result_dsc_get.rc} == ${0}     FAIL    Timeout waiting for ${component} to be ready, DSC CR content stored in 'dsc-${component}-dump-${suffix}.yaml'
+        FAIL    Timeout waiting for ${component} to be ready, DSC CR cannot be retrieved
     END
     Log To Console    ${component} is ready
 

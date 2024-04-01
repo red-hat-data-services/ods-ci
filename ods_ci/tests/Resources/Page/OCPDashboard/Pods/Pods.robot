@@ -142,11 +142,17 @@ Container Image Url Should Contain
     ...    msg=Unexpected container image url
 
 Search Pod
-    [Documentation]   Returns list pod  ${pod_start_with} = here ypu have to provide starting of pod name
-    [Arguments]   ${namespace}  ${pod_start_with}
-    ${pod} =  Run  oc get pods -n ${namespace} -o json | jq '.items[] | select(.metadata.name | startswith("${pod_start_with}")) | .metadata.name'    #robocop:disable
+    [Documentation]   Returns a list of pods that match the regular expression '${pod_regex}'
+    [Arguments]   ${namespace}  ${pod_regex}
+    ${pod} =  Run  oc get pods -n ${namespace} -o json | jq '.items[] | select(.metadata.name | test("${pod_regex}")) | .metadata.name'    #robocop:disable
     @{list_pods} =  Split String  ${pod}  \n
     RETURN  ${list_pods}
+
+Find First Pod By Name
+    [Documentation]   Returns first occurred of pod that starts with '${pod_regex}'
+    [Arguments]   ${namespace}  ${pod_regex}
+    ${list_pods} =  Search Pod  namespace=${namespace}  pod_regex=^${pod_regex}
+    RETURN  ${list_pods}[0]
 
 Run Command In Container
     [Documentation]    Executes a command in a container.
@@ -170,12 +176,6 @@ Check Is Container Exist
     [Arguments]     ${namespace}    ${pod_name}    ${container_to_check}
     ${container_name} =  Run  oc get pod ${pod_name} -n ${namespace} -o json | jq '.spec.containers[] | select(.name == "${container_to_check}") | .name'
     Should Be Equal    "${container_to_check}"    ${container_name}
-
-Find First Pod By Name
-    [Documentation]   Returns first occurred pod  ${pod_start_with} = here ypu have to provide starting of pod name
-    [Arguments]   ${namespace}  ${pod_start_with}
-    ${list_pods} =  Search Pod  namespace=${namespace}  pod_start_with=${pod_start_with}
-    RETURN  ${list_pods}[0]
 
 Get Containers
     [Documentation]    Returns list of containers

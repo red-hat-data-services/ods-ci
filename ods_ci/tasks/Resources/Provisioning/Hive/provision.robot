@@ -10,7 +10,7 @@ Claim Cluster
 Does ClusterName Exists
     @{clusterpoolname} =    Oc Get   kind=ClusterPool    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
     Log Many    @{clusterpoolname}
-    Log Many    ${cluster_name} 
+    Log Many    ${cluster_name}
     FOR    ${name}    IN    @{clusterpoolname}
         IF    "${name}[metadata][name]" == "${pool_name}"
             Log    ${name}[metadata][name]    console=True
@@ -58,7 +58,7 @@ Create Provider Resources
     ELSE
         FAIL    Invalid provider name
     END
-    
+
 Select Provisioner Template
     [Arguments]    ${provider_type}
     IF    "${provider_type}" == "AWS"
@@ -74,7 +74,7 @@ Select Provisioner Template
         FAIL    Invalid provider name
     END
     RETURN    ${template}
-        
+
 Create Openstack Resources
     Log    Creating OSP resources in Cloud '${infrastructure_configurations}[osp_cloud_name]'    console=True
     ${result}    Run Process 	echo '${infrastructure_configurations}[osp_cloud_name]' | base64 -w0    shell=yes
@@ -102,7 +102,8 @@ Create Floating IPs
     File Should Not Be Empty    ${osp_clouds_yaml}
     ${shell_script} =     Catenate
     ...    ${CURDIR}/OSP/create_fips.sh ${cluster_name} ${infrastructure_configurations}[base_domain]
-    ...    ${infrastructure_configurations}[osp_network] ${infrastructure_configurations}[osp_cloud_name] ${artifacts_dir}/    
+    ...    ${infrastructure_configurations}[osp_network] ${infrastructure_configurations}[osp_cloud_name] ${artifacts_dir}/
+    ...    ${infrastructure_configurations}[AWS_ACCESS_KEY_ID] ${infrastructure_configurations}[AWS_SECRET_ACCESS_KEY]
     ${return_code} =    Run and Watch Command    ${shell_script}    output_should_contain=Exporting Floating IPs
     Should Be Equal As Integers	${return_code}	 0   msg=Error creating floating IPs for cluster '${cluster_name}'
     ${fips_file_to_export} =    Set Variable
@@ -145,23 +146,25 @@ Watch Hive Install Log
 
 Wait For Cluster To Be Ready
     ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
+    Set Task Variable    ${pool_namespace}
     Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
     Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
     Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
     ${provision_status} =    Run Process
-    ...    oc -n ${pool_namespace} wait --for\=condition\=Provisioned\=True cd ${pool_namespace} --timeout\=10m
+    ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${pool_namespace} --timeout\=15m
     ...    shell=yes
     ${web_access} =    Run Process
     ...    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status
     ...    shell=yes
     ${claim_status} =    Run Process
-    ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=10m    shell=yes    # robocop: disable:line-too-long
+    ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
     # Workaround for old Hive with Openstack - Cluster is displayed as Resuming even when it is Running
+    # add also support to the new Hive where the Cluster is displayed as Running
     IF    "${provider_type}" == "OSP"
-        ${claim_status} =    Run Process 	
-        ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and .reason\=\="Resuming")' --exit-status    shell=yes
+        ${claim_status} =    Run Process
+        ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and (.reason\=\="Resuming" or .reason\=\="Running"))' --exit-status    shell=yes
     END
     IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${claim_status.rc} != 0
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json    shell=yes
@@ -173,31 +176,32 @@ Wait For Cluster To Be Ready
         FAIL    Cluster '${cluster_name}' provisioning failed. Please look into the logs for more details.
     END
     Log    Cluster '${cluster_name}' install completed and accessible at: ${web_access.stdout}     console=True
-    
+
 Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
-    Set Task Variable    ${cluster_kubeconf}    ${artifacts_dir}/kubeconfig
-    ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-    ${result} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.apiURL' --exit-status    shell=yes
-    Should Be True    ${result.rc} == 0    Hive Cluster deployment '${pool_namespace}' does not have a valid API access
+    ${result} =    Run Process
+    ...    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status
+    ...    shell=yes
+    Should Be True    ${result.rc} == 0
+    ...    Hive Cluster deployment '${pool_namespace}' does not have a valid webConsoleURL access
     Create File     ${cluster_details}    console=${result.stdout}\n
-    ${ClusterDeployment} =    Oc Get    kind=ClusterDeployment    name=${pool_namespace}
-    ...    namespace=${pool_namespace}    api_version=hive.openshift.io/v1
-    ${apiURL} =    Set Variable    "${ClusterDeployment[0]['status']['apiURL']}"
-    Append to File     ${cluster_details}     api=${apiURL}\n
+    ${result} =    Run Process
+    ...    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.apiURL' --exit-status
+    ...    shell=yes
+    Append To File     ${cluster_details}     api=${result.stdout}\n
     ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     ${username} = 	Get File 	${artifacts_dir}/username
     ${password} = 	Get File 	${artifacts_dir}/password
-    Append to File     ${cluster_details}     username=${username}\n
-    Append to File     ${cluster_details}     password=${password}\n
+    Append To File     ${cluster_details}     username=${username}\n
+    Append To File     ${cluster_details}     password=${password}\n
     ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${pool_namespace} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
     ...    shell=yes
     Should Be True    ${result.rc} == 0
-    RETURN    ${cluster_kubeconf}
-    
+
 Login To Cluster
+    ${cluster_kubeconf} =    Set Variable    ${artifacts_dir}/kubeconfig
     Export Variables From File    ${cluster_details}
     Create File     ${cluster_kubeconf}
     # Test the extracted credentials
@@ -208,18 +212,9 @@ Login To Cluster
     Log    ${result.stdout}\n${result.stderr}     console=True
     Should Be True    ${result.rc} == 0
 
-Set Cluster Storage
-    Log    Update Cluster ${cluster_name} Storage Class     console=True
-    ${result} =    Run Process    oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
-    ...    shell=yes
-    Log    StorageClass standard:\n${result.stdout}\n${result.stderr}     console=True
-    ${result} =    Run Process    oc --kubeconfig\=${cluster_kubeconf} patch StorageClass standard-csi -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-    ...    shell=yes
-    Log    StorageClass standard-csi:\n${result.stdout}\n${result.stderr}     console=True
-    Run Keyword And Ignore Error    Should Be True    ${result.rc} == 0
-
 Get Cluster Pool Namespace
     [Arguments]    ${hive_pool_name}
+    Log    Cluster pool name is: ${hive_pool_name}     console=True
     ${namespace} =    Wait Until Keyword Succeeds    2 min    2 s
     ...    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${hive_pool_name}
     ${pool_namespace} =    Set Variable   ${namespace[0]['metadata']['name']}

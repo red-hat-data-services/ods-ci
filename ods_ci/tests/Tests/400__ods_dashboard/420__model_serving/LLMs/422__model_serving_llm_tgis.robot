@@ -21,8 +21,9 @@ ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/artifact
 ${TEST_NS}=    tgis-standalone
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 @{SEARCH_METRICS}=    tgi_    istio_
+${USE_GPU}=    ${FALSE}
 
-
+  
 *** Test Cases ***
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
@@ -36,18 +37,29 @@ Verify User Can Serve And Query A Model
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    inference_type=streaming    n_times=1
+    ...    inference_type=tokenize    n_times=1    port_forwarding=${IS_KSERVE_RAW}
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=model-info    n_times=1    port_forwarding=${IS_KSERVE_RAW}
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=streaming    n_times=1    port_forwarding=${IS_KSERVE_RAW}
     ...    namespace=${test_namespace}    validate_response=${FALSE}
-    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Deploy Multiple Models In The Same Namespace
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
@@ -61,28 +73,40 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_one_name}
+    ...    process_alias=llm-one
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    n_times=5    namespace=${test_namespace}
-    Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    n_times=10    namespace=${test_namespace}
+    ...    n_times=5    namespace=${test_namespace}     port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    n_times=5    namespace=${test_namespace}
+    ...    n_times=5    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
+    IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_two_name}
+    ...    process_alias=llm-two
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    n_times=10    namespace=${test_namespace}
-    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    n_times=10    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
+    Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    n_times=10    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-two    kill=true
 
 Verify User Can Deploy Multiple Models In Different Namespaces
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
@@ -98,31 +122,43 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=singlemodel-multi1
     Compile Inference Service YAML    isvc_name=${model_two_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=singlemodel-multi2
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=singlemodel-multi1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=singlemodel-multi1    model_name=${model_one_name}
+    ...    process_alias=llm-one
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    n_times=2    namespace=singlemodel-multi1
+    ...    n_times=2    namespace=singlemodel-multi1    port_forwarding=${IS_KSERVE_RAW}
+    IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=singlemodel-multi2    model_name=${model_two_name}
+    ...    process_alias=llm-two
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    n_times=2    namespace=singlemodel-multi2
-    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
+    ...    n_times=2    namespace=singlemodel-multi2    port_forwarding=${IS_KSERVE_RAW}
+    [Teardown]    Run Keywords
+    ...            Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
     ...           wait_prj_deletion=${FALSE}
     ...           AND
     ...           Clean Up Test Project    test_ns=singlemodel-multi2    isvc_names=${models_names_ns_2}
     ...           wait_prj_deletion=${FALSE}
+    ...           AND
+    ...           Run Keyword If    ${IS_KSERVE_RAW}     Terminate Process    llm-one    kill=true
+    ...           AND
+    ...           Run Keyword If    ${IS_KSERVE_RAW}     Terminate Process    llm-two    kill=true
 
 Verify Model Upgrade Using Canaray Rollout
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
-    [Tags]    Tier1    ODS-2372
+    [Tags]    Tier1    ODS-2372    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
     ${isvc_name}=    Set Variable    canary-caikit
@@ -136,6 +172,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    namespace=${test_namespace}
     ...    validate_response=${FALSE}
     ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Log To Console    Applying Canary Tarffic for Model Upgrade
     ${model_name}=    Set Variable    bloom-560m-caikit
     Compile Deploy And Query LLM model   isvc_name=${isvc_name}
@@ -147,6 +184,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    validate_response=${FALSE}
     ...    n_queries=${0}
     ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${canary_percentage}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
     ...    runtime=${TGIS_RUNTIME_NAME}
@@ -177,17 +215,22 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    model_name=${model_name}
     ...    namespace=no-infer-kserve
     ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}    port_forwarding=${IS_KSERVE_RAW}
     Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s
     Should Be Equal As Integers    ${rc}    ${0}
-    [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
+    [Teardown]   Run Keywords
+    ...    Clean Up Test Project    test_ns=no-infer-kserve
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
     ...    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model.
     ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
+    ...                When running on GPUs, it requires 3 GPUs           
     [Tags]    Tier1    ODS-2376
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
@@ -198,34 +241,35 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    min_replicas=1
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${test_namespace}    timeout=360s
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_replicas=3
+    Wait For New Replica Set To Be Ready    new_exp_replicas=3    model_name=${model_name}
+    ...    namespace=${test_namespace}    old_rev_id=${rev_id}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
-    ...    namespace=${test_namespace}    timeout=360s
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    Wait For New Replica Set To Be Ready    new_exp_replicas=1    model_name=${model_name}
+    ...    namespace=${test_namespace}    old_rev_id=${rev_id}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
-    ...    namespace=${test_namespace}
-    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
+    [Teardown]   Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Autoscale Using Concurrency
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
-    [Tags]    Tier1    ODS-2377
+    [Tags]    Tier1    ODS-2377    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -235,6 +279,7 @@ Verify User Can Autoscale Using Concurrency
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    auto_scale=True
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -251,7 +296,7 @@ Verify User Can Autoscale Using Concurrency
 
 Verify User Can Validate Scale To Zero
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
-    [Tags]    Tier1    ODS-2379    AutomationBug
+    [Tags]    Tier1    ODS-2379    AutomationBug    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
@@ -259,27 +304,21 @@ Verify User Can Validate Scale To Zero
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-zero
-    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
+    ...    namespace=autoscale-zero
     Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
-    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
+    ...    namespace=autoscale-zero
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=autoscale-zero
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -305,25 +344,31 @@ Verify User Can Set Requests And Limits For A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
+    ${label_selector}=    Get Model Pod Label Selector    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
-    ${new_requests}=    Create Dictionary    cpu=2    memory=3Gi
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
+    ${new_requests}=    Create Dictionary    cpu=3    memory=3Gi
     Set Model Hardware Resources    model_name=${flan_model_name}    namespace=hw-res
     ...    requests=${new_requests}    limits=${NONE}
-    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    Wait For Pods To Be Terminated    label_selector=${label_selector}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
-    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    [Teardown]   Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify Model Can Be Served And Query On A GPU Node
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
@@ -349,12 +394,17 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
     Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=10
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=5
     ...    namespace=${test_namespace}    inference_type=streaming    validate_response=${FALSE}
-    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
+    ...    port_forwarding=${IS_KSERVE_RAW}
+    [Teardown]   Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify Non Admin Can Serve And Query A Model
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
@@ -369,6 +419,7 @@ Verify Non Admin Can Serve And Query A Model
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -376,15 +427,18 @@ Verify Non Admin Can Serve And Query A Model
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1    validate_response=${FALSE}
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
-    ...        wait_prj_deletion=${FALSE}
+    ...        wait_prj_deletion=${FALSE}   kserve_mode=${DSC_KSERVE_MODE}
+    ...        AND
+    ...        Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
@@ -397,18 +451,23 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_GRAMMAR_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
-    ...    namespace=${test_namespace}    query_idx=1
+    ...    namespace=${test_namespace}    query_idx=1    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1    validate_response=${FALSE}
-    ...    namespace=${test_namespace}    query_idx=${1}
-    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    namespace=${test_namespace}    query_idx=${1}    port_forwarding=${IS_KSERVE_RAW}
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Serve And Query Flan-t5 Large
     [Documentation]    Deploys and queries flan-t5-large model
@@ -421,18 +480,22 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_LARGE_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
-    ...    namespace=${test_namespace}    query_idx=${0}
+    ...    namespace=${test_namespace}    query_idx=${0}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1    validate_response=${FALSE}
-    ...    namespace=${test_namespace}    query_idx=${0}
-    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    namespace=${test_namespace}    query_idx=${0}    port_forwarding=${IS_KSERVE_RAW}
+    [Teardown]    Run Keywords    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify Runtime Upgrade Does Not Affect Deployed Models
     [Documentation]    Upgrades the caikit runtime inthe same NS where a model
@@ -449,13 +512,15 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
-    ...    namespace=${test_namespace}
+    ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}    container=kserve-container
     Upgrade Runtime Image    container=kserve-container    runtime=${TGIS_RUNTIME_NAME}
@@ -468,8 +533,11 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    namespace=${test_namespace}    container=kserve-container
     Should Be Equal    ${created_at}    ${created_at_after}
     Should Be Equal As Strings    ${caikitsha}    ${caikitsha_after}
-    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    AND
+    ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
 Verify User Can Access Model Metrics From UWM
     [Documentation]    Verifies that model metrics are available for users in the
@@ -477,7 +545,7 @@ Verify User Can Access Model Metrics From UWM
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    Tier1    ODS-2401
+    [Tags]    Tier1    ODS-2401    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -488,6 +556,7 @@ Verify User Can Access Model Metrics From UWM
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+    ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -514,7 +583,7 @@ Verify User Can Access Model Metrics From UWM
     Wait Until Keyword Succeeds    30 times    5s
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=stream    namespace=${test_namespace}    period=5m    exp_value=1
-    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Query A Model Using HTTP Calls
@@ -552,3 +621,46 @@ Suite Setup
     RHOSi Setup
     Load Expected Responses
     Run    git clone https://github.com/IBM/text-generation-inference/
+    IF   ${USE_GPU}
+        ${limits}=    Create Dictionary    nvidia.com/gpu=1
+        Set Suite Variable    ${GPU_LIMITS}    ${limits}
+    ELSE
+        Set Suite Variable    ${GPU_LIMITS}    &{EMPTY}
+    END
+    ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
+    Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
+    IF    "${dsc_kserve_mode}" == "RawDeployment"
+        Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
+    ELSE
+        Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
+    END
+
+Get Model Pod Label Selector
+    [Documentation]    Creates the model pod selector for the tests which performs
+    ...                rollouts of a new model version/configuration. It returns
+    ...                the label selecto to be used to check the old version,
+    ...                e.g., its pods get deleted successfully
+    [Arguments]    ${model_name}    ${namespace}
+    IF    ${IS_KSERVE_RAW}
+        ${rc}  ${hash}=    Run And Return Rc And Output
+        ...    oc get pod -l serving.kserve.io/inferenceservice=${model_name} -ojsonpath='{.items[0].metadata.labels.pod-template-hash}'
+        Should Be Equal As Integers    ${rc}    ${0}    msg=${hash}
+        ${label_selector}=    Set Variable    pod-template-hash=${hash}
+    ELSE
+        ${rev_id}=    Get Current Revision ID    model_name=${model_name}
+        ...    namespace=${namespace}
+        ${label_selector}=    Set Variable    serving.knative.dev/revisionUID=${rev_id}
+    END
+    RETURN    ${label_selector}
+
+Wait For New Replica Set To Be Ready
+    [Documentation]    When the replicas setting is changed, it wait for the new ods to come up
+    ...            In case of Serverless deployment, it wait for old pods to be deleted.
+    [Arguments]    ${new_exp_replicas}    ${model_name}    ${namespace}    ${old_rev_id}=${NONE}
+    IF    not ${IS_KSERVE_RAW}
+        Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${old_rev_id}
+        ...    namespace=${namespace}    timeout=360s        
+    END
+    Wait Until Keyword Succeeds    5 times    5s
+    ...    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${namespace}    exp_replicas=${new_exp_replicas}

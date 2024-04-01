@@ -1,10 +1,10 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: rhods-operator
+  name: rhoai-operator
   namespace: <OPERATOR_NAMESPACE>
 spec:
-  channel: embedded
+  channel: <UPDATE_CHANNEL>
   name: rhods-operator
   source: <CS_NAME>
   sourceNamespace: <CS_NAMESPACE>

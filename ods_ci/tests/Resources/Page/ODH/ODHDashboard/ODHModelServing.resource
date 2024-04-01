@@ -69,7 +69,7 @@ Serve Model
         SeleniumLibrary.Wait Until Page Contains    Deploy model
         SeleniumLibrary.Click Button    Deploy model
     END
-    SeleniumLibrary.Wait Until Page Contains Element    xpath://h1[.="Deploy model"]
+    Wait For Dashboard Page Title    Deploy model
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
@@ -88,9 +88,6 @@ Serve Model
         Set Folder Path    ${model_path}
     END
     SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
-    # Workaround for UI glitch bug RHOAIENG-2724 - Reselect model server and framework
-    Select Model Server    ${model_server}
-    Select Framework    ${framework}
     SeleniumLibrary.Click Button    Deploy
     SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 
@@ -200,7 +197,7 @@ Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
     [Arguments]    ${model_name}
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
-    Wait Until Page Contains    xpath://h1[.="Deploy model"]
+    Wait For Dashboard Page Title    Deploy model
 
 Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.

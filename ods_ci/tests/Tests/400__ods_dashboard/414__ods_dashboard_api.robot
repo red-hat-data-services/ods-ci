@@ -1,6 +1,8 @@
 *** Settings ***
 Documentation     Suite for a basic security test of Dashboard APIs. The tests verifies that user
-...               reach endpoints based on their user permissions
+...               reach endpoints based on their user permissions.
+...    Refer to this file https://github.com/opendatahub-io/odh-dashboard/blob/main/frontend/src/types.ts
+...    to read particular API definitions.
 Library           OpenShiftLibrary
 Library           SeleniumLibrary
 Resource          ../../Resources/Common.robot
@@ -25,7 +27,7 @@ ${DOCS_ENDPOINT}=        api/docs
 ${GETTING_STARTED_ENDPOINT}=        api/getting-started
 ${QUICKSTARTS_ENDPOINT}=        api/quickstarts
 ${SEGMENT_KEY_ENDPOINT}=        api/segment-key
-${GPU_ENDPOINT}=        api/gpu
+${GPU_ENDPOINT}=        api/accelerators
 
 ${NOTEBOOK_NS}=          ${NOTEBOOKS_NAMESPACE}
 ${DASHBOARD_NS}=         ${APPLICATIONS_NAMESPACE}
@@ -72,8 +74,8 @@ ${VALIDATE_ISV_RESULT_ENDPOINT}=         api/validate-isv/results?appName=anacon
 ${NB_ENDPOINT_PT0}=      api/notebooks
 ${NB_ENDPOINT_PT1}=      ${NB_ENDPOINT_PT0}/${NOTEBOOK_NS}/
 ${NB_ENDPOINT_PT2}=      /status
-${NB_ENDPOINT_BODY_A}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":{"configMap":{},"secrets":{"super-secre":"my new secret 20!"}},"state":"started"}
-${NB_ENDPOINT_BODY_B}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","url":"${ODH_DASHBOARD_URL}","gpus":0,"envVars":{"configMap":{},"secrets":{"super-secre":"my new secret 20!"}},"state":"started","username":"<USERNAME>"}
+${NB_ENDPOINT_BODY_A}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","acceleratorProfile": {"count": 0},"envVars":{"configMap":{},"secrets":{"super-secret":"my new secret 20!"}},"state":"started"}  #robocop: disable:line-too-long
+${NB_ENDPOINT_BODY_B}=      {"notebookSizeName":"Small","imageName":"s2i-minimal-notebook","imageTagName":"<IMAGETAGNAME>","acceleratorProfile": {"count": 0},"envVars":{"configMap":{},"secrets":{"super-secret":"my new secret 20!"}},"state":"started","username":"<USERNAME>"}  #robocop: disable:line-too-long
 ${NB_STOP_ENDPOINT_BODY_A}=    {"state":"stopped"}
 ${NB_STOP_ENDPOINT_BODY_B}=    {"state":"stopped","username": "<USERNAME>"}
 
@@ -472,9 +474,11 @@ Verify Access To groups-config API Endpoint
 Verify Access To images API Endpoint
     [Documentation]     Verifies the endpoint "images" works as expected
     ...                 based on the permissions of the users who query the endpoint
+    ...                 ProductBug RHOAIENG-4469
     [Tags]    ODS-1724
     ...       Tier1    Sanity
     ...       Security
+    ...       ProductBug
     Perform Dashboard API Endpoint POST Call   endpoint=${IMG_ENDPOINT_PT0}    token=${BASIC_USER_TOKEN}
     ...                                       body=${IMG_ENDPOINT_BODY}
     Operation Should Be Unauthorized
@@ -833,11 +837,11 @@ Delete Dummy ConfigMaps
 Delete Test Notebooks CRs And PVCs From CLI
     [Documentation]     Stops all the notebook servers spanwed during a test by
     ...                 deleting their CRs. At the end it closes any opened browsers
-    ${CR_1}=   Get User CR Notebook Name    ${TEST_USER_3.USERNAME}
-    ${CR_2}=   Get User CR Notebook Name    ${TEST_USER_4.USERNAME}
-    ${test_crs}=   Create List     ${CR_1}   ${CR_2}
-    FOR   ${nb_cr}    IN  @{test_crs}
-        ${present}=     Run Keyword And Return Status   OpenshiftLibrary.Oc Get    kind=Notebook  namespace=${NOTEBOOK_NS}  name=${nb_cr}
+    ${test_usernames}=   Create List  ${TEST_USER.USERNAME}  ${TEST_USER_3.USERNAME}  ${TEST_USER_4.USERNAME}
+    FOR  ${username}  IN  @{test_usernames}
+        ${nb_cr}=   Get User CR Notebook Name    ${username}
+        ${present}=     Run Keyword And Return Status
+        ...    OpenshiftLibrary.Oc Get    kind=Notebook    namespace=${NOTEBOOK_NS}  name=${nb_cr}
         IF    ${present} == ${FALSE}
             Continue For Loop
         ELSE
@@ -845,9 +849,10 @@ Delete Test Notebooks CRs And PVCs From CLI
         END
     END
     Close All Browsers
+    ${PVC_ADMIN_USER}=   Get User Notebook PVC Name    ${TEST_USER.USERNAME}
     ${PVC_BASIC_USER}=   Get User Notebook PVC Name    ${TEST_USER_3.USERNAME}
     ${PVC_BASIC_USER_2}=   Get User Notebook PVC Name    ${TEST_USER_4.USERNAME}
-    ${test_pvcs}=   Create List     ${PVC_BASIC_USER}   ${PVC_BASIC_USER_2}
+    ${test_pvcs}=   Create List     ${PVC_ADMIN_USER}    ${PVC_BASIC_USER}    ${PVC_BASIC_USER_2}
     Delete Test PVCs     pvc_names=${test_pvcs}
 
 Set Username In Secret Payload

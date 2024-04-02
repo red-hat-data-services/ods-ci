@@ -200,3 +200,29 @@ Wait Until CRD Exists
     [Arguments]    ${crd_fullname}
     Wait Until Keyword Succeeds    15 times    5s
     ...    Oc Get    kind=CustomResourceDefinition    name=${crd_fullname}
+
+Resource Should Exist
+    [Documentation]    Check resource existson a namespace
+    [Arguments]       ${resource}     ${resource_name}    ${namespace}
+    ${rc}    ${out}=     Run and Return Rc And Output
+    ...  oc get ${resource} ${resource_name} -n ${namespace}
+    Should Be Equal    "${rc}"    "0"    msg=${out}
+
+Resource Status Should Be
+    [Documentation]    Check Resource Status
+    [Arguments]       ${oc_get}     ${resource}    ${expected_status}
+    ${status}=     Run
+    ...  ${oc_get}
+    Log    ${status}    console=True
+    Should Be Equal    ${status}    ${expected_status}   msg=${resource} is not in Ready status
+
+Check For Errors On Operator Logs
+    [Documentation]    Checks there are no errors on Operator Logs
+    [Arguments]    ${operator_name}    ${operator_namespace}    ${regex_pattern}
+    ${data}       Run keyword   Oc Get   kind=Pod     namespace=${operator_namespace}   label_selector=name=rhods-operator
+    ${pod_logs}=    Oc Get Pod Logs  name=${operator_name}  namespace=${operator_namespace}  container=rhods-operator
+    ${match_list} 	 Get Regexp Matches   ${pod_logs}     ${regex_pattern}
+    ${entry_msg}      Remove Duplicates      ${match_list}
+    ${length}         Get Length   ${entry_msg}
+    IF   ${length} != ${0}    FAIL    Check logs, there are some ERROR entries present. 
+    ...    ELSE    Log    message=No ERROR logs found on Pod.    level=INFO

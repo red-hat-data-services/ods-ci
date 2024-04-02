@@ -179,6 +179,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     #SeleniumLibrary.Reload Page
     #Wait Until Project Is Open    project_title=${PRJ_TITLE}
     ${connected_woksps}=    Create List    ${WORKBENCH_3_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=cluster-storages
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${connected_woksps}
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}

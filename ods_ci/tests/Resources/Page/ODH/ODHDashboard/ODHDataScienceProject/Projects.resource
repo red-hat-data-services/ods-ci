@@ -262,7 +262,7 @@ Stop Workbench From Projects Home Page
 
 Wait Until Workbench Is Started From Projects Home Page
     [Documentation]    Waits until the workbench status is "RUNNING", from the DS Project home page
-    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
+    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=60s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
     ...     workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
 
@@ -280,7 +280,7 @@ Launch And Access Workbench From Projects Home Page
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Workbench"]//a[text()="${workbench_title}"]
+        Click Element       xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="workbenchName"]//a[text()="${workbench_title}"]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}    expected_ide=${expected_ide}
@@ -292,7 +292,7 @@ Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
     ${link_status}=    Get Element Attribute
-    ...    xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Workbench"]//a[text()="${workbench_title}"]    aria-disabled
+    ...    xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="workbenchName"]//a[text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
     ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 

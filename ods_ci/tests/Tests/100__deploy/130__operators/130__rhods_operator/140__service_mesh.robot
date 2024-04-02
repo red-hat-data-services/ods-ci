@@ -24,7 +24,7 @@ ${IS_NOT_PRESENT}                       1
 *** Test Cases ***
 Validate Service Mesh State Managed
     [Documentation]    The purpose of this Test Case is to validate Service Mesh integration
-    [Tags]    Operator    Smoke    ODS-2526    ServiceMesh-Managed
+    [Tags]    Operator    Tier1    ODS-2526    ServiceMesh-Managed
 
     Is Resource Present    ServiceMeshControlPlane    ${SERVICE_MESH_CR_NAME}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
     Check If Pod Exists    istiod    ${SERVICE_MESH_CR_NS}
@@ -32,7 +32,7 @@ Validate Service Mesh State Managed
 Validate Service Mesh State Unmanaged
     [Documentation]    The purpose of this Test Case is to validate Service Mesh state 'Unmanaged'.
     ...                The operator will not recreate/update the Service Mesh CR if removed or changed.
-    [Tags]    Operator    Smoke    ODS-2526    ServiceMesh-Unmanaged
+    [Tags]    Operator    Tier1    ODS-2526    ServiceMesh-Unmanaged
 
     Set Service Mesh Management State    Unmanaged    ${OPERATOR_NS}
     Delete Service Mesh Control Plane    ${SERVICE_MESH_CR_NS}

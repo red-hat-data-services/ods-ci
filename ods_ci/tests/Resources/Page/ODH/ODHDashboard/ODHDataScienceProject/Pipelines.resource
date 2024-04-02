@@ -320,7 +320,7 @@ Wait Until Pipeline Server Is Deployed
 #    [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state
 #    ...    In the DS Project view of a given project
 #    [Arguments]    ${pipeline_run_name}    ${pipeline_name}    ${project_name}
-#    Open Data Science Project Details Page    ${project_name}
+#    Open Data Science Project Details Page    ${project_name}    tab_id=pipelines-projects
 #    Wait Until Pipeline Last Run Is Started    pipeline_name=${pipeline_name}
 #    ...    timeout=10s
 #    Wait Until Pipeline Last Run Is Finished    pipeline_name=${pipeline_name}

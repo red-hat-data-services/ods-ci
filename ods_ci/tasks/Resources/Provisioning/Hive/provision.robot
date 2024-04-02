@@ -24,12 +24,19 @@ Does ClusterName Exists
         END
         RETURN    False
     ELSE
-        ${clusterdeploymentname} =    Oc Get   kind=ClusterDeployment    namespace=${hive_namespace}
-        ...    api_version=hive.openshift.io/v1    fields=['spec.clusterName']
-        Log    ${clusterdeploymentname}
-        Log    ${cluster_name}
-        IF    "${clusterdeploymentname}" == "${cluster_name}"
-            RETURN    ${clusterdeploymentname}
+        ${anycluster}=    Run Keyword And Return Status
+        ...    Oc Get   kind=ClusterDeployment    namespace=${hive_namespace}
+        ...    api_version=hive.openshift.io/v1
+        IF    ${anycluster}
+            ${clusterdeploymentname} =    Oc Get   kind=ClusterDeployment    namespace=${hive_namespace}
+            ...    api_version=hive.openshift.io/v1    fields=['spec.clusterName']
+            Log    ${clusterdeploymentname}
+            Log    ${cluster_name}
+            IF    "${clusterdeploymentname}" == "${cluster_name}"
+                RETURN    ${clusterdeploymentname}
+            END
+        ELSE
+            Log    message=No ClusterDeployment found in ${hive_namespace}.
         END
         RETURN    False
     END
@@ -81,8 +88,9 @@ Create Provider Resources
     ELSE IF    "${provider_type}" == "IBM"
         Create IBM CredentialsRequests And Service IDs
         Create IBM Manifests Secret
-        Oc Apply    kind=List    src=${template}    api_version=v1
-        ...    template_data=${infrastructure_configurations}
+        ${hive_yaml} =    Set Variable    ${artifacts_dir}/${cluster_name}_hive.yaml
+        Create File From Template    ${template}    ${hive_yaml}
+        Oc Apply    kind=List    src=${hive_yaml}    api_version=v1
     ELSE
         FAIL    Invalid provider name
     END

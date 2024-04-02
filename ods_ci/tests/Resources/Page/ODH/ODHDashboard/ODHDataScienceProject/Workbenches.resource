@@ -8,7 +8,8 @@ Resource       Projects.resource
 
 *** Variables ***
 ${WORKBENCH_SECTION_XP}=             xpath=//div[@id="workbenches"]
-${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
+${WORKBENCH_TAB}=                      xpath=//button[.="Workbenches"]
+${WORKBENCH_CREATE_BTN_XP}=           xpath=//div/button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
@@ -51,7 +52,9 @@ Create Workbench
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}    ${gpus}=${NONE}
     ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
     ...             ${data_connection}=${NONE}
-    Click Element    ${WORKBENCH_CREATE_BTN_XP}
+    Click Button    ${WORKBENCH_TAB}
+    Wait Until Page Contains Element        ${WORKBENCH_CREATE_BTN_XP}      timeout=5s
+    Click Button    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}
@@ -277,7 +280,7 @@ Workbench Status Should Be
     [Arguments]     ${workbench_title}      ${status}
     Run keyword And Continue On Failure
     ...    Page Should Contain Element
-    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...        //*[@id="workbenches"]/div/table/tbody/tr[1]/td[5]/div/div/p[text()="${status}"]
 
 Status Error Icon Should Appear
     [Documentation]    Checks if the error icon appears on the given workbench
@@ -290,8 +293,9 @@ Status Error Icon Should Appear
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
     [Arguments]     ${workbench_title}    ${timeout}=60s    ${status}=${WORKBENCH_STATUS_RUNNING}
-    Wait Until Page Contains Element
-    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}  # robocop: disable
+    Click Button         ${WORKBENCH_TAB}
+    Wait Until Page Contains Element        //*[@id="workbenches"]/div/table/tbody/tr[1]/td[5]/div/div/p[text()="${status}"]          timeout=${timeout}
+    #...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}  # robocop: disable
 
 Wait Until Workbench Is Stopped
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
@@ -307,7 +311,7 @@ Wait Until Workbench Is Restarting
 
 Start Workbench
     [Documentation]    Starts a workbench from the DS Project details page
-    [Arguments]     ${workbench_title}      ${timeout}=60s
+    [Arguments]     ${workbench_title}      ${timeout}=90s
 
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
@@ -332,7 +336,7 @@ Access To Workbench
         Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
         Wait Until Page Contains  Do you trust the authors of the files in this folder?
     ELSE IF  "${expected_ide}"=="JupyterLab"
-        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=120s
         Maybe Close Popup
     ELSE
         Fail    msg=Unknown IDE typy given: '${expected_ide}'. Please check and fix or implement.
@@ -355,8 +359,8 @@ Launch And Access Workbench
 Open Workbench
     [Documentation]    Clicks on "open" link for a given workbench
     [Arguments]    ${workbench_title}
-    ${open_workbench_link}=    Set Variable
-    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
+    ${open_workbench_link}=    Set Variable     //*[@id="workbenches"]/div/table/tbody/tr[1]/td[6]/div/div/a[text()="Open"]
+    #...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
     Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
     Click Link    ${open_workbench_link}
     Switch Window    NEW

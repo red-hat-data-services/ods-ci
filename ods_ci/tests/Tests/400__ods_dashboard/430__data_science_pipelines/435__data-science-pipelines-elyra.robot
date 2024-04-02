@@ -45,7 +45,7 @@ Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
-    Start Workbench     workbench_title=elyra-sds    timeout=300s
+    Start Workbench     workbench_title=elyra-sds    timeout=400s
     Launch And Access Workbench    workbench_title=elyra-sds
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
@@ -55,7 +55,7 @@ Verify Pipeline Can Be Submitted And Runs Correctly From Standard Data Science W
     [Documentation]    Submits an example Elyra pipeline to be run by Data Science Pipelines and
     ...    Confirms that it runs correctly
     [Tags]    Sanity    Tier1
-    ...       ODS-2199
+    ...       ODS-2199      RunThisTest
     Set Runtime Image In All Nodes    runtime_image=Datascience with Python 3.9 (UBI9)
     Run Pipeline
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s

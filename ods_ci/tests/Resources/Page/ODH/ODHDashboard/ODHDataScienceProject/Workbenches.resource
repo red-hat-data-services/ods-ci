@@ -51,7 +51,7 @@ Create Workbench
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}    ${gpus}=${NONE}
     ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
     ...             ${data_connection}=${NONE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
+    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
@@ -97,7 +97,7 @@ Create Workbench
         Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
     Wait Until Generic Modal Disappears  timeout=1 minute
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
+    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
 
 #robocop: disable: line-too-long
 Add Environment Variables In Workbench

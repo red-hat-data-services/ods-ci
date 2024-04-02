@@ -262,7 +262,7 @@ Stop Workbench From Projects Home Page
 
 Wait Until Workbench Is Started From Projects Home Page
     [Documentation]    Waits until the workbench status is "RUNNING", from the DS Project home page
-    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=60s
+    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
     ...     workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
 
@@ -386,20 +386,20 @@ Permissions Tab Should Not Be Accessible
 Wait Until Permissions Tab Is Open
     [Documentation]    Wait until "Permissions" tab is rendered
     Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element    id:user-permission-User
+    ...    Wait Until Page Contains Element    id:permissions
 
-Wait Until Components Tab Is Open
-    [Documentation]    Wait until "Components" tab is rendered
+Wait Until Overview Tab Is Open
+    [Documentation]    Wait until "Overview" tab is rendered
     Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element    id:workbenches-title
+    ...    Wait Until Page Contains Element    id:overview
 
-Components Tab Should Be Accessible
-    [Documentation]    Verify user can access the "Permissions" tab of a DS project
+Overview Tab Should Be Accessible
+    [Documentation]    Verify user can access the "Overview" tab of a DS project
     Run Keyword And Continue On Failure
     ...    Page Should Contain Element
-    ...    xpath://span[text()="Components"]
-    Move To Tab    tab_title=Components
-    Wait Until Components Tab Is Open
+    ...    xpath://span[text()="Overview"]
+    Move To Tab    tab_title=Overview
+    Wait Until Overview Tab Is Open
 
 Move To Tab
     [Documentation]    Open one of the tabs in a DS Project details page (e.g., Permissions)

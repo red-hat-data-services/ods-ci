@@ -27,7 +27,7 @@ Create S3 Data Connection
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     ...            ${aws_s3_ca_bundle}=${NONE}
-
+    Open Data Science Project Details Page       project_title=${project_title}    tab_id=data-connections
     Wait Until Element Is Visible     ${DC_ADD_BTN_1_XP}    timeout=30s
     Click Button                      ${DC_ADD_BTN_1_XP}
     Fill Data Connection Form    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}

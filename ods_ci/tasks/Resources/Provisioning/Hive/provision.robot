@@ -165,8 +165,7 @@ Watch Hive Install Log
             ...    label_selector=hive.openshift.io/cluster-deployment-name=${cluster_name}
         END
         TRY
-            ${podname}=    Set Variable    ${pod[0]['metadata']['name']}
-            ${new_log_data} =    Oc Get Pod Logs    name=${podname}    container=hive    namespace=${namespace}
+            ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=hive    namespace=${namespace}
         EXCEPT
             # Hive container (OCP installer log) is not ready yet
             Log To Console    .    no_newline=true

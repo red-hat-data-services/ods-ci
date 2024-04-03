@@ -8,6 +8,7 @@ Resource       Projects.resource
 *** Variables ***
 ${S3_NAME_DC_INPUT_XP}=         xpath=//input[@aria-label="Field list Name"]
 ${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_ACCESS_KEY_ID"]
+
 ${S3_SECRET_DC_INPUT_XP}=       xpath=//input[@aria-label="Field list AWS_SECRET_ACCESS_KEY"]
 ${S3_ENDPOINT_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_ENDPOINT"]
 ${S3_REGION_DC_INPUT_XP}=       xpath=//input[@aria-label="Field list AWS_DEFAULT_REGION"]
@@ -19,6 +20,7 @@ ${S3_DC_EDIT_BTN}=              xpath=//footer/button[.="Update data connection"
 ${DC_WORKBENCH_SELECTOR_XP}=    xpath=//ul[@aria-label="Notebook select"]/li
 
 
+
 *** Keywords ***
 Create S3 Data Connection
     [Documentation]    Creates a S3 Data Connection from DS Project details page
@@ -28,8 +30,10 @@ Create S3 Data Connection
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     ...            ${aws_s3_ca_bundle}=${NONE}
 
+
     Wait Until Element Is Visible     ${DC_ADD_BTN_1_XP}    timeout=30s
     Click Button                      ${DC_ADD_BTN_1_XP}
+
     Fill Data Connection Form    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${S3_DC_ADD_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}

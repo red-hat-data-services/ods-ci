@@ -5,6 +5,7 @@ Resource       ../ODHDataSciencePipelines.resource
 
 
 *** Variables ***
+
 ${PIPELINES_SECTION_XP}=              xpath://div[@id="pipelines-projects"]
 ${PIPELINES_TABLE_XP}=                xpath://table[@data-testid="pipelines-table"]
 ${PIPELINES_SERVER_BTN_XP}=           xpath=//*[@data-testid="create-pipeline-button"]
@@ -16,6 +17,7 @@ ${RUN_TOPOLOGY_OUTPUT_BTN_XP}=        xpath://*[@data-testid="bottom-drawer-tab-
 ${RUN_TOPOLOGY_XP}=                   xpath://*[@data-test-id="topology"]
 ${PIPELINES_DISABLED_EXC_MARK}=       xpath=//*[@id="page-sidebar"]/div/nav/ul/li[3]/a/div/div[2]
 
+
 *** Keywords ***
 Create Pipeline Server
     [Documentation]    Creates the DS Pipeline server from DS Project details page
@@ -25,10 +27,12 @@ Create Pipeline Server
     ...            ${aws_s3_ca_bundle}=${NONE}
     # Every 2 mins the frontend updates its cache and the client polls every 30seconds.
     # So the longest you’d have to wait is 2.5 mins. Set 3 min just to make sure
+
     Projects.Move To Tab    Pipelines
     Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}    timeout=180s
     Element Should Be Enabled    ${PIPELINES_SERVER_BTN_XP}
     Click Button    ${PIPELINES_SERVER_BTN_XP}
+
     Wait Until Generic Modal Appears
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_SERVER_CONFIG_BTN_XP}
     Select Data Connection    dc_name=${dc_name}
@@ -306,6 +310,7 @@ Verify Pipeline Server Deployments    # robocop: disable
     ...    label_selector=app=mariadb-dspa
     ${containerNames}=  Create List  mariadb
     Verify Deployment    ${mariadb}  1  1  ${containerNames}
+
 
 
 Wait Until Pipeline Server Is Deployed

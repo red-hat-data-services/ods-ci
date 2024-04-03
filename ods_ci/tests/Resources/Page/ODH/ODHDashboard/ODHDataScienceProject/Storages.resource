@@ -6,7 +6,7 @@ Resource       Projects.resource
 
 
 *** Variables ***
-${STORAGE_SECTION_XP}=             xpath=//div[@id="cluster-storages"]
+${STORAGE_SECTION_XP}=             xpath=//div[@data-testid="section-cluster-storages"]
 ${STORAGE_NAME_INPUT_XP}=          xpath=//input[@name="create-new-storage-name"]
 ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-description"]
 ${STORAGE_SIZE_INPUT_XP}=         xpath=//input[@aria-label="Input"]
@@ -24,12 +24,12 @@ Storage Should Be Listed
     [Arguments]     ${name}   ${description}   ${type}   ${connected_workbench}
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]//*/div[text()="${name}"]
     Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//td[@data-label="Name"]/p[text()="${description}"]
-    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//*/div[text()="${name}"]]/td[@data-label="Type"]/p[contains(text(),"${type}")]
+    Run Keyword And Continue On Failure     Wait Until Page Contains Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//div[text()="${name}"]]/td[@data-label="Type"]//*[contains(text(),"${type}")]
     IF    "${connected_workbench}" == "${NONE}"
         Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//*/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
-            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//*/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
+            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//div[text()="${name}"]]/td[@data-label="Connected workbenches"]//*[contains(text(),"${workbench_title}")]
         END
     END
 

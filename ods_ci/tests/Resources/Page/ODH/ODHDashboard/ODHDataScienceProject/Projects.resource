@@ -280,7 +280,7 @@ Launch And Access Workbench From Projects Home Page
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Workbench"]//a[text()="${workbench_title}"]
+        Click Element       xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="workbenchName"]//a[text()="${workbench_title}"]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}    expected_ide=${expected_ide}
@@ -292,7 +292,7 @@ Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
     ${link_status}=    Get Element Attribute
-    ...    xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Workbench"]//a[text()="${workbench_title}"]    aria-disabled
+    ...    xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="workbenchName"]//a[text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
     ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 
@@ -386,20 +386,20 @@ Permissions Tab Should Not Be Accessible
 Wait Until Permissions Tab Is Open
     [Documentation]    Wait until "Permissions" tab is rendered
     Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element    id:user-permission-User
+    ...    Wait Until Page Contains Element    id:permissions
 
-Wait Until Components Tab Is Open
-    [Documentation]    Wait until "Components" tab is rendered
+Wait Until Overview Tab Is Open
+    [Documentation]    Wait until "Overview" tab is rendered
     Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element    id:workbenches-title
+    ...    Wait Until Page Contains Element    id:overview
 
-Components Tab Should Be Accessible
-    [Documentation]    Verify user can access the "Permissions" tab of a DS project
+Overview Tab Should Be Accessible
+    [Documentation]    Verify user can access the "Overview" tab of a DS project
     Run Keyword And Continue On Failure
     ...    Page Should Contain Element
-    ...    xpath://span[text()="Components"]
-    Move To Tab    tab_title=Components
-    Wait Until Components Tab Is Open
+    ...    xpath://span[text()="Overview"]
+    Move To Tab    tab_title=Overview
+    Wait Until Overview Tab Is Open
 
 Move To Tab
     [Documentation]    Open one of the tabs in a DS Project details page (e.g., Permissions)

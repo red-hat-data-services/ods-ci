@@ -23,7 +23,7 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 @{SEARCH_METRICS}=    tgi_    istio_
 ${USE_GPU}=    ${FALSE}
 
-  
+
 *** Test Cases ***
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
@@ -42,7 +42,8 @@ Verify User Can Serve And Query A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
@@ -87,14 +88,16 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_one_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ...    process_alias=llm-one
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=5    namespace=${test_namespace}     port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=5    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_two_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ...    process_alias=llm-two
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=10    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
@@ -136,12 +139,14 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    namespace=singlemodel-multi1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=singlemodel-multi1    model_name=${model_one_name}
+    ${pod_name}=  Get Pod Name    namespace=singlemodel-multi1    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ...    process_alias=llm-one
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi1    port_forwarding=${IS_KSERVE_RAW}
     IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=singlemodel-multi2    model_name=${model_two_name}
+    ${pod_name}=  Get Pod Name    namespace=singlemodel-multi2    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ...    process_alias=llm-two
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi2    port_forwarding=${IS_KSERVE_RAW}
@@ -230,7 +235,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model.
     ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
-    ...                When running on GPUs, it requires 3 GPUs           
+    ...                When running on GPUs, it requires 3 GPUs
     [Tags]    Tier1    ODS-2376
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
@@ -246,7 +251,8 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_replicas=1
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
@@ -344,7 +350,8 @@ Verify User Can Set Requests And Limits For A Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
     ${label_selector}=    Get Model Pod Label Selector    model_name=${flan_model_name}
@@ -394,7 +401,8 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
     Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=10
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=5
@@ -427,7 +435,8 @@ Verify Non Admin Can Serve And Query A Model
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
@@ -456,7 +465,8 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=1    port_forwarding=${IS_KSERVE_RAW}
@@ -485,7 +495,8 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}    port_forwarding=${IS_KSERVE_RAW}
@@ -517,7 +528,8 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    model_name=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
@@ -560,7 +572,7 @@ Verify User Can Access Model Metrics From UWM
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    
+    ...    namespace=${test_namespace}
     Wait Until Keyword Succeeds    30 times    4s
     ...    Metrics Should Exist In UserWorkloadMonitoring
     ...    thanos_url=${thanos_url}    thanos_token=${token}

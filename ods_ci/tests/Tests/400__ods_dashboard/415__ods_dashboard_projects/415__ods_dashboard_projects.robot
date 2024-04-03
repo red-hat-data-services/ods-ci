@@ -179,6 +179,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     #SeleniumLibrary.Reload Page
     #Wait Until Project Is Open    project_title=${PRJ_TITLE}
     ${connected_woksps}=    Create List    ${WORKBENCH_3_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=cluster-storages
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${connected_woksps}
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
@@ -487,11 +488,10 @@ Verify Users Can Start, Stop, Launch And Delete A Workbench
 Verify Users Can Start, Stop And Launch A Workbench From DS Projects Home Page
     [Tags]     Smoke    Sanity    Tier1
     ...        ODS-1818    ODS-1823
+    ...        ProductBug    RHOAIENG-5084
     [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
     [Setup]        Run Keywords
     ...    Launch Data Science Project Main Page
-    ...    AND
-    ...    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     ...    AND
     ...    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small

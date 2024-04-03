@@ -226,3 +226,29 @@ Check For Errors On Operator Logs
     ${length}         Get Length   ${entry_msg}
     IF   ${length} != ${0}    FAIL    Check logs, there are some ERROR entries present. 
     ...    ELSE    Log    message=No ERROR logs found on Pod.    level=INFO
+
+Is Resource Present
+    [Documentation]    Check If Resource Is Present In Namespace
+    [Arguments]    ${resource}    ${resource_name}    ${namespace}    ${expected_result}
+    ${rc}=    Run And Return Rc
+    ...    oc get ${resource} ${resource_name} -n ${namespace}
+    Should Be Equal    "${rc}"    "${expected_result}"    msg=${resource} does not exist in ${namespace}
+
+Create Namespace In Openshift
+    [Documentation]    Create a new namespace if it does not already exist
+    [Arguments]    ${namespace}
+    ${rc}   ${output}=    Run And Return Rc And Output    oc get project ${namespace}
+    IF    ${rc} != 0
+        ${rc}=     Run And Return Rc    oc new-project ${namespace}
+        Should Be Equal    "${rc}"    "0"   msg=${output}
+    END
+
+Delete Namespace From Openshift
+    [Documentation]    Delete namespace from opneshift if it exists
+    [Arguments]    ${namespace}
+    ${rc}   ${output}=    Run And Return Rc And Output    oc get project ${namespace}
+    IF    ${rc} == 0
+        ${rc}   ${output}=    Run And Return Rc And Output    oc delete project ${namespace}
+        Should Be Equal    "${rc}"    "0"   msg=${output}
+    END
+

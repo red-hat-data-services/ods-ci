@@ -62,6 +62,7 @@ Deprovision Cluster
     ...    Log    Cluster Claim ${claim_name} does not exists. Deleting Configuration   console=True
     IF    ${cluster_deprovision} == False
     ...    Log    Cluster ${cluster_name} has not been deleted. Please do it manually   console=True
+    ...    level=ERROR
     Log    Cluster ${cluster_name} has been deprovisioned    console=True
 
 Unclaim Cluster

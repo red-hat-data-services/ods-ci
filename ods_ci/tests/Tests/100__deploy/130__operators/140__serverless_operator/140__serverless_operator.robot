@@ -33,7 +33,7 @@ Validate DSC creates all Serverless CRs
     ${pod_names}=    Get Pod Names    ${KNATIVESERVING_NS}    app.kubernetes.io/component=controller
     Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
     ${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${LABEL_SELECTOR}
-    Check For Errors On Pod Logs    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
+    Verify Pod Logs Do Not Contain    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
     Read DSC Conditions    ${KNATIVESERVING_NS}    default-dsc
 
 

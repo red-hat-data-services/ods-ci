@@ -216,10 +216,10 @@ Resource Status Should Be
     Log    ${status}    console=True
     Should Be Equal    ${status}    ${expected_status}   msg=${resource} is not in Ready status
 
-Check For Errors On Pod Logs
+Verify Pod Logs Do Not Contain
     [Documentation]    Checks there are no errors on Pod Logs
-    [Arguments]    ${operator_name}    ${operator_namespace}    ${regex_pattern}    ${container}
-    ${pod_logs}=    Oc Get Pod Logs  name=${operator_name}  namespace=${operator_namespace}  container=${container}
+    [Arguments]    ${pod_name}    ${pod_namespace}    ${regex_pattern}    ${container}
+    ${pod_logs}=    Oc Get Pod Logs  name=${pod_name}  namespace=${pod_namespace}  container=${container}
     ${match_list} 	 Get Regexp Matches   ${pod_logs}     ${regex_pattern}
     ${entry_msg}      Remove Duplicates      ${match_list}
     ${length}         Get Length   ${entry_msg}

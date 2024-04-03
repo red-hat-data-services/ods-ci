@@ -86,6 +86,8 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    ...    namespace=${test_namespace}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ...    process_alias=llm-one

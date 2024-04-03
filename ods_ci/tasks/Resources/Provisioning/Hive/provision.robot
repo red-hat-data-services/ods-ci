@@ -185,14 +185,14 @@ Watch Hive Install Log
 
 Wait For Cluster To Be Ready
     IF    ${use_cluster_pool}
-        Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
         ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
         Set Task Variable    ${pool_namespace}
         Set Task Variable    ${clusterdeployment_name}    ${pool_namespace}
+        Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
     ELSE
-        Log    Watching Hive ClusterDeployment namespace: ${pool_namespace}    console=True
         Set Task Variable    ${pool_namespace}    ${hive_namespace}
         Set Task Variable    ${clusterdeployment_name}    ${cluster_name}
+        Log    Watching Hive ClusterDeployment namespace: ${pool_namespace}    console=True
     END
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
@@ -209,7 +209,7 @@ Wait For Cluster To Be Ready
         ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
     ELSE
         ${custer_status} =    Run Process
-        ...    oc -n ${hive_namespace} wait --for\=condition\=Running\=True clusterdeployment ${clusterdeployment_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+        ...    oc -n ${hive_namespace} wait --for\=condition\=Ready\=True clusterdeployment ${clusterdeployment_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
     END
     # Workaround for old Hive with Openstack - Cluster is displayed as Resuming even when it is Running
     # add also support to the new Hive where the Cluster is displayed as Running

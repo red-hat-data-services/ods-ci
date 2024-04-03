@@ -71,11 +71,3 @@ Set ClusterPool Variables
         # use ClusterPool as default option
         Set Task Variable    ${use_cluster_pool}    ${TRUE}
     END
-    IF    ${use_cluster_pool}
-        ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-        Set Task Variable    ${pool_namespace}
-        Set Task Variable    ${clusterdeployment_name}    ${pool_namespace}
-    ELSE
-        Set Task Variable    ${pool_namespace}    ${hive_namespace}
-        Set Task Variable    ${clusterdeployment_name}    ${cluster_name}
-    END

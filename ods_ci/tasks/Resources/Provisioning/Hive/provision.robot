@@ -186,8 +186,13 @@ Watch Hive Install Log
 Wait For Cluster To Be Ready
     IF    ${use_cluster_pool}
         Log    Watching Hive Pool namespace: ${pool_namespace}    console=True
+        ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
+        Set Task Variable    ${pool_namespace}
+        Set Task Variable    ${clusterdeployment_name}    ${pool_namespace}
     ELSE
         Log    Watching Hive ClusterDeployment namespace: ${pool_namespace}    console=True
+        Set Task Variable    ${pool_namespace}    ${hive_namespace}
+        Set Task Variable    ${clusterdeployment_name}    ${cluster_name}
     END
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
@@ -204,7 +209,7 @@ Wait For Cluster To Be Ready
         ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
     ELSE
         ${custer_status} =    Run Process
-        ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterdeployment ${clusterdeployment_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+        ...    oc -n ${hive_namespace} wait --for\=condition\=Running\=True clusterdeployment ${clusterdeployment_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
     END
     # Workaround for old Hive with Openstack - Cluster is displayed as Resuming even when it is Running
     # add also support to the new Hive where the Cluster is displayed as Running
@@ -212,10 +217,10 @@ Wait For Cluster To Be Ready
         ${custer_status} =    Run Process
         ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and (.reason\=\="Resuming" or .reason\=\="Running"))' --exit-status    shell=yes
     END
-    IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${claim_status.rc} != 0
+    IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${custer_status.rc} != 0
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes
         ${custer_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
-        Log    Cluster '${cluster_name}' deployment had errors, see: ${\n}${provision_status.stdout}${\n}${claim_status.stdout}    level=ERROR    # robocop: disable:line-too-long
+        Log    Cluster '${cluster_name}' deployment had errors, see: ${\n}${provision_status.stdout}${\n}${custer_status.stdout}    level=ERROR    # robocop: disable:line-too-long
         Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources now
         ...    console=True
         Deprovision Cluster

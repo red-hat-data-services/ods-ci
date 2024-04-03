@@ -1,7 +1,8 @@
 *** Settings ***
 Documentation    Test Cases to verify Trusted CA Bundle support
 Library    Collections
-Resource    ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource       ../../../../Resources/OCP.resource
+Resource       ../../../../Resources/ODS.robot
 Suite Setup    Suite Setup
 Suite Teardown    Suite Teardown
 
@@ -87,20 +88,6 @@ Restore DSCI Trusted CA Bundle Settings
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}   ''    ${OPERATOR_NS}
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
 
-Wait Until Operator Ready
-    [Documentation]    Checks if operator is available/ready
-    [Arguments]    ${operator_name}    ${namespace}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc wait --timeout=2m --for condition=available -n ${namespace} deploy/${operator_name}
-    Should Be Equal    "${rc}"    "0"    msg=${output}
-
-Is Resource Present
-    [Documentation]    Check if resource is present in namespace
-    [Arguments]       ${resource}     ${resource_name}    ${namespace}    ${expected_result}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...  oc get ${resource} ${resource_name} -n ${namespace}
-    Should Be Equal    "${rc}"    "${expected_result}"    msg=${output}
-
 Is CA Bundle Value Present
     [Documentation]    Check if the ConfigtMap contains Custom CA Bundle value
     [Arguments]    ${config_map}    ${custom_ca_bundle_value}    ${namespace}        ${expected_result}
@@ -108,34 +95,12 @@ Is CA Bundle Value Present
     ...    oc get configmap ${config_map} -n ${namespace} -o yaml | grep ${custom_ca_bundle_value}
     Should Be Equal    "${rc}"    "${expected_result}"    msg=${output}
 
-Wait For DSCI Ready State
-    [Documentation]    Checks that DSCI reconciled succesfully
-    [Arguments]    ${dsci}    ${namespace}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc wait --timeout=3m --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsci ${dsci}
-    Should Be Equal    "${rc}"    "0"     msg=${output}
-
 Check ConfigMap Contains CA Bundle Key
     [Documentation]    Checks that ConfigMap contains CA Bundle
     [Arguments]    ${config_map}    ${ca_bundle_name}    ${namespace}
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc get configmap ${config_map} -n ${namespace} -o yaml | grep ${ca_bundle_name}
     Should Be Equal    "${rc}"    "0"     msg=${output}
-
-Create Namespace In Openshift
-    [Documentation]    Create a new namespace if it does not already exist
-    [Arguments]    ${namespace}
-    ${rc}   ${output}=    Run And Return Rc And Output    oc get project ${namespace}
-    IF    ${rc} != 0
-        ${rc}=     Run And Return Rc    oc new-project ${namespace}
-        Should Be Equal    "${rc}"    "0"   msg=${output}
-    END
-
-Delete Namespace From Openshift
-    [Documentation]    Delete namespace from opneshift
-    [Arguments]    ${namespace}
-    ${rc}   ${output}=    Run And Return Rc And Output    oc delete project ${namespace}
-    Should Be Equal    "${rc}"    "0"   msg=${output}
 
 Set Custom CA Bundle Value In DSCI
     [Documentation]    Set Custom CA Bundle value in DSCI

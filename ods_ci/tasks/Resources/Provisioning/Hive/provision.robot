@@ -158,9 +158,15 @@ Watch Hive Install Log
     WHILE   True    limit=${hive_timeout}    on_limit_message=Hive Install ${hive_timeout} Timeout Exceeded    # robotcode: ignore
         ${old_log_data} = 	Get File 	${install_log_file}
         ${last_line_index} =    Get Line Count    ${old_log_data}
-        ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
+        IF    ${use_cluster_pool}
+            ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
+        ELSE
+            ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
+            ...    label_selector=hive.openshift.io/cluster-deployment-name=${cluster_name}
+        END
+        ${podname}=    Set Variable    ${pod[0]['metadata']['name']}
         TRY
-            ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=hive    namespace=${namespace}
+            ${new_log_data} =    Oc Get Pod Logs    name=${podname}    container=hive    namespace=${namespace}
         EXCEPT
             # Hive container (OCP installer log) is not ready yet
             Log To Console    .    no_newline=true

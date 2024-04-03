@@ -388,7 +388,8 @@ Compile Deploy And Query LLM model
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${namespace}    model_name=${model_name}
+    ${pod_name}=  Get POD Names    namespace=${namespace}    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${namespace}    pod_name=${pod_name}
     Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
     ...    n_times=${n_queries}    namespace=${namespace}    query_idx=${query_idx}
     ...    validate_response=${validate_response}    protocol=${protocol}

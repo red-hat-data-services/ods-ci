@@ -158,7 +158,7 @@ Launch RHODS Dashboard Session And Create A DS Project With User B
     Create Data Science Project    title=${PRJ_USER_B_TITLE}
     ...    description=${PRJ_DESCRIPTION}
     Permissions Tab Should Be Accessible
-    Components Tab Should Be Accessible
+    Overview Tab Should Be Accessible
 
 Launch RHODS Dashboard Session With User C
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_C_TITLE}
@@ -169,7 +169,7 @@ Launch RHODS Dashboard Session With User C
     Create Data Science Project    title=${PRJ_USER_C_TITLE}
     ...    description=${PRJ_DESCRIPTION}
     Permissions Tab Should Be Accessible
-    Components Tab Should Be Accessible
+    Overview Tab Should Be Accessible
 
 Set User Groups For Testing
     Create Group    ${USER_GROUP_1}
@@ -259,7 +259,7 @@ ${username} Should Have Admin Access To ${project_title}
     Wait Until Project Is Listed    project_title=${project_title}
     Open Data Science Project Details Page    ${project_title}    tab_id=permissions
     Permissions Tab Should Be Accessible
-    Components Tab Should Be Accessible
+    Overview Tab Should Be Accessible
 
 ${username} Should Not Have Access To ${project_title}
     Switch To User    ${username}

@@ -223,8 +223,8 @@ Verify Pod Logs Do Not Contain
     ${match_list} 	 Get Regexp Matches   ${pod_logs}     ${regex_pattern}
     ${entry_msg}      Remove Duplicates      ${match_list}
     ${length}         Get Length   ${entry_msg}
-    IF   ${length} != ${0}    FAIL    Check logs, there are some ERROR entries present. 
-    ...    ELSE    Log    message=No ERROR logs found on Pod.    level=INFO
+    IF   ${length} != ${0}    FAIL    Pod ${pod_name} logs should not contain regexp ${regex_pattern}. Matching log entry: ${entry_msg} 
+    ...    ELSE    Log    message=Pod ${pod_name} logs does not contain regexp ${regex_pattern}    level=INFO
 
 Is Resource Present
     [Documentation]    Check If Resource Is Present In Namespace

@@ -61,8 +61,13 @@ Disconnect Self-Managed Cluster
     [Tags]    self_managed_disconnect
     Disconnect Cluster
 
+
 *** Keywords ***
 Set ClusterPool Variables
+    [Documentation]    Set the variable to instruct the task about using ClusterPool
+    ...                or ClusterDeployment provisioning type.
+    ...                You can set the value of 'use_cluster_pool' key in the infrastructure_configurations yaml file.
+    ...                By default (if the key is not set in the yaml) it uses ClusterPool
     ${key_present}=    Run Keyword And Return Status    Dictionary Should Contain Key
     ...    ${infrastructure_configurations}    use_cluster_pool
     IF    ${key_present}

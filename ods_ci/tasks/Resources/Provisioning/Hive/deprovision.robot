@@ -1,6 +1,7 @@
 *** Settings ***
-Library    OpenShiftLibrary
+Documentation    Set of keywords to handle self-managed cluster deprovisioning
 Library    OperatingSystem
+Library    OpenShiftLibrary
 
 
 *** Keywords ***
@@ -28,22 +29,22 @@ Delete Cluster Configuration
     ELSE
         ${Delete_Cluster} =    Oc Delete    kind=ClusterDeployment    name=${cluster_name}
         ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
-        ${rc}  ${out}=    Run And Return Rc And Output    oc wait --for=delete cd/${cluster_name} --timeout 120s
+        ${rc}  ${out} =    Run And Return Rc And Output    oc wait --for=delete cd/${cluster_name} --timeout 120s
         Should Be Equal As Integers    ${rc}    ${0}    ${out}
         IF    "${provider_type}" == "IBM"
             Oc Delete    kind=Secret    name=${cluster_name}-manifests    namespace=${hive_namespace}
-            ${rc}  ${srv_ids}=    Run And Return Rc And Output
+            ${rc}  ${srv_ids} =    Run And Return Rc And Output
             ...    ibmcloud iam service-ids --output json | jq -c '.[] | select(.name | contains("${cluster_name}-openshift-")) | .name' | tr -d '"'    # robocop: disabe
             Should Be Equal As Integers    ${rc}    ${0}    msg=${srv_ids}
-            ${srv_ids}=    Split To Lines    ${srv_ids}
+            ${srv_ids} =    Split To Lines    ${srv_ids}
             FOR    ${index}    ${srv}    IN ENUMERATE    @{srv_ids}
                 Log    ${index}: ${srv}
-                ${rc}  ${out}=    Run And Return Rc And Output    ibmcloud iam service-id-delete ${srv} -f
+                ${rc}  ${out} =    Run And Return Rc And Output    ibmcloud iam service-id-delete ${srv} -f
                 Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
             END
             IF    len($srv_ids) == 0
                 Log    message=no Service IDs found on IBM Cloud corresponding to ${cluster_name} cluster. Please check.
-                ...    level=WARN                
+                ...    level=WARN
             END
         END
     END
@@ -51,7 +52,7 @@ Delete Cluster Configuration
 Deprovision Cluster
     IF    ${use_cluster_pool}
         ${cluster_claim} =    Run Keyword And Return Status
-        ...    Unclaim Cluster    ${claim_name}        
+        ...    Unclaim Cluster    ${claim_name}
     ELSE
         ${cluster_claim}=    Set Variable    ${FALSE}
     END

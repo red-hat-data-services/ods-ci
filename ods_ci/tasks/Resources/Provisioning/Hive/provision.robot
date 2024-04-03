@@ -12,7 +12,8 @@ Claim Cluster
 Does ClusterName Exists
     [Arguments]    ${use_pool}=${TRUE}
     IF    ${use_pool}
-        @{clusterpoolname} =    Oc Get   kind=ClusterPool    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        @{clusterpoolname} =    Oc Get   kind=ClusterPool    namespace=${hive_namespace}
+        ...    api_version=hive.openshift.io/v1
         Log Many    @{clusterpoolname}
         Log Many    ${cluster_name}
         FOR    ${name}    IN    @{clusterpoolname}
@@ -24,7 +25,7 @@ Does ClusterName Exists
         END
         RETURN    False
     ELSE
-        ${anycluster}=    Run Keyword And Return Status
+        ${anycluster} =    Run Keyword And Return Status
         ...    Oc Get   kind=ClusterDeployment    namespace=${hive_namespace}
         ...    api_version=hive.openshift.io/v1
         IF    ${anycluster}
@@ -48,10 +49,11 @@ Get Clusters
     END
 
 Provision Cluster
+    [Documentation]    If cluster does not exist already, it selects the
+    ...                resource provisioning template based on the Cloud provider
+    ...                and starts the creationg of cloud resources
     Log    Setting cluster ${cluster_name} configuration    console=True
     Should Be True    "${hive_kubeconf}" != "${EMPTY}"
-    ${key_present}=    Run Keyword And Return Status    Dictionary Should Contain Key
-    ...    ${infrastructure_configurations}    use_cluster_pool
     ${clustername_exists} =    Does ClusterName Exists    use_pool=${use_cluster_pool}
     ${template} =    Select Provisioner Template    ${provider_type}
     IF    ${clustername_exists}    Handle Already Existing Cluster
@@ -59,13 +61,15 @@ Provision Cluster
     Create Provider Resources
 
 Handle Already Existing Cluster
+    [Documentation]    Fails if the cluster already exists. It works with both ClusterPools
+    ...                and ClusterDeployment provisioning type.
     IF    ${use_cluster_pool}
-        Log    Cluster name '${cluster_name}' already exists in Hive pool '${pool_name}' - Checking if it has a valid web-console      console=True
+        Log    Cluster name '${cluster_name}' already exists in Hive pool '${pool_name}' - Checking if it has a valid web-console      console=True    # robocop: disable:line-too-long
         ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
-        ${result} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes
+        ${result} =    Run Process    oc -n ${pool_namespace} get cd ${pool_namespace} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes    # robocop: disable:line-too-long
     ELSE
-        Log    Cluster name '${cluster_name}' already exists as Hive ClusterDeployment - Checking if it has a valid web-console      console=True
-        ${result} =    Run Process    oc -n ${hive_namespace} get cd ${cluster_name} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes        
+        Log    Cluster name '${cluster_name}' already exists as Hive ClusterDeployment - Checking if it has a valid web-console      console=True    # robocop: disable:line-too-long
+        ${result} =    Run Process    oc -n ${hive_namespace} get cd ${cluster_name} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes        # robocop: disable:line-too-long
     END
     IF    ${result.rc} != 0
         Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources    console=True
@@ -199,10 +203,10 @@ Wait For Cluster To Be Ready
     Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
     Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
     ${provision_status} =    Run Process
-    ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m
+    ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m    # robocop: disable:line-too-long
     ...    shell=yes
     ${web_access} =    Run Process
-    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status
+    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
     ...    shell=yes
     IF    ${use_cluster_pool}
         ${custer_status} =    Run Process
@@ -215,7 +219,7 @@ Wait For Cluster To Be Ready
     # add also support to the new Hive where the Cluster is displayed as Running
     IF    "${provider_type}" == "OSP"
         ${custer_status} =    Run Process
-        ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and (.reason\=\="Resuming" or .reason\=\="Running"))' --exit-status    shell=yes
+        ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and (.reason\=\="Resuming" or .reason\=\="Running"))' --exit-status    shell=yes    # robocop: disable:line-too-long
     END
     IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${custer_status.rc} != 0
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes
@@ -240,14 +244,14 @@ Save Cluster Credentials
     ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.apiURL' --exit-status
     ...    shell=yes
     Append To File     ${cluster_details}     api=${result.stdout}\n
-    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${artifacts_dir}
+    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o jsonpath\='{.spec.clusterMetadata.adminPasswordSecretRef.name}') --to\=${artifacts_dir}    # robocop: disable:line-too-long
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     ${username} = 	Get File 	${artifacts_dir}/username
     ${password} = 	Get File 	${artifacts_dir}/password
     Append To File     ${cluster_details}     username=${username}\n
     Append To File     ${cluster_details}     password=${password}\n
-    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}
+    ${result} =    Run Process    oc extract -n ${pool_namespace} --confirm secret/$(oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o jsonpath\='{.spec.clusterMetadata.adminKubeconfigSecretRef.name}') --to\=${artifacts_dir}    # robocop: disable:line-too-long
     ...    shell=yes
     Should Be True    ${result.rc} == 0
 
@@ -272,17 +276,21 @@ Get Cluster Pool Namespace
     RETURN    ${pool_namespace}
 
 Create IBM CredentialsRequests And Service IDs
-    ${result}=    Run Process    command=mkdir credreqs ; oc adm release extract --cloud=ibmcloud --credentials-requests ${release_image} --to=./credreqs
+    [Documentation]    Creates the credentials requests manifests and Service IDs resources
+    ...                necessary for creating IBM Cloud resources
+    ...                ref: https://github.com/openshift/cloud-credential-operator/blob/master/docs/ccoctl.md#ibmcloud
+    ${result}=    Run Process    command=mkdir credreqs ; oc adm release extract --cloud=ibmcloud --credentials-requests ${release_image} --to=./credreqs    # robocop: disable:line-too-long
     ...    shell=yes
     Should Be True    ${result.rc} == 0    msg=${result.stderr}
     Set Log Level    NONE
-    ${result}=    Run Process    command=export IC_API_KEY=${infrastructure_configurations}[ibmcloud_api_key] && ccoctl ibmcloud create-service-id --credentials-requests-dir ./credreqs --name ${cluster_name}
+    ${result}=    Run Process    command=export IC_API_KEY=${infrastructure_configurations}[ibmcloud_api_key] && ccoctl ibmcloud create-service-id --credentials-requests-dir ./credreqs --name ${cluster_name}    # robocop: disable:line-too-long
     ...    shell=yes
     Set Log Level    INFO
     Should Be True    ${result.rc} == 0    msg=${result.stderr}
 
 Create IBM Manifests Secret
-    ${result}=    Run Process    command=oc create secret generic ${cluster_name}-manifests -n ${hive_namespace} --from-file=./manifests
+    [Documentation]    Creates Secrets in hive containing the CredentialsRequests manifests
+    ${result}=    Run Process    command=oc create secret generic ${cluster_name}-manifests -n ${hive_namespace} --from-file=./manifests    # robocop: disable:line-too-long
     ...    shell=yes
     Log    ${result.stderr}
     Should Be True    ${result.rc} == 0    msg=${result.stderr}

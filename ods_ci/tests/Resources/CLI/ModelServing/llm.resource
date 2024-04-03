@@ -755,8 +755,8 @@ Get KServe Default Deployment Mode From DSC
     RETURN    ${mode}
 
 Start Port-forwarding
-    [Arguments]    ${namespace}    ${model_name}    ${process_alias}=llm-query-process
-    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
+    [Arguments]    ${namespace}    ${pod_name}    ${process_alias}=llm-query-process
+    ${process}=    Start Process    oc -n ${namespace} port-forward pod/${pod_name} 8033:8033
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  7s

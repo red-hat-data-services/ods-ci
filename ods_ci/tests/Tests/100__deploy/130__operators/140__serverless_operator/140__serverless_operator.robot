@@ -10,12 +10,10 @@ Suite Teardown   Suite Teardown
 
 
 *** Variables ***
-${SERVERLESS_APPNAME}  Red Hat OpenShift Serverless
-${SERVERLESS_OPERATOR_NAME}    Red Hat OpenShift Serverless
 ${KNATIVESERVING_NS}    knative-serving
 ${ISTIO_NS}     istio-system
 ${regex_pattern}       ERROR
-
+${LABEL_SELECTOR}    name=rhods-operator
 
 *** Test Cases ***
 Validate DSC creates all Serverless CRs
@@ -24,8 +22,6 @@ Validate DSC creates all Serverless CRs
     ...    ProductBug: RHOAIENG-4358
     [Tags]  Operator    ODS-2600    ProductBug
     Assign Vars According To Product    ${PRODUCT}
-    Check And Install Operator in Openshift    ${SERVERLESS_APPNAME}    ${SERVERLESS_OPERATOR_NAME}
-    Check And Install Operator in Openshift    ${OPERATOR_APPNAME}    ${OPERATOR_NAME}
     Resource Should Exist     KnativeServing    knative-serving     ${KNATIVESERVING_NS}
     Resource Status Should Be     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
     Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
@@ -36,8 +32,8 @@ Validate DSC creates all Serverless CRs
     ...    label_selector=app.kubernetes.io/component=controller    timeout=120
     ${pod_names}=    Get Pod Names    ${KNATIVESERVING_NS}    app.kubernetes.io/component=controller
     Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
-    ${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    label_selector=name=rhods-operator
-    Check For Errors On Operator Logs    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}
+    ${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${LABEL_SELECTOR}
+    Check For Errors On Pod Logs    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
     Read DSC Conditions    ${KNATIVESERVING_NS}    default-dsc
 
 
@@ -54,11 +50,11 @@ Suite Teardown
 
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
-    [Arguments]    ${product}
-    IF    "${product}" == "RHODS"
+    [Arguments]    ${PRODUCT}
+    IF    "${PRODUCT}" == "RHODS"
         Set Suite Variable    ${OPERATOR_APPNAME}     Red Hat OpenShift AI
         Set Suite Variable    ${OPERATOR_NAME}    Red Hat OpenShift AI
-    ELSE IF    "${product}" == "ODH"
+    ELSE IF    "${PRODUCT}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  Open Data Hub Operator
         Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator
     END

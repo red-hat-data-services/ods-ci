@@ -34,7 +34,7 @@ Validate DSC creates all Serverless CRs
     Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
     ${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${LABEL_SELECTOR}
     Verify Pod Logs Do Not Contain    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
-    Read DSC Conditions    ${KNATIVESERVING_NS}    default-dsc
+    Wait For DSC Conditions Reconciled    ${KNATIVESERVING_NS}    default-dsc
 
 
 *** Keywords ***
@@ -59,10 +59,10 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator
     END
 
-Read DSC Conditions
-    [Documentation]    Reads all DSC conditions
+Wait For DSC Conditions Reconciled
+    [Documentation]    Checks all DSC conditions to be successfully reconciled
     [Arguments]    ${namespace}    ${dsc_name}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get DataScienceCluster ${dsc_name} -n ${namespace} -o jsonpath='{.status.conditions[].reason}'
+    ...    oc wait --timeout=3m --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsc ${dsc_name}    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
     Log    ${out}    console=${out}

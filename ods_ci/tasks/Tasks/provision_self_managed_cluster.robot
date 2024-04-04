@@ -1,5 +1,8 @@
 *** Settings ***
-Documentation    Provision Self-Managed clusters for testing Beta
+Documentation    Provision Self-Managed clusters for testing. The cluster provisioning
+...              currently leverages on Hive ClusterPool for AWS, GCP and OpenStack (PSI).
+...              For IBM Cloud it leverages on Hive ClusterDeployment since Pools are not currently
+...              supported for this provider in Hive.
 Metadata         provision
 Resource         ../../tests/Resources/Common.robot
 Resource         ../Resources/Provisioning/Hive/provision.robot

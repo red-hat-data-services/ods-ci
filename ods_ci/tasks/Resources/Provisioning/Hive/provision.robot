@@ -72,12 +72,12 @@ Handle Already Existing Cluster
         ${result} =    Run Process    oc -n ${hive_namespace} get cd ${cluster_name} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes        # robocop: disable:line-too-long
     END
     IF    ${result.rc} != 0
-        Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources    console=True
+        Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources
+        ...    console=True
         Delete Cluster Configuration
     ELSE
         FAIL    Cluster '${cluster_name}' is already in use, please choose a different name.
     END
-
 
 Create Provider Resources
     Log    Creating Hive resources for cluster ${cluster_name} on ${provider_type} according to: ${template}   console=True
@@ -227,7 +227,7 @@ Wait For Cluster To Be Ready
         ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and (.reason\=\="Resuming" or .reason\=\="Running"))' --exit-status    shell=yes    # robocop: disable:line-too-long
     END
     IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${custer_status.rc} != 0
-        ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes
+        ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes    # robocop: disable:line-too-long
         ${custer_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
         Log    Cluster '${cluster_name}' deployment had errors, see: ${\n}${provision_status.stdout}${\n}${custer_status.stdout}    level=ERROR    # robocop: disable:line-too-long
         Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources now
@@ -240,7 +240,7 @@ Wait For Cluster To Be Ready
 Save Cluster Credentials
     Set Task Variable    ${cluster_details}    ${artifacts_dir}/${cluster_name}_details.txt
     ${result} =    Run Process
-    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status
+    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
     ...    shell=yes
     Should Be True    ${result.rc} == 0
     ...    Hive Cluster deployment '${clusterdeployment_name}' does not have a valid webConsoleURL access

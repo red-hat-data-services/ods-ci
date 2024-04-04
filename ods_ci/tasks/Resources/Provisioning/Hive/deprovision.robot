@@ -34,7 +34,7 @@ Delete Cluster Configuration
         IF    "${provider_type}" == "IBM"
             Oc Delete    kind=Secret    name=${cluster_name}-manifests    namespace=${hive_namespace}
             ${rc}  ${srv_ids} =    Run And Return Rc And Output
-            ...    ibmcloud iam service-ids --output json | jq -c '.[] | select(.name | contains("${cluster_name}-openshift-")) | .name' | tr -d '"'    # robocop: disabe
+            ...    ibmcloud iam service-ids --output json | jq -c '.[] | select(.name | contains("${cluster_name}-openshift-")) | .name' | tr -d '"'    # robocop: disable:line-too-long
             Should Be Equal As Integers    ${rc}    ${0}    msg=${srv_ids}
             ${srv_ids} =    Split To Lines    ${srv_ids}
             FOR    ${index}    ${srv}    IN ENUMERATE    @{srv_ids}
@@ -54,7 +54,7 @@ Deprovision Cluster
         ${cluster_claim} =    Run Keyword And Return Status
         ...    Unclaim Cluster    ${claim_name}
     ELSE
-        ${cluster_claim}=    Set Variable    ${FALSE}
+        ${cluster_claim} =    Set Variable    ${FALSE}
     END
     ${cluster_deprovision} =    Run Keyword And Return Status
     ...    Delete Cluster Configuration

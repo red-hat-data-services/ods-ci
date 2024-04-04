@@ -21,7 +21,7 @@ Additional arguments for container build
 * OC_VERSION (default: 4.13): version of OC CLI to download
 * OC_CHANNEL (default: stable): release channel to download OC CLI from,e.g, latest, candidate, etc
 ```bash
-podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
+podman build -t ods-ci:main -f ods_ci/build/Dockerfile .
              --build-arg OC_CHANNEL=latest
              --build-arg OC_VERSION=4.12
 ```

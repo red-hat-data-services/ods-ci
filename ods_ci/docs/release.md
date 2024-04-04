@@ -6,8 +6,8 @@ As an example, for RHODS release 1.21.0-21 we would create a branch releases/1.2
     Use the main repo instead of a fork
     1. git clone https://github.com/red-hat-data-services/ods-ci
 
-        In case you had the repo already cloned, remember to pull new changes from master
-        1. git checkout master
+        In case you had the repo already cloned, remember to pull new changes from main
+        1. git checkout main
         2. git pull
 
     Remove “stable” tag from local and remote

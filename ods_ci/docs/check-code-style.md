@@ -38,7 +38,7 @@ Robocop is a tool that performs static code analysis of Robot Framework code.
   ```
 
 - Excluding robocop rules:
-  - In the [.robocop](https://github.com/red-hat-data-services/ods-ci/blob/master/.robocop) configuration file you can see the rules we have already disabled.
+  - In the [.robocop](https://github.com/red-hat-data-services/ods-ci/blob/main/.robocop) configuration file you can see the rules we have already disabled.
   -  You can disable a rule for a particular line of code adding a comment like this (more examples [here](https://robocop.readthedocs.io/en/stable/including_rules.html#ignore-rule-from-source-code)):
      ```
      Some Keyword  # robocop: disable
@@ -47,7 +47,7 @@ Robocop is a tool that performs static code analysis of Robot Framework code.
 
  # Automatically format the code using Robotidy
 
- Robotidy is a tool for auto formatting Robot Framework code. It runs various [transformers](https://robotidy.readthedocs.io/en/latest/transformers/index.html) to format the code. Transformers are enabled and configured in the [robotidy.toml](https://github.com/red-hat-data-services/ods-ci/blob/master/robotidy.toml) config file at the root folder.
+ Robotidy is a tool for auto formatting Robot Framework code. It runs various [transformers](https://robotidy.readthedocs.io/en/latest/transformers/index.html) to format the code. Transformers are enabled and configured in the [robotidy.toml](https://github.com/red-hat-data-services/ods-ci/blob/main/ods_ci/robotidy.toml) config file at the root folder.
 
  - Install the required libraries
     ```

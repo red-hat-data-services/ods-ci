@@ -201,6 +201,31 @@ Wait Until CRD Exists
     Wait Until Keyword Succeeds    15 times    5s
     ...    Oc Get    kind=CustomResourceDefinition    name=${crd_fullname}
 
+Resource Should Exist
+    [Documentation]    Check resource existson a namespace
+    [Arguments]       ${resource}     ${resource_name}    ${namespace}
+    ${rc}    ${out}=     Run and Return Rc And Output
+    ...  oc get ${resource} ${resource_name} -n ${namespace}
+    Should Be Equal    "${rc}"    "0"    msg=${out}
+
+Resource Status Should Be
+    [Documentation]    Check Resource Status
+    [Arguments]       ${oc_get}     ${resource}    ${expected_status}
+    ${status}=     Run
+    ...  ${oc_get}
+    Log    ${status}    console=True
+    Should Be Equal    ${status}    ${expected_status}   msg=${resource} is not in Ready status
+
+Verify Pod Logs Do Not Contain
+    [Documentation]    Checks there are no errors on Pod Logs
+    [Arguments]    ${pod_name}    ${pod_namespace}    ${regex_pattern}    ${container}
+    ${pod_logs}=    Oc Get Pod Logs  name=${pod_name}  namespace=${pod_namespace}  container=${container}
+    ${match_list} 	 Get Regexp Matches   ${pod_logs}     ${regex_pattern}
+    ${entry_msg}      Remove Duplicates      ${match_list}
+    ${length}         Get Length   ${entry_msg}
+    IF   ${length} != ${0}    FAIL    Pod ${pod_name} logs should not contain regexp ${regex_pattern}. Matching log entry: ${entry_msg} 
+    ...    ELSE    Log    message=Pod ${pod_name} logs does not contain regexp ${regex_pattern}    level=INFO
+
 Is Resource Present
     [Documentation]    Check If Resource Is Present In Namespace
     [Arguments]    ${resource}    ${resource_name}    ${namespace}    ${expected_result}
@@ -225,3 +250,4 @@ Delete Namespace From Openshift
         ${rc}   ${output}=    Run And Return Rc And Output    oc delete project ${namespace}
         Should Be Equal    "${rc}"    "0"   msg=${output}
     END
+

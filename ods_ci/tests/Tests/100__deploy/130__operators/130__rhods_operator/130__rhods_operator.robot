@@ -21,7 +21,7 @@ Verify RHODS operator information
   [Tags]  ODS-498   ODS-624   Sanity   ProductBug    Tier1
   Open Installed Operators Page
   #Select All Projects
-  Wait Until Keyword Succeeds    10 times  5s    Click On Searched Operator      Red Hat OpenShift Data Science   #robocop: disable
+  Wait Until Keyword Succeeds    10 times  5s    Click On Searched Operator      Red Hat OpenShift AI   #robocop: disable
   ${link_elements}=  Get WebElements    xpath=//*[@class="co-clusterserviceversion-details__field"]//a
   #Temporary List to hold the url for the verification
   ${temp_list}        Create List

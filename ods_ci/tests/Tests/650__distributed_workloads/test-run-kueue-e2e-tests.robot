@@ -6,17 +6,18 @@ Library           OperatingSystem
 Library           Process
 Library           OpenShiftLibrary
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../tests/Resources/Page/OCPLogin/OCPLogin.robot
 
 
 *** Variables ***
-${KUEUE_KUBECONFIG}         %{HOME}/.kube/config
+${KUEUE_KUBECONFIG}         %{WORKSPACE=.}/kueue-kubeconfig
 ${WORKER_NODE}              ${EMPTY}
 ${KUEUE_RELEASE_ASSETS}     %{KUEUE_RELEASE_ASSETS=https://github.com/opendatahub-io/kueue/releases/latest/download}
 
 *** Test Cases ***
 Run E2E test
     [Documentation]    Run ginkgo E2E single cluster test
-    [Tags]  Tier2
+    [Tags]  Tier1
     ...     Kueue
     ...     DistributedWorkloads
     Run Kueue E2E Test    e2e_test.go
@@ -40,6 +41,9 @@ Prepare Kueue E2E Test Suite
     IF    ${result.rc} != 0
         FAIL    Unable to retrieve e2e-singlecluster compiled binary
     END
+
+    # Store login information into dedicated config
+    Login To OCP Using API And Kubeconfig    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${KUEUE_KUBECONFIG}
 
     Enable Component    kueue
     Wait Component Ready    kueue

@@ -11,9 +11,6 @@ ${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_ACCESS_
 ${S3_SECRET_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_SECRET_ACCESS_KEY"]
 ${S3_ENDPOINT_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_S3_ENDPOINT"]
 ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="AWS field AWS_DEFAULT_REGION"]
-${DC_SECTION_XP}=             xpath=//div[@id="data-connections"]
-${DC_ADD_BTN_1_XP}=           ${DC_SECTION_XP}//button[.="Add data connection"]
-${DC_ADD_BTN_2_XP}=           xpath=//footer/button[.="Add data connection"]
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="AWS field AWS_S3_BUCKET"]
 ${REPLICAS_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
 ${REPLICAS_MIN_BTN_XP}=         xpath=//div/button[@aria-label="Minus"]
@@ -33,13 +30,14 @@ Create Model Server
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0    ${existing_server}=${FALSE}
+    Move To Tab    Models
     IF    ${existing_server}
         ${existing_server}=  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
         IF  ${existing_server}    Run Keyword And Return
         ...    Log    Model Server '${server_name}' already exists, reusing server    console=True
     END
     SeleniumLibrary.Click Button    Add model server
-    Wait Until Page Contains Element    //span[.="Add model server"]
+    SeleniumLibrary.Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
     Set Replicas Number With Buttons    ${no_replicas}
     Set Model Server Runtime    ${runtime}

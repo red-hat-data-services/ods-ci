@@ -405,6 +405,7 @@ Move To Tab
     [Documentation]    Open one of the tabs in a DS Project details page (e.g., Permissions)
     [Arguments]    ${tab_title}
     Click Element    xpath://span[text()="${tab_title}"]
+    Sleep    1s    reason=The tab page needs to load content according to user permissions
 
 Create Data Science Project If Not Exists
     [Documentation]    If the given ${project_title} DS Project does not exist, it creates one.

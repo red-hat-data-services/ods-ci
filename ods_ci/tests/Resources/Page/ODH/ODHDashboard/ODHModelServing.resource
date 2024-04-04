@@ -66,10 +66,11 @@ Serve Model
     ELSE
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
+        SeleniumLibrary.Click Button    //button[@data-testid="empty-state-action-button"]
         SeleniumLibrary.Wait Until Page Contains    Deploy model
         SeleniumLibrary.Click Button    Deploy model
     END
-    Wait For Dashboard Page Title    Deploy model
+    SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
@@ -371,7 +372,6 @@ Namespace Should Be Removed From ServiceMeshMemberRoll
         ...    msg=${namespace} should have been automatically removed from SMMR
     END
 
-
 Deploy Model Via CLI
     [Documentation]    Deploys a model using Model Serving feature by applying the InfereceService
     ...                yaml via CLI. It assumes that the necessary Runtime has been already created
@@ -386,13 +386,8 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
-    ${first_deploy}=    Run Keyword And Return Status
-    ...    Page Should Contain Element    xpath=//article[@id="single-serving-platform-card"]
-    IF  ${first_deploy}
-        Click Button    //article[@id="single-serving-platform-card"]//button[.="Deploy model"]
-    ELSE
-        Click Button    //div[@id="model-server"]//button[.="Deploy model"]
-    END
+    Move To Tab    Models
+    Click Button    //button[@data-testid="single-serving-deploy-button"]
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Select Kserve Serving Runtime    ${serving_runtime}

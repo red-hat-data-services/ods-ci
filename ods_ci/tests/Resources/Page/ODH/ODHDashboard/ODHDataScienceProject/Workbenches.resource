@@ -10,6 +10,7 @@ Resource       Projects.resource
 
 ${WORKBENCH_SECTION_XP}=             xpath=//div[@data-testid="section-workbenches"]
 ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
+${WORKBENCH_TAB}=                      xpath=//button[.="Workbenches"
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
@@ -294,7 +295,6 @@ Status Error Icon Should Appear
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
     [Arguments]     ${workbench_title}    ${timeout}=60s    ${status}=${WORKBENCH_STATUS_RUNNING}
-    Click Button         ${WORKBENCH_TAB}
     Wait Until Page Contains Element        //*[@id="workbenches"]/div/table/tbody/tr[1]/td[5]/div/div/p[text()="${status}"]          timeout=${timeout}
     #...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}  # robocop: disable
 

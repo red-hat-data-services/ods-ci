@@ -18,6 +18,7 @@ ${S3_BUCKET_DC_INPUT_XP}=       xpath=//*[@data-testid="field AWS_S3_BUCKET"]
 ${S3_DC_ADD_BTN}=               xpath=//*[@data-testid="data-connection-submit-button"]
 ${S3_DC_EDIT_BTN}=              xpath=//footer/button[.="Update data connection"]
 ${DC_WORKBENCH_SELECTOR_XP}=    xpath=//ul[@aria-label="Notebook select"]/li
+${DC_TAB}=                      xpath=//button[.="Data connections"]
 
 
 
@@ -30,6 +31,8 @@ Create S3 Data Connection
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     ...            ${aws_s3_ca_bundle}=${NONE}
 
+    Click Button    ${DC_TAB}
+    Wait Until Page Contains    Add data connection
 
     Wait Until Element Is Visible     ${DC_ADD_BTN_1_XP}    timeout=30s
     Click Button                      ${DC_ADD_BTN_1_XP}

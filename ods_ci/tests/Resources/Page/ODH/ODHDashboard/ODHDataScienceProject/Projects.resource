@@ -16,6 +16,7 @@ ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
 ${SPAWNER_LINK}=        xpath=//*[text()="Launch Jupyter"]
+${Workbenches_tab}=     xpath=//button[text()="Workbenches"]
 
 *** Keywords ***
 Open Data Science Projects Home Page
@@ -42,7 +43,9 @@ Open Data Science Project Details Page
         IF    ${is_open} == ${FALSE}
             Open Data Science Projects Home Page
         END
-        Click Link    ${project_title}
+        #Click Button    //button[@role="tab" and @aria-controls="${tab_id}"]
+        #Wait Until Page Contains    ${project_title}        timeout=5s
+        #Click Link    ${project_title}
         Wait Until Project Is Open    project_title=${project_title}
     END
     IF  "${tab_id}" != "${NONE}"

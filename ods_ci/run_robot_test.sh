@@ -346,7 +346,10 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
     fi
   fi
 
-  poetry --no-interaction install --sync
+  poetry install --no-interaction --sync || {
+      echo "[ERROR] poetry environment setup failed, aborting the execution!"
+      exit 1
+  }
 fi
 # shellcheck disable=SC1091
 source "$(poetry env info --path)/bin/activate"

@@ -27,7 +27,7 @@ Validate Service Mesh State Managed
     [Tags]    Operator    Tier1    ODS-2526    ServiceMesh-Managed
 
     Is Resource Present    ServiceMeshControlPlane    ${SERVICE_MESH_CR_NAME}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
-    Check If Pod Exists    istiod    ${SERVICE_MESH_CR_NS}
+    Check If Pod Exists    ${SERVICE_MESH_CR_NS}    app=istiod    ${FALSE}
 
 Validate Service Mesh State Unmanaged
     [Documentation]    The purpose of this Test Case is to validate Service Mesh state 'Unmanaged'.

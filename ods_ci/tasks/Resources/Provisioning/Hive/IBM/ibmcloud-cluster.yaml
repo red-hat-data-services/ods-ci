@@ -75,5 +75,3 @@ items:
         name: ibmcloud-sno-install-config
       manifestsSecretRef:
         name: ${infrastructure_configurations}[hive_cluster_name]-manifests
-    # pullSecretRef:
-    #   name: ${infrastructure_configurations}[hive_cluster_name]-pull-secret

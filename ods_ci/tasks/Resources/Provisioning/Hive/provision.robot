@@ -23,7 +23,6 @@ Does ClusterName Exists
                 RETURN    ${clustername_exists}
             END
         END
-        RETURN    False
     ELSE
         ${anycluster} =    Run Keyword And Return Status
         ...    Oc Get   kind=ClusterDeployment    namespace=${hive_namespace}
@@ -31,16 +30,17 @@ Does ClusterName Exists
         IF    ${anycluster}
             ${clusterdeploymentname} =    Oc Get   kind=ClusterDeployment    namespace=${hive_namespace}
             ...    api_version=hive.openshift.io/v1    fields=['spec.clusterName']
+            ${clusterdeploymentname}=    Set Variable    ${clusterdeploymentname}[0][spec.clusterName]
             Log    ${clusterdeploymentname}
             Log    ${cluster_name}
             IF    "${clusterdeploymentname}" == "${cluster_name}"
-                RETURN    ${clusterdeploymentname}
+                RETURN    True
             END
         ELSE
             Log    message=No ClusterDeployment found in ${hive_namespace}.
         END
-        RETURN    False
     END
+    RETURN    False
 
 Get Clusters
     @{clusters} =    Oc Get    kind=ClusterClaim    namespace=${hive_namespace}

@@ -26,6 +26,7 @@ ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
 
 
 *** Keywords ***
@@ -53,6 +54,7 @@ Serve Model
     ...    Can update existing Model, and use existing Connection.
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test    ${existing_model}=${FALSE}
+    ...    ${serving_runtime}=${NONE}
     Open Model Serving Home Page
     Switch Model Serving Project    ${project_name}
     IF    ${existing_model}
@@ -67,13 +69,15 @@ Serve Model
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
         SeleniumLibrary.Click Button    //button[@data-testid="empty-state-action-button"]
-        SeleniumLibrary.Wait Until Page Contains    Deploy model
-        SeleniumLibrary.Click Button    Deploy model
+        Maybe Wait For Dashboard Loading Spinner Page
+        SeleniumLibrary.Wait Until Element Is Enabled    ${DEPLOY_MODEL_BTN}
+        SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     END
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
+    IF    "${serving_runtime}" != "${NONE}"    Select Kserve Serving Runtime    ${serving_runtime}
     SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
     IF    ${existing_data_connection}==${TRUE}
@@ -387,7 +391,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
     Move To Tab    Models
-    Click Button    //button[@data-testid="single-serving-deploy-button"]
+    Click Button    ${DEPLOY_MODEL_BTN}
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Select Kserve Serving Runtime    ${serving_runtime}

@@ -18,7 +18,7 @@ ${PIPELINE_TEST_NAME}=    ${PIPELINE_TEST_BASENAME}-${TEST_USER_3.USERNAME}
 ${DC_NAME}=    ds-pipeline-conn
 ${PIPELINE_TEST_BASENAME}=    iris
 ${PIPELINE_TEST_DESC}=    test pipeline definition
-${PIPELINE_TEST_FILEPATH}=    ods_ci/tests/Resources/Files/pipeline-samples/v2/iris_pipeline.yaml
+${PIPELINE_TEST_FILEPATH}=    ods_ci/tests/Resources/Files/pipeline-samples/v2/iris_pipeline_compiled.yaml
 ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 
 
@@ -56,7 +56,6 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}
     ...    pipeline_name=${PIPELINE_TEST_NAME}    run_type=Immediate
     ...    press_cancel=${TRUE}
-    # FIXME: remove workaround for hardcoded iris-pipeline parameters (related to RHOAIENG-4738)
     # Create run
     Open Data Science Project Details Page    ${PRJ_TITLE}    tab_id=pipelines-projects
     ${workflow_name}=    Create Pipeline Run    name=${PIPELINE_TEST_RUN_BASENAME}

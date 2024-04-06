@@ -1,0 +1,211 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: version-test-pipeline
+  annotations:
+    tekton.dev/output_artifacts: '{"print-message": [{"key": "artifacts/$PIPELINERUN/print-message/Output.tgz",
+      "name": "print-message-Output", "path": "/tmp/outputs/Output/data"}], "print-message-2":
+      [{"key": "artifacts/$PIPELINERUN/print-message-2/Output.tgz", "name": "print-message-2-Output",
+      "path": "/tmp/outputs/Output/data"}]}'
+    tekton.dev/input_artifacts: '{"print-message-2": [{"name": "print-message-Output",
+      "parent_task": "print-message"}], "print-message-3": [{"name": "print-message-2-Output",
+      "parent_task": "print-message-2"}]}'
+    tekton.dev/artifact_bucket: mlpipeline
+    tekton.dev/artifact_endpoint: minio-service.kubeflow:9000
+    tekton.dev/artifact_endpoint_scheme: http://
+    tekton.dev/artifact_items: '{"print-message": [["Output", "$(results.Output.path)"]],
+      "print-message-2": [["Output", "$(results.Output.path)"]], "print-message-3":
+      []}'
+    sidecar.istio.io/inject: "false"
+    tekton.dev/template: ''
+    pipelines.kubeflow.org/big_data_passing_format: $(workspaces.$TASK_NAME.path)/artifacts/$ORIG_PR_NAME/$TASKRUN_NAME/$TASK_PARAM_NAME
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "Pipeline that prints a
+      hello message", "inputs": [{"default": "Hello world", "name": "message", "optional":
+      true, "type": "String"}], "name": "version-test-pipeline"}'
+  labels:
+    pipelines.kubeflow.org/pipelinename: ''
+    pipelines.kubeflow.org/generation: ''
+spec:
+  params:
+  - name: message
+    value: Hello world
+  pipelineSpec:
+    params:
+    - name: message
+      default: Hello world
+    tasks:
+    - name: print-message
+      params:
+      - name: message
+        value: $(params.message)
+      taskSpec:
+        steps:
+        - name: main
+          args:
+          - --message
+          - $(inputs.params.message)
+          - '----output-paths'
+          - $(results.Output.path)
+          command:
+          - sh
+          - -ec
+          - |
+            program_path=$(mktemp)
+            printf "%s" "$0" > "$program_path"
+            python3 -u "$program_path" "$@"
+          - |
+            def print_message(message):
+                """Prints a message"""
+                print(message)
+                return message
+
+            def _serialize_str(str_value: str) -> str:
+                if not isinstance(str_value, str):
+                    raise TypeError('Value "{}" has type "{}" instead of str.'.format(
+                        str(str_value), str(type(str_value))))
+                return str_value
+
+            import argparse
+            _parser = argparse.ArgumentParser(prog='Print message', description='Prints a message')
+            _parser.add_argument("--message", dest="message", type=str, required=True, default=argparse.SUPPRESS)
+            _parser.add_argument("----output-paths", dest="_output_paths", type=str, nargs=1)
+            _parsed_args = vars(_parser.parse_args())
+            _output_files = _parsed_args.pop("_output_paths", [])
+
+            _outputs = print_message(**_parsed_args)
+
+            _outputs = [_outputs]
+
+            _output_serializers = [
+                _serialize_str,
+
+            ]
+
+            import os
+            for idx, output_file in enumerate(_output_files):
+                try:
+                    os.makedirs(os.path.dirname(output_file))
+                except OSError:
+                    pass
+                with open(output_file, 'w') as f:
+                    f.write(_output_serializers[idx](_outputs[idx]))
+          image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        params:
+        - name: message
+        results:
+        - name: Output
+          type: string
+          description: /tmp/outputs/Output/data
+        metadata:
+          labels:
+            pipelines.kubeflow.org/cache_enabled: "true"
+          annotations:
+            pipelines.kubeflow.org/component_spec_digest: '{"name": "Print message",
+              "outputs": [{"name": "Output", "type": "String"}], "version": "Print
+              message@sha256=fc7ffc1b623e533a9816b909fb25a9e755cd17934910cb4a584db727d394a18d"}'
+    - name: print-message-2
+      params:
+      - name: print-message-Output
+        value: $(tasks.print-message.results.Output)
+      taskSpec:
+        steps:
+        - name: main
+          args:
+          - --message
+          - $(inputs.params.print-message-Output)
+          - '----output-paths'
+          - $(results.Output.path)
+          command:
+          - sh
+          - -ec
+          - |
+            program_path=$(mktemp)
+            printf "%s" "$0" > "$program_path"
+            python3 -u "$program_path" "$@"
+          - |
+            def print_message_2(message):
+                """Prints a message"""
+                print(message)
+                return message
+
+            def _serialize_str(str_value: str) -> str:
+                if not isinstance(str_value, str):
+                    raise TypeError('Value "{}" has type "{}" instead of str.'.format(
+                        str(str_value), str(type(str_value))))
+                return str_value
+
+            import argparse
+            _parser = argparse.ArgumentParser(prog='Print message 2', description='Prints a message')
+            _parser.add_argument("--message", dest="message", type=str, required=True, default=argparse.SUPPRESS)
+            _parser.add_argument("----output-paths", dest="_output_paths", type=str, nargs=1)
+            _parsed_args = vars(_parser.parse_args())
+            _output_files = _parsed_args.pop("_output_paths", [])
+
+            _outputs = print_message_2(**_parsed_args)
+
+            _outputs = [_outputs]
+
+            _output_serializers = [
+                _serialize_str,
+
+            ]
+
+            import os
+            for idx, output_file in enumerate(_output_files):
+                try:
+                    os.makedirs(os.path.dirname(output_file))
+                except OSError:
+                    pass
+                with open(output_file, 'w') as f:
+                    f.write(_output_serializers[idx](_outputs[idx]))
+          image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        params:
+        - name: print-message-Output
+        results:
+        - name: Output
+          type: string
+          description: /tmp/outputs/Output/data
+        metadata:
+          labels:
+            pipelines.kubeflow.org/cache_enabled: "true"
+          annotations:
+            pipelines.kubeflow.org/component_spec_digest: '{"name": "Print message
+              2", "outputs": [{"name": "Output", "type": "String"}], "version": "Print
+              message 2@sha256=8958b6241f037b2931ee8830253221e35070fd81c89d2e8a99606e9d4ac7486a"}'
+    - name: print-message-3
+      params:
+      - name: print-message-2-Output
+        value: $(tasks.print-message-2.results.Output)
+      taskSpec:
+        steps:
+        - name: main
+          args:
+          - --message
+          - $(inputs.params.print-message-2-Output)
+          command:
+          - sh
+          - -ec
+          - |
+            program_path=$(mktemp)
+            printf "%s" "$0" > "$program_path"
+            python3 -u "$program_path" "$@"
+          - |
+            def print_message_3(message):
+                """Prints a message"""
+                print(message)
+
+            import argparse
+            _parser = argparse.ArgumentParser(prog='Print message 3', description='Prints a message')
+            _parser.add_argument("--message", dest="message", type=str, required=True, default=argparse.SUPPRESS)
+            _parsed_args = vars(_parser.parse_args())
+
+            _outputs = print_message_3(**_parsed_args)
+          image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        params:
+        - name: print-message-2-Output
+        metadata:
+          labels:
+            pipelines.kubeflow.org/cache_enabled: "true"
+          annotations:
+            pipelines.kubeflow.org/component_spec_digest: '{"name": "Print message
+              3", "outputs": [], "version": "Print message 3@sha256=dacfe624f5773863129f61dd5a0786298e1305fd8832fe9b560efd194fc0f007"}'

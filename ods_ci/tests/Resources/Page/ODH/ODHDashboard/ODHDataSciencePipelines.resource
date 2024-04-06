@@ -55,12 +55,6 @@ Fill In Run Creation Form    # robocop: disable
     Input Text    ${PIPELINE_RUN_DESC_INPUT_XP}    ${name}
     Run Keyword And Warn On Failure    Element Should Be Disabled    ${PIPELINE_RUN_CREATE_BTN_XP}
 
-    # FIXME: temporally harcoding parameters for iris-pipeline.
-    # This is a dirty workaround for RHOAIENG-4738 (dashboard not loading default pipeline parameters)
-    Wait Until Element is Visible    //*[@data-testid="neighbors"]/*/*/*/input
-    Input Text                       //*[@data-testid="neighbors"]/*/*/*/input   3
-    Click Element                    //*[@data-testid="radio-standard_scaler-true"]
-
 #    TODO: by fix it to select latest version of ${pipeline_name}
 #    IF    "${pipeline_name}" != "${NONE}"
 #        Select Pipeline For The Run    pipeline_name=${pipeline_name}

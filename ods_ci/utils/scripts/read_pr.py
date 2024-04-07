@@ -93,6 +93,7 @@ class ReadPR:
                     tag = line.replace("...", " ").strip().replace("\n", "")
                 else:
                     started = False
+                    continue
                 if started:
                     tag = tag.strip().replace("\n", "")
                     # multiple tag in one line or a tag with comments
@@ -139,7 +140,7 @@ class ReadPR:
                 sections_info[file_name] = {}
             if section_name == self.keyword_key:
                 r = self.get_keywords(section_data)
-            sections_info[file_name][section_name] = r
+                sections_info[file_name][section_name] = r
 
     def get_keywords(self, section_data):
         keywords = []

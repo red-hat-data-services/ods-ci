@@ -362,9 +362,9 @@ Wait Until Pipeline Server Is Deployed
 
 Wait Until Pipeline Server Is Deleted
     [Documentation]    Waits until all pipeline server pods are deleted
-
+    [Arguments]    ${project_title}
     FOR  ${index}  IN RANGE  0  30
-        ${pod_count}    Run    oc get pods -n ${data_science_project_name} -l component=data-science-pipelines | wc -l
+        ${pod_count}    Run    oc get pods -n ${project_title} -l component=data-science-pipelines | wc -l
         IF  ${pod_count}==0  BREAK
         Sleep  1s
     END

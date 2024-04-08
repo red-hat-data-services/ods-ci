@@ -62,7 +62,10 @@ ignore = [
 pythonVersion = "3.11"
 pythonPlatform = "Linux"
 
+# https://docs.astral.sh/ruff/configuration
 [tool.ruff]
+include = ["pyproject.toml", "ods_ci/**/*.py"]
+exclude = ["ods_ci/tests/Resources/Files/pipeline-samples/"]
 target-version = "py311"
 line-length = 120
 

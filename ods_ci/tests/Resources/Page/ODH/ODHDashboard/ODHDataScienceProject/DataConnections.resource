@@ -11,7 +11,7 @@ ${S3_KEY_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_ACCESS
 ${S3_SECRET_DC_INPUT_XP}=       xpath=//input[@aria-label="Field list AWS_SECRET_ACCESS_KEY"]
 ${S3_ENDPOINT_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_ENDPOINT"]
 ${S3_REGION_DC_INPUT_XP}=       xpath=//input[@aria-label="Field list AWS_DEFAULT_REGION"]
-${DC_SECTION_XP}=               xpath=//div[@id="data-connections"]
+${DC_SECTION_XP}=               xpath=//section[@id="data-connections"]
 ${DC_ADD_BTN_1_XP}=             xpath=//*[@data-testid="add-data-connection-button"]
 ${S3_BUCKET_DC_INPUT_XP}=       xpath=//*[@data-testid="field AWS_S3_BUCKET"]
 ${S3_DC_ADD_BTN}=               xpath=//*[@data-testid="data-connection-submit-button"]
@@ -27,7 +27,7 @@ Create S3 Data Connection
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     ...            ${aws_s3_ca_bundle}=${NONE}
-
+    Open Data Science Project Details Page       project_title=${project_title}    tab_id=data-connections
     Wait Until Element Is Visible     ${DC_ADD_BTN_1_XP}    timeout=30s
     Click Button                      ${DC_ADD_BTN_1_XP}
     Fill Data Connection Form    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
@@ -146,7 +146,6 @@ Fill Data Connection Form
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
 
-
 Get Data Connection Form Values
     [Arguments]    ${dc_name}
     ODHDashboard.Click Action From Actions Menu    item_title=${dc_name}    item_type=data connection    action=Edit
@@ -165,6 +164,7 @@ Recreate S3 Data Connection
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     ...            ${aws_s3_ca_bundle}=${NONE}
+    Open Data Science Project Details Page       project_title=${project_title}    tab_id=data-connections
     ${is_exist}=  Run Keyword And Return Status
     ...    Wait Until Page Contains Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${dc_name}"]]
     IF  ${is_exist}

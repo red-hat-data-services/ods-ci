@@ -40,6 +40,7 @@ robotframework-robocop = "^4.1.0"
 robotframework-tidy = "^4.5.0"
 ruff = "0.3.4"
 pyright = "1.1.356"
+pre-commit = "3.7.0"
 
 [build-system]
 requires = ["poetry-core"]

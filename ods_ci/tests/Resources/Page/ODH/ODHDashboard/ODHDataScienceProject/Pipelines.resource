@@ -217,21 +217,21 @@ Pipeline Should Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}=${EMPTY}
 
     Projects.Move To Tab    Pipelines
-    ${pipeline_row_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
-    Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_row_xp}
+    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_title_xp}
 
     IF    "${pipeline_description}" != "${EMPTY}"
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
-        ...        ${pipeline_row_xp}/following-sibling::*[p[text()="${pipeline_description}"]]
+        ...        ${pipeline_title_xp}/following-sibling::*[p[text()="${pipeline_description}"]]
     END
 
 Pipeline Should Not Be Listed
     [Documentation]    Verifies a pipeline not listed in Data Science Project > Pipelines
     [Arguments]     ${pipeline_name}
     Projects.Move To Tab    Pipelines
-    ${pipeline_row_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
-    Run Keyword And Continue On Failure    Wait Until Page Does Not Contain Element    ${pipeline_row_xp}
+    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]
+    Run Keyword And Continue On Failure    Wait Until Page Does Not Contain Element    ${pipeline_title_xp}
 
 Pipeline Last Run Should Be
     [Documentation]    Checks the pipeline last run which is reported is the expected one

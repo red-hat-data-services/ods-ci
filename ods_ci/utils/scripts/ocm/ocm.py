@@ -359,7 +359,7 @@ class OpenshiftClusterManager:
         if ret is None:
             log.info(f"Failed to get {addon_name} addon state for cluster {self.cluster_name}")
             return None
-        match = re.search(addon_name + "\s*(.*)", ret)
+        match = re.search(addon_name + r"\s*(.*)", ret)
         if match is None:
             log.info("regex failed in get_addon_state")
             return None

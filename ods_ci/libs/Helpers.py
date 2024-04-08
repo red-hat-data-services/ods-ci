@@ -267,7 +267,7 @@ class Helpers:
                 )
             else:
                 response = requests.post(endpoint, headers=headers, data=data)
-        return response.status_code, response.text
+        return response.status_code, response.text  # pyright: ignore [reportPossiblyUnboundVariable]
 
     @keyword
     def process_resource_list(self, filename_in, filename_out=None):

@@ -79,7 +79,7 @@ class DataSciencePipelinesKfp:
                 break
             time.sleep(1)
             count += 1
-        return run_status
+        return run_status  # pyright: ignore [reportPossiblyUnboundVariable]
 
     @keyword
     def delete_run(self, run_id):

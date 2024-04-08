@@ -211,6 +211,8 @@ class OpenshiftClusterManager:
                     self.cluster_name,
                 )
             )
+        else:
+            raise ValueError(f"{self.cloud_provider=} is not supported.")
         ret = execute_command(cmd)
         if ret is None:
             log.error(f"Failed to create osd cluster {self.cluster_name}")

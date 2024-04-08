@@ -130,7 +130,7 @@ Delete Pipeline Server
     Click Element    //li[contains(a/text(), 'Delete pipeline server')]
     Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server
     Wait Until Page Contains     text=Configure pipeline server    timeout=120s
-    Pipelines.Wait Until Pipeline Server Is Deleted
+    Pipelines.Wait Until Pipeline Server Is Deleted    ${data_science_project_name}
 
 Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     [Documentation]    Verify me message "Error displaying Pipelines" after creating pipeline server

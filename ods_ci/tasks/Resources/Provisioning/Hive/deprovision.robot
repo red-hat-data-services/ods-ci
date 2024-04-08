@@ -1,3 +1,9 @@
+*** Settings ***
+Documentation    Set of keywords to handle self-managed cluster deprovisioning
+Library    OperatingSystem
+Library    OpenShiftLibrary
+
+
 *** Keywords ***
 Set Hive Default Variables
     ${cluster_name} =    Get Variable Value    ${cluster_name}    %{TEST_CLUSTER}
@@ -12,23 +18,51 @@ Set Hive Default Variables
     Set Suite Variable    ${hive_namespace}
 
 Delete Cluster Configuration
-    Log    Deleting cluster ${cluster_name} configuration    console=True
-    @{Delete_Cluster} =    Oc Delete    kind=ClusterPool    name=${pool_name}
-    ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
-    Log Many    @{Delete_Cluster}
-    ${Delete_Cluster} =    Oc Delete    kind=ClusterDeploymentCustomization    name=${conf_name}
-    ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
-    Log Many    @{Delete_Cluster}
+    IF    ${use_cluster_pool}
+        Log    Deleting cluster ${cluster_name} configuration    console=True
+        @{Delete_Cluster} =    Oc Delete    kind=ClusterPool    name=${pool_name}
+        ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        Log Many    @{Delete_Cluster}
+        ${Delete_Cluster} =    Oc Delete    kind=ClusterDeploymentCustomization    name=${conf_name}
+        ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        Log Many    @{Delete_Cluster}
+    ELSE
+        ${Delete_Cluster} =    Oc Delete    kind=ClusterDeployment    name=${cluster_name}
+        ...    namespace=${hive_namespace}    api_version=hive.openshift.io/v1
+        ${rc}  ${out} =    Run And Return Rc And Output    oc wait --for=delete cd/${cluster_name} --timeout 600s
+        Should Be Equal As Integers    ${rc}    ${0}    ${out}
+        IF    "${provider_type}" == "IBM"
+            Oc Delete    kind=Secret    name=${cluster_name}-manifests    namespace=${hive_namespace}
+            ${rc}  ${srv_ids} =    Run And Return Rc And Output
+            ...    ibmcloud iam service-ids --output json | jq -c '.[] | select(.name | contains("${cluster_name}-openshift-")) | .name' | tr -d '"'    # robocop: disable:line-too-long
+            Should Be Equal As Integers    ${rc}    ${0}    msg=${srv_ids}
+            ${srv_ids} =    Split To Lines    ${srv_ids}
+            FOR    ${index}    ${srv}    IN ENUMERATE    @{srv_ids}
+                Log    ${index}: ${srv}
+                ${rc}  ${out} =    Run And Return Rc And Output    ibmcloud iam service-id-delete ${srv} -f
+                Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+            END
+            IF    len($srv_ids) == 0
+                Log    message=no Service IDs found on IBM Cloud corresponding to ${cluster_name} cluster. Please check.
+                ...    level=WARN
+            END
+        END
+    END
 
 Deprovision Cluster
-    ${cluster_claim} =    Run Keyword And Return Status
-    ...    Unclaim Cluster    ${claim_name}
+    IF    ${use_cluster_pool}
+        ${cluster_claim} =    Run Keyword And Return Status
+        ...    Unclaim Cluster    ${claim_name}
+    ELSE
+        ${cluster_claim} =    Set Variable    ${FALSE}
+    END
     ${cluster_deprovision} =    Run Keyword And Return Status
     ...    Delete Cluster Configuration
-    IF    ${cluster_claim} == False
+    IF    ${use_cluster_pool} == True and ${cluster_claim} == False
     ...    Log    Cluster Claim ${claim_name} does not exists. Deleting Configuration   console=True
     IF    ${cluster_deprovision} == False
     ...    Log    Cluster ${cluster_name} has not been deleted. Please do it manually   console=True
+    ...    level=ERROR
     Log    Cluster ${cluster_name} has been deprovisioned    console=True
 
 Unclaim Cluster

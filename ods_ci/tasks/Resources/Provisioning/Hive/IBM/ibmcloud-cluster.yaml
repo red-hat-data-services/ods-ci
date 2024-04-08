@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ibmcloud-sno-install-config
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  type: Opaque
+  stringData:
+    install-config.yaml: |
+      apiVersion: v1
+      baseDomain: ${infrastructure_configurations}[base_domain]
+      credentialsMode: Manual
+      compute:
+      - name: worker
+        platform:
+          ibmcloud:
+            type: ${infrastructure_configurations}[worker_node_instance_type]
+        replicas: ${infrastructure_configurations}[worker_node_replicas]
+      controlPlane:
+        name: master
+        platform:
+          ibmcloud:
+            type: ${infrastructure_configurations}[master_node_instance_type]
+        replicas: ${infrastructure_configurations}[master_node_replicas]
+      metadata:
+        name: ${infrastructure_configurations}[hive_cluster_name]
+      networking:
+        clusterNetwork:
+        - cidr: 10.128.0.0/14
+          hostPrefix: 23
+        machineNetwork:
+        - cidr: 10.0.0.0/16
+        serviceNetwork:
+        - 172.30.0.0/16
+      fips: ${infrastructure_configurations}[fips_validation]
+      platform:
+        ibmcloud:
+          region: ${infrastructure_configurations}[ibmcloud_region]
+      pullSecret: '${infrastructure_configurations}[pull_secret]'
+      sshKey: ${infrastructure_configurations}[ssh_key]
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterImageSet
+  metadata:
+    name: ${infrastructure_configurations}[image_set]
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  spec:
+    releaseImage: ${infrastructure_configurations}[release_image]
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ibmcloud-creds
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  type: Opaque
+  stringData:
+    ibmcloud_api_key: ${infrastructure_configurations}[ibmcloud_api_key]
+- apiVersion: hive.openshift.io/v1
+  kind: ClusterDeployment
+  metadata:
+    name: ${infrastructure_configurations}[hive_cluster_name]
+    namespace: ${infrastructure_configurations}[hive_claim_ns]
+  spec:
+    baseDomain: ${infrastructure_configurations}[base_domain]
+    clusterName: ${infrastructure_configurations}[hive_cluster_name]
+    platform:
+      ibmcloud:
+        region: ${infrastructure_configurations}[ibmcloud_region]
+        credentialsSecretRef:
+          name: ibmcloud-creds
+    provisioning:
+      imageSetRef:
+        name: ${infrastructure_configurations}[image_set]
+      installConfigSecretRef:
+        name: ibmcloud-sno-install-config
+      manifestsSecretRef:
+        name: ${infrastructure_configurations}[hive_cluster_name]-manifests

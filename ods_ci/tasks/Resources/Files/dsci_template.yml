@@ -13,3 +13,6 @@ spec:
             name: data-science-smcp
             namespace: istio-system
         managementState: Managed
+    trustedCABundle:
+        customCABundle: ''
+        managementState: Managed

@@ -43,7 +43,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    filepath=${PIPELINE_TEST_FILEPATH}
     ...    press_cancel=${TRUE}
     Pipeline Should Not Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
-    ...    pipeline_description=${PIPELINE_TEST_DESC}
+
     # Import pipeline
     Import Pipeline    name=${PIPELINE_TEST_NAME}
     ...    description=${PIPELINE_TEST_DESC}

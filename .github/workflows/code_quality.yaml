@@ -73,10 +73,10 @@ jobs:
 
       # run all liners in turn and don't fail fast
 
-      - run: poetry run ruff check ods_ci/
+      - run: poetry run ruff check
         if: "!cancelled()"
 
-      - run: poetry run ruff format ods_ci/ --check --diff
+      - run: poetry run ruff format --check --diff
         if: "!cancelled()"
 
       - run: poetry run pyright

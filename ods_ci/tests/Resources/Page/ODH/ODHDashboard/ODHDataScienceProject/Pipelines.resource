@@ -220,7 +220,7 @@ Pipeline Should Be Listed
     ${pipeline_row_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_row_xp}
 
-    IF    "${pipeline_description}" != ${EMPTY}
+    IF    "${pipeline_description}" != "${EMPTY}"
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
         ...        ${pipeline_row_xp}/following-sibling::*[p[text()="${pipeline_description}"]]

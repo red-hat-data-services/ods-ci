@@ -7,7 +7,7 @@ metadata:
     tekton.dev/input_artifacts: '{}'
     tekton.dev/artifact_bucket: mlpipeline
     tekton.dev/artifact_endpoint: minio-service.kubeflow:9000
-    tekton.dev/artifact_endpoint_scheme: http://
+    tekton.dev/artifact_endpoint_scheme: https://
     tekton.dev/artifact_items: '{"print-message": []}'
     sidecar.istio.io/inject: "false"
     tekton.dev/template: ''

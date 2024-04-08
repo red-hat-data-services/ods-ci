@@ -183,7 +183,7 @@ Compile Inference Service YAML
             ${mode}=    Set Variable    ${DSC_KSERVE_MODE}
         ELSE
             ${mode}=    Get KServe Default Deployment Mode From DSC
-        END  
+        END
         Log    message=Using defaultDeploymentMode set in the DSC: ${mode}
     END
 
@@ -388,7 +388,8 @@ Compile Deploy And Query LLM model
     ...    namespace=${namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     ...    namespace=${namespace}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${namespace}    model_name=${model_name}
+    ${pod_name}=  Get Pod Name    namespace=${namespace}    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
+    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${namespace}    pod_name=${pod_name}
     Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
     ...    n_times=${n_queries}    namespace=${namespace}    query_idx=${query_idx}
     ...    validate_response=${validate_response}    protocol=${protocol}
@@ -755,8 +756,8 @@ Get KServe Default Deployment Mode From DSC
     RETURN    ${mode}
 
 Start Port-forwarding
-    [Arguments]    ${namespace}    ${model_name}    ${process_alias}=llm-query-process
-    ${process}=    Start Process    oc -n ${namespace} port-forward svc/${model_name}-predictor 8033:80
+    [Arguments]    ${namespace}    ${pod_name}    ${process_alias}=llm-query-process
+    ${process}=    Start Process    oc -n ${namespace} port-forward pod/${pod_name} 8033:8033
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  7s

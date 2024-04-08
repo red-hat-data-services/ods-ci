@@ -38,8 +38,9 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}   query_idx=2    validate_response=${TRUE}    # temp
@@ -83,8 +84,9 @@ Verify User Can Serve And Query A google/flan-t5-xl Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}   query_idx=3   validate_response=${TRUE}
@@ -128,8 +130,9 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}   query_idx=3   validate_response=${TRUE}
@@ -172,8 +175,9 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}   query_idx=4    validate_response=${TRUE}    # temp
@@ -217,8 +221,9 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}   query_idx=0   validate_response=${TRUE}
@@ -262,8 +267,9 @@ Verify User Can Serve And Query A google/flan-ul-2 Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}   query_idx=3   validate_response=${TRUE}
@@ -307,8 +313,9 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=3000s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}   query_idx=5   validate_response=${TRUE}
@@ -343,8 +350,9 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc
     ...    namespace=${test_namespace}   query_idx=0   validate_response=${TRUE}    # temp
@@ -393,8 +401,9 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    timeout=300s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    model_name=${model_name}
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ${prompt_tuned_params}=    Create Dictionary    prefix_id=flan-t5-xl-tuned
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=grpc

@@ -13,7 +13,7 @@ def rosa_whoami():
     execute_command(" ".join(cmd_rosa_whoami))
 
 
-def create_account_roles():
+def create_account_roles() -> str | None:
     cmd_create_account_roles = [
         "rosa",
         "create",
@@ -25,8 +25,7 @@ def create_account_roles():
     ret = execute_command(" ".join(cmd_create_account_roles))
     if ret is None:
         log.error("Failed to Create account roles")
-        return ret
-    return None
+    return ret
 
 
 def rosa_create_cluster(

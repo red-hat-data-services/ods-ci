@@ -38,7 +38,7 @@ ${DC_NAME} =    elyra-s3
 Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
     [Documentation]    Loads an example Elyra pipeline and confirms the Elyra web UI displays it correctly
     [Tags]    Sanity    Tier1
-    ...       ODS-2197      RunThisTest
+    ...       ODS-2197
     [Setup]    Elyra Pipelines SDS Setup
     Create Workbench    workbench_title=elyra-sds    workbench_description=Elyra test
     ...                 prj_title=${PRJ_TITLE}    image_name=Standard Data Science  deployment_size=Small
@@ -55,7 +55,7 @@ Verify Pipeline Can Be Submitted And Runs Correctly From Standard Data Science W
     [Documentation]    Submits an example Elyra pipeline to be run by Data Science Pipelines and
     ...    Confirms that it runs correctly
     [Tags]    Sanity    Tier1
-    ...       ODS-2199      RunThisTest
+    ...       ODS-2199
     Set Runtime Image In All Nodes    runtime_image=Datascience with Python 3.9 (UBI9)
     Run Pipeline
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s

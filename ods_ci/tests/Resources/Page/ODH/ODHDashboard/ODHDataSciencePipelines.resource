@@ -19,6 +19,7 @@ ${PIPELINE_RUN_DESC_INPUT_XP}=                 id:run-description
 ${PIPELINE_RUN_CREATE_BTN_XP}=                 xpath://*[@data-testid="run-page-submit-button"]
 
 
+
 *** Keywords ***
 # robocop: disable:line-too-long
 Install DataSciencePipelinesApplication CR
@@ -137,6 +138,15 @@ Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     ...    Bug: RHOAIENG-2931
     Run Keyword And Ignore Error       Wait Until Page Contains    Error displaying pipelines    timeout=60s
     Run Keyword And Warn On Failure    Page Should Not Contain     Error displaying pipelines
+
+Verify That There Are No Sample Pipelines After Creating Pipeline Server
+    [Documentation]      Verify creation of sample pipelines by default when deploying dsp in odh/rhoai
+    ${status}=      Run Keyword And Return Status    Wait Until Page Contains     Create pipeline   timeout=10s
+    IF     ${status}
+        Log     Default Sample Pipelines are Not Available and No Pipelines Created
+    ELSE
+        Log     Default Sample Pipelines are Available
+    END
 
 Open Pipeline Detail
     [Documentation]    Open the Pipeline detail

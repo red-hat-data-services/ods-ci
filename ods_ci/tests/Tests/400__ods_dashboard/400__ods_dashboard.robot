@@ -640,7 +640,7 @@ Check And Uninstall Operator In Openshift
         IF  ${actual_no_of_operator} == ${expected_number_operator}
             Uninstall Operator    ${operator_name}
         ELSE
-            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Opearatorhub
+            FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Operatorhub
 
         END
     END

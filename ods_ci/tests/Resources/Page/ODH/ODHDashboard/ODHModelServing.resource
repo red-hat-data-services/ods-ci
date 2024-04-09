@@ -26,6 +26,7 @@ ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
 
 
 *** Keywords ***
@@ -53,6 +54,7 @@ Serve Model
     ...    Can update existing Model, and use existing Connection.
     [Arguments]    ${project_name}    ${model_name}    ${framework}    ${data_connection_name}    ${model_path}
     ...    ${existing_data_connection}=${TRUE}    ${model_server}=Model Serving Test    ${existing_model}=${FALSE}
+    ...    ${serving_runtime}=${NONE}
     Open Model Serving Home Page
     Switch Model Serving Project    ${project_name}
     IF    ${existing_model}
@@ -66,13 +68,16 @@ Serve Model
     ELSE
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
-        SeleniumLibrary.Wait Until Page Contains    Deploy model
-        SeleniumLibrary.Click Button    Deploy model
+        SeleniumLibrary.Click Button    //button[@data-testid="empty-state-action-button"]
+        Maybe Wait For Dashboard Loading Spinner Page
+        SeleniumLibrary.Wait Until Element Is Enabled    ${DEPLOY_MODEL_BTN}
+        SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     END
-    Wait For Dashboard Page Title    Deploy model
+    SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
+    IF    "${serving_runtime}" != "${NONE}"    Select Kserve Serving Runtime    ${serving_runtime}
     SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
     IF    ${existing_data_connection}==${TRUE}
@@ -371,7 +376,6 @@ Namespace Should Be Removed From ServiceMeshMemberRoll
         ...    msg=${namespace} should have been automatically removed from SMMR
     END
 
-
 Deploy Model Via CLI
     [Documentation]    Deploys a model using Model Serving feature by applying the InfereceService
     ...                yaml via CLI. It assumes that the necessary Runtime has been already created
@@ -386,13 +390,8 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
-    ${first_deploy}=    Run Keyword And Return Status
-    ...    Page Should Contain Element    xpath=//article[@id="single-serving-platform-card"]
-    IF  ${first_deploy}
-        Click Button    //article[@id="single-serving-platform-card"]//button[.="Deploy model"]
-    ELSE
-        Click Button    //div[@id="model-server"]//button[.="Deploy model"]
-    END
+    Move To Tab    Models
+    Click Button    ${DEPLOY_MODEL_BTN}
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Select Kserve Serving Runtime    ${serving_runtime}

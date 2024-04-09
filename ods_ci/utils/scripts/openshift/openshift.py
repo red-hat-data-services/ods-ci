@@ -151,8 +151,8 @@ class OpenshiftOps:
 
         output = process.stdout.read().decode("utf-8")
         match = re.search(
-            ".*Access the OpenShift web-console here: (\S+)"
-            '.*Login to the console with user: "(\S+)".*password: "(\S+)".*',
+            r".*Access the OpenShift web-console here: (\S+)"
+            r'.*Login to the console with user: "(\S+)".*password: "(\S+)".*',
             output,
             re.S,
         )

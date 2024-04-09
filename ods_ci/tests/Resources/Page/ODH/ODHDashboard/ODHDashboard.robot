@@ -16,8 +16,7 @@ ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawe
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
 ${CARD_BUTTON_XP}=  //input[@name="odh-explore-selectable-card"]
 ${RES_CARDS_XP}=  //div[contains(@data-ouia-component-type, "Card")]
-${SAMPLE_APP_CARD_XP}=    //div[contains(@data-testid,"explore-card")]
-${JUPYTER_CARD_XP}=    //div[@data-testid="explore-card jupyter"]
+${JUPYTER_CARD_XP}=    //div[@data-testid="card jupyter"]
 ${EXPLORE_PANEL_XP}=    //div[@data-testid="explore-drawer-panel"]
 ${HEADER_XP}=  div[@class='pf-v5-c-card__header']
 ${TITLE_XP}=   div[@class='pf-v5-c-card__title']//span
@@ -205,35 +204,32 @@ Remove Disabled Application From Enabled Page
    Wait Until Page Does Not Contain Element    xpath://div[@id='${app_id}']
    Capture Page Screenshot  ${app_id}_removed.png
 
-
-Verify Service Provides "Enable" Button In The Explore Page
-  [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the tile, the sidebar opens and there is an "Enable" button
+Open "Get Started" For App Name
+  [Documentation]   Open Explore page and select a Card titled "${app_name}", to view its "Get Started" on the sidebar
   [Arguments]  ${app_name}    ${app_id}=${NONE}
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
   IF    "${app_id}" == "${NONE}"
-      ${card_locator}=    Set Variable    //*[.='${app_name}']/../../..//input[@type='radio']
+      ${card_locator}=    Set Variable    //*[contains(@data-testid,"cardtitle") and contains(text(),'${app_name}')]
   ELSE
       ${card_locator}=    Set Variable    ${CARDS_XP}\[@id='${app_id}']
   END
   ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
   Capture Page Screenshot
   Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
+
+Verify Service Provides "Enable" Button In The Explore Page
+  [Documentation]   Verify the service appears in Applications > Explore
+  ...    and after clicking on the tile, the sidebar opens and there is an "Enable" button
+  [Arguments]  ${app_name}    ${app_id}=${NONE}
+  Open "Get Started" For App Name    ${app_name}    ${app_id}
   Page Should Contain Button    ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}   message=${app_name} does not have a "Enable" button in ODS Dashboard
 
 Verify Service Provides "Get Started" Button In The Explore Page
-  [Documentation]   Verify the service appears in Applications > Explore and, after clicking on the circle next to the title, the sidebar opens and there is a "Get Started" button
+  [Documentation]   Verify the service appears in Applications > Explore
+  ...    and after clicking on the circle next to the title, the sidebar opens and there is a "Get Started" button
   [Arguments]  ${app_name}    ${app_id}=${NONE}
-  Menu.Navigate To Page    Applications    Explore
-  Wait For RHODS Dashboard To Load    expected_page=Explore
-  IF    "${app_id}" == "${NONE}"
-      ${card_locator}=    Set Variable    //*[.='${app_name}']/../../..//input[@type='radio']
-  ELSE
-      ${card_locator}=    Set Variable    ${CARDS_XP}\[@id='${app_id}']
-  END
-  ${status}=    Open Get Started Sidebar And Return Status    card_locator=${card_locator}
-  Capture Page Screenshot
-  Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${TRUE}
+  Open "Get Started" For App Name    ${app_name}    ${app_id}
   Page Should Contain Element    ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}   message=${app_name} does not have a "Get started" button in ODS Dashboard
 
 Go To RHODS Dashboard
@@ -344,8 +340,10 @@ Open Get Started Sidebar And Return Status
     [Arguments]  ${card_locator}
     Wait Until Element Is Visible    xpath:${card_locator}
     Wait Until Element Is Enabled     xpath:${card_locator}    timeout=20s     error=Element is not clickbale  #robocop : disable
-    Click Element    ${card_locator}
-        ${status}=  Run Keyword and Return Status  Wait Until Page Contains Element    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
+    Mouse Down    ${card_locator}
+    Mouse Up    ${card_locator}
+    ${status}=    Run Keyword And Return Status    Wait Until Page Contains Element
+    ...    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
     Sleep  1
     RETURN  ${status}
 

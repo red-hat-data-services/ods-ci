@@ -156,7 +156,7 @@ class Helpers:
             import numbers
             import re
 
-            model_name = re.compile("^[\S]+(__isvc-)?[\w\d]+$")
+            model_name = re.compile(r"^[\S]+(__isvc-)?[\w\d]+$")
 
             # Cast from string to python type
             expected = ast.literal_eval(expected)
@@ -267,11 +267,11 @@ class Helpers:
                 )
             else:
                 response = requests.post(endpoint, headers=headers, data=data)
-        return response.status_code, response.text
+        return response.status_code, response.text  # pyright: ignore [reportPossiblyUnboundVariable]
 
     @keyword
     def process_resource_list(self, filename_in, filename_out=None):
-        """
+        r"""
         Tries to remove pseudorandom substring from openshift resource names using a regex.
         This portion of the regex: -\b(?:[a-z]+\d|\d+[a-z])[a-z0-9]*\b tries to find an
         alphanumeric string of any length preceded by a `-`, while the second part of the regex
@@ -299,7 +299,7 @@ class Helpers:
 
     @keyword
     def escape_forward_slashes(self, string_to_escape):
-        return string_to_escape.replace("/", "\/")
+        return string_to_escape.replace("/", r"\/")
 
     @keyword
     def is_string_empty(self, string):

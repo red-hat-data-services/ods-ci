@@ -112,7 +112,7 @@ def render_template(search_path, template_file, output_file, replace_vars):
         outputText = template.render(replace_vars)
         with open(output_file, "w") as fh:
             fh.write(outputText)
-    except:
+    except Exception:
         print("Failed to render template and create json file {}".format(output_file))
         sys.exit(1)
 
@@ -125,7 +125,7 @@ def read_data_from_json(filename):
         with open(filename, "r") as f:
             data = json.load(f)
         return data
-    except:
+    except Exception:
         return None
 
 

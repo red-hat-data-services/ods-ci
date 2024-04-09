@@ -211,6 +211,8 @@ class OpenshiftClusterManager:
                     self.cluster_name,
                 )
             )
+        else:
+            raise ValueError(f"{self.cloud_provider=} is not supported.")
         ret = execute_command(cmd)
         if ret is None:
             log.error(f"Failed to create osd cluster {self.cluster_name}")
@@ -334,7 +336,7 @@ class OpenshiftClusterManager:
             outputText = template.render(replace_vars)
             with open(output_file, "w") as fh:
                 fh.write(outputText)
-        except:
+        except Exception:
             log.error(f"Failed to render template and create json file {output_file}")
             sys.exit(1)
 
@@ -357,7 +359,7 @@ class OpenshiftClusterManager:
         if ret is None:
             log.info(f"Failed to get {addon_name} addon state for cluster {self.cluster_name}")
             return None
-        match = re.search(addon_name + "\s*(.*)", ret)
+        match = re.search(addon_name + r"\s*(.*)", ret)
         if match is None:
             log.info("regex failed in get_addon_state")
             return None
@@ -490,15 +492,6 @@ class OpenshiftClusterManager:
             return False
         else:
             return True
-
-    def hide_values_in_op_json(self, fields, json_str):
-        json_dict = json.loads(json_str)
-        params = json_dict["parameters"]["items"]
-        for field in fields:
-            for p in params:
-                if p["id"] == field:
-                    p["value"] = "##hidden##"
-        return json.dumps(json_dict)
 
     def hide_values_in_op_json(self, fields, json_str):
         json_dict = json.loads(json_str)

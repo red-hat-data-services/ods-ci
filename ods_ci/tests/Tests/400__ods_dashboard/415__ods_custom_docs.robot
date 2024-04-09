@@ -10,15 +10,16 @@ Suite Teardown   Custom Doc Suite Taerdown
 
 
 *** Variables ***
-${QS_YAML}=                  ods_ci/tests/Resources/Files/custom_quickstart.yaml
-${APP_YAML}=                 ods_ci/tests/Resources/Files/custom_app.yaml
-${HOWTO_YAML}=               ods_ci/tests/Resources/Files/custom_doc_howto.yaml
-${TUTORIAL_YAML}=            ods_ci/tests/Resources/Files/custom_doc_tutorial.yaml
-&{EXPECTED_ITEMS_TITLES}=    quickstart=TEST - Custom Quick Start
-...                          application=TEST - Custom ODS-CI Application
-...                          howto=TEST - Custom How-To Documentation
-...                          tutorial=TEST - Custom Tutorial Documentation
-${CUSTOM_APP_DICT_PATH}=     ods_ci/tests/Resources/Files/CustomAppInfoDictionary.json
+${QS_YAML}=                     ods_ci/tests/Resources/Files/custom_quickstart.yaml
+${APP_YAML}=                    ods_ci/tests/Resources/Files/custom_app.yaml
+${HOWTO_YAML}=                  ods_ci/tests/Resources/Files/custom_doc_howto.yaml
+${TUTORIAL_YAML}=               ods_ci/tests/Resources/Files/custom_doc_tutorial.yaml
+&{EXPECTED_ITEMS_TITLES}=       quickstart=TEST - Custom Quick Start
+...                             application=TEST - Custom ODS-CI Application
+...                             howto=TEST - Custom How-To Documentation
+...                             tutorial=TEST - Custom Tutorial Documentation
+@{EXPECTED_QUICKSTART_IDS}=     custom-quick-start-test
+${CUSTOM_APP_DICT_PATH}=        ods_ci/tests/Resources/Files/CustomAppInfoDictionary.json
 
 
 *** Test Cases ***
@@ -26,7 +27,7 @@ Verify Documentation Items Can Be Added Using Odh CRDs
     [Documentation]     Verified it is possible to create QuickStarts,Tutorials,How-to and Application
     ...                 by using Dashboard CRDs: OdhQuickStart, OdhDocument (for both how-to and tutorial)
     ...                 and OdhApplication.
-    [Tags]    Tier2
+    [Tags]    Sanity
     ...       ODS-697    ODS-1768    ODS-1769    ODS-1770
     Create Custom QuickStart
     Create Custom Application
@@ -133,7 +134,8 @@ Check Custom QuickStart Item Has Been Successfully Created
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["quickstart"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=QuickStart
     ...                                                   expected_titles=${exp_titles}
-    Run Keyword And Continue On Failure     Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   custom-quick-start-test
+    Run Keyword And Continue On Failure
+    ...    Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   ${EXPECTED_QUICKSTART_IDS}
 
 Check Custom Application Item Has Been Successfully Created
     [Documentation]     Checks if RHODS Dashboard shows the custom Application item.

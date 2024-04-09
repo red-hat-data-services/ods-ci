@@ -122,98 +122,6 @@ Resources Test Setup
 Resources Test Teardown
     Close All Browsers
 
-Verify Quick Starts Work As Expected When All Steps Are Marked As Yes
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Star QuickStart Tour
-        FOR     ${index}    IN RANGE    ${count}
-            Run Keyword And Continue On Failure    Wait Until Keyword Succeeds    2 times   0.3s
-            ...    Mark Step Check As Yes
-            IF  ${index} != ${count-1}
-                Go To Next QuickStart Step
-            END
-        END
-        Run Keyword And Continue On Failure     Go Back And Check Previouse Step Is Selected
-        ...     n_steps=${count}   exp_step=${count-1}
-        Go To Next QuickStart Step
-        Go To Next QuickStart Step
-        Close QuickStart From Button
-        Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  Complete
-
-    END
-
-Verify Quick Starts Work As Expected When Restarting The Previous One
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
-        ...    exp_link_text=Restart
-        Run Keyword And Continue On Failure     QuickStart Status Should Not Be Set     ${element}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
-        ...     exp_link_text=Close
-        Star QuickStart Tour
-        Run Keyword And Continue On Failure     Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
-        Close QuickStart From Top     decision=cancel
-        Run Keyword And Continue On Failure     Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
-        Close QuickStart From Top     decision=leave
-        Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  In Progress
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
-        ...    exp_link_text=Continue
-    END
-
-Verify Quick Starts Work As Expected When One Step Is Marked As No
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Star QuickStart Tour
-        FOR     ${index}    IN RANGE    ${count}
-            Wait Until Keyword Succeeds    2 times   0.3s    Mark Step Check As Yes
-            IF  ${index} != ${count-1}
-                Go To Next QuickStart Step
-            END
-        END
-        Wait Until Keyword Succeeds    2 times   0.3s    Mark Step Check As No
-        Go To Next QuickStart Step
-        Close QuickStart From Button
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      Failed
-    END
-
-Verify Quick Starts Work As Expected When All Steps Are Skipped
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Star QuickStart Tour
-        FOR     ${index}    IN RANGE    ${count}
-            Go To Next QuickStart Step
-        END
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      In Progress
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
-    END
-
-Verify Quick Starts Work As Expected When At Least One Step Is Skipped
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Star QuickStart Tour
-        FOR     ${index}    IN RANGE    ${count}
-            IF  ${index} == ${0}
-                Run Keyword And Continue On Failure     Mark Step Check As No
-            END
-            Go To Next QuickStart Step
-        END
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      In Progress
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
-        ...    exp_link_text=Continue
-    END
-
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled
     Select Checkbox Using Id    enabled-filter-checkbox--check-box
@@ -311,9 +219,8 @@ Set Quick Starts Elements List Based On RHODS Type
     IF    ${is_self_managed} == ${TRUE}
             @{quickStartElements}=      Create List
             ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
-            ...    deploy-python-model    create-aikit-notebook    openvino-inference-notebook
-            ...    pachyderm-beginner-tutorial-notebook    build-deploy-watson-model
-            ...    using-starburst-enterprise
+            ...    build-deploy-watson-model    deploy-python-model    pachyderm-beginner-tutorial-notebook
+            ...    using-starburst-enterprise    create-aikit-notebook    openvino-inference-notebook
     ELSE
             @{quickStartElements}=      Create List
             ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
@@ -368,13 +275,11 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
             Run Keyword And Continue On Failure     Page Should Contain Element
             ...    //ul[@class="pf-v5-c-list pfext-quick-start-task-header__list"]/li[${index}+1]
         END
-        Click Button        //button[@data-testid="qs-drawer-start"]
+        Click Button        //button[@data-testid="qs-drawer-restart"]
         FOR     ${index}    IN RANGE    ${count}
             Run Keyword And Continue On Failure     Wait Until Keyword Succeeds    2 times   0.3s
             ...    Mark Step Check As Yes
-            IF  ${index} != ${count-1}
-                Run Keyword And Continue On Failure     Go To Next QuickStart Step
-            END
+            Run Keyword And Continue On Failure     Go To Next QuickStart Step
         END
         Run Keyword And Continue On Failure     Go Back And Check Previouse Step Is Selected     n_steps=${count}
         ...    exp_step=${count-1}

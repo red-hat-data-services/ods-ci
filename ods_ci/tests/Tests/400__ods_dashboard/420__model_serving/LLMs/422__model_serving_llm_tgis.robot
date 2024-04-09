@@ -302,7 +302,7 @@ Verify User Can Autoscale Using Concurrency
 
 Verify User Can Validate Scale To Zero
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
-    [Tags]    Tier1    ODS-2379    AutomationBug    ServerlessOnly
+    [Tags]    Tier1    ODS-2379    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
@@ -671,7 +671,7 @@ Wait For New Replica Set To Be Ready
     [Arguments]    ${new_exp_replicas}    ${model_name}    ${namespace}    ${old_rev_id}=${NONE}
     IF    not ${IS_KSERVE_RAW}
         Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${old_rev_id}
-        ...    namespace=${namespace}    timeout=360s        
+        ...    namespace=${namespace}    timeout=360s
     END
     Wait Until Keyword Succeeds    5 times    5s
     ...    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}

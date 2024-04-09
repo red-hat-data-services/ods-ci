@@ -65,11 +65,8 @@ Is RHODS Self-Managed
     ...                 in the cluster (e.g., usually on OSD, ROSA).
     ...                 Returns ${TRUE} if RHODS Self-Managed is installed or if PRODUCT=ODH
     IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
-    ${is_managed} =    Run Keyword And Return Status    OpenshiftLibrary.Oc Get
-    ...                                                      kind=CatalogSource
-    ...                                                      name=addon-managed-odh-catalog
-    ...                                                      namespace=${OPERATOR_NAMESPACE}
-    Run Keyword And Return    Evaluate    not ${is_managed}
+    ${rc} =    Run And Return Rc    oc get catalogsource addon-managed-odh-catalog -n ${OPERATOR_NAMESPACE}
+    Run Keyword And Return    Run Keyword And Return Status      Should Not Be Equal As Numbers    ${rc}    ${0}
 
 Get MachineSets
     [Documentation]    Returns a list of machinesets names
@@ -223,7 +220,7 @@ Verify Pod Logs Do Not Contain
     ${match_list} 	 Get Regexp Matches   ${pod_logs}     ${regex_pattern}
     ${entry_msg}      Remove Duplicates      ${match_list}
     ${length}         Get Length   ${entry_msg}
-    IF   ${length} != ${0}    FAIL    Pod ${pod_name} logs should not contain regexp ${regex_pattern}. Matching log entry: ${entry_msg} 
+    IF   ${length} != ${0}    FAIL    Pod ${pod_name} logs should not contain regexp ${regex_pattern}. Matching log entry: ${entry_msg}
     ...    ELSE    Log    message=Pod ${pod_name} logs does not contain regexp ${regex_pattern}    level=INFO
 
 Is Resource Present

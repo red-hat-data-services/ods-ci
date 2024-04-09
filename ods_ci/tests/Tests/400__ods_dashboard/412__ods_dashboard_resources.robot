@@ -9,6 +9,7 @@ Suite Setup       RHOSi Setup
 Suite Teardown    RHOSi Teardown
 Test Setup        Resources Test Setup
 Test Teardown     Resources Test Teardown
+Test Tags         Dashboard
 
 
 *** Variables ***
@@ -233,7 +234,7 @@ Filter By Resource Type And Check Output
     [Documentation]    Filter by resource type
     Select Checkbox Using Id    id=tutorial--check-box
     Verify The Resources Are Filtered
-    ...    expected_types=${EXPECTED_ITEM_RESOURCE_TYPE}    expected_number=14
+    ...    expected_types=${EXPECTED_ITEM_RESOURCE_TYPE}    expected_number=15
     Deselect Checkbox Using Id    id=tutorial--check-box
 
 Filter By Provider Type And Check Output
@@ -259,7 +260,8 @@ Set Expected Items Based On RHODS Type    # robocop: disable
     ...                installed as Self-Managed or Cloud Service
     ${is_self_managed}=    Is RHODS Self-Managed
     ${n_items}=    Set Variable    49
-    ${EXPECTED_ITEMS_FOR_ENABLE}=    Create List    Creating a Jupyter notebook
+    ${EXPECTED_ITEMS_FOR_ENABLE}=    Create List
+    ...    Creating a Jupyter notebook
     ...    Deploying a sample Python application using Flask and OpenShift.
     ...    How to install Python packages on your notebook server
     ...    How to update notebook server settings
@@ -268,24 +270,19 @@ Set Expected Items Based On RHODS Type    # robocop: disable
     ...    Jupyter
     ${EXPECTED_ITEM_PROVIDERS}=    Create List       by Anaconda Professional
     ${EXPECTED_ITEM_RESOURCE_TYPE}=    Create List     Tutorial
-    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}=    Create List
-    ...    Creating a Jupyter notebook
-    ...    How to install Python packages on your notebook server
-    ...    How to update notebook server settings
-    ...    How to use data from Amazon S3 buckets
-    ...    How to view installed packages on your notebook server
-    ...    Deploying a sample Python application using Flask and OpenShift.
-    ...    Jupyter
+    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}=     Evaluate    ${EXPECTED_ITEMS_FOR_ENABLE}.copy()
+    Append To List    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
     ...    OpenShift AI tutorial - Fraud detection example
-    ...    OpenShift API Management
-    ...    Securing a deployed model using Red Hat OpenShift API Management
+    ...    Red Hat OpenShift AI
     @{EXPECTED_ITEMS_FOR_COMBINATIONS}=      Create List
-    ...    Jupyter    OpenShift API Management
+    ...    Jupyter
+    ...    Red Hat OpenShift AI
     IF    ${is_self_managed} == ${TRUE}
-        Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
-        Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
-        Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
-        ${n_items}=    Set Variable    46
+        # Deprecated
+        # Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
+        # Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
+        # Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
+        ${n_items}=    Set Variable    48
     END
     Set Suite Variable    ${EXPECTED_RESOURCE_ITEMS}    ${n_items}
     Set Suite Variable    ${EXPECTED_ITEMS_FOR_ENABLE}    ${EXPECTED_ITEMS_FOR_ENABLE}

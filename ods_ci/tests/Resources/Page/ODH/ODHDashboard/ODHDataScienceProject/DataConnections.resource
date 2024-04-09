@@ -82,18 +82,16 @@ Set Connection Between Data Connection And Workbench
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
     [Arguments]     ${name}   ${type}   ${connected_workbench}
-    Run keyword And Continue On Failure     Page Should Contain Element
-    ...    ${DC_SECTION_XP}//td[@data-label="Name"]/*/div[text()="${name}"]
-    Run keyword And Continue On Failure     Page Should Contain Element
-    ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[text()=" ${type}"]
+    ${connection_xp} =    Set Variable    ${DC_SECTION_XP}//tr[td[@data-label="Name"]//div[text()="${name}"]]
+    Run keyword And Continue On Failure     Page Should Contain Element    ${connection_xp}
+    Run keyword And Continue On Failure     Page Should Contain Element    ${connection_xp}/td[text()=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
-        Run Keyword And Continue On Failure    Page Should Contain Element
-        ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[text()="No connections"]
+        Run Keyword And Continue On Failure    Page Should Contain Element    ${connection_xp}/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
             Log    ${index}: ${workbench_title}
             Run Keyword And Continue On Failure    Page Should Contain Element
-            ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]/td[@data-label="Connected workbenches"]/ul/li[text()="${workbench_title}"]
+            ...    ${connection_xp}/td[@data-label="Connected workbenches"]//*[text()="${workbench_title}"]
         END
     END
 

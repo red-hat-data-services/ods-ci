@@ -55,12 +55,6 @@ Fill In Run Creation Form    # robocop: disable
     Input Text    ${PIPELINE_RUN_DESC_INPUT_XP}    ${name}
     Run Keyword And Warn On Failure    Element Should Be Disabled    ${PIPELINE_RUN_CREATE_BTN_XP}
 
-    # FIXME: temporally harcoding parameters for iris-pipeline.
-    # This is a dirty workaround for RHOAIENG-4738 (dashboard not loading default pipeline parameters)
-    Wait Until Element is Visible    //*[@data-testid="neighbors"]/*/*/*/input
-    Input Text                       //*[@data-testid="neighbors"]/*/*/*/input   3
-    Click Element                    //*[@data-testid="radio-standard_scaler-true"]
-
 #    TODO: by fix it to select latest version of ${pipeline_name}
 #    IF    "${pipeline_name}" != "${NONE}"
 #        Select Pipeline For The Run    pipeline_name=${pipeline_name}
@@ -109,31 +103,34 @@ Archive Pipeline Run
     Wait Until Page Contains Element    xpath://h2[contains(text(), 'No triggered runs yet')]
 
 Delete Pipeline
-    [Documentation]    Delete a pipeline. From the left menu select "Data Science Pipelines" -> Pipelines.
-    ...                The "Delete Pipeline" will search for a line in the grid that match the pipeline name.
-    ...                Based on that, hit the ... Menu in the row and hit Delete drop down menu.
+    [Documentation]    Navigates to "Data Science Pipelines" -> Pipelines, deletes the latest pipeline version
+    ...    available and deletes the pipeline using the pipelines actions menu.
+    ...    TODO: improve keyword to delete multiple pipeline versions
     [Arguments]    ${pipeline_name}
     Navigate To Page    Data Science Pipelines    Pipelines
-    Wait Until Page Contains Element    xpath://h2[text()='${pipeline_name}']
-    Pipelines.Click Action From Actions Menu    ${pipeline_name}    Delete
+    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
+
+    Pipelines.Expand Pipeline Details    ${pipeline_name}
+    Pipelines.Click Action From Pipeline Version Actions Menu    ${pipeline_name}    Delete pipeline version
     Handle Deletion Confirmation Modal    ${pipeline_name}    pipeline
-    Wait Until Page Contains Element    xpath://h4[contains(text(), 'No pipelines yet')]
+
+    Pipelines.Click Action From Pipeline Actions Menu    ${pipeline_name}    Delete
+    Handle Deletion Confirmation Modal    ${pipeline_name}    pipeline
+    Wait Until Pipeline Is Not Listed    ${pipeline_name}
 
 Delete Pipeline Server
-    [Documentation]    Delete a pipeline server. From the top right menu inside "Data Science Pipelines" -> Pipelines
+    [Documentation]    Navigates to "Data Science Pipelines" -> Pipelines and deletes the pipeline server
     [Arguments]    ${data_science_project_name}
+    Navigate To Page    Data Science Pipelines    Pipelines
+    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Pipeline server actions')]
-    Click Element    //button[contains(span/text(), 'Pipeline server actions')]
+    Wait Until Element Is Enabled       xpath://button[contains(span/text(), 'Pipeline server actions')]
+    Click Element                       xpath://button[contains(span/text(), 'Pipeline server actions')]
     Wait Until Page Contains Element    xpath://li[contains(a/text(), 'Delete pipeline server')]
     Click Element    //li[contains(a/text(), 'Delete pipeline server')]
     Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server
-    Wait Until Page Contains Element    xpath://h3[text()="Enable pipelines"]    timeout=120s
-    FOR  ${index}  IN RANGE  0  30
-        ${pod_count}    Run    oc get pods -n ${data_science_project_name} -l component=data-science-pipelines | wc -l
-        IF  ${pod_count}==0  BREAK
-        Sleep  1s
-    END
-    Should Be True    ${pod_count} == 0    Pods weren't removed
+    Wait Until Page Contains     text=Configure pipeline server    timeout=120s
+    Pipelines.Wait Until Pipeline Server Is Deleted    ${data_science_project_name}
 
 Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     [Documentation]    Verify me message "Error displaying Pipelines" after creating pipeline server

@@ -2,8 +2,10 @@ import kfp
 from kfp import Client, compiler, dsl
 from kfp.dsl import ClassificationMetrics, Dataset, Input, Model, Output
 
+common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+# common_base_image = "quay.io/opendatahub/ds-pipelines-sample-base:v1.0"
 
-@dsl.component(base_image="quay.io/opendatahub/ds-pipelines-sample-base:v1.0", packages_to_install=["pandas==2.2.0"])
+@dsl.component(base_image=common_base_image, packages_to_install=["pandas==2.2.0"])
 def create_dataset(iris_dataset: Output[Dataset]):
     import pandas as pd
 
@@ -16,7 +18,7 @@ def create_dataset(iris_dataset: Output[Dataset]):
 
 
 @dsl.component(
-    base_image="quay.io/opendatahub/ds-pipelines-sample-base:v1.0",
+    base_image=common_base_image,
     packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
 )
 def normalize_dataset(
@@ -41,7 +43,7 @@ def normalize_dataset(
 
 
 @dsl.component(
-    base_image="quay.io/opendatahub/ds-pipelines-sample-base:v1.0",
+    base_image=common_base_image,
     packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
 )
 def train_model(
@@ -95,6 +97,4 @@ def my_pipeline(
     )
 
 
-endpoint = "http://ml-pipeline-ui-kubeflow.apps.rmartine.dev.datahub.redhat.com/"
-
-compiler.Compiler().compile(pipeline_func=my_pipeline, package_path=__file__.replace(".py", "-v2.yaml"))
+compiler.Compiler().compile(pipeline_func=my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))

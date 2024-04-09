@@ -149,7 +149,6 @@ class DataSciencePipelinesAPI:
             if "annotations" in storage_class["metadata"]:
                 if storage_class["metadata"]["annotations"]["storageclass.kubernetes.io/is-default-class"] == "true":
                     return storage_class["metadata"]["name"]
-        return None
 
     @keyword
     def get_openshift_server(self):

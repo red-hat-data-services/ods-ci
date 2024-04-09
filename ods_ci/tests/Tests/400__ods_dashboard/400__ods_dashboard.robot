@@ -161,36 +161,6 @@ Search and Verify GPU Items Appears In Resources Page
     Search Items In Resources Section    GPU
     Check GPU Resources
 
-Verify "Notebook Images Are Building" Is Not Shown When No Images Are Building
-    [Documentation]     Verifies that RHODS Notification Drawer doesn't contain "Notebook Images are building", if no build is running
-    [Tags]    Sanity
-    ...       ODS-307
-    ...       Tier1
-    Skip If RHODS Version Greater Or Equal Than  1.20.0  CUDA build chain removed in v1.20
-    Wait Until All Builds Are Complete  namespace=${APPLICATIONS_NAMESPACE}
-    RHODS Notification Drawer Should Not Contain  message=Notebooks images are building
-
-Verify Notifications Appears When Notebook Builds Finish And Atleast One Failed
-    [Documentation]    Verifies that Notifications are shown when Notebook Builds are finished and atleast one fails
-    [Tags]    Tier2
-    ...       ODS-470  ODS-718
-    ...       Execution-Time-Over-30m
-    ...       FlakyTest
-    ${failed_build_name}=    Set Variable    ${NONE}
-    Skip If RHODS Version Greater Or Equal Than    1.20.0    CUDA build chain removed in v1.20
-    Clear Dashboard Notifications
-    ${build_name}=  Search Last Build  namespace=${APPLICATIONS_NAMESPACE}    build_name_includes=pytorch
-    Delete Build    namespace=${APPLICATIONS_NAMESPACE}    build_name=${build_name}
-    ${new_buildname}=  Start New Build    namespace=${APPLICATIONS_NAMESPACE}    buildconfig=s2i-pytorch-gpu-cuda-11.4.2-notebook
-    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}    build_name=${new_buildname}   expected_status=Running
-    ${failed_build_name}=  Provoke Image Build Failure    namespace=${APPLICATIONS_NAMESPACE}
-    ...    build_name_includes=tensorflow    build_config_name=tensorflow-gpu-cuda-11.4.2-notebook
-    ...    container_to_kill=sti-build
-    Wait Until Build Status Is    namespace=${APPLICATIONS_NAMESPACE}    build_name=${newbuild_name}     expected_status=Complete
-    Verify Notifications After Build Is Complete
-    Verify RHODS Notification After Logging Out
-    [Teardown]     Restart Failed Build And Close Browser  failed_build_name=${failed_build_name}  build_config=tensorflow-gpu-cuda-11.4.2-notebook
-
 Verify Favorite Resource Cards
     [Tags]    ODS-389    ODS-384
     ...       Sanity

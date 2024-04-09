@@ -65,7 +65,7 @@ Is RHODS Self-Managed
     ...                 in the cluster (e.g., usually on OSD, ROSA).
     ...                 Returns ${TRUE} if RHODS Self-Managed is installed or if PRODUCT=ODH
     IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
-    ${rc} =    Run And Return Rc    oc get catalogsource addon-managed-odh-catalog -n ${OPERATOR_NAMESPACE}
+    ${rc}=    Run And Return Rc    oc get catalogsource addon-managed-odh-catalog -n ${OPERATOR_NAMESPACE}
     Run Keyword And Return    Run Keyword And Return Status      Should Not Be Equal As Numbers    ${rc}    ${0}
 
 Get MachineSets

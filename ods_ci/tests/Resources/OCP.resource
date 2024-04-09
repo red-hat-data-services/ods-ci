@@ -62,8 +62,11 @@ Verify Notebook CR Is Running
 
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
-    ...                 in the cluster (e.g., usually on OSD, ROSA).
-    ...                 Returns ${TRUE} if RHODS Self-Managed is installed or if PRODUCT=ODH
+    ...    in the cluster (e.g., usually on OSD, ROSA).
+    ...    Returns ${TRUE} if RHODS Self-Managed is installed or if PRODUCT=ODH
+    ...
+    ...    Note: this keyword is not using OpenShift library to speed up its execution on local.
+    ...    You'll find more info at https://github.com/red-hat-data-services/ods-ci/pull/1366
     IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
     ${rc}=    Run And Return Rc    oc get catalogsource addon-managed-odh-catalog -n ${OPERATOR_NAMESPACE}
     Run Keyword And Return    Run Keyword And Return Status      Should Not Be Equal As Numbers    ${rc}    ${0}

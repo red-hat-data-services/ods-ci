@@ -208,18 +208,6 @@ Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     ...       ODS-586
     Skip      msg=JupyterHub Pod is removed after KFNBC migration
 
-Verify Grafana Is Connected To Prometheus Using TLS
-    [Documentation]    Verifies Grafana is connected to Prometheus using TLS
-    [Tags]    Tier2
-    ...       ODS-963
-    ...       ProductBug
-    [Setup]  Set Library Search Order  Selenium Library
-    Skip If RHODS Version Greater Or Equal Than    version=1.20.0
-    ...    msg=Grafana was removed in RHODS 1.20
-    Verify Grafana Datasources Have TLS Enabled
-    Verify Grafana Can Obtain Data From Prometheus Datasource
-    [Teardown]  Close Browser
-
 Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In All ODS Projects
     [Documentation]    Verifies that CPU and Memory requests and limits are defined
     ...                for all containers in all pods for all ODS projects

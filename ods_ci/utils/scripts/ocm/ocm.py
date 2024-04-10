@@ -6,8 +6,6 @@ import io
 import json
 import os
 import re
-import shutil
-import subprocess
 import sys
 import time
 from contextlib import redirect_stderr, redirect_stdout
@@ -18,7 +16,7 @@ import yaml
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 from logger import log
-from util import clone_config_repo, compare_dicts, execute_command, read_data_from_json, read_yaml, write_data_in_json
+from util import compare_dicts, execute_command, read_data_from_json, write_data_in_json
 
 """
 Class for Openshift Cluster Manager

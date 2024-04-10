@@ -51,8 +51,6 @@ Prepare Codeflare-sdk E2E Test Suite
         FAIL    Unable to setup Python virtual environment
     END
 
-    Enable Component    codeflare
-    Enable Component    ray
     RHOSi Setup
 
 Teardown Codeflare-sdk E2E Test Suite
@@ -71,8 +69,6 @@ Teardown Codeflare-sdk E2E Test Suite
         FAIL   Unable to switch python environment 3.11
     END
 
-    Disable Component    codeflare
-    Disable Component    ray
     RHOSi Teardown
 
 Run Codeflare-sdk E2E Test

@@ -320,8 +320,8 @@ Verify Pipeline Server Deployments    # robocop: disable
 
     @{pipeline_metadata_envoy}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-metadata-envoy-dspa
-    ${containerNames}=  Create List  container
-    Verify Deployment    ${pipeline_metadata_envoy}  1  1  ${containerNames}
+    ${containerNames}=  Create List  container    oauth-proxy
+    Verify Deployment    ${pipeline_metadata_envoy}  1  2  ${containerNames}
 
     @{pipeline_metadata_grpc}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-metadata-grpc-dspa

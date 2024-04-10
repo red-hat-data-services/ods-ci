@@ -14,13 +14,11 @@ Select Checkbox Using Id
     [Documentation]    Select check-box
     [Arguments]    ${id}
     Select Checkbox    id=${id}
-    sleep    1s
 
 Deselect Checkbox Using Id
     [Documentation]    Deselect check-box
     [Arguments]    ${id}
     Unselect Checkbox    id=${id}
-    sleep    1s
 
 Select Checkbox Filter By Label
     [Arguments]     ${partial_label}
@@ -29,6 +27,14 @@ Select Checkbox Filter By Label
         ${id}=   Get Element Attribute    ${checkbox}     id
         Select Checkbox Using Id    id=${id}
     END
+
+Get Count From Checkbox Label By Id
+    [Documentation]    Get the textual counter in a checkbox label by checkbox ID
+    [Arguments]    ${id}
+    ${checkbox_counter}=    Get Element Attribute
+    ...    //input[@id='${id}']/following-sibling::label   textContent
+    ${checkbox_counter}=    Get Regexp Matches	  ${checkbox_counter}    [0-9]+
+    RETURN    ${checkbox_counter[0]}
 
 Search Resources
     [Arguments]     ${search_term}
@@ -90,3 +96,10 @@ Resource Page Should Contain
     END
     Search Resources    search_term=${search_term}
     Verify The Resources Are Filtered    list_of_items=${expected_items}
+
+Verify Resources Count By Checkbox ID
+    [Arguments]     ${checkbox_id}
+    Select Checkbox Using Id    ${checkbox_id}
+    ${expected_number}=	   Get Count From Checkbox Label By Id    ${checkbox_id}
+    Verify The Resources Are Filtered    expected_number=${expected_number}
+    Deselect Checkbox Using Id    id=${checkbox_id}

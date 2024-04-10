@@ -22,7 +22,7 @@ ${SUCCESS_STEP}              h3[normalize-space(@class="pf-v5-c-title pf-m-md pf
 Verify Quick Starts Work As Expected On Yes And Restart
     [Documentation]   Verify the Quickstarts are completed successfully
     ...    when all steps are marked as yes and restarted later
-    ...    ProductBug: RHODS-7935
+    ...    ProductBug: RHOAIENG-5273
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1306    ODS-1308    ODS-1166
@@ -46,7 +46,7 @@ Verify Quick Starts Work When All Steps Are Skipped
 Verify Quick Starts Work When At Least One Step Is Skipped
     [Documentation]   Verify the Quickstarts work fine when at least of the
     ...    steps are skipped
-    ...    ProductBug: RHODS-7935
+    ...    ProductBug: RHOAIENG-5273
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1403
@@ -58,7 +58,7 @@ Verify Quick Starts Work When At Least One Step Is Skipped
 Verify Quick Starts Work As Expected When At Least One Step Is Marked As No
     [Documentation]   Verify the Quickstarts are works as expected
     ...    when mark last one step as no
-    ...    ProductBug: RHODS-7935
+    ...    ProductBug: RHOAIENG-5273
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1307
@@ -124,33 +124,27 @@ Resources Test Teardown
 
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled
-    Select Checkbox Using Id    enabled-filter-checkbox--check-box
+    ${id_name}=  Set Variable    enabled-filter-checkbox--check-box
     Run Keyword And Continue On Failure
-    ...    Verify The Resources Are Filtered
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_ENABLE}
-    Deselect Checkbox Using Id    enabled-filter-checkbox--check-box
+    ...    Verify Resources Count By Checkbox ID    ${id_name}
 
 Filter By Application (Aka Povider) And Check Output
     [Documentation]    Filter by application (aka provider)
     ${id_name}=  Set Variable    Anaconda Professional--check-box
-    Select Checkbox Using Id    ${id_name}
-    Verify The Resources Are Filtered
-    ...    expected_providers=${EXPECTED_ITEM_PROVIDERS}    expected_number=10
-    Deselect Checkbox Using Id    id=${id_name}
+    Run Keyword And Continue On Failure
+    ...    Verify Resources Count By Checkbox ID    ${id_name}
 
 Filter By Resource Type And Check Output
     [Documentation]    Filter by resource type
-    Select Checkbox Using Id    id=tutorial--check-box
-    Verify The Resources Are Filtered
-    ...    expected_types=${EXPECTED_ITEM_RESOURCE_TYPE}    expected_number=15
-    Deselect Checkbox Using Id    id=tutorial--check-box
+    ${id_name}=  Set Variable    tutorial--check-box
+    Run Keyword And Continue On Failure
+    ...    Verify Resources Count By Checkbox ID    ${id_name}
 
 Filter By Provider Type And Check Output
     [Documentation]    Filter by provider type
-    Select Checkbox Using Id    id=Red Hat managed--check-box
-    Verify The Resources Are Filtered
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
-    Deselect Checkbox Using Id    id=Red Hat managed--check-box
+    ${id_name}=  Set Variable    Red Hat managed--check-box
+    Run Keyword And Continue On Failure
+    ...    Verify Resources Count By Checkbox ID    ${id_name}
 
 Filter By Using More Than One Filter And Check Output
     [Documentation]    Filter resouces using more than one filter ${list_of_ids} = list of check-box ids

@@ -27,7 +27,7 @@ ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Page
     [Documentation]    Verifies user are able to create and execute a DS Pipeline leveraging on
     ...                DS Project UI
-    [Tags]    Smoke     RunThisTest
+    [Tags]    Smoke
     ...       ODS-2206    ODS-2226    ODS-2633
 
     Open Data Science Project Details Page    ${PRJ_TITLE}

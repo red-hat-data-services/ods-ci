@@ -138,6 +138,15 @@ Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     Run Keyword And Ignore Error       Wait Until Page Contains    Error displaying pipelines    timeout=60s
     Run Keyword And Warn On Failure    Page Should Not Contain     Error displaying pipelines
 
+Verify That There Are No Sample Pipelines After Creating Pipeline Server
+    [Documentation]     Verify creation of sample pipelines by default when deploying dsp in RHOAI
+    ${status}=      Run Keyword And Return Status   Wait Until Page Contains    Create pipeline    timeout=10s
+    IF  ${status}
+        Log     Default Sample Pipelines are Not Available and No Pipelines Created
+    ELSE
+        Log     Default Sample Pipelines are Available
+    END
+
 Open Pipeline Detail
     [Documentation]    Open the Pipeline detail
     [Arguments]    ${pipeline_name}

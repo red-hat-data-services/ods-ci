@@ -15,8 +15,8 @@ Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
-  Verify Service Is Available In The Explore Page    IBM Watson Studio
-  Verify Service Provides "Get Started" Button In The Explore Page    IBM Watson Studio
+  Verify Service Is Available In The Explore Page    IBM watsonx.ai
+  Verify Service Provides "Get Started" Button In The Explore Page    IBM watsonx.ai
 
 * Keywords ***
 IBM Watson Studio Suite Setup

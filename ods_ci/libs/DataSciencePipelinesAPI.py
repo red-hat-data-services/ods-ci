@@ -1,6 +1,5 @@
 import base64
 import json
-import os
 import subprocess
 import time
 from json import JSONDecodeError

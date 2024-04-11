@@ -1,4 +1,3 @@
-from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
 from robotlibcore import keyword
 from semver import VersionInfo
@@ -223,7 +222,6 @@ class Helpers:
         shape={"B": 1, "C": 3, "H": 512, "W": 512},
         no_requests=100,
     ):
-        import os
         import random
         from pathlib import Path
 

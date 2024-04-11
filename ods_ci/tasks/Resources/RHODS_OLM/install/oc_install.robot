@@ -29,13 +29,7 @@ Install RHODS
   ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
-            IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
-                 Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
-            ELSE
-                 ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
-                 Create Catalog Source For Operator
-                 Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
-            END
+             Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
           Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
@@ -47,13 +41,7 @@ Install RHODS
       END
   ELSE IF  "${cluster_type}" == "managed"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
-           IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
-                Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
-           ELSE
-                ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
-                Create Catalog Source For Operator
-                Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
-           END
+          Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
           FAIL    Provided test envrioment is not supported
       END
@@ -61,27 +49,18 @@ Install RHODS
   Wait Until Csv Is Ready    ${OPERATOR_NAME}
 
 Verify RHODS Installation
-  # Needs to be removed ASAP
-  IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
-    Set Global Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
-    Set Global Variable    ${MONITORING_NAMESPACE}    opendatahub
-    Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-operators
-    Set Global Variable    ${NOTEBOOKS_NAMESPACE}    opendatahub
-  END
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
-  IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
-       Wait For Pods Numbers  1
-       ...                   namespace=${OPERATOR_NAMESPACE}
-       ...                   label_selector=name=${OPERATOR_NAME}
-       ...                   timeout=2000
-       Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
-       Log  Verified redhat-ods-operator  console=yes
-  END
+  Wait For Pods Numbers  1
+  ...                   namespace=${OPERATOR_NAMESPACE}
+  ...                   label_selector=name=${OPERATOR_NAME}
+  ...                   timeout=2000
+  Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
+  Log  Verified redhat-ods-operator  console=yes
 
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
-    IF  "${PRODUCT}" == "ODH"
+    IF  '"${PRODUCT}" == "ODH" and !("${UPDATE_CHANNEL}" == "odh-nightlies" and "${cluster_type}" == "managed")'
         Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
@@ -198,7 +177,7 @@ Install RHODS In Self Managed Cluster Using CLI
 Install RHODS In Managed Cluster Using CLI
   [Documentation]   Install rhods on managed managed cluster using cli
   [Arguments]     ${cluster_type}     ${image_url}
-  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url}  #robocop:disable
+  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} -a ${APPLICATIONS_NAMESPACE} -m ${MONITORING_NAMESPACE}  #robocop:disable
   Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
 
@@ -314,15 +293,6 @@ Is Component Enabled
               RETURN    true
          END
     END
-
-Create Catalog Source For Operator
-    [Documentation]    Create Catalog source for odh nightly build
-    [Arguments]    ${file_path}=tasks/Resources/Files/
-    ${return_code}    ${output} =    Run And Return Rc And Output    sed -i "s,image: .*,image: ${image_url},g" ${file_path}/odh_catalogsource.yml
-    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while making changes to file
-    ${return_code}    ${output} =    Run And Return Rc And Output   oc apply -f ${file_path}/odh_catalogsource.yml
-    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while apply the catalog
-    Wait for Catalog To Be Ready
 
 Wait for Catalog To Be Ready
     [Documentation]    Verify catalog is Ready OR NOT

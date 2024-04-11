@@ -88,9 +88,9 @@ Uninstall RHODS V2
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete clusterserviceversion opendatahub-operator.1.18.0 -n openshift-operators --ignore-not-found
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription rhods-odh-nightly-operator -n openshift-operators --ignore-not-found # robocop: disable
+    ...    oc delete CatalogSource rhoai-catalog-dev -n openshift-marketplace --ignore-not-found  # robocop: disable
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete CatalogSource odh-catalog-dev -n openshift-marketplace --ignore-not-found  # robocop: disable
+        ...    oc delete CatalogSource addon-managed-odh-catalog -n openshift-marketplace --ignore-not-found  # robocop: disable
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${OPERATOR_NAMESPACE} --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting operatorgroup

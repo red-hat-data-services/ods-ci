@@ -123,7 +123,6 @@ ignore = [
   # "W504", # not yet implemented; line break after binary operator
  # TODO
   "B006", # Do not use mutable data structures for argument defaults
-  "B007", # Loop control variable `retry` not used within loop body
   "COM812", # Trailing comma missing
   "F841", # Local variable `response` is assigned to but never used
   "FA100", # Missing `from __future__ import annotations`, but uses `typing.Optional`

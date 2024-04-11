@@ -40,6 +40,7 @@ robotframework-robocop = "^4.1.0"
 robotframework-tidy = "^4.5.0"
 ruff = "0.3.4"
 pyright = "1.1.356"
+pre-commit = "3.7.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -62,7 +63,10 @@ ignore = [
 pythonVersion = "3.11"
 pythonPlatform = "Linux"
 
+# https://docs.astral.sh/ruff/configuration
 [tool.ruff]
+include = ["pyproject.toml", "ods_ci/**/*.py"]
+exclude = ["ods_ci/tests/Resources/Files/pipeline-samples/"]
 target-version = "py311"
 line-length = 120
 
@@ -137,7 +141,6 @@ ignore = [
   "PLW1514", # `codecs.open` in text mode without explicit `encoding` argument
   "PLW2901", # `for` loop variable `tag_it` overwritten by assignment target
   "RET501", # Do not explicitly `return None` in function if it is the only possible return value
-  "RET503", # Missing explicit `return` at the end of function able to return non-`None` value
   "RET504", # Unnecessary assignment to `names` before `return` statement
   "RET505", # Unnecessary `else` after `return` statement
   "UP015", # Unnecessary open mode parameters
@@ -147,7 +150,6 @@ ignore = [
  # TODO(jdanek)
   "E402", # Module level import not at top of file
   "E721", # Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
-  "F401", # `re` imported but unused
   "F403", # `from python_terraform import *` used; unable to detect undefined names
   "F405", # `IsNotFlagged` may be undefined, or defined from star imports
   "F821", # Undefined name `os`

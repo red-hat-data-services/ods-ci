@@ -13,9 +13,6 @@ Ray smoke test
     [Documentation]    Check that Kuberay deployment and service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    [Setup]    Enable Component    ray
-    [Teardown]    Disable Component    ray
-    Wait Component Ready    ray
     Log To Console    Waiting for kuberay-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${ODH_NAMESPACE} deployment/kuberay-operator
     ...    shell=true    stderr=STDOUT
@@ -36,9 +33,6 @@ Codeflare smoke test
     [Documentation]    Check that Codeflare deployment and its monitoring service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    [Setup]    Enable Component    codeflare
-    [Teardown]    Disable Component    codeflare
-    Wait Component Ready    codeflare
     Log To Console    Waiting for codeflare-operator-manager to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${ODH_NAMESPACE} deployment/codeflare-operator-manager
     ...    shell=true    stderr=STDOUT
@@ -58,9 +52,6 @@ Kueue smoke test
     [Documentation]    Check that Kueue deployment and its service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    [Setup]    Enable Component    kueue
-    [Teardown]    Disable Component    kueue
-    Wait Component Ready    kueue
     Log To Console    Waiting for kueue-controller-manager to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${ODH_NAMESPACE} deployment/kueue-controller-manager
     ...    shell=true    stderr=STDOUT

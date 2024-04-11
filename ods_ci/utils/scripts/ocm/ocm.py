@@ -6,8 +6,6 @@ import io
 import json
 import os
 import re
-import shutil
-import subprocess
 import sys
 import time
 from contextlib import redirect_stderr, redirect_stdout
@@ -18,7 +16,7 @@ import yaml
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../")
 from logger import log
-from util import clone_config_repo, compare_dicts, execute_command, read_data_from_json, read_yaml, write_data_in_json
+from util import compare_dicts, execute_command, read_data_from_json, write_data_in_json
 
 """
 Class for Openshift Cluster Manager
@@ -564,7 +562,7 @@ class OpenshiftClusterManager:
             log.error(f"{kind} object called {name} not found (ns: {namespace}).")
         return found
 
-    def install_rhoam_addon(self, exit_on_failure=True):
+    def install_rhoam_addon(self, exit_on_failure=True) -> bool:
         if not self.is_addon_installed(addon_name="managed-api-service"):
             add_vars = {"CIDR": "10.1.0.0/26"}
             failure_flags = []
@@ -642,13 +640,14 @@ class OpenshiftClusterManager:
             #    self.wait_for_addon_installation_to_complete(addon_name="managed-api-service")
         else:
             log.info("managed-api-service is already installed on {}".format(self.cluster_name))
+            return True
 
     def uninstall_rhoam_addon(self, exit_on_failure=True):
         """Uninstalls RHOAM addon"""
         self.uninstall_addon(addon_name="managed-api-service", exit_on_failure=exit_on_failure)
         self.wait_for_addon_uninstallation_to_complete(addon_name="managed-api-service")
 
-    def install_managed_starburst_addon(self, license, exit_on_failure=True):
+    def install_managed_starburst_addon(self, license, exit_on_failure=True) -> bool:
         if not self.is_addon_installed(addon_name="managed-starburst"):
             add_vars = {
                 "NOTIFICATION_EMAIL": self.notification_email,
@@ -676,6 +675,7 @@ class OpenshiftClusterManager:
             #    self.wait_for_addon_installation_to_complete(addon_name="managed-starburst")
         else:
             log.info(f"managed-api-service is already installed on {self.cluster_name}")
+            return True
 
     def uninstall_managed_starburst_addon(self, exit_on_failure=True):
         """Uninstalls RHOAM addon"""
@@ -1181,7 +1181,7 @@ class OpenshiftClusterManager:
         write_data_in_json(filename=self.osd_latest_version_data, data=old_data)
         log.info("File is updated to : {} ".format(old_data))
 
-    def change_cluster_channel_group(self):
+    def change_cluster_channel_group(self) -> str | None:
         """update the channel using ocm cmd"""
         cluster_id = self.get_osd_cluster_id()
         run_change_channel_cmd = "ocm --v={} patch /api/clusters_mgmt/v1/clusters/{} --body {}".format(
@@ -1191,9 +1191,9 @@ class OpenshiftClusterManager:
         ret = execute_command(run_change_channel_cmd)
         if ret is None:
             log.info("Failed to update the channel to {}".format(self.cluster_name))
-            return ret
+        return ret
 
-    def update_ocm_policy(self):
+    def update_ocm_policy(self) -> str | None:
         """update cluster policy to schedule for upgrade osd"""
         cluster_id = self.get_osd_cluster_id()
         utc_time_cmd = """ oc debug node/"$(oc get nodes | awk 'FNR == 2 {print $1}')"\
@@ -1221,7 +1221,7 @@ class OpenshiftClusterManager:
         ret = execute_command(schedule_cluster_upgrade)
         if ret is None:
             log.info("Failed  to Update the Upgrade Policy")
-            return ret
+        return ret
 
 
 if __name__ == "__main__":

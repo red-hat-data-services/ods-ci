@@ -52,10 +52,6 @@ Run TestMnistPyTorchMCAD ODH test
 
 *** Keywords ***
 Prepare Codeflare E2E Test Suite
-    Enable Component    ray
-    Enable Component    codeflare
-    Wait Component Ready    ray
-    Wait Component Ready    codeflare
     Create Directory    %{WORKSPACE}/codeflare-e2e-logs
     Create Directory    %{WORKSPACE}/codeflare-odh-logs
     RHOSi Setup
@@ -69,8 +65,6 @@ Teardown Codeflare E2E Test Suite
     IF    ${result.rc} != 0
         FAIL    Unable to remove compiled binaries
     END
-    Disable Component    codeflare
-    Disable Component    ray
     RHOSi Teardown
 
 Run Codeflare E2E Test

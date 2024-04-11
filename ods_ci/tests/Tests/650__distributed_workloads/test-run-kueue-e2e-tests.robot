@@ -45,9 +45,6 @@ Prepare Kueue E2E Test Suite
     # Store login information into dedicated config
     Login To OCP Using API And Kubeconfig    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${KUEUE_KUBECONFIG}
 
-    Enable Component    kueue
-    Wait Component Ready    kueue
-
     # Add label instance-type=on-demand on worker node
     Log To Console    Add label on worker node ...
     ${return_code}    ${output}    Run And Return Rc And Output    oc get nodes -o name --selector='node-role.kubernetes.io/worker,node-role.kubernetes.io notin (infra)' | tail -n1
@@ -65,7 +62,6 @@ Teardown Kueue E2E Test Suite
     IF    ${result.rc} != 0
         FAIL    Unable to remove files
     END
-    Disable Component    kueue
 
     # Remove label instance-type=on-demand from worker node
     Log To Console    Remove label from worker node ...

@@ -43,9 +43,7 @@ Prepare Kuberay E2E Test Suite
     IF    ${result.rc} != 0
         FAIL    Unable to retrieve e2e compiled binary
     END
-    Enable Component    ray
     RHOSi Setup
-    Wait Component Ready    ray
 
 Teardown Kuberay E2E Test Suite
     Log To Console    "Removing test binaries"
@@ -56,7 +54,6 @@ Teardown Kuberay E2E Test Suite
     IF    ${result.rc} != 0
         FAIL    Unable to remove compiled binaries
     END
-    Disable Component    ray
     RHOSi Teardown
 
 Run Kuberay E2E Test

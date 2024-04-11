@@ -1,3 +1,4 @@
+# robocop: off=line-too-long,unnecessary-string-conversion,file-too-long,too-many-arguments,too-many-calls-in-keyword
 *** Settings ***
 Documentation    Collection of keywords to interact with DS Pipelines
 Resource       Projects.resource
@@ -16,8 +17,9 @@ ${RUN_TOPOLOGY_OUTPUT_BTN_XP}=        xpath://*[@data-testid="bottom-drawer-tab-
 ${RUN_TOPOLOGY_XP}=                   xpath://*[@data-test-id="topology"]
 ${PIPELINES_DISABLED_EXC_MARK}=       xpath=//*[@id="page-sidebar"]/div/nav/ul/li[3]/a/div/div[2]
 
+
 *** Keywords ***
-Create Pipeline Server
+Create Pipeline Server    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Creates the DS Pipeline server from DS Project details page
     ...                It assumes the Data Connection is aleady created
     ...                and you wants to use defaul DB configurations [TEMPORARY]
@@ -65,23 +67,29 @@ Select Data Connection
     [Documentation]    Selects an existing data connection from the dropdown
     ...                in the modal for Pipeline Server creation
     [Arguments]    ${dc_name}
+    # robocop: off=line-too-long
     Wait Until Page Contains Element    xpath://div[@class="pf-v5-c-form__group"][.//label//*[text()="Access key"]]//div[@data-ouia-component-type="PF5/Dropdown"]
     Click Element                       xpath://div[@class="pf-v5-c-form__group"][.//label//*[text()="Access key"]]//div[@data-ouia-component-type="PF5/Dropdown"]
     Wait Until Page Contains Element    xpath://button//*[text()="${dc_name}"]
     Click Element    xpath://button//*[text()="${dc_name}"]
+
+Wait Until Pipeline Is Not Listed
+    [Documentation]    Waits until pipeline is no longer listed in the pipelines table
+    [Arguments]    ${pipeline_name}    ${timeout}=60s
+    Maybe Wait For Dashboard Loading Spinner Page
+    ${pipeline_row_xp}=    Set Variable    (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
+    Wait Until Page Does Not Contain Element    ${pipeline_row_xp}    timeout=${timeout}
 
 Import Pipeline
     [Documentation]    Import a pipeline definition from DS Project details page.
     ...                It expects to receive the relative path starting from ods_ci/
     [Arguments]    ${name}    ${filepath}    ${project_title}    ${description}=${NONE}    ${press_cancel}=${FALSE}
     Projects.Move To Tab    Pipelines
-    Wait Until Element Is Enabled       ${PIPELINES_IMPORT_BTN_XP}  timeout=120
-    Element Should Be Enabled    ${PIPELINES_IMPORT_BTN_XP}
     Click Button    ${PIPELINES_IMPORT_BTN_XP}
     Wait Until Generic Modal Appears
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
     Fill In Pipeline Import Form    ${name}    ${filepath}    ${project_title}    ${description}
-    IF    ${press_cancel} == ${TRUE}
+    IF    ${press_cancel}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
         Click Button    ${PIPELINES_IMPORT_BTN_FORM_XP}
@@ -89,24 +97,24 @@ Import Pipeline
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
 
-Create Pipeline Run    # robocop: disable
+Create Pipeline Run
     [Documentation]    Create a pipeline run from DS Project details page.
     ...                Note that the ${type} arguments can accept:
     ...                - immediate
     ...                - schedule -> this requires to insert additional arguments
     ...                TEMPORARILY SUPPORTING ONLY IMMEDIATE RUNS AND DEFAULT MODEL PARAMS
     [Arguments]    ${name}    ${pipeline_name}=${NONE}    ${run_type}=Immediate
-    ...            ${trigger_type}=Periodic    ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
+    ...            ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
     ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    ${press_cancel}=${FALSE}    &{model_param}
     Projects.Move To Tab    Pipelines
-    Pipelines.Click Action From Actions Menu    pipeline_name=${pipeline_name}    action=Create run
+    Pipelines.Click Action From Pipeline Actions Menu    pipeline_name=${pipeline_name}    action=Create run
     Wait For RHODS Dashboard To Load    expected_page=Create run
     ...    wait_for_cards=${FALSE}
     Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
     ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
     ...    start_time=${start_time}    end_date=${end_date}    end_time=${end_time}
     ...    cron_expr=${cron_expr}    &{model_param}
-    IF    ${press_cancel} == ${TRUE}
+    IF    ${press_cancel}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
         Wait For RHODS Dashboard To Load    expected_page=Pipelines
         ...    wait_for_cards=${FALSE}
@@ -118,12 +126,34 @@ Create Pipeline Run    # robocop: disable
     END
     RETURN    ${workflow_name}
 
-# robocop: disable=too-many-calls-in-keyword,line-too-long
-Click Action From Actions Menu
-    [Documentation]    Click an action from Actions menu (3-dots menu on the right)
-    [Arguments]    ${pipeline_name}    ${action}
+Expand Pipeline Details
+    [Documentation]    Expands a pipeline row in the dashboard UI
+    [Arguments]    ${pipeline_name}
 
-    ${pipeline_row_xp}=    Set Variable    //*[@data-testid="table-row-title-${pipeline_name}"]/../..
+    ${pipeline_row_xp}=                 Set Variable    (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
+    ${pipeline_details_xp}=             Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Details"]
+    ${expanded_pipeline_details_xp}=    Set Variable    ${pipeline_row_xp}/td/button[@aria-expanded="true"]
+
+    ${is_expanded}=  Run Keyword And Return Status
+    ...  Page Should Contain Element  xpath:${expanded_pipeline_details_xp}
+    IF  not ${is_expanded}    Click Button  xpath:${pipeline_details_xp}
+
+Collapse Pipeline Details
+    [Documentation]    Collapses a pipeline row in the dashboard UI
+    [Arguments]    ${pipeline_name}
+    ${pipeline_row_xp}=                 Set Variable    (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
+    ${pipeline_details_xp}=             Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Details"]
+    ${expanded_pipeline_details_xp}=    Set Variable    ${pipeline_row_xp}/td/button[@aria-expanded="true"]
+
+    ${is_expanded}=  Run Keyword And Return Status
+    ...  Page Should Contain Element  xpath:${expanded_pipeline_details_xp}
+    IF  ${is_expanded}    Click Button  xpath:${pipeline_details_xp}
+
+Click Action From Pipeline Actions Menu
+    [Documentation]    Click an action from Pipeline Actions menu (3-dots menu on the right)
+    [Arguments]    ${pipeline_name}    ${action}
+    # robocop: off=line-too-long
+    ${pipeline_row_xp}=    Set Variable    (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
     ${kebab_xp}=           Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Kebab toggle"]
     ${kebap_action_xp}=    Set Variable    ${pipeline_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
     Wait Until Page Contains Element    ${kebab_xp}
@@ -131,6 +161,17 @@ Click Action From Actions Menu
     Wait Until Page Contains Element    ${kebap_action_xp}
     Click Element                       ${kebap_action_xp}
 
+Click Action From Pipeline Version Actions Menu
+    [Documentation]    Click an action from Pipeline Version Actions menu (3-dots menu on the right)
+    [Arguments]    ${pipeline_version_name_contains}    ${action}
+    # robocop: off=line-too-long
+    ${pipeline_row_xp}=    Set Variable    (//*[contains(@data-testid,"table-row-title-${pipeline_version_name_contains}")])[2]/../..
+    ${kebab_xp}=           Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Kebab toggle"]
+    ${kebap_action_xp}=    Set Variable    ${pipeline_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
+    Wait Until Page Contains Element    ${kebab_xp}
+    Click Element                       ${kebab_xp}
+    Wait Until Page Contains Element    ${kebap_action_xp}
+    Click Element                       ${kebap_action_xp}
 
 Click Action From Pipeline Run Actions Menu
     [Documentation]    In Data Science Pipelines > Runs, click an action from Actions menu (3-dots menu on the right)
@@ -144,13 +185,12 @@ Click Action From Pipeline Run Actions Menu
     Wait Until Page Contains Element    ${kebap_action_xp}
     Click Element                       ${kebap_action_xp}
 
-
 Pipeline Context Menu Should Be Working
     [Documentation]   Test Pipeline YAML context menu works with mouse right-click and with keyboard
     [Arguments]    ${pipeline_name}
     ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
     Menu.Navigate To Page    Data Science Pipelines    Pipelines
-    Wait Until Element is Visible     //a[text()="${pipeline_name}"]          timeout=30s
+    Wait Until Element Is Visible     //a[text()="${pipeline_name}"]          timeout=30s
     Click Link      ${pipeline_name}
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
     Open Context Menu    //div[contains(@class, 'lines-content')]
@@ -164,7 +204,7 @@ Pipeline Yaml Should Be Readonly
     [Arguments]    ${pipeline_name}
     ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
     Menu.Navigate To Page    Data Science Pipelines    Pipelines
-    Wait Until Element is Visible     //a[text()="${pipeline_name}"]          timeout=30s
+    Wait Until Element Is Visible     //a[text()="${pipeline_name}"]          timeout=30s
     Click Link      ${pipeline_name}
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
     Press Keys    //div[contains(@class, 'lines-content')]    cannot_enter_read_only
@@ -174,23 +214,24 @@ Pipeline Yaml Should Be Readonly
 
 Pipeline Should Be Listed
     [Documentation]    Verifies a pipeline is listed in Data Science Project > Pipelines
-    [Arguments]     ${pipeline_name}    ${pipeline_description}
-    Projects.Move To Tab    Pipelines
-    ${pipeline_name_xpath}=    Set Variable    //*[@data-testid="table-row-title-${pipeline_name}"]
-    Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_name_xpath}
+    [Arguments]     ${pipeline_name}    ${pipeline_description}=${EMPTY}
 
-    IF    "${pipeline_description}" != ${NONE}
+    Projects.Move To Tab    Pipelines
+    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]
+    Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_title_xp}
+
+    IF    "${pipeline_description}" != "${EMPTY}"
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
-        ...        ${pipeline_name_xpath}/following-sibling::*[p[text()="${pipeline_description}"]]
+        ...        ${pipeline_title_xp}/following-sibling::*[p[text()="${pipeline_description}"]]
     END
 
 Pipeline Should Not Be Listed
     [Documentation]    Verifies a pipeline not listed in Data Science Project > Pipelines
-    [Arguments]     ${pipeline_name}    ${pipeline_description}
+    [Arguments]     ${pipeline_name}
     Projects.Move To Tab    Pipelines
-    ${pipeline_name_xpath}=    Set Variable    //*[@data-testid="table-row-title-${pipeline_name}"]
-    Run Keyword And Continue On Failure    Wait Until Page Does Not Contain Element    ${pipeline_name_xpath}
+    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]
+    Run Keyword And Continue On Failure    Wait Until Page Does Not Contain Element    ${pipeline_title_xp}
 
 Pipeline Last Run Should Be
     [Documentation]    Checks the pipeline last run which is reported is the expected one
@@ -279,8 +320,8 @@ Verify Pipeline Server Deployments    # robocop: disable
 
     @{pipeline_metadata_envoy}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-metadata-envoy-dspa
-    ${containerNames}=  Create List  container
-    Verify Deployment    ${pipeline_metadata_envoy}  1  1  ${containerNames}
+    ${containerNames}=  Create List  container    oauth-proxy
+    Verify Deployment    ${pipeline_metadata_envoy}  1  2  ${containerNames}
 
     @{pipeline_metadata_grpc}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-metadata-grpc-dspa
@@ -307,7 +348,6 @@ Verify Pipeline Server Deployments    # robocop: disable
     ${containerNames}=  Create List  mariadb
     Verify Deployment    ${mariadb}  1  1  ${containerNames}
 
-
 Wait Until Pipeline Server Is Deployed
     [Documentation]    Waits until all the expected pods of the pipeline server
     ...                are running
@@ -315,8 +355,18 @@ Wait Until Pipeline Server Is Deployed
     Wait Until Keyword Succeeds    10 times    10s
     ...    Verify Pipeline Server Deployments    project_title=${project_title}
 
+Wait Until Pipeline Server Is Deleted
+    [Documentation]    Waits until all pipeline server pods are deleted
+    [Arguments]    ${project_title}
+    # robocop: off=expression-can-be-simplified
+    FOR  ${_}  IN RANGE  0  30
+        ${pod_count}=    Run    oc get pods -n ${project_title} -l component=data-science-pipelines | wc -l
+        IF  ${pod_count}==0  BREAK
+        Sleep  1s
+    END
+
 # TODO: we need to replace this keyword for a similar one checking in Data Science Pipelines > Runs
-#Verify Successful Pipeline Run Via Project UI
+# Verify Successful Pipeline Run Via Project UI
 #    [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state
 #    ...    In the DS Project view of a given project
 #    [Arguments]    ${pipeline_run_name}    ${pipeline_name}    ${project_name}

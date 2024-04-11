@@ -78,7 +78,7 @@ Close QuickStart From Button
     Click Element    //*[@data-testid="qs-drawer-close"]
     ${leave_btn_exists} =    Run Keyword And Return Status    Page Should Contain Element
     ...    //*[@data-test="leave button"]
-    IF  ${leave_btn_exists}==${TRUE}    Click Element    //*[@data-test="leave button"]
+    IF  ${leave_btn_exists}    Click Element    //*[@data-test="leave button"]
 
 Mark Step Check As Yes
     Wait Until Page Contains Element    //input[@data-testid="qs-drawer-check-yes"]
@@ -92,7 +92,7 @@ Mark Step Check As No
 Go To Next QuickStart Step
     ${next_btn_exists} =    Run Keyword And Return Status    Page Should Contain Element
     ...    //button[@data-testid="qs-drawer-next"]
-    IF  ${next_btn_exists}==${TRUE}    Click Button    //button[@data-testid="qs-drawer-next"]
+    IF  ${next_btn_exists}    Click Button    //button[@data-testid="qs-drawer-next"]
 
 Continue QuickStart
     Click Button    //button[@data-testid="qs-drawer-continue"]

@@ -544,7 +544,7 @@ class OpenshiftClusterManager:
             "maximum {} times".format(kind, name, namespace, retry_sec_interval, retries)
         )
         found = False
-        for retry in range(retries):
+        for _ in range(retries):
             cmd = f"oc get {kind} {name} -n {namespace}"
             ret = execute_command(cmd)
             if ret is None or "Error" in ret:

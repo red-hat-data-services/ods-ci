@@ -122,7 +122,7 @@ def add_testcase_properties(xml_obj, tcconfig=None):
             testcase.insert(0, tcproperties)
         else:
             xml_obj_testsuite = xml_obj.find("./testsuite")
-            for i in range(len(polarion_id) - 1):
+            for _ in range(len(polarion_id) - 1):
                 xml_obj_testsuite.append(deepcopy(testcase))
             multile_test_ids[testcase.get("name")] = polarion_id
 

@@ -3,12 +3,14 @@ Resource        ../../../Resources/Page/LoginPage.robot
 Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource        ../../../Resources/RHOSi.resource
 Library         SeleniumLibrary
-Suite Setup     IBM Watson Studio Suite Setup
-Suite Teardown  IBM Watson Studio Suite Teardown
+Suite Setup     IBM Watsonx AI Suite Setup
+Suite Teardown  IBM Watsonx AI Suite Teardown
 Test Tags       ExcludeOnODH
 
 *** Test Cases ***
-Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page
+Verify IBM Watsonx AI Is Available In RHODS Dashboard Explore Page
+  [Documentation]  Very simple test to check that the Watsonx.ai tile/card is present
+  ...    in the list of applications on the Applications -> Explore page.
   [Tags]  Smoke
   ...     Tier1
   ...     ODS-267
@@ -19,9 +21,11 @@ Verify IBM Watson Studio Is Available In RHODS Dashboard Explore Page
   Verify Service Provides "Get Started" Button In The Explore Page    IBM watsonx.ai
 
 * Keywords ***
-IBM Watson Studio Suite Setup
+IBM Watsonx AI Suite Setup
+  [Documentation]  Suite setup
   Set Library Search Order  SeleniumLibrary
   RHOSi Setup
 
-IBM Watson Studio Suite Teardown
+IBM Watsonx AI Suite Teardown
+  [Documentation]  Suite teardown
   Close All Browsers

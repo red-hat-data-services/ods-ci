@@ -98,6 +98,7 @@ Resource Page Should Contain
     Verify The Resources Are Filtered    list_of_items=${expected_items}
 
 Verify Resources Count By Checkbox ID
+    [Documentation]    Select resources by Checkbox ID and verify that its count number is correct
     [Arguments]     ${checkbox_id}
     Select Checkbox Using Id    ${checkbox_id}
     ${expected_number}=	   Get Count From Checkbox Label By Id    ${checkbox_id}

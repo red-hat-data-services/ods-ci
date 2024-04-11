@@ -222,8 +222,8 @@ Verify Version Selection Dropdown
     ...                uses the recommended image by default, and has two options
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_LABEL}
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
-    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
     Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
     Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]

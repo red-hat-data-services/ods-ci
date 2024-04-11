@@ -12,6 +12,7 @@ Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
 Test Tags          Dashboard
 
+
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI Common Prj
 ${PRJ_TITLE1}=    ODS-CI DS Project1
@@ -169,13 +170,9 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${pv_name}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_3_TITLE}
-    #SeleniumLibrary.Reload Page
-    #Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_3_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_3_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_3_TITLE}   namespace=${ns_name}
-    #SeleniumLibrary.Reload Page
-    #Wait Until Project Is Open    project_title=${PRJ_TITLE}
     ${connected_woksps}=    Create List    ${WORKBENCH_3_TITLE}
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${connected_woksps}
@@ -187,23 +184,18 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     [Tags]    Sanity    Tier1
     ...       ODS-1825    ODS-1972
     [Documentation]    Verifies users can add a Data connection to AWS S3
-    [Setup]    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    ...    AND
-    ...    Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
+    Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    ...    AND
-    ...    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
-    ...    AND
-    ...    Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
-    ...    AND
-    ...    Stop Workbench    workbench_title=${WORKBENCH_2_TITLE}    from_running=${FALSE}
-    ...    AND
-    ...    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
+    Stop Workbench    workbench_title=${WORKBENCH_2_TITLE}    from_running=${FALSE}
+    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=data-connections
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
@@ -328,8 +320,8 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Environment Variables Should Be Available In Jupyter    exp_env_variables=${test_envs_list}
-    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE}
-    ...    pvc_title=${WORKBENCH_4_TITLE}-PV
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_4_TITLE}
+    ...    project_title=${PRJ_TITLE}    pvc_title=${WORKBENCH_4_TITLE}-PV
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
     [Tags]    Sanity    Tier1    ODS-1971
@@ -618,7 +610,8 @@ Check Corresponding Notebook CR Exists
     ${res}  ${response}=    Get Openshift Notebook CR From Workbench   workbench_title=${workbench_title}
     ...    namespace=${namespace}
     IF    "${response}" == "${EMPTY}"
-        Run Keyword And Continue On Failure    Fail    msg=Notebook CR not found for ${workbench_title} in ${namespace} NS
+        Run Keyword And Continue On Failure    Fail
+        ...    msg=Notebook CR not found for ${workbench_title} in ${namespace} NS
     END
 
 Check Workbench CR Is Deleted
@@ -657,7 +650,8 @@ Check Corresponding PersistentVolumeClaim Exists
     END
 
 Check Storage PersistentVolumeClaim Is Deleted
-    [Documentation]    Checks if when a PV cluster storage is deleted its Openshift PersistentVolumeClaim gets deleted too
+    [Documentation]    Checks that when a PV cluster storage is deleted,
+    ...    its Openshift PersistentVolumeClaim gets deleted too
     [Arguments]    ${storage_name}   ${namespace}    ${timeout}=10s
     ${status}=      Run Keyword And Return Status    Check Corresponding PersistentVolumeClaim Exists
     ...    storage_name=${storage_name}    namespace=${namespace}
@@ -679,7 +673,8 @@ Environment Variables Should Be Available In Jupyter
         ${n_pairs}=    Get Length    ${env_variable_dict.keys()}
         FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable_dict}
             Log   ${pair_idx}-${key}-${value}
-            Run Keyword And Continue On Failure     Run Cell And Check Output    import os;print(os.environ["${key}"])    ${value}
+            Run Keyword And Continue On Failure     Run Cell And Check Output
+            ...    import os;print(os.environ["${key}"])    ${value}
             Capture Page Screenshot
         END
     END
@@ -702,8 +697,8 @@ Environment Variables Should Be Displayed According To Their Type
         Environment Variable Type Should Be    expected_type=${input_type}    var_idx=${idx}
         FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable_dict}
             Log   ${pair_idx}-${key}-${value}
-            Environment Variable Key/Value Fields Should Be Correctly Displayed    var_idx=${idx}    var_pair_idx=${pair_idx}
-            ...    expected_key=${key}    expected_value=${value}    type=${input_type}
+            Environment Variable Key/Value Fields Should Be Correctly Displayed    var_idx=${idx}
+            ...    var_pair_idx=${pair_idx}    expected_key=${key}    expected_value=${value}    type=${input_type}
         END
     END
     Click Button    ${GENERIC_CANCEL_BTN_XP}
@@ -726,7 +721,9 @@ Environment Variable Key/Value Fields Should Be Correctly Displayed
     ${displayed_val}=    Get Value    ${displayed_value_xp}
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_val}    ${expected_value}
     IF    "${type}" == "Secret"
-        Run Keyword And Continue On Failure    Element Attribute Value Should Be    ${displayed_value_xp}    type    password
+        Run Keyword And Continue On Failure    Element Attribute Value Should Be
+        ...    ${displayed_value_xp}    type    password
     ELSE
-        Run Keyword And Continue On Failure    Element Attribute Value Should Be    ${displayed_value_xp}    type    text
+        Run Keyword And Continue On Failure    Element Attribute Value Should Be
+        ...    ${displayed_value_xp}    type    text
     END

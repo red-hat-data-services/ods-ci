@@ -116,7 +116,6 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     [Tags]    Smoke    Sanity    ODS-1814    Tier1
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=cluster-storages
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}   existing_storage=${TRUE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
@@ -144,8 +143,10 @@ Verify User Can Create A PV Storage
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
+    # Create Storage from UI, but press Cancel at the end (without submitting)
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}    press_cancel=${TRUE}
+    # Create Storage from UI, and submit this time
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${workbenches}   existing_storage=${TRUE}
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
@@ -156,7 +157,7 @@ Verify User Can Create A PV Storage
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
     ...    project_title=${PRJ_TITLE}    pvc_title=${pv_name}
     ...    AND
-    ...    Delete All PVC In Project From CLI    project_title=${PRJ_TITLE}
+    ...    Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
     [Tags]    Smoke    Sanity    ODS-1816    Tier1    ExcludeOnDisconnected
@@ -174,6 +175,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_3_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_3_TITLE}   namespace=${ns_name}
     ${connected_woksps}=    Create List    ${WORKBENCH_3_TITLE}
+    Open Data Science Project Details Page    ${PRJ_TITLE}    tab_id=cluster-storages
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${connected_woksps}
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
@@ -245,7 +247,7 @@ Verify User Can Delete A Data Connection
     Check Data Connection Secret Is Deleted    dc_name=${DC_3_S3_NAME}    namespace=${ns_name}
 
 Verify user can create a workbench with an existing data connection
-    [Tags]  Tier1  ODS-2176
+    [Tags]  Sanity    Tier1  ODS-2176
     [Documentation]  Verifies users can create a workbench with an existing data connection
     ${data_connection_name}=    Set Variable    aDataConnection
     Create S3 Data Connection  project_title=${PRJ_TITLE}
@@ -263,6 +265,7 @@ Verify user can create a workbench with an existing data connection
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     # The data connection has the workbench name in the "Connected workbenches" column
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=data-connections
     Data Connection Should Be Listed    name=${data_connection_name}    type=${DC_S3_TYPE}
     ...                connected_workbench=${workbenches}
 
@@ -341,7 +344,7 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop
     Access To Workbench    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Open JupyterLab Control Panel
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}    timeout-pre-spinner=1m    timeout-spinner=2m
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
     ...    status=${WORKBENCH_STATUS_RUNNING}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
@@ -349,7 +352,7 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop
     ...    Log In Should Not Be Requested
     Wait Until JupyterLab Is Loaded    timeout=2m
     Logout JupyterLab
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}    timeout-pre-spinner=1m    timeout-spinner=2m
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
     ...    status=${WORKBENCH_STATUS_RUNNING}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
@@ -542,14 +545,16 @@ Verify User Can Access Only Its Owned Projects
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     Capture Page Screenshot
-    Number Of Displayed Projects Should Be    expected_number=3
+    # User ldap admin should be able to see all 4 projects
+    Number Of Displayed Projects Should Be    expected_number=4
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Capture Page Screenshot
-    Number Of Displayed Projects Should Be    expected_number=3
+    # User cluster admin should be able to see all 4 projects
+    Number Of Displayed Projects Should Be    expected_number=4
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}

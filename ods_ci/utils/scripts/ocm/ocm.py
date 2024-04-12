@@ -1158,19 +1158,18 @@ class OpenshiftClusterManager:
             new_data["RUN"] = None
             write_data_in_json(filename=self.osd_latest_version_data, data=old_data)
             return None
-        else:
-            if self.osd_major_version not in old_data.keys() and self.osd_major_version in new_data.keys():
-                old_data[self.osd_major_version] = {"0": "0"}
-                log.info(old_data.keys())
-                lst_to_trigger_job = compare_dicts(
-                    new_data[self.osd_major_version],
-                    old_data[self.osd_major_version],
-                )
-            elif self.osd_major_version in old_data.keys():
-                lst_to_trigger_job = compare_dicts(
-                    new_data[self.osd_major_version],
-                    old_data[self.osd_major_version],
-                )
+        elif self.osd_major_version not in old_data.keys() and self.osd_major_version in new_data.keys():
+            old_data[self.osd_major_version] = {"0": "0"}
+            log.info(old_data.keys())
+            lst_to_trigger_job = compare_dicts(
+                new_data[self.osd_major_version],
+                old_data[self.osd_major_version],
+            )
+        elif self.osd_major_version in old_data.keys():
+            lst_to_trigger_job = compare_dicts(
+                new_data[self.osd_major_version],
+                old_data[self.osd_major_version],
+            )
 
         old_data.update(new_data)
         if self.new_run == "True":

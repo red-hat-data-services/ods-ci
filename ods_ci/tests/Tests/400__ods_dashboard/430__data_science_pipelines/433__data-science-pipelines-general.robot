@@ -37,13 +37,11 @@ Verify Ods User Can Bind The Route Role
     Create A Pipeline Server And Wait For Dsp Route    ${TEST_USER_4.USERNAME}    ${TEST_USER_4.PASSWORD}
     ...         ${TEST_USER_4.AUTH_TYPE}    ${PROJECT_USER4}
     # due that the projects were created, it is expected a failure in the first request
-    ${status}    Login And Wait Dsp Route    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}
-    ...         ${PROJECT_USER4}    ${1}
+    ${status}    Login And Wait Dsp Route    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${PROJECT_USER4}
     Should Be True    ${status} == 403    The user must not have permission to access
-    Add Role To User    ds-pipeline-user-access-pipelines-definition    ${TEST_USER_3.USERNAME}    ${PROJECT_USER4}
+    Add Role To User    ds-pipeline-user-access-dspa    ${TEST_USER_3.USERNAME}    ${PROJECT_USER4}
     # rbac is async and takes some time
     ${status}    Login And Wait Dsp Route    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${PROJECT_USER4}
-    ...    ${30}
     Should Be True    ${status} == 200    Rolling Binding Not Working
 
 

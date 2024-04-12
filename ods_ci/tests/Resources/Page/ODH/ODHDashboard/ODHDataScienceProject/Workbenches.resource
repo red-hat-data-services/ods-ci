@@ -52,6 +52,7 @@ Create Workbench
     ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
     ...             ${data_connection}=${NONE}
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
+    Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_XP}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
@@ -84,8 +85,11 @@ Create Workbench
             Click Element    //a[@href="#cluster-storage"]
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
+            Log    msg=Delete PVC '${pv_name}' before creating new one via the Workbench dialog
+            Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${prj_title}
         ELSE
             Log    msg="pv_existent" argument not set, using default PV settings   level=WARN
+            Delete PVC In Project From CLI    pvc_title=${workbench_title}    project_title=${prj_title}
         END
     ELSE
         Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
@@ -96,7 +100,7 @@ Create Workbench
         Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
         Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
-    Wait Until Generic Modal Disappears  timeout=1 minute
+    Wait Until Element Is Not Visible    //form    10s 
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
 
 #robocop: disable: line-too-long
@@ -221,8 +225,8 @@ Verify Version Selection Dropdown
     ...                uses the recommended image by default, and has two options
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_LABEL}
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
-    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
     Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
     Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]
@@ -275,10 +279,11 @@ Workbench Should Not Be Listed
 
 Workbench Status Should Be
     [Documentation]    Checks a workbench status is the expected one in the DS Project details page
-    [Arguments]     ${workbench_title}      ${status}
+    [Arguments]     ${workbench_title}      ${status}    ${timeout}=10
     Run keyword And Continue On Failure
-    ...    Page Should Contain Element
-    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    Wait Until Page Contains Element
+    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    timeout=${timeout}
 
 Status Error Icon Should Appear
     [Documentation]    Checks if the error icon appears on the given workbench
@@ -292,7 +297,8 @@ Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
     [Arguments]     ${workbench_title}    ${timeout}=60s    ${status}=${WORKBENCH_STATUS_RUNNING}
     Wait Until Page Contains Element
-    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}  # robocop: disable
+    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    timeout=${timeout}
 
 Wait Until Workbench Is Stopped
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
@@ -426,7 +432,7 @@ Get Openshift Notebook CR From Workbench
     [Documentation]    Retrieves name of Notebook CR corresponding to a workbench
     [Arguments]     ${workbench_title}      ${namespace}
     ${result}=    Run Process
-    ...    oc get notebook -n ${namespace} -o jsonpath\='{.items[?(@.metadata.annotations.openshift\\.io/display-name\=\="${workbench_title}")].metadata.name}'
+    ...    oc get notebooks.kubeflow.org -n ${namespace} -o jsonpath\='{.items[?(@.metadata.annotations.openshift\\.io/display-name\=\="${workbench_title}")].metadata.name}'
     ...    shell=yes
     RETURN    ${result.rc}    ${result.stdout}
 

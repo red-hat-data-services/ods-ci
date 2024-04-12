@@ -8,6 +8,7 @@ Resource           ../../../Resources/Page/ODH/JupyterHub/GPU.resource
 Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
 Test Teardown      Close All Browsers
+Test Tags          Dashboard
 
 
 *** Variables ***
@@ -52,8 +53,6 @@ Verify Notebook Tolerations Are Applied To Workbenches
     Run Keyword And Continue On Failure
     ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_TOL_1}
     Open Settings And Set Tolerations To    ${TOLERATIONS}
-    Open Data Science Projects Home Page
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Sleep   40s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
     Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
@@ -70,7 +69,6 @@ Verify Notebook Tolerations Are Applied To Workbenches
     ...    toleration=${TOLERATIONS}
     Open Settings And Set Tolerations To    ${TOLERATIONS_2}
     Sleep   40s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
-    Open Data Science Projects Home Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Stopped     workbench_title=${WORKBENCH_TITLE_TOL_1}
@@ -87,7 +85,6 @@ Verify User Can Add GPUs To Workbench
     [Tags]    Tier1    Sanity
     ...       ODS-2013    Resources-GPU
     Launch Data Science Project Main Page
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
     ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
     ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
@@ -111,7 +108,6 @@ Verify User Can Remove GPUs From Workbench
     [Tags]    Tier1    Sanity
     ...       ODS-2014    Resources-GPU
     Launch Data Science Project Main Page
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
     ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
     ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
@@ -205,7 +201,6 @@ Verify Workbench Does Not Have The Given Tolerations
 Restore Tolerations Settings And Clean Project
     [Documentation]    Reset the notebook tolerations after testing
     Open Settings And Disable Tolerations
-    Open Data Science Projects Home Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
     Stop Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}

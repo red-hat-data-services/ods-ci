@@ -375,7 +375,8 @@ Check Sidebar Links
         ${link_idx}=  Convert To String    ${link_idx}
         ${link_text}=  Get Text    ${s_link}
         ${link_href}=  Get Element Attribute    ${s_link}    href
-        ${link_status}=  Run Keyword And Continue On Failure  Check HTTP Status Code   link_to_check=${link_href}  expected=200
+        ${link_status}=  Check HTTP Status Code   link_to_check=${link_href}  expected=200
+        IF    ${link_status} != 200    Capture Page Screenshot
         ${expected_link}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][url]
         ${expected_text}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][text]
         ${lt_json_list}=  Set Variable  ${expected_data}[${app_id}][sidebar_links][${link_idx}][matching]

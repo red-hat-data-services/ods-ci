@@ -9,7 +9,6 @@ Suite Teardown    Suite Teardown
 
 *** Variables ***
 ${OPERATOR_NS}    ${OPERATOR_NAMESPACE}
-${RHOAI_OPERATOR_DEPLOYMENT_NAME}    rhods-operator
 ${TEST_NS}    test-trustedcabundle
 ${DSCI_NAME}    default-dsci
 ${TRUSTED_CA_BUNDLE_CONFIGMAP}    odh-trusted-ca-bundle
@@ -73,10 +72,11 @@ Validate Trusted CA Bundles State Removed
 *** Keywords ***
 Suite Setup
     [Documentation]    Suite Setup
+    Assign Vars According To Product    ${PRODUCT}
     RHOSi Setup
-    Wait Until Operator Ready    ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
+    Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
-    Create Namespace In Openshift    ${TEST_NS}
+    Create Namespace In Openshift    ${TEST_NS}    
 
 Suite Teardown
     [Documentation]    Suite Teardown

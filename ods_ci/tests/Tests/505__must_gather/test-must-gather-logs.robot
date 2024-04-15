@@ -6,6 +6,7 @@ Resource         ../../Resources/Common.robot
 *** Test Cases ***
 Verify that the must-gather image provides RHODS logs and info
       [Tags]   Smoke
+      ...      Tier1
       ...      ODS-505
       ...      Upgrade
       Get must-gather logs

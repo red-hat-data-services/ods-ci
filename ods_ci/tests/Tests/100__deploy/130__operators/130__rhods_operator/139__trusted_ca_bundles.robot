@@ -3,6 +3,7 @@ Documentation    Test Cases to verify Trusted CA Bundle support
 Library    Collections
 Resource       ../../../../Resources/OCP.resource
 Resource       ../../../../Resources/ODS.robot
+Resource        ../../../../Resources/RHOSi.resource
 Suite Setup    Suite Setup
 Suite Teardown    Suite Teardown
 

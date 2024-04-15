@@ -70,6 +70,7 @@ Protect Sensitive Variables In Keywords
 Initialize Global Variables
     [Documentation]   Sets global variables
     [Arguments]    ${force_fetch}=False
+    Assign Vars According To Product    ${PRODUCT}
     ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
     Set Global Variable   ${RHODS_VERSION}
     Set Prometheus Variables
@@ -82,3 +83,18 @@ Required Global Variables Should Exist
     Variable Should Exist    ${MONITORING_NAMESPACE}
     Variable Should Exist    ${OPERATOR_NAMESPACE}
     Variable Should Exist    ${NOTEBOOKS_NAMESPACE}
+
+Assign Vars According To Product
+    [Documentation]    Assign vars related to product
+    [Arguments]    ${PRODUCT}
+    IF    "${PRODUCT}" == "RHODS"
+        Set Suite Variable    ${OPERATOR_APPNAME}     Red Hat OpenShift AI
+        Set Suite Variable    ${OPERATOR_NAME}    Red Hat OpenShift AI
+        Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
+        Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
+    ELSE IF    "${PRODUCT}" == "ODH"
+        Set Suite Variable    ${OPERATOR_APPNAME}  Open Data Hub Operator
+        Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator
+        Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
+        Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
+    END

@@ -1,5 +1,3 @@
 # Overwrite here values for local variables defined in test suites
 # in order to make them compatible with ODH
 ODH_DASHBOARD_PROJECT_NAME: Open Data Hub
-
-RHOAI_OPERATOR_DEPLOYMENT_NAME: opendatahub-operator-controller-manager

@@ -112,7 +112,7 @@
 
                    "0": {
                          "text": "Get started",
-                         "url": "https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html",
+                         "url": "https://opendatahub.io/docs/getting-started-with-open-data-hub/#launching-jupyter-and-starting-a-notebook-server_get-started",
                          "matching": "full"
                    },
                    "1": {

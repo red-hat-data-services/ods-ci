@@ -24,7 +24,7 @@ ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:se
 *** Test Cases ***
 Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
     [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries
-    [Tags]    Smoke
+    [Tags]    Sanity
     ...       Tier1
     ...       ODS-173
     Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}

@@ -70,6 +70,17 @@ class TestExecuteCommand(unittest.TestCase):
     def test_stderr(self):
         assert util.execute_command("echo stderr >&2") == "stderr\n"
 
+    def test_output_printing_spaces(self):
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            assert util.execute_command("echo hello world") == "hello world\n"
+        assert output.getvalue() == ">: hello world\n"
+
+    def test_output_printing_tab(self):
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            # use echo binary, not the shell builtin, because some shells (e.g. /bin/sh on Ubuntu) don't support -e
+            assert util.execute_command("/usr/bin/echo -e 'hello\tworld'") == "hello\tworld\n"
+        assert output.getvalue() == ">: hello   world\n"
+
     def test_string_cmd(self):
         assert util.execute_command("echo hello world", print_stdout=False) == "hello world\n"
 

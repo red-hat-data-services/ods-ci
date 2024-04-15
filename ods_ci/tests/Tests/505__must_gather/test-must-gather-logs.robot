@@ -5,14 +5,15 @@ Resource         ../../Resources/Common.robot
 
 *** Test Cases ***
 Verify that the must-gather image provides RHODS logs and info
-      [Tags]   Smoke    Sanity
-      ...      Tier1
+      [Tags]   Smoke
       ...      ODS-505
       ...      Upgrade
       Get must-gather logs
       Verify logs for ${APPLICATIONS_NAMESPACE}
-      Verify logs for redhat-ods-operator
-      Run Keyword If RHODS Is Managed    Verify logs for redhat-ods-monitoring
+      IF  "${PRODUCT}" == "RHODS"
+        Verify logs for ${OPERATOR_NAMESPACE}
+        Run Keyword If RHODS Is Managed    Verify logs for ${MONITORING_NAMESPACE}
+      END
       [Teardown]  Cleanup must-gather logs
 
 
@@ -24,29 +25,14 @@ Get must-gather logs
       ${namespaces-log-dir}=      Run     ls -d ${must-gather-dir}/quay-io-modh-must-gather-sha256-*/namespaces
       Set Suite Variable      ${must-gather-dir}
       Set Suite Variable      ${namespaces-log-dir}
-
       Directory Should Exist    ${must-gather-dir}
       Directory Should Not Be Empty   ${must-gather-dir}
 
-Verify logs for ${APPLICATIONS_NAMESPACE}
-      Directory Should Exist    ${namespaces-log-dir}/${APPLICATIONS_NAMESPACE}
-      Directory Should Not Be Empty    ${namespaces-log-dir}/${APPLICATIONS_NAMESPACE}
-      Directory Should Not Be Empty    ${namespaces-log-dir}/${APPLICATIONS_NAMESPACE}/pods
-      ${log-files}=     Run   find ${namespaces-log-dir}/${APPLICATIONS_NAMESPACE}/pods -type f -name "*.log"
-      Should Not Be Equal    ${log-files}  ${EMPTY}
-
-Verify logs for redhat-ods-operator
-      Directory Should Exist    ${namespaces-log-dir}/redhat-ods-operator
-      Directory Should Not Be Empty   ${namespaces-log-dir}/redhat-ods-operator
-      Directory Should Not Be Empty   ${namespaces-log-dir}/redhat-ods-operator/pods
-      ${log-files}=     Run   find ${namespaces-log-dir}/redhat-ods-operator/pods -type f -name "*.log"
-      Should Not Be Equal    ${log-files}  ${EMPTY}
-
-Verify logs for redhat-ods-monitoring
-      Directory Should Exist    ${namespaces-log-dir}
-      Directory Should Not Be Empty   ${namespaces-log-dir}/redhat-ods-monitoring
-      Directory Should Not Be Empty   ${namespaces-log-dir}/redhat-ods-monitoring/pods
-      ${log-files}=     Run   find ${namespaces-log-dir}/redhat-ods-monitoring/pods -type f -name "*.log"
+Verify logs for ${namespace}
+      Directory Should Exist    ${namespaces-log-dir}/${namespace}
+      Directory Should Not Be Empty    ${namespaces-log-dir}/${namespace}
+      Directory Should Not Be Empty    ${namespaces-log-dir}/${namespace}/pods
+      ${log-files}=     Run   find ${namespaces-log-dir}/${namespace}/pods -type f -name "*.log"
       Should Not Be Equal    ${log-files}  ${EMPTY}
 
 Cleanup must-gather logs

@@ -12,7 +12,7 @@ ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
-${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//div[@id="workbench-image-stream-selection"]/button    # robocop: disable
+${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//*[@data-testid="workbench-image-stream-selection"]    # robocop: disable
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//div[@id="workbench-image-stream-selection"]//li//div
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button  # Removing the attribute in case it changes like it did for the image dropdown
 ${WORKBENCH_SIZE_SIDE_MENU_BTN}=           xpath=//nav[@aria-label="Jump to section"]//span[text()="Deployment size"]
@@ -32,7 +32,7 @@ ${WORKBENCH_STATUS_STARTING}=                 Starting...
 ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"]
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
-${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="workbench-image-version-selection"]
+${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=data-science-notebook    TensorFlow=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
@@ -206,10 +206,9 @@ Select Workbench Jupyter Image
     [Arguments]     ${image_name}    ${version}=default
     Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
-    Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
+    Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
     Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-
     IF    "${version}" != "${NONE}"
         IF    "${version}"=="default"
             Verify Version Selection Dropdown

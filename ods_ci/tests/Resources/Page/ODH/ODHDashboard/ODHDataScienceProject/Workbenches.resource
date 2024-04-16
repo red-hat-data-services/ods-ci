@@ -20,7 +20,7 @@ ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-a
 ${WORKBENCH_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
 ${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/following-sibling::button
-${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
+${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@aria-label="Container size select"]/li/button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
@@ -100,7 +100,7 @@ Create Workbench
         Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
         Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
-    Wait Until Element Is Not Visible    //form    10s 
+    Wait Until Element Is Not Visible    //form    10s
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
 
 #robocop: disable: line-too-long

@@ -68,7 +68,6 @@ Serve Model
     ELSE
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
-        SeleniumLibrary.Click Button    //button[@data-testid="empty-state-action-button"]
         Maybe Wait For Dashboard Loading Spinner Page
         SeleniumLibrary.Wait Until Element Is Enabled    ${DEPLOY_MODEL_BTN}
         SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
@@ -120,6 +119,7 @@ Select Model Server
     [Documentation]    If there are multiple model servers to choose from, this keyword
     ...    Selects the given one
     [Arguments]    ${model_server}
+    Sleep    1s     reason=It's taking a little bit time to load the Model Server options
     ${selectable}=    Run Keyword And Return Status
     ...    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
     IF    ${selectable}==True

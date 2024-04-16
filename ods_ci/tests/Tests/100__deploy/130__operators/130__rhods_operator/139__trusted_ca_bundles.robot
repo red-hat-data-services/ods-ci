@@ -76,7 +76,7 @@ Suite Setup
     RHOSi Setup
     Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
-    Create Namespace In Openshift    ${TEST_NS}    
+    Create Namespace In Openshift    ${TEST_NS}
 
 Suite Teardown
     [Documentation]    Suite Teardown

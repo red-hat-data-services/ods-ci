@@ -20,7 +20,7 @@ ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-a
 ${WORKBENCH_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
 ${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/following-sibling::button
-${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@aria-label="Container size select"]/li/button
+${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//*[@data-testid="container-size-group"]//button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]

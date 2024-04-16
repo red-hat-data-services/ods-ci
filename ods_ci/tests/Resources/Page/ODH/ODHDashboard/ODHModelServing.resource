@@ -68,7 +68,6 @@ Serve Model
     ELSE
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
-        SeleniumLibrary.Click Button    //button[@data-testid="empty-state-action-button"]
         Maybe Wait For Dashboard Loading Spinner Page
         SeleniumLibrary.Wait Until Element Is Enabled    ${DEPLOY_MODEL_BTN}
         SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
@@ -121,7 +120,7 @@ Select Model Server
     ...    Selects the given one
     [Arguments]    ${model_server}
     ${selectable}=    Run Keyword And Return Status
-    ...    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
+    ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=1
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
         Click Element    xpath://li/button[.="${model_server}"]

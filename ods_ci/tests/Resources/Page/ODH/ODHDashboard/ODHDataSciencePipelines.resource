@@ -141,12 +141,10 @@ Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
 Verify That There Are No Sample Pipelines After Creating Pipeline Server
     [Documentation]     Verify creation of sample pipelines by default when deploying dsp in RHOAI/ODH
     Log    ${PRODUCT}
-    ${samples_created}=      Run Keyword And Return Status      Wait Until Page Does Not Contain    Start by importing a pipeline    timeout=10s
-    Run Keyword If    ${samples_created}    Log    Sample Pipelines Created
-    IF       ${samples_created}==True and "${PRODUCT}" == "RHODS"
+    ${samples_not_created}=      Run Keyword And Return Status      Wait Until Page Contains    Start by importing a pipeline    timeout=40s
+    Run Keyword If    ${samples_not_created}    Log    Sample Pipelines Not Created
+    IF       ${samples_not_created}==False
         Fail    Default Sample Pipelines should not be created after creating a pipeline server in ${PRODUCT}
-    ELSE IF  ${samples_created}==True and "${PRODUCT}" == "ODH"
-        Fail    Default Sample Pipelines should be created after creating a pipeline server in ${PRODUCT}
     END
 
 

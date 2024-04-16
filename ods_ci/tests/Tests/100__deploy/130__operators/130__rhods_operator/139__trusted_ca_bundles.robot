@@ -3,13 +3,13 @@ Documentation    Test Cases to verify Trusted CA Bundle support
 Library    Collections
 Resource       ../../../../Resources/OCP.resource
 Resource       ../../../../Resources/ODS.robot
+Resource        ../../../../Resources/RHOSi.resource
 Suite Setup    Suite Setup
 Suite Teardown    Suite Teardown
 
 
 *** Variables ***
 ${OPERATOR_NS}    ${OPERATOR_NAMESPACE}
-${RHOAI_OPERATOR_DEPLOYMENT_NAME}    rhods-operator
 ${TEST_NS}    test-trustedcabundle
 ${DSCI_NAME}    default-dsci
 ${TRUSTED_CA_BUNDLE_CONFIGMAP}    odh-trusted-ca-bundle
@@ -74,7 +74,7 @@ Validate Trusted CA Bundles State Removed
 Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
-    Wait Until Operator Ready    ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
+    Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
     Create Namespace In Openshift    ${TEST_NS}
 

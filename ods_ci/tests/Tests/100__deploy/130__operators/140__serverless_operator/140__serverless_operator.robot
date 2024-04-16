@@ -42,7 +42,6 @@ Suite Setup
     [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    Assign Vars According To Product    ${PRODUCT}
 
 Suite Teardown
     [Documentation]    Suite Teardown

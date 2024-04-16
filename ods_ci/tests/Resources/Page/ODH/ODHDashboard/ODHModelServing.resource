@@ -119,9 +119,8 @@ Select Model Server
     [Documentation]    If there are multiple model servers to choose from, this keyword
     ...    Selects the given one
     [Arguments]    ${model_server}
-    Sleep    1s     reason=It's taking a little bit time to load the Model Server options
     ${selectable}=    Run Keyword And Return Status
-    ...    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
+    ...    Wait Until Element is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=1
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
         Click Element    xpath://li/button[.="${model_server}"]

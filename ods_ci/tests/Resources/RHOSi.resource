@@ -70,7 +70,7 @@ Protect Sensitive Variables In Keywords
 Initialize Global Variables
     [Documentation]   Sets global variables
     [Arguments]    ${force_fetch}=False
-    Assign Vars According To Product    ${PRODUCT}
+    Assign Vars According To Product
     ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
     Set Global Variable   ${RHODS_VERSION}
     Set Prometheus Variables
@@ -86,7 +86,6 @@ Required Global Variables Should Exist
 
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
-    [Arguments]    ${PRODUCT}
     IF    "${PRODUCT}" == "RHODS"
         Set Suite Variable    ${OPERATOR_APPNAME}     Red Hat OpenShift AI
         Set Suite Variable    ${OPERATOR_NAME}    Red Hat OpenShift AI

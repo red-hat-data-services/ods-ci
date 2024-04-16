@@ -73,7 +73,6 @@ Validate Trusted CA Bundles State Removed
 *** Keywords ***
 Suite Setup
     [Documentation]    Suite Setup
-    Assign Vars According To Product    ${PRODUCT}
     RHOSi Setup
     Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}

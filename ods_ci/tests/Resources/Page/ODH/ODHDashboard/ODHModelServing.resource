@@ -76,7 +76,7 @@ Serve Model
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
-    IF    "${serving_runtime}" != "${NONE}"    Select Kserve Serving Runtime    ${serving_runtime}
+    IF    "${serving_runtime}" != "${NONE}"    Set Model Server Runtime    ${serving_runtime}
     SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
     IF    ${existing_data_connection}==${TRUE}
@@ -393,7 +393,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     Click Button    ${DEPLOY_MODEL_BTN}
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
-    Select Kserve Serving Runtime    ${serving_runtime}
+    Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}
     Set Replicas Number With Buttons    ${replicas}
     Set Server Size    ${size}
@@ -411,8 +411,9 @@ Deploy Kserve Model Via UI  #robocop: disable
     Click Button    Deploy
     Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
 
-Select Kserve Serving Runtime
-    [Documentation]    Opens the Runtime dropdown in the deploy modal for kserve models and select the given runtime
+Set Model Server Runtime
+    [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
+    ...    and select the given runtime
     [Arguments]    ${runtime}=Caikit
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}

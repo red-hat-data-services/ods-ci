@@ -225,6 +225,12 @@ def generate_test_config_file(
     data["OPERATOR_NAMESPACE"] = config_data["OPERATOR_NAMESPACE"]
     data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
     data["OPENSHIFT_PIPELINES_CHANNEL"] = config_data["OPENSHIFT_PIPELINES_CHANNEL"]
+    if config_data.get("PIP_INDEX_URL"):
+        data["PIP_INDEX_URL"] = config_data["PIP_INDEX_URL"]
+    if config_data.get("PIP_TRUSTED_HOST"):
+        data["PIP_TRUSTED_HOST"] = config_data["PIP_TRUSTED_HOST"]
+    if config_data.get("PIP_CA_BUNDLE"):
+        data["PIP_CA_BUNDLE"] = config_data["PIP_CA_BUNDLE"]
 
     if components:
         print("Setting components")

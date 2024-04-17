@@ -2,6 +2,7 @@
 Documentation    Collection of keywords to interact with Model Servers
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
+Resource       ../ODHModelServing.resource
 Resource       Projects.resource
 
 
@@ -164,13 +165,6 @@ Verify Displayed GPU Count In Single Model Serving
     ${current_accs}=    SeleniumLibrary.Get Text
     ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../../../tr[last()]//span[.="Number of accelerators"]/../../dd/div  #robocop: disable
     Should Match    ${current_accs}    ${no_gpus}
-
-Set Model Server Runtime
-    [Documentation]    Selects a given Runtime for the model server
-    [Arguments]    ${runtime}
-    Open Serving runtime Options Menu  # robocop: disable
-    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//*[text()="${runtime}"]
-    # TODO: Implement Custom
 
 Set Model Server Name
     [Documentation]    Sets a custom name for the model server

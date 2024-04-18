@@ -79,7 +79,7 @@ Verify Elyra Pipelines In SDS-Based Images
     FOR    ${img}    IN    @{IMAGE_LIST}
         Run Elyra Hello World Pipeline Test    ${img}
     END
-    #[Teardown]    Elyra Pipelines SDS Teardown
+    [Teardown]    Elyra Pipelines SDS Teardown
 
 
 *** Keywords ***

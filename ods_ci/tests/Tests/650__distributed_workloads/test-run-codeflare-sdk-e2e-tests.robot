@@ -15,17 +15,6 @@ ${VIRTUAL_ENV_NAME}                 venv3.9
 
 
 *** Test Cases ***
-Run TestMNISTRayClusterSDK test
-    [Documentation]    Run Python E2E test: TestMNISTRayClusterSDK
-    ...    ProductBug: https://issues.redhat.com/browse/RHOAIENG-3981 https://issues.redhat.com/browse/RHOAIENG-4240
-    [Tags]  ODS-2544
-    ...     Tier1
-    ...     DistributedWorkloads
-    ...     Codeflare-sdk
-    ...   	ProductBug
-    Skip    "Skipping because of RHOAIENG-3981 and RHOAIENG-4240."
-    Run Codeflare-sdk E2E Test    mnist_raycluster_sdk_test.py
-
 Run TestRayClusterSDKOauth test
     [Documentation]    Run Python E2E test: TestRayClusterSDKOauth
     [Tags]

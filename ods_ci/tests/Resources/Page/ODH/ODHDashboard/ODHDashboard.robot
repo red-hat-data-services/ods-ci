@@ -35,6 +35,7 @@ ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-v5-c-alert pf-m-success']
 ${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title"]
 ${CLUSTER_SETTINGS_XP}=  //*[@data-testid="app-page-title" and text()="Cluster settings"]
+${PVC_SIZE_INPUT_XP}=           xpath=//*[@data-testid="pvc-size-input"]
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
 ${CUSTOM_IMAGE_SOFTWARE_TABLE}=  //caption[contains(., "the advertised software")]/../tbody
 ${CUSTOM_IMAGE_PACKAGE_TABLE}=  //caption[contains(., "the advertised packages")]/../tbody
@@ -516,7 +517,7 @@ Verify Cluster Settings Is Available
     Menu.Navigate To Page    Settings    Cluster settings
     Capture Page Screenshot
     Wait Until Page Contains Element    ${CLUSTER_SETTINGS_XP}    timeout=30
-    Wait Until Page Contains Element    ${USAGE_DATA_COLLECTION_XP}    timeout=30
+    Wait Until Page Contains Element    ${PVC_SIZE_INPUT_XP}    timeout=30
 
 Verify Cluster Settings Is Not Available
     [Documentation]    Verifies submenu Settings > Cluster settings is not visible

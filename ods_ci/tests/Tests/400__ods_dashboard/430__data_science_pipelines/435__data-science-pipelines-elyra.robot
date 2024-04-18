@@ -48,7 +48,7 @@ Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
     Start Workbench     workbench_title=elyra-sds    timeout=300s
     Launch And Access Workbench    workbench_title=elyra-sds
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
-    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
     Verify Hello World Pipeline Elements
 
 Verify Pipeline Can Be Submitted And Runs Correctly From Standard Data Science Workbench
@@ -79,7 +79,7 @@ Verify Elyra Pipelines In SDS-Based Images
     FOR    ${img}    IN    @{IMAGE_LIST}
         Run Elyra Hello World Pipeline Test    ${img}
     END
-    [Teardown]    Elyra Pipelines SDS Teardown
+    #[Teardown]    Elyra Pipelines SDS Teardown
 
 
 *** Keywords ***
@@ -114,7 +114,7 @@ Elyra Pipelines Suite Teardown
 
 Verify Hello World Pipeline Elements
     [Documentation]    Verifies that the example pipeline is displayed correctly by Elyra
-    Wait Until Page Contains Element    xpath=${SVG_CANVAS}
+    Wait Until Page Contains Element    xpath=${SVG_CANVAS}     timeout=10s
     Maybe Migrate Pipeline
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Load weather data"]  # robocop: disable
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 1 - Data Cleaning.ipynb"]  # robocop: disable
@@ -144,7 +144,7 @@ Run Elyra Hello World Pipeline Test  # robocop: disable
     Start Workbench     workbench_title=elyra_${img}    timeout=300s
     Launch And Access Workbench    workbench_title=elyra_${img}
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
-    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=Datascience with Python 3.9 (UBI9)
     Run Pipeline    pipeline_name=${img} Pipeline

@@ -22,7 +22,7 @@ Open QuickStart Element in Resource Section By Name
     ...    //div[@id="${element}"]//button[contains(., 'Open') or contains(., 'Continue') or contains(., 'Restart')]
     Wait Until Page Contains Element    ${start_tutorial_btn_xp}
     Click Button    ${start_tutorial_btn_xp}
-    Wait Until Page Contains ELement    //div[@data-test="quickstart drawer"]     5
+    Wait Until Page Contains Element    //div[@data-test="quickstart drawer"]     5
 
 Star QuickStart Tour
     Click Button    //button[@data-test="Start button"]
@@ -30,7 +30,7 @@ Star QuickStart Tour
 
 Get The Count Of QuickStart Steps
     [Documentation]     Gives the count of steps in a the quick start
-    ${count}=   Get ELement Count   //div[@class="pfext-quick-start-content"]/ul/li
+    ${count}=   Get Element Count   //div[@class="pfext-quick-start-content"]/ul/li
     RETURN    ${count}
 
 Link Text On QuickStart Card Should Be
@@ -62,17 +62,14 @@ QuickStart Status Should Not Be Set
 
 Close QuickStart From Top
     [Arguments]     ${decision}=leave
-    Wait Until Page Contains ELement    //div[@class="pf-c-drawer__panel-main"]     5
-    Page Should Contain Element     //*[@data-testid="qs-drawer-close"]
+    Wait Until Page Contains Element    //*[@data-testid="qs-drawer-close"]     5
     Click Element    //*[@data-testid="qs-drawer-close"]
-    IF    $decision == "leave"
-        Click Element    //*[@data-test="leave button"]
-    ELSE IF     $decision == "cancel"
-        Click Element    //*[@data-test="cancel button"]
-    END
+    ${btn_exists}=    Run Keyword And Return Status    Page Should Contain Element
+    ...    //*[@data-test="${decision} button"]
+    IF  ${btn_exists}    Click Element    //*[@data-test="${decision} button"]
 
 Page Should Not Contain QuickStart Sidebar
-    Wait Until Page Does Not Contain ELement    //div[@class="pf-c-drawer__panel-main"]     5
+    Wait Until Page Does Not Contain Element    //div[@class="pf-c-drawer__panel-main"]     5
 
 Close QuickStart From Button
     Click Element    //*[@data-testid="qs-drawer-close"]

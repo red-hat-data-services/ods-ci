@@ -40,7 +40,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Documentation]    Verifies that a workbench using the Standard Data Science Image can be used to
     ...    create and run a Data Science Pipeline
     [Tags]    Smoke    Tier1
-    ...       ODS-2197   ODS-2199    RunThisTest
+    ...       ODS-2197   ODS-2199
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test    Standard Data Science
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images

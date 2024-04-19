@@ -166,14 +166,8 @@ Open Pipeline Detail
 Open Pipeline Run
     [Documentation]    Open the Pipeline Run detail.
     [Arguments]    ${pipeline_run_name}
-    ${present}=  Run Keyword And Return Status    Element Should Be Visible   xpath=//a[text()='Runs']
-    # We can run Open Pipeline Run step multiple times. If the menu is expanded, then it will colapse
-    IF    ${present} == ${FALSE}
-        Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
-        Click Element    xpath=//button[text()='Data Science Pipelines']
-        Wait Until Page Contains Element    xpath=//a[text()='Runs']
-    END
-    Click Element    xpath=//a[text()='Runs']
+    Navigate To Page    Data Science Pipelines    Runs
+    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
     Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
     Click Element    xpath=//*[@data-testid="active-runs-tab"]
     Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']

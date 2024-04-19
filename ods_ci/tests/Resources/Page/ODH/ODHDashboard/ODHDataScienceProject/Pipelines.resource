@@ -387,7 +387,7 @@ Verify Successful Pipeline Run Via Pipelines Runs UI
     [Arguments]    ${pipeline_name}
     Menu.Navigate To Page    Data Science Pipelines    Runs
     Wait Until Page Contains Element    xpath://span[text()='Triggered']   timeout=10s
-    Click Element    //span[text()='Triggered']
+    Click Element    //span[text()='Active']
     Wait Until Pipeline Run Is Started    pipeline_name=${pipeline_name}
     ...    timeout=10s
     Wait Until Pipeline Run Is Finished    pipeline_name=${pipeline_name}

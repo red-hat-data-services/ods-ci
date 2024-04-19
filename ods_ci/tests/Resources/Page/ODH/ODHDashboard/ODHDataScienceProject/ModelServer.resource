@@ -204,17 +204,30 @@ Click Minus Button
     Click Element    ${REPLICAS_MIN_BTN_XP}
 
 Query Model With GRPCURL
-    [Arguments]    ${host}    ${port}    ${endpoint}    ${json_body}
-    ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    ${plaintext}=${FALSE}
-    ...            ${background}=${NONE}    ${skip_res_json}=${FALSE}    &{args}
+    [Arguments]    ${host}
+    ...            ${port}
+    ...            ${endpoint}
+    ...            ${json_body}
+    ...            ${json_header}=${NONE}
+    ...            ${insecure}=${FALSE}
+    ...            ${plaintext}=${FALSE}
+    ...            ${background}=${NONE}
+    ...            ${skip_res_json}=${FALSE}
+    ...            ${cert}=${False}
+    ...            &{args}
     ${cmd}=    Set Variable    grpcurl -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
     END
-    IF    ${insecure} == ${TRUE}
+    IF    ${insecure}
         ${cmd}=    Catenate    ${cmd}    -insecure
+    ELSE  # -insecure and -cacert are incompatible with each other. Assuming we want either option always on.
+        IF    ${cert}==${False}
+            Log    The call will fail because you have not provided a valid CA bundle file
+        END
+        ${cmd}=    Catenate    ${cmd}    -cacert ${cert}
     END
-    IF    ${plaintext} == ${TRUE}
+    IF    ${plaintext}
         ${cmd}=    Catenate    ${cmd}    -plaintext
     END
     # IF    "${proto_filepath}" != "${NONE}"

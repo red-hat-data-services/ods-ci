@@ -13,9 +13,12 @@ Test Tags         Dashboard
 
 
 *** Variables ***
-@{LIST_OF_IDS_FOR_COMBINATIONS}         documentation--check-box    Red Hat managed--check-box
-${SUCCESS_STEP}              h3[normalize-space(@class="pf-v5-c-title pf-m-md pfext-quick-start-task-header__title
-...                           pfext-quick-start-task-header__title-success")]
+@{QUICKSTART_ELEMENTS}    create-jupyter-notebook    create-jupyter-notebook-anaconda    deploy-python-model
+...                       pachyderm-beginner-tutorial-notebook    using-starburst-enterprise
+...                       create-aikit-notebook    openvino-inference-notebook
+@{LIST_OF_IDS_FOR_COMBINATIONS}    documentation--check-box    Red Hat managed--check-box
+${SUCCESS_STEP}    h3[normalize-space(@class="pf-v5-c-title pf-m-md pfext-quick-start-task-header__title
+...                pfext-quick-start-task-header__title-success")]
 
 
 *** Test Cases ***
@@ -207,19 +210,8 @@ Set Quick Starts Elements List Based On RHODS Type
     [Documentation]    Set QuickStarts list based on RHODS
     ...     is self-managed or managed
     ${is_self_managed}=    Is RHODS Self-Managed
-    IF    ${is_self_managed} == ${TRUE}
-            @{quickStartElements}=      Create List
-            ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
-            ...    build-deploy-watson-model    deploy-python-model    pachyderm-beginner-tutorial-notebook
-            ...    using-starburst-enterprise    create-aikit-notebook    openvino-inference-notebook
-    ELSE
-            @{quickStartElements}=      Create List
-            ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
-            ...    deploy-python-model    create-aikit-notebook    deploy-model-rhoam    gpu-enabled-notebook-quickstart
-            ...    pachyderm-beginner-tutorial-notebook    openvino-inference-notebook    using-starburst-galaxy
-            ...    gpu-quickstart    build-deploy-watson-model
-    END
-    Set Suite Variable    ${QUICKSTART_ELEMENTS}    ${quickStartElements}
+    IF    not ${is_self_managed}    Append To List    ${QUICKSTART_ELEMENTS}
+    ...    deploy-model-rhoam    gpu-enabled-notebook-quickstart    using-starburst-galaxy    gpu-quickstart
 
 Validate Number Of Quick Starts In Dashboard Is As Expected
     [Arguments]    ${quickStartElements}
@@ -230,34 +222,36 @@ Validate Number Of Quick Starts In Dashboard Is As Expected
     ...    Should Be True    ${expectedLen} == ${actualLen}    Quick Starts have been updated. Update the list accordingly.
 
 Verify Quick Starts Work As Expected When Restarted And Left In Between
+    [Documentation]    Loop on all QuickStart cards and verify its tutorial steps and status:
+    ...    Open -> Start -> In Progress -> Restart -> Completed -> Close
     [Arguments]    ${quickStartElements}
     FOR    ${element}    IN    @{quickStartElements}
         Run Keyword And Continue On Failure    QuickStart Status Should Be    ${element}  Complete
         Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
         ...    exp_link_text=Restart
         Open QuickStart Element In Resource Section By Name     ${element}
-        Page Should Not Contain         //article[@id="${element}"]//span[@class="pf-v5-c-label pf-m-green pf-m-outline"]
+        Page Should Not Contain    //article[@id="${element}"]//span[@class="pf-v5-c-label pf-m-green pf-m-outline"]
         ${count}=   Get The Count Of QuickStart Steps
         Run Keyword And Continue On Failure     Click Button    //button[@data-testid="qs-drawer-start"]
         Run Keyword And Continue On Failure     Wait Until Page Contains Element
         ...    //div[@class="pfext-quick-start-content"]
-        ${temp_count}   Set Variable    2
-        FOR     ${index}    IN RANGE    ${temp_count}
-            IF  ${index} != ${count-1}
-                Run Keyword And Continue On Failure     Wait Until Keyword Succeeds    2 times   0.3s
-                ...    Mark Step Check As Yes
-                Run Keyword And Continue On Failure     Go To Next QuickStart Step
-            END
+        # To set QuickStart tutorial to "In Progress" - Complete half of the steps
+        ${half_count}=   Set Variable    ${count // 2}
+        FOR     ${index}    IN RANGE    ${half_count}
+            Run Keyword And Continue On Failure     Wait Until Keyword Succeeds    2 times   0.3s
+            ...    Mark Step Check As Yes
+            Run Keyword And Continue On Failure     Go To Next QuickStart Step
         END
         Run Keyword And Continue On Failure     Close QuickStart From Top     decision=leave
         Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
         Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  In Progress
         Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
         ...    exp_link_text=Continue
-        Run Keyword And Continue On Failure     Click Link      //article[@id="${element}"]//a
-        Run Keyword And Continue On Failure     Wait Until Page Contains ELement
+        Run Keyword And Continue On Failure     Click Element
+        ...    //*[@id="${element}"]//button[@data-testid="quick-start-button"]
+        Run Keyword And Continue On Failure     Wait Until Page Contains Element
         ...    //div[@class="pf-v5-c-drawer__panel-main"]     5
-        FOR     ${index}    IN RANGE    ${temp_count}
+        FOR     ${index}    IN RANGE    ${half_count}
             Run Keyword And Continue On Failure     Page Should Contain Element
             ...    //div[@class="pfext-quick-start-tasks__list"]//li[${index+1}]//${SUCCESS_STEP}
         END
@@ -266,7 +260,7 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
             Run Keyword And Continue On Failure     Page Should Contain Element
             ...    //ul[@class="pf-v5-c-list pfext-quick-start-task-header__list"]/li[${index}+1]
         END
-        Click Button        //button[@data-testid="qs-drawer-restart"]
+        Run Keyword And Continue On Failure    Click Button        //button[@data-testid="qs-drawer-start"]
         FOR     ${index}    IN RANGE    ${count}
             Run Keyword And Continue On Failure     Wait Until Keyword Succeeds    2 times   0.3s
             ...    Mark Step Check As Yes
@@ -278,4 +272,3 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
         Go To Next QuickStart Step
         Run Keyword And Continue On Failure     Close QuickStart From Button
     END
-

@@ -550,6 +550,35 @@ Verify User Can Query A Model Using HTTP Calls
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
+Verify User Can Serve And Query A Model With Token
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    ...                using Kserve and Caikit+TGIS runtime
+    [Tags]    authz-2
+    [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
+    ${test_namespace}=    Set Variable     ${TEST_NS}-cli
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    ${overlays}=    Create List    authz
+    Compile Inference Service YAML    isvc_name=${flan_model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${FLAN_STORAGE_URI}
+    ...    overlays=${overlays}
+
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}
+   Create Role Binding For Authorino   name=${DEFAULT_BUCKET_PREFIX}   namespace=${test_namespace}
+   ${inf_token}     Create Inference Access Token   ${test_namespace}    ${DEFAULT_BUCKET_SA_NAME}
+    Query Model Multiple Times    model_name=${flan_model_name}
+    ...    inference_type=all-tokens    n_times=1
+    ...    namespace=${test_namespace}   token=${inf_token}
+    Query Model Multiple Times    model_name=${flan_model_name}
+    ...    inference_type=streaming    n_times=1
+    ...    namespace=${test_namespace}   token=${inf_token}
+
+    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 *** Keywords ***
 Install Model Serving Stack Dependencies

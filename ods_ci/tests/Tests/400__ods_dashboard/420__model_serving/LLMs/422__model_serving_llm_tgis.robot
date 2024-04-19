@@ -625,6 +625,53 @@ Verify User Can Query A Model Using HTTP Calls
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
+Verify User Can Serve And Query A Model With Token
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    ...                 with token using Kserve and TGIS runtime
+    [Tags]    Tier1    ODS-authz
+
+    [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-cli
+    ${test_namespace}=    Set Variable     ${TEST_NS}-cli
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    ${models_names}=    Create List    ${flan_model_name}
+    ${overlays}=    Create List    authz
+
+   Compile Inference Service YAML    isvc_name=${flan_model_name}
+   ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+   ...    model_storage_uri=${FLAN_STORAGE_URI}
+   ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
+   ...    limits_dict=${GPU_LIMITS}
+   ...    overlays=${overlays}
+   Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+   ...    namespace=${test_namespace}
+   Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+   ...    namespace=${test_namespace}
+   Create Role Binding For Authorino   name=${DEFAULT_BUCKET_PREFIX}   namespace=tgis-standalone-cli
+   ${inf_token}     Create Inference Access Token   ${test_namespace}    ${DEFAULT_BUCKET_SA_NAME}
+   ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+   IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+   Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+   ...    inference_type=all-tokens    n_times=1
+   ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}   token=${inf_token}
+   Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=tokenize    n_times=1    port_forwarding=${IS_KSERVE_RAW}
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+    ...    token=${inf_token}
+   Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=model-info    n_times=1    port_forwarding=${IS_KSERVE_RAW}
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+    ...    token=${inf_token}
+   Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+    ...    inference_type=streaming    n_times=1    port_forwarding=${IS_KSERVE_RAW}
+    ...    namespace=${test_namespace}    validate_response=${FALSE}
+    ...    token=${inf_token}
+
+  [Teardown]    Run Keywords
+  ...    Clean Up Test Project    test_ns=${test_namespace}
+  ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+  ...    AND
+  ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
+
 
 *** Keywords ***
 Suite Setup

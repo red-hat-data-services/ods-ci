@@ -301,10 +301,21 @@ Query Model Multiple Times
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
     ...                In order to use a self-signed certificate when performing the request, pass the CA bundle file
     ...                path as the ${cert} argument - defaults to ${False}, i.e. insecure request.
-    [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
-    ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
-    ...            ${string_check_only}=${FALSE}    ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443
-    ...            ${body_params}=&{EMPTY}    ${cert}=${False}    &{args}
+    [Arguments]    ${model_name}
+    ...            ${namespace}
+    ...            ${runtime}=caikit-tgis-runtime
+    ...            ${isvc_name}=${model_name}
+    ...            ${inference_type}=all-tokens
+    ...            ${n_times}=10
+    ...            ${query_idx}=0
+    ...            ${validate_response}=${TRUE}
+    ...            ${string_check_only}=${FALSE}
+    ...            ${protocol}=grpc
+    ...            ${port_forwarding}=${FALSE}
+    ...            ${port}=443
+    ...            ${body_params}=&{EMPTY}
+    ...            ${cert}=${False}
+    ...            &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
     ELSE
@@ -338,7 +349,7 @@ Query Model Multiple Times
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
             ...    insecure=${insecure}    plaintext=${plaintext}    skip_res_json=${skip_json_load_response}
-            ...    cabundle_file=${cert}    &{args}
+            ...    cert=${cert}    &{args}
          ELSE IF    "${protocol}" == "http"
             ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
             Log Dictionary    ${args}

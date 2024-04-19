@@ -102,6 +102,13 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page
     Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m
+    [Teardown]    Verify Pipelines Integration With Elyra Teardown    ${img}
+
+Verify Pipelines Integration With Elyra Teardown
+    [Documentation]    Closes all browsers and stops the running workbench
+    [Arguments]    ${img}
+    Close All Browsers
+    Launch Data Science Project Main Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Stop Workbench    workbench_title=elyra_${img}
 
@@ -113,3 +120,5 @@ Verify Hello World Pipeline Elements
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 1 - Data Cleaning.ipynb"]  # robocop: disable
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 2 - Data Analysis.ipynb"]  # robocop: disable
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 3 - Time Series Forecasting.ipynb"]  # robocop: disable
+
+

@@ -97,3 +97,9 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
     END
+
+Create Inference Access Token
+    [Arguments]  ${test_namespace}  ${bucket_sa_name}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc create token -n ${test_namespace} ${bucket_sa_name}
+    Should Be Equal As Strings    ${rc}    0
+    [Return]    ${out}

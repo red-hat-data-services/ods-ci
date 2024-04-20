@@ -552,8 +552,9 @@ Verify User Can Query A Model Using HTTP Calls
 
 Verify User Can Serve And Query A Model With Token
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
-    ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    authz-2
+    ...                With Token using Kserve and Caikit+TGIS runtime
+    [Tags]    RHOAIENG-6333
+    ...       Tier1
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

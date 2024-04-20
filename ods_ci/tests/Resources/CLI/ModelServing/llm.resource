@@ -344,7 +344,6 @@ Query Model Multiple Times
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
     IF    "${token}" != "${None}"
         ${header}=    Set Variable  "Authorization: Bearer ${token}" -H ${header}
-        Log To Console   ${header}
     END
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
     ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
@@ -781,12 +780,6 @@ Start Port-forwarding
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  7s
-
-Create Inference Access Token
-    [Arguments]  ${test_namespace}  ${DEFAULT_BUCKET_SA_NAME}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc create token -n ${test_namespace} ${DEFAULT_BUCKET_SA_NAME}
-    Should Be Equal As Strings    ${rc}    0
-    [Return]    ${out}
 
 Create Role Binding For Authorino
     [Arguments]    ${name}    ${namespace}

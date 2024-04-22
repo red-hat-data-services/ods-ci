@@ -91,11 +91,10 @@ Suite Teardown
 
 Restore DSCI Trusted CA Bundle Settings
     [Documentation]    Restore DSCI Trusted CA Bundle settings to original tate
-    [Arguments]    ${custsom_ca_value}
+    [Arguments]    ${custom_ca_value}
 
-    Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}   ''    ${OPERATOR_NS}
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
-    Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${custsom_ca_value}    ${OPERATOR_NS}
+    Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${custom_ca_value}    ${OPERATOR_NS}
 
 Is CA Bundle Value Present
     [Documentation]    Check if the ConfigtMap contains Custom CA Bundle value

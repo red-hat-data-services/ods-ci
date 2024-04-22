@@ -338,7 +338,7 @@ Access To Workbench
         Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
         Wait Until Page Contains  Do you trust the authors of the files in this folder?
     ELSE IF  "${expected_ide}"=="JupyterLab"
-        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=90s
         Maybe Close Popup
     ELSE
         Fail    msg=Unknown IDE typy given: '${expected_ide}'. Please check and fix or implement.

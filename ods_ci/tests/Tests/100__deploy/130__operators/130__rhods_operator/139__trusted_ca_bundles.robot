@@ -136,7 +136,7 @@ Set Trusted CA Bundle Management State
     Should Be Equal    "${rc}"    "0"   msg=${output}
 
 Get Custom CA Bundle Value In DSCI
-    [Documentation]    Get Custdom CA Bundle Value
+    [Documentation]    Get DSCI Custdom CA Bundle Value
     [Arguments]    ${DSCI}    ${namespace}
     ${rc}   ${value}=    Run And Return Rc And Output
     ...    oc get DSCInitialization/${DSCI_NAME} -n ${namespace} -o 'jsonpath={.spec.trustedCABundle.customCABundle}'

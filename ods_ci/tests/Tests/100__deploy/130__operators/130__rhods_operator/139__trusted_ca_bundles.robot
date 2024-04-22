@@ -25,6 +25,8 @@ Validate Trusted CA Bundles State Managed
     ...    each non-reserved namespace.
     [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Managed
 
+    ${saved_custom_ca_bundle}=    Get Custom CA Bundle Value In DSCI     ${DSCI_NAME}    ${OPERATOR_NS}
+
     Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is Resource Present    project    ${TEST_NS}    ${TEST_NS}    ${IS_PRESENT}
 
@@ -39,12 +41,14 @@ Validate Trusted CA Bundles State Managed
     Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${TEST_NS}    ${IS_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${saved_custom_ca_bundle}
 
 Validate Trusted CA Bundles State Unmanaged
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Unmanaged
     ...    With Trusted CA Bundles Unmanaged, ConfigMap odh-trusted-ca-bundle will not be managed by the operator.
     [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Unmanaged
+
+    ${saved_custom_ca_bundle}=    Get Custom CA Bundle Value In DSCI     ${DSCI_NAME}    ${OPERATOR_NS}
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Unmanaged    ${OPERATOR_NS}
 
@@ -54,12 +58,14 @@ Validate Trusted CA Bundles State Unmanaged
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    ${IS_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${saved_custom_ca_bundle}
 
 Validate Trusted CA Bundles State Removed
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Removed
     ...    With Trusted CA Bundles Removed, all odh-trusted-ca-bundle ConfigMaps will be removed.
     [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Removed
+
+    ${saved_custom_ca_bundle}=    Get Custom CA Bundle Value In DSCI     ${DSCI_NAME}    ${OPERATOR_NS}
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Removed    ${OPERATOR_NS}
 
@@ -67,7 +73,7 @@ Validate Trusted CA Bundles State Removed
     Wait Until Keyword Succeeds    3 min    0 sec
     ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_NOT_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${saved_custom_ca_bundle}
 
 
 *** Keywords ***
@@ -85,9 +91,11 @@ Suite Teardown
 
 Restore DSCI Trusted CA Bundle Settings
     [Documentation]    Restore DSCI Trusted CA Bundle settings to original tate
+    [Arguments]    ${custsom_ca_value}
+
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}   ''    ${OPERATOR_NS}
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
-
+    Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${custsom_ca_value}    ${OPERATOR_NS}
 Is CA Bundle Value Present
     [Documentation]    Check if the ConfigtMap contains Custom CA Bundle value
     [Arguments]    ${config_map}    ${custom_ca_bundle_value}    ${namespace}        ${expected_result}
@@ -112,7 +120,7 @@ Set Custom CA Bundle Value In DSCI
 Set Custom CA Bundle Value On ConfigMap
     [Documentation]    Set Custom CA Bundle value in ConfigMap
     [Arguments]    ${config_map}    ${custom_ca_bundle_value}    ${namespace}    ${reconsile_wait_time}
-    Log    message=IN Here:${config_map} ${custom_ca_bundle_value} ${namespace}    level=INFO
+
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc patch ConfigMap/${config_map} -n ${namespace} -p '{"data":{"odh-ca-bundle.crt":"${custom_ca_bundle_value}"}}' --type merge
     Should Be Equal    "${rc}"    "0"   msg=${output}
@@ -126,3 +134,12 @@ Set Trusted CA Bundle Management State
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc patch DSCInitialization/${DSCI} -n ${namespace} -p '{"spec":{"trustedCABundle":{"managementState":"${management_state}"}}}' --type merge
     Should Be Equal    "${rc}"    "0"   msg=${output}
+
+Get Custom CA Bundle Value In DSCI
+    [Documentation]    Get Custdom CA Bundle Value
+    [Arguments]    ${DSCI}    ${namespace}
+    ${rc}   ${value}=    Run And Return Rc And Output
+    ...    oc get DSCInitialization/${DSCI_NAME} -n ${namespace} -o 'jsonpath={.spec.trustedCABundle.customCABundle}'
+    Should Be Equal    "${rc}"    "0"   msg=${value}
+
+    RETURN    ${value}

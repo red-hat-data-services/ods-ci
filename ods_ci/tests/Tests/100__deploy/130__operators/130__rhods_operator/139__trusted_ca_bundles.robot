@@ -96,6 +96,7 @@ Restore DSCI Trusted CA Bundle Settings
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}   ''    ${OPERATOR_NS}
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${custsom_ca_value}    ${OPERATOR_NS}
+
 Is CA Bundle Value Present
     [Documentation]    Check if the ConfigtMap contains Custom CA Bundle value
     [Arguments]    ${config_map}    ${custom_ca_bundle_value}    ${namespace}        ${expected_result}
@@ -137,9 +138,9 @@ Set Trusted CA Bundle Management State
 
 Get Custom CA Bundle Value In DSCI
     [Documentation]    Get DSCI Custdom CA Bundle Value
-    [Arguments]    ${DSCI}    ${namespace}
+    [Arguments]    ${dsci}    ${namespace}
     ${rc}   ${value}=    Run And Return Rc And Output
-    ...    oc get DSCInitialization/${DSCI_NAME} -n ${namespace} -o 'jsonpath={.spec.trustedCABundle.customCABundle}'
+    ...    oc get DSCInitialization/${dsci} -n ${namespace} -o 'jsonpath={.spec.trustedCABundle.customCABundle}'
     Should Be Equal    "${rc}"    "0"   msg=${value}
 
     RETURN    ${value}

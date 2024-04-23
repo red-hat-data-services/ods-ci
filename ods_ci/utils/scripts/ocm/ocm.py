@@ -217,11 +217,16 @@ class OpenshiftClusterManager:
             sys.exit(1)
 
     def get_osd_cluster_id(self):
-        """Gets osd cluster ID"""
+        """Gets OSD cluster ID used by ocm"""
+
+        # "id": "2ans0g24pc4l4f08fcu6tdusf883avvu",              --- ID used by ocm tool - this is what we get
+        #                                                            (and also what we provide to make this function reflexive)
+        # "name": "mods-sa-mastr4",                              --- name of the cluster (we provide in self.cluster_name)
+        # "external_id": "feb5a50a-b9ce-40ad-99a7-69159f0ca957", --- ID of the cluster itself (we provide in self.cluster_name)
 
         if not self.cluster_id:
-            cmd = "ocm list clusters -p search=\"name = '{}' or id = '{}'\" --columns id --no-headers".format(
-                self.cluster_name, self.cluster_name
+            cmd = "ocm list clusters -p search=\"name = '{}' or id = '{}' or external_id = '{}'\" --columns id --no-headers".format(
+                self.cluster_name, self.cluster_name, self.cluster_name
             )
             cluster_id = execute_command(cmd)
             if cluster_id in [None, ""]:

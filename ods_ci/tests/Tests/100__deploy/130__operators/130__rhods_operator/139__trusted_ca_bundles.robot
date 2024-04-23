@@ -78,8 +78,8 @@ Suite Setup
     Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
     Create Namespace In Openshift    ${TEST_NS}
-    ${CA}=    Get Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
-    Set Suite Variable    ${SAVED_CUSTOM_CA_BUNDLE}    ${CA}
+    ${SAVED_CUSTOM_CA_BUNDLE}=    Get Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
+    Set Suite Variable    ${SAVED_CUSTOM_CA_BUNDLE}
 
 Suite Teardown
     [Documentation]    Suite Teardown

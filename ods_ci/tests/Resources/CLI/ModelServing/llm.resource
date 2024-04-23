@@ -252,7 +252,7 @@ Prepare Payload
     Set Test Variable    ${query_text}
     Create File From Template    ${RUNTIME_FORMATS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
     Load Runtime Query Formats    filepath=${LLM_RESOURCES_DIRPATH}/runtime_query_formats_filled.json
-    ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
+    ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][endpoints][${inference_type}][${protocol}]
     ${body}=    Replace String    ${runtime_details}[body]    '    "
     ${header}=    Set Variable    ${runtime_details}[header]
     IF    ${body_params} != &{EMPTY}
@@ -339,7 +339,7 @@ Query Model Multiple Times
     ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
     ...    inference_type=${inference_type}    model_name=${model_name}    body_params=${body_params}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
-    ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][${inference_type}][${protocol}]
+    ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][endpoints][${inference_type}][${protocol}]
     ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
     Set To Dictionary    ${args}    &{extra_args}
     FOR    ${counter}    IN RANGE    0    ${n_times}    1
@@ -399,8 +399,8 @@ Compile Deploy And Query LLM model
     ...    limits_dict=${limits_dict}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
-    ...    namespace=${namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
+    ...    namespace=${test_namespace}    runtime=${runtime}
     ${pod_name}=  Get Pod Name    namespace=${namespace}    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${namespace}    pod_name=${pod_name}
     Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}
@@ -774,3 +774,39 @@ Start Port-forwarding
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  7s
+
+Wait For Model KServe Deployment To Be Ready
+    [Arguments]    ${label_selector}    ${namespace}    ${runtime}
+    ...    ${timeout}=300s    ${exp_replicas}=${1}
+    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=${timeout}
+    Verify Model KServe Deployment    ${label_selector}    ${namespace}    ${runtime}    ${exp_replicas}
+
+Verify Model KServe Deployment
+    [Arguments]    ${label_selector}    ${namespace}    ${runtime}    ${exp_replicas}
+    ${test_mode_var_exist}=    Run Keyword And Return Status    Variable Should Exist    ${KSERVE_MODE}
+    ${dsc_raw_var_exist}=    Run Keyword And Return Status    Variable Should Exist    ${IS_KSERVE_RAW}
+    IF    ${test_mode_var_exist}
+        IF    ${KSERVE_MODE} == "RawDeployment"
+            Set Test Variable    ${is_raw}    ${TRUE}
+        ELSE
+            Set Test Variable    ${is_raw}    ${FALSE}
+        END
+    ELSE IF  ${dsc_raw_var_exist}
+        IF    ${IS_KSERVE_RAW}
+            Set Test Variable    ${is_raw}    ${TRUE}
+        ELSE
+            Set Test Variable    ${is_raw}    ${FALSE}
+        END
+    ELSE
+        Fail    msg=either ${KSERVE_MODE} or ${IS_KSERVE_RAW} suite/global variables are expected to be set
+    END
+    Load Runtime Query Formats
+    @{model_pods} =  Oc Get    kind=Pod    namespace=${namespace}    label_selector=${label_selector}
+    ${containers}=  Set Variable    ${RUNTIME_FORMATS}[${runtime}][containers]
+    IF    not ${is_raw}
+        ${serverless_container}=    Create List    queue-proxy    istio-proxy
+        Append To List    ${containers}    @{serverless_container}
+    END
+    ${n_containers}=    Get Length    ${containers}
+    Run Keyword And Continue On Failure    Verify Deployment    ${model_pods}  ${exp_replicas}
+    ...    ${n_containers}  ${containers}

@@ -3,24 +3,19 @@ Documentation       Post install test cases that verify Model Registry
 Library             OpenShiftLibrary
 Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../Resources/OCP.resource
+Suite Setup         Registry Suite Setup
 Suite Teardown      Teardown
 
 
 *** Variables ***
 ${MODEL_REGISTRY_NS}=    ${APPLICATIONS_NAMESPACE}
-${ENABLED_REGISTRY}=     False
 
 
 *** Test Cases ***
 Verify Model Registry Operator Installation
     [Documentation]    Verifies that the Model Registry operator has been
     ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace in ODS
-    [Tags]    OpenDataHub    robot:recursive-continue-on-failure    RunThisTest
-    ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
-    IF    "${modelregistry}" == "false"
-        Enable Component    modelregistry
-        ${ENABLED_REGISTRY} =  Set Variable  True
-    END
+    [Tags]    OpenDataHub    robot:recursive-continue-on-failure
     Wait Until Keyword Succeeds  1 min  10 sec  Verify Model Registry Operator Deployment
     Wait Until Keyword Succeeds    10 times  5s    Verify Model Registry ReplicaSets Info
     Wait Until Keyword Succeeds    10 times  5s    Verify Model Registry Container Names
@@ -48,9 +43,14 @@ Verify Model Registry Container Names
     ${containerNames} =    Create List     manager   kube-rbac-proxy
     Verify Deployment    ${model_registry}    1    2    ${containerNames}
 
+Registry Suite Setup
+    [Documentation]  Model Registry suite setup
+    ${REGISTRY} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+    IF    "${REGISTRY}" == "false"    Enable Component    modelregistry
+    Set Suite Variable     ${REGISTRY}
+
+
 Teardown
     [Documentation]    Disable Registry if Enabled
-    IF   ${ENABLED_REGISTRY}==True
-         Disable Component   modelregistry
-    END
     SeleniumLibrary.Close Browser
+    IF    "${REGISTRY}" == "false"    Disable Component     modelregistry

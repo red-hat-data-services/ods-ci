@@ -16,6 +16,7 @@ ${TRUSTED_CA_BUNDLE_CONFIGMAP}    odh-trusted-ca-bundle
 ${CUSTOM_CA_BUNDLE}    test-example-custom-ca-bundle
 ${IS_PRESENT}    0
 ${IS_NOT_PRESENT}    1
+${SAVED_CUSTOM_CA_BUNDLE}    ${EMPTY}
 
 
 *** Test Cases ***
@@ -24,8 +25,6 @@ Validate Trusted CA Bundles State Managed
     ...    With Trusted CA Bundles Managed, ConfigMap odh-trusted-ca-bundle is expected to be created in
     ...    each non-reserved namespace.
     [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Managed
-
-    ${saved_custom_ca_bundle}=    Get Custom CA Bundle Value In DSCI     ${DSCI_NAME}    ${OPERATOR_NS}
 
     Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is Resource Present    project    ${TEST_NS}    ${TEST_NS}    ${IS_PRESENT}
@@ -41,14 +40,12 @@ Validate Trusted CA Bundles State Managed
     Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${TEST_NS}    ${IS_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${saved_custom_ca_bundle}
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
 
 Validate Trusted CA Bundles State Unmanaged
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Unmanaged
     ...    With Trusted CA Bundles Unmanaged, ConfigMap odh-trusted-ca-bundle will not be managed by the operator.
     [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Unmanaged
-
-    ${saved_custom_ca_bundle}=    Get Custom CA Bundle Value In DSCI     ${DSCI_NAME}    ${OPERATOR_NS}
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Unmanaged    ${OPERATOR_NS}
 
@@ -58,14 +55,12 @@ Validate Trusted CA Bundles State Unmanaged
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    ${IS_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${saved_custom_ca_bundle}
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
 
 Validate Trusted CA Bundles State Removed
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Removed
     ...    With Trusted CA Bundles Removed, all odh-trusted-ca-bundle ConfigMaps will be removed.
     [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Removed
-
-    ${saved_custom_ca_bundle}=    Get Custom CA Bundle Value In DSCI     ${DSCI_NAME}    ${OPERATOR_NS}
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Removed    ${OPERATOR_NS}
 
@@ -73,7 +68,7 @@ Validate Trusted CA Bundles State Removed
     Wait Until Keyword Succeeds    3 min    0 sec
     ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_NOT_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${saved_custom_ca_bundle}
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
 
 
 *** Keywords ***
@@ -83,6 +78,8 @@ Suite Setup
     Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
     Create Namespace In Openshift    ${TEST_NS}
+    ${CA}=    Get Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
+    Set Suite Variable    ${SAVED_CUSTOM_CA_BUNDLE}    ${CA}
 
 Suite Teardown
     [Documentation]    Suite Teardown

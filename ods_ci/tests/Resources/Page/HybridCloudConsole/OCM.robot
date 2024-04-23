@@ -1,5 +1,6 @@
 *** Settings ***
 Resource        ../../Common.robot
+Resource        ./HCCLogin.robot
 
 Library         SeleniumLibrary
 
@@ -9,11 +10,12 @@ Wait Until OCM Cluster Page Is Loaded
     [Documentation]     wait until the OCM page loads for ${cluster_name}
     [Arguments]    ${cluster_name}
     Wait OCM Splash Page
-    Element Should Contain    //div[@class="pf-l-split__item"]/h1    ${cluster_name}
+    Element Should Contain    //div[@class="pf-v5-l-split__item"]/h1    ${cluster_name}
 
 Login To OCM
     [Documentation]    Login to the OpenShift Cluster Manager
-    Input Text    //div[@class="pf-v5-c-form__group"]/input    ${SSO.USERNAME}
+    Maybe Accept Cookie Policy
+    Input Text    //div[@class="pf-c-form__group"]/input    ${SSO.USERNAME}  # This is OCM page, so not PatternFly 5
     Click Button   //*[@id="login-show-step2"]
     Sleep   1s
     Input Text    //*[@id="password"]    ${SSO.PASSWORD}

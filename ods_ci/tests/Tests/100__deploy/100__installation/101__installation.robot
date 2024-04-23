@@ -15,8 +15,8 @@ Suite Teardown   Installation Suite Teardown
 
 
 *** Variables ***
-${Stage_URL}    https://qaprodauth.console.redhat.com/openshift
-${Prod_URL}     https://console.redhat.com/openshift
+${STAGE_URL}    https://console.dev.redhat.com/openshift
+${PROD_URL}     https://console.redhat.com/openshift
 
 
 *** Test Cases ***
@@ -62,9 +62,9 @@ Decide OCM URL And Open Link
   [Documentation]   Decides OCM URL based on the OpenShift Console URL and open the URL.
   ${cluster_type}=  Fetch ODS Cluster Environment
   IF    "${cluster_type}" == "stage"
-        ${OCM_URL}=     Set Variable    ${Stage_URL}
+        ${OCM_URL}=     Set Variable    ${STAGE_URL}
   ELSE
-        ${OCM_URL}=     Set Variable    ${Prod_URL}
+        ${OCM_URL}=     Set Variable    ${PROD_URL}
   END
   Go To     ${OCM_URL}
 

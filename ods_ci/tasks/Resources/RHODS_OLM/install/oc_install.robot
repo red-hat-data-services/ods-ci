@@ -26,27 +26,38 @@ Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
   Install Kserve Dependencies
   Clone OLM Install Repo
-  ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
+  IF  "${PRODUCT}" == "ODH"
+      ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
+  ELSE
+      ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
+  END
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
           Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
+          IF  "${PRODUCT}" == "ODH"
+              Run    sed -i 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
+          ELSE
+              Run    sed -i 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+          END
+          Run    sed -i 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
+          Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
           Run    sed -i 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
           Oc Apply   kind=List   src=${file_path}cs_apply.yaml
           Remove File    ${file_path}cs_apply.yml
       ELSE
-           FAIL    Provided test envrioment and install type is not supported
+           FAIL    Provided test environment and install type is not supported
       END
   ELSE IF  "${cluster_type}" == "managed"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
-          FAIL    Provided test envrioment is not supported
+          FAIL    Provided test environment is not supported
       END
   END
-  Wait Until Csv Is Ready    ${OPERATOR_NAME}
+  Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
 
 Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
@@ -57,11 +68,12 @@ Verify RHODS Installation
   ...                   label_selector=name=${OPERATOR_NAME}
   ...                   timeout=2000
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
-  Log  Verified redhat-ods-operator  console=yes
+  Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
-    IF  '"${PRODUCT}" == "ODH" and !("${UPDATE_CHANNEL}" == "odh-nightlies" and "${cluster_type}" == "managed")'
+    IF  "${PRODUCT}" == "ODH"
         Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+        Wait For DSCInitialization CustomResource To Be Ready    timeout=20
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
@@ -140,7 +152,7 @@ Verify RHODS Installation
 
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
     Log To Console    "Waiting for pod status in ${APPLICATIONS_NAMESPACE}"
-    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60
+    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
     Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
 
@@ -201,6 +213,12 @@ Wait For Pods Numbers
 Apply DSCInitialization CustomResource
     [Documentation]
     [Arguments]        ${dsci_name}=${DSCI_NAME}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get DSCInitialization --output json | jq -j '.items | length'
+    Log To Console    output : ${output}, return_code : ${return_code}
+    IF  ${output} != 0
+        Log to Console    Skip creation of DSCInitialization
+        RETURN
+    END
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Log to Console    Requested Configuration:
     Create DSCInitialization CustomResource Using Test Variables
@@ -220,6 +238,24 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
     Run    sed -i 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
+
+Wait For DSCInitialization CustomResource To Be Ready
+  [Documentation]   Wait for DSCInitialization CustomResource To Be Ready
+  [Arguments]     ${timeout}
+  Log To Console    Waiting for DSCInitialization CustomResource To Be Ready
+  ${status}   Set Variable   False
+  FOR    ${counter}    IN RANGE   ${timeout}
+         ${return_code}    ${output}    Run And Return Rc And Output   oc get DSCInitialization --no-headers -o custom-columns=":status.phase"
+         IF    '${output}' == 'Ready'
+               ${status}  Set Variable  True
+               Log To Console  DSCInitialization CustomResource is Ready
+               Exit For Loop
+         END
+         Sleep    1 sec
+  END
+  IF    '${status}' == 'False'
+        Run Keyword And Continue On Failure    FAIL    Timeout- DSCInitialization CustomResource is not Ready
+  END
 
 Apply DataScienceCluster CustomResource
     [Documentation]

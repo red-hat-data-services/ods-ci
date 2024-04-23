@@ -16,12 +16,10 @@ Is RHODS Installed
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
           ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
-          ...                                              subscription=rhods-operator  AND
+          ...                                              subscription=${OPERATOR_NAME}  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
-          ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-          ...          field_selector=metadata.name=redhat-operators
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}
       ELSE
           FAIL    Provided test environment and install type combination is not supported
       END
@@ -33,7 +31,7 @@ Is RHODS Installed
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
-      ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
+      ...  Oc Get  kind=CatalogSource  namespace=${OPERATOR_NAMESPACE}
       ...          field_selector=metadata.name=addon-managed-odh-catalog
   ELSE
       FAIL    Provided test environment and install type ${INSTALL_TYPE} ${UPDATE_CHANNEL} ${cluster_type} combination

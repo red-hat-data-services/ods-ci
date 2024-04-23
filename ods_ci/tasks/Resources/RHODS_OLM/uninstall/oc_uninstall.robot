@@ -13,7 +13,7 @@ Trigger RHODS Uninstall
 Verify RHODS Uninstallation
   IF  "${cluster_type}" == "managed"
         Run Keyword And Expect Error  *Not Found*
-        ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
+        ...  Oc Get  kind=CatalogSource  namespace=${OPERATOR_NAMESPACE}
         ...       field_selector=metadata.name=addon-managed-odh-catalog
   ELSE IF  "${cluster_type}" == "selfmanaged"
         Run Keyword And Expect Error  *Not Found*

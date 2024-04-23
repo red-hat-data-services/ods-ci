@@ -21,6 +21,16 @@ ${RHODS_VERSION}                None
 *** Tasks ***
 Can Install RHODS Operator
   [Tags]  install
+  IF  "${PRODUCT}" == "ODH"
+      Set Global Variable  ${OPERATOR_NAMESPACE}  opendatahub-operators
+      IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+          Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+      ELSE
+          Set Global Variable  ${OPERATOR_NAME}  opendatahub-operator
+      END
+  ELSE
+      Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+  END
   Given Selected Cluster Type ${cluster_type}
   When Installing RHODS Operator ${image_url}
   Then RHODS Operator Should Be Installed
@@ -28,6 +38,16 @@ Can Install RHODS Operator
 
 Can Uninstall RHODS Operator
   [Tags]  uninstall
+  IF  "${PRODUCT}" == "ODH"
+      Set Global Variable  ${OPERATOR_NAMESPACE}  opendatahub-operators
+      IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+          Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+      ELSE
+          Set Global Variable  ${OPERATOR_NAME}  opendatahub-operator
+      END
+  ELSE
+      Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+  END
   Given Selected Cluster Type ${cluster_type}
   When Uninstalling RHODS Operator
   Then RHODS Operator Should Be Uninstalled

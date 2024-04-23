@@ -27,8 +27,8 @@ ${USE_GPU}=    ${FALSE}
 *** Test Cases ***
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
-    ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Tier1    ODS-2341
+    ...                using Kserve and TGIS runtime
+    [Tags]    Sanity    Tier1    ODS-2341
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

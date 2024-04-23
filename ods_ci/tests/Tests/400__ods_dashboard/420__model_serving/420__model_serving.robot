@@ -11,7 +11,6 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
-# Test Teardown     Model Serving Test Teardown
 Test Tags         ModelMesh
 
 *** Variables ***

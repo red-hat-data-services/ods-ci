@@ -299,10 +299,23 @@ Query Model Multiple Times
     ...                ${inference_type} arguments accepts these 2 values for now:
     ...                  - all-tokens: it returns the entire generated response text
     ...                  - streaming: it returns the streamed generated response (i.e., one word per time)
-    [Arguments]    ${model_name}    ${namespace}    ${runtime}=caikit-tgis-runtime    ${isvc_name}=${model_name}
-    ...            ${inference_type}=all-tokens    ${n_times}=10    ${query_idx}=0    ${validate_response}=${TRUE}
-    ...            ${string_check_only}=${FALSE}    ${protocol}=grpc    ${port_forwarding}=${FALSE}    ${port}=443
-    ...            ${body_params}=&{EMPTY}    &{args}
+    ...                In order to use a self-signed certificate when performing the request, pass the CA bundle file
+    ...                path as the ${cert} argument - defaults to ${False}, i.e. insecure request.
+    [Arguments]    ${model_name}
+    ...            ${namespace}
+    ...            ${runtime}=caikit-tgis-runtime
+    ...            ${isvc_name}=${model_name}
+    ...            ${inference_type}=all-tokens
+    ...            ${n_times}=10
+    ...            ${query_idx}=0
+    ...            ${validate_response}=${TRUE}
+    ...            ${string_check_only}=${FALSE}
+    ...            ${protocol}=grpc
+    ...            ${port_forwarding}=${FALSE}
+    ...            ${port}=443
+    ...            ${body_params}=&{EMPTY}
+    ...            ${cert}=${False}
+    ...            &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
     ELSE
@@ -336,12 +349,12 @@ Query Model Multiple Times
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
             ...    insecure=${insecure}    plaintext=${plaintext}    skip_res_json=${skip_json_load_response}
-            ...    &{args}
+            ...    cert=${cert}    &{args}
          ELSE IF    "${protocol}" == "http"
             ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
             Log Dictionary    ${args}
             Set To Dictionary    ${args}    url=https://${host}:${port}/${endpoint}   expected_status=any
-            ...             headers=${header}   json=${payload}    verify=${False}
+            ...             headers=${header}   json=${payload}    verify=${cert}
             ${is_timeout}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${args}    timeout
             IF    ${is_timeout} == ${FALSE}
                 Set To Dictionary    ${args}    timeout=10

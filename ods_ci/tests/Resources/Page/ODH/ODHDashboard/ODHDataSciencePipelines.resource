@@ -138,6 +138,17 @@ Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     Run Keyword And Ignore Error       Wait Until Page Contains    Error displaying pipelines    timeout=60s
     Run Keyword And Warn On Failure    Page Should Not Contain     Error displaying pipelines
 
+Verify That There Are No Sample Pipelines After Creating Pipeline Server
+    [Documentation]     Verify creation of sample pipelines by default when deploying dsp in RHOAI/ODH
+    Log    ${PRODUCT}
+    ${samples_not_created}=      Run Keyword And Return Status      Wait Until Page Contains    Start by importing a pipeline    timeout=40s
+    Run Keyword If    ${samples_not_created}    Log    Sample Pipelines Not Created
+    IF       ${samples_not_created}==False
+        Fail    Default Sample Pipelines should not be created after creating a pipeline server in ${PRODUCT}
+    END
+
+
+
 Open Pipeline Detail
     [Documentation]    Open the Pipeline detail
     [Arguments]    ${pipeline_name}
@@ -155,14 +166,8 @@ Open Pipeline Detail
 Open Pipeline Run
     [Documentation]    Open the Pipeline Run detail.
     [Arguments]    ${pipeline_run_name}
-    ${present}=  Run Keyword And Return Status    Element Should Be Visible   xpath=//a[text()='Runs']
-    # We can run Open Pipeline Run step multiple times. If the menu is expanded, then it will colapse
-    IF    ${present} == ${FALSE}
-        Wait Until Page Contains Element    xpath=//button[text()='Data Science Pipelines']
-        Click Element    xpath=//button[text()='Data Science Pipelines']
-        Wait Until Page Contains Element    xpath=//a[text()='Runs']
-    END
-    Click Element    xpath=//a[text()='Runs']
+    Navigate To Page    Data Science Pipelines    Runs
+    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
     Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
     Click Element    xpath=//*[@data-testid="active-runs-tab"]
     Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']

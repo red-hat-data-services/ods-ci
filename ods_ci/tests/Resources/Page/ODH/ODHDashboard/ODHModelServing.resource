@@ -24,7 +24,7 @@ ${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboa
 ${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
 ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
-${KSERVE_RUNTIME_DROPDOWN}=    //span[.="Serving runtime"]/../../..//div[@id="serving-runtime-template-selection"]
+${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
 
@@ -68,7 +68,6 @@ Serve Model
     ELSE
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="multi-serving-platform-card"]
         SeleniumLibrary.Wait Until Page Does Not Contain Element    //div[@id="single-serving-platform-card"]
-        SeleniumLibrary.Click Button    //button[@data-testid="empty-state-action-button"]
         Maybe Wait For Dashboard Loading Spinner Page
         SeleniumLibrary.Wait Until Element Is Enabled    ${DEPLOY_MODEL_BTN}
         SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
@@ -77,7 +76,7 @@ Serve Model
     Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
-    IF    "${serving_runtime}" != "${NONE}"    Select Kserve Serving Runtime    ${serving_runtime}
+    IF    "${serving_runtime}" != "${NONE}"    Set Model Server Runtime    ${serving_runtime}
     SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
     IF    ${existing_data_connection}==${TRUE}
@@ -121,7 +120,7 @@ Select Model Server
     ...    Selects the given one
     [Arguments]    ${model_server}
     ${selectable}=    Run Keyword And Return Status
-    ...    Page Should Contain Element     xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]
+    ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=1
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
         Click Element    xpath://li/button[.="${model_server}"]
@@ -394,7 +393,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     Click Button    ${DEPLOY_MODEL_BTN}
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
-    Select Kserve Serving Runtime    ${serving_runtime}
+    Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}
     Set Replicas Number With Buttons    ${replicas}
     Set Server Size    ${size}
@@ -412,12 +411,13 @@ Deploy Kserve Model Via UI  #robocop: disable
     Click Button    Deploy
     Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
 
-Select Kserve Serving Runtime
-    [Documentation]    Opens the Runtime dropdown in the deploy modal for kserve models and select the given runtime
+Set Model Server Runtime
+    [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
+    ...    and select the given runtime
     [Arguments]    ${runtime}=Caikit
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/button
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/ul//span[contains(text(),"${runtime}")]
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

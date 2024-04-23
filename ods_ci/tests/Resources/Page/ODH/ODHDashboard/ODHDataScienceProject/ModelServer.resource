@@ -2,6 +2,7 @@
 Documentation    Collection of keywords to interact with Model Servers
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
+Resource       ../ODHModelServing.resource
 Resource       Projects.resource
 
 
@@ -165,13 +166,6 @@ Verify Displayed GPU Count In Single Model Serving
     ...    xpath://td[@data-label="Name"]/div[text()="${model_name}"]/../../../tr[last()]//span[.="Number of accelerators"]/../../dd/div  #robocop: disable
     Should Match    ${current_accs}    ${no_gpus}
 
-Set Model Server Runtime
-    [Documentation]    Selects a given Runtime for the model server
-    [Arguments]    ${runtime}
-    Open Serving runtime Options Menu  # robocop: disable
-    Click Element    xpath://div[@id="serving-runtime-template-selection"]//li//*[text()="${runtime}"]
-    # TODO: Implement Custom
-
 Set Model Server Name
     [Documentation]    Sets a custom name for the model server
     [Arguments]    ${server_name}
@@ -210,17 +204,30 @@ Click Minus Button
     Click Element    ${REPLICAS_MIN_BTN_XP}
 
 Query Model With GRPCURL
-    [Arguments]    ${host}    ${port}    ${endpoint}    ${json_body}
-    ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    ${plaintext}=${FALSE}
-    ...            ${background}=${NONE}    ${skip_res_json}=${FALSE}    &{args}
+    [Arguments]    ${host}
+    ...            ${port}
+    ...            ${endpoint}
+    ...            ${json_body}
+    ...            ${json_header}=${NONE}
+    ...            ${insecure}=${FALSE}
+    ...            ${plaintext}=${FALSE}
+    ...            ${background}=${NONE}
+    ...            ${skip_res_json}=${FALSE}
+    ...            ${cert}=${False}
+    ...            &{args}
     ${cmd}=    Set Variable    grpcurl -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
     END
-    IF    ${insecure} == ${TRUE}
+    IF    ${insecure}
         ${cmd}=    Catenate    ${cmd}    -insecure
+    ELSE  # -insecure and -cacert are incompatible with each other. Assuming we want either option always on.
+        IF    ${cert}==${False}
+            Log    The call will fail because you have not provided a valid CA bundle file
+        END
+        ${cmd}=    Catenate    ${cmd}    -cacert ${cert}
     END
-    IF    ${plaintext} == ${TRUE}
+    IF    ${plaintext}
         ${cmd}=    Catenate    ${cmd}    -plaintext
     END
     # IF    "${proto_filepath}" != "${NONE}"

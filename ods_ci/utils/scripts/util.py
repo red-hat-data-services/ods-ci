@@ -53,7 +53,7 @@ def read_yaml(filename):
         return None
 
 
-def execute_command(cmd, print_stdout=True):
+def execute_command(cmd: str, print_stdout: bool = True) -> str | None:
     """
     Executes command in the local node, and print real-time output
     """
@@ -72,7 +72,7 @@ def execute_command(cmd, print_stdout=True):
             for line in p.stdout:
                 output.append(line)
                 if print_stdout:
-                    print(">:", line, end="")
+                    print(">:", line.expandtabs(tabsize=8), end="")
                     sys.stdout.flush()
             return "".join(output)
     except Exception as e:

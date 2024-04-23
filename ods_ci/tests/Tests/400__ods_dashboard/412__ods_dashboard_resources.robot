@@ -9,23 +9,26 @@ Suite Setup       RHOSi Setup
 Suite Teardown    RHOSi Teardown
 Test Setup        Resources Test Setup
 Test Teardown     Resources Test Teardown
+Test Tags         Dashboard
 
 
 *** Variables ***
-@{LIST_OF_IDS_FOR_COMBINATIONS}         documentation--check-box    Red Hat managed--check-box
-${SUCCESS_STEP}              h3[normalize-space(@class="pf-v5-c-title pf-m-md pfext-quick-start-task-header__title
-...                           pfext-quick-start-task-header__title-success")]
+@{QUICKSTART_ELEMENTS}    create-jupyter-notebook    create-jupyter-notebook-anaconda    deploy-python-model
+...                       pachyderm-beginner-tutorial-notebook    using-starburst-enterprise
+...                       create-aikit-notebook    openvino-inference-notebook
+@{LIST_OF_IDS_FOR_COMBINATIONS}    documentation--check-box    Red Hat managed--check-box
+${SUCCESS_STEP}    h3[normalize-space(@class="pf-v5-c-title pf-m-md pfext-quick-start-task-header__title
+...                pfext-quick-start-task-header__title-success")]
 
 
 *** Test Cases ***
 Verify Quick Starts Work As Expected On Yes And Restart
     [Documentation]   Verify the Quickstarts are completed successfully
     ...    when all steps are marked as yes and restarted later
-    ...    ProductBug: RHODS-7935
+    ...    ProductBug: RHOAIENG-5273
     [Tags]  Sanity
     ...     Tier1
-    ...     ODS-1306    ODS-1308    ODS-1166
-    ...     ODS-1406    ODS-1405    ProductBug
+    ...     ODS-1306    ODS-1308    ODS-1166    ODS-1406    ODS-1405
     Set Quick Starts Elements List Based On RHODS Type
     Validate Number Of Quick Starts In Dashboard Is As Expected    ${QUICKSTART_ELEMENTS}
     Verify Quick Starts Work As Expected When All Steps Are Marked As Yes   ${QUICKSTART_ELEMENTS}
@@ -45,11 +48,10 @@ Verify Quick Starts Work When All Steps Are Skipped
 Verify Quick Starts Work When At Least One Step Is Skipped
     [Documentation]   Verify the Quickstarts work fine when at least of the
     ...    steps are skipped
-    ...    ProductBug: RHODS-7935
+    ...    ProductBug: RHOAIENG-5273
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1403
-    ...     ProductBug
     Set Quick Starts Elements List Based On RHODS Type
     Validate Number Of Quick Starts In Dashboard Is As Expected    ${QUICKSTART_ELEMENTS}
     Verify Quick Starts Work As Expected When At Least One Step Is Skipped    ${QUICKSTART_ELEMENTS}
@@ -57,11 +59,10 @@ Verify Quick Starts Work When At Least One Step Is Skipped
 Verify Quick Starts Work As Expected When At Least One Step Is Marked As No
     [Documentation]   Verify the Quickstarts are works as expected
     ...    when mark last one step as no
-    ...    ProductBug: RHODS-7935
+    ...    ProductBug: RHOAIENG-5273
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1307
-    ...     ProductBug
     Set Quick Starts Elements List Based On RHODS Type
     Validate Number Of Quick Starts In Dashboard Is As Expected    ${QUICKSTART_ELEMENTS}
     Verify Quick Starts Work As Expected When One Step Is Marked As No    ${QUICKSTART_ELEMENTS}
@@ -121,127 +122,29 @@ Resources Test Setup
 Resources Test Teardown
     Close All Browsers
 
-Verify Quick Starts Work As Expected When All Steps Are Marked As Yes
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Star QuickStart Tour
-        FOR     ${index}    IN RANGE    ${count}
-            Run Keyword And Continue On Failure    Wait Until Keyword Succeeds    2 times   0.3s
-            ...    Mark Step Check As Yes
-            IF  ${index} != ${count-1}
-                Go To Next QuickStart Step
-            END
-        END
-        Run Keyword And Continue On Failure     Go Back And Check Previouse Step Is Selected
-        ...     n_steps=${count}   exp_step=${count-1}
-        Go To Next QuickStart Step
-        Go To Next QuickStart Step
-        Close QuickStart From Button
-        Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  Complete
-
-    END
-
-Verify Quick Starts Work As Expected When Restarting The Previous One
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
-        ...    exp_link_text=Restart
-        Run Keyword And Continue On Failure     QuickStart Status Should Not Be Set     ${element}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
-        ...     exp_link_text=Close
-        Star QuickStart Tour
-        Run Keyword And Continue On Failure     Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
-        Close QuickStart From Top     decision=cancel
-        Run Keyword And Continue On Failure     Current Step In QuickStart Should Be    n_steps=${count}  exp_step=1
-        Close QuickStart From Top     decision=leave
-        Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  In Progress
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
-        ...    exp_link_text=Continue
-    END
-
-Verify Quick Starts Work As Expected When One Step Is Marked As No
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Star QuickStart Tour
-        FOR     ${index}    IN RANGE    ${count}
-            Wait Until Keyword Succeeds    2 times   0.3s    Mark Step Check As Yes
-            IF  ${index} != ${count-1}
-                Go To Next QuickStart Step
-            END
-        END
-        Wait Until Keyword Succeeds    2 times   0.3s    Mark Step Check As No
-        Go To Next QuickStart Step
-        Close QuickStart From Button
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      Failed
-    END
-
-Verify Quick Starts Work As Expected When All Steps Are Skipped
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Star QuickStart Tour
-        FOR     ${index}    IN RANGE    ${count}
-            Go To Next QuickStart Step
-        END
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      In Progress
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}  exp_link_text=Continue
-    END
-
-Verify Quick Starts Work As Expected When At Least One Step Is Skipped
-    [Arguments]    ${quickStartElements}
-    FOR    ${element}    IN    @{quickStartElements}
-        Open QuickStart Element In Resource Section By Name     ${element}
-        ${count}=   Get The Count Of QuickStart Steps
-        Star QuickStart Tour
-        FOR     ${index}    IN RANGE    ${count}
-            IF  ${index} == ${0}
-                Run Keyword And Continue On Failure     Mark Step Check As No
-            END
-            Go To Next QuickStart Step
-        END
-        Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}      In Progress
-        Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
-        ...    exp_link_text=Continue
-    END
-
 Filter Resources By Status "Enabled" And Check Output
     [Documentation]    Filters the resources By Status Enabled
-    Select Checkbox Using Id    enabled-filter-checkbox--check-box
+    ${id_name}=  Set Variable    enabled-filter-checkbox--check-box
     Run Keyword And Continue On Failure
-    ...    Verify The Resources Are Filtered
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_ENABLE}
-    Deselect Checkbox Using Id    enabled-filter-checkbox--check-box
+    ...    Verify Resources Count By Checkbox ID    ${id_name}
 
 Filter By Application (Aka Povider) And Check Output
     [Documentation]    Filter by application (aka provider)
     ${id_name}=  Set Variable    Anaconda Professional--check-box
-    Select Checkbox Using Id    ${id_name}
-    Verify The Resources Are Filtered
-    ...    expected_providers=${EXPECTED_ITEM_PROVIDERS}    expected_number=10
-    Deselect Checkbox Using Id    id=${id_name}
+    Run Keyword And Continue On Failure
+    ...    Verify Resources Count By Checkbox ID    ${id_name}
 
 Filter By Resource Type And Check Output
     [Documentation]    Filter by resource type
-    Select Checkbox Using Id    id=tutorial--check-box
-    Verify The Resources Are Filtered
-    ...    expected_types=${EXPECTED_ITEM_RESOURCE_TYPE}    expected_number=14
-    Deselect Checkbox Using Id    id=tutorial--check-box
+    ${id_name}=  Set Variable    tutorial--check-box
+    Run Keyword And Continue On Failure
+    ...    Verify Resources Count By Checkbox ID    ${id_name}
 
 Filter By Provider Type And Check Output
     [Documentation]    Filter by provider type
-    Select Checkbox Using Id    id=Red Hat managed--check-box
-    Verify The Resources Are Filtered
-    ...    list_of_items=${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
-    Deselect Checkbox Using Id    id=Red Hat managed--check-box
+    ${id_name}=  Set Variable    Red Hat managed--check-box
+    Run Keyword And Continue On Failure
+    ...    Verify Resources Count By Checkbox ID    ${id_name}
 
 Filter By Using More Than One Filter And Check Output
     [Documentation]    Filter resouces using more than one filter ${list_of_ids} = list of check-box ids
@@ -259,7 +162,8 @@ Set Expected Items Based On RHODS Type    # robocop: disable
     ...                installed as Self-Managed or Cloud Service
     ${is_self_managed}=    Is RHODS Self-Managed
     ${n_items}=    Set Variable    49
-    ${EXPECTED_ITEMS_FOR_ENABLE}=    Create List    Creating a Jupyter notebook
+    ${EXPECTED_ITEMS_FOR_ENABLE}=    Create List
+    ...    Creating a Jupyter notebook
     ...    Deploying a sample Python application using Flask and OpenShift.
     ...    How to install Python packages on your notebook server
     ...    How to update notebook server settings
@@ -268,24 +172,19 @@ Set Expected Items Based On RHODS Type    # robocop: disable
     ...    Jupyter
     ${EXPECTED_ITEM_PROVIDERS}=    Create List       by Anaconda Professional
     ${EXPECTED_ITEM_RESOURCE_TYPE}=    Create List     Tutorial
-    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}=    Create List
-    ...    Creating a Jupyter notebook
-    ...    How to install Python packages on your notebook server
-    ...    How to update notebook server settings
-    ...    How to use data from Amazon S3 buckets
-    ...    How to view installed packages on your notebook server
-    ...    Deploying a sample Python application using Flask and OpenShift.
-    ...    Jupyter
+    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}=     Evaluate    ${EXPECTED_ITEMS_FOR_ENABLE}.copy()
+    Append To List    ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}
     ...    OpenShift AI tutorial - Fraud detection example
-    ...    OpenShift API Management
-    ...    Securing a deployed model using Red Hat OpenShift API Management
+    ...    Red Hat OpenShift AI
     @{EXPECTED_ITEMS_FOR_COMBINATIONS}=      Create List
-    ...    Jupyter    OpenShift API Management
+    ...    Jupyter
+    ...    Red Hat OpenShift AI
     IF    ${is_self_managed} == ${TRUE}
-        Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
-        Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
-        Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
-        ${n_items}=    Set Variable    46
+        # Deprecated
+        # Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
+        # Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
+        # Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
+        ${n_items}=    Set Variable    48
     END
     Set Suite Variable    ${EXPECTED_RESOURCE_ITEMS}    ${n_items}
     Set Suite Variable    ${EXPECTED_ITEMS_FOR_ENABLE}    ${EXPECTED_ITEMS_FOR_ENABLE}
@@ -311,20 +210,8 @@ Set Quick Starts Elements List Based On RHODS Type
     [Documentation]    Set QuickStarts list based on RHODS
     ...     is self-managed or managed
     ${is_self_managed}=    Is RHODS Self-Managed
-    IF    ${is_self_managed} == ${TRUE}
-            @{quickStartElements}=      Create List
-            ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
-            ...    deploy-python-model    create-aikit-notebook    openvino-inference-notebook
-            ...    pachyderm-beginner-tutorial-notebook    build-deploy-watson-model
-            ...    using-starburst-enterprise
-    ELSE
-            @{quickStartElements}=      Create List
-            ...    create-jupyter-notebook    create-jupyter-notebook-anaconda
-            ...    deploy-python-model    create-aikit-notebook    deploy-model-rhoam    gpu-enabled-notebook-quickstart
-            ...    pachyderm-beginner-tutorial-notebook    openvino-inference-notebook    using-starburst-galaxy
-            ...    gpu-quickstart    build-deploy-watson-model
-    END
-    Set Suite Variable    ${QUICKSTART_ELEMENTS}    ${quickStartElements}
+    IF    not ${is_self_managed}    Append To List    ${QUICKSTART_ELEMENTS}
+    ...    deploy-model-rhoam    gpu-enabled-notebook-quickstart    using-starburst-galaxy    gpu-quickstart
 
 Validate Number Of Quick Starts In Dashboard Is As Expected
     [Arguments]    ${quickStartElements}
@@ -335,34 +222,36 @@ Validate Number Of Quick Starts In Dashboard Is As Expected
     ...    Should Be True    ${expectedLen} == ${actualLen}    Quick Starts have been updated. Update the list accordingly.
 
 Verify Quick Starts Work As Expected When Restarted And Left In Between
+    [Documentation]    Loop on all QuickStart cards and verify its tutorial steps and status:
+    ...    Open -> Start -> In Progress -> Restart -> Completed -> Close
     [Arguments]    ${quickStartElements}
     FOR    ${element}    IN    @{quickStartElements}
         Run Keyword And Continue On Failure    QuickStart Status Should Be    ${element}  Complete
         Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
         ...    exp_link_text=Restart
         Open QuickStart Element In Resource Section By Name     ${element}
-        Page Should Not Contain         //article[@id="${element}"]//span[@class="pf-v5-c-label pf-m-green pf-m-outline"]
+        Page Should Not Contain    //article[@id="${element}"]//span[@class="pf-v5-c-label pf-m-green pf-m-outline"]
         ${count}=   Get The Count Of QuickStart Steps
         Run Keyword And Continue On Failure     Click Button    //button[@data-testid="qs-drawer-start"]
         Run Keyword And Continue On Failure     Wait Until Page Contains Element
         ...    //div[@class="pfext-quick-start-content"]
-        ${temp_count}   Set Variable    2
-        FOR     ${index}    IN RANGE    ${temp_count}
-            IF  ${index} != ${count-1}
-                Run Keyword And Continue On Failure     Wait Until Keyword Succeeds    2 times   0.3s
-                ...    Mark Step Check As Yes
-                Run Keyword And Continue On Failure     Go To Next QuickStart Step
-            END
+        # To set QuickStart tutorial to "In Progress" - Complete half of the steps
+        ${half_count}=   Set Variable    ${count // 2}
+        FOR     ${index}    IN RANGE    ${half_count}
+            Run Keyword And Continue On Failure     Wait Until Keyword Succeeds    2 times   0.3s
+            ...    Mark Step Check As Yes
+            Run Keyword And Continue On Failure     Go To Next QuickStart Step
         END
         Run Keyword And Continue On Failure     Close QuickStart From Top     decision=leave
         Run Keyword And Continue On Failure     Page Should Not Contain QuickStart Sidebar
         Run Keyword And Continue On Failure     QuickStart Status Should Be    ${element}  In Progress
         Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
         ...    exp_link_text=Continue
-        Run Keyword And Continue On Failure     Click Link      //article[@id="${element}"]//a
-        Run Keyword And Continue On Failure     Wait Until Page Contains ELement
+        Run Keyword And Continue On Failure     Click Element
+        ...    //*[@id="${element}"]//button[@data-testid="quick-start-button"]
+        Run Keyword And Continue On Failure     Wait Until Page Contains Element
         ...    //div[@class="pf-v5-c-drawer__panel-main"]     5
-        FOR     ${index}    IN RANGE    ${temp_count}
+        FOR     ${index}    IN RANGE    ${half_count}
             Run Keyword And Continue On Failure     Page Should Contain Element
             ...    //div[@class="pfext-quick-start-tasks__list"]//li[${index+1}]//${SUCCESS_STEP}
         END
@@ -371,13 +260,11 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
             Run Keyword And Continue On Failure     Page Should Contain Element
             ...    //ul[@class="pf-v5-c-list pfext-quick-start-task-header__list"]/li[${index}+1]
         END
-        Click Button        //button[@data-testid="qs-drawer-start"]
+        Run Keyword And Continue On Failure    Click Button        //button[@data-testid="qs-drawer-start"]
         FOR     ${index}    IN RANGE    ${count}
             Run Keyword And Continue On Failure     Wait Until Keyword Succeeds    2 times   0.3s
             ...    Mark Step Check As Yes
-            IF  ${index} != ${count-1}
-                Run Keyword And Continue On Failure     Go To Next QuickStart Step
-            END
+            Run Keyword And Continue On Failure     Go To Next QuickStart Step
         END
         Run Keyword And Continue On Failure     Go Back And Check Previouse Step Is Selected     n_steps=${count}
         ...    exp_step=${count-1}
@@ -385,4 +272,3 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
         Go To Next QuickStart Step
         Run Keyword And Continue On Failure     Close QuickStart From Button
     END
-

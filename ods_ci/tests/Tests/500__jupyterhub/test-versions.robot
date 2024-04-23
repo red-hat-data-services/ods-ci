@@ -19,7 +19,7 @@ Test Tags          JupyterHub
 &{package_versions}      # robocop: disable
 ${JupyterLab_Version}         v3.6
 ${Notebook_Version}           v6.5
-${JupyterLab-git_Version}     v0.42
+${JupyterLab-git_Version}     v0.44
 
 
 *** Test Cases ***

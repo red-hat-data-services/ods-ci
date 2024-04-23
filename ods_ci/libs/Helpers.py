@@ -122,13 +122,12 @@ class Helpers:
                 print(tolerations)
             elif line.startswith("Events:"):
                 break
+            elif saving is True:
+                tolerations.append(line.strip())
+                print(line)
+                print(tolerations)
             else:
-                if saving is True:
-                    tolerations.append(line.strip())
-                    print(line)
-                    print(tolerations)
-                else:
-                    continue
+                continue
         return tolerations
 
     @keyword
@@ -196,9 +195,8 @@ class Helpers:
                         if expected.split("__")[0] != received.split("__")[0]:
                             failures.append([expected, received])
                     # else compare values are equal
-                    else:
-                        if not expected == received:
-                            failures.append([expected, received])
+                    elif not expected == received:
+                        failures.append([expected, received])
 
             _inference_object_comparison(expected, received, threshold)
             if len(failures) > 0:

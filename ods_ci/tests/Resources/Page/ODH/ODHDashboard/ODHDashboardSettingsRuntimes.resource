@@ -92,9 +92,9 @@ Select Model Serving Platform
     [Documentation]    Selects which model serving platform the serving runtime could be executed on
     [Arguments]    ${platform}="both"
     ${platform_link_name}=    Get From Dictionary    ${PLATFORM_NAMES_MAPPING}    ${platform.lower()}
-    Click Element    xpath://div[@data-testid="custom-serving-runtime-selection"]//button
-    Wait Until Page Contains Element    xpath://a[text()="${platform_link_name}"]
-    Click Link    ${platform_link_name}
+    Click Button    xpath://button[@data-testid="custom-serving-runtime-selection"]
+    Wait Until Page Contains Element    xpath://span[text()="${platform_link_name}"]
+    Click Element    xpath://span[text()="${platform_link_name}"]
 
 Select Runtime API Protocol
     [Documentation]    Selects which API protocol for the runtime

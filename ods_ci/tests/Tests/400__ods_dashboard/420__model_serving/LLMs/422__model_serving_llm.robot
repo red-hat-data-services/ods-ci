@@ -382,6 +382,7 @@ Verify Non Admin Can Serve And Query A Model
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
+    ...    kserve_mode=${DSC_KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -397,7 +398,7 @@ Verify Non Admin Can Serve And Query A Model
     ...    namespace=${test_namespace}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
-    ...        wait_prj_deletion=${FALSE}
+    ...        wait_prj_deletion=${FALSE}    kserve_mode=${DSC_KSERVE_MODE}
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
@@ -569,6 +570,13 @@ Install Model Serving Stack Dependencies
         END
     END
     Load Expected Responses
+    ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
+    Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
+    IF    "${dsc_kserve_mode}" == "RawDeployment"
+        Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
+    ELSE
+        Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
+    END
 
 Install Service Mesh Stack
     [Documentation]    Installs the operators needed for Service Mesh operator purposes

@@ -12,7 +12,7 @@ ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
-${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//section[@id="notebook-image"]//div[@id="workbench-image-stream-selection"]/button    # robocop: disable
+${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//*[@data-testid="workbench-image-stream-selection"]    # robocop: disable
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//div[@id="workbench-image-stream-selection"]//li//div
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button  # Removing the attribute in case it changes like it did for the image dropdown
 ${WORKBENCH_SIZE_SIDE_MENU_BTN}=           xpath=//nav[@aria-label="Jump to section"]//span[text()="Deployment size"]
@@ -20,7 +20,7 @@ ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-a
 ${WORKBENCH_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
 ${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/following-sibling::button
-${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//ul[@data-id="container-size-select"]/li/button
+${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//*[@data-testid="container-size-group"]//button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
 ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
@@ -32,7 +32,7 @@ ${WORKBENCH_STATUS_STARTING}=                 Starting...
 ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"]
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
-${WORKBENCH_IMAGE_VER_DROPDOWN}=     ${WORKBENCH_IMAGE_VER_BUTTON}/../ul[@id="workbench-image-version-selection"]
+${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"]
 &{IMAGE_ID_MAPPING}=                 Minimal Python=minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
 ...                                  Standard Data Science=data-science-notebook    TensorFlow=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
@@ -52,6 +52,7 @@ Create Workbench
     ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
     ...             ${data_connection}=${NONE}
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
+    Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_XP}
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
@@ -84,8 +85,11 @@ Create Workbench
             Click Element    //a[@href="#cluster-storage"]
             Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
             Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
+            Log    msg=Delete PVC '${pv_name}' before creating new one via the Workbench dialog
+            Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${prj_title}
         ELSE
             Log    msg="pv_existent" argument not set, using default PV settings   level=WARN
+            Delete PVC In Project From CLI    pvc_title=${workbench_title}    project_title=${prj_title}
         END
     ELSE
         Click Element   xpath=//input[@name="ephemeral-storage-type-radio"]
@@ -96,7 +100,7 @@ Create Workbench
         Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
         Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
-    Wait Until Generic Modal Disappears  timeout=1 minute
+    Wait Until Element Is Not Visible    //form    10s
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
 
 #robocop: disable: line-too-long
@@ -202,10 +206,9 @@ Select Workbench Jupyter Image
     [Arguments]     ${image_name}    ${version}=default
     Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
-    Click Button    ${WORKBENCH_IMAGE_MENU_BTN_XP}
+    Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
     Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]
-
     IF    "${version}" != "${NONE}"
         IF    "${version}"=="default"
             Verify Version Selection Dropdown
@@ -221,8 +224,8 @@ Verify Version Selection Dropdown
     ...                uses the recommended image by default, and has two options
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_LABEL}
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
-    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
     Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
     Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]
@@ -275,10 +278,11 @@ Workbench Should Not Be Listed
 
 Workbench Status Should Be
     [Documentation]    Checks a workbench status is the expected one in the DS Project details page
-    [Arguments]     ${workbench_title}      ${status}
+    [Arguments]     ${workbench_title}      ${status}    ${timeout}=10
     Run keyword And Continue On Failure
-    ...    Page Should Contain Element
-    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    Wait Until Page Contains Element
+    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    timeout=${timeout}
 
 Status Error Icon Should Appear
     [Documentation]    Checks if the error icon appears on the given workbench
@@ -292,7 +296,8 @@ Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
     [Arguments]     ${workbench_title}    ${timeout}=60s    ${status}=${WORKBENCH_STATUS_RUNNING}
     Wait Until Page Contains Element
-    ...        ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]    timeout=${timeout}  # robocop: disable
+    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    timeout=${timeout}
 
 Wait Until Workbench Is Stopped
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
@@ -333,7 +338,7 @@ Access To Workbench
         Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
         Wait Until Page Contains  Do you trust the authors of the files in this folder?
     ELSE IF  "${expected_ide}"=="JupyterLab"
-        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=90s
         Maybe Close Popup
     ELSE
         Fail    msg=Unknown IDE typy given: '${expected_ide}'. Please check and fix or implement.
@@ -426,7 +431,7 @@ Get Openshift Notebook CR From Workbench
     [Documentation]    Retrieves name of Notebook CR corresponding to a workbench
     [Arguments]     ${workbench_title}      ${namespace}
     ${result}=    Run Process
-    ...    oc get notebook -n ${namespace} -o jsonpath\='{.items[?(@.metadata.annotations.openshift\\.io/display-name\=\="${workbench_title}")].metadata.name}'
+    ...    oc get notebooks.kubeflow.org -n ${namespace} -o jsonpath\='{.items[?(@.metadata.annotations.openshift\\.io/display-name\=\="${workbench_title}")].metadata.name}'
     ...    shell=yes
     RETURN    ${result.rc}    ${result.stdout}
 

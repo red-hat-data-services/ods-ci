@@ -12,6 +12,7 @@ Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
 Test Tags          Dashboard
 
+
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI Common Prj
 ${PRJ_TITLE1}=    ODS-CI DS Project1
@@ -115,7 +116,6 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     [Tags]    Smoke    Sanity    ODS-1814    Tier1
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=cluster-storages
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}   existing_storage=${TRUE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
@@ -136,7 +136,6 @@ Verify User Can Create A PV Storage
     ...                MAIN GOAL OF THE TEST CASE IS COVERED BY ODS-1814
     ${pv_name}=    Set Variable    ${PV_BASENAME}-A
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${NONE}
@@ -144,8 +143,10 @@ Verify User Can Create A PV Storage
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
+    # Create Storage from UI, but press Cancel at the end (without submitting)
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}    press_cancel=${TRUE}
+    # Create Storage from UI, and submit this time
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${workbenches}   existing_storage=${TRUE}
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
@@ -156,7 +157,7 @@ Verify User Can Create A PV Storage
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
     ...    project_title=${PRJ_TITLE}    pvc_title=${pv_name}
     ...    AND
-    ...    Delete All PVC In Project From CLI    project_title=${PRJ_TITLE}
+    ...    Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
     [Tags]    Smoke    Sanity    ODS-1816    Tier1    ExcludeOnDisconnected
@@ -165,21 +166,16 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     ...    Since there is a size check in this test, it would fail unless some extra condition to be brought in here.
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_3_TITLE}  workbench_description=${WORKBENCH_3_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${pv_name}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_3_TITLE}
-    #SeleniumLibrary.Reload Page
-    #Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_3_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_3_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_3_TITLE}   namespace=${ns_name}
-    #SeleniumLibrary.Reload Page
-    #Wait Until Project Is Open    project_title=${PRJ_TITLE}
     ${connected_woksps}=    Create List    ${WORKBENCH_3_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=cluster-storages
+    Open Data Science Project Details Page    ${PRJ_TITLE}    tab_id=cluster-storages
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${connected_woksps}
     Storage Size Should Be    name=${pv_name}    namespace=${ns_name}  size=${PV_SIZE}
@@ -190,25 +186,18 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     [Tags]    Sanity    Tier1
     ...       ODS-1825    ODS-1972
     [Documentation]    Verifies users can add a Data connection to AWS S3
-    [Setup]    Run Keywords    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
-    ...    AND
-    ...    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
+    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    ...    AND
-    ...    Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
+    Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    ...    AND
-    ...    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
-    ...    AND
-    ...    Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
-    ...    AND
-    ...    Stop Workbench    workbench_title=${WORKBENCH_2_TITLE}    from_running=${FALSE}
-    ...    AND
-    ...    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
+    Stop Workbench    workbench_title=${WORKBENCH_2_TITLE}    from_running=${FALSE}
+    Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=data-connections
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
@@ -224,6 +213,7 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...                          aws_s3_endpoint=${DC_S3_ENDPOINT}    aws_region=${DC_S3_REGION}
     ...                          connected_workbench=${workbenches}
     Data Connection Should Be Listed    name=${DC_2_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STOPPED}
     [Teardown]    Run Keywords
@@ -236,7 +226,6 @@ Verify User Can Delete A Persistent Storage
     [Documentation]    Verifies users can delete a PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-TO-DELETE
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=permissions
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}   project_title=${PRJ_TITLE}
     Delete Storage    name=${pv_name}    press_cancel=${TRUE}
@@ -248,7 +237,6 @@ Verify User Can Delete A Data Connection
     [Tags]    Sanity    Tier1    ODS-1826
     [Documentation]    Verifies users can delete a Data connection
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=data-connections
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_3_S3_NAME}
     ...                          aws_access_key=dummy-key
     ...                          aws_secret_access=dummy-secret
@@ -259,10 +247,9 @@ Verify User Can Delete A Data Connection
     Check Data Connection Secret Is Deleted    dc_name=${DC_3_S3_NAME}    namespace=${ns_name}
 
 Verify user can create a workbench with an existing data connection
-    [Tags]  Tier1  ODS-2176
+    [Tags]  Sanity    Tier1  ODS-2176
     [Documentation]  Verifies users can create a workbench with an existing data connection
     ${data_connection_name}=    Set Variable    aDataConnection
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=data-connections
     Create S3 Data Connection  project_title=${PRJ_TITLE}
     ...                    dc_name=${data_connection_name}
     ...                    aws_access_key=dummy-key
@@ -278,6 +265,7 @@ Verify user can create a workbench with an existing data connection
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     # The data connection has the workbench name in the "Connected workbenches" column
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=data-connections
     Data Connection Should Be Listed    name=${data_connection_name}    type=${DC_S3_TYPE}
     ...                connected_workbench=${workbenches}
 
@@ -293,7 +281,6 @@ Verify User Can Create A Workbench With Environment Variables
     ${envs_var_cm}=         Create Dictionary    cmA=TestVarA-CM   cmB=TestVarB-CM
     ...    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
@@ -316,7 +303,6 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ${envs_var_cm}=    Create Dictionary    filepath=${ENV_CM_FILEPATH}
     ...    k8s_type=Config Map  input_type=${UPLOAD_TYPE}
     ${envs_list}=    Create List   ${envs_var_secret}     ${envs_var_cm}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     # Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
@@ -331,13 +317,14 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ${test_envs_list}=    Create List   ${test_envs_var_secret}     ${test_envs_var_cm}
     Environment Variables Should Be Displayed According To Their Type
     ...    workbench_title=${WORKBENCH_4_TITLE}    exp_env_variables=${test_envs_list}
+    Move To Tab    tab_title=Workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Environment Variables Should Be Available In Jupyter    exp_env_variables=${test_envs_list}
-    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE}
-    ...    pvc_title=${WORKBENCH_4_TITLE}-PV
+    [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_4_TITLE}
+    ...    project_title=${PRJ_TITLE}    pvc_title=${WORKBENCH_4_TITLE}-PV
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
     [Tags]    Sanity    Tier1    ODS-1971
@@ -345,7 +332,6 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop
     ...                Users have 2 options:
     ...                1. click "File" > "Log Out" to actually close the login session
     ...                2. click "File" > "Hub Control Panel" to return to project details page
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
@@ -358,7 +344,7 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop
     Access To Workbench    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Open JupyterLab Control Panel
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}    timeout-pre-spinner=1m    timeout-spinner=2m
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
     ...    status=${WORKBENCH_STATUS_RUNNING}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
@@ -366,7 +352,7 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop
     ...    Log In Should Not Be Requested
     Wait Until JupyterLab Is Loaded    timeout=2m
     Logout JupyterLab
-    Wait Until Project Is Open    project_title=${PRJ_TITLE}    timeout-pre-spinner=1m    timeout-spinner=2m
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
     ...    status=${WORKBENCH_STATUS_RUNNING}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
@@ -379,7 +365,6 @@ Verify Event Log Is Accessible While Starting A Workbench
     [Tags]    Tier1    Sanity
     ...       ODS-1970
     [Documentation]    Verify user can access event log while starting a workbench
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_6_TITLE}  workbench_description=${WORKBENCH_6_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
@@ -403,7 +388,6 @@ Verify User Can Cancel Workbench Start From Event Log
     [Tags]    Sanity    Tier1    ODS-1975
     [Documentation]    Verify user can cancel workbench start from event log
 
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
     ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
@@ -432,7 +416,6 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     ...                At the moment the test is considering only the scenario where
     ...                the workbench fails for Insufficient resources.
     [Teardown]    Delete Workbench    workbench_title=${WORKBENCH_5_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_5_TITLE}  workbench_description=${WORKBENCH_5_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=X Large
     ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
@@ -454,8 +437,6 @@ Verify Users Can Start, Stop, Launch And Delete A Workbench
     [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
     [Setup]        Run Keywords
     ...    Launch Data Science Project Main Page
-    ...    AND
-    ...    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
     ...    AND
     ...    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
@@ -564,14 +545,16 @@ Verify User Can Access Only Its Owned Projects
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     Capture Page Screenshot
-    Number Of Displayed Projects Should Be    expected_number=3
+    # User ldap admin should be able to see all 4 projects
+    Number Of Displayed Projects Should Be    expected_number=4
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Capture Page Screenshot
-    Number Of Displayed Projects Should Be    expected_number=3
+    # User cluster admin should be able to see all 4 projects
+    Number Of Displayed Projects Should Be    expected_number=4
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}
@@ -632,7 +615,8 @@ Check Corresponding Notebook CR Exists
     ${res}  ${response}=    Get Openshift Notebook CR From Workbench   workbench_title=${workbench_title}
     ...    namespace=${namespace}
     IF    "${response}" == "${EMPTY}"
-        Run Keyword And Continue On Failure    Fail    msg=Notebook CR not found for ${workbench_title} in ${namespace} NS
+        Run Keyword And Continue On Failure    Fail
+        ...    msg=Notebook CR not found for ${workbench_title} in ${namespace} NS
     END
 
 Check Workbench CR Is Deleted
@@ -671,7 +655,8 @@ Check Corresponding PersistentVolumeClaim Exists
     END
 
 Check Storage PersistentVolumeClaim Is Deleted
-    [Documentation]    Checks if when a PV cluster storage is deleted its Openshift PersistentVolumeClaim gets deleted too
+    [Documentation]    Checks that when a PV cluster storage is deleted,
+    ...    its Openshift PersistentVolumeClaim gets deleted too
     [Arguments]    ${storage_name}   ${namespace}    ${timeout}=10s
     ${status}=      Run Keyword And Return Status    Check Corresponding PersistentVolumeClaim Exists
     ...    storage_name=${storage_name}    namespace=${namespace}
@@ -693,7 +678,8 @@ Environment Variables Should Be Available In Jupyter
         ${n_pairs}=    Get Length    ${env_variable_dict.keys()}
         FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable_dict}
             Log   ${pair_idx}-${key}-${value}
-            Run Keyword And Continue On Failure     Run Cell And Check Output    import os;print(os.environ["${key}"])    ${value}
+            Run Keyword And Continue On Failure     Run Cell And Check Output
+            ...    import os;print(os.environ["${key}"])    ${value}
             Capture Page Screenshot
         END
     END
@@ -716,8 +702,8 @@ Environment Variables Should Be Displayed According To Their Type
         Environment Variable Type Should Be    expected_type=${input_type}    var_idx=${idx}
         FOR  ${pair_idx}   ${key}  ${value}  IN ENUMERATE  &{env_variable_dict}
             Log   ${pair_idx}-${key}-${value}
-            Environment Variable Key/Value Fields Should Be Correctly Displayed    var_idx=${idx}    var_pair_idx=${pair_idx}
-            ...    expected_key=${key}    expected_value=${value}    type=${input_type}
+            Environment Variable Key/Value Fields Should Be Correctly Displayed    var_idx=${idx}
+            ...    var_pair_idx=${pair_idx}    expected_key=${key}    expected_value=${value}    type=${input_type}
         END
     END
     Click Button    ${GENERIC_CANCEL_BTN_XP}
@@ -740,7 +726,9 @@ Environment Variable Key/Value Fields Should Be Correctly Displayed
     ${displayed_val}=    Get Value    ${displayed_value_xp}
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_val}    ${expected_value}
     IF    "${type}" == "Secret"
-        Run Keyword And Continue On Failure    Element Attribute Value Should Be    ${displayed_value_xp}    type    password
+        Run Keyword And Continue On Failure    Element Attribute Value Should Be
+        ...    ${displayed_value_xp}    type    password
     ELSE
-        Run Keyword And Continue On Failure    Element Attribute Value Should Be    ${displayed_value_xp}    type    text
+        Run Keyword And Continue On Failure    Element Attribute Value Should Be
+        ...    ${displayed_value_xp}    type    text
     END

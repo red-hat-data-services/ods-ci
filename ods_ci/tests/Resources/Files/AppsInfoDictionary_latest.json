@@ -27,28 +27,33 @@
              }
 
         },
-        "watson-studio": {
+        "watson-x-ai": {
              "badges": ["Self-managed"],
              "provider": "by IBM",
-             "title": "IBM Watson Studio",
-             "description": "IBM Watson Studio is a platform for embedding AI and machine learning into your business and creating custom models with your own data.",
+             "title": "IBM watsonx.ai",
+             "description": "IBM® watsonx.ai is part of the IBM watsonx AI and data platform, bringing together new generative AI capabilities powered by foundation models and traditional machine learning (ML) into a powerful studio spanning the AI lifecycle.",
              "rhods_type": ["Self-managed", "Cloud Service"],
              "image":  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTgiIGhlaWdodD0iMjMiIHZpZXdCb3g9IjAgMCA1OCAyMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gPHRpdGxlPklCTSBMb2dvPC90aXRsZT4gPHBhdGggZD0iTTU4IDIxLjQ2N1YyM2gtNy42MzJ2LTEuNTMzSDU4em0tMTguMzE2IDBWMjNoLTcuNjMxdi0xLjUzM2g3LjYzMXptNS45NTUgMEw0NS4wMjUgMjNsLS42MDYtMS41MzNoMS4yMnptLTE3LjA5NyAwQTYuMjg1IDYuMjg1IDAgMCAxIDI0LjM5MSAyM0gxMi4yMXYtMS41MzN6bS0xNy44NTggMFYyM0gwdi0xLjUzM2gxMC42ODR6bTI5LTMuMDY3djEuNTMzaC03LjYzMVYxOC40aDcuNjMxem03LjE0OCAwbC0uNTk0IDEuNTMzSDQzLjgybC0uNTk4LTEuNTMzaDMuNjA5em0tMTYuNzY0IDBhNS43MTkgNS43MTkgMCAwIDEtLjY0IDEuNTMzSDEyLjIxVjE4LjR6bS0xOS4zODQgMHYxLjUzM0gwVjE4LjRoMTAuNjg0ek01OCAxOC40djEuNTMzaC03LjYzMlYxOC40SDU4em0tMy4wNTMtMy4wNjd2MS41MzRoLTQuNTc5di0xLjUzNGg0LjU4em0tMTUuMjYzIDB2MS41MzRoLTQuNTc5di0xLjUzNGg0LjU4em04LjM0NSAwbC0uNiAxLjUzNGgtNC44MDZsLS42MDQtMS41MzRoNi4wMXptLTE4LjE3NCAwYy4xMzcuNDkuMjEzIDEuMDAzLjIxMyAxLjUzNGgtNS42NDd2LTEuNTM0em0tMTAuMDEzIDB2MS41MzRoLTQuNTc5di0xLjUzNGg0LjU4em0tMTIuMjEgMHYxLjUzNGgtNC41OHYtMS41MzRoNC41OHptNDcuMzE1LTMuMDY2VjEzLjhoLTQuNTc5di0xLjUzM2g0LjU4em0tMTUuMjYzIDBWMTMuOGgtNC41Nzl2LTEuNTMzaDQuNTh6bTkuNTQxIDBsLS41OTcgMS41MzNoLTcuMjJsLS41OTEtMS41MzNoOC40MDh6bS0yMS4yNDggMGMuNTI3LjQzMi45OC45NTEgMS4zMjggMS41MzNIMTUuMjYzdi0xLjUzM3ptLTIwLjM0NSAwVjEzLjhoLTQuNTh2LTEuNTMzaDQuNTh6TTQ0LjU5OSA5LjJsLjQyNyAxLjI0LjQyOC0xLjI0aDkuNDkzdjEuNTMzaC00LjU3OVY5LjMyNGwtLjUxOSAxLjQxaC05LjY2MWwtLjUwNC0xLjQxdjEuNDFoLTQuNTc5VjkuMkg0NC42em0tMzYuOTY3IDB2MS41MzNoLTQuNThWOS4yaDQuNTh6bTIxLjY3MyAwYTUuOTUgNS45NSAwIDAgMS0xLjMyOCAxLjUzM0gxNS4yNjNWOS4yem0yNS42NDItMy4wNjd2MS41MzRoLTguOTY0bC41NC0xLjUzNGg4LjQyNHptLTExLjQxMyAwbC41NCAxLjUzNGgtOC45NjlWNi4xMzNoOC40M3ptLTEzLjQ2NiAwYzAgLjUzMS0uMDc2IDEuMDQ1LS4yMTMgMS41MzRIMjQuNDJWNi4xMzN6bS0xMC4yMjYgMHYxLjUzNGgtNC41NzlWNi4xMzNoNC41OHptLTEyLjIxIDB2MS41MzRoLTQuNThWNi4xMzNoNC41OHptMzQuODQ1LTMuMDY2bC41MyAxLjUzM0gzMi4wNTRWMy4wNjdoMTAuNDI0em0xNS41MjMgMFY0LjZINDcuMDRsLjU1LTEuNTMzSDU4em0tMjguNTczIDBjLjI4NC40NzMuNTA0Ljk4OC42NDEgMS41MzNIMTIuMjExVjMuMDY3em0tMTguNzQzIDBWNC42SDBWMy4wNjdoMTAuNjg0ek00MS40MDYgMGwuNTQgMS41MzNoLTkuODkzVjBoOS4zNTN6TTU4IDB2MS41MzNoLTkuODgxTDQ4LjY0NyAwSDU4ek0yNC4zOSAwYzEuNjAxIDAgMy4wNTcuNTgxIDQuMTUyIDEuNTMzSDEyLjIxMVYwek0xMC42ODUgMHYxLjUzM0gwVjBoMTAuNjg0eiIgZmlsbD0iIzE2MTYxNiIgZmlsbC1ydWxlPSJldmVub2RkIj48L3BhdGg+IDwvc3ZnPg==",
-             "sidebar_h1": "IBM Watson Studio",
+             "sidebar_h1": "IBM watsonx.ai",
              "sidebar_links":  {
                  "0": {
                        "text": "Get started",
-                       "url": "https://developer.ibm.com/series/cloud-pak-for-data-learning-path",
+                       "url": "https://ibm.biz/wxai-get-started",
                        "matching": "full"
                   },
                  "1": {
-                       "text": "https://marketplace.redhat.com/en-us/products/ibm-watson-studio",
-                       "url": "https://marketplace.redhat.com/en-us/products/ibm-watson-studio",
+                       "text": "Install",
+                       "url": "https://ibm.biz/wxai-install",
                        "matching": "full"
                   },
                  "2": {
-                       "text": "https://marketplace.redhat.com/en-us/documentation/operators",
-                       "url": "https://marketplace.redhat.com/en-us/documentation/operators",
+                       "text": "Use",
+                       "url": "https://www.ibm.com/docs/SSQNUZ_latest/wsj/analyze-data/fm-overview.html",
+                       "matching": "full"
+                  },
+                 "3": {
+                       "text": "What's new",
+                       "url": "https://www.ibm.com/docs/SSQNUZ_latest/fixlist/watsonxai-fixlist.html",
                        "matching": "full"
                   }
              }
@@ -107,7 +112,7 @@
 
                    "0": {
                          "text": "Get started",
-                         "url": "https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html",
+                         "url": "https://opendatahub.io/docs/getting-started-with-open-data-hub/#launching-jupyter-and-starting-a-notebook-server_get-started",
                          "matching": "full"
                    },
                    "1": {

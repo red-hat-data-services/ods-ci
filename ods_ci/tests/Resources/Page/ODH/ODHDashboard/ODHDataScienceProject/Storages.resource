@@ -93,6 +93,7 @@ Create PersistentVolume Storage
     [Documentation]    Create a PersistenVolume storage in DS Project details page
     [Arguments]    ${project_title}    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
     ...    ${press_cancel}=${FALSE}    ${existing_storage}=${FALSE}
+    Open Data Science Project Details Page    ${project_title}    tab_id=cluster-storages
     IF    ${existing_storage}
         ${storage_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${name} ') and contains(., 'Persistent storage')]
         ${existing_storage}=    Run Keyword And Return Status

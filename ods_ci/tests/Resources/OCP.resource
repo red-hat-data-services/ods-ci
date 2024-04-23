@@ -250,4 +250,3 @@ Delete Namespace From Openshift
         ${rc}   ${output}=    Run And Return Rc And Output    oc delete project ${namespace}
         Should Be Equal    "${rc}"    "0"   msg=${output}
     END
-

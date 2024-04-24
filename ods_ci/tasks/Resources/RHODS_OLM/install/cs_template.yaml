@@ -5,20 +5,20 @@ items:
   -   apiVersion: project.openshift.io/v1
       kind: Project
       metadata:
-          name: redhat-ods-operator
+          name: <OPERATOR_NAMESPACE>
   -   apiVersion: operators.coreos.com/v1alpha1
       kind: Subscription
       metadata:
-          name: rhods-operator
-          namespace: redhat-ods-operator
+          name: <OPERATOR_NAME>
+          namespace: <OPERATOR_NAMESPACE>
       spec:
           channel: <UPDATE_CHANNEL>
           installPlanApproval: Automatic
-          name: rhods-operator
-          source: redhat-operators
+          name: <OPERATOR_NAME>
+          source: <CATALOG_SOURCE>
           sourceNamespace: openshift-marketplace
   -   apiVersion: operators.coreos.com/v1
       kind: OperatorGroup
       metadata:
-          name: redhat-operators
-          namespace: redhat-ods-operator
+          name: <OPERATOR_NAME>
+          namespace: <OPERATOR_NAMESPACE>

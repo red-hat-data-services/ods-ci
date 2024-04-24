@@ -291,7 +291,7 @@ Verify User Can Validate Scale To Zero
     Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}    exp_replicas=${2}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model With GRPCURL   host=${host}    port=443

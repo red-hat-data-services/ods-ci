@@ -23,7 +23,7 @@ ${TGIS_RUNTIME_NAME}=    tgis-runtime
 @{SEARCH_METRICS}=    tgi_    istio_
 ${USE_GPU}=    ${FALSE}
 
-
+ 
 *** Test Cases ***
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
@@ -321,7 +321,7 @@ Verify User Can Validate Scale To Zero
     Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${2}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1

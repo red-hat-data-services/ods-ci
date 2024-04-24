@@ -52,7 +52,7 @@ Install RHODS
       END
   ELSE IF  "${cluster_type}" == "managed"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi" and "${UPDATE_CHANNEL}" == "odh-nightlies"
-          Set Global Variable    ${OPERATOR_NAME}     rhods-operator            
+          Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
           Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}

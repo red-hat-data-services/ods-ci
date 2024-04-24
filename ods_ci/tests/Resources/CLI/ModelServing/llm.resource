@@ -786,7 +786,7 @@ Verify Model KServe Deployment
     ${test_mode_var_exist}=    Run Keyword And Return Status    Variable Should Exist    ${KSERVE_MODE}
     ${dsc_raw_var_exist}=    Run Keyword And Return Status    Variable Should Exist    ${IS_KSERVE_RAW}
     IF    ${test_mode_var_exist}
-        IF    ${KSERVE_MODE} == "RawDeployment"
+        IF    "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${is_raw}    ${TRUE}
         ELSE
             Set Test Variable    ${is_raw}    ${FALSE}

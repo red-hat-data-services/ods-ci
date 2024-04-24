@@ -51,7 +51,10 @@ Install RHODS
            FAIL    Provided test environment and install type is not supported
       END
   ELSE IF  "${cluster_type}" == "managed"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi" and "${UPDATE_CHANNEL}" == "odh-nightlies"
+          Set Global Variable    ${OPERATOR_NAME}     rhods-operator            
+          Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
           FAIL    Provided test environment is not supported

@@ -400,7 +400,7 @@ Compile Deploy And Query LLM model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
-    ...    namespace=${test_namespace}    runtime=${runtime}
+    ...    namespace=${namespace}    runtime=${runtime}
     ${pod_name}=  Get Pod Name    namespace=${namespace}    label_selector=serving.kserve.io/inferenceservice=${isvc_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${namespace}    pod_name=${pod_name}
     Query Model Multiple Times    isvc_name=${isvc_name}    model_name=${model_name}

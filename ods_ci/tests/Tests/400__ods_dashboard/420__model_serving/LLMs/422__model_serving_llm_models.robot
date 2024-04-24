@@ -63,7 +63,7 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
-
+  
 Verify User Can Serve And Query A google/flan-t5-xl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
@@ -83,7 +83,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime= ${TGIS_RUNTIME_NAME}    timeout=900s
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    timeout=900s
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
@@ -129,7 +129,7 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime= ${TGIS_RUNTIME_NAME}    timeout=900s
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    timeout=900s
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
@@ -174,7 +174,7 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime= ${TGIS_RUNTIME_NAME}    timeout=900s
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    timeout=900s
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
@@ -220,7 +220,7 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime= ${TGIS_RUNTIME_NAME}    timeout=900s
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    timeout=900s
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
@@ -266,7 +266,7 @@ Verify User Can Serve And Query A google/flan-ul-2 Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime= ${TGIS_RUNTIME_NAME}    timeout=900s
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    timeout=900s
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
@@ -312,7 +312,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime= ${TGIS_RUNTIME_NAME}    timeout=3000s
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    timeout=3000s
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
@@ -349,7 +349,7 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime= ${TGIS_RUNTIME_NAME}    timeout=900s
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    timeout=900s
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
@@ -400,7 +400,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime= ${TGIS_RUNTIME_NAME}    timeout=300s
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    timeout=300s
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}

@@ -134,7 +134,8 @@ Verify User Can Set Requests And Limits For A Model Using The UI  # robocop: dis
     #### Editing the size of an existing model does not work in 2.5, deploying a different one with different size
     Deploy Kserve Model Via UI    ${flan_model_name}-medium    Caikit    kserve-connection
     ...    flan-t5-small/${flan_model_name}  size=Medium
-    # Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    # Wait For Model KServe Deployment To Be Ready
+    # ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     # ...    namespace=${test_namespace}    exp_replicas=1    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ##### Usually our clusters won't have enough resource to actually spawn this, don't wait for pods to be ready
     Sleep    5
@@ -285,7 +286,8 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     IF  ${modal}==${TRUE}
         Click Element    //button[@aria-label="Close"]
     END
-    Run Keyword And Continue On Failure    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    Run Keyword And Continue On Failure    Wait For Model KServe Deployment To Be Ready
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Run Keyword And Continue On Failure    Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1

@@ -776,12 +776,15 @@ Start Port-forwarding
     sleep  7s
 
 Wait For Model KServe Deployment To Be Ready
+    [Documentation]    Waits for the Pod to be Ready (i.e., Running status) and checks that
+    ...                the deployment has the expected pods and containers
     [Arguments]    ${label_selector}    ${namespace}    ${runtime}
     ...    ${timeout}=300s    ${exp_replicas}=${1}
     Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=${timeout}
     Verify Model KServe Deployment    ${label_selector}    ${namespace}    ${runtime}    ${exp_replicas}
 
 Verify Model KServe Deployment
+    [Documentation]    Checks the given deployment has the expected pods and containers
     [Arguments]    ${label_selector}    ${namespace}    ${runtime}    ${exp_replicas}
     ${test_mode_var_exist}=    Run Keyword And Return Status    Variable Should Exist    ${KSERVE_MODE}
     ${dsc_raw_var_exist}=    Run Keyword And Return Status    Variable Should Exist    ${IS_KSERVE_RAW}
@@ -801,7 +804,7 @@ Verify Model KServe Deployment
         Fail    msg=either ${KSERVE_MODE} or ${IS_KSERVE_RAW} suite/global variables are expected to be set
     END
     Load Runtime Query Formats
-    @{model_pods} =  Oc Get    kind=Pod    namespace=${namespace}    label_selector=${label_selector}
+    @{model_pods}=  Oc Get    kind=Pod    namespace=${namespace}    label_selector=${label_selector}
     ${containers}=  Set Variable    ${RUNTIME_FORMATS}[${runtime}][containers]
     IF    not ${is_raw}
         ${serverless_container}=    Create List    queue-proxy    istio-proxy

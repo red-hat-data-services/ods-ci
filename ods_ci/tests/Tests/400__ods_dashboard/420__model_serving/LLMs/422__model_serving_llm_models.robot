@@ -63,7 +63,7 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     ...    kserve_mode=${KSERVE_MODE}
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
-  
+
 Verify User Can Serve And Query A google/flan-t5-xl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime

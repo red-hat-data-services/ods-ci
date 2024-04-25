@@ -6,6 +6,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resou
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../../Resources/CLI/DSProjects/DSProjects.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup       Model Serving Suite Setup
@@ -15,12 +16,12 @@ Test Tags         ModelMesh
 *** Variables ***
 ${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
 ${INFERENCE_INPUT_OPENVINO}=    @ods_ci/tests/Resources/Files/openvino-example-input.json
-${PRJ_TITLE}=    model-serving-project
+${PRJ_TITLE}=    model-serving-project-420
 ${PRJ_DESCRIPTION}=    project used for model serving tests
 ${MODEL_CREATED}=    ${FALSE}
 ${MODEL_NAME}=    test-model
 ${RUNTIME_NAME}=    Model Serving Test
-${SECOND_PROJECT}=    sec-model-serving-project
+${SECOND_PROJECT}=    sec-model-serving-project-420
 ${SECURED_MODEL}=    test-model-secured
 ${SECURED_RUNTIME}=    Model Serving With Authentication
 ${EXPECTED_INFERENCE_SECURED_OUTPUT}=    {"model_name":"${SECURED_MODEL}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
@@ -46,7 +47,7 @@ Verify Openvino_IR Model Via UI
     ...       ODS-2054
     Create Openvino Models    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}    project_name=${PRJ_TITLE}
     ...    num_projects=1
-    [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    [Teardown]   Run Keyword If Test Failed    Get Modelmesh Events And Logs
     ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
 
 Test Inference Without Token Authentication
@@ -57,7 +58,7 @@ Test Inference Without Token Authentication
     Depends On Test  Verify Openvino_IR Model Via UI
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
-    [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    [Teardown]   Run Keyword If Test Failed    Get Modelmesh Events And Logs
     ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
 
 Verify Tensorflow Model Via UI
@@ -65,12 +66,12 @@ Verify Tensorflow Model Via UI
     [Tags]    Sanity    Tier1
     ...       ODS-2268
     Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    Create Data Science Project    title=${PRJ_TITLE}-2268    description=${PRJ_DESCRIPTION}
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}-2268    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
-    Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=tensorflow
+    Serve Model    project_name=${PRJ_TITLE}-2268    model_name=${MODEL_NAME}    framework=tensorflow
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=inception_resnet_v2.pb
     ${runtime_pod_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
@@ -83,8 +84,10 @@ Verify Tensorflow Model Via UI
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
-    [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
+    [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    AND
+    ...    Model Serving Test Teardown
 
 Verify Secure Model Can Be Deployed In Same Project
     [Documentation]    Verifies that a model can be deployed in a secured server (with token) using only the UI.
@@ -106,8 +109,10 @@ Verify Secure Model Can Be Deployed In Same Project
     Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service
     Verify Model Status    ${SECURED_MODEL}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
-    [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${SECURED_RUNTIME}    project_title=${PRJ_TITLE}
+    [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    AND
+    ...    Model Serving Test Teardown
 
 Test Inference With Token Authentication
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
@@ -130,8 +135,10 @@ Test Inference With Token Authentication
     Open Model Serving Home Page
     ${out}=    Get Model Inference   ${SECURED_MODEL}    ${INFERENCE_INPUT}    token_auth=${FALSE}
     Should Contain    ${out}    <button type="submit" class="btn btn-lg btn-primary">Log in with OpenShift</button>
-    [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${SECURED_RUNTIME}    project_title=${SECOND_PROJECT}
+    [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    AND
+    ...    Model Serving Test Teardown
 
 Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
@@ -139,7 +146,7 @@ Verify Multiple Projects With Same Model
     ...       RHOAIENG-549    RHOAIENG-2724
     Create Openvino Models    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}    project_name=${PRJ_TITLE}
     ...    num_projects=4
-    [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    [Teardown]   Run Keyword If Test Failed    Get Modelmesh Events And Logs
     ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
 
 Verify Editing Existing Model Deployment
@@ -147,12 +154,12 @@ Verify Editing Existing Model Deployment
     [Tags]    Sanity    Tier1
     ...       RHOAIENG-2869
     Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    Create Data Science Project    title=${PRJ_TITLE}-2869    description=${PRJ_DESCRIPTION}
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}-2869    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
-    Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=tensorflow
+    Serve Model    project_name=${PRJ_TITLE}-2869    model_name=${MODEL_NAME}    framework=tensorflow
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=inception_resnet_v2.pb
     ${runtime_pod_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
@@ -165,19 +172,21 @@ Verify Editing Existing Model Deployment
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
-    Serve Model    project_name=${PRJ_TITLE}    model_name=${MODEL_NAME}    framework=openvino_ir
+    Serve Model    project_name=${PRJ_TITLE}-2869    model_name=${MODEL_NAME}    framework=openvino_ir
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=openvino-example-model    existing_model=${TRUE}
     ${runtime_pod_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
     ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
     Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
-    ...    project_name=${PRJ_TITLE}
-    Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    ${PRJ_TITLE}
+    ...    project_name=${PRJ_TITLE}-2869
+    Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    ${PRJ_TITLE}-2869
     Verify Model Status    ${MODEL_NAME}    success
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
-    [Teardown]    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
+    [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    AND
+    ...    Model Serving Test Teardown
 
 *** Keywords ***
 Model Serving Suite Setup
@@ -217,19 +226,13 @@ Create Openvino Models
     END
 
 Model Serving Suite Teardown
-    [Documentation]    Suite teardown steps after testing DSG. It Deletes
-    ...                all the DS projects created by the tests and run RHOSi teardown
-    # Even if kw fails, deleting the whole project will also delete the model
-    # Failure will be shown in the logs of the run nonetheless
-    IF    ${MODEL_CREATED}
-        Clean All Models Of Current User
-    ELSE
-        Log    Model not deployed, skipping deletion step during teardown    console=true
-    END
-    ${projects}=    Create List    ${PRJ_TITLE}
-    Delete Data Science Projects From CLI   ocp_projects=${projects}
-    # Will only be present on SM cluster runs, but keyword passes
-    # if file does not exist
+    [Documentation]    Teardown steps after testing the suite.
     Remove File    openshift_ca.crt
     Close All Browsers
     RHOSi Teardown
+
+Model Serving Test Teardown
+    [Documentation]    Test teardown steps after test. It Deletes
+    ...                all the DS projects created by the tests
+    # Deleting the whole project will also delete the model
+    Delete All DS Projects With Name Like    ${PRJ_TITLE}

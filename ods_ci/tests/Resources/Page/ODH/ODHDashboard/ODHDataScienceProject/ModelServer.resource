@@ -278,3 +278,4 @@ Switch Model Serving Project
     Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
     Wait Until Element Is Visible     //ul//a[contains(., '${project_name}')]
     Click Element     //ul//a[contains(., '${project_name}')]
+    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page

@@ -34,8 +34,8 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     Deploy Kserve Model Via UI    model_name=${model_name}
     ...    serving_runtime=TGIS Standalone ServingRuntime for KServe
     ...    data_connection=kserve-connection    model_framework=pytorch    path=${FLAN_MODEL_S3_DIR}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    protocol=grpc
@@ -65,8 +65,8 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     Deploy Kserve Model Via UI    model_name=${isvc__name}    serving_runtime=TGIS Standalone ServingRuntime for KServe
     ...    data_connection=kserve-connection    model_framework=pytorch    path=${FLAN_MODEL_S3_DIR}
     ...    no_gpus=${1}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc__name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc__name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${isvc__name}
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
@@ -95,6 +95,13 @@ Non-Admin Setup Kserve UI Test
     Set Suite Variable    ${PROJECTS_TO_DELETE}
     Fetch CA Certificate If RHODS Is Self-Managed
     Set Thanos Credentials Variables
+    ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
+    Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
+    IF    "${dsc_kserve_mode}" == "RawDeployment"
+        Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
+    ELSE
+        Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
+    END
 
 Non-Admin Teardown Kserve UI Test
     Delete Data Science Project   project_title=${TEST_NS}

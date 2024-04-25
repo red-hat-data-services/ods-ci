@@ -410,18 +410,3 @@ Wait For DSC Conditions Reconciled
     ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsc ${dsc_name}    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
     Log    ${out}    console=${out}
-
-Check DSC Component Management State
-    [Documentation]    Check DSC Componenet Management state is as expected
-    [Arguments]    ${DSC}    ${component}    ${management_state}    ${namespace}
-
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc get DataScienceCluster/${DSC} -n ${namespace} -o 'jsonpath={.spec.components.${component}.managementState}'
-    Should Be Equal    "${output}"    "${management_state}"   msg=${output}
-
-Set DSC Component Management State
-    [Documentation]    Change DSC component Management state to one of Managed/Unmanaged/Removed
-    [Arguments]    ${DSC}    ${component}    ${management_state}    ${namespace}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc patch DataScienceCluster/${DSC} -n ${namespace} -p '{"spec":{"components":{"${component}":{"managementState":"${management_state}"}}}}' --type merge
-    Should Be Equal    "${rc}"    "0"   msg=${output}

@@ -377,6 +377,16 @@ Set Component State
     END
     Log To Console    Component ${component} state was set to ${state}
 
+Get DSC Component State
+    [Documentation]    Get component management state
+    [Arguments]    ${dsc}    ${component}    ${namespace}
+
+    ${rc}   ${state}=    Run And Return Rc And Output
+    ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${component}.managementState}'
+    Should Be Equal    "${rc}"    "0"    msg=${state}
+    Log To Console    Component ${component} state ${state}
+
+    RETURN    ${state}
 Enable Component
     [Documentation]    Enables a component in Data Science Cluster
     [Arguments]    ${component}

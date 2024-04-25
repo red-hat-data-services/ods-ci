@@ -11,4 +11,4 @@ spec:
   objectStorage:
     minio:
       # Image field is required
-      image: 'quay.io/opendatahub/minio:RELEASE.2019-08-14T20-37-41Z-license-compliance'
+      image: 'quay.io/opendatahub/minio@sha256:587abc14be9bbeed794473cf7290c40e377062f2f77f5e4e27742a77680f08e0'

@@ -12,14 +12,14 @@ Test Tags           DistributedWorkloadMetrics
 *** Variables ***
 ${PRJ_TITLE}=    test-dw-ui
 ${PRJ_TITLE_NONADMIN}=    test-dw-nonadmin
-${PRJ_DESCRIPTION}=    project used for distributed workload metrics
-${KUEUE_RESOURCES_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
-${CPU_SHARED_QUOTA}=    20
-${MEMEORY_SHARED_QUOTA}=    36
+${PRJ_DESCRIPTION}=    project used for distributed workload metric
 ${project_created}=    False
 ${RESOURCE_FLAVOR_NAME}=    test-resource-flavor
 ${CLUSTER_QUEUE_NAME}=    test-cluster-queue
 ${LOCAL_QUEUE_NAME}=    test-local-queue
+${CPU_REQUESTED}=    2
+${MEMORY_REQUESTED}=    2000
+${JOB_NAME_QUEUE}=    kueue-job
 
 
 *** Test Cases ***
@@ -29,8 +29,8 @@ Verify Workload Metrics Home page Contents
     [Tags]    RHOAIENG-4837
     ...       Sanity    DistributedWorkloads
     Open Distributed Workload Metrics Home Page
-    Wait until Element is Visible    ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}   timeout=20
-    Wait until Element is Visible    ${PROJECT_METRICS_TAB_XP}   timeout=20
+    Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}   timeout=20
+    Wait Until Element Is Visible    ${PROJECT_METRICS_TAB_XP}   timeout=20
     Page Should Contain Element     ${DISTRIBUITED_WORKLOAD_METRICS_TITLE_XP}
     Page Should Contain Element     ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}
     Page Should Contain Element     ${PROJECT_XP}
@@ -54,7 +54,7 @@ Verify Distributed Workload status Default Page contents
     [Documentation]    Verifiy distributed workload status page default contents
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
-    Wait until Element is Visible    xpath=//div[text()="Distributed workload resource metrics"]   timeout=20
+    Wait Until Element Is Visible    xpath=//div[text()="Distributed workload resource metrics"]   timeout=20
     Check Distributed Workload Status Page Contents
 
 Verify That Not Admin Users Can Access Distributed workload metrics default page contents
@@ -68,7 +68,7 @@ Verify That Not Admin Users Can Access Distributed workload metrics default page
     Create Data Science Project    title=${PRJ_TITLE_NONADMIN}   description=${PRJ_DESCRIPTION}
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE_NONADMIN}
-    Wait until Element is Visible    xpath=//h4[text()="Configure the project queue"]   timeout=20
+    Wait Until Element Is Visible    xpath=//h4[text()="Configure the project queue"]   timeout=20
     Page Should Contain Element     xpath=//div[text()="Configure the queue for this project, or select a different project."]
     # setup Kueue resource for the created project
     Setup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
@@ -84,6 +84,83 @@ Verify That Not Admin Users Can Access Distributed workload metrics default page
     ...    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE_NONADMIN}
     ...    AND
     ...    Switch Browser    1
+
+Verify The Workload Metrics By Submitting Kueue Batch Workload
+    [Documentation]    Monitor the workload metrics status and chart details by submitting kueue batch workload
+    [Tags]    RHOAIENG-5216
+    ...       Tier1    DistributedWorkloads
+
+    Open Distributed Workload Metrics Home Page
+    # Submitting kueue batch workload
+    ${result} =    Run Process    sh ${KUEUE_WORKLOADS_SETUP_FILEPATH} ${LOCAL_QUEUE_NAME} ${PRJ_TITLE} ${CPU_REQUESTED} ${MEMORY_REQUESTED} ${JOB_NAME_QUEUE}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to submit kueue workloads
+    END
+    Select Distributed Workload Project By Name    ${PRJ_TITLE}
+    Select Refresh Interval    15 seconds
+    Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
+    Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=30
+
+    ${cpu_requested} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
+    ${memory_requested} =   Get Memory Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}    Job
+    Check Requested Resources Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}
+    Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    Job
+
+
+    Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Running
+    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Running    All pods were ready or succeeded since the workload admission
+
+    Click Button    ${PROJECT_METRICS_TAB_XP}
+
+    Check Distributed Workload Resource Metrics Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}    Job    ${JOB_NAME_QUEUE}
+    Wait Until Element Is Visible    xpath=//*[text()="Succeeded"]    timeout=180
+    Select Refresh Interval    15 seconds
+    Page Should Not Contain Element    xpath=//*[text()="Running"]
+    Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    0    0    Job
+    Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Succeeded
+    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Succeeded    Job finished successfully
+
+    ${result} =    Run Process  oc delete Job ${JOB_NAME_QUEUE} -n ${PRJ_TITLE}
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL   Failed to delete job ${JOB_NAME_QUEUE}
+    END
+
+    Click Button    ${PROJECT_METRICS_TAB_XP}
+    Wait Until Element Is Visible    xpath=//*[@data-testid="dw-workloada-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]    timeout=60
+    Page Should Not Contain    ${JOB_NAME_QUEUE}
+    Page Should Not Contain    Succeeded
+    Check Distributed Workload Status Page Contents
+    [Teardown]    Run Process     oc delete Job ${JOB_NAME_QUEUE} -n ${PRJ_TITLE}    shell=true
+
+Verify The Workload Metrics By Submitting Ray Workload
+    [Documentation]    Monitor the workload metrics status and chart details by submitting Ray workload
+    [Tags]    RHOAIENG-5216
+    ...       Tier1    DistributedWorkloads
+    ${PRJ_RAY} =     Set Variable    test-ns-rayupgrade
+    Create Ray Cluster Workload
+    Open Distributed Workload Metrics Home Page
+    Select Distributed Workload Project By Name    ${PRJ_RAY}
+    Select Refresh Interval    15 seconds
+    Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
+    Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=30
+
+    ${cpu_requested} =   Get CPU Requested    ${PRJ_RAY}    local-queue-mnist
+    ${memory_requested} =   Get Memory Requested    ${PRJ_RAY}    local-queue-mnist    RayCluster
+    Check Requested Resources Chart    ${PRJ_RAY}    ${cpu_requested}    ${memory_requested}
+    Check Requested Resources    ${PRJ_RAY}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    RayCluster
+
+    Check Distributed Workload Resource Metrics Status    mnist    Running
+    Check Distributed Worklaod Status Overview    mnist    Running    All pods were ready or succeeded since the workload admission
+
+    Click Button    ${PROJECT_METRICS_TAB_XP}
+    Check Distributed Workload Resource Metrics Chart    ${PRJ_RAY}    ${cpu_requested}    ${memory_requested}    RayCluster    mnist
+
+    [Teardown]    Cleanup Ray Cluster Workload    ${PRJ_RAY}
 
 
 *** Keywords ***
@@ -107,63 +184,3 @@ Project Suite Teardown
     ...    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE}
     SeleniumLibrary.Close All Browsers
     RHOSi Teardown
-
-Check Project Metrics Default Page Contents
-    [Documentation]    checks Project Metrics Default Page contents exists
-    [Arguments]    ${project_name}
-    Wait until Element is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
-    Page Should Contain Element    ${PROJECT_METRICS_TAB_XP}
-    Page Should Contain Element    ${REFRESH_INTERVAL_XP}
-    Page Should Contain Element    ${REQUESTED_RESOURCES_TITLE_XP}
-    Check Requested Resources    ${project_name}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    0    0
-    Page Should Contain Element    ${RESOURCES_CONSUMING_TITLE_XP}
-    Page Should Contain Element    xpath=//*[@data-testid="dw-top-consuming-workloads"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
-    Page Should Contain Element    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}
-    Page Should Contain Element    xpath=//*[@data-testid="dw-workloada-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
-
-Check Distributed Workload Status Page Contents
-    [Documentation]    checks Distributed Workload status Default Page contents exists
-    Click Button    ${WORKLOAD_STATUS_TAB_XP}
-    Wait until Element is Visible  ${WORKLOADS_STATUS_XP}    timeout=20
-    Page Should Contain Element    ${REFRESH_INTERVAL_XP}
-    Page Should Contain Element    ${STATUS_OVERVIEW_XP}
-    Page Should Contain Element    xpath=//*[@data-testid="dw-status-overview-card"]//*[text()="Select another project or create a distributed workload in the selected project."]
-    Page Should Contain Element    ${WORKLOADS_STATUS_XP}
-    Page Should Contain Element    xpath=//*[@data-testid="dw-workloads-table-card"]//*[text()="Select another project or create a distributed workload in the selected project."]
-
-Check Requested Resources
-    [Documentation]    checks requested resource contents
-    [Arguments]    ${project_name}   ${cpu_shared_quota}    ${memory_shared_quota}    ${cpu_requested}    ${memory_requested}
-    Check Expected String Equals    //*[@id="requested-resources-chart-CPU-ChartLegend-ChartLabel-0"]    Requested by ${project_name}: ${cpu_requested}
-
-    Check Expected String Equals    //*[@id="requested-resources-chart-CPU-ChartLegend-ChartLabel-2"]    Total shared quota: ${CPU_SHARED_QUOTA}
-
-    Check Expected String Equals    //*[@id="requested-resources-chart-CPU-ChartLegend-ChartLabel-1"]    Requested by all projects: ${cpu_requested}
-
-    Check Expected String Equals   //*[@id="requested-resources-chart-Memory-ChartLegend-ChartLabel-0"]    Requested by ${project_name}: ${memory_requested}
-
-    Check Expected String Equals    //*[@id="requested-resources-chart-Memory-ChartLegend-ChartLabel-1"]    Requested by all projects: ${memory_requested}
-
-    Check Expected String Equals    //*[@id="requested-resources-chart-Memory-ChartLegend-ChartLabel-2"]   Total shared quota: ${memory_shared_quota}
-
-Setup Kueue Resources
-    [Documentation]    Setup the kueue resources for the project
-    [Arguments]    ${project_name}    ${cluster_queue_name}    ${resource_flavor_name}    ${local_queue_name}
-    ${result} =    Run Process    sh ${KUEUE_RESOURCES_SETUP_FILEPATH} ${cluster_queue_name} ${resource_flavor_name} ${local_queue_name} ${project_name} ${CPU_SHARED_QUOTA} ${MEMEORY_SHARED_QUOTA}
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to setup kueue resources
-    END
-
-Cleanup Kueue Resources
-    [Documentation]    Cleanup the kueue resources for the project
-    [Arguments]    ${project_name}    ${cluster_queue_name}   ${resource_flavor}    ${local_queue_name}
-    ${result}=    Run Process    oc delete LocalQueue ${local_queue_name} -n ${project_name} & oc delete ClusterQueue ${cluster_queue_name} & oc delete ResourceFlavor ${resource_flavor}
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to delete kueue resources
-    END

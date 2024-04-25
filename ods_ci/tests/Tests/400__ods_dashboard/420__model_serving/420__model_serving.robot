@@ -84,10 +84,10 @@ Verify Tensorflow Model Via UI
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
-    [Teardown]   Run Keywords    Model Serving Test Teardown
+    [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
     ...    AND
-    ...    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2268
+    ...    Model Serving Test Teardown
 
 Verify Secure Model Can Be Deployed In Same Project
     [Documentation]    Verifies that a model can be deployed in a secured server (with token) using only the UI.
@@ -109,10 +109,10 @@ Verify Secure Model Can Be Deployed In Same Project
     Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service
     Verify Model Status    ${SECURED_MODEL}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
-    [Teardown]   Run Keywords    Model Serving Test Teardown
+    [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
     ...    AND
-    ...    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
+    ...    Model Serving Test Teardown
 
 Test Inference With Token Authentication
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
@@ -135,10 +135,10 @@ Test Inference With Token Authentication
     Open Model Serving Home Page
     ${out}=    Get Model Inference   ${SECURED_MODEL}    ${INFERENCE_INPUT}    token_auth=${FALSE}
     Should Contain    ${out}    <button type="submit" class="btn btn-lg btn-primary">Log in with OpenShift</button>
-    [Teardown]   Run Keywords    Model Serving Test Teardown
+    [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
     ...    AND
-    ...    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${SECURED_RUNTIME}    project_title=${SECOND_PROJECT}
+    ...    Model Serving Test Teardown
 
 Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
@@ -183,10 +183,10 @@ Verify Editing Existing Model Deployment
     Verify Model Status    ${MODEL_NAME}    success
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
-    [Teardown]   Run Keywords    Model Serving Test Teardown
-    ...    AND
-    ...    Run Keyword If Test Failed    Get Modelmesh Events And Logs
+    [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
     ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    AND
+    ...    Model Serving Test Teardown
 
 *** Keywords ***
 Model Serving Suite Setup
@@ -226,13 +226,13 @@ Create Openvino Models
     END
 
 Model Serving Suite Teardown
-    [Documentation]    Suite teardown steps after testing DSG.
+    [Documentation]    Teardown steps after testing the suite.
     Remove File    openshift_ca.crt
     Close All Browsers
     RHOSi Teardown
 
 Model Serving Test Teardown
     [Documentation]    Test teardown steps after test. It Deletes
-    ...                all the DS projects created by the tests and run RHOSi teardown
+    ...                all the DS projects created by the tests
     # Deleting the whole project will also delete the model
     Delete All DS Projects With Name Like    ${PRJ_TITLE}

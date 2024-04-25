@@ -4,8 +4,9 @@ Documentation    Collection of keywords to interact with the administration of D
 
 *** Keywords ***
 
+
 Delete All DS Projects With Name Like
-    [Documentation]    Delete all accelerator profiles with a name that partially or totally matches with the given
+    [Documentation]    Delete all DS PRojects with a name that partially or totally matches with the given
     ...                {dsp_name}
     ...                Uses OC
     [Arguments]   ${dsp_name}

@@ -8,17 +8,16 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     import ray
     from codeflare_sdk.cluster.auth import TokenAuthentication
     from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration
+    from codeflare_sdk import generate_cert
 
     print("before login")
     auth = TokenAuthentication(token=openshift_token, server=openshift_server, skip_tls=True)
     auth_return = auth.login()
     print(f'auth_return: "{auth_return}"')
     print("after login")
-    # openshift_oauth is a workaround for RHOAIENG-3981
     cluster = Cluster(
         ClusterConfiguration(
             name="raytest",
-            openshift_oauth=True,
             num_workers=1,
             head_cpus="500m",
             min_memory=1,
@@ -26,6 +25,7 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
             num_gpus=0,
             image="quay.io/project-codeflare/ray:latest-py39-cu118",
             instascale=False,
+            verify_tls=False
         )
     )
 
@@ -48,7 +48,9 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     # reset the ray context in case there's already one.
     ray.shutdown()
     # establish connection to ray cluster
-    ray.init(address=ray_cluster_uri)
+    generate_cert.generate_tls_cert(cluster.config.name, cluster.config.namespace)
+    generate_cert.export_env(cluster.config.name, cluster.config.namespace)
+    ray.init(address=cluster.cluster_uri())
     print("Ray cluster is up and running: ", ray.is_initialized())
 
     @ray.remote

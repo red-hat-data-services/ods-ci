@@ -19,12 +19,14 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
         ClusterConfiguration(
             name="raytest",
             num_workers=1,
-            head_cpus="500m",
+            head_cpus=1,
+            head_memory=2,
+            min_cpus=1,
+            max_cpus=1,
             min_memory=1,
-            max_memory=1,
+            max_memory=2,
             num_gpus=0,
             image="quay.io/project-codeflare/ray:latest-py39-cu118",
-            instascale=False,
             verify_tls=False
         )
     )

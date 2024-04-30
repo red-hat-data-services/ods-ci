@@ -517,7 +517,7 @@ Select Workbench Number Of GPUs
     Wait Until Page Contains Element    ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}
     Click Element    ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}
     IF  "${gpus}" == "0"
-        Click Element    xpath=//a[text()='None']
+        Click Element    xpath=//span[text()='None']
     ELSE
         # Select Accelerator Technology
         Wait Until Page Contains Element    xpath=//div[@class and text()=${gpu_type}]
